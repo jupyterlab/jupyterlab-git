@@ -55,6 +55,9 @@ namespace CommandIDs {
   export
   const git_log = 'AVCbox:git log';
 
+  export 
+  const git_pull = 'AVCbox:git pull';
+
   export
   const get_git_api = 'AVCbox:git api';
 };
@@ -80,6 +83,7 @@ export default AVCboxPlugin;
  * a test link function for buttons
  */
 
+
 let serverSettings = ServerConnection.makeSettings();
 let gapiLoaded = new PromiseDelegate<void>();
 export
@@ -98,6 +102,27 @@ function loadGapi(): Promise<void> {
   });
 }
 
+function POST_Git_Request(git_command){
+      let request = {
+        url: URLExt.join(serverSettings.baseUrl, 'hi'),
+          method: 'POST',
+          cache: true,
+          contentType: 'bar',
+          headers: {
+            foo: 'bar'
+          },
+          //data: '["foo", {"bar":["git status", null, 1.0, 2]}]',
+          data: '{"git_command":"'+git_command+'", "parameters":{"id":"valore"}}'
+      };
+  
+      ServerConnection.makeRequest(request, serverSettings).then(response =>{
+        if (response.xhr.status !== 200) {
+          throw ServerConnection.makeError(response);
+        }
+        console.log(JSON.stringify(response.data, null, 2));
+      });
+
+}
 
 /**
  * Activate the AVCbox extension.
@@ -132,24 +157,7 @@ function activateAVCbox(app: JupyterLab, rendermime: IRenderMime, palette: IComm
     label: 'git status command',
     execute: args => {
       console.log('Try to exec *git status* command');
-
-      let request = {
-        url: URLExt.join(serverSettings.baseUrl, 'hi'),
-          method: 'POST',
-          cache: true,
-          contentType: 'bar',
-          headers: {
-            foo: 'bar'
-          },
-          data: '["foo", {"bar":["baz", null, 1.0, 2]}]',
-      };
-  
-      ServerConnection.makeRequest(request, serverSettings).then(response =>{
-        if (response.xhr.status !== 200) {
-          throw ServerConnection.makeError(response);
-        }
-        console.log(JSON.stringify(response.data, null, 2));
-      });
+      POST_Git_Request("status")
     }
   });
   palette.addItem({ command, category });
@@ -161,17 +169,29 @@ function activateAVCbox(app: JupyterLab, rendermime: IRenderMime, palette: IComm
     label: 'git log command',
     execute: args => {
       console.log('Try to exec *git log* command');
+      
      $.getJSON(serverSettings.baseUrl + 'hi', function(data) {
-            //console.log(data['rss']);
-            //console.log(data['limits']['memory']);
-            console.log(JSON.stringify(data, null, 2));
+            console.log(data['rss']);
+            console.log(data['limits']['memory']);
+            //console.log(JSON.stringify(data, null, 2));
       });  
+      POST_Git_Request("log")
     }
   });
   palette.addItem({ command, category });
 
+ //git pull button
+  command = CommandIDs.git_pull;
+  commands.addCommand(command, {
+    label: 'git pull command',
+    execute: args => {
+      console.log('Try to exec *git pull* command');
+      POST_Git_Request("pull")
+    }
+  });
+  palette.addItem({ command, category });
 
-//Third button
+//test button
   command = CommandIDs.get_git_api;
   commands.addCommand(command, {
     label: 'Access GitHub JSON',
