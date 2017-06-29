@@ -37,8 +37,9 @@ class hi(IPythonHandler):
     def post(self):
         my_data = json.loads(self.request.body)
         temp = my_data["git_command"]
-        print(temp+"hahahaha")
-        my_output = subprocess.check_output(["git", temp])
+        print(temp)
+        my_output = subprocess.check_output(temp)
+        #my_output = subprocess.check_output(["git", temp])
         self.finish(my_output)
         #self.finish(json.dumps(post_metrics()))
         print("Hi there! post extensions!!")
