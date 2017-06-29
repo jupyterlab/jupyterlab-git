@@ -235,7 +235,7 @@ function activateAVCbox(app: JupyterLab, rendermime: IRenderMime, palette: IComm
     label: 'git status command',
     execute: args => {
       console.log('Try to exec *git status* command');
-      POST_Git_Request(["git","status"])
+      POST_Git_Request(    ["git","status"]   )
     }
   });
   palette.addItem({ command, category });
@@ -280,6 +280,7 @@ function activateAVCbox(app: JupyterLab, rendermime: IRenderMime, palette: IComm
   });
   palette.addItem({ command, category });
 
+//jvftcf
   //git commit button
   command = CommandIDs.git_commit;
   commands.addCommand(command, {
