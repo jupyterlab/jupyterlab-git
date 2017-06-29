@@ -31,16 +31,14 @@ def post_metrics():
 
 class hi(IPythonHandler):
     def get(self):
-        my_output = subprocess.check_output(["git", "log"])
-        print(my_output)
-        #self.finish(my_output)
-        self.finish(json.dumps(get_metrics(my_output.decode("utf-8"))))
+        self.finish(json.dumps(post_metrics()))
         print("Hi there! get extension!!")
         
     def post(self):
         my_data = json.loads(self.request.body)
-        print(my_data)
-        my_output = subprocess.check_output(["git", "status"])
+        temp = my_data["git_command"]
+        print(temp+"hahahaha")
+        my_output = subprocess.check_output(["git", temp])
         self.finish(my_output)
         #self.finish(json.dumps(post_metrics()))
         print("Hi there! post extensions!!")
