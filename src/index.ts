@@ -287,6 +287,7 @@ function activateAVCbox(app: JupyterLab, rendermime: IRenderMime, palette: IComm
     label: 'git commit command',
     execute: args => {
       console.log('Try to exec *git commit* command');
+      //need to pop up a window to let user input the message for commit
       POST_Git_Request(["git", "commit", "-m", "'surprise!!!!'"])
     }
   });
