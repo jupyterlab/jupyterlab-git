@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette
+  ICommandPalette, Dialog, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -288,7 +288,19 @@ function activateAVCbox(app: JupyterLab, rendermime: IRenderMime, palette: IComm
     execute: args => {
       console.log('Try to exec *git commit* command');
       //need to pop up a window to let user input the message for commit
-      POST_Git_Request(["git", "commit", "-m", "'surprise!!!!'"])
+    let message = `descriptive message for commit`;
+    if (1) {
+      return showDialog({
+        title: 'Commit',
+        body: message,
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'OK'})]
+      }).then(result => {
+        if (result.accept) {
+          POST_Git_Request(["git", "commit", "-m", "'surprise!!!!'"]);
+        }
+      });
+    }
+      
     }
   });
   palette.addItem({ command, category });
