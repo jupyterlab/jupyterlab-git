@@ -1,6 +1,7 @@
 # jupyterlab-git
 
 
+
 JLG
 
 
@@ -29,4 +30,5 @@ To rebuild the package and the JupyterLab app:
 npm run build
 jupyter lab build
 ```
+
 
