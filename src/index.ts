@@ -1,186 +1,76 @@
-/*
-this is a test JupyterLab-extension-program for Jupyterlab-Git
-based on chatbox-extension code, we are trying to create events in typescript file and eventually
-can communicate with the tornado server through HTTP requests. 
-*/
-import $ = require('jquery');
-
 import {
-  URLExt
-} from '@jupyterlab/coreutils';
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
 /*
 import {
   JSONObject
 } from '@phosphor/coreutils';
 */
 import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+  LauncherModel, LauncherWidget
+} from '@jupyterlab/launcher';
+
+import {
+  each
+} from '@phosphor/algorithm';
+
+import {
+  TabBar, Widget
+} from '@phosphor/widgets';
+
+import {
+  URLExt
+} from '@jupyterlab/coreutils';
 
 import {
   ServerConnection
 } from '@jupyterlab/services';
 
-import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
+import '../style/index.css';
 
-import {
-  ICommandPalette, Dialog, showDialog
-} from '@jupyterlab/apputils';
-
-import {
-  IDocumentManager
-} from '@jupyterlab/docmanager';
-
-import {
-  IEditorServices
-} from '@jupyterlab/codeeditor';
-
-import {
-  ChatboxPanel
-} from '@jupyterlab/chatbox';
-
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime';
-//const SESSION_SERVICE_URL = 'api/sessions';
-/**
- * The command IDs used by the AVCbox(Version Control box) plugin.
- */
-namespace CommandIDs {
-  export
-  const git_st = 'AVCbox:git status';
-
-  export
-  const git_add = 'AVCbox:git add';
-
-  export
-  const git_log = 'AVCbox:git log';
-
-  export 
-  const git_pull = 'AVCbox:git pull';
-
-  export 
-  const git_remote = 'AVCbox:git remote';
-
-  export 
-  const git_commit = 'AVCbox:git commit';
-
-  export
-  const get_git_api = 'AVCbox:git api';
+function parseStatus(str) {
+	var chunks = str.split('\0');
+	var ret = [];
+	for (var i = 0; i < chunks.length; i++) {
+		var chunk = chunks[i];
+		if (chunk.length) {
+			var x = chunk[0];
+			var fileStatus = {
+				x: x,
+				y: chunk[1],
+				to: chunk.substring(3),
+				from: null
+			};
+			if (x === 'R') {
+				i++;
+				fileStatus.from = chunks[i];
+			}
+			ret.push(fileStatus);
+		}
+	}
+	return ret;
+}
+/*
+var DESCRIPTIONS = {
+	' ': 'unmodified',
+	'M': 'modified',
+	'A': 'added',
+	'D': 'deleted',
+	'R': 'renamed',
+	'C': 'copied',
+	'U': 'umerged',
+	'?': 'untracked',
+	'!': 'ignored'
 };
 
-/**
- * The AVCbox widget content factory.
- */
-export
-const AVCboxPlugin: JupyterLabPlugin<void> = {
-  id: 'jupyter.extensions.AVCbox',
-  requires: [IRenderMime, ICommandPalette, IEditorServices, IDocumentManager, ILayoutRestorer],
-  autoStart: true,
-  activate: activateAVCbox
+function describeCode(code) {
+	return DESCRIPTIONS[code.toUpperCase()];
 }
-
-
-/**
- * Export the plugin as the default.
- */
-export default AVCboxPlugin;
-
-/**
- * Export interfaces for Git command use
- */
-export interface IGit {
-	path: string;
-	version: string;
-}
-
-export interface IFileStatus {
-	x: string;
-	y: string;
-	path: string;
-	rename?: string;
-}
-
-export interface Remote {
-	name: string;
-	url: string;
-}
-
-export enum RefType {
-	Head,
-	RemoteHead,
-	Tag
-}
-
-export interface Ref {
-	type: RefType;
-	name?: string;
-	commit?: string;
-	remote?: string;
-}
-
-export interface Branch extends Ref {
-	upstream?: string;
-	ahead?: number;
-	behind?: number;
-}
-
-export interface IExecutionResult {
-	exitCode: number;
-	stdout: string;
-	stderr: string;
-}
-
-export interface IGitErrorData {
-	error?: Error;
-	message?: string;
-	stdout?: string;
-	stderr?: string;
-	exitCode?: number;
-	gitErrorCode?: string;
-	gitCommand?: string;
-}
-
-export interface IGitOptions {
-	gitPath: string;
-	version: string;
-	env?: any;
-}
-
-export interface Commit {
-	hash: string;
-	message: string;
-}
-
-/**
- * a test link function for buttons
- */
-
-
-let serverSettings = ServerConnection.makeSettings();
-let gapiLoaded = new PromiseDelegate<void>();
-export
-function loadGapi(): Promise<void> {
-  return new Promise<void>( (resolve, reject) => {
-    // Get the gapi script from Google.
-    $.getJSON('https://api.github.com')
-    .done((script, textStatus) => {
-      console.log("gapi: loaded onto page");
-      console.log(JSON.stringify(script, null, 2));
-    }).fail( () => {
-      console.log("gapi: unable to load onto page");
-      gapiLoaded.reject(void 0);
-      reject(void 0);
-    });
-  });
-}
-
+*/
 function POST_Git_Request(git_command){
   let data0 = {"git_command":git_command , "parameters":{"id":"valore"}};
       let request = {
-        url: URLExt.join(serverSettings.baseUrl, 'hi'),
+        url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'hi'),
           method: 'POST',
           cache: true,
           contentType: 'bar',
@@ -190,157 +80,120 @@ function POST_Git_Request(git_command){
           data: JSON.stringify(data0),
           //data: '{"git_command":["git", "status"], "parameters":{"id":"valore"}}'
       };
-  
-      ServerConnection.makeRequest(request, serverSettings).then(response =>{
+      ServerConnection.makeRequest(request, ServerConnection.makeSettings()).then(response =>{
         if (response.xhr.status !== 200) {
           throw ServerConnection.makeError(response);
         }
-        //console.log(JSON.stringify(response.data, null, 2)); 
-        console.log(response.data);
+        let data_json = parseStatus(response.data)
+        console.log(JSON.stringify(data_json, null, 2)); 
+       // console.log(parseStatus(response.data));
+      for (var i=0; i<data_json.length; i++){
+        console.log("CheckBit 1: "+data_json[i].x);
+        console.log("CheckBit 2: "+data_json[i].y);
+        console.log("Path To: "+data_json[i].to);
+        console.log("Path From: "+data_json[i].from);
+      }
+        return data_json;
       });
-
 }
 
 /**
- * Activate the AVCbox extension.
+ * The default tab manager extension.
  */
-function activateAVCbox(app: JupyterLab, rendermime: IRenderMime, palette: ICommandPalette, editorServices: IEditorServices, docManager: IDocumentManager, restorer: ILayoutRestorer): void {
-  const id = 'AVCbox';
-  let { commands, shell } = app;
-  let category = 'AVCbox';
-  let command: string;
+const plugin1: JupyterLabPlugin<void> = {
+  id: 'jupyter.extensions.tab-manager1',
+  activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
+    const { shell } = app;
+    const tabs = new TabBar<Widget>({ orientation: 'vertical' });
+    const header = document.createElement('header');
 
-  /**
-   * Create a AVCbox for a given path.
-   */
-  let editorFactory = editorServices.factoryService.newInlineEditor.bind(
-    editorServices.factoryService);
-  let contentFactory = new ChatboxPanel.ContentFactory({ editorFactory });
-  let panel = new ChatboxPanel({
-    rendermime: rendermime.clone(),
-    contentFactory
-  });
+    const header1 = document.createElement('header');
+    const header2 = document.createElement('header');
 
-  //test msg
-  console.log('JupyterLab extension JL_git (typescript extension) is activated!');
-  // Add the AVCbox panel to the tracker.
-  panel.title.label = 'AVC';
-  panel.id = id;
+    restorer.add(tabs, 'tab-manager');
+    tabs.id = 'tab-manager';
+    tabs.title.label = 'Git Plugin';
+    header.textContent = 'Unstaged Files';
+    header1.textContent = 'Add Files';
+    header2.textContent = 'Untracked Files';
+    
 
-  restorer.add(panel, 'AVCbox');
+    tabs.node.insertBefore(header, tabs.contentNode);
+    tabs.node.insertBefore(header1, null);
+    tabs.node.insertBefore(header2, null);
+    shell.addToLeftArea(tabs, { rank: 600 });
 
-  //git status button
-  command = CommandIDs.git_st;
-  commands.addCommand(command, {
-    label: 'git status command',
-    execute: args => {
-      console.log('Try to exec *git status* command');
-      POST_Git_Request(    ["git","status"]   )
-    }
-  });
-  palette.addItem({ command, category });
+    app.restored.then(() => {
+      const populate = () => {
+        tabs.clearTabs();
+        POST_Git_Request(    ["git","status","--porcelain", "-z"]   );
 
+        let data0 = {"git_command": ["git","status","--porcelain", "-z"] , "parameters":{"id":"valore"}};
+        let request = {
+          url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'hi'),
+          method: 'POST',
+          cache: true,
+          contentType: 'bar',
+          headers: {
+            foo: 'bar'
+          },
+          data: JSON.stringify(data0),
+          //data: '{"git_command":["git", "status"], "parameters":{"id":"valore"}}'
+        };
+        ServerConnection.makeRequest(request, ServerConnection.makeSettings()).then(response =>{
+          if (response.xhr.status !== 200) {
+            throw ServerConnection.makeError(response);
+          }
+          let data_json = parseStatus(response.data)
+          console.log(JSON.stringify(data_json, null, 2)); 
+          // console.log(parseStatus(response.data));
+          for (var i=0; i<data_json.length; i++){
 
-//git log button
-  command = CommandIDs.git_log;
-  commands.addCommand(command, {
-    label: 'git log command',
-    execute: args => {
-      console.log('Try to exec *git log* command');
-      
-     $.getJSON(serverSettings.baseUrl + 'hi', function(data) {
-            console.log(data['rss']);
-            console.log(data['limits']['memory']);
-            //console.log(JSON.stringify(data, null, 2));
-      });  
-      POST_Git_Request(["git","log"])
-    }
-  });
-  palette.addItem({ command, category });
+            let model = new LauncherModel();
+            let cwd = String(data_json[i].to) ;
+            let id = data_json[i].to;
+            let callback = (item: Widget) => {
+              shell.addToMainArea(item, { ref: id });
+              shell.activateById(item.id);
+            };
+            let widget = new LauncherWidget({ cwd, callback });
+            widget.model = model;
+            widget.id = id;
+            widget.title.label = data_json[i].to;
+            widget.title.closable = true;
+            //shell.addToMainArea(widget);
+            /*
+            if (args['activate'] !== false) {
+              shell.activateById(widget.id);
+            }
+            */
+            tabs.addTab(widget.title);
+          }
+        });
+        
+        each(shell.widgets('main'), widget => { tabs.addTab(widget.title); });
+      };
 
- //git pull button
-  command = CommandIDs.git_pull;
-  commands.addCommand(command, {
-    label: 'git pull command',
-    execute: args => {
-      console.log('Try to exec *git pull* command');
-      POST_Git_Request(["git","pull"])
-    }
-  });
-  palette.addItem({ command, category });
+      // Connect signal handlers.
+      shell.layoutModified.connect(() => { populate(); });
 
-  //git remote button
-  command = CommandIDs.git_remote;
-  commands.addCommand(command, {
-    label: 'git remote command',
-    execute: args => {
-      console.log('Try to exec *git remote -v* command');
-      POST_Git_Request(["git", "remote", "-v"])
-    }
-  });
-  palette.addItem({ command, category });
-
-//jvftcf
-  //git commit button
-  command = CommandIDs.git_commit;
-  commands.addCommand(command, {
-    label: 'git commit command',
-    execute: args => {
-      console.log('Try to exec *git commit* command');
-      //need to pop up a window to let user input the message for commit
-    let message = `descriptive message for commit`;
-    if (1) {
-      return showDialog({
-        title: 'Commit',
-        body: message,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'OK'})]
-      }).then(result => {
-        if (result.accept) {
-          POST_Git_Request(["git", "commit", "-m", "'surprise!!!!'"]);
-        }
+      tabs.tabActivateRequested.connect((sender, tab) => {
+        shell.activateById(tab.title.owner.id);
       });
-    }
-      
-    }
-  });
-  palette.addItem({ command, category });
+      tabs.tabCloseRequested.connect((sender, tab) => {
+        tab.title.owner.close();
+      });
 
-  //git add button
-  command = CommandIDs.git_add;
-  commands.addCommand(command, {
-    label: 'git add command',
-    execute: args => {
-      console.log('Try to exec *git add* command');
-      POST_Git_Request(["git", "add", "src/index.ts"])
-    }
-  });
-  palette.addItem({ command, category });
-
-//test button
-  command = CommandIDs.get_git_api;
-  commands.addCommand(command, {
-    label: 'Access GitHub JSON',
-    execute: args => {
-      console.log('Try to receive JSON from api.github.com!!');
-      loadGapi();
-    }
-  });
-  palette.addItem({ command, category });
+      // Populate the tab manager.
+      populate();
+    });
+  },
+  autoStart: true,
+  requires: [ILayoutRestorer]
+};
 
 
-
-  let updateDocumentContext = function (): void {
-    let context = docManager.contextForWidget(shell.currentWidget);
-    if (context && context.model.modelDB.isCollaborative) {
-      if (!panel.isAttached) {
-        shell.addToLeftArea(panel);
-      }
-      panel.context = context;
-    }
-  };
-
-  app.restored.then(() => {
-    updateDocumentContext();
-  });
-  shell.currentChanged.connect(updateDocumentContext);
-}
+/**
+ * Export the plugin as default.
+ */
+export default plugin1;
