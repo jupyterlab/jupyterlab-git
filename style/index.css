@@ -1,3 +1,245 @@
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-git-button-height: 28px;
+  --jp-private-git-button-width: 48px;
+  --jp-private-git-item-height: 24px;
+  --jp-private-git-shutdown-button-height: 24px;
+}
+
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-GitSessions {
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size0);
+}
+
+
+.jp-GitSessions-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  margin: var(--jp-toolbar-header-margin);
+}
+
+
+.jp-GitSessions-headerRefresh {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 100px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image: var(--jp-icon-refresh);
+  background-size: 16px;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+
+.jp-GitSessions-section {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+}
+
+
+.jp-GitSessions-headerRefresh:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-GitSessions-headerRefresh:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+
+
+.jp-GitSessions-sectionHeader {
+  flex: 0 0 auto;
+  margin: 4px 0px;
+  padding: 4px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 1px;
+}
+
+
+.jp-GitSessions-sectionContainer {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+
+.jp-GitSessions-sectionList {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+
+.jp-GitSessions-item {
+  display: flex;
+  flex-direction: row;
+  color: var(--jp-ui-font-color1);
+  height: var(--jp-private-running-item-height);
+  line-height: var(--jp-private-running-item-height);
+}
+
+
+.jp-GitSessions-itemIcon {
+  flex: 0 0 auto;
+  padding: 0px 8px;
+  margin-right: 4px;
+  margin-left: 8px;
+  vertical-align: baseline;
+  background-size: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+
+.jp-GitSessions-itemIcon.jp-mod-notebook {
+  background-image: var(--jp-icon-book);
+}
+
+
+.jp-GitSessions-itemIcon.jp-mod-console {
+  background-image: var(--jp-icon-terminal);
+}
+
+
+.jp-GitSessions-itemIcon.jp-mod-file:before {
+  background-image: var(--jp-icon-file);
+}
+
+
+.jp-GitSessions-itemIcon.jp-mod-terminal {
+  background-image: var(--jp-icon-terminal);
+}
+
+
+.jp-GitSessions-itemLabel {
+  font-size: var(--jp-ui-font-size1);
+  flex: 1 1 auto;
+  margin-right: 4px;
+  padding-left: 4px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  direction: rtl;
+  white-space: nowrap;
+  border-radius: 2px;
+  transition: background-color 0.1s ease;
+}
+
+
+.jp-GitSessions-itemLabel:hover {
+  background-color: rgba(153,153,153,.1);
+}
+
+
+.jp-GitSessions-itemLabel:focus {
+  background-color: rgba(153,153,153,.2);
+}
+
+.jp-GitSessions-itemAdd.jp-mod-styled {
+  margin: 0px 4px;
+  color: var(--jp-warn-color1);
+  font-weight: 400;
+  background-color: transparent;
+  height: var(--jp-private-running-shutdown-button-height);
+  line-height: var(--jp-private-running-shutdown-button-height);
+  transition: background-color 0.1s ease;
+  border-radius: 2px;
+}
+.jp-GitSessions-itemAdd.jp-mod-styled:hover {
+  background-color: rgba(153,153,153,.1);
+}
+.jp-GitSessions-itemAdd.jp-mod-styled:focus {
+  border: none;
+  box-shadow: none;
+  background-color: rgba(153,153,153,.2);
+}
+
+.jp-GitSessions-itemReset.jp-mod-styled {
+  margin: 0px 4px;
+  color: var(--jp-warn-color1);
+  font-weight: 400;
+  background-color: transparent;
+  height: var(--jp-private-running-shutdown-button-height);
+  line-height: var(--jp-private-running-shutdown-button-height);
+  transition: background-color 0.1s ease;
+  border-radius: 2px;
+}
+.jp-GitSessions-itemReset.jp-mod-styled:hover {
+  background-color: rgba(153,153,153,.1);
+}
+.jp-GitSessions-itemReset.jp-mod-styled:focus {
+  border: none;
+  box-shadow: none;
+  background-color: rgba(153,153,153,.2);
+}
+
+.jp-GitSessions-itemCheckout.jp-mod-styled {
+  margin: 0px 4px;
+  color: var(--jp-warn-color1);
+  font-weight: 400;
+  background-color: transparent;
+  height: var(--jp-private-running-shutdown-button-height);
+  line-height: var(--jp-private-running-shutdown-button-height);
+  transition: background-color 0.1s ease;
+  border-radius: 2px;
+}
+.jp-GitSessions-itemCheckout.jp-mod-styled:hover {
+  background-color: rgba(153,153,153,.1);
+}
+.jp-GitSessions-itemCheckout.jp-mod-styled:focus {
+  border: none;
+  box-shadow: none;
+  background-color: rgba(153,153,153,.2);
+}
+
+.jp-GitSessions-itemCommit.jp-mod-styled {
+  margin: 0px 4px;
+  color: var(--jp-warn-color1);
+  font-weight: 400;
+  background-color: transparent;
+  height: var(--jp-private-running-shutdown-button-height);
+  line-height: var(--jp-private-running-shutdown-button-height);
+  transition: background-color 0.1s ease;
+  border-radius: 2px;
+}
+.jp-GitSessions-itemCommit.jp-mod-styled:hover {
+  background-color: rgba(153,153,153,.1);
+}
+.jp-GitSessions-itemCommit.jp-mod-styled:focus {
+  border: none;
+  box-shadow: none;
+  background-color: rgba(153,153,153,.2);
+}
+
 :root {
   --jp-private-tab-manager-active-top-border: 2px;
   --jp-private-tab-manager-tab-height: 32px;
