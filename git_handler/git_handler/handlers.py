@@ -29,7 +29,7 @@ def post_metrics():
         }
     }
 
-class hi(IPythonHandler):
+class git_handler(IPythonHandler):
     def get(self):
         self.finish(json.dumps(post_metrics()))
         print("Hi there! get extension!!")
@@ -38,8 +38,8 @@ class hi(IPythonHandler):
         my_data = json.loads(self.request.body)
         temp = my_data["git_command"]
         print(temp)
+        #my_output = subprocess.check_output(temp, cwd = os.getcwd()+'/jupyterlab-git')
         my_output = subprocess.check_output(temp)
-        #my_output = subprocess.check_output(["git", temp])
         self.finish(my_output)
         #self.finish(json.dumps(post_metrics()))
         print("Hi there! post extensions!!")
@@ -50,5 +50,5 @@ class hi(IPythonHandler):
 
 
 def setup_handlers(web_app):
-    route_pattern = url_path_join(web_app.settings['base_url'], '/hi')
-    web_app.add_handlers('.*', [(route_pattern, hi)])
+    route_pattern = url_path_join(web_app.settings['base_url'], '/git_handler')
+    web_app.add_handlers('.*', [(route_pattern, git_handler)])
