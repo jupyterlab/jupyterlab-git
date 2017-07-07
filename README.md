@@ -1,4 +1,5 @@
 # jupyterlab-git
+pre-alpha version
 
 
 JLG
@@ -8,7 +9,7 @@ JLG
 
 * JupyterLab
 
-## Installation
+## Installation for git-plugin
 
 ```bash
 jupyter labextension install jupyterlab-git
@@ -32,6 +33,24 @@ To rebuild the package and the JupyterLab app:
 ```bash
 npm run build
 jupyter lab build
+
+```
+
+##Installation and activation for git handler
+
+```bash
+pip install git_handler
+jupyter serverextension enable --py git_handler
+jupyter nbextension install --py git_handler
+```
+
+
+To enable this extension:
+
+```bash
+jupyter nbextension enable --py git_handler
+
 ```
 
 Launch JupyterLab & you will see the new Git buttons on the left side of the window.
+
