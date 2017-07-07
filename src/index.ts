@@ -19,6 +19,23 @@ import {
   DOMUtils
 } from '@jupyterlab/apputils';
 
+import {
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+} from '@jupyterlab/application';
+
+import {
+  IServiceManager
+} from '@jupyterlab/services';
+
+import {
+  URLExt
+} from '@jupyterlab/coreutils';
+
+import {
+  ServerConnection
+} from '@jupyterlab/services';
+
+
 import '../style/index.css';
 
 /**
@@ -178,7 +195,7 @@ class GitSessions extends Widget {
 
     let data0 = {"git_command": ["git","status","--porcelain", "-z"] , "parameters":{"id":"valore"}};
     let request = {
-        url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'hi'),
+        url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'git_handler'),
         method: 'POST',
         cache: true,
         contentType: 'bar',
@@ -259,7 +276,7 @@ class GitSessions extends Widget {
 
     let data0 = {"git_command": ["git","status","--porcelain", "-z"] , "parameters":{"id":"valore"}};
     let request = {
-        url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'hi'),
+        url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'git_handler'),
         method: 'POST',
         cache: true,
         contentType: 'bar',
@@ -363,7 +380,7 @@ class GitSessions extends Widget {
 
     let data0 = {"git_command": ["git","status","--porcelain", "-z"] , "parameters":{"id":"valore"}};
     let request = {
-        url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'hi'),
+        url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'git_handler'),
         method: 'POST',
         cache: true,
         contentType: 'bar',
@@ -437,6 +454,7 @@ class GitSessions extends Widget {
     let git_commit = renderer.getUncommittedCommit(node0);
     if (ElementExt.hitTest(git_commit, clientX, clientY)) {
         POST_Git_Request(["git", "commit", "-m", "hardcode"]);
+        //TODO:  pop up a window to let user type in commit info
         return;
     }
     // Check for a uncommitted item click.
@@ -920,35 +938,7 @@ namespace GitSessions {
   const defaultRenderer = new Renderer();
 }
 
-import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
 
-import {
-  IServiceManager
-} from '@jupyterlab/services';
-/*
-import {
-  LauncherModel, LauncherWidget
-} from '@jupyterlab/launcher';
-
-import {
-  each
-} from '@phosphor/algorithm';
-
-import {
-  TabBar, Widget
-} from '@phosphor/widgets';
-*/
-import {
-  URLExt
-} from '@jupyterlab/coreutils';
-
-import {
-  ServerConnection
-} from '@jupyterlab/services';
-
-import '../style/index.css';
 
 function parseStatus(str) {
 	var chunks = str.split('\0');
@@ -972,37 +962,7 @@ function parseStatus(str) {
 	}
 	return ret;
 }
-/*
-function POST_Git_Request(git_command){
-  let data0 = {"git_command":git_command , "parameters":{"id":"valore"}};
-      let request = {
-        url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'hi'),
-          method: 'POST',
-          cache: true,
-          contentType: 'bar',
-          headers: {
-            foo: 'bar'
-          },
-          data: JSON.stringify(data0),
-          //data: '{"git_command":["git", "status"], "parameters":{"id":"valore"}}'
-      };
-      ServerConnection.makeRequest(request, ServerConnection.makeSettings()).then(response =>{
-        if (response.xhr.status !== 200) {
-          throw ServerConnection.makeError(response);
-        }
-        let data_json = parseStatus(response.data)
-        console.log(JSON.stringify(data_json, null, 2)); 
-       // console.log(parseStatus(response.data));
-      for (var i=0; i<data_json.length; i++){
-        console.log("CheckBit 1: "+data_json[i].x);
-        console.log("CheckBit 2: "+data_json[i].y);
-        console.log("Path To: "+data_json[i].to);
-        console.log("Path From: "+data_json[i].from);
-      }
-        return data_json;
-      });
-}
-*/
+
 
 /**
  * The default running sessions extension.
@@ -1032,7 +992,7 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   // Let the application restorer track the running panel for restoration of
   // application state (e.g. setting the running panel as the current side bar
   // widget).
- 
+ //console.log(this.IFileContainer.path);
 
 
   restorer.add(git_plugin, 'git-sessions');
@@ -1040,12 +1000,18 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(git_plugin, { rank: 200 });
+
 }
+
+
+
 
 function POST_Git_Request(git_command){
   let data0 = {"git_command":git_command , "parameters":{"id":"valore"}};
+
+
       let request = {
-        url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'hi'),
+        url: URLExt.join((ServerConnection.makeSettings()).baseUrl, 'git_handler'),
           method: 'POST',
           cache: true,
           contentType: 'bar',
