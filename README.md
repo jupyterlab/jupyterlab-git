@@ -1,12 +1,16 @@
 # jupyterlab-git
 
+JupyterLab Git Extension
 
-JLG
+## THIS IS A PRE-ALPHA VERSION.
+## NOT READY TO USE YET.
 
+Still, if you are a JupyterLab developer & want to see the progress, follow the steps below.
 
 ## Prerequisites
 
 * JupyterLab
+* This repo cloned in your system. (To get all the files)
 
 ## Installation
 
