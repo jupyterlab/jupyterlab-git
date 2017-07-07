@@ -23,23 +23,12 @@ For a development install (requires npm version 4 or later), do the following in
 npm install
 jupyter labextension link .
 ```
-to install the server extension, go inside the git_handler directory and do the following:
-```bash
-pip install ./hi
-```
 
-To rebuild the package and the JupyterLab app:
-
-```bash
-npm run build
-jupyter lab build
-
-```
 
 ##Installation and activation for git handler
 
 ```bash
-pip install git_handler
+pip install git_handler/
 jupyter serverextension enable --py git_handler
 jupyter nbextension install --py git_handler
 ```
