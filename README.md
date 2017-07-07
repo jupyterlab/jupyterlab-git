@@ -24,8 +24,7 @@ npm install
 jupyter labextension link .
 ```
 
-
-##Installation and activation for git handler
+## Installation and activation of git handler
 
 ```bash
 pip install git_handler/
