@@ -453,7 +453,11 @@ class GitSessions extends Widget {
     }
     let git_commit = renderer.getUncommittedCommit(node0);
     if (ElementExt.hitTest(git_commit, clientX, clientY)) {
-	 var msg = prompt("Enter commit message");   
+	 var msg = prompt("Enter commit message"); 
+	    if(msg ===null || msg===undefined)
+	    {
+		    msg = "committed!"
+	    }
         POST_Git_Request(["git", "commit", "-m", msg]);
         //TODO:  pop up a window to let user type in commit info
         return;
