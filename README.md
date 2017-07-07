@@ -14,32 +14,14 @@ JLG
 ```bash
 jupyter labextension install jupyterlab-git
 ```
+## npm install
+go to the ```jupyterlab-git``` directory in  the terminal &  use ``` npm install ``` to install all the necessary modules.
 
-## Development
 
-For a development install (requires npm version 4 or later), do the following in the repository directory:
-
-```bash
-npm install
-jupyter labextension link .
-```
-to install the server extension, go inside the git_handler directory and do the following:
-```bash
-pip install ./hi
-```
-
-To rebuild the package and the JupyterLab app:
+## Installation and activation of git handler
 
 ```bash
-npm run build
-jupyter lab build
-
-```
-
-##Installation and activation for git handler
-
-```bash
-pip install git_handler
+pip install git_handler/
 jupyter serverextension enable --py git_handler
 jupyter nbextension install --py git_handler
 ```
