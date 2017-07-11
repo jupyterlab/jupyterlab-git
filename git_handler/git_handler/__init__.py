@@ -14,4 +14,6 @@ def _jupyter_nbextension_paths():
     }]
 
 def load_jupyter_server_extension(nbapp):
+    git = Git() # The Python class all of your handlers will need/use
+    nbapp.web_app.settings['git'] = git
     setup_handlers(nbapp.web_app)
