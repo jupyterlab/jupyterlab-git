@@ -1,4 +1,5 @@
 from git_handler.handlers import setup_handlers
+from git_handler.git_class import Git
 # Jupyter Extension points
 def _jupyter_server_extension_paths():
     return [{
@@ -14,4 +15,6 @@ def _jupyter_nbextension_paths():
     }]
 
 def load_jupyter_server_extension(nbapp):
+    git = Git()
+    nbapp.web_app.settings['git'] = git
     setup_handlers(nbapp.web_app)
