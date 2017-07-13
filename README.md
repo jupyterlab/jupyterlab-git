@@ -1,5 +1,5 @@
 # jupyterlab-git
-
+pre-alpha version
 
 
 JLG
@@ -9,7 +9,7 @@ JLG
 
 * JupyterLab
 
-## Installation
+## Installation for git-plugin
 
 ```bash
 jupyter labextension install jupyterlab-git
@@ -31,4 +31,17 @@ npm run build
 jupyter lab build
 ```
 
+##Installation and activation for jupyterlab_git python handler package
 
+```bash
+pip install jupyterlab_git
+jupyter serverextension enable --py jupyterlab_git
+jupyter nbextension install --py jupyterlab_git
+```
+
+To enable this extension:
+
+```bash
+jupyter nbextension enable --py jupyterlab_git
+
+```

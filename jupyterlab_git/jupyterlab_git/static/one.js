@@ -10,7 +10,7 @@ define(['jquery', 'base/js/utils'], function ($, utils) {
 
     function open_rsession() {
 
-        var rsp_url = base_url + '/hi';
+        var rsp_url = base_url + '/git_handler';
         console.log("Let's Go and test it!!!!!!!!!!00000");
 
         var settings = {
@@ -30,14 +30,6 @@ define(['jquery', 'base/js/utils'], function ($, utils) {
     }
    
     function load() {
-        //var w = window.open(undefined, Jupyter._target);
-        //open_rsession();
-/*
-        $.getJSON(utils.get_body_data('baseUrl') + 'hi', function(data) {
-            console.log(data['rss']);
-            console.log(data['limits']['memory']);
-        });
-*/
         console.log("Let's Go and test it!!!!!!!!!!");
         
     }
