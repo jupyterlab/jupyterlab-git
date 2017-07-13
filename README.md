@@ -29,20 +29,19 @@ To rebuild the package and the JupyterLab app:
 ```bash
 npm run build
 jupyter lab build
-
 ```
 
-##Installation and activation for git handler
+##Installation and activation for jupyterlab_git python handler package
 
 ```bash
-pip install git_handler
-jupyter serverextension enable --py git_handler
-jupyter nbextension install --py git_handler
+pip install jupyterlab_git
+jupyter serverextension enable --py jupyterlab_git
+jupyter nbextension install --py jupyterlab_git
 ```
 
 To enable this extension:
 
 ```bash
-jupyter nbextension enable --py git_handler
+jupyter nbextension enable --py jupyterlab_git
 
 ```

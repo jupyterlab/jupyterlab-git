@@ -37,6 +37,10 @@ import {
   ConsolePanel
 } from '@jupyterlab/console';
 
+import {
+  Git
+} from './git'
+
 import '../style/index.css';
 
 /**
@@ -155,15 +159,6 @@ class GitSessions extends Widget {
     this._renderer = options.renderer || GitSessions.defaultRenderer;
     this.addClass(Git_CLASS);
     let renderer = this._renderer;
-    
-    
-/*
-    This may be the way to open files here
-    let manager = this._manager = options.manager;
-    manager.contents.get
-*/
-
-
 
 //prepare 3 sections
 
@@ -200,28 +195,22 @@ class GitSessions extends Widget {
       untrackedContainer.appendChild(untrackedList);
       untrackedNode.appendChild(untrackedContainer);
 
+      let git_temp = new Git();
+      let promise_temp = (git_temp.status(''));
+      promise_temp.then(response=> {
+        if (response.xhr.status !== 200) {
+        console.log("response error info:::");
+        console.log(response.xhr.status);
+        throw ServerConnection.makeError(response);
+        }
 
+        console.log("response.xhr info:::");
+        console.log(response.xhr.responseText);
+        console.log(response.xhr.responseURL);
+        console.log(response.xhr.status);
+        console.log(response.xhr.statusText);
 
-    let data0 = {"git_command": ["git","status","--porcelain", "-z"] ,"current_path":''};
-    let request = {
-        //url: URLExt.join((ServerConnection.makeSettings()).baseUrl, '/git/status'),
-        url:'/git/status',
-        method: 'POST',
-        cache: true,
-        contentType: 'bar',
-        headers: {
-          foo: 'bar'
-        },
-        data: JSON.stringify(data0),
-    };
-    ServerConnection.makeRequest(request, ServerConnection.makeSettings()).then(response =>{
-          if (response.xhr.status !== 200) {
-            throw ServerConnection.makeError(response);
-          }
-          //let data_json = parseStatus(response.data)
-
-          let data_json = response.data;
-          console.log(response.data);
+      let data_json = response.data;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -239,7 +228,8 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
-        });
+      }
+      );
   }
 
   /**
@@ -295,45 +285,52 @@ class GitSessions extends Widget {
     untrackedContainer.appendChild(untrackedList);
 
 
-    let data0 = {"git_command": ["git","status","--porcelain", "-z"] , "current_path":fb.model.path};
-    let request = {
-        //url: URLExt.join((ServerConnection.makeSettings()).baseUrl, '/git/status'),
-          url:'/git/status',
-          method: 'POST',
-          cache: true,
-          contentType: 'bar',
-          headers: {
-            foo: 'bar'
-          },
-          data: JSON.stringify(data0),
-    };
-    ServerConnection.makeRequest(request, ServerConnection.makeSettings()).then(response =>{
-      if (response.xhr.status !== 200) {
-          throw ServerConnection.makeError(response);
-      }
-      let data_json = response.data
-      console.log(JSON.stringify(data_json, null, 2)); 
-      for (var i=0; i<data_json.length; i++){
-          if(data_json[i].x=="M"){
+      let git_temp = new Git();
+      
+      let current_root_repo_path = '';
+      git_temp.showtoplevel(fb.model.path).then(response=>{
+        current_root_repo_path = response.data;
+        console.log("!!!!!!!!!!!!!!!!!!!!");
+        console.log(response.data);
+        console.log(current_root_repo_path);
+      });
+
+
+
+      let promise_temp = (git_temp.status(fb.model.path));
+      promise_temp.then(response=> {
+        if (response.xhr.status !== 200) {
+        console.log("response error info:::");
+        console.log(response.xhr.status);
+        throw ServerConnection.makeError(response);
+        }
+
+        console.log("response.xhr info:::");
+        console.log(response.xhr.responseText);
+        console.log(response.xhr.responseURL);
+        console.log(response.xhr.status);
+        console.log(response.xhr.statusText);
+
+      let data_json = response.data;
+          for (var i=0; i<data_json.length; i++){
+            if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               uncommittedList.appendChild(node);
-          }
-          if(data_json[i].y=="M"){
+            }
+            if(data_json[i].y=="M"){
               let node = renderer.createUnstagedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               unstagedList.appendChild(node);
-          }
-          if(data_json[i].x=="?"&&data_json[i].y=="?"){
+            }
+            if(data_json[i].x=="?"&&data_json[i].y=="?"){
               let node = renderer.createUntrackedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               untrackedList.appendChild(node);
+            }
           }
-          }
-        });
-
-    //let terminals = this._manager.terminals;
-    //let sessions = this._manager.sessions;
+      }
+      );
     clearTimeout(this._refreshId);
     let promises: Promise<void>[] = [];
    /* if (terminals.isAvailable()) {
@@ -407,42 +404,42 @@ class GitSessions extends Widget {
     console.log(fb.title.label);
     fb = ll.next();
   }
-    let data0 = {"git_command": ["git","status","--porcelain", "-z"] , "current_path":fb.model.path};
-    let request = {
-        //url: URLExt.join((ServerConnection.makeSettings()).baseUrl, '/git/status'),
-        url: '/git/status',
-        method: 'POST',
-        cache: true,
-        contentType: 'bar',
-        headers: {
-            foo: 'bar'
-        },
-        data: JSON.stringify(data0),
-    };
-    ServerConnection.makeRequest(request, ServerConnection.makeSettings()).then(response =>{
-      if (response.xhr.status !== 200) {
-          throw ServerConnection.makeError(response);
-      }
+
+      let git_temp = new Git();
+      let promise_temp = (git_temp.status(fb.model.path));
+      promise_temp.then(response=> {
+        if (response.xhr.status !== 200) {
+        console.log("response error info:::");
+        console.log(response.xhr.status);
+        throw ServerConnection.makeError(response);
+        }
+
+        console.log("response.xhr info:::");
+        console.log(response.xhr.responseText);
+        console.log(response.xhr.responseURL);
+        console.log(response.xhr.status);
+        console.log(response.xhr.statusText);
+
       let data_json = response.data;
-      console.log(JSON.stringify(data_json, null, 2)); 
-      for (var i=0; i<data_json.length; i++){
-          if(data_json[i].x=="M"){
+          for (var i=0; i<data_json.length; i++){
+            if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               uncommittedList.appendChild(node);
-          }
-          if(data_json[i].y=="M"){
+            }
+            if(data_json[i].y=="M"){
               let node = renderer.createUnstagedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               unstagedList.appendChild(node);
-          }
-          if(data_json[i].x=="?"&&data_json[i].y=="?"){
+            }
+            if(data_json[i].x=="?"&&data_json[i].y=="?"){
               let node = renderer.createUntrackedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               untrackedList.appendChild(node);
+            }
           }
-          }
-        });
+      }
+      );
 
 
   }
@@ -469,52 +466,41 @@ class GitSessions extends Widget {
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
-      let ll = app0.shell.widgets('left');
-  let fb = ll.next();
-  while(fb.title.label!='Files'){
-    console.log(fb.title.label);
-    fb = ll.next();
-  }
+    let ll = app0.shell.widgets('left');
+    let fb = ll.next();
+    while(fb.title.label!='Files'){
+      console.log(fb.title.label);
+      fb = ll.next();
+    }
     // Check for a refresh.
     if (ElementExt.hitTest(refresh, clientX, clientY)) {
       this.refresh();
       return;
     }
+    let git_temp = new Git();
+      
+    let current_root_repo_path = '';
+    git_temp.showtoplevel(fb.model.path).then(response=>{
+        current_root_repo_path = response.data;
+        console.log("!!!!!!!!!!!!!!!!!!!!");
+        console.log(response.data);
+        console.log(current_root_repo_path);
+
+
     let node0 = uncommittedHeader as HTMLLIElement;
+
     let git_reset_all = renderer.getUncommittedReset(node0);
     if (ElementExt.hitTest(git_reset_all, clientX, clientY)) {
-        POST_Git_Request('/git/reset',{"Reset_all": 1, "Filename":null});
+        git_temp.reset(true,null,current_root_repo_path);
         return;
     }
+
     let git_commit = renderer.getUncommittedCommit(node0);
     if (ElementExt.hitTest(git_commit, clientX, clientY)) {
-/*
-        let input = document.createElement('input');
-        showDialog({
-          title: 'Add collaborator Gmail address',
-          body: input,
-          primaryElement: input,
-          buttons: [Dialog.cancelButton(), Dialog.okButton({label: 'COMMITT'})]
-        }).then( result=> {
-          if (result.accept) {
-            let localPath = path.split(':').pop();
-            getResourceForPath(localPath).then((resource: any) => {
-              createPermissions(resource.id, input.value);
-            });
-          }
-        });
-*/
-
-
-
-
-
-
         var msg = prompt("Enter commit message");
         if(msg!=null&&msg!=undefined){
-          POST_Git_Request('/git/commit',{"Commit_msg":msg});
+          git_temp.commit(msg, current_root_repo_path);
         }
-        //TODO:  pop up a window to let user type in commit info
         return;
     }
     // Check for a uncommitted item click.
@@ -523,7 +509,8 @@ class GitSessions extends Widget {
       let node = uncommittedList.children[index] as HTMLLIElement;
       let git_reset = renderer.getUncommittedReset(node);
       if (ElementExt.hitTest(git_reset, clientX, clientY)) {
-        POST_Git_Request('/git/reset',{"Reset_all": 0, "Filename":node.title});
+        //POST_Git_Request('/git/reset',{"Reset_all": 0, "Filename":node.title});
+        git_temp.reset(false,node.title, current_root_repo_path);
         return;
       }
     }
@@ -532,14 +519,18 @@ class GitSessions extends Widget {
     node0 = unstagedHeader as HTMLLIElement;
     let git_add_all = renderer.getUnstagedAdd(node0);
     if (ElementExt.hitTest(git_add_all, clientX, clientY)) {
-        POST_Git_Request('/git/add',{"Add_all": 1 , "Filename":null});
+        //POST_Git_Request('/git/add',{"Add_all": 1 , "Filename":null});
+        git_temp.add(true,null, current_root_repo_path);
         return;
     }
+
     let git_checkout_all = renderer.getUnstagedCheckout(node0);
     if (ElementExt.hitTest(git_checkout_all, clientX, clientY)) {
-        POST_Git_Request('/git/checkout',{"Checkout_all": 1 , "Filename":null});
+       //POST_Git_Request('/git/checkout',{"Checkout_all": 1 , "Filename":null});
+        git_temp.checkout(true,null,current_root_repo_path);
         return;
     }
+
     // Check for a unstaged item click.
     index = DOMUtils.hitTestNodes(unstagedList.children, clientX, clientY);
     if (index !== -1) {
@@ -547,11 +538,13 @@ class GitSessions extends Widget {
       let git_add = renderer.getUnstagedAdd(node);
       let git_checkout = renderer.getUnstagedCheckout(node);
       if (ElementExt.hitTest(git_add, clientX, clientY)) {
-        POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
+        //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
+        git_temp.add(false,node.title,current_root_repo_path);
         return;
       }
       else if(ElementExt.hitTest(git_checkout, clientX, clientY)) {
-        POST_Git_Request('/git/checkout',{"Checkout_all": 0 , "Filename":node.title})
+        //POST_Git_Request('/git/checkout',{"Checkout_all": 0 , "Filename":node.title})
+        git_temp.checkout(false,node.title,current_root_repo_path);
         return;
       }
     }
@@ -562,37 +555,13 @@ class GitSessions extends Widget {
       let node = untrackedList.children[index] as HTMLLIElement;
       let git_add = renderer.getUntrackedAdd(node);
       if (ElementExt.hitTest(git_add, clientX, clientY)) {
-        POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
+        //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
+        git_temp.add(false,node.title,current_root_repo_path);
         return;
       }
     }
+    });
   }
-
-  /**
-   * Handle a change to the running sessions.
-   */
-  /*
-  private _onSessionsChanged(sender: Session.IManager, models: Session.IModel[]): void {
-    // Strip out non-file backed sessions.
-    this._runningSessions = [];
-    for (let session of models) {
-      let name = session.name || session.path.split('/').pop();
-      if (name.indexOf('.') !== -1 || session.name) {
-        this._runningSessions.push(session);
-      }
-    }
-    this.update();
-  }
-*/
-  /**
-   * Handle a change to the running terminals.
-   */
-  /*
-  private _onTerminalsChanged(sender: TerminalSession.IManager, models: TerminalSession.IModel[]): void {
-    this._runningTerminals = models;
-    this.update();
-  }
-*/
   private _manager: ServiceManager.IManager = null;
   private _renderer: GitSessions.IRenderer = null;
   private _runningSessions: Session.IModel[] = [];
@@ -769,7 +738,7 @@ namespace GitSessions {
      */
     createUncommittedHeaderNode(): HTMLElement {
       let node = document.createElement('div');
-      node.textContent = 'Changes to be committed';
+      node.textContent = 'Uncommitted Files';
 
       let git_reset = document.createElement('button');
       git_reset.className = `${RESET_BUTTON_CLASS} jp-mod-styled`;
@@ -793,7 +762,7 @@ namespace GitSessions {
 
     createUnstagedHeaderNode(): HTMLElement {
       let node = document.createElement('div');
-      node.textContent = 'Changes not staged for commit';
+      node.textContent = 'Unstaged files';
 
       let git_add = document.createElement('button');
       git_add.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
@@ -998,32 +967,6 @@ namespace GitSessions {
   const defaultRenderer = new Renderer();
 }
 
-
-/*
-function parseStatus(str) {
-	var chunks = str.split('\0');
-	var ret = [];
-	for (var i = 0; i < chunks.length; i++) {
-		var chunk = chunks[i];
-		if (chunk.length) {
-			var x = chunk[0];
-			var fileStatus = {
-				x: x,
-				y: chunk[1],
-				to: chunk.substring(3),
-				from: null
-			};
-			if (x === 'R') {
-				i++;
-				fileStatus.from = chunks[i];
-			}
-			ret.push(fileStatus);
-		}
-	}
-	return ret;
-}
-*/
-
 /**
  * The default running sessions extension.
  */
@@ -1047,7 +990,7 @@ export default plugin;
 function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutRestorer, panel: ConsolePanel,model: Session.IModel): void {
   let git_plugin = new GitSessions({ manager: services });
   git_plugin.id = 'jp-git-sessions';
-  git_plugin.title.label = 'Git-plugin';
+  git_plugin.title.label = 'Git';
   //console.log(mainBrowser.title.label);
   // Let the application restorer track the running panel for restoration of
   // application state (e.g. setting the running panel as the current side bar
@@ -1066,13 +1009,9 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
 
 
 
-
-function POST_Git_Request(URL,REQUEST){
-  //let data0 = {"git_command":git_command , "current_path":current_path};
-
-
+/*
+function POST_Git_Request(URL,REQUEST):any{
       let request = {
-        //url: URLExt.join((ServerConnection.makeSettings()).baseUrl, '/git/status'),
           url:URL,
           method: 'POST',
           cache: true,
@@ -1081,12 +1020,21 @@ function POST_Git_Request(URL,REQUEST){
             foo: 'bar'
           },
           data: JSON.stringify(REQUEST),
-          //data: '{"git_command":["git", "status"], "parameters":{"id":"valore"}}'
       };
+
       ServerConnection.makeRequest(request, ServerConnection.makeSettings()).then(response =>{
+                console.log("response.xhr info:::");
+        console.log(response.xhr.responseText);
+        console.log(response.xhr.responseURL);
+        console.log(response.xhr.status);
+        console.log(response.xhr.statusText);
+
         if (response.xhr.status !== 200) {
           throw ServerConnection.makeError(response);
         }
         console.log(JSON.stringify(response.data, null, 2)); 
-      });
+        return response;
+      }). ;
+      
 }
+*/
