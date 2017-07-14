@@ -504,7 +504,7 @@ class GitSessions extends Widget {
     if (ElementExt.hitTest(git_commit, clientX, clientY)) {
         let input = document.createElement('input');
         showDialog({
-            title: 'COMMIT CHANGES',
+            title: 'Input commit message:',
             body: input,
             buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Commit'})]
         }).then(result => {
@@ -514,9 +514,6 @@ class GitSessions extends Widget {
             }
         });
           return;
-
-
-
 /*
         var msg = prompt("Enter commit message");
         if(msg!=null&&msg!=undefined){
