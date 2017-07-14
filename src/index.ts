@@ -15,7 +15,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  DOMUtils
+  DOMUtils, Dialog, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -36,6 +36,10 @@ import {
 import {
   ConsolePanel
 } from '@jupyterlab/console';
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   Git
@@ -142,7 +146,19 @@ const FILE_ICON_CLASS = 'jp-mod-file';
  */
 const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
 
+/**
+ * The duration of auto-refresh in ms.
+ */
+const REFRESH_DURATION = 50000;
+
+/**
+ * The enforced time between refreshes in ms.
+ */
+const MIN_REFRESH = 5000;
+
+
 let app0 = null;
+let current_fb_path = '';
 /**
  * A class that exposes the git-plugin sessions.
  */
@@ -159,6 +175,7 @@ class GitSessions extends Widget {
     this._renderer = options.renderer || GitSessions.defaultRenderer;
     this.addClass(Git_CLASS);
     let renderer = this._renderer;
+
 
 //prepare 3 sections
 
@@ -220,14 +237,19 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
+
+
       }
       );
+      this._scheduleUpdate();
+      this._startTimer();
   }
   /**
    * override widget's show() to update content everytime Git widget shows up.
    */
   show():void{
     super.show();
+    this.refresh_current_fb_path();
     this.refresh();
   }
   /**
@@ -236,7 +258,18 @@ class GitSessions extends Widget {
   get renderer(): GitSessions.IRenderer {
     return this._renderer;
   }
-
+  /**
+   * A signal emitted when the directory listing is refreshed.
+   */
+  get refreshed(): ISignal<this, void> {
+    return this._refreshed;
+  }
+  /**
+   * Get the input text node.
+   */
+  get inputNode(): HTMLInputElement {
+    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
+  }
   /**
    * Dispose of the resources used by the widget.
    */
@@ -245,19 +278,23 @@ class GitSessions extends Widget {
     this._runningSessions = null;
     this._runningTerminals = null;
     this._renderer = null;
+    clearTimeout(this._refreshId);
     super.dispose();
   }
+  
 
+  refresh_current_fb_path():void {
+    let ll = app0.shell.widgets('left');
+    let fb = ll.next();
+    while(fb.id!='filebrowser'){
+      fb = ll.next();
+    }
+    current_fb_path = fb.model.path;
+  }
   /**
    * Refresh the widget.
    */
   refresh(): Promise<void> {
-
-  let ll = app0.shell.widgets('left');
-  let fb = ll.next();
-  while(fb.id!='filebrowser'){
-    fb = ll.next();
-  }
 
     let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
     let uncommittedContainer = DOMUtils.findElement(uncommittedSection, CONTAINER_CLASS);
@@ -283,7 +320,7 @@ class GitSessions extends Widget {
 
 
       let git_temp = new Git();
-      let promise_temp = (git_temp.status(fb.model.path));
+      let promise_temp = (git_temp.status(current_fb_path));
       promise_temp.then(response=> {
         if (response.xhr.status !== 200) {
         throw ServerConnection.makeError(response);
@@ -309,12 +346,14 @@ class GitSessions extends Widget {
           }
       }
       );
-    clearTimeout(this._refreshId);
+    //clearTimeout(this._refreshId);
     let promises: Promise<void>[] = [];
    /* if (terminals.isAvailable()) {
       promises.push(terminals.refreshRunning());
     }
     promises.push(sessions.refreshRunning());*/
+    this._lastRefresh = new Date().getTime();
+    this._requested = false;
     return Promise.all(promises).then(() => void 0);
   }
 
@@ -385,14 +424,9 @@ class GitSessions extends Widget {
     untrackedContainer.appendChild(untrackedList);
 
 
-      let ll = app0.shell.widgets('left');
-  let fb = ll.next();
-  while(fb.id!='filebrowser'){
-    fb = ll.next();
-  }
-
       let git_temp = new Git();
-      let promise_temp = (git_temp.status(fb.model.path));
+      this.refresh_current_fb_path();
+      let promise_temp = (git_temp.status(current_fb_path));
       promise_temp.then(response=> {
         if (response.xhr.status !== 200) {
         throw ServerConnection.makeError(response);
@@ -444,11 +478,8 @@ class GitSessions extends Widget {
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
-    let ll = app0.shell.widgets('left');
-    let fb = ll.next();
-    while(fb.id!='filebrowser'){
-      fb = ll.next();
-    }
+      
+    this.refresh_current_fb_path();
     // Check for a refresh.
     if (ElementExt.hitTest(refresh, clientX, clientY)) {
       this.refresh();
@@ -457,7 +488,7 @@ class GitSessions extends Widget {
     let git_temp = new Git();
       
     let current_root_repo_path = '';
-    git_temp.showtoplevel(fb.model.path).then(response=>{
+    git_temp.showtoplevel(current_fb_path).then(response=>{
         current_root_repo_path = response.data;
 
     let node0 = uncommittedHeader as HTMLLIElement;
@@ -471,12 +502,29 @@ class GitSessions extends Widget {
 
     let git_commit = renderer.getUncommittedCommit(node0);
     if (ElementExt.hitTest(git_commit, clientX, clientY)) {
+        let input = document.createElement('input');
+        showDialog({
+            title: 'COMMIT CHANGES',
+            body: input,
+            buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Commit'})]
+        }).then(result => {
+            if (result.accept&&input.value) {
+                git_temp.commit(input.value, current_root_repo_path);
+                this.refresh();
+            }
+        });
+          return;
+
+
+
+/*
         var msg = prompt("Enter commit message");
         if(msg!=null&&msg!=undefined){
           git_temp.commit(msg, current_root_repo_path);
           this.refresh();
         }
         return;
+        */
     }
     // Check for a uncommitted item click.
     let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
@@ -504,8 +552,16 @@ class GitSessions extends Widget {
     let git_checkout_all = renderer.getUnstagedCheckout(node0);
     if (ElementExt.hitTest(git_checkout_all, clientX, clientY)) {
        //POST_Git_Request('/git/checkout',{"Checkout_all": 1 , "Filename":null});
-        git_temp.checkout(true,null,current_root_repo_path);
-        this.refresh();
+        showDialog({
+            title: 'DISCARD CHANGES',
+            body: "Do you really want to discard all uncommitted changes?",
+            buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
+        }).then(result => {
+            if (result.accept) {
+                git_temp.checkout(true,null,current_root_repo_path);
+                this.refresh();
+            }
+        });
         return;
     }
 
@@ -522,9 +578,16 @@ class GitSessions extends Widget {
         return;
       }
       else if(ElementExt.hitTest(git_checkout, clientX, clientY)) {
-        //POST_Git_Request('/git/checkout',{"Checkout_all": 0 , "Filename":node.title})
-        git_temp.checkout(false,node.title,current_root_repo_path);
-        this.refresh();
+        showDialog({
+            title: 'DISCARD CHANGES',
+            body: "Do you really want to discard the uncommitted changes in this file?",
+            buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
+        }).then(result => {
+            if (result.accept) {
+                git_temp.checkout(false,node.title,current_root_repo_path);
+                this.refresh();
+            }
+        });
         return;
       }
     }
@@ -537,7 +600,6 @@ class GitSessions extends Widget {
       if (ElementExt.hitTest(git_add, clientX, clientY)) {
         //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
         git_temp.add(false,node.title,current_root_repo_path);
-
         this.refresh();
         return;
       }
@@ -574,6 +636,7 @@ class GitSessions extends Widget {
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
+
     let ll = app0.shell.widgets('left');
     let fb = ll.next();
     while(fb.id!='filebrowser'){
@@ -625,13 +688,42 @@ class GitSessions extends Widget {
 
 
   }
+  /**
+   * Start the internal refresh timer.
+   */
+  private _startTimer(): void {
+    this._refreshId = window.setInterval(() => {
+      if (this._requested) {
+        this.refresh();
+        return;
+      }
+      let date = new Date().getTime();
+      if ((date - this._lastRefresh) > REFRESH_DURATION) {
+        this.refresh();
+      }
+    }, MIN_REFRESH);
+  }
 
+  /**
+   * Handle internal model refresh logic.
+   */
+  private _scheduleUpdate(): void {
+    let date = new Date().getTime();
+    if ((date - this._lastRefresh) > MIN_REFRESH) {
+        this.refresh();
+    } else {
+      this._requested = true;
+    }
+  }
 
   private _manager: ServiceManager.IManager = null;
   private _renderer: GitSessions.IRenderer = null;
   private _runningSessions: Session.IModel[] = [];
   private _runningTerminals: TerminalSession.IModel[] = [];
   private _refreshId = -1;
+  private _refreshed = new Signal<this, void>(this);
+  private _lastRefresh = -1;
+  private _requested = false;
 }
 
 
