@@ -11,6 +11,10 @@ import {
 } from '@phosphor/domutils';
 
 import {
+  Terminal
+} from '@jupyterlab/terminal';
+
+import {
   Widget
 } from '@phosphor/widgets';
 
@@ -215,7 +219,10 @@ class GitSessions extends Widget {
       let git_temp = new Git();
       let promise_temp = (git_temp.status(''));
       promise_temp.then(response=> {
+        console.log("first response:")
+        console.log(response.xhr.status)
         if (response.xhr.status !== 200) {
+          console.log(response.xhr.status)
         throw ServerConnection.makeError(response);
         }
 
@@ -237,10 +244,11 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
+      }).catch(response =>{
+        console.log("second response:")
+        console.log(response.xhr.status)
 
-
-      }
-      );
+      }) ;
       this._scheduleUpdate();
       this._startTimer();
   }
@@ -295,6 +303,13 @@ class GitSessions extends Widget {
    * Refresh the widget.
    */
   refresh(): Promise<void> {
+    
+    let term = new Terminal();
+      term.title.closable = true;
+      term.title.icon = TERMINAL_ICON_CLASS;
+      term.title.label = '...';
+      app0.shell.addToMainArea(term);
+
 
     let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
     let uncommittedContainer = DOMUtils.findElement(uncommittedSection, CONTAINER_CLASS);

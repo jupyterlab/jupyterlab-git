@@ -20,6 +20,8 @@ class Git_handler(APIHandler):
         return self.settings['git']
 
 class Git_showtoplevel_handler(Git_handler):       
+    def get(self):
+        self.finish(json.dumps({"add_all": "check" , "filename":"filename", "top_repo_path": "path"}))
     def post(self):
         my_data = json.loads(self.request.body)
         current_path = my_data["current_path"]
@@ -29,9 +31,7 @@ class Git_showtoplevel_handler(Git_handler):
 
 class Git_status_handler(Git_handler):
     def get(self):
-        #my_data = json.loads(self.request.body)
-
-        print("Hi there! get extensions!!")
+        self.finish(json.dumps({"add_all": "check" , "filename":"filename", "top_repo_path": "path"}))
         
     def post(self):
         result = []
@@ -46,6 +46,8 @@ class Git_status_handler(Git_handler):
 
 
 class Git_add_handler(Git_handler):
+    def get(self):
+        self.finish(json.dumps({"add_all": "check" , "filename":"filename", "top_repo_path": "path"}))
     def post(self):
         my_data = json.loads(self.request.body)
         top_repo_path = my_data["top_repo_path"]
