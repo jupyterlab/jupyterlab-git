@@ -202,12 +202,6 @@ class GitSessions extends Widget {
         throw ServerConnection.makeError(response);
         }
 
-        console.log("response.xhr info:::");
-        console.log(response.xhr.responseText);
-        console.log(response.xhr.responseURL);
-        console.log(response.xhr.status);
-        console.log(response.xhr.statusText);
-
       let data_json = response.data;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
@@ -261,8 +255,7 @@ class GitSessions extends Widget {
 
   let ll = app0.shell.widgets('left');
   let fb = ll.next();
-  while(fb.title.label!='Files'){
-    console.log(fb.title.label);
+  while(fb.id!='filebrowser'){
     fb = ll.next();
   }
 
@@ -293,16 +286,8 @@ class GitSessions extends Widget {
       let promise_temp = (git_temp.status(fb.model.path));
       promise_temp.then(response=> {
         if (response.xhr.status !== 200) {
-        console.log("response error info:::");
-        console.log(response.xhr.status);
         throw ServerConnection.makeError(response);
         }
-
-        console.log("response.xhr info:::");
-        console.log(response.xhr.responseText);
-        console.log(response.xhr.responseURL);
-        console.log(response.xhr.status);
-        console.log(response.xhr.statusText);
 
       let data_json = response.data;
           for (var i=0; i<data_json.length; i++){
@@ -344,8 +329,15 @@ class GitSessions extends Widget {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
-    if (event.type === 'click') {
+    switch (event.type) {
+    case 'click':
       this._evtClick(event as MouseEvent);
+      break;
+    case 'dblclick':
+      this._evtDblClick(event as MouseEvent);
+      break;
+    default:
+      break;
     }
   }
 
@@ -354,6 +346,7 @@ class GitSessions extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
+    this.node.addEventListener('dblclick', this);
   }
 
   /**
@@ -361,6 +354,7 @@ class GitSessions extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
+    this.node.removeEventListener('dblclick', this);
   }
 
   /**
@@ -393,8 +387,7 @@ class GitSessions extends Widget {
 
       let ll = app0.shell.widgets('left');
   let fb = ll.next();
-  while(fb.title.label!='Files'){
-    console.log(fb.title.label);
+  while(fb.id!='filebrowser'){
     fb = ll.next();
   }
 
@@ -402,16 +395,8 @@ class GitSessions extends Widget {
       let promise_temp = (git_temp.status(fb.model.path));
       promise_temp.then(response=> {
         if (response.xhr.status !== 200) {
-        console.log("response error info:::");
-        console.log(response.xhr.status);
         throw ServerConnection.makeError(response);
         }
-
-        console.log("response.xhr info:::");
-        console.log(response.xhr.responseText);
-        console.log(response.xhr.responseURL);
-        console.log(response.xhr.status);
-        console.log(response.xhr.statusText);
 
       let data_json = response.data;
           for (var i=0; i<data_json.length; i++){
@@ -461,8 +446,7 @@ class GitSessions extends Widget {
     let clientY = event.clientY;
     let ll = app0.shell.widgets('left');
     let fb = ll.next();
-    while(fb.title.label!='Files'){
-      console.log(fb.title.label);
+    while(fb.id!='filebrowser'){
       fb = ll.next();
     }
     // Check for a refresh.
@@ -475,10 +459,6 @@ class GitSessions extends Widget {
     let current_root_repo_path = '';
     git_temp.showtoplevel(fb.model.path).then(response=>{
         current_root_repo_path = response.data;
-        console.log("!!!!!!!!!!!!!!!!!!!!");
-        console.log(response.data);
-        console.log(current_root_repo_path);
-
 
     let node0 = uncommittedHeader as HTMLLIElement;
 
@@ -538,7 +518,6 @@ class GitSessions extends Widget {
       if (ElementExt.hitTest(git_add, clientX, clientY)) {
         //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
         git_temp.add(false,node.title,current_root_repo_path);
-        fb._listing._manager.openOrReveal(node.title);
         this.refresh();
         return;
       }
@@ -565,6 +544,89 @@ class GitSessions extends Widget {
     }
     });
   }
+  /**
+   * Handle the `'dblclick'` event for the widget.
+   */
+  private _evtDblClick(event: MouseEvent): void {
+    
+    console.log("DOUBLE CLICK JUST HAPPENED")
+    // Do nothing if it's not a left mouse press.
+    if (event.button !== 0) {
+      return;
+    }
+
+    // Do nothing if any modifier keys are pressed.
+    if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+      return;
+    }
+
+    // Stop the event propagation.
+    event.preventDefault();
+    event.stopPropagation();
+
+    let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
+    let uncommittedList = DOMUtils.findElement(uncommittedSection, LIST_CLASS);
+    let unstagedSection = DOMUtils.findElement(this.node, UNSTAGED_CLASS);
+    let unstagedList = DOMUtils.findElement(unstagedSection, LIST_CLASS);
+    let untrackedSection = DOMUtils.findElement(this.node, UNTRACKED_CLASS);
+    let untrackedList = DOMUtils.findElement(untrackedSection, LIST_CLASS);
+
+    let renderer = this._renderer;
+    let clientX = event.clientX;
+    let clientY = event.clientY;
+    let ll = app0.shell.widgets('left');
+    let fb = ll.next();
+    while(fb.id!='filebrowser'){
+      fb = ll.next();
+    }
+
+    let git_temp = new Git();
+      
+    let current_root_repo_path = '';
+    git_temp.showtoplevel(fb.model.path).then(response=>{
+        current_root_repo_path = response.data;
+        
+    // Check for a uncommitted item click.
+    let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
+    if (index !== -1) {
+      let node = uncommittedList.children[index] as HTMLLIElement;
+      let git_label = renderer.getUncommittedLabel(node);
+      if (ElementExt.hitTest(git_label, clientX, clientY)) {
+        fb._listing._manager.openOrReveal(fb.model.path+'/'+node.title);
+        return;
+      }
+    }
+
+    // Check for a unstaged item click.
+    index = DOMUtils.hitTestNodes(unstagedList.children, clientX, clientY);
+    if (index !== -1) {
+      let node = unstagedList.children[index] as HTMLLIElement;
+      let git_label = renderer.getUnstagedLabel(node);
+      if (ElementExt.hitTest(git_label, clientX, clientY)) {
+        fb._listing._manager.openOrReveal(fb.model.path+'/'+node.title);
+        this.refresh();
+        return;
+      }
+    }
+
+    // Check for a untracked item click.
+    index = DOMUtils.hitTestNodes(untrackedList.children, clientX, clientY);
+    if (index !== -1) {
+      let node = untrackedList.children[index] as HTMLLIElement;
+      let git_label = renderer.getUntrackedLabel(node);
+      if (ElementExt.hitTest(git_label, clientX, clientY)) {
+        fb._listing._manager.openOrReveal(fb.model.path+'/'+node.title);
+        this.refresh();
+        return;
+      }
+    }
+    });
+
+
+
+  }
+
+
   private _manager: ServiceManager.IManager = null;
   private _renderer: GitSessions.IRenderer = null;
   private _runningSessions: Session.IModel[] = [];
@@ -658,6 +720,7 @@ namespace GitSessions {
      */
     getUncommittedReset(node: HTMLLIElement): HTMLElement;
     getUncommittedCommit(node: HTMLLIElement): HTMLElement;
+    getUncommittedLabel(node: HTMLLIElement): HTMLElement;
     /**
      * Get the shutdown node for a session node.
      *
@@ -671,9 +734,10 @@ namespace GitSessions {
      */
     getUnstagedAdd(node: HTMLLIElement): HTMLElement;
     getUnstagedCheckout(node: HTMLLIElement): HTMLElement;
+    getUnstagedLabel(node: HTMLLIElement): HTMLElement;
 
     getUntrackedAdd(node: HTMLLIElement): HTMLElement;
-
+    getUntrackedLabel(node: HTMLLIElement): HTMLElement;
     /**
      * Populate a node with running terminal session data.
      *
@@ -888,6 +952,9 @@ namespace GitSessions {
     getUncommittedCommit(node: HTMLLIElement): HTMLElement{
       return DOMUtils.findElement(node, COMMIT_BUTTON_CLASS);
     };
+    getUncommittedLabel(node: HTMLLIElement): HTMLElement{
+      return DOMUtils.findElement(node, ITEM_LABEL_CLASS);
+    };
 
     /**
      * Get the shutdown node for a session node.
@@ -908,10 +975,15 @@ namespace GitSessions {
     getUnstagedCheckout(node: HTMLLIElement): HTMLElement {
       return DOMUtils.findElement(node, CHECKOUT_BUTTON_CLASS);
     }
-
+    getUnstagedLabel(node: HTMLLIElement): HTMLElement {
+      return DOMUtils.findElement(node, ITEM_LABEL_CLASS);
+    }
 
     getUntrackedAdd(node: HTMLLIElement): HTMLElement {
       return DOMUtils.findElement(node, ADD_BUTTON_CLASS);
+    }
+    getUntrackedLabel(node: HTMLLIElement): HTMLElement {
+      return DOMUtils.findElement(node, ITEM_LABEL_CLASS);
     }
 
     /**
