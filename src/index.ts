@@ -199,8 +199,6 @@ class GitSessions extends Widget {
       let promise_temp = (git_temp.status(''));
       promise_temp.then(response=> {
         if (response.xhr.status !== 200) {
-        console.log("response error info:::");
-        console.log(response.xhr.status);
         throw ServerConnection.makeError(response);
         }
 
@@ -231,7 +229,13 @@ class GitSessions extends Widget {
       }
       );
   }
-
+  /**
+   * override widget's show() to update content everytime Git widget shows up.
+   */
+  show():void{
+    super.show();
+    this.refresh();
+  }
   /**
    * The renderer used by the running sessions widget.
    */
@@ -286,17 +290,6 @@ class GitSessions extends Widget {
 
 
       let git_temp = new Git();
-      
-      let current_root_repo_path = '';
-      git_temp.showtoplevel(fb.model.path).then(response=>{
-        current_root_repo_path = response.data;
-        console.log("!!!!!!!!!!!!!!!!!!!!");
-        console.log(response.data);
-        console.log(current_root_repo_path);
-      });
-
-
-
       let promise_temp = (git_temp.status(fb.model.path));
       promise_temp.then(response=> {
         if (response.xhr.status !== 200) {
@@ -492,6 +485,7 @@ class GitSessions extends Widget {
     let git_reset_all = renderer.getUncommittedReset(node0);
     if (ElementExt.hitTest(git_reset_all, clientX, clientY)) {
         git_temp.reset(true,null,current_root_repo_path);
+        this.refresh();
         return;
     }
 
@@ -500,6 +494,7 @@ class GitSessions extends Widget {
         var msg = prompt("Enter commit message");
         if(msg!=null&&msg!=undefined){
           git_temp.commit(msg, current_root_repo_path);
+          this.refresh();
         }
         return;
     }
@@ -511,6 +506,7 @@ class GitSessions extends Widget {
       if (ElementExt.hitTest(git_reset, clientX, clientY)) {
         //POST_Git_Request('/git/reset',{"Reset_all": 0, "Filename":node.title});
         git_temp.reset(false,node.title, current_root_repo_path);
+        this.refresh();
         return;
       }
     }
@@ -521,6 +517,7 @@ class GitSessions extends Widget {
     if (ElementExt.hitTest(git_add_all, clientX, clientY)) {
         //POST_Git_Request('/git/add',{"Add_all": 1 , "Filename":null});
         git_temp.add(true,null, current_root_repo_path);
+        this.refresh();
         return;
     }
 
@@ -528,6 +525,7 @@ class GitSessions extends Widget {
     if (ElementExt.hitTest(git_checkout_all, clientX, clientY)) {
        //POST_Git_Request('/git/checkout',{"Checkout_all": 1 , "Filename":null});
         git_temp.checkout(true,null,current_root_repo_path);
+        this.refresh();
         return;
     }
 
@@ -540,11 +538,14 @@ class GitSessions extends Widget {
       if (ElementExt.hitTest(git_add, clientX, clientY)) {
         //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
         git_temp.add(false,node.title,current_root_repo_path);
+        fb._listing._manager.openOrReveal(node.title);
+        this.refresh();
         return;
       }
       else if(ElementExt.hitTest(git_checkout, clientX, clientY)) {
         //POST_Git_Request('/git/checkout',{"Checkout_all": 0 , "Filename":node.title})
         git_temp.checkout(false,node.title,current_root_repo_path);
+        this.refresh();
         return;
       }
     }
@@ -557,6 +558,8 @@ class GitSessions extends Widget {
       if (ElementExt.hitTest(git_add, clientX, clientY)) {
         //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
         git_temp.add(false,node.title,current_root_repo_path);
+
+        this.refresh();
         return;
       }
     }
