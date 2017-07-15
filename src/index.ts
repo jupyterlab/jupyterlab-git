@@ -11,10 +11,6 @@ import {
 } from '@phosphor/domutils';
 
 import {
-  Terminal
-} from '@jupyterlab/terminal';
-
-import {
   Widget
 } from '@phosphor/widgets';
 
@@ -303,13 +299,6 @@ class GitSessions extends Widget {
    * Refresh the widget.
    */
   refresh(): Promise<void> {
-    
-    let term = new Terminal();
-      term.title.closable = true;
-      term.title.icon = TERMINAL_ICON_CLASS;
-      term.title.label = '...';
-      app0.shell.addToMainArea(term);
-
 
     let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
     let uncommittedContainer = DOMUtils.findElement(uncommittedSection, CONTAINER_CLASS);
@@ -359,8 +348,10 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
-      }
-      );
+      }).catch(response =>{
+        console.log("second response:")
+        console.log(response.xhr.status)
+      });
     //clearTimeout(this._refreshId);
     let promises: Promise<void>[] = [];
    /* if (terminals.isAvailable()) {
@@ -465,8 +456,11 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
-      }
-      );
+      }).catch(response =>{
+        console.log("second response:")
+        console.log(response.xhr.status)
+
+      }) ;
 
 
   }
@@ -616,7 +610,11 @@ class GitSessions extends Widget {
         return;
       }
     }
-    });
+    }).catch(response =>{
+        console.log("second response:")
+        console.log(response.xhr.status)
+
+      }) ;
   }
   /**
    * Handle the `'dblclick'` event for the widget.
@@ -695,7 +693,11 @@ class GitSessions extends Widget {
         return;
       }
     }
-    });
+    }).catch(response =>{
+        console.log("second response:")
+        console.log(response.xhr.status)
+
+      }) ;
 
 
 
