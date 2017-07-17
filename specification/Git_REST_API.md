@@ -36,6 +36,7 @@ Request JSON:
     }
 Reply JSON:
     {
+        "code": "10000",
         "current_path": "current/path/in/filebrowser/widget",
         "files": [
             {
@@ -64,7 +65,7 @@ Request JSON:
     }
 Reply JSON:
     {
-
+        "code": "0",
     }
 Error JSON:
     {
@@ -84,7 +85,7 @@ Request JSON:
     }
 Reply JSON:
     {
-
+        "code": "0",
     }
 Error JSON:
     {
@@ -103,7 +104,7 @@ Request JSON:
     }
 Reply JSON:
     {
-
+        "code": "0",
     }
 Error JSON:
     {
@@ -123,7 +124,7 @@ Request JSON:
     }
 Reply JSON:
     {
-        ????
+        "code": "0",
     }
 Error JSON:
     {

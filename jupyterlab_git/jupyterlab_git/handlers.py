@@ -25,22 +25,17 @@ class Git_showtoplevel_handler(Git_handler):
     def post(self):
         my_data = json.loads(self.request.body)
         current_path = my_data["current_path"]
-        my_output = (self.git.showtoplevel(current_path)).decode('utf-8').strip('\n')   
-        print(my_output)
-        self.finish(json.dumps(my_output))    
+        result = self.git.showtoplevel(current_path)  
+        self.finish(json.dumps(result))    
 
 class Git_status_handler(Git_handler):
     def get(self):
         self.finish(json.dumps({"add_all": "check" , "filename":"filename", "top_repo_path": "path"}))
         
     def post(self):
-        result = []
         my_data = json.loads(self.request.body)
         current_path = my_data["current_path"]
-        my_output = self.git.status(current_path)   
-        line_array = my_output.decode('utf-8').splitlines()
-        for line in line_array:
-            result.append({'x':line[0],'y':line[1],'to':line[3:],'from':None})
+        result = self.git.status(current_path)   
         self.finish(json.dumps(result))
 
 

@@ -221,8 +221,8 @@ class GitSessions extends Widget {
           console.log(response.xhr.status)
         throw ServerConnection.makeError(response);
         }
-
-      let data_json = response.data;
+        if(response.data.code==0){
+          let data_json = response.data.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -240,6 +240,11 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
+        }
+        else{
+          console.log("Error happened, EXITCODE is:")
+          console.log(response.data.message)
+        }
       }).catch(response =>{
         console.log("second response:")
         console.log(response.xhr.status)
@@ -329,8 +334,8 @@ class GitSessions extends Widget {
         if (response.xhr.status !== 200) {
         throw ServerConnection.makeError(response);
         }
-
-      let data_json = response.data;
+        if(response.data.code==0){
+          let data_json = response.data.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -348,6 +353,11 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
+        }
+        else{
+          console.log("Error happened, EXITCODE is:")
+          console.log(response.data.message)          
+        }
       }).catch(response =>{
         console.log("second response:")
         console.log(response.xhr.status)
@@ -437,8 +447,8 @@ class GitSessions extends Widget {
         if (response.xhr.status !== 200) {
         throw ServerConnection.makeError(response);
         }
-
-      let data_json = response.data;
+        if(response.data.code==0){
+          let data_json = response.data.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -456,6 +466,11 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
+        }
+        else{
+          console.log("Error happened, EXITCODE is:")
+          console.log(response.data.message);          
+        }
       }).catch(response =>{
         console.log("second response:")
         console.log(response.xhr.status)
@@ -498,7 +513,7 @@ class GitSessions extends Widget {
       
     let current_root_repo_path = '';
     git_temp.showtoplevel(current_fb_path).then(response=>{
-        current_root_repo_path = response.data;
+        current_root_repo_path = response.data.top_repo_path;
 
     let node0 = uncommittedHeader as HTMLLIElement;
 
@@ -657,7 +672,7 @@ class GitSessions extends Widget {
       
     let current_root_repo_path = '';
     git_temp.showtoplevel(fb.model.path).then(response=>{
-        current_root_repo_path = response.data;
+        current_root_repo_path = response.data.top_repo_path ;
         
     // Check for a uncommitted item click.
     let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
@@ -1184,38 +1199,4 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(git_plugin, { rank: 200 });
 
-
-
 }
-
-
-
-/*
-function POST_Git_Request(URL,REQUEST):any{
-      let request = {
-          url:URL,
-          method: 'POST',
-          cache: true,
-          contentType: 'bar',
-          headers: {
-            foo: 'bar'
-          },
-          data: JSON.stringify(REQUEST),
-      };
-
-      ServerConnection.makeRequest(request, ServerConnection.makeSettings()).then(response =>{
-                console.log("response.xhr info:::");
-        console.log(response.xhr.responseText);
-        console.log(response.xhr.responseURL);
-        console.log(response.xhr.status);
-        console.log(response.xhr.statusText);
-
-        if (response.xhr.status !== 200) {
-          throw ServerConnection.makeError(response);
-        }
-        console.log(JSON.stringify(response.data, null, 2)); 
-        return response;
-      }). ;
-      
-}
-*/
