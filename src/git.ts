@@ -14,6 +14,23 @@ import '../style/index.css';
 
 'use strict';
 
+export interface GitShowTopLevelResult {
+	code: number;
+	top_repo_path?: string;
+}
+
+export interface GitStatusResult {
+	code: number;
+	files?: [
+            {
+                x: string,
+                y: string,
+                to: string,
+                from: string
+            }
+        ]
+}
+
 export interface IGit {
 	path: string;
 	version: string;
@@ -194,12 +211,38 @@ export class Git {
 
 	constructor() {
 	}
-	showtoplevel(path:string):Promise<ServerConnection.IResponse> {
-		return HTTP_Git_Request('/git/showtoplevel','POST',{"current_path": path});
+	async showtoplevel(path:string):Promise<GitShowTopLevelResult>{
+		try{
+			var val = await HTTP_Git_Request('/git/showtoplevel','POST',{"current_path": path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				console.log("Git command Error:")
+				console.log(val.data.message);
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
 	}
 
-	status(path: string):Promise<ServerConnection.IResponse> {
-		return HTTP_Git_Request('/git/status','POST',{"current_path":path});
+	async status(path: string):Promise<GitStatusResult> {
+		try{
+			var val = await HTTP_Git_Request('/git/status','POST',{"current_path":path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				console.log("Git command Error:")
+				console.log(val.data.message);
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
 	}
 
 	add(check: boolean, filename: string, path: string) {

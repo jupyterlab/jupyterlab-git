@@ -29,10 +29,11 @@ import {
 import {
   URLExt//,PathExt
 } from '@jupyterlab/coreutils';
-*/
+
 import {
   ServerConnection
 } from '@jupyterlab/services';
+*/
 import {
   ConsolePanel
 } from '@jupyterlab/console';
@@ -216,13 +217,9 @@ class GitSessions extends Widget {
       let promise_temp = (git_temp.status(''));
       promise_temp.then(response=> {
         console.log("first response:")
-        console.log(response.xhr.status)
-        if (response.xhr.status !== 200) {
-          console.log(response.xhr.status)
-        throw ServerConnection.makeError(response);
-        }
-        if(response.data.code==0){
-          let data_json = response.data.files;
+        console.log(response.code)
+        if(response.code==0){
+          let data_json = response.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -241,10 +238,12 @@ class GitSessions extends Widget {
             }
           }
         }
+        /*
         else{
           console.log("Error happened, EXITCODE is:")
           console.log(response.data.message)
         }
+        */
       }).catch(response =>{
         console.log("second response:")
         console.log(response.xhr.status)
@@ -331,11 +330,8 @@ class GitSessions extends Widget {
       let git_temp = new Git();
       let promise_temp = (git_temp.status(current_fb_path));
       promise_temp.then(response=> {
-        if (response.xhr.status !== 200) {
-        throw ServerConnection.makeError(response);
-        }
-        if(response.data.code==0){
-          let data_json = response.data.files;
+        if(response.code==0){
+          let data_json = response.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -354,10 +350,12 @@ class GitSessions extends Widget {
             }
           }
         }
+        /*
         else{
           console.log("Error happened, EXITCODE is:")
           console.log(response.data.message)          
         }
+        */
       }).catch(response =>{
         console.log("second response:")
         console.log(response.xhr.status)
@@ -444,11 +442,8 @@ class GitSessions extends Widget {
       this.refresh_current_fb_path();
       let promise_temp = (git_temp.status(current_fb_path));
       promise_temp.then(response=> {
-        if (response.xhr.status !== 200) {
-        throw ServerConnection.makeError(response);
-        }
-        if(response.data.code==0){
-          let data_json = response.data.files;
+        if(response.code==0){
+          let data_json = response.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -467,10 +462,12 @@ class GitSessions extends Widget {
             }
           }
         }
+        /*
         else{
           console.log("Error happened, EXITCODE is:")
           console.log(response.data.message);          
         }
+        */
       }).catch(response =>{
         console.log("second response:")
         console.log(response.xhr.status)
@@ -512,20 +509,36 @@ class GitSessions extends Widget {
     let git_temp = new Git();
       
     let current_root_repo_path = '';
+/*
+    let temp = git_temp.showtoplevel0(current_fb_path);
+    temp.then(response=>{
+      if(response.code==0){
+        console.log("it works!!!!!!!!!!!!!!!!!");
+        console.log(response.code); 
+        console.log(response.path);       
+      }
+      else{
+        console.log("it still works!!!!!!!!!!!!!!!!!");
+        console.log(response.code); 
+        console.log(response.path);   
+      } 
+    });
+*/
+
     git_temp.showtoplevel(current_fb_path).then(response=>{
-        current_root_repo_path = response.data.top_repo_path;
+      if(response.code==0){
+        current_root_repo_path = response.top_repo_path;
+        let node0 = uncommittedHeader as HTMLLIElement;
 
-    let node0 = uncommittedHeader as HTMLLIElement;
+        let git_reset_all = renderer.getUncommittedReset(node0);
+        if (ElementExt.hitTest(git_reset_all, clientX, clientY)) {
+          git_temp.reset(true,null,current_root_repo_path);
+          this.refresh();
+          return;
+        }
 
-    let git_reset_all = renderer.getUncommittedReset(node0);
-    if (ElementExt.hitTest(git_reset_all, clientX, clientY)) {
-        git_temp.reset(true,null,current_root_repo_path);
-        this.refresh();
-        return;
-    }
-
-    let git_commit = renderer.getUncommittedCommit(node0);
-    if (ElementExt.hitTest(git_commit, clientX, clientY)) {
+        let git_commit = renderer.getUncommittedCommit(node0);
+        if (ElementExt.hitTest(git_commit, clientX, clientY)) {
         let input = document.createElement('input');
         showDialog({
             title: 'Input commit message:',
@@ -546,89 +559,89 @@ class GitSessions extends Widget {
         }
         return;
         */
-    }
-    // Check for a uncommitted item click.
-    let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
-    if (index !== -1) {
-      let node = uncommittedList.children[index] as HTMLLIElement;
-      let git_reset = renderer.getUncommittedReset(node);
-      if (ElementExt.hitTest(git_reset, clientX, clientY)) {
-        //POST_Git_Request('/git/reset',{"Reset_all": 0, "Filename":node.title});
-        git_temp.reset(false,node.title, current_root_repo_path);
-        this.refresh();
-        return;
-      }
-    }
+        }
+        // Check for a uncommitted item click.
+        let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
+        if (index !== -1) {
+          let node = uncommittedList.children[index] as HTMLLIElement;
+          let git_reset = renderer.getUncommittedReset(node);
+          if (ElementExt.hitTest(git_reset, clientX, clientY)) {
+            git_temp.reset(false,node.title, current_root_repo_path);
+            this.refresh();
+            return;
+          }
+        }
     
     
-    node0 = unstagedHeader as HTMLLIElement;
-    let git_add_all = renderer.getUnstagedAdd(node0);
-    if (ElementExt.hitTest(git_add_all, clientX, clientY)) {
-        //POST_Git_Request('/git/add',{"Add_all": 1 , "Filename":null});
-        git_temp.add(true,null, current_root_repo_path);
-        this.refresh();
-        return;
-    }
+        node0 = unstagedHeader as HTMLLIElement;
+        let git_add_all = renderer.getUnstagedAdd(node0);
+        if (ElementExt.hitTest(git_add_all, clientX, clientY)) {
+          git_temp.add(true,null, current_root_repo_path);
+          this.refresh();
+          return;
+        }
 
-    let git_checkout_all = renderer.getUnstagedCheckout(node0);
-    if (ElementExt.hitTest(git_checkout_all, clientX, clientY)) {
-       //POST_Git_Request('/git/checkout',{"Checkout_all": 1 , "Filename":null});
-        showDialog({
+        let git_checkout_all = renderer.getUnstagedCheckout(node0);
+        if (ElementExt.hitTest(git_checkout_all, clientX, clientY)) {
+          showDialog({
             title: 'DISCARD CHANGES',
             body: "Do you really want to discard all uncommitted changes?",
             buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
-        }).then(result => {
+          }).then(result => {
             if (result.accept) {
                 git_temp.checkout(true,null,current_root_repo_path);
                 this.refresh();
             }
-        });
+          });
         return;
-    }
+        }
 
-    // Check for a unstaged item click.
-    index = DOMUtils.hitTestNodes(unstagedList.children, clientX, clientY);
-    if (index !== -1) {
-      let node = unstagedList.children[index] as HTMLLIElement;
-      let git_add = renderer.getUnstagedAdd(node);
-      let git_checkout = renderer.getUnstagedCheckout(node);
-      if (ElementExt.hitTest(git_add, clientX, clientY)) {
-        //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
-        git_temp.add(false,node.title,current_root_repo_path);
-        this.refresh();
-        return;
-      }
-      else if(ElementExt.hitTest(git_checkout, clientX, clientY)) {
-        showDialog({
-            title: 'DISCARD CHANGES',
-            body: "Do you really want to discard the uncommitted changes in this file?",
-            buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
-        }).then(result => {
-            if (result.accept) {
+        // Check for a unstaged item click.
+        index = DOMUtils.hitTestNodes(unstagedList.children, clientX, clientY);
+        if (index !== -1) {
+          let node = unstagedList.children[index] as HTMLLIElement;
+          let git_add = renderer.getUnstagedAdd(node);
+          let git_checkout = renderer.getUnstagedCheckout(node);
+          if (ElementExt.hitTest(git_add, clientX, clientY)) {
+          //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
+            git_temp.add(false,node.title,current_root_repo_path);
+            this.refresh();
+            return;
+          }
+          else if(ElementExt.hitTest(git_checkout, clientX, clientY)) {
+            showDialog({
+              title: 'DISCARD CHANGES',
+              body: "Do you really want to discard the uncommitted changes in this file?",
+              buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
+            }).then(result => {
+              if (result.accept) {
                 git_temp.checkout(false,node.title,current_root_repo_path);
                 this.refresh();
-            }
-        });
-        return;
-      }
-    }
+              }
+            });
+          return;
+         }
+       }
 
-    // Check for a untracked item click.
-    index = DOMUtils.hitTestNodes(untrackedList.children, clientX, clientY);
-    if (index !== -1) {
-      let node = untrackedList.children[index] as HTMLLIElement;
-      let git_add = renderer.getUntrackedAdd(node);
-      if (ElementExt.hitTest(git_add, clientX, clientY)) {
-        //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
-        git_temp.add(false,node.title,current_root_repo_path);
-        this.refresh();
-        return;
+        // Check for a untracked item click.
+        index = DOMUtils.hitTestNodes(untrackedList.children, clientX, clientY);
+        if (index !== -1) {
+          let node = untrackedList.children[index] as HTMLLIElement;
+          let git_add = renderer.getUntrackedAdd(node);
+          if (ElementExt.hitTest(git_add, clientX, clientY)) {
+          //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
+          git_temp.add(false,node.title,current_root_repo_path);
+          this.refresh();
+          return;
+        }
       }
-    }
-    }).catch(response =>{
-        console.log("second response:")
-        console.log(response.xhr.status)
-
+      }
+    /*
+      else{
+          console.log("Error happened, EXITCODE is:")
+          console.log(response.data.message)   
+      }
+        */
       }) ;
   }
   /**
@@ -672,47 +685,51 @@ class GitSessions extends Widget {
       
     let current_root_repo_path = '';
     git_temp.showtoplevel(fb.model.path).then(response=>{
-        current_root_repo_path = response.data.top_repo_path ;
+        if(response.code==0){
+          current_root_repo_path = response.top_repo_path ;
         
-    // Check for a uncommitted item click.
-    let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
-    if (index !== -1) {
-      let node = uncommittedList.children[index] as HTMLLIElement;
-      let git_label = renderer.getUncommittedLabel(node);
-      if (ElementExt.hitTest(git_label, clientX, clientY)) {
-        fb._listing._manager.openOrReveal(fb.model.path+'/'+node.title);
-        return;
-      }
-    }
+          // Check for a uncommitted item click.
+          let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
+          if (index !== -1) {
+            let node = uncommittedList.children[index] as HTMLLIElement;
+            let git_label = renderer.getUncommittedLabel(node);
+            if (ElementExt.hitTest(git_label, clientX, clientY)) {
+              fb._listing._manager.openOrReveal(fb.model.path+'/'+node.title);
+              return;
+            }
+          }
 
-    // Check for a unstaged item click.
-    index = DOMUtils.hitTestNodes(unstagedList.children, clientX, clientY);
-    if (index !== -1) {
-      let node = unstagedList.children[index] as HTMLLIElement;
-      let git_label = renderer.getUnstagedLabel(node);
-      if (ElementExt.hitTest(git_label, clientX, clientY)) {
-        fb._listing._manager.openOrReveal(fb.model.path+'/'+node.title);
-        this.refresh();
-        return;
-      }
-    }
+          // Check for a unstaged item click.
+          index = DOMUtils.hitTestNodes(unstagedList.children, clientX, clientY);
+          if (index !== -1) {
+            let node = unstagedList.children[index] as HTMLLIElement;
+            let git_label = renderer.getUnstagedLabel(node);
+            if (ElementExt.hitTest(git_label, clientX, clientY)) {
+              fb._listing._manager.openOrReveal(fb.model.path+'/'+node.title);
+              this.refresh();
+              return;
+            }
+          }
 
-    // Check for a untracked item click.
-    index = DOMUtils.hitTestNodes(untrackedList.children, clientX, clientY);
-    if (index !== -1) {
-      let node = untrackedList.children[index] as HTMLLIElement;
-      let git_label = renderer.getUntrackedLabel(node);
-      if (ElementExt.hitTest(git_label, clientX, clientY)) {
-        fb._listing._manager.openOrReveal(fb.model.path+'/'+node.title);
-        this.refresh();
-        return;
-      }
-    }
-    }).catch(response =>{
-        console.log("second response:")
-        console.log(response.xhr.status)
-
-      }) ;
+          // Check for a untracked item click.
+          index = DOMUtils.hitTestNodes(untrackedList.children, clientX, clientY);
+          if (index !== -1) {
+            let node = untrackedList.children[index] as HTMLLIElement;
+            let git_label = renderer.getUntrackedLabel(node);
+            if (ElementExt.hitTest(git_label, clientX, clientY)) {
+              fb._listing._manager.openOrReveal(fb.model.path+'/'+node.title);
+              this.refresh();
+              return;
+            }
+          }
+        }
+        /*
+        else{
+          console.log("Error happened, EXITCODE is:")
+          console.log(response.data.message)             
+        }
+        */
+    }) ;
 
 
 

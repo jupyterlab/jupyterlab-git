@@ -17,11 +17,12 @@ Request JSON:
     }
 Reply JSON:
     {
+        "code": 0,
         "top_repo_path": "/absolute/path/to/root/of/repo"
     }
 Error JSON:
     {
-        "code": "10000",
+        "code": 10000,
         "message": "Not in a Git repository"
     }
 
@@ -36,8 +37,7 @@ Request JSON:
     }
 Reply JSON:
     {
-        "code": "10000",
-        "current_path": "current/path/in/filebrowser/widget",
+        "code": 0,
         "files": [
             {
                 "x": "CHECK/bit/X",
@@ -49,7 +49,7 @@ Reply JSON:
     }
 Error JSON:
     {
-        "code": "10000",
+        "code": 10001,
         "message": "Not in a Git repository"
     }
 
@@ -65,11 +65,11 @@ Request JSON:
     }
 Reply JSON:
     {
-        "code": "0",
+        "code": 0,
     }
 Error JSON:
     {
-        "code": "10001",
+        "code": 10002,
         "message": "File not found"
     }
 
@@ -85,11 +85,11 @@ Request JSON:
     }
 Reply JSON:
     {
-        "code": "0",
+        "code": 0,
     }
 Error JSON:
     {
-        "code": "10001",
+        "code": 10003,
         "message": "File not found"
     }
 
@@ -104,11 +104,11 @@ Request JSON:
     }
 Reply JSON:
     {
-        "code": "0",
+        "code": 0,
     }
 Error JSON:
     {
-        "code": "10001",
+        "code": 10004,
         "message": "Commit failed"
     }
 
@@ -124,11 +124,11 @@ Request JSON:
     }
 Reply JSON:
     {
-        "code": "0",
+        "code": 0,
     }
 Error JSON:
     {
-        "code": "10001",
+        "code": 10005,
         "message": "File not found"
     }
 

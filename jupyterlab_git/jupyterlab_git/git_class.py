@@ -35,9 +35,13 @@ class Git:
             return {"code": p.returncode, "message": my_error.decode('utf-8')}
 
     def showtoplevel(self, current_path):
-        my_output = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], cwd = os.getcwd()+'/'+current_path)
-        result ={"top_repo_path": my_output.decode('utf-8').strip('\n')}
-        return result
+        p = Popen(["git", "rev-parse", "--show-toplevel"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
+        my_output, my_error = p.communicate()
+        if(p.returncode==0):
+            result ={"code": p.returncode, "top_repo_path": my_output.decode('utf-8').strip('\n')}
+            return result
+        else:
+            return {"code": p.returncode, "message": my_error.decode('utf-8')}
 
     def add(self, filename, top_repo_path):
         my_output = subprocess.check_output(["git", "add", filename], cwd = top_repo_path)
