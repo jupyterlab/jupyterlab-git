@@ -238,12 +238,6 @@ class GitSessions extends Widget {
             }
           }
         }
-        /*
-        else{
-          console.log("Error happened, EXITCODE is:")
-          console.log(response.data.message)
-        }
-        */
       }).catch(response =>{
         console.log("second response:")
         console.log(response.xhr.status)
@@ -290,7 +284,9 @@ class GitSessions extends Widget {
     super.dispose();
   }
   
-
+  /**
+   * get the path shown in filebrowser widget.
+   */
   refresh_current_fb_path():void {
     let ll = app0.shell.widgets('left');
     let fb = ll.next();
@@ -350,22 +346,11 @@ class GitSessions extends Widget {
             }
           }
         }
-        /*
-        else{
-          console.log("Error happened, EXITCODE is:")
-          console.log(response.data.message)          
-        }
-        */
       }).catch(response =>{
         console.log("second response:")
         console.log(response.xhr.status)
       });
-    //clearTimeout(this._refreshId);
     let promises: Promise<void>[] = [];
-   /* if (terminals.isAvailable()) {
-      promises.push(terminals.refreshRunning());
-    }
-    promises.push(sessions.refreshRunning());*/
     this._lastRefresh = new Date().getTime();
     this._requested = false;
     return Promise.all(promises).then(() => void 0);
@@ -462,12 +447,6 @@ class GitSessions extends Widget {
             }
           }
         }
-        /*
-        else{
-          console.log("Error happened, EXITCODE is:")
-          console.log(response.data.message);          
-        }
-        */
       }).catch(response =>{
         console.log("second response:")
         console.log(response.xhr.status)
@@ -509,22 +488,6 @@ class GitSessions extends Widget {
     let git_temp = new Git();
       
     let current_root_repo_path = '';
-/*
-    let temp = git_temp.showtoplevel0(current_fb_path);
-    temp.then(response=>{
-      if(response.code==0){
-        console.log("it works!!!!!!!!!!!!!!!!!");
-        console.log(response.code); 
-        console.log(response.path);       
-      }
-      else{
-        console.log("it still works!!!!!!!!!!!!!!!!!");
-        console.log(response.code); 
-        console.log(response.path);   
-      } 
-    });
-*/
-
     git_temp.showtoplevel(current_fb_path).then(response=>{
       if(response.code==0){
         current_root_repo_path = response.top_repo_path;
@@ -551,14 +514,6 @@ class GitSessions extends Widget {
             }
         });
           return;
-/*
-        var msg = prompt("Enter commit message");
-        if(msg!=null&&msg!=undefined){
-          git_temp.commit(msg, current_root_repo_path);
-          this.refresh();
-        }
-        return;
-        */
         }
         // Check for a uncommitted item click.
         let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
@@ -603,7 +558,6 @@ class GitSessions extends Widget {
           let git_add = renderer.getUnstagedAdd(node);
           let git_checkout = renderer.getUnstagedCheckout(node);
           if (ElementExt.hitTest(git_add, clientX, clientY)) {
-          //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
             git_temp.add(false,node.title,current_root_repo_path);
             this.refresh();
             return;
@@ -636,12 +590,6 @@ class GitSessions extends Widget {
         }
       }
       }
-    /*
-      else{
-          console.log("Error happened, EXITCODE is:")
-          console.log(response.data.message)   
-      }
-        */
       }) ;
   }
   /**
@@ -723,12 +671,6 @@ class GitSessions extends Widget {
             }
           }
         }
-        /*
-        else{
-          console.log("Error happened, EXITCODE is:")
-          console.log(response.data.message)             
-        }
-        */
     }) ;
 
 
