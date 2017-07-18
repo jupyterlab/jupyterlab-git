@@ -485,6 +485,7 @@ class GitSessions extends Widget {
       this.refresh();
       return;
     }
+
     let git_temp = new Git();
       
     let current_root_repo_path = '';
@@ -526,6 +527,7 @@ class GitSessions extends Widget {
             return;
           }
         }
+
     
     
         node0 = unstagedHeader as HTMLLIElement;
@@ -1159,3 +1161,4 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   app.shell.addToLeftArea(git_plugin, { rank: 200 });
 
 }
+
