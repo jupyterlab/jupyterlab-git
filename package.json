@@ -2,7 +2,7 @@
   "name": "jupyterlab-git",
   "version": "0.1.0",
   "description": "JLG",
-  "author": "Ji Zhang",
+  "author": "Git Interns",
   "main": "lib/index.js",
   "keywords": [
     "jupyter",
@@ -14,7 +14,8 @@
     "prepublish": "npm run build"
   },
   "files": [
-    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/*.css"
   ],
   "jupyterlab": {
     "extension": true

@@ -1212,7 +1212,6 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   // application state (e.g. setting the running panel as the current side bar
   // widget).
   app0 = app;
-
   restorer.add(git_plugin, 'git-sessions');
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running
