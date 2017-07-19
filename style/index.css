@@ -139,6 +139,33 @@
 .jp-GitSessions-itemIcon.jp-mod-terminal {
   background-image: var(--jp-icon-terminal);
 }
+.jp-GitSessions-itemIcon.jp-OpenFolderIcon {
+  background-image: var(--jp-icon-landingfolder);
+}
+.jp-GitSessions-itemIcon.jp-FileIcon {
+  background-image: var(--jp-icon-file);
+}
+.jp-GitSessions-itemIcon.jp-YamlIcon {
+  background-image: var(--jp-icon-yaml-selected);
+}
+.jp-GitSessions-itemIcon.jp-MarkdownIcon {
+  background-image: var(--jp-icon-markdown-selected);
+}
+.jp-GitSessions-itemIcon.jp-ImageIcon {
+  background-image: var(--jp-icon-image-selected);
+}
+.jp-GitSessions-itemIcon.jp-SpreadsheetIcon {
+  background-image: var(--jp-icon-spreadsheet-selected);
+}
+.jp-GitSessions-itemIcon.jp-JSONIcon {
+  background-image: var(--jp-icon-json-selected);
+}
+.jp-GitSessions-itemIcon.jp-PythonIcon {
+  background-image: var(--jp-icon-python-selected);
+}
+.jp-GitSessions-itemIcon.jp-RKernelIcon {
+  background-image: var(--jp-icon-r-selected);
+}
 
 
 .jp-GitSessions-itemLabel {
@@ -245,6 +272,10 @@
   --jp-private-tab-manager-tab-height: 32px;
   --jp-private-tab-manager-tab-padding-top: 8px;
 }
+
+
+
+
 
 
 /*-----------------------------------------------------------------------------

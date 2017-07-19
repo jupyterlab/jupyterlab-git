@@ -15,7 +15,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  DOMUtils
+  DOMUtils, Dialog, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -25,17 +25,22 @@ import {
 import {
   IServiceManager
 } from '@jupyterlab/services';
-/*
+
 import {
-  URLExt//,PathExt
+  PathExt //URLExt
 } from '@jupyterlab/coreutils';
-*/
+/*
 import {
   ServerConnection
 } from '@jupyterlab/services';
+*/
 import {
   ConsolePanel
 } from '@jupyterlab/console';
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling';
 
 import {
   Git
@@ -125,7 +130,7 @@ const COMMIT_BUTTON_CLASS = 'jp-GitSessions-itemCommit';
 /**
  * The class name added to a notebook icon.
  */
-const NOTEBOOK_ICON_CLASS = 'jp-mod-notebook';
+//const NOTEBOOK_ICON_CLASS = 'jp-mod-notebook';
 
 /**
  * The class name added to a console icon.
@@ -140,9 +145,66 @@ const FILE_ICON_CLASS = 'jp-mod-file';
 /**
  * The class name added to a terminal icon.
  */
-const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
+//const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
+/**
+ * The class name added to a markdown file browser item.
+ */
+const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
+
+/**
+ * The class name added to a python file browser item.
+ */
+const PYTHON_ICON_CLASS = 'jp-PythonIcon';
+
+/**
+ * The class name added to a JSON file browser item.
+ */
+const JSON_ICON_CLASS = 'jp-JSONIcon';
+
+/**
+ * The class name added to a speadsheet file browser item.
+ */
+const SPREADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon';
+
+/**
+ * The class name added to a R Kernel file browser item.
+ */
+const RKERNEL_ICON_CLASS = 'jp-RKernelIcon';
+
+/**
+ * The class name added to a YAML file browser item.
+ */
+const YAML_ICON_CLASS = 'jp-YamlIcon';
+
+/**
+ * The class added for image file browser items.
+ */
+const IMAGE_ICON_CLASS = 'jp-ImageIcon';
+
+/**
+ * The class name added to a file type content item.
+ */
+const FILE_TYPE_CLASS = 'jp-FileIcon';
+
+/**
+ * The class name added to a directory file browser item.
+ */
+const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
+
+
+/**
+ * The duration of auto-refresh in ms.
+ */
+const REFRESH_DURATION = 50000;
+
+/**
+ * The enforced time between refreshes in ms.
+ */
+const MIN_REFRESH = 5000;
+
 
 let app0 = null;
+let current_fb_path = '';
 /**
  * A class that exposes the git-plugin sessions.
  */
@@ -159,6 +221,7 @@ class GitSessions extends Widget {
     this._renderer = options.renderer || GitSessions.defaultRenderer;
     this.addClass(Git_CLASS);
     let renderer = this._renderer;
+
 
 //prepare 3 sections
 
@@ -198,19 +261,10 @@ class GitSessions extends Widget {
       let git_temp = new Git();
       let promise_temp = (git_temp.status(''));
       promise_temp.then(response=> {
-        if (response.xhr.status !== 200) {
-        console.log("response error info:::");
-        console.log(response.xhr.status);
-        throw ServerConnection.makeError(response);
-        }
-
-        console.log("response.xhr info:::");
-        console.log(response.xhr.responseText);
-        console.log(response.xhr.responseURL);
-        console.log(response.xhr.status);
-        console.log(response.xhr.statusText);
-
-      let data_json = response.data;
+        console.log("first response:")
+        console.log(response.code)
+        if(response.code==0){
+          let data_json = response.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -228,17 +282,41 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
-      }
-      );
-  }
+        }
+      }).catch(response =>{
+        console.log("second response:")
+        console.log(response.xhr.status)
 
+      }) ;
+      this._scheduleUpdate();
+      this._startTimer();
+  }
+  /**
+   * override widget's show() to update content everytime Git widget shows up.
+   */
+  show():void{
+    super.show();
+    this.refresh_current_fb_path();
+    this.refresh();
+  }
   /**
    * The renderer used by the running sessions widget.
    */
   get renderer(): GitSessions.IRenderer {
     return this._renderer;
   }
-
+  /**
+   * A signal emitted when the directory listing is refreshed.
+   */
+  get refreshed(): ISignal<this, void> {
+    return this._refreshed;
+  }
+  /**
+   * Get the input text node.
+   */
+  get inputNode(): HTMLInputElement {
+    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
+  }
   /**
    * Dispose of the resources used by the widget.
    */
@@ -247,20 +325,25 @@ class GitSessions extends Widget {
     this._runningSessions = null;
     this._runningTerminals = null;
     this._renderer = null;
+    clearTimeout(this._refreshId);
     super.dispose();
   }
-
+  
+  /**
+   * get the path shown in filebrowser widget.
+   */
+  refresh_current_fb_path():void {
+    let ll = app0.shell.widgets('left');
+    let fb = ll.next();
+    while(fb.id!='filebrowser'){
+      fb = ll.next();
+    }
+    current_fb_path = fb.model.path;
+  }
   /**
    * Refresh the widget.
    */
   refresh(): Promise<void> {
-
-  let ll = app0.shell.widgets('left');
-  let fb = ll.next();
-  while(fb.title.label!='Files'){
-    console.log(fb.title.label);
-    fb = ll.next();
-  }
 
     let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
     let uncommittedContainer = DOMUtils.findElement(uncommittedSection, CONTAINER_CLASS);
@@ -286,32 +369,10 @@ class GitSessions extends Widget {
 
 
       let git_temp = new Git();
-      
-      let current_root_repo_path = '';
-      git_temp.showtoplevel(fb.model.path).then(response=>{
-        current_root_repo_path = response.data;
-        console.log("!!!!!!!!!!!!!!!!!!!!");
-        console.log(response.data);
-        console.log(current_root_repo_path);
-      });
-
-
-
-      let promise_temp = (git_temp.status(fb.model.path));
+      let promise_temp = (git_temp.status(current_fb_path));
       promise_temp.then(response=> {
-        if (response.xhr.status !== 200) {
-        console.log("response error info:::");
-        console.log(response.xhr.status);
-        throw ServerConnection.makeError(response);
-        }
-
-        console.log("response.xhr info:::");
-        console.log(response.xhr.responseText);
-        console.log(response.xhr.responseURL);
-        console.log(response.xhr.status);
-        console.log(response.xhr.statusText);
-
-      let data_json = response.data;
+        if(response.code==0){
+          let data_json = response.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -329,14 +390,16 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
-      }
-      );
-    clearTimeout(this._refreshId);
+        }
+      }).catch(response =>{
+        console.log("second response:")
+        console.log(response.xhr.status)
+      });
+
+
     let promises: Promise<void>[] = [];
-   /* if (terminals.isAvailable()) {
-      promises.push(terminals.refreshRunning());
-    }
-    promises.push(sessions.refreshRunning());*/
+    this._lastRefresh = new Date().getTime();
+    this._requested = false;
     return Promise.all(promises).then(() => void 0);
   }
 
@@ -351,8 +414,15 @@ class GitSessions extends Widget {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
-    if (event.type === 'click') {
+    switch (event.type) {
+    case 'click':
       this._evtClick(event as MouseEvent);
+      break;
+    case 'dblclick':
+      this._evtDblClick(event as MouseEvent);
+      break;
+    default:
+      break;
     }
   }
 
@@ -361,6 +431,7 @@ class GitSessions extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
+    this.node.addEventListener('dblclick', this);
   }
 
   /**
@@ -368,6 +439,7 @@ class GitSessions extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
+    this.node.removeEventListener('dblclick', this);
   }
 
   /**
@@ -398,29 +470,12 @@ class GitSessions extends Widget {
     untrackedContainer.appendChild(untrackedList);
 
 
-      let ll = app0.shell.widgets('left');
-  let fb = ll.next();
-  while(fb.title.label!='Files'){
-    console.log(fb.title.label);
-    fb = ll.next();
-  }
-
       let git_temp = new Git();
-      let promise_temp = (git_temp.status(fb.model.path));
+      this.refresh_current_fb_path();
+      let promise_temp = (git_temp.status(current_fb_path));
       promise_temp.then(response=> {
-        if (response.xhr.status !== 200) {
-        console.log("response error info:::");
-        console.log(response.xhr.status);
-        throw ServerConnection.makeError(response);
-        }
-
-        console.log("response.xhr info:::");
-        console.log(response.xhr.responseText);
-        console.log(response.xhr.responseURL);
-        console.log(response.xhr.status);
-        console.log(response.xhr.statusText);
-
-      let data_json = response.data;
+        if(response.code==0){
+          let data_json = response.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -438,8 +493,12 @@ class GitSessions extends Widget {
               untrackedList.appendChild(node);
             }
           }
-      }
-      );
+        }
+      }).catch(response =>{
+        console.log("second response:")
+        console.log(response.xhr.status)
+
+      }) ;
 
 
   }
@@ -466,12 +525,8 @@ class GitSessions extends Widget {
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
-    let ll = app0.shell.widgets('left');
-    let fb = ll.next();
-    while(fb.title.label!='Files'){
-      console.log(fb.title.label);
-      fb = ll.next();
-    }
+      
+    this.refresh_current_fb_path();
     // Check for a refresh.
     if (ElementExt.hitTest(refresh, clientX, clientY)) {
       this.refresh();
@@ -480,93 +535,244 @@ class GitSessions extends Widget {
     let git_temp = new Git();
       
     let current_root_repo_path = '';
-    git_temp.showtoplevel(fb.model.path).then(response=>{
-        current_root_repo_path = response.data;
-        console.log("!!!!!!!!!!!!!!!!!!!!");
-        console.log(response.data);
-        console.log(current_root_repo_path);
+    git_temp.showtoplevel(current_fb_path).then(response=>{
+      if(response.code==0){
+        current_root_repo_path = response.top_repo_path;
+        let node0 = uncommittedHeader as HTMLLIElement;
 
-
-    let node0 = uncommittedHeader as HTMLLIElement;
-
-    let git_reset_all = renderer.getUncommittedReset(node0);
-    if (ElementExt.hitTest(git_reset_all, clientX, clientY)) {
-        git_temp.reset(true,null,current_root_repo_path);
-        return;
-    }
-
-    let git_commit = renderer.getUncommittedCommit(node0);
-    if (ElementExt.hitTest(git_commit, clientX, clientY)) {
-        var msg = prompt("Enter commit message");
-        if(msg!=null&&msg!=undefined){
-          git_temp.commit(msg, current_root_repo_path);
+        let git_reset_all = renderer.getUncommittedReset(node0);
+        if (ElementExt.hitTest(git_reset_all, clientX, clientY)) {
+          git_temp.reset(true,null,current_root_repo_path);
+          this.refresh();
+          return;
         }
-        return;
-    }
-    // Check for a uncommitted item click.
-    let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
-    if (index !== -1) {
-      let node = uncommittedList.children[index] as HTMLLIElement;
-      let git_reset = renderer.getUncommittedReset(node);
-      if (ElementExt.hitTest(git_reset, clientX, clientY)) {
-        //POST_Git_Request('/git/reset',{"Reset_all": 0, "Filename":node.title});
-        git_temp.reset(false,node.title, current_root_repo_path);
-        return;
-      }
-    }
+
+        let git_commit = renderer.getUncommittedCommit(node0);
+        if (ElementExt.hitTest(git_commit, clientX, clientY)) {
+        let input = document.createElement('input');
+        showDialog({
+            title: 'Input commit message:',
+            body: input,
+            buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Commit'})]
+        }).then(result => {
+            if (result.accept&&input.value) {
+                git_temp.commit(input.value, current_root_repo_path);
+                this.refresh();
+            }
+        });
+          return;
+        }
+        // Check for a uncommitted item click.
+        let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
+        if (index !== -1) {
+          let node = uncommittedList.children[index] as HTMLLIElement;
+          let git_reset = renderer.getUncommittedReset(node);
+          if (ElementExt.hitTest(git_reset, clientX, clientY)) {
+            git_temp.reset(false,node.title, current_root_repo_path);
+            this.refresh();
+            return;
+          }
+        }
     
     
-    node0 = unstagedHeader as HTMLLIElement;
-    let git_add_all = renderer.getUnstagedAdd(node0);
-    if (ElementExt.hitTest(git_add_all, clientX, clientY)) {
-        //POST_Git_Request('/git/add',{"Add_all": 1 , "Filename":null});
-        git_temp.add(true,null, current_root_repo_path);
-        return;
-    }
+        node0 = unstagedHeader as HTMLLIElement;
+        let git_add_all = renderer.getUnstagedAdd(node0);
+        if (ElementExt.hitTest(git_add_all, clientX, clientY)) {
+          git_temp.add(true,null, current_root_repo_path);
+          this.refresh();
+          return;
+        }
 
-    let git_checkout_all = renderer.getUnstagedCheckout(node0);
-    if (ElementExt.hitTest(git_checkout_all, clientX, clientY)) {
-       //POST_Git_Request('/git/checkout',{"Checkout_all": 1 , "Filename":null});
-        git_temp.checkout(true,null,current_root_repo_path);
+        let git_checkout_all = renderer.getUnstagedCheckout(node0);
+        if (ElementExt.hitTest(git_checkout_all, clientX, clientY)) {
+          showDialog({
+            title: 'DISCARD CHANGES',
+            body: "Do you really want to discard all uncommitted changes?",
+            buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
+          }).then(result => {
+            if (result.accept) {
+                git_temp.checkout(true,null,current_root_repo_path);
+                this.refresh();
+            }
+          });
         return;
-    }
+        }
 
-    // Check for a unstaged item click.
-    index = DOMUtils.hitTestNodes(unstagedList.children, clientX, clientY);
-    if (index !== -1) {
-      let node = unstagedList.children[index] as HTMLLIElement;
-      let git_add = renderer.getUnstagedAdd(node);
-      let git_checkout = renderer.getUnstagedCheckout(node);
-      if (ElementExt.hitTest(git_add, clientX, clientY)) {
-        //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
-        git_temp.add(false,node.title,current_root_repo_path);
-        return;
-      }
-      else if(ElementExt.hitTest(git_checkout, clientX, clientY)) {
-        //POST_Git_Request('/git/checkout',{"Checkout_all": 0 , "Filename":node.title})
-        git_temp.checkout(false,node.title,current_root_repo_path);
-        return;
-      }
-    }
+        // Check for a unstaged item click.
+        index = DOMUtils.hitTestNodes(unstagedList.children, clientX, clientY);
+        if (index !== -1) {
+          let node = unstagedList.children[index] as HTMLLIElement;
+          let git_add = renderer.getUnstagedAdd(node);
+          let git_checkout = renderer.getUnstagedCheckout(node);
+          if (ElementExt.hitTest(git_add, clientX, clientY)) {
+            git_temp.add(false,node.title,current_root_repo_path);
+            this.refresh();
+            return;
+          }
+          else if(ElementExt.hitTest(git_checkout, clientX, clientY)) {
+            showDialog({
+              title: 'DISCARD CHANGES',
+              body: "Do you really want to discard the uncommitted changes in this file?",
+              buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
+            }).then(result => {
+              if (result.accept) {
+                git_temp.checkout(false,node.title,current_root_repo_path);
+                this.refresh();
+              }
+            });
+          return;
+         }
+       }
 
-    // Check for a untracked item click.
-    index = DOMUtils.hitTestNodes(untrackedList.children, clientX, clientY);
-    if (index !== -1) {
-      let node = untrackedList.children[index] as HTMLLIElement;
-      let git_add = renderer.getUntrackedAdd(node);
-      if (ElementExt.hitTest(git_add, clientX, clientY)) {
-        //POST_Git_Request('/git/add',{"Add_all": 0 , "Filename":node.title})
-        git_temp.add(false,node.title,current_root_repo_path);
-        return;
+        // Check for a untracked item click.
+        index = DOMUtils.hitTestNodes(untrackedList.children, clientX, clientY);
+        if (index !== -1) {
+          let node = untrackedList.children[index] as HTMLLIElement;
+          let git_add = renderer.getUntrackedAdd(node);
+          if (ElementExt.hitTest(git_add, clientX, clientY)) {
+            git_temp.add(false,node.title,current_root_repo_path);
+            this.refresh();
+            return;
+        }
       }
-    }
-    });
+      }
+      }) ;
   }
+  /**
+   * Handle the `'dblclick'` event for the widget.
+   */
+  private _evtDblClick(event: MouseEvent): void {
+    
+    console.log("DOUBLE CLICK JUST HAPPENED")
+    // Do nothing if it's not a left mouse press.
+    if (event.button !== 0) {
+      return;
+    }
+
+    // Do nothing if any modifier keys are pressed.
+    if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+      return;
+    }
+
+    // Stop the event propagation.
+    event.preventDefault();
+    event.stopPropagation();
+
+    let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
+    let uncommittedList = DOMUtils.findElement(uncommittedSection, LIST_CLASS);
+    let unstagedSection = DOMUtils.findElement(this.node, UNSTAGED_CLASS);
+    let unstagedList = DOMUtils.findElement(unstagedSection, LIST_CLASS);
+    let untrackedSection = DOMUtils.findElement(this.node, UNTRACKED_CLASS);
+    let untrackedList = DOMUtils.findElement(untrackedSection, LIST_CLASS);
+
+    let renderer = this._renderer;
+    let clientX = event.clientX;
+    let clientY = event.clientY;
+
+    let ll = app0.shell.widgets('left');
+    let fb = ll.next();
+    while(fb.id!='filebrowser'){
+      fb = ll.next();
+    }
+
+    let git_temp = new Git();
+      
+    let current_under_repo_path = '';
+    git_temp.showprefix(fb.model.path).then(response=>{
+        if(response.code==0){
+          current_under_repo_path = response.under_repo_path;
+          let filebrowser_cur_path = fb.model.path+'/';
+          let open_file_path = filebrowser_cur_path.substring(0,filebrowser_cur_path.length-current_under_repo_path.length);
+          // Check for a uncommitted item click.
+          let index = DOMUtils.hitTestNodes(uncommittedList.children, clientX, clientY);
+          if (index !== -1) {
+            let node = uncommittedList.children[index] as HTMLLIElement;
+            let git_label = renderer.getUncommittedLabel(node);
+            if (ElementExt.hitTest(git_label, clientX, clientY)) {
+              //let temp = find(fb._listing._sortedItems as  Contents.IModel[], value => value.path === open_file_path+node.title);
+              if(node.title[node.title.length-1]!=='/'){
+                fb._listing._manager.openOrReveal(open_file_path+node.title);
+              }
+              else{
+                console.log("Cannot open a folder here")
+              };
+              return;
+            }
+          }
+
+          // Check for a unstaged item click.
+          index = DOMUtils.hitTestNodes(unstagedList.children, clientX, clientY);
+          if (index !== -1) {
+            let node = unstagedList.children[index] as HTMLLIElement;
+            let git_label = renderer.getUnstagedLabel(node);
+            if (ElementExt.hitTest(git_label, clientX, clientY)) {
+              if(node.title[node.title.length-1]!=='/'){
+                fb._listing._manager.openOrReveal(open_file_path+node.title);
+              }
+              else{
+                console.log("Cannot open a folder here")
+              };            
+              return;
+            }
+          }
+
+          // Check for a untracked item click.
+          index = DOMUtils.hitTestNodes(untrackedList.children, clientX, clientY);
+          if (index !== -1) {
+            let node = untrackedList.children[index] as HTMLLIElement;
+            let git_label = renderer.getUntrackedLabel(node);
+            if (ElementExt.hitTest(git_label, clientX, clientY)) {
+              if(node.title[node.title.length-1]!=='/'){
+                fb._listing._manager.openOrReveal(open_file_path+node.title);
+              }
+              else{
+                console.log("Cannot open a folder here")
+              };         
+              return;
+            }
+          }
+        }
+    }) ;
+
+
+
+  }
+  /**
+   * Start the internal refresh timer.
+   */
+  private _startTimer(): void {
+    this._refreshId = window.setInterval(() => {
+      if (this._requested) {
+        this.refresh();
+        return;
+      }
+      let date = new Date().getTime();
+      if ((date - this._lastRefresh) > REFRESH_DURATION) {
+        this.refresh();
+      }
+    }, MIN_REFRESH);
+  }
+
+  /**
+   * Handle internal model refresh logic.
+   */
+  private _scheduleUpdate(): void {
+    let date = new Date().getTime();
+    if ((date - this._lastRefresh) > MIN_REFRESH) {
+        this.refresh();
+    } else {
+      this._requested = true;
+    }
+  }
+
   private _manager: ServiceManager.IManager = null;
   private _renderer: GitSessions.IRenderer = null;
   private _runningSessions: Session.IModel[] = [];
   private _runningTerminals: TerminalSession.IModel[] = [];
   private _refreshId = -1;
+  private _refreshed = new Signal<this, void>(this);
+  private _lastRefresh = -1;
+  private _requested = false;
 }
 
 
@@ -655,6 +861,7 @@ namespace GitSessions {
      */
     getUncommittedReset(node: HTMLLIElement): HTMLElement;
     getUncommittedCommit(node: HTMLLIElement): HTMLElement;
+    getUncommittedLabel(node: HTMLLIElement): HTMLElement;
     /**
      * Get the shutdown node for a session node.
      *
@@ -668,9 +875,10 @@ namespace GitSessions {
      */
     getUnstagedAdd(node: HTMLLIElement): HTMLElement;
     getUnstagedCheckout(node: HTMLLIElement): HTMLElement;
+    getUnstagedLabel(node: HTMLLIElement): HTMLElement;
 
     getUntrackedAdd(node: HTMLLIElement): HTMLElement;
-
+    getUntrackedLabel(node: HTMLLIElement): HTMLElement;
     /**
      * Populate a node with running terminal session data.
      *
@@ -738,7 +946,7 @@ namespace GitSessions {
      */
     createUncommittedHeaderNode(): HTMLElement {
       let node = document.createElement('div');
-      node.textContent = 'Uncommitted Files';
+      node.textContent = 'Staged Files';
 
       let git_reset = document.createElement('button');
       git_reset.className = `${RESET_BUTTON_CLASS} jp-mod-styled`;
@@ -802,7 +1010,7 @@ namespace GitSessions {
     createUncommittedNode(path: string): HTMLLIElement {
       let node = document.createElement('li');
       let icon = document.createElement('span');
-      icon.className = `${ITEM_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
+      icon.className = `${ITEM_ICON_CLASS} ${parseFileExtension(path)}`;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
       label.textContent = path;
@@ -830,7 +1038,7 @@ namespace GitSessions {
     createUntrackedNode(path:string): HTMLLIElement {
       let node = document.createElement('li');
       let icon = document.createElement('span');
-      icon.className = ITEM_ICON_CLASS;
+      icon.className = `${ITEM_ICON_CLASS} ${FILE_ICON_CLASS}`;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
       label.textContent = path;
@@ -848,7 +1056,7 @@ namespace GitSessions {
       createUnstagedNode(path: string): HTMLLIElement {
       let node = document.createElement('li');
       let icon = document.createElement('span');
-      icon.className = ITEM_ICON_CLASS;
+      icon.className = `${ITEM_ICON_CLASS} ${FOLDER_MATERIAL_ICON_CLASS}`;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
       label.textContent = path;
@@ -885,6 +1093,9 @@ namespace GitSessions {
     getUncommittedCommit(node: HTMLLIElement): HTMLElement{
       return DOMUtils.findElement(node, COMMIT_BUTTON_CLASS);
     };
+    getUncommittedLabel(node: HTMLLIElement): HTMLElement{
+      return DOMUtils.findElement(node, ITEM_LABEL_CLASS);
+    };
 
     /**
      * Get the shutdown node for a session node.
@@ -905,10 +1116,15 @@ namespace GitSessions {
     getUnstagedCheckout(node: HTMLLIElement): HTMLElement {
       return DOMUtils.findElement(node, CHECKOUT_BUTTON_CLASS);
     }
-
+    getUnstagedLabel(node: HTMLLIElement): HTMLElement {
+      return DOMUtils.findElement(node, ITEM_LABEL_CLASS);
+    }
 
     getUntrackedAdd(node: HTMLLIElement): HTMLElement {
       return DOMUtils.findElement(node, ADD_BUTTON_CLASS);
+    }
+    getUntrackedLabel(node: HTMLLIElement): HTMLElement {
+      return DOMUtils.findElement(node, ITEM_LABEL_CLASS);
     }
 
     /**
@@ -944,7 +1160,7 @@ namespace GitSessions {
       let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       let name = model.name || model.path.split('/').pop();
       if (name.indexOf('.ipynb') !== -1) {
-        icon.className = `${ITEM_ICON_CLASS} ${NOTEBOOK_ICON_CLASS}`;
+        icon.className = `${ITEM_ICON_CLASS} ${FOLDER_MATERIAL_ICON_CLASS}`;
       } else if (model.type.toLowerCase() === 'console') {
         icon.className = `${ITEM_ICON_CLASS} ${CONSOLE_ICON_CLASS}`;
       } else {
@@ -1003,38 +1219,45 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(git_plugin, { rank: 200 });
 
-
-
 }
 
-
-
-/*
-function POST_Git_Request(URL,REQUEST):any{
-      let request = {
-          url:URL,
-          method: 'POST',
-          cache: true,
-          contentType: 'bar',
-          headers: {
-            foo: 'bar'
-          },
-          data: JSON.stringify(REQUEST),
-      };
-
-      ServerConnection.makeRequest(request, ServerConnection.makeSettings()).then(response =>{
-                console.log("response.xhr info:::");
-        console.log(response.xhr.responseText);
-        console.log(response.xhr.responseURL);
-        console.log(response.xhr.status);
-        console.log(response.xhr.statusText);
-
-        if (response.xhr.status !== 200) {
-          throw ServerConnection.makeError(response);
-        }
-        console.log(JSON.stringify(response.data, null, 2)); 
-        return response;
-      }). ;
-      
-}
-*/
+function parseFileExtension(path: string): string {
+      if(path[path.length-1]==='/'){
+        return FOLDER_MATERIAL_ICON_CLASS;
+      }
+      var fileExtension = PathExt.extname(path).toLocaleLowerCase();
+      switch (fileExtension) {
+        case '.md':
+          return MARKDOWN_ICON_CLASS;
+        case '.py':
+          return PYTHON_ICON_CLASS;
+        case '.json':
+          return JSON_ICON_CLASS;
+        case '.csv':
+          return SPREADSHEET_ICON_CLASS;
+        case '.xls':
+          return SPREADSHEET_ICON_CLASS;
+        case '.r':
+          return RKERNEL_ICON_CLASS;
+        case '.yml':
+          return YAML_ICON_CLASS;
+        case '.yaml':
+          return YAML_ICON_CLASS;
+        case '.svg':
+          return IMAGE_ICON_CLASS;
+        case '.tiff':
+          return IMAGE_ICON_CLASS;
+        case '.jpeg':
+          return IMAGE_ICON_CLASS;
+        case '.jpg':
+          return IMAGE_ICON_CLASS;
+        case '.gif':
+          return IMAGE_ICON_CLASS;
+        case '.png':
+          return IMAGE_ICON_CLASS;
+        case '.raw':
+          return IMAGE_ICON_CLASS;
+        default:
+          return FILE_TYPE_CLASS;
+      }
+    }

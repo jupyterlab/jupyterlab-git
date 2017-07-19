@@ -1,9 +1,8 @@
-
 {
   "name": "jupyterlab-git",
   "version": "0.1.0",
   "description": "JLG",
-  "author": "interns",
+  "author": "Ji Zhang",
   "main": "lib/index.js",
   "keywords": [
     "jupyter",
@@ -15,36 +14,17 @@
     "prepublish": "npm run build"
   },
   "files": [
-    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "style/*.css"
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
   ],
   "jupyterlab": {
     "extension": true
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.7.0",
-    "@jupyterlab/apputils": "0.7.0",
-    "@jupyterlab/console": "^0.7.0",
-    "@jupyterlab/coreutils": "^0.7.0",
-    "@jupyterlab/docmanager": "^0.7.0",
-    "@jupyterlab/docregistry": "^0.7.0",
-    "@jupyterlab/filebrowser": "^0.7.0",
-    "@jupyterlab/launcher": "^0.7.0",
-    "@jupyterlab/launcher-extension": "^0.7.1",
-    "@jupyterlab/services": "^0.46.0",
-    "@phosphor/algorithm": "^1.1.1",
-    "@phosphor/application": "^1.3.0",
-    "@phosphor/commands": "^1.2.1",
-    "@phosphor/coreutils": "^1.1.1",
-    "@phosphor/disposable": "^1.1.1",
-    "@phosphor/signaling": "^1.2.1",
-    "@phosphor/widgets": "^1.3.0",
-    "core-js": "^2.4.1",
-    "es6-promise": "^4.1.0",
-    "jquery": "^2.2.0"
+    "@jupyterlab/application": "^0.8.3",
+    "@jupyterlab/console": "^0.8.2"
   },
   "devDependencies": {
     "rimraf": "^2.6.1",
-    "typescript": "~2.2.0"
+    "typescript": "~2.4.0"
   }
 }
