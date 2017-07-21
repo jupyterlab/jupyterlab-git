@@ -590,7 +590,6 @@ class GitSessions extends Widget {
           console.log(response.code);
           if(response.code == 0){  
             console.log(response.message);
-            this.refresh();
           }
           else{
             let msg_box = document.createElement('div');
@@ -604,12 +603,13 @@ class GitSessions extends Widget {
               buttons: [Dialog.cancelButton(), Dialog.warnButton({label: 'Stash'}) ,Dialog.okButton({ label: 'Commit'})]
             }).then(result => {
               if (result.accept&&input.value) {
-                git_temp.commit(input.value, current_root_repo_path);   
+                git_temp.add(true,null, current_root_repo_path);
+                git_temp.commit(input.value, current_root_repo_path);
+                git_temp.checkout(true,current_repo_branch, false, null, current_fb_path);               
               }
-              this.refresh();
             });            
           }
-
+          this.refresh();
         });
         return;   
       }    
