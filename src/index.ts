@@ -603,8 +603,8 @@ class GitSessions extends Widget {
             }).then(result => {
               if (result.accept&&input.value) {
                 git_temp.add(true,null, current_root_repo_path);
-                git_temp.commit(input.value, current_root_repo_path);
-                git_temp.checkout(true,current_repo_branch, false, null, current_fb_path);               
+                git_temp.commit(input.value, current_root_repo_path); 
+                this.refresh();           
               }
             });            
           }
