@@ -143,8 +143,6 @@ export class Git {
 				console.log(val.data.message);
 			}
 			return val.data;
-
-
 		}catch(err){
 			throw ServerConnection.makeError(err);
 		}
