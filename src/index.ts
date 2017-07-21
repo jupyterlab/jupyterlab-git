@@ -15,7 +15,7 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  DOMUtils, Dialog, showDialog
+  DOMUtils, Dialog, showDialog,Styling
 } from '@jupyterlab/apputils';
 
 import {
@@ -57,12 +57,19 @@ const Git_CLASS = 'jp-GitSessions';
  * The class name added to a git-plugin widget header.
  */
 const HEADER_CLASS = 'jp-GitSessions-header';
-
+const HEADER0_CLASS = 'jp-GitSessions-header0';
 /**
  * The class name added to a git-plugin widget header refresh button.
  */
 const REFRESH_CLASS = 'jp-GitSessions-headerRefresh';
-
+/**
+ * The class name added to a git-plugin widget header refresh button.
+ */
+//const SWITCH_BRANCH_CLASS = 'jp-GitSessions-headerSwitchBranch';
+/**
+ * The class name added to a git-plugin widget header refresh button.
+ */
+const NEW_TERMINAL_CLASS = 'jp-GitSessions-headerNewTerminal';
 /**
  * The class name added to the git-plugin terminal sessions section.
  */
@@ -190,7 +197,17 @@ const FILE_TYPE_CLASS = 'jp-FileIcon';
  * The class name added to a directory file browser item.
  */
 const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
+/**
+ * The class name added to a csv toolbar widget.
+ */
+const CSV_TOOLBAR_CLASS = 'jp-CSVToolbar';
 
+const CSV_TOOLBAR_LABEL_CLASS = 'jp-CSVToolbar-label';
+
+/**
+ * The class name added to a csv toolbar's dropdown element.
+ */
+const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVToolbar-dropdown';
 
 /**
  * The duration of auto-refresh in ms.
@@ -259,8 +276,7 @@ class GitSessions extends Widget {
       untrackedNode.appendChild(untrackedContainer);
 
       let git_temp = new Git();
-      let promise_temp = (git_temp.status(''));
-      promise_temp.then(response=> {
+      (git_temp.status('')).then(response=> {
         console.log("first response:")
         console.log(response.code)
         if(response.code==0){
@@ -328,7 +344,23 @@ class GitSessions extends Widget {
     clearTimeout(this._refreshId);
     super.dispose();
   }
-  
+    /**
+   * Refresh the widget.
+   */
+  switch_branch(label: string) {
+    console.log("About to switch branch! current branch is");
+    console.log(label);
+  }
+
+  open_new_terminal() {
+    let ll = app0.shell.widgets('left');
+    let fb = ll.next();
+    while(fb.id!='filebrowser'){
+      fb = ll.next();
+    }
+    app0.commands.execute('terminal:open', {  path:fb.model.path });
+    console.log("just opened a new terminal");
+  }
   /**
    * get the path shown in filebrowser widget.
    */
@@ -344,18 +376,23 @@ class GitSessions extends Widget {
    * Refresh the widget.
    */
   refresh(): Promise<void> {
-
+    let header0node = DOMUtils.findElement(this.node, HEADER0_CLASS);
     let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
     let uncommittedContainer = DOMUtils.findElement(uncommittedSection, CONTAINER_CLASS);
     let untrackedSection = DOMUtils.findElement(this.node, UNTRACKED_CLASS);
     let untrackedContainer = DOMUtils.findElement(untrackedSection, CONTAINER_CLASS);
     let unstagedSection = DOMUtils.findElement(this.node, UNSTAGED_CLASS);
     let unstagedContainer = DOMUtils.findElement(unstagedSection, CONTAINER_CLASS);
+    let switch_branch = DOMUtils.findElement(this.node, CSV_TOOLBAR_CLASS);
+    let switch_branch_label = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_LABEL_CLASS);
+    let switch_branch_old_node = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
     let renderer = this._renderer;
 
     uncommittedContainer.removeChild(uncommittedContainer.firstChild);
     unstagedContainer.removeChild(unstagedContainer.firstChild);
     untrackedContainer.removeChild(untrackedContainer.firstChild);
+    switch_branch_old_node.remove();
+    
 
     let uncommittedList = document.createElement('ul');
     uncommittedList.className = LIST_CLASS;
@@ -367,10 +404,34 @@ class GitSessions extends Widget {
     untrackedList.className = LIST_CLASS;
     untrackedContainer.appendChild(untrackedList);
 
+    header0node.textContent = "HOME:/"+current_fb_path;
+    let git_temp = new Git();
+    (git_temp.branch(current_fb_path)).then(response=>{
+      if(response.code==0){
+        let select = document.createElement('select');
+        let data_json = response.repos;
+        for (var i=0; i<data_json.length; i++){
+          let option = document.createElement('option');
+          option.value = 'test';
+          if(data_json[i].current[0]){
+            switch_branch_label.textContent = 'Branch: '+ data_json[i].name;
+            option.selected = true;
+          }
+          if(data_json[i].remote[0]){
+            option.textContent = data_json[i].name + ": Remote branch at "+ data_json[i].tag;
+          }
+          else{
+            option.textContent = data_json[i].name + ": "+ data_json[i].tag;
+          }
+          select.appendChild(option);
+        }
+      let switch_branch_node = Styling.wrapSelect(select);
+      switch_branch_node.classList.add(CSV_TOOLBAR_DROPDOWN_CLASS);
+      switch_branch.appendChild(switch_branch_node);
+      }
+    });
 
-      let git_temp = new Git();
-      let promise_temp = (git_temp.status(current_fb_path));
-      promise_temp.then(response=> {
+      (git_temp.status(current_fb_path)).then(response=> {
         if(response.code==0){
           let data_json = response.files;
           for (var i=0; i<data_json.length; i++){
@@ -415,14 +476,16 @@ class GitSessions extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    case 'dblclick':
-      this._evtDblClick(event as MouseEvent);
-      break;
-    default:
-      break;
+      case 'change':
+        console.log("XXXXXXXXXXchange just happened");
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      case 'dblclick':
+        this._evtDblClick(event as MouseEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -472,8 +535,7 @@ class GitSessions extends Widget {
 
       let git_temp = new Git();
       this.refresh_current_fb_path();
-      let promise_temp = (git_temp.status(current_fb_path));
-      promise_temp.then(response=> {
+      (git_temp.status(current_fb_path)).then(response=> {
         if(response.code==0){
           let data_json = response.files;
           for (var i=0; i<data_json.length; i++){
@@ -520,13 +582,29 @@ class GitSessions extends Widget {
     let untrackedSection = DOMUtils.findElement(this.node, UNTRACKED_CLASS);
    // let untrackedHeader = DOMUtils.findElement(untrackedSection,SECTION_HEADER_CLASS);
     let untrackedList = DOMUtils.findElement(untrackedSection, LIST_CLASS);
-
+    //let switch_branch = DOMUtils.findElement(this.node, SWITCH_BRANCH_CLASS);
+    let switch_branch = DOMUtils.findElement(this.node, CSV_TOOLBAR_CLASS);
+ //   let switch_branch_label = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_LABEL_CLASS);
+    let switch_branch_dropdown = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
+    let new_terminal = DOMUtils.findElement(this.node, NEW_TERMINAL_CLASS);
     let refresh = DOMUtils.findElement(this.node, REFRESH_CLASS);
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
       
     this.refresh_current_fb_path();
+
+     // Check for a switch branch.
+    if (ElementExt.hitTest(switch_branch_dropdown, clientX, clientY)) {
+      this.switch_branch((switch_branch_dropdown.getElementsByTagName('select')![0]).textContent);
+      return;
+    }   
+     // Check for opening a new terminal.
+    if (ElementExt.hitTest(new_terminal, clientX, clientY)) {
+      this.open_new_terminal();
+      return;
+    }  
+
     // Check for a refresh.
     if (ElementExt.hitTest(refresh, clientX, clientY)) {
       this.refresh();
@@ -919,7 +997,9 @@ namespace GitSessions {
      */
     createNode(): HTMLElement {
       let node = document.createElement('div');
+      let header0 = this.createPathHeaderNode();
       let header = document.createElement('div');
+      header0.className = HEADER0_CLASS;
       header.className = HEADER_CLASS;
       let uncommitted = document.createElement('div');
       uncommitted.className = `${SECTION_CLASS} ${UNCOMMITTED_CLASS}`;
@@ -927,18 +1007,58 @@ namespace GitSessions {
       unstaged.className = `${SECTION_CLASS} ${UNSTAGED_CLASS}`;
       let untracked = document.createElement('div');
       untracked.className = `${SECTION_CLASS} ${UNTRACKED_CLASS}`;
+/*
+      let switch_branch = document.createElement('button');
+      switch_branch.className = SWITCH_BRANCH_CLASS;
+      header.appendChild(switch_branch);
+*/
+      let switch_branch = document.createElement('div');
+      switch_branch.className = CSV_TOOLBAR_CLASS;
+      let label = document.createElement('span');
+      let select = document.createElement('select');
+      label.textContent = 'Branch: ';
+      label.className = CSV_TOOLBAR_LABEL_CLASS;
+      {
+        let option = document.createElement('option');
+        option.value = 'initial dummy node';
+        option.textContent = '';
+        select.appendChild(option);
+      };
+      switch_branch.appendChild(label);
+      let switch_branch_node = Styling.wrapSelect(select);
+      switch_branch_node.classList.add(CSV_TOOLBAR_DROPDOWN_CLASS);
+      switch_branch.appendChild(switch_branch_node);
+      header.appendChild(switch_branch);
+
+
 
       let refresh = document.createElement('button');
       refresh.className = REFRESH_CLASS;
       header.appendChild(refresh);
 
+      let new_terminal = document.createElement('button');
+      new_terminal.className = NEW_TERMINAL_CLASS;
+      header.appendChild(new_terminal);
+      
+      node.appendChild(header0);
       node.appendChild(header);
       node.appendChild(uncommitted);
       node.appendChild(unstaged);
       node.appendChild(untracked);
+
       return node;
     }
-
+    /**
+     * Create a fully populated header node for the terminals section.
+     *
+     * @returns A new node for a running terminal session header.
+     */
+    createPathHeaderNode(): HTMLElement {
+      let node = document.createElement('div');
+      node.textContent = 'Current Path Repo';
+      node.className = SECTION_HEADER_CLASS;
+      return node;
+    }
     /**
      * Create a fully populated header node for the terminals section.
      *
@@ -950,12 +1070,12 @@ namespace GitSessions {
 
       let git_reset = document.createElement('button');
       git_reset.className = `${RESET_BUTTON_CLASS} jp-mod-styled`;
-      git_reset.textContent = 'Reset All';
+      git_reset.textContent = 'Reset';
       node.appendChild(git_reset);
 
       let git_commit = document.createElement('button');
       git_commit.className = `${COMMIT_BUTTON_CLASS} jp-mod-styled`;
-      git_commit.textContent = 'Commit Changes';
+      git_commit.textContent = 'Commit';
       node.appendChild(git_commit);
 
       return node;
@@ -974,12 +1094,12 @@ namespace GitSessions {
 
       let git_add = document.createElement('button');
       git_add.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
-      git_add.textContent = 'Add All';
+      git_add.textContent = 'Add';
       node.appendChild(git_add);
 
       let git_checkout = document.createElement('button');
       git_checkout.className = `${CHECKOUT_BUTTON_CLASS} jp-mod-styled`;
-      git_checkout.textContent = 'Discard All';
+      git_checkout.textContent = 'Discard';
       node.appendChild(git_checkout);
 
       return node;
@@ -991,7 +1111,7 @@ namespace GitSessions {
       
       let git_add = document.createElement('button');
       git_add.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
-      git_add.textContent = 'Add All';
+      git_add.textContent = 'Add';
       node.appendChild(git_add);
       
       return node;
@@ -1038,7 +1158,7 @@ namespace GitSessions {
     createUntrackedNode(path:string): HTMLLIElement {
       let node = document.createElement('li');
       let icon = document.createElement('span');
-      icon.className = `${ITEM_ICON_CLASS} ${FILE_ICON_CLASS}`;
+      icon.className = `${ITEM_ICON_CLASS} ${parseFileExtension(path)}`;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
       label.textContent = path;
@@ -1056,7 +1176,7 @@ namespace GitSessions {
       createUnstagedNode(path: string): HTMLLIElement {
       let node = document.createElement('li');
       let icon = document.createElement('span');
-      icon.className = `${ITEM_ICON_CLASS} ${FOLDER_MATERIAL_ICON_CLASS}`;
+      icon.className = `${ITEM_ICON_CLASS} ${parseFileExtension(path)}`;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
       label.textContent = path;

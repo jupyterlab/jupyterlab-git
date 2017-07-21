@@ -14,7 +14,17 @@ export interface GitShowPrefixResult {
 	code: number;
 	under_repo_path?: string;
 }
-
+export interface GitBranchResult {
+	code: number;
+	repos?: [
+            {
+                current: boolean,
+                remote: boolean,
+				name: string,
+				tag: string,
+            }
+        ]
+}
 export interface GitStatusResult {
 	code: number;
 	files?: [
@@ -82,6 +92,23 @@ export class Git {
 	async status(path: string):Promise<GitStatusResult> {
 		try{
 			var val = await HTTP_Git_Request('/git/status','POST',{"current_path":path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				console.log("Git command Error:")
+				console.log(val.data.message);
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
+	}
+
+	async branch(path: string): Promise<GitBranchResult>{
+		try{
+			var val = await HTTP_Git_Request('/git/branch','POST',{"current_path":path});
 			if (val.xhr.status !== 200) {
           		console.log(val.xhr.status)
         		throw ServerConnection.makeError(val);

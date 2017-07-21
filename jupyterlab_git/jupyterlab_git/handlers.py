@@ -1,4 +1,3 @@
-
 import os
 import json
 import socket
@@ -11,8 +10,6 @@ import subprocess
 
 from notebook.utils import url_path_join
 from notebook.base.handlers import APIHandler
-
-
 
 class Git_handler(APIHandler):
     @property
@@ -43,6 +40,12 @@ class Git_status_handler(Git_handler):
         result = self.git.status(current_path)   
         self.finish(json.dumps(result))
 
+class Git_branch_handler(Git_handler):       
+    def post(self):
+        my_data = json.loads(self.request.body)
+        current_path = my_data["current_path"]
+        result = self.git.branch(current_path)   
+        self.finish(json.dumps(result))
 
 
 class Git_add_handler(Git_handler):
@@ -108,6 +111,7 @@ def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/showprefix', Git_showprefix_handler)])
     web_app.add_handlers('.*', [('/git/add', Git_add_handler)])
     web_app.add_handlers('.*', [('/git/status', Git_status_handler)])
+    web_app.add_handlers('.*', [('/git/branch', Git_branch_handler)])
     web_app.add_handlers('.*', [('/git/reset', Git_reset_handler)])
     web_app.add_handlers('.*', [('/git/checkout', Git_checkout_handler)])
     web_app.add_handlers('.*', [('/git/commit', Git_commit_handler)])

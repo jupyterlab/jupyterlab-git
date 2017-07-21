@@ -34,6 +34,27 @@ class Git:
         else:
             return {"code": p.returncode, "message": my_error.decode('utf-8')}
 
+    def branch(self, current_path):
+        p = Popen(["git", "branch", "-a"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
+        my_output, my_error = p.communicate()
+        if(p.returncode==0):
+            result = [] 
+            line_array = my_output.decode('utf-8').splitlines()
+            '''By comparing strings 'remotes/' to determine if a branch is local or remote, Should have btter ways '''
+            for line in line_array:
+                current = False,
+                remote = False,
+                if(line[0]=='*'):
+                    current = True,
+                if(len(line)>=10) and (line[2:10]=="remotes/"):
+                    remote = True,
+                    result.append({'current':current,'remote':remote,'name':line[10:],'tag':None})
+                else:
+                    result.append({'current':current,'remote':remote,'name':line[2:],'tag':None})
+            return {"code": p.returncode, "repos":result}
+        else:
+            return {"code": p.returncode, "message": my_error.decode('utf-8')}
+
     def showtoplevel(self, current_path):
         p = Popen(["git", "rev-parse", "--show-toplevel"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
         my_output, my_error = p.communicate()

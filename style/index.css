@@ -14,6 +14,38 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+.jp-CSVToolbar {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+    /* Add the border width because this is border-box sized */
+    height: calc(var(--jp-private-csvviewer-toolbar-height) + var(--jp-border-width));
+    background: var(--jp-toolbar-background);
+    z-index: 1;
+    box-shadow: var(--jp-toolbar-box-shadow);
+}
+
+.jp-CSVToolbar .jp-CSVToolbar-label {
+    color: var(--jp-ui-font-color1);
+    font-size: var(--jp-ui-font-size1);
+    line-height: var(--jp-private-csvviewer-toolbar-height);
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+
+.jp-CSVToolbar .jp-CSVToolbar-dropdown {
+    flex: 0 0 auto;
+    vertical-align: middle;
+    border: var(--jp-border-width) solid var(--jp-border-color1);
+    border-radius: 0;
+    outline: none;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
 
 .jp-GitSessions {
   display: flex;
@@ -32,12 +64,76 @@
   margin: var(--jp-toolbar-header-margin);
 }
 
+.jp-GitSessions-headerSwitchBranch {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 100px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image: var(--jp-icon-json);/*currently just use a json icon to represent*/
+  background-size: 16px;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-GitSessions-headerSwitchBranch:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-GitSessions-headerSwitchBranch:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+.jp-GitSessions-headerNewTerminal {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 50px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image: var(--jp-icon-terminal);/*currently just use a json icon to represent*/
+  background-size: 16px;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-GitSessions-headerNewTerminal:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-GitSessions-headerNewTerminal:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
 
 .jp-GitSessions-headerRefresh {
   flex: 1 1 auto;
   height: var(--jp-private-running-button-height);
   width: var(--jp-private-running-button-width);
-  max-width: 100px;
+  max-width: 50px;
   min-width: 16px;
   min-height: 16px;
   padding: 4px 6px;
@@ -141,31 +237,31 @@
   background-image: var(--jp-icon-terminal);
 }
 .jp-GitSessions-itemIcon.jp-OpenFolderIcon {
-  background-image: var(--jp-icon-landingfolder);
+  background-image: var(--jp-icon-directory-selected);
 }
 .jp-GitSessions-itemIcon.jp-FileIcon {
   background-image: var(--jp-icon-file);
 }
 .jp-GitSessions-itemIcon.jp-YamlIcon {
-  background-image: var(--jp-icon-yaml-selected);
+  background-image: var(--jp-icon-yaml);
 }
 .jp-GitSessions-itemIcon.jp-MarkdownIcon {
-  background-image: var(--jp-icon-markdown-selected);
+  background-image: var(--jp-icon-markdown);
 }
 .jp-GitSessions-itemIcon.jp-ImageIcon {
-  background-image: var(--jp-icon-image-selected);
+  background-image: var(--jp-icon-image);
 }
 .jp-GitSessions-itemIcon.jp-SpreadsheetIcon {
-  background-image: var(--jp-icon-spreadsheet-selected);
+  background-image: var(--jp-icon-spreadsheet);
 }
 .jp-GitSessions-itemIcon.jp-JSONIcon {
-  background-image: var(--jp-icon-json-selected);
+  background-image: var(--jp-icon-json);
 }
 .jp-GitSessions-itemIcon.jp-PythonIcon {
-  background-image: var(--jp-icon-python-selected);
+  background-image: var(--jp-icon-python);
 }
 .jp-GitSessions-itemIcon.jp-RKernelIcon {
-  background-image: var(--jp-icon-r-selected);
+  background-image: var(--jp-icon-r);
 }
 
 
