@@ -592,10 +592,14 @@ class GitSessions extends Widget {
             console.log(response.message);
           }
           else{
+            let msg_box = document.createElement('div');
+            msg_box.textContent = response.message;
             let input = document.createElement('input');
+            msg_box.appendChild(input);
+
             showDialog({        
               title: 'Input commit message:',
-              body: input,
+              body: msg_box,
               buttons: [Dialog.cancelButton(), Dialog.okButton({label: 'Stash'}) ,Dialog.okButton({ label: 'Commit'})]
             }).then(result => {
               if (result.accept&&input.value) {
