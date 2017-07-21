@@ -596,7 +596,6 @@ class GitSessions extends Widget {
             msg_box.textContent = response.message;
             let input = document.createElement('input');
             msg_box.appendChild(input);
-
             showDialog({        
               title: 'Input commit message:',
               body: msg_box,
