@@ -600,7 +600,7 @@ class GitSessions extends Widget {
             showDialog({        
               title: 'Input commit message:',
               body: msg_box,
-              buttons: [Dialog.cancelButton(), Dialog.okButton({label: 'Stash'}) ,Dialog.okButton({ label: 'Commit'})]
+              buttons: [Dialog.cancelButton(), Dialog.warnButton({label: 'Stash'}) ,Dialog.okButton({ label: 'Commit'})]
             }).then(result => {
               if (result.accept&&input.value) {
                 git_temp.commit(input.value, current_root_repo_path);
