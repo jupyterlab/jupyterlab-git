@@ -93,6 +93,15 @@ class Git:
         print("Hi there! post extensions!!")
         return my_output
 
+    def checkout_branch(self, branchname, current_path):
+        p = Popen(["git", "checkout", branchname], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
+        my_output, my_error = p.communicate()
+        if(p.returncode==0):
+            return {"code": p.returncode, "message": my_output.decode('utf-8')}
+        else:
+            return {"code": p.returncode, "message": my_error.decode('utf-8')}
+
+
     def checkout(self, filename, top_repo_path):
         my_output = subprocess.check_output(["git", "checkout", "--", filename], cwd = top_repo_path)
         print("Hi there! post extensions!!")

@@ -14,6 +14,10 @@ export interface GitShowPrefixResult {
 	code: number;
 	under_repo_path?: string;
 }
+export interface GitCheckoutResult {
+	code: number;
+	message?: string;
+}
 export interface GitBranchResult {
 	code: number;
 	repos?: [
@@ -127,8 +131,23 @@ export class Git {
 		return  HTTP_Git_Request('/git/add','POST',{"add_all": check , "filename":filename, "top_repo_path": path});
 	}
 
-	checkout(check: boolean,filename: string,  path: string) {
-		return  HTTP_Git_Request('/git/checkout','POST',{"checkout_all": check , "filename":filename, "top_repo_path": path});
+	async checkout(checkout_branch: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string):Promise<GitCheckoutResult> {
+		try{
+			var val =  await HTTP_Git_Request('/git/checkout','POST',{"checkout_branch": checkout_branch, "branchname":branchname, "checkout_all": checkout_all , "filename":filename, "top_repo_path": path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				console.log("Git command Error:")
+				console.log(val.data.message);
+			}
+			return val.data;
+
+
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
 	}
 
 	commit(message: string, path: string) {

@@ -222,6 +222,8 @@ const MIN_REFRESH = 5000;
 
 let app0 = null;
 let current_fb_path = '';
+let current_repo_branch = '';
+let current_root_repo_path = '';
 /**
  * A class that exposes the git-plugin sessions.
  */
@@ -347,10 +349,7 @@ class GitSessions extends Widget {
     /**
    * Refresh the widget.
    */
-  switch_branch(label: string) {
-    console.log("About to switch branch! current branch is");
-    console.log(label);
-  }
+
 
   open_new_terminal() {
     let ll = app0.shell.widgets('left');
@@ -412,10 +411,11 @@ class GitSessions extends Widget {
         let data_json = response.repos;
         for (var i=0; i<data_json.length; i++){
           let option = document.createElement('option');
-          option.value = 'test';
+          option.value = data_json[i].name;;
           if(data_json[i].current[0]){
             switch_branch_label.textContent = 'Branch: '+ data_json[i].name;
             option.selected = true;
+            current_repo_branch = data_json[i].name;
           }
           if(data_json[i].remote[0]){
             option.textContent = data_json[i].name + ": Remote branch at "+ data_json[i].tag;
@@ -477,7 +477,7 @@ class GitSessions extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'change':
-        console.log("XXXXXXXXXXchange just happened");
+        this._evtChange(event as MouseEvent);
       case 'click':
         this._evtClick(event as MouseEvent);
         break;
@@ -493,6 +493,7 @@ class GitSessions extends Widget {
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('change', this);
     this.node.addEventListener('click', this);
     this.node.addEventListener('dblclick', this);
   }
@@ -501,6 +502,7 @@ class GitSessions extends Widget {
    * A message handler invoked on a `'before-detach'` message.
    */
   protected onBeforeDetach(msg: Message): void {
+    this.node.addEventListener('change', this);
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('dblclick', this);
   }
@@ -564,7 +566,51 @@ class GitSessions extends Widget {
 
 
   }
+  /**
+   * Handle the `'click'` event for the widget.
+   *
+   * #### Notes
+   * This listener is attached to the document node.
+   */
+  private _evtChange(event: MouseEvent): void {
+    console.log('change just happened');
+    let switch_branch = DOMUtils.findElement(this.node, CSV_TOOLBAR_CLASS);
+    let switch_branch_dropdown = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
 
+    let NL = (switch_branch_dropdown.getElementsByTagName('select')![0]).childNodes;
+    for(var i = 0; i<NL.length; i++){
+      let option_node = NL.item(i) as HTMLSelectElement;
+      if(option_node.selected){
+        console.log(NL.item(i).textContent);
+        console.log(i+"th the node infor");   
+        current_repo_branch =  option_node.value;
+        console.log(current_repo_branch);  
+        let git_temp = new Git();
+        git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
+          console.log(response.code);
+          if(response.code == 0){  
+            console.log(response.message);
+          }
+          else{
+            let input = document.createElement('input');
+            showDialog({        
+              title: 'Input commit message:',
+              body: input,
+              buttons: [Dialog.cancelButton(), Dialog.okButton({label: 'Stash'}) ,Dialog.okButton({ label: 'Commit'})]
+            }).then(result => {
+              if (result.accept&&input.value) {
+                git_temp.commit(input.value, current_root_repo_path);
+                git_temp.checkout(true,current_repo_branch, false, null, current_fb_path);               
+              }
+            });            
+          }
+          this.refresh();
+        });
+        return;   
+      }    
+    }
+    return;  
+  }
   /**
    * Handle the `'click'` event for the widget.
    *
@@ -582,10 +628,6 @@ class GitSessions extends Widget {
     let untrackedSection = DOMUtils.findElement(this.node, UNTRACKED_CLASS);
    // let untrackedHeader = DOMUtils.findElement(untrackedSection,SECTION_HEADER_CLASS);
     let untrackedList = DOMUtils.findElement(untrackedSection, LIST_CLASS);
-    //let switch_branch = DOMUtils.findElement(this.node, SWITCH_BRANCH_CLASS);
-    let switch_branch = DOMUtils.findElement(this.node, CSV_TOOLBAR_CLASS);
- //   let switch_branch_label = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_LABEL_CLASS);
-    let switch_branch_dropdown = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
     let new_terminal = DOMUtils.findElement(this.node, NEW_TERMINAL_CLASS);
     let refresh = DOMUtils.findElement(this.node, REFRESH_CLASS);
     let renderer = this._renderer;
@@ -594,11 +636,7 @@ class GitSessions extends Widget {
       
     this.refresh_current_fb_path();
 
-     // Check for a switch branch.
-    if (ElementExt.hitTest(switch_branch_dropdown, clientX, clientY)) {
-      this.switch_branch((switch_branch_dropdown.getElementsByTagName('select')![0]).textContent);
-      return;
-    }   
+
      // Check for opening a new terminal.
     if (ElementExt.hitTest(new_terminal, clientX, clientY)) {
       this.open_new_terminal();
@@ -612,7 +650,7 @@ class GitSessions extends Widget {
     }
     let git_temp = new Git();
       
-    let current_root_repo_path = '';
+
     git_temp.showtoplevel(current_fb_path).then(response=>{
       if(response.code==0){
         current_root_repo_path = response.top_repo_path;
@@ -669,7 +707,7 @@ class GitSessions extends Widget {
             buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
           }).then(result => {
             if (result.accept) {
-                git_temp.checkout(true,null,current_root_repo_path);
+                git_temp.checkout(false, null,true,null,current_root_repo_path);
                 this.refresh();
             }
           });
@@ -694,7 +732,7 @@ class GitSessions extends Widget {
               buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
             }).then(result => {
               if (result.accept) {
-                git_temp.checkout(false,node.title,current_root_repo_path);
+                git_temp.checkout(false, null, false,node.title,current_root_repo_path);
                 this.refresh();
               }
             });
@@ -711,8 +749,8 @@ class GitSessions extends Widget {
             git_temp.add(false,node.title,current_root_repo_path);
             this.refresh();
             return;
+          }
         }
-      }
       }
       }) ;
   }

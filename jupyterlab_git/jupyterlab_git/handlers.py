@@ -83,16 +83,13 @@ class Git_reset_handler(Git_handler):
 class Git_checkout_handler(Git_handler):    
     def post(self):
         my_data = json.loads(self.request.body)
-        top_repo_path = my_data["top_repo_path"]        
-        if(my_data["checkout_all"]):
+        top_repo_path = my_data["top_repo_path"]
+        if (my_data["checkout_branch"]):
+            my_output = self.git.checkout_branch(my_data["branchname"],top_repo_path);        
+        elif(my_data["checkout_all"]):
             my_output = self.git.checkout_all(top_repo_path)
         else:
-            filename = my_data["filename"]
-
-            print(filename)
-            print(top_repo_path)
-
-            my_output = self.git.checkout(filename, top_repo_path)
+            my_output = self.git.checkout(my_data["filename"], top_repo_path)
         self.finish(my_output)
         print("Hi there! git checkout handler!!")
 
