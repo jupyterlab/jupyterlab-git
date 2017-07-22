@@ -94,7 +94,9 @@ class Git:
         return my_output
 
     def checkout_branch(self, branchname, current_path):
-        p = Popen(["git", "checkout", branchname], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
+        true_branch = branchname.split(' -> '),
+        print(true_branch[0]),
+        p = Popen(["git", "checkout", true_branch[0]], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
         my_output, my_error = p.communicate()
         if(p.returncode==0):
             return {"code": p.returncode, "message": my_output.decode('utf-8')}
