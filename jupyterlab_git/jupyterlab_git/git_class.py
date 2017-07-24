@@ -41,16 +41,25 @@ class Git:
             result = [] 
             line_array = my_output.decode('utf-8').splitlines()
             '''By comparing strings 'remotes/' to determine if a branch is local or remote, Should have btter ways '''
-            for line in line_array:
+            for line_full in line_array:
+                line_cut = line_full.split(' -> '),
+                tag = None,
                 current = False,
                 remote = False,
-                if(line[0]=='*'):
+                if(len(line_cut[0])>1):
+                    tag = line_cut[0][1]
+                line = line_cut[0][0],
+                print(line_cut)
+                print(len(line_cut))
+                print(line)
+                print(len(line))
+                if(line_full[0]=='*'):
                     current = True,
-                if(len(line)>=10) and (line[2:10]=="remotes/"):
+                if(len(line_full)>=10) and (line_full[2:10]=="remotes/"):
                     remote = True,
-                    result.append({'current':current,'remote':remote,'name':line[10:],'tag':None})
+                    result.append({'current':current,'remote':remote,'name':line[0][10:],'tag':tag})
                 else:
-                    result.append({'current':current,'remote':remote,'name':line[2:],'tag':None})
+                    result.append({'current':current,'remote':remote,'name':line_full[2:],'tag':tag})
             return {"code": p.returncode, "repos":result}
         else:
             return {"code": p.returncode, "message": my_error.decode('utf-8')}
@@ -94,10 +103,7 @@ class Git:
         return my_output
 
     def checkout_branch(self, branchname, current_path):
-        true_branch = branchname.split(' -> '),
-        print(true_branch[0]),
-        print(true_branch[0][0]),
-        p = Popen(["git", "checkout", true_branch[0][0]], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
+        p = Popen(["git", "checkout", branchname], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
         my_output, my_error = p.communicate()
         if(p.returncode==0):
             return {"code": p.returncode, "message": my_output.decode('utf-8')}

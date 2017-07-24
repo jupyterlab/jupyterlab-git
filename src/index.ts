@@ -603,8 +603,9 @@ class GitSessions extends Widget {
             }).then(result => {
               if (result.accept&&input.value) {
                 /** TODO: make better design for this part, what are th possible actions here */
-                git_temp.add(true,null, current_root_repo_path);
-                git_temp.commit(input.value, current_root_repo_path);            
+                git_temp.add(true,null, current_root_repo_path).then(response =>{
+                  git_temp.commit(input.value, current_root_repo_path);
+                })            
               }
             });            
           }
