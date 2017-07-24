@@ -282,24 +282,34 @@ class GitSessions extends Widget {
         console.log("first response:")
         console.log(response.code)
         if(response.code==0){
+          let SF = 0; /** staged file count */
+          let USF = 0; /** unstaged file count */
+          let UTF = 0; /** untracked file count */
+
           let data_json = response.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               uncommittedList.appendChild(node);
+              SF++;
             }
             if(data_json[i].y=="M"){
               let node = renderer.createUnstagedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               unstagedList.appendChild(node);
+              USF++;
             }
             if(data_json[i].x=="?"&&data_json[i].y=="?"){
               let node = renderer.createUntrackedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               untrackedList.appendChild(node);
+              UTF++;
             }
           }
+          renderer.UpdateFileCount(uncommittedHeader, SF, 'staged');
+          renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
+          renderer.UpdateFileCount(untrackedHeader, UTF,'untracked');
         }
       }).catch(response =>{
         console.log("second response:")
@@ -387,6 +397,10 @@ class GitSessions extends Widget {
     let switch_branch_old_node = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
     let renderer = this._renderer;
 
+    let uncommittedHeader = DOMUtils.findElement(uncommittedSection, SECTION_HEADER_CLASS);
+    let unstagedHeader = DOMUtils.findElement(unstagedSection,SECTION_HEADER_CLASS);
+    let untrackedHeader = DOMUtils.findElement(untrackedSection,SECTION_HEADER_CLASS);
+
     uncommittedContainer.removeChild(uncommittedContainer.firstChild);
     unstagedContainer.removeChild(unstagedContainer.firstChild);
     untrackedContainer.removeChild(untrackedContainer.firstChild);
@@ -433,24 +447,33 @@ class GitSessions extends Widget {
 
       (git_temp.status(current_fb_path)).then(response=> {
         if(response.code==0){
+          let SF = 0; /** staged file count */
+          let USF = 0; /** unstaged file count */
+          let UTF = 0; /** untracked file count */
           let data_json = response.files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               uncommittedList.appendChild(node);
+              SF++;
             }
             if(data_json[i].y=="M"){
               let node = renderer.createUnstagedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               unstagedList.appendChild(node);
+              USF++;
             }
             if(data_json[i].x=="?"&&data_json[i].y=="?"){
               let node = renderer.createUntrackedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
               untrackedList.appendChild(node);
+              UTF++;
             }
           }
+          renderer.UpdateFileCount(uncommittedHeader, SF, 'Staged');
+          renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
+          renderer.UpdateFileCount(untrackedHeader, UTF, 'untracked');
         }
       }).catch(response =>{
         console.log("second response:")
@@ -590,6 +613,7 @@ class GitSessions extends Widget {
           console.log(response.code);
           if(response.code == 0){  
             console.log(response.message);
+            this.refresh();
           }
           else{
             let msg_box = document.createElement('div');
@@ -604,12 +628,15 @@ class GitSessions extends Widget {
               if (result.accept&&input.value) {
                 /** TODO: make better design for this part, what are th possible actions here */
                 git_temp.add(true,null, current_root_repo_path).then(response =>{
-                  git_temp.commit(input.value, current_root_repo_path);
+                  git_temp.commit(input.value, current_root_repo_path).then(response=>{
+                    git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
+                      this.refresh();
+                    });
+                  });
                 })            
               }
             });            
           }
-          this.refresh();
         });
         return;   
       }    
@@ -1027,6 +1054,7 @@ namespace GitSessions {
      * reflect the data for the session models.
      */
     updateUntrackedNode(node: HTMLLIElement, model: Session.IModel, kernelName: string): void;
+    UpdateFileCount(node: HTMLElement, num: number, label: string):void;
   }
 
 
@@ -1109,7 +1137,12 @@ namespace GitSessions {
      */
     createUncommittedHeaderNode(): HTMLElement {
       let node = document.createElement('div');
-      node.textContent = 'Staged Files';
+      //node.textContent = 'Staged Files';
+      
+      let label = document.createElement('span');
+      label.className = ITEM_LABEL_CLASS;
+      label.textContent = 'Staged Files';
+      node.appendChild(label);
 
       let git_reset = document.createElement('button');
       git_reset.className = `${RESET_BUTTON_CLASS} jp-mod-styled`;
@@ -1133,7 +1166,12 @@ namespace GitSessions {
 
     createUnstagedHeaderNode(): HTMLElement {
       let node = document.createElement('div');
-      node.textContent = 'Unstaged files';
+      //node.textContent = 'Unstaged files';
+
+      let label = document.createElement('span');
+      label.className = ITEM_LABEL_CLASS;
+      label.textContent = 'Unstaged Files';
+      node.appendChild(label);
 
       let git_add = document.createElement('button');
       git_add.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
@@ -1150,7 +1188,12 @@ namespace GitSessions {
 
     createUntrackedHeaderNode(): HTMLElement {
       let node = document.createElement('div');
-      node.textContent = 'Untracked files';
+      //node.textContent = 'Untracked files';
+
+      let label = document.createElement('span');
+      label.className = ITEM_LABEL_CLASS;
+      label.textContent = 'Untracked Files';
+      node.appendChild(label);
       
       let git_add = document.createElement('button');
       git_add.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
@@ -1337,7 +1380,14 @@ namespace GitSessions {
       );
       label.title = title;
     }
+
+    UpdateFileCount(node: HTMLElement, num: number ,label: string){
+      let label_node = DOMUtils.findElement(node, ITEM_LABEL_CLASS);
+      label_node.textContent = label + " ("+num+")";
+    }
+
   }
+
 
   /**
    * The default `Renderer` instance.
@@ -1382,6 +1432,7 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   app.shell.addToLeftArea(git_plugin, { rank: 200 });
 
 }
+
 
 function parseFileExtension(path: string): string {
       if(path[path.length-1]==='/'){
