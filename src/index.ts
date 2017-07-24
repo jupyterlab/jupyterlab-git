@@ -43,7 +43,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Git
+  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitErrorInfo
 } from './git'
 
 import '../style/index.css';
@@ -279,14 +279,11 @@ class GitSessions extends Widget {
 
       let git_temp = new Git();
       (git_temp.status('')).then(response=> {
-        console.log("first response:")
-        console.log(response.code)
+        let SF = 0; /** staged file count */
+        let USF = 0; /** unstaged file count */
+        let UTF = 0; /** untracked file count */
         if(response.code==0){
-          let SF = 0; /** staged file count */
-          let USF = 0; /** unstaged file count */
-          let UTF = 0; /** untracked file count */
-
-          let data_json = response.files;
+          let data_json = (response as GitStatusResult).files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -307,15 +304,11 @@ class GitSessions extends Widget {
               UTF++;
             }
           }
-          renderer.UpdateFileCount(uncommittedHeader, SF, 'staged');
-          renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
-          renderer.UpdateFileCount(untrackedHeader, UTF,'untracked');
         }
-      }).catch(response =>{
-        console.log("second response:")
-        console.log(response.xhr.status)
-
-      }) ;
+        renderer.UpdateFileCount(uncommittedHeader, SF, 'staged');
+        renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
+        renderer.UpdateFileCount(untrackedHeader, UTF,'untracked');
+      });
       this._scheduleUpdate();
       this._startTimer();
   }
@@ -368,7 +361,6 @@ class GitSessions extends Widget {
       fb = ll.next();
     }
     app0.commands.execute('terminal:open', {  path:fb.model.path });
-    console.log("just opened a new terminal");
   }
   /**
    * get the path shown in filebrowser widget.
@@ -404,7 +396,13 @@ class GitSessions extends Widget {
     uncommittedContainer.removeChild(uncommittedContainer.firstChild);
     unstagedContainer.removeChild(unstagedContainer.firstChild);
     untrackedContainer.removeChild(untrackedContainer.firstChild);
-    switch_branch_old_node.remove();
+
+    /** while not in a repo, this step may be performed multiple times, causing null to call remove() (which will cause an error)
+     * an easy solution is to use try..catch here to prevent such action
+     * A more serious solution may be adding a dummy if not in a repo, but that seems quite redundant ??*/
+    try{
+      switch_branch_old_node.remove();
+    }catch(err){}
     
 
     let uncommittedList = document.createElement('ul');
@@ -422,7 +420,7 @@ class GitSessions extends Widget {
     (git_temp.branch(current_fb_path)).then(response=>{
       if(response.code==0){
         let select = document.createElement('select');
-        let data_json = response.repos;
+        let data_json = (response as GitBranchResult).repos;
         for (var i=0; i<data_json.length; i++){
           let option = document.createElement('option');
           option.value = data_json[i].name;;
@@ -446,11 +444,11 @@ class GitSessions extends Widget {
     });
 
       (git_temp.status(current_fb_path)).then(response=> {
-        if(response.code==0){
           let SF = 0; /** staged file count */
           let USF = 0; /** unstaged file count */
-          let UTF = 0; /** untracked file count */
-          let data_json = response.files;
+          let UTF = 0; /** untracked file count */        
+        if(response.code==0){
+          let data_json = (response as GitStatusResult).files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -471,13 +469,10 @@ class GitSessions extends Widget {
               UTF++;
             }
           }
-          renderer.UpdateFileCount(uncommittedHeader, SF, 'Staged');
-          renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
-          renderer.UpdateFileCount(untrackedHeader, UTF, 'untracked');
         }
-      }).catch(response =>{
-        console.log("second response:")
-        console.log(response.xhr.status)
+        renderer.UpdateFileCount(uncommittedHeader, SF, 'Staged');
+        renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
+        renderer.UpdateFileCount(untrackedHeader, UTF, 'untracked');
       });
 
 
@@ -562,7 +557,7 @@ class GitSessions extends Widget {
       this.refresh_current_fb_path();
       (git_temp.status(current_fb_path)).then(response=> {
         if(response.code==0){
-          let data_json = response.files;
+          let data_json = (response as GitStatusResult).files;
           for (var i=0; i<data_json.length; i++){
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
@@ -581,11 +576,7 @@ class GitSessions extends Widget {
             }
           }
         }
-      }).catch(response =>{
-        console.log("second response:")
-        console.log(response.xhr.status)
-
-      }) ;
+      });
 
 
   }
@@ -596,28 +587,22 @@ class GitSessions extends Widget {
    * This listener is attached to the document node.
    */
   private _evtChange(event: MouseEvent): void {
-    console.log('change just happened');
     let switch_branch = DOMUtils.findElement(this.node, CSV_TOOLBAR_CLASS);
     let switch_branch_dropdown = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
 
     let NL = (switch_branch_dropdown.getElementsByTagName('select')![0]).childNodes;
     for(var i = 0; i<NL.length; i++){
       let option_node = NL.item(i) as HTMLSelectElement;
-      if(option_node.selected){
-        console.log(NL.item(i).textContent);
-        console.log(i+"th the node infor");   
+      if(option_node.selected){ 
         current_repo_branch =  option_node.value;
-        console.log(current_repo_branch);  
         let git_temp = new Git();
         git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
-          console.log(response.code);
           if(response.code == 0){  
-            console.log(response.message);
             this.refresh();
           }
           else{
             let msg_box = document.createElement('div');
-            msg_box.textContent = response.message;
+            msg_box.textContent = (response as GitErrorInfo).stderr;
             let input = document.createElement('input');
             msg_box.appendChild(input);
             showDialog({        
@@ -685,7 +670,7 @@ class GitSessions extends Widget {
 
     git_temp.showtoplevel(current_fb_path).then(response=>{
       if(response.code==0){
-        current_root_repo_path = response.top_repo_path;
+        current_root_repo_path = (response as GitShowTopLevelResult).top_repo_path;
         let node0 = uncommittedHeader as HTMLLIElement;
 
         let git_reset_all = renderer.getUncommittedReset(node0);
@@ -790,8 +775,6 @@ class GitSessions extends Widget {
    * Handle the `'dblclick'` event for the widget.
    */
   private _evtDblClick(event: MouseEvent): void {
-    
-    console.log("DOUBLE CLICK JUST HAPPENED")
     // Do nothing if it's not a left mouse press.
     if (event.button !== 0) {
       return;
@@ -828,7 +811,7 @@ class GitSessions extends Widget {
     let current_under_repo_path = '';
     git_temp.showprefix(fb.model.path).then(response=>{
         if(response.code==0){
-          current_under_repo_path = response.under_repo_path;
+          current_under_repo_path = (response as GitShowPrefixResult).under_repo_path;
           let filebrowser_cur_path = fb.model.path+'/';
           let open_file_path = filebrowser_cur_path.substring(0,filebrowser_cur_path.length-current_under_repo_path.length);
           // Check for a uncommitted item click.
@@ -1420,7 +1403,6 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   let git_plugin = new GitSessions({ manager: services });
   git_plugin.id = 'jp-git-sessions';
   git_plugin.title.label = 'Git';
-  //console.log(mainBrowser.title.label);
   // Let the application restorer track the running panel for restoration of
   // application state (e.g. setting the running panel as the current side bar
   // widget).

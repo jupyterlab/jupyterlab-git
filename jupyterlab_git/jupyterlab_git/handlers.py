@@ -58,11 +58,8 @@ class Git_add_handler(Git_handler):
             my_output = self.git.add_all(top_repo_path)
         else:
             filename = my_data["filename"]
-            print(filename)
-            print(top_repo_path)
             my_output = self.git.add(filename, top_repo_path)
         self.finish(my_output)
-        print("Hi there! git add handler!!")
 
 class Git_reset_handler(Git_handler):
     def post(self):
@@ -72,13 +69,8 @@ class Git_reset_handler(Git_handler):
             my_output = self.git.reset_all(top_repo_path)
         else:
             filename = my_data["filename"]
-
-            print(filename)
-            print(top_repo_path)
-
             my_output = self.git.reset(filename, top_repo_path)
         self.finish(my_output)
-        print("Hi there! git reset handler!!")
     
 class Git_checkout_handler(Git_handler):    
     def post(self):
@@ -91,7 +83,6 @@ class Git_checkout_handler(Git_handler):
         else:
             my_output = self.git.checkout(my_data["filename"], top_repo_path)
         self.finish(my_output)
-        print("Hi there! git checkout handler!!")
 
 class Git_commit_handler(Git_handler):   
     def post(self):
@@ -99,8 +90,7 @@ class Git_commit_handler(Git_handler):
         top_repo_path = my_data["top_repo_path"]
         commit_msg = my_data["commit_msg"]
         my_output = self.git.commit(commit_msg, top_repo_path)
-        self.finish(my_output)
-        print("Hi there! git commit handler!!")        
+        self.finish(my_output)     
 
 
 def setup_handlers(web_app):

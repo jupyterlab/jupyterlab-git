@@ -32,7 +32,7 @@ class Git:
                 result.append({'x':line[0],'y':line[1],'to':line[3:],'from':None})
             return {"code": p.returncode, "files":result}
         else:
-            return {"code": p.returncode, "message": my_error.decode('utf-8')}
+            return {"code": p.returncode, 'command':"git status --porcelain", "message": my_error.decode('utf-8')}
 
     def branch(self, current_path):
         p = Popen(["git", "branch", "-a"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
@@ -49,10 +49,6 @@ class Git:
                 if(len(line_cut[0])>1):
                     tag = line_cut[0][1]
                 line = line_cut[0][0],
-                print(line_cut)
-                print(len(line_cut))
-                print(line)
-                print(len(line))
                 if(line_full[0]=='*'):
                     current = True,
                 if(len(line_full)>=10) and (line_full[2:10]=="remotes/"):
@@ -62,7 +58,7 @@ class Git:
                     result.append({'current':current,'remote':remote,'name':line_full[2:],'tag':tag})
             return {"code": p.returncode, "repos":result}
         else:
-            return {"code": p.returncode, "message": my_error.decode('utf-8')}
+            return {"code": p.returncode, 'command':"git branch -a", "message": my_error.decode('utf-8')}
 
     def showtoplevel(self, current_path):
         p = Popen(["git", "rev-parse", "--show-toplevel"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
@@ -71,7 +67,7 @@ class Git:
             result ={"code": p.returncode, "top_repo_path": my_output.decode('utf-8').strip('\n')}
             return result
         else:
-            return {"code": p.returncode, "message": my_error.decode('utf-8')}
+            return {"code": p.returncode, 'command':"git rev-parse --show-toplevel", "message": my_error.decode('utf-8')}
 
     def showprefix(self, current_path):
         p = Popen(["git", "rev-parse", "--show-prefix"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
@@ -80,26 +76,22 @@ class Git:
             result ={"code": p.returncode, "under_repo_path": my_output.decode('utf-8').strip('\n')}
             return result
         else:
-            return {"code": p.returncode, "message": my_error.decode('utf-8')}
+            return {"code": p.returncode, 'command':"git rev-parse --show-prefix", "message": my_error.decode('utf-8')}
 
     def add(self, filename, top_repo_path):
         my_output = subprocess.check_output(["git", "add", filename], cwd = top_repo_path)
-        print("Hi there! post extensions!!")
         return my_output
     
     def add_all(self, top_repo_path):
         my_output = subprocess.check_output(["git", "add", "-u"], cwd = top_repo_path)
-        print("Hi there! post extensions!!")
         return my_output
 
     def reset(self, filename, top_repo_path):
         my_output = subprocess.check_output(["git", "reset", filename], cwd = top_repo_path)
-        print("Hi there! post extensions!!")
         return my_output
 
     def reset_all(self, top_repo_path):
         my_output = subprocess.check_output(["git", "reset"], cwd = top_repo_path)
-        print("Hi there! post extensions!!")
         return my_output
 
     def checkout_branch(self, branchname, current_path):
@@ -108,21 +100,18 @@ class Git:
         if(p.returncode==0):
             return {"code": p.returncode, "message": my_output.decode('utf-8')}
         else:
-            return {"code": p.returncode, "message": my_error.decode('utf-8')}
+            return {"code": p.returncode, 'command':"git checkout "+branchname, "message": my_error.decode('utf-8')}
 
 
     def checkout(self, filename, top_repo_path):
         my_output = subprocess.check_output(["git", "checkout", "--", filename], cwd = top_repo_path)
-        print("Hi there! post extensions!!")
         return my_output
 
     def checkout_all(self, top_repo_path):
         my_output = subprocess.check_output(["git", "checkout", "--", "."], cwd = top_repo_path)
-        print("Hi there! post extensions!!")
         return my_output
 
     def commit(self, commit_msg, top_repo_path):
         my_output = subprocess.check_output(["git", "commit", "-m", commit_msg], cwd = top_repo_path)
-        print("Hi there! post extensions!!")
         return my_output
       
