@@ -98,6 +98,22 @@ export interface GitStatusResult {
         ]
 }
 
+export interface GitLogResult {
+	code: number;
+	files?: [
+            {
+                commit: string,
+                author: string,
+                date: string,
+				commit_msg: string,
+				modified_file_note: string,
+				modified_files: [{
+					modified_file_path: string,
+				}]
+            }
+        ]
+}
+
 function HTTP_Git_Request(URL,METHOD,REQUEST):Promise<ServerConnection.IResponse>{
   let request = {
     url:URL,
