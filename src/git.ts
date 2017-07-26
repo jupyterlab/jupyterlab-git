@@ -10,6 +10,10 @@ export interface GitShowTopLevelResult {
 	code: number;
 	top_repo_path?: string;
 }
+export interface GitShowPrefixResult {
+	code: number;
+	under_repo_path?: string;
+}
 
 export interface GitStatusResult {
 	code: number;
@@ -19,6 +23,28 @@ export interface GitStatusResult {
                 y: string,
                 to: string,
                 from: string
+            }
+        ]
+}
+
+export interface GitLogResult {
+	code: number;
+	commits?: [
+            {
+                author: string,
+				commitMsg: string,
+				commitDate: string
+            }
+        ]
+}
+
+export interface GitDiffResult {
+	code: number;
+	result?: [
+            {
+                insertions: string,
+				deletions: string,
+				filename: string
             }
         ]
 }
@@ -58,6 +84,23 @@ export class Git {
 		}
 	}
 
+	async showprefix(path:string):Promise<GitShowPrefixResult>{
+		try{
+			var val = await HTTP_Git_Request('/git/showprefix','POST',{"current_path": path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				console.log("Git command Error:")
+				console.log(val.data.message);
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
+	}
+
 	async status(path: string):Promise<GitStatusResult> {
 		try{
 			var val = await HTTP_Git_Request('/git/status','POST',{"current_path":path});
@@ -71,6 +114,40 @@ export class Git {
 			}
 			return val.data;
 		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
+	}
+
+	async log(path: string):Promise<GitLogResult> {
+		try{
+			var val = await HTTP_Git_Request('/git/log', 'POST', {"top_repo_path" : path});
+			if(val.xhr.status!== 200) {
+				console.log(val.xhr.status)
+				throw ServerConnection.makeError(val);
+			}
+			if(val.data.code!=0){
+				console.log("Git Command Error:")
+				console.log(val.data.message);
+			}
+			return val.data;
+		} catch (err) {
+			throw ServerConnection.makeError(err);
+		}
+	}
+
+	async diff(path: string):Promise<GitDiffResult> {
+		try{
+			var val = await HTTP_Git_Request('/git/diff', 'POST', {"top_repo_path" : path});
+			if(val.xhr.status!== 200) {
+				console.log(val.xhr.status)
+				throw ServerConnection.makeError(val);
+			}
+			if(val.data.code!=0){
+				console.log("Git Command Error:")
+				console.log(val.data.message);
+			}
+			return val.data;
+		} catch (err) {
 			throw ServerConnection.makeError(err);
 		}
 	}
@@ -90,7 +167,14 @@ export class Git {
 	reset(check: boolean, filename: string, path: string) {
 		return HTTP_Git_Request('/git/reset','POST',{"reset_all": check, "filename":filename, "top_repo_path": path});
 	}
+	pull(origin: string, master: string, path:string) {
+		return HTTP_Git_Request('/git/pull', 'POST', {"origin": origin, "master":master,"top_repo_path": path});
+	}
 
+	push(origin: string, master: string, path:string) {
+		return HTTP_Git_Request('/git/push', 'POST', {"origin": origin, "master":master,"top_repo_path": path});
+	}
+	
 }
 
 
