@@ -1,6 +1,4 @@
-//import { AfterViewChecked, OnInit, Component, ViewChild, ElementRef } from '@angular/core';
 
-//import { RouterExtensions } from "nativescript-angular";
 import {
   ServiceManager, Session, TerminalSession
 } from '@jupyterlab/services';
@@ -282,8 +280,8 @@ class GitSessions extends Widget {
       (git_temp.log('')).then(response=> {
         if(response.code==0){
           let data_json = (response as GitLogResult).commits;
-          for (var i=data_json.length-1; i>=0; i--){
-              let node = renderer.createPastCommitNode(data_json[i], i+1);
+          for (var i=0; i<data_json.length; i++){
+              let node = renderer.createPastCommitNode(data_json[i], i);
               pastcommitsList.appendChild(node);
           }
         }
@@ -412,7 +410,6 @@ class GitSessions extends Widget {
         renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
         renderer.UpdateFileCount(untrackedHeader, UTF,'untracked');
       });
-
       this._scheduleUpdate();
       this._startTimer();
   }
@@ -784,8 +781,6 @@ class GitSessions extends Widget {
     //check for commit list left shift
     if (ElementExt.hitTest(pastcommits_left_button, clientX, clientY)) {
       console.log("left shift");
-      //pastcommitsContainer.scrollTop -= 100;
-      //pastcommitsContainer.scrollLeft -= 100;
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop-200});
       $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft-200});
     }
@@ -793,8 +788,6 @@ class GitSessions extends Widget {
     //check for commit list right shift
     if (ElementExt.hitTest(pastcommits_right_button, clientX, clientY)) {
       console.log("right shift");
-      //pastcommitsContainer.scrollTop += 100;
-      //pastcommitsContainer.scrollLeft += 100;
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop+200});
       $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft+200});
     }
@@ -816,11 +809,6 @@ class GitSessions extends Widget {
 
         let git_commit = renderer.getUncommittedCommit(node0);
         if (ElementExt.hitTest(git_commit, clientX, clientY)) {
-      /*
-          let body: Widget;
-        body = new Widget({ node: document.createElement('input') });
-        Styling.styleNode(body.node);
-*/
         let input = new Widget({ node: document.createElement('input') });
         showDialog({
             title: 'Input commit message:',
@@ -1524,6 +1512,7 @@ namespace GitSessions {
       createUnstagedNode(path: string): HTMLLIElement {
       let node = document.createElement('li');
       let icon = document.createElement('span');
+      
       icon.className = `${ITEM_ICON_CLASS} ${parseFileExtension(path)}`;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
@@ -1548,8 +1537,14 @@ namespace GitSessions {
       past_commit_container.textContent = "---"
       let node = document.createElement('button');
       node.className = PAST_COMMIT_BUTTON_CLASS;
-      node.id = "+"+num;
-      node.textContent = "+"+num;
+      if(num==0){
+          node.id = "H";
+          node.textContent = "H";
+      }
+      else{
+        node.id = "^"+num;
+        node.textContent = "^"+num;
+      }
       node.setAttribute('commit', commit_info.commit);
       node.setAttribute('author',commit_info.author);
       node.setAttribute('date', commit_info.date);

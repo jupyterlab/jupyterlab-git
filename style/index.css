@@ -314,6 +314,7 @@
   padding: 0;
   overflow: hidden;
   white-space: nowrap;
+  direction: rtl;
 }
 
 .jp-GitSessions-sectionPastCommitList {
@@ -425,7 +426,7 @@
   background-image: var(--jp-icon-terminal);
 }
 .jp-GitSessions-itemIcon.jp-OpenFolderIcon {
-  background-image: var(--jp-icon-directory-selected);
+  background-image: var(--jp-icon-directory);
 }
 .jp-GitSessions-itemIcon.jp-FileIcon {
   background-image: var(--jp-icon-file);
