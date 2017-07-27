@@ -46,7 +46,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitErrorInfo, GitLogResult
+  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult, SingleCommitInfo
 } from './git'
 
 import '../style/index.css';
@@ -65,6 +65,7 @@ const HEADER0_CLASS = 'jp-GitSessions-header0';
 const SHIFT_LEFT_BUTTON_CLASS = 'jp-GitSessions-headershiftleftbutton';
 const SHIFT_RIGHT_BUTTON_CLASS = 'jp-GitSessions-headershiftrightbutton';
 const CUR_BUTTON_CLASS = 'jp-GitSessions-headercurbutton'; 
+
 /**
  * The class name added to a git-plugin widget header refresh button.
  */
@@ -268,6 +269,7 @@ class GitSessions extends Widget {
       pastcommitsContainer.className = PAST_COMMIT_CONTAINER_CLASS;
 
       let shift_left = document.createElement('button');
+      shift_left.textContent = '<';
       shift_left.className = SHIFT_LEFT_BUTTON_CLASS;
       pastcommitsNode.appendChild(shift_left);
 
@@ -279,15 +281,15 @@ class GitSessions extends Widget {
 
       (git_temp.log('')).then(response=> {
         if(response.code==0){
-          let data_json = (response as GitLogResult).files;
+          let data_json = (response as GitLogResult).commits;
           for (var i=data_json.length-1; i>=0; i--){
-              let node = renderer.createPastCommitNode(JSON.stringify(data_json[i]));
+              let node = renderer.createPastCommitNode(data_json[i], i+1);
               pastcommitsList.appendChild(node);
           }
         }
       });
 
-
+/*
       let node11 = renderer.createPastCommitNode("11");
       pastcommitsList.appendChild(node11);
       let node10 = renderer.createPastCommitNode("10");
@@ -313,7 +315,7 @@ class GitSessions extends Widget {
       let node00 = renderer.createPastCommitNode("00");
       pastcommitsList.appendChild(node00);
 
-
+*/
 
 
 
@@ -323,6 +325,7 @@ class GitSessions extends Widget {
       
 
       let shift_right = document.createElement('button');
+      shift_right.textContent = '>';
       shift_right.className = SHIFT_RIGHT_BUTTON_CLASS;
       pastcommitsNode.appendChild(shift_right);
 
@@ -704,6 +707,7 @@ class GitSessions extends Widget {
             this.refresh();
           }
           else{
+/*
             let msg_box = document.createElement('div');
             msg_box.textContent = (response as GitErrorInfo).stderr;
             let input = document.createElement('input');
@@ -714,7 +718,6 @@ class GitSessions extends Widget {
               buttons: [Dialog.cancelButton(), Dialog.warnButton({label: 'Stash'}) ,Dialog.okButton({ label: 'Commit'})]
             }).then(result => {
               if (result.accept&&input.value) {
-                /** TODO: make better design for this part, what are th possible actions here */
                 git_temp.add(true,null, current_root_repo_path).then(response =>{
                   git_temp.commit(input.value, current_root_repo_path).then(response=>{
                     git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
@@ -724,6 +727,7 @@ class GitSessions extends Widget {
                 })            
               }
             });            
+          */
           }
         });
         return;   
@@ -812,14 +816,22 @@ class GitSessions extends Widget {
 
         let git_commit = renderer.getUncommittedCommit(node0);
         if (ElementExt.hitTest(git_commit, clientX, clientY)) {
-        let input = document.createElement('input');
+      /*
+          let body: Widget;
+        body = new Widget({ node: document.createElement('input') });
+        Styling.styleNode(body.node);
+*/
+        let input = new Widget({ node: document.createElement('input') });
         showDialog({
             title: 'Input commit message:',
             body: input,
+            focusNodeSelector: 'input',
             buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Commit'})]
         }).then(result => {
-            if (result.accept&&input.value) {
-                git_temp.commit(input.value, current_root_repo_path);
+          let msg = (input.node as HTMLInputElement).value ;
+          console.log(msg);
+            if (result.button.accept&&msg) {
+                git_temp.commit(msg, current_root_repo_path);
                 this.refresh();
             }
         });
@@ -853,7 +865,7 @@ class GitSessions extends Widget {
             body: "Do you really want to discard all uncommitted changes?",
             buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
           }).then(result => {
-            if (result.accept) {
+            if (result.button.accept) {
                 git_temp.checkout(false, null,true,null,current_root_repo_path);
                 this.refresh();
             }
@@ -878,7 +890,7 @@ class GitSessions extends Widget {
               body: "Do you really want to discard the uncommitted changes in this file?",
               buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
             }).then(result => {
-              if (result.accept) {
+              if (result.button.accept) {
                 git_temp.checkout(false, null, false,node.title,current_root_repo_path);
                 this.refresh();
               }
@@ -985,9 +997,11 @@ class GitSessions extends Widget {
           let label_node = pastcommitinfoHeader.firstChild;
           label_node.textContent = 'Commit: '+past_commit.getAttribute('commit');
           label_node = label_node.nextSibling;
-          label_node.textContent = 'Author: '+past_commit.getAttribute('Author');
+          label_node.textContent = 'Author: '+past_commit.getAttribute('author');
           label_node = label_node.nextSibling;
-          label_node.textContent = 'Date: '+past_commit.getAttribute('Date');
+          label_node.textContent = 'Date: '+past_commit.getAttribute('date');
+          label_node = label_node.nextSibling;
+          label_node.textContent = past_commit.getAttribute('commit_msg');
 
           pastcommitinfoContainer.removeChild(pastcommitinfoContainer.firstChild);
           let pastcommitinfoList = document.createElement('ul');
@@ -1197,7 +1211,7 @@ namespace GitSessions {
     createUnstagedNode(path:string): HTMLLIElement;
 
     createpastcommitinfoHeaderNode():HTMLElement;
-    createPastCommitNode(path:string): HTMLSpanElement;
+    createPastCommitNode(commit_info:SingleCommitInfo, num: number): HTMLSpanElement;
     createPastCommitInforFileNode(path:string): HTMLLIElement;
     /**
      * Get the shutdown node for a terminal node.
@@ -1370,12 +1384,12 @@ namespace GitSessions {
       commit_msg.className = PAST_COMMIT_INFO_LABEL_CLASS;
       commit_msg.textContent = 'commit msg';
       node.appendChild(commit_msg);
-
+/*
       let commit_info = document.createElement('div');
       commit_info.className = PAST_COMMIT_INFO_LABEL_CLASS;
       commit_info.textContent = '1 file changed';
       node.appendChild(commit_info);
-
+*/
       return node;  
     }
     /**
@@ -1528,18 +1542,18 @@ namespace GitSessions {
       return node;
     }
 
-    createPastCommitNode(path:string): HTMLSpanElement{
+    createPastCommitNode(commit_info: SingleCommitInfo, num:number): HTMLSpanElement{
       let past_commit_container = document.createElement('span');
       past_commit_container.className = PAST_SINGLE_COMMIT_CONTAINER_CLASS;
       past_commit_container.textContent = "---"
       let node = document.createElement('button');
       node.className = PAST_COMMIT_BUTTON_CLASS;
-      node.id = path;
-      node.textContent = path;
-      node.setAttribute('commit', path);
-      node.setAttribute('Author','JZ');
-      node.setAttribute('Date', "x x x");
-      node.setAttribute('commit_msg', 'need commit');
+      node.id = "+"+num;
+      node.textContent = "+"+num;
+      node.setAttribute('commit', commit_info.commit);
+      node.setAttribute('author',commit_info.author);
+      node.setAttribute('date', commit_info.date);
+      node.setAttribute('commit_msg', commit_info.commit_msg);
       node.setAttribute('file_changed','1');
       node.setAttribute("file_path", 'src/index.ts');
       node.setAttribute('open', 'no');

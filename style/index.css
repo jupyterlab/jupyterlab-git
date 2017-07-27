@@ -101,16 +101,13 @@
   max-width: 16px;
   min-width: 16px;
   min-height: 16px;
-  padding: 4px 6px;
   background: var(--jp-layout-color1);
   border: none;
   outline: 0;
-  background-image: var(--jp-icon-json);
-  background-size: 16px;
   display: block;
   vertical-align: middle;
   background-repeat: no-repeat;
-  background-position: center;
+  text-align: center;
 }
 
 .jp-GitSessions-headershiftrightbutton:hover {
@@ -134,16 +131,13 @@
   max-width: 16px;
   min-width: 16px;
   min-height: 16px;
-  padding: 4px 6px;
   background: var(--jp-layout-color1);
   border: none;
   outline: 0;
-  background-image: var(--jp-icon-json);
-  background-size: 16px;
   display: block;
   vertical-align: middle;
   background-repeat: no-repeat;
-  background-position: center;
+  font-weight: 400;
 }
 
 .jp-GitSessions-headershiftleftbutton:hover {
@@ -184,7 +178,7 @@
   display: block;
   vertical-align: middle;
   background-repeat: no-repeat;
-  background-position: center;
+  font-weight: 400;
 }
 
 .jp-GitSessions-headerSwitchBranch:hover {
