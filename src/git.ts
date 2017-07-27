@@ -4,143 +4,16 @@ import {
 
 import '../style/index.css';
 
-
-
-
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 'use strict';
 
-export interface IGit {
-	path: string;
-	version: string;
-}
-
-export interface IFileStatus {
-	x: string;
-	y: string;
-	path: string;
-	rename?: string;
-}
-
-export interface Remote {
-	name: string;
-	url: string;
-}
-
-export enum RefType {
-	Head,
-	RemoteHead,
-	Tag
-}
-
-export interface Ref {
-	type: RefType;
-	name?: string;
-	commit?: string;
-	remote?: string;
-}
-
-export interface Branch extends Ref {
-	upstream?: string;
-	ahead?: number;
-	behind?: number;
-}
-
-
-export interface IExecutionResult {
-	exitCode: number;
-	stdout: string;
-	stderr: string;
-}
-
-
-
-function HTTP_Git_Request(URL,METHOD,REQUEST):Promise<ServerConnection.IResponse>{
-  //let data0 = {"git_command":git_command , "current_path":current_path};
-  let request = {
-    url:URL,
-    method: METHOD,
-    cache: true,
-    contentType: 'bar',
-    headers: {
-      foo: 'bar'
-    },
-    data: JSON.stringify(REQUEST),
-  };
-  return ServerConnection.makeRequest(request, ServerConnection.makeSettings());
-  /*
-  ServerConnection.makeRequest(request, ServerConnection.makeSettings()).then(response =>{
-    if (response.xhr.status !== 200) {
-          throw ServerConnection.makeError(response);
-    }
-    console.log(JSON.stringify(response.data, null, 2)); 
-    return  response;
-  });
-  */
-  
-}
-
-export interface IGitErrorData {
+export class GitErrorInfo {
 	error?: Error;
 	message?: string;
 	stdout?: string;
 	stderr?: string;
-	exitCode?: number;
+	code?: number;
 	gitErrorCode?: string;
 	gitCommand?: string;
-}
-
-export class GitError {
-
-	error?: Error;
-	message: string;
-	stdout?: string;
-	stderr?: string;
-	exitCode?: number;
-	gitErrorCode?: string;
-	gitCommand?: string;
-
-	constructor(data: IGitErrorData) {
-		if (data.error) {
-			this.error = data.error;
-			this.message = data.error.message;
-		} else {
-			this.error = void 0;
-		}
-
-		this.message = this.message || data.message || 'Git error';
-		this.stdout = data.stdout;
-		this.stderr = data.stderr;
-		this.exitCode = data.exitCode;
-		this.gitErrorCode = data.gitErrorCode;
-		this.gitCommand = data.gitCommand;
-	}
-
-	toString(): string {
-		let result = this.message + ' ' + JSON.stringify({
-			exitCode: this.exitCode,
-			gitErrorCode: this.gitErrorCode,
-			gitCommand: this.gitCommand,
-			stdout: this.stdout,
-			stderr: this.stderr
-		}, [], 2);
-
-		if (this.error) {
-			result += (<any>this.error).stack;
-		}
-
-		return result;
-	}
-}
-
-export interface IGitOptions {
-	gitPath: string;
-	version: string;
-	env?: any;
 }
 
 export const GitErrorCodes = {
@@ -165,7 +38,7 @@ export const GitErrorCodes = {
 	BranchNotFullyMerged: 'BranchNotFullyMerged',
 	NoRemoteReference: 'NoRemoteReference'
 };
-/*
+
 function getGitErrorCode(stderr: string): string | undefined {
 	if (/Another git process seems to be running in this repository|If no other git process is currently running/.test(stderr)) {
 		return GitErrorCodes.RepositoryIsLocked;
@@ -189,25 +62,208 @@ function getGitErrorCode(stderr: string): string | undefined {
 
 	return void 0;
 }
-*/
+
+export interface GitShowTopLevelResult {
+	code: number;
+	top_repo_path?: string;
+}
+export interface GitShowPrefixResult {
+	code: number;
+	under_repo_path?: string;
+}
+export interface GitCheckoutResult {
+	code: number;
+	message?: string;
+}
+export interface GitBranchResult {
+	code: number;
+	repos?: [
+            {
+                current: boolean,
+                remote: boolean,
+				name: string,
+				tag: string,
+            }
+        ]
+}
+export interface GitStatusResult {
+	code: number;
+	files?: [
+            {
+                x: string,
+                y: string,
+                to: string,
+                from: string
+            }
+        ]
+}
+
+export interface GitLogResult {
+	code: number;
+	files?: [
+            {
+                commit: string,
+                author: string,
+                date: string,
+				commit_msg: string,
+				modified_file_note: string,
+				modified_files: [{
+					modified_file_path: string,
+				}]
+            }
+        ]
+}
+
+function HTTP_Git_Request(URL,METHOD,REQUEST):Promise<ServerConnection.IResponse>{
+  let request = {
+    url:URL,
+    method: METHOD,
+    cache: true,
+    contentType: 'bar',
+    headers: {
+      foo: 'bar'
+    },
+    data: JSON.stringify(REQUEST),
+  };
+  return ServerConnection.makeRequest(request, ServerConnection.makeSettings());
+}
+
 export class Git {
 
 	constructor() {
 	}
-	showtoplevel(path:string):Promise<ServerConnection.IResponse> {
-		return HTTP_Git_Request('/git/showtoplevel','POST',{"current_path": path});
+	async showtoplevel(path:string):Promise<GitShowTopLevelResult|GitErrorInfo>{
+		try{
+			var val = await HTTP_Git_Request('/git/showtoplevel','POST',{"current_path": path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				let err = new GitErrorInfo();
+				err.code = val.data.code;
+				err.gitCommand = val.data.command;
+				err.message = 'Failed to execute git';
+				err.gitErrorCode = getGitErrorCode(val.data.message);
+				err.stderr = val.data.message;
+
+				console.log(err.message);
+				console.log(err.gitCommand);
+				console.log(err.gitErrorCode);
+
+				return err;
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
 	}
 
-	status(path: string):Promise<ServerConnection.IResponse> {
-		return HTTP_Git_Request('/git/status','POST',{"current_path":path});
+	async showprefix(path:string):Promise<GitShowPrefixResult|GitErrorInfo>{
+		try{
+			var val = await HTTP_Git_Request('/git/showprefix','POST',{"current_path": path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				let err = new GitErrorInfo();
+				err.code = val.data.code;
+				err.gitCommand = val.data.command;
+				err.message = 'Failed to execute git';
+				err.gitErrorCode = getGitErrorCode(val.data.message);
+				err.stderr = val.data.message;
+
+				console.log(err.message);
+				console.log(err.gitCommand);
+				console.log(err.gitErrorCode);
+				return err;
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
+	}
+
+	async status(path: string):Promise<GitStatusResult|GitErrorInfo> {
+		try{
+			var val = await HTTP_Git_Request('/git/status','POST',{"current_path":path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				let err = new GitErrorInfo();
+				err.code = val.data.code;
+				err.gitCommand = val.data.command;
+				err.message = 'Failed to execute git';
+				err.gitErrorCode = getGitErrorCode(val.data.message);
+				err.stderr = val.data.message;
+				console.log(err.message);
+				console.log(err.gitCommand);
+				console.log(err.gitErrorCode);				
+				return err;
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
+	}
+
+	async branch(path: string): Promise<GitBranchResult|GitErrorInfo>{
+		try{
+			var val = await HTTP_Git_Request('/git/branch','POST',{"current_path":path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				let err = new GitErrorInfo();
+				err.code = val.data.code;
+				err.gitCommand = val.data.command;
+				err.message = 'Failed to execute git';
+				err.gitErrorCode = getGitErrorCode(val.data.message);
+				err.stderr = val.data.message;
+				console.log(err.message);
+				console.log(err.gitCommand);
+				console.log(err.gitErrorCode);
+				return err;				
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
 	}
 
 	add(check: boolean, filename: string, path: string) {
 		return  HTTP_Git_Request('/git/add','POST',{"add_all": check , "filename":filename, "top_repo_path": path});
 	}
 
-	checkout(check: boolean,filename: string,  path: string) {
-		return  HTTP_Git_Request('/git/checkout','POST',{"checkout_all": check , "filename":filename, "top_repo_path": path});
+	async checkout(checkout_branch: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string):Promise<GitCheckoutResult|GitErrorInfo> {
+		try{
+			var val =  await HTTP_Git_Request('/git/checkout','POST',{"checkout_branch": checkout_branch, "branchname":branchname, "checkout_all": checkout_all , "filename":filename, "top_repo_path": path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				let err = new GitErrorInfo();
+				err.code = val.data.code;
+				err.gitCommand = val.data.command;
+				err.message = 'Failed to execute git';
+				err.gitErrorCode = getGitErrorCode(val.data.message);
+				err.stderr = val.data.message;	
+				
+				console.log(err.message);
+				console.log(err.gitCommand);
+				console.log(err.gitErrorCode);
+
+				return err;			
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
 	}
 
 	commit(message: string, path: string) {
@@ -217,8 +273,6 @@ export class Git {
 	reset(check: boolean, filename: string, path: string) {
 		return HTTP_Git_Request('/git/reset','POST',{"reset_all": check, "filename":filename, "top_repo_path": path});
 	}
-
-
 
 }
 
