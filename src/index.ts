@@ -456,6 +456,7 @@ class GitSessions extends Widget {
               pastcommitsList.appendChild(node);
           }
         }
+        pastcommitsContainer.scrollLeft += pastcommitsContainer.scrollWidth;
       });
     let promises: Promise<void>[] = [];
     this._lastRefresh = new Date().getTime();
@@ -699,9 +700,6 @@ class GitSessions extends Widget {
     let switch_branch = DOMUtils.findElement(this.node, CSV_TOOLBAR_CLASS);
     let switch_branch_dropdown = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
 
-    let pastcommitsSection = DOMUtils.findElement(this.node, PAST_COMMIT_CLASS);
-    let pastcommitsContainer = DOMUtils.findElement(pastcommitsSection, PAST_COMMIT_CONTAINER_CLASS);
-
     let NL = (switch_branch_dropdown.getElementsByTagName('select')![0]).childNodes;
     for(var i = 0; i<NL.length; i++){
       let option_node = NL.item(i) as HTMLSelectElement;
@@ -711,10 +709,7 @@ class GitSessions extends Widget {
         git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
           if(response.code == 0){  
             this.refresh();
-            this.refresh_past_commit_list().then(response=>{
-              console.log(pastcommitsContainer.scrollWidth);
-              pastcommitsContainer.scrollLeft += pastcommitsContainer.scrollWidth;
-            });
+            this.refresh_past_commit_list();
           }
           else{
 /*
@@ -839,10 +834,7 @@ class GitSessions extends Widget {
             if (result.button.accept&&msg) {
                 git_temp.commit(msg, current_root_repo_path).then(response=>{
                   this.refresh();
-                  this.refresh_past_commit_list().then(response=>{
-                    console.log(pastcommitsContainer.scrollWidth);
-                    pastcommitsContainer.scrollLeft += pastcommitsContainer.scrollWidth;
-                  });
+                  this.refresh_past_commit_list();
                 });
             }
         });
