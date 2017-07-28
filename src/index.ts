@@ -378,6 +378,7 @@ class GitSessions extends Widget {
     super.show();
     this.refresh_current_fb_path();
     this.refresh();
+    this.refresh_past_commit_list();
   }
   /**
    * The renderer used by the running sessions widget.
@@ -447,7 +448,7 @@ class GitSessions extends Widget {
     pastcommitsContainer.appendChild(pastcommitsList);
 
     let git_temp = new Git();
-    (git_temp.log('')).then(response=> {
+    (git_temp.log(current_fb_path)).then(response=> {
         if(response.code==0){
           let data_json = (response as GitLogResult).commits;
           for (var i=0; i<data_json.length; i++){
@@ -707,6 +708,7 @@ class GitSessions extends Widget {
         git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
           if(response.code == 0){  
             this.refresh();
+            this.refresh_past_commit_list();
           }
           else{
 /*
@@ -745,6 +747,10 @@ class GitSessions extends Widget {
    */
   private _evtClick(event: MouseEvent): void {
     // Fetch common variables.
+    let GitWhoeleContainer = DOMUtils.findElement(this.node, GIT_WHOLE_CONTAINER_CLASS);
+    if(GitWhoeleContainer.hidden){
+      return;
+    }
     let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
     let uncommittedHeader = DOMUtils.findElement(uncommittedSection, SECTION_HEADER_CLASS);
     let uncommittedList = DOMUtils.findElement(uncommittedSection, LIST_CLASS);
@@ -826,6 +832,7 @@ class GitSessions extends Widget {
             if (result.button.accept&&msg) {
                 git_temp.commit(msg, current_root_repo_path);
                 this.refresh();
+                this.refresh_past_commit_list();
             }
         });
           return;
@@ -923,6 +930,10 @@ class GitSessions extends Widget {
     // Stop the event propagation.
     event.preventDefault();
     event.stopPropagation();
+    let GitWhoeleContainer = DOMUtils.findElement(this.node, GIT_WHOLE_CONTAINER_CLASS);
+    if(GitWhoeleContainer.hidden){
+      return;
+    }
 
     let pastcommitinfoSection = DOMUtils.findElement(this.node, PAST_COMMIT_INFO_CLASS);
     let pastcommitinfoContainer = DOMUtils.findElement(pastcommitinfoSection, CONTAINER_CLASS);
