@@ -445,7 +445,7 @@ class GitSessions extends Widget {
 
     let pastcommitsList = document.createElement('ul');
     pastcommitsList.className = PAST_COMMIT_LIST_CLASS;
-    pastcommitsContainer.appendChild(pastcommitsList);
+    
 
     let git_temp = new Git();
     (git_temp.log(current_fb_path)).then(response=> {
@@ -456,6 +456,7 @@ class GitSessions extends Widget {
               pastcommitsList.appendChild(node);
           }
         }
+        pastcommitsContainer.appendChild(pastcommitsList);
       });
     let promises: Promise<void>[] = [];
     this._lastRefresh = new Date().getTime();
