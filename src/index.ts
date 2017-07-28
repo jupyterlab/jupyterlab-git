@@ -707,8 +707,10 @@ class GitSessions extends Widget {
         let git_temp = new Git();
         git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
           if(response.code == 0){  
-            this.refresh();
-            this.refresh_past_commit_list();
+            this.refresh().then(response=>{
+                this.refresh_past_commit_list();
+            })
+           
           }
           else{
 /*
@@ -832,8 +834,10 @@ class GitSessions extends Widget {
           console.log(msg);
             if (result.button.accept&&msg) {
                 git_temp.commit(msg, current_root_repo_path).then(response=>{
-                  this.refresh();
-                  this.refresh_past_commit_list();
+                  
+                  this.refresh_past_commit_list().then(response=>{
+                    this.refresh();
+                  })
                 });
             }
         });
