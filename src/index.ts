@@ -707,9 +707,7 @@ class GitSessions extends Widget {
         let git_temp = new Git();
         git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
           if(response.code == 0){  
-            this.refresh().then(response=>{
-                this.refresh_past_commit_list();
-            })
+            this.show();
            
           }
           else{
@@ -835,9 +833,7 @@ class GitSessions extends Widget {
             if (result.button.accept&&msg) {
                 git_temp.commit(msg, current_root_repo_path).then(response=>{
                   
-                  this.refresh_past_commit_list().then(response=>{
-                    this.refresh();
-                  })
+                  this.show();
                 });
             }
         });
@@ -991,6 +987,7 @@ class GitSessions extends Widget {
           unstagedContainer.hidden = false;
           untrackedHeader.hidden = false;
           untrackedContainer.hidden = false;
+          this.refresh();
     }
     else if(ElementExt.hitTest(pastcommits_left_button, clientX, clientY)){
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop-200});
