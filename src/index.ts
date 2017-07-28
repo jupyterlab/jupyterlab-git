@@ -712,7 +712,7 @@ class GitSessions extends Widget {
           if(response.code == 0){  
             this.refresh();
             this.refresh_past_commit_list().then(response=>{
-              pastcommitsContainer.scrollTop += pastcommitsContainer.scrollWidth;
+              pastcommitsContainer.scrollLeft += pastcommitsContainer.scrollWidth;
             });
           }
           else{
@@ -839,7 +839,7 @@ class GitSessions extends Widget {
                 git_temp.commit(msg, current_root_repo_path).then(response=>{
                   this.refresh();
                   this.refresh_past_commit_list().then(response=>{
-                    pastcommitsContainer.scrollTop += pastcommitsContainer.scrollWidth;
+                    pastcommitsContainer.scrollLeft += pastcommitsContainer.scrollWidth;
                   });
                 });
             }
