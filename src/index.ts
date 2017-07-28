@@ -813,9 +813,10 @@ class GitSessions extends Widget {
 
         let git_reset_all = renderer.getUncommittedReset(node0);
         if (ElementExt.hitTest(git_reset_all, clientX, clientY)) {
-          git_temp.reset(true,null,current_root_repo_path);
-          this.refresh();
-          return;
+          git_temp.reset(true,null,current_root_repo_path).then(response=>{
+            this.refresh();
+            return;
+          });
         }
 
         let git_commit = renderer.getUncommittedCommit(node0);
@@ -830,9 +831,10 @@ class GitSessions extends Widget {
           let msg = (input.node as HTMLInputElement).value ;
           console.log(msg);
             if (result.button.accept&&msg) {
-                git_temp.commit(msg, current_root_repo_path);
-                this.refresh();
-                this.refresh_past_commit_list();
+                git_temp.commit(msg, current_root_repo_path).then(response=>{
+                  this.refresh();
+                  this.refresh_past_commit_list();
+                });
             }
         });
           return;
@@ -843,9 +845,10 @@ class GitSessions extends Widget {
           let node = uncommittedList.children[index] as HTMLLIElement;
           let git_reset = renderer.getUncommittedReset(node);
           if (ElementExt.hitTest(git_reset, clientX, clientY)) {
-            git_temp.reset(false,node.title, current_root_repo_path);
-            this.refresh();
-            return;
+            git_temp.reset(false,node.title, current_root_repo_path).then(response=>{
+              this.refresh();
+              return;
+            });
           }
         }
     
@@ -853,9 +856,10 @@ class GitSessions extends Widget {
         node0 = unstagedHeader as HTMLLIElement;
         let git_add_all = renderer.getUnstagedAdd(node0);
         if (ElementExt.hitTest(git_add_all, clientX, clientY)) {
-          git_temp.add(true,null, current_root_repo_path);
-          this.refresh();
-          return;
+          git_temp.add(true,null, current_root_repo_path).then(response=>{
+            this.refresh();
+            return;
+          });
         }
 
         let git_checkout_all = renderer.getUnstagedCheckout(node0);
@@ -866,8 +870,9 @@ class GitSessions extends Widget {
             buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
           }).then(result => {
             if (result.button.accept) {
-                git_temp.checkout(false, null,true,null,current_root_repo_path);
-                this.refresh();
+                git_temp.checkout(false, null,true,null,current_root_repo_path).then(response=>{
+                  this.refresh();
+                });
             }
           });
         return;
@@ -880,9 +885,10 @@ class GitSessions extends Widget {
           let git_add = renderer.getUnstagedAdd(node);
           let git_checkout = renderer.getUnstagedCheckout(node);
           if (ElementExt.hitTest(git_add, clientX, clientY)) {
-            git_temp.add(false,node.title,current_root_repo_path);
-            this.refresh();
-            return;
+            git_temp.add(false,node.title,current_root_repo_path).then(response=>{
+              this.refresh();
+              return;
+            });
           }
           else if(ElementExt.hitTest(git_checkout, clientX, clientY)) {
             showDialog({
@@ -891,8 +897,9 @@ class GitSessions extends Widget {
               buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
             }).then(result => {
               if (result.button.accept) {
-                git_temp.checkout(false, null, false,node.title,current_root_repo_path);
-                this.refresh();
+                git_temp.checkout(false, null, false,node.title,current_root_repo_path).then(response=>{
+                  this.refresh();
+                });
               }
             });
           return;
@@ -905,9 +912,10 @@ class GitSessions extends Widget {
           let node = untrackedList.children[index] as HTMLLIElement;
           let git_add = renderer.getUntrackedAdd(node);
           if (ElementExt.hitTest(git_add, clientX, clientY)) {
-            git_temp.add(false,node.title,current_root_repo_path);
-            this.refresh();
-            return;
+            git_temp.add(false,node.title,current_root_repo_path).then(respones=>{
+              this.refresh();
+              return;
+            });
           }
         }
       }
