@@ -367,6 +367,7 @@ class GitSessions extends Widget {
         renderer.UpdateFileCount(uncommittedHeader, SF, 'staged');
         renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
         renderer.UpdateFileCount(untrackedHeader, UTF,'untracked');
+
       });
       this._scheduleUpdate();
       this._startTimer();
@@ -516,8 +517,11 @@ class GitSessions extends Widget {
     (git_temp.branch(current_fb_path)).then(response=>{
       if(response.code==0){
         header0Node.textContent = "HOME:/"+current_fb_path;
-        let select = document.createElement('select');
         let data_json = (response as GitBranchResult).repos;
+
+
+        let select = document.createElement('select');
+
         for (var i=0; i<data_json.length; i++){
           let option = document.createElement('option');
           option.value = data_json[i].name;;
@@ -542,7 +546,7 @@ class GitSessions extends Widget {
           let SF = 0; /** staged file count */
           let USF = 0; /** unstaged file count */
           let UTF = 0; /** untracked file count */ 
-          let Changes = 0;       
+          let Changes = 0; /** all changes that haven't been commited */     
         if(response.code==0){
           let data_json = (response as GitStatusResult).files;
           for (var i=0; i<data_json.length; i++){
@@ -572,6 +576,15 @@ class GitSessions extends Widget {
         renderer.UpdateFileCount(uncommittedHeader, SF, 'Staged');
         renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
         renderer.UpdateFileCount(untrackedHeader, UTF, 'untracked');
+        if(Changes > 0){
+          /** since there are uncommitted changes, disable switch branch button */
+          select.disabled = true;
+          select.title = "Please commit your changes or stash them before you switch branches";
+        }
+        else{
+          select.disabled = false;
+          select.title = "select branches";
+        }
       });
 
         GitWhoeleContainer.hidden = false;
