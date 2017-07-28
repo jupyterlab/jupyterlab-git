@@ -258,9 +258,9 @@ export class Git {
 		return  HTTP_Git_Request('/git/add','POST',{"add_all": check , "filename":filename, "top_repo_path": path});
 	}
 
-	async checkout(checkout_branch: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string):Promise<GitCheckoutResult|GitErrorInfo> {
+	async checkout(checkout_branch: boolean, new_check: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string):Promise<GitCheckoutResult|GitErrorInfo> {
 		try{
-			var val =  await HTTP_Git_Request('/git/checkout','POST',{"checkout_branch": checkout_branch, "branchname":branchname, "checkout_all": checkout_all , "filename":filename, "top_repo_path": path});
+			var val =  await HTTP_Git_Request('/git/checkout','POST',{"checkout_branch": checkout_branch, "new_check": new_check, "branchname":branchname, "checkout_all": checkout_all , "filename":filename, "top_repo_path": path});
 			if (val.xhr.status !== 200) {
           		console.log(val.xhr.status)
         		throw ServerConnection.makeError(val);

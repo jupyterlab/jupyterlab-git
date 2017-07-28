@@ -461,6 +461,9 @@
 .jp-GitSessions-itemIcon.jp-JSONIcon {
   background-image: var(--jp-icon-json);
 }
+.jp-GitSessions-itemIcon.jp-homeIcon {
+  background-image: var(--jp-icon-home);
+}
 .jp-GitSessions-itemIcon.jp-PythonIcon {
   background-image: var(--jp-icon-python);
 }

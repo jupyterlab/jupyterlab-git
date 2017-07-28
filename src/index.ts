@@ -44,7 +44,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult, SingleCommitInfo
+  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo
 } from './git'
 
 import '../style/index.css';
@@ -58,7 +58,6 @@ const Git_CLASS = 'jp-GitSessions';
  * The class name added to a git-plugin widget header.
  */
 const HEADER_CLASS = 'jp-GitSessions-header';
-const HEADER0_CLASS = 'jp-GitSessions-header0';
 
 const SHIFT_LEFT_BUTTON_CLASS = 'jp-GitSessions-headershiftleftbutton';
 const SHIFT_RIGHT_BUTTON_CLASS = 'jp-GitSessions-headershiftrightbutton';
@@ -81,6 +80,7 @@ const NEW_TERMINAL_CLASS = 'jp-GitSessions-headerNewTerminal';
  */
 const SECTION_CLASS = 'jp-GitSessions-section';
 
+const PATH_HEADER_CLASS = 'jp-GitSessions-pathHeaderSection';
 
 const PAST_COMMIT_CLASS = 'jp-GitSessions-pastcommitsection';
 
@@ -135,6 +135,7 @@ const ITEM_ICON_CLASS = 'jp-GitSessions-itemIcon';
  */
 const ITEM_LABEL_CLASS = 'jp-GitSessions-itemLabel';
 
+
 /**
  * The class name added to a git-plugin session item git-add button.
  */
@@ -186,6 +187,7 @@ const PYTHON_ICON_CLASS = 'jp-PythonIcon';
  */
 const JSON_ICON_CLASS = 'jp-JSONIcon';
 
+const HOME_ICON_CLASS = 'jp-homeIcon';
 /**
  * The class name added to a speadsheet file browser item.
  */
@@ -262,7 +264,7 @@ class GitSessions extends Widget {
     let git_temp = new Git();
 
 //prepare 6 sections
-    /**build the head node (below header0) containing branch info, refresh button, terminal button and triple dot button in the future */
+    /**build the head node (below path_header) containing branch info, refresh button, terminal button and triple dot button in the future */
       let headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
       let headerWholeContainer = this._renderer.createHeaderNode();
       headerNode.appendChild(headerWholeContainer);
@@ -469,12 +471,10 @@ class GitSessions extends Widget {
    * Refresh the widget.
    */
   refresh(): Promise<void> {
-    let header0Node = DOMUtils.findElement(this.node, HEADER0_CLASS);
+    let pathheaderNode = DOMUtils.findElement(this.node, PATH_HEADER_CLASS);
+    let path_label = DOMUtils.findElement(pathheaderNode, ITEM_LABEL_CLASS);
+    let warning_label = DOMUtils.findElement(pathheaderNode, ADD_BUTTON_CLASS);
     let GitWhoeleContainer = DOMUtils.findElement(this.node, GIT_WHOLE_CONTAINER_CLASS);
-    //let headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
-    //let headerWholeContainer = DOMUtils.findElement(headerNode, TOP_CONTAINER_CLASS);
-    //let pastcommitsSection = DOMUtils.findElement(this.node, PAST_COMMIT_CLASS);
-    //let pastcommitsWholeContainer = DOMUtils.findElement(pastcommitsSection, TOP_CONTAINER_CLASS);
     let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
     let uncommittedContainer = DOMUtils.findElement(uncommittedSection, CONTAINER_CLASS);
     let untrackedSection = DOMUtils.findElement(this.node, UNTRACKED_CLASS);
@@ -516,10 +516,7 @@ class GitSessions extends Widget {
     let git_temp = new Git();
     (git_temp.branch(current_fb_path)).then(response=>{
       if(response.code==0){
-        header0Node.textContent = "HOME:/"+current_fb_path;
         let data_json = (response as GitBranchResult).repos;
-
-
         let select = document.createElement('select');
 
         for (var i=0; i<data_json.length; i++){
@@ -538,6 +535,11 @@ class GitSessions extends Widget {
           }
           select.appendChild(option);
         }
+        let new_branch_option = document.createElement('option');
+        new_branch_option.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
+        new_branch_option.textContent = "Create a new branch";
+        select.appendChild(new_branch_option);
+
         let switch_branch_node = Styling.wrapSelect(select);
         switch_branch_node.classList.add(CSV_TOOLBAR_DROPDOWN_CLASS);
         switch_branch.appendChild(switch_branch_node);
@@ -586,13 +588,14 @@ class GitSessions extends Widget {
           select.title = "select branches";
         }
       });
-
+        path_label.textContent = current_fb_path+"/";
+        warning_label.hidden = true;
         GitWhoeleContainer.hidden = false;
 
       }
       else{
-        header0Node.textContent = "HOME:/"+current_fb_path+" || Git-plugin tracks the work directory in jupyterlab-filebrowser, the current folder in a git repository";
-        
+        path_label.textContent = current_fb_path+"/";
+        warning_label.hidden = false;
         GitWhoeleContainer.hidden = true;
 
       }
@@ -713,42 +716,48 @@ class GitSessions extends Widget {
     let switch_branch = DOMUtils.findElement(this.node, CSV_TOOLBAR_CLASS);
     let switch_branch_dropdown = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
 
+    let new_check = false;
+    let target_branch = '';
     let NL = (switch_branch_dropdown.getElementsByTagName('select')![0]).childNodes;
     for(var i = 0; i<NL.length; i++){
       let option_node = NL.item(i) as HTMLSelectElement;
-      if(option_node.selected){ 
-        current_repo_branch =  option_node.value;
+      if(option_node.selected){
+        if(i==NL.length-1){
+          let input = new Widget({ node: document.createElement('input') });
+          showDialog({        
+            title: 'Input a name to create a new branch and switch to it:',
+            body: input,
+            buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Create'})]
+          }).then(result => {
+            let msg = (input.node as HTMLInputElement).value ;
+            if(result.button.accept&&msg){
+              target_branch = msg;
+              new_check = true;
+            }
+          });    
+        } 
+        else{
+          current_repo_branch =  option_node.value;
+          target_branch = option_node.value;
+          new_check = false;
+        }
         let git_temp = new Git();
-        git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
+        git_temp.checkout(true, new_check, target_branch, false, null, current_fb_path).then(response=>{
           if(response.code == 0){  
             this.refresh();
             this.refresh_past_commit_list();
           }
           else{
-/*
-            let msg_box = document.createElement('div');
-            msg_box.textContent = (response as GitErrorInfo).stderr;
-            let input = document.createElement('input');
-            msg_box.appendChild(input);
             showDialog({        
-              title: 'Input commit message:',
-              body: msg_box,
-              buttons: [Dialog.cancelButton(), Dialog.warnButton({label: 'Stash'}) ,Dialog.okButton({ label: 'Commit'})]
+              title: 'Create or Switch Branch Failed:',
+              body: (response as GitErrorInfo).stderr,
+              buttons: [Dialog.warnButton({ label: 'OK'})]
             }).then(result => {
-              if (result.accept&&input.value) {
-                git_temp.add(true,null, current_root_repo_path).then(response =>{
-                  git_temp.commit(input.value, current_root_repo_path).then(response=>{
-                    git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
-                      this.refresh();
-                    });
-                  });
-                })            
-              }
+              this.refresh();
             });            
-          */
           }
         });
-        return;   
+        return;        
       }    
     }
     return;  
@@ -884,7 +893,7 @@ class GitSessions extends Widget {
             buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
           }).then(result => {
             if (result.button.accept) {
-                git_temp.checkout(false, null,true,null,current_root_repo_path).then(response=>{
+                git_temp.checkout(false,false, null,true,null,current_root_repo_path).then(response=>{
                   this.refresh();
                 });
             }
@@ -911,7 +920,7 @@ class GitSessions extends Widget {
               buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
             }).then(result => {
               if (result.button.accept) {
-                git_temp.checkout(false, null, false,node.title,current_root_repo_path).then(response=>{
+                git_temp.checkout(false, false, null, false,node.title,current_root_repo_path).then(response=>{
                   this.refresh();
                 });
               }
@@ -1315,8 +1324,7 @@ namespace GitSessions {
      */
     createNode(): HTMLElement {
       let node = document.createElement('div');
-      let header0 = this.createPathHeaderNode();
-      header0.className = HEADER0_CLASS;
+      let path_header = this.createPathHeaderNode();
 
       /**create a container for all Git related info (visiblity depends on if it's in a repo) */
       let GitWhoeleContainer = document.createElement('div');
@@ -1339,7 +1347,7 @@ namespace GitSessions {
       let untracked = document.createElement('div');
       untracked.className = `${SECTION_CLASS} ${UNTRACKED_CLASS}`;
       
-      node.appendChild(header0);
+      node.appendChild(path_header);
       node.appendChild(GitWhoeleContainer);
       GitWhoeleContainer.appendChild(header);
       GitWhoeleContainer.appendChild(past_commits);
@@ -1357,8 +1365,25 @@ namespace GitSessions {
      */
     createPathHeaderNode(): HTMLElement {
       let node = document.createElement('div');
-      node.textContent = 'Current Path Repo';
-      node.className = SECTION_HEADER_CLASS;
+      node.className = `${SECTION_CLASS} ${PATH_HEADER_CLASS}`;
+
+      let path_node = document.createElement('li');
+      path_node.className = ITEM_CLASS;
+      let icon = document.createElement('span');
+      icon.className = `${ITEM_ICON_CLASS} ${HOME_ICON_CLASS}`;
+      let label = document.createElement('span');
+      label.className = ITEM_LABEL_CLASS;
+      label.textContent = '/';
+      path_node.appendChild(icon);
+      path_node.appendChild(label);
+
+      node.appendChild(path_node);
+
+      let warning_node = document.createElement('li');
+      warning_node.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
+      warning_node.textContent = " Git-plugin tracks the work directory in jupyterlab-filebrowser, the current folder is not under a git repository"
+      node.appendChild(warning_node);
+
       return node;
     }
 
