@@ -756,23 +756,22 @@ class GitSessions extends Widget {
           current_repo_branch =  option_node.value;
           target_branch = option_node.value;
           new_check = false;
-        }
-
-        git_temp.checkout(true, new_check, target_branch, false, null, current_fb_path).then(response=>{
-          if(response.code == 0){  
-            this.refresh();
-            this.refresh_past_commit_list();
-          }
-          else{
-            showDialog({        
-              title: 'Switch Branch Failed:',
-              body: (response as GitErrorInfo).stderr,
-              buttons: [Dialog.warnButton({ label: 'OK'})]
-            }).then(result => {
+          git_temp.checkout(true, new_check, target_branch, false, null, current_fb_path).then(response=>{
+            if(response.code == 0){  
               this.refresh();
-            });            
-          }
-        });
+              this.refresh_past_commit_list();
+            }
+            else{
+              showDialog({        
+                title: 'Switch Branch Failed:',
+                body: (response as GitErrorInfo).stderr,
+                buttons: [Dialog.warnButton({ label: 'OK'})]
+              }).then(result => {
+                this.refresh();
+              });            
+            }
+          });
+        }
         return;        
       }    
     }
