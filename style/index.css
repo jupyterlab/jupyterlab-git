@@ -280,6 +280,20 @@
   letter-spacing: 1px;
 }
 
+.jp-GitSessions-sectionGitWholeContainer {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+.jp-GitSessions-sectionTopContainer {
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  margin: var(--jp-toolbar-header-margin);
+}
 
 .jp-GitSessions-sectionContainer {
   flex: 1 1 auto;
@@ -309,7 +323,7 @@
   margin: var(--jp-toolbar-header-margin);
 }
 .jp-GitSessions-sectionPastCommitContainer {
-  max-width: 250px;
+  max-width: 225px;
   margin: 0;
   padding: 0;
   overflow: hidden;
