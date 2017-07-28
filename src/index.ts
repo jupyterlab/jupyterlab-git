@@ -445,7 +445,7 @@ class GitSessions extends Widget {
 
     let pastcommitsList = document.createElement('ul');
     pastcommitsList.className = PAST_COMMIT_LIST_CLASS;
-    
+    pastcommitsContainer.appendChild(pastcommitsList);
 
     let git_temp = new Git();
     (git_temp.log(current_fb_path)).then(response=> {
@@ -456,7 +456,6 @@ class GitSessions extends Widget {
               pastcommitsList.appendChild(node);
           }
         }
-        pastcommitsContainer.appendChild(pastcommitsList);
       });
     let promises: Promise<void>[] = [];
     this._lastRefresh = new Date().getTime();
@@ -700,6 +699,9 @@ class GitSessions extends Widget {
     let switch_branch = DOMUtils.findElement(this.node, CSV_TOOLBAR_CLASS);
     let switch_branch_dropdown = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
 
+    let pastcommitsSection = DOMUtils.findElement(this.node, PAST_COMMIT_CLASS);
+    let pastcommitsContainer = DOMUtils.findElement(pastcommitsSection, PAST_COMMIT_CONTAINER_CLASS);
+
     let NL = (switch_branch_dropdown.getElementsByTagName('select')![0]).childNodes;
     for(var i = 0; i<NL.length; i++){
       let option_node = NL.item(i) as HTMLSelectElement;
@@ -708,8 +710,10 @@ class GitSessions extends Widget {
         let git_temp = new Git();
         git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
           if(response.code == 0){  
-            this.show();
-           
+            this.refresh();
+            this.refresh_past_commit_list().then(response=>{
+              pastcommitsContainer.scrollTop += pastcommitsContainer.scrollWidth;
+            });
           }
           else{
 /*
@@ -833,8 +837,10 @@ class GitSessions extends Widget {
           console.log(msg);
             if (result.button.accept&&msg) {
                 git_temp.commit(msg, current_root_repo_path).then(response=>{
-                  
-                  this.show();
+                  this.refresh();
+                  this.refresh_past_commit_list().then(response=>{
+                    pastcommitsContainer.scrollTop += pastcommitsContainer.scrollWidth;
+                  });
                 });
             }
         });
