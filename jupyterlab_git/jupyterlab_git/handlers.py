@@ -94,8 +94,10 @@ class Git_checkout_handler(Git_handler):
         top_repo_path = my_data["top_repo_path"]
         if (my_data["checkout_branch"]):
             if(my_data["new_check"]):
+                print("to create a new branch")
                 my_output = self.git.checkout_new_branch(my_data["branchname"],top_repo_path)
-            else:                 
+            else:  
+                print("switch to an old branch")               
                 my_output = self.git.checkout_branch(my_data["branchname"],top_repo_path)        
         elif(my_data["checkout_all"]):
             my_output = self.git.checkout_all(top_repo_path)
