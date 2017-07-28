@@ -715,7 +715,7 @@ class GitSessions extends Widget {
   private _evtChange(event: MouseEvent): void {
     let switch_branch = DOMUtils.findElement(this.node, CSV_TOOLBAR_CLASS);
     let switch_branch_dropdown = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
-
+    let git_temp = new Git();
     let new_check = false;
     let target_branch = '';
     let NL = (switch_branch_dropdown.getElementsByTagName('select')![0]).childNodes;
@@ -733,7 +733,23 @@ class GitSessions extends Widget {
             if(result.button.accept&&msg){
               target_branch = msg;
               new_check = true;
+              git_temp.checkout(true, new_check, target_branch, false, null, current_fb_path).then(response=>{
+                if(response.code == 0){  
+                  this.refresh();
+                  this.refresh_past_commit_list();
+                }
+                else{
+                  showDialog({        
+                  title: 'Create Branch Failed:',
+                  body: (response as GitErrorInfo).stderr,
+                  buttons: [Dialog.warnButton({ label: 'OK'})]
+                  }).then(result => {
+                    this.refresh();
+                  });            
+                }
+              });
             }
+            return;
           });    
         } 
         else{
@@ -741,7 +757,7 @@ class GitSessions extends Widget {
           target_branch = option_node.value;
           new_check = false;
         }
-        let git_temp = new Git();
+
         git_temp.checkout(true, new_check, target_branch, false, null, current_fb_path).then(response=>{
           if(response.code == 0){  
             this.refresh();
@@ -749,7 +765,7 @@ class GitSessions extends Widget {
           }
           else{
             showDialog({        
-              title: 'Create or Switch Branch Failed:',
+              title: 'Switch Branch Failed:',
               body: (response as GitErrorInfo).stderr,
               buttons: [Dialog.warnButton({ label: 'OK'})]
             }).then(result => {
@@ -760,7 +776,6 @@ class GitSessions extends Widget {
         return;        
       }    
     }
-    return;  
   }
   /**
    * Handle the `'click'` event for the widget.
