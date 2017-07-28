@@ -1,6 +1,4 @@
-//import { AfterViewChecked, OnInit, Component, ViewChild, ElementRef } from '@angular/core';
 
-//import { RouterExtensions } from "nativescript-angular";
 import {
   ServiceManager, Session, TerminalSession
 } from '@jupyterlab/services';
@@ -46,7 +44,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitErrorInfo, GitLogResult
+  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo
 } from './git'
 
 import '../style/index.css';
@@ -60,11 +58,11 @@ const Git_CLASS = 'jp-GitSessions';
  * The class name added to a git-plugin widget header.
  */
 const HEADER_CLASS = 'jp-GitSessions-header';
-const HEADER0_CLASS = 'jp-GitSessions-header0';
 
 const SHIFT_LEFT_BUTTON_CLASS = 'jp-GitSessions-headershiftleftbutton';
 const SHIFT_RIGHT_BUTTON_CLASS = 'jp-GitSessions-headershiftrightbutton';
 const CUR_BUTTON_CLASS = 'jp-GitSessions-headercurbutton'; 
+
 /**
  * The class name added to a git-plugin widget header refresh button.
  */
@@ -82,6 +80,7 @@ const NEW_TERMINAL_CLASS = 'jp-GitSessions-headerNewTerminal';
  */
 const SECTION_CLASS = 'jp-GitSessions-section';
 
+const PATH_HEADER_CLASS = 'jp-GitSessions-pathHeaderSection';
 
 const PAST_COMMIT_CLASS = 'jp-GitSessions-pastcommitsection';
 
@@ -106,6 +105,8 @@ const SECTION_HEADER_CLASS = 'jp-GitSessions-sectionHeader';
 /**
  * The class name added to a section container.
  */
+const GIT_WHOLE_CONTAINER_CLASS = 'jp-GitSessions-sectionGitWholeContainer';
+const TOP_CONTAINER_CLASS = 'jp-GitSessions-sectionTopContainer';
 const CONTAINER_CLASS = 'jp-GitSessions-sectionContainer';
 const PAST_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastCommitContainer';
 const PAST_SINGLE_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastSingleCommitContainer';
@@ -133,6 +134,7 @@ const ITEM_ICON_CLASS = 'jp-GitSessions-itemIcon';
  * The class name added to a git-plugin session item label.
  */
 const ITEM_LABEL_CLASS = 'jp-GitSessions-itemLabel';
+
 
 /**
  * The class name added to a git-plugin session item git-add button.
@@ -185,6 +187,7 @@ const PYTHON_ICON_CLASS = 'jp-PythonIcon';
  */
 const JSON_ICON_CLASS = 'jp-JSONIcon';
 
+const HOME_ICON_CLASS = 'jp-homeIcon';
 /**
  * The class name added to a speadsheet file browser item.
  */
@@ -260,77 +263,32 @@ class GitSessions extends Widget {
 
     let git_temp = new Git();
 
-//prepare 4 sections
+//prepare 6 sections
+    /**build the head node (below path_header) containing branch info, refresh button, terminal button and triple dot button in the future */
+      let headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
+      let headerWholeContainer = this._renderer.createHeaderNode();
+      headerNode.appendChild(headerWholeContainer);
+
+
+
+    /**build the pastcommits node (below header) containing sliding cards for past commits, left, right button, and a button for current work?? */
       let pastcommitsNode = DOMUtils.findElement(this.node, PAST_COMMIT_CLASS);
-
-      let pastcommitsContainer = document.createElement('div');
-      pastcommitsContainer.id = "past_commits_list";
-      pastcommitsContainer.className = PAST_COMMIT_CONTAINER_CLASS;
-
-      let shift_left = document.createElement('button');
-      shift_left.className = SHIFT_LEFT_BUTTON_CLASS;
-      pastcommitsNode.appendChild(shift_left);
-
-
-      let pastcommitsList = document.createElement('ul');
-      pastcommitsList.className = PAST_COMMIT_LIST_CLASS;
-      pastcommitsContainer.appendChild(pastcommitsList);
-      pastcommitsNode.appendChild(pastcommitsContainer);
+      let pastcommitsWholeContainer = this._renderer.createpastcommitsNode();
+      pastcommitsNode.appendChild(pastcommitsWholeContainer);
+      let pastcommitsList = DOMUtils.findElement(pastcommitsNode, PAST_COMMIT_LIST_CLASS);
 
       (git_temp.log('')).then(response=> {
         if(response.code==0){
-          let data_json = (response as GitLogResult).files;
-          for (var i=data_json.length-1; i>=0; i--){
-              let node = renderer.createPastCommitNode(JSON.stringify(data_json[i]));
+          let data_json = (response as GitLogResult).commits;
+          for (var i=0; i<data_json.length; i++){
+              let node = renderer.createPastCommitNode(data_json[i], i);
               pastcommitsList.appendChild(node);
           }
         }
       });
 
-
-      let node11 = renderer.createPastCommitNode("11");
-      pastcommitsList.appendChild(node11);
-      let node10 = renderer.createPastCommitNode("10");
-      pastcommitsList.appendChild(node10);
-      let node09 = renderer.createPastCommitNode("09");
-      pastcommitsList.appendChild(node09);
-      let node08 = renderer.createPastCommitNode("08");
-      pastcommitsList.appendChild(node08);
-      let node07 = renderer.createPastCommitNode("07");
-      pastcommitsList.appendChild(node07);
-      let node06 = renderer.createPastCommitNode("06");
-      pastcommitsList.appendChild(node06);
-      let node05 = renderer.createPastCommitNode("05");
-      pastcommitsList.appendChild(node05);
-      let node04 = renderer.createPastCommitNode("04");
-      pastcommitsList.appendChild(node04);
-      let node03 = renderer.createPastCommitNode("03");
-      pastcommitsList.appendChild(node03);
-      let node02 = renderer.createPastCommitNode("02");
-      pastcommitsList.appendChild(node02);
-      let node01 = renderer.createPastCommitNode("01");
-      pastcommitsList.appendChild(node01);
-      let node00 = renderer.createPastCommitNode("00");
-      pastcommitsList.appendChild(node00);
-
-
-
-
-
-
-
-
-      
-
-      let shift_right = document.createElement('button');
-      shift_right.className = SHIFT_RIGHT_BUTTON_CLASS;
-      pastcommitsNode.appendChild(shift_right);
-
-      let cur_work = document.createElement('button');
-      cur_work.className = CUR_BUTTON_CLASS;
-      cur_work.textContent = 'CUR';
-      pastcommitsNode.appendChild(cur_work);
-
+      /**build the pastcommitinfoNode (below pastcommits), usually it's hidden, will be visible to display the detail information of a single past commit
+       *  if users double click a card of past commit in pastcommits node */
       let pastcommitinfoNode = DOMUtils.findElement(this.node, PAST_COMMIT_INFO_CLASS);
       let pastcommitinfoHeader = this._renderer.createpastcommitinfoHeaderNode();
       pastcommitinfoHeader.className = PAST_COMMIT_INFO_SECTION_HEADER_CLASS;
@@ -344,6 +302,7 @@ class GitSessions extends Widget {
       pastcommitinfoContainer.appendChild(pastcommitinfoList);
       pastcommitinfoNode.appendChild(pastcommitinfoContainer);
 
+      /**build the node to hold all staged but uncommitted changes */
       let uncommittedNode = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
       let uncommittedHeader = this._renderer.createUncommittedHeaderNode();
       uncommittedHeader.className = SECTION_HEADER_CLASS;
@@ -355,6 +314,7 @@ class GitSessions extends Widget {
       uncommittedContainer.appendChild(uncommittedList);
       uncommittedNode.appendChild(uncommittedContainer);
 
+      /**build the node to hold all unstaged changes */
       let unstagedNode = DOMUtils.findElement(this.node, UNSTAGED_CLASS);
       let unstagedHeader = this._renderer.createUnstagedHeaderNode();
       unstagedHeader.className = SECTION_HEADER_CLASS;
@@ -366,6 +326,7 @@ class GitSessions extends Widget {
       unstagedContainer.appendChild(unstagedList);
       unstagedNode.appendChild(unstagedContainer);
 
+      /**build the node to hold all untracked changes */
       let untrackedNode = DOMUtils.findElement(this.node, UNTRACKED_CLASS);
       let untrackedHeader = this._renderer.createUntrackedHeaderNode();
       untrackedHeader.className = SECTION_HEADER_CLASS;
@@ -408,8 +369,8 @@ class GitSessions extends Widget {
         renderer.UpdateFileCount(uncommittedHeader, SF, 'staged');
         renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
         renderer.UpdateFileCount(untrackedHeader, UTF,'untracked');
-      });
 
+      });
       this._scheduleUpdate();
       this._startTimer();
   }
@@ -420,6 +381,7 @@ class GitSessions extends Widget {
     super.show();
     this.refresh_current_fb_path();
     this.refresh();
+    this.refresh_past_commit_list();
   }
   /**
    * The renderer used by the running sessions widget.
@@ -474,13 +436,45 @@ class GitSessions extends Widget {
     }
     current_fb_path = fb.model.path;
   }
+
+  /**
+   * refresh the past commit list.
+   */
+  refresh_past_commit_list(): Promise<void> {
+    let pastcommitsNode = DOMUtils.findElement(this.node, PAST_COMMIT_CLASS);
+    let pastcommitsContainer = DOMUtils.findElement(pastcommitsNode, PAST_COMMIT_CONTAINER_CLASS);
+    pastcommitsContainer.removeChild(pastcommitsContainer.firstChild);
+    let renderer = this._renderer;
+
+    let pastcommitsList = document.createElement('ul');
+    pastcommitsList.className = PAST_COMMIT_LIST_CLASS;
+    pastcommitsContainer.appendChild(pastcommitsList);
+
+    let git_temp = new Git();
+    (git_temp.log(current_fb_path)).then(response=> {
+        if(response.code==0){
+          let data_json = (response as GitLogResult).commits;
+          for (var i=0; i<data_json.length; i++){
+              let node = renderer.createPastCommitNode(data_json[i], i);
+              pastcommitsList.appendChild(node);
+          }
+        }
+        pastcommitsContainer.scrollLeft += pastcommitsContainer.scrollWidth;
+      });
+    let promises: Promise<void>[] = [];
+    this._lastRefresh = new Date().getTime();
+    this._requested = false;
+    return Promise.all(promises).then(() => void 0);
+  }
+
   /**
    * Refresh the widget.
    */
   refresh(): Promise<void> {
-    let header0node = DOMUtils.findElement(this.node, HEADER0_CLASS);
-    //let pastcommitsSection = DOMUtils.findElement(this.node, PAST_COMMIT_CLASS);
-    //let pastcommitsContainer = DOMUtils.findElement(pastcommitsSection, CONTAINER_CLASS);
+    let pathheaderNode = DOMUtils.findElement(this.node, PATH_HEADER_CLASS);
+    let path_label = DOMUtils.findElement(pathheaderNode, ITEM_LABEL_CLASS);
+    let warning_label = DOMUtils.findElement(pathheaderNode, ADD_BUTTON_CLASS);
+    let GitWhoeleContainer = DOMUtils.findElement(this.node, GIT_WHOLE_CONTAINER_CLASS);
     let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
     let uncommittedContainer = DOMUtils.findElement(uncommittedSection, CONTAINER_CLASS);
     let untrackedSection = DOMUtils.findElement(this.node, UNTRACKED_CLASS);
@@ -518,12 +512,13 @@ class GitSessions extends Widget {
     untrackedList.className = LIST_CLASS;
     untrackedContainer.appendChild(untrackedList);
 
-    header0node.textContent = "HOME:/"+current_fb_path;
+    
     let git_temp = new Git();
     (git_temp.branch(current_fb_path)).then(response=>{
       if(response.code==0){
-        let select = document.createElement('select');
         let data_json = (response as GitBranchResult).repos;
+        let select = document.createElement('select');
+
         for (var i=0; i<data_json.length; i++){
           let option = document.createElement('option');
           option.value = data_json[i].name;;
@@ -540,19 +535,26 @@ class GitSessions extends Widget {
           }
           select.appendChild(option);
         }
-      let switch_branch_node = Styling.wrapSelect(select);
-      switch_branch_node.classList.add(CSV_TOOLBAR_DROPDOWN_CLASS);
-      switch_branch.appendChild(switch_branch_node);
-      }
-    });
+        let new_branch_option = document.createElement('option');
+        new_branch_option.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
+        new_branch_option.textContent = "Create a new branch";
+        select.appendChild(new_branch_option);
 
-      (git_temp.status(current_fb_path)).then(response=> {
+        let switch_branch_node = Styling.wrapSelect(select);
+        switch_branch_node.classList.add(CSV_TOOLBAR_DROPDOWN_CLASS);
+        switch_branch.appendChild(switch_branch_node);
+
+        (git_temp.status(current_fb_path)).then(response=> {
           let SF = 0; /** staged file count */
           let USF = 0; /** unstaged file count */
-          let UTF = 0; /** untracked file count */        
+          let UTF = 0; /** untracked file count */ 
+          let Changes = 0; /** all changes that haven't been commited */     
         if(response.code==0){
           let data_json = (response as GitStatusResult).files;
           for (var i=0; i<data_json.length; i++){
+            if(data_json[i].x!="?"&&data_json[i].x!="!"){
+              Changes++;
+            }
             if(data_json[i].x=="M"){
               let node = renderer.createUncommittedNode(data_json[i].to);
               node.classList.add(ITEM_CLASS);
@@ -576,7 +578,28 @@ class GitSessions extends Widget {
         renderer.UpdateFileCount(uncommittedHeader, SF, 'Staged');
         renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
         renderer.UpdateFileCount(untrackedHeader, UTF, 'untracked');
+        if(Changes > 0){
+          /** since there are uncommitted changes, disable switch branch button */
+          select.disabled = true;
+          select.title = "Please commit your changes or stash them before you switch branches";
+        }
+        else{
+          select.disabled = false;
+          select.title = "select branches";
+        }
       });
+        path_label.textContent = current_fb_path+"/";
+        warning_label.hidden = true;
+        GitWhoeleContainer.hidden = false;
+
+      }
+      else{
+        path_label.textContent = current_fb_path+"/";
+        warning_label.hidden = false;
+        GitWhoeleContainer.hidden = true;
+
+      }
+    });
 
 
     let promises: Promise<void>[] = [];
@@ -692,44 +715,66 @@ class GitSessions extends Widget {
   private _evtChange(event: MouseEvent): void {
     let switch_branch = DOMUtils.findElement(this.node, CSV_TOOLBAR_CLASS);
     let switch_branch_dropdown = DOMUtils.findElement(switch_branch, CSV_TOOLBAR_DROPDOWN_CLASS);
-
+    let git_temp = new Git();
+    let new_check = false;
+    let target_branch = '';
     let NL = (switch_branch_dropdown.getElementsByTagName('select')![0]).childNodes;
     for(var i = 0; i<NL.length; i++){
       let option_node = NL.item(i) as HTMLSelectElement;
-      if(option_node.selected){ 
-        current_repo_branch =  option_node.value;
-        let git_temp = new Git();
-        git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
-          if(response.code == 0){  
-            this.refresh();
-          }
-          else{
-            let msg_box = document.createElement('div');
-            msg_box.textContent = (response as GitErrorInfo).stderr;
-            let input = document.createElement('input');
-            msg_box.appendChild(input);
-            showDialog({        
-              title: 'Input commit message:',
-              body: msg_box,
-              buttons: [Dialog.cancelButton(), Dialog.warnButton({label: 'Stash'}) ,Dialog.okButton({ label: 'Commit'})]
-            }).then(result => {
-              if (result.accept&&input.value) {
-                /** TODO: make better design for this part, what are th possible actions here */
-                git_temp.add(true,null, current_root_repo_path).then(response =>{
-                  git_temp.commit(input.value, current_root_repo_path).then(response=>{
-                    git_temp.checkout(true,current_repo_branch, false, null, current_fb_path).then(response=>{
-                      this.refresh();
-                    });
-                  });
-                })            
-              }
-            });            
-          }
-        });
-        return;   
+      if(option_node.selected){
+        if(i==NL.length-1){
+          let input = new Widget({ node: document.createElement('input') });
+          showDialog({        
+            title: 'Input a name to create a new branch and switch to it:',
+            body: input,
+            buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Create'})]
+          }).then(result => {
+            let msg = (input.node as HTMLInputElement).value ;
+            if(result.button.accept&&msg){
+              target_branch = msg;
+              new_check = true;
+              git_temp.checkout(true, new_check, target_branch, false, null, current_fb_path).then(response=>{
+                if(response.code == 0){  
+                  this.refresh();
+                  this.refresh_past_commit_list();
+                }
+                else{
+                  showDialog({        
+                  title: 'Create Branch Failed:',
+                  body: (response as GitErrorInfo).stderr,
+                  buttons: [Dialog.warnButton({ label: 'OK'})]
+                  }).then(result => {
+                    this.refresh();
+                  });            
+                }
+              });
+            }
+            return;
+          });    
+        } 
+        else{
+          current_repo_branch =  option_node.value;
+          target_branch = option_node.value;
+          new_check = false;
+          git_temp.checkout(true, new_check, target_branch, false, null, current_fb_path).then(response=>{
+            if(response.code == 0){  
+              this.refresh();
+              this.refresh_past_commit_list();
+            }
+            else{
+              showDialog({        
+                title: 'Switch Branch Failed:',
+                body: (response as GitErrorInfo).stderr,
+                buttons: [Dialog.warnButton({ label: 'OK'})]
+              }).then(result => {
+                this.refresh();
+              });            
+            }
+          });
+        }
+        return;        
       }    
     }
-    return;  
   }
   /**
    * Handle the `'click'` event for the widget.
@@ -739,6 +784,10 @@ class GitSessions extends Widget {
    */
   private _evtClick(event: MouseEvent): void {
     // Fetch common variables.
+    let GitWhoeleContainer = DOMUtils.findElement(this.node, GIT_WHOLE_CONTAINER_CLASS);
+    if(GitWhoeleContainer.hidden){
+      return;
+    }
     let uncommittedSection = DOMUtils.findElement(this.node, UNCOMMITTED_CLASS);
     let uncommittedHeader = DOMUtils.findElement(uncommittedSection, SECTION_HEADER_CLASS);
     let uncommittedList = DOMUtils.findElement(uncommittedSection, LIST_CLASS);
@@ -780,8 +829,6 @@ class GitSessions extends Widget {
     //check for commit list left shift
     if (ElementExt.hitTest(pastcommits_left_button, clientX, clientY)) {
       console.log("left shift");
-      //pastcommitsContainer.scrollTop -= 100;
-      //pastcommitsContainer.scrollLeft -= 100;
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop-200});
       $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft-200});
     }
@@ -789,8 +836,6 @@ class GitSessions extends Widget {
     //check for commit list right shift
     if (ElementExt.hitTest(pastcommits_right_button, clientX, clientY)) {
       console.log("right shift");
-      //pastcommitsContainer.scrollTop += 100;
-      //pastcommitsContainer.scrollLeft += 100;
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop+200});
       $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft+200});
     }
@@ -805,22 +850,28 @@ class GitSessions extends Widget {
 
         let git_reset_all = renderer.getUncommittedReset(node0);
         if (ElementExt.hitTest(git_reset_all, clientX, clientY)) {
-          git_temp.reset(true,null,current_root_repo_path);
-          this.refresh();
-          return;
+          git_temp.reset(true,null,current_root_repo_path).then(response=>{
+            this.refresh();
+            return;
+          });
         }
 
         let git_commit = renderer.getUncommittedCommit(node0);
         if (ElementExt.hitTest(git_commit, clientX, clientY)) {
-        let input = document.createElement('input');
+        let input = new Widget({ node: document.createElement('input') });
         showDialog({
             title: 'Input commit message:',
             body: input,
+            focusNodeSelector: 'input',
             buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Commit'})]
         }).then(result => {
-            if (result.accept&&input.value) {
-                git_temp.commit(input.value, current_root_repo_path);
-                this.refresh();
+          let msg = (input.node as HTMLInputElement).value ;
+          console.log(msg);
+            if (result.button.accept&&msg) {
+                git_temp.commit(msg, current_root_repo_path).then(response=>{
+                  this.refresh();
+                  this.refresh_past_commit_list();
+                });
             }
         });
           return;
@@ -831,9 +882,10 @@ class GitSessions extends Widget {
           let node = uncommittedList.children[index] as HTMLLIElement;
           let git_reset = renderer.getUncommittedReset(node);
           if (ElementExt.hitTest(git_reset, clientX, clientY)) {
-            git_temp.reset(false,node.title, current_root_repo_path);
-            this.refresh();
-            return;
+            git_temp.reset(false,node.title, current_root_repo_path).then(response=>{
+              this.refresh();
+              return;
+            });
           }
         }
     
@@ -841,9 +893,10 @@ class GitSessions extends Widget {
         node0 = unstagedHeader as HTMLLIElement;
         let git_add_all = renderer.getUnstagedAdd(node0);
         if (ElementExt.hitTest(git_add_all, clientX, clientY)) {
-          git_temp.add(true,null, current_root_repo_path);
-          this.refresh();
-          return;
+          git_temp.add(true,null, current_root_repo_path).then(response=>{
+            this.refresh();
+            return;
+          });
         }
 
         let git_checkout_all = renderer.getUnstagedCheckout(node0);
@@ -853,9 +906,10 @@ class GitSessions extends Widget {
             body: "Do you really want to discard all uncommitted changes?",
             buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
           }).then(result => {
-            if (result.accept) {
-                git_temp.checkout(false, null,true,null,current_root_repo_path);
-                this.refresh();
+            if (result.button.accept) {
+                git_temp.checkout(false,false, null,true,null,current_root_repo_path).then(response=>{
+                  this.refresh();
+                });
             }
           });
         return;
@@ -868,9 +922,10 @@ class GitSessions extends Widget {
           let git_add = renderer.getUnstagedAdd(node);
           let git_checkout = renderer.getUnstagedCheckout(node);
           if (ElementExt.hitTest(git_add, clientX, clientY)) {
-            git_temp.add(false,node.title,current_root_repo_path);
-            this.refresh();
-            return;
+            git_temp.add(false,node.title,current_root_repo_path).then(response=>{
+              this.refresh();
+              return;
+            });
           }
           else if(ElementExt.hitTest(git_checkout, clientX, clientY)) {
             showDialog({
@@ -878,9 +933,10 @@ class GitSessions extends Widget {
               body: "Do you really want to discard the uncommitted changes in this file?",
               buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
             }).then(result => {
-              if (result.accept) {
-                git_temp.checkout(false, null, false,node.title,current_root_repo_path);
-                this.refresh();
+              if (result.button.accept) {
+                git_temp.checkout(false, false, null, false,node.title,current_root_repo_path).then(response=>{
+                  this.refresh();
+                });
               }
             });
           return;
@@ -893,9 +949,10 @@ class GitSessions extends Widget {
           let node = untrackedList.children[index] as HTMLLIElement;
           let git_add = renderer.getUntrackedAdd(node);
           if (ElementExt.hitTest(git_add, clientX, clientY)) {
-            git_temp.add(false,node.title,current_root_repo_path);
-            this.refresh();
-            return;
+            git_temp.add(false,node.title,current_root_repo_path).then(respones=>{
+              this.refresh();
+              return;
+            });
           }
         }
       }
@@ -918,6 +975,10 @@ class GitSessions extends Widget {
     // Stop the event propagation.
     event.preventDefault();
     event.stopPropagation();
+    let GitWhoeleContainer = DOMUtils.findElement(this.node, GIT_WHOLE_CONTAINER_CLASS);
+    if(GitWhoeleContainer.hidden){
+      return;
+    }
 
     let pastcommitinfoSection = DOMUtils.findElement(this.node, PAST_COMMIT_INFO_CLASS);
     let pastcommitinfoContainer = DOMUtils.findElement(pastcommitinfoSection, CONTAINER_CLASS);
@@ -963,6 +1024,7 @@ class GitSessions extends Widget {
           unstagedContainer.hidden = false;
           untrackedHeader.hidden = false;
           untrackedContainer.hidden = false;
+          this.refresh();
     }
     else if(ElementExt.hitTest(pastcommits_left_button, clientX, clientY)){
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop-200});
@@ -985,9 +1047,11 @@ class GitSessions extends Widget {
           let label_node = pastcommitinfoHeader.firstChild;
           label_node.textContent = 'Commit: '+past_commit.getAttribute('commit');
           label_node = label_node.nextSibling;
-          label_node.textContent = 'Author: '+past_commit.getAttribute('Author');
+          label_node.textContent = 'Author: '+past_commit.getAttribute('author');
           label_node = label_node.nextSibling;
-          label_node.textContent = 'Date: '+past_commit.getAttribute('Date');
+          label_node.textContent = 'Date: '+past_commit.getAttribute('date');
+          label_node = label_node.nextSibling;
+          label_node.textContent = past_commit.getAttribute('commit_msg');
 
           pastcommitinfoContainer.removeChild(pastcommitinfoContainer.firstChild);
           let pastcommitinfoList = document.createElement('ul');
@@ -1155,7 +1219,8 @@ namespace GitSessions {
      * Create the root node for the running sessions widget.
      */
     createNode(): HTMLElement;
-
+    createHeaderNode(): HTMLElement;
+    createpastcommitsNode(): HTMLElement; 
     /**
      * Create a fully populated header node for the terminals section.
      *
@@ -1197,7 +1262,7 @@ namespace GitSessions {
     createUnstagedNode(path:string): HTMLLIElement;
 
     createpastcommitinfoHeaderNode():HTMLElement;
-    createPastCommitNode(path:string): HTMLSpanElement;
+    createPastCommitNode(commit_info:SingleCommitInfo, num: number): HTMLSpanElement;
     createPastCommitInforFileNode(path:string): HTMLLIElement;
     /**
      * Get the shutdown node for a terminal node.
@@ -1273,15 +1338,18 @@ namespace GitSessions {
      */
     createNode(): HTMLElement {
       let node = document.createElement('div');
-      let header0 = this.createPathHeaderNode();
+      let path_header = this.createPathHeaderNode();
+
+      /**create a container for all Git related info (visiblity depends on if it's in a repo) */
+      let GitWhoeleContainer = document.createElement('div');
+      GitWhoeleContainer.className = GIT_WHOLE_CONTAINER_CLASS;
+
       let header = document.createElement('div');
-      
-      header0.className = HEADER0_CLASS;
       header.className = HEADER_CLASS;
       
 
       let past_commits = document.createElement('div');
-      past_commits.className = PAST_COMMIT_CLASS;
+      past_commits.className = `${SECTION_CLASS} ${PAST_COMMIT_CLASS}`;
 
       let past_commit_info = document.createElement('div');
       past_commit_info.className = `${SECTION_CLASS} ${PAST_COMMIT_INFO_CLASS}`;
@@ -1292,11 +1360,52 @@ namespace GitSessions {
       unstaged.className = `${SECTION_CLASS} ${UNSTAGED_CLASS}`;
       let untracked = document.createElement('div');
       untracked.className = `${SECTION_CLASS} ${UNTRACKED_CLASS}`;
-/*
-      let switch_branch = document.createElement('button');
-      switch_branch.className = SWITCH_BRANCH_CLASS;
-      header.appendChild(switch_branch);
-*/
+      
+      node.appendChild(path_header);
+      node.appendChild(GitWhoeleContainer);
+      GitWhoeleContainer.appendChild(header);
+      GitWhoeleContainer.appendChild(past_commits);
+      GitWhoeleContainer.appendChild(past_commit_info);
+      GitWhoeleContainer.appendChild(uncommitted);
+      GitWhoeleContainer.appendChild(unstaged);
+      GitWhoeleContainer.appendChild(untracked);
+
+      return node;
+    }
+    /**
+     * Create a fully populated header node for the terminals section.
+     *
+     * @returns A new node for a running terminal session header.
+     */
+    createPathHeaderNode(): HTMLElement {
+      let node = document.createElement('div');
+      node.className = `${SECTION_CLASS} ${PATH_HEADER_CLASS}`;
+
+      let path_node = document.createElement('li');
+      path_node.className = ITEM_CLASS;
+      let icon = document.createElement('span');
+      icon.className = `${ITEM_ICON_CLASS} ${HOME_ICON_CLASS}`;
+      let label = document.createElement('span');
+      label.className = ITEM_LABEL_CLASS;
+      label.textContent = '/';
+      path_node.appendChild(icon);
+      path_node.appendChild(label);
+
+      node.appendChild(path_node);
+
+      let warning_node = document.createElement('li');
+      warning_node.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
+      warning_node.textContent = " Git-plugin tracks the work directory in jupyterlab-filebrowser, the current folder is not under a git repository"
+      node.appendChild(warning_node);
+
+      return node;
+    }
+
+    createHeaderNode(): HTMLElement {
+
+      let headerWholeContainer = document.createElement('div');
+      headerWholeContainer.className = TOP_CONTAINER_CLASS;
+
       let switch_branch = document.createElement('div');
       switch_branch.className = CSV_TOOLBAR_CLASS;
       let label = document.createElement('span');
@@ -1313,38 +1422,47 @@ namespace GitSessions {
       let switch_branch_node = Styling.wrapSelect(select);
       switch_branch_node.classList.add(CSV_TOOLBAR_DROPDOWN_CLASS);
       switch_branch.appendChild(switch_branch_node);
-      header.appendChild(switch_branch);
-
-
+      headerWholeContainer.appendChild(switch_branch);
 
       let refresh = document.createElement('button');
       refresh.className = REFRESH_CLASS;
-      header.appendChild(refresh);
-
+      headerWholeContainer.appendChild(refresh);
       let new_terminal = document.createElement('button');
       new_terminal.className = NEW_TERMINAL_CLASS;
-      header.appendChild(new_terminal);
+      headerWholeContainer.appendChild(new_terminal);
       
-      node.appendChild(header0);
-      node.appendChild(header);
-      node.appendChild(past_commits);
-      node.appendChild(past_commit_info);
-      node.appendChild(uncommitted);
-      node.appendChild(unstaged);
-      node.appendChild(untracked);
-
-      return node;
+      return headerWholeContainer;
     }
-    /**
-     * Create a fully populated header node for the terminals section.
-     *
-     * @returns A new node for a running terminal session header.
-     */
-    createPathHeaderNode(): HTMLElement {
-      let node = document.createElement('div');
-      node.textContent = 'Current Path Repo';
-      node.className = SECTION_HEADER_CLASS;
-      return node;
+
+    createpastcommitsNode(): HTMLElement {
+      let pastcommitsWholeContainer = document.createElement('div');
+      pastcommitsWholeContainer.className = TOP_CONTAINER_CLASS;
+
+      let pastcommitsContainer = document.createElement('div');
+      pastcommitsContainer.id = "past_commits_list";
+      pastcommitsContainer.className = PAST_COMMIT_CONTAINER_CLASS;
+
+      let shift_left = document.createElement('button');
+      shift_left.textContent = '<';
+      shift_left.className = SHIFT_LEFT_BUTTON_CLASS;
+      pastcommitsWholeContainer.appendChild(shift_left);
+
+      let pastcommitsList = document.createElement('ul');
+      pastcommitsList.className = PAST_COMMIT_LIST_CLASS;
+      pastcommitsContainer.appendChild(pastcommitsList);
+      pastcommitsWholeContainer.appendChild(pastcommitsContainer);
+
+      let shift_right = document.createElement('button');
+      shift_right.textContent = '>';
+      shift_right.className = SHIFT_RIGHT_BUTTON_CLASS;
+      pastcommitsWholeContainer.appendChild(shift_right);
+
+      let cur_work = document.createElement('button');
+      cur_work.className = CUR_BUTTON_CLASS;
+      cur_work.textContent = 'CUR';
+      pastcommitsWholeContainer.appendChild(cur_work);
+
+      return pastcommitsWholeContainer;
     }
 
     createpastcommitinfoHeaderNode():HTMLElement{
@@ -1370,12 +1488,12 @@ namespace GitSessions {
       commit_msg.className = PAST_COMMIT_INFO_LABEL_CLASS;
       commit_msg.textContent = 'commit msg';
       node.appendChild(commit_msg);
-
+/*
       let commit_info = document.createElement('div');
       commit_info.className = PAST_COMMIT_INFO_LABEL_CLASS;
       commit_info.textContent = '1 file changed';
       node.appendChild(commit_info);
-
+*/
       return node;  
     }
     /**
@@ -1510,6 +1628,7 @@ namespace GitSessions {
       createUnstagedNode(path: string): HTMLLIElement {
       let node = document.createElement('li');
       let icon = document.createElement('span');
+      
       icon.className = `${ITEM_ICON_CLASS} ${parseFileExtension(path)}`;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
@@ -1528,18 +1647,24 @@ namespace GitSessions {
       return node;
     }
 
-    createPastCommitNode(path:string): HTMLSpanElement{
+    createPastCommitNode(commit_info: SingleCommitInfo, num:number): HTMLSpanElement{
       let past_commit_container = document.createElement('span');
       past_commit_container.className = PAST_SINGLE_COMMIT_CONTAINER_CLASS;
       past_commit_container.textContent = "---"
       let node = document.createElement('button');
       node.className = PAST_COMMIT_BUTTON_CLASS;
-      node.id = path;
-      node.textContent = path;
-      node.setAttribute('commit', path);
-      node.setAttribute('Author','JZ');
-      node.setAttribute('Date', "x x x");
-      node.setAttribute('commit_msg', 'need commit');
+      if(num==0){
+          node.id = "H";
+          node.textContent = "H";
+      }
+      else{
+        node.id = "^"+num;
+        node.textContent = "^"+num;
+      }
+      node.setAttribute('commit', commit_info.commit);
+      node.setAttribute('author',commit_info.author);
+      node.setAttribute('date', commit_info.date);
+      node.setAttribute('commit_msg', commit_info.commit_msg);
       node.setAttribute('file_changed','1');
       node.setAttribute("file_path", 'src/index.ts');
       node.setAttribute('open', 'no');

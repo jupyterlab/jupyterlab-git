@@ -40,6 +40,22 @@ class Git_status_handler(Git_handler):
         result = self.git.status(current_path)   
         self.finish(json.dumps(result))
 
+class Git_log_handler(Git_handler):
+    def post(self):
+        my_data = json.loads(self.request.body)
+        current_path = my_data["current_path"]
+        result = self.git.log(current_path)
+        self.finish(json.dumps(result))
+
+class Git_diff_handler(Git_handler):
+    def post(self):
+        my_data = json.loads(self.request.body)
+        top_repo_path = my_data["top_repo_path"]
+        my_output = self.git.diff(top_repo_path)
+        self.finish(my_output)
+        print("GIT DIFF")
+        print(my_output)
+
 class Git_branch_handler(Git_handler):       
     def post(self):
         my_data = json.loads(self.request.body)
@@ -77,7 +93,12 @@ class Git_checkout_handler(Git_handler):
         my_data = json.loads(self.request.body)
         top_repo_path = my_data["top_repo_path"]
         if (my_data["checkout_branch"]):
-            my_output = self.git.checkout_branch(my_data["branchname"],top_repo_path);        
+            if(my_data["new_check"]):
+                print("to create a new branch")
+                my_output = self.git.checkout_new_branch(my_data["branchname"],top_repo_path)
+            else:  
+                print("switch to an old branch")               
+                my_output = self.git.checkout_branch(my_data["branchname"],top_repo_path)        
         elif(my_data["checkout_all"]):
             my_output = self.git.checkout_all(top_repo_path)
         else:
@@ -92,6 +113,25 @@ class Git_commit_handler(Git_handler):
         my_output = self.git.commit(commit_msg, top_repo_path)
         self.finish(my_output)     
 
+class Git_pull_handler(Git_handler):
+    def post(self):
+        my_data = json.loads(self.request.body)
+        origin = my_data["origin"]
+        master = my_data["master"]
+        top_repo_path = my_data["top_repo_path"]
+        my_output = self.git.pull(origin,master,top_repo_path)
+        self.finish(my_output)
+        print("You Pull")
+
+class Git_push_handler(Git_handler):
+    def post(self):
+        my_data = json.loads(self.request.body)
+        origin = my_data["origin"]
+        master = my_data["master"]
+        top_repo_path = my_data["top_repo_path"]
+        my_output = self.git.push(origin,master,top_repo_path)
+        self.finish(my_output)
+        print("You Pushed")
 
 def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/showtoplevel', Git_showtoplevel_handler)])
@@ -102,3 +142,7 @@ def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/reset', Git_reset_handler)])
     web_app.add_handlers('.*', [('/git/checkout', Git_checkout_handler)])
     web_app.add_handlers('.*', [('/git/commit', Git_commit_handler)])
+    web_app.add_handlers('.*', [('/git/pull', Git_pull_handler)])
+    web_app.add_handlers('.*', [('/git/push', Git_push_handler)])
+    web_app.add_handlers('.*', [('/git/diff', Git_diff_handler)])
+    web_app.add_handlers('.*', [('/git/log', Git_log_handler)])

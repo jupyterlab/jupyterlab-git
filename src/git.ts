@@ -98,19 +98,21 @@ export interface GitStatusResult {
         ]
 }
 
+export interface SingleCommitInfo {
+    commit: string,
+    author: string,
+    date: string,
+	commit_msg: string,
+	modified_file_note?: string,
+	modified_files?: [{
+		modified_file_path: string,
+	}]
+}
+
 export interface GitLogResult {
 	code: number;
-	files?: [
-            {
-                commit: string,
-                author: string,
-                date: string,
-				commit_msg: string,
-				modified_file_note: string,
-				modified_files: [{
-					modified_file_path: string,
-				}]
-            }
+	commits?: [
+			SingleCommitInfo
         ]
 }
 
@@ -210,6 +212,23 @@ export class Git {
 		}
 	}
 
+	async log(path: string):Promise<GitLogResult> {
+		try{
+			var val = await HTTP_Git_Request('/git/log', 'POST', {"current_path": path});
+			if(val.xhr.status!== 200) {
+				console.log(val.xhr.status)
+				throw ServerConnection.makeError(val);
+			}
+			if(val.data.code!=0){
+				console.log("Git Command Error:")
+				console.log(val.data.message);
+			}
+			return val.data;
+		} catch (err) {
+			throw ServerConnection.makeError(err);
+		}
+	}
+
 	async branch(path: string): Promise<GitBranchResult|GitErrorInfo>{
 		try{
 			var val = await HTTP_Git_Request('/git/branch','POST',{"current_path":path});
@@ -239,9 +258,9 @@ export class Git {
 		return  HTTP_Git_Request('/git/add','POST',{"add_all": check , "filename":filename, "top_repo_path": path});
 	}
 
-	async checkout(checkout_branch: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string):Promise<GitCheckoutResult|GitErrorInfo> {
+	async checkout(checkout_branch: boolean, new_check: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string):Promise<GitCheckoutResult|GitErrorInfo> {
 		try{
-			var val =  await HTTP_Git_Request('/git/checkout','POST',{"checkout_branch": checkout_branch, "branchname":branchname, "checkout_all": checkout_all , "filename":filename, "top_repo_path": path});
+			var val =  await HTTP_Git_Request('/git/checkout','POST',{"checkout_branch": checkout_branch, "new_check": new_check, "branchname":branchname, "checkout_all": checkout_all , "filename":filename, "top_repo_path": path});
 			if (val.xhr.status !== 200) {
           		console.log(val.xhr.status)
         		throw ServerConnection.makeError(val);

@@ -121,6 +121,14 @@ class Git:
         my_output = subprocess.check_output(["git", "reset"], cwd = top_repo_path)
         return my_output
 
+    def checkout_new_branch(self, branchname, current_path):
+        p = Popen(["git", "checkout", "-b", branchname], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
+        my_output, my_error = p.communicate()
+        if(p.returncode==0):
+            return {"code": p.returncode, "message": my_output.decode('utf-8')}
+        else:
+            return {"code": p.returncode, 'command':"git checkout "+"-b"+branchname, "message": my_error.decode('utf-8')}
+
     def checkout_branch(self, branchname, current_path):
         p = Popen(["git", "checkout", branchname], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
         my_output, my_error = p.communicate()

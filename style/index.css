@@ -101,16 +101,13 @@
   max-width: 16px;
   min-width: 16px;
   min-height: 16px;
-  padding: 4px 6px;
   background: var(--jp-layout-color1);
   border: none;
   outline: 0;
-  background-image: var(--jp-icon-json);
-  background-size: 16px;
   display: block;
   vertical-align: middle;
   background-repeat: no-repeat;
-  background-position: center;
+  text-align: center;
 }
 
 .jp-GitSessions-headershiftrightbutton:hover {
@@ -134,16 +131,13 @@
   max-width: 16px;
   min-width: 16px;
   min-height: 16px;
-  padding: 4px 6px;
   background: var(--jp-layout-color1);
   border: none;
   outline: 0;
-  background-image: var(--jp-icon-json);
-  background-size: 16px;
   display: block;
   vertical-align: middle;
   background-repeat: no-repeat;
-  background-position: center;
+  font-weight: 400;
 }
 
 .jp-GitSessions-headershiftleftbutton:hover {
@@ -184,7 +178,7 @@
   display: block;
   vertical-align: middle;
   background-repeat: no-repeat;
-  background-position: center;
+  font-weight: 400;
 }
 
 .jp-GitSessions-headerSwitchBranch:hover {
@@ -286,6 +280,20 @@
   letter-spacing: 1px;
 }
 
+.jp-GitSessions-sectionGitWholeContainer {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+.jp-GitSessions-sectionTopContainer {
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  margin: var(--jp-toolbar-header-margin);
+}
 
 .jp-GitSessions-sectionContainer {
   flex: 1 1 auto;
@@ -315,11 +323,12 @@
   margin: var(--jp-toolbar-header-margin);
 }
 .jp-GitSessions-sectionPastCommitContainer {
-  max-width: 250px;
+  max-width: 225px;
   margin: 0;
   padding: 0;
   overflow: hidden;
   white-space: nowrap;
+  direction: rtl;
 }
 
 .jp-GitSessions-sectionPastCommitList {
@@ -327,6 +336,7 @@
   padding: 0;
   /*float:right;*/
   list-style-type: none;
+
 }
 
 .jp-GitSessions-sectionPastSingleCommitContainer{
@@ -431,7 +441,7 @@
   background-image: var(--jp-icon-terminal);
 }
 .jp-GitSessions-itemIcon.jp-OpenFolderIcon {
-  background-image: var(--jp-icon-directory-selected);
+  background-image: var(--jp-icon-directory);
 }
 .jp-GitSessions-itemIcon.jp-FileIcon {
   background-image: var(--jp-icon-file);
@@ -450,6 +460,9 @@
 }
 .jp-GitSessions-itemIcon.jp-JSONIcon {
   background-image: var(--jp-icon-json);
+}
+.jp-GitSessions-itemIcon.jp-homeIcon {
+  background-image: var(--jp-icon-home);
 }
 .jp-GitSessions-itemIcon.jp-PythonIcon {
   background-image: var(--jp-icon-python);
