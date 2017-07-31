@@ -68,6 +68,7 @@ const CUR_BUTTON_CLASS = 'jp-GitSessions-headercurbutton';
  * The class name added to a git-plugin widget header refresh button.
  */
 const REFRESH_CLASS = 'jp-GitSessions-headerRefresh';
+
 /**
  * The class name added to a git-plugin widget header refresh button.
  */
@@ -76,6 +77,7 @@ const REFRESH_CLASS = 'jp-GitSessions-headerRefresh';
  * The class name added to a git-plugin widget header refresh button.
  */
 const NEW_TERMINAL_CLASS = 'jp-GitSessions-headerNewTerminal';
+
 /**
  * The class name added to the git-plugin terminal sessions section.
  */
@@ -90,6 +92,8 @@ const PAST_COMMIT_INFO_CLASS = 'jp-GitSessions-pastcommitinfoSection';
  * The class name added to the git-plugin terminal sessions section.
  */
 const UNCOMMITTED_CLASS = 'jp-GitSessions-uncommittedSection';
+
+//const MESSAGE_CLASS = 'jp-GitSessions-MessageSection';
 
 /**
  * The class name added to the git-plugin kernel sessions section.
@@ -188,7 +192,9 @@ const PYTHON_ICON_CLASS = 'jp-PythonIcon';
  */
 const JSON_ICON_CLASS = 'jp-JSONIcon';
 
+
 const HOME_ICON_CLASS = 'jp-homeIcon';
+
 /**
  * The class name added to a speadsheet file browser item.
  */
@@ -218,6 +224,7 @@ const FILE_TYPE_CLASS = 'jp-FileIcon';
  * The class name added to a directory file browser item.
  */
 const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
+
 /**
  * The class name added to a csv toolbar widget.
  */
@@ -229,6 +236,7 @@ const CSV_TOOLBAR_LABEL_CLASS = 'jp-CSVToolbar-label';
  * The class name added to a csv toolbar's dropdown element.
  */
 const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVToolbar-dropdown';
+
 
 /**
  * The duration of auto-refresh in ms.
@@ -245,6 +253,7 @@ let app0 = null;
 let current_fb_path = '';
 let current_repo_branch = '';
 let current_root_repo_path = '';
+
 /**
  * A class that exposes the git-plugin sessions.
  */
@@ -261,6 +270,7 @@ class GitSessions extends Widget {
     this._renderer = options.renderer || GitSessions.defaultRenderer;
     this.addClass(Git_CLASS);
     let renderer = this._renderer;
+    
 
     let git_temp = new Git();
 
@@ -339,6 +349,7 @@ class GitSessions extends Widget {
       untrackedContainer.appendChild(untrackedList);
       untrackedNode.appendChild(untrackedContainer);
 
+
       
       (git_temp.status('')).then(response=> {
         let SF = 0; /** staged file count */
@@ -367,6 +378,7 @@ class GitSessions extends Widget {
             }
           }
         }
+
         renderer.UpdateFileCount(uncommittedHeader, SF, 'staged');
         renderer.UpdateFileCount(unstagedHeader, USF, 'unstaged');
         renderer.UpdateFileCount(untrackedHeader, UTF,'untracked');
@@ -379,6 +391,7 @@ class GitSessions extends Widget {
    * override widget's show() to update content everytime Git widget shows up.
    */
   show():void{
+
     super.show();
     this.refresh_current_fb_path();
     this.refresh();
@@ -413,6 +426,7 @@ class GitSessions extends Widget {
     clearTimeout(this._refreshId);
     super.dispose();
   }
+
     /**
    * Refresh the widget.
    */
@@ -513,6 +527,7 @@ class GitSessions extends Widget {
     untrackedList.className = LIST_CLASS;
     untrackedContainer.appendChild(untrackedList);
 
+
     
     let git_temp = new Git();
     (git_temp.branch(current_fb_path)).then(response=>{
@@ -600,6 +615,7 @@ class GitSessions extends Widget {
 
       }
     });
+
 
 
     let promises: Promise<void>[] = [];
@@ -807,6 +823,13 @@ class GitSessions extends Widget {
 
     let new_terminal = DOMUtils.findElement(this.node, NEW_TERMINAL_CLASS);
     let refresh = DOMUtils.findElement(this.node, REFRESH_CLASS);
+    let terminal = DOMUtils.findElement(this.node,TERMINAL_CLASS);
+    let pull = DOMUtils.findElement(this.node,PULL_CLASS);
+    let push = DOMUtils.findElement(this.node,PUSH_CLASS);
+    let tutorial = DOMUtils.findElement(this.node,TUTORIAL_CLASS);
+    let diff = DOMUtils.findElement(this.node,DIFF_CLASS);
+    let log = DOMUtils.findElement(this.node,LOG_CLASS);
+
     let renderer = this._renderer;
     let clientX = event.clientX;
     let clientY = event.clientY;
@@ -819,7 +842,6 @@ class GitSessions extends Widget {
       this.open_new_terminal();
       return;
     }  
-
     // Check for a refresh.
     if (ElementExt.hitTest(refresh, clientX, clientY)) {
       this.refresh();
@@ -839,9 +861,8 @@ class GitSessions extends Widget {
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop+200});
       $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft+200});
     }
-
     let git_temp = new Git();
-      
+
 
     git_temp.showtoplevel(current_fb_path).then(response=>{
       if(response.code==0){
@@ -1145,8 +1166,6 @@ class GitSessions extends Widget {
         }
     }) ;
 
-
-
   }
   /**
    * Start the internal refresh timer.
@@ -1246,6 +1265,7 @@ namespace GitSessions {
      *
      * The `updateTerminalNode` method will be called for initialization.
      */
+    createUncommittedNode(path:string): HTMLLIElement;
     createUncommittedNode(path:string): HTMLLIElement;
 
     /**
@@ -1569,6 +1589,7 @@ namespace GitSessions {
       return node;
     }
 
+
     /**
      * Create a node for a running terminal session item.
      *
@@ -1852,7 +1873,6 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     menu.addItem({command});
   });
   mainMenu.addMenu(menu,{rank:60});
-
 }
 /**
  * The command IDs used by the git plugin.
@@ -1967,5 +1987,3 @@ function parseFileExtension(path: string): string {
           return FILE_TYPE_CLASS;
       }
     }
-
-

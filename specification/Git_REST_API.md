@@ -27,9 +27,11 @@ Error JSON:
     }
 
 
+
 ## git status
 
 URL:  
+
     POST /git/status
 Request JSON:
     {
@@ -52,6 +54,7 @@ Error JSON:
         "code": 10001,
         "message": "Not in a Git repository"
     }
+
 
 ## git add
 
@@ -93,6 +96,7 @@ Error JSON:
         "message": "File not found"
     }
 
+
 ## git commit
 
 URL:  
@@ -111,6 +115,7 @@ Error JSON:
         "code": 10004,
         "message": "Commit failed"
     }
+
 
 ## git reset
 
@@ -131,4 +136,5 @@ Error JSON:
         "code": 10005,
         "message": "File not found"
     }
+
 

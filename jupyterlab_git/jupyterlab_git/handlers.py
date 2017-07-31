@@ -56,12 +56,14 @@ class Git_diff_handler(Git_handler):
         print("GIT DIFF")
         print(my_output)
 
+
 class Git_branch_handler(Git_handler):       
     def post(self):
         my_data = json.loads(self.request.body)
         current_path = my_data["current_path"]
         result = self.git.branch(current_path)   
         self.finish(json.dumps(result))
+
 
 
 class Git_add_handler(Git_handler):
@@ -122,6 +124,7 @@ class Git_pull_handler(Git_handler):
         my_output = self.git.pull(origin,master,top_repo_path)
         self.finish(my_output)
         print("You Pull")
+
 
 class Git_push_handler(Git_handler):
     def post(self):

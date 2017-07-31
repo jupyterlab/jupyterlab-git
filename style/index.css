@@ -235,16 +235,139 @@
   max-width: 50px;
   min-width: 16px;
   min-height: 16px;
+  margin: 0 1em;
   padding: 4px 6px;
   background: var(--jp-layout-color1);
   border: none;
   outline: 0;
   background-image: var(--jp-icon-refresh);
   background-size: 16px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-GitSessions-Terminal {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 40px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: dodgerblue;
+  z-index: -1;
+  /*background: url("line.svg");/*var(--jp-layout-color1);*/
+  border: none;
+  outline: 0;
+  background-image: var(--jp-icon-terminal);
+  background-size: 16px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: 0 1em;
+}
+.jp-GitSessions-Pull {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 40px;
+  min-width: 16px;
+  min-height: 16px;
+  /*padding: 4px 6px;*/
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image: url("expand-more.svg");
+  background-size: 16px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: 0 1em;
+}
+
+.jp-GitSessions-Push {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 40px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image: url("expand-less.svg");
+  background-size: 16px;
   display: block;
   vertical-align: middle;
   background-repeat: no-repeat;
   background-position: center;
+  margin: 0 1em;
+}
+
+
+.jp-GitSessions-Tutorial {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 40px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image:  var(--jp-icon-terminal);
+  background-size: 16px;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: 0 1em;
+}
+
+.jp-GitSessions-Diff {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 40px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image: var(--jp-icon-terminal);
+  background-size: 16px;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: 0 1em;
+}
+
+
+.jp-GitSessions-Log {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 40px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  border: none;
+  outline: 0;
+  background-image: var(--jp-icon-terminal);
+  background-size: 16px;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: 0 1em;
 }
 
 
@@ -269,6 +392,32 @@
   box-shadow: var(--jp-toolbar-box-shadow);
 }
 
+.jp-GitSessions-Terminal:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+.jp-GitSessions-Pull:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+.jp-GitSessions-Push:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+.jp-GitSessions-Terminal:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
 
 .jp-GitSessions-sectionHeader {
   flex: 0 0 auto;

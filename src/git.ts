@@ -161,6 +161,7 @@ export class Git {
 		}
 	}
 
+
 	async showprefix(path:string):Promise<GitShowPrefixResult|GitErrorInfo>{
 		try{
 			var val = await HTTP_Git_Request('/git/showprefix','POST',{"current_path": path});
@@ -291,6 +292,9 @@ export class Git {
 
 	reset(check: boolean, filename: string, path: string) {
 		return HTTP_Git_Request('/git/reset','POST',{"reset_all": check, "filename":filename, "top_repo_path": path});
+	}
+	pull(origin: string, master: string, path:string) {
+		return HTTP_Git_Request('/git/pull', 'POST', {"origin": origin, "master":master,"top_repo_path": path});
 	}
 
 }

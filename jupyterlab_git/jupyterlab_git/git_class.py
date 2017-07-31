@@ -32,6 +32,7 @@ class Git:
                 result.append({'x':line[0],'y':line[1],'to':line[3:],'from':None})
             return {"code": p.returncode, "files":result}
         else:
+
             return {"code": p.returncode, 'command':"git status --porcelain", "message": my_error.decode('utf-8')}
 
     def log(self,current_path):
@@ -61,6 +62,7 @@ class Git:
             return {"code":p.returncode, "message":my_error.decode('utf-8')}
 
 
+
     def branch(self, current_path):
         p = Popen(["git", "branch", "-a"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
         my_output, my_error = p.communicate()
@@ -87,6 +89,7 @@ class Git:
         else:
             return {"code": p.returncode, 'command':"git branch -a", "message": my_error.decode('utf-8')}
 
+
     def showtoplevel(self, current_path):
         p = Popen(["git", "rev-parse", "--show-toplevel"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
         my_output, my_error = p.communicate()
@@ -95,6 +98,7 @@ class Git:
             return result
         else:
             return {"code": p.returncode, 'command':"git rev-parse --show-toplevel", "message": my_error.decode('utf-8')}
+
 
     def showprefix(self, current_path):
         p = Popen(["git", "rev-parse", "--show-prefix"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
