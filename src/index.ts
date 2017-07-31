@@ -39,6 +39,7 @@ import {
   ConsolePanel
 } from '@jupyterlab/console';
 
+
 import {
   ISignal, Signal
 } from '@phosphor/signaling';
@@ -1809,7 +1810,7 @@ namespace GitSessions {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.running-sessions-git',
-  requires: [IServiceManager, ILayoutRestorer],
+  requires: [IServiceManager, IMainMenu, ILayoutRestorer],
   autoStart: true
 };
 
@@ -1824,7 +1825,7 @@ export default plugin;
  * Activate the running plugin.
  */
 function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, restorer: ILayoutRestorer, panel: ConsolePanel,model: Session.IModel): void {
-  const{commands } = app;
+  const { commands} = app;
   const category = 'Git';
   let git_plugin = new GitSessions({ manager: services });
   git_plugin.id = 'jp-git-sessions';
@@ -1850,7 +1851,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   ].forEach(command =>{
     menu.addItem({command});
   });
-  mainMenu.addMenu(menu,{rank:45});
+  mainMenu.addMenu(menu,{rank:60});
 
 }
 /**
@@ -1890,7 +1891,12 @@ function addCommands(app: JupyterLab) {
     label: 'Open Terminal',
     caption: 'Start a new terminal session to directly use git command',
     execute: args => {
-      this.open_new_terminal();
+      let ll = app0.shell.widgets('left');
+      let fb = ll.next();
+      while(fb.id!='filebrowser'){
+        fb = ll.next();
+      }
+      app0.commands.execute('terminal:open', {  path:fb.model.path });
     }
   });
 
