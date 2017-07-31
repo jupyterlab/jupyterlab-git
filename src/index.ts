@@ -823,12 +823,7 @@ class GitSessions extends Widget {
 
     let new_terminal = DOMUtils.findElement(this.node, NEW_TERMINAL_CLASS);
     let refresh = DOMUtils.findElement(this.node, REFRESH_CLASS);
-    let terminal = DOMUtils.findElement(this.node,TERMINAL_CLASS);
-    let pull = DOMUtils.findElement(this.node,PULL_CLASS);
-    let push = DOMUtils.findElement(this.node,PUSH_CLASS);
-    let tutorial = DOMUtils.findElement(this.node,TUTORIAL_CLASS);
-    let diff = DOMUtils.findElement(this.node,DIFF_CLASS);
-    let log = DOMUtils.findElement(this.node,LOG_CLASS);
+
 
     let renderer = this._renderer;
     let clientX = event.clientX;
