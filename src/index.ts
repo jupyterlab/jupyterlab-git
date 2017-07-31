@@ -12,11 +12,11 @@ import {
 } from '@phosphor/domutils';
 
 import {
-  Widget
+  Widget, Menu
 } from '@phosphor/widgets';
 
 import {
-  DOMUtils, Dialog, showDialog,Styling
+  DOMUtils, Dialog, showDialog,Styling, IMainMenu
 } from '@jupyterlab/apputils';
 
 import {
@@ -536,7 +536,6 @@ class GitSessions extends Widget {
           select.appendChild(option);
         }
         let new_branch_option = document.createElement('option');
-        new_branch_option.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
         new_branch_option.textContent = "Create a new branch";
         select.appendChild(new_branch_option);
 
@@ -1824,7 +1823,9 @@ export default plugin;
 /**
  * Activate the running plugin.
  */
-function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutRestorer, panel: ConsolePanel,model: Session.IModel): void {
+function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, restorer: ILayoutRestorer, panel: ConsolePanel,model: Session.IModel): void {
+  const{commands } = app;
+  const category = 'Git';
   let git_plugin = new GitSessions({ manager: services });
   git_plugin.id = 'jp-git-sessions';
   git_plugin.title.label = 'Git';
@@ -1837,6 +1838,85 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(git_plugin, { rank: 200 });
+
+  addCommands(app);
+  let menu = new Menu({commands});
+  menu.title.label = category;
+  [
+    CommandIDs.git_terminal,
+    CommandIDs.git_pull,
+    CommandIDs.git_push,
+    CommandIDs.git_init
+  ].forEach(command =>{
+    menu.addItem({command});
+  });
+  mainMenu.addMenu(menu,{rank:45});
+
+}
+/**
+ * The command IDs used by the git plugin.
+ */
+namespace CommandIDs {
+  export
+  const git_terminal = 'git:create-new-terminal';
+
+  export
+  const git_pull = 'git:pull';
+
+  export
+  const git_push = 'git:push';
+
+  export
+  const git_init = 'git:init';
+
+};
+/**
+ * Add the commands for the git-plugin.
+ */
+export
+function addCommands(app: JupyterLab) {
+  let { commands} = app;
+
+  /**
+   * Whether under a git repo.
+   */
+  /*
+  function underGit(): boolean {
+    return tracker.currentWidget !== null;
+  }
+*/
+  // Add terminal commands.
+  commands.addCommand(CommandIDs.git_terminal, {
+    label: 'Open Terminal',
+    caption: 'Start a new terminal session to directly use git command',
+    execute: args => {
+      this.open_new_terminal();
+    }
+  });
+
+  commands.addCommand(CommandIDs.git_pull, {
+    label: 'Pull',
+    caption: 'Incorporates changes from a remote repository into the current branch',
+    execute: args => {
+      console.log("git pull");
+    }
+  });
+
+  commands.addCommand(CommandIDs.git_push, {
+    label: 'Push',
+    caption: 'Update remote refs along with associated objects',
+    execute: () => {
+      console.log("git push");
+    },
+  });
+
+  commands.addCommand(CommandIDs.git_init, {
+    label: 'Init',
+    caption: " Create an empty Git repository or reinitialize an existing one",
+    execute: () => {
+      console.log("git init");
+    },
+  });
 
 }
 
