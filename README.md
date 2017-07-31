@@ -1,6 +1,4 @@
 # jupyterlab-git
-pre-alpha version
-
 
 JLG
 
@@ -9,7 +7,7 @@ JLG
 
 * JupyterLab
 
-## Installation for git-plugin
+## Installation
 
 ```bash
 jupyter labextension install jupyterlab-git

@@ -14,6 +14,38 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+.jp-CSVToolbar {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+    /* Add the border width because this is border-box sized */
+    height: calc(var(--jp-private-csvviewer-toolbar-height) + var(--jp-border-width));
+    background: var(--jp-toolbar-background);
+    z-index: 1;
+    box-shadow: var(--jp-toolbar-box-shadow);
+}
+
+.jp-CSVToolbar .jp-CSVToolbar-label {
+    color: var(--jp-ui-font-color1);
+    font-size: var(--jp-ui-font-size1);
+    line-height: var(--jp-private-csvviewer-toolbar-height);
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+
+.jp-CSVToolbar .jp-CSVToolbar-dropdown {
+    flex: 0 0 auto;
+    vertical-align: middle;
+    border: var(--jp-border-width) solid var(--jp-border-color1);
+    border-radius: 0;
+    outline: none;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
 
 .jp-GitSessions {
   display: flex;
@@ -24,12 +56,175 @@
   font-size: var(--jp-ui-font-size0);
 }
 
+.jp-GitSessions-header_past_commits {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  margin: var(--jp-toolbar-header-margin);
+}
+.jp-GitSessions-headercurbutton {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 50px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-GitSessions-headercurbutton:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-GitSessions-headercurbutton:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+.jp-GitSessions-headershiftrightbutton {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  text-align: center;
+}
+
+.jp-GitSessions-headershiftrightbutton:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-GitSessions-headershiftrightbutton:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+
+.jp-GitSessions-headershiftleftbutton {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  font-weight: 400;
+}
+
+.jp-GitSessions-headershiftleftbutton:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-GitSessions-headershiftleftbutton:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+
 
 .jp-GitSessions-header {
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
   margin: var(--jp-toolbar-header-margin);
+}
+
+.jp-GitSessions-headerSwitchBranch {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 100px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image: var(--jp-icon-json);/*currently just use a json icon to represent*/
+  background-size: 16px;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  font-weight: 400;
+}
+
+.jp-GitSessions-headerSwitchBranch:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-GitSessions-headerSwitchBranch:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+.jp-GitSessions-headerNewTerminal {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 50px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image: var(--jp-icon-terminal);/*currently just use a json icon to represent*/
+  background-size: 16px;
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-GitSessions-headerNewTerminal:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-GitSessions-headerNewTerminal:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
 }
 
 
@@ -234,6 +429,20 @@
   letter-spacing: 1px;
 }
 
+.jp-GitSessions-sectionGitWholeContainer {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+.jp-GitSessions-sectionTopContainer {
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  margin: var(--jp-toolbar-header-margin);
+}
 
 .jp-GitSessions-sectionContainer {
   flex: 1 1 auto;
@@ -241,6 +450,97 @@
   padding: 0;
   overflow: auto;
 }
+
+.jp-GitSessions-pastcommitinfosectionHeader {
+  flex: 0 0 auto;
+  margin: 4px 0px;
+  padding: 4px 12px;
+  font-weight: 600;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 1px;
+}
+
+
+
+
+.jp-GitSessions-pastcommitsection {
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  margin: var(--jp-toolbar-header-margin);
+}
+.jp-GitSessions-sectionPastCommitContainer {
+  max-width: 225px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  direction: rtl;
+}
+
+.jp-GitSessions-sectionPastCommitList {
+  margin: 0;
+  padding: 0;
+  /*float:right;*/
+  list-style-type: none;
+
+}
+
+.jp-GitSessions-sectionPastSingleCommitContainer{
+  flex: 0 0 auto;
+  min-width: 50px;
+  min-height: 50px;
+  max-width: 50px;
+  max-height: 50px;
+  background-color: var(--jp-layout-color0);
+
+}
+.jp-GitSessions-sectionPastCommitButton{
+  width: 45px;
+  height: 30px;
+  background-color: rgba(53,53,153,.1);;
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+.jp-GitSessions-sectionPastCommitButton:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-GitSessions-sectionPastCommitButton:active {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+.jp-GitSessions-sectionPastCommitSelectedButton{
+  width: 45px;
+  height: 30px;
+  background-color: white;
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: none;
+  z-index: 1; /* raise overlapping border */
+}
+
+.jp-GitSessions-pastcommitinfoLabel{
+  font-size: var(--jp-ui-font-size1);
+  flex: 1 1 auto;
+  margin-right: 4px;
+  padding-left: 4px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  border-radius: 2px;
+  transition: background-color 0.1s ease;
+}
+
+
+
 
 
 .jp-GitSessions-sectionList {
@@ -290,31 +590,34 @@
   background-image: var(--jp-icon-terminal);
 }
 .jp-GitSessions-itemIcon.jp-OpenFolderIcon {
-  background-image: var(--jp-icon-landingfolder);
+  background-image: var(--jp-icon-directory);
 }
 .jp-GitSessions-itemIcon.jp-FileIcon {
   background-image: var(--jp-icon-file);
 }
 .jp-GitSessions-itemIcon.jp-YamlIcon {
-  background-image: var(--jp-icon-yaml-selected);
+  background-image: var(--jp-icon-yaml);
 }
 .jp-GitSessions-itemIcon.jp-MarkdownIcon {
-  background-image: var(--jp-icon-markdown-selected);
+  background-image: var(--jp-icon-markdown);
 }
 .jp-GitSessions-itemIcon.jp-ImageIcon {
-  background-image: var(--jp-icon-image-selected);
+  background-image: var(--jp-icon-image);
 }
 .jp-GitSessions-itemIcon.jp-SpreadsheetIcon {
-  background-image: var(--jp-icon-spreadsheet-selected);
+  background-image: var(--jp-icon-spreadsheet);
 }
 .jp-GitSessions-itemIcon.jp-JSONIcon {
-  background-image: var(--jp-icon-json-selected);
+  background-image: var(--jp-icon-json);
+}
+.jp-GitSessions-itemIcon.jp-homeIcon {
+  background-image: var(--jp-icon-home);
 }
 .jp-GitSessions-itemIcon.jp-PythonIcon {
-  background-image: var(--jp-icon-python-selected);
+  background-image: var(--jp-icon-python);
 }
 .jp-GitSessions-itemIcon.jp-RKernelIcon {
-  background-image: var(--jp-icon-r-selected);
+  background-image: var(--jp-icon-r);
 }
 
 
