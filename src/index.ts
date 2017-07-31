@@ -746,7 +746,7 @@ class GitSessions extends Widget {
             buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Create'})]
           }).then(result => {
             let msg = (input.node as HTMLInputElement).value ;
-            if(result.button.accept&&msg){
+            if(result.accept&&msg){
               target_branch = msg;
               new_check = true;
               git_temp.checkout(true, new_check, target_branch, false, null, current_fb_path).then(response=>{
@@ -823,12 +823,6 @@ class GitSessions extends Widget {
 
     let new_terminal = DOMUtils.findElement(this.node, NEW_TERMINAL_CLASS);
     let refresh = DOMUtils.findElement(this.node, REFRESH_CLASS);
-    let terminal = DOMUtils.findElement(this.node,TERMINAL_CLASS);
-    let pull = DOMUtils.findElement(this.node,PULL_CLASS);
-    let push = DOMUtils.findElement(this.node,PUSH_CLASS);
-    let tutorial = DOMUtils.findElement(this.node,TUTORIAL_CLASS);
-    let diff = DOMUtils.findElement(this.node,DIFF_CLASS);
-    let log = DOMUtils.findElement(this.node,LOG_CLASS);
 
     let renderer = this._renderer;
     let clientX = event.clientX;
@@ -883,12 +877,12 @@ class GitSessions extends Widget {
         showDialog({
             title: 'Input commit message:',
             body: input,
-            focusNodeSelector: 'input',
+         
             buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Commit'})]
         }).then(result => {
           let msg = (input.node as HTMLInputElement).value ;
           console.log(msg);
-            if (result.button.accept&&msg) {
+            if (result.accept&&msg) {
                 git_temp.commit(msg, current_root_repo_path).then(response=>{
                   this.refresh();
                   this.refresh_past_commit_list();
@@ -927,7 +921,7 @@ class GitSessions extends Widget {
             body: "Do you really want to discard all uncommitted changes?",
             buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
           }).then(result => {
-            if (result.button.accept) {
+            if (result.accept) {
                 git_temp.checkout(false,false, null,true,null,current_root_repo_path).then(response=>{
                   this.refresh();
                 });
@@ -954,7 +948,7 @@ class GitSessions extends Widget {
               body: "Do you really want to discard the uncommitted changes in this file?",
               buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
             }).then(result => {
-              if (result.button.accept) {
+              if (result.accept) {
                 git_temp.checkout(false, false, null, false,node.title,current_root_repo_path).then(response=>{
                   this.refresh();
                 });
@@ -1905,7 +1899,7 @@ function addCommands(app: JupyterLab) {
   function underGit(): boolean {
     return tracker.currentWidget !== null;
   }
-*/
+*/let git_temp = new Git();
   // Add terminal commands.
   commands.addCommand(CommandIDs.git_terminal, {
     label: 'Open Terminal',
@@ -1925,6 +1919,9 @@ function addCommands(app: JupyterLab) {
     caption: 'Incorporates changes from a remote repository into the current branch',
     execute: args => {
       console.log("git pull");
+      let upstream = prompt("Enter Upstream Branch Name");
+      let master = prompt("Enter Master Branch Name");
+      git_temp.pull(upstream,master,current_fb_path);
     }
   });
 
@@ -1933,6 +1930,9 @@ function addCommands(app: JupyterLab) {
     caption: 'Update remote refs along with associated objects',
     execute: () => {
       console.log("git push");
+      let upstream = prompt("Enter Upstream Branch Name");
+      let master = prompt("Enter Master Branch Name");
+      git_temp.push(upstream,master,current_fb_path);
     },
   });
 
@@ -1941,9 +1941,17 @@ function addCommands(app: JupyterLab) {
     caption: " Create an empty Git repository or reinitialize an existing one",
     execute: () => {
       console.log("git init");
+      showDialog({
+            title: 'Initialize a Repository',
+            body: "Do you really want to make this directory a Git Repo?",
+            buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Yes'})]
+          }).then(result => {
+            if (result.accept) {
+                git_temp.init(current_fb_path);
+            }
+          }); 
     },
   });
-
 }
 
 
