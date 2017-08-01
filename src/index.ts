@@ -277,6 +277,11 @@ class GitSessions extends Widget {
       let pastcommitsWholeContainer = this._renderer.createpastcommitsNode();
       pastcommitsNode.appendChild(pastcommitsWholeContainer);
       let pastcommitsList = DOMUtils.findElement(pastcommitsNode, PAST_COMMIT_LIST_CLASS);
+      
+      let cur_work = document.createElement('button');
+      cur_work.className = CUR_BUTTON_CLASS;
+      cur_work.textContent = 'CUR';
+      pastcommitsList.appendChild(cur_work);
 
       (git_temp.log('')).then(response=> {
         if(response.code==0){
@@ -450,6 +455,11 @@ class GitSessions extends Widget {
     let pastcommitsList = document.createElement('ul');
     pastcommitsList.className = PAST_COMMIT_LIST_CLASS;
     pastcommitsContainer.appendChild(pastcommitsList);
+
+    let cur_work = document.createElement('button');
+    cur_work.className = CUR_BUTTON_CLASS;
+    cur_work.textContent = 'CUR';
+    pastcommitsList.appendChild(cur_work);
 
     let git_temp = new Git();
     (git_temp.log(current_fb_path)).then(response=> {
@@ -831,6 +841,13 @@ class GitSessions extends Widget {
       console.log("left shift");
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop-200});
       $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft-200});
+      if(pastcommitsContainer.scrollLeft==0){
+        pastcommits_left_button.style.display = "none";
+        pastcommits_right_button.style.display = "block";
+      }
+      else{
+        pastcommits_right_button.style.display = "block";
+      }
     }
 
     //check for commit list right shift
@@ -838,6 +855,13 @@ class GitSessions extends Widget {
       console.log("right shift");
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop+200});
       $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft+200});
+      if(pastcommitsContainer.scrollLeft>=pastcommitsContainer.scrollWidth-200){
+        pastcommits_right_button.style.display = "none";
+        pastcommits_left_button.style.display = "block";
+      }
+      else{
+        pastcommits_left_button.style.display = "block";
+      }
     }
 
     let git_temp = new Git();
@@ -1468,12 +1492,12 @@ namespace GitSessions {
       shift_right.textContent = '>';
       shift_right.className = SHIFT_RIGHT_BUTTON_CLASS;
       pastcommitsWholeContainer.appendChild(shift_right);
-
+/*
       let cur_work = document.createElement('button');
       cur_work.className = CUR_BUTTON_CLASS;
       cur_work.textContent = 'CUR';
       pastcommitsWholeContainer.appendChild(cur_work);
-
+*/
       return pastcommitsWholeContainer;
     }
 
@@ -1890,6 +1914,7 @@ namespace CommandIDs {
 export
 function addCommands(app: JupyterLab) {
   let { commands} = app;
+  let git_temp = new Git();
 
   /**
    * Whether under a git repo.
@@ -1918,6 +1943,9 @@ function addCommands(app: JupyterLab) {
     caption: 'Incorporates changes from a remote repository into the current branch',
     execute: args => {
       console.log("git pull");
+      let upstream = prompt("Enter Upstream Branch Name");
+      let master = prompt("Enter Master Branch Name");
+      git_temp.pull(upstream,master,current_fb_path);
     }
   });
 
@@ -1926,6 +1954,10 @@ function addCommands(app: JupyterLab) {
     caption: 'Update remote refs along with associated objects',
     execute: () => {
       console.log("git push");
+      let upstream = prompt("Enter Upstream Branch Name");
+      let master = prompt("Enter Master Branch Name");
+      git_temp.push(upstream,master,current_fb_path);
+
     },
   });
 
@@ -1934,6 +1966,15 @@ function addCommands(app: JupyterLab) {
     caption: " Create an empty Git repository or reinitialize an existing one",
     execute: () => {
       console.log("git init");
+      showDialog({
+        title: 'Initialize a Repository',
+        body: "Do you really want to make this directory a Git Repo?",
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Yes'})]
+        }).then(result => {
+          if (result.button.accept) {
+            git_temp.init(current_fb_path);
+          }
+        });
     },
   });
 

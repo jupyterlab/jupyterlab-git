@@ -319,6 +319,18 @@ export class Git {
 		return HTTP_Git_Request('/git/reset','POST',{"reset_all": check, "filename":filename, "top_repo_path": path});
 	}
 
+	pull(origin: string, master: string, path:string) {
+		return HTTP_Git_Request('/git/pull', 'POST', {"origin": origin, "master":master,"top_repo_path": path});
+	}
+
+	push(origin: string, master: string, path:string) {
+		return HTTP_Git_Request('/git/push', 'POST', {"origin": origin, "master":master,"top_repo_path": path});
+	}
+	init(path:string){
+		//return HTTP_Git_Request('/git/init','POST',{"top_repo_path":path});
+	}
+
+
 }
 
 

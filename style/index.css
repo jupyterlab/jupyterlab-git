@@ -64,6 +64,34 @@
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   margin: var(--jp-toolbar-header-margin);
 }
+
+.jp-GitSessions-headercurbutton{
+  width: 35px;
+  height: 35px;
+  /*background-color: rgba(53,53,153,.1);*/
+  background-image: url(git_button_circles/edit-circle-selected.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border-radius: 50%;
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+.jp-GitSessions-headercurbutton:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1; /* raise overlapping border */
+}
+
+
+.jp-GitSessions-headercurbutton:selected {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+/*
 .jp-GitSessions-headercurbutton {
   flex: 1 1 auto;
   height: var(--jp-private-running-button-height);
@@ -85,7 +113,7 @@
   background-color: var(--jp-layout-color0);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: 1px solid var(--jp-toolbar-border-color);
-  z-index: 1; /* raise overlapping border */
+  z-index: 1; 
 }
 
 
@@ -93,7 +121,8 @@
   border: 1px solid var(--jp-toolbar-border-color);
   background-color: var(--jp-toolbar-active-background);
   box-shadow: var(--jp-toolbar-box-shadow);
-}
+}*/
+
 .jp-GitSessions-headershiftrightbutton {
   flex: 1 1 auto;
   height: var(--jp-private-running-button-height);
@@ -349,10 +378,15 @@
 
 }
 .jp-GitSessions-sectionPastCommitButton{
-  width: 45px;
-  height: 30px;
-  background-color: rgba(53,53,153,.1);;
+  width: 35px;
+  height: 35px;
+  /*background-color: rgba(53,53,153,.1);*/
+  background-image: url(git_button_circles/normal-circle-selected.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
   box-shadow: var(--jp-toolbar-box-shadow);
+  border-radius: 50%;
   border: 1px solid var(--jp-toolbar-border-color);
   z-index: 1; /* raise overlapping border */
 }
@@ -462,7 +496,10 @@
   background-image: var(--jp-icon-json);
 }
 .jp-GitSessions-itemIcon.jp-homeIcon {
-  background-image: var(--jp-icon-home);
+  background-image: url(git_button_circles/home.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
 }
 .jp-GitSessions-itemIcon.jp-PythonIcon {
   background-image: var(--jp-icon-python);

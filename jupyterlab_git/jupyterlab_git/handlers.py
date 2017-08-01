@@ -129,7 +129,7 @@ class Git_pull_handler(Git_handler):
         top_repo_path = my_data["top_repo_path"]
         my_output = self.git.pull(origin,master,top_repo_path)
         self.finish(my_output)
-        print("You Pull")
+        print("You Pulled")
 
 class Git_push_handler(Git_handler):
     def post(self):
@@ -140,6 +140,13 @@ class Git_push_handler(Git_handler):
         my_output = self.git.push(origin,master,top_repo_path)
         self.finish(my_output)
         print("You Pushed")
+
+class Git_init_handler(Git_handler):
+    def post(self):
+        my_data = json.loads(self.request.body)
+        top_repo_path = my_data["top_repo_path"]
+        my_output=self.git.init(top_repo_path)
+        self.finish(my_output)
 
 def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/showtoplevel', Git_showtoplevel_handler)])
@@ -155,3 +162,4 @@ def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/diff', Git_diff_handler)])
     web_app.add_handlers('.*', [('/git/log', Git_log_handler)])
     web_app.add_handlers('.*', [('/git/log_1', Git_log_1_handler)])
+    web_app.add_handlers('.*', [('/git/init', Git_init_handler)])

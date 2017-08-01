@@ -169,13 +169,15 @@ class Git:
         return my_output
       
     def pull(self, origin, master,top_repo_path):
-        my_output_1 = subprocess.check_output(["git", "fetch", "--all"], cwd = top_repo_path)
-        str1 = origin +"/"+master
-        my_output = subprocess.check_output(["git", "reset","--hard", str1], cwd = top_repo_path)
+        my_output = subprocess.check_output(["git", "pull",origin,master,"--no-commit"], cwd = top_repo_path)
         print("Hi there! post extensions!!")
         return my_output
 
     def push(self, origin, master,top_repo_path):
         my_output = subprocess.check_output(["git", "push", origin,master], cwd = top_repo_path)
         print("Hi there! post extensions!!")
+        return my_output
+
+    def init(self,top_repo_path):
+        my_output = subprocess.check_output(["git", "init"],cwd = top_repo_path)
         return my_output
