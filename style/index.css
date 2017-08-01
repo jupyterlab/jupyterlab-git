@@ -133,7 +133,10 @@
   background: var(--jp-layout-color1);
   border: none;
   outline: 0;
-  display: block;
+  display: inline-block;
+  top:0;
+  right:0;
+  z-index: 20;
   vertical-align: middle;
   background-repeat: no-repeat;
   text-align: center;
@@ -163,7 +166,10 @@
   background: var(--jp-layout-color1);
   border: none;
   outline: 0;
-  display: block;
+  top:0;
+  left:0;
+  z-index: 20;
+  display: inline-block;
   vertical-align: middle;
   background-repeat: no-repeat;
   font-weight: 400;
@@ -352,7 +358,7 @@
   margin: var(--jp-toolbar-header-margin);
 }
 .jp-GitSessions-sectionPastCommitContainer {
-  max-width: 225px;
+  max-width: 240px;
   margin: 0;
   padding: 0;
   overflow: hidden;

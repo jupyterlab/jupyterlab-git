@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 21.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 22 22" style="enable-background:new 0 0 22 22;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#434343;}
+	.st1{fill:#E0E0E0;}
+</style>
+<title>head-circle</title>
+<circle class="st0" cx="11" cy="11" r="11"/>
+<g>
+	<path class="st1" d="M11,5.2c3.2,0,5.8,2.6,5.8,5.8s-2.6,5.8-5.8,5.8S5.2,14.2,5.2,11S7.8,5.2,11,5.2 M11,2.2
+		c-4.9,0-8.8,3.9-8.8,8.8s3.9,8.8,8.8,8.8s8.8-3.9,8.8-8.8S15.9,2.2,11,2.2L11,2.2z"/>
+</g>
+<circle class="st0" cx="11" cy="11" r="6.5"/>
+<circle class="st0" cx="11" cy="11" r="2.2"/>
+</svg>

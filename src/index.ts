@@ -1,4 +1,3 @@
-
 import {
   ServiceManager, Session, TerminalSession
 } from '@jupyterlab/services';
@@ -31,9 +30,11 @@ import {
   PathExt //URLExt
 } from '@jupyterlab/coreutils';
 /*
+import * as vdom from '@phosphor/virtualdom';
+
 import {
-  ServerConnection
-} from '@jupyterlab/services';
+  VDomModel, VDomRenderer
+} from '@jupyterlab/apputils';
 */
 import {
   ConsolePanel
