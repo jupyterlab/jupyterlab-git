@@ -45,7 +45,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo
+  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo, SingleCommitFilePathInfo
 } from './git'
 
 import '../style/index.css';
@@ -1012,6 +1012,12 @@ class GitSessions extends Widget {
     let clientY = event.clientY;
     
     let git_temp = new Git();
+    let ll = app0.shell.widgets('left');
+    let fb = ll.next();
+    while(fb.id!='filebrowser'){
+      fb = ll.next();
+    }
+
 
     // Check for a past commit item click.
     if(ElementExt.hitTest(currentworkbutton, clientX, clientY)){
@@ -1052,17 +1058,27 @@ class GitSessions extends Widget {
           label_node.textContent = 'Date: '+past_commit.getAttribute('date');
           label_node = label_node.nextSibling;
           label_node.textContent = past_commit.getAttribute('commit_msg');
+          label_node = label_node.nextSibling;
+          label_node.textContent = "";
 
           pastcommitinfoContainer.removeChild(pastcommitinfoContainer.firstChild);
           let pastcommitinfoList = document.createElement('ul');
           pastcommitinfoList.className = LIST_CLASS;
           pastcommitinfoContainer.appendChild(pastcommitinfoList);
 
-          for (var i=0; i<3; i++){
-              let node = renderer.createPastCommitInforFileNode('src/index.ts');
-              node.classList.add(ITEM_CLASS);
-              pastcommitinfoList.appendChild(node);
-          }
+          git_temp.log_1(past_commit.getAttribute('commit'), fb.model.path).then(response=>{
+            if(response.code==0){
+              let m_f = (response as SingleCommitFilePathInfo).modified_files;
+              if(m_f.length>0){
+                for (var i=0; i<m_f.length; i++){
+                  let node = renderer.createPastCommitInforFileNode(m_f[i].modified_file_path, m_f[i].insertion, m_f[i].deletion);
+                  node.classList.add(ITEM_CLASS);
+                  pastcommitinfoList.appendChild(node);
+                }
+                label_node.textContent = response.modified_file_note;
+              }
+            }
+          });
 
           pastcommitinfoContainer.hidden = false;
           pastcommitinfoHeader.hidden = false;
@@ -1080,11 +1096,7 @@ class GitSessions extends Widget {
         return;
       }
     }
-    let ll = app0.shell.widgets('left');
-    let fb = ll.next();
-    while(fb.id!='filebrowser'){
-      fb = ll.next();
-    }
+
 
 
       
@@ -1263,7 +1275,7 @@ namespace GitSessions {
 
     createpastcommitinfoHeaderNode():HTMLElement;
     createPastCommitNode(commit_info:SingleCommitInfo, num: number): HTMLSpanElement;
-    createPastCommitInforFileNode(path:string): HTMLLIElement;
+    createPastCommitInforFileNode(path:string, insertion_num:string, deletion_num:string): HTMLLIElement;
     /**
      * Get the shutdown node for a terminal node.
      *
@@ -1488,12 +1500,12 @@ namespace GitSessions {
       commit_msg.className = PAST_COMMIT_INFO_LABEL_CLASS;
       commit_msg.textContent = 'commit msg';
       node.appendChild(commit_msg);
-/*
+
       let commit_info = document.createElement('div');
       commit_info.className = PAST_COMMIT_INFO_LABEL_CLASS;
-      commit_info.textContent = '1 file changed';
+      commit_info.textContent = 'modified_file_note';
       node.appendChild(commit_info);
-*/
+
       return node;  
     }
     /**
@@ -1665,7 +1677,7 @@ namespace GitSessions {
       node.setAttribute('author',commit_info.author);
       node.setAttribute('date', commit_info.date);
       node.setAttribute('commit_msg', commit_info.commit_msg);
-      node.setAttribute('file_changed','1');
+      node.setAttribute('modified_file_note',commit_info.modified_file_note);
       node.setAttribute("file_path", 'src/index.ts');
       node.setAttribute('open', 'no');
       past_commit_container.appendChild(node);
@@ -1673,13 +1685,14 @@ namespace GitSessions {
       return past_commit_container;
     }
     
-    createPastCommitInforFileNode(path:string): HTMLLIElement{
+    createPastCommitInforFileNode(path:string, insertion_num: string, deletion_num: string): HTMLLIElement{
       let node = document.createElement('li');
       let icon = document.createElement('span');
       icon.className = `${ITEM_ICON_CLASS} ${parseFileExtension(path)}`;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
-      label.textContent = path;
+
+      label.textContent = path + " :"+ insertion_num+"(+), "+deletion_num+"(-) ";
       node.title = path;
       node.appendChild(icon);
       node.appendChild(label);

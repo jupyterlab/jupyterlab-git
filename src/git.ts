@@ -108,6 +108,15 @@ export interface SingleCommitInfo {
 		modified_file_path: string,
 	}]
 }
+export interface SingleCommitFilePathInfo {
+	code:number;
+	modified_file_note?: string,
+	modified_files?: [{
+		modified_file_path: string,
+		insertion: string;
+		deletion: string
+	}]
+}
 
 export interface GitLogResult {
 	code: number;
@@ -215,6 +224,23 @@ export class Git {
 	async log(path: string):Promise<GitLogResult> {
 		try{
 			var val = await HTTP_Git_Request('/git/log', 'POST', {"current_path": path});
+			if(val.xhr.status!== 200) {
+				console.log(val.xhr.status)
+				throw ServerConnection.makeError(val);
+			}
+			if(val.data.code!=0){
+				console.log("Git Command Error:")
+				console.log(val.data.message);
+			}
+			return val.data;
+		} catch (err) {
+			throw ServerConnection.makeError(err);
+		}
+	}
+
+	async log_1(hash: string, path: string):Promise<SingleCommitFilePathInfo> {
+		try{
+			var val = await HTTP_Git_Request('/git/log_1', 'POST', {"selected_hash":hash,"current_path": path});
 			if(val.xhr.status!== 200) {
 				console.log(val.xhr.status)
 				throw ServerConnection.makeError(val);

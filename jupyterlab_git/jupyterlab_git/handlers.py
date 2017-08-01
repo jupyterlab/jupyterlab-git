@@ -47,6 +47,14 @@ class Git_log_handler(Git_handler):
         result = self.git.log(current_path)
         self.finish(json.dumps(result))
 
+class Git_log_1_handler(Git_handler):
+    def post(self):
+        my_data = json.loads(self.request.body)
+        selected_hash = my_data["selected_hash"]
+        current_path = my_data["current_path"]
+        result = self.git.log_1(selected_hash, current_path)
+        self.finish(json.dumps(result))
+
 class Git_diff_handler(Git_handler):
     def post(self):
         my_data = json.loads(self.request.body)
@@ -146,3 +154,4 @@ def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/push', Git_push_handler)])
     web_app.add_handlers('.*', [('/git/diff', Git_diff_handler)])
     web_app.add_handlers('.*', [('/git/log', Git_log_handler)])
+    web_app.add_handlers('.*', [('/git/log_1', Git_log_1_handler)])

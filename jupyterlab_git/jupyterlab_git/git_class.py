@@ -47,6 +47,24 @@ class Git:
         else:
             return {"code":p.returncode, "message":my_error.decode('utf-8')}
 
+    def log_1(self, selected_hash, current_path):
+        p = Popen(["git", "log","-1", "--stat", "--numstat", "--oneline",selected_hash], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
+        my_output,my_error = p.communicate()
+        if(p.returncode==0):
+            result = []
+            note = ""
+            line_array = my_output.decode('utf-8').splitlines()
+            length = len(line_array)
+            if(length>1):
+                note = line_array[length-1]
+                for num in range(1, int(length/2)):
+                    line_info = line_array[num].split()
+                    result.append({"modified_file_path":line_info[2], "insertion": line_info[0], "deletion": line_info[1]})
+
+            return {"code": p.returncode, "modified_file_note": note, "modified_files":result}
+        else:
+            return {"code":p.returncode, "message":my_error.decode('utf-8')}
+
     def diff(self,top_repo_path):
         p = Popen(["git", "diff","--numstat"], stdout=PIPE, stderr=PIPE, cwd = top_repo_path)
         my_output,my_error = p.communicate()
