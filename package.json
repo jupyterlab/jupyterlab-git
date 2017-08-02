@@ -30,7 +30,8 @@
     "@jupyterlab/theming": "^0.9.0",
     "jquery": "^2.2.0",
     "react": "^15.6.1",
-    "react-dom": "^15.6.1"
+    "react-dom": "^15.6.1",
+    "react-widgets": "^3.4.8"
   },
   "devDependencies": {
     "rimraf": "^2.6.1",

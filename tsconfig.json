@@ -3,13 +3,14 @@
     "declaration": true,
     "noImplicitAny": false,
     "noEmitOnError": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
     "outDir": "./lib",
     "lib": ["ES5", "ES2015.Promise", "DOM"],
-    "types": []
+    "types": [],
+    "jsx": "react"
   },
   "include": ["src/*"]
 }
