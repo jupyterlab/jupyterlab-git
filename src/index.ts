@@ -1,4 +1,3 @@
-
 import {
   ServiceManager, Session, TerminalSession
 } from '@jupyterlab/services';
@@ -12,11 +11,11 @@ import {
 } from '@phosphor/domutils';
 
 import {
-  Widget
+  Widget, Menu
 } from '@phosphor/widgets';
 
 import {
-  DOMUtils, Dialog, showDialog,Styling
+  DOMUtils, Dialog, showDialog,Styling, IMainMenu
 } from '@jupyterlab/apputils';
 
 import {
@@ -31,20 +30,23 @@ import {
   PathExt //URLExt
 } from '@jupyterlab/coreutils';
 /*
+import * as vdom from '@phosphor/virtualdom';
+
 import {
-  ServerConnection
-} from '@jupyterlab/services';
+  VDomModel, VDomRenderer
+} from '@jupyterlab/apputils';
 */
 import {
   ConsolePanel
 } from '@jupyterlab/console';
+
 
 import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
-  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo
+  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo, SingleCommitFilePathInfo
 } from './git'
 
 import '../style/index.css';
@@ -276,6 +278,11 @@ class GitSessions extends Widget {
       let pastcommitsWholeContainer = this._renderer.createpastcommitsNode();
       pastcommitsNode.appendChild(pastcommitsWholeContainer);
       let pastcommitsList = DOMUtils.findElement(pastcommitsNode, PAST_COMMIT_LIST_CLASS);
+      
+      let cur_work = document.createElement('button');
+      cur_work.className = CUR_BUTTON_CLASS;
+      cur_work.textContent = 'CUR';
+      pastcommitsList.appendChild(cur_work);
 
       (git_temp.log('')).then(response=> {
         if(response.code==0){
@@ -450,6 +457,11 @@ class GitSessions extends Widget {
     pastcommitsList.className = PAST_COMMIT_LIST_CLASS;
     pastcommitsContainer.appendChild(pastcommitsList);
 
+    let cur_work = document.createElement('button');
+    cur_work.className = CUR_BUTTON_CLASS;
+    cur_work.textContent = 'CUR';
+    pastcommitsList.appendChild(cur_work);
+
     let git_temp = new Git();
     (git_temp.log(current_fb_path)).then(response=> {
         if(response.code==0){
@@ -536,7 +548,6 @@ class GitSessions extends Widget {
           select.appendChild(option);
         }
         let new_branch_option = document.createElement('option');
-        new_branch_option.className = `${ADD_BUTTON_CLASS} jp-mod-styled`;
         new_branch_option.textContent = "Create a new branch";
         select.appendChild(new_branch_option);
 
@@ -831,6 +842,13 @@ class GitSessions extends Widget {
       console.log("left shift");
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop-200});
       $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft-200});
+      if(pastcommitsContainer.scrollLeft==0){
+        pastcommits_left_button.style.display = "none";
+        pastcommits_right_button.style.display = "block";
+      }
+      else{
+        pastcommits_right_button.style.display = "block";
+      }
     }
 
     //check for commit list right shift
@@ -838,6 +856,13 @@ class GitSessions extends Widget {
       console.log("right shift");
       $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop+200});
       $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft+200});
+      if(pastcommitsContainer.scrollLeft>=pastcommitsContainer.scrollWidth-200){
+        pastcommits_right_button.style.display = "none";
+        pastcommits_left_button.style.display = "block";
+      }
+      else{
+        pastcommits_left_button.style.display = "block";
+      }
     }
 
     let git_temp = new Git();
@@ -1012,6 +1037,12 @@ class GitSessions extends Widget {
     let clientY = event.clientY;
     
     let git_temp = new Git();
+    let ll = app0.shell.widgets('left');
+    let fb = ll.next();
+    while(fb.id!='filebrowser'){
+      fb = ll.next();
+    }
+
 
     // Check for a past commit item click.
     if(ElementExt.hitTest(currentworkbutton, clientX, clientY)){
@@ -1052,17 +1083,27 @@ class GitSessions extends Widget {
           label_node.textContent = 'Date: '+past_commit.getAttribute('date');
           label_node = label_node.nextSibling;
           label_node.textContent = past_commit.getAttribute('commit_msg');
+          label_node = label_node.nextSibling;
+          label_node.textContent = "";
 
           pastcommitinfoContainer.removeChild(pastcommitinfoContainer.firstChild);
           let pastcommitinfoList = document.createElement('ul');
           pastcommitinfoList.className = LIST_CLASS;
           pastcommitinfoContainer.appendChild(pastcommitinfoList);
 
-          for (var i=0; i<3; i++){
-              let node = renderer.createPastCommitInforFileNode('src/index.ts');
-              node.classList.add(ITEM_CLASS);
-              pastcommitinfoList.appendChild(node);
-          }
+          git_temp.log_1(past_commit.getAttribute('commit'), fb.model.path).then(response=>{
+            if(response.code==0){
+              let m_f = (response as SingleCommitFilePathInfo).modified_files;
+              if(m_f.length>0){
+                for (var i=0; i<m_f.length; i++){
+                  let node = renderer.createPastCommitInforFileNode(m_f[i].modified_file_path, m_f[i].insertion, m_f[i].deletion);
+                  node.classList.add(ITEM_CLASS);
+                  pastcommitinfoList.appendChild(node);
+                }
+                label_node.textContent = response.modified_file_note;
+              }
+            }
+          });
 
           pastcommitinfoContainer.hidden = false;
           pastcommitinfoHeader.hidden = false;
@@ -1080,11 +1121,7 @@ class GitSessions extends Widget {
         return;
       }
     }
-    let ll = app0.shell.widgets('left');
-    let fb = ll.next();
-    while(fb.id!='filebrowser'){
-      fb = ll.next();
-    }
+
 
 
       
@@ -1263,7 +1300,7 @@ namespace GitSessions {
 
     createpastcommitinfoHeaderNode():HTMLElement;
     createPastCommitNode(commit_info:SingleCommitInfo, num: number): HTMLSpanElement;
-    createPastCommitInforFileNode(path:string): HTMLLIElement;
+    createPastCommitInforFileNode(path:string, insertion_num:string, deletion_num:string): HTMLLIElement;
     /**
      * Get the shutdown node for a terminal node.
      *
@@ -1456,12 +1493,12 @@ namespace GitSessions {
       shift_right.textContent = '>';
       shift_right.className = SHIFT_RIGHT_BUTTON_CLASS;
       pastcommitsWholeContainer.appendChild(shift_right);
-
+/*
       let cur_work = document.createElement('button');
       cur_work.className = CUR_BUTTON_CLASS;
       cur_work.textContent = 'CUR';
       pastcommitsWholeContainer.appendChild(cur_work);
-
+*/
       return pastcommitsWholeContainer;
     }
 
@@ -1488,12 +1525,12 @@ namespace GitSessions {
       commit_msg.className = PAST_COMMIT_INFO_LABEL_CLASS;
       commit_msg.textContent = 'commit msg';
       node.appendChild(commit_msg);
-/*
+
       let commit_info = document.createElement('div');
       commit_info.className = PAST_COMMIT_INFO_LABEL_CLASS;
-      commit_info.textContent = '1 file changed';
+      commit_info.textContent = 'modified_file_note';
       node.appendChild(commit_info);
-*/
+
       return node;  
     }
     /**
@@ -1665,7 +1702,7 @@ namespace GitSessions {
       node.setAttribute('author',commit_info.author);
       node.setAttribute('date', commit_info.date);
       node.setAttribute('commit_msg', commit_info.commit_msg);
-      node.setAttribute('file_changed','1');
+      node.setAttribute('modified_file_note',commit_info.modified_file_note);
       node.setAttribute("file_path", 'src/index.ts');
       node.setAttribute('open', 'no');
       past_commit_container.appendChild(node);
@@ -1673,13 +1710,14 @@ namespace GitSessions {
       return past_commit_container;
     }
     
-    createPastCommitInforFileNode(path:string): HTMLLIElement{
+    createPastCommitInforFileNode(path:string, insertion_num: string, deletion_num: string): HTMLLIElement{
       let node = document.createElement('li');
       let icon = document.createElement('span');
       icon.className = `${ITEM_ICON_CLASS} ${parseFileExtension(path)}`;
       let label = document.createElement('span');
       label.className = ITEM_LABEL_CLASS;
-      label.textContent = path;
+
+      label.textContent = path + " :"+ insertion_num+"(+), "+deletion_num+"(-) ";
       node.title = path;
       node.appendChild(icon);
       node.appendChild(label);
@@ -1810,7 +1848,7 @@ namespace GitSessions {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.running-sessions-git',
-  requires: [IServiceManager, ILayoutRestorer],
+  requires: [IServiceManager, IMainMenu, ILayoutRestorer],
   autoStart: true
 };
 
@@ -1824,7 +1862,9 @@ export default plugin;
 /**
  * Activate the running plugin.
  */
-function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutRestorer, panel: ConsolePanel,model: Session.IModel): void {
+function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, restorer: ILayoutRestorer, panel: ConsolePanel,model: Session.IModel): void {
+  const { commands} = app;
+  const category = 'Git';
   let git_plugin = new GitSessions({ manager: services });
   git_plugin.id = 'jp-git-sessions';
   git_plugin.title.label = 'Git';
@@ -1837,6 +1877,107 @@ function activate(app: JupyterLab, services: IServiceManager, restorer: ILayoutR
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(git_plugin, { rank: 200 });
+
+  addCommands(app);
+  let menu = new Menu({commands});
+  menu.title.label = category;
+  [
+    CommandIDs.git_terminal,
+    CommandIDs.git_pull,
+    CommandIDs.git_push,
+    CommandIDs.git_init
+  ].forEach(command =>{
+    menu.addItem({command});
+  });
+  mainMenu.addMenu(menu,{rank:60});
+
+}
+/**
+ * The command IDs used by the git plugin.
+ */
+namespace CommandIDs {
+  export
+  const git_terminal = 'git:create-new-terminal';
+
+  export
+  const git_pull = 'git:pull';
+
+  export
+  const git_push = 'git:push';
+
+  export
+  const git_init = 'git:init';
+
+};
+/**
+ * Add the commands for the git-plugin.
+ */
+export
+function addCommands(app: JupyterLab) {
+  let { commands} = app;
+  let git_temp = new Git();
+
+  /**
+   * Whether under a git repo.
+   */
+  /*
+  function underGit(): boolean {
+    return tracker.currentWidget !== null;
+  }
+*/
+  // Add terminal commands.
+  commands.addCommand(CommandIDs.git_terminal, {
+    label: 'Open Terminal',
+    caption: 'Start a new terminal session to directly use git command',
+    execute: args => {
+      let ll = app0.shell.widgets('left');
+      let fb = ll.next();
+      while(fb.id!='filebrowser'){
+        fb = ll.next();
+      }
+      app0.commands.execute('terminal:open', {  path:fb.model.path });
+    }
+  });
+
+  commands.addCommand(CommandIDs.git_pull, {
+    label: 'Pull',
+    caption: 'Incorporates changes from a remote repository into the current branch',
+    execute: args => {
+      console.log("git pull");
+      let upstream = prompt("Enter Upstream Branch Name");
+      let master = prompt("Enter Master Branch Name");
+      git_temp.pull(upstream,master,current_fb_path);
+    }
+  });
+
+  commands.addCommand(CommandIDs.git_push, {
+    label: 'Push',
+    caption: 'Update remote refs along with associated objects',
+    execute: () => {
+      console.log("git push");
+      let upstream = prompt("Enter Upstream Branch Name");
+      let master = prompt("Enter Master Branch Name");
+      git_temp.push(upstream,master,current_fb_path);
+
+    },
+  });
+
+  commands.addCommand(CommandIDs.git_init, {
+    label: 'Init',
+    caption: " Create an empty Git repository or reinitialize an existing one",
+    execute: () => {
+      console.log("git init");
+      showDialog({
+        title: 'Initialize a Repository',
+        body: "Do you really want to make this directory a Git Repo?",
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Yes'})]
+        }).then(result => {
+          if (result.button.accept) {
+            git_temp.init(current_fb_path);
+          }
+        });
+    },
+  });
 
 }
 
