@@ -9,11 +9,11 @@ import {
 import {
   Message
 } from '@phosphor/messaging';
-/*
+
 import {
   ElementExt
 } from '@phosphor/domutils';
-*/
+
 import {
   Widget//, Menu
 } from '@phosphor/widgets';
@@ -26,7 +26,8 @@ import {
   JupyterLab
 } from '@jupyterlab/application';
 
-/*
+
+
 import {
   PathExt //URLExt
 } from '@jupyterlab/coreutils';
@@ -36,7 +37,7 @@ import * as vdom from '@phosphor/virtualdom';
 import {
   VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
-*/
+
 
 
 
@@ -45,7 +46,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Git//, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo, SingleCommitFilePathInfo
+  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo, SingleCommitFilePathInfo
 } from './git'
 
 import '../style/index.css';
@@ -58,11 +59,11 @@ const Git_CLASS = 'jp-GitSessions';
 /**
  * The class name added to a git-plugin widget header.
  */
-//const HEADER_CLASS = 'jp-GitSessions-header';
+const HEADER_CLASS = 'jp-GitSessions-header';
 
 const SHIFT_LEFT_BUTTON_CLASS = 'jp-GitSessions-headershiftleftbutton';
 const SHIFT_RIGHT_BUTTON_CLASS = 'jp-GitSessions-headershiftrightbutton';
-//const CUR_BUTTON_CLASS = 'jp-GitSessions-headercurbutton'; 
+const CUR_BUTTON_CLASS = 'jp-GitSessions-headercurbutton'; 
 
 /**
  * The class name added to a git-plugin widget header refresh button.
@@ -71,55 +72,55 @@ const REFRESH_CLASS = 'jp-GitSessions-headerRefresh';
 /**
  * The class name added to a git-plugin widget header refresh button.
  */
-//const SWITCH_BRANCH_CLASS = 'jp-GitSessions-headerSwitchBranch';
+const SWITCH_BRANCH_CLASS = 'jp-GitSessions-headerSwitchBranch';
 /**
  * The class name added to a git-plugin widget header refresh button.
  */
-//const NEW_TERMINAL_CLASS = 'jp-GitSessions-headerNewTerminal';
+const NEW_TERMINAL_CLASS = 'jp-GitSessions-headerNewTerminal';
 /**
  * The class name added to the git-plugin terminal sessions section.
  */
-//const SECTION_CLASS = 'jp-GitSessions-section';
+const SECTION_CLASS = 'jp-GitSessions-section';
 
-//const PATH_HEADER_CLASS = 'jp-GitSessions-pathHeaderSection';
+const PATH_HEADER_CLASS = 'jp-GitSessions-pathHeaderSection';
 
-//const PAST_COMMIT_CLASS = 'jp-GitSessions-pastcommitsection';
+const PAST_COMMIT_CLASS = 'jp-GitSessions-pastcommitsection';
 
-//const PAST_COMMIT_INFO_CLASS = 'jp-GitSessions-pastcommitinfoSection';
+const PAST_COMMIT_INFO_CLASS = 'jp-GitSessions-pastcommitinfoSection';
 /**
  * The class name added to the git-plugin terminal sessions section.
  */
-//const UNCOMMITTED_CLASS = 'jp-GitSessions-uncommittedSection';
+const UNCOMMITTED_CLASS = 'jp-GitSessions-uncommittedSection';
 
 /**
  * The class name added to the git-plugin kernel sessions section.
  */
-//const UNTRACKED_CLASS = 'jp-GitSessions-untrackedSection';
+const UNTRACKED_CLASS = 'jp-GitSessions-untrackedSection';
 
-//const UNSTAGED_CLASS = 'jp-GitSessions-unstagedSection';
+const UNSTAGED_CLASS = 'jp-GitSessions-unstagedSection';
 
 /**
  * The class name added to the git-plugin sessions section header.
  */
-//const SECTION_HEADER_CLASS = 'jp-GitSessions-sectionHeader';
+const SECTION_HEADER_CLASS = 'jp-GitSessions-sectionHeader';
 
 /**
  * The class name added to a section container.
  */
-//const GIT_WHOLE_CONTAINER_CLASS = 'jp-GitSessions-sectionGitWholeContainer';
+const GIT_WHOLE_CONTAINER_CLASS = 'jp-GitSessions-sectionGitWholeContainer';
 const TOP_CONTAINER_CLASS = 'jp-GitSessions-sectionTopContainer';
-//const CONTAINER_CLASS = 'jp-GitSessions-sectionContainer';
+const CONTAINER_CLASS = 'jp-GitSessions-sectionContainer';
 const PAST_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastCommitContainer';
-//const PAST_SINGLE_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastSingleCommitContainer';
-//const PAST_COMMIT_BUTTON_CLASS = 'jp-GitSessions-sectionPastCommitButton';
+const PAST_SINGLE_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastSingleCommitContainer';
+const PAST_COMMIT_BUTTON_CLASS = 'jp-GitSessions-sectionPastCommitButton';
 //const PAST_COMMIT_SELECTED_BUTTON_CLASS = 'jp-GitSessions-sectionPastCommitSelectedButton';
 /**
  * The class name added to the git-plugin kernel sessions section list.
  */
-//const LIST_CLASS = 'jp-GitSessions-sectionList';
+const LIST_CLASS = 'jp-GitSessions-sectionList';
 
 const PAST_COMMIT_LIST_CLASS = 'jp-GitSessions-sectionPastCommitList';
-//const PAST_COMMIT_INFO_SECTION_HEADER_CLASS = 'jp-GitSessions-pastcommitinfosectionHeader';
+const PAST_COMMIT_INFO_SECTION_HEADER_CLASS = 'jp-GitSessions-pastcommitinfosectionHeader';
 const PAST_COMMIT_INFO_LABEL_CLASS = 'jp-GitSessions-pastcommitinfoLabel';
 /**
  * The class name added to the git-plugin sessions items.
@@ -157,26 +158,26 @@ const COMMIT_BUTTON_CLASS = 'jp-GitSessions-itemCommit';
 /**
  * The class name added to a notebook icon.
  */
-//const NOTEBOOK_ICON_CLASS = 'jp-mod-notebook';
+const NOTEBOOK_ICON_CLASS = 'jp-mod-notebook';
 
 /**
  * The class name added to a console icon.
  */
-//const CONSOLE_ICON_CLASS = 'jp-mod-console';
+const CONSOLE_ICON_CLASS = 'jp-mod-console';
 
 /**
  * The class name added to a file icon.
  */
-//const FILE_ICON_CLASS = 'jp-mod-file';
+const FILE_ICON_CLASS = 'jp-mod-file';
 
 /**
  * The class name added to a terminal icon.
  */
-//const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
+const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
 /**
  * The class name added to a markdown file browser item.
  */
-//const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
+const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
 
 /**
  * The class name added to a python file browser item.
@@ -186,38 +187,38 @@ const PYTHON_ICON_CLASS = 'jp-PythonIcon';
 /**
  * The class name added to a JSON file browser item.
  */
-//const JSON_ICON_CLASS = 'jp-JSONIcon';
+const JSON_ICON_CLASS = 'jp-JSONIcon';
 
 const HOME_ICON_CLASS = 'jp-homeIcon';
 /**
  * The class name added to a speadsheet file browser item.
  */
-//const SPREADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon';
+const SPREADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon';
 
 /**
  * The class name added to a R Kernel file browser item.
  */
-//const RKERNEL_ICON_CLASS = 'jp-RKernelIcon';
+const RKERNEL_ICON_CLASS = 'jp-RKernelIcon';
 
 /**
  * The class name added to a YAML file browser item.
  */
-//const YAML_ICON_CLASS = 'jp-YamlIcon';
+const YAML_ICON_CLASS = 'jp-YamlIcon';
 
 /**
  * The class added for image file browser items.
  */
-//const IMAGE_ICON_CLASS = 'jp-ImageIcon';
+const IMAGE_ICON_CLASS = 'jp-ImageIcon';
 
 /**
  * The class name added to a file type content item.
  */
-//const FILE_TYPE_CLASS = 'jp-FileIcon';
+const FILE_TYPE_CLASS = 'jp-FileIcon';
 
 /**
  * The class name added to a directory file browser item.
  */
-//const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
+const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
 /**
  * The class name added to a csv toolbar widget.
  */
@@ -233,21 +234,25 @@ const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVToolbar-dropdown';
 /**
  * The duration of auto-refresh in ms.
  */
-//const REFRESH_DURATION = 50000;
+const REFRESH_DURATION = 50000;
 
 /**
  * The enforced time between refreshes in ms.
  */
-//const MIN_REFRESH = 5000;
+const MIN_REFRESH = 5000;
 
 
-//let app0 = null;
+let app0 = null;
 let current_fb_path = '';
 //let current_repo_branch = '';
 //let current_root_repo_path = '';
 /**
  * A class that exposes the git-plugin sessions.
  */
+
+
+
+
 
 
 export
@@ -263,15 +268,11 @@ class GitSessions extends Widget {
    // this._renderer = options.renderer || GitSessions.defaultRenderer;
     this.addClass(Git_CLASS);
     //let renderer = this._renderer;
-    $(app).ready(function(){
-      let ll = app.shell.widgets('left');
-      let fb = ll.next();
-      while(fb.id!='filebrowser'){
-        fb = ll.next();
-      }
-      let current_fb_path = (fb as any).model.path;
-      ReactDOM.render(<GitSessionNode(current_fb_path) />, this.node);
-    });
+
+
+    
+      const element =<GitSessionNode path=''/>;
+      ReactDOM.render(element, this.node);
       
 
   }
@@ -473,6 +474,7 @@ export namespace CommandIDs {
 export
 function addCommands(app: JupyterLab) {
   let { commands} = app;
+  app0 = app;
   let git_temp = new Git();
 
   /**
@@ -534,87 +536,235 @@ function addCommands(app: JupyterLab) {
 
 }
 
+namespace GitSessionNode {
+  export
+  interface IState {
+    path: string;
+  }
+
+  export
+  interface IProps {
+    path: string;
+  }
+}
 
 
+class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNode.IState>{
+  constructor(props: GitSessionNode.IProps) {
+    super(props);
+    this.state = {path: ''}
+    this.refresh = this.refresh.bind(this);
+  }  
+  
+  refresh(){
+   let current_fb_path = '';
+   try{
+    let ll = app0.shell.widgets('left');
+    let fb = ll.next();
+    while(fb.id!='filebrowser'){
+      fb = ll.next();
+    }
+    current_fb_path = (fb as any).model.path;
+   }catch(err){
+     console.log("app doesn't work??")
+   };
+    this.setState({path: current_fb_path});
+ }
 
-
-class GitSessionNode extends React.Component{
-  constructor(current_fb_path:string) {
-    super();
-	}  
   render(){
+    
     return(
       <div >
-        <PathHeader />
-        <GitWholeContainer />
+        <PathHeader path={this.state.path} refresh={this.refresh}/>
+        <GitWholeContainer path={this.state.path} refresh={this.refresh}/>
       </div>
     );
   }
 }
 
-class PathHeader extends React.Component{
-  constructor() {
-    super();
-	}
+namespace PathHeader {
+  export
+  interface IState {
+    path: string;
+    refresh: any;
+  }
+
+  export
+  interface IProps {
+    path: string;
+    refresh: any;
+  }
+}
+class PathHeader extends React.Component<PathHeader.IProps, PathHeader.IState>{
+  constructor(props: PathHeader.IProps) {
+    super(props);
+    this.state = {path: props.path, refresh : props.refresh}
+  }
+
   render(){
     return (
-      React.createElement('div',{className:"TOP_CONTAINER_CLASS"},
-        React.createElement('li',{className: ITEM_CLASS}, 
-          React.createElement('span', {className:`${ITEM_ICON_CLASS} ${HOME_ICON_CLASS}`}),
-          React.createElement('span',{className: ITEM_LABEL_CLASS}, "current_path _in_filefrowser"),
-          React.createElement('button',{className: REFRESH_CLASS})
-        )
-        //React.createElement('li',{className:`${ADD_BUTTON_CLASS} jp-mod-styled`}," Git-plugin tracks the work directory in jupyterlab-filebrowser, the current folder is not under a git repository")
-      )
-    );
+        <div className={`${SECTION_CLASS} ${PATH_HEADER_CLASS}`}>
+          <li className={ITEM_CLASS}>
+            <span className={`${ITEM_ICON_CLASS} ${HOME_ICON_CLASS}`}/>
+            <span className={ITEM_LABEL_CLASS}> 
+              {this.props.path}
+              </span> 
+            <button className={REFRESH_CLASS}  onClick={()=>this.props.refresh()} />
+            </li>
+          </div>
+    )
   }
 }
 
-class GitWholeContainer extends React.Component{
-  constructor() {
-    super();
+
+
+namespace GitWholeContainer {
+  export
+  interface IState {
+    path: string;
+    refresh: any;
+  }
+
+  export
+  interface IProps {
+    path: string;
+    refresh: any;
+  }
+}
+class GitWholeContainer extends React.Component<GitWholeContainer.IProps, GitWholeContainer.IState>{
+  constructor(props: GitWholeContainer.IProps) {
+    super(props);
+    this.state = {path: props.path, refresh : props.refresh}
 	}
   render(){
     return(
       <div>
-        <BranchHeader />
-        <PastCommits />
-        <SinglePastCommitInfo />
-        <Staged />
-        <Unstaged />
-        <Untracked />
+        <BranchHeader path={this.props.path} refresh={this.props.refresh}/>
+        <PastCommits path={this.props.path} refresh={this.props.refresh}/>
+        <StatusFiles path={this.props.path} refresh={this.props.refresh}/>
         </div>
     );
   }
 }
 
+namespace BranchHeader {
+  export
+  interface IState {
+    path: string;
+    data: any;
+  }
 
-class BranchHeader extends React.Component{
-  constructor() {
-    super();
-	}
+  export
+  interface IProps {
+    path: string;
+    refresh: any;  
+  }
+}
+class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
+  constructor(props: BranchHeader.IProps) {
+    super(props);
+    this.state = {path: props.path, data: []}
+  }
+
+  async componentDidMount() {
+    let result = [];
+    let git_temp = new Git();
+    console.log("inside branchHeader componentDidMount: "+this.props.path);
+    let response = await git_temp.branch(this.props.path);
+    if(response.code==0){
+      this.setState({data: (response as GitBranchResult).repos});
+    }
+  }
+
+  async componentWillReceiveProps() {
+    let result = [];
+    let git_temp = new Git();
+    console.log("inside branchHeader componentWillReceiveProps: "+this.props.path);
+    let response = await git_temp.branch(this.props.path);
+    if(response.code==0){
+      this.setState({data: (response as GitBranchResult).repos});
+    }
+  }
+
   render(){
     return (
-      React.createElement('div', {className : CSV_TOOLBAR_CLASS},
-        React.createElement('span',{className : CSV_TOOLBAR_LABEL_CLASS},"current_branch"),
-        React.createElement('select',{className : CSV_TOOLBAR_DROPDOWN_CLASS})
-      )
+      <div  className='jp-CSVToolbar'>
+        <span className ='jp-CSVToolbar-label'> Current Branch{this.props.path}:
+        </span>,
+        <select className='jp-CSVToolbar-dropdown' >
+             {this.state.data.map((dj)=>
+              <option>
+                  {dj.name}
+              </option>
+              )}
+          </select>,  
+      </div>
     );
   }
 }
 
-class PastCommits extends React.Component{
-  constructor() {
-    super();
-	}
+
+
+namespace PastCommits {
+  export
+  interface IState {
+    data: any;
+  }
+
+  export
+  interface IProps {
+    path: string;
+    refresh: any;      
+  }
+}
+
+
+class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState>{
+
+  constructor(props: PastCommits.IProps) {
+    super(props);
+    this.state = {data: ["null"]}
+  }
+
+  printstate(){
+    console.log(this.state.data);
+  }
+
+  async componentDidMount() {
+    let result = [];
+    let git_temp = new Git();
+    let response = await git_temp.log(this.props.path);
+    if(response.code==0){
+      this.setState({data: response.commits});
+    }
+  }
+
+  async componentWillReceiveProps() {
+    let result = [];
+    let git_temp = new Git();
+    let response = await git_temp.log(this.props.path);
+    if(response.code==0){
+      this.setState({data: response.commits});
+    }
+  }
+
+
   render(){
     return (
       React.createElement('div',{className: TOP_CONTAINER_CLASS},
         React.createElement('button',{className : SHIFT_LEFT_BUTTON_CLASS}, '<'),
-        React.createElement('div',{className : PAST_COMMIT_LIST_CLASS},
-            React.createElement('ul',{className : PAST_COMMIT_CONTAINER_CLASS})
-          ),      
-        React.createElement('button',{className : SHIFT_RIGHT_BUTTON_CLASS},'>')
+        <div className={PAST_COMMIT_CONTAINER_CLASS}> 
+          <ul className={PAST_COMMIT_LIST_CLASS}>
+             {this.state.data.map((dj)=>
+              <span className={PAST_SINGLE_COMMIT_CONTAINER_CLASS}>---
+                  <button className={PAST_COMMIT_BUTTON_CLASS}>
+                    {dj.commit}
+                    </button>
+              </span>
+              )}
+              </ul>
+          </div>,     
+        React.createElement('button',{className : SHIFT_RIGHT_BUTTON_CLASS, onClick:()=>this.printstate()},'>')
       )
     );
   }
@@ -637,19 +787,142 @@ class SinglePastCommitInfo extends React.Component{
   }
 }
 
-class Staged extends React.Component{
-  constructor() {
-    super();
-	}
+namespace StatusFiles {
+  export
+  interface IState {
+    data: any;
+    staged_files: any;
+    unstaged_files: any;
+    untracked_files: any;
+  }
+
+  export
+  interface IProps {
+    path: string;
+    refresh: any;  
+  }
+}
+
+
+
+class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState>{
+  constructor(props: StatusFiles.IProps) {
+    super(props);
+    this.state = {data: [], staged_files: [], unstaged_files: [], untracked_files: []}
+  }
+
+  printstate(){
+    console.log(this.state.data);
+  }
+
+  async componentDidMount() {
+    let staged = [], unstaged = [], untracked = [];
+    let SF = 0, USF = 0, UTF = 0;
+    let git_temp = new Git();
+    let response = await git_temp.status(this.props.path);
+    if(response.code==0){
+      let data_json = (response as GitStatusResult).files;
+      for (var i=0; i<data_json.length; i++){
+        if(data_json[i].x=="M"){
+          staged.push(data_json[i].to);
+          SF++;
+        }
+        if(data_json[i].y=="M"){
+          unstaged.push(data_json[i].to);
+          USF++;
+        }
+        if(data_json[i].x=="?"&&data_json[i].y=="?"){
+          untracked.push(data_json[i].to);
+          UTF++;
+        }
+      }      
+      this.setState({staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
+    }
+  }
+
+  async componentWillReceiveProps() {
+    let staged = [], unstaged = [], untracked = [];
+    let SF = 0, USF = 0, UTF = 0;
+    let git_temp = new Git();
+    let response = await git_temp.status(this.props.path);
+    if(response.code==0){
+      let data_json = (response as GitStatusResult).files;
+      for (var i=0; i<data_json.length; i++){
+        if(data_json[i].x=="M"){
+          staged.push(data_json[i].to);
+          SF++;
+        }
+        if(data_json[i].y=="M"){
+          unstaged.push(data_json[i].to);
+          USF++;
+        }
+        if(data_json[i].x=="?"&&data_json[i].y=="?"){
+          untracked.push(data_json[i].to);
+          UTF++;
+        }
+      }      
+      this.setState({staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
+    }
+  }
+
   render(){
     return (
       <div>
         <StagedHeader />
-        <StagedNode />
+        <div className= 'jp-GitSessions-sectionContainer'>
+          <ul>
+            {this.props.path}
+            {this.state.staged_files.map((file)=>
+              StagedNode(file)
+            )}
+          </ul>
+        </div>
+        <UnstagedHeader />
+        <div className= 'jp-GitSessions-sectionContainer'>
+          <ul>
+            {this.state.unstaged_files.map((file)=>
+              UnstagedNode(file)
+            )}
+          </ul>
+        </div>
+        <UntrackedHeader />
+        <div className= 'jp-GitSessions-sectionContainer'>
+          <ul>
+            {this.state.untracked_files.map((file)=>
+              UntrackedNode(file)
+            )}
+          </ul>
+        </div>
       </div>
     );
   }
 }
+
+function reset_all_StagedNode(){
+  let git_temp = new Git();
+  git_temp.reset(true,null,this.props.path);
+}
+
+function commit_all_StagedNode(){
+  let git_temp = new Git();
+  let input = new Widget({ node: document.createElement('input') });
+  showDialog({
+    title: 'Input commit message:',
+    body: input,
+    focusNodeSelector: 'input',
+    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Commit'})]
+  }).then(result => {
+    let msg = (input.node as HTMLInputElement).value ;
+    console.log(msg);
+    if (result.button.accept&&msg) {
+      git_temp.commit(msg, this.props.path).then(response=>{
+        this.refresh();
+        this.refresh_past_commit_list();
+      });
+    }
+  });
+}
+
 
 class StagedHeader extends React.Component{
   constructor() {
@@ -657,43 +930,52 @@ class StagedHeader extends React.Component{
 	}
   render(){
     return (
-      React.createElement('div',{className: TOP_CONTAINER_CLASS},
-        React.createElement('span',{className:ITEM_LABEL_CLASS}, 'Staged'),
-        React.createElement('button',{className:`${RESET_BUTTON_CLASS} jp-mod-styled`}, 'Reset'),
-        React.createElement('button',{className:`${COMMIT_BUTTON_CLASS} jp-mod-styled`}, 'Commit')
-      )
+      <div className={SECTION_HEADER_CLASS} >
+        <span className={ITEM_LABEL_CLASS}> Staged'</span>
+        <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_all_StagedNode()}>Reset</button>
+        <button className={`${COMMIT_BUTTON_CLASS} jp-mod-styled`} onClick={()=>commit_all_StagedNode()}>Commit</button>
+        </div>
     );
   }
+}
+function reset_StagedNode(file:string){
+  let git_temp = new Git();
+  git_temp.reset(false, file, "");
 }
 
-class StagedNode extends React.Component{
-  constructor() {
-    super();
-	}
-  render(){
-    return (
-      React.createElement('li',{className: TOP_CONTAINER_CLASS},
-        React.createElement('span',{className:`${ITEM_ICON_CLASS} ${PYTHON_ICON_CLASS}`}),
-        React.createElement('span',{className:ITEM_LABEL_CLASS}, 'dummy staged files'),
-        React.createElement('button',{className:`${RESET_BUTTON_CLASS} jp-mod-styled`}, 'Reset')
-      )
-    );
-  }
+function StagedNode(file:string){
+  return (
+    <li className={ITEM_CLASS}>
+      <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
+      <span className={ITEM_LABEL_CLASS}>{file}</span>
+      <button className= {`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_StagedNode(file)}> reset </button>
+    </li>
+  );
 }
 
-class Unstaged extends React.Component{
-  constructor() {
-    super();
-	}
-  render(){
-    return (
-      <div>
-        <UnstagedHeader />
-        <UnstagedNode />
-      </div>
-    );
-  }
+
+function add_all_UnstagedNode(){
+  let git_temp = new Git();
+  git_temp.add(true,null, '');
 }
+
+function discard_all_UnstagedNode(){
+  let git_temp = new Git();
+  let input = new Widget({ node: document.createElement('input') });
+  showDialog({
+    title: 'DISCARD CHANGES',
+    body: "Do you really want to discard all uncommitted changes?",
+    buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
+  }).then(result => {
+    if (result.button.accept) {
+      git_temp.checkout(false,false, null,true,null,'').then(response=>{
+        this.refresh();
+      });
+    }
+  });
+}
+
+
 
 class UnstagedHeader extends React.Component{
   constructor() {
@@ -701,45 +983,48 @@ class UnstagedHeader extends React.Component{
 	}
   render(){
     return (
-      React.createElement('div',{className: TOP_CONTAINER_CLASS},
-        React.createElement('span',{className:ITEM_LABEL_CLASS}, 'Unstaged'),
-        React.createElement('button',{className:`${ADD_BUTTON_CLASS} jp-mod-styled`}, 'Add'),
-        React.createElement('button',{className:`${RESET_BUTTON_CLASS} jp-mod-styled`}, 'Reset')
-      )
+      <div className={SECTION_HEADER_CLASS} >
+        <span className={ITEM_LABEL_CLASS}> Unstaged'</span>
+        <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_all_UnstagedNode()}>Add</button>
+        <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_all_UnstagedNode()}>Discard</button>
+        </div>
     );
   }
 }
 
-class UnstagedNode extends React.Component{
-  constructor() {
-    super();
-	}
-  render(){
-    return (
-      React.createElement('li',{className: TOP_CONTAINER_CLASS},
-        React.createElement('span',{className:`${ITEM_ICON_CLASS} ${PYTHON_ICON_CLASS}`}),
-        React.createElement('span',{className:ITEM_LABEL_CLASS},'dummy unstaged files'),
-        React.createElement('button',{className:`${ADD_BUTTON_CLASS} jp-mod-styled`}, 'Add'),
-        React.createElement('button',{className:`${RESET_BUTTON_CLASS} jp-mod-styled`}, 'Reset')
-      )
-    );
-  }
+function add_UnstagedNode(file:string){
+  let git_temp = new Git();
+  git_temp.add(false, file, '');
+}
+
+function discard_UnstagedNode(file:string){
+  let git_temp = new Git();
+  let input = new Widget({ node: document.createElement('input') });
+  showDialog({
+    title: 'DISCARD CHANGES',
+    body: "Do you really want to discard the uncommitted changes in this file?",
+    buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
+  }).then(result => {
+    if (result.button.accept) {
+      git_temp.checkout(false,false, null,false,file,'').then(response=>{
+        this.refresh();
+      });
+    }
+  });
+}
+
+function UnstagedNode(file:string){
+  return (
+    <li className={ITEM_CLASS}>
+      <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
+      <span className={ITEM_LABEL_CLASS}>{file}</span>
+      <button className= {`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_UnstagedNode(file)}> add </button>
+      <button className= {`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_UnstagedNode(file)}> discard </button>
+    </li>
+  );
 }
 
 
-class Untracked extends React.Component{
-  constructor() {
-    super();
-	}
-  render(){
-    return (
-      <div>
-        <UntrackedHeader />
-        <UntrackedNode />
-      </div>
-    );
-  }
-}
 
 class UntrackedHeader extends React.Component{
   constructor() {
@@ -747,31 +1032,32 @@ class UntrackedHeader extends React.Component{
 	}
   render(){
     return (
-      React.createElement('div',{className: TOP_CONTAINER_CLASS},
-        React.createElement('span',{className:ITEM_LABEL_CLASS}, 'Untracked'),
-        React.createElement('button',{className:`${ADD_BUTTON_CLASS} jp-mod-styled`}, 'Add'),
-      )
+      <div className={SECTION_HEADER_CLASS} >
+        <span className={ITEM_LABEL_CLASS}> Untracked</span>
+        <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`}>Add</button>
+        </div>
     );
   }
 }
 
-class UntrackedNode extends React.Component{
-  constructor() {
-    super();
-	}
-  render(){
-    return (
-      React.createElement('li',{className: TOP_CONTAINER_CLASS},
-        React.createElement('span',{className:`${ITEM_ICON_CLASS} ${PYTHON_ICON_CLASS}`}),
-        React.createElement('span',{className:ITEM_LABEL_CLASS}, 'dummy untracked files'),
-        React.createElement('button',{className:`${ADD_BUTTON_CLASS} jp-mod-styled`}, 'Add')
-      )
-    );
-  }
+function add_UntrackedNode(file:string){
+  let git_temp = new Git();
+  git_temp.add(false, file, '');
+}
+
+function UntrackedNode(file:string){
+  return (
+    <li className={ITEM_CLASS}>
+      <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
+      <span className={ITEM_LABEL_CLASS}>{file}</span>
+      <button className= {`${ADD_BUTTON_CLASS} jp-mod-styled`}onClick={()=>add_UntrackedNode(file)}> add </button>
+    </li>
+  );
 }
 
 
-/*
+
+
 function parseFileExtension(path: string): string {
   if(path[path.length-1]==='/'){
     return FOLDER_MATERIAL_ICON_CLASS;
@@ -812,6 +1098,6 @@ function parseFileExtension(path: string): string {
       return FILE_TYPE_CLASS;
   }
 }
-*/
+
 
 
