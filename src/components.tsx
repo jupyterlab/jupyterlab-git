@@ -656,6 +656,7 @@ namespace BranchHeader {
   export
   interface IState {
     top_repo_path: string;
+    current_repo_branch:string;
     data: any;
   }
 
@@ -669,7 +670,7 @@ namespace BranchHeader {
 class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
   constructor(props: BranchHeader.IProps) {
     super(props);
-    this.state = {top_repo_path: props.top_repo_path, data: []}
+    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: '', data: []}
   }
 
   async componentDidMount() {
@@ -684,22 +685,38 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
 
   async componentWillReceiveProps() {
     let result = [];
+    let cur_repo_branch = '';
     let git_temp = new Git();
     console.log("inside branchHeader componentWillReceiveProps: "+this.props.top_repo_path);
     let response = await git_temp.branch(this.props.current_fb_path);
     if(response.code==0){
-      this.setState({data: (response as GitBranchResult).repos});
+      let data_json = (response as GitBranchResult).repos;
+      for (var i=0; i<data_json.length; i++){
+        if(data_json[i].current[0]){
+          cur_repo_branch=data_json[i].name;
+          break;
+        }
+      }
+      this.setState({current_repo_branch: cur_repo_branch, data: (response as GitBranchResult).repos});
     }
+  }
+
+//functions for switch branches
+  switch_branch(event){
+    let git_temp = new Git();
+    git_temp.checkout(true, false, event.target.value, false, null, this.props.current_fb_path).then(respones=>{
+      this.props.refresh();
+    });
   }
 
   render(){
     return (
       <div  className='jp-CSVToolbar'>
-        <span className ='jp-CSVToolbar-label'> Current Branch{this.props.top_repo_path}:
+        <span className ='jp-CSVToolbar-label'> Current Branch:{this.state.current_repo_branch}
         </span>,
-        <select className='jp-CSVToolbar-dropdown' >
+        <select className='jp-CSVToolbar-dropdown' onChange={this.switch_branch} >
              {this.state.data.map((dj)=>
-              <option>
+              <option selected={dj.current[0]} value ={dj.name}>
                   {dj.name}
               </option>
               )}
@@ -708,6 +725,7 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
     );
   }
 }
+
 
 
 
@@ -875,7 +893,7 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
     return (
       <div>
           <div className={SECTION_HEADER_CLASS} >
-              <span className={ITEM_LABEL_CLASS}> Staged'</span>
+              <span className={ITEM_LABEL_CLASS}> Staged</span>
               <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Reset</button>
               <button className={`${COMMIT_BUTTON_CLASS} jp-mod-styled`} onClick={()=>commit_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Commit</button>
           </div>
@@ -893,7 +911,7 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
 
 
           <div className={SECTION_HEADER_CLASS} >
-              <span className={ITEM_LABEL_CLASS}> Unstaged'</span>
+              <span className={ITEM_LABEL_CLASS}> Unstaged</span>
               <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Add</button>
               <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Discard</button>
           </div>
