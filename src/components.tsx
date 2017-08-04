@@ -658,6 +658,7 @@ namespace BranchHeader {
     top_repo_path: string;
     current_repo_branch:string;
     data: any;
+    refresh:any;
   }
 
   export
@@ -670,7 +671,7 @@ namespace BranchHeader {
 class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
   constructor(props: BranchHeader.IProps) {
     super(props);
-    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: '', data: []}
+    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: '', data: [], refresh:props.refresh}
   }
 
   async componentDidMount() {
