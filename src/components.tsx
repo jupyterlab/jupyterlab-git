@@ -876,8 +876,8 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
       <div>
           <div className={SECTION_HEADER_CLASS} >
               <span className={ITEM_LABEL_CLASS}> Staged'</span>
-              <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_all_StagedNode(this.props.top_repo_path)}>Reset</button>
-              <button className={`${COMMIT_BUTTON_CLASS} jp-mod-styled`} onClick={()=>commit_all_StagedNode(this.props.top_repo_path)}>Commit</button>
+              <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Reset</button>
+              <button className={`${COMMIT_BUTTON_CLASS} jp-mod-styled`} onClick={()=>commit_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Commit</button>
           </div>
           <div className= 'jp-GitSessions-sectionContainer'>
               <ul>
@@ -885,7 +885,7 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
                     <li className={ITEM_CLASS}>
                     <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
                     <span className={ITEM_LABEL_CLASS}>{file}</span>
-                    <button className= {`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_StagedNode(file, this.props.top_repo_path)}> reset </button>
+                    <button className= {`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_StagedNode(file, this.props.top_repo_path, this.props.refresh)}> reset </button>
                     </li>
                 )}
               </ul>
@@ -894,8 +894,8 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
 
           <div className={SECTION_HEADER_CLASS} >
               <span className={ITEM_LABEL_CLASS}> Unstaged'</span>
-              <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_all_UnstagedNode(this.props.top_repo_path)}>Add</button>
-              <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path)}>Discard</button>
+              <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Add</button>
+              <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Discard</button>
           </div>
           <div className= 'jp-GitSessions-sectionContainer'>
               <ul>
@@ -903,8 +903,8 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
                     <li className={ITEM_CLASS}>
                     <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
                     <span className={ITEM_LABEL_CLASS}>{file}</span>
-                    <button className= {`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_UnstagedNode(file, this.props.top_repo_path)}> add </button>
-                    <button className= {`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_UnstagedNode(file, this.props.top_repo_path)}> discard </button>
+                    <button className= {`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> add </button>
+                    <button className= {`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> discard </button>
                     </li>
                 )}
               </ul>
@@ -920,7 +920,7 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
                     <li className={ITEM_CLASS}>
                     <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
                     <span className={ITEM_LABEL_CLASS}>{file}</span>
-                    <button className= {`${ADD_BUTTON_CLASS} jp-mod-styled`}onClick={()=>add_UntrackedNode(file, this.props.top_repo_path)}> add </button>
+                    <button className= {`${ADD_BUTTON_CLASS} jp-mod-styled`}onClick={()=>add_UntrackedNode(file, this.props.top_repo_path, this.props.refresh)}> add </button>
                     </li>
                 )}
               </ul>
@@ -931,12 +931,14 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
 }
 
 //functions for staged nodes
-async function reset_all_StagedNode(path:string){
+function reset_all_StagedNode(path:string, refresh){
   let git_temp = new Git();
-  await git_temp.reset(true,null,path);
+  git_temp.reset(true,null,path).then(response=>{
+    refresh();
+  });
 }
 
-function commit_all_StagedNode(path:string){
+function commit_all_StagedNode(path:string, refresh){
   let git_temp = new Git();
   let input = new Widget({ node: document.createElement('input') });
   showDialog({
@@ -949,26 +951,29 @@ function commit_all_StagedNode(path:string){
     console.log(msg);
     if (result.button.accept&&msg) {
       git_temp.commit(msg, path).then(response=>{
-        this.refresh();
-        this.refresh_past_commit_list();
+        refresh();
       });
     }
   });
 }
 
-function reset_StagedNode(file:string, path:string){
+function reset_StagedNode(file:string, path:string, refresh){
   let git_temp = new Git();
-  git_temp.reset(false, file, path);
+  git_temp.reset(false, file, path).then(response=>{
+    refresh();
+  });
 }
 
 
 //functions for unstaged nodes
-function add_all_UnstagedNode(path:string){
+function add_all_UnstagedNode(path:string,refresh){
   let git_temp = new Git();
-  git_temp.add(true,null, path);
+  git_temp.add(true,null, path).then(response=>{
+    refresh();
+  });
 }
 
-function discard_all_UnstagedNode(path:string){
+function discard_all_UnstagedNode(path:string,refresh){
   let git_temp = new Git();
   let input = new Widget({ node: document.createElement('input') });
   showDialog({
@@ -978,18 +983,20 @@ function discard_all_UnstagedNode(path:string){
   }).then(result => {
     if (result.button.accept) {
       git_temp.checkout(false,false, null,true,null,path).then(response=>{
-        this.refresh();
+        refresh();
       });
     }
   });
 }
 
-function add_UnstagedNode(file:string, path:string){
+function add_UnstagedNode(file:string, path:string, refresh){
   let git_temp = new Git();
-  git_temp.add(false, file, path);
+  git_temp.add(false, file, path).then(response=>{
+    refresh();
+  });
 }
 
-function discard_UnstagedNode(file:string, path:string){
+function discard_UnstagedNode(file:string, path:string, refresh){
   let git_temp = new Git();
   let input = new Widget({ node: document.createElement('input') });
   showDialog({
@@ -999,16 +1006,18 @@ function discard_UnstagedNode(file:string, path:string){
   }).then(result => {
     if (result.button.accept) {
       git_temp.checkout(false,false, null,false,file,path).then(response=>{
-        this.refresh();
+        refresh();
       });
     }
   });
 }
 
 //functions for untracked nodes
-function add_UntrackedNode(file:string, path:string){
+function add_UntrackedNode(file:string, path:string,refresh){
   let git_temp = new Git();
-  git_temp.add(false, file, path);
+  git_temp.add(false, file, path).then(response=>{
+    refresh();
+  });
 }
 
 
