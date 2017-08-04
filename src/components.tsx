@@ -706,7 +706,7 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
   switch_branch(event){
     let git_temp = new Git();
     git_temp.checkout(true, false, event.target.value, false, null, current_fb_path).then(respones=>{
-      console.log("just switched to branch: "+event.target.value);
+      this.state.refresh();
     });
   }
 
