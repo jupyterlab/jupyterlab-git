@@ -703,10 +703,10 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
   }
 
 //functions for switch branches
-  switch_branch(event){
+  switch_branch(event, refresh){
     let git_temp = new Git();
     git_temp.checkout(true, false, event.target.value, false, null, current_fb_path).then(respones=>{
-      this.state.refresh();
+      refresh();
     });
   }
 
@@ -715,7 +715,7 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
       <div  className='jp-CSVToolbar'>
         <span className ='jp-CSVToolbar-label'> Current Branch:{this.state.current_repo_branch}
         </span>,
-        <select className='jp-CSVToolbar-dropdown' onChange={this.switch_branch} >
+        <select className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
              {this.state.data.map((dj)=>
               <option selected={dj.current[0]} value ={dj.name}>
                   {dj.name}
