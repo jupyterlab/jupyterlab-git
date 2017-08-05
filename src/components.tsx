@@ -752,8 +752,16 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
     this.state = {data: ["null"]}
   }
 
-  printstate(){
-    console.log(this.state.data);
+  show_left(){
+    let pastcommitsContainer = ReactDOM.findDOMNode(this.refs.past_commits_container);
+      $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop-200});
+      $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft-200});
+  }
+
+  show_right(){
+    let pastcommitsContainer = ReactDOM.findDOMNode(this.refs.past_commits_container);
+      $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop+200});
+      $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft+200});
   }
 
   async componentDidMount() {
@@ -777,21 +785,24 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
 
   render(){
     return (
-      React.createElement('div',{className: TOP_CONTAINER_CLASS},
-        React.createElement('button',{className : SHIFT_LEFT_BUTTON_CLASS}, '<'),
-        <div className={PAST_COMMIT_CONTAINER_CLASS}> 
+      <div className={TOP_CONTAINER_CLASS}>
+        <button className={SHIFT_LEFT_BUTTON_CLASS} onClick={()=>this.show_left()}> L </button>
+        <div className={PAST_COMMIT_CONTAINER_CLASS} ref='past_commits_container'> 
           <ul className={PAST_COMMIT_LIST_CLASS}>
-             {this.state.data.map((dj)=>
+            <button className={CUR_BUTTON_CLASS}>
+               CUR
+            </button>           
+            {this.state.data.map((dj)=>
               <span className={PAST_SINGLE_COMMIT_CONTAINER_CLASS}>---
                   <button className={PAST_COMMIT_BUTTON_CLASS}>
                     {dj.commit}
                     </button>
               </span>
-              )}
-              </ul>
+            )}
+            </ul>
           </div>,     
-        React.createElement('button',{className : SHIFT_RIGHT_BUTTON_CLASS, onClick:()=>this.printstate()},'>')
-      )
+         <button className={SHIFT_RIGHT_BUTTON_CLASS} onClick={()=>this.show_right()}> R </button>
+      </div>
     );
   }
 }
