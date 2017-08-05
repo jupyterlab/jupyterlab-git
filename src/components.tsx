@@ -257,6 +257,7 @@ let current_fb_path = '';
 
 export
 class GitSessions extends Widget {
+  element: any;
   /**
    * Construct a new running widget.
    */
@@ -271,8 +272,8 @@ class GitSessions extends Widget {
 
 
     
-      const element =<GitSessionNode current_fb_path='' top_repo_path=''/>;
-      ReactDOM.render(element, this.node);
+      this.element =<GitSessionNode current_fb_path='' top_repo_path=''/>;
+      ReactDOM.render(this.element, this.node);
       
 
   }
@@ -281,6 +282,7 @@ class GitSessions extends Widget {
    */
   show():void{
     super.show();
+    this.element.refresh();
   }
   /**
    * The renderer used by the running sessions widget.
