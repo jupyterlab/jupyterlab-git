@@ -546,7 +546,7 @@ namespace GitSessionNode {
 
     branches: any;
     current_branch:string;
-    switch_barnch:boolean;
+    disable_switch_branch:boolean;
 
     past_commits: any;
 
@@ -566,7 +566,7 @@ namespace GitSessionNode {
 class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNode.IState>{
   constructor(props: GitSessionNode.IProps) {
     super(props);
-    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', switch_barnch:false, past_commits:[], staged_files:[], unstaged_files:[], untracked_files:[]}
+    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', disable_switch_branch:true, past_commits:[], staged_files:[], unstaged_files:[], untracked_files:[]}
     this.refresh = this.refresh.bind(this);
   }  
   
@@ -578,9 +578,58 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
       fb = ll.next();
     }
     let git_temp = new Git();
-    let response = await git_temp.showtoplevel((fb as any).model.path);
-    if(response.code==0){
-      this.setState({current_fb_path:(fb as any).model.path, top_repo_path: (response as GitShowTopLevelResult).top_repo_path, show:true});
+    //retrieve git_showtoplevel
+    let response_showtoplevel = await git_temp.showtoplevel((fb as any).model.path);
+    if(response_showtoplevel.code==0){
+      //retrieve git_branch
+      let response_branch = await git_temp.branch(this.props.current_fb_path);
+      let current_branch = '';
+      if(response_branch.code==0){
+        let data_json = (response_branch as GitBranchResult).repos;
+        for (var i=0; i<data_json.length; i++){
+          if(data_json[i].current[0]){
+            current_branch=data_json[i].name;
+            break;
+          }
+        }
+        //retrieve git_log
+        let response_log = await git_temp.log(this.props.current_fb_path);
+        if(response_log.code==0){
+          //retrieve git_status
+          let staged = [], unstaged = [], untracked = [];
+          let SF = 0, USF = 0, UTF = 0, Changes = 0;
+          let disable_switch_branch = true;
+          let response_status = await git_temp.status(this.props.current_fb_path);
+          if(response_status.code==0){
+            let data_json = (response_status as GitStatusResult).files;
+            for (var i=0; i<data_json.length; i++){
+              if(data_json[i].x!="?"&&data_json[i].x!="!"){
+                Changes++;
+              }
+              if(data_json[i].x=="M"){
+                staged.push(data_json[i].to);
+                SF++;
+              }
+              if(data_json[i].y=="M"){
+                unstaged.push(data_json[i].to);
+                USF++;
+              }
+              if(data_json[i].x=="?"&&data_json[i].y=="?"){
+                untracked.push(data_json[i].to);
+                UTF++;
+              }
+            }  
+            if(Changes == 0){
+            /** since there are no uncommitted changes, enable switch branch button */
+              disable_switch_branch = false;
+            }   
+            this.setState({current_fb_path:(fb as any).model.path, top_repo_path: (response_showtoplevel as GitShowTopLevelResult).top_repo_path, show:true, 
+              branches: (response_branch as GitBranchResult).repos, current_branch: current_branch, disable_switch_branch: disable_switch_branch, 
+              past_commits: response_log.commits,
+              staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
+          }
+        }
+      }
     }
     else{
       this.setState({current_fb_path: (fb as any).model.path, top_repo_path: '', show:false});
@@ -595,7 +644,10 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
       <div >
         <PathHeader current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} refresh={this.refresh}/>
         <ToggleDisplay show={this.state.show}>
-        <GitWholeContainer current_fb_path={this.state.current_fb_path}  top_repo_path={this.state.top_repo_path} refresh={this.refresh}/>
+        <GitWholeContainer current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} 
+              branches={this.state.branches}  current_branch={this.state.current_branch} disable_switch_branch={this.state.disable_switch_branch} 
+              past_commits={this.state.past_commits}
+              staged_files={this.state.staged_files} unstaged_files={this.state.unstaged_files} untracked_files={this.state.untracked_files} refresh={this.refresh}/>
          </ToggleDisplay>
 
         <ToggleDisplay show={!(this.state.show)}>
@@ -649,38 +701,38 @@ class PathHeader extends React.Component<PathHeader.IProps, PathHeader.IState>{
 namespace GitWholeContainer {
   export
   interface IState {
-    top_repo_path: string;
-    refresh: any;
-    disabled:boolean;
+
   }
 
   export
   interface IProps {
-    current_fb_path: string;
+    current_fb_path:string;
     top_repo_path: string;
+
+    branches: any;
+    current_branch:string;
+    disable_switch_branch:boolean;
+
+    past_commits: any;
+
+    staged_files: any;
+    unstaged_files: any;
+    untracked_files: any;
+    
     refresh: any;
   }
 }
 class GitWholeContainer extends React.Component<GitWholeContainer.IProps, GitWholeContainer.IState>{
   constructor(props: GitWholeContainer.IProps) {
     super(props);
-    this.state = {top_repo_path: props.top_repo_path, refresh : props.refresh, disabled:true}
   }
-
-  async switch_branch_enable(){
-    console.log('enable dropdown buttons');
-    this.setState({disabled:false})
-  }
-  async switch_branch_disable(){
-    console.log('disable dropdown buttons');
-    this.setState({disabled:true})    
-  }
-
   render(){
     return(
       <div>
-        <BranchHeader current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} refresh={this.props.refresh} disabled={this.state.disabled}/>
-        <PastCommits current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} refresh={this.props.refresh} switch_branch_enable={this.switch_branch_enable} switch_branch_disable={this.switch_branch_disable}/>
+        <BranchHeader current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} refresh={this.props.refresh} current_branch={this.props.current_branch} data={this.props.branches} disabled={this.props.disable_switch_branch}/>
+        <PastCommits current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} 
+              past_commits={this.props.past_commits}
+              staged_files={this.props.staged_files} unstaged_files={this.props.unstaged_files} untracked_files={this.props.untracked_files} refresh={this.props.refresh}/>
         
         </div>
     );
@@ -701,6 +753,8 @@ namespace BranchHeader {
   interface IProps {
     current_fb_path:string;
     top_repo_path: string;
+    current_branch: string;
+    data:any;
     refresh: any;  
     disabled: boolean;
   }
@@ -708,9 +762,9 @@ namespace BranchHeader {
 class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
   constructor(props: BranchHeader.IProps) {
     super(props);
-    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: '', data: [], refresh:props.refresh, disabled:props.disabled}
+    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: props.current_branch, data: [], refresh:props.refresh, disabled:props.disabled}
   }
-
+/*
   async componentDidMount() {
     let result = [];
     let git_temp = new Git();
@@ -738,7 +792,7 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
       this.setState({current_repo_branch: cur_repo_branch, data: (response as GitBranchResult).repos});
     }
   }
-
+*/
 //functions for switch branches
   switch_branch(event, refresh){
     let git_temp = new Git();
@@ -750,10 +804,10 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
   render(){
     return (
       <div  className='jp-CSVToolbar'>
-        <span className ='jp-CSVToolbar-label'> Current Branch:{this.state.current_repo_branch}
+        <span className ='jp-CSVToolbar-label'> Current Branch:{this.props.current_branch}
         </span>,
-        <select ref="switch_branch_dropdown_button" disabled = {this.state.disabled} title = {this.state.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
-             {this.state.data.map((dj)=>
+        <select ref="switch_branch_dropdown_button" disabled = {this.props.disabled} title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
+             {this.props.data.map((dj)=>
               <option selected={dj.current[0]} value ={dj.name}>
                   {dj.name}
               </option>
@@ -778,9 +832,14 @@ namespace PastCommits {
   interface IProps {
     current_fb_path:string;
     top_repo_path: string;
-    refresh: any;   
-    switch_branch_disable: any;
-    switch_branch_enable: any   
+
+    past_commits: any;
+
+    staged_files: any;
+    unstaged_files: any;
+    untracked_files: any;
+    
+    refresh: any;
   }
 }
 
@@ -789,7 +848,7 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
 
   constructor(props: PastCommits.IProps) {
     super(props);
-    this.state = {data: ["null"], show: false}
+    this.state = {data: props.past_commits, show: false}
   }
 
   show_left(){
@@ -812,7 +871,7 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
       this.setState({data: response.commits});
     }
   }
-
+/*
   async componentWillReceiveProps() {
     let result = [];
     let git_temp = new Git();
@@ -821,7 +880,7 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
       this.setState({data: response.commits});
     }
   }
-
+*/
   show_current_work(){
     this.setState({show:false})
   }
@@ -857,7 +916,8 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
           </ToggleDisplay>
  
           <ToggleDisplay show={!(this.state.show)}>
-          <StatusFiles current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} refresh={this.props.refresh} switch_branch_disable={this.props.switch_branch_disable} switch_branch_enable={this.props.switch_branch_enable}/>
+          <StatusFiles current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} 
+              staged_files={this.props.staged_files} unstaged_files={this.props.unstaged_files} untracked_files={this.props.untracked_files} refresh={this.props.refresh}/>
           </ToggleDisplay>
       </div>
     );
@@ -884,32 +944,26 @@ class SinglePastCommitInfo extends React.Component{
 namespace StatusFiles {
   export
   interface IState {
-    data: any;
-    staged_files: any;
-    unstaged_files: any;
-    untracked_files: any;
   }
 
   export
   interface IProps {
-    current_fb_path: string;
+    current_fb_path:string;
     top_repo_path: string;
-    refresh: any;  
-    switch_branch_disable:any;
-    switch_branch_enable:any;
+
+    staged_files: any;
+    unstaged_files: any;
+    untracked_files: any;
+    
+    refresh: any;
   }
 }
 
 class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState>{
   constructor(props: StatusFiles.IProps) {
     super(props);
-    this.state = {data: [], staged_files: [], unstaged_files: [], untracked_files: []}
   }
-
-  printstate(){
-    console.log(this.state.data);
-  }
-
+/*
   async componentDidMount() {
     let staged = [], unstaged = [], untracked = [];
     let SF = 0, USF = 0, UTF = 0, Changes = 0;
@@ -935,7 +989,6 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
         }
       }  
       if(Changes > 0){
-          /** since there are uncommitted changes, disable switch branch button */
         this.props.switch_branch_disable();  
       }
       else{
@@ -970,7 +1023,6 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
         }
       }
       if(Changes > 0){
-          /** since there are uncommitted changes, disable switch branch button */
         this.props.switch_branch_disable();  
       }
       else{
@@ -979,18 +1031,18 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
       this.setState({staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
     }
   }
-
+*/
   render(){
     return (
       <div ref="three_sections_for_current_work">
           <div className={SECTION_HEADER_CLASS} >
-              <span className={ITEM_LABEL_CLASS}> Staged({(this.state.staged_files).length})</span>
+              <span className={ITEM_LABEL_CLASS}> Staged({(this.props.staged_files).length})</span>
               <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Reset</button>
               <button className={`${COMMIT_BUTTON_CLASS} jp-mod-styled`} onClick={()=>commit_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Commit</button>
           </div>
           <div className= 'jp-GitSessions-sectionContainer'>
               <ul>
-                {this.state.staged_files.map((file)=>
+                {this.props.staged_files.map((file)=>
                     <li className={ITEM_CLASS}>
                     <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
                     <span className={ITEM_LABEL_CLASS}>{file}</span>
@@ -1002,13 +1054,13 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
 
 
           <div className={SECTION_HEADER_CLASS} >
-              <span className={ITEM_LABEL_CLASS}> Unstaged({(this.state.unstaged_files).length})</span>
+              <span className={ITEM_LABEL_CLASS}> Unstaged({(this.props.unstaged_files).length})</span>
               <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Add</button>
               <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Discard</button>
           </div>
           <div className= 'jp-GitSessions-sectionContainer'>
               <ul>
-                {this.state.unstaged_files.map((file)=>
+                {this.props.unstaged_files.map((file)=>
                     <li className={ITEM_CLASS}>
                     <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
                     <span className={ITEM_LABEL_CLASS}>{file}</span>
@@ -1020,12 +1072,12 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
           </div>
 
           <div className={SECTION_HEADER_CLASS} >
-              <span className={ITEM_LABEL_CLASS}> Untracked({(this.state.untracked_files).length})</span>
+              <span className={ITEM_LABEL_CLASS}> Untracked({(this.props.untracked_files).length})</span>
               <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`}>Add</button>
           </div>
           <div className= 'jp-GitSessions-sectionContainer'>
               <ul>
-                {this.state.untracked_files.map((file)=>
+                {this.props.untracked_files.map((file)=>
                     <li className={ITEM_CLASS}>
                     <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
                     <span className={ITEM_LABEL_CLASS}>{file}</span>
