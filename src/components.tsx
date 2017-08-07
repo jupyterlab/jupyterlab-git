@@ -543,6 +543,16 @@ namespace GitSessionNode {
     current_fb_path:string;
     top_repo_path: string;
     show: boolean;
+
+    branches: any;
+    current_branch:string;
+    switch_barnch:boolean;
+
+    past_commits: any;
+
+    staged_files: any;
+    unstaged_files: any;
+    untracked_files: any;
   }
 
   export
@@ -556,7 +566,7 @@ namespace GitSessionNode {
 class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNode.IState>{
   constructor(props: GitSessionNode.IProps) {
     super(props);
-    this.state = {current_fb_path: '', top_repo_path: '', show:false}
+    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', switch_barnch:false, past_commits:[], staged_files:[], unstaged_files:[], untracked_files:[]}
     this.refresh = this.refresh.bind(this);
   }  
   
@@ -655,6 +665,8 @@ class GitWholeContainer extends React.Component<GitWholeContainer.IProps, GitWho
   constructor(props: GitWholeContainer.IProps) {
     super(props);
     this.state = {top_repo_path: props.top_repo_path, refresh : props.refresh, disabled:true}
+    this.switch_branch_disable = this.switch_branch_disable.bind(this);
+    this.switch_branch_enable = this.switch_branch_enable.bind(this);
   }
 
   async switch_branch_enable(){
@@ -860,13 +872,13 @@ class SinglePastCommitInfo extends React.Component{
 	}
   render(){
     return (
-      React.createElement('div',{},
-        React.createElement('li',{className:PAST_COMMIT_INFO_LABEL_CLASS},'commit'),
-        React.createElement('li',{className:PAST_COMMIT_INFO_LABEL_CLASS}, 'author'),
-        React.createElement('li',{className:PAST_COMMIT_INFO_LABEL_CLASS}, 'date'),
-        React.createElement('li',{className:PAST_COMMIT_INFO_LABEL_CLASS}, 'commit_msg'),
-        React.createElement('li',{className:PAST_COMMIT_INFO_LABEL_CLASS}, 'modified_file_note')
-      )
+      <div>
+        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> commit</li>
+        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> author</li>
+        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> date</li>
+        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> commit_msg</li>
+        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> modified_file_note</li>
+        </div>
     );
   }
 }
