@@ -33,6 +33,7 @@
     "jquery": "^2.2.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "react-toggle-display": "^2.2.0",
     "react-widgets": "^3.4.8"
   },
   "devDependencies": {

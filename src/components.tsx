@@ -1,6 +1,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import ToggleDisplay from 'react-toggle-display'
 //import ReactWidget from 'react-widgets';
 import {
   ServiceManager, Session, TerminalSession
@@ -257,7 +258,6 @@ let current_fb_path = '';
 
 export
 class GitSessions extends Widget {
-  element: any;
   /**
    * Construct a new running widget.
    */
@@ -272,8 +272,8 @@ class GitSessions extends Widget {
 
 
     
-      this.element =<GitSessionNode current_fb_path='' top_repo_path=''/>;
-      ReactDOM.render(this.element, this.node);
+      const element =<GitSessionNode current_fb_path='' top_repo_path=''/>;
+      ReactDOM.render(element, this.node);
       
 
   }
@@ -282,7 +282,6 @@ class GitSessions extends Widget {
    */
   show():void{
     super.show();
-    this.element.refresh();
   }
   /**
    * The renderer used by the running sessions widget.
@@ -543,6 +542,7 @@ namespace GitSessionNode {
   interface IState {
     current_fb_path:string;
     top_repo_path: string;
+    show: boolean;
   }
 
   export
@@ -556,7 +556,7 @@ namespace GitSessionNode {
 class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNode.IState>{
   constructor(props: GitSessionNode.IProps) {
     super(props);
-    this.state = {current_fb_path: '', top_repo_path: ''}
+    this.state = {current_fb_path: '', top_repo_path: '', show:false}
     this.refresh = this.refresh.bind(this);
   }  
   
@@ -570,7 +570,10 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
     let git_temp = new Git();
     let response = await git_temp.showtoplevel((fb as any).model.path);
     if(response.code==0){
-      this.setState({current_fb_path:(fb as any).model.path, top_repo_path: (response as GitShowTopLevelResult).top_repo_path});
+      this.setState({current_fb_path:(fb as any).model.path, top_repo_path: (response as GitShowTopLevelResult).top_repo_path, show:true});
+    }
+    else{
+      this.setState({current_fb_path: (fb as any).model.path, top_repo_path: '', show:false});
     }
    }catch(err){
      console.log("app doesn't work??")
@@ -581,7 +584,16 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
     return(
       <div >
         <PathHeader current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} refresh={this.refresh}/>
+        <ToggleDisplay show={this.state.show}>
         <GitWholeContainer current_fb_path={this.state.current_fb_path}  top_repo_path={this.state.top_repo_path} refresh={this.refresh}/>
+         </ToggleDisplay>
+
+        <ToggleDisplay show={!(this.state.show)}>
+          <div>
+              <span> Git-pulgin trackes the filepath in filebrowser, the current folder is not a git-repo</span>
+          </div>
+         </ToggleDisplay>
+
       </div>
     );
   }
@@ -629,6 +641,7 @@ namespace GitWholeContainer {
   interface IState {
     top_repo_path: string;
     refresh: any;
+    disabled:boolean;
   }
 
   export
@@ -641,14 +654,22 @@ namespace GitWholeContainer {
 class GitWholeContainer extends React.Component<GitWholeContainer.IProps, GitWholeContainer.IState>{
   constructor(props: GitWholeContainer.IProps) {
     super(props);
-    this.state = {top_repo_path: props.top_repo_path, refresh : props.refresh}
-	}
+    this.state = {top_repo_path: props.top_repo_path, refresh : props.refresh, disabled:true}
+  }
+
+  async switch_branch_enable(){
+    this.setState({disabled:false})
+  }
+  async switch_branch_disable(){
+    this.setState({disabled:true})    
+  }
+
   render(){
     return(
       <div>
-        <BranchHeader current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} refresh={this.props.refresh}/>
-        <PastCommits current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} refresh={this.props.refresh}/>
-        <StatusFiles current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} refresh={this.props.refresh}/>
+        <BranchHeader current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} refresh={this.props.refresh} disabled={this.state.disabled}/>
+        <PastCommits current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} refresh={this.props.refresh} switch_branch_enable={this.switch_branch_enable} switch_branch_disable={this.switch_branch_disable}/>
+        
         </div>
     );
   }
@@ -668,6 +689,7 @@ namespace BranchHeader {
     current_fb_path:string;
     top_repo_path: string;
     refresh: any;  
+    disabled: boolean;
   }
 }
 class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
@@ -717,7 +739,7 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
       <div  className='jp-CSVToolbar'>
         <span className ='jp-CSVToolbar-label'> Current Branch:{this.state.current_repo_branch}
         </span>,
-        <select className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
+        <select ref="switch_branch_dropdown_button" disabled = {this.props.disabled} className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
              {this.state.data.map((dj)=>
               <option selected={dj.current[0]} value ={dj.name}>
                   {dj.name}
@@ -736,13 +758,16 @@ namespace PastCommits {
   export
   interface IState {
     data: any;
+    show:boolean;
   }
 
   export
   interface IProps {
     current_fb_path:string;
     top_repo_path: string;
-    refresh: any;      
+    refresh: any;   
+    switch_branch_disable: any;
+    switch_branch_enable: any   
   }
 }
 
@@ -751,7 +776,7 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
 
   constructor(props: PastCommits.IProps) {
     super(props);
-    this.state = {data: ["null"]}
+    this.state = {data: ["null"], show: false}
   }
 
   show_left(){
@@ -784,18 +809,27 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
     }
   }
 
+  show_current_work(){
+    this.setState({show:false})
+  }
+  
+  show_past_commit_work(dj:SingleCommitInfo){
+    this.setState({show:true})
+  }
+
 
   render(){
     return (
+      <div>
       <div className={TOP_CONTAINER_CLASS}>
         <button className={SHIFT_LEFT_BUTTON_CLASS} onClick={()=>this.show_left()}> L </button>
         <div className={PAST_COMMIT_CONTAINER_CLASS} ref='past_commits_container'> 
           <ul className={PAST_COMMIT_LIST_CLASS}>
-            <button className={CUR_BUTTON_CLASS}>
+            <button className={CUR_BUTTON_CLASS} onDoubleClick={()=>this.show_current_work()}>
                CUR
             </button>           
             {this.state.data.map((dj)=>
-              <span className={PAST_SINGLE_COMMIT_CONTAINER_CLASS}>---
+              <span className={PAST_SINGLE_COMMIT_CONTAINER_CLASS} onDoubleClick={()=>this.show_past_commit_work(dj)}>---
                   <button className={PAST_COMMIT_BUTTON_CLASS}>
                     {dj.commit}
                     </button>
@@ -804,6 +838,14 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
             </ul>
           </div>,     
          <button className={SHIFT_RIGHT_BUTTON_CLASS} onClick={()=>this.show_right()}> R </button>
+      </div>
+          <ToggleDisplay show={this.state.show}>
+          <SinglePastCommitInfo />
+          </ToggleDisplay>
+ 
+          <ToggleDisplay show={!(this.state.show)}>
+          <StatusFiles current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} refresh={this.props.refresh} switch_branch_disable={this.props.switch_branch_disable} switch_branch_enable={this.props.switch_branch_enable}/>
+          </ToggleDisplay>
       </div>
     );
   }
@@ -840,6 +882,8 @@ namespace StatusFiles {
     current_fb_path: string;
     top_repo_path: string;
     refresh: any;  
+    switch_branch_disable:any;
+    switch_branch_enable:any;
   }
 }
 
@@ -855,12 +899,15 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
 
   async componentDidMount() {
     let staged = [], unstaged = [], untracked = [];
-    let SF = 0, USF = 0, UTF = 0;
+    let SF = 0, USF = 0, UTF = 0, Changes = 0;
     let git_temp = new Git();
     let response = await git_temp.status(this.props.current_fb_path);
     if(response.code==0){
       let data_json = (response as GitStatusResult).files;
       for (var i=0; i<data_json.length; i++){
+        if(data_json[i].x!="?"&&data_json[i].x!="!"){
+          Changes++;
+        }
         if(data_json[i].x=="M"){
           staged.push(data_json[i].to);
           SF++;
@@ -873,19 +920,29 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
           untracked.push(data_json[i].to);
           UTF++;
         }
-      }      
+      }  
+      if(Changes > 0){
+          /** since there are uncommitted changes, disable switch branch button */
+        this.props.switch_branch_disable();  
+      }
+      else{
+        this.props.switch_branch_enable();
+      }    
       this.setState({staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
     }
   }
 
   async componentWillReceiveProps() {
     let staged = [], unstaged = [], untracked = [];
-    let SF = 0, USF = 0, UTF = 0;
+    let SF = 0, USF = 0, UTF = 0, Changes = 0;
     let git_temp = new Git();
     let response = await git_temp.status(this.props.current_fb_path);
     if(response.code==0){
       let data_json = (response as GitStatusResult).files;
       for (var i=0; i<data_json.length; i++){
+        if(data_json[i].x!="?"&&data_json[i].x!="!"){
+          Changes++;
+        }
         if(data_json[i].x=="M"){
           staged.push(data_json[i].to);
           SF++;
@@ -898,16 +955,23 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
           untracked.push(data_json[i].to);
           UTF++;
         }
-      }      
+      }
+      if(Changes > 0){
+          /** since there are uncommitted changes, disable switch branch button */
+        this.props.switch_branch_disable();  
+      }
+      else{
+        this.props.switch_branch_enable();
+      }
       this.setState({staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
     }
   }
 
   render(){
     return (
-      <div>
+      <div ref="three_sections_for_current_work">
           <div className={SECTION_HEADER_CLASS} >
-              <span className={ITEM_LABEL_CLASS}> Staged</span>
+              <span className={ITEM_LABEL_CLASS}> Staged({(this.state.staged_files).length})</span>
               <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Reset</button>
               <button className={`${COMMIT_BUTTON_CLASS} jp-mod-styled`} onClick={()=>commit_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Commit</button>
           </div>
@@ -925,7 +989,7 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
 
 
           <div className={SECTION_HEADER_CLASS} >
-              <span className={ITEM_LABEL_CLASS}> Unstaged</span>
+              <span className={ITEM_LABEL_CLASS}> Unstaged({(this.state.unstaged_files).length})</span>
               <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Add</button>
               <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Discard</button>
           </div>
@@ -943,7 +1007,7 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
           </div>
 
           <div className={SECTION_HEADER_CLASS} >
-              <span className={ITEM_LABEL_CLASS}> Untracked</span>
+              <span className={ITEM_LABEL_CLASS}> Untracked({(this.state.untracked_files).length})</span>
               <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`}>Add</button>
           </div>
           <div className= 'jp-GitSessions-sectionContainer'>
