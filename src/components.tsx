@@ -658,9 +658,11 @@ class GitWholeContainer extends React.Component<GitWholeContainer.IProps, GitWho
   }
 
   async switch_branch_enable(){
+    console.log('enable dropdown buttons');
     this.setState({disabled:false})
   }
   async switch_branch_disable(){
+    console.log('disable dropdown buttons');
     this.setState({disabled:true})    
   }
 
