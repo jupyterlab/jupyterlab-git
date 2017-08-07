@@ -240,7 +240,6 @@ const REFRESH_DURATION = 50000;
 const MIN_REFRESH = 5000;
 
 
-let app0 = null;
 let current_fb_path = '';
 //let current_repo_branch = '';
 //let current_root_repo_path = '';
@@ -266,7 +265,7 @@ class GitSessions extends Widget {
    // this._renderer = options.renderer || GitSessions.defaultRenderer;
     this.addClass(Git_CLASS);
     //let renderer = this._renderer;
-      const element =<GitSessionNode current_fb_path='' top_repo_path=''/>;
+      const element =<GitSessionNode current_fb_path='' top_repo_path='' app={app}/>;
       ReactDOM.render(element, this.node);
       
 
@@ -469,7 +468,6 @@ export namespace CommandIDs {
 export
 function addCommands(app: JupyterLab) {
   let { commands} = app;
-  app0 = app;
   let git_temp = new Git();
 
   /**
@@ -553,6 +551,7 @@ namespace GitSessionNode {
   interface IProps {
     current_fb_path:string;
     top_repo_path: string;
+    app:JupyterLab;
   }
 }
 
@@ -566,7 +565,7 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
   
   async refresh(){
    try{
-    let ll = app0.shell.widgets('left');
+    let ll = this.props.app.shell.widgets('left');
     let fb = ll.next();
     while(fb.id!='filebrowser'){
       fb = ll.next();
