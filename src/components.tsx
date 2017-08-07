@@ -665,8 +665,6 @@ class GitWholeContainer extends React.Component<GitWholeContainer.IProps, GitWho
   constructor(props: GitWholeContainer.IProps) {
     super(props);
     this.state = {top_repo_path: props.top_repo_path, refresh : props.refresh, disabled:true}
-    this.switch_branch_disable = this.switch_branch_disable.bind(this);
-    this.switch_branch_enable = this.switch_branch_enable.bind(this);
   }
 
   async switch_branch_enable(){
