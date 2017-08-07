@@ -39,9 +39,6 @@ import {
   VDomModel, VDomRenderer
 } from '@jupyterlab/apputils';
 
-
-
-
 import {
   ISignal, Signal
 } from '@phosphor/signaling';
@@ -799,6 +796,7 @@ namespace PastCommits {
   export
   interface IState {
     data: any;
+    single_data:any;
     show:boolean;
   }
 
@@ -822,7 +820,7 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
 
   constructor(props: PastCommits.IProps) {
     super(props);
-    this.state = {data: props.past_commits, show: false}
+    this.state = {data: props.past_commits, single_data:'', show: false}
   }
 
   show_left(){
@@ -851,7 +849,9 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
   }
   
   show_past_commit_work(dj:SingleCommitInfo){
-    this.setState({show:true})
+    console.log("clicked!!!!!!!!!!!!!!!");
+    console.log(dj);
+    this.setState({single_data:dj,show:true})
   }
 
 
@@ -864,11 +864,11 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
           <ul className={PAST_COMMIT_LIST_CLASS}>
             <button className={CUR_BUTTON_CLASS} onDoubleClick={()=>this.show_current_work()}>
                CUR
-            </button>           
-            {this.state.data.map((dj)=>
+            </button>         
+            {this.state.data.map((dj, dj_index)=>
               <span className={PAST_SINGLE_COMMIT_CONTAINER_CLASS} onDoubleClick={()=>this.show_past_commit_work(dj)}>---
                   <button className={PAST_COMMIT_BUTTON_CLASS}>
-                    {dj.commit}
+                      <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
                     </button>
               </span>
             )}
@@ -877,9 +877,10 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
          <button className={SHIFT_RIGHT_BUTTON_CLASS} onClick={()=>this.show_right()}> R </button>
       </div>
           <ToggleDisplay show={this.state.show}>
-          <SinglePastCommitInfo />
+          <SinglePastCommitInfo data={this.state.single_data}/>
           </ToggleDisplay>
- 
+
+
           <ToggleDisplay show={!(this.state.show)}>
           <StatusFiles current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} 
               staged_files={this.props.staged_files} unstaged_files={this.props.unstaged_files} untracked_files={this.props.untracked_files} refresh={this.props.refresh}/>
@@ -889,18 +890,56 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
   }
 }
 
-class SinglePastCommitInfo extends React.Component{
-  constructor() {
-    super();
+namespace PastCommitNodeInfo {
+  export
+  interface IState {
+
+  }
+
+  export
+  interface IProps {
+    index:number;
+    commit:string;
+    author:string;
+    date:string;
+    commit_msg:string;
+  }
+}
+
+class PastCommitNodeInfo extends React.Component<PastCommitNodeInfo.IProps, PastCommitNodeInfo.IState>{
+  constructor(props: PastCommitNodeInfo.IProps) {
+    super(props);
+  }
+  render(){
+    return(
+      <div>
+        {this.props.index}
+        </div>
+    );
+  }
+}
+
+namespace SinglePastCommitInfo {
+  export
+  interface IState {
+  }
+
+  export
+  interface IProps {
+    data:SingleCommitInfo;
+  }
+}
+class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.IProps, SinglePastCommitInfo.IState>{
+  constructor(props:SinglePastCommitInfo.IProps) {
+    super(props);
 	}
   render(){
     return (
       <div>
-        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> commit</li>
-        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> author</li>
-        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> date</li>
-        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> commit_msg</li>
-        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> modified_file_note</li>
+        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> commit: {this.props.data.commit}</li>
+        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> author: {this.props.data.author}</li>
+        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> date: {this.props.data.date}</li>
+        <li className={PAST_COMMIT_INFO_LABEL_CLASS}> commit_msg: {this.props.data.commit_msg}</li>
         </div>
     );
   }
