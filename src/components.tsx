@@ -266,9 +266,6 @@ class GitSessions extends Widget {
    // this._renderer = options.renderer || GitSessions.defaultRenderer;
     this.addClass(Git_CLASS);
     //let renderer = this._renderer;
-
-
-    
       const element =<GitSessionNode current_fb_path='' top_repo_path=''/>;
       ReactDOM.render(element, this.node);
       
@@ -849,8 +846,6 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
   }
   
   show_past_commit_work(dj:SingleCommitInfo){
-    console.log("clicked!!!!!!!!!!!!!!!");
-    console.log(dj);
     this.setState({single_data:dj,show:true})
   }
 
@@ -865,7 +860,7 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
             <button className={CUR_BUTTON_CLASS} onDoubleClick={()=>this.show_current_work()}>
                CUR
             </button>         
-            {this.state.data.map((dj, dj_index)=>
+            {this.props.past_commits.map((dj, dj_index)=>
               <span className={PAST_SINGLE_COMMIT_CONTAINER_CLASS} onDoubleClick={()=>this.show_past_commit_work(dj)}>---
                   <button className={PAST_COMMIT_BUTTON_CLASS}>
                       <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
