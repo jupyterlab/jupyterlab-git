@@ -764,35 +764,7 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
     super(props);
     this.state = {top_repo_path: props.top_repo_path, current_repo_branch: props.current_branch, data: [], refresh:props.refresh, disabled:props.disabled}
   }
-/*
-  async componentDidMount() {
-    let result = [];
-    let git_temp = new Git();
-    console.log("inside branchHeader componentDidMount: "+this.props.top_repo_path);
-    let response = await git_temp.branch(this.props.current_fb_path);
-    if(response.code==0){
-      this.setState({data: (response as GitBranchResult).repos});
-    }
-  }
 
-  async componentWillReceiveProps() {
-    let result = [];
-    let cur_repo_branch = '';
-    let git_temp = new Git();
-    console.log("inside branchHeader componentWillReceiveProps: "+this.props.top_repo_path);
-    let response = await git_temp.branch(this.props.current_fb_path);
-    if(response.code==0){
-      let data_json = (response as GitBranchResult).repos;
-      for (var i=0; i<data_json.length; i++){
-        if(data_json[i].current[0]){
-          cur_repo_branch=data_json[i].name;
-          break;
-        }
-      }
-      this.setState({current_repo_branch: cur_repo_branch, data: (response as GitBranchResult).repos});
-    }
-  }
-*/
 //functions for switch branches
   switch_branch(event, refresh){
     let git_temp = new Git();
@@ -873,16 +845,7 @@ class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState
       this.setState({data: response.commits});
     }
   }
-/*
-  async componentWillReceiveProps() {
-    let result = [];
-    let git_temp = new Git();
-    let response = await git_temp.log(this.props.current_fb_path);
-    if(response.code==0){
-      this.setState({data: response.commits});
-    }
-  }
-*/
+
   show_current_work(){
     this.setState({show:false})
   }
@@ -965,75 +928,7 @@ class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState
   constructor(props: StatusFiles.IProps) {
     super(props);
   }
-/*
-  async componentDidMount() {
-    let staged = [], unstaged = [], untracked = [];
-    let SF = 0, USF = 0, UTF = 0, Changes = 0;
-    let git_temp = new Git();
-    let response = await git_temp.status(this.props.current_fb_path);
-    if(response.code==0){
-      let data_json = (response as GitStatusResult).files;
-      for (var i=0; i<data_json.length; i++){
-        if(data_json[i].x!="?"&&data_json[i].x!="!"){
-          Changes++;
-        }
-        if(data_json[i].x=="M"){
-          staged.push(data_json[i].to);
-          SF++;
-        }
-        if(data_json[i].y=="M"){
-          unstaged.push(data_json[i].to);
-          USF++;
-        }
-        if(data_json[i].x=="?"&&data_json[i].y=="?"){
-          untracked.push(data_json[i].to);
-          UTF++;
-        }
-      }  
-      if(Changes > 0){
-        this.props.switch_branch_disable();  
-      }
-      else{
-        this.props.switch_branch_enable();
-      }    
-      this.setState({staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
-    }
-  }
 
-  async componentWillReceiveProps() {
-    let staged = [], unstaged = [], untracked = [];
-    let SF = 0, USF = 0, UTF = 0, Changes = 0;
-    let git_temp = new Git();
-    let response = await git_temp.status(this.props.current_fb_path);
-    if(response.code==0){
-      let data_json = (response as GitStatusResult).files;
-      for (var i=0; i<data_json.length; i++){
-        if(data_json[i].x!="?"&&data_json[i].x!="!"){
-          Changes++;
-        }
-        if(data_json[i].x=="M"){
-          staged.push(data_json[i].to);
-          SF++;
-        }
-        if(data_json[i].y=="M"){
-          unstaged.push(data_json[i].to);
-          USF++;
-        }
-        if(data_json[i].x=="?"&&data_json[i].y=="?"){
-          untracked.push(data_json[i].to);
-          UTF++;
-        }
-      }
-      if(Changes > 0){
-        this.props.switch_branch_disable();  
-      }
-      else{
-        this.props.switch_branch_enable();
-      }
-      this.setState({staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
-    }
-  }
-*/
   render(){
     return (
       <div ref="three_sections_for_current_work">
@@ -1182,9 +1077,6 @@ function add_UntrackedNode(file:string, path:string,refresh){
     refresh();
   });
 }
-
-
-
 
 
 function parseFileExtension(path: string): string {
