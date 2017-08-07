@@ -684,6 +684,7 @@ namespace BranchHeader {
     current_repo_branch:string;
     data: any;
     refresh:any;
+    disabled:boolean;
   }
 
   export
@@ -697,7 +698,7 @@ namespace BranchHeader {
 class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
   constructor(props: BranchHeader.IProps) {
     super(props);
-    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: '', data: [], refresh:props.refresh}
+    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: '', data: [], refresh:props.refresh, disabled:props.disabled}
   }
 
   async componentDidMount() {
@@ -741,7 +742,7 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
       <div  className='jp-CSVToolbar'>
         <span className ='jp-CSVToolbar-label'> Current Branch:{this.state.current_repo_branch}
         </span>,
-        <select ref="switch_branch_dropdown_button" disabled = {this.props.disabled} className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
+        <select ref="switch_branch_dropdown_button" disabled = {this.state.disabled} title = {this.state.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
              {this.state.data.map((dj)=>
               <option selected={dj.current[0]} value ={dj.name}>
                   {dj.name}
