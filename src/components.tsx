@@ -821,6 +821,8 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
 
 
 
+
+
 namespace PastCommits {
   export
   interface IState {
