@@ -283,20 +283,26 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
     });
   }
 
+//functions for create a new branch and switch to it
+  create_switch_branch(refresh){
+    console.log("test jfifndsiv90nre9bokmfg");
+  }
+
   render(){
     return (
       <div  className='jp-CSVToolbar'>
         <span className ='jp-CSVToolbar-label'> Current Branch:{this.props.current_branch}
         </span>,
-        <select ref="switch_branch_dropdown_button" defaultValue={this.props.current_branch} disabled = {this.props.disabled} title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
+        <select required ref="switch_branch_dropdown_button" defaultValue={this.props.current_branch} disabled = {this.props.disabled} title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
+             <option value="" disabled selected>Please Choose</option>
              {this.props.data.map((dj)=>
               <option value ={dj.name}>
                   {dj.name}
               </option>
               )}
-              <button>
-                ABCDFG
-                </button>
+              <option>
+                <button onClick={()=>this.create_switch_branch(this.props.refresh)}></button>
+              </option>
           </select>,  
       </div>
     );
