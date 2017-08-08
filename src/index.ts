@@ -1,6 +1,9 @@
 import {
-  addCommands, GitSessions, CommandIDs
- } from './components'
+  addCommands, CommandIDs
+ } from './git_mainmenu_command'
+import {
+  GitSessions
+ } from './components/components'
 
 import {
   ILayoutRestorer, JupyterLab, JupyterLabPlugin

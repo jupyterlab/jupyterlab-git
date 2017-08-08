@@ -108,14 +108,19 @@ export interface SingleCommitInfo {
 		modified_file_path: string,
 	}]
 }
+
+export interface CommitModifiedFile{
+	modified_file_path: string,
+	insertion: string;
+	deletion: string
+}
+
 export interface SingleCommitFilePathInfo {
 	code:number;
 	modified_file_note?: string,
-	modified_files?: [{
-		modified_file_path: string,
-		insertion: string;
-		deletion: string
-	}]
+	modified_files?: [
+		CommitModifiedFile
+	]
 }
 
 export interface GitLogResult {
