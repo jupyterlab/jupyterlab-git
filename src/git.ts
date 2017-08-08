@@ -336,14 +336,6 @@ export class Git {
 		//return HTTP_Git_Request('/git/init','POST',{"top_repo_path":path});
 	}
 
-	push(origin: string, master: string, path:string) {
-		return HTTP_Git_Request('/git/push', 'POST', {"origin": origin, "master":master,"top_repo_path": path});
-	}
-	init(path:string){
-		//return HTTP_Git_Request('/git/init','POST',{"top_repo_path":path});
-	}
-
-
 }
 
 
