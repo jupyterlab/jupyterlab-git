@@ -290,7 +290,7 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
         </span>,
         <select ref="switch_branch_dropdown_button" defaultValue={this.props.current_branch} disabled = {this.props.disabled} title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
              {this.props.data.map((dj)=>
-              <option value ={dj.name}>
+              <option selected={dj.current[0]} value ={dj.name}>
                   {dj.name}
               </option>
               )}
