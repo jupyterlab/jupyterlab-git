@@ -256,7 +256,7 @@ let global_current_fb_path = '';
 
 export
 class GitSessions extends Widget {
-  GSN:any;
+  component:any;
   /**
    * Construct a new running widget.
    */
@@ -268,8 +268,8 @@ class GitSessions extends Widget {
    // this._renderer = options.renderer || GitSessions.defaultRenderer;
     this.addClass(Git_CLASS);
     //let renderer = this._renderer;
-    const element =<GitSessionNode ref="myGitSessionNode" current_fb_path='' top_repo_path='' app={app}/>;
-      ReactDOM.render(element, this.node);
+    const element =<GitSessionNode current_fb_path='' top_repo_path='' app={app}/>
+    this.component = ReactDOM.render(element, this.node);
       
 
   }
@@ -279,8 +279,7 @@ class GitSessions extends Widget {
   show():void{
     super.show();
     console.log("GSN");
-
-    
+    this.component.refresh();
   }
   /**
    * The renderer used by the running sessions widget.
@@ -562,20 +561,9 @@ namespace GitSessionNode {
   }
 }
 
-
-class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNode.IState>{
-  constructor(props: GitSessionNode.IProps) {
-    super(props);
-    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', disable_switch_branch:true, past_commits:[], staged_files:[], unstaged_files:[], untracked_files:[]}
-    this.refresh = this.refresh.bind(this);
-  }  
-  
- test(){
-    console.log("HAHAHAHAHAHAHHAHAHAHHAHA")
-  }
-
-  async refresh(){
-   
+  async function refresh(){
+    console.log(this.props.current_fb_path);
+    console.log(this.props.top_repo_path);
    try{
     let ll = this.props.app.shell.widgets('left');
     let fb = ll.next();
@@ -644,6 +632,20 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
      console.log("app doesn't work??")
    };
  }
+
+class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNode.IState>{
+  refresh:any;
+  constructor(props: GitSessionNode.IProps) {
+    super(props);
+    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', disable_switch_branch:true, past_commits:[], staged_files:[], unstaged_files:[], untracked_files:[]}
+    this.refresh = refresh.bind(this);
+  }  
+  
+ static test(){
+    console.log("HAHAHAHAHAHAHHAHAHAHHAHA")
+  }
+
+
 
   render(){
     return(
