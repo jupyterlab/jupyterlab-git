@@ -278,14 +278,26 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
 //functions for switch branches
   switch_branch(event, refresh){
     let git_temp = new Git();
-    git_temp.checkout(true, false, event.target.value, false, null, this.props.current_fb_path).then(respones=>{
-      refresh();
-    });
-  }
-
-//functions for create a new branch and switch to it
-  create_switch_branch(refresh){
-    console.log("test jfifndsiv90nre9bokmfg");
+    if(event.target.value==''){
+      let input = new Widget({ node: document.createElement('input') });
+        showDialog({        
+          title: 'Input a name to create a new branch and switch to it:',
+          body: input,
+          buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Create'})]
+        }).then(result => {
+          let target_branch = (input.node as HTMLInputElement).value ;
+          if (result.button.accept&&target_branch) {
+            git_temp.checkout(true, true, target_branch, false, null, this.props.current_fb_path).then(response=>{
+              refresh();
+            });
+          }
+      });
+    }
+    else{
+      git_temp.checkout(true, false, event.target.value, false, null, this.props.current_fb_path).then(respones=>{
+        refresh();
+      });
+    }
   }
 
   render(){
@@ -300,8 +312,8 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
                   {dj.name}
               </option>
               )}
-              <option>
-                <button onClick={()=>this.create_switch_branch(this.props.refresh)}>Create New Branch</button>
+              <option value = ''>
+                CREATE NEW BRANCH
               </option>
           </select>,  
       </div>
