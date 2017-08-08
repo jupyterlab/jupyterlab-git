@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import ToggleDisplay from 'react-toggle-display'
@@ -27,7 +26,9 @@ import {
   JupyterLab
 } from '@jupyterlab/application';
 
-
+import {
+	  FileBrowser
+} from '@jupyterlab/filebrowser';
 
 import {
   PathExt //URLExt
@@ -240,7 +241,8 @@ const REFRESH_DURATION = 50000;
 const MIN_REFRESH = 5000;
 
 
-let current_fb_path = '';
+
+let global_current_fb_path = '';
 //let current_repo_branch = '';
 //let current_root_repo_path = '';
 /**
@@ -254,10 +256,11 @@ let current_fb_path = '';
 
 export
 class GitSessions extends Widget {
+  GSN:any;
   /**
    * Construct a new running widget.
    */
-  constructor(app: JupyterLab, options: GitSessions.IOptions) {
+  constructor(app:JupyterLab,options: GitSessions.IOptions) {
     super({
       node: (options.renderer || GitSessions.defaultRenderer).createNode()
     });
@@ -265,7 +268,7 @@ class GitSessions extends Widget {
    // this._renderer = options.renderer || GitSessions.defaultRenderer;
     this.addClass(Git_CLASS);
     //let renderer = this._renderer;
-      const element =<GitSessionNode current_fb_path='' top_repo_path='' app={app}/>;
+    const element =<GitSessionNode ref="myGitSessionNode" current_fb_path='' top_repo_path='' app={app}/>;
       ReactDOM.render(element, this.node);
       
 
@@ -275,6 +278,9 @@ class GitSessions extends Widget {
    */
   show():void{
     super.show();
+    console.log("GSN");
+
+    
   }
   /**
    * The renderer used by the running sessions widget.
@@ -468,6 +474,7 @@ export namespace CommandIDs {
 export
 function addCommands(app: JupyterLab) {
   let { commands} = app;
+
   let git_temp = new Git();
 
   /**
@@ -494,7 +501,7 @@ function addCommands(app: JupyterLab) {
       console.log("git pull");
       let upstream = prompt("Enter Upstream Branch Name");
       let master = prompt("Enter Master Branch Name");
-      git_temp.pull(upstream,master,current_fb_path);
+      git_temp.pull(upstream,master,global_current_fb_path);
     }
   });
 
@@ -505,7 +512,7 @@ function addCommands(app: JupyterLab) {
       console.log("git push");
       let upstream = prompt("Enter Upstream Branch Name");
       let master = prompt("Enter Master Branch Name");
-      git_temp.push(upstream,master,current_fb_path);
+      git_temp.push(upstream,master,global_current_fb_path);
 
     },
   });
@@ -521,7 +528,7 @@ function addCommands(app: JupyterLab) {
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Yes'})]
         }).then(result => {
           if (result.button.accept) {
-            git_temp.init(current_fb_path);
+            git_temp.init(global_current_fb_path);
           }
         });
     },
@@ -563,19 +570,25 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
     this.refresh = this.refresh.bind(this);
   }  
   
+ test(){
+    console.log("HAHAHAHAHAHAHHAHAHAHHAHA")
+  }
+
   async refresh(){
+   
    try{
     let ll = this.props.app.shell.widgets('left');
     let fb = ll.next();
     while(fb.id!='filebrowser'){
       fb = ll.next();
     }
+    global_current_fb_path = (fb as any).model.path;
     let git_temp = new Git();
     //retrieve git_showtoplevel
     let response_showtoplevel = await git_temp.showtoplevel((fb as any).model.path);
     if(response_showtoplevel.code==0){
       //retrieve git_branch
-      let response_branch = await git_temp.branch(this.props.current_fb_path);
+      let response_branch = await git_temp.branch((fb as any).model.path);
       let current_branch = '';
       if(response_branch.code==0){
         let data_json = (response_branch as GitBranchResult).repos;
@@ -586,13 +599,13 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
           }
         }
         //retrieve git_log
-        let response_log = await git_temp.log(this.props.current_fb_path);
+        let response_log = await git_temp.log((fb as any).model.path);
         if(response_log.code==0){
           //retrieve git_status
           let staged = [], unstaged = [], untracked = [];
           let SF = 0, USF = 0, UTF = 0, Changes = 0;
           let disable_switch_branch = true;
-          let response_status = await git_temp.status(this.props.current_fb_path);
+          let response_status = await git_temp.status((fb as any).model.path);
           if(response_status.code==0){
             let data_json = (response_status as GitStatusResult).files;
             for (var i=0; i<data_json.length; i++){
@@ -761,7 +774,7 @@ class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.ISt
 //functions for switch branches
   switch_branch(event, refresh){
     let git_temp = new Git();
-    git_temp.checkout(true, false, event.target.value, false, null, current_fb_path).then(respones=>{
+    git_temp.checkout(true, false, event.target.value, false, null, this.props.current_fb_path).then(respones=>{
       refresh();
     });
   }

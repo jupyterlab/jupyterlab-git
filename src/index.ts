@@ -7,6 +7,10 @@ import {
 } from '@jupyterlab/application';
 
 import {
+	  FileBrowser, IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
+
+import {
   IServiceManager
 } from '@jupyterlab/services';
 
