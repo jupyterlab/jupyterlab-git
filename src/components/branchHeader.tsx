@@ -301,7 +301,7 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
               </option>
               )}
               <option>
-                <button onClick={()=>this.create_switch_branch(this.props.refresh)}></button>
+                <button onClick={()=>this.create_switch_branch(this.props.refresh)}>Create New Branch</button>
               </option>
           </select>,  
       </div>
