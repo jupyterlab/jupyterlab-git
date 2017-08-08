@@ -32,7 +32,6 @@ class Git:
                 result.append({'x':line[0],'y':line[1],'to':line[3:],'from':None})
             return {"code": p.returncode, "files":result}
         else:
-
             return {"code": p.returncode, 'command':"git status --porcelain", "message": my_error.decode('utf-8')}
 
     def log(self,current_path):
@@ -48,6 +47,24 @@ class Git:
         else:
             return {"code":p.returncode, "message":my_error.decode('utf-8')}
 
+    def log_1(self, selected_hash, current_path):
+        p = Popen(["git", "log","-1", "--stat", "--numstat", "--oneline",selected_hash], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
+        my_output,my_error = p.communicate()
+        if(p.returncode==0):
+            result = []
+            note = ""
+            line_array = my_output.decode('utf-8').splitlines()
+            length = len(line_array)
+            if(length>1):
+                note = line_array[length-1]
+                for num in range(1, int(length/2)):
+                    line_info = line_array[num].split()
+                    result.append({"modified_file_path":line_info[2], "insertion": line_info[0], "deletion": line_info[1]})
+
+            return {"code": p.returncode, "modified_file_note": note, "modified_files":result}
+        else:
+            return {"code":p.returncode, "message":my_error.decode('utf-8')}
+
     def diff(self,top_repo_path):
         p = Popen(["git", "diff","--numstat"], stdout=PIPE, stderr=PIPE, cwd = top_repo_path)
         my_output,my_error = p.communicate()
@@ -60,7 +77,6 @@ class Git:
             return {"code": p.returncode, "result":result}
         else:
             return {"code":p.returncode, "message":my_error.decode('utf-8')}
-
 
 
     def branch(self, current_path):
@@ -89,7 +105,6 @@ class Git:
         else:
             return {"code": p.returncode, 'command':"git branch -a", "message": my_error.decode('utf-8')}
 
-
     def showtoplevel(self, current_path):
         p = Popen(["git", "rev-parse", "--show-toplevel"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
         my_output, my_error = p.communicate()
@@ -98,7 +113,6 @@ class Git:
             return result
         else:
             return {"code": p.returncode, 'command':"git rev-parse --show-toplevel", "message": my_error.decode('utf-8')}
-
 
     def showprefix(self, current_path):
         p = Popen(["git", "rev-parse", "--show-prefix"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
@@ -155,7 +169,6 @@ class Git:
         return my_output
       
     def pull(self, origin, master,top_repo_path):
-       # str1 = origin +" "+master+" "+"--no-commit"
         my_output = subprocess.check_output(["git", "pull",origin,master,"--no-commit"], cwd = top_repo_path)
         print("Hi there! post extensions!!")
         return my_output
@@ -168,3 +181,4 @@ class Git:
     def init(self,top_repo_path):
         my_output = subprocess.check_output(["git", "init"],cwd = top_repo_path)
         return my_output
+
