@@ -33,6 +33,7 @@ import {
    Menu
 } from '@phosphor/widgets';
 
+
 /**
  * The default running sessions extension.
  */
@@ -81,5 +82,4 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     menu.addItem({command});
   });
   mainMenu.addMenu(menu,{rank:60});
-
 }
