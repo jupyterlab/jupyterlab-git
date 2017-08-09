@@ -49,6 +49,12 @@ import {
 } from '../git'
 
 import {
+  PathHeader
+} from './pathHeader'
+
+
+
+import {
   PastCommits
 } from './pastCommits'
 
@@ -68,14 +74,14 @@ const Git_CLASS = 'jp-GitSessions';
  */
 const HEADER_CLASS = 'jp-GitSessions-header';
 
-const SHIFT_LEFT_BUTTON_CLASS = 'jp-GitSessions-headershiftleftbutton';
-const SHIFT_RIGHT_BUTTON_CLASS = 'jp-GitSessions-headershiftrightbutton';
-const CUR_BUTTON_CLASS = 'jp-GitSessions-headercurbutton'; 
+const SHIFT_LEFT_BUTTON_CLASS = 'jp-mod-left';
+const SHIFT_RIGHT_BUTTON_CLASS = 'jp-mod-right';
+const CUR_BUTTON_CLASS = 'jp-mod-current'; 
 
 /**
  * The class name added to a git-plugin widget header refresh button.
  */
-const REFRESH_CLASS = 'jp-GitSessions-headerRefresh';
+const REFRESH_CLASS  = 'jp-Git-repo-refresh';
 /**
  * The class name added to a git-plugin widget header refresh button.
  */
@@ -115,18 +121,18 @@ const SECTION_HEADER_CLASS = 'jp-GitSessions-sectionHeader';
  * The class name added to a section container.
  */
 const GIT_WHOLE_CONTAINER_CLASS = 'jp-GitSessions-sectionGitWholeContainer';
-const TOP_CONTAINER_CLASS = 'jp-GitSessions-sectionTopContainer';
+const TOP_CONTAINER_CLASS = 'jp-Git-timeline';
 const CONTAINER_CLASS = 'jp-GitSessions-sectionContainer';
 const PAST_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastCommitContainer';
 const PAST_SINGLE_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastSingleCommitContainer';
-const PAST_COMMIT_BUTTON_CLASS = 'jp-GitSessions-sectionPastCommitButton';
+const PAST_COMMIT_BUTTON_CLASS = 'jp-Git-timeline-commit';
 //const PAST_COMMIT_SELECTED_BUTTON_CLASS = 'jp-GitSessions-sectionPastCommitSelectedButton';
 /**
  * The class name added to the git-plugin kernel sessions section list.
  */
 const LIST_CLASS = 'jp-GitSessions-sectionList';
 
-const PAST_COMMIT_LIST_CLASS = 'jp-GitSessions-sectionPastCommitList';
+const PAST_COMMIT_LIST_CLASS =  'jp-Git-timeline-container';
 const PAST_COMMIT_INFO_SECTION_HEADER_CLASS = 'jp-GitSessions-pastcommitinfosectionHeader';
 const PAST_COMMIT_INFO_LABEL_CLASS = 'jp-GitSessions-pastcommitinfoLabel';
 /**
@@ -143,6 +149,8 @@ const ITEM_ICON_CLASS = 'jp-GitSessions-itemIcon';
  * The class name added to a git-plugin session item label.
  */
 const ITEM_LABEL_CLASS = 'jp-GitSessions-itemLabel';
+const REPO_CLASS = 'jp-Git-repo-path';
+
 
 
 /**
@@ -229,14 +237,14 @@ const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
 /**
  * The class name added to a csv toolbar widget.
  */
-const CSV_TOOLBAR_CLASS = 'jp-CSVToolbar';
+const CSV_TOOLBAR_CLASS = 'jp-Git-branch';
 
-const CSV_TOOLBAR_LABEL_CLASS = 'jp-CSVToolbar-label';
+const CSV_TOOLBAR_LABEL_CLASS = 'jp-Git-branch-dropdown';
 
 /**
  * The class name added to a csv toolbar's dropdown element.
  */
-const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVToolbar-dropdown';
+const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-Git-branch-icon';
 
 /**
  * The duration of auto-refresh in ms.
@@ -285,10 +293,10 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
 
   render(){
     return (
-      <div  className='jp-CSVToolbar'>
-        <span className ='jp-CSVToolbar-label'> Current Branch:{this.props.current_branch}
+      <div  className='jp-Git-branch'>
+        <span className ='jp-Git-branch-dropdown'> Current Branch:{this.props.current_branch}
         </span>,
-        <select ref="switch_branch_dropdown_button" disabled = {this.props.disabled} title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} className='jp-CSVToolbar-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
+        <select ref="switch_branch_dropdown_button" disabled = {this.props.disabled} title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} className='jp-Git-branch-icon' onChange={event=>this.switch_branch(event, this.props.refresh)} >
              {this.props.data.map((dj)=>
               <option selected={dj.current[0]} value ={dj.name}>
                   {dj.name}
