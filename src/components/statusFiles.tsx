@@ -268,6 +268,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
     super(props);
     this.state={commit_msg:'', commit_disable:true};
     this.handleChange = this.handleChange.bind(this);
+    this.init_input = this.init_input.bind(this);
   }
   handleChange(event){
     if(event.target.value&&event.target.value!=''){
