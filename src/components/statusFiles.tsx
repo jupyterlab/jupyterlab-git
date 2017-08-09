@@ -48,6 +48,20 @@ import {
   Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo, SingleCommitFilePathInfo, CommitModifiedFile
 } from '../git'
 
+import {
+  PathHeader
+} from './pathHeader'
+
+import {
+  BranchHeader
+} from './branchHeader'
+
+import {
+  PastCommits
+} from './pastCommits'
+
+
+
 import '../../style/index.css';
 import $ = require('jquery');
 /**
@@ -60,14 +74,14 @@ const Git_CLASS = 'jp-GitSessions';
  */
 const HEADER_CLASS = 'jp-GitSessions-header';
 
-const SHIFT_LEFT_BUTTON_CLASS = 'jp-GitSessions-headershiftleftbutton';
-const SHIFT_RIGHT_BUTTON_CLASS = 'jp-GitSessions-headershiftrightbutton';
-const CUR_BUTTON_CLASS = 'jp-GitSessions-headercurbutton'; 
+const SHIFT_LEFT_BUTTON_CLASS = 'jp-mod-left';
+const SHIFT_RIGHT_BUTTON_CLASS = 'jp-mod-right';
+const CUR_BUTTON_CLASS = 'jp-mod-current'; 
 
 /**
  * The class name added to a git-plugin widget header refresh button.
  */
-const REFRESH_CLASS = 'jp-GitSessions-headerRefresh';
+const REFRESH_CLASS  = 'jp-Git-repo-refresh';
 /**
  * The class name added to a git-plugin widget header refresh button.
  */
@@ -103,22 +117,25 @@ const UNSTAGED_CLASS = 'jp-GitSessions-unstagedSection';
  */
 const SECTION_HEADER_CLASS = 'jp-GitSessions-sectionHeader';
 
+const STAGED_SECTION = 'jp-Git-staged';
+const UNSTAGED_SECTION = 'jp-Git-unstaged';
+const UNTRACKED_SECTION = 'jp-Git-untracked';
 /**
  * The class name added to a section container.
  */
 const GIT_WHOLE_CONTAINER_CLASS = 'jp-GitSessions-sectionGitWholeContainer';
-const TOP_CONTAINER_CLASS = 'jp-GitSessions-sectionTopContainer';
+const TOP_CONTAINER_CLASS = 'jp-Git-timeline';
 const CONTAINER_CLASS = 'jp-GitSessions-sectionContainer';
 const PAST_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastCommitContainer';
 const PAST_SINGLE_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastSingleCommitContainer';
-const PAST_COMMIT_BUTTON_CLASS = 'jp-GitSessions-sectionPastCommitButton';
+const PAST_COMMIT_BUTTON_CLASS = 'jp-Git-timeline-commit';
 //const PAST_COMMIT_SELECTED_BUTTON_CLASS = 'jp-GitSessions-sectionPastCommitSelectedButton';
 /**
  * The class name added to the git-plugin kernel sessions section list.
  */
 const LIST_CLASS = 'jp-GitSessions-sectionList';
 
-const PAST_COMMIT_LIST_CLASS = 'jp-GitSessions-sectionPastCommitList';
+const PAST_COMMIT_LIST_CLASS =  'jp-Git-timeline-container';
 const PAST_COMMIT_INFO_SECTION_HEADER_CLASS = 'jp-GitSessions-pastcommitinfosectionHeader';
 const PAST_COMMIT_INFO_LABEL_CLASS = 'jp-GitSessions-pastcommitinfoLabel';
 /**
@@ -134,17 +151,21 @@ const ITEM_ICON_CLASS = 'jp-GitSessions-itemIcon';
 /**
  * The class name added to a git-plugin session item label.
  */
-const ITEM_LABEL_CLASS = 'jp-GitSessions-itemLabel';
+const ITEM_LABEL_CLASS = 'jp-Git-label';
+const REPO_CLASS = 'jp-Git-repo-path';
+
 
 
 /**
  * The class name added to a git-plugin session item git-add button.
  */
 const ADD_BUTTON_CLASS = 'jp-GitSessions-itemAdd';
+const ADD_BUTTON = 'jp-Git-add';
 /**
  * The class name added to a git-plugin session item git-reset button.
  */
 const RESET_BUTTON_CLASS = 'jp-GitSessions-itemReset';
+const RESET_BUTTON = 'jp-Git-reset';
 /**
  * The class name added to a git-plugin session item git-checkout button.
  */
@@ -153,6 +174,7 @@ const RESET_BUTTON_CLASS = 'jp-GitSessions-itemReset';
  * The class name added to a git-plugin session item git-commit button.
  */
 const COMMIT_BUTTON_CLASS = 'jp-GitSessions-itemCommit';
+const COMMIT_BUTTON = 'jp-Git-commit';
 
 /**
  * The class name added to a notebook icon.
@@ -221,14 +243,14 @@ const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
 /**
  * The class name added to a csv toolbar widget.
  */
-const CSV_TOOLBAR_CLASS = 'jp-CSVToolbar';
+const CSV_TOOLBAR_CLASS = 'jp-Git-branch';
 
-const CSV_TOOLBAR_LABEL_CLASS = 'jp-CSVToolbar-label';
+const CSV_TOOLBAR_LABEL_CLASS = 'jp-Git-branch-dropdown';
 
 /**
  * The class name added to a csv toolbar's dropdown element.
  */
-const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVToolbar-dropdown';
+const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-Git-branch-icon';
 
 /**
  * The duration of auto-refresh in ms.
@@ -267,12 +289,12 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
   render(){
     return (
       <div ref="three_sections_for_current_work">
-          <div className={SECTION_HEADER_CLASS} >
+          <div className={STAGED_SECTION} >
               <span className={ITEM_LABEL_CLASS}> Staged({(this.props.staged_files).length})</span>
-              <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Reset</button>
-              <button className={`${COMMIT_BUTTON_CLASS} jp-mod-styled`} onClick={()=>commit_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Commit</button>
+              <button className={`${RESET_BUTTON} jp-mod-styled`} onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Reset</button>
+              <button className={`${COMMIT_BUTTON} jp-mod-styled`} onClick={()=>commit_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Commit</button>
           </div>
-          <div className= 'jp-GitSessions-sectionContainer'>
+          <div className= 'jp-Git-sections'>
               <ul>
                 {this.props.staged_files.map((file)=>
                     <li className={ITEM_CLASS}>
@@ -285,35 +307,35 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
           </div>
 
 
-          <div className={SECTION_HEADER_CLASS} >
+          <div className={UNSTAGED_SECTION} >
               <span className={ITEM_LABEL_CLASS}> Unstaged({(this.props.unstaged_files).length})</span>
-              <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Add</button>
-              <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Discard</button>
+              <button className={`${ADD_BUTTON} jp-mod-styled`}onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Add</button>
+              <button className={`${RESET_BUTTON} jp-mod-styled`} onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Discard</button>
           </div>
-          <div className= 'jp-GitSessions-sectionContainer'>
+          <div className= 'jp-Git-sections'>
               <ul>
                 {this.props.unstaged_files.map((file)=>
                     <li className={ITEM_CLASS}>
                     <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
                     <span className={ITEM_LABEL_CLASS} onDoubleClick={()=>open_listed_file(file,this.props.app)}>{file}</span>
-                    <button className= {`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> add </button>
-                    <button className= {`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> discard </button>
+                    <button className= {`${ADD_BUTTON} jp-mod-styled`}  onClick={()=>add_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> add </button>
+                    <button className= {`${RESET_BUTTON} jp-mod-styled`} onClick={()=>discard_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> discard </button>
                     </li>
                 )}
               </ul>
           </div>
 
-          <div className={SECTION_HEADER_CLASS} >
+          <div className={UNTRACKED_SECTION} >
               <span className={ITEM_LABEL_CLASS}> Untracked({(this.props.untracked_files).length})</span>
-              <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`}>Add</button>
+              <button className={`${ADD_BUTTON} jp-mod-styled`} >Add</button>
           </div>
-          <div className= 'jp-GitSessions-sectionContainer'>
+          <div className= 'jp-Git-sections'>
               <ul>
                 {this.props.untracked_files.map((file)=>
                     <li className={ITEM_CLASS}>
                     <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(file)}`} />
                     <span className={ITEM_LABEL_CLASS} onDoubleClick={()=>open_listed_file(file,this.props.app)}>{file}</span>
-                    <button className= {`${ADD_BUTTON_CLASS} jp-mod-styled`}onClick={()=>add_UntrackedNode(file, this.props.top_repo_path, this.props.refresh)}> add </button>
+                    <button className= {`${ADD_BUTTON} jp-mod-styled`} onClick={()=>add_UntrackedNode(file, this.props.top_repo_path, this.props.refresh)}> add </button>
                     </li>
                 )}
               </ul>
