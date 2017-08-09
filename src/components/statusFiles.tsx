@@ -271,13 +271,15 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
   }
   handleChange(event){
     if(event.target.value&&event.target.value!=''){
-      console.log('hahaahah')
       this.setState({commit_msg:event.target.value,commit_disable:false});
     }
     else{
-       console.log('llllllllahaahah')
       this.setState({commit_msg:event.target.value,commit_disable:true});
     }
+  }
+
+  init_input(){
+    this.setState({commit_msg:''});
   }
 
   render(){
@@ -288,7 +290,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
             <label>
               <input className={COMMIT_INPUT_BOX} type="text" placeholder='Input message to commit staged changes'onChange={this.handleChange}/>
               </label>
-              <input type="button" value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh)}/>
+              <input type="button" value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>{commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh),this.init_input()}}/>
               </form>
             
               <span className={ITEM_LABEL_CLASS}> Staged({(this.props.staged_files).length})</span>
