@@ -421,7 +421,7 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
           {this.props.list.map((mf)=>
             <li className={ITEM_CLASS}>
               <span className={`${ITEM_ICON_CLASS} ${parseFileExtension(mf.modified_file_path)}`} />
-              <span className={ITEM_LABEL_CLASS}>{mf.modified_file_path} :{mf.insertion}(+), {mf.deletion}(-) </span>
+              <span className={ITEM_LABEL_CLASS} onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} :{mf.insertion}(+), {mf.deletion}(-) </span>
             </li>
           )}
           </ul>

@@ -178,7 +178,7 @@ class Git:
         print("Hi there! post extensions!!")
         return my_output
 
-    def init(self,top_repo_path):
-        my_output = subprocess.check_output(["git", "init"],cwd = top_repo_path)
+    def init(self,curr_fb_path):
+        my_output = subprocess.check_output(["git", "init"],cwd = os.getcwd()+'/'+curr_fb_path)
         return my_output
 

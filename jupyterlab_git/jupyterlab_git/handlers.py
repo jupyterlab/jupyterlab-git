@@ -144,8 +144,9 @@ class Git_push_handler(Git_handler):
 class Git_init_handler(Git_handler):
     def post(self):
         my_data = json.loads(self.request.body)
-        top_repo_path = my_data["top_repo_path"]
-        my_output=self.git.init(top_repo_path)
+        curr_fb_path = my_data["curr_path"]
+        my_output=self.git.init(curr_fb_path)
+        print(my_output);
         self.finish(my_output)
 
 def setup_handlers(web_app):

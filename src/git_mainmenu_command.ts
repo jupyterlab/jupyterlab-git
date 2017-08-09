@@ -90,7 +90,7 @@ function addCommands(app: JupyterLab) {
     caption: 'Start a new terminal session to directly use git command',
     execute: args => {
       console.log("git new terminal");
-      app.commands.execute('terminal:open');
+      app.commands.execute('terminal:create-new');
     }
   });
 
@@ -101,10 +101,20 @@ function addCommands(app: JupyterLab) {
       let cur_fb_path = find_cur_fb_path();
       console.log("git pull");
       let upstream = prompt("Enter Upstream Branch Name");
-      let master = prompt("Enter Master Branch Name");
-      git_temp.pull(upstream,master,cur_fb_path);
-    }
-  });
+      if(upstream==="" || upstream===null)
+        alert("Oops.. You can't leave branch name empty");
+      else
+        {
+          let master = prompt("Enter Master Branch Name");
+          if(master==="" || master ===null)
+            alert("Oops.. You can't leave branch name empty");
+          else
+            {
+              git_temp.pull(upstream,master,cur_fb_path);
+        
+            }
+        }
+  }});
 
   commands.addCommand(CommandIDs.git_push, {
     label: 'Push',
@@ -113,17 +123,26 @@ function addCommands(app: JupyterLab) {
       let cur_fb_path = find_cur_fb_path();
       console.log("git push");
       let upstream = prompt("Enter Upstream Branch Name");
-      let master = prompt("Enter Master Branch Name");
-      git_temp.push(upstream,master,cur_fb_path);
-
-    },
+      if(upstream=="" || upstream===null)
+        alert("Oops.. You can't leave branch name empty");
+      else
+        {
+          let master = prompt("Enter Master Branch Name");
+          if(master==="" || master===null)
+            alert("Oops.. You can't leave branch name empty");
+          else
+            {
+              git_temp.pull(upstream,master,cur_fb_path); 
+            }
+        }
+    }
   });
 
   commands.addCommand(CommandIDs.git_init, {
     label: 'Init',
     caption: " Create an empty Git repository or reinitialize an existing one",
     execute: () => {
-      let cur_fb_path = find_cur_fb_path();
+      let curr_fb_path = find_cur_fb_path();
       console.log("git init");
       showDialog({
         title: 'Initialize a Repository',
@@ -131,10 +150,13 @@ function addCommands(app: JupyterLab) {
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Yes'})]
         }).then(result => {
           if (result.button.accept) {
-            git_temp.init(cur_fb_path);
+            git_temp.init(curr_fb_path);
           }
         });
     },
   });
 
 }
+
+
+
