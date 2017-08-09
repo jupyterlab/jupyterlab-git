@@ -15,6 +15,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 .jp-CSVToolbar {
+    background-color: lightslategray;
     display: flex;
     flex: 0 0 auto;
     flex-direction: row;
@@ -91,37 +92,7 @@
   background-color: var(--jp-toolbar-active-background);
   box-shadow: var(--jp-toolbar-box-shadow);
 }
-/*
-.jp-GitSessions-headercurbutton {
-  flex: 1 1 auto;
-  height: var(--jp-private-running-button-height);
-  width: var(--jp-private-running-button-width);
-  max-width: 50px;
-  min-width: 16px;
-  min-height: 16px;
-  padding: 4px 6px;
-  background: var(--jp-layout-color1);
-  border: none;
-  outline: 0;
-  display: block;
-  vertical-align: middle;
-  background-repeat: no-repeat;
-  background-position: center;
-}
 
-.jp-GitSessions-headercurbutton:hover {
-  background-color: var(--jp-layout-color0);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  border: 1px solid var(--jp-toolbar-border-color);
-  z-index: 1; 
-}
-
-
-.jp-GitSessions-headercurbutton:active {
-  border: 1px solid var(--jp-toolbar-border-color);
-  background-color: var(--jp-toolbar-active-background);
-  box-shadow: var(--jp-toolbar-box-shadow);
-}*/
 
 .jp-GitSessions-headershiftrightbutton {
   flex: 1 1 auto;
@@ -130,7 +101,7 @@
   max-width: 16px;
   min-width: 16px;
   min-height: 16px;
-  background: var(--jp-layout-color1);
+  background-color: grey;
   border: none;
   outline: 0;
   display: inline-block;
@@ -163,7 +134,7 @@
   max-width: 16px;
   min-width: 16px;
   min-height: 16px;
-  background: var(--jp-layout-color1);
+  background-color: grey;
   border: none;
   outline: 0;
   top:0;
@@ -304,6 +275,41 @@
   box-shadow: var(--jp-toolbar-box-shadow);
 }
 
+.jp-GitSessions-commitinputBox{
+  width: 85%;
+  font-weight: 300;
+}
+
+.jp-GitSessions-stagedsectionHeader {
+  background-color: green;
+  flex: 0 0 auto;
+  margin: 4px 0px;
+  padding: 4px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 1px;
+}
+.jp-GitSessions-unstagedsectionHeader {
+  background-color: lightgrey;
+  flex: 0 0 auto;
+  margin: 4px 0px;
+  padding: 4px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 1px;
+}
+.jp-GitSessions-untrackedsectionHeader {
+  background-color: lightgrey;
+  flex: 0 0 auto;
+  margin: 4px 0px;
+  padding: 4px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 1px;
+}
 
 .jp-GitSessions-sectionHeader {
   flex: 0 0 auto;
@@ -321,6 +327,16 @@
   padding: 0;
   overflow: auto;
 }
+.jp-GitSessions-sectionPastCommitsTopContainer{
+  background-color: grey;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  /*margin: var(--jp-toolbar-header-margin);*/
+}
+
 .jp-GitSessions-sectionTopContainer {
   margin: 0;
   padding: 0;
@@ -358,6 +374,7 @@
   margin: var(--jp-toolbar-header-margin);
 }
 .jp-GitSessions-sectionPastCommitContainer {
+  background-color: grey;
   max-width: 240px;
   margin: 0;
   padding: 0;
@@ -375,15 +392,17 @@
 }
 
 .jp-GitSessions-sectionPastSingleCommitContainer{
+  color: lightgray;
   flex: 0 0 auto;
   min-width: 50px;
   min-height: 50px;
   max-width: 50px;
   max-height: 50px;
-  background-color: var(--jp-layout-color0);
+  /*background-color: var(--jp-layout-color0);*/
 
 }
 .jp-GitSessions-sectionPastCommitButton{
+  color: lightgrey;
   width: 35px;
   height: 35px;
   /*background-color: rgba(53,53,153,.1);*/

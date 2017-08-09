@@ -112,6 +112,8 @@ const SECTION_HEADER_CLASS = 'jp-GitSessions-sectionHeader';
  */
 const GIT_WHOLE_CONTAINER_CLASS = 'jp-GitSessions-sectionGitWholeContainer';
 const TOP_CONTAINER_CLASS = 'jp-GitSessions-sectionTopContainer';
+
+const PAST_COMMITS_TOP_CONTAINER_CLASS= 'jp-GitSessions-sectionPastCommitsTopContainer'
 const CONTAINER_CLASS = 'jp-GitSessions-sectionContainer';
 const PAST_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastCommitContainer';
 const PAST_SINGLE_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastSingleCommitContainer';
@@ -317,7 +319,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
   render(){
     return (
       <div>
-      <div className={TOP_CONTAINER_CLASS}>
+      <div className={PAST_COMMITS_TOP_CONTAINER_CLASS}>
         <button className={SHIFT_LEFT_BUTTON_CLASS} onClick={()=>this.show_left()}> L </button>
         <div className={PAST_COMMIT_CONTAINER_CLASS} ref='past_commits_container'> 
           <ul className={PAST_COMMIT_LIST_CLASS}>

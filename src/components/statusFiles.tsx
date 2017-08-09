@@ -89,19 +89,21 @@ const PAST_COMMIT_INFO_CLASS = 'jp-GitSessions-pastcommitinfoSection';
 /**
  * The class name added to the git-plugin terminal sessions section.
  */
-const UNCOMMITTED_CLASS = 'jp-GitSessions-uncommittedSection';
+const STAGED_HEADER_CLASS = 'jp-GitSessions-stagedsectionHeader';
 
 /**
  * The class name added to the git-plugin kernel sessions section.
  */
-const UNTRACKED_CLASS = 'jp-GitSessions-untrackedSection';
+const UNTRACKED_HEADER_CLASS = 'jp-GitSessions-untrackedsectionHeader';
 
-const UNSTAGED_CLASS = 'jp-GitSessions-unstagedSection';
+const UNSTAGED_HEADER_CLASS = 'jp-GitSessions-unstagedsectionHeader';
 
 /**
  * The class name added to the git-plugin sessions section header.
  */
 const SECTION_HEADER_CLASS = 'jp-GitSessions-sectionHeader';
+
+const COMMIT_INPUT_BOX = 'jp-GitSessions-commitinputBox';
 
 /**
  * The class name added to a section container.
@@ -243,6 +245,8 @@ const MIN_REFRESH = 5000;
 export namespace StatusFiles {
   export
   interface IState {
+    commit_msg:string;
+    commit_disable:boolean
   }
 
   export
@@ -262,15 +266,34 @@ export namespace StatusFiles {
 export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState>{
   constructor(props: StatusFiles.IProps) {
     super(props);
+    this.state={commit_msg:'', commit_disable:true};
+    this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(event){
+    if(event.target.value&&event.target.value!=''){
+      console.log('hahaahah')
+      this.setState({commit_msg:event.target.value,commit_disable:false});
+    }
+    else{
+       console.log('llllllllahaahah')
+      this.setState({commit_msg:event.target.value,commit_disable:true});
+    }
   }
 
   render(){
     return (
       <div ref="three_sections_for_current_work">
-          <div className={SECTION_HEADER_CLASS} >
+          <div className={STAGED_HEADER_CLASS} >
+            <form>
+            <label>
+              <input className={COMMIT_INPUT_BOX} type="text" placeholder='Input message to commit staged changes'onChange={this.handleChange}/>
+              </label>
+              <input type="button" value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh)}/>
+              </form>
+            
               <span className={ITEM_LABEL_CLASS}> Staged({(this.props.staged_files).length})</span>
-              <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Reset</button>
-              <button className={`${COMMIT_BUTTON_CLASS} jp-mod-styled`} onClick={()=>commit_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Commit</button>
+              <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`}onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Reset</button>
+              {/*<button className={`${COMMIT_BUTTON_CLASS} jp-mod-styled`} onClick={()=>commit_all_StagedNode(this.props.top_repo_path, this.props.refresh)}>Commit</button>*/}
           </div>
           <div className= 'jp-GitSessions-sectionContainer'>
               <ul>
@@ -285,7 +308,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
           </div>
 
 
-          <div className={SECTION_HEADER_CLASS} >
+          <div className={UNSTAGED_HEADER_CLASS} >
               <span className={ITEM_LABEL_CLASS}> Unstaged({(this.props.unstaged_files).length})</span>
               <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`} onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Add</button>
               <button className={`${RESET_BUTTON_CLASS} jp-mod-styled`} onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>Discard</button>
@@ -303,7 +326,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
               </ul>
           </div>
 
-          <div className={SECTION_HEADER_CLASS} >
+          <div className={UNTRACKED_HEADER_CLASS} >
               <span className={ITEM_LABEL_CLASS}> Untracked({(this.props.untracked_files).length})</span>
               <button className={`${ADD_BUTTON_CLASS} jp-mod-styled`}>Add</button>
           </div>
@@ -353,7 +376,16 @@ function reset_all_StagedNode(path:string, refresh){
   });
 }
 
-function commit_all_StagedNode(path:string, refresh){
+function commit_all_StagedNode(msg:string, path:string, refresh){
+  if(msg&&msg!=''){
+    let git_temp = new Git();
+     git_temp.commit(msg, path).then(response=>{
+        refresh();
+      });
+  }
+
+
+  /*
   let git_temp = new Git();
   let input = new Widget({ node: document.createElement('input') });
   showDialog({
@@ -370,6 +402,7 @@ function commit_all_StagedNode(path:string, refresh){
       });
     }
   });
+  */
 }
 
 function reset_StagedNode(file:string, path:string, refresh){
