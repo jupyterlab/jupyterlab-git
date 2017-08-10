@@ -30,7 +30,6 @@ export namespace PastCommits {
     single_num:string;
     single_data:any;
     single_data_filelist:any;
-    show:boolean;
   }
 
   export
@@ -39,12 +38,15 @@ export namespace PastCommits {
     top_repo_path: string;
 
     past_commits: any;
+    in_new_repo: boolean;
+    show_CUR:boolean;
 
     staged_files: any;
     unstaged_files: any;
     untracked_files: any;
     app: JupyterLab;
     refresh: any;
+    show_current_work:any
   }
 }
 
@@ -52,7 +54,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
 
   constructor(props: PastCommits.IProps) {
     super(props);
-    this.state = {data: props.past_commits, single_num:'', single_data:'', single_data_filelist:[], show: false}
+    this.state = {data: props.past_commits, single_num:'', single_data:'', single_data_filelist:[]}
   }
 
   show_left(){
@@ -75,9 +77,6 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
     }
   }
 
-  show_current_work(){
-    this.setState({show:false})
-  }
   
   async show_past_commit_work(dj:SingleCommitInfo, dj_index:number, path:string){
     let d_j = dj;
@@ -85,7 +84,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
     let response = await git_temp.log_1(dj.commit, path);
     if(response.code==0){
       d_j.modified_file_note = response.modified_file_note;
-      this.setState({single_data:dj, single_num: dj_index+' commit(s) before',single_data_filelist:response.modified_files, show:true})
+      this.setState({single_data:dj, single_num: dj_index+' commit(s) before',single_data_filelist:response.modified_files})
     }
   }
 
@@ -94,27 +93,27 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
     return (
       <div>
       <div className='jp-Git-timeline'>
-        <button className='jp-Git-timeline-arrow' onClick={()=>this.show_left()}> L </button>
+        <button className='jp-Git-timeline-arrow' onClick={()=>this.show_left()}> {'\u276e'} </button>
         <div className='jp-Git-timeline-container' ref='past_commits_container'> 
-            <button className='jp-Git-mod-current' onDoubleClick={()=>this.show_current_work()}>
+            <button className='jp-Git-mod-current' onDoubleClick={()=>this.props.show_current_work(true)}>
                CUR
             </button>         
             {this.props.past_commits.map((dj, dj_index)=>
-              <span className='jp-Git-mod-container' key={dj_index} onDoubleClick={()=>this.show_past_commit_work(dj,dj_index,this.props.current_fb_path)}>---
+              <span className='jp-Git-mod-container' key={dj_index} onDoubleClick={()=>{this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), this.props.show_current_work(false)}}>---
                   <button className='jp-Git-mod-pastCommit'>
                       <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
                     </button>
               </span>
             )}
           </div>,     
-         <button className='jp-Git-timeline-arrow' onClick={()=>this.show_right()}> R </button>
+         <button className='jp-Git-timeline-arrow' onClick={()=>this.show_right()}> {'\u276f'} </button>
       </div>
-          <ToggleDisplay show={this.state.show}>
+          <ToggleDisplay show={!(this.props.show_CUR)}>
           <SinglePastCommitInfo num={this.state.single_num} data={this.state.single_data} list={this.state.single_data_filelist}/>
           </ToggleDisplay>
 
 
-          <ToggleDisplay show={!(this.state.show)}>
+          <ToggleDisplay show={this.props.show_CUR}>
           <StatusFiles current_fb_path={this.props.current_fb_path} top_repo_path={this.props.top_repo_path} 
               staged_files={this.props.staged_files} unstaged_files={this.props.unstaged_files} untracked_files={this.props.untracked_files} app={this.props.app} refresh={this.props.refresh}/>
           </ToggleDisplay>

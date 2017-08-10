@@ -74,13 +74,13 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
         <select required ref="switch_branch_dropdown_button" defaultValue={this.props.current_branch} disabled = {this.props.disabled} 
         title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} 
         className='jp-Git-branch-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
-             <option value="" disabled selected>Switch Branches: </option>
+             <option value=" " disabled selected>Switch Branches: </option>
              {this.props.data.map((dj, dj_index)=>
               <option value ={dj.name} key={dj_index}>
                   {dj.name}
               </option>
               )}
-              <option>
+              <option value="">
                 CREATE NEW BRANCH
               </option>
           </select>,  

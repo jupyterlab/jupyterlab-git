@@ -23,7 +23,7 @@ import {
 } from '@phosphor/signaling';
 
 import {
-  Git, GitBranchResult,GitStatusResult,GitShowTopLevelResult
+  Git, GitBranchResult,GitStatusResult,GitShowTopLevelResult, GitAPI, GitLogResult
 } from '../git'
 
 import {
@@ -255,6 +255,8 @@ namespace GitSessionNode {
     disable_switch_branch:boolean;
 
     past_commits: any;
+    in_new_repo: boolean;
+    show_CUR: boolean;
 
     staged_files: any;
     unstaged_files: any;
@@ -275,58 +277,71 @@ namespace GitSessionNode {
       fb = ll.next();
     }
     let git_temp = new Git();
-    //retrieve git_showtoplevel
-    let response_showtoplevel = await git_temp.showtoplevel((fb as any).model.path);
-    if(response_showtoplevel.code==0){
+    let api_result =await git_temp.api((fb as any).model.path);
+    if(api_result.code==0){
+      let api_showtoplevel = (api_result as GitAPI).data.showtoplevel;
+
       //retrieve git_branch
-      let response_branch = await git_temp.branch((fb as any).model.path);
-      let current_branch = '';
-      if(response_branch.code==0){
-        let data_json = (response_branch as GitBranchResult).repos;
+      let api_branch = (api_result as GitAPI).data.branch;
+      let current_branch = 'master';
+      if(api_branch.code==0){
+        let data_json = (api_branch as GitBranchResult).repos;
         for (var i=0; i<data_json.length; i++){
           if(data_json[i].current[0]){
             current_branch=data_json[i].name;
             break;
           }
         }
-        //retrieve git_log
-        let response_log = await git_temp.log((fb as any).model.path);
-        if(response_log.code==0){
-          //retrieve git_status
-          let staged = [], unstaged = [], untracked = [];
-          let SF = 0, USF = 0, UTF = 0, Changes = 0;
-          let disable_switch_branch = true;
-          let response_status = await git_temp.status((fb as any).model.path);
-          if(response_status.code==0){
-            let data_json = (response_status as GitStatusResult).files;
-            for (var i=0; i<data_json.length; i++){
-              if(data_json[i].x!="?"&&data_json[i].x!="!"){
-                Changes++;
-              }
-              if(data_json[i].x=="M"){
-                staged.push(data_json[i].to);
-                SF++;
-              }
-              if(data_json[i].y=="M"){
-                unstaged.push(data_json[i].to);
-                USF++;
-              }
-              if(data_json[i].x=="?"&&data_json[i].y=="?"){
-                untracked.push(data_json[i].to);
-                UTF++;
-              }
-            }  
-            if(Changes == 0){
-            /** since there are no uncommitted changes, enable switch branch button */
-              disable_switch_branch = false;
-            }   
-            this.setState({current_fb_path:(fb as any).model.path, top_repo_path: (response_showtoplevel as GitShowTopLevelResult).top_repo_path, show:true, 
-              branches: (response_branch as GitBranchResult).repos, current_branch: current_branch, disable_switch_branch: disable_switch_branch, 
-              past_commits: response_log.commits,
-              staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
+      }
+      
+      //retrieve git_log
+      let api_log = (api_result as GitAPI).data.log;
+      let past_commits = [];
+      if(api_log.code==0){
+        past_commits = (api_log as GitLogResult).commits;
+      }
+      
+      //retrieve git_status
+      let staged = [], unstaged = [], untracked = [];
+      let SF = 0, USF = 0, UTF = 0, Changes = 0;
+      let disable_switch_branch = true;
+      let api_status = (api_result as GitAPI).data.status;
+      if(api_status.code==0){
+        let data_json = (api_status as GitStatusResult).files;
+        for (var i=0; i<data_json.length; i++){
+          if(data_json[i].x!="?"&&data_json[i].x!="!"){
+            Changes++;
           }
+          if(data_json[i].x=="M"){
+            staged.push(data_json[i].to);
+            SF++;
+          }
+          if(data_json[i].y=="M"){
+            unstaged.push(data_json[i].to);
+            USF++;
+          }
+          if(data_json[i].x=="?"&&data_json[i].y=="?"){
+            untracked.push(data_json[i].to);
+            UTF++;
+          }
+        }  
+        if(Changes == 0){
+        // since there are no uncommitted changes, enable switch branch button 
+          disable_switch_branch = false;
         }
       }
+      
+      //determine if in the same repo as previously, if not, display the CUR;
+      let in_new_repo= this.state.top_repo_path!==(api_showtoplevel as GitShowTopLevelResult).top_repo_path;
+      let show_CUR = this.state.show_CUR;  
+      if(in_new_repo){
+        show_CUR = true;
+      }
+            
+      this.setState({current_fb_path:(fb as any).model.path, top_repo_path: (api_showtoplevel as GitShowTopLevelResult).top_repo_path, show:true, 
+        branches: (api_branch as GitBranchResult).repos, current_branch: current_branch, disable_switch_branch: disable_switch_branch, 
+        past_commits: past_commits, in_new_repo: in_new_repo, show_CUR:show_CUR,
+        staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
     }
     else{
       this.setState({current_fb_path: (fb as any).model.path, top_repo_path: '', show:false});
@@ -341,15 +356,20 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
   refresh:any;
   constructor(props: GitSessionNode.IProps) {
     super(props);
-    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', disable_switch_branch:true, past_commits:[], staged_files:[], unstaged_files:[], untracked_files:[]}
+    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', disable_switch_branch:true, past_commits:[], in_new_repo:true, show_CUR:true, staged_files:[], unstaged_files:[], untracked_files:[]}
     this.refresh = refresh.bind(this);
+    this.show_current_work = this.show_current_work.bind(this);
   }
   componentDidMount() {
     this.interval = setInterval(() => this.refresh(), 50000);
   }
   componentWillUnmount() {
     clearInterval(this.interval);
-  }  
+  } 
+  
+  show_current_work(show_value:boolean){
+    this.setState({show_CUR: show_value});
+  }
   
   render(){
     return(
@@ -359,8 +379,8 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
         <BranchHeader current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} refresh={this.refresh} 
               current_branch={this.state.current_branch} data={this.state.branches} disabled={this.state.disable_switch_branch}/>
         <PastCommits current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} 
-              past_commits={this.state.past_commits}
-              staged_files={this.state.staged_files} unstaged_files={this.state.unstaged_files} untracked_files={this.state.untracked_files} app={this.props.app} refresh={this.refresh}/>
+              past_commits={this.state.past_commits} in_new_repo={this.state.in_new_repo} show_CUR={this.state.show_CUR}
+              staged_files={this.state.staged_files} unstaged_files={this.state.unstaged_files} untracked_files={this.state.untracked_files} app={this.props.app} refresh={this.refresh} show_current_work={this.show_current_work}/>
          </ToggleDisplay>
 
         <ToggleDisplay show={!(this.state.show)}>
