@@ -48,7 +48,6 @@ export namespace PastCommits {
   }
 }
 
-
 export class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState>{
 
   constructor(props: PastCommits.IProps) {
@@ -101,7 +100,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
                CUR
             </button>         
             {this.props.past_commits.map((dj, dj_index)=>
-              <span className='jp-Git-mod-container' onDoubleClick={()=>this.show_past_commit_work(dj,dj_index,this.props.current_fb_path)}>---
+              <span className='jp-Git-mod-container' key={dj_index} onDoubleClick={()=>this.show_past_commit_work(dj,dj_index,this.props.current_fb_path)}>---
                   <button className='jp-Git-mod-pastCommit'>
                       <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
                     </button>
@@ -183,8 +182,8 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
         <div className='jp-Git-singlePastCommit-label'> summary: {this.props.data.modified_file_note}</div>
       </div>
       <div className='jp-Git-singlePastCommitDetail'>
-          {this.props.list.map((mf)=>
-            <li className='jp-Git-singlePastCommitDetail-file'>
+          {this.props.list.map((mf, mf_index)=>
+            <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} />
               <span className='jp-Git-singlePastCommitDetail-file-path' onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} :{mf.insertion}(+), {mf.deletion}(-) </span>
             </li>

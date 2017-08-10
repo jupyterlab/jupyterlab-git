@@ -337,11 +337,18 @@ namespace GitSessionNode {
  }
 
 class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNode.IState>{
+  interval:any;
   refresh:any;
   constructor(props: GitSessionNode.IProps) {
     super(props);
     this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', disable_switch_branch:true, past_commits:[], staged_files:[], unstaged_files:[], untracked_files:[]}
     this.refresh = refresh.bind(this);
+  }
+  componentDidMount() {
+    this.interval = setInterval(() => this.refresh(), 50000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }  
   
   render(){

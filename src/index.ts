@@ -29,7 +29,6 @@ import {
    Menu
 } from '@phosphor/widgets';
 
-
 /**
  * The default running sessions extension.
  */

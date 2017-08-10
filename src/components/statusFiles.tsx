@@ -18,7 +18,6 @@ import {
 
 import '../../style/index.css';
 
-
 /**
  * The class name added to the git-plugin sessions items.
  */
@@ -148,8 +147,8 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
               <button className={`${GIT_BUTTON_RESET} jp-mod-styled`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}> {'\u2938'}</button>
           </div>
           <div className= 'jp-Git-section-fileContainer'>
-                {this.props.staged_files.map((file)=>
-                    <li className={GIT_FILE}>
+                {this.props.staged_files.map((file, file_index)=>
+                    <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file)}`} />
                     <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file,this.props.app)} >{file}</span>
                     <button className={`${GIT_BUTTON_RESET} jp-mod-styled`} title='Reset this staged change' onClick={()=>reset_StagedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u2938'} </button>
@@ -164,8 +163,8 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
               <button className={`${GIT_BUTTON_DISCARD} jp-mod-styled`} title='Discard all the changes' onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>{'\u292c'}</button>
           </div>
           <div className= 'jp-Git-section-fileContainer'>
-                {this.props.unstaged_files.map((file)=>
-                    <li className={GIT_FILE}>
+                {this.props.unstaged_files.map((file, file_index)=>
+                    <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file)}`} />
                     <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file,this.props.app)}>{file}</span>
                     <button className= {`${GIT_BUTTON_ADD} jp-mod-styled`} title='Stage this change' onClick={()=>add_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u21e7'}</button>
@@ -179,8 +178,8 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
               <button className={`${GIT_BUTTON_ADD} jp-mod-styled`}>{'\u2b06'}</button>
           </div>
           <div className= 'jp-Git-section-fileContainer'>
-                {this.props.untracked_files.map((file)=>
-                    <li className={GIT_FILE}>
+                {this.props.untracked_files.map((file, file_index)=>
+                    <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file)}`} />
                     <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file,this.props.app)}>{file}</span>
                     <button className= {`${GIT_BUTTON_ADD} jp-mod-styled`} title='Track this file' onClick={()=>add_UntrackedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u21e7'} </button>
