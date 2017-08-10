@@ -1,14 +1,13 @@
 import {
-  addCommands, GitSessions, CommandIDs
- } from './components'
+  addCommands, CommandIDs
+ } from './git_mainmenu_command'
+import {
+  GitSessions
+ } from './components/components'
 
 import {
   ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
-
-import {
-	  FileBrowser, IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
 
 import {
   IServiceManager
@@ -78,5 +77,4 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
     menu.addItem({command});
   });
   mainMenu.addMenu(menu,{rank:60});
-
 }

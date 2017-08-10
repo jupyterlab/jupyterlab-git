@@ -1,0 +1,337 @@
+import * as React from 'react';
+
+import {
+  Dialog, showDialog
+} from '@jupyterlab/apputils';
+
+import {
+  JupyterLab
+} from '@jupyterlab/application';
+
+import {
+  PathExt 
+} from '@jupyterlab/coreutils';
+
+import {
+  Git, GitShowPrefixResult
+} from '../git'
+
+import '../../style/index.css';
+
+/**
+ * The class name added to the git-plugin sessions items.
+ */
+const GIT_FILE = 'jp-Git-file';
+
+/**
+ * The class name added to a git-plugin session item icon.
+ */
+const GIT_FILE_ICON = 'jp-Git-fileIcon';
+
+/**
+ * The class name added to a git-plugin session item label.
+ */
+const GIT_FILE_LABEL = 'jp-Git-fileLabel';
+
+
+/**
+ * The class name added to a git-plugin session item git-add button.
+ */
+const GIT_BUTTON_ADD = 'jp-Git-button-add';
+/**
+ * The class name added to a git-plugin session item git-reset button.
+ */
+const GIT_BUTTON_RESET = 'jp-Git-button-reset';
+
+const GIT_BUTTON_DISCARD = 'jp-Git-button-discard';
+
+/**
+ * The class name added to a markdown file browser item.
+ */
+const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
+
+/**
+ * The class name added to a python file browser item.
+ */
+const PYTHON_ICON_CLASS = 'jp-PythonIcon';
+
+/**
+ * The class name added to a JSON file browser item.
+ */
+const JSON_ICON_CLASS = 'jp-JSONIcon';
+
+/**
+ * The class name added to a speadsheet file browser item.
+ */
+const SPREADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon';
+
+/**
+ * The class name added to a R Kernel file browser item.
+ */
+const RKERNEL_ICON_CLASS = 'jp-RKernelIcon';
+
+/**
+ * The class name added to a YAML file browser item.
+ */
+const YAML_ICON_CLASS = 'jp-YamlIcon';
+
+/**
+ * The class added for image file browser items.
+ */
+const IMAGE_ICON_CLASS = 'jp-ImageIcon';
+
+/**
+ * The class name added to a file type content item.
+ */
+const FILE_TYPE_CLASS = 'jp-FileIcon';
+
+/**
+ * The class name added to a directory file browser item.
+ */
+const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
+
+
+export namespace StatusFiles {
+  export
+  interface IState {
+    commit_msg:string;
+    commit_disable:boolean
+  }
+
+  export
+  interface IProps {
+    current_fb_path:string;
+    top_repo_path: string;
+
+    staged_files: any;
+    unstaged_files: any;
+    untracked_files: any;
+    
+    app:JupyterLab;
+    refresh: any;
+  }
+}
+
+export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState>{
+  constructor(props: StatusFiles.IProps) {
+    super(props);
+    this.state={commit_msg:'', commit_disable:true};
+    this.handleChange = this.handleChange.bind(this);
+    this.init_input = this.init_input.bind(this)
+  }
+  handleChange(event){
+    if(event.target.value&&event.target.value!=''){
+      this.setState({commit_msg:event.target.value,commit_disable:false});
+    }
+    else{
+      this.setState({commit_msg:event.target.value,commit_disable:true});
+    }
+  }
+
+  init_input(){
+    this.setState({commit_msg:'',commit_disable:true});
+  }
+
+  render(){
+    return (
+      <div>
+          <div className='jp-Git-staged'>
+            <form>
+            <label>
+              <input className='jp-Git-staged-commit-msg' type="text" placeholder='Input message to commit staged changes'value={this.state.commit_msg} onChange={this.handleChange}/>
+              </label>
+              <input className='jp-Git-staged-commit-button' type="button" title='Commit' value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>{commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh),this.init_input()}}/>
+              </form>
+            
+              <span className='jp-git-staged-header-label'> Staged({(this.props.staged_files).length})</span>
+              <button className={`${GIT_BUTTON_RESET} jp-mod-styled`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}> {'\u2938'}</button>
+          </div>
+          <div className= 'jp-Git-section-fileContainer'>
+                {this.props.staged_files.map((file, file_index)=>
+                    <li className={GIT_FILE} key={file_index}>
+                    <span className={`${GIT_FILE_ICON} ${parseFileExtension(file)}`} />
+                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file,this.props.app)} >{file}</span>
+                    <button className={`${GIT_BUTTON_RESET} jp-mod-styled`} title='Reset this staged change' onClick={()=>reset_StagedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u2938'} </button>
+                    </li>
+                )}
+          </div>
+
+
+          <div className='jp-Git-unstaged' >
+              <span className='jp-Git-unstaged-header-label'> Unstaged({(this.props.unstaged_files).length})</span>
+              <button className={`${GIT_BUTTON_ADD} jp-mod-styled`} title='Stage all the changes' onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>{'\u2b06'}</button>
+              <button className={`${GIT_BUTTON_DISCARD} jp-mod-styled`} title='Discard all the changes' onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>{'\u292c'}</button>
+          </div>
+          <div className= 'jp-Git-section-fileContainer'>
+                {this.props.unstaged_files.map((file, file_index)=>
+                    <li className={GIT_FILE} key={file_index}>
+                    <span className={`${GIT_FILE_ICON} ${parseFileExtension(file)}`} />
+                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file,this.props.app)}>{file}</span>
+                    <button className= {`${GIT_BUTTON_ADD} jp-mod-styled`} title='Stage this change' onClick={()=>add_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u21e7'}</button>
+                    <button className= {`${GIT_BUTTON_DISCARD} jp-mod-styled`} title='Discard this change' onClick={()=>discard_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u292c'} </button>
+                    </li>
+                )}
+          </div>
+
+          <div className='jp-Git-untracked' >
+              <span className='jp-Git-untracked-header-label'> Untracked({(this.props.untracked_files).length})</span>
+              <button className={`${GIT_BUTTON_ADD} jp-mod-styled`}>{'\u2b06'}</button>
+          </div>
+          <div className= 'jp-Git-section-fileContainer'>
+                {this.props.untracked_files.map((file, file_index)=>
+                    <li className={GIT_FILE} key={file_index}>
+                    <span className={`${GIT_FILE_ICON} ${parseFileExtension(file)}`} />
+                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file,this.props.app)}>{file}</span>
+                    <button className= {`${GIT_BUTTON_ADD} jp-mod-styled`} title='Track this file' onClick={()=>add_UntrackedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u21e7'} </button>
+                    </li>
+                )}
+           </div>
+      </div>
+    );
+  }
+}
+
+//function for opening files
+async function open_listed_file(path:string, app:JupyterLab){
+  try{
+    let ll = app.shell.widgets('left');
+    let fb = ll.next();
+    while(fb.id!='filebrowser'){
+      fb = ll.next();
+    }
+    let git_temp = new Git();
+    let response = await git_temp.showprefix((fb as any).model.path);
+    let current_under_repo_path = (response as GitShowPrefixResult).under_repo_path;
+    let filebrowser_cur_path = (fb as any).model.path+'/';
+    let open_file_path = filebrowser_cur_path.substring(0,filebrowser_cur_path.length-current_under_repo_path.length);
+    if(path[path.length-1]!=='/'){
+      (fb as any)._listing._manager.openOrReveal(open_file_path+path);
+    }
+    else{
+      console.log("Cannot open a folder here")
+    }; 
+  }catch(err0){}
+}
+
+//functions for staged nodes
+function reset_all_StagedNode(path:string, refresh){
+  let git_temp = new Git();
+  git_temp.reset(true,null,path).then(response=>{
+    refresh();
+  });
+}
+
+function commit_all_StagedNode(msg:string, path:string, refresh){
+  if(msg&&msg!=''){
+    let git_temp = new Git();
+     git_temp.commit(msg, path).then(response=>{
+        refresh();
+      });
+  }
+}
+
+function reset_StagedNode(file:string, path:string, refresh){
+  let git_temp = new Git();
+  git_temp.reset(false, file, path).then(response=>{
+    refresh();
+  });
+}
+
+
+//functions for unstaged nodes
+function add_all_UnstagedNode(path:string,refresh){
+  let git_temp = new Git();
+  git_temp.add(true,null, path).then(response=>{
+    refresh();
+  });
+}
+
+function discard_all_UnstagedNode(path:string,refresh){
+  let git_temp = new Git();
+  showDialog({
+    title: 'DISCARD CHANGES',
+    body: "Do you really want to discard all uncommitted changes?",
+    buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
+  }).then(result => {
+    if (result.button.accept) {
+      git_temp.checkout(false,false, null,true,null,path).then(response=>{
+        refresh();
+      });
+    }
+  });
+}
+
+function add_UnstagedNode(file:string, path:string, refresh){
+  let git_temp = new Git();
+  git_temp.add(false, file, path).then(response=>{
+    refresh();
+  });
+}
+
+function discard_UnstagedNode(file:string, path:string, refresh){
+  let git_temp = new Git();
+  showDialog({
+    title: 'DISCARD CHANGES',
+    body: "Do you really want to discard the uncommitted changes in this file?",
+    buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
+  }).then(result => {
+    if (result.button.accept) {
+      git_temp.checkout(false,false, null,false,file,path).then(response=>{
+        refresh();
+      });
+    }
+  });
+}
+
+//functions for untracked nodes
+function add_UntrackedNode(file:string, path:string,refresh){
+  let git_temp = new Git();
+  git_temp.add(false, file, path).then(response=>{
+    refresh();
+  });
+}
+
+
+export function parseFileExtension(path: string): string {
+  if(path[path.length-1]==='/'){
+    return FOLDER_MATERIAL_ICON_CLASS;
+  }
+  var fileExtension = PathExt.extname(path).toLocaleLowerCase();
+  switch (fileExtension) {
+    case '.md':
+      return MARKDOWN_ICON_CLASS;
+    case '.py':
+      return PYTHON_ICON_CLASS;
+    case '.json':
+      return JSON_ICON_CLASS;
+    case '.csv':
+      return SPREADSHEET_ICON_CLASS;
+    case '.xls':
+      return SPREADSHEET_ICON_CLASS;
+    case '.r':
+      return RKERNEL_ICON_CLASS;
+    case '.yml':
+      return YAML_ICON_CLASS;
+    case '.yaml':
+      return YAML_ICON_CLASS;
+    case '.svg':
+      return IMAGE_ICON_CLASS;
+    case '.tiff':
+      return IMAGE_ICON_CLASS;
+    case '.jpeg':
+      return IMAGE_ICON_CLASS;
+    case '.jpg':
+      return IMAGE_ICON_CLASS;
+    case '.gif':
+      return IMAGE_ICON_CLASS;
+    case '.png':
+      return IMAGE_ICON_CLASS;
+    case '.raw':
+      return IMAGE_ICON_CLASS;
+    default:
+      return FILE_TYPE_CLASS;
+  }
+}
+
+
+

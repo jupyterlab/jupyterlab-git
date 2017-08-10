@@ -108,14 +108,19 @@ export interface SingleCommitInfo {
 		modified_file_path: string,
 	}]
 }
+
+export interface CommitModifiedFile{
+	modified_file_path: string,
+	insertion: string;
+	deletion: string
+}
+
 export interface SingleCommitFilePathInfo {
 	code:number;
 	modified_file_note?: string,
-	modified_files?: [{
-		modified_file_path: string,
-		insertion: string;
-		deletion: string
-	}]
+	modified_files?: [
+		CommitModifiedFile
+	]
 }
 
 export interface GitLogResult {
@@ -320,16 +325,16 @@ export class Git {
 	}
 
 	pull(origin: string, master: string, path:string) {
-		return HTTP_Git_Request('/git/pull', 'POST', {"origin": origin, "master":master,"top_repo_path": path});
+		return HTTP_Git_Request('/git/pull', 'POST', {"origin": origin, "master":master,"top_repo_path": path});	
 	}
 
 	push(origin: string, master: string, path:string) {
-		return HTTP_Git_Request('/git/push', 'POST', {"origin": origin, "master":master,"top_repo_path": path});
-	}
+ 		return HTTP_Git_Request('/git/push', 'POST', {"origin": origin, "master":master,"top_repo_path": path});
+	 }
+	
 	init(path:string){
-		//return HTTP_Git_Request('/git/init','POST',{"top_repo_path":path});
+		return HTTP_Git_Request('/git/init','POST',{"current_path":path});
 	}
-
 
 }
 
