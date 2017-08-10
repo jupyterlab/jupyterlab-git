@@ -90,14 +90,17 @@ function addCommands(app: JupyterLab) {
       let upstream = prompt("Enter Upstream Branch Name");
       if(upstream==="" || upstream===null)
         alert("Oops.. You can't leave branch name empty");
-      else{
-        let master = prompt("Enter Master Branch Name");
-        if(master==="" || master ===null)
-          alert("Oops.. You can't leave branch name empty");
-        else{
-          git_temp.push(upstream,master,cur_fb_path);
+
+      else
+        {
+          let master = prompt("Enter Master Branch Name");
+          if(master==="" || master===null)
+            alert("Oops.. You can't leave branch name empty");
+          else
+            {
+              git_temp.push(upstream,master,cur_fb_path); 
+            }
         }
-      }
     },
   });
 

@@ -28,6 +28,10 @@ To rebuild the package and the JupyterLab app:
 npm run build
 jupyter lab build
 ```
+<<<<<<< HEAD
+=======
+
+>>>>>>> b26780a8429e7116b85f7bc2c4428f1626ff1297
 ## Installation and activation of Git handler
 
 Installation and activation for jupyterlab_git python handler package, do it inside jupyterlab-git directory.:
@@ -47,3 +51,7 @@ jupyter nbextension enable --py jupyterlab_git
 Launch JupyterLab & you will see the new Git buttons on the left side of the window.
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> b26780a8429e7116b85f7bc2c4428f1626ff1297
