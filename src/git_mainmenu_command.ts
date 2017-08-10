@@ -1,22 +1,5 @@
-
 import {
-  ServiceManager, Session, TerminalSession
-} from '@jupyterlab/services';
-
-import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  ElementExt
-} from '@phosphor/domutils';
-
-import {
-  Widget//, Menu
-} from '@phosphor/widgets';
-
-import {
-  DOMUtils, Dialog, showDialog,/*Styling,*/// IMainMenu
+  Dialog, showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -24,24 +7,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-	  FileBrowser
-} from '@jupyterlab/filebrowser';
-
-import {
-  PathExt //URLExt
-} from '@jupyterlab/coreutils';
-
-
-import {
-  VDomModel, VDomRenderer
-} from '@jupyterlab/apputils';
-
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
-  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo, SingleCommitFilePathInfo, CommitModifiedFile
+  Git
 } from './git'
 /**
  * The command IDs used by the git plugin.
@@ -103,18 +69,17 @@ function addCommands(app: JupyterLab) {
       let upstream = prompt("Enter Upstream Branch Name");
       if(upstream==="" || upstream===null)
         alert("Oops.. You can't leave branch name empty");
-      else
-        {
-          let master = prompt("Enter Master Branch Name");
-          if(master==="" || master ===null)
-            alert("Oops.. You can't leave branch name empty");
-          else
-            {
-              git_temp.pull(upstream,master,cur_fb_path);
-        
-            }
+      else{
+        let master = prompt("Enter Master Branch Name");
+        if(master==="" || master ===null)
+          alert("Oops.. You can't leave branch name empty");
+        else{
+          git_temp.pull(upstream,master,cur_fb_path);
         }
-  }});
+      }
+    }
+  });
+
 
   commands.addCommand(CommandIDs.git_push, {
     label: 'Push',
@@ -123,8 +88,9 @@ function addCommands(app: JupyterLab) {
       let cur_fb_path = find_cur_fb_path();
       console.log("git push");
       let upstream = prompt("Enter Upstream Branch Name");
-      if(upstream=="" || upstream===null)
+      if(upstream==="" || upstream===null)
         alert("Oops.. You can't leave branch name empty");
+
       else
         {
           let master = prompt("Enter Master Branch Name");
@@ -134,8 +100,10 @@ function addCommands(app: JupyterLab) {
             {
               git_temp.push(upstream,master,cur_fb_path); 
             }
+
         }
-    }
+      }
+    },
   });
 
   commands.addCommand(CommandIDs.git_init, {

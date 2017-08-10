@@ -10,10 +10,6 @@ import {
 } from '@jupyterlab/application';
 
 import {
-	  FileBrowser, IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
-
-import {
   IServiceManager
 } from '@jupyterlab/services';
 
@@ -32,7 +28,6 @@ import {
 import {
    Menu
 } from '@phosphor/widgets';
-
 
 /**
  * The default running sessions extension.

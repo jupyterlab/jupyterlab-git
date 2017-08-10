@@ -63,6 +63,16 @@ function getGitErrorCode(stderr: string): string | undefined {
 	return void 0;
 }
 
+export interface GitAPI{
+	code: number;
+	data?:{
+		showtoplevel?: GitShowTopLevelResult;
+		branch?: GitBranchResult;
+		log?: GitLogResult;
+		status?: GitStatusResult;
+	}
+}
+
 export interface GitShowTopLevelResult {
 	code: number;
 	top_repo_path?: string;
@@ -148,6 +158,35 @@ export class Git {
 
 	constructor() {
 	}
+	
+	async api(path:string):Promise<GitAPI|GitErrorInfo>{
+		try{
+			var val = await HTTP_Git_Request('/git/API','POST',{"current_path": path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				let err = new GitErrorInfo();
+				err.code = val.data.code;
+				err.gitCommand = val.data.command;
+				err.message = 'Failed to execute git';
+				err.gitErrorCode = getGitErrorCode(val.data.message);
+				err.stderr = val.data.message;
+
+				console.log(err.message);
+				console.log(err.gitCommand);
+				console.log(err.gitErrorCode);
+
+				return err;
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}
+	}
+
+
 	async showtoplevel(path:string):Promise<GitShowTopLevelResult|GitErrorInfo>{
 		try{
 			var val = await HTTP_Git_Request('/git/showtoplevel','POST',{"current_path": path});
@@ -328,12 +367,13 @@ export class Git {
 		return HTTP_Git_Request('/git/pull', 'POST', {"origin": origin, "master":master,"curr_fb_path": path});	
 	}
 
+
 	push(origin: string, master: string, path:string) {
  		return HTTP_Git_Request('/git/push', 'POST', {"origin": origin, "master":master,"curr_fb_path": path});
 	 }
 	
 	init(path:string){
-		return HTTP_Git_Request('/git/init','POST',{"curr_path":path});
+		return HTTP_Git_Request('/git/init','POST',{"current_path":path});
 	}
 
 }

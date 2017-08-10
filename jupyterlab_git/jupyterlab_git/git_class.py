@@ -35,7 +35,7 @@ class Git:
             return {"code": p.returncode, 'command':"git status --porcelain", "message": my_error.decode('utf-8')}
 
     def log(self,current_path):
-        p = Popen(["git", "log","--pretty=format:%h-%an-%ar-%s"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
+        p = Popen(["git", "log","--pretty=format:%H-%an-%ar-%s"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
         my_output,my_error = p.communicate()
         if(p.returncode==0):
             result = []
@@ -178,7 +178,7 @@ class Git:
         print("Hi there! post extensions!!")
         return my_output
 
-    def init(self,curr_fb_path):
-        my_output = subprocess.check_output(["git", "init"],cwd = os.getcwd()+'/'+curr_fb_path)
+    def init(self,current_path):
+        my_output = subprocess.check_output(["git", "init"],cwd = os.getcwd()+'/'+current_path)
         return my_output
 
