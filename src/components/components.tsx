@@ -11,41 +11,19 @@ import {
 } from '@phosphor/messaging';
 
 import {
-  ElementExt
-} from '@phosphor/domutils';
-
-import {
-  Widget//, Menu
+  Widget
 } from '@phosphor/widgets';
-
-import {
-  DOMUtils, Dialog, showDialog,/*Styling,*/// IMainMenu
-} from '@jupyterlab/apputils';
 
 import {
   JupyterLab
 } from '@jupyterlab/application';
 
 import {
-	  FileBrowser
-} from '@jupyterlab/filebrowser';
-
-import {
-  PathExt //URLExt
-} from '@jupyterlab/coreutils';
-
-import * as vdom from '@phosphor/virtualdom';
-
-import {
-  VDomModel, VDomRenderer
-} from '@jupyterlab/apputils';
-
-import {
   ISignal, Signal
 } from '@phosphor/signaling';
 
 import {
-  Git, GitBranchResult,GitStatusResult,GitShowPrefixResult,GitShowTopLevelResult,GitLogResult,GitErrorInfo,SingleCommitInfo, SingleCommitFilePathInfo, CommitModifiedFile
+  Git, GitBranchResult,GitStatusResult,GitShowTopLevelResult, GitAPI, GitLogResult
 } from '../git'
 
 import {
@@ -60,213 +38,16 @@ import {
   PastCommits
 } from './pastCommits'
 
-import {
-  StatusFiles, parseFileExtension
-} from './statusFiles'
-
 import '../../style/index.css';
-import $ = require('jquery');
+
 /**
  * The class name added to a git-plugin widget.
  */
-const Git_CLASS = 'jp-GitSessions';
-
-/**
- * The class name added to a git-plugin widget header.
- */
-const HEADER_CLASS = 'jp-GitSessions-header';
-
-const SHIFT_LEFT_BUTTON_CLASS = 'jp-mod-left';
-const SHIFT_RIGHT_BUTTON_CLASS = 'jp-mod-right';
-const CUR_BUTTON_CLASS = 'jp-mod-current'; 
-
-/**
- * The class name added to a git-plugin widget header refresh button.
- */
-const REFRESH_CLASS  = 'jp-Git-repo-refresh';
-/**
- * The class name added to a git-plugin widget header refresh button.
- */
-const SWITCH_BRANCH_CLASS = 'jp-GitSessions-headerSwitchBranch';
-/**
- * The class name added to a git-plugin widget header refresh button.
- */
-const NEW_TERMINAL_CLASS = 'jp-GitSessions-headerNewTerminal';
-/**
- * The class name added to the git-plugin terminal sessions section.
- */
-const SECTION_CLASS = 'jp-GitSessions-section';
-
-const PATH_HEADER_CLASS = 'jp-GitSessions-pathHeaderSection';
-
-const PAST_COMMIT_CLASS = 'jp-GitSessions-pastcommitsection';
-
-const PAST_COMMIT_INFO_CLASS = 'jp-GitSessions-pastcommitinfoSection';
-/**
- * The class name added to the git-plugin terminal sessions section.
- */
-const UNCOMMITTED_CLASS = 'jp-GitSessions-uncommittedSection';
-
-/**
- * The class name added to the git-plugin kernel sessions section.
- */
-const UNTRACKED_CLASS = 'jp-GitSessions-untrackedSection';
-
-const UNSTAGED_CLASS = 'jp-GitSessions-unstagedSection';
-
-/**
- * The class name added to the git-plugin sessions section header.
- */
-const SECTION_HEADER_CLASS = 'jp-GitSessions-sectionHeader';
-
-/**
- * The class name added to a section container.
- */
-const GIT_WHOLE_CONTAINER_CLASS = 'jp-GitSessions-sectionGitWholeContainer';
-const TOP_CONTAINER_CLASS = 'jp-Git-timeline';
-const CONTAINER_CLASS = 'jp-GitSessions-sectionContainer';
-const PAST_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastCommitContainer';
-const PAST_SINGLE_COMMIT_CONTAINER_CLASS = 'jp-GitSessions-sectionPastSingleCommitContainer';
-const PAST_COMMIT_BUTTON_CLASS = 'jp-Git-timeline-commit';
-//const PAST_COMMIT_SELECTED_BUTTON_CLASS = 'jp-GitSessions-sectionPastCommitSelectedButton';
-/**
- * The class name added to the git-plugin kernel sessions section list.
- */
-const LIST_CLASS = 'jp-GitSessions-sectionList';
-
-const PAST_COMMIT_LIST_CLASS =  'jp-Git-timeline-container';
-const PAST_COMMIT_INFO_SECTION_HEADER_CLASS = 'jp-GitSessions-pastcommitinfosectionHeader';
-const PAST_COMMIT_INFO_LABEL_CLASS = 'jp-GitSessions-pastcommitinfoLabel';
-/**
- * The class name added to the git-plugin sessions items.
- */
-const ITEM_CLASS = 'jp-GitSessions-item';
-
-/**
- * The class name added to a git-plugin session item icon.
- */
-const ITEM_ICON_CLASS = 'jp-GitSessions-itemIcon';
-
-/**
- * The class name added to a git-plugin session item label.
- */
-const ITEM_LABEL_CLASS = 'jp-GitSessions-itemLabel';
-const REPO_CLASS = 'jp-Git-repo-path';
-
-
-
-/**
- * The class name added to a git-plugin session item git-add button.
- */
-const ADD_BUTTON_CLASS = 'jp-GitSessions-itemAdd';
-/**
- * The class name added to a git-plugin session item git-reset button.
- */
-const RESET_BUTTON_CLASS = 'jp-GitSessions-itemReset';
-/**
- * The class name added to a git-plugin session item git-checkout button.
- */
-//const CHECKOUT_BUTTON_CLASS = 'jp-GitSessions-itemCheckout';
-/**
- * The class name added to a git-plugin session item git-commit button.
- */
-const COMMIT_BUTTON_CLASS = 'jp-GitSessions-itemCommit';
-
-/**
- * The class name added to a notebook icon.
- */
-const NOTEBOOK_ICON_CLASS = 'jp-mod-notebook';
-
-/**
- * The class name added to a console icon.
- */
-const CONSOLE_ICON_CLASS = 'jp-mod-console';
-
-/**
- * The class name added to a file icon.
- */
-const FILE_ICON_CLASS = 'jp-mod-file';
-
-/**
- * The class name added to a terminal icon.
- */
-const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
-/**
- * The class name added to a markdown file browser item.
- */
-const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
-
-/**
- * The class name added to a python file browser item.
- */
-const PYTHON_ICON_CLASS = 'jp-PythonIcon';
-
-/**
- * The class name added to a JSON file browser item.
- */
-const JSON_ICON_CLASS = 'jp-JSONIcon';
-
-const HOME_ICON_CLASS = 'jp-homeIcon';
-/**
- * The class name added to a speadsheet file browser item.
- */
-const SPREADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon';
-
-/**
- * The class name added to a R Kernel file browser item.
- */
-const RKERNEL_ICON_CLASS = 'jp-RKernelIcon';
-
-/**
- * The class name added to a YAML file browser item.
- */
-const YAML_ICON_CLASS = 'jp-YamlIcon';
-
-/**
- * The class added for image file browser items.
- */
-const IMAGE_ICON_CLASS = 'jp-ImageIcon';
-
-/**
- * The class name added to a file type content item.
- */
-const FILE_TYPE_CLASS = 'jp-FileIcon';
-
-/**
- * The class name added to a directory file browser item.
- */
-const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
-/**
- * The class name added to a csv toolbar widget.
- */
-const CSV_TOOLBAR_CLASS = 'jp-Git-branch';
-
-const CSV_TOOLBAR_LABEL_CLASS = 'jp-Git-branch-dropdown';
-
-/**
- * The class name added to a csv toolbar's dropdown element.
- */
-const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-Git-branch-icon';
-
-/**
- * The duration of auto-refresh in ms.
- */
-const REFRESH_DURATION = 50000;
-
-/**
- * The enforced time between refreshes in ms.
- */
-const MIN_REFRESH = 5000;
-
+const Git_CLASS = 'jp-Git';
 
 /**
  * A class that exposes the git-plugin sessions.
  */
-
-
-
-
-
 
 export
 class GitSessions extends Widget {
@@ -278,10 +59,7 @@ class GitSessions extends Widget {
     super({
       node: (options.renderer || GitSessions.defaultRenderer).createNode()
     });
-    //let manager = this._manager = options.manager;
-   // this._renderer = options.renderer || GitSessions.defaultRenderer;
     this.addClass(Git_CLASS);
-    //let renderer = this._renderer;
     const element =<GitSessionNode app={app}/>
     this.component = ReactDOM.render(element, this.node);
     this.component.refresh();
@@ -477,6 +255,8 @@ namespace GitSessionNode {
     disable_switch_branch:boolean;
 
     past_commits: any;
+    in_new_repo: boolean;
+    show_CUR: boolean;
 
     staged_files: any;
     unstaged_files: any;
@@ -497,58 +277,71 @@ namespace GitSessionNode {
       fb = ll.next();
     }
     let git_temp = new Git();
-    //retrieve git_showtoplevel
-    let response_showtoplevel = await git_temp.showtoplevel((fb as any).model.path);
-    if(response_showtoplevel.code==0){
+    let api_result =await git_temp.api((fb as any).model.path);
+    if(api_result.code==0){
+      let api_showtoplevel = (api_result as GitAPI).data.showtoplevel;
+
       //retrieve git_branch
-      let response_branch = await git_temp.branch((fb as any).model.path);
-      let current_branch = '';
-      if(response_branch.code==0){
-        let data_json = (response_branch as GitBranchResult).repos;
+      let api_branch = (api_result as GitAPI).data.branch;
+      let current_branch = 'master';
+      if(api_branch.code==0){
+        let data_json = (api_branch as GitBranchResult).repos;
         for (var i=0; i<data_json.length; i++){
           if(data_json[i].current[0]){
             current_branch=data_json[i].name;
             break;
           }
         }
-        //retrieve git_log
-        let response_log = await git_temp.log((fb as any).model.path);
-        if(response_log.code==0){
-          //retrieve git_status
-          let staged = [], unstaged = [], untracked = [];
-          let SF = 0, USF = 0, UTF = 0, Changes = 0;
-          let disable_switch_branch = true;
-          let response_status = await git_temp.status((fb as any).model.path);
-          if(response_status.code==0){
-            let data_json = (response_status as GitStatusResult).files;
-            for (var i=0; i<data_json.length; i++){
-              if(data_json[i].x!="?"&&data_json[i].x!="!"){
-                Changes++;
-              }
-              if(data_json[i].x=="M"){
-                staged.push(data_json[i].to);
-                SF++;
-              }
-              if(data_json[i].y=="M"){
-                unstaged.push(data_json[i].to);
-                USF++;
-              }
-              if(data_json[i].x=="?"&&data_json[i].y=="?"){
-                untracked.push(data_json[i].to);
-                UTF++;
-              }
-            }  
-            if(Changes == 0){
-            /** since there are no uncommitted changes, enable switch branch button */
-              disable_switch_branch = false;
-            }   
-            this.setState({current_fb_path:(fb as any).model.path, top_repo_path: (response_showtoplevel as GitShowTopLevelResult).top_repo_path, show:true, 
-              branches: (response_branch as GitBranchResult).repos, current_branch: current_branch, disable_switch_branch: disable_switch_branch, 
-              past_commits: response_log.commits,
-              staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
+      }
+      
+      //retrieve git_log
+      let api_log = (api_result as GitAPI).data.log;
+      let past_commits = [];
+      if(api_log.code==0){
+        past_commits = (api_log as GitLogResult).commits;
+      }
+      
+      //retrieve git_status
+      let staged = [], unstaged = [], untracked = [];
+      let SF = 0, USF = 0, UTF = 0, Changes = 0;
+      let disable_switch_branch = true;
+      let api_status = (api_result as GitAPI).data.status;
+      if(api_status.code==0){
+        let data_json = (api_status as GitStatusResult).files;
+        for (var i=0; i<data_json.length; i++){
+          if(data_json[i].x!="?"&&data_json[i].x!="!"){
+            Changes++;
           }
+          if(data_json[i].x=="M"){
+            staged.push(data_json[i].to);
+            SF++;
+          }
+          if(data_json[i].y=="M"){
+            unstaged.push(data_json[i].to);
+            USF++;
+          }
+          if(data_json[i].x=="?"&&data_json[i].y=="?"){
+            untracked.push(data_json[i].to);
+            UTF++;
+          }
+        }  
+        if(Changes == 0){
+        // since there are no uncommitted changes, enable switch branch button 
+          disable_switch_branch = false;
         }
       }
+      
+      //determine if in the same repo as previously, if not, display the CUR;
+      let in_new_repo= this.state.top_repo_path!==(api_showtoplevel as GitShowTopLevelResult).top_repo_path;
+      let show_CUR = this.state.show_CUR;  
+      if(in_new_repo){
+        show_CUR = true;
+      }
+            
+      this.setState({current_fb_path:(fb as any).model.path, top_repo_path: (api_showtoplevel as GitShowTopLevelResult).top_repo_path, show:true, 
+        branches: (api_branch as GitBranchResult).repos, current_branch: current_branch, disable_switch_branch: disable_switch_branch, 
+        past_commits: past_commits, in_new_repo: in_new_repo, show_CUR:show_CUR,
+        staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
     }
     else{
       this.setState({current_fb_path: (fb as any).model.path, top_repo_path: '', show:false});
@@ -559,12 +352,24 @@ namespace GitSessionNode {
  }
 
 class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNode.IState>{
+  interval:any;
   refresh:any;
   constructor(props: GitSessionNode.IProps) {
     super(props);
-    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', disable_switch_branch:true, past_commits:[], staged_files:[], unstaged_files:[], untracked_files:[]}
+    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', disable_switch_branch:true, past_commits:[], in_new_repo:true, show_CUR:true, staged_files:[], unstaged_files:[], untracked_files:[]}
     this.refresh = refresh.bind(this);
-  }  
+    this.show_current_work = this.show_current_work.bind(this);
+  }
+  componentDidMount() {
+    this.interval = setInterval(() => this.refresh(), 50000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  } 
+  
+  show_current_work(show_value:boolean){
+    this.setState({show_CUR: show_value});
+  }
   
   render(){
     return(
@@ -574,8 +379,8 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
         <BranchHeader current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} refresh={this.refresh} 
               current_branch={this.state.current_branch} data={this.state.branches} disabled={this.state.disable_switch_branch}/>
         <PastCommits current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} 
-              past_commits={this.state.past_commits}
-              staged_files={this.state.staged_files} unstaged_files={this.state.unstaged_files} untracked_files={this.state.untracked_files} app={this.props.app} refresh={this.refresh}/>
+              past_commits={this.state.past_commits} in_new_repo={this.state.in_new_repo} show_CUR={this.state.show_CUR}
+              staged_files={this.state.staged_files} unstaged_files={this.state.unstaged_files} untracked_files={this.state.untracked_files} app={this.props.app} refresh={this.refresh} show_current_work={this.show_current_work}/>
          </ToggleDisplay>
 
         <ToggleDisplay show={!(this.state.show)}>

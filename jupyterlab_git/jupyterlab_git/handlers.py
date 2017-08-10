@@ -16,6 +16,21 @@ class Git_handler(APIHandler):
     def git(self):
         return self.settings['git']
 
+class Git_API_handler(Git_handler):       
+    def post(self):
+        my_data = json.loads(self.request.body)
+        current_path = my_data["current_path"]
+        showtoplevel = self.git.showtoplevel(current_path)
+        if(showtoplevel['code']!=0):
+            self.finish(json.dumps(showtoplevel))
+        else:
+            branch = self.git.branch(current_path)
+            log = self.git.log(current_path)
+            status = self.git.status(current_path)
+
+            result = {"code": showtoplevel['code'], 'data': {'showtoplevel': showtoplevel, 'branch': branch, 'log':log, 'status':status}}  
+            self.finish(json.dumps(result)) 
+
 class Git_showtoplevel_handler(Git_handler):       
     def post(self):
         my_data = json.loads(self.request.body)
@@ -144,9 +159,8 @@ class Git_push_handler(Git_handler):
 class Git_init_handler(Git_handler):
     def post(self):
         my_data = json.loads(self.request.body)
-        curr_fb_path = my_data["curr_path"]
-        my_output=self.git.init(curr_fb_path)
-        print(my_output);
+        current_path = my_data["current_path"]
+        my_output=self.git.init(current_path)
         self.finish(my_output)
 
 def setup_handlers(web_app):
@@ -164,3 +178,4 @@ def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/log', Git_log_handler)])
     web_app.add_handlers('.*', [('/git/log_1', Git_log_1_handler)])
     web_app.add_handlers('.*', [('/git/init', Git_init_handler)])
+    web_app.add_handlers('.*', [('/git/API', Git_API_handler)])
