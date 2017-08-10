@@ -80,7 +80,7 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
                   {dj.name}
               </option>
               )}
-              <option value="">
+              <option value=''>
                 CREATE NEW BRANCH
               </option>
           </select>,  

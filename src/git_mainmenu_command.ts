@@ -105,7 +105,7 @@ function addCommands(app: JupyterLab) {
     label: 'Init',
     caption: " Create an empty Git repository or reinitialize an existing one",
     execute: () => {
-      let cur_fb_path = find_cur_fb_path();
+      let curr_fb_path = find_cur_fb_path();
       console.log("git init");
       showDialog({
         title: 'Initialize a Repository',
@@ -113,10 +113,13 @@ function addCommands(app: JupyterLab) {
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Yes'})]
         }).then(result => {
           if (result.button.accept) {
-            git_temp.init(cur_fb_path);
+            git_temp.init(curr_fb_path);
           }
         });
     },
   });
 
 }
+
+
+

@@ -10,6 +10,9 @@ import {
   Git, SingleCommitInfo,CommitModifiedFile
 } from '../git'
 
+
+
+
 import {
   StatusFiles, parseFileExtension
 } from './statusFiles'
@@ -21,7 +24,6 @@ import $ = require('jquery');
  * The class name added to a git-plugin session item icon.
  */
 const GIT_FILE_ICON = 'jp-Git-fileIcon';
-
 
 export namespace PastCommits {
   export

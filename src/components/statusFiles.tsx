@@ -16,6 +16,8 @@ import {
   Git, GitShowPrefixResult
 } from '../git'
 
+
+
 import '../../style/index.css';
 
 /**
@@ -89,7 +91,6 @@ const FILE_TYPE_CLASS = 'jp-FileIcon';
  * The class name added to a directory file browser item.
  */
 const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
-
 
 export namespace StatusFiles {
   export
