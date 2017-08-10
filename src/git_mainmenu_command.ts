@@ -132,7 +132,7 @@ function addCommands(app: JupyterLab) {
             alert("Oops.. You can't leave branch name empty");
           else
             {
-              git_temp.pull(upstream,master,cur_fb_path); 
+              git_temp.push(upstream,master,cur_fb_path); 
             }
         }
     }

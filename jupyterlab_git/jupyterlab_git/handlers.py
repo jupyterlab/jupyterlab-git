@@ -126,8 +126,8 @@ class Git_pull_handler(Git_handler):
         my_data = json.loads(self.request.body)
         origin = my_data["origin"]
         master = my_data["master"]
-        top_repo_path = my_data["top_repo_path"]
-        my_output = self.git.pull(origin,master,top_repo_path)
+        curr_fb_path = my_data["curr_fb_path"]
+        my_output = self.git.pull(origin,master,curr_fb_path)
         self.finish(my_output)
         print("You Pulled")
 
@@ -136,8 +136,8 @@ class Git_push_handler(Git_handler):
         my_data = json.loads(self.request.body)
         origin = my_data["origin"]
         master = my_data["master"]
-        top_repo_path = my_data["top_repo_path"]
-        my_output = self.git.push(origin,master,top_repo_path)
+        curr_fb_path = my_data["curr_fb_path"]
+        my_output = self.git.push(origin,master,curr_fb_path)
         self.finish(my_output)
         print("You Pushed")
 
