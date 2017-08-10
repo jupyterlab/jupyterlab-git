@@ -11,6 +11,16 @@ import {
 } from '../git'
 
 import {
+  PathHeader
+} from './pathHeader'
+
+import {
+  BranchHeader
+} from './branchHeader'
+
+
+
+import {
   StatusFiles, parseFileExtension
 } from './statusFiles'
 

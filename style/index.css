@@ -130,6 +130,7 @@
     margin-bottom: 2px;
 }
 
+
 /*-----------------------------------------------------------------------------
 | Git-timeline
 |----------------------------------------------------------------------------*/
@@ -160,12 +161,14 @@
   background-repeat: no-repeat;
   text-align: center;
 }
+
 .jp-Git-timeline-arrow:hover {
   background-color: var(--jp-layout-color0);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: 1px solid var(--jp-toolbar-border-color);
   z-index: 1; /* raise overlapping border */
 }
+
 .jp-Git-timeline-arrow:active {
   border: 1px solid var(--jp-toolbar-border-color);
   background-color: var(--jp-toolbar-active-background);
@@ -211,6 +214,7 @@
   background-color: var(--jp-toolbar-active-background);
   box-shadow: var(--jp-toolbar-box-shadow);
 }
+
 
 .jp-Git-mod-container{
   color: lightgray;
@@ -260,6 +264,7 @@
   letter-spacing: 1px;
 }
 
+
 .jp-Git-singlePastCommit-label{
   font-size: var(--jp-ui-font-size1);
   flex: 1 1 auto;
@@ -295,6 +300,7 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+
   border-radius: 2px;
   transition: background-color 0.1s ease;
 }
@@ -563,6 +569,7 @@
   transition: background-color 0.1s ease;
   border-radius: 2px;
 }
+
 .jp-Git-button-discard.jp-mod-styled:hover {
   background-color: rgba(153,153,153,.1);
 }
@@ -577,4 +584,3 @@
   --jp-private-tab-manager-tab-height: 32px;
   --jp-private-tab-manager-tab-padding-top: 8px;
 }
-
