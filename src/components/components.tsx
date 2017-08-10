@@ -241,8 +241,6 @@ namespace GitSessions {
 }
 
 
-
-
 namespace GitSessionNode {
   export
   interface IState {

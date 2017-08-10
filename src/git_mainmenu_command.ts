@@ -100,9 +100,7 @@ function addCommands(app: JupyterLab) {
             {
               git_temp.push(upstream,master,cur_fb_path); 
             }
-
         }
-      }
     },
   });
 

@@ -10,13 +10,6 @@ import {
   Git, SingleCommitInfo,CommitModifiedFile
 } from '../git'
 
-import {
-  PathHeader
-} from './pathHeader'
-
-import {
-  BranchHeader
-} from './branchHeader'
 
 
 
@@ -31,7 +24,6 @@ import $ = require('jquery');
  * The class name added to a git-plugin session item icon.
  */
 const GIT_FILE_ICON = 'jp-Git-fileIcon';
-
 
 export namespace PastCommits {
   export

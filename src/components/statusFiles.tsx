@@ -16,18 +16,6 @@ import {
   Git, GitShowPrefixResult
 } from '../git'
 
-import {
-  PathHeader
-} from './pathHeader'
-
-import {
-  BranchHeader
-} from './branchHeader'
-
-import {
-  PastCommits
-} from './pastCommits'
-
 
 
 import '../../style/index.css';
@@ -48,17 +36,14 @@ const GIT_FILE_ICON = 'jp-Git-fileIcon';
 const GIT_FILE_LABEL = 'jp-Git-fileLabel';
 
 
-
 /**
  * The class name added to a git-plugin session item git-add button.
  */
-
 const GIT_BUTTON_ADD = 'jp-Git-button-add';
 /**
  * The class name added to a git-plugin session item git-reset button.
  */
 const GIT_BUTTON_RESET = 'jp-Git-button-reset';
-
 
 const GIT_BUTTON_DISCARD = 'jp-Git-button-discard';
 
@@ -106,7 +91,6 @@ const FILE_TYPE_CLASS = 'jp-FileIcon';
  * The class name added to a directory file browser item.
  */
 const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon';
-
 
 export namespace StatusFiles {
   export
@@ -172,7 +156,6 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
                     </li>
                 )}
           </div>
-
 
 
           <div className='jp-Git-unstaged' >
