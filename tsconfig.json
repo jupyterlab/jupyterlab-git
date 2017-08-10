@@ -3,7 +3,7 @@
     "declaration": true,
     "noImplicitAny": false,
     "noEmitOnError": true,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",

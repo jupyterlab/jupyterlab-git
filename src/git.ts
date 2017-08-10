@@ -333,7 +333,7 @@ export class Git {
 	 }
 	
 	init(path:string){
-		//return HTTP_Git_Request('/git/init','POST',{"top_repo_path":path});
+		return HTTP_Git_Request('/git/init','POST',{"current_path":path});
 	}
 
 }
