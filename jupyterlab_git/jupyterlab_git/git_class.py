@@ -29,7 +29,29 @@ class Git:
             result = [] 
             line_array = my_output.decode('utf-8').splitlines()
             for line in line_array:
-                result.append({'x':line[0],'y':line[1],'to':line[3:],'from':None})
+                to1 = None
+                to2 = None
+                from_path = line[3:]
+                
+                if line[0]=='R':
+                    to0 = line[3:].split(' -> ')
+                    to1 = to0[len(to0)-1]
+                else:
+                    to1 = line[3:]
+
+                if to1.startswith('"'):
+                    to1 = to1[1:]
+                if to1.endswith('"'):
+                    to1 = to1[:-1] 
+                if(to1.endswith('/')):
+                    to1 = to1[:-1]
+                    to2 = to1.split('/')
+                    to = to2[len(to2)-1]+'/'
+                else:
+                    to2 = to1.split('/')
+                    to = to2[len(to2)-1]
+
+                result.append({'x':line[0],'y':line[1],'to':to,'from':from_path})
             return {"code": p.returncode, "files":result}
         else:
             return {"code": p.returncode, 'command':"git status --porcelain", "message": my_error.decode('utf-8')}
