@@ -132,12 +132,17 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
   init_input(){
     this.setState({commit_msg:'',commit_disable:true});
   }
+  onKeyPress(event){
+    if (event.which === 13 /* Enter */) {
+      event.preventDefault();
+    }
+  }
 
   render(){
     return (
       <div>
           <div className='jp-Git-staged'>
-            <form>
+            <form onKeyPress={this.onKeyPress}>
             <label>
               <input className='jp-Git-staged-commit-msg' type="text" disabled ={(this.props.staged_files).length==0} placeholder={(this.props.staged_files).length==0?'Stage your changes before commit':'Input message to commit staged changes'} value={this.state.commit_msg} onChange={this.handleChange}/>
               </label>
