@@ -111,7 +111,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
          <button className='jp-Git-timeline-arrow' onClick={()=>this.show_right()}> {'\u276f'} </button>
       </div>
           <ToggleDisplay show={!(this.props.show_CUR)}>
-          <SinglePastCommitInfo num={this.state.single_num} data={this.state.single_data} list={this.state.single_data_filelist}/>
+          <SinglePastCommitInfo num={this.state.single_num} data={this.state.single_data} list={this.state.single_data_filelist} app={this.props.app}/>
           </ToggleDisplay>
 
 
@@ -165,6 +165,7 @@ export namespace SinglePastCommitInfo {
     num: string;
     data:SingleCommitInfo;
     list:[CommitModifiedFile];
+    app: JupyterLab;
   }
 }
 export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.IProps, SinglePastCommitInfo.IState>{
@@ -186,7 +187,7 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
           {this.props.list.map((mf, mf_index)=>
             <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} />
-              <span className='jp-Git-singlePastCommitDetail-file-path' onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} :{mf.insertion}(+), {mf.deletion}(-) </span>
+              <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit}) }>{mf.modified_file_path} :{mf.insertion}(+), {mf.deletion}(-) </span>
             </li>
           )}
       </div>
@@ -195,6 +196,8 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
   }
 }
 
-
+/**
+ * onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}
+ */
 
 

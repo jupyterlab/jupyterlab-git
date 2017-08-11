@@ -7,6 +7,18 @@ import {
 } from '@jupyterlab/application';
 
 import {
+  ServiceManager
+} from '@jupyterlab/services';
+
+import {
+  InstanceTracker
+
+} from '@jupyterlab/apputils';
+import {
+  Terminal
+} from '@jupyterlab/terminal';
+
+import {
   Git
 } from './git'
 /**
@@ -15,6 +27,9 @@ import {
 export namespace CommandIDs {
   export
   const git_terminal = 'git:create-new-terminal';
+
+  export
+  const git_terminal_cmd = 'git:terminal-cmd';
 
   export
   const git_pull = 'git:pull';
@@ -30,9 +45,10 @@ export namespace CommandIDs {
  * Add the commands for the git-plugin.
  */
 export
-function addCommands(app: JupyterLab) {
-  let { commands} = app;
-
+function addCommands(app: JupyterLab, services: ServiceManager) {
+  let { commands } = app;
+  const namespace = 'terminal';
+  const tracker = new InstanceTracker<Terminal>({ namespace });
   let git_temp = new Git();
 
   /**
@@ -55,8 +71,54 @@ function addCommands(app: JupyterLab) {
     label: 'Open Terminal',
     caption: 'Start a new terminal session to directly use git command',
     execute: args => {
-      console.log("git new terminal");
-      app.commands.execute('terminal:create-new');
+      let cur_fb_path = find_cur_fb_path();
+      //console.log("git new terminal");
+      //app.commands.execute('terminal:create-new');
+      let name = args ? args['name'] as string : '';
+      let term = new Terminal();
+      term.title.closable = true;
+      //term.title.icon = TERMINAL_ICON_CLASS;
+      term.title.label = '...';
+      app.shell.addToMainArea(term);
+      let promise = name ?
+        services.terminals.connectTo(name)
+        : services.terminals.startNew();
+
+      return promise.then(session => {
+        term.session = session;
+        tracker.add(term);
+        app.shell.activateById(term.id);
+        term.session.send({
+          type: 'stdin',
+          content: ['cd '+cur_fb_path+'\n']
+        });
+        return term;
+      }).catch(() => { term.dispose(); });
+    }
+  });
+
+    commands.addCommand(CommandIDs.git_terminal_cmd, {
+    label: 'Terminal_CMD',
+    caption: 'Open a new terminal session and perform git command',
+    execute: args => {
+      let cur_fb_path = find_cur_fb_path();
+      let cmd = args ? ('&&'+(args['cmd'] as string)) : '';
+      let term = new Terminal();
+      term.title.closable = true;
+      term.title.label = '...';
+      app.shell.addToMainArea(term);
+      let promise = services.terminals.startNew();
+
+      return promise.then(session => {
+        term.session = session;
+        tracker.add(term);
+        app.shell.activateById(term.id);
+        term.session.send({
+          type: 'stdin',
+          content: ['cd '+cur_fb_path+cmd+'\n']
+        });
+        return term;
+      }).catch(() => { term.dispose(); });
     }
   });
 

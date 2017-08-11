@@ -6,6 +6,31 @@ pre-alpha version
 4. Reply JSON
 5. How errors are handled (HTTP error codes, error JSON)
 
+## git api (not a real command)
+
+URL:  
+    POST /git/API
+Request JSON:
+    {
+        "current_path": "current/path/in/filebrowser/widget"
+    }
+Reply JSON:
+    {
+        "code": 0,
+    	"data"?:{
+		    "showtoplevel": GitShowTopLevelResult;
+		    "branch"?: GitBranchResult;
+		    "log"?: GitLogResult;
+		    "status"?: GitStatusResult;
+	    }
+    }
+    }
+Error JSON:
+    {
+        "code": 10000,
+        "message": "Not in a Git repository"
+    }
+
 
 ## git rev-parse --show-toplevel
 

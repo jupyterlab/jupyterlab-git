@@ -5,6 +5,10 @@ import {
   GitSessions
  } from './components/components'
 
+ import {
+  ServiceManager
+} from '@jupyterlab/services';
+
 import {
   ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
@@ -49,7 +53,7 @@ export default plugin;
 /**
  * Activate the running plugin.
  */
-function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMenu, restorer: ILayoutRestorer, panel: ConsolePanel,model: Session.IModel): void {
+function activate(app: JupyterLab, services: ServiceManager, mainMenu: IMainMenu, restorer: ILayoutRestorer, panel: ConsolePanel,model: Session.IModel): void {
   const { commands} = app;
   const category = 'Git';
   let git_plugin = new GitSessions(app, { manager: services });
@@ -65,7 +69,7 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(git_plugin, { rank: 200 });
 
-  addCommands(app);
+  addCommands(app, services);
   let menu = new Menu({commands});
   menu.title.label = category;
   [

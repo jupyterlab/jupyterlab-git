@@ -203,68 +203,6 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
       </div>
     );
   }
-
-
-
-/*
-  render(){
-    return (
-      <div>
-          <div className='jp-Git-staged'>
-            <form>
-            <label>
-              <input className='jp-Git-staged-commit-msg' type="text" placeholder='Input message to commit staged changes'value={this.state.commit_msg} onChange={this.handleChange}/>
-              </label>
-              <input className='jp-Git-staged-commit-button' type="button" title='Commit' value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>{commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh),this.init_input()}}/>
-              </form>
-            
-              <span className='jp-git-staged-header-label'> Staged({(this.props.staged_files).length})</span>
-              <button className={`${GIT_BUTTON_RESET} jp-mod-styled`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}> {'\u2938'}</button>
-          </div>
-          <div className= 'jp-Git-section-fileContainer'>
-                {this.props.staged_files.map((file, file_index)=>
-                    <li className={GIT_FILE} key={file_index}>
-                    <span className={`${GIT_FILE_ICON} ${parseFileExtension(file)}`} />
-                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file,this.props.app)} >{file}</span>
-                    <button className={`${GIT_BUTTON_RESET} jp-mod-styled`} title='Reset this staged change' onClick={()=>reset_StagedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u2938'} </button>
-                    </li>
-                )}
-          </div>
-
-
-          <div className='jp-Git-unstaged' >
-              <span className='jp-Git-unstaged-header-label'> Unstaged({(this.props.unstaged_files).length})</span>
-              <button className={`${GIT_BUTTON_ADD} jp-mod-styled`} title='Stage all the changes' onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>{'\u2b06'}</button>
-              <button className={`${GIT_BUTTON_DISCARD} jp-mod-styled`} title='Discard all the changes' onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>{'\u292c'}</button>
-          </div>
-          <div className= 'jp-Git-section-fileContainer'>
-                {this.props.unstaged_files.map((file, file_index)=>
-                    <li className={GIT_FILE} key={file_index}>
-                    <span className={`${GIT_FILE_ICON} ${parseFileExtension(file)}`} />
-                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file,this.props.app)}>{file}</span>
-                    <button className= {`${GIT_BUTTON_ADD} jp-mod-styled`} title='Stage this change' onClick={()=>add_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u21e7'}</button>
-                    <button className= {`${GIT_BUTTON_DISCARD} jp-mod-styled`} title='Discard this change' onClick={()=>discard_UnstagedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u292c'} </button>
-                    </li>
-                )}
-          </div>
-
-          <div className='jp-Git-untracked' >
-              <span className='jp-Git-untracked-header-label'> Untracked({(this.props.untracked_files).length})</span>
-              <button className={`${GIT_BUTTON_ADD} jp-mod-styled`}>{'\u2b06'}</button>
-          </div>
-          <div className= 'jp-Git-section-fileContainer'>
-                {this.props.untracked_files.map((file, file_index)=>
-                    <li className={GIT_FILE} key={file_index}>
-                    <span className={`${GIT_FILE_ICON} ${parseFileExtension(file)}`} />
-                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file,this.props.app)}>{file}</span>
-                    <button className= {`${GIT_BUTTON_ADD} jp-mod-styled`} title='Track this file' onClick={()=>add_UntrackedNode(file, this.props.top_repo_path, this.props.refresh)}> {'\u21e7'} </button>
-                    </li>
-                )}
-           </div>
-      </div>
-    );
-  }
-  */
 }
 
 //function for opening files
