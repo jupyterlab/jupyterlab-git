@@ -43,6 +43,7 @@ class Git:
                     to1 = to1[1:]
                 if to1.endswith('"'):
                     to1 = to1[:-1] 
+                '''
                 if(to1.endswith('/')):
                     to1 = to1[:-1]
                     to2 = to1.split('/')
@@ -50,8 +51,8 @@ class Git:
                 else:
                     to2 = to1.split('/')
                     to = to2[len(to2)-1]
-
-                result.append({'x':line[0],'y':line[1],'to':to,'from':from_path})
+                '''
+                result.append({'x':line[0],'y':line[1],'to':to1,'from':from_path})
             return {"code": p.returncode, "files":result}
         else:
             return {"code": p.returncode, 'command':"git status --porcelain", "message": my_error.decode('utf-8')}
