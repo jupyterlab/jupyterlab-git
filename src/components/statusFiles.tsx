@@ -132,6 +132,8 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
   init_input(){
     this.setState({commit_msg:'',commit_disable:true});
   }
+
+  /** to prevent ENTER key trigged 'submit' action during inputing commit msg*/
   onKeyPress(event){
     if (event.which === 13 /* Enter */) {
       event.preventDefault();
@@ -150,13 +152,15 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
               </form>
             
               <span className='jp-git-staged-header-label'> Staged({(this.props.staged_files).length})</span>
+              <ToggleDisplay show={this.props.staged_files.length>0}>
               <button className={`${GIT_BUTTON_RESET} jp-mod-styled`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}> {'\u2938'}</button>
+              </ToggleDisplay>
           </div>
           <div className= 'jp-Git-section-fileContainer'>
                 {this.props.staged_files.map((file, file_index)=>
                     <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
-                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.to,this.props.app)} >{file.to}[{file.x}]</span>
+                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.to,this.props.app)} >{file.to}[{file.x}]</span>
                     <ToggleDisplay show={file.x!='D'}>
                     <button className={`${GIT_BUTTON_RESET} jp-mod-styled`} title='Reset this staged change' onClick={()=>reset_StagedNode(file.to, this.props.top_repo_path, this.props.refresh)}> {'\u2938'} </button>
                     </ToggleDisplay>
@@ -167,14 +171,16 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
 
           <div className='jp-Git-unstaged' >
               <span className='jp-Git-unstaged-header-label'> Unstaged({(this.props.unstaged_files).length})</span>
+              <ToggleDisplay show={this.props.unstaged_files.length>0}>
               <button className={`${GIT_BUTTON_ADD} jp-mod-styled`} title='Stage all the changes' onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>{'\u2b06'}</button>
               <button className={`${GIT_BUTTON_DISCARD} jp-mod-styled`} title='Discard all the changes' onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}>{'\u292c'}</button>
+              </ToggleDisplay>
           </div>
           <div className= 'jp-Git-section-fileContainer'>
                 {this.props.unstaged_files.map((file, file_index)=>
                     <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
-                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.to,this.props.app)}>{file.to}[{file.y}]</span>
+                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.to,this.props.app)}>{file.to}[{file.y}]</span>
                     <button className= {`${GIT_BUTTON_ADD} jp-mod-styled`} title='Stage this change' onClick={()=>add_UnstagedNode(file.to, this.props.top_repo_path, this.props.refresh)}> {'\u21e7'}</button>
                     <button className= {`${GIT_BUTTON_DISCARD} jp-mod-styled`} title='Discard this change' onClick={()=>discard_UnstagedNode(file.to, this.props.top_repo_path, this.props.refresh)}> {'\u292c'} </button>
                     </li>
@@ -183,13 +189,13 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
 
           <div className='jp-Git-untracked' >
               <span className='jp-Git-untracked-header-label'> Untracked({(this.props.untracked_files).length})</span>
-              <button className={`${GIT_BUTTON_ADD} jp-mod-styled`}>{'\u2b06'}</button>
+              {/*<button className={`${GIT_BUTTON_ADD} jp-mod-styled`}>{'\u2b06'}</button>*/}
           </div>
           <div className= 'jp-Git-section-fileContainer'>
                 {this.props.untracked_files.map((file, file_index)=>
                     <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
-                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.to,this.props.app)}>{file.to}</span>
+                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.to,this.props.app)}>{file.to}</span>
                     <button className= {`${GIT_BUTTON_ADD} jp-mod-styled`} title='Track this file' onClick={()=>add_UntrackedNode(file.to, this.props.top_repo_path, this.props.refresh)}> {'\u21e7'} </button>
                     </li>
                 )}
@@ -262,7 +268,11 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
 }
 
 //function for opening files
-async function open_listed_file(path:string, app:JupyterLab){
+async function open_listed_file(type: string,path:string, app:JupyterLab){
+  if(type=='D'){
+    console.log("Cannot open a deleted file")
+    return;
+  }
   try{
     let ll = app.shell.widgets('left');
     let fb = ll.next();

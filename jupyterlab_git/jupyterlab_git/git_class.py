@@ -58,14 +58,15 @@ class Git:
             return {"code": p.returncode, 'command':"git status --porcelain", "message": my_error.decode('utf-8')}
 
     def log(self,current_path):
-        p = Popen(["git", "log","--pretty=format:%H-%an-%ar-%s"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
+        p = Popen(["git", "log","--pretty=format:%H%n%an%n%ar%n%s"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+current_path)
         my_output,my_error = p.communicate()
         if(p.returncode==0):
             result = []
             line_array = my_output.decode('utf-8').splitlines()
-            for line in line_array:
-                linesplit = line.split('-')
-                result.append({'commit':linesplit[0], 'author': linesplit[1],'date':linesplit[2],'commit_msg':linesplit[3]})
+            i = 0
+            while i < len(line_array):
+                result.append({'commit':line_array[i], 'author': line_array[i+1],'date':line_array[i+2],'commit_msg':line_array[i+3]})
+                i += 4
             return {"code": p.returncode, "commits":result}
         else:
             return {"code":p.returncode, "message":my_error.decode('utf-8')}

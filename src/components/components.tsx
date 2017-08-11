@@ -331,6 +331,9 @@ namespace GitSessionNode {
           disable_switch_branch = false;
         }
       }
+      if(past_commits.length==0){
+        disable_switch_branch = true;
+      }
       
       //determine if in the same repo as previously, if not, display the CUR;
       let in_new_repo= this.state.top_repo_path!==(api_showtoplevel as GitShowTopLevelResult).top_repo_path;
