@@ -75,6 +75,7 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
         <span className ='jp-Git-branch-label'> Current Branch:{this.props.current_branch}
         </span>,
         <select required ref="switch_branch_dropdown_button" value = {this.props.current_branch} disabled = {this.props.disabled} 
+
         title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} 
         className='jp-Git-branch-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
              <option value=" " disabled selected>Switch Branches: </option>

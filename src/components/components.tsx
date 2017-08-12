@@ -310,23 +310,29 @@ namespace GitSessionNode {
           if(data_json[i].x!="?"&&data_json[i].x!="!"){
             Changes++;
           }
-          if(data_json[i].x=="M"){
-            staged.push(data_json[i].to);
-            SF++;
-          }
-          if(data_json[i].y=="M"){
-            unstaged.push(data_json[i].to);
-            USF++;
-          }
+          
           if(data_json[i].x=="?"&&data_json[i].y=="?"){
-            untracked.push(data_json[i].to);
+            untracked.push(data_json[i]);
             UTF++;
+          }
+          else{
+            if(data_json[i].x!=" "&&data_json[i].y!="D"){
+              staged.push(data_json[i]);
+              SF++;
+            }
+            if(data_json[i].y!=" "){
+              unstaged.push(data_json[i]);
+              USF++;
+            }
           }
         }  
         if(Changes == 0){
         // since there are no uncommitted changes, enable switch branch button 
           disable_switch_branch = false;
         }
+      }
+      if(past_commits.length==0){
+        disable_switch_branch = true;
       }
       
       //determine if in the same repo as previously, if not, display the CUR;
