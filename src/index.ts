@@ -67,14 +67,26 @@ function activate(app: JupyterLab, services: IServiceManager, mainMenu: IMainMen
 
   addCommands(app);
   let menu = new Menu({commands});
+  let tutorial = new Menu({commands});
+  tutorial.title.label = " Tutorial ";
   menu.title.label = category;
   [
     CommandIDs.git_terminal,
     CommandIDs.git_pull,
     CommandIDs.git_push,
-    CommandIDs.git_init
+    CommandIDs.git_init,
   ].forEach(command =>{
     menu.addItem({command});
   });
+
+  [
+    CommandIDs.setup_remotes,
+    CommandIDs.tutorial_Pull,
+    CommandIDs.tutorial_Push,
+    CommandIDs.link4,
+  ].forEach(command => {
+    tutorial.addItem({command});
+  });
+  menu.addItem({type: 'submenu' , submenu: tutorial});
   mainMenu.addMenu(menu,{rank:60});
 }
