@@ -95,7 +95,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
     return (
       <div>
       <div className='jp-Git-timeline'>
-        <button className='jp-Git-timeline-arrow' onClick={()=>this.show_left()}> {'\u276e'} </button>
+        <button className='jp-Git-timeline-arrow-left' onClick={()=>this.show_left()}> {'\u276e'} </button>
         <div className='jp-Git-timeline-container' ref='past_commits_container'> 
             <button className='jp-Git-mod-current' onDoubleClick={()=>this.props.show_current_work(true)}>
                CUR
@@ -108,7 +108,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
               </span>
             )}
           </div>,     
-         <button className='jp-Git-timeline-arrow' onClick={()=>this.show_right()}> {'\u276f'} </button>
+         <button className='jp-Git-timeline-arrow-right' onClick={()=>this.show_right()}> {'\u276f'} </button>
       </div>
           <ToggleDisplay show={!(this.props.show_CUR)}>
           <SinglePastCommitInfo num={this.state.single_num} data={this.state.single_data} list={this.state.single_data_filelist}/>
