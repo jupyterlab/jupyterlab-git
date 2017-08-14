@@ -576,14 +576,14 @@ input[type=text]:focus {
 
 
 .jp-Git-button:hover {
-  background-color: rgba(153,153,153,.1);
+  background-color: none;
 }
 
 
 .jp-Git-button:focus {
   border: none;
   box-shadow: none;
-  background-color: rgba(153,153,153,.2);
+  background-color:none;
 }
 
 
