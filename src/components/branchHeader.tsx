@@ -25,7 +25,6 @@ export namespace BranchHeader {
     data: any;
     refresh:any;
     disabled:boolean;
-    value:string;
   }
 
   export
@@ -41,7 +40,7 @@ export namespace BranchHeader {
 export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
   constructor(props: BranchHeader.IProps) {
     super(props);
-    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: props.current_branch, data: [], refresh:props.refresh, disabled:props.disabled, value:props.current_branch}
+    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: props.current_branch, data: [], refresh:props.refresh, disabled:props.disabled}
   }
 
 //functions for switch branches
