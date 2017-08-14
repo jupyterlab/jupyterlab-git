@@ -7,18 +7,34 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  Git
-} from './git'
+  ServiceManager
+} from '@jupyterlab/services';
 
 import {
-  Widget//, Menu
-} from '@phosphor/widgets';
+  InstanceTracker
+
+} from '@jupyterlab/apputils';
+
+import {
+  Terminal
+} from '@jupyterlab/terminal';
+
+import {
+   Widget
+  } from '@phosphor/widgets';
+
+import {
+  Git
+} from './git'
 /**
  * The command IDs used by the git plugin.
  */
 export namespace CommandIDs {
   export
   const git_terminal = 'git:create-new-terminal';
+
+  export
+  const git_terminal_cmd = 'git:terminal-cmd';
 
   export
   const git_pull = 'git:pull';
@@ -29,29 +45,27 @@ export namespace CommandIDs {
   export
   const git_init = 'git:init';
 
-
-  export 
+  export
   const setup_remotes = 'git:tutorial_remotes';
 
-  export 
+  export
   const tutorial_Pull = 'git:tutorial_Pull';
 
-  export 
+  export
   const tutorial_Push = 'git:tutorial_Push';
-
-  export 
+  
+  export
   const link4 = 'git:tutorial_link_4';
-
-
 
 };
 /**
  * Add the commands for the git-plugin.
  */
 export
-function addCommands(app: JupyterLab) {
-  let { commands} = app;
-
+function addCommands(app: JupyterLab, services: ServiceManager) {
+  let { commands } = app;
+  const namespace = 'terminal';
+  const tracker = new InstanceTracker<Terminal>({ namespace });
   let git_temp = new Git();
 
   /**
@@ -69,21 +83,72 @@ function addCommands(app: JupyterLab) {
    }catch(err){}
   }
 
+  function pullReady(){
+    return false;
+  }
+
   // Add terminal commands.
   commands.addCommand(CommandIDs.git_terminal, {
     label: 'Open Terminal',
     caption: 'Start a new terminal session to directly use git command',
     execute: args => {
-      console.log("git new terminal");
-      app.commands.execute('terminal:create-new');
+      let cur_fb_path = find_cur_fb_path();
+      //console.log("git new terminal");
+      //app.commands.execute('terminal:create-new');
+      let name = args ? args['name'] as string : '';
+      let term = new Terminal();
+      term.title.closable = true;
+      //term.title.icon = TERMINAL_ICON_CLASS;
+      term.title.label = '...';
+      app.shell.addToMainArea(term);
+      let promise = name ?
+        services.terminals.connectTo(name)
+        : services.terminals.startNew();
+
+      return promise.then(session => {
+        term.session = session;
+        tracker.add(term);
+        app.shell.activateById(term.id);
+        term.session.send({
+          type: 'stdin',
+          content: ['cd '+cur_fb_path+'\n']
+        });
+        return term;
+      }).catch(() => { term.dispose(); });
+    }
+  });
+
+    commands.addCommand(CommandIDs.git_terminal_cmd, {
+    label: 'Terminal_CMD',
+    caption: 'Open a new terminal session and perform git command',
+    execute: args => {
+      let cur_fb_path = find_cur_fb_path();
+      let cd_cmd = cur_fb_path==''?'':('cd '+cur_fb_path);
+      let git_cmd = args ? (args['cmd'] as string) : '';
+      let link_cmd = (cd_cmd!=''&&git_cmd!='')? '&&' : '';
+      let term = new Terminal();
+      term.title.closable = true;
+      term.title.label = '...';
+      app.shell.addToMainArea(term);
+      let promise = services.terminals.startNew();
+
+      return promise.then(session => {
+        term.session = session;
+        tracker.add(term);
+        app.shell.activateById(term.id);
+        term.session.send({
+          type: 'stdin',
+          content: [cd_cmd+link_cmd+git_cmd+'\n']
+        });
+        return term;
+      }).catch(() => { term.dispose(); });
     }
   });
 
   commands.addCommand(CommandIDs.git_pull, {
     label: 'Pull',
-    caption: 'Update remote refs along with associated objects',
-    execute: () => {
-
+    caption: 'Incorporates changes from a remote repository into the current branch',
+    execute: args => {
       let cur_fb_path = find_cur_fb_path();
       let br1 = new Widget({node: document.createElement("input")});
       let br2 = new Widget({node: document.createElement("input")});
@@ -124,6 +189,7 @@ function addCommands(app: JupyterLab) {
           }
     });
     },
+    isEnabled: pullReady
   });
 
 
@@ -131,7 +197,6 @@ function addCommands(app: JupyterLab) {
     label: 'Push',
     caption: 'Update remote refs along with associated objects',
     execute: () => {
-
       let cur_fb_path = find_cur_fb_path();
       let br1 = new Widget({node: document.createElement("input")});
       let br2 = new Widget({node: document.createElement("input")});
@@ -172,6 +237,7 @@ function addCommands(app: JupyterLab) {
           }
     });
     },
+  //isEnabled: pushReady();
   });
 
   commands.addCommand(CommandIDs.git_init, {
@@ -190,9 +256,10 @@ function addCommands(app: JupyterLab) {
           }
         });
     },
+    //isEnabled: initReady();
   });
 
-  commands.addCommand(CommandIDs.setup_remotes, {
+    commands.addCommand(CommandIDs.setup_remotes, {
     label: "Set Up Remotes",
     caption: "Learn about Remotes",
     execute: () => {
@@ -229,6 +296,5 @@ function addCommands(app: JupyterLab) {
   });
 
 }
-
 
 
