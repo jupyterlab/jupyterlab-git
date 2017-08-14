@@ -557,7 +557,7 @@ input[type=text]:focus {
 }
 
 /*-----------------------------------------------------------------------------
-| Git-button (for add, reset, discard)
+| Git-button (for add, reset, track)
 |----------------------------------------------------------------------------*/
 .jp-Git-button {
   margin: 0px 4px;
@@ -567,9 +567,11 @@ input[type=text]:focus {
   line-height: var(--jp-private-running-shutdown-button-height);
   transition: background-color 0.1s ease;
   border-radius: 2px;
-  background-size: 16px;
+  height: 16px;
   background-position: center;
   background-repeat: no-repeat;
+  border: none;
+
 }
 
 
