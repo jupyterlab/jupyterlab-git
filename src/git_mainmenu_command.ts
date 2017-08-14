@@ -14,9 +14,14 @@ import {
   InstanceTracker
 
 } from '@jupyterlab/apputils';
+
 import {
   Terminal
 } from '@jupyterlab/terminal';
+
+import {
+   Widget
+  } from '@phosphor/widgets';
 
 import {
   Git
@@ -39,6 +44,18 @@ export namespace CommandIDs {
 
   export
   const git_init = 'git:init';
+
+  export
+  const setup_remotes = 'git:tutorial_remotes';
+
+  export
+  const tutorial_Pull = 'git:tutorial_Pull';
+
+  export
+  const tutorial_Push = 'git:tutorial_Push';
+  
+  export
+  const link4 = 'git:tutorial_link_4';
 
 };
 /**
@@ -64,6 +81,10 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
     }
     return(fb as any).model.path;
    }catch(err){}
+  }
+
+  function pullReady(){
+    return false;
   }
 
   // Add terminal commands.
@@ -102,7 +123,9 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
     caption: 'Open a new terminal session and perform git command',
     execute: args => {
       let cur_fb_path = find_cur_fb_path();
-      let cmd = args ? ('&&'+(args['cmd'] as string)) : '';
+      let cd_cmd = cur_fb_path==''?'':('cd '+cur_fb_path);
+      let git_cmd = args ? (args['cmd'] as string) : '';
+      let link_cmd = (cd_cmd!=''&&git_cmd!='')? '&&' : '';
       let term = new Terminal();
       term.title.closable = true;
       term.title.label = '...';
@@ -115,7 +138,7 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
         app.shell.activateById(term.id);
         term.session.send({
           type: 'stdin',
-          content: ['cd '+cur_fb_path+cmd+'\n']
+          content: [cd_cmd+link_cmd+git_cmd+'\n']
         });
         return term;
       }).catch(() => { term.dispose(); });
@@ -127,19 +150,46 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
     caption: 'Incorporates changes from a remote repository into the current branch',
     execute: args => {
       let cur_fb_path = find_cur_fb_path();
-      console.log("git pull");
-      let upstream = prompt("Enter Upstream Branch Name");
-      if(upstream==="" || upstream===null)
-        alert("Oops.. You can't leave branch name empty");
-      else{
-        let master = prompt("Enter Master Branch Name");
-        if(master==="" || master ===null)
-          alert("Oops.. You can't leave branch name empty");
-        else{
-          git_temp.pull(upstream,master,cur_fb_path);
-        }
-      }
-    }
+      let br1 = new Widget({node: document.createElement("input")});
+      let br2 = new Widget({node: document.createElement("input")});
+      showDialog({
+       title: "Enter Branch name you would like to Pull from",
+       body:br1,
+       buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "OK"})]
+      }).then(result => {
+          let msg1 = (br1.node as HTMLInputElement).value;
+          console.log(msg1);
+          if (result.button.accept && msg1 && msg1!=null) 
+          {
+            showDialog({
+              title: "Enter Branch name you would like to Pull into",
+              body:br2,
+              buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "Pull"})]
+             }).then(result => {
+                 let msg2 = (br2.node as HTMLInputElement).value;
+                 console.log(msg2);
+                 if (result.button.accept && msg2 && msg2!=null) 
+                 {  
+                  git_temp.pull(msg1,msg2,cur_fb_path); 
+                 }
+                 else{
+                  showDialog({
+                    title: "Oopss you can't leave a branch name empty",
+                    buttons: [Dialog.okButton({ label: "OK"})]
+                   })
+                }
+                  
+           });
+          }
+          else{
+            showDialog({
+              title: "Oopss you can't leave a branch name empty",
+              buttons: [Dialog.okButton({ label: "OK"})]
+            })
+          }
+    });
+    },
+    isEnabled: pullReady
   });
 
 
@@ -148,22 +198,46 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
     caption: 'Update remote refs along with associated objects',
     execute: () => {
       let cur_fb_path = find_cur_fb_path();
-      console.log("git push");
-      let upstream = prompt("Enter Upstream Branch Name");
-      if(upstream==="" || upstream===null)
-        alert("Oops.. You can't leave branch name empty");
-
-      else
-        {
-          let master = prompt("Enter Master Branch Name");
-          if(master==="" || master===null)
-            alert("Oops.. You can't leave branch name empty");
-          else
-            {
-              git_temp.push(upstream,master,cur_fb_path); 
-            }
-        }
+      let br1 = new Widget({node: document.createElement("input")});
+      let br2 = new Widget({node: document.createElement("input")});
+      showDialog({
+       title: "Enter Branch name you would like to Push towards",
+       body:br1,
+       buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "OK"})]
+      }).then(result => {
+          let msg1 = (br1.node as HTMLInputElement).value;
+          console.log(msg1);
+          if (result.button.accept && msg1 && msg1!=null) 
+          {
+            showDialog({
+              title: "Enter Branch name you would like to Push from",
+              body:br2,
+              buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "Push"})]
+             }).then(result => {
+                 let msg2 = (br2.node as HTMLInputElement).value;
+                 console.log(msg2);
+                 if (result.button.accept && msg2 && msg2!=null) 
+                 {  
+                  git_temp.push(msg1,msg2,cur_fb_path); 
+                 }
+                 else{
+                  showDialog({
+                    title: "Oopss you can't leave a branch name empty",
+                    buttons: [Dialog.okButton({ label: "OK"})]
+                   })
+                }
+                  
+           });
+          }
+          else{
+            showDialog({
+              title: "Oopss you can't leave a branch name empty",
+              buttons: [Dialog.okButton({ label: "OK"})]
+            })
+          }
+    });
     },
+  //isEnabled: pushReady();
   });
 
   commands.addCommand(CommandIDs.git_init, {
@@ -181,6 +255,43 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
             git_temp.init(curr_fb_path);
           }
         });
+    },
+    //isEnabled: initReady();
+  });
+
+    commands.addCommand(CommandIDs.setup_remotes, {
+    label: "Set Up Remotes",
+    caption: "Learn about Remotes",
+    execute: () => {
+      console.log("Git Tutorial link 1");
+      window.open("https://www.atlassian.com/git/tutorials/setting-up-a-repository");
+    },
+  });
+
+  commands.addCommand(CommandIDs.tutorial_Pull, {
+    label: 'How to use Pull',
+    caption: "What's Pull",
+    execute: () => {
+      console.log("Git Tutorial link 2");
+      window.open("https://git-scm.com/docs/git-pull");
+    },
+  });
+
+  commands.addCommand(CommandIDs.tutorial_Push, {
+    label: "How to use Push",
+    caption: "What's Push",
+    execute: () => {
+      console.log("Git Tutorial link 3");
+      window.open("https://git-scm.com/docs/git-push");
+    },
+  });
+
+  commands.addCommand(CommandIDs.link4, {
+    label: 'Something Else',
+    caption: "Dummy Link ",
+    execute: () => {
+      console.log("Git Tutorial link 4");
+      window.open("https://www.google.com");
     },
   });
 

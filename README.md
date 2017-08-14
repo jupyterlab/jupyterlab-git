@@ -2,6 +2,7 @@
 
 JLG
 
+* pre-alpha version, download the whole repo and install
 
 ## Prerequisites
 

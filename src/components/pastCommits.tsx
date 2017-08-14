@@ -186,7 +186,7 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
       <div className='jp-Git-singlePastCommitDetail'>
           {this.props.list.map((mf, mf_index)=>
             <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
-              <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} />
+              <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}/>
               <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit}) }>{mf.modified_file_path} :{mf.insertion}(+), {mf.deletion}(-) </span>
             </li>
           )}

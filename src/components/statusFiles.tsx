@@ -160,7 +160,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
                 {this.props.staged_files.map((file, file_index)=>
                     <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
-                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.to,this.props.app)} >{file.to}[{file.x}]</span>
+                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.y,file.to,this.props.app)} >{file.to}[{file.x}]</span>
                     <ToggleDisplay show={file.x!='D'}>
                     <button className={`${GIT_BUTTON_RESET} jp-mod-styled`} title='Reset this staged change' onClick={()=>reset_StagedNode(file.to, this.props.top_repo_path, this.props.refresh)}> {'\u2938'} </button>
                     </ToggleDisplay>
@@ -180,7 +180,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
                 {this.props.unstaged_files.map((file, file_index)=>
                     <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
-                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.to,this.props.app)}>{file.to}[{file.y}]</span>
+                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.y,file.to,this.props.app)}>{file.to}[{file.y}]</span>
                     <button className= {`${GIT_BUTTON_ADD} jp-mod-styled`} title='Stage this change' onClick={()=>add_UnstagedNode(file.to, this.props.top_repo_path, this.props.refresh)}> {'\u21e7'}</button>
                     <button className= {`${GIT_BUTTON_DISCARD} jp-mod-styled`} title='Discard this change' onClick={()=>discard_UnstagedNode(file.to, this.props.top_repo_path, this.props.refresh)}> {'\u292c'} </button>
                     </li>
@@ -195,7 +195,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
                 {this.props.untracked_files.map((file, file_index)=>
                     <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
-                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.to,this.props.app)}>{file.to}</span>
+                    <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.y,file.to,this.props.app)}>{file.to}</span>
                     <button className= {`${GIT_BUTTON_ADD} jp-mod-styled`} title='Track this file' onClick={()=>add_UntrackedNode(file.to, this.props.top_repo_path, this.props.refresh)}> {'\u21e7'} </button>
                     </li>
                 )}
@@ -206,10 +206,18 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
 }
 
 //function for opening files
-async function open_listed_file(type: string,path:string, app:JupyterLab){
-  if(type=='D'){
-    console.log("Cannot open a deleted file")
-    return;
+async function open_listed_file(typeX: string,typeY: string, path:string, app:JupyterLab){
+  if(typeX=='D'||typeY=='D'){
+    showDialog({
+      title: 'Open File Failed',
+      body: "This file has been deleted!",
+      buttons: [Dialog.warnButton({ label: 'OK'})]
+    }).then(result => {
+      if (result.button.accept) {
+      return;
+      }
+    });
+   return;
   }
   try{
     let ll = app.shell.widgets('left');

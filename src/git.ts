@@ -96,15 +96,18 @@ export interface GitBranchResult {
             }
         ]
 }
+
+export interface GitStatusFileResult{
+    x: string,
+    y: string,
+    to: string,
+    from: string
+}
+
 export interface GitStatusResult {
 	code: number;
 	files?: [
-            {
-                x: string,
-                y: string,
-                to: string,
-                from: string
-            }
+            GitStatusFileResult
         ]
 }
 
