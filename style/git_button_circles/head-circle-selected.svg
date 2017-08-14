@@ -3,8 +3,9 @@
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 22 22" style="enable-background:new 0 0 22 22;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#434343;}
+	.st0{fill:#0A0A0A;}
 	.st1{fill:#4CAF50;}
+	.st2{fill:#434343;}
 </style>
 <title>head-circle</title>
 <circle class="st0" cx="11" cy="11" r="11"/>
@@ -12,5 +13,5 @@
 <circle class="st0" cx="11" cy="11" r="6.5"/>
 <circle class="st1" cx="11" cy="11" r="4.3"/>
 <circle class="st0" cx="11" cy="11" r="2.2"/>
-<ellipse class="st0" cx="15.5" cy="8.1" rx="0" ry="0.2"/>
+<ellipse class="st2" cx="15.5" cy="8.1" rx="0" ry="0.2"/>
 </svg>

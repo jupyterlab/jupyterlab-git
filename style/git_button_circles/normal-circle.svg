@@ -3,7 +3,7 @@
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 22 22" style="enable-background:new 0 0 22 22;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#434343;}
+	.st0{fill:#0A0A0A;}
 	.st1{fill:#E0E0E0;}
 </style>
 <title>head-circle</title>
@@ -13,5 +13,4 @@
 		c-4.9,0-8.8,3.9-8.8,8.8s3.9,8.8,8.8,8.8s8.8-3.9,8.8-8.8S15.9,2.2,11,2.2L11,2.2z"/>
 </g>
 <circle class="st0" cx="11" cy="11" r="6.5"/>
-<circle class="st0" cx="11" cy="11" r="2.2"/>
 </svg>
