@@ -1,3 +1,4 @@
+@import './variables.css';
 
 /*-----------------------------------------------------------------------------
 | Variables
@@ -494,7 +495,7 @@ input[type=text]:focus {
 }
 
 .jp-Git-unstaged-header-label {
-  font-size: var(--jp-ui-font-size1);
+  font-size: var(--jp-ui-font-size);
   flex: 1 1 auto;
   margin-right: 4px;
   padding-left: 4px;
@@ -531,7 +532,7 @@ input[type=text]:focus {
 }
 
 .jp-Git-untracked-header-label {
-  font-size: var(--jp-ui-font-size1);
+  font-size: var(--jp-ui-font-size);
   flex: 1 1 auto;
   margin-right: 4px;
   padding-left: 4px;
@@ -558,61 +559,42 @@ input[type=text]:focus {
 /*-----------------------------------------------------------------------------
 | Git-button (for add, reset, discard)
 |----------------------------------------------------------------------------*/
-.jp-Git-button-add.jp-mod-styled{
+.jp-Git-button {
   margin: 0px 4px;
-  color: var(--jp-warn-color1);
   font-weight: 600;
   background-color: transparent;
   height: var(--jp-private-running-shutdown-button-height);
   line-height: var(--jp-private-running-shutdown-button-height);
   transition: background-color 0.1s ease;
   border-radius: 2px;
+  background-size: 16px;
+  background-position: center;
+  background-repeat: no-repeat;
 }
-.jp-Git-button-add.jp-mod-styled:hover {
+
+
+.jp-Git-button:hover {
   background-color: rgba(153,153,153,.1);
 }
-.jp-Git-button-add.jp-mod-styled:focus {
+
+
+.jp-Git-button:focus {
   border: none;
   box-shadow: none;
   background-color: rgba(153,153,153,.2);
 }
 
-.jp-Git-button-reset.jp-mod-styled{
-  margin: 0px 4px;
-  color: var(--jp-warn-color1);
-  font-weight: 400;
-  background-color: transparent;
-  height: var(--jp-private-running-shutdown-button-height);
-  line-height: var(--jp-private-running-shutdown-button-height);
-  transition: background-color 0.1s ease;
-  border-radius: 2px;
-}
-.jp-Git-button-reset.jp-mod-styled:hover {
-  background-color: rgba(153,153,153,.1);
-}
-.jp-Git-button-reset.jp-mod-styled:focus {
-  border: none;
-  box-shadow: none;
-  background-color: rgba(153,153,153,.2);
+
+.jp-Git-button-add {
+  background-image: var(--jp-Git-icon-add);
 }
 
-.jp-Git-button-discard.jp-mod-styled{
-  margin: 0px 4px;
-  color: var(--jp-warn-color1);
-  font-weight: 400;
-  background-color: transparent;
-  height: var(--jp-private-running-shutdown-button-height);
-  line-height: var(--jp-private-running-shutdown-button-height);
-  transition: background-color 0.1s ease;
-  border-radius: 2px;
+.jp-Git-button-reset {
+  background-image: var(--jp-Git-icon-reset);
 }
-.jp-Git-button-discard.jp-mod-styled:hover {
-  background-color: rgba(153,153,153,.1);
-}
-.jp-Git-button-discard.jp-mod-styled:focus {
-  border: none;
-  box-shadow: none;
-  background-color: rgba(153,153,153,.2);
+
+.jp-Git-button-track {
+  background-image: var(--jp-Git-icon-track);
 }
 
 :root {

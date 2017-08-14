@@ -1,0 +1,10 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+:root {
+    --jp-Git-icon-add: url('./git_button_circles/add.svg');
+    --jp-Git-icon-track: url('./git_button_circles/track.svg');
+    --jp-Git-icon-refresh: url('./git_button_circles/reset.svg');
+}
