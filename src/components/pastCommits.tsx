@@ -98,7 +98,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
         <button className='jp-Git-timeline-arrow-left' onClick={()=>this.show_left()}> {'\u276e'} </button>
         <div className='jp-Git-timeline-container' ref='past_commits_container'> 
             <button className='jp-Git-mod-current' onDoubleClick={()=>this.props.show_current_work(true)}>
-               CUR
+             CUR
             </button>         
             {this.props.past_commits.map((dj, dj_index)=>
               <span className='jp-Git-mod-container' key={dj_index} onDoubleClick={()=>{this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), this.props.show_current_work(false)}}>---------
