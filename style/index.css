@@ -224,20 +224,22 @@ jp-Git-timeline-arrow-left:active {
   box-shadow: none;
   border-radius: 50%;
   border: none;
+  outline: none !important;
   z-index: 1; /* raise overlapping border */
 }
 .jp-Git-mod-current:hover {
-  background-color: var(--jp-layout-color0);
+  background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
   z-index: 1; /* raise overlapping border */
+  outline: none !important;
 }
 .jp-Git-mod-current:selected {
-
   background-image: url(git_button_circles/edit-circle-selected.svg);
-  border: none;
-  background-color: var(--jp-toolbar-active-background);
+  background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
+  border: none;
+  outline: none !important;
 }
 
 .jp-Git-mod-container{
@@ -264,19 +266,21 @@ jp-Git-timeline-arrow-left:active {
   border-radius: 50%;
   border:none;
   z-index: 1; /* raise overlapping border */
+  outline: none !important;
 }
 .jp-Git-mod-pastCommit:hover {
-  background-color: var(--jp-layout-color0);
+  background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
   z-index: 1; /* raise overlapping border */
 }
 .jp-Git-mod-pastCommit:active {
+  background-color: rgba(53,53,153,.1);
   border: none;
-  background-color: var(--jp-toolbar-active-background);
   box-shadow: var(--jp-toolbar-box-shadow);
 }
 .jp-Git-mod-pastCommit:selected {
+  background-color: rgba(53,53,153,.1);
   background-image: url(git_button_circles/normal-circle.svg);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
@@ -577,6 +581,7 @@ input[type=text]:focus {
 
 .jp-Git-button:hover {
   background-color: none;
+  outline: none;
 }
 
 

@@ -4,15 +4,11 @@
 	 viewBox="0 0 22 22" style="enable-background:new 0 0 22 22;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:#0A0A0A;}
-	.st1{fill:#4CAF50;}
-	.st2{fill:#434343;}
+	.st1{fill:#434343;}
+	.st2{fill:none;stroke:#4CAF50;stroke-width:1.5;stroke-miterlimit:10;}
 </style>
 <title>head-circle</title>
 <circle class="st0" cx="11" cy="11" r="11"/>
-<g>
-	<path class="st1" d="M11,5.2c3.2,0,5.8,2.6,5.8,5.8s-2.6,5.8-5.8,5.8S5.2,14.2,5.2,11S7.8,5.2,11,5.2 M11,2.2
-		c-4.9,0-8.8,3.9-8.8,8.8s3.9,8.8,8.8,8.8s8.8-3.9,8.8-8.8S15.9,2.2,11,2.2L11,2.2z"/>
-</g>
-<circle class="st0" cx="11" cy="11" r="6.5"/>
-<ellipse class="st2" cx="15.5" cy="8.1" rx="0" ry="0.2"/>
+<ellipse class="st1" cx="15.5" cy="8.1" rx="0" ry="0.2"/>
+<circle class="st2" cx="11" cy="11" r="8.8"/>
 </svg>
