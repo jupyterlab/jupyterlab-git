@@ -134,34 +134,31 @@ background-image: var(--jp-icon-refresh-selected);
   background-color: var(--jp-ui-font-color1);
   margin: 0;
   padding: 0;
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: row;
+  height: 70px;
+  position: relative;
 }
 
 .jp-Git-timeline-arrow-right {
-  flex: 1 1 auto;
   height: 70px;
   width:30px;
-  background: var(--jp-ui-font-color1);
   background-image: url(git_button_circles/fade-right.svg);
-  display: inline-block;
+  background-color: var(--jp-ui-font-color3);
+  display: block;
   top:0;
   right:0;
   z-index: 20;
   vertical-align: middle;
   background-repeat: no-repeat;
-  text-align: center;
   border:none;
   outline: none;
+  position: absolute;
 }
 
 .jp-Git-timeline-arrow-left {
-  flex: 1 1 auto;
   height: 70px;
   width:30px;
-  background: var(--jp-ui-font-color1);
   background-image: url(git_button_circles/fade-left.svg);
+  background-color: var(--jp-ui-font-color3);
   display: inline-block;
   top:0;
   right:0;
@@ -171,6 +168,8 @@ background-image: var(--jp-icon-refresh-selected);
   text-align: center;
   border:none;
   outline:none;
+  position: absolute;
+  left: 0;
 }
 
 .jp-Git-timeline-arrow-right:hover{
@@ -202,13 +201,15 @@ jp-Git-timeline-arrow-left:active {
 
 .jp-Git-timeline-container {
   background-color: var(--jp-ui-font-color1);
-  max-width: 100%;
+  width: 100%;
   margin: 0;
   padding-top: 20px;
   overflow: hidden;
   white-space: nowrap;
   direction: rtl;
   height: 50px;
+  z-index: 0;
+  position: absolute;
 }
 
 /*-----------------------------------------------------------------------------
@@ -535,7 +536,7 @@ input[type=text]:focus {
 .jp-Git-unstaged {
   flex: 0 0 auto;
   margin: 4px 0px;
-  padding: 4px 12px;
+  padding: 4px 1px 4px 12px;
   font-weight: 600;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
@@ -572,7 +573,7 @@ input[type=text]:focus {
 .jp-Git-untracked {
   flex: 0 0 auto;
   margin: 4px 0px;
-  padding: 4px 12px;
+  padding: 4px 1px 4px 12px;
   font-weight: 600;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
@@ -637,14 +638,17 @@ input[type=text]:focus {
 
 .jp-Git-button-add {
   background-image: var(--jp-Git-icon-add);
+  float: right;
 }
 
 .jp-Git-button-reset {
   background-image: var(--jp-Git-icon-reset);
+  float: right;
 }
 
 .jp-Git-button-track {
   background-image: var(--jp-Git-icon-track);
+  float: right;
 }
 
 :root {

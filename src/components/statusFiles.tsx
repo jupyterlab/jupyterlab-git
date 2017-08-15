@@ -184,8 +184,8 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
                     <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
                     <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.to,this.props.app)}>{file.to}[{file.y}]</span>
-                    <button className= {`jp-Git-button ${GIT_BUTTON_ADD}`} title='Stage this change' onClick={()=>add_UnstagedNode(file.to, this.props.top_repo_path, this.props.refresh)}></button>
                     <button className= {`jp-Git-button ${GIT_BUTTON_RESET}`} title='Discard this change' onClick={()=>discard_UnstagedNode(file.to, this.props.top_repo_path, this.props.refresh)}></button>
+                    <button className= {`jp-Git-button ${GIT_BUTTON_ADD}`} title='Stage this change' onClick={()=>add_UnstagedNode(file.to, this.props.top_repo_path, this.props.refresh)}></button>
                     </li>
                 )}
           </div>
@@ -199,7 +199,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
                     <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
                     <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.to,this.props.app)}>{file.to}</span>
-                    <button className= {`jp-Git-button ${GIT_BUTTON_ADD}`} title='Track this file' onClick={()=>add_UntrackedNode(file.to, this.props.top_repo_path, this.props.refresh)}></button>
+                    <button className= {`jp-Git-button ${GIT_BUTTON_TRACK}`} title='Track this file' onClick={()=>add_UntrackedNode(file.to, this.props.top_repo_path, this.props.refresh)}></button>
                     </li>
                 )}
            </div>
