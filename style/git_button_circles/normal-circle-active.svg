@@ -4,9 +4,12 @@
 	 viewBox="0 0 22 22" style="enable-background:new 0 0 22 22;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:#0A0A0A;}
-	.st1{fill:none;stroke:#E0E0E0;stroke-width:1.5;stroke-miterlimit:10;}
+	.st1{fill:#E0E0E0;}
 </style>
 <title>head-circle</title>
 <circle class="st0" cx="11" cy="11" r="11"/>
-<circle class="st1" cx="11" cy="11" r="10.2"/>
+<g>
+	<path class="st1" d="M11,1.5c5.2,0,9.5,4.3,9.5,9.5s-4.3,9.5-9.5,9.5S1.5,16.2,1.5,11S5.8,1.5,11,1.5 M11,0C4.9,0,0,4.9,0,11
+		s4.9,11,11,11s11-4.9,11-11S17.1,0,11,0L11,0z"/>
+</g>
 </svg>

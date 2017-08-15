@@ -146,19 +146,20 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
     return (
       <div>
           <div className='jp-Git-staged'>
-            <form onKeyPress={this.onKeyPress}>
-            <label>
-              <input className='jp-Git-staged-commit-msg' type="text" disabled ={(this.props.staged_files).length==0} placeholder={(this.props.staged_files).length==0?'Stage your changes before commit':'Input message to commit staged changes'} value={this.state.commit_msg} onChange={this.handleChange}/>
-              </label>
-              <input className='jp-Git-staged-commit-button' type="button" title='Commit' value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>{commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh),this.init_input()}}/>
-              </form>
-            
               <span className='jp-git-staged-header-label'> Staged({(this.props.staged_files).length})</span>
               <ToggleDisplay show={this.props.staged_files.length>0}>
               <button className={`jp-Git-button ${GIT_BUTTON_RESET}`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}></button>
               </ToggleDisplay>
           </div>
           <div className= 'jp-Git-section-fileContainer'>
+
+             <form onKeyPress={this.onKeyPress}>
+            <label>
+              <input className='jp-Git-staged-commit-msg' type="text" disabled ={(this.props.staged_files).length==0} placeholder={(this.props.staged_files).length==0?'Stage your changes before commit':'Input message to commit staged changes'} value={this.state.commit_msg} onChange={this.handleChange}/>
+              </label>
+              <input className='jp-Git-staged-commit-button' type="button" title='Commit' value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>{commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh),this.init_input()}}/>
+              </form>
+
                 {this.props.staged_files.map((file, file_index)=>
                     <li className={GIT_FILE} key={file_index}>
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
