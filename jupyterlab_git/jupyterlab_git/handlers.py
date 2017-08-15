@@ -163,6 +163,14 @@ class Git_init_handler(Git_handler):
         my_output=self.git.init(current_path)
         self.finish(my_output)
 
+class Git_add_all_untracked_handler(Git_handler):
+    def post(self):
+        my_data = json.loads(self.request.body)
+        top_repo_path = my_data["top_repo_path"]
+        my_output=self.git.add_all_untracked(top_repo_path)
+        print(my_output)
+        self.finish(my_output)    
+
 def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/showtoplevel', Git_showtoplevel_handler)])
     web_app.add_handlers('.*', [('/git/showprefix', Git_showprefix_handler)])
@@ -179,3 +187,5 @@ def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/log_1', Git_log_1_handler)])
     web_app.add_handlers('.*', [('/git/init', Git_init_handler)])
     web_app.add_handlers('.*', [('/git/API', Git_API_handler)])
+    web_app.add_handlers('.*', [('/git/add_all_untracked', Git_add_all_untracked_handler)])
+    

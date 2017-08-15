@@ -331,6 +331,34 @@ export class Git {
 		return  HTTP_Git_Request('/git/add','POST',{"add_all": check , "filename":filename, "top_repo_path": path});
 	}
 
+	async add_all_untracked(path: string){
+		try{
+			var val =  await HTTP_Git_Request('/git/add_all_untracked','POST',{"top_repo_path": path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				let err = new GitErrorInfo();
+				err.code = val.data.code;
+				err.gitCommand = val.data.command;
+				err.message = 'Failed to execute git';
+				err.gitErrorCode = getGitErrorCode(val.data.message);
+				err.stderr = val.data.message;	
+				
+				console.log(err.message);
+				console.log(err.gitCommand);
+				console.log(err.gitErrorCode);
+
+				return err;			
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}		
+	}
+
+
 	async checkout(checkout_branch: boolean, new_check: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string):Promise<GitCheckoutResult|GitErrorInfo> {
 		try{
 			var val =  await HTTP_Git_Request('/git/checkout','POST',{"checkout_branch": checkout_branch, "new_check": new_check, "branchname":branchname, "checkout_all": checkout_all , "filename":filename, "top_repo_path": path});

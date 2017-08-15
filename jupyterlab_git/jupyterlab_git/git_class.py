@@ -155,6 +155,12 @@ class Git:
         my_output = subprocess.check_output(["git", "add", "-u"], cwd = top_repo_path)
         return my_output
 
+    def add_all_untracked(self, top_repo_path):
+        e = 'echo "a\n*\nq\n" | git add -i'
+        my_output = subprocess.call(e, shell=True, cwd = top_repo_path)
+        return {"result": my_output}
+
+
     def reset(self, filename, top_repo_path):
         my_output = subprocess.check_output(["git", "reset", filename], cwd = top_repo_path)
         return my_output

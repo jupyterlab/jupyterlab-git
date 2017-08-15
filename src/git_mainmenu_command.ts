@@ -26,6 +26,11 @@ import {
 import {
   Git
 } from './git'
+
+import {
+  GitSessions
+} from './components/components'
+
 /**
  * The command IDs used by the git plugin.
  */
@@ -84,7 +89,29 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
   }
 
   function pullReady(){
-    return false;
+    let st = false;
+    try{
+      let ll = app.shell.widgets('left');
+      let gp = ll.next();
+      while(gp.id!='jp-git-sessions'){
+        gp = ll.next();
+      }
+      st = (!(gp.isHidden))&&(gp as GitSessions).component.state.pull_enable;
+    }catch(err){}
+    return st;
+  }
+
+  function pushReady(){
+    let st = false;
+    try{
+      let ll = app.shell.widgets('left');
+      let gp = ll.next();
+      while(gp.id!='jp-git-sessions'){
+        gp = ll.next();
+      }
+      st = (!(gp.isHidden))&&(gp as GitSessions).component.state.push_enable;
+    }catch(err){}
+    return st;
   }
 
   // Add terminal commands.
@@ -237,7 +264,7 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
           }
     });
     },
-  //isEnabled: pushReady();
+    isEnabled: pushReady
   });
 
   commands.addCommand(CommandIDs.git_init, {

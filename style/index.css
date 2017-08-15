@@ -22,6 +22,18 @@
   background: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size0);
 }
+.jp-Git-container{
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.jp-Git-section-fileContainer{
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
 /*-----------------------------------------------------------------------------
 | Git-repo
 |----------------------------------------------------------------------------*/
@@ -185,12 +197,68 @@
 /*-----------------------------------------------------------------------------
 | Git-mod (elements in Git-timeline)
 |----------------------------------------------------------------------------*/
+.jp-Git-mod-container{
+  color: lightgray;
+  flex: 0 0 auto;
+  min-width: 50px;
+  min-height: 50px;
+  max-width: 50px;
+  max-height: 50px;
+}
 
+.jp-Git-mod{
+  color:lightgray;
+  width: 35px;
+  height: 35px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border-radius: 50%;
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1;
+}
+.jp-Git-mod:hover {
+  background-color: var(--jp-layout-color0);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: 1px solid var(--jp-toolbar-border-color);
+  z-index: 1;
+}
+.jp-Git-mod:selected {
+  border: 1px solid var(--jp-toolbar-border-color);
+  background-color: var(--jp-toolbar-active-background);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+
+.jp-Git-mod.jp-Edit {
+  background-image: url(git_button_circles/edit-circle.svg);
+}
+.jp-Git-mod.jp-Edit-selected {
+  background-image: url(git_button_circles/edit-circle-selected.svg);
+}
+
+.jp-Git-mod.jp-Head {
+  background-image: url(git_button_circles/head-circle.svg);
+}
+.jp-Git-mod.jp-Head-selected {
+  background-image: url(git_button_circles/head-circle-selected.svg);
+}
+
+.jp-Git-mod.jp-Normal {
+  background-image: url(git_button_circles/normal-circle.svg);
+}
+.jp-Git-mod.jp-Normal-selected {
+  background-image: url(git_button_circles/normal-circle-selected.svg);
+}
+
+
+
+
+/*
 .jp-Git-mod-current{
   color:lightgray;
   width: 35px;
   height: 35px;
-  /*background-color: rgba(53,53,153,.1);*/
   background-image: url(git_button_circles/edit-circle-selected.svg);
   background-repeat: no-repeat;
   background-position: center;
@@ -198,13 +266,13 @@
   box-shadow: var(--jp-toolbar-box-shadow);
   border-radius: 50%;
   border: 1px solid var(--jp-toolbar-border-color);
-  z-index: 1; /* raise overlapping border */
+  z-index: 1;
 }
 .jp-Git-mod-current:hover {
   background-color: var(--jp-layout-color0);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: 1px solid var(--jp-toolbar-border-color);
-  z-index: 1; /* raise overlapping border */
+  z-index: 1;
 }
 .jp-Git-mod-current:selected {
   border: 1px solid var(--jp-toolbar-border-color);
@@ -225,7 +293,6 @@
   color: lightgrey;
   width: 35px;
   height: 35px;
-  /*background-color: rgba(53,53,153,.1);*/
   background-image: url(git_button_circles/normal-circle-selected.svg);
   background-repeat: no-repeat;
   background-position: center;
@@ -233,20 +300,20 @@
   box-shadow: var(--jp-toolbar-box-shadow);
   border-radius: 50%;
   border: 1px solid var(--jp-toolbar-border-color);
-  z-index: 1; /* raise overlapping border */
+  z-index: 1; 
 }
 .jp-Git-mod-pastCommit:hover {
   background-color: var(--jp-layout-color0);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: 1px solid var(--jp-toolbar-border-color);
-  z-index: 1; /* raise overlapping border */
+  z-index: 1; 
 }
 .jp-Git-mod-pastCommit:active {
   border: 1px solid var(--jp-toolbar-border-color);
   background-color: var(--jp-toolbar-active-background);
   box-shadow: var(--jp-toolbar-box-shadow);
 }
-
+*/
 /*-----------------------------------------------------------------------------
 | Git-single-past-commit
 |----------------------------------------------------------------------------*/
@@ -314,6 +381,9 @@
   color: var(--jp-ui-font-color1);
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
 }
 
 .jp-Git-fileLabel {
@@ -431,7 +501,7 @@
   flex: 1 1 auto;
   margin: 0;
   padding: 0;
-  overflow: auto;
+  overflow: scroll;
 }
 
 /*-----------------------------------------------------------------------------
@@ -470,7 +540,7 @@
   flex: 1 1 auto;
   margin: 0;
   padding: 0;
-  overflow: auto;
+  overflow: scroll;
 }
 
 /*-----------------------------------------------------------------------------
@@ -509,7 +579,7 @@
   flex: 1 1 auto;
   margin: 0;
   padding: 0;
-  overflow: auto;
+  overflow: scroll;
 }
 
 /*-----------------------------------------------------------------------------

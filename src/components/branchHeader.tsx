@@ -12,10 +12,7 @@ import {
   Git
 } from '../git'
 
-
 import '../../style/index.css';
-
-
 
 export namespace BranchHeader {
   export
