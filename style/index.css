@@ -44,7 +44,7 @@
   background-size: 16px;
   background-repeat: no-repeat;
   background-position: center;
-  background-image: url(git_button_circles/directory.svg);
+  background-image: url(Images/directory.svg);
 }
 
 .jp-Git-repo-path {
@@ -141,7 +141,7 @@ background-image: var(--jp-icon-refresh-selected);
 .jp-Git-timeline-arrow-right {
   height: 70px;
   width:30px;
-  background-image: url(git_button_circles/fade-right.svg);
+  background-image: url(Images/fade-right.svg);
   background-color: var(--jp-ui-font-color9);
   display: block;
   top:0;
@@ -157,7 +157,7 @@ background-image: var(--jp-icon-refresh-selected);
 .jp-Git-timeline-arrow-left {
   height: 70px;
   width:30px;
-  background-image: url(git_button_circles/fade-left.svg);
+  background-image: url(Images/fade-left.svg);
   background-color: var(--jp-ui-font-color9);
   display: inline-block;
   top:0;
@@ -173,14 +173,14 @@ background-image: var(--jp-icon-refresh-selected);
 }
 
 .jp-Git-timeline-arrow-right:hover{
-  background-image: url(git_button_circles/right-arrow.svg);
+  background-image: url(Images/right-arrow.svg);
   background-color: none;
   z-index: 1; /* raise overlapping border */
 }
 
 
 .jp-Git-timeline-arrow-left:hover {
-  background-image: url(git_button_circles/left-arrow.svg);
+  background-image: url(Images/left-arrow.svg);
   background-color: none;
   z-index: 1; /* raise overlapping border */
 }
@@ -188,14 +188,14 @@ background-image: var(--jp-icon-refresh-selected);
 .jp-Git-timeline-arrow-right:active {
   border:0;
   background-color: none;
-  background-image: url(git_button_circles/right-arrow.svg);
+  background-image: url(Images/right-arrow.svg);
   outline:none;
 }
 
 jp-Git-timeline-arrow-left:active {
   border:0;
   background-color: none;
-  background-image: url(git_button_circles/left-arrow.svg);
+  background-image: url(Images/left-arrow.svg);
   outline:none;
 }
 
@@ -223,7 +223,7 @@ jp-Git-timeline-arrow-left:active {
   padding-bottom: 10px;
   background-color: rgba(53,53,153,.1);
   /*background-color: rgba(53,53,153,.1);*/
-  background-image: url(git_button_circles/edit-circle.svg);
+  background-image: url(Images/edit-circle.svg);
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100%;
@@ -234,6 +234,7 @@ jp-Git-timeline-arrow-left:active {
   z-index: 1; /* raise overlapping border */
 }
 .jp-Git-mod-current:hover {
+  color: white;
   background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
@@ -241,7 +242,7 @@ jp-Git-timeline-arrow-left:active {
   outline: none !important;
 }
 .jp-Git-mod-current:selected {
-  background-image: url(git_button_circles/edit-circle-selected.svg);
+  background-image: url(Images/edit-circle-selected.svg);
   background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
@@ -249,7 +250,7 @@ jp-Git-timeline-arrow-left:active {
 }
 
 .jp-Git-mod-current:selected:active {
-  background-image: url(git_button_circles/edit-circle-selected-active.svg);
+  background-image: url(Images/edit-circle-selected-active.svg);
   background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
@@ -257,7 +258,7 @@ jp-Git-timeline-arrow-left:active {
 }
 
 .jp-Git-mod-current:active {
-  background-image: url(git_button_circles/edit-circle-active.svg);
+  background-image: url(Images/edit-circle-active.svg);
   background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
@@ -279,7 +280,7 @@ jp-Git-timeline-arrow-left:active {
   width: 28px;
   height: 28px;
   /*background-color: rgba(53,53,153,.1);*/
-  background-image: url(git_button_circles/normal-circle-selected.svg);
+  background-image: url(Images/normal-circle-selected.svg);
   background-color: rgba(53,53,153,.1);
   background-repeat: no-repeat;
   background-position: center;
@@ -291,6 +292,7 @@ jp-Git-timeline-arrow-left:active {
   outline: none !important;
 }
 .jp-Git-mod-pastCommit:hover {
+  color: white;
   background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
@@ -299,7 +301,7 @@ jp-Git-timeline-arrow-left:active {
 
 .jp-Git-mod-pastCommit:selected {
   background-color: rgba(53,53,153,.1);
-  background-image: url(git_button_circles/normal-circle.svg);
+  background-image: url(Images/normal-circle.svg);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
   z-index: 1; /* raise overlapping border */
@@ -307,7 +309,7 @@ jp-Git-timeline-arrow-left:active {
 
 .jp-Git-mod-pastCommit:active {
   background-color: rgba(53,53,153,.1);
-  background-image: url(git_button_circles/normal-circle-active.svg);
+  background-image: url(Images/normal-circle-active.svg);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
   z-index: 1; /* raise overlapping border */
@@ -315,7 +317,7 @@ jp-Git-timeline-arrow-left:active {
 
 .jp-Git-mod-pastCommit:selected:active {
   background-color: rgba(53,53,153,.1);
-  background-image: url(git_button_circles/normal-circle-selected-active.svg);
+  background-image: url(Images/normal-circle-selected-active.svg);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
   z-index: 1; /* raise overlapping border */
@@ -479,10 +481,11 @@ input[type=text]:focus {
   background-color: var(--md-green-500);
   flex: 0 0 auto;
   height: 10px;
-  padding: 10px 12px;
+  padding: 10px 12px 10px 16px;
   font-weight: 400;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
+  font-size: 12px;
 }
 
 .jp-Git-staged-commit-msg{
@@ -536,10 +539,11 @@ input[type=text]:focus {
 .jp-Git-unstaged {
   flex: 0 0 auto;
   margin: 4px 0px;
-  padding: 4px 1px 4px 12px;
+  padding: 4px 1px 4px 13px;
   font-weight: 600;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
+  font-size: 12px;
 }
 
 .jp-Git-unstaged-header-label {
@@ -573,10 +577,11 @@ input[type=text]:focus {
 .jp-Git-untracked {
   flex: 0 0 auto;
   margin: 4px 0px;
-  padding: 4px 1px 4px 12px;
+  padding: 4px 1px 4px 13px;
   font-weight: 600;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
+  font-size: 12px;
 }
 
 .jp-Git-untracked-header-label {

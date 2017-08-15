@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-    --jp-Git-icon-add: url('./git_button_circles/add.svg');
-    --jp-Git-icon-track: url('./git_button_circles/track.svg');
-    --jp-Git-icon-reset: url('./git_button_circles/reset.svg');
+    --jp-Git-icon-add: url('./Images/add.svg');
+    --jp-Git-icon-track: url('./Images/track.svg');
+    --jp-Git-icon-reset: url('./Images/reset.svg');
 }
