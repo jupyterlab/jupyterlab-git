@@ -5,12 +5,13 @@
 <style type="text/css">
 	.st0{fill:#0A0A0A;}
 	.st1{fill:#434343;}
-	.st2{fill:none;stroke:#E0E0E0;stroke-width:1.5;stroke-miterlimit:10;}
+	.st2{fill:#4CAF50;}
 </style>
 <title>head-circle</title>
 <circle class="st0" cx="11" cy="11" r="11"/>
-<circle class="st0" cx="11" cy="11" r="2.2"/>
 <ellipse class="st1" cx="15.5" cy="8.1" rx="0" ry="0.2"/>
-<circle class="st2" cx="11" cy="11" r="8.8"/>
-<circle class="st2" cx="11" cy="11" r="5.6"/>
+<g>
+	<path class="st2" d="M11,1.5c5.2,0,9.5,4.3,9.5,9.5s-4.3,9.5-9.5,9.5S1.5,16.2,1.5,11S5.8,1.5,11,1.5 M11,0C4.9,0,0,4.9,0,11
+		s4.9,11,11,11s11-4.9,11-11S17.1,0,11,0L11,0z"/>
+</g>
 </svg>
