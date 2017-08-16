@@ -97,7 +97,7 @@ class Git:
             line_array = my_output.decode('utf-8').splitlines()
             for line in line_array:
                 linesplit = line.split()
-                result.append({'insertions':linesplit[0], 'deletions': linesplit[1],'filename':linesplit[2]})
+                result.append({'insINSrtions':linesplit[0], 'deletions': linesplit[1],'filename':linesplit[2]})
             return {"code": p.returncode, "result":result}
         else:
             return {"code":p.returncode, "message":my_error.decode('utf-8')}
