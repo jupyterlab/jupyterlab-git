@@ -700,14 +700,27 @@ input[type=text]:focus {
 /*-----------------------------------------------------------------------------
 | Git-Icon
 |----------------------------------------------------------------------------*/
-.jp-Git-icon-addition{
-  background-image: var(--jp-Git-icon-addition);
+.jp-Git-icon-insertion, .jp-Git-icon-deletion {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 11px;
+  float: right;
+}
+
+.jp-Git-icon-insertion{
+  background-image: var(--jp-Git-icon-insertion);
   }
 
 .jp-Git-icon-deletion{
     background-image: var(--jp-Git-icon-deletion);
     }
 
+.jp-Git-modNumber{
+  float: right;
+}
 
 :root {
   --jp-private-tab-manager-active-top-border: 2px;

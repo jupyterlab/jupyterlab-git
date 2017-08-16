@@ -188,9 +188,11 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
           {this.props.list.map((mf, mf_index)=>
             <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} />
-              <span className='jp-Git-singlePastCommitDetail-file-path' onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} (+){mf.insertion}, (-){mf.deletion} 
-              <span className='jp-Git-icon-addition'/>
-              <span className='jp-Git-icon-deletion'/>
+              <span className='jp-Git-singlePastCommitDetail-file-path' onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} 
+                <span className="jp-Git-modNumber"> {mf.deletion}</span>   
+                <span className='jp-Git-icon-deletion'></span>   
+                <span className="jp-Git-modNumber">{mf.insertion}</span>
+                <span className='jp-Git-icon-insertion'></span>
               </span>
             </li>
           )}
