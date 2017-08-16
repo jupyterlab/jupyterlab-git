@@ -377,7 +377,7 @@ jp-Git-timeline-arrow-left:active {
 .jp-Git-singlePastCommit-label-commit-message {
   clear:left;
   padding: 0 10px 10px 10px;
-  font-style: italic;
+  color:
 }
 
 .jp-Git-singlePastCommit-label-summary {
