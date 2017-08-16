@@ -37,6 +37,9 @@ import {
    Menu
 } from '@phosphor/widgets';
 
+
+
+
 /**
  * The default running sessions extension.
  */
@@ -73,6 +76,8 @@ function activate(app: JupyterLab, services: ServiceManager, fb:FileBrowser, mai
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(git_plugin, { rank: 200 });
 
+
+
   addCommands(app, services);
   let menu = new Menu({commands});
   let tutorial = new Menu({commands});
@@ -95,5 +100,6 @@ function activate(app: JupyterLab, services: ServiceManager, fb:FileBrowser, mai
     tutorial.addItem({command});
   });
   menu.addItem({type: 'submenu' , submenu: tutorial});
+
   mainMenu.addMenu(menu,{rank:60});
 }

@@ -1,6 +1,9 @@
 # jupyterlab-git
 
 JLG
+Pre-alpha version
+(not yet published on npm) 
+If you want to install& give it a try, clone the repo first & then use the commands below from the cloned directory..
 
 
 ## Prerequisites
@@ -31,10 +34,10 @@ jupyter lab build
 
 ## Installation and activation of Git handler
 
-Installation and activation for jupyterlab_git python handler package, do it inside jupyterlab-git directory.:
+Installation and activation for jupyterlab_git python handler package:
 
 ```bash
-pip install jupyterlab_git/
+pip install jupyterlab_git
 jupyter serverextension enable --py jupyterlab_git
 jupyter nbextension install --py jupyterlab_git
 ```

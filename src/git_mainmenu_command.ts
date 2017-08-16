@@ -26,6 +26,12 @@ import {
 import {
   Git
 } from './git'
+
+/*
+import {
+  newClosableIFrame
+}from './urls';
+*/
 /**
  * The command IDs used by the git plugin.
  */
@@ -57,7 +63,12 @@ export namespace CommandIDs {
   export
   const link4 = 'git:tutorial_link_4';
 
+
+
 };
+
+export 
+const urrll = 'https://www.google.com';
 /**
  * Add the commands for the git-plugin.
  */
@@ -292,6 +303,10 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
     execute: () => {
       console.log("Git Tutorial link 4");
       window.open("https://www.google.com");
+      //const url = "https://www.google.com";
+      //let iframe = newClosableIFrame(url,'link20');
+      //app.shell.addToMainArea(iframe);
+      //app.shell.activateById(iframe.id);
     },
   });
 
