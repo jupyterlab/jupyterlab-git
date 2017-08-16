@@ -87,7 +87,7 @@ export interface GitCheckoutResult {
 }
 export interface GitBranchResult {
 	code: number;
-	repos?: [
+	branches?: [
             {
                 current: boolean,
                 remote: boolean,
@@ -116,10 +116,6 @@ export interface SingleCommitInfo {
     author: string,
     date: string,
 	commit_msg: string,
-	modified_file_note?: string,
-	modified_files?: [{
-		modified_file_path: string,
-	}]
 }
 
 export interface CommitModifiedFile{

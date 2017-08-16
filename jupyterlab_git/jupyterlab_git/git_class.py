@@ -125,7 +125,7 @@ class Git:
                     result.append({'current':current,'remote':remote,'name':line[0][10:],'tag':tag})
                 else:
                     result.append({'current':current,'remote':remote,'name':line_full[2:],'tag':tag})
-            return {"code": p.returncode, "repos":result}
+            return {"code": p.returncode, "branches":result}
         else:
             return {"code": p.returncode, 'command':"git branch -a", "message": my_error.decode('utf-8')}
 
@@ -202,7 +202,7 @@ class Git:
         p = Popen(["git", "pull",origin,master,"--no-commit"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+curr_fb_path)
         my_output, my_error = p.communicate()
         if(p.returncode==0):
-            return {"code": p.returncode, "message": my_output.decode('utf-8')}
+            return {"code": p.returncode}
         else:
             return {"code": p.returncode, 'command':"git pull "+origin+' '+master+" --no-commit", "message": my_error.decode('utf-8')}
 
@@ -210,7 +210,7 @@ class Git:
         p = Popen(["git", "push",origin,master], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+curr_fb_path)
         my_output, my_error = p.communicate()
         if(p.returncode==0):
-            return {"code": p.returncode, "message": my_output.decode('utf-8')}
+            return {"code": p.returncode}
         else:
             return {"code": p.returncode, 'command':"git push "+origin+' '+master, "message": my_error.decode('utf-8')}
 

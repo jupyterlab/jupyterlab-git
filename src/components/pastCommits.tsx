@@ -27,6 +27,7 @@ export namespace PastCommits {
   export
   interface IState {
     data: any;
+    info:string;
     single_num:string;
     single_data:any;
     single_data_filelist:any;
@@ -56,7 +57,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
 
   constructor(props: PastCommits.IProps) {
     super(props);
-    this.state = {data: props.past_commits, single_num:'', single_data:'', single_data_filelist:[], show_left_arrow:true, show_right_arrow:false}
+    this.state = {data: props.past_commits, info:'', single_num:'', single_data:'', single_data_filelist:[], show_left_arrow:true, show_right_arrow:false}
   }
 
   show_left(){
@@ -89,12 +90,10 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
 
   
   async show_past_commit_work(dj:SingleCommitInfo, dj_index:number, path:string){
-    let d_j = dj;
     let git_temp = new Git();
     let response = await git_temp.log_1(dj.commit, path);
     if(response.code==0){
-      d_j.modified_file_note = response.modified_file_note;
-      this.setState({single_data:dj, single_num: dj_index+' commit(s) before',single_data_filelist:response.modified_files})
+      this.setState({info:response.modified_file_note, single_data:dj, single_num: dj_index+' commit(s) before',single_data_filelist:response.modified_files})
     }
   }
 
@@ -138,7 +137,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
 
       </div>
           <ToggleDisplay show={this.props.show_index!=-1}>
-          <SinglePastCommitInfo num={this.state.single_num} data={this.state.single_data} list={this.state.single_data_filelist} app={this.props.app}/>
+          <SinglePastCommitInfo num={this.state.single_num} data={this.state.single_data}  info={this.state.info} list={this.state.single_data_filelist} app={this.props.app}/>
           </ToggleDisplay>
 
 
@@ -191,6 +190,7 @@ export namespace SinglePastCommitInfo {
   interface IProps {
     num: string;
     data:SingleCommitInfo;
+    info:string;
     list:[CommitModifiedFile];
     app: JupyterLab;
   }
@@ -208,7 +208,7 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
         <div className='jp-Git-singlePastCommit-label'> author: {this.props.data.author}</div>
         <div className='jp-Git-singlePastCommit-label'> date: {this.props.data.date}</div>
         <div className='jp-Git-singlePastCommit-label'> commit_msg: {this.props.data.commit_msg}</div>
-        <div className='jp-Git-singlePastCommit-label'> summary: {this.props.data.modified_file_note}</div>
+        <div className='jp-Git-singlePastCommit-label'> summary: {this.props.info}</div>
       </div>
       <div className='jp-Git-singlePastCommitDetail'>
           {this.props.list.map((mf, mf_index)=>

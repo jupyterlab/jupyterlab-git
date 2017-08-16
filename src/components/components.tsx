@@ -285,7 +285,7 @@ namespace GitSessionNode {
       let api_branch = (api_result as GitAPI).data.branch;
       let current_branch = 'master';
       if(api_branch.code==0){
-        let data_json = (api_branch as GitBranchResult).repos;
+        let data_json = (api_branch as GitBranchResult).branches;
         for (var i=0; i<data_json.length; i++){
           if(data_json[i].current[0]){
             current_branch=data_json[i].name;
@@ -349,7 +349,7 @@ namespace GitSessionNode {
       }
             
       this.setState({current_fb_path:(fb as any).model.path, top_repo_path: (api_showtoplevel as GitShowTopLevelResult).top_repo_path, show:true, 
-        branches: (api_branch as GitBranchResult).repos, current_branch: current_branch, disable_switch_branch: disable_switch_branch, pull_enable:pull_enable, push_enable:push_enable,
+        branches: (api_branch as GitBranchResult).branches, current_branch: current_branch, disable_switch_branch: disable_switch_branch, pull_enable:pull_enable, push_enable:push_enable,
         past_commits: past_commits, in_new_repo: in_new_repo, show_index:show_index,
         staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
     }

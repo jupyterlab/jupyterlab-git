@@ -1,30 +1,56 @@
-# jupyterlab-git REST API
-pre-alpha version
-1. URLS
-2. HTTP verbs (GET, POST, etc): Only POST can send data to server through Jupyterlab's ServerConnection, so, all commands use POST
+# Specification of jupyterlab-git REST API
+This part of the REST API contains calls for working with the git-plugin of jupyterlab. 
+Contents for each call include:
+1. URLS: Only POST can send data to server through Jupyterlab's ServerConnection, so, all commands use POST
 3. Request JSON
 4. Reply JSON
 5. How errors are handled (HTTP error codes, error JSON)
 
-## git api (not a real command)
-```bash
-URL:  
+## Get all information of current repo
+Request with a 'current_path', if it's a git repo, return all the git repo information with a zero 'code', if not, return error message with a non-zero 'code'.
+This request consists 4 seperate subprocess executions on server side (showtoplevel, branch, log, status) and may fail individually, so each part has its own 'code' to indicate execution status(zero for success, none-zero for failure)   
+URL:
+```bash 
     POST /git/API
+```
 Request JSON:
-    {
+```bash
+    [
+        {
         "current_path": "current/path/in/filebrowser/widget"
-    }
+        }
+    ]
+```
 Reply JSON:
+```bash
     {
         "code": 0,
     	"data":{
-		    "showtoplevel": GitShowTopLevelResult;
-		    "branch"?: GitBranchResult;
-		    "log"?: GitLogResult;
-		    "status"?: GitStatusResult;
+		    "showtoplevel": {'code': 0, 'top_repo_path': "/absolute/path/to/root/of/repo"};
+		    "branch"?: {
+                'code': 0,
+                'repos': [
+                    {'current':false,'remote':true,'name':'branch/name','tag':'branch/tag'}
+                ]
+            }
+		    "log"?: {
+                'code': 0,
+                'commits': [
+                    {'commit':line_array[i], 'author': line_array[i+1],'date':line_array[i+2],'commit_msg':line_array[i+3] }
+                ]
+            }
+		        "status"?: {
+                    'code': 0,
+                    'files': {
+                        "x": "CHECK/bit/X",
+                        "y": "CHECK/bit/Y",
+                        "to": "file/or/folder/path",
+                        "from": "original/path/for/copied/file/or/folder"
+                    }
+            }
 	    }
     }
-    }
+```
 Error JSON:
     {
         "code": 10000,
