@@ -329,9 +329,10 @@ jp-Git-timeline-arrow-left:active {
 
 .jp-Git-singlePastCommit {
   flex: 0 0 auto;
-  margin: 4px 0px;
-  padding: 4px 12px;
-  font-weight: 600;
+  margin:0;
+  width: 100%;
+  padding: 0;
+  font-size: 12px;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
 }
@@ -347,6 +348,46 @@ jp-Git-timeline-arrow-left:active {
   border-radius: 2px;
   transition: background-color 0.1s ease;
 }
+
+.jp-Git-singlePastCommit-header {
+  background-color: var(--md-green-500);
+  color: white;
+  display: inline-block;
+  width: 100%;
+}
+
+.jp-Git-singlePastCommit-label-commit-number{
+  width: 50%;
+  overflow: hidden;
+  float: left;
+  width: 30%;
+  padding: 10px;
+}
+
+.jp-Git-singlePastCommit-label-author{
+  float: left;
+  padding: 10px;
+}
+
+.jp-Git-singlePastCommit-label-date {
+  float: right;
+  padding: 10px;
+}
+
+.jp-Git-singlePastCommit-label-commit-message {
+  clear:left;
+  padding: 0 10px 10px 10px;
+  font-style: italic;
+}
+
+.jp-Git-singlePastCommit-label-summary {
+  width: 50%;
+  padding: 10px;
+  float: right;
+  font-weight: 400;
+  text-align: right;
+}
+
 
 .jp-Git-singlePastCommitDetail {
   flex: 1 1 auto;
@@ -655,6 +696,18 @@ input[type=text]:focus {
   background-image: var(--jp-Git-icon-track);
   float: right;
 }
+
+/*-----------------------------------------------------------------------------
+| Git-Icon
+|----------------------------------------------------------------------------*/
+.jp-Git-icon-addition{
+  background-image: var(--jp-Git-icon-addition);
+  }
+
+.jp-Git-icon-deletion{
+    background-image: var(--jp-Git-icon-deletion);
+    }
+
 
 :root {
   --jp-private-tab-manager-active-top-border: 2px;

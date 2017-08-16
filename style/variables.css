@@ -7,4 +7,7 @@
     --jp-Git-icon-add: url('./Images/add.svg');
     --jp-Git-icon-track: url('./Images/track.svg');
     --jp-Git-icon-reset: url('./Images/reset.svg');
+    --jp-Git-icon-addition: url('./Images/addition.svg');
+    --jp-Git-icon-deletion: url('./Images/deletion.svg');
+    --jp-Git-author-icon: url('./Images/author.svg');
 }

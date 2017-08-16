@@ -175,18 +175,22 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
     return (
       <div >
       <div className='jp-Git-singlePastCommit'>
-        <div className='jp-Git-singlePastCommit-label'> No. {this.props.num}</div>
-        <div className='jp-Git-singlePastCommit-label'> commit: {this.props.data.commit}</div>
-        <div className='jp-Git-singlePastCommit-label'> author: {this.props.data.author}</div>
-        <div className='jp-Git-singlePastCommit-label'> date: {this.props.data.date}</div>
-        <div className='jp-Git-singlePastCommit-label'> commit_msg: {this.props.data.commit_msg}</div>
-        <div className='jp-Git-singlePastCommit-label'> summary: {this.props.data.modified_file_note}</div>
+        <div className='jp-Git-singlePastCommit-header'>
+          <span className='jp-Git-singlePastCommit-label-commit-number'> #{this.props.data.commit}</span>
+          <span className='jp-Git-singlePastCommit-label-summary'> {this.props.data.modified_file_note}</span>
+        </div>
+        <div className='jp-Git-singlePastCommit-label-author'> <span className="jp-Git-author-icon"/> {this.props.data.author}</div>
+        <div className='jp-Git-singlePastCommit-label-date'> {this.props.data.date}</div>
+        <div className='jp-Git-singlePastCommit-label-commit-message'> "<span className="jp-past-commit-message"/>{this.props.data.commit_msg}"</div>
+
       </div>
       <div className='jp-Git-singlePastCommitDetail'>
           {this.props.list.map((mf, mf_index)=>
             <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} />
-              <span className='jp-Git-singlePastCommitDetail-file-path' onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} :{mf.insertion}(+), {mf.deletion}(-) </span>
+              <span className='jp-Git-singlePastCommitDetail-file-path' onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} (+)<img className='jp-Git-icon-addition'/>{mf.insertion}
+                , (-)<img className='jp-Git-icon-deletion'/>{mf.deletion} 
+              </span>
             </li>
           )}
       </div>
