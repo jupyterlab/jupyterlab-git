@@ -7,7 +7,7 @@ pre-alpha version
 5. How errors are handled (HTTP error codes, error JSON)
 
 ## git api (not a real command)
-
+```bash
 URL:  
     POST /git/API
 Request JSON:
@@ -17,7 +17,7 @@ Request JSON:
 Reply JSON:
     {
         "code": 0,
-    	"data"?:{
+    	"data":{
 		    "showtoplevel": GitShowTopLevelResult;
 		    "branch"?: GitBranchResult;
 		    "log"?: GitLogResult;
@@ -30,10 +30,10 @@ Error JSON:
         "code": 10000,
         "message": "Not in a Git repository"
     }
-
+```
 
 ## git rev-parse --show-toplevel
-
+```bash
 URL:  
     POST /git/showtoplevel
 Request JSON:
@@ -50,10 +50,10 @@ Error JSON:
         "code": 10000,
         "message": "Not in a Git repository"
     }
-
+```
 
 ## git status
-
+```bash
 URL:  
     POST /git/status
 Request JSON:
@@ -77,9 +77,9 @@ Error JSON:
         "code": 10001,
         "message": "Not in a Git repository"
     }
-
+```
 ## git add
-
+```bash
 URL:  
     POST /git/add
 Request JSON:
@@ -97,9 +97,9 @@ Error JSON:
         "code": 10002,
         "message": "File not found"
     }
-
+```
 ## git checkout
-
+```bash
 URL:  
     POST /git/checkout
 Request JSON:
@@ -117,9 +117,9 @@ Error JSON:
         "code": 10003,
         "message": "File not found"
     }
-
+```
 ## git commit
-
+```bash
 URL:  
     POST /git/commit
 Request JSON:
@@ -136,9 +136,9 @@ Error JSON:
         "code": 10004,
         "message": "Commit failed"
     }
-
+```
 ## git reset
-
+```bash
 URL:  
     POST /git/commit
 Request JSON:
@@ -156,4 +156,4 @@ Error JSON:
         "code": 10005,
         "message": "File not found"
     }
-
+```
