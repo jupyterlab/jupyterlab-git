@@ -177,44 +177,47 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
     caption: 'Incorporates changes from a remote repository into the current branch',
     execute: args => {
       let cur_fb_path = find_cur_fb_path();
-      let br1 = new Widget({node: document.createElement("input")});
-      let br2 = new Widget({node: document.createElement("input")});
+      let input_block = document.createElement("div");
+      let remote_repo_prompt = document.createElement("li");
+      remote_repo_prompt.textContent = 'Enter the name of remote repository to Pull from';
+      let remote_repo_input = document.createElement("input");
+      let branch_prompt = document.createElement("li")
+      branch_prompt.textContent = 'Enter the name of branch to Pull into';
+      let branch_input = document.createElement("input");
+
+      input_block.appendChild(remote_repo_prompt);
+      input_block.appendChild(remote_repo_input);
+      input_block.appendChild(branch_prompt);
+      input_block.appendChild(branch_input);      
+
+      let br = new Widget({node:input_block});
       showDialog({
-       title: "Enter Branch name you would like to Pull from",
-       body:br1,
+       title: " Fetch from and integrate with a repo or branch",
+       body:br,
        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "OK"})]
       }).then(result => {
-          let msg1 = (br1.node as HTMLInputElement).value;
-          console.log(msg1);
-          if (result.button.accept && msg1 && msg1!=null) 
-          {
-            showDialog({
-              title: "Enter Branch name you would like to Pull into",
-              body:br2,
-              buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "Pull"})]
-             }).then(result => {
-                 let msg2 = (br2.node as HTMLInputElement).value;
-                 console.log(msg2);
-                 if (result.button.accept && msg2 && msg2!=null) 
-                 {  
-                  git_temp.pull(msg1,msg2,cur_fb_path); 
-                 }
-                 else{
+          let msg1 = remote_repo_input.value;
+          let msg2 = branch_input.value;
+          if (result.button.accept){ 
+            if(msg1 && msg1!=null&&msg2&&msg2!=null) {
+              git_temp.pull(msg1,msg2,cur_fb_path).then(response=>{
+                if(response.code!=0){
                   showDialog({
-                    title: "Oopss you can't leave a branch name empty",
-                    buttons: [Dialog.okButton({ label: "OK"})]
-                   })
+                    title: "Warning",
+                    body: response.message,
+                    buttons: [Dialog.warnButton({ label: "OK"})]
+                  })
                 }
-                  
-           });
+              }) 
+            }
+            else{
+              showDialog({
+                title: "Repo and branch name cannot be empty",
+                buttons: [Dialog.okButton({ label: "OK"})]
+              })
+            }
           }
-          else{
-            showDialog({
-              title: "Oopss you can't leave a branch name empty",
-              buttons: [Dialog.okButton({ label: "OK"})]
-            })
-          }
-    });
+      });
     },
     isEnabled: pullReady
   });
@@ -225,44 +228,47 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
     caption: 'Update remote refs along with associated objects',
     execute: () => {
       let cur_fb_path = find_cur_fb_path();
-      let br1 = new Widget({node: document.createElement("input")});
-      let br2 = new Widget({node: document.createElement("input")});
+      let input_block = document.createElement("div");
+      let remote_repo_prompt = document.createElement("li");
+      remote_repo_prompt.textContent = 'Enter the name of remote repository to Push into';
+      let remote_repo_input = document.createElement("input");
+      let branch_prompt = document.createElement("li")
+      branch_prompt.textContent = 'Enter the name of branch to Push from';
+      let branch_input = document.createElement("input");
+
+      input_block.appendChild(remote_repo_prompt);
+      input_block.appendChild(remote_repo_input);
+      input_block.appendChild(branch_prompt);
+      input_block.appendChild(branch_input);      
+
+      let br = new Widget({node:input_block});
       showDialog({
-       title: "Enter Branch name you would like to Push towards",
-       body:br1,
+       title: "Update remote refs along with associated objects",
+       body:br,
        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "OK"})]
       }).then(result => {
-          let msg1 = (br1.node as HTMLInputElement).value;
-          console.log(msg1);
-          if (result.button.accept && msg1 && msg1!=null) 
-          {
-            showDialog({
-              title: "Enter Branch name you would like to Push from",
-              body:br2,
-              buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "Push"})]
-             }).then(result => {
-                 let msg2 = (br2.node as HTMLInputElement).value;
-                 console.log(msg2);
-                 if (result.button.accept && msg2 && msg2!=null) 
-                 {  
-                  git_temp.push(msg1,msg2,cur_fb_path); 
-                 }
-                 else{
+          let msg1 = remote_repo_input.value;
+          let msg2 = branch_input.value;
+          if (result.button.accept){ 
+            if(msg1 && msg1!=null&&msg2&&msg2!=null) {
+              git_temp.push(msg1,msg2,cur_fb_path).then(response=>{
+                if(response.code!=0){
                   showDialog({
-                    title: "Oopss you can't leave a branch name empty",
-                    buttons: [Dialog.okButton({ label: "OK"})]
-                   })
+                    title: "Warning",
+                    body: response.message,
+                    buttons: [Dialog.warnButton({ label: "OK"})]
+                  })
                 }
-                  
-           });
+              }) 
+            }
+            else{
+              showDialog({
+                title: "Repo and branch name cannot be empty",
+                buttons: [Dialog.okButton({ label: "OK"})]
+              })
+            }
           }
-          else{
-            showDialog({
-              title: "Oopss you can't leave a branch name empty",
-              buttons: [Dialog.okButton({ label: "OK"})]
-            })
-          }
-    });
+      });
     },
     isEnabled: pushReady
   });

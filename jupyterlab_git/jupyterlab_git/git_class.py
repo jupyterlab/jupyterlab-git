@@ -199,14 +199,20 @@ class Git:
         return my_output
       
     def pull(self, origin, master,curr_fb_path):
-        my_output = subprocess.check_output(["git", "pull",origin,master,"--no-commit"], cwd = os.getcwd()+'/'+curr_fb_path)
-        print("Hi there! post extensions!!")
-        return my_output
+        p = Popen(["git", "pull",origin,master,"--no-commit"], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+curr_fb_path)
+        my_output, my_error = p.communicate()
+        if(p.returncode==0):
+            return {"code": p.returncode, "message": my_output.decode('utf-8')}
+        else:
+            return {"code": p.returncode, 'command':"git pull "+origin+' '+master+" --no-commit", "message": my_error.decode('utf-8')}
 
     def push(self, origin, master,curr_fb_path):
-        my_output = subprocess.check_output(["git", "push", origin,master], cwd = os.getcwd()+'/'+curr_fb_path)
-        print("Hi there! post extensions!!")
-        return my_output
+        p = Popen(["git", "push",origin,master], stdout=PIPE, stderr=PIPE, cwd = os.getcwd()+'/'+curr_fb_path)
+        my_output, my_error = p.communicate()
+        if(p.returncode==0):
+            return {"code": p.returncode, "message": my_output.decode('utf-8')}
+        else:
+            return {"code": p.returncode, 'command':"git push "+origin+' '+master, "message": my_error.decode('utf-8')}
 
     def init(self,current_path):
         my_output = subprocess.check_output(["git", "init"],cwd = os.getcwd()+'/'+current_path)

@@ -394,13 +394,59 @@ export class Git {
 		return HTTP_Git_Request('/git/reset','POST',{"reset_all": check, "filename":filename, "top_repo_path": path});
 	}
 
-	pull(origin: string, master: string, path:string) {
-		return HTTP_Git_Request('/git/pull', 'POST', {"origin": origin, "master":master,"curr_fb_path": path});	
+	async pull(origin: string, master: string, path:string) {
+		try{
+			var val = await HTTP_Git_Request('/git/pull', 'POST', {"origin": origin, "master":master,"curr_fb_path": path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				let err = new GitErrorInfo();
+				err.code = val.data.code;
+				err.gitCommand = val.data.command;
+				err.message = val.data.message;
+				err.gitErrorCode = getGitErrorCode(val.data.message);
+				err.stderr = val.data.message;	
+				
+				console.log(err.message);
+				console.log(err.gitCommand);
+				console.log(err.gitErrorCode);
+
+				return err;			
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}	
 	}
 
 
-	push(origin: string, master: string, path:string) {
- 		return HTTP_Git_Request('/git/push', 'POST', {"origin": origin, "master":master,"curr_fb_path": path});
+	async push(origin: string, master: string, path:string) {
+		try{
+			var val = await HTTP_Git_Request('/git/push', 'POST', {"origin": origin, "master":master,"curr_fb_path": path});
+			if (val.xhr.status !== 200) {
+          		console.log(val.xhr.status)
+        		throw ServerConnection.makeError(val);
+       	 	}
+			if(val.data.code!=0){
+				let err = new GitErrorInfo();
+				err.code = val.data.code;
+				err.gitCommand = val.data.command;
+				err.message = val.data.message;
+				err.gitErrorCode = getGitErrorCode(val.data.message);
+				err.stderr = val.data.message;	
+				
+				console.log(err.message);
+				console.log(err.gitCommand);
+				console.log(err.gitErrorCode);
+
+				return err;			
+			}
+			return val.data;
+		}catch(err){
+			throw ServerConnection.makeError(err);
+		}	
 	 }
 	
 	init(path:string){

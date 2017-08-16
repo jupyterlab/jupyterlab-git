@@ -144,7 +144,7 @@ class Git_pull_handler(Git_handler):
         curr_fb_path = my_data["curr_fb_path"]
         my_output = self.git.pull(origin,master,curr_fb_path)
         self.finish(my_output)
-        print("You Pulled")
+
 
 class Git_push_handler(Git_handler):
     def post(self):
@@ -154,7 +154,6 @@ class Git_push_handler(Git_handler):
         curr_fb_path = my_data["curr_fb_path"]
         my_output = self.git.push(origin,master,curr_fb_path)
         self.finish(my_output)
-        print("You Pushed")
 
 class Git_init_handler(Git_handler):
     def post(self):
