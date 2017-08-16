@@ -1,9 +1,8 @@
 # jupyterlab-git
 
-JLG
-Pre-alpha version
-(not yet published on npm) 
-If you want to install& give it a try, clone the repo first & then use the commands below from the cloned directory..
+Pre-alpha version.  
+(not yet published on npm).  
+If you want to install & give it a try, clone the repo first & then use the commands below from the cloned directory.
 
 
 ## Prerequisites
