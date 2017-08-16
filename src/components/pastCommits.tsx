@@ -179,7 +179,7 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
           <span className='jp-Git-singlePastCommit-label-commit-number'> #{this.props.data.commit}</span>
           <span className='jp-Git-singlePastCommit-label-summary'> {this.props.data.modified_file_note}</span>
         </div>
-        <div className='jp-Git-singlePastCommit-label-author'> <span className="jp-Git-author-icon"/> {this.props.data.author}</div>
+        <div className='jp-Git-singlePastCommit-label-author'> <span className="jp-Git-icon-author"/> {this.props.data.author}</div>
         <div className='jp-Git-singlePastCommit-label-date'> {this.props.data.date}</div>
         <div className='jp-Git-singlePastCommit-label-commit-message'> "<span className="jp-past-commit-message"/>{this.props.data.commit_msg}"</div>
 

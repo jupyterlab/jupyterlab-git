@@ -9,5 +9,6 @@
     --jp-Git-icon-reset: url('./Images/reset.svg');
     --jp-Git-icon-insertion: url('./Images/insertion.svg');
     --jp-Git-icon-deletion: url('./Images/deletion.svg');
-    --jp-Git-author-icon: url('./Images/author.svg');
+    --jp-Git-icon-author: url('./Images/author.svg');
+    --jp-Git-icon-branch: url('./Images/branch.svg')
 }

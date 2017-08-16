@@ -114,6 +114,16 @@ background-image: var(--jp-icon-refresh-selected);
     padding-right: 8px;
 }
 
+.jp-Git-icon-branch{
+    background-image: var(--jp-Git-icon-branch);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+    background-size:14px;
+    margin: 6px 10px -2px 0px;
+    background-repeat: no-repeat;
+}
+
 .jp-Git-branch-dropdown {
     flex: 0 0 auto;
     vertical-align: middle;
@@ -367,6 +377,13 @@ jp-Git-timeline-arrow-left:active {
 .jp-Git-singlePastCommit-label-author{
   float: left;
   padding: 10px;
+}
+
+.jp-Git-icon-author {
+  background-image: var(--jp-Git-icon-author);
+  display: inline-block;
+  height: 14px;
+  width: 14px;
 }
 
 .jp-Git-singlePastCommit-label-date {
@@ -708,6 +725,7 @@ input[type=text]:focus {
   background-repeat: no-repeat;
   background-size: 11px;
   float: right;
+  padding: 10px 5px 0px 0px;
 }
 
 .jp-Git-icon-insertion{
