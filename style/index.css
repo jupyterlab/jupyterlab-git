@@ -227,22 +227,27 @@ jp-Git-timeline-arrow-left:active {
 | Git-mod (elements in Git-timeline)
 |----------------------------------------------------------------------------*/
 
-.jp-Git-currentCommit-btn{
+.jp-Git-currentCommit-btn, .jp-Git-currentCommit-active {
+  position: relative;
   color:var(--jp-ui-font-color1);
   width: 28px;
   height: 28px;
   padding-bottom: 10px;
   background-color: rgba(53,53,153,.1);
   /*background-color: rgba(53,53,153,.1);*/
-  background-image: url(Images/edit-circle.svg);
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100%;
   box-shadow: none;
   border-radius: 50%;
-  border: none;
+  border: 2.7px dotted #e0e0e0;
   outline: none !important;
   z-index: 1; /* raise overlapping border */
+  top: -2.7px;
+}
+.jp-Git-currentCommit-active {
+  position: absolute;
+  top: 20px;
 }
 .jp-Git-currentCommit-btn:hover {
   color: white;
@@ -286,7 +291,7 @@ jp-Git-timeline-arrow-left:active {
   letter-spacing: -1px;
 }
 
-.jp-Git-pastCommit-btn{
+.jp-Git-pastCommit-btn, .jp-Git-pastCommit-active {
   color: var(--jp-ui-font-color1);
   width: 28px;
   height: 28px;
@@ -330,6 +335,18 @@ jp-Git-timeline-arrow-left:active {
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
   z-index: 1; /* raise overlapping border */
+}
+
+.jp-Git-pastCommit-active {
+  transition: .5s border-color, .5s height, .5s width, .5s margin-top, .5s margin-right;
+  position: absolute;
+}
+
+.jp-Git-pastCommit-active.jp-mod-active {
+  height: 16px;
+  width: 16px;
+  margin-top: 6px;
+  margin-right: 6px;
 }
 
 /*-----------------------------------------------------------------------------

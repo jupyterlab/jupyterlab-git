@@ -97,14 +97,18 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
       <div className='jp-Git-timeline'>
         <button className='jp-Git-timeline-arrow-left' onClick={()=>this.show_left()}> </button>
         <div className='jp-Git-timeline-container' ref='past_commits_container'> 
-            <button className='jp-Git-currentCommit-btn' onDoubleClick={()=>this.props.show_current_work(true)}>
-             
+            <button className='jp-Git-currentCommit-active' onClick={()=>this.props.show_current_work(true)}>
+            </button>    
+            <button className='jp-Git-currentCommit-btn'>
             </button>         
             {this.props.past_commits.map((dj, dj_index)=>
-              <span className='jp-Git-commit-btn-container' key={dj_index} onDoubleClick={()=>{this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), this.props.show_current_work(false)}}>---------
+              <span className='jp-Git-commit-btn-container' key={dj_index} onClick={()=>{this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), this.props.show_current_work(false)}}>---------
+                  <button className='jp-Git-pastCommit-active'>
+                      <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
+                  </button>
                   <button className='jp-Git-pastCommit-btn'>
                       <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
-                    </button>
+                  </button>
               </span>
             )}
           </div>,     
