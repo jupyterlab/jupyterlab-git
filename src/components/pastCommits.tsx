@@ -97,12 +97,12 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
       <div className='jp-Git-timeline'>
         <button className='jp-Git-timeline-arrow-left' onClick={()=>this.show_left()}> </button>
         <div className='jp-Git-timeline-container' ref='past_commits_container'> 
-            <button className='jp-Git-mod-current' onDoubleClick={()=>this.props.show_current_work(true)}>
+            <button className='jp-Git-currentCommit-btn' onDoubleClick={()=>this.props.show_current_work(true)}>
              
             </button>         
             {this.props.past_commits.map((dj, dj_index)=>
-              <span className='jp-Git-mod-container' key={dj_index} onDoubleClick={()=>{this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), this.props.show_current_work(false)}}>---------
-                  <button className='jp-Git-mod-pastCommit'>
+              <span className='jp-Git-commit-btn-container' key={dj_index} onDoubleClick={()=>{this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), this.props.show_current_work(false)}}>---------
+                  <button className='jp-Git-pastCommit-btn'>
                       <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
                     </button>
               </span>
@@ -188,12 +188,12 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
           {this.props.list.map((mf, mf_index)=>
             <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} />
-              <span className='jp-Git-singlePastCommitDetail-file-path' onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} 
+              <span className='jp-Git-singlePastCommitDetail-file-path' onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} </span>
                 <span className="jp-Git-modNumber"> {mf.deletion}</span>   
                 <span className='jp-Git-icon-deletion'></span>   
                 <span className="jp-Git-modNumber">{mf.insertion}</span>
                 <span className='jp-Git-icon-insertion'></span>
-              </span>
+              
             </li>
           )}
       </div>
