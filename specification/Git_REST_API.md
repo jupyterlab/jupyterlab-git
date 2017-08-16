@@ -32,10 +32,41 @@ on git command success
     {
         "code": 0,
     	"data":{
-            "showtoplevel": {"code": 0, "top_repo_path": "/absolute/path/to/root/of/repo"}
-            "branch"?: {"code": 0,"branches": [{"current":false, "remote":true,"name":"branch-name", "tag":"branch-tag"}]} 
-            "log"?: { "code": 0,"commits": [{"commit":"1234567890987654321", "author": "person0","date": "3-hourss-ago","commit_msg": "update-file-changes" }]} 
-            "status"?: {"code": 0,"files": {"x": "CHECK-bit-X", "y": "CHECK-bit-Y","to": "file/or/folder/path","from": "original/path/for/copied/file/or/folder"}}
+            "showtoplevel": {
+                "code": 0, 
+                "top_repo_path": "/absolute/path/to/root/of/repo"
+            }
+            "branch"?: {
+                "code": 0,
+                "branches": [
+                    {
+                        "current":false, 
+                        "remote":true,
+                        "name":"branch-name", 
+                        "tag":"branch-tag"
+                    }
+                ]
+            } 
+            "log"?: { 
+                "code": 0,
+                "commits": [
+                    {
+                        "commit":"1234567890987654321", 
+                        "author": "person0",
+                        "date": "3-hourss-ago",
+                        "commit_msg": "update-file-changes" 
+                    }
+                ]
+            } 
+            "status"?: {
+                "code": 0,
+                "files": {
+                    "x": "CHECK-bit-X", 
+                    "y": "CHECK-bit-Y",
+                    "to": "file/or/folder/path",
+                    "from": "original/path/for/copied/file/or/folder"
+                }
+            }
         }
     }
 ```
@@ -237,12 +268,12 @@ on git command success
 	    "code": 0;
 	    "modified_file_note": "5 files changes, 100 insetion, 200 deletion",
 	    "modified_files": [
-            {
+            { 
                 "modified_file_path": "file/path",
-	            "insertion": "49";
-	            "deletion": "108"
+                "insertion": "49";
+                "deletion": "108"
             }
-	    ]
+        ]
     }
 
 ```
