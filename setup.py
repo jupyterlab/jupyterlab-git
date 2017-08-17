@@ -1,3 +1,6 @@
+"""
+Setup Module to setup Python Handlers (Git Handlers) for the Git Plugin.
+"""
 import setuptools
 
 setuptools.setup(
@@ -9,3 +12,4 @@ setuptools.setup(
     ],
     package_data={'jupyterlab_git': ['static/*']},
 )
+
