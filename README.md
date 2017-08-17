@@ -38,13 +38,6 @@ Installation and activation for jupyterlab_git python handler package:
 ```bash
 pip install .
 jupyter serverextension enable --py jupyterlab_git
-jupyter nbextension install --py jupyterlab_git
-```
-
-To enable this extension:
-
-```bash
-jupyter nbextension enable --py jupyterlab_git
 ```
 
 Launch JupyterLab & you will see the new Git buttons on the left side of the window.
