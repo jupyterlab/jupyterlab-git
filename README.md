@@ -4,7 +4,6 @@ Pre-alpha version.
 (not yet published on npm)  
 If you want to install & give it a try, clone the repo first & then use the commands below from the cloned directory.
 
-* pre-alpha version, download the whole repo and install
 
 ## Prerequisites
 
@@ -37,15 +36,8 @@ jupyter lab build
 Installation and activation for jupyterlab_git python handler package:
 
 ```bash
-pip install jupyterlab_git
+pip install .
 jupyter serverextension enable --py jupyterlab_git
-jupyter nbextension install --py jupyterlab_git
-```
-
-To enable this extension:
-
-```bash
-jupyter nbextension enable --py jupyterlab_git
 ```
 
 Launch JupyterLab & you will see the new Git buttons on the left side of the window.

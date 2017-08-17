@@ -86,6 +86,7 @@ function activate(app: JupyterLab, services: ServiceManager, fb:FileBrowser, mai
   ].forEach(command =>{
     menu.addItem({command});
   });
+  
   [
     CommandIDs.setup_remotes,
     CommandIDs.tutorial_Pull,
