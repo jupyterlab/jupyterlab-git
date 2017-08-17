@@ -82,7 +82,7 @@ function activate(app: JupyterLab, services: ServiceManager, fb:FileBrowser, mai
     CommandIDs.git_terminal,
     CommandIDs.git_pull,
     CommandIDs.git_push,
-    CommandIDs.git_init
+    CommandIDs.git_init,
   ].forEach(command =>{
     menu.addItem({command});
   });

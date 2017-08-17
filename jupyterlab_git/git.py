@@ -79,6 +79,7 @@ class Git:
         else:
             return {"code":p.returncode, "message":my_error.decode('utf-8')}
 
+
     def log_1(self, selected_hash, current_path):
         """
         Function used to execute the second git log command(used to get insertions & deletions per file) & send back the result.
@@ -112,6 +113,7 @@ class Git:
                 "modified_files": result}
         else:
             return {"code": p.returncode, 'command': "git log_1","message": my_error.decode('utf-8')}
+
 
     def diff(self, top_repo_path):
         """
@@ -319,3 +321,4 @@ class Git:
         my_output = subprocess.check_output(
             ["git", "init"], cwd=os.getcwd() + '/' + current_path)
         return my_output
+

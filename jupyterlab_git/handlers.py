@@ -362,6 +362,7 @@ class Git_add_all_untracked_handler(Git_handler):
         print(my_output)
         self.finish(my_output)
 
+
 def setup_handlers(web_app):
     """
     Function used to setup all of the Git_Handlers used in the file.
@@ -383,3 +384,4 @@ def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/init', Git_init_handler)])
     web_app.add_handlers('.*', [('/git/API', Git_API_handler)])
     web_app.add_handlers('.*', [('/git/add_all_untracked', Git_add_all_untracked_handler)])
+

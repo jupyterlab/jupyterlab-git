@@ -12,3 +12,4 @@ setuptools.setup(
     ],
     package_data={'jupyterlab_git': ['static/*']},
 )
+
