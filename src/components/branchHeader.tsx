@@ -12,10 +12,7 @@ import {
   Git
 } from '../git'
 
-
 import '../../style/index.css';
-
-
 
 export namespace BranchHeader {
   export
@@ -77,14 +74,15 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
 
         title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} 
         className='jp-Git-branch-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
-             <option value=" " disabled selected>Switch Branches: </option>
+             <option value=" " disabled selected>**Switch Branches: </option>
              {this.props.data.map((dj, dj_index)=>
               <option value ={dj.name} key={dj_index}>
                   {dj.name}
               </option>
               )}
+              <option value=" " disabled selected>**Create a new branch: </option>
               <option value=''>
-                CREATE NEW BRANCH
+                CREATE NEW
               </option>
           </select>,  
       </div>

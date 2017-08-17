@@ -63,7 +63,6 @@ class GitSessions extends Widget {
     const element =<GitSessionNode app={app}/>
     this.component = ReactDOM.render(element, this.node);
     this.component.refresh();
-
   }
   /**
    * override widget's show() to update content everytime Git widget shows up.
@@ -252,9 +251,12 @@ namespace GitSessionNode {
     current_branch:string;
     disable_switch_branch:boolean;
 
+    pull_enable:boolean;
+    push_enable:boolean;
+
     past_commits: any;
     in_new_repo: boolean;
-    show_CUR: boolean;
+    show_index: number;
 
     staged_files: any;
     unstaged_files: any;
@@ -283,7 +285,7 @@ namespace GitSessionNode {
       let api_branch = (api_result as GitAPI).data.branch;
       let current_branch = 'master';
       if(api_branch.code==0){
-        let data_json = (api_branch as GitBranchResult).repos;
+        let data_json = (api_branch as GitBranchResult).branches;
         for (var i=0; i<data_json.length; i++){
           if(data_json[i].current[0]){
             current_branch=data_json[i].name;
@@ -303,6 +305,8 @@ namespace GitSessionNode {
       let staged = [], unstaged = [], untracked = [];
       let SF = 0, USF = 0, UTF = 0, Changes = 0;
       let disable_switch_branch = true;
+      let pull_enable = false;
+      let push_enable = true;
       let api_status = (api_result as GitAPI).data.status;
       if(api_status.code==0){
         let data_json = (api_status as GitStatusResult).files;
@@ -329,26 +333,28 @@ namespace GitSessionNode {
         if(Changes == 0){
         // since there are no uncommitted changes, enable switch branch button 
           disable_switch_branch = false;
+          pull_enable = true;
         }
       }
       if(past_commits.length==0){
         disable_switch_branch = true;
+        push_enable = false;
       }
       
       //determine if in the same repo as previously, if not, display the CUR;
       let in_new_repo= this.state.top_repo_path!==(api_showtoplevel as GitShowTopLevelResult).top_repo_path;
-      let show_CUR = this.state.show_CUR;  
+      let show_index = this.state.show_index;  
       if(in_new_repo){
-        show_CUR = true;
+        show_index = -1;
       }
             
       this.setState({current_fb_path:(fb as any).model.path, top_repo_path: (api_showtoplevel as GitShowTopLevelResult).top_repo_path, show:true, 
-        branches: (api_branch as GitBranchResult).repos, current_branch: current_branch, disable_switch_branch: disable_switch_branch, 
-        past_commits: past_commits, in_new_repo: in_new_repo, show_CUR:show_CUR,
+        branches: (api_branch as GitBranchResult).branches, current_branch: current_branch, disable_switch_branch: disable_switch_branch, pull_enable:pull_enable, push_enable:push_enable,
+        past_commits: past_commits, in_new_repo: in_new_repo, show_index:show_index,
         staged_files: staged, unstaged_files: unstaged, untracked_files: untracked});
     }
     else{
-      this.setState({current_fb_path: (fb as any).model.path, top_repo_path: '', show:false});
+      this.setState({current_fb_path: (fb as any).model.path, top_repo_path: '', show:false,  pull_enable:false, push_enable:false});
     }
    }catch(err){
      console.log("app doesn't work??")
@@ -360,7 +366,7 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
   refresh:any;
   constructor(props: GitSessionNode.IProps) {
     super(props);
-    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', disable_switch_branch:true, past_commits:[], in_new_repo:true, show_CUR:true, staged_files:[], unstaged_files:[], untracked_files:[]}
+    this.state = {current_fb_path: '', top_repo_path: '', show:false, branches:[], current_branch:'', disable_switch_branch:true, pull_enable:false, push_enable:false, past_commits:[], in_new_repo:true, show_index:-1, staged_files:[], unstaged_files:[], untracked_files:[]}
     this.refresh = refresh.bind(this);
     this.show_current_work = this.show_current_work.bind(this);
   }
@@ -371,19 +377,19 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
     clearInterval(this.interval);
   } 
   
-  show_current_work(show_value:boolean){
-    this.setState({show_CUR: show_value});
+  show_current_work(show_value:number){
+    this.setState({show_index: show_value});
   }
   
   render(){
     return(
-      <div >
+      <div className='jp-Git-container'>
         <PathHeader current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} refresh={this.refresh}/>
         <ToggleDisplay show={this.state.show}>
         <BranchHeader current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} refresh={this.refresh} 
               current_branch={this.state.current_branch} data={this.state.branches} disabled={this.state.disable_switch_branch}/>
         <PastCommits current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} 
-              past_commits={this.state.past_commits} in_new_repo={this.state.in_new_repo} show_CUR={this.state.show_CUR}
+              past_commits={this.state.past_commits} in_new_repo={this.state.in_new_repo} show_index={this.state.show_index}
               staged_files={this.state.staged_files} unstaged_files={this.state.unstaged_files} untracked_files={this.state.untracked_files} app={this.props.app} refresh={this.refresh} show_current_work={this.show_current_work}/>
          </ToggleDisplay>
 
