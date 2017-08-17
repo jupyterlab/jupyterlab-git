@@ -21,7 +21,6 @@ import $ = require('jquery');
  * The class name added to a git-plugin session item icon.
  */
 const GIT_FILE_ICON = 'jp-Git-fileIcon';
-const GIT_MOD = 'jp-Git-mod';
 
 export namespace PastCommits {
   export
@@ -100,11 +99,9 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
   mod_class_selection(index:number, show_index:number):string{
     switch (index) {
       case -1:
-        return index==show_index?`${GIT_MOD} jp-Edit-selected`:`${GIT_MOD} jp-Edit`;
-      case 0:
-        return index==show_index?`${GIT_MOD} jp-Head-selected`:`${GIT_MOD} jp-Head`;
+        return index==show_index?'jp-Git-currentCommit-active jp-mod-active':'jp-Git-currentCommit-active';
       default:
-        return index==show_index?`${GIT_MOD} jp-Normal-selected`:`${GIT_MOD} jp-Normal`;
+        return index==show_index?'jp-Git-pastCommit-active jp-mod-active':'jp-Git-pastCommit-active';
     }
   }
 
@@ -118,16 +115,16 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
         </ToggleDisplay>
 
         <div className='jp-Git-timeline-container' ref='past_commits_container'> 
-            <button className='jp-Git-currentCommit-active' onDoubleClick={()=>this.props.show_current_work(-1)}>
+            <button className={this.mod_class_selection(-1, this.props.show_index)} onDoubleClick={()=>this.props.show_current_work(-1)}>
             </button> 
-            <button className='jp-Git-currentCommit-btn'onDoubleClick={()=>this.props.show_current_work(-1)}>
+            <button className='jp-Git-currentCommit-btn' onDoubleClick={()=>this.props.show_current_work(-1)}>
             </button>  
             {this.props.past_commits.map((dj, dj_index)=>
               <span className='jp-Git-commit-btn-container' key={dj_index} onDoubleClick={()=>{this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), this.props.show_current_work(dj_index)}}>---
-                  <button className='jp-Git-pastCommit-active'>
+                  <button className={this.mod_class_selection(dj_index, this.props.show_index)}>
                       <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
                   </button>
-                  <button className='jp-Git-pastCommit-btn'>
+                  <button className='jp-Git-pastCommit-btn' >
                       <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
                   </button>
               </span>

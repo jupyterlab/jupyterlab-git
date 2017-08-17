@@ -313,8 +313,15 @@ jp-Git-timeline-arrow-left:active {
   top: -2.7px;
 }
 .jp-Git-currentCommit-active {
+  transition: .5s border-color, .5s height, .5s width, .5s margin-top, .5s margin-right;
   position: absolute;
   top: 20px;
+}
+.jp-Git-currentCommit-active.jp-mod-active {
+  height: 16px;
+  width: 16px;
+  margin-top: 6px;
+  margin-right: 6px;
 }
 .jp-Git-currentCommit-btn:hover {
   color: white;
