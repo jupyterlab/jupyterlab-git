@@ -37,12 +37,23 @@ class Git:
                   stderr=PIPE, cwd=os.getcwd() + '/' + current_path)
         my_output, my_error = p.communicate()
         if(p.returncode == 0):
-            result = []
+            result = [] 
             line_array = my_output.decode('utf-8').splitlines()
             for line in line_array:
-                result.append(
-                    {'x': line[0], 'y': line[1], 'to': line[3:], 'from': None})
-            return {"code": p.returncode, "files": result}
+                to1 = None
+                to2 = None
+                from_path = line[3:]             
+                if line[0]=='R':
+                    to0 = line[3:].split(' -> ')
+                    to1 = to0[len(to0)-1]
+                else:
+                    to1 = line[3:]
+                if to1.startswith('"'):
+                    to1 = to1[1:]
+                if to1.endswith('"'):
+                    to1 = to1[:-1] 
+                result.append({'x':line[0],'y':line[1],'to':to1,'from':from_path})
+            return {"code": p.returncode, "files":result}
         else:
             return {
                 "code": p.returncode,
@@ -53,21 +64,20 @@ class Git:
         """
         Function used to execute git log command & send back the result.
         """
-        p = Popen(["git", "log", "--pretty=format:%H-%an-%ar-%s"],
+        p = Popen(["git", "log", "--pretty=format:%H%n%an%n%ar%n%s"],
                   stdout=PIPE, stderr=PIPE, cwd=os.getcwd() + '/' + current_path)
         my_output, my_error = p.communicate()
-        if(p.returncode == 0):
+        if(p.returncode==0):
             result = []
             line_array = my_output.decode('utf-8').splitlines()
-            for line in line_array:
-                linesplit = line.split('-')
-                result.append({'commit': linesplit[0],
-                               'author': linesplit[1],
-                               'date': linesplit[2],
-                               'commit_msg': linesplit[3]})
-            return {"code": p.returncode, "commits": result}
+            i = 0
+            while i < len(line_array):
+                result.append(
+                    {'commit':line_array[i], 'author': line_array[i+1],'date':line_array[i+2],'commit_msg':line_array[i+3]})
+                i += 4
+            return {"code": p.returncode, "commits":result}
         else:
-            return {"code": p.returncode, "message": my_error.decode('utf-8')}
+            return {"code":p.returncode, "message":my_error.decode('utf-8')}
 
     def log_1(self, selected_hash, current_path):
         """
@@ -101,7 +111,7 @@ class Git:
                 "modified_file_note": note,
                 "modified_files": result}
         else:
-            return {"code": p.returncode, "message": my_error.decode('utf-8')}
+            return {"code": p.returncode, 'command': "git log_1","message": my_error.decode('utf-8')}
 
     def diff(self, top_repo_path):
         """
@@ -149,7 +159,7 @@ class Git:
                 else:
                     result.append(
                         {'current': current, 'remote': remote, 'name': line_full[2:], 'tag': tag})
-            return {"code": p.returncode, "repos": result}
+            return {"code": p.returncode, "branches": result}
         else:
             return {
                 "code": p.returncode,
@@ -207,6 +217,14 @@ class Git:
         my_output = subprocess.check_output(
             ["git", "add", "-u"], cwd=top_repo_path)
         return my_output
+
+    def add_all_untracked(self, top_repo_path):
+        """
+        Function used to execute git add_all_untracked command & send back the result.
+        """
+        e = 'echo "a\n*\nq\n" | git add -i'
+        my_output = subprocess.call(e, shell=True, cwd = top_repo_path)
+        return {"result": my_output}
 
     def reset(self, filename, top_repo_path):
         """

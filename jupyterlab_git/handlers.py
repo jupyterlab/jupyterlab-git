@@ -346,6 +346,21 @@ class Git_init_handler(Git_handler):
         my_output = self.git.init(current_path)
         self.finish(my_output)
 
+class Git_add_all_untracked_handler(Git_handler):
+    """
+    A class used to add and ONLY add all the untracked files.
+    The git command used here is 'echo "a\n*\nq\n" | git add -i'.
+    """
+    def post(self):
+        """
+        Function used to apply POST method of 'Git_add_all_untracked_handler'.
+        git add_all_untracked is used to add all the untracked files.
+        """        
+        my_data = json.loads(self.request.body)
+        top_repo_path = my_data["top_repo_path"]
+        my_output=self.git.add_all_untracked(top_repo_path)
+        print(my_output)
+        self.finish(my_output)
 
 def setup_handlers(web_app):
     """
@@ -367,3 +382,4 @@ def setup_handlers(web_app):
     web_app.add_handlers('.*', [('/git/log_1', Git_log_1_handler)])
     web_app.add_handlers('.*', [('/git/init', Git_init_handler)])
     web_app.add_handlers('.*', [('/git/API', Git_API_handler)])
+    web_app.add_handlers('.*', [('/git/add_all_untracked', Git_add_all_untracked_handler)])
