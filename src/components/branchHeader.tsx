@@ -68,7 +68,8 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
   render(){
     return (
       <div  className='jp-Git-branch'>
-        <span className ='jp-Git-branch-label'> Current Branch:{this.props.current_branch}
+        <span className ='jp-Git-branch-label'> <span className='jp-Git-icon-branch'></span>
+          {this.props.current_branch}
         </span>,
         <select required ref="switch_branch_dropdown_button" value = {this.props.current_branch} disabled = {this.props.disabled} 
 
