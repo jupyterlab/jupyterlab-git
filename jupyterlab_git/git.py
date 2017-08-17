@@ -113,6 +113,7 @@ class Git:
         else:
             return {"code": p.returncode, 'command': "git log_1","message": my_error.decode('utf-8')}
 
+
     def diff(self, top_repo_path):
         """
         Function used to execute git diff command & send back the result.
