@@ -174,8 +174,9 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
 
   commands.addCommand(CommandIDs.git_pull, {
     label: 'Pull',
-    caption: 'Incorporates changes from a remote repository into the current branch',
-    execute: args => {
+    caption: 'Update remote refs along with associated objects',
+    execute: () => {
+
       let cur_fb_path = find_cur_fb_path();
       let input_block = document.createElement("div");
       let remote_repo_prompt = document.createElement("li");
@@ -227,6 +228,7 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
     label: 'Push',
     caption: 'Update remote refs along with associated objects',
     execute: () => {
+
       let cur_fb_path = find_cur_fb_path();
       let input_block = document.createElement("div");
       let remote_repo_prompt = document.createElement("li");
@@ -293,6 +295,42 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
   });
 
     commands.addCommand(CommandIDs.setup_remotes, {
+    label: "Set Up Remotes",
+    caption: "Learn about Remotes",
+    execute: () => {
+      console.log("Git Tutorial link 1");
+      window.open("https://www.atlassian.com/git/tutorials/setting-up-a-repository");
+    },
+  });
+
+  commands.addCommand(CommandIDs.tutorial_Pull, {
+    label: 'How to use Pull',
+    caption: "What's Pull",
+    execute: () => {
+      console.log("Git Tutorial link 2");
+      window.open("https://git-scm.com/docs/git-pull");
+    },
+  });
+
+  commands.addCommand(CommandIDs.tutorial_Push, {
+    label: "How to use Push",
+    caption: "What's Push",
+    execute: () => {
+      console.log("Git Tutorial link 3");
+      window.open("https://git-scm.com/docs/git-push");
+    },
+  });
+
+  commands.addCommand(CommandIDs.link4, {
+    label: 'Something Else',
+    caption: "Dummy Link ",
+    execute: () => {
+      console.log("Git Tutorial link 4");
+      window.open("https://www.google.com");
+    },
+  });
+
+  commands.addCommand(CommandIDs.setup_remotes, {
     label: "Set Up Remotes",
     caption: "Learn about Remotes",
     execute: () => {

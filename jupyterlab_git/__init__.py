@@ -31,3 +31,4 @@ def load_jupyter_server_extension(nbapp):
     git = Git()
     nbapp.web_app.settings['git'] = git
     setup_handlers(nbapp.web_app)
+
