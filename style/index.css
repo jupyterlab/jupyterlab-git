@@ -1,3 +1,4 @@
+@import './variables.css';
 
 /*-----------------------------------------------------------------------------
 | Variables
@@ -28,6 +29,7 @@
 .jp-Git-repo{
   display: flex;
   flex-direction: row;
+  background-color: var(--jp-layout-color2);
   color: var(--jp-ui-font-color1);
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
@@ -42,7 +44,7 @@
   background-size: 16px;
   background-repeat: no-repeat;
   background-position: center;
-  background-image: url(git_button_circles/home.svg);
+  background-image: url(Images/directory.svg);
 }
 
 .jp-Git-repo-path {
@@ -65,13 +67,13 @@
 
 .jp-Git-repo-refresh{
   flex: 1 1 auto;
-  height: var(--jp-private-running-button-height);
+  height: 24px;
   width: var(--jp-private-running-button-width);
   max-width: 50px;
   min-width: 16px;
   min-height: 16px;
   padding: 4px 6px;
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color2);
   border: none;
   outline: 0;
   background-image: var(--jp-icon-refresh);
@@ -82,15 +84,10 @@
   background-position: center;
 }
 .jp-Git-repo-refresh:hover {
-  background-color: var(--jp-layout-color0);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  border: 1px solid var(--jp-toolbar-border-color);
-  z-index: 1; /* raise overlapping border */
+background-image: var(--jp-icon-refresh-selected);
 }
 .jp-Git-repo-refresh:active {
-  border: 1px solid var(--jp-toolbar-border-color);
-  background-color: var(--jp-toolbar-active-background);
-  box-shadow: var(--jp-toolbar-box-shadow);
+background-image: var(--jp-icon-refresh-selected);
 }
 
 
@@ -98,60 +95,80 @@
 | Git-branch
 |----------------------------------------------------------------------------*/
 .jp-Git-branch {
-    background-color: lightslategray;
+    background-color: var(--md-grey-700);
     display: flex;
     flex: 0 0 auto;
     flex-direction: row;
-    border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
     /* Add the border width because this is border-box sized */
     height: calc(var(--jp-private-csvviewer-toolbar-height) + var(--jp-border-width));
-    background: var(--jp-toolbar-background);
+    background: var(--md-grey-700);
     z-index: 1;
     box-shadow: var(--jp-toolbar-box-shadow);
 }
 
 .jp-Git-branch-label {
-    color: var(--jp-ui-font-color1);
+    color: white;
     font-size: var(--jp-ui-font-size1);
     line-height: var(--jp-private-csvviewer-toolbar-height);
     padding-left: 8px;
     padding-right: 8px;
 }
 
+.jp-Git-icon-branch{
+    background-image: var(--jp-Git-icon-branch);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+    background-size:14px;
+    margin: 6px 10px -2px 0px;
+    background-repeat: no-repeat;
+}
+
 .jp-Git-branch-dropdown {
     flex: 0 0 auto;
     vertical-align: middle;
-    border: var(--jp-border-width) solid var(--jp-border-color1);
+    border: var(--md-grey-700);
     border-radius: 0;
     outline: none;
     width: 20px;
     height: 20px;
     margin-top: 2px;
     margin-bottom: 2px;
+    background-color: var(--md-grey-700);
 }
 
 /*-----------------------------------------------------------------------------
 | Git-timeline
 |----------------------------------------------------------------------------*/
 .jp-Git-timeline{
-  background-color: grey;
+  background-color: var(--jp-ui-font-color1);
   margin: 0;
   padding: 0;
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: row;
+  height: 70px;
+  position: relative;
 }
 
-.jp-Git-timeline-arrow {
-  flex: 1 1 auto;
-  height: var(--jp-private-running-button-height);
-  width: var(--jp-private-running-button-width);
-  max-width: 16px;
-  min-width: 16px;
-  min-height: 16px;
-  background-color: grey;
-  border: none;
-  outline: 0;
+.jp-Git-timeline-arrow-right {
+  height: 70px;
+  width:30px;
+  background-image: url(Images/fade-right.svg);
+  background-color: var(--jp-ui-font-color9);
+  display: block;
+  top:0;
+  right:0;
+  z-index: 20;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  border:none;
+  outline: none;
+  position: absolute;
+}
+
+.jp-Git-timeline-arrow-left {
+  height: 70px;
+  width:30px;
+  background-image: url(Images/fade-left.svg);
+  background-color: var(--jp-ui-font-color9);
   display: inline-block;
   top:0;
   right:0;
@@ -159,92 +176,177 @@
   vertical-align: middle;
   background-repeat: no-repeat;
   text-align: center;
+  border:none;
+  outline:none;
+  position: absolute;
+  left: 0;
 }
-.jp-Git-timeline-arrow:hover {
-  background-color: var(--jp-layout-color0);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  border: 1px solid var(--jp-toolbar-border-color);
+
+.jp-Git-timeline-arrow-right:hover{
+  background-image: url(Images/right-arrow.svg);
+  background-color: none;
   z-index: 1; /* raise overlapping border */
 }
-.jp-Git-timeline-arrow:active {
-  border: 1px solid var(--jp-toolbar-border-color);
-  background-color: var(--jp-toolbar-active-background);
-  box-shadow: var(--jp-toolbar-box-shadow);
+
+
+.jp-Git-timeline-arrow-left:hover {
+  background-image: url(Images/left-arrow.svg);
+  background-color: none;
+  z-index: 1; /* raise overlapping border */
+}
+
+.jp-Git-timeline-arrow-right:active {
+  border:0;
+  background-color: none;
+  background-image: url(Images/right-arrow.svg);
+  outline:none;
+}
+
+jp-Git-timeline-arrow-left:active {
+  border:0;
+  background-color: none;
+  background-image: url(Images/left-arrow.svg);
+  outline:none;
 }
 
 .jp-Git-timeline-container {
-  background-color: grey;
-  max-width: 100%;
+  background-color: var(--jp-ui-font-color1);
+  width: 92%;
   margin: 0;
-  padding: 0;
+  padding-top: 20px;
   overflow: hidden;
   white-space: nowrap;
   direction: rtl;
+  height: 50px;
+  z-index: 0;
+  position: absolute;
+  padding-right: 8%;
 }
 
 /*-----------------------------------------------------------------------------
 | Git-mod (elements in Git-timeline)
 |----------------------------------------------------------------------------*/
 
-.jp-Git-mod-current{
-  color:lightgray;
-  width: 35px;
-  height: 35px;
+.jp-Git-currentCommit-btn, .jp-Git-currentCommit-active {
+  position: relative;
+  color:var(--jp-ui-font-color1);
+  width: 28px;
+  height: 28px;
+  padding-bottom: 10px;
+  background-color: rgba(53,53,153,.1);
   /*background-color: rgba(53,53,153,.1);*/
-  background-image: url(git_button_circles/edit-circle-selected.svg);
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100%;
-  box-shadow: var(--jp-toolbar-box-shadow);
+  box-shadow: none;
   border-radius: 50%;
-  border: 1px solid var(--jp-toolbar-border-color);
+  border: 2.7px dotted #e0e0e0;
+  outline: none !important;
   z-index: 1; /* raise overlapping border */
+  top: -2.7px;
 }
-.jp-Git-mod-current:hover {
-  background-color: var(--jp-layout-color0);
+.jp-Git-currentCommit-active {
+  position: absolute;
+  top: 20px;
+}
+.jp-Git-currentCommit-btn:hover {
+  color: white;
+  background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
-  border: 1px solid var(--jp-toolbar-border-color);
+  border: none;
   z-index: 1; /* raise overlapping border */
+  outline: none !important;
 }
-.jp-Git-mod-current:selected {
-  border: 1px solid var(--jp-toolbar-border-color);
-  background-color: var(--jp-toolbar-active-background);
+.jp-Git-currentCommit-btn:selected {
+  background-image: url(Images/edit-circle-selected.svg);
+  background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
+  border: none;
+  outline: none !important;
 }
 
-.jp-Git-mod-container{
+.jp-Git-currentCommit-btn:selected:active {
+  background-image: url(Images/edit-circle-selected-active.svg);
+  background-color: rgba(53,53,153,.1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: none;
+  outline: none !important;
+}
+
+.jp-Git-currentCommit-btn:active {
+  background-image: url(Images/edit-circle-active.svg);
+  background-color: rgba(53,53,153,.1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: none;
+  outline: none !important;
+}
+
+.jp-Git-commit-btn-container{
   color: lightgray;
   flex: 0 0 auto;
   min-width: 50px;
   min-height: 50px;
   max-width: 50px;
   max-height: 50px;
+  letter-spacing: -1px;
 }
 
-.jp-Git-mod-pastCommit{
-  color: lightgrey;
-  width: 35px;
-  height: 35px;
-  /*background-color: rgba(53,53,153,.1);*/
-  background-image: url(git_button_circles/normal-circle-selected.svg);
-  background-repeat: no-repeat;
-  background-position: center;
+.jp-Git-pastCommit-btn, .jp-Git-pastCommit-active {
+  color: var(--jp-ui-font-color1);
+  width: 28px;
+  height: 28px;
+  background-color: rgba(53,53,153,.1);
   background-size: 100%;
   box-shadow: var(--jp-toolbar-box-shadow);
   border-radius: 50%;
-  border: 1px solid var(--jp-toolbar-border-color);
+  border: none;
+  z-index: 1;
+  outline: none !important;
+  background-color: #0a0a0a;
+  border: 1.5px solid #4caf50;
+}
+.jp-Git-pastCommit-btn:hover {
+  color: white;
+  background-color: rgba(53,53,153,.1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: none;
   z-index: 1; /* raise overlapping border */
 }
-.jp-Git-mod-pastCommit:hover {
-  background-color: var(--jp-layout-color0);
+
+.jp-Git-pastCommit-btn:selected {
+  background-color: rgba(53,53,153,.1);
+  background-image: url(Images/normal-circle.svg);
   box-shadow: var(--jp-toolbar-box-shadow);
-  border: 1px solid var(--jp-toolbar-border-color);
+  border: none;
   z-index: 1; /* raise overlapping border */
 }
-.jp-Git-mod-pastCommit:active {
-  border: 1px solid var(--jp-toolbar-border-color);
-  background-color: var(--jp-toolbar-active-background);
+
+.jp-Git-pastCommit-btn:active {
+  background-color: rgba(53,53,153,.1);
+  background-image: url(Images/normal-circle-active.svg);
   box-shadow: var(--jp-toolbar-box-shadow);
+  border: none;
+  z-index: 1; /* raise overlapping border */
+}
+
+.jp-Git-pastCommit-btn:selected:active {
+  background-color: rgba(53,53,153,.1);
+  background-image: url(Images/normal-circle-selected-active.svg);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  border: none;
+  z-index: 1; /* raise overlapping border */
+}
+
+.jp-Git-pastCommit-active {
+  transition: .5s border-color, .5s height, .5s width, .5s margin-top, .5s margin-right;
+  position: absolute;
+}
+
+.jp-Git-pastCommit-active.jp-mod-active {
+  height: 16px;
+  width: 16px;
+  margin-top: 6px;
+  margin-right: 6px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -253,9 +355,10 @@
 
 .jp-Git-singlePastCommit {
   flex: 0 0 auto;
-  margin: 4px 0px;
-  padding: 4px 12px;
-  font-weight: 600;
+  margin:0;
+  width: 100%;
+  padding: 0;
+  font-size: 12px;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
 }
@@ -271,6 +374,53 @@
   border-radius: 2px;
   transition: background-color 0.1s ease;
 }
+
+.jp-Git-singlePastCommit-header {
+  background-color: var(--md-green-500);
+  color: white;
+  display: inline-block;
+  width: 100%;
+}
+
+.jp-Git-singlePastCommit-label-commit-number{
+  width: 50%;
+  overflow: hidden;
+  float: left;
+  width: 30%;
+  padding: 10px;
+}
+
+.jp-Git-singlePastCommit-label-author{
+  float: left;
+  padding: 10px;
+}
+
+.jp-Git-icon-author {
+  background-image: var(--jp-Git-icon-author);
+  display: inline-block;
+  height: 14px;
+  width: 14px;
+}
+
+.jp-Git-singlePastCommit-label-date {
+  float: right;
+  padding: 10px;
+}
+
+.jp-Git-singlePastCommit-label-commit-message {
+  clear:left;
+  padding: 0 10px 10px 10px;
+  color:
+}
+
+.jp-Git-singlePastCommit-label-summary {
+  width: 50%;
+  padding: 10px;
+  float: right;
+  font-weight: 400;
+  text-align: right;
+}
+
 
 .jp-Git-singlePastCommitDetail {
   flex: 1 1 auto;
@@ -315,6 +465,12 @@
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
 }
+
+.jp-Git-file .jp-mod-selected {
+  background: var(--jp-brand-color1);
+}
+
+
 
 .jp-Git-fileLabel {
   font-size: var(--jp-ui-font-size1);
@@ -390,23 +546,40 @@
 | Git-staged-special (staged background, input box, commit button...)
 |----------------------------------------------------------------------------*/
 
+input[type=text]:focus {
+  outline: none;
+}
+
 .jp-Git-staged {
-  background-color: green;
+  color:white;
+  background-color: var(--md-green-500);
   flex: 0 0 auto;
-  margin: 4px 0px;
-  padding: 4px 12px;
-  font-weight: 600;
-  text-transform: uppercase;
+  height: 10px;
+  padding: 10px 12px 10px 16px;
+  font-weight: 400;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
+  font-size: 12px;
 }
 
 .jp-Git-staged-commit-msg{
-  width: 85%;
+  width: 75%;
   font-weight: 300;
+  height: 36px;
+  margin-left: 15px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  overflow-x: auto;
+  border: var(--jp-border-width) solid var(--jp-border-color2)
 }
+
+
 .jp-Git-staged-commit-button{
-  background-color: transparent;
+  background-color: var(--md-green-500);
+    color: white;
+    height: 40px;
+    width: 40px;
+    border:0;
 }
 
 .jp-Git-staged-header-label {
@@ -438,18 +611,17 @@
 | Git-unstaged-special (unstaged background)
 |----------------------------------------------------------------------------*/
 .jp-Git-unstaged {
-  background-color: lightgrey;
   flex: 0 0 auto;
   margin: 4px 0px;
-  padding: 4px 12px;
+  padding: 4px 1px 4px 13px;
   font-weight: 600;
-  text-transform: uppercase;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
+  font-size: 12px;
 }
 
 .jp-Git-unstaged-header-label {
-  font-size: var(--jp-ui-font-size1);
+  font-size: var(--jp-ui-font-size);
   flex: 1 1 auto;
   margin-right: 4px;
   padding-left: 4px;
@@ -460,10 +632,10 @@
   transition: background-color 0.1s ease;
 }
 .jp-Git-unstaged-header-label:hover {
-  background-color: rgba(153,153,153,.1);
+  background-color: 0;
 }
 .jp-Git-unstaged-header-label:focus {
-  background-color: rgba(153,153,153,.2);
+  background-color: 0;
 }
 
 .jp-Git-unstaged-fileContainer {
@@ -477,18 +649,17 @@
 | Git-untracked-special (untracked background)
 |----------------------------------------------------------------------------*/
 .jp-Git-untracked {
-  background-color: lightgrey;
   flex: 0 0 auto;
   margin: 4px 0px;
-  padding: 4px 12px;
+  padding: 4px 1px 4px 13px;
   font-weight: 600;
-  text-transform: uppercase;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
+  font-size: 12px;
 }
 
 .jp-Git-untracked-header-label {
-  font-size: var(--jp-ui-font-size1);
+  font-size: var(--jp-ui-font-size);
   flex: 1 1 auto;
   margin-right: 4px;
   padding-left: 4px;
@@ -513,63 +684,76 @@
 }
 
 /*-----------------------------------------------------------------------------
-| Git-button (for add, reset, discard)
+| Git-button (for add, reset, track)
 |----------------------------------------------------------------------------*/
-.jp-Git-button-add.jp-mod-styled{
+.jp-Git-button {
   margin: 0px 4px;
-  color: var(--jp-warn-color1);
-  font-weight: 400;
+  font-weight: 600;
   background-color: transparent;
   height: var(--jp-private-running-shutdown-button-height);
   line-height: var(--jp-private-running-shutdown-button-height);
   transition: background-color 0.1s ease;
   border-radius: 2px;
-}
-.jp-Git-button-add.jp-mod-styled:hover {
-  background-color: rgba(153,153,153,.1);
-}
-.jp-Git-button-add.jp-mod-styled:focus {
+  height: 16px;
+  background-position: center;
+  background-repeat: no-repeat;
   border: none;
-  box-shadow: none;
-  background-color: rgba(153,153,153,.2);
+  outline: none;
 }
 
-.jp-Git-button-reset.jp-mod-styled{
-  margin: 0px 4px;
-  color: var(--jp-warn-color1);
-  font-weight: 400;
-  background-color: transparent;
-  height: var(--jp-private-running-shutdown-button-height);
-  line-height: var(--jp-private-running-shutdown-button-height);
-  transition: background-color 0.1s ease;
-  border-radius: 2px;
-}
-.jp-Git-button-reset.jp-mod-styled:hover {
-  background-color: rgba(153,153,153,.1);
-}
-.jp-Git-button-reset.jp-mod-styled:focus {
-  border: none;
-  box-shadow: none;
-  background-color: rgba(153,153,153,.2);
+
+.jp-Git-button:hover {
+  background-color: none;
+  outline: none;
 }
 
-.jp-Git-button-discard.jp-mod-styled{
-  margin: 0px 4px;
-  color: var(--jp-warn-color1);
-  font-weight: 400;
-  background-color: transparent;
-  height: var(--jp-private-running-shutdown-button-height);
-  line-height: var(--jp-private-running-shutdown-button-height);
-  transition: background-color 0.1s ease;
-  border-radius: 2px;
-}
-.jp-Git-button-discard.jp-mod-styled:hover {
-  background-color: rgba(153,153,153,.1);
-}
-.jp-Git-button-discard.jp-mod-styled:focus {
+
+.jp-Git-button:focus {
   border: none;
   box-shadow: none;
-  background-color: rgba(153,153,153,.2);
+  background-color:none;
+}
+
+
+.jp-Git-button-add {
+  background-image: var(--jp-Git-icon-add);
+  float: right;
+}
+
+.jp-Git-button-reset {
+  background-image: var(--jp-Git-icon-reset);
+  float: right;
+}
+
+.jp-Git-button-track {
+  background-image: var(--jp-Git-icon-track);
+  float: right;
+}
+
+/*-----------------------------------------------------------------------------
+| Git-Icon
+|----------------------------------------------------------------------------*/
+.jp-Git-icon-insertion, .jp-Git-icon-deletion {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 11px;
+  float: right;
+  padding: 10px 5px 0px 0px;
+}
+
+.jp-Git-icon-insertion{
+  background-image: var(--jp-Git-icon-insertion);
+  }
+
+.jp-Git-icon-deletion{
+    background-image: var(--jp-Git-icon-deletion);
+    }
+
+.jp-Git-modNumber{
+  float: right;
 }
 
 :root {
@@ -577,3 +761,4 @@
   --jp-private-tab-manager-tab-height: 32px;
   --jp-private-tab-manager-tab-padding-top: 8px;
 }
+

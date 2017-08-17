@@ -95,20 +95,24 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
     return (
       <div>
       <div className='jp-Git-timeline'>
-        <button className='jp-Git-timeline-arrow' onClick={()=>this.show_left()}> {'\u276e'} </button>
+        <button className='jp-Git-timeline-arrow-left' onClick={()=>this.show_left()}> </button>
         <div className='jp-Git-timeline-container' ref='past_commits_container'> 
-            <button className='jp-Git-mod-current' onDoubleClick={()=>this.props.show_current_work(true)}>
-               CUR
+            <button className='jp-Git-currentCommit-active' onClick={()=>this.props.show_current_work(true)}>
+            </button>    
+            <button className='jp-Git-currentCommit-btn'>
             </button>         
             {this.props.past_commits.map((dj, dj_index)=>
-              <span className='jp-Git-mod-container' key={dj_index} onDoubleClick={()=>{this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), this.props.show_current_work(false)}}>---
-                  <button className='jp-Git-mod-pastCommit'>
+              <span className='jp-Git-commit-btn-container' key={dj_index} onClick={()=>{this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), this.props.show_current_work(false)}}>---------
+                  <button className='jp-Git-pastCommit-active'>
                       <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
-                    </button>
+                  </button>
+                  <button className='jp-Git-pastCommit-btn'>
+                      <PastCommitNodeInfo index={dj_index} commit={dj.commit} author={dj.author} date={dj.date} commit_msg={dj.commit_msg}/>
+                  </button>
               </span>
             )}
           </div>,     
-         <button className='jp-Git-timeline-arrow' onClick={()=>this.show_right()}> {'\u276f'} </button>
+         <button className='jp-Git-timeline-arrow-right' onClick={()=>this.show_right()}></button>
       </div>
           <ToggleDisplay show={!(this.props.show_CUR)}>
           <SinglePastCommitInfo num={this.state.single_num} data={this.state.single_data} list={this.state.single_data_filelist}/>
@@ -175,18 +179,25 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
     return (
       <div >
       <div className='jp-Git-singlePastCommit'>
-        <div className='jp-Git-singlePastCommit-label'> No. {this.props.num}</div>
-        <div className='jp-Git-singlePastCommit-label'> commit: {this.props.data.commit}</div>
-        <div className='jp-Git-singlePastCommit-label'> author: {this.props.data.author}</div>
-        <div className='jp-Git-singlePastCommit-label'> date: {this.props.data.date}</div>
-        <div className='jp-Git-singlePastCommit-label'> commit_msg: {this.props.data.commit_msg}</div>
-        <div className='jp-Git-singlePastCommit-label'> summary: {this.props.data.modified_file_note}</div>
+        <div className='jp-Git-singlePastCommit-header'>
+          <span className='jp-Git-singlePastCommit-label-commit-number'> #{this.props.data.commit}</span>
+          <span className='jp-Git-singlePastCommit-label-summary'> {this.props.data.modified_file_note}</span>
+        </div>
+        <div className='jp-Git-singlePastCommit-label-author'> <span className="jp-Git-icon-author"/> {this.props.data.author}</div>
+        <div className='jp-Git-singlePastCommit-label-date'> {this.props.data.date}</div>
+        <div className='jp-Git-singlePastCommit-label-commit-message'> "<span className="jp-past-commit-message"/>{this.props.data.commit_msg}"</div>
+
       </div>
       <div className='jp-Git-singlePastCommitDetail'>
           {this.props.list.map((mf, mf_index)=>
             <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} />
-              <span className='jp-Git-singlePastCommitDetail-file-path' onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} :{mf.insertion}(+), {mf.deletion}(-) </span>
+              <span className='jp-Git-singlePastCommitDetail-file-path' onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}>{mf.modified_file_path} </span>
+                <span className="jp-Git-modNumber"> {mf.deletion}</span>   
+                <span className='jp-Git-icon-deletion'></span>   
+                <span className="jp-Git-modNumber">{mf.insertion}</span>
+                <span className='jp-Git-icon-insertion'></span>
+              
             </li>
           )}
       </div>
