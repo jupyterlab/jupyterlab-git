@@ -70,12 +70,6 @@
   border-radius: 2px;
   transition: background-color 0.1s ease;
 }
-.jp-Git-repo-path:hover {
-  background-color: rgba(153,153,153,.1);
-}
-.jp-Git-repo-path:focus {
-  background-color: rgba(153,153,153,.2);
-}
 
 .jp-Git-repo-refresh{
   flex: 1 1 auto;
@@ -137,6 +131,8 @@ background-image: var(--jp-icon-refresh-selected);
 }
 
 .jp-Git-branch-dropdown {
+
+    background-image: url(Images/triangle-right-white.svg);
     flex: 0 0 auto;
     vertical-align: middle;
     border: var(--md-grey-700);
@@ -608,12 +604,12 @@ input[type=text]:focus {
   color:white;
   background-color: var(--md-green-500);
   flex: 0 0 auto;
-  height: 10px;
-  padding: 10px 12px 10px 16px;
+  height: 25px;
   font-weight: 400;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
   font-size: 12px;
+  padding-left: 12px;
 }
 
 .jp-Git-staged-commit-msg{
@@ -647,9 +643,7 @@ input[type=text]:focus {
   border-radius: 2px;
   transition: background-color 0.1s ease;
 }
-.jp-Git-staged-header-label:hover {
-  background-color: rgba(153,153,153,.1);
-}
+
 .jp-Git-staged-header-label:focus {
   background-color: rgba(153,153,153,.2);
 }
@@ -748,7 +742,8 @@ input[type=text]:focus {
   line-height: var(--jp-private-running-shutdown-button-height);
   transition: background-color 0.1s ease;
   border-radius: 2px;
-  height: 16px;
+  height: 12px;
+  width: 12px;
   background-position: center;
   background-repeat: no-repeat;
   border: none;
@@ -772,18 +767,45 @@ input[type=text]:focus {
 .jp-Git-button-add {
   background-image: var(--jp-Git-icon-add);
   float: right;
+  padding-top: 20px;
 }
 
 .jp-Git-button-reset {
-  background-image: var(--jp-Git-icon-reset);
+  background-image: var(--jp-Git-button-reset);
+  float: right;
+  padding-top: 20px;
+}
+
+.jp-git-file:hover .jp-Git-button-reset {
+
+}
+
+.jp-Git-button-reset-white {
+  background-image: var(--jp-Git-button-reset-white);
   float: right;
 }
 
 .jp-Git-button-track {
   background-image: var(--jp-Git-icon-track);
   float: right;
+  padding-top: 20px;
 }
 
+.jp-button .jp-git-button-triangle-down {
+  background-image: url('./Images/triangle-down.svg');
+ }
+
+ .jp-git-button-triangle-down-white {
+  
+}
+
+.jp-git-button-triangle-right {
+  
+}
+
+.jp-git-button-triangle-right-white {
+  
+}
 /*-----------------------------------------------------------------------------
 | Git-Icon
 |----------------------------------------------------------------------------*/

@@ -6,9 +6,13 @@
 :root {
     --jp-Git-icon-add: url('./Images/add.svg');
     --jp-Git-icon-track: url('./Images/track.svg');
-    --jp-Git-icon-reset: url('./Images/reset.svg');
+    --jp-Git-button-reset: url('./Images/reset.svg');
     --jp-Git-icon-insertion: url('./Images/insertion.svg');
     --jp-Git-icon-deletion: url('./Images/deletion.svg');
     --jp-Git-icon-author: url('./Images/author.svg');
-    --jp-Git-icon-branch: url('./Images/branch.svg')
+    --jp-Git-icon-branch: url('./Images/branch.svg');
+    --jp-Git-button-triangle-down-white: url('./Images/triangle-down-white.svg');
+    --jp-Git-button-triangle-right-white: url('./Images/triangle-right-white.svg');
+    --jp-Git-button-triangle-down: url('./Images/triangle-down.svg');
+    --jp-Git-button-triangle-right: url('./Images/triangle-right.svg');
 }
