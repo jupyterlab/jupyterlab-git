@@ -120,7 +120,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
         <div className='jp-Git-timeline-container' ref='past_commits_container'> 
             <button className='jp-Git-currentCommit-active' onDoubleClick={()=>this.props.show_current_work(-1)}>
             </button> 
-            <button className='jp-Git-currentCommit-btn'>
+            <button className='jp-Git-currentCommit-btn'onDoubleClick={()=>this.props.show_current_work(-1)}>
             </button>  
             {this.props.past_commits.map((dj, dj_index)=>
               <span className='jp-Git-commit-btn-container' key={dj_index} onDoubleClick={()=>{this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), this.props.show_current_work(dj_index)}}>---
@@ -217,7 +217,7 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
           {this.props.list.map((mf, mf_index)=>
             <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}/>
-              <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit})>{mf.modified_file_path} </span>
+              <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit})}>{mf.modified_file_path} </span>
                 <span className="jp-Git-modNumber"> {mf.deletion}</span>   
                 <span className='jp-Git-icon-deletion'></span>   
                 <span className="jp-Git-modNumber">{mf.insertion}</span>

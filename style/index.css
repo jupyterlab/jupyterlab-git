@@ -272,24 +272,24 @@ jp-Git-timeline-arrow-left:active {
 }
 
 .jp-Git-mod.jp-Edit {
-  background-image: url(git_button_circles/edit-circle.svg);
+  background-image: url(Images/edit-circle.svg);
 }
 .jp-Git-mod.jp-Edit-selected {
-  background-image: url(git_button_circles/edit-circle-selected.svg);
+  background-image: url(Images/edit-circle-selected.svg);
 }
 
 .jp-Git-mod.jp-Head {
-  background-image: url(git_button_circles/head-circle.svg);
+  background-image: url(Images/head-circle.svg);
 }
 .jp-Git-mod.jp-Head-selected {
-  background-image: url(git_button_circles/head-circle-selected.svg);
+  background-image: url(Images/head-circle-selected.svg);
 }
 
 .jp-Git-mod.jp-Normal {
-  background-image: url(git_button_circles/normal-circle.svg);
+  background-image: url(Images/normal-circle.svg);
 }
 .jp-Git-mod.jp-Normal-selected {
-  background-image: url(git_button_circles/normal-circle-selected.svg);
+  background-image: url(Images/normal-circle-selected.svg);
 }
 
 
@@ -477,7 +477,6 @@ jp-Git-timeline-arrow-left:active {
 .jp-Git-singlePastCommit-label-commit-message {
   clear:left;
   padding: 0 10px 10px 10px;
-  color:
 }
 
 .jp-Git-singlePastCommit-label-summary {
