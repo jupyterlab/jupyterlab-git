@@ -4,7 +4,7 @@ Contents for each call include:
 1. URLS: Only POST can send data to server through Jupyterlab"s ServerConnection, so, all commands use POST
 3. Request JSON
 4. Reply JSON
-5. How errors are handled (HTTP error codes, error JSON)
+5. How errors are handled (HTTP success codes, error JSON)
 
 ### git API - Get all information of current repo
 Request with a "current_path", if it"s a git repo, return all the git repo information with a zero "code", if not, return error message with a non-zero "code".
