@@ -90,10 +90,10 @@
   background-position: center;
 }
 .jp-Git-repo-refresh:hover {
-background-image: var(--jp-icon-refresh);
+background-color: var(--jp-border-color2)
 }
 .jp-Git-repo-refresh:active {
-background-image: var(--jp-icon-refresh);
+background-image: var(--jp-border-color2);
 }
 
 
@@ -107,7 +107,7 @@ background-image: var(--jp-icon-refresh);
     flex-direction: row;
     /* Add the border width because this is border-box sized */
     height: calc(var(--jp-private-csvviewer-toolbar-height) + var(--jp-border-width));
-    background: var(--md-grey-700);
+    background-color: var(--md-grey-700);
     z-index: 1;
     box-shadow: var(--jp-toolbar-box-shadow);
 }
@@ -545,6 +545,11 @@ jp-Git-timeline-arrow-left:active {
   list-style-type: none;
 }
 
+.jp-Git-file .jp-Git-button {
+  display: none;
+} 
+
+
 .jp-Git-file .jp-mod-selected {
   background: var(--jp-brand-color1);
 }
@@ -802,11 +807,6 @@ input[type=text]:focus {
   border: none;
   outline: none;
 }
-
-
-.jp-Git-button {
-  display: none;
-} 
 
 
 .jp-Git-button:hover {
