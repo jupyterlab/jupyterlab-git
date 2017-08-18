@@ -31,6 +31,17 @@ import {
   GitSessions
 } from './components/components'
 
+  
+import '../style/index.css';
+
+
+/*
+import {
+  newClosableIFrame
+}from './urls';
+*/
+
+
 /**
  * The command IDs used by the git plugin.
  */
@@ -65,7 +76,11 @@ export namespace CommandIDs {
 };
 /**
  * Add the commands for the git-plugin.
+ * 
+ * 
  */
+
+
 export
 function addCommands(app: JupyterLab, services: ServiceManager) {
   let { commands } = app;
@@ -113,6 +128,9 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
     }catch(err){}
     return st;
   }
+
+
+  
 
   // Add terminal commands.
   commands.addCommand(CommandIDs.git_terminal, {
@@ -327,6 +345,10 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
     execute: () => {
       console.log("Git Tutorial link 4");
       window.open("https://www.google.com");
+      //const url = "https://www.google.com";
+      //let iframe = newClosableIFrame(url,'textt');
+      //app.shell.addToMainArea(iframe);
+      //app.shell.activateById(iframe.id);
     },
   });
 

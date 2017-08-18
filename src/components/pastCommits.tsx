@@ -27,6 +27,9 @@ export namespace PastCommits {
   interface IState {
     data: any;
     info:string;
+    files_changed:string,
+    insertion_count:string,
+    deletion_count:string,
     single_num:string;
     single_data:any;
     single_data_filelist:any;
@@ -56,7 +59,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
 
   constructor(props: PastCommits.IProps) {
     super(props);
-    this.state = {data: props.past_commits, info:'', single_num:'', single_data:'', single_data_filelist:[], show_left_arrow:true, show_right_arrow:false}
+    this.state = {data: props.past_commits, info:'', files_changed:'',insertion_count:'',deletion_count:'',single_num:'', single_data:'', single_data_filelist:[], show_left_arrow:true, show_right_arrow:false}
   }
 
   show_left(){
@@ -92,7 +95,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
     let git_temp = new Git();
     let response = await git_temp.log_1(dj.commit, path);
     if(response.code==0){
-      this.setState({info:response.modified_file_note, single_data:dj, single_num: dj_index+' commit(s) before',single_data_filelist:response.modified_files})
+      this.setState({info:response.modified_file_note, files_changed:response.modified_files_count,insertion_count:response.number_of_insertions,deletion_count:response.number_of_deletions,  single_data:dj, single_num: dj_index+' commit(s) before',single_data_filelist:response.modified_files})
     }
   }
 
@@ -144,7 +147,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
          </ToggleDisplay>
       </div>
           <ToggleDisplay show={this.props.show_index!=-1}>
-          <SinglePastCommitInfo num={this.state.single_num} data={this.state.single_data}  info={this.state.info} list={this.state.single_data_filelist} app={this.props.app}/>
+          <SinglePastCommitInfo num={this.state.single_num} data={this.state.single_data}  info={this.state.info} files_changed={this.state.files_changed} insertion_count={this.state.insertion_count} deletion_count={this.state.deletion_count} list={this.state.single_data_filelist} app={this.props.app}/>
           </ToggleDisplay>
 
 
@@ -198,6 +201,9 @@ export namespace SinglePastCommitInfo {
     num: string;
     data:SingleCommitInfo;
     info:string;
+    files_changed:string,
+    insertion_count:string,
+    deletion_count:string,
     list:[CommitModifiedFile];
     app: JupyterLab;
   }
@@ -212,7 +218,7 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
       <div className='jp-Git-singlePastCommit'>
         <div className='jp-Git-singlePastCommit-header'>
           <span className='jp-Git-singlePastCommit-label-commit-number'> #{this.props.data.commit}</span>
-          <span className='jp-Git-singlePastCommit-label-summary'> {this.props.info}</span>
+          <span className='jp-Git-singlePastCommit-label-summary'> {this.props.files_changed} { this.props.deletion_count} {this.props.insertion_count}</span>
         </div>
         <div className='jp-Git-singlePastCommit-label-author'> <span className="jp-Git-icon-author"/> {this.props.data.author}</div>
         <div className='jp-Git-singlePastCommit-label-date'> {this.props.data.date}</div>
@@ -223,10 +229,12 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
             <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}/>
               <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit})}>{mf.modified_file_path} </span>
+
                 <span className="jp-Git-modNumber"> {mf.deletion}</span>   
                 <span className='jp-Git-icon-deletion'></span>   
                 <span className="jp-Git-modNumber">{mf.insertion}</span>
                 <span className='jp-Git-icon-insertion'></span>
+
             </li>
           )}
       </div>
@@ -237,6 +245,8 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
 
 /**
  * onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}
+ *           <span className='jp-Git-icon-deletion'> {this.props.deletion_count}</span>
+          <span className='jp-Git-icon-insertion'> {this.props.insertion_count}</span>
  */
 
 
