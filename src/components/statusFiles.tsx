@@ -207,10 +207,8 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
           <ToggleDisplay show={this.state.staged_show}>
           <div className= 'jp-Git-section-fileContainer'>
 
-             <form onKeyPress={this.onKeyPress}>
-            <label>
+             <form className="jp-Git-staged-commit" onKeyPress={this.onKeyPress}>
               <input className='jp-Git-staged-commit-msg' type="text" disabled ={(this.props.staged_files).length==0} placeholder={(this.props.staged_files).length==0?'Stage your changes before commit':'Input message to commit staged changes'} value={this.state.commit_msg} onChange={this.handleChange}/>
-              </label>
               <input className={this.commit_box_class_selection(this.state.commit_disable, this.props.staged_files.length)} type="button" title='Commit' value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>{commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh),this.init_input()}}/>
               </form>
               
