@@ -142,7 +142,6 @@ background-image: var(--jp-icon-refresh-selected);
     height: 20px;
     margin-top: 2px;
     margin-bottom: 2px;
-    background-color: var(--md-grey-700);
 }
 
 /*-----------------------------------------------------------------------------
@@ -791,8 +790,8 @@ input[type=text]:focus {
   padding-top: 20px;
 }
 
-.jp-button .jp-git-button-triangle-down {
-  background-image: url('./Images/triangle-down.svg');
+.jp-Git-button-triangle-down {
+    background-image: var(--jp-Git-button-triangle-down);
  }
 
  .jp-git-button-triangle-down-white {
