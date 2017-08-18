@@ -127,6 +127,9 @@ export interface CommitModifiedFile{
 export interface SingleCommitFilePathInfo {
 	code:number;
 	modified_file_note?: string,
+	modified_files_count?: string,
+	number_of_insertions?: string,
+	number_of_deletions?: string,
 	modified_files?: [
 		CommitModifiedFile
 	]

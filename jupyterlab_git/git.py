@@ -97,19 +97,37 @@ class Git:
         my_output, my_error = p.communicate()
         if(p.returncode == 0):
             result = []
-            note = ""
+            note = [0]*3
+            count=0;
+            insert = ""
+            delete = ""
+            temp = ""
             line_array = my_output.decode('utf-8').splitlines()
             length = len(line_array)
             if(length > 1):
-                note = line_array[length - 1]
+                temp = line_array[length - 1]
+                words = temp.split()
+                for i in range(0,len(words)):
+                    if words[i].isdigit():
+                        note[count]=words[i];
+                        count +=1
                 for num in range(1, int(length / 2)):
                     line_info = line_array[num].split()
                     result.append(
                         {"modified_file_path": line_info[2], "insertion": line_info[0], "deletion": line_info[1]})
 
+            if(note[2]==0 and length>1):
+                if '-' in temp:
+                    exchange = note[1]
+                    note[1]=note[2]
+                    note[2]=exchange 
+
             return {
                 "code": p.returncode,
-                "modified_file_note": note,
+                "modified_file_note": temp,
+                "modified_files_count": note[0],
+                "number_of_insertions": note[1],
+                "number_of_deletions": note[2],
                 "modified_files": result}
         else:
             return {"code": p.returncode, 'command': "git log_1","message": my_error.decode('utf-8')}

@@ -3,14 +3,12 @@
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 22 22" style="enable-background:new 0 0 22 22;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#4CAF50;}
+	.st0{fill:none;}
 	.st1{display:none;}
 	.st2{display:inline;fill:none;stroke:#9E9E9E;stroke-width:2.000000e-02;stroke-miterlimit:10;}
+	.st3{fill:#FFFFFF;}
 </style>
-<g>
-	<path class="st0" d="M11,0C4.9,0,0,4.9,0,11s4.9,11,11,11s11-4.9,11-11S17.1,0,11,0z M18.7,12.1h-6.6v6.6H9.9v-6.6H3.3V9.9h6.6V3.3
-		h2.2v6.6h6.6V12.1z"/>
-</g>
+<path class="st0" d="M-1-1h24v24H-1V-1z"/>
 <g class="st1">
 	<line class="st2" x1="11" y1="0" x2="11" y2="22"/>
 	<path class="st2" d="M21.5,11"/>
@@ -72,4 +70,6 @@
 	<line class="st2" x1="0" y1="1.1" x2="22" y2="1.1"/>
 	<line class="st2" x1="0" y1="20.9" x2="22" y2="20.9"/>
 </g>
+<polyline class="st3" points="19.7,5.5 19.8,19.8 6.6,19.8 6.6,17.6 17.6,17.6 17.6,7.7 8.8,7.7 8.8,5.5 "/>
+<polygon class="st3" points="8.8,11.6 8.8,1.6 2.6,6.6 "/>
 </svg>
