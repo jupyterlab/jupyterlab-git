@@ -233,6 +233,30 @@ jp-Git-timeline-arrow-left:active {
   position: absolute;
   padding-right: 8%;
 }
+/*-----------------------------------------------------------------------------
+| IFRAME
+|----------------------------------------------------------------------------*/
+.jp-Help {
+  min-width: 480px;
+  background: white;
+  outline: none;
+}
+
+
+.jp-Help::before {
+    content: '';
+    display: block;
+    height: var(--jp-toolbar-micro-height);
+    background: var(--jp-toolbar-background);
+    border-bottom: 1px solid var(--jp-toolbar-border-color);
+    box-shadow: var(--jp-toolbar-box-shadow);
+    z-index: 1;
+}
+
+
+.jp-Help > iframe {
+  border: none;
+}
 
 /*-----------------------------------------------------------------------------
 | Git-mod (elements in Git-timeline)
@@ -465,7 +489,7 @@ jp-Git-timeline-arrow-left:active {
 }
 
 .jp-Git-singlePastCommit-label-summary {
-  width: 50%;
+  width: 30%;
   padding: 10px;
   float: right;
   font-weight: 400;
@@ -486,6 +510,7 @@ jp-Git-timeline-arrow-left:active {
   color: var(--jp-ui-font-color1);
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
+  white-space: nowrap;
 }
 
 .jp-Git-singlePastCommitDetail-file-path {
