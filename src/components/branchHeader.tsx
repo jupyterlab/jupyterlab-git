@@ -79,7 +79,7 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
       <div  className='jp-Git-branch'>
         <span className ='jp-Git-branch-label'> <span className='jp-Git-icon-branch'/>
           {this.state.show_notice?'Stage and commit changes before switching branches':this.props.current_branch}
-        </span>,
+        </span>
         <ToggleDisplay show={!(this.props.disabled)}>
         <select required ref="switch_branch_dropdown_button" value = {this.props.current_branch} disabled = {this.props.disabled} 
         title = {this.props.disabled?'Stage and commit changes before switching branches':'select branches'} 
@@ -97,7 +97,7 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
           </select>
           </ToggleDisplay> 
           <ToggleDisplay show={this.props.disabled&&!(this.state.show_notice)}>
-          <span className='jp-Git-icon-branch'onClick={()=>this.switch_branch_diable_notice()}/>
+          <select className='jp-Git-branch-dropdown' onClick={()=>this.switch_branch_diable_notice()}/>
           </ToggleDisplay> 
       </div>
     );
