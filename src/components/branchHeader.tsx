@@ -73,6 +73,8 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
         }.bind(this),3000);
   }
 
+
+  
   render(){
     this.state
     return (
