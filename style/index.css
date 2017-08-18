@@ -915,13 +915,41 @@ input[type=text]:focus {
   padding: 10px 5px 0px 0px;
 }
 
+.jp-Git-icon-insertion-white, .jp-Git-icon-deletion-white, .jp-Git-icon-directory-white{
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 11px;
+  float: right;
+  padding: 1px 5px 0px 0px;
+  border: none;
+}
+
 .jp-Git-icon-insertion{
   background-image: var(--jp-Git-icon-insertion);
-  }
+}
+
+.jp-Git-icon-insertion-white{
+  background-image: var(--jp-Git-icon-insertion-white);
+}
 
 .jp-Git-icon-deletion{
-    background-image: var(--jp-Git-icon-deletion);
-    }
+  background-image: var(--jp-Git-icon-deletion);
+}
+
+.jp-Git-icon-deletion-white{
+  background-image: var(--jp-Git-icon-deletion-white);
+}
+
+.jp-Git-icon-deletion-white{
+  background-image: var(--jp-Git-icon-deletion-white);
+}
+
+.jp-Git-icon-directory-white{
+  background-image: var(--jp-Git-icon-directory-white);
+}
 
 .jp-Git-modNumber{
   float: right;

@@ -5,10 +5,9 @@
 <style type="text/css">
 	.st0{display:none;}
 	.st1{display:inline;fill:none;stroke:#9E9E9E;stroke-width:2.000000e-02;stroke-miterlimit:10;}
-	.st2{clip-path:url(#SVGID_2_);}
-	.st3{clip-path:url(#SVGID_4_);fill:#FFFFFF;}
+	.st2{fill:#FFFFFF;}
 </style>
-<g class="st0">
+<g id="grid" class="st0">
 	<line class="st1" x1="11" y1="0" x2="11" y2="22"/>
 	<path class="st1" d="M21.5,11"/>
 	<path class="st1" d="M0.4,11"/>
@@ -44,12 +43,14 @@
 	<line class="st1" x1="1.1" y1="0" x2="22" y2="20.9"/>
 	<path class="st1" d="M22,22"/>
 	<path class="st1" d="M0,0"/>
+	<line class="st1" x1="20.9" y1="22" x2="0" y2="1.1"/>
+	<line class="st1" x1="1.1" y1="0" x2="22" y2="20.9"/>
 	<line class="st1" x1="0" y1="20.9" x2="20.9" y2="0"/>
 	<line class="st1" x1="22" y1="1.1" x2="1.1" y2="22"/>
 	<line class="st1" x1="4.4" y1="0" x2="4.4" y2="22"/>
 	<line class="st1" x1="22" y1="17.6" x2="0" y2="17.6"/>
 	<line class="st1" x1="22" y1="4.4" x2="0" y2="4.4"/>
-	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5563 10.9998)" class="st1" width="6.2" height="6.2"/>
+	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5563 11.0003)" class="st1" width="6.2" height="6.2"/>
 	<line class="st1" x1="0" y1="16.5" x2="22" y2="16.5"/>
 	<line class="st1" x1="16.5" y1="22" x2="16.5" y2="0"/>
 	<line class="st1" x1="5.5" y1="22" x2="5.5" y2="0"/>
@@ -71,27 +72,13 @@
 </g>
 <g>
 	<g>
-		<g>
-			<defs>
-				<polygon id="SVGID_1_" points="15.2,11 6.9,16 6.9,6 				"/>
-			</defs>
-			<clipPath id="SVGID_2_">
-				<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
-			</clipPath>
-			<g class="st2">
-				<g>
-					<g>
-						<defs>
-							<rect id="SVGID_3_" x="-336.7" y="-263" width="2736.4" height="1520.7"/>
-						</defs>
-						<clipPath id="SVGID_4_">
-							<use xlink:href="#SVGID_3_"  style="overflow:visible;"/>
-						</clipPath>
-						<rect x="-2.7" y="-3.4" class="st3" width="27.1" height="28.8"/>
-					</g>
-				</g>
-			</g>
-		</g>
+		<path class="st2" d="M9.1,2.9l1.7,1.7c0.6,0.6,1.2,0.8,2,0.8h6.5l-0.1,13.8H2.8V2.9H9.1 M9.3,1.2H2.4c-0.7,0-1.2,0.6-1.2,1.2v17.1
+			c0,0.7,0.6,1.2,1.2,1.2h17.1c0.7,0,1.2-0.6,1.2-1.2l0.1-14.7c0-0.7-0.6-1.2-1.2-1.2h-6.9c-0.3,0-0.7-0.1-0.9-0.3l-1.8-1.8
+			C9.9,1.3,9.5,1.2,9.3,1.2L9.3,1.2z"/>
 	</g>
+</g>
+<g>
+	<path class="st2" d="M2.3,1.2h7c0.3,0,0.6,0.1,0.8,0.3l1.8,1.8c0.2,0.2,0.4,0.3,0.8,0.3h7c0.7,0,1.1,0.4,1.1,1.1v1.4
+		c0,0.7-0.6,1.1-1.1,1.1H2.3c-0.7,0-1.1-0.6-1.1-1.1V2.3C1.2,1.8,1.8,1.2,2.3,1.2z"/>
 </g>
 </svg>
