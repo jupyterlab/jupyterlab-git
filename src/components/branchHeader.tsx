@@ -66,31 +66,23 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
       });
     }
   }
-
-  switch_branch_diable_notice(switch_check){
-    if(switch_check){
+  switch_branch_diable_notice(){
       this.setState({show_notice:true});
-
-    }
+      setTimeout(function(){
+             this.setState({show_notice:false});
+        }.bind(this),3000);
   }
-  componentDidMount() {
-      this.interval = setInterval(() => this.setState({show_notice:false}), 5000);
-  }
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  } 
 
   render(){
+    this.state
     return (
       <div  className='jp-Git-branch'>
-      <ToggleDisplay show={!(this.state.show_notice)}>
-        <span className ='jp-Git-branch-label'> <span className='jp-Git-icon-branch'></span>
-          {this.props.current_branch}
+        <span className ='jp-Git-branch-label'> <span className='jp-Git-icon-branch'/>
+          {this.state.show_notice?'Stage and commit changes before switching branches':this.props.current_branch}
         </span>,
-        <select required ref="switch_branch_dropdown_button" value = {this.props.current_branch}
-
-        title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} 
-        onClick={()=>this.switch_branch_diable_notice(this.props.disabled)}
+        <ToggleDisplay show={!(this.props.disabled)}>
+        <select required ref="switch_branch_dropdown_button" value = {this.props.current_branch} disabled = {this.props.disabled} 
+        title = {this.props.disabled?'Stage and commit changes before switching branches':'select branches'} 
         className='jp-Git-branch-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
              <option value=" " disabled>**Switch Branches: </option>
              {this.props.data.map((dj, dj_index)=>
@@ -102,13 +94,12 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
               <option value=''>
                 CREATE NEW
               </option>
-          </select>,  
-      </ToggleDisplay>
-      <ToggleDisplay show={this.state.show_notice}>
-        <span className ='jp-Git-branch-label'> <span className='jp-Git-icon-branch'></span>
-          Commit changes before switch branches
-         </span>
-        </ToggleDisplay>
+          </select>
+          </ToggleDisplay> 
+          <ToggleDisplay show={this.props.disabled&&!(this.state.show_notice)}>
+          <span className='jp-Git-icon-branch'onClick={()=>this.switch_branch_diable_notice()}/>
+          </ToggleDisplay> 
+
       </div>
     );
   }
