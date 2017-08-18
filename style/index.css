@@ -70,12 +70,6 @@
   border-radius: 2px;
   transition: background-color 0.1s ease;
 }
-.jp-Git-repo-path:hover {
-  background-color: rgba(153,153,153,.1);
-}
-.jp-Git-repo-path:focus {
-  background-color: rgba(153,153,153,.2);
-}
 
 .jp-Git-repo-refresh{
   flex: 1 1 auto;
@@ -123,7 +117,7 @@ background-image: var(--jp-icon-refresh-selected);
     font-size: var(--jp-ui-font-size1);
     line-height: var(--jp-private-csvviewer-toolbar-height);
     padding-left: 8px;
-    padding-right: 8px;
+    padding-right: 4px;
 }
 
 .jp-Git-icon-branch{
@@ -137,6 +131,8 @@ background-image: var(--jp-icon-refresh-selected);
 }
 
 .jp-Git-branch-dropdown {
+    background-image: url(Images/triangle-right-white.svg);
+    background-color: transparent;
     flex: 0 0 auto;
     vertical-align: middle;
     border: var(--md-grey-700);
@@ -146,7 +142,10 @@ background-image: var(--jp-icon-refresh-selected);
     height: 20px;
     margin-top: 2px;
     margin-bottom: 2px;
-    background-color: var(--md-grey-700);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    text-indent: 20px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -438,8 +437,9 @@ jp-Git-timeline-arrow-left:active {
   width: 50%;
   overflow: hidden;
   float: left;
-  width: 30%;
+  width: 36%;
   padding: 10px;
+  text-overflow: ellipsis;
 }
 
 .jp-Git-singlePastCommit-label-author{
@@ -525,6 +525,9 @@ jp-Git-timeline-arrow-left:active {
 }
 
 
+.jp-Git-file:hover .jp-Git-button {
+  display: inline;
+}
 
 .jp-Git-fileLabel {
   font-size: var(--jp-ui-font-size1);
@@ -537,9 +540,7 @@ jp-Git-timeline-arrow-left:active {
   border-radius: 2px;
   transition: background-color 0.1s ease;
 }
-.jp-Git-fileLabel:hover {
-  background-color: rgba(153,153,153,.1);
-}
+
 .jp-Git-fileLabel:focus {
   background-color: rgba(153,153,153,.2);
 }
@@ -605,35 +606,52 @@ input[type=text]:focus {
 }
 
 .jp-Git-staged {
+  display: flex;
+  align-items: center;
   color:white;
   background-color: var(--md-green-500);
   flex: 0 0 auto;
-  height: 10px;
-  padding: 10px 12px 10px 16px;
+  height: 25px;
   font-weight: 400;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
   font-size: 12px;
+  padding-left: 12px;
+}
+
+.jp-Git-staged-header-label {
+  flex: 1 1 auto;
+}
+
+.jp-Git-staged-commit {
+  resize: none;
+  display: flex;
+  align-items: center;
+  margin: 8px;
 }
 
 .jp-Git-staged-commit-msg{
   width: 75%;
   font-weight: 300;
   height: 36px;
-  margin-left: 15px;
-  margin-top: 10px;
-  margin-bottom: 5px;
   overflow-x: auto;
-  border: var(--jp-border-width) solid var(--jp-border-color2)
+  border: var(--jp-border-width) solid var(--jp-border-color2);
+  flex: 20 1 auto;
+  resize: none;
+}
+
+.jp-Git-staged-commit-msg:focus {
+  outline: none;
 }
 
 
 .jp-Git-staged-commit-button{
   background-color: var(--md-green-500);
-    color: white;
-    height: 40px;
-    width: 40px;
-    border:0;
+  color: white;
+  height: 42px;
+  width: 40px;
+  border: 0;
+  flex: 1 1 auto;
 }
 
 .jp-Git-staged-header-label {
@@ -647,9 +665,7 @@ input[type=text]:focus {
   border-radius: 2px;
   transition: background-color 0.1s ease;
 }
-.jp-Git-staged-header-label:hover {
-  background-color: rgba(153,153,153,.1);
-}
+
 .jp-Git-staged-header-label:focus {
   background-color: rgba(153,153,153,.2);
 }
@@ -740,7 +756,7 @@ input[type=text]:focus {
 /*-----------------------------------------------------------------------------
 | Git-button (for add, reset, track)
 |----------------------------------------------------------------------------*/
-.jp-Git-button {
+.jp-Git-button, .jp-Git-header-button {
   margin: 0px 4px;
   font-weight: 600;
   background-color: transparent;
@@ -748,12 +764,18 @@ input[type=text]:focus {
   line-height: var(--jp-private-running-shutdown-button-height);
   transition: background-color 0.1s ease;
   border-radius: 2px;
-  height: 16px;
+  height: 12px;
+  width: 12px;
   background-position: center;
   background-repeat: no-repeat;
   border: none;
   outline: none;
 }
+
+
+.jp-Git-button {
+  display: none;
+} 
 
 
 .jp-Git-button:hover {
@@ -772,18 +794,45 @@ input[type=text]:focus {
 .jp-Git-button-add {
   background-image: var(--jp-Git-icon-add);
   float: right;
+  padding-top: 20px;
 }
 
 .jp-Git-button-reset {
-  background-image: var(--jp-Git-icon-reset);
+  background-image: var(--jp-Git-button-reset);
+  float: right;
+  padding-top: 20px;
+}
+
+.jp-git-file:hover .jp-Git-button-reset {
+
+}
+
+.jp-Git-button-reset-white {
+  background-image: var(--jp-Git-button-reset-white);
   float: right;
 }
 
 .jp-Git-button-track {
   background-image: var(--jp-Git-icon-track);
   float: right;
+  padding-top: 20px;
 }
 
+.jp-Git-button-triangle-down {
+    background-image: var(--jp-Git-button-triangle-down);
+ }
+
+ .jp-git-button-triangle-down-white {
+  
+}
+
+.jp-git-button-triangle-right {
+  
+}
+
+.jp-git-button-triangle-right-white {
+  
+}
 /*-----------------------------------------------------------------------------
 | Git-Icon
 |----------------------------------------------------------------------------*/
