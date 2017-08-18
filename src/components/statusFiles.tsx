@@ -155,6 +155,20 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
     this.setState({untracked_show:!(this.state.untracked_show)});
   }
 
+  commit_box_class_selection(disable:boolean, files_num:number):string{
+    if(disable) {
+      if(files_num==0){
+        return 'jp-Git-staged-commit-button-disable'
+      }
+      else{
+        return 'jp-Git-staged-commit-button-ready';
+      }
+    }
+    else{
+        return 'jp-Git-staged-commit-button';
+    }
+  }
+
   render(){
     return (
       <div>
@@ -173,7 +187,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
             <label>
               <input className='jp-Git-staged-commit-msg' type="text" disabled ={(this.props.staged_files).length==0} placeholder={(this.props.staged_files).length==0?'Stage your changes before commit':'Input message to commit staged changes'} value={this.state.commit_msg} onChange={this.handleChange}/>
               </label>
-              <input className={this.state.commit_disable?'jp-Git-staged-commit-button-disable':'jp-Git-staged-commit-button'} type="button" title='Commit' value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>{commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh),this.init_input()}}/>
+              <input className={this.commit_box_class_selection(this.state.commit_disable, this.props.staged_files.length)} type="button" title='Commit' value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>{commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh),this.init_input()}}/>
               </form>
               
                 {this.props.staged_files.map((file, file_index)=>

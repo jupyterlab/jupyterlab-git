@@ -1,5 +1,5 @@
 import * as React from 'react';
-
+import ToggleDisplay from 'react-toggle-display'
 import {
   Widget
 } from '@phosphor/widgets';
@@ -22,6 +22,7 @@ export namespace BranchHeader {
     data: any;
     refresh:any;
     disabled:boolean;
+    show_notice:boolean;
   }
 
   export
@@ -35,9 +36,10 @@ export namespace BranchHeader {
   }
 }
 export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
+  interval:any;
   constructor(props: BranchHeader.IProps) {
     super(props);
-    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: props.current_branch, data: [], refresh:props.refresh, disabled:props.disabled}
+    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: props.current_branch, data: [], refresh:props.refresh, disabled:props.disabled, show_notice:false}
   }
 
 //functions for switch branches
@@ -65,15 +67,30 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
     }
   }
 
+  switch_branch_diable_notice(switch_check){
+    if(switch_check){
+      this.setState({show_notice:true});
+
+    }
+  }
+  componentDidMount() {
+      this.interval = setInterval(() => this.setState({show_notice:false}), 5000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  } 
+
   render(){
     return (
       <div  className='jp-Git-branch'>
+      <ToggleDisplay show={!(this.state.show_notice)}>
         <span className ='jp-Git-branch-label'> <span className='jp-Git-icon-branch'></span>
           {this.props.current_branch}
         </span>,
-        <select required ref="switch_branch_dropdown_button" value = {this.props.current_branch} disabled = {this.props.disabled} 
+        <select required ref="switch_branch_dropdown_button" value = {this.props.current_branch}
 
         title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} 
+        onClick={()=>this.switch_branch_diable_notice(this.props.disabled)}
         className='jp-Git-branch-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
              <option value=" " disabled>**Switch Branches: </option>
              {this.props.data.map((dj, dj_index)=>
@@ -86,6 +103,12 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
                 CREATE NEW
               </option>
           </select>,  
+      </ToggleDisplay>
+      <ToggleDisplay show={this.state.show_notice}>
+        <span className ='jp-Git-branch-label'> <span className='jp-Git-icon-branch'></span>
+          Commit changes before switch branches
+         </span>
+        </ToggleDisplay>
       </div>
     );
   }

@@ -628,14 +628,17 @@ input[type=text]:focus {
 }
 
 
-.jp-Git-staged-commit-button, .jp-Git-staged-commit-button-disable{
+.jp-Git-staged-commit-button, .jp-Git-staged-commit-button-ready, .jp-Git-staged-commit-button-disable{
   background-color: var(--md-green-500);
     color: white;
     height: 40px;
     width: 40px;
     border:0;
 }
-  .jp-Git-staged-commit-button-disable{
+.jp-Git-staged-commit-button-ready{
+    opacity: .3;
+  }
+.jp-Git-staged-commit-button-disable{
   background-color: lightgray;
   }
 
