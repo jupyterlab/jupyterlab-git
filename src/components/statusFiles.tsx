@@ -184,19 +184,17 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
       <div>
         <div className= 'jp-Git-section-fileContainer'>
           <div className='jp-Git-staged'>       
-              <span className='jp-git-staged-header-label'> Staged({(this.props.staged_files).length})</span>
+              <span className='jp-Git-staged-header-label'> Staged({(this.props.staged_files).length})</span>
               <ToggleDisplay show={this.props.staged_files.length>0}>
               <button className={`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN}`} onClick={()=>this.dropdown_staged()}></button>
-              <button className={`jp-Git-button ${GIT_BUTTON_RESET}`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}></button>
+              <button className={`jp-Git-header-button ${GIT_BUTTON_RESET}`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}></button>
               </ToggleDisplay>
           </div>
           <ToggleDisplay show={this.state.staged_show}>
           <div className= 'jp-Git-section-fileContainer'>
 
-             <form onKeyPress={this.onKeyPress}>
-            <label>
-              <input className='jp-Git-staged-commit-msg' type="text" disabled ={(this.props.staged_files).length==0} placeholder={(this.props.staged_files).length==0?'Stage your changes before commit':'Input message to commit staged changes'} value={this.state.commit_msg} onChange={this.handleChange}/>
-              </label>
+             <form className="jp-Git-staged-commit" onKeyPress={this.onKeyPress}>
+              <textarea className='jp-Git-staged-commit-msg' disabled ={(this.props.staged_files).length==0} placeholder={(this.props.staged_files).length==0?'Stage your changes before commit':'Input message to commit staged changes'} value={this.state.commit_msg} onChange={this.handleChange}/>
               <input className='jp-Git-staged-commit-button' type="button" title='Commit' value={'\u2714'}  disabled={this.state.commit_disable} onClick={()=>{commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh),this.init_input()}}/>
               </form>
               
@@ -217,8 +215,8 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
               <span className='jp-Git-unstaged-header-label'> Unstaged({(this.props.unstaged_files).length})</span>  
               <ToggleDisplay show={this.props.unstaged_files.length>0}>
               <button className={`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN}`} onClick={()=>this.dropdown_unstaged()}></button>
-              <button className={`jp-Git-button ${GIT_BUTTON_ADD}`} title='Stage all the changes' onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}></button>
-              <button className={`jp-Git-button ${GIT_BUTTON_RESET}`} title='Discard all the changes' onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}></button>
+              <button className={`jp-Git-header-button ${GIT_BUTTON_ADD}`} title='Stage all the changes' onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}></button>
+              <button className={`jp-Git-header-button ${GIT_BUTTON_RESET}`} title='Discard all the changes' onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}></button>
               </ToggleDisplay>
           </div>
           <ToggleDisplay show={this.state.unstaged_show}>
@@ -240,7 +238,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
               <span className='jp-Git-untracked-header-label'> Untracked({(this.props.untracked_files).length})</span>
               <ToggleDisplay show={this.props.untracked_files.length>0}>
               <button className={`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN}`} onClick={()=>this.dropdown_untracked()}></button>
-              <button className={`jp-Git-button ${GIT_BUTTON_TRACK}`} title='Track all the files' onClick={()=>add_all_UntrackedNode(this.props.top_repo_path, this.props.refresh)}></button>
+              <button className={`jp-Git-header-button ${GIT_BUTTON_TRACK}`} title='Track all the files' onClick={()=>add_all_UntrackedNode(this.props.top_repo_path, this.props.refresh)}></button>
               </ToggleDisplay>
           </div>
           <ToggleDisplay show={this.state.untracked_show}>

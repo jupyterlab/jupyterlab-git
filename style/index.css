@@ -117,7 +117,7 @@ background-image: var(--jp-icon-refresh-selected);
     font-size: var(--jp-ui-font-size1);
     line-height: var(--jp-private-csvviewer-toolbar-height);
     padding-left: 8px;
-    padding-right: 8px;
+    padding-right: 4px;
 }
 
 .jp-Git-icon-branch{
@@ -131,8 +131,8 @@ background-image: var(--jp-icon-refresh-selected);
 }
 
 .jp-Git-branch-dropdown {
-
     background-image: url(Images/triangle-right-white.svg);
+    background-color: transparent;
     flex: 0 0 auto;
     vertical-align: middle;
     border: var(--md-grey-700);
@@ -142,6 +142,10 @@ background-image: var(--jp-icon-refresh-selected);
     height: 20px;
     margin-top: 2px;
     margin-bottom: 2px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    text-indent: 20px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -433,8 +437,9 @@ jp-Git-timeline-arrow-left:active {
   width: 50%;
   overflow: hidden;
   float: left;
-  width: 30%;
+  width: 36%;
   padding: 10px;
+  text-overflow: ellipsis;
 }
 
 .jp-Git-singlePastCommit-label-author{
@@ -520,6 +525,9 @@ jp-Git-timeline-arrow-left:active {
 }
 
 
+.jp-Git-file:hover .jp-Git-button {
+  display: inline;
+}
 
 .jp-Git-fileLabel {
   font-size: var(--jp-ui-font-size1);
@@ -532,9 +540,7 @@ jp-Git-timeline-arrow-left:active {
   border-radius: 2px;
   transition: background-color 0.1s ease;
 }
-.jp-Git-fileLabel:hover {
-  background-color: rgba(153,153,153,.1);
-}
+
 .jp-Git-fileLabel:focus {
   background-color: rgba(153,153,153,.2);
 }
@@ -600,6 +606,8 @@ input[type=text]:focus {
 }
 
 .jp-Git-staged {
+  display: flex;
+  align-items: center;
   color:white;
   background-color: var(--md-green-500);
   flex: 0 0 auto;
@@ -611,24 +619,39 @@ input[type=text]:focus {
   padding-left: 12px;
 }
 
+.jp-Git-staged-header-label {
+  flex: 1 1 auto;
+}
+
+.jp-Git-staged-commit {
+  resize: none;
+  display: flex;
+  align-items: center;
+  margin: 8px;
+}
+
 .jp-Git-staged-commit-msg{
   width: 75%;
   font-weight: 300;
   height: 36px;
-  margin-left: 15px;
-  margin-top: 10px;
-  margin-bottom: 5px;
   overflow-x: auto;
-  border: var(--jp-border-width) solid var(--jp-border-color2)
+  border: var(--jp-border-width) solid var(--jp-border-color2);
+  flex: 20 1 auto;
+  resize: none;
+}
+
+.jp-Git-staged-commit-msg:focus {
+  outline: none;
 }
 
 
 .jp-Git-staged-commit-button{
   background-color: var(--md-green-500);
-    color: white;
-    height: 40px;
-    width: 40px;
-    border:0;
+  color: white;
+  height: 42px;
+  width: 40px;
+  border: 0;
+  flex: 1 1 auto;
 }
 
 .jp-Git-staged-header-label {
@@ -733,7 +756,7 @@ input[type=text]:focus {
 /*-----------------------------------------------------------------------------
 | Git-button (for add, reset, track)
 |----------------------------------------------------------------------------*/
-.jp-Git-button {
+.jp-Git-button, .jp-Git-header-button {
   margin: 0px 4px;
   font-weight: 600;
   background-color: transparent;
@@ -748,6 +771,11 @@ input[type=text]:focus {
   border: none;
   outline: none;
 }
+
+
+.jp-Git-button {
+  display: none;
+} 
 
 
 .jp-Git-button:hover {
@@ -818,7 +846,6 @@ input[type=text]:focus {
   float: right;
   padding: 10px 5px 0px 0px;
 }
-
 
 .jp-Git-icon-insertion{
   background-image: var(--jp-Git-icon-insertion);
