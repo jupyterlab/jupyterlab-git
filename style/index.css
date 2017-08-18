@@ -670,7 +670,7 @@ input[type=text]:focus {
 }
 
 
-.jp-Git-staged-commit-button{
+.jp-Git-staged-commit-button, .jp-Git-staged-commit-button-ready, .jp-Git-staged-commit-button-disable{
   background-color: var(--md-green-500);
   color: white;
   height: 42px;
@@ -678,6 +678,12 @@ input[type=text]:focus {
   border: 0;
   flex: 1 1 auto;
 }
+.jp-Git-staged-commit-button-ready{
+    opacity: .3;
+  }
+.jp-Git-staged-commit-button-disable{
+  background-color: lightgray;
+  }
 
 .jp-Git-staged-header-label {
   font-size: var(--jp-ui-font-size1);

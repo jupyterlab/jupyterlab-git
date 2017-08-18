@@ -64,8 +64,7 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
 
   show_left(){
     let pastcommitsContainer = ReactDOM.findDOMNode(this.refs.past_commits_container);
-      $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop-200});
-      $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft-200});
+      $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft-200}, 320);
       this.setState({show_right_arrow:true});
       if(pastcommitsContainer.scrollLeft==0){
         this.setState({show_left_arrow:false});
@@ -74,10 +73,9 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
 
   show_right(){
     let pastcommitsContainer = ReactDOM.findDOMNode(this.refs.past_commits_container);
-      $(pastcommitsContainer).animate({scrollTop: pastcommitsContainer.scrollTop+200});
-      $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft+200});
+      $(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft+200},320);
       this.setState({show_left_arrow:true});
-      if(pastcommitsContainer.scrollLeft==pastcommitsContainer.scrollWidth){
+      if(pastcommitsContainer.scrollLeft>=pastcommitsContainer.scrollWidth-400){
         this.setState({show_right_arrow:false});
       }
   }
@@ -217,7 +215,7 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
       <div >
       <div className='jp-Git-singlePastCommit'>
         <div className='jp-Git-singlePastCommit-header'>
-          <span className='jp-Git-singlePastCommit-label-commit-number'> #{this.props.data.commit}</span>
+          <span className='jp-Git-singlePastCommit-label-commit-number'> #{this.props.data.commit?this.props.data.commit.substring(0,7):''}</span>
           <span className='jp-Git-singlePastCommit-label-summary'> {this.props.files_changed} { this.props.deletion_count} {this.props.insertion_count}</span>
         </div>
         <div className='jp-Git-singlePastCommit-label-author'> <span className="jp-Git-icon-author"/> {this.props.data.author}</div>

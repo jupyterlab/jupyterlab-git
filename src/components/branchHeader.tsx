@@ -1,5 +1,5 @@
 import * as React from 'react';
-
+import ToggleDisplay from 'react-toggle-display'
 import {
   Widget
 } from '@phosphor/widgets';
@@ -22,6 +22,7 @@ export namespace BranchHeader {
     data: any;
     refresh:any;
     disabled:boolean;
+    show_notice:boolean;
   }
 
   export
@@ -35,9 +36,10 @@ export namespace BranchHeader {
   }
 }
 export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
+  interval:any;
   constructor(props: BranchHeader.IProps) {
     super(props);
-    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: props.current_branch, data: [], refresh:props.refresh, disabled:props.disabled}
+    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: props.current_branch, data: [], refresh:props.refresh, disabled:props.disabled, show_notice:false}
   }
 
 //functions for switch branches
@@ -64,28 +66,39 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
       });
     }
   }
+  switch_branch_diable_notice(){
+      this.setState({show_notice:true});
+      setTimeout(function(){
+             this.setState({show_notice:false});
+        }.bind(this),3000);
+  }
 
   render(){
+    this.state
     return (
       <div  className='jp-Git-branch'>
-        <span className ='jp-Git-branch-label'> <span className='jp-Git-icon-branch'></span>
-          {this.props.current_branch}
-        </span>
-        <select required ref="switch_branch_dropdown_button" disabled = {this.props.disabled} 
-          
-        title = {this.props.disabled?'Please commit your changes or stash them before you switch branches':'select branches'} 
+        <span className ='jp-Git-branch-label'> <span className='jp-Git-icon-branch'/>
+          {this.state.show_notice?'Stage and commit changes before switching branches':this.props.current_branch}
+        </span>,
+        <ToggleDisplay show={!(this.props.disabled)}>
+        <select required ref="switch_branch_dropdown_button" value = {this.props.current_branch} disabled = {this.props.disabled} 
+        title = {this.props.disabled?'Stage and commit changes before switching branches':'select branches'} 
         className='jp-Git-branch-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
-             <option value=" " disabled selected>**Switch Branches: </option>
+             <option value=" " disabled>**Switch Branches: </option>
              {this.props.data.map((dj, dj_index)=>
               <option value ={dj.name} key={dj_index}>
                   {dj.name}
               </option>
               )}
-              <option value=" " disabled selected>**Create a new branch: </option>
-              <option value=" ">
+              <option value=" " disabled>**Create a new branch: </option>
+              <option value=''>
                 CREATE NEW
               </option>
-          </select>  
+          </select>
+          </ToggleDisplay> 
+          <ToggleDisplay show={this.props.disabled&&!(this.state.show_notice)}>
+          <span className='jp-Git-icon-branch'onClick={()=>this.switch_branch_diable_notice()}/>
+          </ToggleDisplay> 
       </div>
     );
   }
