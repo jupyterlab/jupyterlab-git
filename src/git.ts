@@ -175,7 +175,7 @@ export class Git {
 				err.message = 'Failed to execute git';
 				err.gitErrorCode = getGitErrorCode(val.data.message);
 				err.stderr = val.data.message;
-
+				console.log(val.data.code);
 				console.log(err.message);
 				console.log(err.gitCommand);
 				console.log(err.gitErrorCode);
@@ -203,7 +203,7 @@ export class Git {
 				err.message = 'Failed to execute git';
 				err.gitErrorCode = getGitErrorCode(val.data.message);
 				err.stderr = val.data.message;
-
+				console.log(val.data.code);
 				console.log(err.message);
 				console.log(err.gitCommand);
 				console.log(err.gitErrorCode);
