@@ -227,6 +227,12 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
                     buttons: [Dialog.warnButton({ label: "OK"})]
                   })
                 }
+                else{
+                  showDialog({
+                    title: "Git Pull success!",
+                    buttons: [Dialog.okButton({ label: "OK"})]
+                  })
+                }
               }) 
             }
             else{
@@ -277,6 +283,12 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
                     title: "Warning",
                     body: response.message,
                     buttons: [Dialog.warnButton({ label: "OK"})]
+                  })
+                }
+                else{
+                  showDialog({
+                    title: "Git Push success!",
+                    buttons: [Dialog.okButton({ label: "OK"})]
                   })
                 }
               }) 
