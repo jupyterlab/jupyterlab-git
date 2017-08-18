@@ -228,7 +228,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
                     <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.y,file.to,this.props.app)} >{file.to}[{file.x}]</span>
                     <ToggleDisplay show={file.x!='D'}>
-                    <button className={`jp-Git-button ${GIT_BUTTON_RESET_WHITE}`} title='Reset this staged change' onClick={()=>reset_StagedNode(file.to, this.props.top_repo_path, this.props.refresh)}></button>
+                    <button className={`jp-Git-button ${GIT_BUTTON_RESET}`} title='Reset this staged change' onClick={()=>reset_StagedNode(file.to, this.props.top_repo_path, this.props.refresh)}></button>
                     </ToggleDisplay>
                     </li>
                 )}
