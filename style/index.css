@@ -90,10 +90,10 @@
   background-position: center;
 }
 .jp-Git-repo-refresh:hover {
-background-image: var(--jp-icon-refresh-selected);
+background-image: var(--jp-icon-refresh);
 }
 .jp-Git-repo-refresh:active {
-background-image: var(--jp-icon-refresh-selected);
+background-image: var(--jp-icon-refresh);
 }
 
 
