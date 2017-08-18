@@ -47,6 +47,12 @@ const GIT_BUTTON_RESET = 'jp-Git-button-reset';
 /**
  * The class name added to a git-plugin session item git-reset button.
  */
+const GIT_BUTTON_RESET_WHITE = 'jp-Git-button-reset-white';
+
+
+/**
+ * The class name added to a git-plugin session item discard button.
+ */
 const GIT_BUTTON_DISCARD = 'jp-Git-button-discard';
 
 /**
@@ -203,9 +209,9 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
       <div>
         <div className= 'jp-Git-section-fileContainer'>
           <div className='jp-Git-staged'>       
-              <span className='jp-Git-staged-header-label'> Staged({(this.props.staged_files).length})</span>
+              <span className='jp-Git-staged-header-label'> Staged({(this.props.staged_files).length})<button className={`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN}`} onClick={()=>this.dropdown_staged()}></button></span>
               <ToggleDisplay show={this.props.staged_files.length>0}>
-              <button className={`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN}`} onClick={()=>this.dropdown_staged()}></button>
+              
               <button className={`jp-Git-header-button ${GIT_BUTTON_RESET}`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}></button>
               </ToggleDisplay>
           </div>
@@ -222,7 +228,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
                     <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.y,file.to,this.props.app)} >{file.to}[{file.x}]</span>
                     <ToggleDisplay show={file.x!='D'}>
-                    <button className={`jp-Git-button ${GIT_BUTTON_RESET}`} title='Reset this staged change' onClick={()=>reset_StagedNode(file.to, this.props.top_repo_path, this.props.refresh)}></button>
+                    <button className={`jp-Git-button ${GIT_BUTTON_RESET_WHITE}`} title='Reset this staged change' onClick={()=>reset_StagedNode(file.to, this.props.top_repo_path, this.props.refresh)}></button>
                     </ToggleDisplay>
                     </li>
                 )}

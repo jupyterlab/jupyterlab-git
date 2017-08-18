@@ -790,7 +790,7 @@ input[type=text]:focus {
 }
 
 /*-----------------------------------------------------------------------------
-| Git-button (for add, reset, track)
+| Git-button (for add, reset, track, discard)
 |----------------------------------------------------------------------------*/
 .jp-Git-button, .jp-Git-header-button {
   margin: 0px 4px;
@@ -830,6 +830,18 @@ input[type=text]:focus {
 
 .jp-Git-button-reset {
   background-image: var(--jp-Git-button-reset);
+  float: right;
+  padding-top: 20px;
+}
+
+.jp-Git-button-discard {
+  background-image: var(--jp-Git-button-discard);
+  float: right;
+  padding-top: 20px;
+}
+
+.jp-Git-button-discard-white {
+  background-image: var(--jp-Git-button-discard-white);
   float: right;
   padding-top: 20px;
 }
