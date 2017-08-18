@@ -33,7 +33,6 @@ const GIT_FILE_ICON = 'jp-Git-fileIcon';
  */
 const GIT_FILE_LABEL = 'jp-Git-fileLabel';
 
-
 /**
  * The class name added to a git-plugin session item git-add button.
  */
