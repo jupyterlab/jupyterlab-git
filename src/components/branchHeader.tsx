@@ -97,7 +97,7 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
           </select>
           </ToggleDisplay> 
           <ToggleDisplay show={this.props.disabled&&!(this.state.show_notice)}>
-          <span className='jp-Git-icon-branch'onClick={()=>this.switch_branch_diable_notice()}/>
+          <select className='jp-Git-branch-dropdown' onClick={()=>this.switch_branch_diable_notice()}/>
           </ToggleDisplay> 
       </div>
     );
