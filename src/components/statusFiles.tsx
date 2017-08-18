@@ -62,9 +62,9 @@ const GIT_BUTTON_TRACK = 'jp-Git-button-track';
 
  /**
  * The class name added to a git-plugin session item white expand button.
- 
+ */
 const GIT_BUTTON_TRIANGLE_DOWN_WHITE = 'jp-Git-button-triangle-down-white';
-*/
+
 
 /**
  * The class name added to a git-plugin session item white collapse button.
@@ -209,10 +209,10 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
       <div>
         <div className= 'jp-Git-section-fileContainer'>
           <div className='jp-Git-staged'>       
-              <span className='jp-Git-staged-header-label'> Staged({(this.props.staged_files).length})<button className={`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN}`} onClick={()=>this.dropdown_staged()}></button></span>
+              <span className='jp-Git-staged-header-label'> Staged({(this.props.staged_files).length})<button className={`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN_WHITE}`} onClick={()=>this.dropdown_staged()}></button></span>
               <ToggleDisplay show={this.props.staged_files.length>0}>
               
-              <button className={`jp-Git-header-button ${GIT_BUTTON_RESET}`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}></button>
+              <button className={`jp-Git-header-button ${GIT_BUTTON_RESET_WHITE}`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}></button>
               </ToggleDisplay>
           </div>
           <ToggleDisplay show={this.state.staged_show}>
