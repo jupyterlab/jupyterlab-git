@@ -140,9 +140,9 @@
     border: var(--md-grey-700);
     border-radius: 0;
     outline: none;
-    width: 20px;
-    height: 20px;
-    margin-top: 2px;
+    width: 15px;
+    height: 15px;
+    margin-top: 6px;
     margin-bottom: 2px;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -864,6 +864,7 @@ input[type=text]:focus {
 .jp-Git-button-reset {
   background-image: var(--jp-Git-button-reset);
   float: right;
+  margin-top: 6px;
 }
 
 .jp-Git-button-discard {
@@ -884,6 +885,7 @@ input[type=text]:focus {
 .jp-Git-button-track {
   background-image: var(--jp-Git-icon-track);
   float: right;
+  margin-top: 4px;
 }
 
 .jp-Git-button-triangle-down {
