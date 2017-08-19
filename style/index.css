@@ -941,7 +941,7 @@ input[type=text]:focus {
 |----------------------------------------------------------------------------*/
 .jp-Git-icon-insertion, .jp-Git-icon-deletion {
   display: inline-block;
-  width: 38px;
+  width: 20px;
   height: 11px;
   background-position: center;
   background-repeat: no-repeat;
