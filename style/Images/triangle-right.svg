@@ -49,7 +49,7 @@
 	<line class="st1" x1="4.4" y1="0" x2="4.4" y2="22"/>
 	<line class="st1" x1="22" y1="17.6" x2="0" y2="17.6"/>
 	<line class="st1" x1="22" y1="4.4" x2="0" y2="4.4"/>
-	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5564 10.9999)" class="st1" width="6.2" height="6.2"/>
+	<rect x="7.9" y="7.9" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -4.5563 10.9998)" class="st1" width="6.2" height="6.2"/>
 	<line class="st1" x1="0" y1="16.5" x2="22" y2="16.5"/>
 	<line class="st1" x1="16.5" y1="22" x2="16.5" y2="0"/>
 	<line class="st1" x1="5.5" y1="22" x2="5.5" y2="0"/>
@@ -71,21 +71,25 @@
 </g>
 <g>
 	<g>
-		<defs>
-			<polygon id="SVGID_1_" points="13.8,11.1 8.2,14.4 8.2,7.8 			"/>
-		</defs>
-		<clipPath id="SVGID_2_">
-			<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
-		</clipPath>
-		<g class="st2">
-			<g>
-				<defs>
-					<rect id="SVGID_3_" x="-220.9" y="-171.7" width="1824.3" height="1013.8"/>
-				</defs>
-				<clipPath id="SVGID_4_">
-					<use xlink:href="#SVGID_3_"  style="overflow:visible;"/>
-				</clipPath>
-				<rect x="1.9" y="1.4" class="st3" width="18.1" height="19.2"/>
+		<g>
+			<defs>
+				<polygon id="SVGID_1_" points="15.2,11.1 6.8,16 6.8,6.2 				"/>
+			</defs>
+			<clipPath id="SVGID_2_">
+				<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
+			</clipPath>
+			<g class="st2">
+				<g>
+					<g>
+						<defs>
+							<rect id="SVGID_3_" x="-336.8" y="-263.1" width="2736.4" height="1520.7"/>
+						</defs>
+						<clipPath id="SVGID_4_">
+							<use xlink:href="#SVGID_3_"  style="overflow:visible;"/>
+						</clipPath>
+						<rect x="-2.7" y="-3.5" class="st3" width="27.1" height="28.8"/>
+					</g>
+				</g>
 			</g>
 		</g>
 	</g>
