@@ -64,7 +64,7 @@ const GIT_BUTTON_TRACK = 'jp-Git-button-track';
  */
 const GIT_BUTTON_TRIANGLE_DOWN_WHITE = 'jp-Git-button-triangle-down-white';
 
-
+const GIT_BUTTON_TRIANGLE_RIGHT_WHITE = 'jp-Git-button-triangle-right-white';
 /**
  * The class name added to a git-plugin session item white collapse button.
 
@@ -76,6 +76,7 @@ const GIT_BUTTON_TRIANGLE_RIGHT_WHITE = 'jp-Git-button-triangle-right-white';
  */
 const GIT_BUTTON_TRIANGLE_DOWN = 'jp-Git-button-triangle-down';
 
+const GIT_BUTTON_TRIANGLE_RIGHT = 'jp-Git-button-triangle-right';
 /**
  * The class name added to a git-plugin session item collapse button.
 const GIT_BUTTON_TRIANGLE_RIGHT = 'jp-Git-button-triangle-right';
@@ -208,7 +209,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
       <div>
         <div className= 'jp-Git-section-fileContainer'>
           <div className='jp-Git-staged'>       
-              <span className='jp-Git-staged-header-label'> Staged({(this.props.staged_files).length})<button className={`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN_WHITE}`} onClick={()=>this.dropdown_staged()}></button></span>
+              <span className='jp-Git-staged-header-label'> Staged({(this.props.staged_files).length})<button className={this.state.staged_show?`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN_WHITE}`:`jp-Git-button ${GIT_BUTTON_TRIANGLE_RIGHT_WHITE}`} onClick={()=>this.dropdown_staged()}></button></span>
               <ToggleDisplay show={this.props.staged_files.length>0}>
               
               <button className={`jp-Git-header-button ${GIT_BUTTON_RESET_WHITE}`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}></button>
@@ -238,7 +239,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
           <div className='jp-Git-unstaged' >
               <span className='jp-Git-unstaged-header-label'> Unstaged({(this.props.unstaged_files).length})</span>  
               <ToggleDisplay show={this.props.unstaged_files.length>0}>
-              <button className={`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN}`} onClick={()=>this.dropdown_unstaged()}></button>
+              <button className={this.state.unstaged_show?`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN}`:`jp-Git-button ${GIT_BUTTON_TRIANGLE_RIGHT}`} onClick={()=>this.dropdown_unstaged()}></button>
               <button className={`jp-Git-header-button ${GIT_BUTTON_ADD}`} title='Stage all the changes' onClick={()=>add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}></button>
               <button className={`jp-Git-header-button ${GIT_BUTTON_DISCARD}`} title='Discard all the changes' onClick={()=>discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}></button>
               </ToggleDisplay>
@@ -261,7 +262,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
           <div className='jp-Git-untracked' >
               <span className='jp-Git-untracked-header-label'> Untracked({(this.props.untracked_files).length})</span>
               <ToggleDisplay show={this.props.untracked_files.length>0}>
-              <button className={`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN}`} onClick={()=>this.dropdown_untracked()}></button>
+              <button className={this.state.untracked_show?`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN}`:`jp-Git-button ${GIT_BUTTON_TRIANGLE_RIGHT}`} onClick={()=>this.dropdown_untracked()}></button>
               <button className={`jp-Git-header-button ${GIT_BUTTON_TRACK}`} title='Track all the files' onClick={()=>add_all_UntrackedNode(this.props.top_repo_path, this.props.refresh)}></button>
               </ToggleDisplay>
           </div>
