@@ -90,11 +90,12 @@
   background-position: center;
 }
 .jp-Git-repo-refresh:hover {
-  background-color: var(--jp-border-color2)
+  background-color: lightgray;
 }
 .jp-Git-repo-refresh:active {
-  background-image: var(--jp-icon-refresh);
-  background-color: var(--jp-cell-editor-border-color)
+  background-color: lightgray;
+  box-shadow: 0 1px #666;
+  transform: translateY(0.5px);
 }
 
 
@@ -336,6 +337,9 @@ jp-Git-timeline-arrow-left:active {
   z-index: 1; /* raise overlapping border */
   top: -2.7px;
 }
+.jp-Git-currentCommit-btn.jp-mod-active {
+  border: 2.72px dotted #4caf50;
+}
 .jp-Git-currentCommit-active {
   transition: .5s border-color, .5s height, .5s width, .5s margin-top, .5s margin-right;
   position: absolute;
@@ -347,6 +351,7 @@ jp-Git-timeline-arrow-left:active {
   width: 16px;
   margin-top: 6px;
   margin-right: 5px;
+  border: 2.72px dotted #4caf50;
 }
 .jp-Git-currentCommit-btn:selected {
   background-image: url(Images/edit-circle-selected.svg);
@@ -385,10 +390,12 @@ jp-Git-timeline-arrow-left:active {
   border: none;
   z-index: 1;
   outline: none !important;
-  background-color: #0a0a0a;
-  border: 1.5px solid #4caf50;
+  background-color: #0a0a0a;  
+  border: 1.0px solid #e0e0e0;
 }
-
+.jp-Git-pastCommit-btn.jp-mod-active {
+  border: 2.0px solid #4caf50;
+}
 .jp-Git-pastCommit-btn:selected {
   background-color: rgba(53,53,153,.1);
   background-image: url(Images/normal-circle.svg);
@@ -412,6 +419,9 @@ jp-Git-timeline-arrow-left:active {
   border: none;
   z-index: 1; /* raise overlapping border */
 }
+.jp-Git-pastCommit-active:hover .jp-Git-commit-index{
+   visibility: visible;
+}
 
 .jp-Git-pastCommit-active {
   transition: .5s border-color, .5s height, .5s width, .5s margin-top, .5s margin-right;
@@ -423,7 +433,16 @@ jp-Git-timeline-arrow-left:active {
   width: 16px;
   margin-top: 6px;
   margin-right: 6px;
+  border: 2.0px solid #4caf50;
 }
+.jp-Git-pastCommit-active.jp-mod-active:hover .jp-Git-commit-index {
+   visibility: hidden;
+}
+.jp-Git-commit-index {
+  color: white;
+  visibility: hidden
+}
+
 */
 /*-----------------------------------------------------------------------------
 | Git-single-past-commit

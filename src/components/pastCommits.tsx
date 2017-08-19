@@ -180,7 +180,7 @@ export class PastCommitNodeInfo extends React.Component<PastCommitNodeInfo.IProp
   }
   render(){
     return(
-      <div>
+      <div className = 'jp-Git-commit-index'>
         {this.props.index}
         </div>
     );
