@@ -109,7 +109,7 @@
     flex-direction: row;
     /* Add the border width because this is border-box sized */
     height: calc(var(--jp-private-csvviewer-toolbar-height) + var(--jp-border-width));
-    background: var(--md-grey-700);
+    background-color: var(--md-grey-700);
     z-index: 1;
     box-shadow: var(--jp-toolbar-box-shadow);
 }
@@ -509,12 +509,18 @@ jp-Git-timeline-arrow-left:active {
 }
 
 .jp-Git-singlePastCommit-label-summary {
-  width: 30%;
+  width: 50%;
   padding: 10px;
   float: right;
   font-weight: 400;
   text-align: right;
 }
+
+.files-changed, .deletions-made, .insertions-made{
+  margin-right: 4px;
+
+}
+
 
 
 .jp-Git-singlePastCommitDetail {
@@ -564,6 +570,11 @@ jp-Git-timeline-arrow-left:active {
   padding: 0;
   list-style-type: none;
 }
+
+.jp-Git-file .jp-Git-button {
+  display: none;
+} 
+
 
 .jp-Git-file .jp-mod-selected {
   background: var(--jp-brand-color1);
@@ -805,7 +816,7 @@ input[type=text]:focus {
 }
 
 /*-----------------------------------------------------------------------------
-| Git-button (for add, reset, track)
+| Git-button (for add, reset, track, discard)
 |----------------------------------------------------------------------------*/
 .jp-Git-button, .jp-Git-header-button {
   margin: 0px 4px;
@@ -824,11 +835,6 @@ input[type=text]:focus {
 }
 
 
-.jp-Git-button {
-  display: none;
-} 
-
-
 .jp-Git-button:hover {
   background-color: none;
   outline: none;
@@ -845,17 +851,21 @@ input[type=text]:focus {
 .jp-Git-button-add {
   background-image: var(--jp-Git-icon-add);
   float: right;
-  padding-top: 20px;
 }
 
 .jp-Git-button-reset {
   background-image: var(--jp-Git-button-reset);
   float: right;
-  padding-top: 20px;
 }
 
-.jp-git-file:hover .jp-Git-button-reset {
+.jp-Git-button-discard {
+  background-image: var(--jp-Git-button-discard);
+  float: right;
+}
 
+.jp-Git-button-discard-white {
+  background-image: var(--jp-Git-button-discard-white);
+  float: right;
 }
 
 .jp-Git-button-reset-white {
@@ -866,24 +876,56 @@ input[type=text]:focus {
 .jp-Git-button-track {
   background-image: var(--jp-Git-icon-track);
   float: right;
-  padding-top: 20px;
 }
 
 .jp-Git-button-triangle-down {
     background-image: var(--jp-Git-button-triangle-down);
  }
 
- .jp-git-button-triangle-down-white {
-  
+ .jp-Git-button-triangle-down-white {
+  background-image: var(--jp-Git-button-triangle-down-white);
 }
 
-.jp-git-button-triangle-right {
-  
+.jp-Git-button-triangle-right {
+  background-image: var(--jp-Git-button-triangle-right);
 }
 
-.jp-git-button-triangle-right-white {
-  
+.jp-Git-button-triangle-right-white {
+  background-image: var(--jp-Git-button-triangle-right-white);
 }
+
+.jp-Git-unstaged .jp-Git-button-discard{
+  padding-top: 14px;
+}
+
+.jp-Git-unstaged .jp-Git-button-add{
+  padding-top: 14px;
+}
+
+.jp-Git-untracked .jp-Git-button-discard{
+  padding-top: 14px;
+}
+
+.jp-Git-untracked .jp-Git-button-discard{
+  padding-top: 14px;
+}
+
+.jp-Git-file .jp-Git-button-add{
+  padding-top: 20px;
+}
+
+.jp-Git-file .jp-Git-button-add{
+  padding-top: 20px;
+}
+
+.jp-Git-file .jp-Git-button-discard{
+  padding-top: 20px;
+}
+
+.jp-Git-file .jp-Git-button-add{
+  padding-top: 20px;
+}
+
 /*-----------------------------------------------------------------------------
 | Git-Icon
 |----------------------------------------------------------------------------*/
@@ -898,13 +940,40 @@ input[type=text]:focus {
   padding: 10px 5px 0px 0px;
 }
 
+.jp-Git-icon-insertion-white, .jp-Git-icon-deletion-white, .jp-Git-icon-directory-white{
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 11px;
+  padding: 1px 5px 0px 0px;
+  border: none;
+}
+
 .jp-Git-icon-insertion{
   background-image: var(--jp-Git-icon-insertion);
-  }
+}
+
+.jp-Git-icon-insertion-white{
+  background-image: var(--jp-Git-icon-insertion-white);
+}
 
 .jp-Git-icon-deletion{
-    background-image: var(--jp-Git-icon-deletion);
-    }
+  background-image: var(--jp-Git-icon-deletion);
+}
+
+.jp-Git-icon-deletion-white{
+  background-image: var(--jp-Git-icon-deletion-white);
+}
+
+.jp-Git-icon-deletion-white{
+  background-image: var(--jp-Git-icon-deletion-white);
+}
+
+.jp-Git-icon-directory-white{
+  background-image: var(--jp-Git-icon-directory-white);
+}
 
 .jp-Git-modNumber{
   float: right;

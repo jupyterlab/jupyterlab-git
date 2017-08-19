@@ -7,8 +7,15 @@
     --jp-Git-icon-add: url('./Images/add.svg');
     --jp-Git-icon-track: url('./Images/track.svg');
     --jp-Git-button-reset: url('./Images/reset.svg');
+    --jp-Git-button-reset-white: url('./Images/reset-white.svg');
+    --jp-Git-button-discard: url('./Images/discard.svg');
+    --jp-Git-button-discard-white: url('./Images/discard-white.svg');
     --jp-Git-icon-insertion: url('./Images/insertion.svg');
+    --jp-Git-icon-insertion-white: url('./Images/insertion-white.svg');
     --jp-Git-icon-deletion: url('./Images/deletion.svg');
+    --jp-Git-icon-deletion-white: url('./Images/deletion-white.svg');
+    --jp-Git-icon-directory: url('./Images/directory.svg');
+    --jp-Git-icon-directory-white: url('./Images/directory-white.svg');
     --jp-Git-icon-author: url('./Images/author.svg');
     --jp-Git-icon-branch: url('./Images/branch.svg');
     --jp-Git-button-triangle-down-white: url('./Images/triangle-down-white.svg');
