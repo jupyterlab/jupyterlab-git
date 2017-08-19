@@ -73,7 +73,7 @@ on git command success
 on git command failure
 ```bash
     {
-        "code": 11,
+        "code": 128,
         "command": "git showtoplevel"
         "message": "Not in a Git repository"
     }
@@ -110,7 +110,7 @@ on git command success
 on git command failure
 ```bash
     {
-        "code": 11,
+        "code": 128,
         "command": "git showtoplevel"
         "message": "Not in a Git repository"
     }
@@ -267,7 +267,10 @@ on git command success
     {
 	    "code": 0;
 	    "modified_file_note": "5 files changes, 100 insetion, 200 deletion",
-	    "modified_files": [
+        "modified_files_count": "5",
+        "number_of_insertions": "100",
+        "number_of_deletions": "200",
+        "modified_files": [
             { 
                 "modified_file_path": "file/path",
                 "insertion": "49";

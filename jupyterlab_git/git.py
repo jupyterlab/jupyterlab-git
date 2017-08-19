@@ -109,7 +109,7 @@ class Git:
                 words = temp.split()
                 for i in range(0,len(words)):
                     if words[i].isdigit():
-                        note[count]=words[i];
+                        note[count]=words[i]
                         count +=1
                 for num in range(1, int(length / 2)):
                     line_info = line_array[num].split()
