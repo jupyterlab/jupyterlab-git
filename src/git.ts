@@ -120,7 +120,8 @@ export interface SingleCommitInfo {
 
 export interface CommitModifiedFile{
 	modified_file_path: string,
-	insertion: string;
+	modified_file_name: string,
+	insertion: string,
 	deletion: string
 }
 
