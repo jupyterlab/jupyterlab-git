@@ -511,23 +511,39 @@ jp-Git-timeline-arrow-left:active {
 
 .jp-Git-singlePastCommit-label-summary {
   width: 50%;
-  padding: 10px;
-  float: right;
   font-weight: 400;
-  text-align: right;
 }
 
-.jp-files-changed-white, .jp-deletions-made-white, .jp-insertions-made-white{
+.jp-files-changed-white {
+  position: absolute;
+  right: 95px;
+  margin-right: 4px;
+  float:right;
+  margin-top: 10px;
+  }
+  
+  .jp-insertions-made-white {
+    position: absolute;
+    right: 60px;
+    margin-right: 4px;
+    float:right;
+    margin-top: 10px;
+    }
+  
+  .jp-deletions-made-white {
+    position: absolute;
+    right: 25px;
+    margin-right: 4px;
+    float:right;
+    margin-top: 10px;
+  }
+
+.jp-deletions-made-color {
   margin-right: 4px;
   width:20px;
 }
 
-.jp-deletions-made {
-  margin-right: 4px;
-  width:20px;
-}
-
-.jp-insertions-made{
+.jp-insertions-made-color{
   margin-right: 4px;
   width:20px;
 }
@@ -957,20 +973,31 @@ input[type=text]:focus {
   background-position: center;
   background-repeat: no-repeat;
   background-size: 11px;
-  padding: 0px 2px 0px 0px;
   border: none;
+  position: absolute;
+  right: 10px;
 }
 
-.jp-Git-icon-insertion{
+.jp-Git-icon-directory-white{
+  background-image: var(--jp-Git-icon-directory-white);
+}
+
+.jp-Git-icon-directory-color{
+}
+.jp-Git-icon-insertion-color{
   background-image: var(--jp-Git-icon-insertion);
+  position: absolute;
+  right: 60px;
 }
 
 .jp-Git-icon-insertion-white{
   background-image: var(--jp-Git-icon-insertion-white);
 }
 
-.jp-Git-icon-deletion{
+.jp-Git-icon-deletion-color{
   background-image: var(--jp-Git-icon-deletion);
+  position: absolute;
+  right: 80px;
 }
 
 .jp-Git-icon-deletion-white{
@@ -979,10 +1006,6 @@ input[type=text]:focus {
 
 .jp-Git-icon-deletion-white{
   background-image: var(--jp-Git-icon-deletion-white);
-}
-
-.jp-Git-icon-directory-white{
-  background-image: var(--jp-Git-icon-directory-white);
 }
 
 .jp-Git-modNumber{
