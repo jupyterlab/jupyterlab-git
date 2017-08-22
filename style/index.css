@@ -976,6 +976,7 @@ input[type=text]:focus {
   border: none;
   position: absolute;
   right: 10px;
+  margin-right: 5px;
 }
 
 .jp-Git-icon-directory-white{
