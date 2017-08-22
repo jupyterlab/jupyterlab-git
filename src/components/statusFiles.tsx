@@ -171,14 +171,15 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
     this.setState({commit_msg:'',commit_disable:true});
   }
 
-  
   /** to prevent ENTER key trigged 'submit' action during inputing commit msg*/
   onKeyPress(this, event){
     if(event.which === 13 && event.shiftKey){
-      this.form.submit();
+      console.log('just pressed shift key!')
+      commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh);
+      this.init_input();
     }
     else if (event.which === 13 /* Enter */) {
-      event.preventDefault();
+      event.submit();
     }
   }
 
