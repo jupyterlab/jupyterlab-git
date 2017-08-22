@@ -265,14 +265,15 @@ Reply JSON:
 on git command success
 ```bash
     {
-	    "code": 0;
-	    "modified_file_note": "5 files changes, 100 insetion, 200 deletion",
+	"code": 0;
+	"modified_file_note": "5 files changes, 100 insetion, 200 deletion",
         "modified_files_count": "5",
         "number_of_insertions": "100",
         "number_of_deletions": "200",
         "modified_files": [
             { 
                 "modified_file_path": "file/path",
+		"modified_file_name": "filename",
                 "insertion": "49";
                 "deletion": "108"
             }
