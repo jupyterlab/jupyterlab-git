@@ -113,8 +113,10 @@ class Git:
                         count +=1
                 for num in range(1, int(length / 2)):
                     line_info = line_array[num].split()
+                    words = line_info[2].split('/')
+                    length = len(words)
                     result.append(
-                        {"modified_file_path": line_info[2], "insertion": line_info[0], "deletion": line_info[1]})
+                        {"modified_file_path": line_info[2], "modified_file_name":words[length-1], "insertion": line_info[0], "deletion": line_info[1]})
 
             if(note[2]==0 and length>1):
                 if '-' in temp:

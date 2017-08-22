@@ -566,6 +566,25 @@ jp-Git-timeline-arrow-left:active {
   background-color: rgba(153,153,153,.2);
 }
 
+.jp-Git-light {
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color2);
+  flex: 1 1 auto;
+  margin-right: 4px;
+  padding-left: 4px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  border-radius: 2px;
+  transition: background-color 0.1s ease;
+}
+.jp-Git-light:hover {
+  background-color: rgba(153,153,153,.1);
+}
+.jp-Git-light:focus {
+  background-color: rgba(153,153,153,.2);
+}
+
 /*-----------------------------------------------------------------------------
 | Git-file
 |----------------------------------------------------------------------------*/

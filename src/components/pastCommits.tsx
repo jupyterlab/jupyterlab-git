@@ -209,7 +209,9 @@ export namespace SinglePastCommitInfo {
 export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.IProps, SinglePastCommitInfo.IState>{
   constructor(props:SinglePastCommitInfo.IProps) {
     super(props);
-	}
+  }
+ 
+  
   render(){
     return (
       <div >
@@ -230,7 +232,8 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
           {this.props.list.map((mf, mf_index)=>
             <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}/>
-              <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit})}>{mf.modified_file_path} </span>
+              <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit})}>{mf.modified_file_name}</span>
+              <span className='jp-Git-light'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit})}> {mf.modified_file_path}</span>
               <span className='jp-modifications'>
                 <span className='jp-deletions-made'>
                     <span className="jp-Git-modNumber"> {mf.deletion}</span>   
