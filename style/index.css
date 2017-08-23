@@ -702,6 +702,7 @@ input[type=text]:focus {
   border: var(--jp-border-width) solid var(--jp-border-color2);
   flex: 20 1 auto;
   resize: none;
+  padding-left: 4px;
 }
 
 .jp-Git-staged-commit-msg:focus {

@@ -9,29 +9,13 @@ import {
   GitSessions
  } from './components/components'
 
- import {
-  ServiceManager
-} from '@jupyterlab/services';
-
 import {
   ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
-/*
-import {
-  IServiceManager
-} from '@jupyterlab/services';
-*/
+
 import {
    IMainMenu
 } from '@jupyterlab/apputils';
-
-import {
-  ConsolePanel
-} from '@jupyterlab/console';
-
-import {
-  Session
-} from '@jupyterlab/services';
 
 import {
    Menu

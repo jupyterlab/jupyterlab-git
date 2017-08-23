@@ -7,7 +7,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ServiceManager, TerminalSession
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -33,14 +33,6 @@ import {
 
   
 import '../style/index.css';
-
-
-/*
-import {
-  newClosableIFrame
-}from './urls';
-*/
-
 
 /**
  * The command IDs used by the git plugin.
