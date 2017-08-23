@@ -219,9 +219,15 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
         <div className='jp-Git-singlePastCommit-header'>
           <span className='jp-Git-singlePastCommit-label-commit-number'> #{this.props.data.commit?this.props.data.commit.substring(0,7):''}</span>
           <span className='jp-Git-singlePastCommit-label-summary'> 
-            <span className= 'jp-files-changed-white'> <span className='jp-Git-icon-directory-white'/> {this.props.files_changed} </span>
-            <span className= 'jp-deletions-made-white'> <span className='jp-Git-icon-deletion-white'/>  { this.props.deletion_count} </span>
-            <span className= 'jp-insertions-made-white'> <span className='jp-Git-icon-insertion-white'/>  {this.props.insertion_count} </span>
+            <span className= 'jp-files-changed-white'> 
+              <span className='jp-Git-icon-directory-white'/> {this.props.files_changed} 
+            </span>
+            <span className= 'jp-insertions-made-white'> 
+              <span className='jp-Git-icon-insertion-white'/>  {this.props.insertion_count} 
+            </span>
+            <span className= 'jp-deletions-made-white'> 
+              <span className='jp-Git-icon-deletion-white'/>  { this.props.deletion_count} 
+            </span>
           </span>
         </div>
         <div className='jp-Git-singlePastCommit-label-author'> <span className="jp-Git-icon-author"/> {this.props.data.author}</div>
@@ -235,13 +241,13 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
               <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit})}>{mf.modified_file_name}</span>
               <span className='jp-Git-light'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit})}> {mf.modified_file_path}</span>
               <span className='jp-modifications'>
-                <span className='jp-deletions-made'>
-                    <span className="jp-Git-modNumber"> {mf.deletion}</span>   
-                    <span className='jp-Git-icon-deletion'></span>   
+                <span className='jp-deletions-made-color'>
+                    <span className="jp-Git-modNumber-deletions"> {mf.deletion}</span>   
+                    <span className='jp-Git-icon-deletion-color'></span>   
                 </span>
-                <span className='jp-insertions-made'>
-                    <span className="jp-Git-modNumber">{mf.insertion}</span>
-                    <span className='jp-Git-icon-insertion'></span>
+                <span className='jp-insertions-made-color'>
+                    <span className="jp-Git-modNumber-insertions">{mf.insertion}</span>
+                    <span className='jp-Git-icon-insertion-color'></span>
                 </span>
               </span>
             </li>
