@@ -955,15 +955,16 @@ input[type=text]:focus {
 /*-----------------------------------------------------------------------------
 | Git-Icon
 |----------------------------------------------------------------------------*/
-.jp-Git-icon-insertion, .jp-Git-icon-deletion {
+.jp-Git-icon-insertion-color, .jp-Git-icon-deletion-color {
   display: inline-block;
   width: 20px;
   height: 11px;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 11px;
-  float: right;
-  padding: 12px 0px 1px 0px;
+  position: absolute;
+  right: 10px;
+  margin-right: 5px;
 }
 
 .jp-Git-icon-insertion-white, .jp-Git-icon-deletion-white, .jp-Git-icon-directory-white{
@@ -983,12 +984,11 @@ input[type=text]:focus {
   background-image: var(--jp-Git-icon-directory-white);
 }
 
-.jp-Git-icon-directory-color{
-}
 .jp-Git-icon-insertion-color{
-  background-image: var(--jp-Git-icon-insertion);
+  background-image: var(--jp-Git-icon-insertion-color);
   position: absolute;
-  right: 60px;
+  right: 70px;
+  margin-top: 7px;
 }
 
 .jp-Git-icon-insertion-white{
@@ -996,9 +996,10 @@ input[type=text]:focus {
 }
 
 .jp-Git-icon-deletion-color{
-  background-image: var(--jp-Git-icon-deletion);
+  background-image: var(--jp-Git-icon-deletion-color);
   position: absolute;
-  right: 80px;
+  right: 35px;
+  margin-top: 7px;
 }
 
 .jp-Git-icon-deletion-white{
@@ -1009,8 +1010,16 @@ input[type=text]:focus {
   background-image: var(--jp-Git-icon-deletion-white);
 }
 
-.jp-Git-modNumber{
-  float: right;
+.jp-Git-modNumber-deletions{
+  position: absolute;
+  right: 30px;
+  margin-top:1px;
+}
+
+.jp-Git-modNumber-insertions{
+  position: absolute;
+  right: 64px;
+  margin-top: 1px;
 }
 
 .jp-modifications{

@@ -239,12 +239,12 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
               <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+this.props.data.commit})}>{mf.modified_file_path} </span>
               <span className='jp-modifications'>
                 <span className='jp-deletions-made-color'>
-                    <span className="jp-Git-modNumber"> {mf.deletion}</span>   
-                    <span className='jp-Git-icon-deletion'></span>   
+                    <span className="jp-Git-modNumber-deletions"> {mf.deletion}</span>   
+                    <span className='jp-Git-icon-deletion-color'></span>   
                 </span>
                 <span className='jp-insertions-made-color'>
-                    <span className="jp-Git-modNumber">{mf.insertion}</span>
-                    <span className='jp-Git-icon-insertion'></span>
+                    <span className="jp-Git-modNumber-insertions">{mf.insertion}</span>
+                    <span className='jp-Git-icon-insertion-color'></span>
                 </span>
               </span>
             </li>
