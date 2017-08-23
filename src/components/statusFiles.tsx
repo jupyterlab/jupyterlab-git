@@ -172,14 +172,9 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
   }
 
   /** to prevent ENTER key trigged 'submit' action during inputing commit msg*/
-  onKeyPress(this, event){
-    if(event.which === 13 && event.shiftKey){
-      console.log('just pressed shift key!')
-      commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh);
-      this.init_input();
-    }
-    else if (event.which === 13 /* Enter */) {
-      event.submit();
+  onKeyPress(event){
+    if (event.which === 13 /* Enter */) {
+      event.preventDefault();
     }
   }
 
@@ -217,7 +212,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
               <span className='jp-Git-staged-header-label'> Staged({(this.props.staged_files).length})<button className={this.state.staged_show?`jp-Git-button ${GIT_BUTTON_TRIANGLE_DOWN_WHITE}`:`jp-Git-button ${GIT_BUTTON_TRIANGLE_RIGHT_WHITE}`} onClick={()=>this.dropdown_staged()}></button></span>
               <ToggleDisplay show={this.props.staged_files.length>0}>
               
-              <button className={`jp-Git-header-button ${GIT_BUTTON_RESET_WHITE}`} title='Reset all staged changes' onClick={()=>reset_all_StagedNode(this.props.top_repo_path, this.props.refresh)}></button>
+              <button className={`jp-Git-header-button ${GIT_BUTTON_RESET_WHITE}`} title='Reset all staged changes' onClick={()=>{reset_all_StagedNode(this.props.top_repo_path, this.props.refresh), this.init_input()}}></button>
               </ToggleDisplay>
           </div>
           <ToggleDisplay show={this.state.staged_show}>
@@ -233,7 +228,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
                     <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
                     <span className={GIT_FILE_LABEL} onDoubleClick={()=>open_listed_file(file.x,file.y,file.to,this.props.app)} >{file.to}[{file.x}]</span>
                     <ToggleDisplay show={file.x!='D'}>
-                    <button className={`jp-Git-button ${GIT_BUTTON_RESET}`} title='Reset this staged change' onClick={()=>reset_StagedNode(file.to, this.props.top_repo_path, this.props.refresh)}></button>
+                    <button className={`jp-Git-button ${GIT_BUTTON_RESET}`} title='Reset this staged change' onClick={()=>{reset_StagedNode(file.to, this.props.top_repo_path, this.props.refresh), this.props.staged_files.length==1?this.init_input():{}}}></button>
                     </ToggleDisplay>
                     </li>
                 )}
@@ -343,6 +338,7 @@ function reset_StagedNode(file:string, path:string, refresh){
   let git_temp = new Git();
   git_temp.reset(false, file, path).then(response=>{
     refresh();
+    
   });
 }
 
@@ -352,6 +348,7 @@ function add_all_UnstagedNode(path:string,refresh){
   let git_temp = new Git();
   git_temp.add(true,null, path).then(response=>{
     refresh();
+
   });
 }
 
