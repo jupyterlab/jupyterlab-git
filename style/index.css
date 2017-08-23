@@ -140,9 +140,9 @@
     border: var(--md-grey-700);
     border-radius: 0;
     outline: none;
-    width: 15px;
-    height: 15px;
-    margin-top: 6px;
+    width: 11px;
+    height: 11px;
+    margin-top: 8px;
     margin-bottom: 2px;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -516,7 +516,8 @@ jp-Git-timeline-arrow-left:active {
 
 .jp-files-changed-white {
   position: absolute;
-  right: 95px;
+  right: 80px;
+  width: 15px;
   margin-right: 4px;
   float:right;
   margin-top: 10px;
@@ -524,7 +525,8 @@ jp-Git-timeline-arrow-left:active {
   
   .jp-insertions-made-white {
     position: absolute;
-    right: 60px;
+    right: 45px;
+    width: 15px;
     margin-right: 4px;
     float:right;
     margin-top: 10px;
@@ -532,8 +534,8 @@ jp-Git-timeline-arrow-left:active {
   
   .jp-deletions-made-white {
     position: absolute;
-    right: 25px;
-    margin-right: 4px;
+    right: 12px;
+    width: 15px;
     float:right;
     margin-top: 10px;
   }
@@ -957,7 +959,7 @@ input[type=text]:focus {
 |----------------------------------------------------------------------------*/
 .jp-Git-icon-insertion-color, .jp-Git-icon-deletion-color {
   display: inline-block;
-  width: 20px;
+  width: 30px;
   height: 11px;
   background-position: center;
   background-repeat: no-repeat;
@@ -969,7 +971,7 @@ input[type=text]:focus {
 
 .jp-Git-icon-insertion-white, .jp-Git-icon-deletion-white, .jp-Git-icon-directory-white{
   display: inline-block;
-  width: 11px;
+  width: 30px;
   height: 11px;
   background-position: center;
   background-repeat: no-repeat;
@@ -977,7 +979,6 @@ input[type=text]:focus {
   border: none;
   position: absolute;
   right: 10px;
-  margin-right: 5px;
 }
 
 .jp-Git-icon-directory-white{
@@ -987,7 +988,7 @@ input[type=text]:focus {
 .jp-Git-icon-insertion-color{
   background-image: var(--jp-Git-icon-insertion-color);
   position: absolute;
-  right: 70px;
+  right: 54px;
   margin-top: 7px;
 }
 
@@ -998,7 +999,7 @@ input[type=text]:focus {
 .jp-Git-icon-deletion-color{
   background-image: var(--jp-Git-icon-deletion-color);
   position: absolute;
-  right: 35px;
+  right: 17px;
   margin-top: 7px;
 }
 
@@ -1012,13 +1013,15 @@ input[type=text]:focus {
 
 .jp-Git-modNumber-deletions{
   position: absolute;
-  right: 30px;
+  right: 12px;
+  width: 15px;
   margin-top:1px;
 }
 
 .jp-Git-modNumber-insertions{
   position: absolute;
-  right: 64px;
+  right: 50px;
+  width: 15px;
   margin-top: 1px;
 }
 
