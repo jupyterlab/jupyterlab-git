@@ -7,7 +7,7 @@ import {
 } from '@jupyterlab/application';
 
 import {
-  ServiceManager
+  ServiceManager, TerminalSession
 } from '@jupyterlab/services';
 
 import {
