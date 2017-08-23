@@ -16,11 +16,11 @@ import {
 import {
   ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
-
+/*
 import {
   IServiceManager
 } from '@jupyterlab/services';
-
+*/
 import {
    IMainMenu
 } from '@jupyterlab/apputils';
@@ -43,7 +43,7 @@ import {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: 'jupyter.extensions.running-sessions-git',
-  requires: [IServiceManager, IFileBrowserFactory, IMainMenu, ILayoutRestorer],
+  requires: [IFileBrowserFactory, IMainMenu, ILayoutRestorer],
   autoStart: true
 };
 
@@ -67,7 +67,7 @@ function activate(app: JupyterLab, services: ServiceManager, fb:FileBrowser, mai
   // application state (e.g. setting the running panel as the current side bar
   // widget).
 
-  restorer.add(git_plugin, 'git-sessions');
+  //restorer. (git_plugin, 'git-sessions');
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
