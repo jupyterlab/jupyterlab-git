@@ -575,6 +575,8 @@ jp-Git-timeline-arrow-left:active {
   overflow: hidden;
   white-space: nowrap;
   border-radius: 2px;
+  max-width: 50%;
+  min-width: 30%;
   transition: background-color 0.1s ease;
 }
 .jp-Git-singlePastCommitDetail-file-path:hover {
@@ -594,6 +596,7 @@ jp-Git-timeline-arrow-left:active {
   overflow: hidden;
   white-space: nowrap;
   border-radius: 2px;
+  width: 40%;
   transition: background-color 0.1s ease;
 }
 .jp-Git-light:hover {
