@@ -52,7 +52,9 @@ class Git:
                     to1 = to1[1:]
                 if to1.endswith('"'):
                     to1 = to1[:-1] 
-                result.append({'x':line[0],'y':line[1],'to':to1,'from':from_path})
+                filename = to1.split('/')
+                length = len(filename)
+                result.append({'x':line[0],'y':line[1],'to':filename[length-1],'from':from_path})
             return {"code": p.returncode, "files":result}
         else:
             return {

@@ -318,7 +318,7 @@ on git command success
             {
                 "x": "CHECK-bit-X",
                 "y": "CHECK-bit-Y",
-                "to": "file/or/folder/path",
+                "to": "filename",
                 "from": "original/path/for/copied/file/or/folder"
             }
         ]
