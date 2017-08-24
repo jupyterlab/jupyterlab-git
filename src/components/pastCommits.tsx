@@ -181,7 +181,7 @@ export class PastCommitNodeInfo extends React.Component<PastCommitNodeInfo.IProp
   render(){
     return(
       <div className = 'jp-Git-commit-index'>
-        {this.props.index}
+        {this.props.index==0?'H':this.props.index}
         </div>
     );
   }
