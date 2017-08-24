@@ -737,12 +737,12 @@ input[type=text]:focus {
 .jp-Git-staged-commit-msg{
   width: 75%;
   font-weight: 300;
-  height: 36px;
+  height: 32px;
   overflow-x: auto;
   border: var(--jp-border-width) solid var(--jp-border-color2);
   flex: 20 1 auto;
   resize: none;
-  padding-left: 4px;
+  padding: 4px 8px;
 }
 
 .jp-Git-staged-commit-msg:focus {
