@@ -5,8 +5,7 @@
 <style type="text/css">
 	.st0{display:none;}
 	.st1{display:inline;fill:none;stroke:#9E9E9E;stroke-width:2.000000e-02;stroke-miterlimit:10;}
-	.st2{clip-path:url(#SVGID_2_);}
-	.st3{clip-path:url(#SVGID_4_);fill:#424242;}
+	.st2{fill:#616161;}
 </style>
 <g class="st0">
 	<line class="st1" x1="11" y1="0" x2="11" y2="22"/>
@@ -69,29 +68,5 @@
 	<line class="st1" x1="0" y1="1.1" x2="22" y2="1.1"/>
 	<line class="st1" x1="0" y1="20.9" x2="22" y2="20.9"/>
 </g>
-<g>
-	<g>
-		<g>
-			<defs>
-				<polygon id="SVGID_1_" points="15.2,11.1 6.8,16 6.8,6.2 				"/>
-			</defs>
-			<clipPath id="SVGID_2_">
-				<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
-			</clipPath>
-			<g class="st2">
-				<g>
-					<g>
-						<defs>
-							<rect id="SVGID_3_" x="-336.8" y="-263.1" width="2736.4" height="1520.7"/>
-						</defs>
-						<clipPath id="SVGID_4_">
-							<use xlink:href="#SVGID_3_"  style="overflow:visible;"/>
-						</clipPath>
-						<rect x="-2.7" y="-3.5" class="st3" width="27.1" height="28.8"/>
-					</g>
-				</g>
-			</g>
-		</g>
-	</g>
-</g>
+<polyline class="st2" points="15.2,11.1 6.8,6.2 6.8,16 "/>
 </svg>
