@@ -9,29 +9,13 @@ import {
   GitSessions
  } from './components/components'
 
- import {
-  ServiceManager
-} from '@jupyterlab/services';
-
 import {
   ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  IServiceManager
-} from '@jupyterlab/services';
-
-import {
    IMainMenu
 } from '@jupyterlab/apputils';
-
-import {
-  ConsolePanel
-} from '@jupyterlab/console';
-
-import {
-  Session
-} from '@jupyterlab/services';
 
 import {
    Menu
@@ -41,9 +25,9 @@ import {
  * The default running sessions extension.
  */
 const plugin: JupyterLabPlugin<void> = {
-  activate,
   id: 'jupyter.extensions.running-sessions-git',
-  requires: [IServiceManager, IFileBrowserFactory, IMainMenu, ILayoutRestorer],
+  requires: [IFileBrowserFactory, IMainMenu, ILayoutRestorer],
+  activate,
   autoStart: true
 };
 
@@ -57,10 +41,10 @@ export default plugin;
 /**
  * Activate the running plugin.
  */
-function activate(app: JupyterLab, services: ServiceManager, fb:FileBrowser, mainMenu: IMainMenu, restorer: ILayoutRestorer, panel: ConsolePanel,model: Session.IModel): void {
+function activate(app: JupyterLab, fb:FileBrowser, mainMenu: IMainMenu, restorer: ILayoutRestorer): void {
   const { commands} = app;
   const category = 'Git';
-  let git_plugin = new GitSessions(app, { manager: services });
+  let git_plugin = new GitSessions(app, { manager: app.serviceManager });
   git_plugin.id = 'jp-git-sessions';
   git_plugin.title.label = 'Git';
   // Let the application restorer track the running panel for restoration of
@@ -72,8 +56,7 @@ function activate(app: JupyterLab, services: ServiceManager, fb:FileBrowser, mai
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(git_plugin, { rank: 200 });
-
-  addCommands(app, services);
+  addCommands(app, app.serviceManager);
   let menu = new Menu({commands});
   let tutorial = new Menu({commands});
   tutorial.title.label = " Tutorial ";

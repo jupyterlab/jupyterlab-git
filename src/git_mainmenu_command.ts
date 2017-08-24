@@ -34,14 +34,6 @@ import {
   
 import '../style/index.css';
 
-
-/*
-import {
-  newClosableIFrame
-}from './urls';
-*/
-
-
 /**
  * The command IDs used by the git plugin.
  */
