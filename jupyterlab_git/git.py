@@ -98,7 +98,7 @@ class Git:
         if(p.returncode == 0):
             result = []
             note = [0]*3
-            count=0;
+            count=0
             insert = ""
             delete = ""
             temp = ""

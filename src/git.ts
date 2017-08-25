@@ -149,9 +149,6 @@ function HTTP_Git_Request(URL,METHOD,REQUEST):Promise<ServerConnection.IResponse
     method: METHOD,
     cache: true,
     contentType: 'bar',
-    headers: {
-      foo: 'bar'
-    },
     data: JSON.stringify(REQUEST),
   };
   return ServerConnection.makeRequest(request, ServerConnection.makeSettings());
