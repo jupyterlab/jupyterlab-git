@@ -9,6 +9,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'notebook',
+        'psutil'
     ],
     package_data={'jupyterlab_git':['*']},
 )
