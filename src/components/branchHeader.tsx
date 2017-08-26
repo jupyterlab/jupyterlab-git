@@ -83,17 +83,17 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
           {this.state.show_notice?'Stage and commit changes before switching branches':this.props.current_branch}
         </span>
         <ToggleDisplay show={!(this.props.disabled)}>
-        <select required ref="switch_branch_dropdown_button" value = {this.props.current_branch} disabled = {this.props.disabled} 
+        <select ref="switch_branch_dropdown_button" value = {this.props.current_branch} disabled = {this.props.disabled} 
         title = {this.props.disabled?'Stage and commit changes before switching branches':'select branches'} 
         className='jp-Git-branch-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
-             <option value=" " disabled>**Switch Branches: </option>
+             <option className= 'jp-Git-switch-branch' value=" " disabled>**Switch Branches: </option>
              {this.props.data.map((dj, dj_index)=>
               <option value ={dj.name} key={dj_index}>
                   {dj.name}
               </option>
               )}
-              <option value=" " disabled>**Create a new branch: </option>
-              <option value=''>
+              <option className= 'jp-Git-create-branch-line' disabled> </option>
+              <option className= 'jp-Git-create-branch' value=''>
                 CREATE NEW
               </option>
           </select>
