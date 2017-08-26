@@ -92,7 +92,7 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
                   {dj.name}
               </option>
               )}
-              <hr className= 'jp-Git-create-branch-line' value=" " disabled> </hr>
+              <option className= 'jp-Git-create-branch-line' value=" " disabled> </option>
               <option className= 'jp-Git-create-branch' value=''>
                 CREATE NEW
               </option>
