@@ -18,8 +18,5 @@
     --jp-Git-icon-directory-white: url('./Images/directory-white.svg');
     --jp-Git-icon-author: url('./Images/author.svg');
     --jp-Git-icon-branch: url('./Images/branch.svg');
-    --jp-Git-button-triangle-down-white: url('./Images/triangle-down-white.svg');
-    --jp-Git-button-triangle-right-white: url('./Images/triangle-right-white.svg');
-    --jp-Git-button-triangle-down: url('./Images/triangle-down.svg');
-    --jp-Git-button-triangle-right: url('./Images/triangle-right.svg');
+    --jp-image-caretdownwhite: url('./Images/caretdownwhite.svg')
 }

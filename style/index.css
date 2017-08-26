@@ -133,7 +133,7 @@
 }
 
 .jp-Git-branch-dropdown {
-    background-image: url(Images/triangle-right-white.svg);
+    background-image: var(--jp-image-caretdownwhite);
     background-color: transparent;
     flex: 0 0 auto;
     vertical-align: middle;
@@ -929,20 +929,20 @@ input[type=text]:focus {
   margin-top: 4px;
 }
 
-.jp-Git-button-triangle-down {
-    background-image: var(--jp-Git-button-triangle-down);
+.jp-image-caretdown {
+    background-image: var(--jp-image-caretdown);
  }
 
- .jp-Git-button-triangle-down-white {
-  background-image: var(--jp-Git-button-triangle-down-white);
+ .jp-image-caretdownwhite {
+  background-image: var(--jp-image-caretdownwhite);
 }
 
-.jp-Git-button-triangle-right {
-  background-image: var(--jp-Git-button-triangle-right);
+.jp-image-caretright {
+  background-image: var(--jp-image-caretright);
 }
 
-.jp-Git-button-triangle-right-white {
-  background-image: var(--jp-Git-button-triangle-right-white);
+.jp-image-caretright {
+  background-image: var(---jp-image-caretright);
 }
 
 .jp-Git-unstaged .jp-Git-button-discard{
