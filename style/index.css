@@ -151,7 +151,9 @@
 }
 
 .jp-Git-switch-branch {
-backgound-color: purple;
+  appearance: none; /* this is must */
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }
 
 .jp-Git-new-branch {
