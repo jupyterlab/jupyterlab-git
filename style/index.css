@@ -133,7 +133,7 @@
 }
 
 .jp-Git-branch-dropdown {
-    background-image: url(Images/triangle-right-white.svg);
+    background-image: var(--jp-image-caretdownwhite);
     background-color: transparent;
     flex: 0 0 auto;
     vertical-align: middle;
@@ -148,6 +148,16 @@
     -moz-appearance: none;
     -o-appearance: none;
     text-indent: 20px;
+}
+
+.jp-Git-switch-branch {
+  appearance: none; /* this is must */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.jp-Git-new-branch {
+  
 }
 
 /*-----------------------------------------------------------------------------
@@ -225,7 +235,6 @@ jp-Git-timeline-arrow-left:active {
 .jp-Git-timeline-container {
   background-color: var(--jp-ui-font-color1);
   width: 92%;
-  margin: 0;
   padding-top: 20px;
   overflow: hidden;
   white-space: nowrap;
@@ -380,12 +389,8 @@ jp-Git-timeline-arrow-left:active {
 }
 
 .jp-Git-pastCommit-btn, .jp-Git-pastCommit-active {
-  color: var(--jp-ui-font-color1);
   width: 28px;
   height: 28px;
-  background-color: rgba(53,53,153,.1);
-  background-size: 100%;
-  box-shadow: var(--jp-toolbar-box-shadow);
   border-radius: 50%;
   border: none;
   z-index: 1;
@@ -556,6 +561,9 @@ jp-Git-timeline-arrow-left:active {
   padding: 0;
   overflow: auto;
 }
+.jp-Git-singlePastCommitDetail:hover {
+  background-color: rgba(153,153,153,.1);
+}
 
 .jp-Git-singlePastCommitDetail-file {
   display: flex;
@@ -579,12 +587,6 @@ jp-Git-timeline-arrow-left:active {
   min-width: 30%;
   transition: background-color 0.1s ease;
 }
-.jp-Git-singlePastCommitDetail-file-path:hover {
-  background-color: rgba(153,153,153,.1);
-}
-.jp-Git-singlePastCommitDetail-file-path:focus {
-  background-color: rgba(153,153,153,.2);
-}
 
 .jp-Git-light {
   font-size: var(--jp-ui-font-size0);
@@ -599,12 +601,7 @@ jp-Git-timeline-arrow-left:active {
   width: 40%;
   transition: background-color 0.1s ease;
 }
-.jp-Git-light:hover {
-  background-color: rgba(153,153,153,.1);
-}
-.jp-Git-light:focus {
-  background-color: rgba(153,153,153,.2);
-}
+
 
 /*-----------------------------------------------------------------------------
 | Git-file
@@ -618,6 +615,9 @@ jp-Git-timeline-arrow-left:active {
   margin: 0;
   padding: 0;
   list-style-type: none;
+}
+.jp-Git-file:hover {
+  background-color: rgba(153,153,153,.1);
 }
 
 .jp-Git-file .jp-Git-button {
@@ -721,10 +721,6 @@ input[type=text]:focus {
   letter-spacing: 1px;
   font-size: 12px;
   padding-left: 12px;
-}
-
-.jp-Git-staged-header-label {
-  flex: 1 1 auto;
 }
 
 .jp-Git-staged-commit {
@@ -850,12 +846,6 @@ input[type=text]:focus {
   border-radius: 2px;
   transition: background-color 0.1s ease;
 }
-.jp-Git-untracked-header-label:hover {
-  background-color: rgba(153,153,153,.1);
-}
-.jp-Git-untracked-header-label:focus {
-  background-color: rgba(153,153,153,.2);
-}
 
 .jp-Git-untracked-fileContainer {
   flex: 1 1 auto;
@@ -929,20 +919,20 @@ input[type=text]:focus {
   margin-top: 4px;
 }
 
-.jp-Git-button-triangle-down {
-    background-image: var(--jp-Git-button-triangle-down);
+.jp-image-caretdown {
+    background-image: var(--jp-image-caretdown);
  }
 
- .jp-Git-button-triangle-down-white {
-  background-image: var(--jp-Git-button-triangle-down-white);
+ .jp-image-caretdownwhite {
+  background-image: var(--jp-image-caretdownwhite);
 }
 
-.jp-Git-button-triangle-right {
-  background-image: var(--jp-Git-button-triangle-right);
+.jp-image-caretright {
+  background-image: var(--jp-image-caretright);
 }
 
-.jp-Git-button-triangle-right-white {
-  background-image: var(--jp-Git-button-triangle-right-white);
+.jp-image-caretright {
+  background-image: var(---jp-image-caretright);
 }
 
 .jp-Git-unstaged .jp-Git-button-discard{
