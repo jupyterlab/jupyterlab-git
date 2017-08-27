@@ -85,7 +85,9 @@ export class GitExtension implements IGitExtension{
       }
   }
 
-  private diffProviders: { [key: string]: IDiffCallback } = {};
+  private diffProviders: { [key: string]: IDiffCallback } = {
+    
+  };
 }
 /**
  * Activate the running plugin.
