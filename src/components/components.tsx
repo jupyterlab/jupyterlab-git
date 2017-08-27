@@ -50,17 +50,17 @@ const Git_CLASS = 'jp-Git';
  */
 
 export
-class GitSessions extends Widget {
+class GitSessions extends Widget  {
   component:any;
   /**
    * Construct a new running widget.
    */
-  constructor(app:JupyterLab,options: GitSessions.IOptions) {
+  constructor(app:JupyterLab,options: GitSessions.IOptions, diff_function: any) {
     super({
       node: (options.renderer || GitSessions.defaultRenderer).createNode()
     });
     this.addClass(Git_CLASS);
-    const element =<GitSessionNode app={app}/>
+    const element =<GitSessionNode app={app} diff={diff_function}/>
     this.component = ReactDOM.render(element, this.node);
     this.component.refresh();
   }
@@ -266,6 +266,7 @@ namespace GitSessionNode {
   export
   interface IProps {
     app:JupyterLab;
+    diff: any;
   }
 }
 
@@ -390,7 +391,7 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
               current_branch={this.state.current_branch} data={this.state.branches} disabled={this.state.disable_switch_branch}/>
         <PastCommits current_fb_path={this.state.current_fb_path} top_repo_path={this.state.top_repo_path} 
               past_commits={this.state.past_commits} in_new_repo={this.state.in_new_repo} show_index={this.state.show_index}
-              staged_files={this.state.staged_files} unstaged_files={this.state.unstaged_files} untracked_files={this.state.untracked_files} app={this.props.app} refresh={this.refresh} show_current_work={this.show_current_work}/>
+              staged_files={this.state.staged_files} unstaged_files={this.state.unstaged_files} untracked_files={this.state.untracked_files} app={this.props.app} refresh={this.refresh} show_current_work={this.show_current_work} diff={this.props.diff}/>
          </ToggleDisplay>
 
         <ToggleDisplay show={!(this.state.show)}>

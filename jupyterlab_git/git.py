@@ -64,7 +64,7 @@ class Git:
         """
         Function used to execute git log command & send back the result.
         """
-        p = Popen(["git", "log", "--pretty=format:%H%n%an%n%ar%n%s"],
+        p = Popen(["git", "log", "--pretty=format:%H%n%an%n%ar%n%s", '-10'],
                   stdout=PIPE, stderr=PIPE, cwd=os.getcwd() + '/' + current_path)
         my_output, my_error = p.communicate()
         if(p.returncode==0):

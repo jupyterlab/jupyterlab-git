@@ -34,6 +34,8 @@ class Git_API_handler(Git_handler):
     Class is used in the refresh method
     """
 
+
+
     def post(self):
         """
         Function used  to apply POST(REST_API) method to 'Git_API_handler'.
