@@ -71,9 +71,14 @@ class Git:
             result = []
             line_array = my_output.decode('utf-8').splitlines()
             i = 0
+            pre_commit = ''
             while i < len(line_array):
-                result.append(
-                    {'commit':line_array[i], 'author': line_array[i+1],'date':line_array[i+2],'commit_msg':line_array[i+3]})
+                if i+4< len(line_array):
+                    result.append(
+                        {'commit':line_array[i], 'author': line_array[i+1],'date':line_array[i+2],'commit_msg':line_array[i+3], 'pre_commit': line_array[i+4]})
+                else:
+                    result.append(
+                        {'commit':line_array[i], 'author': line_array[i+1],'date':line_array[i+2],'commit_msg':line_array[i+3], 'pre_commit': ''})
                 i += 4
             return {"code": p.returncode, "commits":result}
         else:

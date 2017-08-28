@@ -116,6 +116,7 @@ export interface SingleCommitInfo {
     author: string,
     date: string,
 	commit_msg: string,
+	pre_commit: string;
 }
 
 export interface CommitModifiedFile{

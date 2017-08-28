@@ -1,3 +1,4 @@
+
 import {
   addCommands, CommandIDs
  } from './git_mainmenu_command'
@@ -6,7 +7,7 @@ import {
 } from '@jupyterlab/filebrowser';
 
 import {
-  PathExt 
+  PathExt
 } from '@jupyterlab/coreutils';
 
 import {
@@ -27,6 +28,7 @@ import {
 import {
   Token
 } from '@phosphor/coreutils';
+
 /**
  * The default running sessions extension.
  */
@@ -55,12 +57,10 @@ export type IDiffCallback = (filename: string, revisionA: string, revisionB: str
 
 export class GitExtension implements IGitExtension{
   git_plugin;
-  app: JupyterLab;
   constructor(app: JupyterLab, restorer: ILayoutRestorer){
-    this.git_plugin = new GitSessions(app, { manager: app.serviceManager }, this.performDiff);
+    this.git_plugin = new GitSessions(app, { manager: app.serviceManager }, this.performDiff.bind(this));
     this.git_plugin.id = 'jp-git-sessions';
     this.git_plugin.title.label = 'Git';
-    app = app;
   // Let the application restorer track the running panel for restoration of
   // application state (e.g. setting the running panel as the current side bar
   // widget).
@@ -73,21 +73,69 @@ export class GitExtension implements IGitExtension{
     for (let fileType of filetypes) {
       this.diffProviders[fileType] = callback;
     }
-     console.log('new diff method');
+    console.log('new diff method');
   }
 
-  performDiff(filename: string, revisionA: string, revisionB: string) {
-    let extension = PathExt.extname(filename).toLocaleLowerCase();;
-      if (this.diffProviders[extension] !== undefined) {
-        this.diffProviders[extension](filename, revisionA, revisionB);
-      } else {
-        this.app.commands.execute('git:terminal-cmd',{'cmd':'git show '+revisionA});
-      }
+  performDiff(app: JupyterLab, filename: string, revisionA: string, revisionB: string) {
+    let extension = PathExt.extname(filename).toLocaleLowerCase();
+    console.log(extension);
+    console.log(this.diffProviders[extension]);
+    if (this.diffProviders[extension]!== undefined) {
+      this.diffProviders[extension](filename, revisionA, revisionB);
+    } else {
+      app.commands.execute('git:terminal-cmd',{'cmd':'git diff '+revisionA+' '+revisionB});
+    }
   }
 
-  private diffProviders: { [key: string]: IDiffCallback } = {
+  private diffProviders: { [key: string]: IDiffCallback } = {};
+
+/*
+  onDiffRequestCompleted(data: any) {
+    let layoutWork = this.showDiff(data);
+  
+    layoutWork.then(() => {
+      let exportBtn = document.getElementById('nbdime-export') as HTMLButtonElement;
+      exportBtn.style.display = 'initial';
+      toggleSpinner(false);
+      markUnchangedRanges();
+    });
+  }
+
+  onDiffRequestFailed(response: string) {
+    console.log('Diff request failed.');
+    let root = document.getElementById('nbdime-root');
+    if (!root) {
+      throw new Error('Missing root element "nbidme-root"');
+    }
+    root.innerHTML = '<pre>' + response + '</pre>';
+    toggleSpinner(false);
+  }
+  showDiff(data: {base: nbformat.INotebookContent, diff: IDiffEntry[]}): Promise<void> {
     
-  };
+    
+      let rendermime = new RenderMime({items: RenderMime.getDefaultItems(), sanitizer: defaultSanitizer});
+    
+      let nbdModel = new NotebookDiffModel(data.base, data.diff);
+      let nbdWidget = new NotebookDiffWidget(nbdModel, rendermime);
+    
+      let root = document.getElementById('nbdime-root');
+      if (!root) {
+        throw new Error('Missing root element "nbidme-root"');
+      }
+      root.innerHTML = '';
+      let panel = new Panel();
+      panel.id = 'main';
+      Widget.attach(panel, root);
+      panel.addWidget(nbdWidget);
+      let work = nbdWidget.init();
+      work.then(() => {
+        window.onresize = () => { panel.update(); };
+      });
+      return work;
+    }
+*/
+
+
 }
 /**
  * Activate the running plugin.

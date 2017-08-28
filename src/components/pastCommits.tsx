@@ -240,8 +240,8 @@ export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.I
           {this.props.list.map((mf, mf_index)=>
             <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}/>
-              <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.diff(mf.modified_file_path, this.props.data.commit, this.props.data.commit)}>{mf.modified_file_name}</span>
-              <span className='jp-Git-light'  onDoubleClick={()=>this.props.diff(mf.modified_file_path, this.props.data.commit, this.props.data.commit)}> {mf.modified_file_path}</span>
+              <span className='jp-Git-singlePastCommitDetail-file-path'  onDoubleClick={()=> this.props.diff(this.props.app,mf.modified_file_path, this.props.data.commit, this.props.data.pre_commit)}>{mf.modified_file_name}</span>
+              <span className='jp-Git-light'  onDoubleClick={()=>this.props.diff(this.props.app,mf.modified_file_path, this.props.data.commit, this.props.data.pre_commit)}> {mf.modified_file_path}</span>
               <span className='jp-modifications'>
                 <span className='jp-deletions-made-color'>
                     <span className="jp-Git-modNumber-deletions"> {mf.deletion}</span>   
