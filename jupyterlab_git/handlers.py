@@ -46,7 +46,7 @@ class Git_API_handler(Git_handler):
         4. git status
         """
 
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
         showtoplevel = self.git.showtoplevel(current_path)
         if(showtoplevel['code'] != 0):
@@ -77,7 +77,7 @@ class Git_showtoplevel_handler(Git_handler):
         Function used  to apply POST  method to 'Git_showtoplevel_handler'.
         show toplevel gives you the root directory in your git repository.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
         result = self.git.showtoplevel(current_path)
         self.finish(json.dumps(result))
@@ -94,7 +94,7 @@ class Git_showprefix_handler(Git_handler):
         Function used  to apply POST method to 'Git_showprefix_handler'.
         show prefix gives you the prefix with respect to root directory
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
         result = self.git.showprefix(current_path)
         self.finish(json.dumps(result))
@@ -118,7 +118,7 @@ class Git_status_handler(Git_handler):
         """
         Function used to apply POST method to 'Git_status_handler'.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
         result = self.git.status(current_path)
         self.finish(json.dumps(result))
@@ -135,7 +135,7 @@ class Git_log_handler(Git_handler):
         Function used to apply POST method of 'Git_log_handler'.
         log handler is used to get Commit SHA, Author Name, Commit Date & Commit Message.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
         result = self.git.log(current_path)
         self.finish(json.dumps(result))
@@ -152,7 +152,7 @@ class Git_log_1_handler(Git_handler):
         Function used to apply POST method of 'Git_log_1_handler'.
         log 1 handler is used to get file names of committed files, Number of insertions & deletions in that commit.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         selected_hash = my_data["selected_hash"]
         current_path = my_data["current_path"]
         result = self.git.log_1(selected_hash, current_path)
@@ -170,7 +170,7 @@ class Git_diff_handler(Git_handler):
         Function used to apply POST method of 'Git_diff_handler'.
         git diff is used to get differences between commits & current working tree.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         top_repo_path = my_data["top_repo_path"]
         my_output = self.git.diff(top_repo_path)
         self.finish(my_output)
@@ -189,7 +189,7 @@ class Git_branch_handler(Git_handler):
         Function used to apply POST method of 'Git_branch_handler'.
         git branch is used to get all the branches present.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
         result = self.git.branch(current_path)
         self.finish(json.dumps(result))
@@ -214,7 +214,7 @@ class Git_add_handler(Git_handler):
         Function used to apply POST method of 'Git_add_handler'.
         git add is used to add files in the staging area.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         top_repo_path = my_data["top_repo_path"]
         if(my_data["add_all"]):
             my_output = self.git.add_all(top_repo_path)
@@ -235,7 +235,7 @@ class Git_reset_handler(Git_handler):
         Function used to apply POST method of 'Git_reset_handler'.
         git reset is used to reset files from staging to unstage area.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         top_repo_path = my_data["top_repo_path"]
         if(my_data["reset_all"]):
             my_output = self.git.reset_all(top_repo_path)
@@ -256,7 +256,7 @@ class Git_checkout_handler(Git_handler):
         Function used to apply POST method of 'Git_checkout_handler'.
         git checkout is used to changes between branches.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         top_repo_path = my_data["top_repo_path"]
         if (my_data["checkout_branch"]):
             if(my_data["new_check"]):
@@ -285,7 +285,7 @@ class Git_commit_handler(Git_handler):
         Function used to apply POST method of 'Git_commit_handler'.
         git commit is used to commit files.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         top_repo_path = my_data["top_repo_path"]
         commit_msg = my_data["commit_msg"]
         my_output = self.git.commit(commit_msg, top_repo_path)
@@ -303,7 +303,7 @@ class Git_pull_handler(Git_handler):
         Function used to apply POST method of 'Git_pull_handler'.
         git pull is used to pull files from a remote branch to your current work.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         origin = my_data["origin"]
         master = my_data["master"]
         curr_fb_path = my_data["curr_fb_path"]
@@ -323,7 +323,7 @@ class Git_push_handler(Git_handler):
         Function used to apply POST method of 'Git_push_handler'.
         git push is used to push files from a remote branch to your current work.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         origin = my_data["origin"]
         master = my_data["master"]
         curr_fb_path = my_data["curr_fb_path"]
@@ -343,7 +343,7 @@ class Git_init_handler(Git_handler):
         Function used to apply POST method of 'Git_init_handler'.
         git init is used to initialize a repository.
         """
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
         my_output = self.git.init(current_path)
         self.finish(my_output)
@@ -358,7 +358,7 @@ class Git_add_all_untracked_handler(Git_handler):
         Function used to apply POST method of 'Git_add_all_untracked_handler'.
         git add_all_untracked is used to add all the untracked files.
         """        
-        my_data = json.loads(self.request.body)
+        my_data = json.loads(self.request.body.decode('utf-8'))
         top_repo_path = my_data["top_repo_path"]
         my_output=self.git.add_all_untracked(top_repo_path)
         print(my_output)

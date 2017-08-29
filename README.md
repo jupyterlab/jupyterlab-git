@@ -27,7 +27,7 @@ jupyter lab build
 
 ## Installation and activation of Git handler
 
-Installation and activation for jupyterlab_git python handler package (requires anaconda:python version >=3.6.0):
+Installation and activation for jupyterlab_git python handler package:
 
 ```bash
 pip install .
