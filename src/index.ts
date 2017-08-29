@@ -89,53 +89,6 @@ export class GitExtension implements IGitExtension{
 
   private diffProviders: { [key: string]: IDiffCallback } = {};
 
-/*
-  onDiffRequestCompleted(data: any) {
-    let layoutWork = this.showDiff(data);
-  
-    layoutWork.then(() => {
-      let exportBtn = document.getElementById('nbdime-export') as HTMLButtonElement;
-      exportBtn.style.display = 'initial';
-      toggleSpinner(false);
-      markUnchangedRanges();
-    });
-  }
-
-  onDiffRequestFailed(response: string) {
-    console.log('Diff request failed.');
-    let root = document.getElementById('nbdime-root');
-    if (!root) {
-      throw new Error('Missing root element "nbidme-root"');
-    }
-    root.innerHTML = '<pre>' + response + '</pre>';
-    toggleSpinner(false);
-  }
-  showDiff(data: {base: nbformat.INotebookContent, diff: IDiffEntry[]}): Promise<void> {
-    
-    
-      let rendermime = new RenderMime({items: RenderMime.getDefaultItems(), sanitizer: defaultSanitizer});
-    
-      let nbdModel = new NotebookDiffModel(data.base, data.diff);
-      let nbdWidget = new NotebookDiffWidget(nbdModel, rendermime);
-    
-      let root = document.getElementById('nbdime-root');
-      if (!root) {
-        throw new Error('Missing root element "nbidme-root"');
-      }
-      root.innerHTML = '';
-      let panel = new Panel();
-      panel.id = 'main';
-      Widget.attach(panel, root);
-      panel.addWidget(nbdWidget);
-      let work = nbdWidget.init();
-      work.then(() => {
-        window.onresize = () => { panel.update(); };
-      });
-      return work;
-    }
-*/
-
-
 }
 /**
  * Activate the running plugin.
