@@ -64,16 +64,21 @@ class Git:
         """
         Function used to execute git log command & send back the result.
         """
-        p = Popen(["git", "log", "--pretty=format:%H%n%an%n%ar%n%s"],
+        p = Popen(["git", "log", "--pretty=format:%H%n%an%n%ar%n%s", '-10'],
                   stdout=PIPE, stderr=PIPE, cwd=os.getcwd() + '/' + current_path)
         my_output, my_error = p.communicate()
         if(p.returncode==0):
             result = []
             line_array = my_output.decode('utf-8').splitlines()
             i = 0
+            pre_commit = ''
             while i < len(line_array):
-                result.append(
-                    {'commit':line_array[i], 'author': line_array[i+1],'date':line_array[i+2],'commit_msg':line_array[i+3]})
+                if i+4< len(line_array):
+                    result.append(
+                        {'commit':line_array[i], 'author': line_array[i+1],'date':line_array[i+2],'commit_msg':line_array[i+3], 'pre_commit': line_array[i+4]})
+                else:
+                    result.append(
+                        {'commit':line_array[i], 'author': line_array[i+1],'date':line_array[i+2],'commit_msg':line_array[i+3], 'pre_commit': ''})
                 i += 4
             return {"code": p.returncode, "commits":result}
         else:
@@ -98,7 +103,7 @@ class Git:
         if(p.returncode == 0):
             result = []
             note = [0]*3
-            count=0;
+            count=0
             insert = ""
             delete = ""
             temp = ""

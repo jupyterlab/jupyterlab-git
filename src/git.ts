@@ -116,6 +116,7 @@ export interface SingleCommitInfo {
     author: string,
     date: string,
 	commit_msg: string,
+	pre_commit: string;
 }
 
 export interface CommitModifiedFile{
@@ -149,9 +150,6 @@ function HTTP_Git_Request(URL,METHOD,REQUEST):Promise<ServerConnection.IResponse
     method: METHOD,
     cache: true,
     contentType: 'bar',
-    headers: {
-      foo: 'bar'
-    },
     data: JSON.stringify(REQUEST),
   };
   return ServerConnection.makeRequest(request, ServerConnection.makeSettings());
