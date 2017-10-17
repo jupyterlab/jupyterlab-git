@@ -108,6 +108,7 @@ function activate(app: JupyterLab, fb:FileBrowser, mainMenu: IMainMenu, restorer
   tutorial.title.label = " Tutorial ";
   menu.title.label = category;
   [
+    CommandIDs.git_UI,
     CommandIDs.git_terminal,
     CommandIDs.git_pull,
     CommandIDs.git_push,

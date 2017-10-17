@@ -39,6 +39,9 @@ import '../style/index.css';
  */
 export namespace CommandIDs {
   export
+  const git_UI = 'git:UI';
+
+  export
   const git_terminal = 'git:create-new-terminal';
 
   export
@@ -181,6 +184,17 @@ function addCommands(app: JupyterLab, services: ServiceManager) {
       }).catch(() => { term.dispose(); });
     }
   });
+
+  commands.addCommand(CommandIDs.git_UI, {
+    label: 'Git Interface',
+    caption: 'Go to Git user interface',
+    execute: () => {
+      try{
+        app.shell.activateById('jp-git-sessions');
+       }catch(err){}
+    }
+  });
+
 
   commands.addCommand(CommandIDs.git_pull, {
     label: 'Pull',
