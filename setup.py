@@ -5,11 +5,11 @@ import setuptools
 
 setuptools.setup(
     name='jupyterlab_git',
-    version='0.1.0',
+    version='0.1.1',
     packages=setuptools.find_packages(),
     install_requires=[
         'notebook',
         'psutil'
     ],
-    package_data={'jupyterlab_git':['*']},
+    package_data={'jupyterlab_git': ['*']},
 )
