@@ -45,7 +45,6 @@ class Git_API_handler(Git_handler):
         3. git log
         4. git status
         """
-
         my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
         showtoplevel = self.git.showtoplevel(current_path)
@@ -370,20 +369,21 @@ def setup_handlers(web_app):
     Function used to setup all of the Git_Handlers used in the file.
     Every handler is defined here, to be used in git.py file.
     """
-    web_app.add_handlers('.*', [('/git/showtoplevel', Git_showtoplevel_handler)])
-    web_app.add_handlers('.*', [('/git/showprefix', Git_showprefix_handler)])
-    web_app.add_handlers('.*', [('/git/add', Git_add_handler)])
-    web_app.add_handlers('.*', [('/git/status', Git_status_handler)])
-    web_app.add_handlers('.*', [('/git/branch', Git_branch_handler)])
-    web_app.add_handlers('.*', [('/git/reset', Git_reset_handler)])
-    web_app.add_handlers('.*', [('/git/checkout', Git_checkout_handler)])
-    web_app.add_handlers('.*', [('/git/commit', Git_commit_handler)])
-    web_app.add_handlers('.*', [('/git/pull', Git_pull_handler)])
-    web_app.add_handlers('.*', [('/git/push', Git_push_handler)])
-    web_app.add_handlers('.*', [('/git/diff', Git_diff_handler)])
-    web_app.add_handlers('.*', [('/git/log', Git_log_handler)])
-    web_app.add_handlers('.*', [('/git/log_1', Git_log_1_handler)])
-    web_app.add_handlers('.*', [('/git/init', Git_init_handler)])
-    web_app.add_handlers('.*', [('/git/API', Git_API_handler)])
-    web_app.add_handlers('.*', [('/git/add_all_untracked', Git_add_all_untracked_handler)])
+    print('web app base url : '+web_app.settings['base_url'])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/showtoplevel'), Git_showtoplevel_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/showprefix'), Git_showprefix_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/add'), Git_add_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/status'), Git_status_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/branch'), Git_branch_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/reset'), Git_reset_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/checkout'), Git_checkout_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/commit'), Git_commit_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/pull'), Git_pull_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/push'), Git_push_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/diff'), Git_diff_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/log'), Git_log_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/log_1'), Git_log_1_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/init'), Git_init_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/API'), Git_API_handler)])
+    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/add_all_untracked'), Git_add_all_untracked_handler)])
 
