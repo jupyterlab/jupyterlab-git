@@ -2,6 +2,10 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
+import {
+	PageConfig
+} from '@jupyterlab/coreutils'
+
 import '../style/index.css';
 
 'use strict';
@@ -144,9 +148,19 @@ export interface GitLogResult {
         ]
 }
 
+function Get_ABS_URL(URL:string):string {
+   // baseURL always comes with a trailing slash
+  let baseURL = PageConfig.getBaseUrl()
+  if (URL.indexOf('/') == 0) {
+  	return baseURL + URL.substring(1)
+  } else {
+  	return baseURL + URL
+  }
+}
+
 function HTTP_Git_Request(URL,METHOD,REQUEST):Promise<ServerConnection.IResponse>{
   let request = {
-    url:URL,
+    url: Get_ABS_URL(URL),
     method: METHOD,
     cache: true,
     contentType: 'bar',
@@ -159,7 +173,7 @@ export class Git {
 
 	constructor() {
 	}
-	
+
 	async api(path:string):Promise<GitAPI|GitErrorInfo>{
 		try{
 			var val = await HTTP_Git_Request('/git/API','POST',{"current_path": path});
@@ -257,7 +271,7 @@ export class Git {
 				err.stderr = val.data.message;
 				console.log(err.message);
 				console.log(err.gitCommand);
-				console.log(err.gitErrorCode);				
+				console.log(err.gitErrorCode);
 				return err;
 			}
 			return val.data;
@@ -317,7 +331,7 @@ export class Git {
 				console.log(err.message);
 				console.log(err.gitCommand);
 				console.log(err.gitErrorCode);
-				return err;				
+				return err;
 			}
 			return val.data;
 		}catch(err){
@@ -342,18 +356,18 @@ export class Git {
 				err.gitCommand = val.data.command;
 				err.message = 'Failed to execute git';
 				err.gitErrorCode = getGitErrorCode(val.data.message);
-				err.stderr = val.data.message;	
-				
+				err.stderr = val.data.message;
+
 				console.log(err.message);
 				console.log(err.gitCommand);
 				console.log(err.gitErrorCode);
 
-				return err;			
+				return err;
 			}
 			return val.data;
 		}catch(err){
 			throw ServerConnection.makeError(err);
-		}		
+		}
 	}
 
 
@@ -370,13 +384,13 @@ export class Git {
 				err.gitCommand = val.data.command;
 				err.message = 'Failed to execute git';
 				err.gitErrorCode = getGitErrorCode(val.data.message);
-				err.stderr = val.data.message;	
-				
+				err.stderr = val.data.message;
+
 				console.log(err.message);
 				console.log(err.gitCommand);
 				console.log(err.gitErrorCode);
 
-				return err;			
+				return err;
 			}
 			return val.data;
 		}catch(err){
@@ -405,18 +419,18 @@ export class Git {
 				err.gitCommand = val.data.command;
 				err.message = val.data.message;
 				err.gitErrorCode = getGitErrorCode(val.data.message);
-				err.stderr = val.data.message;	
-				
+				err.stderr = val.data.message;
+
 				console.log(err.message);
 				console.log(err.gitCommand);
 				console.log(err.gitErrorCode);
 
-				return err;			
+				return err;
 			}
 			return val.data;
 		}catch(err){
 			throw ServerConnection.makeError(err);
-		}	
+		}
 	}
 
 
@@ -433,20 +447,20 @@ export class Git {
 				err.gitCommand = val.data.command;
 				err.message = val.data.message;
 				err.gitErrorCode = getGitErrorCode(val.data.message);
-				err.stderr = val.data.message;	
-				
+				err.stderr = val.data.message;
+
 				console.log(err.message);
 				console.log(err.gitCommand);
 				console.log(err.gitErrorCode);
 
-				return err;			
+				return err;
 			}
 			return val.data;
 		}catch(err){
 			throw ServerConnection.makeError(err);
-		}	
+		}
 	 }
-	
+
 	init(path:string){
 		return HTTP_Git_Request('/git/init','POST',{"current_path":path});
 	}
