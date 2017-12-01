@@ -36,7 +36,6 @@ class Git_API_handler(Git_handler):
         3. git log
         4. git status
         """
-
         my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
         showtoplevel = self.git.showtoplevel(current_path)
