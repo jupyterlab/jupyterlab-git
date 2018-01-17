@@ -20,7 +20,7 @@ import {
 
 import {
    IMainMenu
-} from '@jupyterlab/apputils';
+} from '@jupyterlab/mainmenu';
 
 import {
    Menu

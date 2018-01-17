@@ -271,6 +271,7 @@ namespace GitSessionNode {
 }
 
   async function refresh(){
+    console.log("hello!!!!!!!!!!!")
    try{
     let ll = this.props.app.shell.widgets('left');
     let fb = ll.next();
@@ -278,7 +279,9 @@ namespace GitSessionNode {
       fb = ll.next();
     }
     let git_temp = new Git();
+    console.log("hello!!!!!!!!!!!---------")
     let api_result =await git_temp.api((fb as any).model.path);
+    
     if(api_result.code==0){
       let api_showtoplevel = (api_result as GitAPI).data.showtoplevel;
 

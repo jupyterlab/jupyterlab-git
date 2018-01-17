@@ -1,17 +1,10 @@
 """
 This is a Handler Module with all the individual handlers for Git-Plugin.
 """
-import os
 import json
-import socket
-import time
-import subprocess as sp
-import psutil
-from tornado import web
-import subprocess
 
 
-from notebook.utils import url_path_join
+from notebook.utils import url_path_join as ujoin
 from notebook.base.handlers import APIHandler
 
 
@@ -34,8 +27,6 @@ class Git_API_handler(Git_handler):
     Class is used in the refresh method
     """
 
-
-
     def post(self):
         """
         Function used  to apply POST(REST_API) method to 'Git_API_handler'.
@@ -45,6 +36,7 @@ class Git_API_handler(Git_handler):
         3. git log
         4. git status
         """
+        """self.log.warning(self.request.body)"""
         my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
         showtoplevel = self.git.showtoplevel(current_path)
@@ -108,10 +100,16 @@ class Git_status_handler(Git_handler):
     def get(self):
         """
         Function used to apply GET method to 'Git_status_handler'.
-        We need GET method to return the status to refresh method & show file status.
+        We need GET method to return the status to refresh method & show file
+        status.
         """
-        self.finish(json.dumps(
-            {"add_all": "check", "filename": "filename", "top_repo_path": "path"}))
+        self.finish(
+            json.dumps({
+                "add_all": "check",
+                "filename": "filename",
+                "top_repo_path": "path"
+            })
+        )
 
     def post(self):
         """
@@ -132,7 +130,8 @@ class Git_log_handler(Git_handler):
     def post(self):
         """
         Function used to apply POST method of 'Git_log_handler'.
-        log handler is used to get Commit SHA, Author Name, Commit Date & Commit Message.
+        log handler is used to get Commit SHA, Author Name, Commit Date &
+        Commit Message.
         """
         my_data = json.loads(self.request.body.decode('utf-8'))
         current_path = my_data["current_path"]
@@ -142,14 +141,16 @@ class Git_log_handler(Git_handler):
 
 class Git_log_1_handler(Git_handler):
     """
-    A class used to get file names of committed files, Number of insertions & deletions in that commit.
-    The git command used here is 'git log -1 --stat --numstat --oneline'
+    A class used to get file names of committed files, Number of insertions &
+    deletions in that commit.  The git command used here is
+        'git log -1 --stat --numstat --oneline'
     """
 
     def post(self):
         """
         Function used to apply POST method of 'Git_log_1_handler'.
-        log 1 handler is used to get file names of committed files, Number of insertions & deletions in that commit.
+        log 1 handler is used to get file names of committed files, Number of
+        insertions & deletions in that commit.
         """
         my_data = json.loads(self.request.body.decode('utf-8'))
         selected_hash = my_data["selected_hash"]
@@ -167,7 +168,8 @@ class Git_diff_handler(Git_handler):
     def post(self):
         """
         Function used to apply POST method of 'Git_diff_handler'.
-        git diff is used to get differences between commits & current working tree.
+        git diff is used to get differences between commits & current working
+        tree.
         """
         my_data = json.loads(self.request.body.decode('utf-8'))
         top_repo_path = my_data["top_repo_path"]
@@ -205,8 +207,13 @@ class Git_add_handler(Git_handler):
         Function used to apply GET method of 'Git_add_handler'.
         git add is used to add files in the staging area.
         """
-        self.finish(json.dumps(
-            {"add_all": "check", "filename": "filename", "top_repo_path": "path"}))
+        self.finish(
+            json.dumps({
+                "add_all": "check",
+                "filename": "filename",
+                "top_repo_path": "path"
+            })
+        )
 
     def post(self):
         """
@@ -300,7 +307,8 @@ class Git_pull_handler(Git_handler):
     def post(self):
         """
         Function used to apply POST method of 'Git_pull_handler'.
-        git pull is used to pull files from a remote branch to your current work.
+        git pull is used to pull files from a remote branch to your current
+        work.
         """
         my_data = json.loads(self.request.body.decode('utf-8'))
         origin = my_data["origin"]
@@ -320,7 +328,8 @@ class Git_push_handler(Git_handler):
     def post(self):
         """
         Function used to apply POST method of 'Git_push_handler'.
-        git push is used to push files from a remote branch to your current work.
+        git push is used to push files from a remote branch to your current
+        work.
         """
         my_data = json.loads(self.request.body.decode('utf-8'))
         origin = my_data["origin"]
@@ -347,6 +356,7 @@ class Git_init_handler(Git_handler):
         my_output = self.git.init(current_path)
         self.finish(my_output)
 
+
 class Git_add_all_untracked_handler(Git_handler):
     """
     A class used to add and ONLY add all the untracked files.
@@ -356,10 +366,10 @@ class Git_add_all_untracked_handler(Git_handler):
         """
         Function used to apply POST method of 'Git_add_all_untracked_handler'.
         git add_all_untracked is used to add all the untracked files.
-        """        
+        """
         my_data = json.loads(self.request.body.decode('utf-8'))
         top_repo_path = my_data["top_repo_path"]
-        my_output=self.git.add_all_untracked(top_repo_path)
+        my_output = self.git.add_all_untracked(top_repo_path)
         print(my_output)
         self.finish(my_output)
 
@@ -369,21 +379,61 @@ def setup_handlers(web_app):
     Function used to setup all of the Git_Handlers used in the file.
     Every handler is defined here, to be used in git.py file.
     """
-    print('web app base url : '+web_app.settings['base_url'])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/showtoplevel'), Git_showtoplevel_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/showprefix'), Git_showprefix_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/add'), Git_add_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/status'), Git_status_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/branch'), Git_branch_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/reset'), Git_reset_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/checkout'), Git_checkout_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/commit'), Git_commit_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/pull'), Git_pull_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/push'), Git_push_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/diff'), Git_diff_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/log'), Git_log_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/log_1'), Git_log_1_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/init'), Git_init_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/API'), Git_API_handler)])
-    web_app.add_handlers('.*', [(url_path_join(web_app.settings['base_url'], '/git/add_all_untracked'), Git_add_all_untracked_handler)])
 
+    git_handlers = [
+        ('/git/showtoplevel', Git_showtoplevel_handler),
+        ('/git/showprefix', Git_showprefix_handler),
+        ('/git/add', Git_add_handler),
+        ('/git/status', Git_status_handler),
+        ('/git/branch', Git_branch_handler),
+        ('/git/reset', Git_reset_handler),
+        ('/git/checkout', Git_checkout_handler),
+        ('/git/commit', Git_commit_handler),
+        ('/git/pull', Git_pull_handler),
+        ('/git/push', Git_push_handler),
+        ('/git/diff', Git_diff_handler),
+        ('/git/log', Git_log_handler),
+        ('/git/log_1', Git_log_1_handler),
+        ('/git/init', Git_init_handler),
+        ('/git/API', Git_API_handler),
+        ('/git/add_all_untracked', Git_add_all_untracked_handler),
+    ]
+
+    # add the baseurl to our paths
+    base_url = web_app.settings['base_url']
+    git_handlers = [
+        (ujoin(base_url, x[0]), x[1])
+        for x in git_handlers
+    ]
+    print("base_url: {}".format(base_url))
+    print(git_handlers)
+
+    web_app.add_handlers('.*', git_handlers)
+
+
+def print_handlers():
+    git_handlers = [
+        ('/git/showtoplevel', Git_showtoplevel_handler),
+        ('/git/showprefix', Git_showprefix_handler),
+        ('/git/add', Git_add_handler),
+        ('/git/status', Git_status_handler),
+        ('/git/branch', Git_branch_handler),
+        ('/git/reset', Git_reset_handler),
+        ('/git/checkout', Git_checkout_handler),
+        ('/git/commit', Git_commit_handler),
+        ('/git/pull', Git_pull_handler),
+        ('/git/push', Git_push_handler),
+        ('/git/diff', Git_diff_handler),
+        ('/git/log', Git_log_handler),
+        ('/git/log_1', Git_log_1_handler),
+        ('/git/init', Git_init_handler),
+        ('/git/API', Git_API_handler),
+        ('/git/add_all_untracked', Git_add_all_untracked_handler),
+    ]
+
+    # add the baseurl to our paths
+    base_url = ''
+    git_handlers = [
+        (ujoin(base_url, x[0]), x[1])
+        for x in git_handlers
+    ]
