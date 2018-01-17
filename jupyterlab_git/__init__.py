@@ -18,10 +18,7 @@ def _jupyter_nbextension_paths():
     """
     Function to declare Jupyter Notebook Extension Paths.
     """
-    return [{
-        "section": "notebook",
-        "dest": "jupyterlab_git"
-    }]
+    return [{"section": "notebook", "dest": "jupyterlab_git"}]
 
 
 def load_jupyter_server_extension(nbapp):
@@ -31,4 +28,3 @@ def load_jupyter_server_extension(nbapp):
     git = Git()
     nbapp.web_app.settings['git'] = git
     setup_handlers(nbapp.web_app)
-

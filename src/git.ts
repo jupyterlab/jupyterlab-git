@@ -2,6 +2,10 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
+import {
+	PageConfig
+} from '@jupyterlab/coreutils'
+
 import '../style/index.css';
 import { URLExt } from '@jupyterlab/coreutils';
 
@@ -275,7 +279,7 @@ export class Git {
 			throw ServerConnection.NetworkError;
 		}	
 	 }
-	
+
 	init(path:string){
 		return HTTP_Git_Request('/git/init','POST',{"current_path":path});
 	}
