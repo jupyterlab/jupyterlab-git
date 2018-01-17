@@ -2,10 +2,6 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
-import {
-	PageConfig
-} from '@jupyterlab/coreutils'
-
 import '../style/index.css';
 import { URLExt } from '@jupyterlab/coreutils';
 
