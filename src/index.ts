@@ -2,9 +2,6 @@
 import {
   addCommands, CommandIDs
  } from './git_mainmenu_command'
-import {
-	  FileBrowser, IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
 
 import {
   PathExt
@@ -34,7 +31,7 @@ import {
  */
 const plugin: JupyterLabPlugin<IGitExtension> = {
   id: 'jupyter.extensions.running-sessions-git',
-  requires: [IFileBrowserFactory, IMainMenu, ILayoutRestorer],
+  requires: [IMainMenu, ILayoutRestorer],
   activate,
   autoStart: true
 };
@@ -93,7 +90,7 @@ export class GitExtension implements IGitExtension{
 /**
  * Activate the running plugin.
  */
-function activate(app: JupyterLab, fb:FileBrowser, mainMenu: IMainMenu, restorer: ILayoutRestorer): IGitExtension {
+function activate(app: JupyterLab, mainMenu: IMainMenu, restorer: ILayoutRestorer): IGitExtension {
   const { commands} = app;
   let git_extension = new GitExtension(app, restorer);
   const category = 'Git';
