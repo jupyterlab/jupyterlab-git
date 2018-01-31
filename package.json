@@ -32,13 +32,10 @@
     "@jupyterlab/terminal": "^0.15.0",
     "@jupyterlab/theming": "^0.9.0",
     "@phosphor/widgets": "^1.5.0",
-    "jquery": "^2.2.0",
     "nbdime": "^0.4.0",
     "react": "^15.6.2",
     "react-dom": "^15.6.2",
-    "react-quill": "^1.0.0-beta-1",
-    "react-toggle-display": "^2.2.0",
-    "react-widgets": "^3.4.8"
+    "react-toggle-display": "^2.2.0"
   },
   "devDependencies": {
     "rimraf": "^2.6.1",
