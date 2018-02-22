@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import ToggleDisplay from 'react-toggle-display'
 //import ReactWidget from 'react-widgets';
 import {
-  ServiceManager, Session, TerminalSession
+  ServiceManager
 } from '@jupyterlab/services';
 
 import {
@@ -93,9 +93,6 @@ class GitSessions extends Widget  {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    this._manager = null;
-    this._runningSessions = null;
-    this._runningTerminals = null;
     this._renderer = null;
     clearTimeout(this._refreshId);
     super.dispose();
@@ -174,10 +171,7 @@ class GitSessions extends Widget  {
   }
 
 
-  private _manager: ServiceManager.IManager = null;
   private _renderer: GitSessions.IRenderer = null;
-  private _runningSessions: Session.IModel[] = [];
-  private _runningTerminals: TerminalSession.IModel[] = [];
   private _refreshId = -1;
   private _refreshed = new Signal<this, void>(this);
   //private _lastRefresh = -1;
@@ -307,7 +301,7 @@ namespace GitSessionNode {
       
       //retrieve git_status
       let staged = [], unstaged = [], untracked = [];
-      let SF = 0, USF = 0, UTF = 0, Changes = 0;
+      let Changes = 0;
       let disable_switch_branch = true;
       let pull_enable = false;
       let push_enable = true;
@@ -321,16 +315,13 @@ namespace GitSessionNode {
           
           if(data_json[i].x=="?"&&data_json[i].y=="?"){
             untracked.push(data_json[i]);
-            UTF++;
           }
           else{
             if(data_json[i].x!=" "&&data_json[i].y!="D"){
               staged.push(data_json[i]);
-              SF++;
             }
             if(data_json[i].y!=" "){
               unstaged.push(data_json[i]);
-              USF++;
             }
           }
         }  
