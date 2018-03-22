@@ -398,8 +398,8 @@ class GitSessionNode extends React.Component<GitSessionNode.IProps, GitSessionNo
          </ToggleDisplay>
 
         <ToggleDisplay show={!(this.state.show)}>
-          <div>
-              <span> Git-pulgin trackes the filepath in filebrowser, the current folder is not a git-repo</span>
+          <div style={{ padding: 16 }}>
+            <span style={{ color: "red", fontWeight: "bold" }}>Error:</span> <span>The current folder is not a git repository. Please make sure you are currently working in a git repository in order to use this plugin.</span>
           </div>
          </ToggleDisplay>
 
