@@ -7,6 +7,8 @@ import { URLExt } from '@jupyterlab/coreutils'
 
 'use strict'
 
+/** Interface for GITAPI request result, 
+  * has all repo information */
 export interface GitAPI {
 	code: number,
 	data?: {
@@ -17,18 +19,31 @@ export interface GitAPI {
 	}
 }
 
+/** Interface for GitShowTopLevel request result, 
+  * has the git root directory inside a repository */
 export interface GitShowTopLevelResult {
 	code: number,
 	top_repo_path?: string
 }
+
+/** Interface for GitShowPrefix request result, 
+  * has the prefix path of a directory in a repository, 
+  * with respect to the root directory. */
 export interface GitShowPrefixResult {
 	code: number,
 	under_repo_path?: string
 }
+
+/** Interface for GitShowPrefix request result, 
+  * has the prefix path of a directory in a repository, 
+  * with respect to the root directory. */
 export interface GitCheckoutResult {
 	code: number,
 	message?: string
 }
+
+/** Interface for GitBranch request result, 
+  * has the result of changing the current working branch */
 export interface GitBranchResult {
 	code: number,
 	branches?: [
@@ -41,6 +56,8 @@ export interface GitBranchResult {
   ]
 }
 
+/** Interface for GitStatus request result, 
+   * has the status of each changed file */
 export interface GitStatusFileResult {
   x: string,
   y: string,
@@ -48,11 +65,15 @@ export interface GitStatusFileResult {
   from: string
 }
 
+/** Interface for GitStatus request result, 
+  * has the status of the entire repo */
 export interface GitStatusResult {
 	code: number,
 	files?: [GitStatusFileResult]
 }
 
+/** Interface for GitLog request result, 
+  * has the info of a single past commit */
 export interface SingleCommitInfo {
   commit: string,
   author: string,
@@ -61,6 +82,8 @@ export interface SingleCommitInfo {
 	pre_commit: string
 }
 
+/** Interface for GitCommit request result, 
+  * has the info of a committed file */
 export interface CommitModifiedFile {
 	modified_file_path: string,
 	modified_file_name: string,
@@ -68,6 +91,8 @@ export interface CommitModifiedFile {
 	deletion: string
 }
 
+/** Interface for GitLog_1 request result, 
+  * has the detailed info of a single past commit */
 export interface SingleCommitFilePathInfo {
 	code: number,
 	modified_file_note?: string,
@@ -77,12 +102,15 @@ export interface SingleCommitFilePathInfo {
 	modified_files?: [CommitModifiedFile]
 }
 
+/** Interface for GitLog request result, 
+  * has the info of all past commits */
 export interface GitLogResult {
 	code: number,
 	commits?: [SingleCommitInfo]
 }
 
-function HTTP_Git_Request(URL,METHOD,REQUEST) : Promise<Response> {
+/** Makes a HTTP request, sending a git command to the backend */
+function HTTP_Git_Request(URL, METHOD, REQUEST) : Promise<Response> {
   let request = {
     method: METHOD,
     body: JSON.stringify(REQUEST)
@@ -93,19 +121,20 @@ function HTTP_Git_Request(URL,METHOD,REQUEST) : Promise<Response> {
   return ServerConnection.makeRequest(url, request, setting)
 }
 
+/** Parent class for all API requests */
 export class Git {
 	constructor() {
 	}
 	
+	/** Make request for all git info of repository 'path' */
 	async api(path: string): Promise<GitAPI> {
 		try {
 			let val = await HTTP_Git_Request('/git/API', 'POST', {"current_path": path})
-			console.log(val)
 			if (val.status !== 200) {
-        console.log(val.status)
-        return val.text().then(data => { 
-          throw new ServerConnection.ResponseError(val, data)
-        })
+				console.log(val.status)
+				return val.text().then(data => { 
+				throw new ServerConnection.ResponseError(val, data)
+				})
 			}
 			return val.json()
 		} catch(err) {
@@ -113,22 +142,24 @@ export class Git {
 		}
 	}
 
-
+	/** Make request for top level path of repository 'path' */
 	async showtoplevel(path: string): Promise<GitShowTopLevelResult> {
 		try {
 			let val = await HTTP_Git_Request('/git/showtoplevel', 'POST', {"current_path": path})
 			if (val.status !== 200) {
-        console.log(val.status)
-        return val.json().then(data => {
-          throw new ServerConnection.ResponseError(val, data.message)
-        })
+				console.log(val.status)
+				return val.json().then(data => {
+				throw new ServerConnection.ResponseError(val, data.message)
+				})
 			}
 			return val.json()
 		} catch(err) {
 			throw ServerConnection.NetworkError
 		}
 	}
-
+  
+  /** Make request for the prefix path of a directory 'path', 
+    * with respect to the root directory of repository  */
 	async showprefix(path: string): Promise<GitShowPrefixResult> {
 		try {
 			let val = await HTTP_Git_Request('/git/showprefix', 'POST', {"current_path": path})
@@ -143,6 +174,7 @@ export class Git {
 		}
 	}
 
+  /** Make request for git status of repository 'path' */
 	async status(path: string): Promise<GitStatusResult> {
 		try {
 			let val = await HTTP_Git_Request('/git/status','POST',{"current_path":path})
@@ -157,10 +189,11 @@ export class Git {
 		}
 	}
 
+  /** Make request for git commit logs of repository 'path' */
 	async log(path: string): Promise<GitLogResult> {
 		try {
 			let val = await HTTP_Git_Request('/git/log', 'POST', {"current_path": path})
-			if(val.status!== 200) {
+			if(val.status !== 200) {
         return val.json().then(data => {
 				  throw new ServerConnection.ResponseError(val, data.message)
 				})
@@ -169,12 +202,14 @@ export class Git {
 		} catch (err) {
 			throw ServerConnection.NetworkError
 		}
-	}
-
+  }
+  
+  /** Make request for detailed git commit info of 
+    * commit 'hash' in repository 'path' */
 	async log_1(hash: string, path: string): Promise<SingleCommitFilePathInfo> {
 		try {
 			let val = await HTTP_Git_Request('/git/log_1', 'POST', {"selected_hash":hash, "current_path": path})
-			if(val.status!== 200) {
+			if(val.status !== 200) {
         return val.json().then(data => {
 					throw new ServerConnection.ResponseError(val, data.message)
 				})
@@ -185,6 +220,7 @@ export class Git {
 		}
 	}
 
+  /** Make request for a list of all git branches in repository 'path' */
 	async branch(path: string): Promise<GitBranchResult> {
 		try{
 			let val = await HTTP_Git_Request('/git/branch', 'POST', {"current_path": path})
@@ -199,10 +235,14 @@ export class Git {
 		}
 	}
 
+  /** Make request to add one or all files into 
+    * the staging area in repository 'path' */
 	add(check: boolean, filename: string, path: string) {
 		return  HTTP_Git_Request('/git/add', 'POST', {"add_all": check , "filename": filename, "top_repo_path": path})
 	}
 
+  /** Make request to add all untracked files into 
+    * the staging area in repository 'path' */
 	async add_all_untracked(path: string) {
 		try {
 			let val =  await HTTP_Git_Request('/git/add_all_untracked', 'POST', {"top_repo_path": path})
@@ -217,6 +257,11 @@ export class Git {
 		}		
 	}
 
+  /** Make request to switch current working branch, 
+    * create new branch if needed, 
+    * or discard all changes, 
+    * or discard a specific file change 
+    * TODO: Refactor into seperate endpoints for each kind of checkout request */
 	async checkout(checkout_branch: boolean, new_check: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string) : Promise<GitCheckoutResult> {
 		try {
 			let val =  await HTTP_Git_Request(
@@ -241,15 +286,19 @@ export class Git {
 			throw ServerConnection.NetworkError
 		}
 	}
-
+/** Make request to commit all staged files in repository 'path' */
 	commit(message: string, path: string) {
 		return HTTP_Git_Request('/git/commit','POST',{"commit_msg":message, "top_repo_path": path})
 	}
 
+	/** Make request to move one or all files from the staged to the unstaged area */
 	reset(check: boolean, filename: string, path: string) {
 		return HTTP_Git_Request('/git/reset','POST',{"reset_all": check, "filename":filename, "top_repo_path": path})
 	}
 
+	/** Make request to pull files from 
+	 	* a remote branch 'origin' and integrate into local branch 'master' 
+		* TODO: Rename parameter names to be more clear */
 	async pull(origin: string, master: string, path: string) {
 		try {
 			let val = await HTTP_Git_Request('/git/pull', 'POST', {"origin": origin, "master": master, "curr_fb_path": path})
@@ -264,7 +313,9 @@ export class Git {
 		}	
 	}
 
-
+	/** Make request to push committed files to a
+		* remote branch 'origin' from local branch 'master'.
+		* TODO: Rename parameter names to be more clear */
 	async push(origin: string, master: string, path: string) {
 		try {
 			let val = await HTTP_Git_Request('/git/push', 'POST', {"origin": origin, "master": master, "curr_fb_path": path})
@@ -279,6 +330,7 @@ export class Git {
 		}	
 	 }
 
+	/** Make request to initialize a  new git repository at path 'path' */
 	init(path: string){
 		return HTTP_Git_Request('/git/init', 'POST', {"current_path": path})
 	}
