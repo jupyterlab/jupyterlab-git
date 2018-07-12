@@ -91,7 +91,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
       }
       let gitApi = new Git()
       // Make API call to get all git info for repo
-      let apiResult = await gitApi.all_history((fileBrowser as any).model.path)
+      let apiResult = await gitApi.allHistory((fileBrowser as any).model.path)
       
       if (apiResult.code === 0) {
         // Get top level path of repo

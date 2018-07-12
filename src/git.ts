@@ -127,7 +127,7 @@ export class Git {
 	}
 	
 	/** Make request for all git info of repository 'path' */
-	async all_history(path: string): Promise<GitAllHistory> {
+	async allHistory(path: string): Promise<GitAllHistory> {
 		try {
 			let val = await httpGitRequest('/git/all_history', 'POST', {"current_path": path})
 			if (val.status !== 200) {
@@ -143,7 +143,7 @@ export class Git {
 	}
 
 	/** Make request for top level path of repository 'path' */
-	async showtoplevel(path: string): Promise<GitShowTopLevelResult> {
+	async showTopLevel(path: string): Promise<GitShowTopLevelResult> {
 		try {
 			let val = await httpGitRequest('/git/showtoplevel', 'POST', {"current_path": path})
 			if (val.status !== 200) {
@@ -159,7 +159,7 @@ export class Git {
   
   /** Make request for the prefix path of a directory 'path', 
     * with respect to the root directory of repository  */
-	async showprefix(path: string): Promise<GitShowPrefixResult> {
+	async showPrefix(path: string): Promise<GitShowPrefixResult> {
 		try {
 			let val = await httpGitRequest('/git/showprefix', 'POST', {"current_path": path})
 			if (val.status !== 200) {
@@ -205,7 +205,7 @@ export class Git {
   
   /** Make request for detailed git commit info of 
     * commit 'hash' in repository 'path' */
-	async detailed_log(hash: string, path: string): Promise<SingleCommitFilePathInfo> {
+	async detailedLog(hash: string, path: string): Promise<SingleCommitFilePathInfo> {
 		try {
 			let val = await httpGitRequest('/git/detailed_log', 'POST', {"selected_hash":hash, "current_path": path})
 			if(val.status !== 200) {
@@ -242,7 +242,7 @@ export class Git {
 
   /** Make request to add all untracked files into 
     * the staging area in repository 'path' */
-	async add_all_untracked(path: string) {
+	async addAllUntracked(path: string) {
 		try {
 			let val =  await httpGitRequest('/git/add_all_untracked', 'POST', {"top_repo_path": path})
 			if (val.status !== 200) {

@@ -393,7 +393,7 @@ async openListedFile(typeX: string, typeY: string, path: string, app: JupyterLab
       fileBrowser = leftSidebarItems.next()
     }
     let gitApi = new Git()
-    let prefixData = await gitApi.showprefix((fileBrowser as any).model.path)
+    let prefixData = await gitApi.showPrefix((fileBrowser as any).model.path)
     let underRepoPath = (prefixData as GitShowPrefixResult).under_repo_path
     let fileBrowserPath = (fileBrowser as any).model.path + '/'
     let openFilePath = fileBrowserPath
@@ -487,7 +487,7 @@ discardUnstagedFile(file: string, path: string, refresh: Function) {
 /** Add all untracked files */
 addAllUntrackedFiles(path: string, refresh: Function) {
   let gitApi = new Git()
-  gitApi.add_all_untracked(path).then(response => {
+  gitApi.addAllUntracked(path).then(response => {
     refresh()
   })
 }
