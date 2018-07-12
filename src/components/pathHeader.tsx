@@ -1,12 +1,12 @@
 export namespace PathHeader {
   export interface IState {
-    top_repo_path: string
+    topRepoPath: string
     refresh: any
   }
 
   export interface IProps {
-    current_fb_path: string
-    top_repo_path: string
+    currentFileBrowserPath: string
+    topRepoPath: string
     refresh: any
   }
 }
@@ -18,7 +18,7 @@ import '../../style/index.css'
 export class PathHeader extends React.Component<PathHeader.IProps, PathHeader.IState> {
   constructor(props: PathHeader.IProps) {
     super(props)
-    this.state = {top_repo_path: props.top_repo_path, refresh : props.refresh}
+    this.state = {topRepoPath: props.topRepoPath, refresh : props.refresh}
   }
 
   render() {
@@ -27,7 +27,7 @@ export class PathHeader extends React.Component<PathHeader.IProps, PathHeader.IS
           <li className='jp-Git-repo'>
             <span className='jp-Git-repo-icon'/>
             <span className='jp-Git-repo-path'> 
-              {this.props.top_repo_path}
+              {this.props.topRepoPath}
               </span> 
             <button className='jp-Git-repo-refresh'  onClick={()=>this.props.refresh()} />
           </li>

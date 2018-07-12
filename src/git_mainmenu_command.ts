@@ -28,7 +28,7 @@ import {
 
 import {
   GitSessions
-} from './components/components'
+} from './components/GitSessions'
 
 import '../style/index.css'
 

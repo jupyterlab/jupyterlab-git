@@ -16,42 +16,41 @@ import {
 
 import '../../style/index.css'
 
-export namespace BranchHeader {
-  export interface IState {
-    top_repo_path: string,
-    current_repo_branch: string,
-    data: any,
-    refresh: any,
-    disabled: boolean,
-    show_notice: boolean
-  }
-
-  export interface IProps {
-    current_fb_path: string,
-    top_repo_path: string,
-    current_branch: string,
-    data: any,
-    refresh: any,
-    disabled: boolean
-  }
+export interface IBranchHeaderState {
+  topRepoPath: string,
+  currentBranch: string,
+  data: any,
+  refresh: any,
+  disabled: boolean,
+  showNotice: boolean
 }
-export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
+
+export interface IBranchHeaderProps {
+  currentFileBrowserPath: string,
+  topRepoPath: string,
+  currentBranch: string,
+  data: any,
+  refresh: any,
+  disabled: boolean
+}
+
+export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHeaderState>{
   interval: any
-  constructor(props: BranchHeader.IProps) {
+  constructor(props: IBranchHeaderProps) {
     super(props)
     this.state = {
-      top_repo_path: props.top_repo_path, 
-      current_repo_branch: props.current_branch, 
+      topRepoPath: props.topRepoPath, 
+      currentBranch: props.currentBranch, 
       data: [], 
       refresh: props.refresh, 
       disabled: props.disabled, 
-      show_notice: false
+      showNotice: false
     }
   }
 
 /** Switch current working branch */
-  switch_branch(event, refresh) {
-    let git_temp = new Git()
+  switchBranch(event, refresh) {
+    let gitApi = new Git()
     if (event.target.value === '') {
       let input = new Widget({ node: document.createElement('input') })
       showDialog(
@@ -62,16 +61,16 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
           Dialog.okButton({ label: 'Create'})]
         }
       ).then(result => {
-        let target_branch = (input.node as HTMLInputElement).value 
-        if (result.button.accept && target_branch) {
-          git_temp.checkout(true, true, target_branch, false, null, this.props.current_fb_path)
+        let targetBranch = (input.node as HTMLInputElement).value 
+        if (result.button.accept && targetBranch) {
+          gitApi.checkout(true, true, targetBranch, false, null, this.props.currentFileBrowserPath)
           .then(response => {
             refresh()
           })
         }
       })
     } else {
-      git_temp.checkout(true, false, event.target.value, false, null, this.props.current_fb_path)
+      gitApi.checkout(true, false, event.target.value, false, null, this.props.currentFileBrowserPath)
       .then(respones => {
         refresh()
       })
@@ -79,10 +78,10 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
   }
 
   /** Trigger notice that switching branches is currently disabled */
-  switch_branch_diable_notice() {
-    this.setState({show_notice: true})
+  switchBranchDisableNotice() {
+    this.setState({showNotice: true})
     setTimeout(function() {
-      this.setState({show_notice: false})
+      this.setState({showNotice: false})
     }
     .bind(this), 3000)
   }
@@ -92,22 +91,22 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
       <div className='jp-Git-branch'>
         <span className ='jp-Git-branch-label'>
           <span className='jp-Git-icon-branch'/>
-          {this.state.show_notice ? 
+          {this.state.showNotice ? 
             'Stage and commit changes before switching branches' 
-            : this.props.current_branch
+            : this.props.currentBranch
           }
         </span>
         <ToggleDisplay show={!this.props.disabled}>
           <select 
             ref="switch_branch_dropdown_button" 
-            value={this.props.current_branch} 
+            value={this.props.currentBranch} 
             disabled={this.props.disabled} 
             title={this.props.disabled ? 
               'Stage and commit changes before switching branches' 
               : 'select branches'
             } 
             className='jp-Git-branch-dropdown' 
-            onChange={event => this.switch_branch(event, this.props.refresh)} 
+            onChange={event => this.switchBranch(event, this.props.refresh)} 
           >
             <option 
               className='jp-Git-switch-branch' 
@@ -124,14 +123,14 @@ export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHea
             }
             <option className='jp-Git-create-branch-line' disabled />
             <option className='jp-Git-create-branch' value=''>
-              CREATE NEW
+              Create New
             </option>
           </select>
         </ToggleDisplay> 
-        <ToggleDisplay show={this.props.disabled&&!(this.state.show_notice)}>
+        <ToggleDisplay show={this.props.disabled && !this.state.showNotice}>
           <select 
             className='jp-Git-branch-dropdown' 
-            onClick={()=>this.switch_branch_diable_notice()}
+            onClick={()=>this.switchBranchDisableNotice()}
           />
         </ToggleDisplay> 
       </div>

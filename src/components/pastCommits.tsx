@@ -3,12 +3,20 @@ import {
 } from '@jupyterlab/application'
 
 import {
-  Git, SingleCommitInfo,CommitModifiedFile
+  Git, SingleCommitInfo
 } from '../git'
 
 import {
-  StatusFiles, parseFileExtension
+  StatusFiles
 } from './statusFiles'
+
+import {
+  PastCommitNodeInfo
+} from './PastCommitNodeInfo'
+
+import {
+  SinglePastCommitInfo
+} from './SinglePastCommitInfo'
 
 import * as React from 'react'
 
@@ -18,214 +26,272 @@ import ToggleDisplay from 'react-toggle-display'
 
 import '../../style/index.css'
 
-/**
- * The class name added to a git-plugin session item icon.
- */
-const GIT_FILE_ICON = 'jp-Git-fileIcon'
-
-export namespace PastCommits {
-  export interface IState {
-    data: any
-    info: string
-    files_changed: string,
-    insertion_count: string,
-    deletion_count: string,
-    single_num: string
-    single_data: any
-    single_data_filelist: any
-    show_left_arrow: boolean
-    show_right_arrow: boolean
-  }
-
-  export interface IProps {
-    current_fb_path: string
-    top_repo_path: string
-
-    past_commits: any
-    in_new_repo: boolean
-    show_index: number
-
-    staged_files: any
-    unstaged_files: any
-    untracked_files: any
-    app: JupyterLab
-    refresh: any
-    show_current_work: any
-    diff: any
-  }
+/** Interface for PastCommits component state */
+export interface IPastCommitsState {
+  data: any
+  info: string
+  filesChanged: string,
+  insertionCount: string,
+  deletionCount: string,
+  singleNumber: string
+  singleData: any
+  singleDataFilelist: any
+  showLeftArrow: boolean
+  showRightArrow: boolean
 }
 
-export class PastCommits extends React.Component<PastCommits.IProps, PastCommits.IState> {
-  constructor(props: PastCommits.IProps) {
+/** Interface for PastCommits component props */
+export interface IPastCommitsProps {
+  currentFileBrowserPath: string
+  topRepoPath: string
+  pastCommits: any
+  inNewRepo: boolean
+  showIndex: number
+  stagedFiles: any
+  unstagedFiles: any
+  untrackedFiles: any
+  app: JupyterLab
+  refresh: any
+  showCurrentWork: any
+  diff: any
+}
+
+export class PastCommits extends React.Component<IPastCommitsProps, IPastCommitsState> {
+  constructor(props: IPastCommitsProps) {
     super(props)
     this.state = {
-      data: props.past_commits, 
+      data: props.pastCommits, 
       info: '', 
-      files_changed: '',
-      insertion_count: '',
-      deletion_count: '',
-      single_num: '', 
-      single_data: '', 
-      single_data_filelist: [], 
-      show_left_arrow: true, 
-      show_right_arrow: false
+      filesChanged: '',
+      insertionCount: '',
+      deletionCount: '',
+      singleNumber: '', 
+      singleData: '', 
+      singleDataFilelist: [], 
+      showLeftArrow: true, 
+      showRightArrow: false
     }
   }
 
-  show_left() {
-    let pastcommitsContainer = ReactDOM.findDOMNode(this.refs.past_commits_container)
-    //$(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft-200}, 320)
-    smooth_scroll_to(pastcommitsContainer, pastcommitsContainer.scrollLeft - 200, 320)
-    this.setState({show_right_arrow:true})
-    /*
-    if (pastcommitsContainer.scrollLeft==0) {
-      this.setState({show_left_arrow:false})
-    }
-    else{
-      this.setState({show_left_arrow:true})
-    }*/
+  /** Scroll the list of past commits left */
+  scrollCommitsLeft() {
+    let pastCommitsContainer = ReactDOM.findDOMNode(this.refs.pastCommitsContainer)
+    this.smoothScrollTo(pastCommitsContainer, pastCommitsContainer.scrollLeft - 200, 320)
+    this.setState({ showRightArrow: true })
   }
 
-  show_right() {
-    let pastcommitsContainer = ReactDOM.findDOMNode(this.refs.past_commits_container)
-    //$(pastcommitsContainer).animate({scrollLeft: pastcommitsContainer.scrollLeft+200},320)
-    smooth_scroll_to(pastcommitsContainer, pastcommitsContainer.scrollLeft + 200, 320)
-    this.setState({show_left_arrow:true})
-    if (pastcommitsContainer.scrollLeft >= pastcommitsContainer.scrollWidth - 400) {
-      this.setState({show_right_arrow:false})
+  /** Scroll the list of past commits right */
+  scrollCommitsRight() {
+    let pastCommitsContainer = ReactDOM.findDOMNode(this.refs.pastCommitsContainer)
+    this.smoothScrollTo(pastCommitsContainer, pastCommitsContainer.scrollLeft + 200, 320)
+    this.setState({showLeftArrow: true})
+    if (pastCommitsContainer.scrollLeft >= pastCommitsContainer.scrollWidth - 400) {
+      this.setState({ showRightArrow: false })
     }
   }
 
+  /** Fetch git log info on mount */
   async componentDidMount() {
-    let git_temp = new Git()
-    let response = await git_temp.log(this.props.current_fb_path)
-    if (response.code === 0) {
-      this.setState({data: response.commits})
+    let gitApi = new Git()
+    let logData = await gitApi.log(this.props.currentFileBrowserPath)
+    if (logData.code === 0) {
+      this.setState({ data: logData.commits })
     }
   }
-
   
-  async show_past_commit_work(dj: SingleCommitInfo, dj_index: number, path: string) {
-    let git_temp = new Git()
-    let response = await git_temp.log_1(dj.commit, path)
-    if (response.code === 0) {
+  /** Show the commit message and changes from a past commit */
+  async showPastCommitWork(pastCommit: SingleCommitInfo, pastCommitIndex: number, path: string) {
+    let gitApi = new Git()
+    let detailedLogData = await gitApi.log_1(pastCommit.commit, path)
+    if (detailedLogData.code === 0) {
       this.setState(
         {
-          info: response.modified_file_note, 
-          files_changed: response.modified_files_count,
-          insertion_count: response.number_of_insertions,
-          deletion_count: response.number_of_deletions,  
-          single_data: dj, 
-          single_num: dj_index + ' commit(s) before',
-          single_data_filelist: response.modified_files
+          info: detailedLogData.modified_file_note, 
+          filesChanged: detailedLogData.modified_files_count,
+          insertionCount: detailedLogData.number_of_insertions,
+          deletionCount: detailedLogData.number_of_deletions,  
+          singleData: pastCommit, 
+          singleNumber: pastCommitIndex + ' commit(s) before',
+          singleDataFilelist: detailedLogData.modified_files
         }
       )
     }
   }
 
-  mod_class_selection(index: number, show_index: number) : string {
+  /** Set CSS div class based on if the currently displayed commit is current or past */
+  getCommitTimeState(index: number, showIndex: number) : string {
     switch (index) {
       case -1:
         return (
-          index === show_index ? 
+          index === showIndex ? 
           'jp-Git-currentCommit-active jp-mod-active' 
           : 'jp-Git-currentCommit-active'
         )
       default:
         return (
-          index === show_index ? 
+          index === showIndex ? 
           'jp-Git-pastCommit-active jp-mod-active' 
           : 'jp-Git-pastCommit-active'
         )
     }
   }
 
-  mod_class_selection_btn(index: number, show_index: number) : string {
+  /** Set CSS button class based on if the currently displayed commit is current or past */
+  getCommitTimeStateButton(index: number, showIndex: number) : string {
   switch (index) {
     case -1:
       return (
-        index === show_index ? 
+        index === showIndex ? 
         'jp-Git-currentCommit-btn jp-mod-active' 
         : 'jp-Git-currentCommit-btn'
       )
     default:
       return (
-        index === show_index ? 
+        index === showIndex ? 
         'jp-Git-pastCommit-btn jp-mod-active' 
         : 'jp-Git-pastCommit-btn'
       )
   }
 }
 
+  /**
+   * Smoothly scroll element to the given target (element.scrollLeft)
+   * for the given duration.
+   * Returns a promise that's fulfilled when done, or rejected if
+   * interrupted
+   */
+  smoothScrollTo(element, target, duration) {
+    target = Math.round(target)
+    duration = Math.round(duration)
+    if (duration < 0) {
+        return Promise.reject("bad duration")
+    }
+
+    if (duration === 0) {
+        element.scrollLeft = target
+        return Promise.resolve()
+    }
+
+    let startTime = Date.now()
+    let endTime = startTime + duration
+
+    let startTop = element.scrollLeft
+    let distance = target - startTop
+
+    // based on http://en.wikipedia.org/wiki/Smoothstep
+    let smoothStep = function(start, end, point) {
+        if (point <= start) { 
+          return 0 
+        }
+        if (point >= end) { 
+          return 1 
+        }
+        let x = (point - start) / (end - start)
+        return x * x * (3 - 2 * x)
+    }
+
+    return new Promise(function(resolve, reject) {
+      // This is to keep track of where the element's scrollLeft is
+      // supposed to be, based on what we're doing
+      let previousTop = element.scrollLeft
+
+      // This is like a think function from a game loop
+      let scrollFrame = function() {
+          if (element.scrollLeft !== previousTop) {
+            reject("interrupted")
+            return
+          }
+          // set the scrollLeft for this frame
+          let now = Date.now()
+          let point = smoothStep(startTime, endTime, now)
+          let frameTop = Math.round(startTop + (distance * point))
+          element.scrollLeft = frameTop
+
+          // check if we're done!
+          if (now >= endTime) {
+            resolve()
+            return
+          }
+
+          // If we were supposed to scroll but didn't, then we
+          // probably hit the limit, so consider it done not
+          // interrupted.
+          if (element.scrollLeft === previousTop
+              && element.scrollLeft !== frameTop) {
+              resolve()
+              return
+          }
+          previousTop = element.scrollLeft
+
+          // schedule next frame for execution
+          setTimeout(scrollFrame, 0)
+      }
+      // boostrap the animation process
+      setTimeout(scrollFrame, 0)
+    })
+  } 
+
   render() {
     return (
       <div>
         <div className='jp-Git-timeline'>
-          <ToggleDisplay show={this.state.show_left_arrow}>
-            <button className='jp-Git-timeline-arrow-left' onClick={()=>this.show_left()} />
+          <ToggleDisplay show={this.state.showLeftArrow}>
+            <button className='jp-Git-timeline-arrow-left' onClick={()=>this.scrollCommitsLeft()} />
           </ToggleDisplay>
-          <div className='jp-Git-timeline-container' ref='past_commits_container'> 
-            <button className={this.mod_class_selection(-1, this.props.show_index)} />
-            <button className={this.mod_class_selection_btn(-1, this.props.show_index)} onClick={()=>this.props.show_current_work(-1)} />
-            {this.props.past_commits.map((dj, dj_index) =>
+          <div className='jp-Git-timeline-container' ref='pastCommitsContainer'> 
+            <button className={this.getCommitTimeState(-1, this.props.showIndex)} />
+            <button className={this.getCommitTimeStateButton(-1, this.props.showIndex)} onClick={()=>this.props.showCurrentWork(-1)} />
+            {this.props.pastCommits.map((pastCommit, pastCommitIndex) =>
               <span 
                 className='jp-Git-commit-btn-container' 
-                key={dj_index} 
+                key={pastCommitIndex} 
                 onClick={() => {
-                  this.show_past_commit_work(dj,dj_index,this.props.current_fb_path), 
-                  this.props.show_current_work(dj_index)
+                  this.showPastCommitWork(pastCommit, pastCommitIndex, this.props.currentFileBrowserPath), 
+                  this.props.showCurrentWork(pastCommitIndex)
                   }
                 }
                 >
                 ---------
-                <button className={this.mod_class_selection(dj_index, this.props.show_index)}>
+                <button className={this.getCommitTimeState(pastCommitIndex, this.props.showIndex)}>
                   <PastCommitNodeInfo 
-                    index={dj_index} 
-                    commit={dj.commit} 
-                    author={dj.author} 
-                    date={dj.date} 
-                    commit_msg={dj.commit_msg}
+                    index={pastCommitIndex} 
                   />
                 </button>
-                <button className={this.mod_class_selection_btn(dj_index, this.props.show_index)} >
+                <button className={this.getCommitTimeStateButton(pastCommitIndex, this.props.showIndex)} >
                   <PastCommitNodeInfo 
-                    index={dj_index} 
-                    commit={dj.commit} 
-                    author={dj.author} 
-                    date={dj.date} 
-                    commit_msg={dj.commit_msg}
+                    index={pastCommitIndex} 
                   />
                 </button>
               </span>
               )}
             </div>
-          <ToggleDisplay show={this.state.show_right_arrow}>    
+          <ToggleDisplay show={this.state.showRightArrow}>    
             <button 
               className='jp-Git-timeline-arrow-right' 
-              onClick={()=>this.show_right()} 
+              onClick={()=>this.scrollCommitsRight()} 
             />
           </ToggleDisplay>
         </div>
-        <ToggleDisplay show={this.props.show_index !== -1}>
+        <ToggleDisplay show={this.props.showIndex !== -1}>
           <SinglePastCommitInfo 
-            num={this.state.single_num}
-            data={this.state.single_data} 
+            num={this.state.singleNumber}
+            data={this.state.singleData} 
             info={this.state.info} 
-            files_changed={this.state.files_changed} 
-            insertion_count={this.state.insertion_count} 
-            deletion_count={this.state.deletion_count} 
-            list={this.state.single_data_filelist} 
+            filesChanged={this.state.filesChanged} 
+            insertionCount={this.state.insertionCount} 
+            deletionCount={this.state.deletionCount} 
+            list={this.state.singleDataFilelist} 
             app={this.props.app} 
             diff={this.props.diff}
           />
         </ToggleDisplay>
-        <ToggleDisplay show={this.props.show_index === -1}>
+        <ToggleDisplay show={this.props.showIndex === -1}>
           <StatusFiles 
-            current_fb_path={this.props.current_fb_path} 
-            top_repo_path={this.props.top_repo_path} 
-            staged_files={this.props.staged_files} 
-            unstaged_files={this.props.unstaged_files} 
-            untracked_files={this.props.untracked_files} 
+            currentFileBrowserPath={this.props.currentFileBrowserPath} 
+            topRepoPath={this.props.topRepoPath} 
+            stagedFiles={this.props.stagedFiles} 
+            unstagedFiles={this.props.unstagedFiles} 
+            untrackedFiles={this.props.untrackedFiles} 
             app={this.props.app} 
             refresh={this.props.refresh}
           />
@@ -234,228 +300,3 @@ export class PastCommits extends React.Component<PastCommits.IProps, PastCommits
     )
   }
 }
-
-export namespace PastCommitNodeInfo {
-  export interface IState {
-  }
-
-  export interface IProps {
-    index: number
-    commit: string
-    author: string
-    date: string
-    commit_msg: string
-  }
-}
-
-export class PastCommitNodeInfo extends React.Component<PastCommitNodeInfo.IProps, PastCommitNodeInfo.IState>{
-  constructor(props: PastCommitNodeInfo.IProps) {
-    super(props)
-  }
-  render() {
-    return(
-      <div className = 'jp-Git-commit-index'>
-        {this.props.index === 0 ? 'H' :this.props.index}
-      </div>
-    )
-  }
-}
-
-export namespace SinglePastCommitInfo {
-  export interface IState {
-  }
-
-  export interface IProps {
-    num: string
-    data: SingleCommitInfo
-    info: string
-    files_changed: string,
-    insertion_count :string,
-    deletion_count: string,
-    list: [CommitModifiedFile]
-    app: JupyterLab
-    diff: any
-  }
-}
-export class SinglePastCommitInfo extends React.Component<SinglePastCommitInfo.IProps, SinglePastCommitInfo.IState>{
-  constructor(props: SinglePastCommitInfo.IProps) {
-    super(props)
-  }
-  
-  render() {
-    return (
-      <div>
-      <div className='jp-Git-singlePastCommit'>
-        <div className='jp-Git-singlePastCommit-header'>
-          <span className='jp-Git-singlePastCommit-label-commit-number'> 
-            #{this.props.data.commit?this.props.data.commit.substring(0,7):''}
-          </span>
-          <span className='jp-Git-singlePastCommit-label-summary'> 
-            <span className= 'jp-files-changed-white'> 
-              <span className='jp-Git-icon-directory-white'/> 
-              {this.props.files_changed} 
-            </span>
-            <span className= 'jp-insertions-made-white'> 
-              <span className='jp-Git-icon-insertion-white'/>  
-              {this.props.insertion_count} 
-            </span>
-            <span className= 'jp-deletions-made-white'> 
-              <span className='jp-Git-icon-deletion-white'/>  
-              {this.props.deletion_count} 
-            </span>
-          </span>
-        </div>
-        <div className='jp-Git-singlePastCommit-label-author'> 
-          <span className="jp-Git-icon-author"/> 
-          {this.props.data.author}
-        </div>
-        <div className='jp-Git-singlePastCommit-label-date'> 
-          {this.props.data.date}
-        </div>
-        <div className='jp-Git-singlePastCommit-label-commit-message'> 
-          "<span className="jp-past-commit-message"/>
-          {this.props.data.commit_msg}"
-        </div>
-      </div>
-      <div className='jp-Git-singlePastCommitDetail'>
-          {this.props.list.map((mf, mf_index)=> {
-            <li className='jp-Git-singlePastCommitDetail-file' key={mf_index} >
-              <span 
-                className={`${GIT_FILE_ICON} ${parseFileExtension(mf.modified_file_path)}`} 
-                onDoubleClick={() => {
-                  window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93'
-                  )}
-                }
-              />
-              <span 
-                className='jp-Git-singlePastCommitDetail-file-path'  
-                onDoubleClick={()=> {
-                  this.props.diff(
-                    this.props.app,mf.modified_file_path, 
-                    this.props.data.commit, 
-                    this.props.data.pre_commit
-                  )}
-                }
-              >
-                {mf.modified_file_name}
-              </span>
-              <span 
-                className='jp-Git-light'  
-                onDoubleClick={() => {
-                  this.props.diff(
-                    this.props.app,mf.modified_file_path, 
-                    this.props.data.commit, 
-                    this.props.data.pre_commit
-                  )}
-                  }
-                > 
-                {mf.modified_file_path}
-              </span>
-              <span className='jp-modifications'>
-                <span className='jp-deletions-made-color'>
-                    <span className="jp-Git-modNumber-deletions"> 
-                      {mf.deletion}
-                    </span>   
-                    <span className='jp-Git-icon-deletion-color' />  
-                </span>
-                <span className='jp-insertions-made-color'>
-                    <span className="jp-Git-modNumber-insertions">
-                      {mf.insertion}
-                    </span>
-                    <span className='jp-Git-icon-insertion-color' />
-                </span>
-              </span>
-            </li>
-          })
-        }
-      </div>
-      </div>
-    )
-  }
-}
-
-
-
-/**
- * onDoubleClick={()=>window.open('https://github.com/search?q='+this.props.data.commit+'&type=Commits&utf8=%E2%9C%93')}
- *           <span className='jp-Git-icon-deletion'> {this.props.deletion_count}</span>
-          <span className='jp-Git-icon-insertion'> {this.props.insertion_count}</span>
- */
-
-/**
-    This smooth_scroll_to Solution is from online resources, for temporary use, may change to react-motion in the future:
-
-    Smoothly scroll element to the given target (element.scrollLeft)
-    for the given duration
-
-    Returns a promise that's fulfilled when done, or rejected if
-    interrupted
- */
-let smooth_scroll_to = function(element, target, duration) {
-  target = Math.round(target)
-  duration = Math.round(duration)
-  if (duration < 0) {
-      return Promise.reject("bad duration")
-  }
-  if (duration === 0) {
-      element.scrollLeft = target
-      return Promise.resolve()
-  }
-
-  let start_time = Date.now()
-  let end_time = start_time + duration
-
-  let start_top = element.scrollLeft
-  let distance = target - start_top
-
-  // based on http://en.wikipedia.org/wiki/Smoothstep
-  let smooth_step = function(start, end, point) {
-      if (point <= start) { return 0 }
-      if (point >= end) { return 1 }
-      let x = (point - start) / (end - start) // interpolation
-      return x * x * (3 - 2 * x)
-  }
-
-  return new Promise(function(resolve, reject) {
-      // This is to keep track of where the element's scrollLeft is
-      // supposed to be, based on what we're doing
-      let previous_top = element.scrollLeft
-
-      // This is like a think function from a game loop
-      let scroll_frame = function() {
-          if (element.scrollLeft != previous_top) {
-            reject("interrupted")
-            return
-          }
-          // set the scrollLeft for this frame
-          let now = Date.now()
-          let point = smooth_step(start_time, end_time, now)
-          let frameTop = Math.round(start_top + (distance * point))
-          element.scrollLeft = frameTop
-
-          // check if we're done!
-          if (now >= end_time) {
-              resolve()
-              return
-          }
-
-          // If we were supposed to scroll but didn't, then we
-          // probably hit the limit, so consider it done not
-          // interrupted.
-          if (element.scrollLeft === previous_top
-              && element.scrollLeft !== frameTop) {
-              resolve()
-              return
-          }
-          previous_top = element.scrollLeft
-
-          // schedule next frame for execution
-          setTimeout(scroll_frame, 0)
-      }
-
-      // boostrap the animation process
-      setTimeout(scroll_frame, 0)
-  })
-}
-
-

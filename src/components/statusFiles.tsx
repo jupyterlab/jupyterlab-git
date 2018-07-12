@@ -54,7 +54,6 @@ const GIT_BUTTON_RESET = 'jp-Git-button-reset'
  */
 const GIT_BUTTON_RESET_WHITE = 'jp-Git-button-reset-white'
 
-
 /**
  * The class name added to a git-plugin session item discard button.
  */
@@ -66,27 +65,16 @@ const GIT_BUTTON_DISCARD = 'jp-Git-button-discard'
 const GIT_BUTTON_TRACK = 'jp-Git-button-track'
 
  /**
- * The class name added to a git-plugin session item white expand button.
+ * The class name added to a git-plugin session item white expand or collapse button.
  */
 const JP_IMAGE_CARET_DOWN_WHITE = 'jp-image-careetdownwhite'
-
 const JP_IMAGE_CARET_RIGHT_WHITE = 'jp-image-caretrightwhite'
-/**
- * The class name added to a git-plugin session item white collapse button.
-
-const JP_IMAGE_CARET_RIGHT_WHITE = 'jp-image-caretrightwhite'
-*/
 
  /**
- * The class name added to a git-plugin session item expand button.
+ * The class name added to a git-plugin session item expand or collapse button.
  */
 const JP_IMAGE_CARET_DOWN = 'jp-image-caretdown'
-
 const JP_IMAGE_CARET_RIGHT = 'jp-image-caretright'
-/**
- * The class name added to a git-plugin session item collapse button.
-const JP_IMAGE_CARET_RIGHT = 'jp-image-caretright'
- */
 
 /**
  * The class name added to a markdown file browser item.
@@ -134,119 +122,126 @@ const FILE_TYPE_CLASS = 'jp-FileIcon'
 const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon'
 
 export namespace CommandIDs {
-  export const git_file_Open = 'gf:Open'
-  export const git_file_Unstage = 'gf:Unstage'
-  export const git_file_Stage = 'gf:Stage'
-  export const git_file_Track = 'gf:Track'
-  export const git_file_Untrack = 'gf:Untrack'
-  export const git_file_Discard = 'gf:Discard'
+  export const gitFileOpen = 'gf:Open'
+  export const gitFileUnstage = 'gf:Unstage'
+  export const gitFileStage = 'gf:Stage'
+  export const gitFileTrack = 'gf:Track'
+  export const gitFileUntrack = 'gf:Untrack'
+  export const gitFileDiscard = 'gf:Discard'
 }
 
-export namespace StatusFiles {
-  export interface IState {
-    commit_msg: string
-    commit_disable: boolean
-    staged_show: boolean
-    unstaged_show: boolean
-    untracked_show: boolean
-    contextmenu_staged: any
-    contextmenu_unstaged: any
-    contextmenu_untracked: any
-  }
-
-  export interface IProps {
-    current_fb_path: string
-    top_repo_path: string
-    staged_files: any
-    unstaged_files: any
-    untracked_files: any
-    app: JupyterLab
-    refresh: any
-  }
+export interface IStatusFilesState {
+  commitMessage: string
+  disableCommit: boolean
+  showStaged: boolean
+  showUnstaged: boolean
+  showUntracked: boolean
+  contextMenuStaged: any
+  contextMenuUnstaged: any
+  contextMenuUntracked: any
+  contextMenuTypeX: string
+  contextMenuTypeY: string 
+  contextMenuFile: string 
 }
 
-export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles.IState> {
-  contextmenu_typeX: string
-  contextmenu_typeY: string 
-  contextmenu_file: string 
+export interface IStatusFilesProps {
+  currentFileBrowserPath: string
+  topRepoPath: string
+  stagedFiles: any
+  unstagedFiles: any
+  untrackedFiles: any
+  app: JupyterLab
+  refresh: any
+}
 
-  constructor(props: StatusFiles.IProps) {
+export class StatusFiles extends React.Component<IStatusFilesProps, IStatusFilesState> {
+
+  constructor(props: IStatusFilesProps) {
     super(props)
-    const { commands} = this.props.app
+
+    const { commands } = this.props.app
+
     this.state = {
-      commit_msg: '', 
-      commit_disable: true, 
-      staged_show: true, 
-      unstaged_show: true, 
-      untracked_show: true, 
-      contextmenu_staged: new Menu({ commands }), 
-      contextmenu_unstaged: new Menu({commands}), 
-      contextmenu_untracked: new Menu({commands})
+      commitMessage: '', 
+      disableCommit: true, 
+      showStaged: true, 
+      showUnstaged: true, 
+      showUntracked: true, 
+      contextMenuStaged: new Menu({ commands }), 
+      contextMenuUnstaged: new Menu({ commands }), 
+      contextMenuUntracked: new Menu({ commands }),
+      contextMenuTypeX: '',
+      contextMenuTypeY: '' ,
+      contextMenuFile: '' 
     }
 
-    this.handleChange = this.handleChange.bind(this)
-    this.init_input = this.init_input.bind(this)
+    /** Add right-click menu options for files in repo 
+      * 
+      */
 
-    commands.addCommand(CommandIDs.git_file_Open, {
+    commands.addCommand(CommandIDs.gitFileOpen, {
       label: 'Open',
       caption: 'Open selected file',
       execute: () => {
         try {
-          open_listed_file(this.contextmenu_typeX, this.contextmenu_typeY, this.contextmenu_file, this.props.app)
+          this.openListedFile(this.state.contextMenuTypeX, this.state.contextMenuTypeY, this.state.contextMenuFile, this.props.app)
          } catch (err) {}
       }
     })
-    commands.addCommand(CommandIDs.git_file_Stage, {
+    commands.addCommand(CommandIDs.gitFileStage, {
       label: 'Stage',
       caption: 'Stage the changes of selected file',
       execute: () => {
         try {
-          add_UnstagedNode(this.contextmenu_file, this.props.top_repo_path, this.props.refresh)
+          this.addUnstagedFile(this.state.contextMenuFile, this.props.topRepoPath, this.props.refresh)
          } catch (err) {}
       }
     })
-    commands.addCommand(CommandIDs.git_file_Track, {
+    commands.addCommand(CommandIDs.gitFileTrack, {
       label: 'Track',
       caption: 'Start tracking selected file',
       execute: () => {
         try {
-          add_UntrackedNode(this.contextmenu_file,  this.props.top_repo_path, this.props.refresh)
+          this.addUntrackedFile(this.state.contextMenuFile,  this.props.topRepoPath, this.props.refresh)
          } catch (err) {}
       }
     })
-    commands.addCommand(CommandIDs.git_file_Unstage, {
+    commands.addCommand(CommandIDs.gitFileUnstage, {
       label: 'Unstage',
       caption: 'Unstage the changes of selected file',
       execute: () => {
         try {
-          if (this.contextmenu_typeX !== 'D') {
-            reset_StagedNode(this.contextmenu_file, this.props.top_repo_path, this.props.refresh)
+          if (this.state.contextMenuTypeX !== 'D') {
+            this.resetStagedFile(this.state.contextMenuFile, this.props.topRepoPath, this.props.refresh)
           }
          } catch (err) {}
       }
     })
-    commands.addCommand(CommandIDs.git_file_Discard, {
+    commands.addCommand(CommandIDs.gitFileDiscard, {
       label: 'Discard',
       caption: 'Discard recent changes of selected file',
       execute: () => {
         try {
-          discard_UnstagedNode(this.contextmenu_file, this.props.top_repo_path, this.props.refresh)
+          this.discardUnstagedFile(this.state.contextMenuFile, this.props.topRepoPath, this.props.refresh)
          } catch (err) {}
       }
     })
 
-    this.state.contextmenu_staged.addItem({ command: CommandIDs.git_file_Open })
-    this.state.contextmenu_staged.addItem({ command: CommandIDs.git_file_Unstage})
+    this.state.contextMenuStaged.addItem({ command: CommandIDs.gitFileOpen })
+    this.state.contextMenuStaged.addItem({ command: CommandIDs.gitFileUnstage})
 
-    this.state.contextmenu_unstaged.addItem({ command: CommandIDs.git_file_Open })
-    this.state.contextmenu_unstaged.addItem({ command: CommandIDs.git_file_Stage })
-    this.state.contextmenu_unstaged.addItem({ command: CommandIDs.git_file_Discard })
+    this.state.contextMenuUnstaged.addItem({ command: CommandIDs.gitFileOpen })
+    this.state.contextMenuUnstaged.addItem({ command: CommandIDs.gitFileStage })
+    this.state.contextMenuUnstaged.addItem({ command: CommandIDs.gitFileDiscard })
 
-    this.state.contextmenu_untracked.addItem({ command: CommandIDs.git_file_Open })
-    this.state.contextmenu_untracked.addItem({ command: CommandIDs.git_file_Track })
+    this.state.contextMenuUntracked.addItem({ command: CommandIDs.gitFileOpen })
+    this.state.contextMenuUntracked.addItem({ command: CommandIDs.gitFileTrack })
   }
 
-  handleClickStaged(event) {//need to disable native action first
+  /** Handle clicks on a staged file
+   * 
+   */
+  handleClickStaged(event) {
     event.preventDefault()
     if (event.buttons === 2) {
       <select>
@@ -270,146 +265,323 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
     }
   }
 
-  contextMenu_staged(event, typeX: string, typeY: string, file: string) {
-      event.preventDefault()
-      this.contextmenu_typeX = typeX
-      this.contextmenu_typeY = typeY
-      this.contextmenu_file = file
-      this.state.contextmenu_staged.open(event.clientX, event.clientY)
-  }
-
-  contextMenu_unstaged(event, typeX: string,typeY: string, file:string) {
+  /** Handle right-click on a staged file */
+  contextMenuStaged(event, typeX: string, typeY: string, file: string) {
+    event.persist()
     event.preventDefault()
-    this.contextmenu_typeX = typeX
-    this.contextmenu_typeY = typeY
-    this.contextmenu_file = file
-    this.state.contextmenu_unstaged.open(event.clientX, event.clientY)
+    this.setState(
+      {
+        contextMenuTypeX: typeX,
+        contextMenuTypeY: typeY,
+        contextMenuFile: file
+      },
+      () => this.state.contextMenuStaged.open(event.clientX, event.clientY)
+    )
   }
 
-  contextMenu_untracked(event, typeX: string, typeY: string, file: string) {
-      event.preventDefault()
-      this.contextmenu_typeX = typeX
-      this.contextmenu_typeY = typeY
-      this.contextmenu_file = file
-      this.state.contextmenu_untracked.open(event.clientX, event.clientY)
+  /** Handle right-click on an unstaged file */
+  contextMenuUnstaged(event, typeX: string,typeY: string, file:string) {
+    event.persist()
+    event.preventDefault()
+    this.setState(
+      {
+        contextMenuTypeX: typeX,
+        contextMenuTypeY: typeY,
+        contextMenuFile: file
+      }, 
+      () => this.state.contextMenuUnstaged.open(event.clientX, event.clientY)
+    )
+  }
+
+  /** Handle right-click on an untracked file */
+  contextMenuUntracked(event, typeX: string, typeY: string, file: string) {
+    event.persist()
+    event.preventDefault()
+    this.setState(
+      {
+        contextMenuTypeX: typeX,
+        contextMenuTypeY: typeY,
+        contextMenuFile: file
+      }, 
+      () => this.state.contextMenuUntracked.open(event.clientX, event.clientY)
+    )
   }
   
-
-  handleChange(event) {
+  /** Handle input inside commit message box */
+  handleChange = (event: any) : void => {
     if (event.target.value && event.target.value !== '') {
-      this.setState({commit_msg:event.target.value,commit_disable:false})
+      this.setState(
+        {
+          commitMessage: event.target.value,
+          disableCommit: false
+        }
+      )
     } else {
-      this.setState({commit_msg:event.target.value,commit_disable:true})
+      this.setState(
+        {
+          commitMessage: event.target.value,
+          disableCommit: true
+        }
+      )
     }
   }
 
-  init_input() {
-    this.setState({commit_msg:'',commit_disable:true})
+  /** Initalize commit message input box */
+  initializeInput = () : void => {
+    this.setState(
+      {
+        commitMessage: '',
+        disableCommit: true
+      }
+    )
   }
 
-  /** to prevent ENTER key trigged 'submit' action during inputing commit msg*/
-  onKeyPress(event) {
-    if (event.which === 13 /* Enter */) {
+  /** Prevent enter key triggered 'submit' action during commit message input */
+  onKeyPress(event) : void {
+    if (event.which === 13) {
       event.preventDefault()
     }
   }
 
-  dropdown_staged() {
-    this.setState({staged_show:!(this.state.staged_show)})
+  /** Toggle display of staged files */
+  displayStaged() : void {
+    this.setState({showStaged: !this.state.showStaged})
   }
 
-  dropdown_unstaged() {
-    this.setState({unstaged_show:!(this.state.unstaged_show)})
+  /** Toggle display of unstaged files */
+  displayUnstaged() : void {
+    this.setState({showUnstaged: !this.state.showUnstaged})
   }
 
-  dropdown_untracked() {
-    this.setState({untracked_show:!(this.state.untracked_show)})
+  /** Toggle display of untracked files */
+  displayUntracked() : void {
+    this.setState({showUntracked: !this.state.showUntracked})
   }
 
-  commit_box_class_selection(disable: boolean, files_num: number) : string {
+  /** Update state of commit message input box */
+  updateCommitBoxState(disable: boolean, numberOfFiles: number) : string {
     if (disable) {
-      if (files_num === 0) {
+      if (numberOfFiles === 0) {
         return 'jp-Git-staged-commit-button-disable'
       } else {
         return 'jp-Git-staged-commit-button-ready'
-      }
+      } 
     } else {
-        return 'jp-Git-staged-commit-button'
+      return 'jp-Git-staged-commit-button'
     }
   }
 
+/** Open a file in the git listing */
+async openListedFile(typeX: string, typeY: string, path: string, app: JupyterLab) {
+  if (typeX === 'D' || typeY === 'D') {
+    showDialog(
+      {
+        title: 'Open File Failed',
+        body: "This file has been deleted!",
+        buttons: [Dialog.warnButton({ label: 'OK' })]
+      }
+    ).then(result => {
+      if (result.button.accept) {
+        return
+      }
+    })
+   return
+  } try {
+    let leftSidebarItems = app.shell.widgets('left')
+    let fileBrowser = leftSidebarItems.next()
+    while (fileBrowser.id !== 'filebrowser') {
+      fileBrowser = leftSidebarItems.next()
+    }
+    let gitApi = new Git()
+    let prefixData = await gitApi.showprefix((fileBrowser as any).model.path)
+    let underRepoPath = (prefixData as GitShowPrefixResult).under_repo_path
+    let fileBrowserPath = (fileBrowser as any).model.path + '/'
+    let openFilePath = fileBrowserPath
+    .substring(0, fileBrowserPath.length - underRepoPath.length)
+    if (path[path.length - 1] !== '/') {
+      (fileBrowser as any)._listing._manager.openOrReveal(openFilePath + path)
+    } else {
+      console.log("Cannot open a folder here")
+    } 
+  } catch(err) {}
+}
+
+/** Reset all staged files */
+resetAllStagedFiles(path: string, refresh: Function) {
+  let gitApi = new Git()
+  gitApi.reset(true, null, path).then(response => {
+    refresh()
+  })
+}
+
+/** Commit all staged files */
+commitAllStagedFiles(message: string, path: string, refresh: Function) {
+  if (message && message !== '') {
+    let gitApi = new Git()
+     gitApi.commit(message, path).then(response => {
+      refresh()
+    })
+  }
+}
+
+/** Reset a specific staged file */
+resetStagedFile(file: string, path: string, refresh: Function) {
+  let gitApi = new Git()
+  gitApi.reset(false, file, path).then(response => {
+    refresh()
+  })
+}
+
+/** Add all unstaged files */
+addAllUnstagedFiles(path: string, refresh: Function) {
+  let gitApi = new Git()
+  gitApi.add(true, null, path).then(response => {
+    refresh()
+  })
+}
+
+/** Discard changes in all unstaged files */
+discardAllUnstagedFiles(path: string, refresh: Function) {
+  let gitApi = new Git()
+  showDialog(
+    {
+      title: 'DISCARD CHANGES',
+      body: "Do you really want to discard all uncommitted changes?",
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+    }
+  ).then(result => {
+    if (result.button.accept) {
+      gitApi.checkout(false, false, null, true, null, path).then(response => {
+        refresh()
+      })
+    }
+  })
+}
+
+/** Add a specific unstaged file */
+addUnstagedFile(file: string, path: string, refresh: Function) {
+  let gitApi = new Git()
+  gitApi.add(false, file, path).then(response => {
+    refresh()
+  })
+}
+
+/** Discard changes in a specific unstaged file */
+discardUnstagedFile(file: string, path: string, refresh: Function) {
+  let gitApi = new Git()
+  showDialog(
+    {
+      title: 'DISCARD CHANGES',
+      body: "Do you really want to discard the uncommitted changes in this file?",
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+    }
+  ).then(result => {
+    if (result.button.accept) {
+      gitApi.checkout(false, false, null, false, file, path).then(response => {
+        refresh()
+      })
+    }
+  })
+}
+
+/** Add all untracked files */
+addAllUntrackedFiles(path: string, refresh: Function) {
+  let gitApi = new Git()
+  gitApi.add_all_untracked(path).then(response => {
+    refresh()
+  })
+}
+
+/** Add a specific untracked file */
+addUntrackedFile(file: string, path: string, refresh: Function) {
+  let gitApi = new Git()
+  gitApi.add(false, file, path).then(response => {
+    refresh()
+  })
+}
+
+/** Get the filename from a path */
+extractFilename(path: string): string {
+  if (path[path.length - 1] === '/') {
+    return path
+  } else {
+    let temp = path.split('/')
+    return temp[temp.length - 1]
+  }
+}
+
   render() {
     return (
-      <div onContextMenu={(e)=>{e.preventDefault()}}>
+      <div onContextMenu={ (event) => event.preventDefault()}>
         <div className= 'jp-Git-section-fileContainer' >
           <div className='jp-Git-staged'>       
             <span 
               className='jp-Git-staged-header-label'
             >
-            Staged({(this.props.staged_files).length})
+            Staged({(this.props.stagedFiles).length})
               <button 
-                className={this.state.staged_show ? 
+                className={this.state.showStaged ? 
                 `jp-Git-button ${JP_IMAGE_CARET_DOWN_WHITE}` 
                 : `jp-Git-button ${JP_IMAGE_CARET_RIGHT_WHITE}`} 
-                onClick={()=>this.dropdown_staged()}
+                onClick={()=>this.displayStaged()}
               />
             </span>
-            <ToggleDisplay show={this.props.staged_files.length > 0}>
+            <ToggleDisplay show={this.props.stagedFiles.length > 0}>
               <button 
                 className={`jp-Git-header-button ${GIT_BUTTON_RESET_WHITE}`} 
                 title='Reset all staged changes' 
                 onClick={() => {
-                  reset_all_StagedNode(this.props.top_repo_path, this.props.refresh), 
-                  this.init_input()
+                  this.resetAllStagedFiles(this.props.topRepoPath, this.props.refresh), 
+                  this.initializeInput()
                   }} 
               />
             </ToggleDisplay>
           </div>
-          <ToggleDisplay show={this.state.staged_show}>
+          <ToggleDisplay show={this.state.showStaged}>
           <div className= 'jp-Git-section-fileContainer'>
             <form className="jp-Git-staged-commit" onKeyPress={this.onKeyPress}>
             <textarea 
               className='jp-Git-staged-commit-msg' 
-              disabled ={(this.props.staged_files).length === 0} 
-              placeholder={(this.props.staged_files).length === 0 ? 
+              disabled ={(this.props.stagedFiles).length === 0} 
+              placeholder={(this.props.stagedFiles).length === 0 ? 
               'Stage your changes before commit'
               : 'Input message to commit staged changes'} 
-              value={this.state.commit_msg} 
+              value={this.state.commitMessage} 
               onChange={this.handleChange}
             />
             <input 
               className={
-                this.commit_box_class_selection(this.state.commit_disable, 
-                this.props.staged_files.length)
+                this.updateCommitBoxState(this.state.disableCommit, 
+                this.props.stagedFiles.length)
               } 
               type="button" 
               title='Commit' 
               value={'\u2714'}  
-              disabled={this.state.commit_disable} 
+              disabled={this.state.disableCommit} 
               onClick={() => 
-                {commit_all_StagedNode(this.state.commit_msg,this.props.top_repo_path, this.props.refresh),
-                  this.init_input()
+                {this.commitAllStagedFiles(this.state.commitMessage,this.props.topRepoPath, this.props.refresh),
+                  this.initializeInput()
                }
               }
             />
             </form>
-            {this.props.staged_files.map((file, file_index) =>
+            {this.props.stagedFiles.map((file, file_index) =>
               <li className={GIT_FILE} key={file_index}>
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
               <span 
                 className={GIT_FILE_LABEL} 
-                onContextMenu={(e) => {this.contextMenu_staged(e, file.x, file.y, file.to)}} 
-                onDoubleClick={() => open_listed_file(file.x, file.y, file.to, this.props.app)}
+                onContextMenu={(e) => {this.contextMenuStaged(e, file.x, file.y, file.to)}} 
+                onDoubleClick={() => this.openListedFile(file.x, file.y, file.to, this.props.app)}
               >
-                {extractFilename(file.to)} [{file.x}]
+                {this.extractFilename(file.to)} [{file.x}]
               </span>
               <ToggleDisplay show={file.x !== 'D'}>
               <button 
                 className={`jp-Git-button ${GIT_BUTTON_RESET}`} 
                 title='Reset this staged change' 
                 onClick={() => {
-                  reset_StagedNode(file.to, this.props.top_repo_path, this.props.refresh), 
-                  this.props.staged_files.length === 1 ? this.init_input() : {}
+                  this.resetStagedFile(file.to, this.props.topRepoPath, this.props.refresh), 
+                  this.props.stagedFiles.length === 1 ? this.initializeInput() : {}
                   }
                 }
               />
@@ -422,45 +594,45 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
         <div className= 'jp-Git-section-fileContainer'>
         <div className='jp-Git-unstaged' >
           <span className='jp-Git-unstaged-header-label'> 
-            Unstaged({(this.props.unstaged_files).length})
+            Unstaged({(this.props.unstagedFiles).length})
           </span>  
-          <ToggleDisplay show={this.props.unstaged_files.length>0}>
+          <ToggleDisplay show={this.props.unstagedFiles.length>0}>
           <button 
-            className={this.state.unstaged_show ? 
+            className={this.state.showUnstaged ? 
               `jp-Git-button ${JP_IMAGE_CARET_DOWN}` 
               : `jp-Git-button ${JP_IMAGE_CARET_RIGHT}`
             } 
-            onClick={() => this.dropdown_unstaged()} 
+            onClick={() => this.displayUnstaged()} 
           />
           <button 
             className={`jp-Git-header-button ${GIT_BUTTON_ADD}`} 
             title='Stage all the changes' 
-            onClick={() => add_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)} 
+            onClick={() => this.addAllUnstagedFiles(this.props.topRepoPath, this.props.refresh)} 
           />
           <button 
             className={`jp-Git-header-button ${GIT_BUTTON_DISCARD}`} 
             title='Discard all the changes' 
-            onClick={() => discard_all_UnstagedNode(this.props.top_repo_path, this.props.refresh)}
+            onClick={() => this.discardAllUnstagedFiles(this.props.topRepoPath, this.props.refresh)}
           />
           </ToggleDisplay>
         </div>
-        <ToggleDisplay show={this.state.unstaged_show}>
+        <ToggleDisplay show={this.state.showUnstaged}>
         <div className= 'jp-Git-section-fileContainer'>
-          {this.props.unstaged_files.map((file, file_index)=>
+          {this.props.unstagedFiles.map((file, file_index)=>
             <li className={GIT_FILE} key={file_index}>
             <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
             <span 
               className={GIT_FILE_LABEL} 
-              onContextMenu={(e) => {this.contextMenu_unstaged(e, file.x, file.y, file.to)}} 
-              onDoubleClick={() => open_listed_file(file.x, file.y, file.to, this.props.app)}
+              onContextMenu={(e) => {this.contextMenuUnstaged(e, file.x, file.y, file.to)}} 
+              onDoubleClick={() => this.openListedFile(file.x, file.y, file.to, this.props.app)}
             >
-              {extractFilename(file.to)} [{file.y}]
+              {this.extractFilename(file.to)} [{file.y}]
             </span>
             <button 
               className= {`jp-Git-button ${GIT_BUTTON_DISCARD}`} 
               title='Discard this change' 
               onClick={() => {
-                discard_UnstagedNode(file.to, this.props.top_repo_path, this.props.refresh)
+                this.discardUnstagedFile(file.to, this.props.topRepoPath, this.props.refresh)
                 }
                } 
             />
@@ -468,7 +640,7 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
               className= {`jp-Git-button ${GIT_BUTTON_ADD}`} 
               title='Stage this change' 
               onClick={() => {
-                add_UnstagedNode(file.to, this.props.top_repo_path, this.props.refresh)
+                this.addUnstagedFile(file.to, this.props.topRepoPath, this.props.refresh)
                 }
               }
             />
@@ -482,43 +654,43 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
             <span 
               className='jp-Git-untracked-header-label'
             > 
-              Untracked({(this.props.untracked_files).length})
+              Untracked({(this.props.untrackedFiles).length})
             </span>
-            <ToggleDisplay show={this.props.untracked_files.length > 0}>
+            <ToggleDisplay show={this.props.untrackedFiles.length > 0}>
               <button 
-                className={this.state.untracked_show ? 
+                className={this.state.showUntracked ? 
                   `jp-Git-button ${JP_IMAGE_CARET_DOWN}` 
                   : `jp-Git-button ${JP_IMAGE_CARET_RIGHT}`
                 } 
-                onClick={() => this.dropdown_untracked()} 
+                onClick={() => this.displayUntracked()} 
               />
               <button 
                 className={`jp-Git-header-button ${GIT_BUTTON_TRACK}`} 
                 title='Track all the files' 
                 onClick={() => {
-                  add_all_UntrackedNode(this.props.top_repo_path, this.props.refresh)
+                  this.addAllUntrackedFiles(this.props.topRepoPath, this.props.refresh)
                   }
                 } 
               />
             </ToggleDisplay>
           </div>
-          <ToggleDisplay show={this.state.untracked_show}>
+          <ToggleDisplay show={this.state.showUntracked}>
           <div className= 'jp-Git-section-fileContainer'>
-            {this.props.untracked_files.map((file, file_index) =>
+            {this.props.untrackedFiles.map((file, file_index) =>
               <li className={GIT_FILE} key={file_index}>
               <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
               <span 
                 className={GIT_FILE_LABEL} 
-                onContextMenu={(e) => {this.contextMenu_untracked(e, file.x, file.y, file.to)}} 
-                onDoubleClick={() => open_listed_file(file.x,file.y,file.to,this.props.app)}
+                onContextMenu={(e) => {this.contextMenuUntracked(e, file.x, file.y, file.to)}} 
+                onDoubleClick={() => this.openListedFile(file.x,file.y,file.to,this.props.app)}
               >
-                {extractFilename(file.to)}
+                {this.extractFilename(file.to)}
               </span>
               <button 
                 className= {`jp-Git-button ${GIT_BUTTON_TRACK}`} 
                 title='Track this file' 
                 onClick={() => {
-                  add_UntrackedNode(file.to, this.props.top_repo_path, this.props.refresh)
+                  this.addUntrackedFile(file.to, this.props.topRepoPath, this.props.refresh)
                   }
                 } 
               />
@@ -529,146 +701,6 @@ export class StatusFiles extends React.Component<StatusFiles.IProps, StatusFiles
           </div>
       </div>
     )
-  }
-}
-
-/** Open a file in the git listing */
-async function open_listed_file(typeX: string,typeY: string, path: string, app: JupyterLab) {
-  if (typeX === 'D'||typeY === 'D') {
-    showDialog(
-      {
-        title: 'Open File Failed',
-        body: "This file has been deleted!",
-        buttons: [Dialog.warnButton({ label: 'OK'})]
-      }
-    ).then(result => {
-      if (result.button.accept) {
-        return
-      }
-    })
-   return
-  } try {
-    let ll = app.shell.widgets('left')
-    let fb = ll.next()
-    while (fb.id !== 'filebrowser') {
-      fb = ll.next()
-    }
-    let git_temp = new Git()
-    let response = await git_temp.showprefix((fb as any).model.path)
-    let current_under_repo_path = (response as GitShowPrefixResult).under_repo_path
-    let filebrowser_cur_path = (fb as any).model.path+'/'
-    let open_file_path = filebrowser_cur_path
-    .substring(0,filebrowser_cur_path.length - current_under_repo_path.length)
-    if (path[path.length - 1] !== '/') {
-      (fb as any)._listing._manager.openOrReveal(open_file_path + path)
-    } else {
-      console.log("Cannot open a folder here")
-    } 
-  } catch(err) {}
-}
-
-/** Reset all staged files */
-function reset_all_StagedNode(path: string, refresh) {
-  let git_temp = new Git()
-  git_temp.reset(true, null, path).then(response => {
-    refresh()
-  })
-}
-
-/** Commit all staged files */
-function commit_all_StagedNode(msg: string, path: string, refresh) {
-  if (msg && msg !== '') {
-    let git_temp = new Git()
-     git_temp.commit(msg, path).then(response => {
-        refresh()
-    })
-  }
-}
-
-/** Reset a specific staged file */
-function reset_StagedNode(file: string, path: string, refresh) {
-  let git_temp = new Git()
-  git_temp.reset(false, file, path).then(response => {
-    refresh()
-  })
-}
-
-
-/** Add all unstaged files */
-function add_all_UnstagedNode(path: string, refresh) {
-  let git_temp = new Git()
-  git_temp.add(true, null, path).then(response => {
-    refresh()
-  })
-}
-
-/** Discard changes in all unstaged files */
-function discard_all_UnstagedNode(path: string, refresh) {
-  let git_temp = new Git()
-  showDialog(
-    {
-      title: 'DISCARD CHANGES',
-      body: "Do you really want to discard all uncommitted changes?",
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
-    }
-  ).then(result => {
-    if (result.button.accept) {
-      git_temp.checkout(false, false, null, true, null, path).then(response => {
-        refresh()
-      })
-    }
-  })
-}
-
-/** Add a specific unstaged file */
-function add_UnstagedNode(file: string, path: string, refresh) {
-  let git_temp = new Git()
-  git_temp.add(false, file, path).then(response => {
-    refresh()
-  })
-}
-
-/** Discard changes in a specific unstaged file */
-function discard_UnstagedNode(file: string, path: string, refresh) {
-  let git_temp = new Git()
-  showDialog(
-    {
-      title: 'DISCARD CHANGES',
-      body: "Do you really want to discard the uncommitted changes in this file?",
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard'})]
-    }
-  ).then(result => {
-    if (result.button.accept) {
-      git_temp.checkout(false, false, null, false, file, path).then(response => {
-        refresh()
-      })
-    }
-  })
-}
-
-/** Add all untracked files */
-function add_all_UntrackedNode(path: string, refresh) {
-  let git_temp = new Git()
-  git_temp.add_all_untracked(path).then(response => {
-    refresh()
-  })
-}
-
-/** Add a specific untracked file */
-function add_UntrackedNode(file: string, path: string, refresh) {
-  let git_temp = new Git()
-  git_temp.add(false, file, path).then(response => {
-    refresh()
-  })
-}
-
-/** Get the filename from a path */
-function extractFilename(path: string): string {
-  if (path[path.length - 1] === '/') {
-    return path
-  } else {
-    let temp = path.split('/')
-    return temp[temp.length - 1]
   }
 }
 

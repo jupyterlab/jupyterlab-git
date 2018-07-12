@@ -9,7 +9,7 @@ import {
 
 import {
   GitSessions
- } from './components/components'
+ } from './components/GitSessions'
 
 import {
   ILayoutRestorer, JupyterLab, JupyterLabPlugin
@@ -22,6 +22,7 @@ import {
 import {
   Menu
 } from '@phosphor/widgets'
+
 import {
   Token
 } from '@phosphor/coreutils'
@@ -36,7 +37,6 @@ const plugin: JupyterLabPlugin<IGitExtension> = {
   autoStart: true
 }
 
-
 /**
  * Export the plugin as default.
  */
@@ -46,18 +46,22 @@ export const EXTENSION_ID = 'jupyter.extensions.git_plugin'
 
 export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID)
 
+/** Interface for extension class */
 export interface IGitExtension {
   register_diff_provider(filetypes: string[], callback: IDiffCallback)
 }
 
+/** Function type for diffing a file's revisions */
 export type IDiffCallback = (filename: string, revisionA: string, revisionB: string) => void
 
+/** Main extension class */
 export class GitExtension implements IGitExtension {
   git_plugin
   constructor(app: JupyterLab, restorer: ILayoutRestorer){
     this.git_plugin = new GitSessions(app, { manager: app.serviceManager }, this.performDiff.bind(this))
     this.git_plugin.id = 'jp-git-sessions'
     this.git_plugin.title.label = 'Git'
+
   // Let the application restorer track the running panel for restoration of
   // application state (e.g. setting the running panel as the current side bar
   // widget).
