@@ -129,14 +129,13 @@ export class Git {
 	/** Make request for all git info of repository 'path' */
 	async allHistory(path: string): Promise<GitAllHistory> {
 		try {
-			let val = await httpGitRequest('/git/all_history', 'POST', {"current_path": path})
-			if (val.status !== 200) {
-				console.log(val.status)
-				return val.text().then(data => { 
-				throw new ServerConnection.ResponseError(val, data)
+			let response = await httpGitRequest('/git/all_history', 'POST', {"current_path": path})
+			if (response.status !== 200) {
+				return response.text().then(data => { 
+				throw new ServerConnection.ResponseError(response, data)
 				})
 			}
-			return val.json()
+			return response.json()
 		} catch(err) {
 			throw ServerConnection.NetworkError
 		}
@@ -145,13 +144,13 @@ export class Git {
 	/** Make request for top level path of repository 'path' */
 	async showTopLevel(path: string): Promise<GitShowTopLevelResult> {
 		try {
-			let val = await httpGitRequest('/git/show_top_level', 'POST', {"current_path": path})
-			if (val.status !== 200) {
-				return val.json().then(data => {
-				throw new ServerConnection.ResponseError(val, data.message)
+			let response = await httpGitRequest('/git/show_top_level', 'POST', {"current_path": path})
+			if (response.status !== 200) {
+				return response.json().then(data => {
+				throw new ServerConnection.ResponseError(response, data.message)
 				})
 			}
-			return val.json()
+			return response.json()
 		} catch(err) {
 			throw ServerConnection.NetworkError
 		}
@@ -161,13 +160,13 @@ export class Git {
     * with respect to the root directory of repository  */
 	async showPrefix(path: string): Promise<GitShowPrefixResult> {
 		try {
-			let val = await httpGitRequest('/git/show_prefix', 'POST', {"current_path": path})
-			if (val.status !== 200) {
-        return val.json().then(data => {
-					throw new ServerConnection.ResponseError(val, data.message)
+			let response = await httpGitRequest('/git/show_prefix', 'POST', {"current_path": path})
+			if (response.status !== 200) {
+        return response.json().then(data => {
+					throw new ServerConnection.ResponseError(response, data.message)
 				})
 			}
-			return val.json()
+			return response.json()
 		} catch(err) {
 			throw ServerConnection.NetworkError
 		}
@@ -176,13 +175,13 @@ export class Git {
   /** Make request for git status of repository 'path' */
 	async status(path: string): Promise<GitStatusResult> {
 		try {
-			let val = await httpGitRequest('/git/status','POST',{"current_path":path})
-			if (val.status !== 200) {
-        return val.json().then(data => {
-					throw new ServerConnection.ResponseError(val, data.message)
+			let response = await httpGitRequest('/git/status', 'POST', {"current_path": path})
+			if (response.status !== 200) {
+        return response.json().then(data => {
+					throw new ServerConnection.ResponseError(response, data.message)
 				})
 			}
-			return val.json()
+			return response.json()
 		} catch(err) {
 			throw ServerConnection.NetworkError
 		}
@@ -191,13 +190,13 @@ export class Git {
   /** Make request for git commit logs of repository 'path' */
 	async log(path: string): Promise<GitLogResult> {
 		try {
-			let val = await httpGitRequest('/git/log', 'POST', {"current_path": path})
-			if(val.status !== 200) {
-        return val.json().then(data => {
-				  throw new ServerConnection.ResponseError(val, data.message)
+			let response = await httpGitRequest('/git/log', 'POST', {"current_path": path})
+			if(response.status !== 200) {
+        return response.json().then(data => {
+				  throw new ServerConnection.ResponseError(response, data.message)
 				})
 			}
-			return val.json()
+			return response.json()
 		} catch (err) {
 			throw ServerConnection.NetworkError
 		}
@@ -207,13 +206,13 @@ export class Git {
     * commit 'hash' in repository 'path' */
 	async detailedLog(hash: string, path: string): Promise<SingleCommitFilePathInfo> {
 		try {
-			let val = await httpGitRequest('/git/detailed_log', 'POST', {"selected_hash":hash, "current_path": path})
-			if(val.status !== 200) {
-        return val.json().then(data => {
-					throw new ServerConnection.ResponseError(val, data.message)
+			let response = await httpGitRequest('/git/detailed_log', 'POST', {"selected_hash": hash, "current_path": path})
+			if(response.status !== 200) {
+        return response.json().then(data => {
+					throw new ServerConnection.ResponseError(response, data.message)
 				})
 			}
-			return val.json()
+			return response.json()
 		} catch (err) {
 			throw ServerConnection.NetworkError
 		}
@@ -222,13 +221,13 @@ export class Git {
   /** Make request for a list of all git branches in repository 'path' */
 	async branch(path: string): Promise<GitBranchResult> {
 		try{
-			let val = await httpGitRequest('/git/branch', 'POST', {"current_path": path})
-			if (val.status !== 200) {
-        return val.json().then(data => {
-					throw new ServerConnection.ResponseError(val, data.message)
+			let response = await httpGitRequest('/git/branch', 'POST', {"current_path": path})
+			if (response.status !== 200) {
+        return response.json().then(data => {
+					throw new ServerConnection.ResponseError(response, data.message)
 				})
 			}
-			return val.json()
+			return response.json()
 		} catch(err) {
 			throw ServerConnection.NetworkError
 		}
@@ -244,13 +243,13 @@ export class Git {
     * the staging area in repository 'path' */
 	async addAllUntracked(path: string) {
 		try {
-			let val =  await httpGitRequest('/git/add_all_untracked', 'POST', {"top_repo_path": path})
-			if (val.status !== 200) {
-        return val.json().then(data => {
-					throw new ServerConnection.ResponseError(val, data.message)
+			let response =  await httpGitRequest('/git/add_all_untracked', 'POST', {"top_repo_path": path})
+			if (response.status !== 200) {
+        return response.json().then(data => {
+					throw new ServerConnection.ResponseError(response, data.message)
 				})
 			}
-			return val.json()
+			return response.json()
 		} catch(err) {
 			throw ServerConnection.NetworkError
 		}		
@@ -263,7 +262,7 @@ export class Git {
     * TODO: Refactor into seperate endpoints for each kind of checkout request */
 	async checkout(checkout_branch: boolean, new_check: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string) : Promise<GitCheckoutResult> {
 		try {
-			let val =  await httpGitRequest(
+			let response =  await httpGitRequest(
         '/git/checkout', 
         'POST', 
         {
@@ -275,24 +274,24 @@ export class Git {
           "top_repo_path": path
         }
       )
-			if (val.status !== 200) {
-        return val.json().then(data => {
-					throw new ServerConnection.ResponseError(val, data.message)
+			if (response.status !== 200) {
+        return response.json().then(data => {
+					throw new ServerConnection.ResponseError(response, data.message)
 				})
 			}
-			return val.json()
+			return response.json()
 		} catch(err) {
 			throw ServerConnection.NetworkError
 		}
 	}
 /** Make request to commit all staged files in repository 'path' */
 	commit(message: string, path: string) {
-		return httpGitRequest('/git/commit','POST',{"commit_msg":message, "top_repo_path": path})
+		return httpGitRequest('/git/commit', 'POST', {"commit_msg": message, "top_repo_path": path})
 	}
 
 	/** Make request to move one or all files from the staged to the unstaged area */
 	reset(check: boolean, filename: string, path: string) {
-		return httpGitRequest('/git/reset','POST',{"reset_all": check, "filename":filename, "top_repo_path": path})
+		return httpGitRequest('/git/reset', 'POST', {"reset_all": check, "filename": filename, "top_repo_path": path})
 	}
 
 	/** Make request to initialize a  new git repository at path 'path' */
