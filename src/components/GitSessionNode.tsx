@@ -11,7 +11,7 @@ import {
   GitBranchResult, 
   GitStatusResult, 
   GitShowTopLevelResult, 
-  GitAPI, 
+  GitAllHistory, 
   GitLogResult
 } from '../git'
 
@@ -96,18 +96,18 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
       }
       let gitApi = new Git()
       // Make API call to get all git info for repo
-      let apiResult = await gitApi.api((fileBrowser as any).model.path)
+      let apiResult = await gitApi.all_history((fileBrowser as any).model.path)
       
       if (apiResult.code === 0) {
         // Get top level path of repo
-        let apiShowTopLevel = (apiResult as GitAPI).data.showtoplevel
+        let apiShowTopLevel = (apiResult as GitAllHistory).data.showtoplevel
 
         // Get current git branch
-        let branchData = (apiResult as GitAPI).data.branch
+        let branchData = (apiResult as GitAllHistory).data.branch
         let currentBranch = 'master'
         if (branchData.code === 0) {
           let allBranches = (branchData as GitBranchResult).branches
-          for (var i = 0 ; i < allBranches.length; i++){
+          for (var i = 0; i < allBranches.length; i++){
             if (allBranches[i].current[0]) {
               currentBranch = allBranches[i].name
               break
@@ -116,7 +116,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
         }
         
         // Get git log for current branch
-        let logData = (apiResult as GitAPI).data.log
+        let logData = (apiResult as GitAllHistory).data.log
         let pastCommits = []
         if (logData.code === 0) {
           pastCommits = (logData as GitLogResult).commits
@@ -128,7 +128,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
         let disableSwitchBranch = true
         let enablePull = false
         let enablePush = true
-        let statusData = (apiResult as GitAPI).data.status
+        let statusData = (apiResult as GitAllHistory).data.status
         if (statusData.code === 0) {
           let statusFiles = (statusData as GitStatusResult).files
           for (let i = 0; i < statusFiles.length; i++) {

@@ -9,7 +9,7 @@ import { URLExt } from '@jupyterlab/coreutils'
 
 /** Interface for GITAPI request result, 
   * has all repo information */
-export interface GitAPI {
+export interface GitAllHistory {
 	code: number,
 	data?: {
 		showtoplevel?: GitShowTopLevelResult,
@@ -127,9 +127,9 @@ export class Git {
 	}
 	
 	/** Make request for all git info of repository 'path' */
-	async api(path: string): Promise<GitAPI> {
+	async all_history(path: string): Promise<GitAllHistory> {
 		try {
-			let val = await httpGitRequest('/git/API', 'POST', {"current_path": path})
+			let val = await httpGitRequest('/git/all_history', 'POST', {"current_path": path})
 			if (val.status !== 200) {
 				console.log(val.status)
 				return val.text().then(data => { 

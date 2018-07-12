@@ -18,7 +18,7 @@ class Git_handler(APIHandler):
         return self.settings["git"]
 
 
-class Git_API_handler(Git_handler):
+class Git_all_history_handler(Git_handler):
     """
     Parent handler for all four history/status git commands:
     1. git showtoplevel
@@ -368,7 +368,7 @@ def setup_handlers(web_app):
         ("/git/log", Git_log_handler),
         ("/git/log_1", Git_log_1_handler),
         ("/git/init", Git_init_handler),
-        ("/git/API", Git_API_handler),
+        ("/git/all_history", Git_all_history_handler),
         ("/git/add_all_untracked", Git_add_all_untracked_handler),
     ]
 
@@ -376,7 +376,7 @@ def setup_handlers(web_app):
     base_url = web_app.settings["base_url"]
     git_handlers = [(ujoin(base_url, x[0]), x[1]) for x in git_handlers]
     print("base_url: {}".format(base_url))
-    print(git_handlers)
+    print_handlers()
 
     web_app.add_handlers(".*", git_handlers)
 
@@ -397,7 +397,7 @@ def print_handlers():
         ("/git/log", Git_log_handler),
         ("/git/log_1", Git_log_1_handler),
         ("/git/init", Git_init_handler),
-        ("/git/API", Git_API_handler),
+        ("/git/all_history", Git_all_history_handler),
         ("/git/add_all_untracked", Git_add_all_untracked_handler),
     ]
 
