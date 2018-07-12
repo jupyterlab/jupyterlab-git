@@ -108,20 +108,20 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, restorer: ILayoutRestore
   tutorial.title.label = " Tutorial "
   menu.title.label = category;
   [
-    CommandIDs.git_UI,
-    CommandIDs.git_terminal,
-    CommandIDs.git_pull,
-    CommandIDs.git_push,
-    CommandIDs.git_init,
+    CommandIDs.gitUI,
+    CommandIDs.gitTerminal,
+    CommandIDs.gitPull,
+    CommandIDs.gitPush,
+    CommandIDs.gitInit,
   ].forEach(command =>{
     menu.addItem({command});
-  })
+  });
   
   [
-    CommandIDs.setup_remotes,
-    CommandIDs.tutorial_Pull,
-    CommandIDs.tutorial_Push,
-    CommandIDs.link4
+    CommandIDs.setupRemotes,
+    CommandIDs.tutorialPull,
+    CommandIDs.tutorialPush,
+    CommandIDs.googleLink
   ].forEach(command => {
     tutorial.addItem({command});
   })

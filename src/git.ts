@@ -110,15 +110,15 @@ export interface GitLogResult {
 }
 
 /** Makes a HTTP request, sending a git command to the backend */
-function HTTP_Git_Request(URL, METHOD, REQUEST) : Promise<Response> {
-  let request = {
-    method: METHOD,
-    body: JSON.stringify(REQUEST)
+function httpGitRequest(url, method, request) : Promise<Response> {
+  let fullRequest = {
+    method: method,
+    body: JSON.stringify(request)
   }
 
   let setting = ServerConnection.makeSettings()
-  let url = URLExt.join(setting.baseUrl, URL)
-  return ServerConnection.makeRequest(url, request, setting)
+  let fullUrl = URLExt.join(setting.baseUrl, url)
+  return ServerConnection.makeRequest(fullUrl, fullRequest, setting)
 }
 
 /** Parent class for all API requests */
@@ -129,7 +129,7 @@ export class Git {
 	/** Make request for all git info of repository 'path' */
 	async api(path: string): Promise<GitAPI> {
 		try {
-			let val = await HTTP_Git_Request('/git/API', 'POST', {"current_path": path})
+			let val = await httpGitRequest('/git/API', 'POST', {"current_path": path})
 			if (val.status !== 200) {
 				console.log(val.status)
 				return val.text().then(data => { 
@@ -145,9 +145,8 @@ export class Git {
 	/** Make request for top level path of repository 'path' */
 	async showtoplevel(path: string): Promise<GitShowTopLevelResult> {
 		try {
-			let val = await HTTP_Git_Request('/git/showtoplevel', 'POST', {"current_path": path})
+			let val = await httpGitRequest('/git/showtoplevel', 'POST', {"current_path": path})
 			if (val.status !== 200) {
-				console.log(val.status)
 				return val.json().then(data => {
 				throw new ServerConnection.ResponseError(val, data.message)
 				})
@@ -162,7 +161,7 @@ export class Git {
     * with respect to the root directory of repository  */
 	async showprefix(path: string): Promise<GitShowPrefixResult> {
 		try {
-			let val = await HTTP_Git_Request('/git/showprefix', 'POST', {"current_path": path})
+			let val = await httpGitRequest('/git/showprefix', 'POST', {"current_path": path})
 			if (val.status !== 200) {
         return val.json().then(data => {
 					throw new ServerConnection.ResponseError(val, data.message)
@@ -177,7 +176,7 @@ export class Git {
   /** Make request for git status of repository 'path' */
 	async status(path: string): Promise<GitStatusResult> {
 		try {
-			let val = await HTTP_Git_Request('/git/status','POST',{"current_path":path})
+			let val = await httpGitRequest('/git/status','POST',{"current_path":path})
 			if (val.status !== 200) {
         return val.json().then(data => {
 					throw new ServerConnection.ResponseError(val, data.message)
@@ -192,7 +191,7 @@ export class Git {
   /** Make request for git commit logs of repository 'path' */
 	async log(path: string): Promise<GitLogResult> {
 		try {
-			let val = await HTTP_Git_Request('/git/log', 'POST', {"current_path": path})
+			let val = await httpGitRequest('/git/log', 'POST', {"current_path": path})
 			if(val.status !== 200) {
         return val.json().then(data => {
 				  throw new ServerConnection.ResponseError(val, data.message)
@@ -208,7 +207,7 @@ export class Git {
     * commit 'hash' in repository 'path' */
 	async log_1(hash: string, path: string): Promise<SingleCommitFilePathInfo> {
 		try {
-			let val = await HTTP_Git_Request('/git/log_1', 'POST', {"selected_hash":hash, "current_path": path})
+			let val = await httpGitRequest('/git/log_1', 'POST', {"selected_hash":hash, "current_path": path})
 			if(val.status !== 200) {
         return val.json().then(data => {
 					throw new ServerConnection.ResponseError(val, data.message)
@@ -223,7 +222,7 @@ export class Git {
   /** Make request for a list of all git branches in repository 'path' */
 	async branch(path: string): Promise<GitBranchResult> {
 		try{
-			let val = await HTTP_Git_Request('/git/branch', 'POST', {"current_path": path})
+			let val = await httpGitRequest('/git/branch', 'POST', {"current_path": path})
 			if (val.status !== 200) {
         return val.json().then(data => {
 					throw new ServerConnection.ResponseError(val, data.message)
@@ -238,14 +237,14 @@ export class Git {
   /** Make request to add one or all files into 
     * the staging area in repository 'path' */
 	add(check: boolean, filename: string, path: string) {
-		return  HTTP_Git_Request('/git/add', 'POST', {"add_all": check , "filename": filename, "top_repo_path": path})
+		return  httpGitRequest('/git/add', 'POST', {"add_all": check , "filename": filename, "top_repo_path": path})
 	}
 
   /** Make request to add all untracked files into 
     * the staging area in repository 'path' */
 	async add_all_untracked(path: string) {
 		try {
-			let val =  await HTTP_Git_Request('/git/add_all_untracked', 'POST', {"top_repo_path": path})
+			let val =  await httpGitRequest('/git/add_all_untracked', 'POST', {"top_repo_path": path})
 			if (val.status !== 200) {
         return val.json().then(data => {
 					throw new ServerConnection.ResponseError(val, data.message)
@@ -264,7 +263,7 @@ export class Git {
     * TODO: Refactor into seperate endpoints for each kind of checkout request */
 	async checkout(checkout_branch: boolean, new_check: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string) : Promise<GitCheckoutResult> {
 		try {
-			let val =  await HTTP_Git_Request(
+			let val =  await httpGitRequest(
         '/git/checkout', 
         'POST', 
         {
@@ -288,12 +287,12 @@ export class Git {
 	}
 /** Make request to commit all staged files in repository 'path' */
 	commit(message: string, path: string) {
-		return HTTP_Git_Request('/git/commit','POST',{"commit_msg":message, "top_repo_path": path})
+		return httpGitRequest('/git/commit','POST',{"commit_msg":message, "top_repo_path": path})
 	}
 
 	/** Make request to move one or all files from the staged to the unstaged area */
 	reset(check: boolean, filename: string, path: string) {
-		return HTTP_Git_Request('/git/reset','POST',{"reset_all": check, "filename":filename, "top_repo_path": path})
+		return httpGitRequest('/git/reset','POST',{"reset_all": check, "filename":filename, "top_repo_path": path})
 	}
 
 	/** Make request to pull files from 
@@ -301,7 +300,7 @@ export class Git {
 		* TODO: Rename parameter names to be more clear */
 	async pull(origin: string, master: string, path: string) {
 		try {
-			let val = await HTTP_Git_Request('/git/pull', 'POST', {"origin": origin, "master": master, "curr_fb_path": path})
+			let val = await httpGitRequest('/git/pull', 'POST', {"origin": origin, "master": master, "curr_fb_path": path})
 			if (val.status !== 200) {
         return val.json().then(data => {
 					throw new ServerConnection.ResponseError(val, data.message)
@@ -318,7 +317,7 @@ export class Git {
 		* TODO: Rename parameter names to be more clear */
 	async push(origin: string, master: string, path: string) {
 		try {
-			let val = await HTTP_Git_Request('/git/push', 'POST', {"origin": origin, "master": master, "curr_fb_path": path})
+			let val = await httpGitRequest('/git/push', 'POST', {"origin": origin, "master": master, "curr_fb_path": path})
 			if (val.status !== 200) {
         return val.json().then(data => {
 					throw new ServerConnection.ResponseError(val, data.message)
@@ -332,6 +331,6 @@ export class Git {
 
 	/** Make request to initialize a  new git repository at path 'path' */
 	init(path: string){
-		return HTTP_Git_Request('/git/init', 'POST', {"current_path": path})
+		return httpGitRequest('/git/init', 'POST', {"current_path": path})
 	}
 }

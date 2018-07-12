@@ -91,7 +91,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
     try {
       let leftSidebarItems = this.props.app.shell.widgets('left')
       let fileBrowser = leftSidebarItems.next()
-      while(fileBrowser.id !== 'filebrowser') {
+      while(fileBrowser && fileBrowser.id !== 'filebrowser') {
         fileBrowser = leftSidebarItems.next()
       }
       let gitApi = new Git()

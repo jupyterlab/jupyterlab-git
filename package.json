@@ -16,13 +16,12 @@
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/*.css",
-    "style/Images/*.svg"
+    "style/images/*.svg"
   ],
   "jupyterlab": {
     "extension": true
   },
   "dependencies": {
-    "@angular/core": "^4.4.6",
     "@jupyterlab/application": "^0.17.0-1",
     "@jupyterlab/apputils": "^0.17.0-1",
     "@jupyterlab/console": "^0.17.0-1",

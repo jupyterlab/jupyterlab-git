@@ -56,7 +56,7 @@
   background-size: 15px;
   background-repeat: no-repeat;
   background-position: center;
-  background-image: url(Images/directory.svg);
+  background-image: url(images/directory.svg);
 }
 
 .jp-Git-repo-path {
@@ -174,7 +174,7 @@
 .jp-Git-timeline-arrow-right {
   height: 70px;
   width:30px;
-  background-image: url(Images/fade-right.svg);
+  background-image: url(images/fade-right.svg);
   background-color: var(--jp-ui-font-color9);
   display: block;
   top:0;
@@ -190,7 +190,7 @@
 .jp-Git-timeline-arrow-left {
   height: 70px;
   width:30px;
-  background-image: url(Images/fade-left.svg);
+  background-image: url(images/fade-left.svg);
   background-color: var(--jp-ui-font-color9);
   display: inline-block;
   top:0;
@@ -206,14 +206,14 @@
 }
 
 .jp-Git-timeline-arrow-right:hover{
-  background-image: url(Images/right-arrow.svg);
+  background-image: url(images/right-arrow.svg);
   background-color: none;
   z-index: 1; /* raise overlapping border */
 }
 
 
 .jp-Git-timeline-arrow-left:hover {
-  background-image: url(Images/left-arrow.svg);
+  background-image: url(images/left-arrow.svg);
   background-color: none;
   z-index: 1; /* raise overlapping border */
 }
@@ -221,14 +221,14 @@
 .jp-Git-timeline-arrow-right:active {
   border:0;
   background-color: none;
-  background-image: url(Images/right-arrow.svg);
+  background-image: url(images/right-arrow.svg);
   outline:none;
 }
 
 jp-Git-timeline-arrow-left:active {
   border:0;
   background-color: none;
-  background-image: url(Images/left-arrow.svg);
+  background-image: url(images/left-arrow.svg);
   outline:none;
 }
 
@@ -306,24 +306,24 @@ jp-Git-timeline-arrow-left:active {
 }
 
 .jp-Git-mod.jp-Edit {
-  background-image: url(Images/edit-circle.svg);
+  background-image: url(images/edit-circle.svg);
 }
 .jp-Git-mod.jp-Edit-selected {
-  background-image: url(Images/edit-circle-selected.svg);
+  background-image: url(images/edit-circle-selected.svg);
 }
 
 .jp-Git-mod.jp-Head {
-  background-image: url(Images/head-circle.svg);
+  background-image: url(images/head-circle.svg);
 }
 .jp-Git-mod.jp-Head-selected {
-  background-image: url(Images/head-circle-selected.svg);
+  background-image: url(images/head-circle-selected.svg);
 }
 
 .jp-Git-mod.jp-Normal {
-  background-image: url(Images/normal-circle.svg);
+  background-image: url(images/normal-circle.svg);
 }
 .jp-Git-mod.jp-Normal-selected {
-  background-image: url(Images/normal-circle-selected.svg);
+  background-image: url(images/normal-circle-selected.svg);
 }
 
 
@@ -363,7 +363,7 @@ jp-Git-timeline-arrow-left:active {
   border: 2.72px dotted #4caf50;
 }
 .jp-Git-currentCommit-btn:selected {
-  background-image: url(Images/edit-circle-selected.svg);
+  background-image: url(images/edit-circle-selected.svg);
   background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
@@ -371,7 +371,7 @@ jp-Git-timeline-arrow-left:active {
 }
 
 .jp-Git-currentCommit-btn:selected:active {
-  background-image: url(Images/edit-circle-selected-active.svg);
+  background-image: url(images/edit-circle-selected-active.svg);
   background-color: rgba(53,53,153,.1);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
@@ -403,7 +403,7 @@ jp-Git-timeline-arrow-left:active {
 }
 .jp-Git-pastCommit-btn:selected {
   background-color: rgba(53,53,153,.1);
-  background-image: url(Images/normal-circle.svg);
+  background-image: url(images/normal-circle.svg);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
   z-index: 1; /* raise overlapping border */
@@ -411,7 +411,7 @@ jp-Git-timeline-arrow-left:active {
 
 .jp-Git-pastCommit-btn:active {
   background-color: rgba(53,53,153,.1);
-  background-image: url(Images/normal-circle-active.svg);
+  background-image: url(images/normal-circle-active.svg);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
   z-index: 1; /* raise overlapping border */
@@ -419,7 +419,7 @@ jp-Git-timeline-arrow-left:active {
 
 .jp-Git-pastCommit-btn:selected:active {
   background-color: rgba(53,53,153,.1);
-  background-image: url(Images/normal-circle-selected-active.svg);
+  background-image: url(images/normal-circle-selected-active.svg);
   box-shadow: var(--jp-toolbar-box-shadow);
   border: none;
   z-index: 1; /* raise overlapping border */
