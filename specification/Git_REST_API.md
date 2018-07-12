@@ -524,7 +524,7 @@ on git command failure
     }
 ```
 
-### git pull - Fetch from and integrate with another repository or a local branch
+<!-- ### git pull - Fetch from and integrate with another repository or a local branch
 Request with a specified remote-repo "origin",  a specified branch "master", and a "curr_fb_path" to fetch.
 
 URL:
@@ -560,9 +560,9 @@ on git command failure
         "command": "git pull origin master"
         "message": "Git pull command error and help tips"
     }
-```
+``` -->
 
-### git push - Update remote refs along with associated objects
+<!-- ### git push - Update remote refs along with associated objects
 Request with a specified remote-repo "origin",  a specified branch "master", and a "curr_fb_path" to push.
 
 URL:
@@ -598,7 +598,7 @@ on git command failure
         "command": "git push origin master"
         "message": "Git push command error and help tips"
     }
-```
+``` -->
 
 ### git init - Create an empty Git repository or reinitialize an existing one
 Request with a "currrent_path" to init as a git repo.

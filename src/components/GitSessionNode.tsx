@@ -39,9 +39,6 @@ export interface IGitSessionNodeState {
   currentBranch: string
   disableSwitchBranch: boolean
 
-  enablePull: boolean
-  enablePush: boolean
-
   pastCommits: any
   inNewRepo: boolean
   showIndex: number
@@ -69,8 +66,6 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
       branches: [], 
       currentBranch: '', 
       disableSwitchBranch: true, 
-      enablePull: false, 
-      enablePush: false, 
       pastCommits: [], 
       inNewRepo: true, 
       showIndex: -1, 
@@ -126,8 +121,6 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
         let stagedFiles = [], unstagedFiles = [], untrackedFiles = []
         let changedFiles = 0
         let disableSwitchBranch = true
-        let enablePull = false
-        let enablePush = true
         let statusData = (apiResult as GitAllHistory).data.status
         if (statusData.code === 0) {
           let statusFiles = (statusData as GitStatusResult).files
@@ -150,16 +143,14 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
               }
             }
           }  
-          // No uncommitted changed files, allow switching branches and pulling
+          // No uncommitted changed files, allow switching branches
           if (changedFiles === 0) {
             disableSwitchBranch = false
-            enablePull = true
           }
         }
-        // No committed files ever, disable switching branches and pushing
+        // No committed files ever, disable switching branches
         if (pastCommits.length === 0) {
           disableSwitchBranch = true
-          enablePush = false
         }
         
         // If not in same repo as before refresh, display the current repo 
@@ -177,8 +168,6 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
             branches: (branchData as GitBranchResult).branches, 
             currentBranch: currentBranch, 
             disableSwitchBranch: disableSwitchBranch, 
-            enablePull: enablePull, 
-            enablePush: enablePush,
             pastCommits: pastCommits, 
             inNewRepo: inNewRepo, 
             showIndex: showIndex,
@@ -193,8 +182,6 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
             currentFileBrowserPath: (fileBrowser as any).model.path, 
             topRepoPath: '', 
             showWarning: false,  
-            enablePull: false, 
-            enablePush: false
           }
         )
       }

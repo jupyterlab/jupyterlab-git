@@ -295,40 +295,6 @@ export class Git {
 		return httpGitRequest('/git/reset','POST',{"reset_all": check, "filename":filename, "top_repo_path": path})
 	}
 
-	/** Make request to pull files from 
-	 	* a remote branch 'origin' and integrate into local branch 'master' 
-		* TODO: Rename parameter names to be more clear */
-	async pull(origin: string, master: string, path: string) {
-		try {
-			let val = await httpGitRequest('/git/pull', 'POST', {"origin": origin, "master": master, "curr_fb_path": path})
-			if (val.status !== 200) {
-        return val.json().then(data => {
-					throw new ServerConnection.ResponseError(val, data.message)
-				})
-			}
-			return val.json()
-		} catch(err) {
-			throw ServerConnection.NetworkError
-		}	
-	}
-
-	/** Make request to push committed files to a
-		* remote branch 'origin' from local branch 'master'.
-		* TODO: Rename parameter names to be more clear */
-	async push(origin: string, master: string, path: string) {
-		try {
-			let val = await httpGitRequest('/git/push', 'POST', {"origin": origin, "master": master, "curr_fb_path": path})
-			if (val.status !== 200) {
-        return val.json().then(data => {
-					throw new ServerConnection.ResponseError(val, data.message)
-				})
-			}
-			return val.json()
-		} catch(err) {
-			throw ServerConnection.NetworkError
-		}	
-	 }
-
 	/** Make request to initialize a  new git repository at path 'path' */
 	init(path: string){
 		return httpGitRequest('/git/init', 'POST', {"current_path": path})

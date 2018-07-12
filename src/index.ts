@@ -110,8 +110,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, restorer: ILayoutRestore
   [
     CommandIDs.gitUI,
     CommandIDs.gitTerminal,
-    CommandIDs.gitPull,
-    CommandIDs.gitPush,
     CommandIDs.gitInit,
   ].forEach(command =>{
     menu.addItem({command});
@@ -119,8 +117,6 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, restorer: ILayoutRestore
   
   [
     CommandIDs.setupRemotes,
-    CommandIDs.tutorialPull,
-    CommandIDs.tutorialPush,
     CommandIDs.googleLink
   ].forEach(command => {
     tutorial.addItem({command});
