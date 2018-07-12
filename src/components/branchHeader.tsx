@@ -57,6 +57,7 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
         {        
           title: 'Input a name to create a new branch and switch to it:',
           body: input,
+          focusNodeSelector: 'input',
           buttons: [Dialog.cancelButton(), 
           Dialog.okButton({ label: 'Create'})]
         }
