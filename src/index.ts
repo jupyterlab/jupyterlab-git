@@ -74,13 +74,10 @@ export class GitExtension implements IGitExtension {
     for (let fileType of filetypes) {
       this.diffProviders[fileType] = callback
     }
-    console.log('new diff method')
   }
 
   performDiff(app: JupyterLab, filename: string, revisionA: string, revisionB: string) {
     let extension = PathExt.extname(filename).toLocaleLowerCase()
-    console.log(extension)
-    console.log(this.diffProviders[extension])
     if (this.diffProviders[extension] !== undefined) {
       this.diffProviders[extension](filename, revisionA, revisionB)
     } else {
