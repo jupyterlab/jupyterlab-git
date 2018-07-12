@@ -21,7 +21,7 @@ class Git_handler(APIHandler):
 class Git_all_history_handler(Git_handler):
     """
     Parent handler for all four history/status git commands:
-    1. git showtoplevel
+    1. git show_top_level
     2. git branch
     3. git log
     4. git status
@@ -31,22 +31,22 @@ class Git_all_history_handler(Git_handler):
     def post(self):
         """
         POST request handler, calls individual handlers for 
-        'git showtoplevel', 'git branch', 'git log', and 'git status'
+        'git show_top_level', 'git branch', 'git log', and 'git status'
         """
         my_data = json.loads(self.request.body.decode("utf-8"))
         current_path = my_data["current_path"]
-        showtoplevel = self.git.showtoplevel(current_path)
-        if showtoplevel["code"] != 0:
-            self.finish(json.dumps(showtoplevel))
+        show_top_level = self.git.show_top_level(current_path)
+        if show_top_level["code"] != 0:
+            self.finish(json.dumps(show_top_level))
         else:
             branch = self.git.branch(current_path)
             log = self.git.log(current_path)
             status = self.git.status(current_path)
 
             result = {
-                "code": showtoplevel["code"],
+                "code": show_top_level["code"],
                 "data": {
-                    "showtoplevel": showtoplevel,
+                    "show_top_level": show_top_level,
                     "branch": branch,
                     "log": log,
                     "status": status,
@@ -55,7 +55,7 @@ class Git_all_history_handler(Git_handler):
             self.finish(json.dumps(result))
 
 
-class Git_showtoplevel_handler(Git_handler):
+class Git_show_top_level_handler(Git_handler):
     """
     Handler for 'git rev-parse --show-toplevel'. 
     Displays the git root directory inside a repository.
@@ -67,11 +67,11 @@ class Git_showtoplevel_handler(Git_handler):
         """
         my_data = json.loads(self.request.body.decode("utf-8")) 
         current_path = my_data["current_path"]
-        result = self.git.showtoplevel(current_path)
+        result = self.git.show_top_level(current_path)
         self.finish(json.dumps(result))
 
 
-class Git_showprefix_handler(Git_handler):
+class Git_show_prefix_handler(Git_handler):
     """
     Handler for 'git rev-parse --show-prefix'. 
     Displays the prefix path of a directory in a repository, 
@@ -85,7 +85,7 @@ class Git_showprefix_handler(Git_handler):
         """
         my_data = json.loads(self.request.body.decode("utf-8"))
         current_path = my_data["current_path"]
-        result = self.git.showprefix(current_path)
+        result = self.git.show_prefix(current_path)
         self.finish(json.dumps(result))
 
 
@@ -354,8 +354,8 @@ def setup_handlers(web_app):
     """
 
     git_handlers = [
-        ("/git/showtoplevel", Git_showtoplevel_handler),
-        ("/git/showprefix", Git_showprefix_handler),
+        ("/git/show_top_level", Git_show_top_level_handler),
+        ("/git/show_prefix", Git_show_prefix_handler),
         ("/git/add", Git_add_handler),
         ("/git/status", Git_status_handler),
         ("/git/branch", Git_branch_handler),

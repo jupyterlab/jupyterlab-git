@@ -231,7 +231,7 @@ class Git:
                 "message": my_error.decode("utf-8"),
             }
 
-    def showtoplevel(self, current_path):
+    def show_top_level(self, current_path):
         """
         Execute git --show-toplevel command & send back the result.
         """
@@ -255,7 +255,7 @@ class Git:
                 "message": my_error.decode("utf-8"),
             }
 
-    def showprefix(self, current_path):
+    def show_prefix(self, current_path):
         """
         Execute git --show-prefix command & send back the result.
         """

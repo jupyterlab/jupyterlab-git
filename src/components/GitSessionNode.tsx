@@ -95,7 +95,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
       
       if (apiResult.code === 0) {
         // Get top level path of repo
-        let apiShowTopLevel = (apiResult as GitAllHistory).data.showtoplevel
+        let apiShowTopLevel = (apiResult as GitAllHistory).data.show_top_level
 
         // Get current git branch
         let branchData = (apiResult as GitAllHistory).data.branch

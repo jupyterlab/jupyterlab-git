@@ -12,7 +12,7 @@ import { URLExt } from '@jupyterlab/coreutils'
 export interface GitAllHistory {
 	code: number,
 	data?: {
-		showtoplevel?: GitShowTopLevelResult,
+		show_top_level?: GitShowTopLevelResult,
 		branch?: GitBranchResult,
 		log?: GitLogResult,
 		status?: GitStatusResult
@@ -145,7 +145,7 @@ export class Git {
 	/** Make request for top level path of repository 'path' */
 	async showTopLevel(path: string): Promise<GitShowTopLevelResult> {
 		try {
-			let val = await httpGitRequest('/git/showtoplevel', 'POST', {"current_path": path})
+			let val = await httpGitRequest('/git/show_top_level', 'POST', {"current_path": path})
 			if (val.status !== 200) {
 				return val.json().then(data => {
 				throw new ServerConnection.ResponseError(val, data.message)
@@ -161,7 +161,7 @@ export class Git {
     * with respect to the root directory of repository  */
 	async showPrefix(path: string): Promise<GitShowPrefixResult> {
 		try {
-			let val = await httpGitRequest('/git/showprefix', 'POST', {"current_path": path})
+			let val = await httpGitRequest('/git/show_prefix', 'POST', {"current_path": path})
 			if (val.status !== 200) {
         return val.json().then(data => {
 					throw new ServerConnection.ResponseError(val, data.message)
