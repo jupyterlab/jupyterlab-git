@@ -7,7 +7,7 @@ import { URLExt } from '@jupyterlab/coreutils'
 
 'use strict'
 
-/** Interface for GITAPI request result, 
+/** Interface for GitAllHistory request result, 
   * has all repo information */
 export interface GitAllHistory {
 	code: number,
@@ -91,7 +91,7 @@ export interface CommitModifiedFile {
 	deletion: string
 }
 
-/** Interface for GitLog_1 request result, 
+/** Interface for GitDetailedLog request result, 
   * has the detailed info of a single past commit */
 export interface SingleCommitFilePathInfo {
 	code: number,
@@ -205,9 +205,9 @@ export class Git {
   
   /** Make request for detailed git commit info of 
     * commit 'hash' in repository 'path' */
-	async log_1(hash: string, path: string): Promise<SingleCommitFilePathInfo> {
+	async detailed_log(hash: string, path: string): Promise<SingleCommitFilePathInfo> {
 		try {
-			let val = await httpGitRequest('/git/log_1', 'POST', {"selected_hash":hash, "current_path": path})
+			let val = await httpGitRequest('/git/detailed_log', 'POST', {"selected_hash":hash, "current_path": path})
 			if(val.status !== 200) {
         return val.json().then(data => {
 					throw new ServerConnection.ResponseError(val, data.message)

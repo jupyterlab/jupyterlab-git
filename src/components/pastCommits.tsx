@@ -102,7 +102,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, IPastCommits
   /** Show the commit message and changes from a past commit */
   async showPastCommitWork(pastCommit: SingleCommitInfo, pastCommitIndex: number, path: string) {
     let gitApi = new Git()
-    let detailedLogData = await gitApi.log_1(pastCommit.commit, path)
+    let detailedLogData = await gitApi.detailed_log(pastCommit.commit, path)
     if (detailedLogData.code === 0) {
       this.setState(
         {

@@ -90,7 +90,7 @@ class Git:
         else:
             return {"code": p.returncode, "message": my_error.decode("utf-8")}
 
-    def log_1(self, selected_hash, current_path):
+    def detailed_log(self, selected_hash, current_path):
         """
         Execute the second git log command (used to get
         insertions & deletions per file) & send back the result.

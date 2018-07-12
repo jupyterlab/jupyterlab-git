@@ -6,13 +6,13 @@ Contents for each call include:
 4. Reply JSON
 5. How errors are handled (HTTP success codes, error JSON)
 
-### git API - Get all information of current repo
+### git all_history - Get all information of current repo
 Request with a "current_path", if it"s a git repo, return all the git repo information with a zero "code", if not, return error message with a non-zero "code".
 This request consists 4 seperate subprocess executions on server side (showtoplevel, branch, log, status) and may fail individually, so each part has its own "code" to indicate execution status(zero for success, none-zero for failure)   
 
 URL:
 ```bash 
-    POST /git/API
+    POST /git/all_history
 ```
 Request JSON:
 ```bash
@@ -241,12 +241,12 @@ on git command failure
     }
 ```
 
-### git log_1 - Get detail information of a selected past commit
+### git detailed_log - Get detailed information of a specific past commit
 Request with a specified "selected_hash" and a "current_path" to get the detail info of this commit.
 
 URL:
 ```bash 
-    POST /git/log_1 
+    POST /git/detailed_log 
 ```
 Request JSON:
 ```bash

@@ -14,7 +14,7 @@ info:
       - application/json
 
 paths:
-  /API:
+  /all_history:
       post:
         summary: Get all git information of current repo
         description: |
@@ -245,12 +245,12 @@ on git command failure
     }
 ```
 
-### git log_1 - Get detail information of a selected past commit
+### git detailed_log - Get detailed information of a selected past commit
 Request with a specified "selected_hash" and a "current_path" to get the detail info of this commit.
 
 URL:
 ```bash 
-    POST /git/log_1 
+    POST /git/detailed_log 
 ```
 Request JSON:
 ```bash

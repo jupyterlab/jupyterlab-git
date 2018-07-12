@@ -131,7 +131,7 @@ class Git_log_handler(Git_handler):
         self.finish(json.dumps(result))
 
 
-class Git_log_1_handler(Git_handler):
+class Git_detailed_log_handler(Git_handler):
     """
     Handler for 'git log -1 --stat --numstat --oneline' command. 
     Fetches file names of committed files, Number of insertions &
@@ -146,7 +146,7 @@ class Git_log_1_handler(Git_handler):
         my_data = json.loads(self.request.body.decode("utf-8"))
         selected_hash = my_data["selected_hash"]
         current_path = my_data["current_path"]
-        result = self.git.log_1(selected_hash, current_path)
+        result = self.git.detailed_log(selected_hash, current_path)
         self.finish(json.dumps(result))
 
 
@@ -366,7 +366,7 @@ def setup_handlers(web_app):
         ("/git/push", Git_push_handler),
         ("/git/diff", Git_diff_handler),
         ("/git/log", Git_log_handler),
-        ("/git/log_1", Git_log_1_handler),
+        ("/git/detailed_log", Git_detailed_log_handler),
         ("/git/init", Git_init_handler),
         ("/git/all_history", Git_all_history_handler),
         ("/git/add_all_untracked", Git_add_all_untracked_handler),
@@ -376,31 +376,6 @@ def setup_handlers(web_app):
     base_url = web_app.settings["base_url"]
     git_handlers = [(ujoin(base_url, x[0]), x[1]) for x in git_handlers]
     print("base_url: {}".format(base_url))
-    print_handlers()
+    print(git_handlers)
 
     web_app.add_handlers(".*", git_handlers)
-
-
-def print_handlers():
-    git_handlers = [
-        ("/git/showtoplevel", Git_showtoplevel_handler),
-        ("/git/showprefix", Git_showprefix_handler),
-        ("/git/add", Git_add_handler),
-        ("/git/status", Git_status_handler),
-        ("/git/branch", Git_branch_handler),
-        ("/git/reset", Git_reset_handler),
-        ("/git/checkout", Git_checkout_handler),
-        ("/git/commit", Git_commit_handler),
-        ("/git/pull", Git_pull_handler),
-        ("/git/push", Git_push_handler),
-        ("/git/diff", Git_diff_handler),
-        ("/git/log", Git_log_handler),
-        ("/git/log_1", Git_log_1_handler),
-        ("/git/init", Git_init_handler),
-        ("/git/all_history", Git_all_history_handler),
-        ("/git/add_all_untracked", Git_add_all_untracked_handler),
-    ]
-
-    # add the baseurl to our paths
-    base_url = ""
-    git_handlers = [(ujoin(base_url, x[0]), x[1]) for x in git_handlers]
