@@ -340,6 +340,7 @@ export class StatusFiles extends React.Component<IStatusFilesProps, IStatusFiles
   onKeyPress(event) : void {
     if (event.which === 13) {
       event.preventDefault()
+      this.setState({commitMessage: this.state.commitMessage + '\n'})
     }
   }
 
@@ -539,7 +540,7 @@ extractFilename(path: string): string {
           </div>
           <ToggleDisplay show={this.state.showStaged}>
           <div className= 'jp-Git-section-fileContainer'>
-            <form className="jp-Git-staged-commit" onKeyPress={this.onKeyPress}>
+            <form className="jp-Git-staged-commit" onKeyPress={(event) => this.onKeyPress(event)}>
             <textarea 
               className='jp-Git-staged-commit-msg' 
               disabled ={(this.props.stagedFiles).length === 0} 
@@ -578,7 +579,7 @@ extractFilename(path: string): string {
               <ToggleDisplay show={file.x !== 'D'}>
               <button 
                 className={`jp-Git-button ${GIT_BUTTON_RESET}`} 
-                title='Reset this staged change' 
+                title='Unstage this change' 
                 onClick={() => {
                   this.resetStagedFile(file.to, this.props.topRepoPath, this.props.refresh), 
                   this.props.stagedFiles.length === 1 ? this.initializeInput() : {}
@@ -594,7 +595,7 @@ extractFilename(path: string): string {
         <div className= 'jp-Git-section-fileContainer'>
         <div className='jp-Git-unstaged' >
           <span className='jp-Git-unstaged-header-label'> 
-            Unstaged({(this.props.unstagedFiles).length})
+            Changes({(this.props.unstagedFiles).length})
           </span>  
           <ToggleDisplay show={this.props.unstagedFiles.length>0}>
           <button 
@@ -606,12 +607,12 @@ extractFilename(path: string): string {
           />
           <button 
             className={`jp-Git-header-button ${GIT_BUTTON_ADD}`} 
-            title='Stage all the changes' 
+            title='Stage all changes' 
             onClick={() => this.addAllUnstagedFiles(this.props.topRepoPath, this.props.refresh)} 
           />
           <button 
             className={`jp-Git-header-button ${GIT_BUTTON_DISCARD}`} 
-            title='Discard all the changes' 
+            title='Discard all changes' 
             onClick={() => this.discardAllUnstagedFiles(this.props.topRepoPath, this.props.refresh)}
           />
           </ToggleDisplay>
@@ -666,7 +667,7 @@ extractFilename(path: string): string {
               />
               <button 
                 className={`jp-Git-header-button ${GIT_BUTTON_TRACK}`} 
-                title='Track all the files' 
+                title='Track all untracked files' 
                 onClick={() => {
                   this.addAllUntrackedFiles(this.props.topRepoPath, this.props.refresh)
                   }

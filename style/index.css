@@ -650,7 +650,6 @@ jp-Git-timeline-arrow-left:active {
   background-color: rgba(153,153,153,.2);
 }
 
-
 .jp-Git-fileIcon {
   flex: 0 0 auto;
   padding: 0px 8px;
@@ -920,7 +919,7 @@ input[type=text]:focus {
 }
 
 .jp-image-caretdown {
-    background-image: var(--jp-image-caretdown);
+  background-image: var(--jp-image-caretdown);
  }
 
  .jp-image-caretdownwhite {
@@ -929,10 +928,6 @@ input[type=text]:focus {
 
 .jp-image-caretright {
   background-image: var(--jp-image-caretright);
-}
-
-.jp-image-caretright {
-  background-image: var(---jp-image-caretright);
 }
 
 .jp-Git-unstaged .jp-Git-button-discard{

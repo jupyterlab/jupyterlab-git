@@ -90,7 +90,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
         fileBrowser = leftSidebarItems.next()
       }
       let gitApi = new Git()
-      // If fileBrowser has loaded
+      // If fileBrowser has loaded, make API request
       if (fileBrowser) {
         // Make API call to get all git info for repo
         let apiResult = await gitApi.allHistory((fileBrowser as any).model.path)
