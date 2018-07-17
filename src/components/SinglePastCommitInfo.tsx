@@ -13,6 +13,7 @@ import {
 import {
   commitStyle,
   headerStyle,
+
   commitNumberLabelStyle,
   commitAuthorLabelStyle,
   commitAuthorIconStyle,
@@ -22,12 +23,31 @@ import {
   commitFilesChangedStyle,
   commitInsertionsMadeStyle,
   commitDeletionsMadeStyle,
+
   commitDeletionsMadeColorStyle,
   commitInsertionsMadeColorStyle,
+
   commitDetailStyle,
   commitDetailFileStyle,
-  commitDetailFilePathStyle
+  commitDetailFilePathStyle,
+
+  iconStyle,
+  iconWhiteStyle,
+  directoryIconWhiteStyle,
+  insertionIconColorStyle,
+  insertionIconWhiteStyle,
+  deletionIconColorStyle,
+  deletionIconWhiteStyle,
+  
+  numberOfDeletionsStyle,
+  numberOfInsertionsStyle,
+
+  modificationsStyle
 } from '../components_style/SinglePastCommitInfoStyle'
+
+import {
+  fileIconStyle
+} from '../components_style/FileListStyle'
 
 import * as React from 'react'
 
@@ -51,92 +71,95 @@ export class SinglePastCommitInfo extends React.Component<ISinglePastCommitInfoP
   }
 
   render() {
+    console.log(this.props.list)
     return (
       <div>
-      <div className={commitStyle}>
-        <div className={headerStyle}>
-          <span className={commitNumberLabelStyle}> 
-            #{this.props.data.commit ? this.props.data.commit.substring(0, 7) : ''}
-          </span>
-          <span className={commitSummaryLabelStyle}> 
-            <span className={commitFilesChangedStyle}> 
-              <span className='jp-Git-icon-directory-white'/> 
-              {this.props.filesChanged} 
+        <div className={commitStyle}>
+          <div className={headerStyle}>
+            <span className={commitNumberLabelStyle}> 
+              #{this.props.data.commit ? this.props.data.commit.substring(0, 7) : ''}
             </span>
-            <span className={commitInsertionsMadeStyle}> 
-              <span className='jp-Git-icon-insertion-white'/>  
-              {this.props.insertionCount} 
-            </span>
-            <span className={commitDeletionsMadeStyle}> 
-              <span className='jp-Git-icon-deletion-white'/>  
-              {this.props.deletionCount} 
-            </span>
-          </span>
-        </div>
-        <div className={commitAuthorLabelStyle}> 
-          <span className={commitAuthorIconStyle}/> 
-          {this.props.data.author}
-        </div>
-        <div className={commitLabelDateStyle}> 
-          {this.props.data.date}
-        </div>
-        <div className={commitLabelMessageStyle}> 
-          "<span className="jp-past-commit-message"/>
-          {this.props.data.commit_msg}"
-        </div>
-      </div>
-      <div className={commitDetailStyle}>
-          {this.props.list.map((modifiedFile, modifiedFileIndex)=> {
-            <li className={commitDetailFileStyle} key={modifiedFileIndex} >
-              <span 
-                className={`jp-Git-fileIcon ${parseFileExtension(modifiedFile.modified_file_path)}`} 
-                onDoubleClick={() => {
-                  window.open('https://github.com/search?q=' + this.props.data.commit + '&type=Commits&utf8=%E2%9C%93'
-                  )}
-                }
-              />
-              <span 
-                className={commitDetailFilePathStyle}  
-                onDoubleClick={()=> {
-                  this.props.diff(
-                    this.props.app,modifiedFile.modified_file_path, 
-                    this.props.data.commit, 
-                    this.props.data.pre_commit
-                  )}
-                }
-              >
-                {modifiedFile.modified_file_name}
+            <span className={commitSummaryLabelStyle}> 
+              <span className={commitFilesChangedStyle}> 
+                <span className={` ${iconWhiteStyle} ${iconStyle} ${directoryIconWhiteStyle} `}/> 
+                {this.props.filesChanged} 
               </span>
-              <span 
-                className='jp-Git-light'  
-                onDoubleClick={() => {
-                  this.props.diff(
-                    this.props.app,modifiedFile.modified_file_path, 
-                    this.props.data.commit, 
-                    this.props.data.pre_commit
-                  )}
-                  }
-                > 
-                {modifiedFile.modified_file_path}
+              <span className={commitInsertionsMadeStyle}> 
+                <span className={` ${iconWhiteStyle} ${iconStyle} ${insertionIconWhiteStyle} `}/>  
+                {this.props.insertionCount} 
               </span>
-              <span className='jp-modifications'>
-                <span className={commitDeletionsMadeColorStyle}>
-                    <span className="jp-Git-modNumber-deletions"> 
-                      {modifiedFile.deletion}
-                    </span>   
-                    <span className='jp-Git-icon-deletion-color' />  
-                </span>
-                <span className={commitInsertionsMadeColorStyle}>
-                    <span className="jp-Git-modNumber-insertions">
-                      {modifiedFile.insertion}
+              <span className={commitDeletionsMadeStyle}> 
+                <span className={` ${iconWhiteStyle} ${iconStyle} ${deletionIconWhiteStyle} `}/>  
+                {this.props.deletionCount} 
+              </span>
+            </span>
+          </div>
+          <div className={commitAuthorLabelStyle}> 
+            <span className={commitAuthorIconStyle}/> 
+            {this.props.data.author}
+          </div>
+          <div className={commitLabelDateStyle}> 
+            {this.props.data.date}
+          </div>
+          <div className={commitLabelMessageStyle}> 
+            "<span className="jp-past-commit-message"/>
+            {this.props.data.commit_msg}"
+          </div>
+        </div>
+        <div className={commitDetailStyle}>
+            {this.props.list.map((modifiedFile, modifiedFileIndex) => {
+              return (
+                <li className={commitDetailFileStyle} key={modifiedFileIndex} >
+                  <span 
+                    className={` ${fileIconStyle} ${parseFileExtension(modifiedFile.modified_file_path)} `} 
+                    onDoubleClick={() => {
+                      window.open('https://github.com/search?q=' + this.props.data.commit + '&type=Commits&utf8=%E2%9C%93'
+                      )}
+                    }
+                  />
+                  <span 
+                    className={commitDetailFilePathStyle}  
+                    onDoubleClick={()=> {
+                      this.props.diff(
+                        this.props.app,modifiedFile.modified_file_path, 
+                        this.props.data.commit, 
+                        this.props.data.pre_commit
+                      )}
+                    }
+                  >
+                    {modifiedFile.modified_file_name}
+                  </span>
+                  <span 
+                    className='jp-Git-light'  
+                    onDoubleClick={() => {
+                      this.props.diff(
+                        this.props.app,modifiedFile.modified_file_path, 
+                        this.props.data.commit, 
+                        this.props.data.pre_commit
+                      )}
+                      }
+                    > 
+                    {modifiedFile.modified_file_path}
+                  </span>
+                  <span className={modificationsStyle}>
+                    <span className={commitDeletionsMadeColorStyle}>
+                        <span className={numberOfDeletionsStyle}> 
+                          {modifiedFile.deletion}
+                        </span>   
+                        <span className={` ${iconStyle} ${deletionIconColorStyle} `} />  
                     </span>
-                    <span className='jp-Git-icon-insertion-color' />
-                </span>
-              </span>
-            </li>
-          })
-        }
-      </div>
+                    <span className={commitInsertionsMadeColorStyle}>
+                        <span className={numberOfInsertionsStyle}>
+                          {modifiedFile.insertion}
+                        </span>
+                        <span className={` ${iconStyle} ${insertionIconColorStyle} `} />
+                    </span>
+                  </span>
+                </li>
+              )
+            })
+          }
+        </div>
       </div>
     )
   }

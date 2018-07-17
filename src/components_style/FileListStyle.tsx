@@ -68,6 +68,16 @@ export const textInputStyle = style (
     outline: 'none'
   }
 )
+
+export const sectionFileContainerStyle = style (
+  {
+      flex: '1 1 auto',
+      margin: '0',
+      padding: '0',
+      overflow: 'auto'
+  }
+)
+
 export const stagedAreaStyle = style (
   {
     display: 'flex',
@@ -203,7 +213,6 @@ export const changeStageButtonStyle = style (
     backgroundRepeat: 'no-repeat',
     border: 'none',
     outline: 'none',
-    float: 'right',
 
     $nest: {
       '&:hover': {
@@ -220,6 +229,12 @@ export const changeStageButtonStyle = style (
   }
 )
 
+export const changeStageButtonRightStyle = style (
+  {
+    float: 'right'
+  }
+)
+
 export const stageFileButtonStyle = style (
   {
     backgroundImage: 'var(--jp-Git-icon-add)'
@@ -228,7 +243,7 @@ export const stageFileButtonStyle = style (
 
 export const unstageFileButtonStyle = style (
   {
-    backgroundImage: 'var(--jp-Git-icon-add)',
+    backgroundImage: 'var(--jp-Git-button-reset)',
     marginTop: '6px'
   }
 )

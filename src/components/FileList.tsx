@@ -35,6 +35,7 @@ import {
   kernelFileIconStyle,
 
   textInputStyle,
+  sectionFileContainerStyle,
 
   stagedAreaStyle,
   stagedCommitStyle,
@@ -56,7 +57,8 @@ import {
   caretdownImageStyle,
   caretdownImageWhiteStyle,
   caretrightImageStyle,
-  fileButtonStyle
+  fileButtonStyle,
+  changeStageButtonRightStyle
 
 } from '../components_style/FileListStyle'
 
@@ -463,7 +465,7 @@ extractFilename(path: string): string {
   render() {
     return (
       <div onContextMenu={ (event) => event.preventDefault()}>
-        <div className= 'jp-Git-section-fileContainer' >
+        <div className={sectionFileContainerStyle} >
           <div className={stagedAreaStyle}>       
             <span 
               className={stagedHeaderLabelStyle}
@@ -478,7 +480,7 @@ extractFilename(path: string): string {
             </span>
             <ToggleDisplay show={this.props.stagedFiles.length > 0}>
               <button 
-                className={`jp-Git-header-button ${unstageFileButtonWhiteStyle}`} 
+                className={`jp-Git-header-button ${unstageFileButtonWhiteStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle}`} 
                 title='Reset all staged changes' 
                 onClick={() => {
                   this.resetAllStagedFiles(this.props.topRepoPath, this.props.refresh), 
@@ -488,7 +490,7 @@ extractFilename(path: string): string {
             </ToggleDisplay>
           </div>
           <ToggleDisplay show={this.state.showStaged}>
-          <div className= 'jp-Git-section-fileContainer'>
+          <div className={sectionFileContainerStyle}>
             <form className={stagedCommitStyle} onKeyPress={(event) => this.onKeyPress(event)}>
             <textarea 
               className={`${textInputStyle} ${stagedCommitMessageStyle}`}
@@ -527,7 +529,7 @@ extractFilename(path: string): string {
               </span>
               <ToggleDisplay show={file.x !== 'D'}>
               <button 
-                className={`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} jp-Git-button ${unstageFileButtonStyle}`} 
+                className={`jp-Git-button ${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle} ${unstageFileButtonStyle}`} 
                 title='Unstage this change' 
                 onClick={() => {
                   this.resetStagedFile(file.to, this.props.topRepoPath, this.props.refresh), 
@@ -541,7 +543,7 @@ extractFilename(path: string): string {
           </div>
           </ToggleDisplay>
         </div>
-        <div className= 'jp-Git-section-fileContainer'>
+        <div className={sectionFileContainerStyle}>
         <div className={sectionAreaStyle} >
           <span className={sectionHeaderLabelStyle}> 
             Changes({(this.props.unstagedFiles).length})
@@ -555,19 +557,19 @@ extractFilename(path: string): string {
             onClick={() => this.displayUnstaged()} 
           />
           <button 
-            className={`jp-Git-header-button ${stageFileButtonStyle}`} 
+            className={`jp-Git-header-button ${stageFileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle}`} 
             title='Stage all changes' 
             onClick={() => this.addAllUnstagedFiles(this.props.topRepoPath, this.props.refresh)} 
           />
           <button 
-            className={`jp-Git-header-button ${discardFileButtonStyle}`} 
+            className={`jp-Git-header-button ${discardFileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle}`} 
             title='Discard all changes' 
             onClick={() => this.discardAllUnstagedFiles(this.props.topRepoPath, this.props.refresh)}
           />
           </ToggleDisplay>
         </div>
         <ToggleDisplay show={this.state.showUnstaged}>
-        <div className= 'jp-Git-section-fileContainer'>
+        <div className={sectionFileContainerStyle}>
           {this.props.unstagedFiles.map((file, file_index)=>
             <li className={fileStyle + ' ' + 'jp-Git-file'} key={file_index}>
             <span className={`${fileIconStyle} ${parseFileExtension(file.to)}`} />
@@ -579,7 +581,7 @@ extractFilename(path: string): string {
               {this.extractFilename(file.to)} [{file.y}]
             </span>
             <button 
-              className= {`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} jp-Git-button ${discardFileButtonStyle}`} 
+              className= {`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle} jp-Git-button ${discardFileButtonStyle}`} 
               title='Discard this change' 
               onClick={() => {
                 this.discardUnstagedFile(file.to, this.props.topRepoPath, this.props.refresh)
@@ -587,7 +589,7 @@ extractFilename(path: string): string {
                } 
             />
             <button 
-              className= {`jp-Git-button ${fileButtonStyle} ${changeStageButtonStyle} ${fileGitButtonStyle} ${stageFileButtonStyle}`} 
+              className= {`jp-Git-button ${fileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle} ${fileGitButtonStyle} ${stageFileButtonStyle}`} 
               title='Stage this change' 
               onClick={() => {
                 this.addUnstagedFile(file.to, this.props.topRepoPath, this.props.refresh)
@@ -599,7 +601,7 @@ extractFilename(path: string): string {
         </div>
         </ToggleDisplay>
         </div>
-        <div className= 'jp-Git-section-fileContainer'>
+        <div className={sectionFileContainerStyle}>
           <div className={sectionAreaStyle} >
             <span 
               className={sectionHeaderLabelStyle}
@@ -615,7 +617,7 @@ extractFilename(path: string): string {
                 onClick={() => this.displayUntracked()} 
               />
               <button 
-                className={`jp-Git-header-button ${trackFileButtonStyle}`} 
+                className={`jp-Git-header-button ${trackFileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle}`} 
                 title='Track all untracked files' 
                 onClick={() => {
                   this.addAllUntrackedFiles(this.props.topRepoPath, this.props.refresh)
@@ -625,7 +627,7 @@ extractFilename(path: string): string {
             </ToggleDisplay>
           </div>
           <ToggleDisplay show={this.state.showUntracked}>
-          <div className= 'jp-Git-section-fileContainer'>
+          <div className={sectionFileContainerStyle}>
             {this.props.untrackedFiles.map((file, file_index) =>
               <li className={fileStyle + ' ' + 'jp-Git-file'} key={file_index}>
               <span className={`${fileIconStyle} ${parseFileExtension(file.to)}`} />
@@ -637,7 +639,7 @@ extractFilename(path: string): string {
                 {this.extractFilename(file.to)}
               </span>
               <button 
-                className= {`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} jp-Git-button ${trackFileButtonStyle}`} 
+                className= {`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle} jp-Git-button ${trackFileButtonStyle}`} 
                 title='Track this file' 
                 onClick={() => {
                   this.addUntrackedFile(file.to, this.props.topRepoPath, this.props.refresh)

@@ -160,3 +160,84 @@ export const commitDetailFilePathStyle = style (
     transition: 'background-color 0.1s ease'
   }
 )
+
+export const iconStyle = style (
+  {
+    display: 'inline-block',
+    width: '30px',
+    height: '11px',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '11px',
+    position: 'absolute',
+    right: '10px',
+    marginRight: '5px'
+  }
+)
+
+export const iconWhiteStyle = style (
+  {
+    border: 'none',
+    marginRight: '0px'
+  }
+)
+
+export const directoryIconWhiteStyle = style (
+  {
+    backgroundImage: 'var(--jp-Git-icon-directory-white)'
+  }
+)
+
+export const insertionIconColorStyle = style (
+  {
+    backgroundImage: 'var(--jp-Git-icon-insertion-color)',
+    position: 'absolute',
+    right: '54px',
+    marginTop: '7px'
+  }
+)
+
+export const insertionIconWhiteStyle = style (
+  {
+    backgroundImage: 'var(--jp-Git-icon-insertion-white)'
+  }
+)
+
+export const deletionIconColorStyle = style (
+  {
+    backgroundImage: 'var(--jp-Git-icon-deletion-color)',
+    position: 'absolute',
+    right: '17px',
+    marginTop: '7px'
+  }
+)
+
+export const deletionIconWhiteStyle = style (
+  {
+    backgroundImage: 'var(--jp-Git-icon-deletion-white)'
+  }
+)
+
+export const numberOfDeletionsStyle = style (
+  {
+    position: 'absolute',
+    right: '12px',
+    width: '15px',
+    marginTop: '1px'
+  }
+)
+
+export const numberOfInsertionsStyle = style (
+  {
+    position: 'absolute',
+    right: '50px',
+    width: '15px',
+    marginTop: '1px'
+  }
+)
+
+export const modificationsStyle = style (
+  {
+    width: '40%'
+  }
+)
