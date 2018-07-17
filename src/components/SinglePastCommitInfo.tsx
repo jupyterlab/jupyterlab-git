@@ -71,7 +71,6 @@ export class SinglePastCommitInfo extends React.Component<ISinglePastCommitInfoP
   }
 
   render() {
-    console.log(this.props.list)
     return (
       <div>
         <div className={commitStyle}>

@@ -19,11 +19,6 @@ import {
 } from '../git'
 
 import {
-  fileStyle,
-  fileGitButtonStyle,
-  fileLabelStyle,
-
-  fileIconStyle,
   folderFileIconStyle,
   genericFileIconStyle,
   yamlFileIconStyle,
@@ -35,40 +30,27 @@ import {
   kernelFileIconStyle,
 
   textInputStyle,
-  sectionFileContainerStyle,
 
-  stagedAreaStyle,
   stagedCommitStyle,
   stagedCommitMessageStyle,
   stagedCommitButtonStyle,
   stagedCommitButtonReadyStyle,
   stagedCommitButtonDisabledStyle,
-  stagedHeaderLabelStyle,
 
-  sectionAreaStyle,
-  sectionHeaderLabelStyle,
-
-  changeStageButtonStyle,
   stageFileButtonStyle,
   unstageFileButtonStyle,
-  unstageFileButtonWhiteStyle,
-  discardFileButtonStyle,
   trackFileButtonStyle,
-  caretdownImageStyle,
-  caretdownImageWhiteStyle,
-  caretrightImageStyle,
-  fileButtonStyle,
-  changeStageButtonRightStyle
-
 } from '../components_style/FileListStyle'
 
 import {
   classes 
 } from 'typestyle/lib'
 
-import * as React from 'react'
+import {
+  GitStage
+} from './GitStage'
 
-import ToggleDisplay from 'react-toggle-display'
+import * as React from 'react'
 
 import '../../style/index.css'
 
@@ -217,7 +199,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   /** Handle right-click on a staged file */
-  contextMenuStaged(event, typeX: string, typeY: string, file: string) {
+  contextMenuStaged = (event, typeX: string, typeY: string, file: string) => {
     event.persist()
     event.preventDefault()
     this.setState(
@@ -231,7 +213,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   /** Handle right-click on an unstaged file */
-  contextMenuUnstaged(event, typeX: string,typeY: string, file:string) {
+  contextMenuUnstaged = (event, typeX: string,typeY: string, file:string) => {
     event.persist()
     event.preventDefault()
     this.setState(
@@ -245,7 +227,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   /** Handle right-click on an untracked file */
-  contextMenuUntracked(event, typeX: string, typeY: string, file: string) {
+  contextMenuUntracked = (event, typeX: string, typeY: string, file: string) => {
     event.persist()
     event.preventDefault()
     this.setState(
@@ -296,17 +278,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   /** Toggle display of staged files */
-  displayStaged() : void {
+  displayStaged = () : void => {
     this.setState({showStaged: !this.state.showStaged})
   }
 
   /** Toggle display of unstaged files */
-  displayUnstaged() : void {
+  displayUnstaged = () : void => {
     this.setState({showUnstaged: !this.state.showUnstaged})
   }
 
   /** Toggle display of untracked files */
-  displayUntracked() : void {
+  displayUntracked = () : void => {
     this.setState({showUntracked: !this.state.showUntracked})
   }
 
@@ -465,192 +447,101 @@ extractFilename(path: string): string {
   render() {
     return (
       <div onContextMenu={ (event) => event.preventDefault()}>
-        <div className={sectionFileContainerStyle} >
-          <div className={stagedAreaStyle}>       
-            <span 
-              className={stagedHeaderLabelStyle}
-            >
-            Staged({(this.props.stagedFiles).length})
-              <button 
-                className={this.state.showStaged ? 
-                `jp-Git-button ${changeStageButtonStyle} ${caretdownImageWhiteStyle}` 
-                : `jp-Git-button ${changeStageButtonStyle} ${caretrightImageStyle}`} 
-                onClick={()=>this.displayStaged()}
-              />
-            </span>
-            <ToggleDisplay show={this.props.stagedFiles.length > 0}>
-              <button 
-                className={`jp-Git-header-button ${unstageFileButtonWhiteStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle}`} 
-                title='Reset all staged changes' 
-                onClick={() => {
-                  this.resetAllStagedFiles(this.props.topRepoPath, this.props.refresh), 
-                  this.initializeInput()
-                  }} 
-              />
-            </ToggleDisplay>
-          </div>
-          <ToggleDisplay show={this.state.showStaged}>
-          <div className={sectionFileContainerStyle}>
-            <form className={stagedCommitStyle} onKeyPress={(event) => this.onKeyPress(event)}>
-            <textarea 
-              className={`${textInputStyle} ${stagedCommitMessageStyle}`}
-              disabled ={(this.props.stagedFiles).length === 0} 
-              placeholder={(this.props.stagedFiles).length === 0 ? 
-              'Stage your changes before commit'
-              : 'Input message to commit staged changes'} 
-              value={this.state.commitMessage} 
-              onChange={this.handleChange}
-            />
-            <input 
-              className={
-                this.updateCommitBoxState(this.state.disableCommit, 
-                this.props.stagedFiles.length)
-              } 
-              type="button" 
-              title='Commit' 
-              value={'\u2714'}  
-              disabled={this.state.disableCommit} 
-              onClick={() => 
-                {this.commitAllStagedFiles(this.state.commitMessage,this.props.topRepoPath, this.props.refresh),
-                  this.initializeInput()
-               }
-              }
-            />
-            </form>
-            {this.props.stagedFiles.map((file, file_index) =>
-              <li className={fileStyle + ' ' + 'jp-Git-file'} key={file_index}>
-              <span className={`${fileIconStyle} ${parseFileExtension(file.to)}`} />
-              <span 
-                className={fileLabelStyle} 
-                onContextMenu={(e) => {this.contextMenuStaged(e, file.x, file.y, file.to)}} 
-                onDoubleClick={() => this.openListedFile(file.x, file.y, file.to, this.props.app)}
-              >
-                {this.extractFilename(file.to)} [{file.x}]
-              </span>
-              <ToggleDisplay show={file.x !== 'D'}>
-              <button 
-                className={`jp-Git-button ${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle} ${unstageFileButtonStyle}`} 
-                title='Unstage this change' 
-                onClick={() => {
-                  this.resetStagedFile(file.to, this.props.topRepoPath, this.props.refresh), 
-                  this.props.stagedFiles.length === 1 ? this.initializeInput() : {}
-                  }
-                }
-              />
-              </ToggleDisplay>
-              </li>
-            )}
-          </div>
-          </ToggleDisplay>
-        </div>
-        <div className={sectionFileContainerStyle}>
-        <div className={sectionAreaStyle} >
-          <span className={sectionHeaderLabelStyle}> 
-            Changes({(this.props.unstagedFiles).length})
-          </span>  
-          <ToggleDisplay show={this.props.unstagedFiles.length>0}>
-          <button 
-            className={this.state.showUnstaged ? 
-              `${changeStageButtonStyle} ${caretdownImageStyle}` 
-              : `${changeStageButtonStyle} ${caretrightImageStyle}`
+        <form className={stagedCommitStyle} onKeyPress={(event) => this.onKeyPress(event)}>
+          <textarea 
+            className={`${textInputStyle} ${stagedCommitMessageStyle}`}
+            disabled ={(this.props.stagedFiles).length === 0} 
+            placeholder={(this.props.stagedFiles).length === 0 ? 
+            'Stage your changes before commit'
+            : 'Input message to commit staged changes'} 
+            value={this.state.commitMessage} 
+            onChange={this.handleChange}
+          />
+          <input 
+            className={
+              this.updateCommitBoxState(this.state.disableCommit, 
+              this.props.stagedFiles.length)
             } 
-            onClick={() => this.displayUnstaged()} 
-          />
-          <button 
-            className={`jp-Git-header-button ${stageFileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle}`} 
-            title='Stage all changes' 
-            onClick={() => this.addAllUnstagedFiles(this.props.topRepoPath, this.props.refresh)} 
-          />
-          <button 
-            className={`jp-Git-header-button ${discardFileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle}`} 
-            title='Discard all changes' 
-            onClick={() => this.discardAllUnstagedFiles(this.props.topRepoPath, this.props.refresh)}
-          />
-          </ToggleDisplay>
-        </div>
-        <ToggleDisplay show={this.state.showUnstaged}>
-        <div className={sectionFileContainerStyle}>
-          {this.props.unstagedFiles.map((file, file_index)=>
-            <li className={fileStyle + ' ' + 'jp-Git-file'} key={file_index}>
-            <span className={`${fileIconStyle} ${parseFileExtension(file.to)}`} />
-            <span 
-              className={fileLabelStyle} 
-              onContextMenu={(e) => {this.contextMenuUnstaged(e, file.x, file.y, file.to)}} 
-              onDoubleClick={() => this.openListedFile(file.x, file.y, file.to, this.props.app)}
-            >
-              {this.extractFilename(file.to)} [{file.y}]
-            </span>
-            <button 
-              className= {`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle} jp-Git-button ${discardFileButtonStyle}`} 
-              title='Discard this change' 
-              onClick={() => {
-                this.discardUnstagedFile(file.to, this.props.topRepoPath, this.props.refresh)
-                }
-               } 
-            />
-            <button 
-              className= {`jp-Git-button ${fileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle} ${fileGitButtonStyle} ${stageFileButtonStyle}`} 
-              title='Stage this change' 
-              onClick={() => {
-                this.addUnstagedFile(file.to, this.props.topRepoPath, this.props.refresh)
-                }
+            type="button" 
+            title='Commit' 
+            value={'\u2714'}  
+            disabled={this.state.disableCommit} 
+            onClick={() => 
+              {this.commitAllStagedFiles(this.state.commitMessage,this.props.topRepoPath, this.props.refresh),
+                this.initializeInput()
               }
-            />
-            </li>
-          )}
-        </div>
-        </ToggleDisplay>
-        </div>
-        <div className={sectionFileContainerStyle}>
-          <div className={sectionAreaStyle} >
-            <span 
-              className={sectionHeaderLabelStyle}
-            > 
-              Untracked({(this.props.untrackedFiles).length})
-            </span>
-            <ToggleDisplay show={this.props.untrackedFiles.length > 0}>
-              <button 
-                className={this.state.showUntracked ? 
-                  `jp-Git-button ${changeStageButtonStyle} ${caretdownImageStyle}` 
-                  : `jp-Git-button ${changeStageButtonStyle} ${caretrightImageStyle}`
-                } 
-                onClick={() => this.displayUntracked()} 
-              />
-              <button 
-                className={`jp-Git-header-button ${trackFileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle}`} 
-                title='Track all untracked files' 
-                onClick={() => {
-                  this.addAllUntrackedFiles(this.props.topRepoPath, this.props.refresh)
-                  }
-                } 
-              />
-            </ToggleDisplay>
-          </div>
-          <ToggleDisplay show={this.state.showUntracked}>
-          <div className={sectionFileContainerStyle}>
-            {this.props.untrackedFiles.map((file, file_index) =>
-              <li className={fileStyle + ' ' + 'jp-Git-file'} key={file_index}>
-              <span className={`${fileIconStyle} ${parseFileExtension(file.to)}`} />
-              <span 
-                className={fileLabelStyle} 
-                onContextMenu={(e) => {this.contextMenuUntracked(e, file.x, file.y, file.to)}} 
-                onDoubleClick={() => this.openListedFile(file.x,file.y,file.to,this.props.app)}
-              >
-                {this.extractFilename(file.to)}
-              </span>
-              <button 
-                className= {`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle} jp-Git-button ${trackFileButtonStyle}`} 
-                title='Track this file' 
-                onClick={() => {
-                  this.addUntrackedFile(file.to, this.props.topRepoPath, this.props.refresh)
-                  }
-                } 
-              />
-              </li>
-            )}
-          </div>
-          </ToggleDisplay>
-          </div>
+            }
+          />
+        </form>
+        <GitStage 
+          heading={'Staged'}
+          topRepoPath={this.props.topRepoPath}
+          files={this.props.stagedFiles}
+          app={this.props.app}
+          refresh={this.props.refresh}
+          showFiles={this.state.showStaged}
+          displayFiles={this.displayStaged}
+          moveAllFilesUp={null}
+          moveAllFilesDown={this.resetAllStagedFiles}
+          moveFileUp={null}
+          moveFileDown={this.resetStagedFile}
+          moveFileUpIconClass={null}
+          moveFileDownIconClass={unstageFileButtonStyle}
+          moveAllFilesUpTitle={null}
+          moveAllFilesDownTitle={'Unstage all changes'}
+          moveFileUpTitle={null}
+          moveFileDownTitle={'Unstage this change'}
+          openFile={this.openListedFile}
+          extractFilename={this.extractFilename}
+          contextMenu={this.contextMenuStaged}
+          parseFileExtension={parseFileExtension}
+        />
+        <GitStage 
+          heading={'Changes'}
+          topRepoPath={this.props.topRepoPath}
+          files={this.props.unstagedFiles}
+          app={this.props.app}
+          refresh={this.props.refresh}
+          showFiles={this.state.showUnstaged}
+          displayFiles={this.displayUnstaged}
+          moveAllFilesUp={this.addAllUnstagedFiles}
+          moveAllFilesDown={this.discardAllUnstagedFiles}
+          moveFileUp={this.addUnstagedFile}
+          moveFileDown={this.discardUnstagedFile}
+          moveFileUpIconClass={stageFileButtonStyle}
+          moveFileDownIconClass={unstageFileButtonStyle}
+          moveAllFilesUpTitle={'Stage all changes'}
+          moveAllFilesDownTitle={'Discard all changes'}
+          moveFileUpTitle={'Stage this change'}
+          moveFileDownTitle={'Discard this change'}
+          openFile={this.openListedFile}
+          extractFilename={this.extractFilename}
+          contextMenu={this.contextMenuUnstaged}
+          parseFileExtension={parseFileExtension}
+        />
+        <GitStage 
+          heading={'Untracked'}
+          topRepoPath={this.props.topRepoPath}
+          files={this.props.untrackedFiles}
+          app={this.props.app}
+          refresh={this.props.refresh}
+          showFiles={this.state.showUntracked}
+          displayFiles={this.displayUntracked}
+          moveAllFilesUp={this.addAllUntrackedFiles}
+          moveAllFilesDown={null}
+          moveFileUp={this.addUntrackedFile}
+          moveFileDown={null}
+          moveFileUpIconClass={trackFileButtonStyle}
+          moveFileDownIconClass={null}
+          moveAllFilesUpTitle={'Track all untracked files'}
+          moveAllFilesDownTitle={null}
+          moveFileUpTitle={'Track this file'}
+          moveFileDownTitle={null}
+          openFile={this.openListedFile}
+          extractFilename={this.extractFilename}
+          contextMenu={this.contextMenuUntracked}
+          parseFileExtension={parseFileExtension}
+        />
       </div>
     )
   }

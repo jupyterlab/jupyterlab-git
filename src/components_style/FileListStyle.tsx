@@ -244,7 +244,6 @@ export const stageFileButtonStyle = style (
 export const unstageFileButtonStyle = style (
   {
     backgroundImage: 'var(--jp-Git-button-reset)',
-    marginTop: '6px'
   }
 )
 
