@@ -8,7 +8,26 @@ import {
 
 import {
   parseFileExtension
-} from './statusFiles'
+} from './FileList'
+
+import {
+  commitStyle,
+  headerStyle,
+  commitNumberLabelStyle,
+  commitAuthorLabelStyle,
+  commitAuthorIconStyle,
+  commitLabelDateStyle,
+  commitLabelMessageStyle,
+  commitSummaryLabelStyle,
+  commitFilesChangedStyle,
+  commitInsertionsMadeStyle,
+  commitDeletionsMadeStyle,
+  commitDeletionsMadeColorStyle,
+  commitInsertionsMadeColorStyle,
+  commitDetailStyle,
+  commitDetailFileStyle,
+  commitDetailFilePathStyle
+} from '../components_style/SinglePastCommitInfoStyle'
 
 import * as React from 'react'
 
@@ -34,41 +53,41 @@ export class SinglePastCommitInfo extends React.Component<ISinglePastCommitInfoP
   render() {
     return (
       <div>
-      <div className='jp-Git-singlePastCommit'>
-        <div className='jp-Git-singlePastCommit-header'>
-          <span className='jp-Git-singlePastCommit-label-commit-number'> 
+      <div className={commitStyle}>
+        <div className={headerStyle}>
+          <span className={commitNumberLabelStyle}> 
             #{this.props.data.commit ? this.props.data.commit.substring(0, 7) : ''}
           </span>
-          <span className='jp-Git-singlePastCommit-label-summary'> 
-            <span className= 'jp-files-changed-white'> 
+          <span className={commitSummaryLabelStyle}> 
+            <span className={commitFilesChangedStyle}> 
               <span className='jp-Git-icon-directory-white'/> 
               {this.props.filesChanged} 
             </span>
-            <span className= 'jp-insertions-made-white'> 
+            <span className={commitInsertionsMadeStyle}> 
               <span className='jp-Git-icon-insertion-white'/>  
               {this.props.insertionCount} 
             </span>
-            <span className= 'jp-deletions-made-white'> 
+            <span className={commitDeletionsMadeStyle}> 
               <span className='jp-Git-icon-deletion-white'/>  
               {this.props.deletionCount} 
             </span>
           </span>
         </div>
-        <div className='jp-Git-singlePastCommit-label-author'> 
-          <span className="jp-Git-icon-author"/> 
+        <div className={commitAuthorLabelStyle}> 
+          <span className={commitAuthorIconStyle}/> 
           {this.props.data.author}
         </div>
-        <div className='jp-Git-singlePastCommit-label-date'> 
+        <div className={commitLabelDateStyle}> 
           {this.props.data.date}
         </div>
-        <div className='jp-Git-singlePastCommit-label-commit-message'> 
+        <div className={commitLabelMessageStyle}> 
           "<span className="jp-past-commit-message"/>
           {this.props.data.commit_msg}"
         </div>
       </div>
-      <div className='jp-Git-singlePastCommitDetail'>
+      <div className={commitDetailStyle}>
           {this.props.list.map((modifiedFile, modifiedFileIndex)=> {
-            <li className='jp-Git-singlePastCommitDetail-file' key={modifiedFileIndex} >
+            <li className={commitDetailFileStyle} key={modifiedFileIndex} >
               <span 
                 className={`jp-Git-fileIcon ${parseFileExtension(modifiedFile.modified_file_path)}`} 
                 onDoubleClick={() => {
@@ -77,7 +96,7 @@ export class SinglePastCommitInfo extends React.Component<ISinglePastCommitInfoP
                 }
               />
               <span 
-                className='jp-Git-singlePastCommitDetail-file-path'  
+                className={commitDetailFilePathStyle}  
                 onDoubleClick={()=> {
                   this.props.diff(
                     this.props.app,modifiedFile.modified_file_path, 
@@ -101,13 +120,13 @@ export class SinglePastCommitInfo extends React.Component<ISinglePastCommitInfoP
                 {modifiedFile.modified_file_path}
               </span>
               <span className='jp-modifications'>
-                <span className='jp-deletions-made-color'>
+                <span className={commitDeletionsMadeColorStyle}>
                     <span className="jp-Git-modNumber-deletions"> 
                       {modifiedFile.deletion}
                     </span>   
                     <span className='jp-Git-icon-deletion-color' />  
                 </span>
-                <span className='jp-insertions-made-color'>
+                <span className={commitInsertionsMadeColorStyle}>
                     <span className="jp-Git-modNumber-insertions">
                       {modifiedFile.insertion}
                     </span>

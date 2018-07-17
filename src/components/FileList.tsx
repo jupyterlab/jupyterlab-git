@@ -18,108 +18,57 @@ import {
   Git, GitShowPrefixResult
 } from '../git'
 
+import {
+  fileStyle,
+  fileGitButtonStyle,
+  fileLabelStyle,
+
+  fileIconStyle,
+  folderFileIconStyle,
+  genericFileIconStyle,
+  yamlFileIconStyle,
+  markdownFileIconStyle,
+  imageFileIconStyle,
+  spreadsheetFileIconStyle,
+  jsonFileIconStyle,
+  pythonFileIconStyle,
+  kernelFileIconStyle,
+
+  textInputStyle,
+
+  stagedAreaStyle,
+  stagedCommitStyle,
+  stagedCommitMessageStyle,
+  stagedCommitButtonStyle,
+  stagedCommitButtonReadyStyle,
+  stagedCommitButtonDisabledStyle,
+  stagedHeaderLabelStyle,
+
+  sectionAreaStyle,
+  sectionHeaderLabelStyle,
+
+  changeStageButtonStyle,
+  stageFileButtonStyle,
+  unstageFileButtonStyle,
+  unstageFileButtonWhiteStyle,
+  discardFileButtonStyle,
+  trackFileButtonStyle,
+  caretdownImageStyle,
+  caretdownImageWhiteStyle,
+  caretrightImageStyle,
+  fileButtonStyle
+
+} from '../components_style/FileListStyle'
+
+import {
+  classes 
+} from 'typestyle/lib'
+
 import * as React from 'react'
 
 import ToggleDisplay from 'react-toggle-display'
 
 import '../../style/index.css'
-
-/**
- * The class name added to the git-plugin sessions items.
- */
-const GIT_FILE = 'jp-Git-file'
-
-/**
- * The class name added to a git-plugin session item icon.
- */
-const GIT_FILE_ICON = 'jp-Git-fileIcon'
-
-/**
- * The class name added to a git-plugin session item label.
- */
-const GIT_FILE_LABEL = 'jp-Git-fileLabel'
-
-/**
- * The class name added to a git-plugin session item git-add button.
- */
-const GIT_BUTTON_ADD = 'jp-Git-button-add'
-
-/**
- * The class name added to a git-plugin session item git-reset button.
- */
-const GIT_BUTTON_RESET = 'jp-Git-button-reset'
-
-/**
- * The class name added to a git-plugin session item git-reset button.
- */
-const GIT_BUTTON_RESET_WHITE = 'jp-Git-button-reset-white'
-
-/**
- * The class name added to a git-plugin session item discard button.
- */
-const GIT_BUTTON_DISCARD = 'jp-Git-button-discard'
-
-/**
- * The class name added to a git-plugin session item track button.
- */
-const GIT_BUTTON_TRACK = 'jp-Git-button-track'
-
- /**
- * The class name added to a git-plugin session item white expand or collapse button.
- */
-const JP_IMAGE_CARET_DOWN_WHITE = 'jp-image-careetdownwhite'
-const JP_IMAGE_CARET_RIGHT_WHITE = 'jp-image-caretrightwhite'
-
- /**
- * The class name added to a git-plugin session item expand or collapse button.
- */
-const JP_IMAGE_CARET_DOWN = 'jp-image-caretdown'
-const JP_IMAGE_CARET_RIGHT = 'jp-image-caretright'
-
-/**
- * The class name added to a markdown file browser item.
- */
-const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon'
-
-/**
- * The class name added to a python file browser item.
- */
-const PYTHON_ICON_CLASS = 'jp-PythonIcon'
-
-/**
- * The class name added to a JSON file browser item.
- */
-const JSON_ICON_CLASS = 'jp-JSONIcon'
-
-/**
- * The class name added to a speadsheet file browser item.
- */
-const SPREADSHEET_ICON_CLASS = 'jp-SpreadsheetIcon'
-
-/**
- * The class name added to a R Kernel file browser item.
- */
-const RKERNEL_ICON_CLASS = 'jp-RKernelIcon'
-
-/**
- * The class name added to a YAML file browser item.
- */
-const YAML_ICON_CLASS = 'jp-YamlIcon'
-
-/**
- * The class added for image file browser items.
- */
-const IMAGE_ICON_CLASS = 'jp-ImageIcon'
-
-/**
- * The class name added to a file type content item.
- */
-const FILE_TYPE_CLASS = 'jp-FileIcon'
-
-/**
- * The class name added to a directory file browser item.
- */
-const FOLDER_MATERIAL_ICON_CLASS = 'jp-OpenFolderIcon'
 
 export namespace CommandIDs {
   export const gitFileOpen = 'gf:Open'
@@ -130,7 +79,7 @@ export namespace CommandIDs {
   export const gitFileDiscard = 'gf:Discard'
 }
 
-export interface IStatusFilesState {
+export interface IFileListState {
   commitMessage: string
   disableCommit: boolean
   showStaged: boolean
@@ -144,7 +93,7 @@ export interface IStatusFilesState {
   contextMenuFile: string 
 }
 
-export interface IStatusFilesProps {
+export interface IFileListProps {
   currentFileBrowserPath: string
   topRepoPath: string
   stagedFiles: any
@@ -154,9 +103,9 @@ export interface IStatusFilesProps {
   refresh: any
 }
 
-export class StatusFiles extends React.Component<IStatusFilesProps, IStatusFilesState> {
+export class FileList extends React.Component<IFileListProps, IFileListState> {
 
-  constructor(props: IStatusFilesProps) {
+  constructor(props: IFileListProps) {
     super(props)
 
     const { commands } = this.props.app
@@ -360,15 +309,15 @@ export class StatusFiles extends React.Component<IStatusFilesProps, IStatusFiles
   }
 
   /** Update state of commit message input box */
-  updateCommitBoxState(disable: boolean, numberOfFiles: number) : string {
+  updateCommitBoxState(disable: boolean, numberOfFiles: number) {
     if (disable) {
       if (numberOfFiles === 0) {
-        return 'jp-Git-staged-commit-button-disable'
+        return classes(stagedCommitButtonStyle, stagedCommitButtonDisabledStyle)
       } else {
-        return 'jp-Git-staged-commit-button-ready'
+        return classes(stagedCommitButtonStyle, stagedCommitButtonReadyStyle)
       } 
     } else {
-      return 'jp-Git-staged-commit-button'
+      return stagedCommitButtonStyle
     }
   }
 
@@ -515,21 +464,21 @@ extractFilename(path: string): string {
     return (
       <div onContextMenu={ (event) => event.preventDefault()}>
         <div className= 'jp-Git-section-fileContainer' >
-          <div className='jp-Git-staged'>       
+          <div className={stagedAreaStyle}>       
             <span 
-              className='jp-Git-staged-header-label'
+              className={stagedHeaderLabelStyle}
             >
             Staged({(this.props.stagedFiles).length})
               <button 
                 className={this.state.showStaged ? 
-                `jp-Git-button ${JP_IMAGE_CARET_DOWN_WHITE}` 
-                : `jp-Git-button ${JP_IMAGE_CARET_RIGHT_WHITE}`} 
+                `jp-Git-button ${changeStageButtonStyle} ${caretdownImageWhiteStyle}` 
+                : `jp-Git-button ${changeStageButtonStyle} ${caretrightImageStyle}`} 
                 onClick={()=>this.displayStaged()}
               />
             </span>
             <ToggleDisplay show={this.props.stagedFiles.length > 0}>
               <button 
-                className={`jp-Git-header-button ${GIT_BUTTON_RESET_WHITE}`} 
+                className={`jp-Git-header-button ${unstageFileButtonWhiteStyle}`} 
                 title='Reset all staged changes' 
                 onClick={() => {
                   this.resetAllStagedFiles(this.props.topRepoPath, this.props.refresh), 
@@ -540,9 +489,9 @@ extractFilename(path: string): string {
           </div>
           <ToggleDisplay show={this.state.showStaged}>
           <div className= 'jp-Git-section-fileContainer'>
-            <form className="jp-Git-staged-commit" onKeyPress={(event) => this.onKeyPress(event)}>
+            <form className={stagedCommitStyle} onKeyPress={(event) => this.onKeyPress(event)}>
             <textarea 
-              className='jp-Git-staged-commit-msg' 
+              className={`${textInputStyle} ${stagedCommitMessageStyle}`}
               disabled ={(this.props.stagedFiles).length === 0} 
               placeholder={(this.props.stagedFiles).length === 0 ? 
               'Stage your changes before commit'
@@ -567,10 +516,10 @@ extractFilename(path: string): string {
             />
             </form>
             {this.props.stagedFiles.map((file, file_index) =>
-              <li className={GIT_FILE} key={file_index}>
-              <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
+              <li className={fileStyle + ' ' + 'jp-Git-file'} key={file_index}>
+              <span className={`${fileIconStyle} ${parseFileExtension(file.to)}`} />
               <span 
-                className={GIT_FILE_LABEL} 
+                className={fileLabelStyle} 
                 onContextMenu={(e) => {this.contextMenuStaged(e, file.x, file.y, file.to)}} 
                 onDoubleClick={() => this.openListedFile(file.x, file.y, file.to, this.props.app)}
               >
@@ -578,7 +527,7 @@ extractFilename(path: string): string {
               </span>
               <ToggleDisplay show={file.x !== 'D'}>
               <button 
-                className={`jp-Git-button ${GIT_BUTTON_RESET}`} 
+                className={`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} jp-Git-button ${unstageFileButtonStyle}`} 
                 title='Unstage this change' 
                 onClick={() => {
                   this.resetStagedFile(file.to, this.props.topRepoPath, this.props.refresh), 
@@ -593,25 +542,25 @@ extractFilename(path: string): string {
           </ToggleDisplay>
         </div>
         <div className= 'jp-Git-section-fileContainer'>
-        <div className='jp-Git-unstaged' >
-          <span className='jp-Git-unstaged-header-label'> 
+        <div className={sectionAreaStyle} >
+          <span className={sectionHeaderLabelStyle}> 
             Changes({(this.props.unstagedFiles).length})
           </span>  
           <ToggleDisplay show={this.props.unstagedFiles.length>0}>
           <button 
             className={this.state.showUnstaged ? 
-              `jp-Git-button ${JP_IMAGE_CARET_DOWN}` 
-              : `jp-Git-button ${JP_IMAGE_CARET_RIGHT}`
+              `${changeStageButtonStyle} ${caretdownImageStyle}` 
+              : `${changeStageButtonStyle} ${caretrightImageStyle}`
             } 
             onClick={() => this.displayUnstaged()} 
           />
           <button 
-            className={`jp-Git-header-button ${GIT_BUTTON_ADD}`} 
+            className={`jp-Git-header-button ${stageFileButtonStyle}`} 
             title='Stage all changes' 
             onClick={() => this.addAllUnstagedFiles(this.props.topRepoPath, this.props.refresh)} 
           />
           <button 
-            className={`jp-Git-header-button ${GIT_BUTTON_DISCARD}`} 
+            className={`jp-Git-header-button ${discardFileButtonStyle}`} 
             title='Discard all changes' 
             onClick={() => this.discardAllUnstagedFiles(this.props.topRepoPath, this.props.refresh)}
           />
@@ -620,17 +569,17 @@ extractFilename(path: string): string {
         <ToggleDisplay show={this.state.showUnstaged}>
         <div className= 'jp-Git-section-fileContainer'>
           {this.props.unstagedFiles.map((file, file_index)=>
-            <li className={GIT_FILE} key={file_index}>
-            <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
+            <li className={fileStyle + ' ' + 'jp-Git-file'} key={file_index}>
+            <span className={`${fileIconStyle} ${parseFileExtension(file.to)}`} />
             <span 
-              className={GIT_FILE_LABEL} 
+              className={fileLabelStyle} 
               onContextMenu={(e) => {this.contextMenuUnstaged(e, file.x, file.y, file.to)}} 
               onDoubleClick={() => this.openListedFile(file.x, file.y, file.to, this.props.app)}
             >
               {this.extractFilename(file.to)} [{file.y}]
             </span>
             <button 
-              className= {`jp-Git-button ${GIT_BUTTON_DISCARD}`} 
+              className= {`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} jp-Git-button ${discardFileButtonStyle}`} 
               title='Discard this change' 
               onClick={() => {
                 this.discardUnstagedFile(file.to, this.props.topRepoPath, this.props.refresh)
@@ -638,7 +587,7 @@ extractFilename(path: string): string {
                } 
             />
             <button 
-              className= {`jp-Git-button ${GIT_BUTTON_ADD}`} 
+              className= {`jp-Git-button ${fileButtonStyle} ${changeStageButtonStyle} ${fileGitButtonStyle} ${stageFileButtonStyle}`} 
               title='Stage this change' 
               onClick={() => {
                 this.addUnstagedFile(file.to, this.props.topRepoPath, this.props.refresh)
@@ -651,22 +600,22 @@ extractFilename(path: string): string {
         </ToggleDisplay>
         </div>
         <div className= 'jp-Git-section-fileContainer'>
-          <div className='jp-Git-untracked' >
+          <div className={sectionAreaStyle} >
             <span 
-              className='jp-Git-untracked-header-label'
+              className={sectionHeaderLabelStyle}
             > 
               Untracked({(this.props.untrackedFiles).length})
             </span>
             <ToggleDisplay show={this.props.untrackedFiles.length > 0}>
               <button 
                 className={this.state.showUntracked ? 
-                  `jp-Git-button ${JP_IMAGE_CARET_DOWN}` 
-                  : `jp-Git-button ${JP_IMAGE_CARET_RIGHT}`
+                  `jp-Git-button ${changeStageButtonStyle} ${caretdownImageStyle}` 
+                  : `jp-Git-button ${changeStageButtonStyle} ${caretrightImageStyle}`
                 } 
                 onClick={() => this.displayUntracked()} 
               />
               <button 
-                className={`jp-Git-header-button ${GIT_BUTTON_TRACK}`} 
+                className={`jp-Git-header-button ${trackFileButtonStyle}`} 
                 title='Track all untracked files' 
                 onClick={() => {
                   this.addAllUntrackedFiles(this.props.topRepoPath, this.props.refresh)
@@ -678,17 +627,17 @@ extractFilename(path: string): string {
           <ToggleDisplay show={this.state.showUntracked}>
           <div className= 'jp-Git-section-fileContainer'>
             {this.props.untrackedFiles.map((file, file_index) =>
-              <li className={GIT_FILE} key={file_index}>
-              <span className={`${GIT_FILE_ICON} ${parseFileExtension(file.to)}`} />
+              <li className={fileStyle + ' ' + 'jp-Git-file'} key={file_index}>
+              <span className={`${fileIconStyle} ${parseFileExtension(file.to)}`} />
               <span 
-                className={GIT_FILE_LABEL} 
+                className={fileLabelStyle} 
                 onContextMenu={(e) => {this.contextMenuUntracked(e, file.x, file.y, file.to)}} 
                 onDoubleClick={() => this.openListedFile(file.x,file.y,file.to,this.props.app)}
               >
                 {this.extractFilename(file.to)}
               </span>
               <button 
-                className= {`jp-Git-button ${GIT_BUTTON_TRACK}`} 
+                className= {`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} jp-Git-button ${trackFileButtonStyle}`} 
                 title='Track this file' 
                 onClick={() => {
                   this.addUntrackedFile(file.to, this.props.topRepoPath, this.props.refresh)
@@ -708,41 +657,41 @@ extractFilename(path: string): string {
 /** Get the extension of a given file */
 export function parseFileExtension(path: string): string {
   if (path[path.length - 1] === '/') {
-    return FOLDER_MATERIAL_ICON_CLASS
+    return folderFileIconStyle
   }
   var fileExtension = PathExt.extname(path).toLocaleLowerCase()
   switch (fileExtension) {
     case '.md':
-      return MARKDOWN_ICON_CLASS
+      return markdownFileIconStyle
     case '.py':
-      return PYTHON_ICON_CLASS
+      return pythonFileIconStyle
     case '.json':
-      return JSON_ICON_CLASS
+      return jsonFileIconStyle
     case '.csv':
-      return SPREADSHEET_ICON_CLASS
+      return spreadsheetFileIconStyle
     case '.xls':
-      return SPREADSHEET_ICON_CLASS
+      return spreadsheetFileIconStyle
     case '.r':
-      return RKERNEL_ICON_CLASS
+      return kernelFileIconStyle
     case '.yml':
-      return YAML_ICON_CLASS
+      return yamlFileIconStyle
     case '.yaml':
-      return YAML_ICON_CLASS
+      return yamlFileIconStyle
     case '.svg':
-      return IMAGE_ICON_CLASS
+      return imageFileIconStyle
     case '.tiff':
-      return IMAGE_ICON_CLASS
+      return imageFileIconStyle
     case '.jpeg':
-      return IMAGE_ICON_CLASS
+      return imageFileIconStyle
     case '.jpg':
-      return IMAGE_ICON_CLASS
+      return imageFileIconStyle
     case '.gif':
-      return IMAGE_ICON_CLASS
+      return imageFileIconStyle
     case '.png':
-      return IMAGE_ICON_CLASS
+      return imageFileIconStyle
     case '.raw':
-      return IMAGE_ICON_CLASS
+      return imageFileIconStyle
     default:
-      return FILE_TYPE_CLASS
+      return genericFileIconStyle
   }
 }

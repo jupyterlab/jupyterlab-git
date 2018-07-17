@@ -7,8 +7,8 @@ import {
 } from '../git'
 
 import {
-  StatusFiles
-} from './statusFiles'
+  FileList
+} from './FileList'
 
 import {
   PastCommitNodeInfo
@@ -18,11 +18,29 @@ import {
   SinglePastCommitInfo
 } from './SinglePastCommitInfo'
 
+import {
+  gitTimelineStyle,
+  gitTimelineContainerStyle,
+  gitCurrentCommitStyle,
+  gitCurrentCommitModifiedStyle,
+  gitCurrentCommitActiveStyle,
+  gitCurrentCommitActiveModifiedStyle,
+  gitCurrentCommitContainerStyle,
+  gitPastCommitStyle,
+  gitPastCommitModifiedStyle,
+  gitPastCommitActiveStyle,
+  gitPastCommitActiveModifiedStyle,
+} from '../components_style/PastCommitsStyle' 
+
 import * as React from 'react'
 
 import * as ReactDOM from 'react-dom'
 
 import ToggleDisplay from 'react-toggle-display'
+
+import {
+  classes 
+} from 'typestyle/lib'
 
 import '../../style/index.css'
 
@@ -119,37 +137,37 @@ export class PastCommits extends React.Component<IPastCommitsProps, IPastCommits
   }
 
   /** Set CSS div class based on if the currently displayed commit is current or past */
-  getCommitTimeState(index: number, showIndex: number) : string {
+  getCommitTimeState(index: number, showIndex: number) {
     switch (index) {
       case -1:
         return (
-          index === showIndex ? 
-          'jp-Git-currentCommit-active jp-mod-active' 
-          : 'jp-Git-currentCommit-active'
+          index === showIndex 
+          ? classes(gitCurrentCommitActiveStyle, gitCurrentCommitActiveModifiedStyle, gitCurrentCommitStyle) 
+          : classes(gitCurrentCommitActiveStyle, gitCurrentCommitStyle)
         )
       default:
         return (
-          index === showIndex ? 
-          'jp-Git-pastCommit-active jp-mod-active' 
-          : 'jp-Git-pastCommit-active'
+          index === showIndex 
+          ? classes(gitPastCommitActiveStyle, gitPastCommitActiveModifiedStyle, gitPastCommitStyle)  
+          : classes(gitPastCommitActiveStyle, gitPastCommitStyle)
         )
     }
   }
 
   /** Set CSS button class based on if the currently displayed commit is current or past */
-  getCommitTimeStateButton(index: number, showIndex: number) : string {
+  getCommitTimeStateButton(index: number, showIndex: number) {
   switch (index) {
     case -1:
       return (
-        index === showIndex ? 
-        'jp-Git-currentCommit-btn jp-mod-active' 
-        : 'jp-Git-currentCommit-btn'
+        index === showIndex 
+        ? classes(gitCurrentCommitModifiedStyle, gitCurrentCommitStyle)
+         : gitCurrentCommitStyle
       )
     default:
       return (
-        index === showIndex ? 
-        'jp-Git-pastCommit-btn jp-mod-active' 
-        : 'jp-Git-pastCommit-btn'
+        index === showIndex 
+        ? classes(gitPastCommitModifiedStyle, gitPastCommitStyle) 
+        : gitPastCommitStyle
       )
   }
 }
@@ -234,16 +252,16 @@ export class PastCommits extends React.Component<IPastCommitsProps, IPastCommits
   render() {
     return (
       <div>
-        <div className='jp-Git-timeline'>
+        <div className={gitTimelineStyle}>
           <ToggleDisplay show={this.state.showLeftArrow}>
             <button className='jp-Git-timeline-arrow-left' onClick={()=>this.scrollCommitsLeft()} />
           </ToggleDisplay>
-          <div className='jp-Git-timeline-container' ref='pastCommitsContainer'> 
+          <div className={gitTimelineContainerStyle} ref='pastCommitsContainer'> 
             <button className={this.getCommitTimeState(-1, this.props.showIndex)} />
             <button className={this.getCommitTimeStateButton(-1, this.props.showIndex)} onClick={()=>this.props.showCurrentWork(-1)} />
             {this.props.pastCommits.map((pastCommit, pastCommitIndex) =>
               <span 
-                className='jp-Git-commit-btn-container' 
+                className={gitCurrentCommitContainerStyle} 
                 key={pastCommitIndex} 
                 onClick={() => {
                   this.showPastCommitWork(pastCommit, pastCommitIndex, this.props.currentFileBrowserPath), 
@@ -286,7 +304,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, IPastCommits
           />
         </ToggleDisplay>
         <ToggleDisplay show={this.props.showIndex === -1}>
-          <StatusFiles 
+          <FileList 
             currentFileBrowserPath={this.props.currentFileBrowserPath} 
             topRepoPath={this.props.topRepoPath} 
             stagedFiles={this.props.stagedFiles} 

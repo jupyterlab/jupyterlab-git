@@ -17,15 +17,15 @@ import {
 
 import {
   PathHeader
-} from './pathHeader'
+} from './PathHeader'
 
 import {
   BranchHeader
-} from './branchHeader'
+} from './BranchHeader'
 
 import {
   PastCommits
-} from './pastCommits'
+} from './PastCommits'
 
 import '../../style/index.css'
 

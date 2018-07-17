@@ -14,6 +14,12 @@ import {
   Git
 } from '../git'
 
+import {
+  gitBranchStyle,
+  gitBranchLabelStyle,
+  gitSwitchBranchStyle
+} from '../components_style/BranchHeaderStyle'
+
 import '../../style/index.css'
 
 export interface IBranchHeaderState {
@@ -89,8 +95,8 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
 
   render() {
     return (
-      <div className='jp-Git-branch'>
-        <span className ='jp-Git-branch-label'>
+      <div className={gitBranchStyle}>
+        <span className ={gitBranchLabelStyle}>
           <span className='jp-Git-icon-branch'/>
           {this.state.showNotice ? 
             'Stage and commit changes before switching branches' 
@@ -110,7 +116,7 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
             onChange={event => this.switchBranch(event, this.props.refresh)} 
           >
             <option 
-              className='jp-Git-switch-branch' 
+              className={gitSwitchBranchStyle}
               value=' '
               disabled
             >
