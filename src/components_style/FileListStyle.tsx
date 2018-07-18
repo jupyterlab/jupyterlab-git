@@ -9,8 +9,7 @@ export const fileStyle = style (
     color: 'var(--jp-ui-font-color1)',
     height: 'var(--jp-private-running-item-height)',
     lineHeight: 'var(--jp-private-running-item-height)',
-    margin: '0',
-    padding: '0',
+    paddingLeft: '4px',
     listStyleType: 'none',
 
     $nest: {
@@ -18,7 +17,7 @@ export const fileStyle = style (
         backgroundColor: 'rgba(153,153,153,.1)'
       },
       '&:hover .jp-Git-button': {
-        display: 'inline'
+        visibility: 'visible'
       }
     }
   }
@@ -26,7 +25,8 @@ export const fileStyle = style (
 
 export const fileGitButtonStyle = style (
   {
-    display: 'none'
+    visibility: 'hidden',
+    display: 'inline'
   }
 )
 
@@ -34,8 +34,6 @@ export const fileLabelStyle = style (
   {
     fontSize: 'var(--jp-ui-font-size1)',
     flex: '1 1 auto',
-    marginRight: '4px',
-    paddingLeft: '4px',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
@@ -44,7 +42,7 @@ export const fileLabelStyle = style (
 
     $nest: {
       '&:focus': {
-        backgroundColor: 'rgba(153,153,153,.2)'
+        backgroundColor: 'var(--jp-layout-color3)'
       }
     }
   }
@@ -55,7 +53,6 @@ export const fileIconStyle = style (
     flex: '0 0 auto',
     padding: '0px 8px',
     marginRight: '4px',
-    marginLeft: '12px',
     verticalAlign: 'baseline',
     backgroundSize: '16px',
     backgroundRepeat: 'no-repeat',
@@ -74,7 +71,13 @@ export const sectionFileContainerStyle = style (
       flex: '1 1 auto',
       margin: '0',
       padding: '0',
-      overflow: 'auto'
+      overflow: 'auto',
+
+      $nest: {
+        '& button:disabled': {
+          opacity: 0.3
+        }
+      }
   }
 )
 
@@ -144,31 +147,11 @@ export const stagedCommitButtonDisabledStyle = style (
   }
 )
 
-export const stagedHeaderLabelStyle = style (
-  {
-    fontSize: 'var(--jp-ui-font-size1)',
-    flex: '1 1 auto',
-    marginRight: '4px',
-    paddingLeft: '4px',
-    textOverflow: 'ellipsis',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    borderRadius: '2px',
-    transition: 'background-color 0.1s ease',
-
-    $nest: {
-      '&:focus': {
-        backgroundColor: 'rgba(153,153,153,.2)'
-      }
-    }
-  }
-)
-
 export const sectionAreaStyle = style (
   {
     flex: '0 0 auto',
     margin: '4px 0px',
-    padding: '4px 1px 4px 13px',
+    padding: '4px 1px 4px 4px',
     fontWeight: 600,
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     letterSpacing: '1px',
@@ -180,8 +163,6 @@ export const sectionHeaderLabelStyle = style (
   {
     fontSize: 'var(--jp-ui-font-size)',
     flex: '1 1 auto',
-    marginRight: '4px',
-    paddingLeft: '4px',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
@@ -201,7 +182,7 @@ export const sectionHeaderLabelStyle = style (
 
 export const changeStageButtonStyle = style (
   {
-    margin: '0px 4px',
+    margin: '0px 2px',
     fontWeight: 600,
     backgroundColor: 'transparent',
     lineHeight: 'var(--jp-private-running-shutdown-button-height)',
@@ -231,25 +212,19 @@ export const changeStageButtonStyle = style (
 
 export const changeStageButtonRightStyle = style (
   {
-    float: 'right'
+    float: 'left'
   }
 )
 
-export const stageFileButtonStyle = style (
+export const moveFileUpButtonStyle = style (
   {
-    backgroundImage: 'var(--jp-Git-icon-add)'
+    backgroundImage: 'var(--jp-move-file-up-icon)'
   }
 )
 
-export const unstageFileButtonStyle = style (
+export const moveFileDownButtonStyle = style (
   {
-    backgroundImage: 'var(--jp-Git-button-reset)',
-  }
-)
-
-export const unstageFileButtonWhiteStyle = style (
-  {
-    backgroundImage: 'var(--jp-Git-button-reset-white)'
+    backgroundImage: 'var(--jp-move-file-down-icon)'
   }
 )
 
@@ -259,28 +234,9 @@ export const discardFileButtonStyle = style (
   }
 )
 
-export const discardFileButtonWhiteStyle = style (
-  {
-    backgroundImage: 'var(--jp-Git-button-discard-white)'
-  }
-)
-
-export const trackFileButtonStyle = style (
-  {
-    backgroundImage: 'var(--jp-Git-icon-track)',
-    marginTop: '4px'
-  }
-)
-
 export const caretdownImageStyle = style (
   {
     backgroundImage: 'var(--jp-image-caretdown)'
-  }
-)
-
-export const caretdownImageWhiteStyle = style (
-  {
-    backgroundImage: 'var(--jp-image-caretdownwhite)'
   }
 )
 
@@ -292,7 +248,7 @@ export const caretrightImageStyle = style (
 
 export const fileButtonStyle = style (
   {
-    paddingTop: '20px'
+    marginTop: '5px'
   }
 )
 

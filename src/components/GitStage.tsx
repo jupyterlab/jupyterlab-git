@@ -3,22 +3,18 @@ import {
 } from '@jupyterlab/application'
 
 import {
-  fileStyle,
-  fileGitButtonStyle,
-  fileLabelStyle,
-  fileIconStyle,
-
   sectionFileContainerStyle,
-
   sectionAreaStyle,
   sectionHeaderLabelStyle,
-
   changeStageButtonStyle,
   caretdownImageStyle,
   caretrightImageStyle,
-  fileButtonStyle,
-  changeStageButtonRightStyle
+  changeStageButtonRightStyle,
 } from '../components_style/FileListStyle'
+
+import {
+  FileItem
+} from './FileItem'
 
 import * as React from 'react'
 
@@ -32,23 +28,39 @@ export interface IGitStageProps {
   refresh: any
   showFiles: boolean
   displayFiles: Function
-  moveAllFilesUp: Function
-  moveAllFilesDown: Function
-  moveFileUp: Function
-  moveFileDown: Function
-  moveFileUpIconClass: string
-  moveFileDownIconClass: string
-  moveAllFilesUpTitle: string
-  moveAllFilesDownTitle: string
-  moveFileUpTitle: string
-  moveFileDownTitle: string
+  moveAllFiles: Function
+  moveFile: Function
+  moveFileIconClass: string
+  moveAllFilesTitle: string
+  moveFileTitle: string
   openFile: Function
   extractFilename: Function
   contextMenu: Function
   parseFileExtension: Function
 } 
 
-export class GitStage extends React.Component<IGitStageProps, {}> {
+export interface IGitStageState {
+  selectedFile: number
+}
+
+export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
+  constructor(props) {
+    super(props)
+    this.state = {selectedFile: -1}
+  }
+
+  checkDisabled() {
+    if(this.props.files.length > 0) {
+      return false
+    } else {
+      return true
+    }
+  }
+
+  updateSelectedFile = (file: any) => {
+    this.setState({selectedFile: file})
+  }
+
   render() {
     return (
       <div className={sectionFileContainerStyle}>
@@ -64,48 +76,39 @@ export class GitStage extends React.Component<IGitStageProps, {}> {
           } 
           onClick={() => this.props.displayFiles()} 
         />
-        <button 
-          className={`jp-Git-header-button ${this.props.moveFileUpIconClass} ${changeStageButtonStyle} ${changeStageButtonRightStyle}`} 
-          title={this.props.moveAllFilesUpTitle}
-          onClick={() => this.props.moveAllFilesUp(this.props.topRepoPath, this.props.refresh)} 
-        />
-        <button 
-          className={`jp-Git-header-button ${this.props.moveFileDownIconClass} ${changeStageButtonStyle} ${changeStageButtonRightStyle}`} 
-          title={this.props.moveAllFilesDownTitle}
-          onClick={() => this.props.moveAllFilesDown(this.props.topRepoPath, this.props.refresh)}
-        />
         </ToggleDisplay>
+        <button 
+          disabled={this.checkDisabled()}
+          className={`${this.props.moveFileIconClass} ${changeStageButtonStyle} 
+                      ${changeStageButtonRightStyle}` } 
+          title={this.props.moveAllFilesTitle}
+          onClick={() => this.props.moveAllFiles(this.props.topRepoPath, this.props.refresh)} 
+        />
       </div>
       <ToggleDisplay show={this.props.showFiles}>
         <div className={sectionFileContainerStyle}>
-          {this.props.files.map((file, file_index)=>
-            <li className={fileStyle + ' ' + 'jp-Git-file'} key={file_index}>
-            <span className={`${fileIconStyle} ${this.props.parseFileExtension(file.to)}`} />
-            <span 
-              className={fileLabelStyle} 
-              onContextMenu={(e) => {this.props.contextMenu(e, file.x, file.y, file.to)}} 
-              onDoubleClick={() => this.props.openFile(file.x, file.y, file.to, this.props.app)}
-            >
-              {this.props.extractFilename(file.to)} [{file.y}]
-            </span>
-            <button 
-              className= {`${fileGitButtonStyle} ${fileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle} jp-Git-button ${this.props.moveFileDownIconClass}`} 
-              title={this.props.moveFileUpTitle} 
-              onClick={() => {
-                this.props.moveFileDown(file.to, this.props.topRepoPath, this.props.refresh)
-                }
-              } 
-            />
-            <button 
-              className= {`jp-Git-button ${fileButtonStyle} ${changeStageButtonStyle} ${changeStageButtonRightStyle} ${fileGitButtonStyle} ${this.props.moveFileUpIconClass}`} 
-              title={this.props.moveFileDownTitle}
-              onClick={() => {
-                this.props.moveFileUp(file.to, this.props.topRepoPath, this.props.refresh)
-                }
-              }
-            />
-            </li>
-          )}
+          {this.props.files.map((file, file_index) => {
+            return (
+              <FileItem
+                key={file_index}
+                topRepoPath={this.props.topRepoPath}
+                file={file}
+                app={this.props.app}
+                refresh={this.props.refresh}
+                moveFile={this.props.moveFile}
+                moveFileIconClass={this.props.moveFileIconClass}
+                moveFileTitle={this.props.moveFileTitle}
+                openFile={this.props.openFile}
+                extractFilename={this.props.extractFilename}
+                contextMenu={this.props.contextMenu}
+                parseFileExtension={this.props.parseFileExtension}
+                selectedFile={this.state.selectedFile}
+                updateSelectedFile={this.updateSelectedFile}
+                fileIndex={file_index}
+              />
+            )
+          })
+        }
         </div>
       </ToggleDisplay>
     </div>

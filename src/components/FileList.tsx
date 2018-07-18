@@ -37,9 +37,8 @@ import {
   stagedCommitButtonReadyStyle,
   stagedCommitButtonDisabledStyle,
 
-  stageFileButtonStyle,
-  unstageFileButtonStyle,
-  trackFileButtonStyle,
+  moveFileUpButtonStyle,
+  moveFileDownButtonStyle,
 } from '../components_style/FileListStyle'
 
 import {
@@ -481,16 +480,11 @@ extractFilename(path: string): string {
           refresh={this.props.refresh}
           showFiles={this.state.showStaged}
           displayFiles={this.displayStaged}
-          moveAllFilesUp={null}
-          moveAllFilesDown={this.resetAllStagedFiles}
-          moveFileUp={null}
-          moveFileDown={this.resetStagedFile}
-          moveFileUpIconClass={null}
-          moveFileDownIconClass={unstageFileButtonStyle}
-          moveAllFilesUpTitle={null}
-          moveAllFilesDownTitle={'Unstage all changes'}
-          moveFileUpTitle={null}
-          moveFileDownTitle={'Unstage this change'}
+          moveAllFiles={this.resetAllStagedFiles}
+          moveFile={this.resetStagedFile}
+          moveFileIconClass={moveFileDownButtonStyle}
+          moveAllFilesTitle={'Unstage all changes'}
+          moveFileTitle={'Unstage this change'}
           openFile={this.openListedFile}
           extractFilename={this.extractFilename}
           contextMenu={this.contextMenuStaged}
@@ -504,16 +498,11 @@ extractFilename(path: string): string {
           refresh={this.props.refresh}
           showFiles={this.state.showUnstaged}
           displayFiles={this.displayUnstaged}
-          moveAllFilesUp={this.addAllUnstagedFiles}
-          moveAllFilesDown={this.discardAllUnstagedFiles}
-          moveFileUp={this.addUnstagedFile}
-          moveFileDown={this.discardUnstagedFile}
-          moveFileUpIconClass={stageFileButtonStyle}
-          moveFileDownIconClass={unstageFileButtonStyle}
-          moveAllFilesUpTitle={'Stage all changes'}
-          moveAllFilesDownTitle={'Discard all changes'}
-          moveFileUpTitle={'Stage this change'}
-          moveFileDownTitle={'Discard this change'}
+          moveAllFiles={this.addAllUnstagedFiles}
+          moveFile={this.addUnstagedFile}
+          moveFileIconClass={moveFileUpButtonStyle}
+          moveAllFilesTitle={'Stage all changes'}
+          moveFileTitle={'Stage this change'}
           openFile={this.openListedFile}
           extractFilename={this.extractFilename}
           contextMenu={this.contextMenuUnstaged}
@@ -527,16 +516,11 @@ extractFilename(path: string): string {
           refresh={this.props.refresh}
           showFiles={this.state.showUntracked}
           displayFiles={this.displayUntracked}
-          moveAllFilesUp={this.addAllUntrackedFiles}
-          moveAllFilesDown={null}
-          moveFileUp={this.addUntrackedFile}
-          moveFileDown={null}
-          moveFileUpIconClass={trackFileButtonStyle}
-          moveFileDownIconClass={null}
-          moveAllFilesUpTitle={'Track all untracked files'}
-          moveAllFilesDownTitle={null}
-          moveFileUpTitle={'Track this file'}
-          moveFileDownTitle={null}
+          moveAllFiles={this.addAllUntrackedFiles}
+          moveFile={this.addUntrackedFile}
+          moveFileIconClass={moveFileUpButtonStyle}
+          moveAllFilesTitle={'Track all untracked files'}
+          moveFileTitle={'Track this file'}
           openFile={this.openListedFile}
           extractFilename={this.extractFilename}
           contextMenu={this.contextMenuUntracked}
