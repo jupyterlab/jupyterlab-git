@@ -4,26 +4,25 @@ import {
 
 export const branchStyle = style (
   {
-    display: 'flex',
-    flexDirection: 'row',
-    backgroundColor: 'var(--md-grey-700)',
     zIndex: 1,
-    boxShadow: 'var(--jp-toolbar-box-shadow)'
+    boxShadow: 'var(--jp-toolbar-box-shadow)',
+    height: '40px',
+    textAlign: 'center'
   }
 )
 
 export const branchLabelStyle = style (
   {
-    color: 'white',
     fontSize: 'var(--jp-ui-font-size1)',
-    paddingLeft: '8px',
-    paddingRight: '4px'
+    fontWeight: 'bold',
+    marginTop: '5px',
+    display: 'inline-block'
   }
 )
 
 export const switchBranchStyle = style (
   {
-    display: 'none',
+    // display: 'none',
   }
 )
 
@@ -54,5 +53,19 @@ export const branchDropdownStyle = style (
     textIndent: '20px',
     '-webkit-appearance': 'none',
     '-moz-appearance': 'none',
+  }
+)
+
+export const changeButtonStyle = style(
+  {
+    color: 'var(--jp-brand-color2)',
+    fontSize: '10px',
+    marginLeft: '5px'
+  }
+)
+
+export const changeButtonDisabledStyle = style(
+  {
+    color: 'var(--jp-font-color2)'
   }
 )

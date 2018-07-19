@@ -28,21 +28,6 @@
 }
 
 /*-----------------------------------------------------------------------------
-| Git-repo
-|----------------------------------------------------------------------------*/
-
-.jp-Git-repo-icon {
-  padding: 0px 8px;
-  margin-right: 4px;
-  margin-left: 8px;
-  margin-bottom: 4px;
-  background-size: 15px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-image: url(images/directory.svg);
-}
-
-/*-----------------------------------------------------------------------------
 | Git-timeline
 |----------------------------------------------------------------------------*/
 .jp-Git-timeline-arrow-right {

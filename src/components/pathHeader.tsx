@@ -1,7 +1,11 @@
 import {
-  gitRepoStyle,
-  gitRepoPathStyle,
-  gitRepoRefreshStyle
+  repoStyle,
+  repoPathStyle,
+  repoRefreshStyle,
+  repoIconStyle,
+  arrowStyle,
+  gitRepoPathContainerStyle,
+  directoryStyle
 } from '../components_style/PathHeaderStyle'
 
 import * as React from 'react'
@@ -29,16 +33,25 @@ export class PathHeader extends React.Component<IPathHeaderProps, IPathHeaderSta
   }
 
   render() {
+    console.log(this.props)
+    let relativePath = this.props.currentFileBrowserPath.split('/')
     return (
-        <div>
-          <li className={gitRepoStyle}>
-            <span className='jp-Git-repo-icon'/>
-            <span className={gitRepoPathStyle}> 
-              {this.props.topRepoPath}
-              </span> 
-            <button className={gitRepoRefreshStyle} onClick={()=>this.props.refresh()} />
-          </li>
-        </div>
+      <div>
+        <li className={repoStyle}>
+          <span className={repoIconStyle} />
+          <span className={repoPathStyle}> 
+            {relativePath.map(directory =>
+                <div key={directory} className={gitRepoPathContainerStyle}>
+                  {relativePath[0] !== '' &&
+                    <span className={arrowStyle} />
+                  }
+                  <span className={directoryStyle}>{directory}</span>
+                </div>
+              )}
+            </span> 
+          <button className={repoRefreshStyle} onClick={()=>this.props.refresh()} />
+        </li>
+      </div>
     )
   }
 }

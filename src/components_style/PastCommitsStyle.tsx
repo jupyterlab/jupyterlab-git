@@ -7,7 +7,8 @@ export const gitTimelineStyle = style(
   {
     backgroundColor: 'var(--jp-ui-font-color1)',
     height: '70px',
-    position: 'relative'
+    position: 'relative',
+    display: 'none'
   }
 )
 

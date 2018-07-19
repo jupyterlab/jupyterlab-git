@@ -19,8 +19,10 @@
     --jp-Git-icon-author: url('./images/author.svg');
     --jp-Git-icon-branch: url('./images/branch.svg');
     --jp-image-caretdownwhite: url('./images/caretdownwhite.svg');
-    --jp-move-file-down-icon: url('images/move-file-down.svg');
-    --jp-move-file-up-icon: url('images/move-file-up.svg');
-    --jp-move-file-down-hover-icon: url('images/move-file-down-hover.svg');
-    --jp-move-file-up-hover-icon: url('images/move-file-up-hover.svg');
+    --jp-move-file-down-icon: url('./images/move-file-down.svg');
+    --jp-move-file-up-icon: url('./images/move-file-up.svg');
+    --jp-move-file-down-hover-icon: url('./images/move-file-down-hover.svg');
+    --jp-move-file-up-hover-icon: url('./images/move-file-up-hover.svg');
+    --jp-git-repo-icon: url('./images/directory.svg');
+    --jp-path-arrow-right: url('./images/path-arrow-right.svg');
 }
