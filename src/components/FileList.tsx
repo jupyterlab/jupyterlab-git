@@ -394,18 +394,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   /** Discard changes in all unstaged files */
   discardAllUnstagedFiles(path: string, refresh: Function) {
     let gitApi = new Git()
-    showDialog(
-      {
-        title: 'DISCARD CHANGES',
-        body: "Do you really want to discard all uncommitted changes?",
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
-      }
-    ).then(result => {
-      if (result.button.accept) {
-        gitApi.checkout(false, false, null, true, null, path).then(response => {
-          refresh()
-        })
-      }
+    gitApi.checkout(false, false, null, true, null, path).then(response => {
+      refresh()
     })
   }
 

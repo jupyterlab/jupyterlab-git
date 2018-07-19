@@ -138,6 +138,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                 </button>
                 <button className={classes(discardButtonStyle, acceptDiscardButtonStyle)} onClick={() => {
                   this.props.discardAllFiles(this.props.topRepoPath, this.props.refresh)
+                  this.cancelDiscard()
                     } 
                   }
                 >
