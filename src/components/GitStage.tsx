@@ -9,12 +9,17 @@ import {
   changeStageButtonStyle,
   caretdownImageStyle,
   caretrightImageStyle,
-  changeStageButtonRightStyle,
+  changeStageButtonLeftStyle,
+  discardFileButtonStyle
 } from '../components_style/FileListStyle'
 
 import {
   FileItem
 } from './FileItem'
+
+import {
+  classes 
+} from 'typestyle/lib'
 
 import * as React from 'react'
 
@@ -29,14 +34,20 @@ export interface IGitStageProps {
   showFiles: boolean
   displayFiles: Function
   moveAllFiles: Function
+  discardAllFiles: Function
+  discardFile: Function
   moveFile: Function
   moveFileIconClass: string
+  moveFileIconSelectedClass: string
   moveAllFilesTitle: string
   moveFileTitle: string
   openFile: Function
   extractFilename: Function
   contextMenu: Function
   parseFileExtension: Function
+  parseSelectedFileExtension: Function
+  selectedStage: string
+  updateSelectedStage: Function
 } 
 
 export interface IGitStageState {
@@ -58,7 +69,10 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
   }
 
   updateSelectedFile = (file: any) => {
-    this.setState({selectedFile: file})
+    this.setState(
+      {selectedFile: file},
+      () => this.props.updateSelectedStage(this.props.heading)
+    )
   }
 
   render() {
@@ -80,10 +94,18 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
         <button 
           disabled={this.checkDisabled()}
           className={`${this.props.moveFileIconClass} ${changeStageButtonStyle} 
-                      ${changeStageButtonRightStyle}` } 
+                      ${changeStageButtonLeftStyle}` } 
           title={this.props.moveAllFilesTitle}
           onClick={() => this.props.moveAllFiles(this.props.topRepoPath, this.props.refresh)} 
         />
+        {this.props.heading === 'Changed' &&
+          <button 
+            disabled={this.checkDisabled()}
+            className={classes(changeStageButtonStyle, discardFileButtonStyle)}
+            title={'Discard All Changes'}
+            onClick={() => this.props.discardAllFiles(this.props.topRepoPath, this.props.refresh)} 
+          />
+        }
       </div>
       <ToggleDisplay show={this.props.showFiles}>
         <div className={sectionFileContainerStyle}>
@@ -92,19 +114,24 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
               <FileItem
                 key={file_index}
                 topRepoPath={this.props.topRepoPath}
+                stage={this.props.heading}
                 file={file}
                 app={this.props.app}
                 refresh={this.props.refresh}
                 moveFile={this.props.moveFile}
+                discardFile={this.props.discardFile}
                 moveFileIconClass={this.props.moveFileIconClass}
+                moveFileIconSelectedClass={this.props.moveFileIconSelectedClass}
                 moveFileTitle={this.props.moveFileTitle}
                 openFile={this.props.openFile}
                 extractFilename={this.props.extractFilename}
                 contextMenu={this.props.contextMenu}
                 parseFileExtension={this.props.parseFileExtension}
+                parseSelectedFileExtension={this.props.parseSelectedFileExtension}
                 selectedFile={this.state.selectedFile}
                 updateSelectedFile={this.updateSelectedFile}
                 fileIndex={file_index}
+                selectedStage={this.props.selectedStage}
               />
             )
           })

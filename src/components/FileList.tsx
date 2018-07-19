@@ -29,6 +29,16 @@ import {
   pythonFileIconStyle,
   kernelFileIconStyle,
 
+  folderFileIconSelectedStyle,
+  genericFileIconSelectedStyle,
+  yamlFileIconSelectedStyle,
+  markdownFileIconSelectedStyle,
+  imageFileIconSelectedStyle,
+  spreadsheetFileIconSelectedStyle,
+  jsonFileIconSelectedStyle,
+  pythonFileIconSelectedStyle,
+  kernelFileIconSelectedStyle,
+
   textInputStyle,
 
   stagedCommitStyle,
@@ -39,6 +49,8 @@ import {
 
   moveFileUpButtonStyle,
   moveFileDownButtonStyle,
+  moveFileUpButtonSelectedStyle,
+  moveFileDownButtonSelectedStyle,
 } from '../components_style/FileListStyle'
 
 import {
@@ -74,6 +86,7 @@ export interface IFileListState {
   contextMenuTypeX: string
   contextMenuTypeY: string 
   contextMenuFile: string 
+  selectedStage: string
 }
 
 export interface IFileListProps {
@@ -87,7 +100,6 @@ export interface IFileListProps {
 }
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
-
   constructor(props: IFileListProps) {
     super(props)
 
@@ -104,7 +116,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       contextMenuUntracked: new Menu({ commands }),
       contextMenuTypeX: '',
       contextMenuTypeY: '' ,
-      contextMenuFile: '' 
+      contextMenuFile: '',
+      selectedStage: ''
     }
 
     /** Add right-click menu options for files in repo 
@@ -212,7 +225,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   /** Handle right-click on an unstaged file */
-  contextMenuUnstaged = (event, typeX: string,typeY: string, file:string) => {
+  contextMenuUnstaged = (event, typeX: string, typeY: string, file:string) => {
     event.persist()
     event.preventDefault()
     this.setState(
@@ -291,6 +304,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this.setState({showUntracked: !this.state.showUntracked})
   }
 
+  updateSelectedStage = (stage: string) : void => {
+    this.setState({selectedStage: stage})
+  }
+
   /** Update state of commit message input box */
   updateCommitBoxState(disable: boolean, numberOfFiles: number) {
     if (disable) {
@@ -304,144 +321,144 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   }
 
-/** Open a file in the git listing */
-async openListedFile(typeX: string, typeY: string, path: string, app: JupyterLab) {
-  if (typeX === 'D' || typeY === 'D') {
-    showDialog(
-      {
-        title: 'Open File Failed',
-        body: "This file has been deleted!",
-        buttons: [Dialog.warnButton({ label: 'OK' })]
+  /** Open a file in the git listing */
+  async openListedFile(typeX: string, typeY: string, path: string, app: JupyterLab) {
+    if (typeX === 'D' || typeY === 'D') {
+      showDialog(
+        {
+          title: 'Open File Failed',
+          body: "This file has been deleted!",
+          buttons: [Dialog.warnButton({ label: 'OK' })]
+        }
+      ).then(result => {
+        if (result.button.accept) {
+          return
+        }
+      })
+    return
+    } try {
+      const leftSidebarItems = app.shell.widgets('left')
+      let fileBrowser = leftSidebarItems.next()
+      while (fileBrowser.id !== 'filebrowser') {
+        fileBrowser = leftSidebarItems.next()
       }
-    ).then(result => {
-      if (result.button.accept) {
-        return
-      }
-    })
-   return
-  } try {
-    let leftSidebarItems = app.shell.widgets('left')
-    let fileBrowser = leftSidebarItems.next()
-    while (fileBrowser.id !== 'filebrowser') {
-      fileBrowser = leftSidebarItems.next()
-    }
-    let gitApi = new Git()
-    let prefixData = await gitApi.showPrefix((fileBrowser as any).model.path)
-    let underRepoPath = (prefixData as GitShowPrefixResult).under_repo_path
-    let fileBrowserPath = (fileBrowser as any).model.path + '/'
-    let openFilePath = fileBrowserPath
-    .substring(0, fileBrowserPath.length - underRepoPath.length)
-    if (path[path.length - 1] !== '/') {
-      (fileBrowser as any)._listing._manager.openOrReveal(openFilePath + path)
-    } else {
-      console.log("Cannot open a folder here")
-    } 
-  } catch(err) {}
-}
+      let gitApi = new Git()
+      let prefixData = await gitApi.showPrefix((fileBrowser as any).model.path)
+      let underRepoPath = (prefixData as GitShowPrefixResult).under_repo_path
+      let fileBrowserPath = (fileBrowser as any).model.path + '/'
+      let openFilePath = fileBrowserPath
+      .substring(0, fileBrowserPath.length - underRepoPath.length)
+      if (path[path.length - 1] !== '/') {
+        (fileBrowser as any)._listing._manager.openOrReveal(openFilePath + path)
+      } else {
+        console.log("Cannot open a folder here")
+      } 
+    } catch(err) {}
+  }
 
-/** Reset all staged files */
-resetAllStagedFiles(path: string, refresh: Function) {
-  let gitApi = new Git()
-  gitApi.reset(true, null, path).then(response => {
-    refresh()
-  })
-}
-
-/** Commit all staged files */
-commitAllStagedFiles(message: string, path: string, refresh: Function) {
-  if (message && message !== '') {
+  /** Reset all staged files */
+  resetAllStagedFiles(path: string, refresh: Function) {
     let gitApi = new Git()
-     gitApi.commit(message, path).then(response => {
+    gitApi.reset(true, null, path).then(response => {
       refresh()
     })
   }
-}
 
-/** Reset a specific staged file */
-resetStagedFile(file: string, path: string, refresh: Function) {
-  let gitApi = new Git()
-  gitApi.reset(false, file, path).then(response => {
-    refresh()
-  })
-}
-
-/** Add all unstaged files */
-addAllUnstagedFiles(path: string, refresh: Function) {
-  let gitApi = new Git()
-  gitApi.add(true, null, path).then(response => {
-    refresh()
-  })
-}
-
-/** Discard changes in all unstaged files */
-discardAllUnstagedFiles(path: string, refresh: Function) {
-  let gitApi = new Git()
-  showDialog(
-    {
-      title: 'DISCARD CHANGES',
-      body: "Do you really want to discard all uncommitted changes?",
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
-    }
-  ).then(result => {
-    if (result.button.accept) {
-      gitApi.checkout(false, false, null, true, null, path).then(response => {
+  /** Commit all staged files */
+  commitAllStagedFiles(message: string, path: string, refresh: Function) {
+    if (message && message !== '') {
+      let gitApi = new Git()
+      gitApi.commit(message, path).then(response => {
         refresh()
       })
     }
-  })
-}
-
-/** Add a specific unstaged file */
-addUnstagedFile(file: string, path: string, refresh: Function) {
-  let gitApi = new Git()
-  gitApi.add(false, file, path).then(response => {
-    refresh()
-  })
-}
-
-/** Discard changes in a specific unstaged file */
-discardUnstagedFile(file: string, path: string, refresh: Function) {
-  let gitApi = new Git()
-  showDialog(
-    {
-      title: 'DISCARD CHANGES',
-      body: "Do you really want to discard the uncommitted changes in this file?",
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
-    }
-  ).then(result => {
-    if (result.button.accept) {
-      gitApi.checkout(false, false, null, false, file, path).then(response => {
-        refresh()
-      })
-    }
-  })
-}
-
-/** Add all untracked files */
-addAllUntrackedFiles(path: string, refresh: Function) {
-  let gitApi = new Git()
-  gitApi.addAllUntracked(path).then(response => {
-    refresh()
-  })
-}
-
-/** Add a specific untracked file */
-addUntrackedFile(file: string, path: string, refresh: Function) {
-  let gitApi = new Git()
-  gitApi.add(false, file, path).then(response => {
-    refresh()
-  })
-}
-
-/** Get the filename from a path */
-extractFilename(path: string): string {
-  if (path[path.length - 1] === '/') {
-    return path
-  } else {
-    let temp = path.split('/')
-    return temp[temp.length - 1]
   }
-}
+
+  /** Reset a specific staged file */
+  resetStagedFile(file: string, path: string, refresh: Function) {
+    let gitApi = new Git()
+    gitApi.reset(false, file, path).then(response => {
+      refresh()
+    })
+  }
+
+  /** Add all unstaged files */
+  addAllUnstagedFiles(path: string, refresh: Function) {
+    let gitApi = new Git()
+    gitApi.add(true, null, path).then(response => {
+      refresh()
+    })
+  }
+
+  /** Discard changes in all unstaged files */
+  discardAllUnstagedFiles(path: string, refresh: Function) {
+    let gitApi = new Git()
+    showDialog(
+      {
+        title: 'DISCARD CHANGES',
+        body: "Do you really want to discard all uncommitted changes?",
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+      }
+    ).then(result => {
+      if (result.button.accept) {
+        gitApi.checkout(false, false, null, true, null, path).then(response => {
+          refresh()
+        })
+      }
+    })
+  }
+
+  /** Add a specific unstaged file */
+  addUnstagedFile(file: string, path: string, refresh: Function) {
+    let gitApi = new Git()
+    gitApi.add(false, file, path).then(response => {
+      refresh()
+    })
+  }
+
+  /** Discard changes in a specific unstaged file */
+  discardUnstagedFile(file: string, path: string, refresh: Function) {
+    let gitApi = new Git()
+    showDialog(
+      {
+        title: 'DISCARD CHANGES',
+        body: "Do you really want to discard the uncommitted changes in this file?",
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+      }
+    ).then(result => {
+      if (result.button.accept) {
+        gitApi.checkout(false, false, null, false, file, path).then(response => {
+          refresh()
+        })
+      }
+    })
+  }
+
+  /** Add all untracked files */
+  addAllUntrackedFiles(path: string, refresh: Function) {
+    let gitApi = new Git()
+    gitApi.addAllUntracked(path).then(response => {
+      refresh()
+    })
+  }
+
+  /** Add a specific untracked file */
+  addUntrackedFile(file: string, path: string, refresh: Function) {
+    let gitApi = new Git()
+    gitApi.add(false, file, path).then(response => {
+      refresh()
+    })
+  }
+
+  /** Get the filename from a path */
+  extractFilename(path: string): string {
+    if (path[path.length - 1] === '/') {
+      return path
+    } else {
+      let temp = path.split('/')
+      return temp[temp.length - 1]
+    }
+  }
 
   render() {
     return (
@@ -481,17 +498,23 @@ extractFilename(path: string): string {
           showFiles={this.state.showStaged}
           displayFiles={this.displayStaged}
           moveAllFiles={this.resetAllStagedFiles}
+          discardAllFiles={null}
+          discardFile={null}
           moveFile={this.resetStagedFile}
           moveFileIconClass={moveFileDownButtonStyle}
+          moveFileIconSelectedClass={moveFileDownButtonSelectedStyle}
           moveAllFilesTitle={'Unstage all changes'}
           moveFileTitle={'Unstage this change'}
           openFile={this.openListedFile}
           extractFilename={this.extractFilename}
           contextMenu={this.contextMenuStaged}
           parseFileExtension={parseFileExtension}
+          parseSelectedFileExtension={parseSelectedFileExtension}
+          selectedStage={this.state.selectedStage}
+          updateSelectedStage={this.updateSelectedStage}
         />
         <GitStage 
-          heading={'Changes'}
+          heading={'Changed'}
           topRepoPath={this.props.topRepoPath}
           files={this.props.unstagedFiles}
           app={this.props.app}
@@ -499,14 +522,20 @@ extractFilename(path: string): string {
           showFiles={this.state.showUnstaged}
           displayFiles={this.displayUnstaged}
           moveAllFiles={this.addAllUnstagedFiles}
+          discardAllFiles={this.discardAllUnstagedFiles}
+          discardFile={this.discardUnstagedFile}
           moveFile={this.addUnstagedFile}
           moveFileIconClass={moveFileUpButtonStyle}
+          moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
           moveAllFilesTitle={'Stage all changes'}
           moveFileTitle={'Stage this change'}
           openFile={this.openListedFile}
           extractFilename={this.extractFilename}
           contextMenu={this.contextMenuUnstaged}
           parseFileExtension={parseFileExtension}
+          parseSelectedFileExtension={parseSelectedFileExtension}
+          selectedStage={this.state.selectedStage}
+          updateSelectedStage={this.updateSelectedStage}
         />
         <GitStage 
           heading={'Untracked'}
@@ -517,14 +546,20 @@ extractFilename(path: string): string {
           showFiles={this.state.showUntracked}
           displayFiles={this.displayUntracked}
           moveAllFiles={this.addAllUntrackedFiles}
+          discardAllFiles={null}
+          discardFile={null}
           moveFile={this.addUntrackedFile}
           moveFileIconClass={moveFileUpButtonStyle}
+          moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
           moveAllFilesTitle={'Track all untracked files'}
           moveFileTitle={'Track this file'}
           openFile={this.openListedFile}
           extractFilename={this.extractFilename}
           contextMenu={this.contextMenuUntracked}
           parseFileExtension={parseFileExtension}
+          parseSelectedFileExtension={parseSelectedFileExtension}
+          selectedStage={this.state.selectedStage}
+          updateSelectedStage={this.updateSelectedStage}
         />
       </div>
     )
@@ -572,3 +607,46 @@ export function parseFileExtension(path: string): string {
       return genericFileIconStyle
   }
 }
+
+/** Get the extension of a given selected file */
+export function parseSelectedFileExtension(path: string): string {
+  if (path[path.length - 1] === '/') {
+    return folderFileIconSelectedStyle
+  }
+  var fileExtension = PathExt.extname(path).toLocaleLowerCase()
+  switch (fileExtension) {
+    case '.md':
+      return markdownFileIconSelectedStyle
+    case '.py':
+      return pythonFileIconSelectedStyle
+    case '.json':
+      return jsonFileIconSelectedStyle
+    case '.csv':
+      return spreadsheetFileIconSelectedStyle
+    case '.xls':
+      return spreadsheetFileIconSelectedStyle
+    case '.r':
+      return kernelFileIconSelectedStyle
+    case '.yml':
+      return yamlFileIconSelectedStyle
+    case '.yaml':
+      return yamlFileIconSelectedStyle
+    case '.svg':
+      return imageFileIconSelectedStyle
+    case '.tiff':
+      return imageFileIconSelectedStyle
+    case '.jpeg':
+      return imageFileIconSelectedStyle
+    case '.jpg':
+      return imageFileIconSelectedStyle
+    case '.gif':
+      return imageFileIconSelectedStyle
+    case '.png':
+      return imageFileIconSelectedStyle
+    case '.raw':
+      return imageFileIconSelectedStyle
+    default:
+      return genericFileIconSelectedStyle
+  }
+}
+

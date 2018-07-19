@@ -6,8 +6,9 @@ export const fileStyle = style (
   {
     display: 'flex',
     flexDirection: 'row',
+    flexWrap: 'wrap',
     color: 'var(--jp-ui-font-color1)',
-    height: 'var(--jp-private-running-item-height)',
+    height: '25px',
     lineHeight: 'var(--jp-private-running-item-height)',
     paddingLeft: '4px',
     listStyleType: 'none',
@@ -20,6 +21,12 @@ export const fileStyle = style (
         visibility: 'visible'
       }
     }
+  }
+)
+
+export const expandedFileStyle = style (
+  {
+    height: '75px',
   }
 )
 
@@ -75,7 +82,7 @@ export const sectionFileContainerStyle = style (
 
       $nest: {
         '& button:disabled': {
-          opacity: 0.3
+          opacity: 0.5
         }
       }
   }
@@ -210,7 +217,7 @@ export const changeStageButtonStyle = style (
   }
 )
 
-export const changeStageButtonRightStyle = style (
+export const changeStageButtonLeftStyle = style (
   {
     float: 'left'
   }
@@ -228,9 +235,31 @@ export const moveFileDownButtonStyle = style (
   }
 )
 
+export const moveFileUpButtonSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-move-file-up-hover-icon)'
+  }
+)
+
+export const moveFileDownButtonSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-move-file-down-hover-icon)'
+  }
+)
+
 export const discardFileButtonStyle = style (
   {
-    backgroundImage: 'var(--jp-Git-button-discard)'
+    backgroundImage: 'var(--jp-discard-file)',
+    marginLeft: '6px',
+    backgroundSize: '120%'
+  }
+)
+
+export const discardFileButtonSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-discard-file-selected)',
+    marginLeft: '6px',
+    backgroundSize: '120%'
   }
 )
 
@@ -321,5 +350,77 @@ export const pythonFileIconStyle = style (
 export const kernelFileIconStyle = style (
   {
     backgroundImage: 'var(--jp-icon-r)'
+  }
+)
+
+export const notebookFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-book-selected)'
+  }
+)
+
+export const consoleFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-terminal-selected)'
+  }
+)
+
+export const terminalFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-terminal-selected)'
+  }
+)
+
+export const folderFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-directory-selected)'
+  }
+)
+
+export const genericFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-file-selected)'
+  }
+)
+
+export const yamlFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-yaml-selected)'
+  }
+)
+
+export const markdownFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-markdown-selected)'
+  }
+)
+
+export const imageFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-image-selected)'
+  }
+)
+
+export const spreadsheetFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-spreadsheet-selected)'
+  }
+)
+
+export const jsonFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-json-selected)'
+  }
+)
+
+export const pythonFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-python-selected)'
+  }
+)
+
+export const kernelFileIconSelectedStyle = style (
+  {
+    backgroundImage: 'var(--jp-icon-r-selected)'
   }
 )

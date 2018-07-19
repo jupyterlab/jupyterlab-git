@@ -8,8 +8,8 @@
     --jp-Git-icon-track: url('./images/track.svg');
     --jp-Git-button-reset: url('./images/reset.svg');
     --jp-Git-button-reset-white: url('./images/reset-white.svg');
-    --jp-Git-button-discard: url('./images/discard.svg');
-    --jp-Git-button-discard-white: url('./images/discard-white.svg');
+    --jp-discard-file: url('./images/discard.svg');
+    --jp-discard-file-selected: url('./images/discard-selected.svg');
     --jp-Git-icon-insertion-color: url('./images/insertion-color.svg');
     --jp-Git-icon-insertion-white: url('./images/insertion-white.svg');
     --jp-Git-icon-deletion-color: url('./images/deletion-color.svg');
