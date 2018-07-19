@@ -10,8 +10,16 @@ import {
   caretdownImageStyle,
   caretrightImageStyle,
   changeStageButtonLeftStyle,
-  discardFileButtonStyle
+  discardFileButtonStyle,
+  discardAllWarningStyle
 } from '../components_style/FileListStyle'
+
+import {
+  cancelDiscardButtonStyle,
+  acceptDiscardButtonStyle,
+  discardButtonStyle,
+  discardWarningStyle
+} from '../components_style/FileItemStyle'
 
 import {
   FileItem
@@ -52,12 +60,16 @@ export interface IGitStageProps {
 
 export interface IGitStageState {
   selectedFile: number
+  showDiscardWarning: boolean
 }
 
 export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
   constructor(props) {
     super(props)
-    this.state = {selectedFile: -1}
+    this.state = {
+      selectedFile: -1,
+      showDiscardWarning: false
+    }
   }
 
   checkDisabled() {
@@ -73,6 +85,14 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
       {selectedFile: file},
       () => this.props.updateSelectedStage(this.props.heading)
     )
+  }
+
+  discardChanges() {
+    this.setState({showDiscardWarning: !this.state.showDiscardWarning})
+  }
+
+  cancelDiscard() {
+    this.setState({showDiscardWarning: false})
   }
 
   render() {
@@ -103,12 +123,29 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
             disabled={this.checkDisabled()}
             className={classes(changeStageButtonStyle, discardFileButtonStyle)}
             title={'Discard All Changes'}
-            onClick={() => this.props.discardAllFiles(this.props.topRepoPath, this.props.refresh)} 
+            onClick={() => this.discardChanges()} 
           />
         }
       </div>
       <ToggleDisplay show={this.props.showFiles}>
         <div className={sectionFileContainerStyle}>
+          {this.state.showDiscardWarning && 
+            <div className={classes(discardAllWarningStyle, discardWarningStyle)}>
+              These changes will be gone forever
+              <div>
+                <button className={classes(discardButtonStyle, cancelDiscardButtonStyle)} onClick={() => this.cancelDiscard()}>
+                  Cancel
+                </button>
+                <button className={classes(discardButtonStyle, acceptDiscardButtonStyle)} onClick={() => {
+                  this.props.discardAllFiles(this.props.topRepoPath, this.props.refresh)
+                    } 
+                  }
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+          }
           {this.props.files.map((file, file_index) => {
             return (
               <FileItem

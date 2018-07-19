@@ -53,6 +53,7 @@ import {
   moveFileDownButtonSelectedStyle,
 } from '../components_style/FileListStyle'
 
+
 import {
   classes 
 } from 'typestyle/lib'
@@ -419,18 +420,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   /** Discard changes in a specific unstaged file */
   discardUnstagedFile(file: string, path: string, refresh: Function) {
     let gitApi = new Git()
-    showDialog(
-      {
-        title: 'DISCARD CHANGES',
-        body: "Do you really want to discard the uncommitted changes in this file?",
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
-      }
-    ).then(result => {
-      if (result.button.accept) {
-        gitApi.checkout(false, false, null, false, file, path).then(response => {
-          refresh()
-        })
-      }
+    gitApi.checkout(false, false, null, false, file, path).then(response => {
+      refresh()
     })
   }
 

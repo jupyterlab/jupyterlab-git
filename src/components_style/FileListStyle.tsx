@@ -30,6 +30,18 @@ export const expandedFileStyle = style (
   }
 )
 
+export const discardAllWarningStyle = style (
+  {
+    height: '40px !important',
+
+    $nest: {
+      '& button': {
+        marginTop: '5px'
+      }
+    }
+  }
+)
+
 export const fileGitButtonStyle = style (
   {
     visibility: 'hidden',

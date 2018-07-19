@@ -235,7 +235,7 @@ export class Git {
 
   /** Make request to add one or all files into 
     * the staging area in repository 'path' */
-	add(check: boolean, filename: string, path: string) {
+	add(check: boolean, filename: string, path: string) : Promise<Response> {
 		return  httpGitRequest('/git/add', 'POST', {"add_all": check , "filename": filename, "top_repo_path": path})
 	}
 
@@ -260,7 +260,7 @@ export class Git {
     * or discard all changes, 
     * or discard a specific file change 
     * TODO: Refactor into seperate endpoints for each kind of checkout request */
-	async checkout(checkout_branch: boolean, new_check: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string) : Promise<GitCheckoutResult> {
+	async checkout(checkout_branch: boolean, new_check: boolean, branchname: string, checkout_all: boolean, filename: string,  path: string) : Promise<Response> {
 		try {
 			let response =  await httpGitRequest(
         '/git/checkout', 
@@ -273,29 +273,29 @@ export class Git {
           "filename": filename, 
           "top_repo_path": path
         }
-      )
+			)
 			if (response.status !== 200) {
         return response.json().then(data => {
 					throw new ServerConnection.ResponseError(response, data.message)
 				})
 			}
-			return response.json()
+			return response
 		} catch(err) {
 			throw ServerConnection.NetworkError
 		}
 	}
 /** Make request to commit all staged files in repository 'path' */
-	commit(message: string, path: string) {
+	commit(message: string, path: string) : Promise<Response> {
 		return httpGitRequest('/git/commit', 'POST', {"commit_msg": message, "top_repo_path": path})
 	}
 
 	/** Make request to move one or all files from the staged to the unstaged area */
-	reset(check: boolean, filename: string, path: string) {
+	reset(check: boolean, filename: string, path: string) : Promise<Response> {
 		return httpGitRequest('/git/reset', 'POST', {"reset_all": check, "filename": filename, "top_repo_path": path})
 	}
 
 	/** Make request to initialize a  new git repository at path 'path' */
-	init(path: string){
+	init(path: string) : Promise<Response> {
 		return httpGitRequest('/git/init', 'POST', {"current_path": path})
 	}
 }
