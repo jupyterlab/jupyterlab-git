@@ -4,6 +4,7 @@ import {
 
 import {
   sectionFileContainerStyle,
+  sectionFileContainerDisabledStyle,
   sectionAreaStyle,
   sectionHeaderLabelStyle,
   changeStageButtonStyle,
@@ -56,11 +57,14 @@ export interface IGitStageProps {
   parseSelectedFileExtension: Function
   selectedStage: string
   updateSelectedStage: Function
+  isDisabled: boolean
+  disableOthers: Function
 } 
 
 export interface IGitStageState {
   selectedFile: number
   showDiscardWarning: boolean
+  disableFiles: boolean
 }
 
 export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
@@ -68,16 +72,24 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
     super(props)
     this.state = {
       selectedFile: -1,
-      showDiscardWarning: false
+      showDiscardWarning: false,
+      disableFiles: false
     }
   }
 
-  checkDisabled() {
+  checkContents() {
     if(this.props.files.length > 0) {
       return false
     } else {
       return true
     }
+  }
+
+  checkDisabled() {
+    return this.props.isDisabled ? 
+      classes(sectionFileContainerStyle, sectionFileContainerDisabledStyle)
+    :
+      sectionFileContainerStyle
   }
 
   updateSelectedFile = (file: any) => {
@@ -87,17 +99,20 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
     )
   }
 
-  discardChanges() {
-    this.setState({showDiscardWarning: !this.state.showDiscardWarning})
+  toggleDiscardChanges() {
+    this.setState(
+      {showDiscardWarning: !this.state.showDiscardWarning},
+      () => this.props.disableOthers()
+    )
   }
 
-  cancelDiscard() {
-    this.setState({showDiscardWarning: false})
+  toggleDisableFiles = () : void => {
+    this.setState({disableFiles: !this.state.disableFiles})
   }
 
   render() {
     return (
-      <div className={sectionFileContainerStyle}>
+      <div className={this.checkDisabled()}>
       <div className={sectionAreaStyle} >
         <span className={sectionHeaderLabelStyle}> 
           {this.props.heading}({(this.props.files).length})
@@ -112,7 +127,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
         />
         </ToggleDisplay>
         <button 
-          disabled={this.checkDisabled()}
+          disabled={this.checkContents()}
           className={`${this.props.moveFileIconClass} ${changeStageButtonStyle} 
                       ${changeStageButtonLeftStyle}` } 
           title={this.props.moveAllFilesTitle}
@@ -120,10 +135,10 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
         />
         {this.props.heading === 'Changed' &&
           <button 
-            disabled={this.checkDisabled()}
+            disabled={this.checkContents()}
             className={classes(changeStageButtonStyle, discardFileButtonStyle)}
             title={'Discard All Changes'}
-            onClick={() => this.discardChanges()} 
+            onClick={() => this.toggleDiscardChanges()} 
           />
         }
       </div>
@@ -133,12 +148,12 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
             <div className={classes(discardAllWarningStyle, discardWarningStyle)}>
               These changes will be gone forever
               <div>
-                <button className={classes(discardButtonStyle, cancelDiscardButtonStyle)} onClick={() => this.cancelDiscard()}>
+                <button className={classes(discardButtonStyle, cancelDiscardButtonStyle)} onClick={() => this.toggleDiscardChanges()}>
                   Cancel
                 </button>
                 <button className={classes(discardButtonStyle, acceptDiscardButtonStyle)} onClick={() => {
                   this.props.discardAllFiles(this.props.topRepoPath, this.props.refresh)
-                  this.cancelDiscard()
+                  this.toggleDiscardChanges()
                     } 
                   }
                 >
@@ -170,6 +185,8 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                 updateSelectedFile={this.updateSelectedFile}
                 fileIndex={file_index}
                 selectedStage={this.props.selectedStage}
+                disableFile={this.state.disableFiles}
+                toggleDisableFiles={this.toggleDisableFiles}
               />
             )
           })

@@ -88,6 +88,9 @@ export interface IFileListState {
   contextMenuTypeY: string 
   contextMenuFile: string 
   selectedStage: string
+  disableStaged: boolean
+  disableUnstaged: boolean
+  disableUntracked: boolean
 }
 
 export interface IFileListProps {
@@ -118,7 +121,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       contextMenuTypeX: '',
       contextMenuTypeY: '' ,
       contextMenuFile: '',
-      selectedStage: ''
+      selectedStage: '',
+      disableStaged: false,
+      disableUnstaged: false,
+      disableUntracked: false
     }
 
     /** Add right-click menu options for files in repo 
@@ -441,6 +447,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   }
 
+  disableStagesForDiscardAll = () => {
+    this.setState({
+      disableStaged: !this.state.disableStaged,
+      disableUntracked: !this.state.disableUntracked
+    })
+  }
+
   render() {
     return (
       <div onContextMenu={ (event) => event.preventDefault()}>
@@ -493,6 +506,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           parseSelectedFileExtension={parseSelectedFileExtension}
           selectedStage={this.state.selectedStage}
           updateSelectedStage={this.updateSelectedStage}
+          disableOthers={null}
+          isDisabled={this.state.disableStaged}
         />
         <GitStage 
           heading={'Changed'}
@@ -517,6 +532,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           parseSelectedFileExtension={parseSelectedFileExtension}
           selectedStage={this.state.selectedStage}
           updateSelectedStage={this.updateSelectedStage}
+          disableOthers={this.disableStagesForDiscardAll}
+          isDisabled={this.state.disableUnstaged}
         />
         <GitStage 
           heading={'Untracked'}
@@ -541,6 +558,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           parseSelectedFileExtension={parseSelectedFileExtension}
           selectedStage={this.state.selectedStage}
           updateSelectedStage={this.updateSelectedStage}
+          disableOthers={null}
+          isDisabled={this.state.disableUntracked}
         />
       </div>
     )

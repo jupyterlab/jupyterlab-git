@@ -25,10 +25,10 @@ import {
 
 import {
   discardWarningStyle,
-  discardWarningSelectedStyle,
   cancelDiscardButtonStyle,
   acceptDiscardButtonStyle,
-  discardButtonStyle
+  discardButtonStyle,
+  disabledFileStyle
 } from '../components_style/FileItemStyle'
 
 import {
@@ -57,6 +57,8 @@ export interface IFileItemProps {
   updateSelectedFile: Function
   fileIndex: number
   selectedStage: string
+  disableFile: boolean
+  toggleDisableFiles: Function
 } 
 
 export interface IFileItemState {
@@ -73,7 +75,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
 
   checkSelected() : boolean {
     return this.props.selectedFile === this.props.fileIndex 
-          && this.props.selectedStage === this.props.stage
+        && this.props.selectedStage === this.props.stage
   }
 
   getFileChangedLabel(change: string) : string {
@@ -90,65 +92,81 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
 
   getFileChangedLabelClass(change: string) {
     if(change === 'M') {
-      return this.checkSelected() ? 
-        classes(fileChangedLabelStyle, fileChangedLabelBrandStyle, selectedFileChangedLabelStyle)
-      : 
-        classes(fileChangedLabelStyle, fileChangedLabelBrandStyle)
+      if(this.state.showDiscardWarning) {
+        return classes(fileChangedLabelStyle, fileChangedLabelBrandStyle)
+      } else {
+        return this.checkSelected() ? 
+          classes(fileChangedLabelStyle, fileChangedLabelBrandStyle, selectedFileChangedLabelStyle)
+        : 
+          classes(fileChangedLabelStyle, fileChangedLabelBrandStyle)
+      }
     } else {
-      return this.checkSelected() ? 
-        classes(fileChangedLabelStyle, fileChangedLabelInfoStyle, selectedFileChangedLabelStyle)
-      :
-        classes(fileChangedLabelStyle, fileChangedLabelInfoStyle)
-    }
+      if(this.state.showDiscardWarning) {
+        return classes(fileChangedLabelStyle, fileChangedLabelInfoStyle)
+      } else {
+        return this.checkSelected() ? 
+          classes(fileChangedLabelStyle, fileChangedLabelInfoStyle, selectedFileChangedLabelStyle)
+        :
+          classes(fileChangedLabelStyle, fileChangedLabelInfoStyle)
+        }
+      }
   }
 
   getFileLableIconClass() {
-    return this.checkSelected() ? 
+    if(this.state.showDiscardWarning) {
+      return classes(fileIconStyle, this.props.parseFileExtension(this.props.file.to))
+    } else {
+      return this.checkSelected() ? 
       classes(fileIconStyle, this.props.parseSelectedFileExtension(this.props.file.to))
     : 
       classes(fileIconStyle, this.props.parseFileExtension(this.props.file.to))
+    }
   }
 
   getFileLableClass() {
-    return this.checkSelected() ?
-      this.state.showDiscardWarning ?  
-        classes(fileStyle, expandedFileStyle, selectedFileStyle)
-      :
+    if(!this.checkSelected() && this.props.disableFile) {
+      return classes(fileStyle, disabledFileStyle)
+    } else if(this.state.showDiscardWarning) {
+      classes(fileStyle, expandedFileStyle)
+    } else {
+      return this.checkSelected() ?
         classes(fileStyle, selectedFileStyle)
-    : 
-      this.state.showDiscardWarning ?  
-        classes(fileStyle, expandedFileStyle)
-      :
+      : 
         classes(fileStyle)
+    }
   }
 
   getMoveFileIconClass() {
-    return this.checkSelected() ? 
-      classes(fileButtonStyle, changeStageButtonStyle, changeStageButtonLeftStyle, fileGitButtonStyle, this.props.moveFileIconSelectedClass)
-    : 
-      classes(fileButtonStyle, changeStageButtonStyle, changeStageButtonLeftStyle, fileGitButtonStyle, this.props.moveFileIconClass)
+    if(this.state.showDiscardWarning) {
+      return classes(fileButtonStyle, changeStageButtonStyle, changeStageButtonLeftStyle, fileGitButtonStyle, this.props.moveFileIconClass)
+    } else {
+      return this.checkSelected() ? 
+        classes(fileButtonStyle, changeStageButtonStyle, changeStageButtonLeftStyle, fileGitButtonStyle, this.props.moveFileIconSelectedClass)
+      : 
+        classes(fileButtonStyle, changeStageButtonStyle, changeStageButtonLeftStyle, fileGitButtonStyle, this.props.moveFileIconClass)
+    }
   }
 
   getDiscardFileIconClass() {
-    return this.checkSelected() ? 
-      classes(fileButtonStyle, changeStageButtonStyle, fileGitButtonStyle, discardFileButtonSelectedStyle)
-    :
-      classes(fileButtonStyle, changeStageButtonStyle, fileGitButtonStyle, discardFileButtonStyle)
+    if(this.state.showDiscardWarning) {
+      return classes(fileButtonStyle, changeStageButtonStyle, fileGitButtonStyle, discardFileButtonStyle)
+    } else {
+      return this.checkSelected() ? 
+        classes(fileButtonStyle, changeStageButtonStyle, fileGitButtonStyle, discardFileButtonSelectedStyle)
+      :
+        classes(fileButtonStyle, changeStageButtonStyle, fileGitButtonStyle, discardFileButtonStyle)
+    }
   }
 
-  discardChanges() {
-    this.setState({showDiscardWarning: !this.state.showDiscardWarning})
-  }
-
-  cancelDiscard() {
-    this.setState({showDiscardWarning: false})
+  toggleDiscardChanges() {
+    this.setState(
+      {showDiscardWarning: !this.state.showDiscardWarning},
+      () => this.props.toggleDisableFiles()
+    )
   }
 
   getDiscardWarningClass() {
-    return this.checkSelected() ?
-      classes(discardWarningStyle, discardWarningSelectedStyle)
-    :
-      discardWarningStyle
+    return discardWarningStyle
   }
 
   render() {
@@ -176,7 +194,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
           <button 
             className={`jp-Git-button ${this.getDiscardFileIconClass()}`} 
             title={'Discard this change'}
-            onClick={() => this.discardChanges()}
+            onClick={() => this.toggleDiscardChanges()}
           />
         }
         </span>
@@ -184,11 +202,12 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
           <div className={this.getDiscardWarningClass()}>
             These changes will be gone forever
             <div>
-              <button className={classes(discardButtonStyle, cancelDiscardButtonStyle)} onClick={() => this.cancelDiscard()}>
+              <button className={classes(discardButtonStyle, cancelDiscardButtonStyle)} onClick={() => this.toggleDiscardChanges()}>
                 Cancel
               </button>
               <button className={classes(discardButtonStyle, acceptDiscardButtonStyle)} onClick={() => {
-                this.props.discardFile(this.props.file.to, this.props.topRepoPath, this.props.refresh)
+                this.props.discardFile(this.props.file.to, this.props.topRepoPath, this.props.refresh),
+                this.toggleDiscardChanges()
                   } 
                 }
               >
