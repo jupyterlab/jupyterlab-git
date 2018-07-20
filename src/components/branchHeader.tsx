@@ -35,6 +35,7 @@ export interface IBranchHeaderState {
   disabled: boolean,
   showNotice: boolean,
   dropdownOpen: boolean
+  showCommitBox: boolean
 }
 
 export interface IBranchHeaderProps {
@@ -58,7 +59,8 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
       refresh: props.refresh, 
       disabled: props.disabled, 
       showNotice: false,
-      dropdownOpen: false
+      dropdownOpen: false,
+      showCommitBox: true
     }
   }
 
@@ -122,7 +124,8 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
     // if (!this.props.disabled) {
     console.log('open dropdown')
     this.setState({
-      dropdownOpen: !this.state.dropdownOpen
+      dropdownOpen: !this.state.dropdownOpen,
+      showCommitBox: !this.state.showCommitBox
     })
     // } else {  
     //   console.log('show message')
@@ -154,7 +157,7 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
               }
           </div>
         }
-        {!this.state.dropdownOpen && 
+        {this.state.showCommitBox && 
           <CommitBox
             checkReadyForSubmit={this.updateCommitBoxState}
             stagedFiles={this.props.stagedFiles}
