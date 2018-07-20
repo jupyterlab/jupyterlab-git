@@ -4,19 +4,23 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-    --jp-Git-icon-add: url('./Images/add.svg');
-    --jp-Git-icon-track: url('./Images/track.svg');
-    --jp-Git-button-reset: url('./Images/reset.svg');
-    --jp-Git-button-reset-white: url('./Images/reset-white.svg');
-    --jp-Git-button-discard: url('./Images/discard.svg');
-    --jp-Git-button-discard-white: url('./Images/discard-white.svg');
-    --jp-Git-icon-insertion-color: url('./Images/insertion-color.svg');
-    --jp-Git-icon-insertion-white: url('./Images/insertion-white.svg');
-    --jp-Git-icon-deletion-color: url('./Images/deletion-color.svg');
-    --jp-Git-icon-deletion-white: url('./Images/deletion-white.svg');
-    --jp-Git-icon-directory: url('./Images/directory.svg');
-    --jp-Git-icon-directory-white: url('./Images/directory-white.svg');
-    --jp-Git-icon-author: url('./Images/author.svg');
-    --jp-Git-icon-branch: url('./Images/branch.svg');
-    --jp-image-caretdownwhite: url('./Images/caretdownwhite.svg')
+    --jp-Git-icon-add: url('./images/add.svg');
+    --jp-Git-icon-track: url('./images/track.svg');
+    --jp-Git-button-reset: url('./images/reset.svg');
+    --jp-Git-button-reset-white: url('./images/reset-white.svg');
+    --jp-Git-button-discard: url('./images/discard.svg');
+    --jp-Git-button-discard-white: url('./images/discard-white.svg');
+    --jp-Git-icon-insertion-color: url('./images/insertion-color.svg');
+    --jp-Git-icon-insertion-white: url('./images/insertion-white.svg');
+    --jp-Git-icon-deletion-color: url('./images/deletion-color.svg');
+    --jp-Git-icon-deletion-white: url('./images/deletion-white.svg');
+    --jp-Git-icon-directory: url('./images/directory.svg');
+    --jp-Git-icon-directory-white: url('./images/directory-white.svg');
+    --jp-Git-icon-author: url('./images/author.svg');
+    --jp-Git-icon-branch: url('./images/branch.svg');
+    --jp-image-caretdownwhite: url('./images/caretdownwhite.svg');
+    --jp-move-file-down-icon: url('images/move-file-down.svg');
+    --jp-move-file-up-icon: url('images/move-file-up.svg');
+    --jp-move-file-down-hover-icon: url('images/move-file-down-hover.svg');
+    --jp-move-file-up-hover-icon: url('images/move-file-up-hover.svg');
 }

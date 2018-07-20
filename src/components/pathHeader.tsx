@@ -1,38 +1,44 @@
-import * as React from 'react';
+import {
+  gitRepoStyle,
+  gitRepoPathStyle,
+  gitRepoRefreshStyle
+} from '../components_style/PathHeaderStyle'
 
-import '../../style/index.css';
+import * as React from 'react'
 
-export namespace PathHeader {
-  export
-  interface IState {
-    top_repo_path: string;
-    refresh: any;
-  }
+import '../../style/index.css'
 
-  export
-  interface IProps {
-    current_fb_path:string;
-    top_repo_path: string;
-    refresh: any;
-  }
+export interface IPathHeaderState {
+  topRepoPath: string
+  refresh: any
 }
-export class PathHeader extends React.Component<PathHeader.IProps, PathHeader.IState>{
-  constructor(props: PathHeader.IProps) {
-    super(props);
-    this.state = {top_repo_path: props.top_repo_path, refresh : props.refresh}
+
+export interface IPathHeaderProps {
+  currentFileBrowserPath: string
+  topRepoPath: string
+  refresh: any
+}
+
+export class PathHeader extends React.Component<IPathHeaderProps, IPathHeaderState> {
+  constructor(props: IPathHeaderProps) {
+    super(props)
+    this.state = {
+      topRepoPath: props.topRepoPath, 
+      refresh: props.refresh
+    }
   }
 
-  render(){
+  render() {
     return (
-        <div >
-          <li className='jp-Git-repo'>
+        <div>
+          <li className={gitRepoStyle}>
             <span className='jp-Git-repo-icon'/>
-            <span className='jp-Git-repo-path'> 
-              {this.props.top_repo_path}
+            <span className={gitRepoPathStyle}> 
+              {this.props.topRepoPath}
               </span> 
-            <button className='jp-Git-repo-refresh'  onClick={()=>this.props.refresh()} />
-            </li>
-          </div>
+            <button className={gitRepoRefreshStyle} onClick={()=>this.props.refresh()} />
+          </li>
+        </div>
     )
   }
 }

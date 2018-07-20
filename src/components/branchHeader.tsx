@@ -1,108 +1,149 @@
-import * as React from 'react';
+import * as React from 'react'
+
 import ToggleDisplay from 'react-toggle-display'
+
 import {
   Widget
-} from '@phosphor/widgets';
+} from '@phosphor/widgets'
 
 import {
   Dialog, showDialog
-} from '@jupyterlab/apputils';
+} from '@jupyterlab/apputils'
 
 import {
   Git
 } from '../git'
 
-import '../../style/index.css';
+import {
+  branchStyle,
+  branchLabelStyle,
+  switchBranchStyle,
+  branchIconStyle,
+  branchDropdownStyle
+} from '../components_style/BranchHeaderStyle'
 
-export namespace BranchHeader {
-  export
-  interface IState {
-    top_repo_path: string;
-    current_repo_branch:string;
-    data: any;
-    refresh:any;
-    disabled:boolean;
-    show_notice:boolean;
-  }
+import '../../style/index.css'
 
-  export
-  interface IProps {
-    current_fb_path:string;
-    top_repo_path: string;
-    current_branch: string;
-    data:any;
-    refresh: any;  
-    disabled: boolean;
-  }
+export interface IBranchHeaderState {
+  topRepoPath: string,
+  currentBranch: string,
+  data: any,
+  refresh: any,
+  disabled: boolean,
+  showNotice: boolean
 }
-export class BranchHeader extends React.Component<BranchHeader.IProps, BranchHeader.IState>{
-  interval:any;
-  constructor(props: BranchHeader.IProps) {
-    super(props);
-    this.state = {top_repo_path: props.top_repo_path, current_repo_branch: props.current_branch, data: [], refresh:props.refresh, disabled:props.disabled, show_notice:false}
+
+export interface IBranchHeaderProps {
+  currentFileBrowserPath: string,
+  topRepoPath: string,
+  currentBranch: string,
+  data: any,
+  refresh: any,
+  disabled: boolean
+}
+
+export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHeaderState>{
+  interval: any
+  constructor(props: IBranchHeaderProps) {
+    super(props)
+    this.state = {
+      topRepoPath: props.topRepoPath, 
+      currentBranch: props.currentBranch, 
+      data: [], 
+      refresh: props.refresh, 
+      disabled: props.disabled, 
+      showNotice: false
+    }
   }
 
-//functions for switch branches
-  switch_branch(event, refresh){
-    let git_temp = new Git();
-    if(event.target.value==''){
-      let input = new Widget({ node: document.createElement('input') });
-        showDialog({        
+/** Switch current working branch */
+  switchBranch(event, refresh) {
+    let gitApi = new Git()
+    if (event.target.value === '') {
+      let input = new Widget({ node: document.createElement('input') })
+      showDialog(
+        {        
           title: 'Input a name to create a new branch and switch to it:',
           body: input,
-          buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Create'})]
-        }).then(result => {
-          let target_branch = (input.node as HTMLInputElement).value ;
-          if (result.button.accept&&target_branch) {
-            git_temp.checkout(true, true, target_branch, false, null, this.props.current_fb_path).then(response=>{
-              refresh();
-            });
-          }
-      });
-    }
-    else{
-      git_temp.checkout(true, false, event.target.value, false, null, this.props.current_fb_path).then(respones=>{
-        refresh();
-      });
+          focusNodeSelector: 'input',
+          buttons: [Dialog.cancelButton(), 
+          Dialog.okButton({ label: 'Create'})]
+        }
+      ).then(result => {
+        let targetBranch = (input.node as HTMLInputElement).value 
+        if (result.button.accept && targetBranch) {
+          gitApi.checkout(true, true, targetBranch, false, null, this.props.currentFileBrowserPath)
+          .then(response => {
+            refresh()
+          })
+        }
+      })
+    } else {
+      gitApi.checkout(true, false, event.target.value, false, null, this.props.currentFileBrowserPath)
+      .then(respones => {
+        refresh()
+      })
     }
   }
-  switch_branch_diable_notice(){
-      this.setState({show_notice:true});
-      setTimeout(function(){
-             this.setState({show_notice:false});
-        }.bind(this),3000);
+
+  /** Trigger notice that switching branches is currently disabled */
+  switchBranchDisableNotice() {
+    this.setState({showNotice: true})
+    setTimeout(function() {
+      this.setState({showNotice: false})
+    }
+    .bind(this), 3000)
   }
 
-
-  
-  render(){
-    this.state
+  render() {
     return (
-      <div  className='jp-Git-branch'>
-        <span className ='jp-Git-branch-label'> <span className='jp-Git-icon-branch'/>
-          {this.state.show_notice?'Stage and commit changes before switching branches':this.props.current_branch}
+      <div className={branchStyle}>
+        <span className ={branchLabelStyle}>
+          <span className={branchIconStyle}/>
+          {this.state.showNotice ? 
+            'Stage and commit changes before switching branches' 
+            : this.props.currentBranch
+          }
         </span>
-        <ToggleDisplay show={!(this.props.disabled)}>
-        <select ref="switch_branch_dropdown_button" value = {this.props.current_branch} disabled = {this.props.disabled} 
-        title = {this.props.disabled?'Stage and commit changes before switching branches':'select branches'} 
-        className='jp-Git-branch-dropdown' onChange={event=>this.switch_branch(event, this.props.refresh)} >
-             <option className= 'jp-Git-switch-branch' value=" " disabled>**Switch Branches: </option>
-             {this.props.data.map((dj, dj_index)=>
-              <option value ={dj.name} key={dj_index}>
-                  {dj.name}
-              </option>
-              )}
-              <option className= 'jp-Git-create-branch-line' disabled> </option>
-              <option className= 'jp-Git-create-branch' value=''>
-                CREATE NEW
-              </option>
+        <ToggleDisplay show={!this.props.disabled}>
+          <select 
+            ref="switch_branch_dropdown_button" 
+            value={this.props.currentBranch} 
+            disabled={this.props.disabled} 
+            title={this.props.disabled ? 
+              'Stage and commit changes before switching branches' 
+              : 'select branches'
+            } 
+            className={branchDropdownStyle}
+            onChange={event => this.switchBranch(event, this.props.refresh)} 
+          >
+            <option 
+              className={switchBranchStyle}
+              value=' '
+              disabled
+            >
+              **Switch Branches: 
+            </option>
+            {this.props.data.map((dj, dj_index) => {
+                <option value ={dj.name} key={dj_index}>
+                    {dj.name}
+                </option>
+              })
+            }
+            <option className='jp-Git-create-branch-line' disabled />
+            <option className='jp-Git-create-branch' value=''>
+              Create New
+            </option>
           </select>
-          </ToggleDisplay> 
-          <ToggleDisplay show={this.props.disabled&&!(this.state.show_notice)}>
-          <select className='jp-Git-branch-dropdown' onClick={()=>this.switch_branch_diable_notice()}/>
-          </ToggleDisplay> 
+        </ToggleDisplay> 
+        <ToggleDisplay show={this.props.disabled && !this.state.showNotice}>
+          <select 
+            className={branchDropdownStyle}
+            onClick={()=>this.switchBranchDisableNotice()}
+          />
+        </ToggleDisplay> 
       </div>
-    );
+    )
   }
 }
 

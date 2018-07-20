@@ -1,0 +1,206 @@
+import * as React from 'react'
+
+import * as ReactDOM from 'react-dom'
+
+import {
+  ServiceManager, 
+  Session, 
+  TerminalSession
+} from '@jupyterlab/services'
+
+import {
+  Message
+} from '@phosphor/messaging'
+
+import {
+  Widget
+} from '@phosphor/widgets'
+
+import {
+  JupyterLab
+} from '@jupyterlab/application'
+
+import {
+  ISignal, Signal
+} from '@phosphor/signaling'
+
+import {
+  GitSessionNode
+} from './GitSessionNode'
+
+import '../../style/index.css'
+
+/**
+ * An options object for creating a running sessions widget.
+ */
+export interface IOptions {
+  /**
+   * A service manager instance.
+   */
+  manager: ServiceManager.IManager
+
+  /**
+   * The renderer for the running sessions widget.
+   * The default is a shared renderer instance.
+   */
+  renderer?: IRenderer
+}
+
+/**
+ * A renderer for use with a running sessions widget.
+ */
+export interface IRenderer {
+  createNode(): HTMLElement
+}
+
+/**
+ * The default implementation of `IRenderer`.
+ */
+export class Renderer implements IRenderer {
+  createNode(): HTMLElement {
+    let node = document.createElement('div')
+    node.id = 'GitSession-root'
+
+    return node
+  }
+}
+
+/**
+ * The default `Renderer` instance.
+ */
+export const defaultRenderer = new Renderer()
+
+/**
+ * A class that exposes the git-plugin sessions.
+ */
+export class GitSessions extends Widget {
+  component: any
+  /**
+   * Construct a new running widget.
+   */
+  constructor(app: JupyterLab, options: IOptions, diff_function: any) {
+    super({
+      node: (options.renderer || defaultRenderer).createNode()
+    })
+    this.addClass('jp-Git')
+    const element = <GitSessionNode app={app} diff={diff_function}/>
+    this.component = ReactDOM.render(element, this.node)
+    this.component.refresh()
+  }
+
+  /**
+   * Override widget's default show() to 
+   * refresh content every time Git widget is shown.
+   */
+  show() : void {
+    super.show()
+    this.component.refresh()
+  }
+
+  /**
+   * The renderer used by the running sessions widget.
+   */
+  get renderer() : IRenderer {
+    return this._renderer
+  }
+
+  /**
+   * A signal emitted when the directory listing is refreshed.
+   */
+  get refreshed() : ISignal<this, void> {
+    return this._refreshed
+  }
+
+  /**
+   * Get the input text node.
+   */
+  get inputNode() : HTMLInputElement {
+    return this.node.getElementsByTagName('input')[0] as HTMLInputElement
+  }
+
+  /**
+   * Dispose of the resources used by the widget.
+   */
+  dispose() : void {
+    this._manager = null
+    this._runningSessions = null
+    this._runningTerminals = null
+    this._renderer = null
+    clearTimeout(this._refreshId)
+    super.dispose()
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the widget's DOM nodes. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event) : void {
+    switch (event.type) {
+      case 'change':
+        this._evtChange(event as MouseEvent)
+      case 'click':
+        this._evtClick(event as MouseEvent)
+        break
+      case 'dblclick':
+        this._evtDblClick(event as MouseEvent)
+        break
+      default:
+        break
+    }
+  }
+
+  /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message) : void {
+    this.node.addEventListener('change', this)
+    this.node.addEventListener('click', this)
+    this.node.addEventListener('dblclick', this)
+  }
+
+  /**
+   * A message handler invoked on a `'before-detach'` message.
+   */
+  protected onBeforeDetach(msg: Message) : void {
+    this.node.addEventListener('change', this)
+    this.node.removeEventListener('click', this)
+    this.node.removeEventListener('dblclick', this)
+  }
+
+  /**
+   * Handle the `'click'` event for the widget.
+   *
+   * #### Notes
+   * This listener is attached to the document node.
+   */
+  private _evtChange(event: MouseEvent) : void {
+
+  }
+  /**
+   * Handle the `'click'` event for the widget.
+   *
+   * #### Notes
+   * This listener is attached to the document node.
+   */
+  private _evtClick(event: MouseEvent): void {
+  }
+
+  /**
+   * Handle the `'dblclick'` event for the widget.
+   */
+  private _evtDblClick(event: MouseEvent): void {
+  }
+
+  private _manager: ServiceManager.IManager = null
+  private _renderer: IRenderer = null
+  private _runningSessions: Session.IModel[] = []
+  private _runningTerminals: TerminalSession.IModel[] = []
+  private _refreshId = -1
+  private _refreshed = new Signal<this, void>(this)
+}

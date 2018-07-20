@@ -1,5 +1,5 @@
 """
-Python module to initialize Server Extension & Notebook Extension
+Module to initialize Server Extension & Notebook Extension
 """
 from jupyterlab_git.handlers import setup_handlers
 from jupyterlab_git.git import Git
