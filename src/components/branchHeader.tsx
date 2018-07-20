@@ -63,7 +63,7 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
   }
 
   /** Commit all staged files */
-  commitAllStagedFiles(message: string, path: string) {
+  commitAllStagedFiles = (message: string, path: string) : void => {
     if (message && message !== '') {
       let gitApi = new Git()
       gitApi.commit(message, path).then(response => {
