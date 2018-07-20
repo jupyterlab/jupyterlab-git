@@ -149,29 +149,6 @@ export const stagedCommitMessageStyle = style (
   }
 )
 
-export const stagedCommitButtonStyle = style (
-  {
-    backgroundColor: 'var(--md-green-500)',
-    color: 'white',
-    height: '42px',
-    width: '40px',
-    border: '0',
-    flex: '1 1 auto'
-  }
-)
-
-export const stagedCommitButtonReadyStyle = style (
-  {
-    opacity: .3
-  }
-)
-
-export const stagedCommitButtonDisabledStyle = style (
-  {
-    backgroundColor: 'lightgray'
-  }
-)
-
 export const sectionAreaStyle = style (
   {
     flex: '0 0 auto',

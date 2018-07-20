@@ -6,23 +6,17 @@ export const branchStyle = style (
   {
     zIndex: 1,
     boxShadow: 'var(--jp-toolbar-box-shadow)',
-    height: '40px',
-    textAlign: 'center'
+    height: '100px',
+    textAlign: 'center',
+    overflowY: 'auto'
   }
 )
 
 export const branchLabelStyle = style (
   {
     fontSize: 'var(--jp-ui-font-size1)',
-    fontWeight: 'bold',
     marginTop: '5px',
     display: 'inline-block'
-  }
-)
-
-export const switchBranchStyle = style (
-  {
-    // display: 'none',
   }
 )
 
@@ -67,5 +61,35 @@ export const changeButtonStyle = style(
 export const changeButtonDisabledStyle = style(
   {
     color: 'var(--jp-font-color2)'
+  }
+)
+
+export const branchListItemStyle = style (
+  {
+    listStyle: 'none',
+    color: 'var(--jp-ui-font-color1)'
+  }
+)
+
+export const stagedCommitButtonStyle = style (
+  {
+    backgroundColor: 'var(--md-green-500)',
+    color: 'white',
+    height: '42px',
+    width: '40px',
+    border: '0',
+    flex: '1 1 auto'
+  }
+)
+
+export const stagedCommitButtonReadyStyle = style (
+  {
+    opacity: .3
+  }
+)
+
+export const stagedCommitButtonDisabledStyle = style (
+  {
+    backgroundColor: 'lightgray'
   }
 )

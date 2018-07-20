@@ -1,10 +1,10 @@
-import * as React from 'react'
+import * as React from 'react';
 
-import ToggleDisplay from 'react-toggle-display'
+import ToggleDisplay from 'react-toggle-display';
 
 import {
   JupyterLab
-} from '@jupyterlab/application'
+} from '@jupyterlab/application';
 
 import {
   Git, 
@@ -13,48 +13,48 @@ import {
   GitShowTopLevelResult, 
   GitAllHistory, 
   GitLogResult
-} from '../git'
+} from '../git';
 
 import {
   PathHeader
-} from './PathHeader'
+} from './PathHeader';
 
 import {
   BranchHeader
-} from './BranchHeader'
+} from './BranchHeader';
 
 import {
   PastCommits
-} from './PastCommits'
+} from './PastCommits';
 
 import {
   gitContainerStyle
-} from '../components_style/GitSessionNodeStyle'
+} from '../components_style/GitSessionNodeStyle';
 
-import '../../style/index.css'
+import '../../style/index.css';
 
 /** Interface for GitSessionNode component state */
 export interface IGitSessionNodeState {
-  currentFileBrowserPath: string
-  topRepoPath: string
-  showWarning: boolean
+  currentFileBrowserPath: string,
+  topRepoPath: string,
+  showWarning: boolean,
 
-  branches: any
-  currentBranch: string
-  disableSwitchBranch: boolean
+  branches: any,
+  currentBranch: string,
+  disableSwitchBranch: boolean,
 
-  pastCommits: any
-  inNewRepo: boolean
-  showIndex: number
+  pastCommits: any,
+  inNewRepo: boolean,
+  showIndex: number,
 
-  stagedFiles: any
-  unstagedFiles: any
+  stagedFiles: any,
+  unstagedFiles: any,
   untrackedFiles: any
 }
 
 /** Interface for GitSessionNode component props */
 export interface IGitSessionNodeProps {
-  app: JupyterLab
+  app: JupyterLab,
   diff: any
 }
 
@@ -80,7 +80,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
   }
 
   showCurrentWork = (show_value: number) => {
-    this.setState({showIndex: show_value})
+    this.setState({showIndex: show_value});
   }
 
   /** 
@@ -133,19 +133,19 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
             for (let i = 0; i < statusFiles.length; i++) {
               // If file has been changed
               if (statusFiles[i].x !== '?' && statusFiles[i].x !== '!') {
-                changedFiles++
+                changedFiles++;
               }
               // If file is untracked
               if (statusFiles[i].x === '?' && statusFiles[i].y === '?') {
-                untrackedFiles.push(statusFiles[i])
+                untrackedFiles.push(statusFiles[i]);
               } else {
                 // If file is staged
                 if (statusFiles[i].x !== ' ' && statusFiles[i].y !== 'D') {
-                  stagedFiles.push(statusFiles[i])
+                  stagedFiles.push(statusFiles[i]);
                 }
                 // If file is unstaged but tracked
                 if (statusFiles[i].y !== ' ') {
-                  unstagedFiles.push(statusFiles[i])
+                  unstagedFiles.push(statusFiles[i]);
                 }
               }
             }  
@@ -211,6 +211,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
             topRepoPath={this.state.topRepoPath} 
             refresh={this.refresh} 
             currentBranch={this.state.currentBranch} 
+            stagedFiles={this.state.stagedFiles}
             data={this.state.branches} 
             disabled={this.state.disableSwitchBranch}
           />

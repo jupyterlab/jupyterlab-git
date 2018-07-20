@@ -4,13 +4,21 @@ import {
   Git
 } from '../git'
 
+
+import {
+  CommitBox
+} from './CommitBox'
+
 import {
   branchStyle,
   branchLabelStyle,
-  // switchBranchStyle,
   // branchDropdownStyle,
   changeButtonStyle,
-  changeButtonDisabledStyle
+  branchListItemStyle,
+  stagedCommitButtonStyle,
+  stagedCommitButtonReadyStyle,
+  stagedCommitButtonDisabledStyle,
+  // changeButtonDisabledStyle
 } from '../components_style/BranchHeaderStyle'
 
 import {
@@ -33,6 +41,7 @@ export interface IBranchHeaderProps {
   currentFileBrowserPath: string,
   topRepoPath: string,
   currentBranch: string,
+  stagedFiles: any
   data: any,
   refresh: any,
   disabled: boolean
@@ -53,7 +62,30 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
     }
   }
 
-/** Switch current working branch */
+  /** Commit all staged files */
+  commitAllStagedFiles(message: string, path: string) {
+    if (message && message !== '') {
+      let gitApi = new Git()
+      gitApi.commit(message, path).then(response => {
+        this.props.refresh()
+      })
+    }
+  }
+
+  /** Update state of commit message input box */
+  updateCommitBoxState(disable: boolean, numberOfFiles: number) {
+    if (disable) {
+      if (numberOfFiles === 0) {
+        return classes(stagedCommitButtonStyle, stagedCommitButtonDisabledStyle)
+      } else {
+        return classes(stagedCommitButtonStyle, stagedCommitButtonReadyStyle)
+      } 
+    } else {
+      return stagedCommitButtonStyle
+    }
+  }
+
+  /** Switch current working branch */
   switchBranch(branchName: string) {
     let gitApi = new Git()
     // if (event.target.value === '') {
@@ -87,14 +119,14 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
     this.props.refresh()
     console.log('toggle')
     console.log(this.props)
-    if (!this.props.disabled) {
-      console.log('open dropdown')
-      this.setState({
-        dropdownOpen: !this.state.dropdownOpen
-      })
-    } else {  
-      console.log('show message')
-    }
+    // if (!this.props.disabled) {
+    console.log('open dropdown')
+    this.setState({
+      dropdownOpen: !this.state.dropdownOpen
+    })
+    // } else {  
+    //   console.log('show message')
+    // }
   }
 
   render() {
@@ -103,9 +135,9 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
         <h3 className={branchLabelStyle}>
           {this.props.currentBranch}
         </h3>
-        <a className={this.props.disabled ? 
+        <a className={/*this.props.disabled ? 
           classes(changeButtonStyle, changeButtonDisabledStyle) 
-          : changeButtonStyle} 
+          :*/ changeButtonStyle} 
           onClick={() => this.toggleSelect()}
         >
           Change
@@ -113,12 +145,23 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
         {this.state.dropdownOpen &&
           <div>
             {this.props.data.map((branch, branchIndex) => {
-                  <li key={branchIndex} onClick={() => this.switchBranch(branch.name)}>
+                  return (
+                    <li className={branchListItemStyle} key={branchIndex} onClick={() => this.switchBranch(branch.name)}>
                       {branch.name}
-                  </li>
+                    </li>
+                  )
                 })
               }
           </div>
+        }
+        {!this.state.dropdownOpen && 
+          <CommitBox
+            checkReadyForSubmit={this.updateCommitBoxState}
+            stagedFiles={this.props.stagedFiles}
+            commitAllStagedFiles={this.commitAllStagedFiles}
+            topRepoPath={this.props.topRepoPath}
+            refresh={this.props.refresh}
+          />
         }
           {/* <select 
             ref="switch_branch_dropdown_button" 

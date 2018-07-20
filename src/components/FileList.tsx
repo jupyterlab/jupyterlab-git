@@ -39,24 +39,11 @@ import {
   pythonFileIconSelectedStyle,
   kernelFileIconSelectedStyle,
 
-  textInputStyle,
-
-  stagedCommitStyle,
-  stagedCommitMessageStyle,
-  stagedCommitButtonStyle,
-  stagedCommitButtonReadyStyle,
-  stagedCommitButtonDisabledStyle,
-
   moveFileUpButtonStyle,
   moveFileDownButtonStyle,
   moveFileUpButtonSelectedStyle,
   moveFileDownButtonSelectedStyle,
 } from '../components_style/FileListStyle'
-
-
-import {
-  classes 
-} from 'typestyle/lib'
 
 import {
   GitStage
@@ -259,43 +246,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     )
   }
   
-  /** Handle input inside commit message box */
-  handleChange = (event: any) : void => {
-    if (event.target.value && event.target.value !== '') {
-      this.setState(
-        {
-          commitMessage: event.target.value,
-          disableCommit: false
-        }
-      )
-    } else {
-      this.setState(
-        {
-          commitMessage: event.target.value,
-          disableCommit: true
-        }
-      )
-    }
-  }
-
-  /** Initalize commit message input box */
-  initializeInput = () : void => {
-    this.setState(
-      {
-        commitMessage: '',
-        disableCommit: true
-      }
-    )
-  }
-
-  /** Prevent enter key triggered 'submit' action during commit message input */
-  onKeyPress(event) : void {
-    if (event.which === 13) {
-      event.preventDefault()
-      this.setState({commitMessage: this.state.commitMessage + '\n'})
-    }
-  }
-
   /** Toggle display of staged files */
   displayStaged = () : void => {
     this.setState({showStaged: !this.state.showStaged})
@@ -313,19 +263,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   updateSelectedStage = (stage: string) : void => {
     this.setState({selectedStage: stage})
-  }
-
-  /** Update state of commit message input box */
-  updateCommitBoxState(disable: boolean, numberOfFiles: number) {
-    if (disable) {
-      if (numberOfFiles === 0) {
-        return classes(stagedCommitButtonStyle, stagedCommitButtonDisabledStyle)
-      } else {
-        return classes(stagedCommitButtonStyle, stagedCommitButtonReadyStyle)
-      } 
-    } else {
-      return stagedCommitButtonStyle
-    }
   }
 
   /** Open a file in the git listing */
@@ -369,16 +306,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     gitApi.reset(true, null, path).then(response => {
       refresh()
     })
-  }
-
-  /** Commit all staged files */
-  commitAllStagedFiles(message: string, path: string, refresh: Function) {
-    if (message && message !== '') {
-      let gitApi = new Git()
-      gitApi.commit(message, path).then(response => {
-        refresh()
-      })
-    }
   }
 
   /** Reset a specific staged file */
@@ -457,32 +384,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   render() {
     return (
       <div onContextMenu={ (event) => event.preventDefault()}>
-        <form className={stagedCommitStyle} onKeyPress={(event) => this.onKeyPress(event)}>
-          <textarea 
-            className={`${textInputStyle} ${stagedCommitMessageStyle}`}
-            disabled ={(this.props.stagedFiles).length === 0} 
-            placeholder={(this.props.stagedFiles).length === 0 ? 
-            'Stage your changes before commit'
-            : 'Input message to commit staged changes'} 
-            value={this.state.commitMessage} 
-            onChange={this.handleChange}
-          />
-          <input 
-            className={
-              this.updateCommitBoxState(this.state.disableCommit, 
-              this.props.stagedFiles.length)
-            } 
-            type="button" 
-            title='Commit' 
-            value={'\u2714'}  
-            disabled={this.state.disableCommit} 
-            onClick={() => 
-              {this.commitAllStagedFiles(this.state.commitMessage,this.props.topRepoPath, this.props.refresh),
-                this.initializeInput()
-              }
-            }
-          />
-        </form>
         <GitStage 
           heading={'Staged'}
           topRepoPath={this.props.topRepoPath}
