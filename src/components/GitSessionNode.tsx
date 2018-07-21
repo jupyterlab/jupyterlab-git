@@ -12,7 +12,8 @@ import {
   GitStatusResult, 
   GitShowTopLevelResult, 
   GitAllHistory, 
-  GitLogResult
+  GitLogResult,
+  SingleCommitInfo
 } from '../git';
 
 import {
@@ -28,7 +29,12 @@ import {
 } from './PastCommits';
 
 import {
-  gitContainerStyle
+  HistorySideBar
+} from './HistorySideBar';
+
+import {
+  gitContainerStyle,
+  gitPushedContentStyle
 } from '../components_style/GitSessionNodeStyle';
 
 import '../../style/index.css';
@@ -45,11 +51,22 @@ export interface IGitSessionNodeState {
 
   pastCommits: any,
   inNewRepo: boolean,
-  showIndex: number,
+  showList: boolean,
 
   stagedFiles: any,
   unstagedFiles: any,
-  untrackedFiles: any
+  untrackedFiles: any,
+
+  sideBarExpanded: boolean,
+
+  pastCommitInfo: string,
+  pastCommitFilesChanged: string,
+  pastCommitInsertionCount: string,
+  pastCommitDeletionCount: string,
+  pastCommitData: any,
+  pastCommitNumber: any,
+  pastCommitFilelist: any,
+
 }
 
 /** Interface for GitSessionNode component props */
@@ -72,15 +89,42 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
       disableSwitchBranch: true, 
       pastCommits: [], 
       inNewRepo: true, 
-      showIndex: -1, 
+      showList: true, 
       stagedFiles: [], 
       unstagedFiles: [], 
-      untrackedFiles: []
+      untrackedFiles: [],
+      sideBarExpanded: false,
+      pastCommitInfo: '',
+      pastCommitFilesChanged: '',
+      pastCommitInsertionCount: '',
+      pastCommitDeletionCount: '',
+      pastCommitData: '',
+      pastCommitNumber: '',
+      pastCommitFilelist: ''
     }
   }
 
-  showCurrentWork = (show_value: number) => {
-    this.setState({showIndex: show_value});
+  setShowList = (state: boolean) => {
+    this.setState({showList: state});
+  }
+
+  /** Show the commit message and changes from a past commit */
+  showPastCommitWork = async (pastCommit: SingleCommitInfo, pastCommitIndex: number, path: string) => {
+    let gitApi = new Git()
+    let detailedLogData = await gitApi.detailedLog(pastCommit.commit, path)
+    if (detailedLogData.code === 0) {
+      this.setState(
+        {
+          pastCommitInfo: detailedLogData.modified_file_note, 
+          pastCommitFilesChanged: detailedLogData.modified_files_count,
+          pastCommitInsertionCount: detailedLogData.number_of_insertions,
+          pastCommitDeletionCount: detailedLogData.number_of_deletions,  
+          pastCommitData: pastCommit, 
+          pastCommitNumber: pastCommitIndex + ' commit(s) before',
+          pastCommitFilelist: detailedLogData.modified_files
+        }
+      )
+    }
   }
 
   /** 
@@ -161,9 +205,9 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
           
           // If not in same repo as before refresh, display the current repo 
           let inNewRepo = this.state.topRepoPath !== (apiShowTopLevel as GitShowTopLevelResult).top_repo_path
-          let showIndex = this.state.showIndex  
+          let showList = this.state.showList  
           if (inNewRepo) {
-            showIndex = -1
+            showList = true
           }
                 
           this.setState(
@@ -176,7 +220,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
               disableSwitchBranch: disableSwitchBranch, 
               pastCommits: pastCommits, 
               inNewRepo: inNewRepo, 
-              showIndex: showIndex,
+              showList: showList,
               stagedFiles: stagedFiles, 
               unstagedFiles: unstagedFiles, 
               untrackedFiles: untrackedFiles
@@ -196,6 +240,17 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
       console.log(err)
     } 
   }
+
+  toggleSidebar = () : void => {
+    this.setState({sideBarExpanded: !this.state.sideBarExpanded})
+  }
+
+  getContentClass() : string {
+    return this.state.sideBarExpanded ? 
+      gitPushedContentStyle
+    :
+      null
+  }
   
   render() {
     return(
@@ -205,41 +260,58 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
           topRepoPath={this.state.topRepoPath} 
           refresh={this.refresh}
         />
-        <ToggleDisplay show={this.state.showWarning}>
-          <BranchHeader 
-            currentFileBrowserPath={this.state.currentFileBrowserPath} 
-            topRepoPath={this.state.topRepoPath} 
-            refresh={this.refresh} 
-            currentBranch={this.state.currentBranch} 
-            stagedFiles={this.state.stagedFiles}
-            data={this.state.branches} 
-            disabled={this.state.disableSwitchBranch}
-          />
-          <PastCommits 
-            currentFileBrowserPath={this.state.currentFileBrowserPath} 
-            topRepoPath={this.state.topRepoPath} 
-            pastCommits={this.state.pastCommits} 
-            inNewRepo={this.state.inNewRepo}
-            showIndex={this.state.showIndex}
-            stagedFiles={this.state.stagedFiles} 
-            unstagedFiles={this.state.unstagedFiles} 
-            untrackedFiles={this.state.untrackedFiles} 
-            app={this.props.app} 
-            refresh={this.refresh} 
-            showCurrentWork={this.showCurrentWork} 
-            diff={this.props.diff}
-          />
-        </ToggleDisplay>
-        <ToggleDisplay show={!(this.state.showWarning)}>
-          <div style={{ padding: 16 }}>
-            <span style={{ color: "red", fontWeight: "bold" }}>
-              Error:
-            </span> 
-            <span>
-              The current folder is not a git repository. Please make sure you are currently working in a git repository in order to use this plugin.
-            </span>
-          </div>
+        <div className={this.getContentClass()}>
+          <ToggleDisplay show={this.state.showWarning}>
+            <HistorySideBar 
+              isExpanded={this.state.sideBarExpanded} 
+              currentFileBrowserPath={this.state.currentFileBrowserPath} 
+              pastCommits={this.state.pastCommits}
+              setShowList={this.setShowList}
+              getPastCommit={this.showPastCommitWork}
+            />
+            <BranchHeader 
+              currentFileBrowserPath={this.state.currentFileBrowserPath} 
+              topRepoPath={this.state.topRepoPath} 
+              refresh={this.refresh} 
+              currentBranch={this.state.currentBranch} 
+              stagedFiles={this.state.stagedFiles}
+              data={this.state.branches} 
+              disabled={this.state.disableSwitchBranch}
+              sideBarExpanded={this.state.sideBarExpanded}
+              toggleSidebar={this.toggleSidebar}
+            />
+            <PastCommits 
+              currentFileBrowserPath={this.state.currentFileBrowserPath} 
+              topRepoPath={this.state.topRepoPath} 
+              pastCommits={this.state.pastCommits} 
+              inNewRepo={this.state.inNewRepo}
+              showList={this.state.showList}
+              stagedFiles={this.state.stagedFiles} 
+              unstagedFiles={this.state.unstagedFiles} 
+              untrackedFiles={this.state.untrackedFiles} 
+              app={this.props.app} 
+              refresh={this.refresh} 
+              diff={this.props.diff}
+              pastCommitInfo={this.state.pastCommitInfo}
+              pastCommitFilesChanged={this.state.pastCommitFilesChanged}
+              pastCommitInsertionCount={this.state.pastCommitInsertionCount}
+              pastCommitDeletionCount={this.state.pastCommitDeletionCount}
+              pastCommitData={this.state.pastCommitData}
+              pastCommitNumber={this.state.pastCommitNumber}
+              pastCommitFilelist={this.state.pastCommitFilelist}
+            />
           </ToggleDisplay>
+          <ToggleDisplay show={!(this.state.showWarning)}>
+            <div style={{ padding: 16 }}>
+              <span style={{ color: "red", fontWeight: "bold" }}>
+                Error:
+              </span> 
+              <span>
+                The current folder is not a git repository. Please make sure you are currently working in a git repository in order to use this plugin.
+              </span>
+            </div>
+          </ToggleDisplay>
+        </div>
       </div>
     )
   }

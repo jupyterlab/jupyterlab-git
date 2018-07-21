@@ -33,7 +33,6 @@ export class PathHeader extends React.Component<IPathHeaderProps, IPathHeaderSta
   }
 
   render() {
-    console.log(this.props)
     let relativePath = this.props.currentFileBrowserPath.split('/')
     return (
       <div>

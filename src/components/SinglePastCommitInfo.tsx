@@ -12,37 +12,23 @@ import {
 
 import {
   commitStyle,
-  headerStyle,
 
   commitNumberLabelStyle,
   commitAuthorLabelStyle,
   commitAuthorIconStyle,
   commitLabelDateStyle,
   commitLabelMessageStyle,
-  commitSummaryLabelStyle,
-  commitFilesChangedStyle,
-  commitInsertionsMadeStyle,
-  commitDeletionsMadeStyle,
-
-  commitDeletionsMadeColorStyle,
-  commitInsertionsMadeColorStyle,
 
   commitDetailStyle,
+  commitDetailHeader,
   commitDetailFileStyle,
   commitDetailFilePathStyle,
-
-  iconStyle,
-  iconWhiteStyle,
-  directoryIconWhiteStyle,
-  insertionIconColorStyle,
-  insertionIconWhiteStyle,
-  deletionIconColorStyle,
-  deletionIconWhiteStyle,
   
-  numberOfDeletionsStyle,
-  numberOfInsertionsStyle,
-
-  modificationsStyle
+  iconStyle,
+  insertionIconStyle,
+  directoryIconStyle,
+  deletionIconStyle,
+  
 } from '../components_style/SinglePastCommitInfoStyle'
 
 import {
@@ -50,6 +36,10 @@ import {
 } from '../components_style/FileListStyle'
 
 import * as React from 'react'
+
+import {
+  classes
+} from 'typestyle/'
 
 import '../../style/index.css'
   
@@ -71,34 +61,21 @@ export class SinglePastCommitInfo extends React.Component<ISinglePastCommitInfoP
   }
 
   render() {
+    console.log(this.props)
     return (
       <div>
         <div className={commitStyle}>
-          <div className={headerStyle}>
+          <div>
+            <div className={commitAuthorLabelStyle}> 
+              <span className={commitAuthorIconStyle}/> 
+              {this.props.data.author}
+            </div>
+            <div className={commitLabelDateStyle}> 
+              {this.props.data.date}
+            </div>
             <span className={commitNumberLabelStyle}> 
-              #{this.props.data.commit ? this.props.data.commit.substring(0, 7) : ''}
-            </span>
-            <span className={commitSummaryLabelStyle}> 
-              <span className={commitFilesChangedStyle}> 
-                <span className={` ${iconWhiteStyle} ${iconStyle} ${directoryIconWhiteStyle} `}/> 
-                {this.props.filesChanged} 
+                #{this.props.data.commit ? this.props.data.commit.substring(0, 7) : ''}
               </span>
-              <span className={commitInsertionsMadeStyle}> 
-                <span className={` ${iconWhiteStyle} ${iconStyle} ${insertionIconWhiteStyle} `}/>  
-                {this.props.insertionCount} 
-              </span>
-              <span className={commitDeletionsMadeStyle}> 
-                <span className={` ${iconWhiteStyle} ${iconStyle} ${deletionIconWhiteStyle} `}/>  
-                {this.props.deletionCount} 
-              </span>
-            </span>
-          </div>
-          <div className={commitAuthorLabelStyle}> 
-            <span className={commitAuthorIconStyle}/> 
-            {this.props.data.author}
-          </div>
-          <div className={commitLabelDateStyle}> 
-            {this.props.data.date}
           </div>
           <div className={commitLabelMessageStyle}> 
             "<span className="jp-past-commit-message"/>
@@ -106,7 +83,22 @@ export class SinglePastCommitInfo extends React.Component<ISinglePastCommitInfoP
           </div>
         </div>
         <div className={commitDetailStyle}>
-            {this.props.list.map((modifiedFile, modifiedFileIndex) => {
+          <div className={commitDetailHeader}>
+              Changed
+              <span> 
+                <span className={classes(iconStyle, directoryIconStyle)}/> 
+                {this.props.filesChanged} 
+              </span>
+              <span> 
+                <span className={classes(iconStyle, insertionIconStyle)}/>  
+                {this.props.insertionCount} 
+              </span>
+              <span> 
+                <span className={classes(iconStyle, deletionIconStyle)}/>  
+                {this.props.deletionCount} 
+              </span>
+            </div>
+            {this.props.list.length > 0 && this.props.list.map((modifiedFile, modifiedFileIndex) => {
               return (
                 <li className={commitDetailFileStyle} key={modifiedFileIndex} >
                   <span 
@@ -127,32 +119,6 @@ export class SinglePastCommitInfo extends React.Component<ISinglePastCommitInfoP
                     }
                   >
                     {modifiedFile.modified_file_name}
-                  </span>
-                  <span 
-                    className='jp-Git-light'  
-                    onDoubleClick={() => {
-                      this.props.diff(
-                        this.props.app,modifiedFile.modified_file_path, 
-                        this.props.data.commit, 
-                        this.props.data.pre_commit
-                      )}
-                      }
-                    > 
-                    {modifiedFile.modified_file_path}
-                  </span>
-                  <span className={modificationsStyle}>
-                    <span className={commitDeletionsMadeColorStyle}>
-                        <span className={numberOfDeletionsStyle}> 
-                          {modifiedFile.deletion}
-                        </span>   
-                        <span className={` ${iconStyle} ${deletionIconColorStyle} `} />  
-                    </span>
-                    <span className={commitInsertionsMadeColorStyle}>
-                        <span className={numberOfInsertionsStyle}>
-                          {modifiedFile.insertion}
-                        </span>
-                        <span className={` ${iconStyle} ${insertionIconColorStyle} `} />
-                    </span>
                   </span>
                 </li>
               )

@@ -22,6 +22,10 @@ import {
 } from '../components_style/BranchHeaderStyle'
 
 import {
+  openHistorySideBarButtonStyle
+} from '../components_style/HistorySideBarStyle';
+
+import {
   classes
 } from 'typestyle'
 
@@ -35,7 +39,7 @@ export interface IBranchHeaderState {
   disabled: boolean,
   showNotice: boolean,
   dropdownOpen: boolean
-  showCommitBox: boolean
+  showCommitBox: boolean,
 }
 
 export interface IBranchHeaderProps {
@@ -45,7 +49,9 @@ export interface IBranchHeaderProps {
   stagedFiles: any
   data: any,
   refresh: any,
-  disabled: boolean
+  disabled: boolean,
+  sideBarExpanded: boolean,
+  toggleSidebar: Function
 }
 
 export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHeaderState>{
@@ -60,7 +66,7 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
       disabled: props.disabled, 
       showNotice: false,
       dropdownOpen: false,
-      showCommitBox: true
+      showCommitBox: true,
     }
   }
 
@@ -120,7 +126,6 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
   toggleSelect() {
     this.props.refresh()
     console.log('toggle')
-    console.log(this.props)
     // if (!this.props.disabled) {
     console.log('open dropdown')
     this.setState({
@@ -135,6 +140,9 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
   render() {
     return (
       <div className={branchStyle}>
+        <button className={openHistorySideBarButtonStyle} onClick={() => this.props.toggleSidebar()}>
+          History
+        </button>
         <h3 className={branchLabelStyle}>
           {this.props.currentBranch}
         </h3>

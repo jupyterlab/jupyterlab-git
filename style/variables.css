@@ -10,10 +10,8 @@
     --jp-Git-button-reset-white: url('./images/reset-white.svg');
     --jp-discard-file: url('./images/discard.svg');
     --jp-discard-file-selected: url('./images/discard-selected.svg');
-    --jp-Git-icon-insertion-color: url('./images/insertion-color.svg');
-    --jp-Git-icon-insertion-white: url('./images/insertion-white.svg');
-    --jp-Git-icon-deletion-color: url('./images/deletion-color.svg');
-    --jp-Git-icon-deletion-white: url('./images/deletion-white.svg');
+    --jp-insertions-made-icon: url('./images/insertions-made-icon.svg');
+    --jp-deletions-made-icon: url('./images/deletions-made-icon.svg');
     --jp-Git-icon-directory: url('./images/directory.svg');
     --jp-Git-icon-directory-white: url('./images/directory-white.svg');
     --jp-Git-icon-author: url('./images/author.svg');
@@ -25,4 +23,7 @@
     --jp-move-file-up-hover-icon: url('./images/move-file-up-hover.svg');
     --jp-git-repo-icon: url('./images/directory.svg');
     --jp-path-arrow-right: url('./images/path-arrow-right.svg');
+    --jp-working-commit-node: url('./images/working-commit-node.svg');
+    --jp-commit-node: url('./images/commit-node.svg');
+    --jp-commit-line: url('./images/commit-line.svg');
 }
