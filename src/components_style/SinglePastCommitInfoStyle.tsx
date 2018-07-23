@@ -53,7 +53,7 @@ export const commitAuthorIconStyle = style (
 export const commitLabelDateStyle = style (
   {
     fontSize: '13px',
-    display: 'inline-block'
+    display: 'inline-block',
   }
 )
 
@@ -61,6 +61,7 @@ export const commitLabelMessageStyle = style (
   {
     fontSize: '13px',
     textAlign: 'left',
+    paddingRight: '10px'
   }
 )
 
@@ -102,8 +103,6 @@ export const commitDetailFilePathStyle = style (
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     borderRadius: '2px',
-    maxWidth: '50%',
-    minWidth: '30%',
     transition: 'background-color 0.1s ease'
   }
 )
@@ -115,14 +114,14 @@ export const iconStyle = style (
     height: '13px',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
-    backgroundSize: '13px',
+    backgroundSize: '15px',
     right: '10px',
   }
 )
 
-export const directoryIconStyle = style (
+export const numberofChangedFilesStyle = style (
   {
-    backgroundImage: 'var(--jp-Git-icon-directory)'
+    backgroundImage: 'var(--jp-icon-file)'
   }
 )
 

@@ -35,7 +35,8 @@ export interface IPastCommitsProps {
   pastCommitDeletionCount: string,
   pastCommitData: any,
   pastCommitNumber: any,
-  pastCommitFilelist: any
+  pastCommitFilelist: any,
+  sideBarExpanded: boolean
 }
 
 export class PastCommits extends React.Component<IPastCommitsProps, {}> {
@@ -68,6 +69,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
             untrackedFiles={this.props.untrackedFiles} 
             app={this.props.app} 
             refresh={this.props.refresh}
+            sideBarExpanded={this.props.sideBarExpanded}
           />
         </ToggleDisplay>
       </div>

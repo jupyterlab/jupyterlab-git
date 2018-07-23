@@ -35,35 +35,36 @@ import * as React from 'react'
 import ToggleDisplay from 'react-toggle-display'
 
 export interface IGitStageProps {
-  heading: string
-  topRepoPath: string
-  files: any
-  app: JupyterLab
-  refresh: any
-  showFiles: boolean
-  displayFiles: Function
-  moveAllFiles: Function
-  discardAllFiles: Function
-  discardFile: Function
-  moveFile: Function
-  moveFileIconClass: string
-  moveFileIconSelectedClass: string
-  moveAllFilesTitle: string
-  moveFileTitle: string
-  openFile: Function
-  extractFilename: Function
-  contextMenu: Function
-  parseFileExtension: Function
-  parseSelectedFileExtension: Function
-  selectedStage: string
-  updateSelectedStage: Function
-  isDisabled: boolean
-  disableOthers: Function
+  heading: string,
+  topRepoPath: string,
+  files: any,
+  app: JupyterLab,
+  refresh: any,
+  showFiles: boolean,
+  displayFiles: Function,
+  moveAllFiles: Function,
+  discardAllFiles: Function,
+  discardFile: Function,
+  moveFile: Function,
+  moveFileIconClass: string,
+  moveFileIconSelectedClass: string,
+  moveAllFilesTitle: string,
+  moveFileTitle: string,
+  openFile: Function,
+  extractFilename: Function,
+  contextMenu: Function,
+  parseFileExtension: Function,
+  parseSelectedFileExtension: Function,
+  selectedStage: string,
+  updateSelectedStage: Function,
+  isDisabled: boolean,
+  disableOthers: Function,
+  sideBarExpanded: boolean
 } 
 
 export interface IGitStageState {
-  selectedFile: number
-  showDiscardWarning: boolean
+  selectedFile: number,
+  showDiscardWarning: boolean,
   disableFiles: boolean
 }
 
@@ -187,6 +188,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                 selectedStage={this.props.selectedStage}
                 disableFile={this.state.disableFiles}
                 toggleDisableFiles={this.toggleDisableFiles}
+                sideBarExpanded={this.props.sideBarExpanded}
               />
             )
           })

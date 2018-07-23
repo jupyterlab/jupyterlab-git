@@ -28,7 +28,8 @@ import {
   cancelDiscardButtonStyle,
   acceptDiscardButtonStyle,
   discardButtonStyle,
-  disabledFileStyle
+  disabledFileStyle,
+  sideBarExpandedFileLabelStyle
 } from '../components_style/FileItemStyle'
 
 import {
@@ -38,27 +39,28 @@ import {
 import * as React from 'react'
 
 export interface IFileItemProps {
-  topRepoPath: string
-  file: any
-  stage: string
-  app: JupyterLab
-  refresh: any
-  moveFile: Function
-  discardFile: Function
-  moveFileIconClass: string
-  moveFileIconSelectedClass: string
-  moveFileTitle: string
-  openFile: Function
-  extractFilename: Function
-  contextMenu: Function
-  parseFileExtension: Function
-  parseSelectedFileExtension: Function
-  selectedFile: number
-  updateSelectedFile: Function
-  fileIndex: number
-  selectedStage: string
-  disableFile: boolean
-  toggleDisableFiles: Function
+  topRepoPath: string,
+  file: any,
+  stage: string,
+  app: JupyterLab,
+  refresh: any,
+  moveFile: Function,
+  discardFile: Function,
+  moveFileIconClass: string,
+  moveFileIconSelectedClass: string,
+  moveFileTitle: string,
+  openFile: Function,
+  extractFilename: Function,
+  contextMenu: Function,
+  parseFileExtension: Function,
+  parseSelectedFileExtension: Function,
+  selectedFile: number,
+  updateSelectedFile: Function,
+  fileIndex: number,
+  selectedStage: string,
+  disableFile: boolean,
+  toggleDisableFiles: Function,
+  sideBarExpanded: boolean
 } 
 
 export interface IFileItemState {
@@ -123,7 +125,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
     }
   }
 
-  getFileLableClass() {
+  getFileClass() {
     if(!this.checkSelected() && this.props.disableFile) {
       return classes(fileStyle, disabledFileStyle)
     } else if(this.state.showDiscardWarning) {
@@ -134,6 +136,13 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
       : 
         classes(fileStyle)
     }
+  }
+
+  getFileLabelClass() {
+    return this.props.sideBarExpanded ?
+      classes(fileLabelStyle, sideBarExpandedFileLabelStyle)
+    :
+      fileLabelStyle
   }
 
   getMoveFileIconClass() {
@@ -171,7 +180,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
 
   render() {
     return (
-      <div className={this.getFileLableClass()} onClick={() => this.props.updateSelectedFile(this.props.fileIndex)}>
+      <div className={this.getFileClass()} onClick={() => this.props.updateSelectedFile(this.props.fileIndex)}>
         <button 
           className={`jp-Git-button ${this.getMoveFileIconClass()}`} 
           title={this.props.moveFileTitle}
@@ -182,7 +191,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
         />
         <span className={this.getFileLableIconClass()} />
         <span 
-          className={fileLabelStyle} 
+          className={this.getFileLabelClass()} 
           onContextMenu={(e) => {this.props.contextMenu(e, this.props.file.x, this.props.file.y, this.props.file.to)}} 
           onDoubleClick={() => this.props.openFile(this.props.file.x, this.props.file.y, this.props.file.to, this.props.app)}
         >

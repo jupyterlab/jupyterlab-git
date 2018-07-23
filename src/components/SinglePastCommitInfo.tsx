@@ -26,7 +26,7 @@ import {
   
   iconStyle,
   insertionIconStyle,
-  directoryIconStyle,
+  numberofChangedFilesStyle,
   deletionIconStyle,
   
 } from '../components_style/SinglePastCommitInfoStyle'
@@ -78,15 +78,14 @@ export class SinglePastCommitInfo extends React.Component<ISinglePastCommitInfoP
               </span>
           </div>
           <div className={commitLabelMessageStyle}> 
-            "<span className="jp-past-commit-message"/>
-            {this.props.data.commit_msg}"
+            {this.props.data.commit_msg}
           </div>
         </div>
         <div className={commitDetailStyle}>
           <div className={commitDetailHeader}>
               Changed
               <span> 
-                <span className={classes(iconStyle, directoryIconStyle)}/> 
+                <span className={classes(iconStyle, numberofChangedFilesStyle)}/> 
                 {this.props.filesChanged} 
               </span>
               <span> 
@@ -102,7 +101,7 @@ export class SinglePastCommitInfo extends React.Component<ISinglePastCommitInfoP
               return (
                 <li className={commitDetailFileStyle} key={modifiedFileIndex} >
                   <span 
-                    className={` ${fileIconStyle} ${parseFileExtension(modifiedFile.modified_file_path)} `} 
+                    className={`${fileIconStyle} ${parseFileExtension(modifiedFile.modified_file_path)}`} 
                     onDoubleClick={() => {
                       window.open('https://github.com/search?q=' + this.props.data.commit + '&type=Commits&utf8=%E2%9C%93'
                       )}

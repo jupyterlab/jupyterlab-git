@@ -277,7 +277,6 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
               stagedFiles={this.state.stagedFiles}
               data={this.state.branches} 
               disabled={this.state.disableSwitchBranch}
-              sideBarExpanded={this.state.sideBarExpanded}
               toggleSidebar={this.toggleSidebar}
             />
             <PastCommits 
@@ -299,6 +298,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
               pastCommitData={this.state.pastCommitData}
               pastCommitNumber={this.state.pastCommitNumber}
               pastCommitFilelist={this.state.pastCommitFilelist}
+              sideBarExpanded={this.state.sideBarExpanded}
             />
           </ToggleDisplay>
           <ToggleDisplay show={!(this.state.showWarning)}>

@@ -54,40 +54,41 @@ import * as React from 'react'
 import '../../style/index.css'
 
 export namespace CommandIDs {
-  export const gitFileOpen = 'gf:Open'
-  export const gitFileUnstage = 'gf:Unstage'
-  export const gitFileStage = 'gf:Stage'
-  export const gitFileTrack = 'gf:Track'
-  export const gitFileUntrack = 'gf:Untrack'
-  export const gitFileDiscard = 'gf:Discard'
+  export const gitFileOpen = 'gf:Open';
+  export const gitFileUnstage = 'gf:Unstage';
+  export const gitFileStage = 'gf:Stage';
+  export const gitFileTrack = 'gf:Track';
+  export const gitFileUntrack = 'gf:Untrack';
+  export const gitFileDiscard = 'gf:Discard';
 }
 
 export interface IFileListState {
-  commitMessage: string
-  disableCommit: boolean
-  showStaged: boolean
-  showUnstaged: boolean
-  showUntracked: boolean
-  contextMenuStaged: any
-  contextMenuUnstaged: any
-  contextMenuUntracked: any
-  contextMenuTypeX: string
-  contextMenuTypeY: string 
-  contextMenuFile: string 
-  selectedStage: string
-  disableStaged: boolean
-  disableUnstaged: boolean
+  commitMessage: string,
+  disableCommit: boolean,
+  showStaged: boolean,
+  showUnstaged: boolean,
+  showUntracked: boolean,
+  contextMenuStaged: any,
+  contextMenuUnstaged: any,
+  contextMenuUntracked: any,
+  contextMenuTypeX: string,
+  contextMenuTypeY: string,
+  contextMenuFile: string,
+  selectedStage: string,
+  disableStaged: boolean,
+  disableUnstaged: boolean,
   disableUntracked: boolean
 }
 
 export interface IFileListProps {
-  currentFileBrowserPath: string
-  topRepoPath: string
-  stagedFiles: any
-  unstagedFiles: any
-  untrackedFiles: any
-  app: JupyterLab
-  refresh: any
+  currentFileBrowserPath: string,
+  topRepoPath: string,
+  stagedFiles: any,
+  unstagedFiles: any,
+  untrackedFiles: any,
+  app: JupyterLab,
+  refresh: any,
+  sideBarExpanded: boolean
 }
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
@@ -409,6 +410,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           updateSelectedStage={this.updateSelectedStage}
           disableOthers={null}
           isDisabled={this.state.disableStaged}
+          sideBarExpanded={this.props.sideBarExpanded}
         />
         <GitStage 
           heading={'Changed'}
@@ -435,6 +437,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           updateSelectedStage={this.updateSelectedStage}
           disableOthers={this.disableStagesForDiscardAll}
           isDisabled={this.state.disableUnstaged}
+          sideBarExpanded={this.props.sideBarExpanded}
         />
         <GitStage 
           heading={'Untracked'}
@@ -461,6 +464,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           updateSelectedStage={this.updateSelectedStage}
           disableOthers={null}
           isDisabled={this.state.disableUntracked}
+          sideBarExpanded={this.props.sideBarExpanded}
         />
       </div>
     )

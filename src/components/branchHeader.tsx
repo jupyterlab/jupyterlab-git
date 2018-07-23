@@ -50,7 +50,6 @@ export interface IBranchHeaderProps {
   data: any,
   refresh: any,
   disabled: boolean,
-  sideBarExpanded: boolean,
   toggleSidebar: Function
 }
 

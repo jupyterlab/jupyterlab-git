@@ -34,3 +34,9 @@ export const acceptDiscardButtonStyle = style (
     marginLeft: '5px',
   }
 )
+
+export const sideBarExpandedFileLabelStyle = style (
+  {
+    maxWidth: '75%'
+  }
+)
