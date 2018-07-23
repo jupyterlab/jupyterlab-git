@@ -143,8 +143,8 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
   toggleNewBranchBox() {
     this.props.refresh()
     this.setState({
+      showCommitBox: this.state.showNewBranchBox ? true : false,
       showNewBranchBox: !this.state.showNewBranchBox,
-      showCommitBox: false,
       dropdownOpen: false
     })
   }
