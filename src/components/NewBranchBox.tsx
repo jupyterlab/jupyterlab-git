@@ -60,7 +60,6 @@ export class NewBranchBox extends React.Component<ICommitBoxProps, ICommitBoxSta
       <form className={stagedCommitStyle} onKeyPress={(event) => this.onKeyPress(event)}>
       <textarea 
         className={classes(textInputStyle, stagedCommitMessageStyle)}
-        disabled ={(this.state.value).length === 0} 
         placeholder={'Name your new branch'} 
         value={this.state.value} 
         onChange={this.handleChange}
