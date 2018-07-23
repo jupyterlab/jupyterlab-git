@@ -4,21 +4,23 @@ import {
   Git
 } from '../git'
 
-
 import {
   CommitBox
 } from './CommitBox'
 
 import {
+  NewBranchBox
+} from './NewBranchBox'
+
+import {
   branchStyle,
   branchLabelStyle,
-  // branchDropdownStyle,
-  changeButtonStyle,
+  headerButtonStyle,
+  headerButtonDisabledStyle,
   branchListItemStyle,
   stagedCommitButtonStyle,
   stagedCommitButtonReadyStyle,
   stagedCommitButtonDisabledStyle,
-  // changeButtonDisabledStyle
 } from '../components_style/BranchHeaderStyle'
 
 import {
@@ -40,6 +42,7 @@ export interface IBranchHeaderState {
   showNotice: boolean,
   dropdownOpen: boolean
   showCommitBox: boolean,
+  showNewBranchBox: boolean
 }
 
 export interface IBranchHeaderProps {
@@ -66,6 +69,7 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
       showNotice: false,
       dropdownOpen: false,
       showCommitBox: true,
+      showNewBranchBox: false
     }
   }
 
@@ -122,18 +126,30 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
     // }
   }
 
+  createNewBranch(branchName: string) {
+    let gitApi = new Git()
+    gitApi.checkout(true, true, branchName, false, null, this.props.currentFileBrowserPath)
+    .then(response => {
+      this.props.refresh()
+    })
+  }
+
   toggleSelect() {
     this.props.refresh()
-    console.log('toggle')
-    // if (!this.props.disabled) {
-    console.log('open dropdown')
+    if (!this.props.disabled) {
+      this.setState({
+        dropdownOpen: !this.state.dropdownOpen,
+        showCommitBox: !this.state.showCommitBox
+      })
+    }
+  }
+
+  toggleNewBranchBox() {
+    this.props.refresh()
     this.setState({
-      dropdownOpen: !this.state.dropdownOpen,
-      showCommitBox: !this.state.showCommitBox
+      showNewBranchBox: !this.state.showNewBranchBox,
+      showCommitBox: false
     })
-    // } else {  
-    //   console.log('show message')
-    // }
   }
 
   render() {
@@ -145,12 +161,19 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
         <h3 className={branchLabelStyle}>
           {this.props.currentBranch}
         </h3>
-        <a className={/*this.props.disabled ? 
-          classes(changeButtonStyle, changeButtonDisabledStyle) 
-          :*/ changeButtonStyle} 
+        <a className={this.props.disabled ? 
+            classes(headerButtonStyle, headerButtonDisabledStyle) 
+          : headerButtonStyle} 
           onClick={() => this.toggleSelect()}
         >
           Change
+        </a>
+        <a className={this.props.disabled ? 
+            classes(headerButtonStyle, headerButtonDisabledStyle) 
+          : headerButtonStyle} 
+          onClick={() => this.toggleNewBranchBox()}
+        >
+          New
         </a>
         {this.state.dropdownOpen &&
           <div>
@@ -173,29 +196,11 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
             refresh={this.props.refresh}
           />
         }
-          {/* <select 
-            ref="switch_branch_dropdown_button" 
-            value={this.props.currentBranch} 
-            disabled={this.props.disabled} 
-            title={this.props.disabled ? 
-              'Stage and commit changes before switching branches' 
-              : 'select branches'
-            } 
-            className={branchDropdownStyle}
-            onChange={event => this.switchBranch(event, this.props.refresh)} 
-          >
-            <option 
-              className={switchBranchStyle}
-              value=' '
-              disabled
-            >
-              Change
-            </option>
-            <option className='jp-Git-create-branch-line' disabled />
-            <option className='jp-Git-create-branch' value=''>
-              Create New
-            </option>
-          </select> */}
+        {this.state.showNewBranchBox && 
+          <NewBranchBox
+            createNewBranch={this.createNewBranch}
+          />
+        }
       </div>
     )
   }

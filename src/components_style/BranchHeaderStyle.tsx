@@ -16,7 +16,8 @@ export const branchLabelStyle = style (
   {
     fontSize: 'var(--jp-ui-font-size1)',
     marginTop: '5px',
-    display: 'inline-block'
+    display: 'inline-block',
+    marginLeft: '45px'
   }
 )
 
@@ -50,17 +51,17 @@ export const branchDropdownStyle = style (
   }
 )
 
-export const changeButtonStyle = style(
+export const headerButtonStyle = style(
   {
-    color: 'var(--jp-brand-color2)',
+    color: 'var(--jp-content-link-color)',
     fontSize: '10px',
     marginLeft: '5px'
   }
 )
 
-export const changeButtonDisabledStyle = style(
+export const headerButtonDisabledStyle = style(
   {
-    color: 'var(--jp-font-color2)'
+    color: 'var(--jp-layout-color3)'
   }
 )
 
