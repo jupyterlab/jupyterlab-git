@@ -7,7 +7,7 @@ export const historySideBarStyle = style (
     height: '100vh',
     display: 'none',
     position: 'fixed',
-    backgroundColor: 'var( --jp-layout-color2)',
+    backgroundColor: 'var(--jp-layout-color2)',
     transition: 'all 0.5s ease',
     left: '33px',
     top: '70px',

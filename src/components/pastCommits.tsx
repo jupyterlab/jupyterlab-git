@@ -10,6 +10,10 @@ import {
   SinglePastCommitInfo
 } from './SinglePastCommitInfo'
 
+import {
+  pastCommitsContainerStyle
+} from '../components_style/PastCommitsStyle'
+
 import * as React from 'react'
 
 import ToggleDisplay from 'react-toggle-display'
@@ -46,7 +50,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
 
   render() {
     return (
-      <div>
+      <div className={pastCommitsContainerStyle}>
         <ToggleDisplay show={!this.props.showList}>
           <SinglePastCommitInfo 
             num={this.props.pastCommitNumber}

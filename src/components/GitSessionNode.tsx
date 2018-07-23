@@ -66,7 +66,6 @@ export interface IGitSessionNodeState {
   pastCommitData: any,
   pastCommitNumber: any,
   pastCommitFilelist: any,
-
 }
 
 /** Interface for GitSessionNode component props */
@@ -278,6 +277,7 @@ export class GitSessionNode extends React.Component<IGitSessionNodeProps, IGitSe
               data={this.state.branches} 
               disabled={this.state.disableSwitchBranch}
               toggleSidebar={this.toggleSidebar}
+              showList={this.state.showList}
             />
             <PastCommits 
               currentFileBrowserPath={this.state.currentFileBrowserPath} 

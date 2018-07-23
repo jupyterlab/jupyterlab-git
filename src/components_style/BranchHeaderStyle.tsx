@@ -5,10 +5,22 @@ import {
 export const branchStyle = style (
   {
     zIndex: 1,
-    boxShadow: 'var(--jp-toolbar-box-shadow)',
+    borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)',
     height: '100px',
     textAlign: 'center',
     overflowY: 'auto'
+  }
+)
+
+export const smallBranchStyle = style (
+  {
+    height: '50px'
+  }
+)
+
+export const expandedBranchStyle = style (
+  {
+    height: '500px'
   }
 )
 

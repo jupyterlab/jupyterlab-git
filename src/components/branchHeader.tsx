@@ -21,6 +21,8 @@ import {
   stagedCommitButtonStyle,
   stagedCommitButtonReadyStyle,
   stagedCommitButtonDisabledStyle,
+  smallBranchStyle,
+  expandedBranchStyle
 } from '../components_style/BranchHeaderStyle'
 
 import {
@@ -53,7 +55,8 @@ export interface IBranchHeaderProps {
   data: any,
   refresh: any,
   disabled: boolean,
-  toggleSidebar: Function
+  toggleSidebar: Function,
+  showList: boolean
 }
 
 export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHeaderState>{
@@ -99,26 +102,6 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
   /** Switch current working branch */
   switchBranch(branchName: string) {
     let gitApi = new Git()
-    // if (event.target.value === '') {
-    //   let input = new Widget({ node: document.createElement('input') })
-    //   showDialog(
-    //     {        
-    //       title: 'Input a name to create a new branch and switch to it:',
-    //       body: input,
-    //       focusNodeSelector: 'input',
-    //       buttons: [Dialog.cancelButton(), 
-    //       Dialog.okButton({ label: 'Create'})]
-    //     }
-    //   ).then(result => {
-    //     let targetBranch = (input.node as HTMLInputElement).value 
-    //     if (result.button.accept && targetBranch) {
-    //       gitApi.checkout(true, true, targetBranch, false, null, this.props.currentFileBrowserPath)
-    //       .then(response => {
-    //         refresh()
-    //       })
-    //     }
-    //   })
-    // } else {
     gitApi.checkout(true, false, branchName, false, null, this.props.currentFileBrowserPath)
     .then(respones => {
       this.props.refresh()
@@ -136,11 +119,24 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
 
   toggleSelect() {
     this.props.refresh()
-    if (!this.props.disabled) {
+    // if (!this.props.disabled) {
       this.setState({
+        showCommitBox: this.state.dropdownOpen ? true : false,
+        showNewBranchBox: false,
         dropdownOpen: !this.state.dropdownOpen,
-        showCommitBox: !this.state.showCommitBox
       })
+    // }
+  }
+
+  getBranchStyle() {
+    if(this.state.dropdownOpen) {
+     return classes(branchStyle, expandedBranchStyle)
+    }
+    else {
+      return this.props.showList ?
+        branchStyle
+      :
+        classes(branchStyle, smallBranchStyle)
     }
   }
 
@@ -148,13 +144,14 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
     this.props.refresh()
     this.setState({
       showNewBranchBox: !this.state.showNewBranchBox,
-      showCommitBox: false
+      showCommitBox: false,
+      dropdownOpen: false
     })
   }
 
   render() {
     return (
-      <div className={branchStyle}>
+      <div className={this.getBranchStyle()}>
         <button className={openHistorySideBarButtonStyle} onClick={() => this.props.toggleSidebar()}>
           History
         </button>
@@ -187,7 +184,7 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
               }
           </div>
         }
-        {this.state.showCommitBox && 
+        {this.state.showCommitBox && this.props.showList && 
           <CommitBox
             checkReadyForSubmit={this.updateCommitBoxState}
             stagedFiles={this.props.stagedFiles}
@@ -196,7 +193,7 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
             refresh={this.props.refresh}
           />
         }
-        {this.state.showNewBranchBox && 
+        {this.state.showNewBranchBox && this.props.showList && 
           <NewBranchBox
             createNewBranch={this.createNewBranch}
           />

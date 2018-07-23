@@ -5,11 +5,9 @@ import {
 export const commitStyle = style(
   {
     flex: '0 0 auto',
-    margin: '0',
     width: '100%',
-    padding: '0px 10px',
+    paddingLeft: '10px',
     fontSize: '12px',
-    letterSpacing: '1px',
     marginBottom: '10px'
   }
 )
@@ -22,7 +20,6 @@ export const headerStyle = style(
     width: '100%',
     height: '30px',
   }
-
 )
 
 export const commitNumberLabelStyle = style (
