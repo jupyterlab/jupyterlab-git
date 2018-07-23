@@ -8,7 +8,6 @@ import {
 
 import {
   stagedCommitButtonStyle,
-  stagedCommitButtonReadyStyle,
   stagedCommitButtonDisabledStyle
 } from '../components_style/BranchHeaderStyle'
 
@@ -52,7 +51,7 @@ export class NewBranchBox extends React.Component<ICommitBoxProps, ICommitBoxSta
     return this.state.value.length === 0 ? 
       classes(stagedCommitButtonStyle, stagedCommitButtonDisabledStyle)
     :
-      classes(stagedCommitButtonStyle, stagedCommitButtonReadyStyle)
+      classes(stagedCommitButtonStyle, stagedCommitButtonStyle)
   } 
 
   render() {

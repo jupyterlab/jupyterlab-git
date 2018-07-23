@@ -126,7 +126,7 @@ export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHea
     // }
   }
 
-  createNewBranch(branchName: string) {
+  createNewBranch = (branchName: string) : void => {
     let gitApi = new Git()
     gitApi.checkout(true, true, branchName, false, null, this.props.currentFileBrowserPath)
     .then(response => {
