@@ -37,7 +37,7 @@ import {
   gitPushedContentStyle
 } from '../components_style/GitSessionNodeStyle';
 
-import '../../style/index.css';
+;
 
 /** Interface for GitSessionNode component state */
 export interface IGitSessionNodeState {

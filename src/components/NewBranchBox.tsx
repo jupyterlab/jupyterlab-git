@@ -1,77 +1,77 @@
-import * as React from 'react'
+import * as React from "react";
 
 import {
   textInputStyle,
-  stagedCommitStyle,
-  stagedCommitMessageStyle,
-} from '../components_style/FileListStyle'
-
-import {
   stagedCommitButtonStyle,
-  stagedCommitButtonDisabledStyle
-} from '../components_style/BranchHeaderStyle'
+  stagedCommitButtonDisabledStyle,
+  stagedCommitStyle,
+  stagedCommitMessageStyle
+} from "../components_style/BranchHeaderStyle";
 
-import {
-  classes 
-} from 'typestyle'
+import { classes } from "typestyle";
 
 export interface ICommitBoxProps {
-  createNewBranch: Function
+  createNewBranch: Function;
 }
 
 export interface ICommitBoxState {
-  value: string
+  value: string;
 }
 
-export class NewBranchBox extends React.Component<ICommitBoxProps, ICommitBoxState> {
+export class NewBranchBox extends React.Component<
+  ICommitBoxProps,
+  ICommitBoxState
+> {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
-      value: '',
-    }
+      value: ""
+    };
   }
 
   /** Prevent enter key triggered 'submit' action during input */
-  onKeyPress(event) : void {
+  onKeyPress(event): void {
     if (event.which === 13) {
-      event.preventDefault()
-      this.setState({value: this.state.value + '\n'})
+      event.preventDefault();
+      this.setState({ value: this.state.value + "\n" });
     }
   }
 
   /** Handle input inside commit message box */
-  handleChange = (event: any) : void => {
+  handleChange = (event: any): void => {
     this.setState({
-        value: event.target.value,
-    })
-  }
+      value: event.target.value
+    });
+  };
 
   /** Update state of input box */
   checkReadyForSubmit() {
-    return this.state.value.length === 0 ? 
-      classes(stagedCommitButtonStyle, stagedCommitButtonDisabledStyle)
-    :
-      classes(stagedCommitButtonStyle, stagedCommitButtonStyle)
-  } 
+    return this.state.value.length === 0
+      ? classes(stagedCommitButtonStyle, stagedCommitButtonDisabledStyle)
+      : classes(stagedCommitButtonStyle, stagedCommitButtonStyle);
+  }
 
   render() {
     return (
-      <form className={stagedCommitStyle} onKeyPress={(event) => this.onKeyPress(event)}>
-      <textarea 
-        className={classes(textInputStyle, stagedCommitMessageStyle)}
-        placeholder={'Name your new branch'} 
-        value={this.state.value} 
-        onChange={this.handleChange}
-      />
-      <input 
-        className={this.checkReadyForSubmit()} 
-        type="button" 
-        title='Create New' 
-        value={'\u2714'}  
-        disabled={this.state.value.length === 0} 
-        onClick={() => this.props.createNewBranch(this.state.value)}
-      />
-    </form>
-    )
+      <form
+        className={stagedCommitStyle}
+        onKeyPress={event => this.onKeyPress(event)}
+      >
+        <textarea
+          className={classes(textInputStyle, stagedCommitMessageStyle)}
+          placeholder={"Name your new branch"}
+          value={this.state.value}
+          onChange={this.handleChange}
+        />
+        <input
+          className={this.checkReadyForSubmit()}
+          type="button"
+          title="Create New"
+          value={"\u2714"}
+          disabled={this.state.value.length === 0}
+          onClick={() => this.props.createNewBranch(this.state.value)}
+        />
+      </form>
+    );
   }
 }

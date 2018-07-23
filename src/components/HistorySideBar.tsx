@@ -1,12 +1,6 @@
-import {
-  Git 
-} from '../git';
+import { Git } from "../git";
 
-
-
-import {
-  PastCommitNode
-} from './PastCommitNode'
+import { PastCommitNode } from "./PastCommitNode";
 
 import {
   historySideBarStyle,
@@ -15,25 +9,23 @@ import {
   pastCommitLineStyle,
   pastCommitLastLineStyle,
   pastCommitWorkingNodeStyle
-} from '../components_style/HistorySideBarStyle';
+} from "../components_style/HistorySideBarStyle";
 
-import {
-  classes
-} from 'typestyle';
+import { classes } from "typestyle";
 
-import * as React from 'react';
+import * as React from "react";
 
 /** Interface for PastCommits component props */
 export interface IHistorySideBarProps {
-  currentFileBrowserPath: string,
-  pastCommits: any,
-  isExpanded: boolean,
-  setShowList: Function,
-  getPastCommit: Function
+  currentFileBrowserPath: string;
+  pastCommits: any;
+  isExpanded: boolean;
+  setShowList: Function;
+  getPastCommit: Function;
 }
 
 export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
-  constructor(props){
+  constructor(props) {
     super(props);
   }
 
@@ -46,33 +38,29 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
     }
   }
 
-  getSideBarClass() : string {
-    return this.props.isExpanded ?
-      classes(historySideBarExpandedStyle, historySideBarStyle)
-    :
-      historySideBarStyle;
+  getSideBarClass(): string {
+    return this.props.isExpanded
+      ? classes(historySideBarExpandedStyle, historySideBarStyle)
+      : historySideBarStyle;
   }
 
-  getPastCommitNodeClass(index: number) : string {
-    return index === 0 ?
-      classes(pastCommitWorkingNodeStyle, pastCommitNodeStyle)
-    :
-      pastCommitNodeStyle;
-
+  getPastCommitNodeClass(index: number): string {
+    return index === 0
+      ? classes(pastCommitWorkingNodeStyle, pastCommitNodeStyle)
+      : pastCommitNodeStyle;
   }
 
-  getPastCommitLineClass(index: number) : string {
-    return index !== this.props.pastCommits.length - 1 ? 
-      pastCommitLineStyle
-    :
-      pastCommitLastLineStyle;
+  getPastCommitLineClass(index: number): string {
+    return index !== this.props.pastCommits.length - 1
+      ? pastCommitLineStyle
+      : pastCommitLastLineStyle;
   }
 
-  getNodeContent(index: number) : string | number {
-    if(index === 0) {
-      return 'Working';
-    } else if(index === 1) {
-      return 'Head';
+  getNodeContent(index: number): string | number {
+    if (index === 0) {
+      return "Working";
+    } else if (index === 1) {
+      return "Head";
     } else {
       return index;
     }
@@ -81,8 +69,8 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
   render() {
     return (
       <div className={this.getSideBarClass()}>
-        {this.props.pastCommits.map((pastCommit, pastCommitIndex) =>
-          <PastCommitNode 
+        {this.props.pastCommits.map((pastCommit, pastCommitIndex) => (
+          <PastCommitNode
             key={pastCommitIndex}
             index={pastCommitIndex}
             isLast={pastCommitIndex === this.props.pastCommits.length - 1}
@@ -91,8 +79,8 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
             setShowList={this.props.setShowList}
             getPastCommit={this.props.getPastCommit}
           />
-        )}
+        ))}
       </div>
-    )
+    );
   }
 }

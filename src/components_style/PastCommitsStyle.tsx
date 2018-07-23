@@ -1,9 +1,5 @@
-import {
-  style
-} from 'typestyle/lib'
+import { style } from "typestyle/lib";
 
-export const pastCommitsContainerStyle = style (
-  {
-    overflowX: 'hidden'
-  }
-)
+export const pastCommitsContainerStyle = style({
+  overflowX: "hidden"
+});
