@@ -23,50 +23,47 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
     super(props);
   }
 
-  getPastCommitNodeClass(index: number): string {
-    return index === 0
+  getPastCommitNodeClass(): string {
+    return this.props.index === -1
       ? classes(pastCommitWorkingNodeStyle, pastCommitNodeStyle)
       : pastCommitNodeStyle;
   }
 
-  getPastCommitLineClass(index: number): string {
+  getPastCommitLineClass(): string {
     return this.props.isLast ? pastCommitLastLineStyle : pastCommitLineStyle;
   }
 
   getNodeContent(): string | number {
-    if (this.props.index === 0) {
+    if (this.props.index === -1) {
       return 'Working';
-    } else if (this.props.index === 1) {
+    } else if (this.props.index === 0) {
       return 'Head';
     } else {
       return this.props.index;
     }
   }
 
-  getShowListFunction(): void {
-    this.props.index === 0
+  handleClick(): void {
+    this.props.index === -1
       ? this.props.setShowList(true)
-      : this.props.setShowList(false);
+      : (this.props.getPastCommit(
+          this.props.pastCommit,
+          this.props.index,
+          this.props.currentFileBrowserPath
+        ),
+        this.props.setShowList(false));
   }
 
   render() {
     return (
       <div key={this.props.index}>
         <div
-          className={this.getPastCommitNodeClass(this.props.index)}
-          onClick={() => {
-            this.props.getPastCommit(
-              this.props.pastCommit,
-              this.props.index,
-              this.props.currentFileBrowserPath
-            );
-            this.getShowListFunction();
-          }}
+          className={this.getPastCommitNodeClass()}
+          onClick={() => this.handleClick()}
         >
           {this.getNodeContent()}
         </div>
-
-        <div className={this.getPastCommitLineClass(this.props.index)} />
+        <div className={this.getPastCommitLineClass()} />
       </div>
     );
   }

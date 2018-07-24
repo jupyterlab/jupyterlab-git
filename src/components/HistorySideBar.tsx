@@ -7,13 +7,6 @@ import {
   historySideBarExpandedStyle
 } from '../components_style/HistorySideBarStyle';
 
-import {
-  pastCommitNodeStyle,
-  pastCommitLineStyle,
-  pastCommitLastLineStyle,
-  pastCommitWorkingNodeStyle
-} from '../components_style/PastCommitNodeStyle';
-
 import { classes } from 'typestyle';
 
 import * as React from 'react';
@@ -47,31 +40,18 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
       : historySideBarStyle;
   }
 
-  getPastCommitNodeClass(index: number): string {
-    return index === 0
-      ? classes(pastCommitWorkingNodeStyle, pastCommitNodeStyle)
-      : pastCommitNodeStyle;
-  }
-
-  getPastCommitLineClass(index: number): string {
-    return index !== this.props.pastCommits.length - 1
-      ? pastCommitLineStyle
-      : pastCommitLastLineStyle;
-  }
-
-  getNodeContent(index: number): string | number {
-    if (index === 0) {
-      return 'Working';
-    } else if (index === 1) {
-      return 'Head';
-    } else {
-      return index;
-    }
-  }
-
   render() {
     return (
       <div className={this.getSideBarClass()}>
+        <PastCommitNode
+            key={-1}
+            index={-1}
+            isLast={false}
+            pastCommit={null}
+            currentFileBrowserPath={this.props.currentFileBrowserPath}
+            setShowList={this.props.setShowList}
+            getPastCommit={this.props.getPastCommit}
+          />
         {this.props.pastCommits.map((pastCommit, pastCommitIndex) => (
           <PastCommitNode
             key={pastCommitIndex}
