@@ -23,9 +23,12 @@ import { PastCommits } from './PastCommits';
 import { HistorySideBar } from './HistorySideBar';
 
 import {
-  gitContainerStyle,
-  gitPushedContentStyle
+  panelContainerStyle,
+  panelPushedContentStyle,
+  panelContentStyle
 } from '../components_style/GitPanelStyle';
+
+import { classes } from 'typestyle';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -241,12 +244,14 @@ export class GitPanel extends React.Component<
   };
 
   getContentClass(): string {
-    return this.state.sideBarExpanded ? gitPushedContentStyle : null;
+    return this.state.sideBarExpanded
+      ? classes(panelPushedContentStyle, panelContentStyle)
+      : panelContentStyle;
   }
 
   render() {
     return (
-      <div className={gitContainerStyle}>
+      <div className={panelContainerStyle}>
         <PathHeader
           currentFileBrowserPath={this.state.currentFileBrowserPath}
           topRepoPath={this.state.topRepoPath}
