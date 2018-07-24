@@ -67,7 +67,6 @@ export class NewBranchBox extends React.Component<
           className={this.checkReadyForSubmit()}
           type="button"
           title="Create New"
-          value={"\u2714"}
           disabled={this.state.value.length === 0}
           onClick={() => this.props.createNewBranch(this.state.value)}
         />

@@ -9,7 +9,7 @@ export const branchStyle = style({
 });
 
 export const smallBranchStyle = style({
-  height: "50px"
+  height: "35px"
 });
 
 export const expandedBranchStyle = style({
