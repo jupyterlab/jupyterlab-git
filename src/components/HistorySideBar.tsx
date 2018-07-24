@@ -1,5 +1,3 @@
-import { Git } from '../git';
-
 import { PastCommitNode } from './PastCommitNode';
 
 import {
@@ -20,17 +18,17 @@ export interface IHistorySideBarProps {
   getPastCommit: Function;
 }
 
-export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
+/** Interface for PastCommits component state */
+export interface IHistorySideBarState {
+  activeNode: number
+}
+
+export class HistorySideBar extends React.Component<IHistorySideBarProps, IHistorySideBarState> {
   constructor(props) {
     super(props);
-  }
 
-  /** Fetch git log info on mount */
-  async componentDidMount() {
-    let gitApi = new Git();
-    let logData = await gitApi.log(this.props.currentFileBrowserPath);
-    if (logData.code === 0) {
-      this.setState({ data: logData.commits });
+    this.state = {
+      activeNode: -1
     }
   }
 
@@ -38,6 +36,10 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
     return this.props.isExpanded
       ? classes(historySideBarExpandedStyle, historySideBarStyle)
       : historySideBarStyle;
+  }
+
+  updateActiveNode = (index: number) : void => {
+    this.setState({activeNode: index})
   }
 
   render() {
@@ -51,6 +53,8 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
             currentFileBrowserPath={this.props.currentFileBrowserPath}
             setShowList={this.props.setShowList}
             getPastCommit={this.props.getPastCommit}
+            activeNode={this.state.activeNode}
+            updateActiveNode={this.updateActiveNode}
           />
         {this.props.pastCommits.map((pastCommit, pastCommitIndex) => (
           <PastCommitNode
@@ -61,6 +65,8 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
             currentFileBrowserPath={this.props.currentFileBrowserPath}
             setShowList={this.props.setShowList}
             getPastCommit={this.props.getPastCommit}
+            activeNode={this.state.activeNode}
+            updateActiveNode={this.updateActiveNode}
           />
         ))}
       </div>

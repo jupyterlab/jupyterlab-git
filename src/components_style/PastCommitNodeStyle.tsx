@@ -5,10 +5,8 @@ export const pastCommitNodeStyle = style({
   color: 'var(--jp-ui-font-color1)',
   width: '36px',
   height: '36px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  backgroundSize: '100%',
-  backgroundImage: 'var(--jp-commit-node)',
+  border: '2px solid #000',
+  borderRadius: '50%',
   outline: 'none !important',
   margin: '-1px auto -1px auto',
   textAlign: 'center',
@@ -16,14 +14,32 @@ export const pastCommitNodeStyle = style({
 });
 
 export const pastCommitWorkingNodeStyle = style({
-  backgroundImage: 'var(--jp-working-commit-node)'
+  border: '2px dashed #000',
+  borderRadius: '50%'
+});
+
+export const pastCommitContentStyle = style({
+  position: 'absolute'
+});
+
+export const pastCommitWorkingContentStyle = style({
+  left: '-7px'
+});
+
+export const pastCommitHeadContentStyle = style({
+  left: '5%'
+});
+
+export const pastCommitNumberContentStyle = style({
+  left: '38%'
+});
+
+export const pastCommitActiveContentStyle = style({
+  color: 'var(--jp-brand-color2)'
 });
 
 export const pastCommitLineStyle = style({
-  backgroundImage: 'var(--jp-commit-line)',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  backgroundSize: '100%',
+  backgroundColor: '#000',
   height: '18px',
   width: '3px',
   margin: '0 auto'

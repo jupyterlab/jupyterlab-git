@@ -1,8 +1,13 @@
 import {
   pastCommitNodeStyle,
+  pastCommitWorkingNodeStyle,
+  pastCommitContentStyle,
+  pastCommitWorkingContentStyle,
+  pastCommitHeadContentStyle,
+  pastCommitNumberContentStyle,
+  pastCommitActiveContentStyle,
   pastCommitLineStyle,
-  pastCommitLastLineStyle,
-  pastCommitWorkingNodeStyle
+  pastCommitLastLineStyle
 } from '../components_style/PastCommitNodeStyle';
 
 import { classes } from 'typestyle';
@@ -16,6 +21,8 @@ export interface IPastCommitNodeProps {
   currentFileBrowserPath: string;
   setShowList: Function;
   getPastCommit: Function;
+  activeNode: number;
+  updateActiveNode: Function;
 }
 
 export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
@@ -33,13 +40,39 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
     return this.props.isLast ? pastCommitLastLineStyle : pastCommitLineStyle;
   }
 
-  getNodeContent(): string | number {
+  getContent(): string | number {
     if (this.props.index === -1) {
       return 'Working';
     } else if (this.props.index === 0) {
       return 'Head';
     } else {
       return this.props.index;
+    }
+  }
+
+  getContentClass(): string {
+    const activeContentStyle =
+      this.props.index === this.props.activeNode
+        ? pastCommitActiveContentStyle
+        : null;
+    if (this.props.index === -1) {
+      return classes(
+        pastCommitWorkingContentStyle,
+        pastCommitContentStyle,
+        activeContentStyle
+      );
+    } else if (this.props.index === 0) {
+      return classes(
+        pastCommitHeadContentStyle,
+        pastCommitContentStyle,
+        activeContentStyle
+      );
+    } else {
+      return classes(
+        pastCommitNumberContentStyle,
+        pastCommitContentStyle,
+        activeContentStyle
+      );
     }
   }
 
@@ -52,6 +85,7 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
           this.props.currentFileBrowserPath
         ),
         this.props.setShowList(false));
+    this.props.updateActiveNode(this.props.index);
   }
 
   render() {
@@ -61,7 +95,7 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
           className={this.getPastCommitNodeClass()}
           onClick={() => this.handleClick()}
         >
-          {this.getNodeContent()}
+          <span className={this.getContentClass()}>{this.getContent()}</span>
         </div>
         <div className={this.getPastCommitLineClass()} />
       </div>
