@@ -88,7 +88,6 @@ export class CommitBox extends React.Component<
           )}
           type="button"
           title="Commit"
-          value={"\u2714"}
           disabled={this.state.disableSubmit}
           onClick={() => {
             this.props.commitAllStagedFiles(

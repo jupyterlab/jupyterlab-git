@@ -74,7 +74,11 @@ export const branchListItemStyle = style({
 });
 
 export const stagedCommitButtonStyle = style({
-  backgroundColor: "var(--md-green-500)",
+  backgroundColor: "var(--jp-brand-color1)",
+  backgroundImage: 'var(--jp-checkmark)',
+  backgroundSize: '100%',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center',
   color: "white",
   height: "42px",
   width: "40px",

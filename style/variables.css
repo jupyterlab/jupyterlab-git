@@ -26,4 +26,5 @@
     --jp-working-commit-node: url('./images/working-commit-node.svg');
     --jp-commit-node: url('./images/commit-node.svg');
     --jp-commit-line: url('./images/commit-line.svg');
+    --jp-checkmark: url('./images/checkmark-icon.svg');
 }
