@@ -1,4 +1,4 @@
-import { style } from "typestyle/lib";
+import { style } from "typestyle";
 
 export const gitContainerStyle = style({
   display: "flex",

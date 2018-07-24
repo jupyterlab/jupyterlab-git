@@ -12,9 +12,9 @@ import { JupyterLab } from "@jupyterlab/application";
 
 import { ISignal, Signal } from "@phosphor/signaling";
 
-import { GitSessionNode } from "./GitSessionNode";
+import { GitPanel } from "./GitPanel";
 
-import { gitSessionsStyle } from "../components_style/GitSessionsStyle";
+import { gitSessionsStyle } from "../components_style/GitWidgetStyle";
 
 import "../../style/variables.css";
 
@@ -61,7 +61,7 @@ export const defaultRenderer = new Renderer();
 /**
  * A class that exposes the git-plugin sessions.
  */
-export class GitSessions extends Widget {
+export class GitWidget extends Widget {
   component: any;
   /**
    * Construct a new running widget.
@@ -71,7 +71,7 @@ export class GitSessions extends Widget {
       node: (options.renderer || defaultRenderer).createNode()
     });
     this.addClass(gitSessionsStyle);
-    const element = <GitSessionNode app={app} diff={diff_function} />;
+    const element = <GitPanel app={app} diff={diff_function} />;
     this.component = ReactDOM.render(element, this.node);
     this.component.refresh();
   }

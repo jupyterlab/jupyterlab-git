@@ -2,7 +2,7 @@ import { addCommands, CommandIDs } from "./git_mainmenu_command";
 
 import { PathExt } from "@jupyterlab/coreutils";
 
-import { GitSessions } from "./components/GitSessions";
+import { GitWidget } from "./components/GitWidget";
 
 import {
   ILayoutRestorer,
@@ -51,7 +51,7 @@ export type IDiffCallback = (
 export class GitExtension implements IGitExtension {
   git_plugin;
   constructor(app: JupyterLab, restorer: ILayoutRestorer) {
-    this.git_plugin = new GitSessions(
+    this.git_plugin = new GitWidget(
       app,
       { manager: app.serviceManager },
       this.performDiff.bind(this)
