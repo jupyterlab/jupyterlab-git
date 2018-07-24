@@ -14,7 +14,8 @@ export const repoPathStyle = style({
   textOverflow: "ellipsis",
   overflow: "hidden",
   whiteSpace: "nowrap",
-  marginTop: "2px"
+  verticalAlign: 'middle',
+  lineHeight: '33px'
 });
 
 export const repoRefreshStyle = style({
@@ -42,7 +43,6 @@ export const repoIconStyle = style({
   padding: "0px 8px",
   marginRight: "4px",
   marginLeft: "8px",
-  marginBottom: "4px",
   backgroundSize: "15px",
   backgroundRepeat: "no-repeat",
   backgroundPosition: "center",
@@ -55,11 +55,14 @@ export const arrowStyle = style({
   backgroundRepeat: "no-repeat",
   width: "18px",
   backgroundSize: "18px",
-  marginTop: "2.5px"
+  verticalAlign: 'middle',
+  lineHeight: '33px'
 });
 
 export const gitRepoPathContainerStyle = style({
-  display: "inline-flex"
+  display: "inline-flex",
+  verticalAlign: 'middle',
+  lineHeight: '33px'
 });
 
 export const directoryStyle = style({
