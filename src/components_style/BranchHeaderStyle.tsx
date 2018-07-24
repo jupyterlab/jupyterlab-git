@@ -1,4 +1,4 @@
-import { style } from 'typestyle/lib';
+import { style } from 'typestyle';
 
 export const branchStyle = style({
   zIndex: 1,

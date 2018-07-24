@@ -1,14 +1,18 @@
-import { Dialog, showDialog } from "@jupyterlab/apputils";
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import { JupyterLab } from "@jupyterlab/application";
+import { JupyterLab } from '@jupyterlab/application';
 
-import { Menu } from "@phosphor/widgets";
+import { Menu } from '@phosphor/widgets';
 
-import { PathExt } from "@jupyterlab/coreutils";
+import { PathExt } from '@jupyterlab/coreutils';
 
-import { Git, GitShowPrefixResult } from "../git";
+import { Git, GitShowPrefixResult } from '../git';
 
 import {
+  moveFileUpButtonStyle,
+  moveFileDownButtonStyle,
+  moveFileUpButtonSelectedStyle,
+  moveFileDownButtonSelectedStyle,
   folderFileIconStyle,
   genericFileIconStyle,
   yamlFileIconStyle,
@@ -27,23 +31,19 @@ import {
   jsonFileIconSelectedStyle,
   pythonFileIconSelectedStyle,
   kernelFileIconSelectedStyle,
-  moveFileUpButtonStyle,
-  moveFileDownButtonStyle,
-  moveFileUpButtonSelectedStyle,
-  moveFileDownButtonSelectedStyle
-} from "../components_style/FileListStyle";
+} from '../components_style/FileListStyle';
 
-import { GitStage } from "./GitStage";
+import { GitStage } from './GitStage';
 
-import * as React from "react";
+import * as React from 'react';
 
 export namespace CommandIDs {
-  export const gitFileOpen = "gf:Open";
-  export const gitFileUnstage = "gf:Unstage";
-  export const gitFileStage = "gf:Stage";
-  export const gitFileTrack = "gf:Track";
-  export const gitFileUntrack = "gf:Untrack";
-  export const gitFileDiscard = "gf:Discard";
+  export const gitFileOpen = 'gf:Open';
+  export const gitFileUnstage = 'gf:Unstage';
+  export const gitFileStage = 'gf:Stage';
+  export const gitFileTrack = 'gf:Track';
+  export const gitFileUntrack = 'gf:Untrack';
+  export const gitFileDiscard = 'gf:Discard';
 }
 
 export interface IFileListState {
@@ -82,7 +82,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const { commands } = this.props.app;
 
     this.state = {
-      commitMessage: "",
+      commitMessage: '',
       disableCommit: true,
       showStaged: true,
       showUnstaged: true,
@@ -90,10 +90,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       contextMenuStaged: new Menu({ commands }),
       contextMenuUnstaged: new Menu({ commands }),
       contextMenuUntracked: new Menu({ commands }),
-      contextMenuTypeX: "",
-      contextMenuTypeY: "",
-      contextMenuFile: "",
-      selectedStage: "",
+      contextMenuTypeX: '',
+      contextMenuTypeY: '',
+      contextMenuFile: '',
+      selectedStage: '',
       disableStaged: false,
       disableUnstaged: false,
       disableUntracked: false
@@ -104,8 +104,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       */
 
     commands.addCommand(CommandIDs.gitFileOpen, {
-      label: "Open",
-      caption: "Open selected file",
+      label: 'Open',
+      caption: 'Open selected file',
       execute: () => {
         try {
           this.openListedFile(
@@ -118,8 +118,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       }
     });
     commands.addCommand(CommandIDs.gitFileStage, {
-      label: "Stage",
-      caption: "Stage the changes of selected file",
+      label: 'Stage',
+      caption: 'Stage the changes of selected file',
       execute: () => {
         try {
           this.addUnstagedFile(
@@ -131,8 +131,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       }
     });
     commands.addCommand(CommandIDs.gitFileTrack, {
-      label: "Track",
-      caption: "Start tracking selected file",
+      label: 'Track',
+      caption: 'Start tracking selected file',
       execute: () => {
         try {
           this.addUntrackedFile(
@@ -144,11 +144,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       }
     });
     commands.addCommand(CommandIDs.gitFileUnstage, {
-      label: "Unstage",
-      caption: "Unstage the changes of selected file",
+      label: 'Unstage',
+      caption: 'Unstage the changes of selected file',
       execute: () => {
         try {
-          if (this.state.contextMenuTypeX !== "D") {
+          if (this.state.contextMenuTypeX !== 'D') {
             this.resetStagedFile(
               this.state.contextMenuFile,
               this.props.topRepoPath,
@@ -159,8 +159,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       }
     });
     commands.addCommand(CommandIDs.gitFileDiscard, {
-      label: "Discard",
-      caption: "Discard recent changes of selected file",
+      label: 'Discard',
+      caption: 'Discard recent changes of selected file',
       execute: () => {
         try {
           this.discardUnstagedFile(
@@ -200,13 +200,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event.preventDefault();
     if (event.buttons === 2) {
       <select>
-        <option className="jp-Git-switch-branch" value="" disabled>
+        <option className='jp-Git-switch-branch' value='' disabled>
           Open
         </option>
-        <option className="jp-Git-create-branch-line" disabled>
+        <option className='jp-Git-create-branch-line' disabled>
           unstaged this file
         </option>
-        <option className="jp-Git-create-branch" value="">
+        <option className='jp-Git-create-branch' value=''>
           CREATE NEW
         </option>
       </select>;
@@ -286,11 +286,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     path: string,
     app: JupyterLab
   ) {
-    if (typeX === "D" || typeY === "D") {
+    if (typeX === 'D' || typeY === 'D') {
       showDialog({
-        title: "Open File Failed",
-        body: "This file has been deleted!",
-        buttons: [Dialog.warnButton({ label: "OK" })]
+        title: 'Open File Failed',
+        body: 'This file has been deleted!',
+        buttons: [Dialog.warnButton({ label: 'OK' })]
       }).then(result => {
         if (result.button.accept) {
           return;
@@ -299,25 +299,25 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       return;
     }
     try {
-      const leftSidebarItems = app.shell.widgets("left");
+      const leftSidebarItems = app.shell.widgets('left');
       let fileBrowser = leftSidebarItems.next();
-      while (fileBrowser.id !== "filebrowser") {
+      while (fileBrowser.id !== 'filebrowser') {
         fileBrowser = leftSidebarItems.next();
       }
       let gitApi = new Git();
       let prefixData = await gitApi.showPrefix((fileBrowser as any).model.path);
       let underRepoPath = (prefixData as GitShowPrefixResult).under_repo_path;
-      let fileBrowserPath = (fileBrowser as any).model.path + "/";
+      let fileBrowserPath = (fileBrowser as any).model.path + '/';
       let openFilePath = fileBrowserPath.substring(
         0,
         fileBrowserPath.length - underRepoPath.length
       );
-      if (path[path.length - 1] !== "/") {
+      if (path[path.length - 1] !== '/') {
         (fileBrowser as any)._listing._manager.openOrReveal(
           openFilePath + path
         );
       } else {
-        console.log("Cannot open a folder here");
+        console.log('Cannot open a folder here');
       }
     } catch (err) {}
   }
@@ -388,10 +388,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Get the filename from a path */
   extractFilename(path: string): string {
-    if (path[path.length - 1] === "/") {
+    if (path[path.length - 1] === '/') {
       return path;
     } else {
-      let temp = path.split("/");
+      let temp = path.split('/');
       return temp[temp.length - 1];
     }
   }
@@ -407,7 +407,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     return (
       <div onContextMenu={event => event.preventDefault()}>
         <GitStage
-          heading={"Staged"}
+          heading={'Staged'}
           topRepoPath={this.props.topRepoPath}
           files={this.props.stagedFiles}
           app={this.props.app}
@@ -420,8 +420,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           moveFile={this.resetStagedFile}
           moveFileIconClass={moveFileDownButtonStyle}
           moveFileIconSelectedClass={moveFileDownButtonSelectedStyle}
-          moveAllFilesTitle={"Unstage all changes"}
-          moveFileTitle={"Unstage this change"}
+          moveAllFilesTitle={'Unstage all changes'}
+          moveFileTitle={'Unstage this change'}
           openFile={this.openListedFile}
           extractFilename={this.extractFilename}
           contextMenu={this.contextMenuStaged}
@@ -434,7 +434,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           sideBarExpanded={this.props.sideBarExpanded}
         />
         <GitStage
-          heading={"Changed"}
+          heading={'Changed'}
           topRepoPath={this.props.topRepoPath}
           files={this.props.unstagedFiles}
           app={this.props.app}
@@ -447,8 +447,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           moveFile={this.addUnstagedFile}
           moveFileIconClass={moveFileUpButtonStyle}
           moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
-          moveAllFilesTitle={"Stage all changes"}
-          moveFileTitle={"Stage this change"}
+          moveAllFilesTitle={'Stage all changes'}
+          moveFileTitle={'Stage this change'}
           openFile={this.openListedFile}
           extractFilename={this.extractFilename}
           contextMenu={this.contextMenuUnstaged}
@@ -461,7 +461,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           sideBarExpanded={this.props.sideBarExpanded}
         />
         <GitStage
-          heading={"Untracked"}
+          heading={'Untracked'}
           topRepoPath={this.props.topRepoPath}
           files={this.props.untrackedFiles}
           app={this.props.app}
@@ -474,8 +474,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           moveFile={this.addUntrackedFile}
           moveFileIconClass={moveFileUpButtonStyle}
           moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
-          moveAllFilesTitle={"Track all untracked files"}
-          moveFileTitle={"Track this file"}
+          moveAllFilesTitle={'Track all untracked files'}
+          moveFileTitle={'Track this file'}
           openFile={this.openListedFile}
           extractFilename={this.extractFilename}
           contextMenu={this.contextMenuUntracked}
@@ -494,40 +494,40 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
 /** Get the extension of a given file */
 export function parseFileExtension(path: string): string {
-  if (path[path.length - 1] === "/") {
+  if (path[path.length - 1] === '/') {
     return folderFileIconStyle;
   }
   var fileExtension = PathExt.extname(path).toLocaleLowerCase();
   switch (fileExtension) {
-    case ".md":
+    case '.md':
       return markdownFileIconStyle;
-    case ".py":
+    case '.py':
       return pythonFileIconStyle;
-    case ".json":
+    case '.json':
       return jsonFileIconStyle;
-    case ".csv":
+    case '.csv':
       return spreadsheetFileIconStyle;
-    case ".xls":
+    case '.xls':
       return spreadsheetFileIconStyle;
-    case ".r":
+    case '.r':
       return kernelFileIconStyle;
-    case ".yml":
+    case '.yml':
       return yamlFileIconStyle;
-    case ".yaml":
+    case '.yaml':
       return yamlFileIconStyle;
-    case ".svg":
+    case '.svg':
       return imageFileIconStyle;
-    case ".tiff":
+    case '.tiff':
       return imageFileIconStyle;
-    case ".jpeg":
+    case '.jpeg':
       return imageFileIconStyle;
-    case ".jpg":
+    case '.jpg':
       return imageFileIconStyle;
-    case ".gif":
+    case '.gif':
       return imageFileIconStyle;
-    case ".png":
+    case '.png':
       return imageFileIconStyle;
-    case ".raw":
+    case '.raw':
       return imageFileIconStyle;
     default:
       return genericFileIconStyle;
@@ -536,40 +536,40 @@ export function parseFileExtension(path: string): string {
 
 /** Get the extension of a given selected file */
 export function parseSelectedFileExtension(path: string): string {
-  if (path[path.length - 1] === "/") {
+  if (path[path.length - 1] === '/') {
     return folderFileIconSelectedStyle;
   }
   var fileExtension = PathExt.extname(path).toLocaleLowerCase();
   switch (fileExtension) {
-    case ".md":
+    case '.md':
       return markdownFileIconSelectedStyle;
-    case ".py":
+    case '.py':
       return pythonFileIconSelectedStyle;
-    case ".json":
+    case '.json':
       return jsonFileIconSelectedStyle;
-    case ".csv":
+    case '.csv':
       return spreadsheetFileIconSelectedStyle;
-    case ".xls":
+    case '.xls':
       return spreadsheetFileIconSelectedStyle;
-    case ".r":
+    case '.r':
       return kernelFileIconSelectedStyle;
-    case ".yml":
+    case '.yml':
       return yamlFileIconSelectedStyle;
-    case ".yaml":
+    case '.yaml':
       return yamlFileIconSelectedStyle;
-    case ".svg":
+    case '.svg':
       return imageFileIconSelectedStyle;
-    case ".tiff":
+    case '.tiff':
       return imageFileIconSelectedStyle;
-    case ".jpeg":
+    case '.jpeg':
       return imageFileIconSelectedStyle;
-    case ".jpg":
+    case '.jpg':
       return imageFileIconSelectedStyle;
-    case ".gif":
+    case '.gif':
       return imageFileIconSelectedStyle;
-    case ".png":
+    case '.png':
       return imageFileIconSelectedStyle;
-    case ".raw":
+    case '.raw':
       return imageFileIconSelectedStyle;
     default:
       return genericFileIconSelectedStyle;

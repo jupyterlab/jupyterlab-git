@@ -1,4 +1,4 @@
-import { JupyterLab } from "@jupyterlab/application";
+import { JupyterLab } from '@jupyterlab/application';
 
 import {
   sectionFileContainerStyle,
@@ -11,22 +11,22 @@ import {
   changeStageButtonLeftStyle,
   discardFileButtonStyle,
   discardAllWarningStyle
-} from "../components_style/FileListStyle";
+} from '../components_style/GitStageStyle';
 
 import {
   cancelDiscardButtonStyle,
   acceptDiscardButtonStyle,
   discardButtonStyle,
   discardWarningStyle
-} from "../components_style/FileItemStyle";
+} from '../components_style/FileItemStyle';
 
-import { FileItem } from "./FileItem";
+import { FileItem } from './FileItem';
 
-import { classes } from "typestyle/lib";
+import { classes } from 'typestyle';
 
-import * as React from "react";
+import * as React from 'react';
 
-import ToggleDisplay from "react-toggle-display";
+import ToggleDisplay from 'react-toggle-display';
 
 export interface IGitStageProps {
   heading: string;
@@ -131,14 +131,14 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                 this.props.refresh
               )}
           />
-          {this.props.heading === "Changed" && (
+          {this.props.heading === 'Changed' && (
             <button
               disabled={this.checkContents()}
               className={classes(
                 changeStageButtonStyle,
                 discardFileButtonStyle
               )}
-              title={"Discard All Changes"}
+              title={'Discard All Changes'}
               onClick={() => this.toggleDiscardChanges()}
             />
           )}

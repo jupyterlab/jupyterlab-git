@@ -6,9 +6,9 @@ import {
   arrowStyle,
   gitRepoPathContainerStyle,
   directoryStyle
-} from "../components_style/PathHeaderStyle";
+} from '../components_style/PathHeaderStyle';
 
-import * as React from "react";
+import * as React from 'react';
 
 export interface IPathHeaderState {
   topRepoPath: string;
@@ -34,7 +34,7 @@ export class PathHeader extends React.Component<
   }
 
   render() {
-    let relativePath = this.props.currentFileBrowserPath.split("/");
+    let relativePath = this.props.currentFileBrowserPath.split('/');
     return (
       <div>
         <li className={repoStyle}>
@@ -42,7 +42,7 @@ export class PathHeader extends React.Component<
           <span className={repoPathStyle}>
             {relativePath.map(directory => (
               <div key={directory} className={gitRepoPathContainerStyle}>
-                {relativePath[0] !== "" && <span className={arrowStyle} />}
+                {relativePath[0] !== '' && <span className={arrowStyle} />}
                 <span className={directoryStyle}>{directory}</span>
               </div>
             ))}

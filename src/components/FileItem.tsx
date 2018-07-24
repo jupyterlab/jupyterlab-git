@@ -1,38 +1,35 @@
-import { JupyterLab } from "@jupyterlab/application";
+import { JupyterLab } from '@jupyterlab/application';
+
+import {
+  changeStageButtonStyle,
+  changeStageButtonLeftStyle,
+  discardFileButtonStyle
+} from '../components_style/GitStageStyle'
 
 import {
   fileStyle,
+  selectedFileStyle,
   expandedFileStyle,
-  fileGitButtonStyle,
-  fileLabelStyle,
+  disabledFileStyle,
   fileIconStyle,
-  changeStageButtonStyle,
-  fileButtonStyle,
-  changeStageButtonLeftStyle,
-  discardFileButtonStyle,
-  discardFileButtonSelectedStyle
-} from "../components_style/FileListStyle";
-
-import {
+  fileLabelStyle,
   fileChangedLabelStyle,
+  selectedFileChangedLabelStyle,
   fileChangedLabelBrandStyle,
   fileChangedLabelInfoStyle,
-  selectedFileStyle,
-  selectedFileChangedLabelStyle
-} from "../components_style/GitStageStyle";
-
-import {
   discardWarningStyle,
+  fileButtonStyle,
+  fileGitButtonStyle,
+  discardFileButtonSelectedStyle,
   cancelDiscardButtonStyle,
   acceptDiscardButtonStyle,
   discardButtonStyle,
-  disabledFileStyle,
   sideBarExpandedFileLabelStyle
-} from "../components_style/FileItemStyle";
+} from '../components_style/FileItemStyle';
 
-import { classes } from "typestyle/lib";
+import { classes } from 'typestyle';
 
-import * as React from "react";
+import * as React from 'react';
 
 export interface IFileItemProps {
   topRepoPath: string;
@@ -79,19 +76,19 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
   }
 
   getFileChangedLabel(change: string): string {
-    if (change === "M") {
-      return "Mod";
-    } else if (change === "A") {
-      return "Add";
-    } else if (change === "D") {
-      return "Rmv";
-    } else if (change === "R") {
-      return "Rnm";
+    if (change === 'M') {
+      return 'Mod';
+    } else if (change === 'A') {
+      return 'Add';
+    } else if (change === 'D') {
+      return 'Rmv';
+    } else if (change === 'R') {
+      return 'Rnm';
     }
   }
 
   getFileChangedLabelClass(change: string) {
-    if (change === "M") {
+    if (change === 'M') {
       if (this.state.showDiscardWarning) {
         return classes(fileChangedLabelStyle, fileChangedLabelBrandStyle);
       } else {
@@ -258,10 +255,10 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
           <span className={this.getFileChangedLabelClass(this.props.file.y)}>
             {this.getFileChangedLabel(this.props.file.y)}
           </span>
-          {this.props.stage === "Changed" && (
+          {this.props.stage === 'Changed' && (
             <button
               className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
-              title={"Discard this change"}
+              title={'Discard this change'}
               onClick={() => this.toggleDiscardChanges()}
             />
           )}

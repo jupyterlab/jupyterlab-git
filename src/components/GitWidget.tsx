@@ -1,22 +1,22 @@
-import * as React from "react";
+import * as React from 'react';
 
-import * as ReactDOM from "react-dom";
+import * as ReactDOM from 'react-dom';
 
-import { ServiceManager, Session, TerminalSession } from "@jupyterlab/services";
+import { ServiceManager, Session, TerminalSession } from '@jupyterlab/services';
 
-import { Message } from "@phosphor/messaging";
+import { Message } from '@phosphor/messaging';
 
-import { Widget } from "@phosphor/widgets";
+import { Widget } from '@phosphor/widgets';
 
-import { JupyterLab } from "@jupyterlab/application";
+import { JupyterLab } from '@jupyterlab/application';
 
-import { ISignal, Signal } from "@phosphor/signaling";
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import { GitPanel } from "./GitPanel";
+import { GitPanel } from './GitPanel';
 
-import { gitSessionsStyle } from "../components_style/GitWidgetStyle";
+import { gitWidgetStyle } from '../components_style/GitWidgetStyle';
 
-import "../../style/variables.css";
+import '../../style/variables.css';
 
 /**
  * An options object for creating a running sessions widget.
@@ -46,8 +46,8 @@ export interface IRenderer {
  */
 export class Renderer implements IRenderer {
   createNode(): HTMLElement {
-    let node = document.createElement("div");
-    node.id = "GitSession-root";
+    let node = document.createElement('div');
+    node.id = 'GitSession-root';
 
     return node;
   }
@@ -70,7 +70,7 @@ export class GitWidget extends Widget {
     super({
       node: (options.renderer || defaultRenderer).createNode()
     });
-    this.addClass(gitSessionsStyle);
+    this.addClass(gitWidgetStyle);
     const element = <GitPanel app={app} diff={diff_function} />;
     this.component = ReactDOM.render(element, this.node);
     this.component.refresh();
@@ -103,7 +103,7 @@ export class GitWidget extends Widget {
    * Get the input text node.
    */
   get inputNode(): HTMLInputElement {
-    return this.node.getElementsByTagName("input")[0] as HTMLInputElement;
+    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
   }
 
   /**
@@ -130,12 +130,12 @@ export class GitWidget extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case "change":
+      case 'change':
         this._evtChange(event as MouseEvent);
-      case "click":
+      case 'click':
         this._evtClick(event as MouseEvent);
         break;
-      case "dblclick":
+      case 'dblclick':
         this._evtDblClick(event as MouseEvent);
         break;
       default:
@@ -147,18 +147,18 @@ export class GitWidget extends Widget {
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener("change", this);
-    this.node.addEventListener("click", this);
-    this.node.addEventListener("dblclick", this);
+    this.node.addEventListener('change', this);
+    this.node.addEventListener('click', this);
+    this.node.addEventListener('dblclick', this);
   }
 
   /**
    * A message handler invoked on a `'before-detach'` message.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.addEventListener("change", this);
-    this.node.removeEventListener("click", this);
-    this.node.removeEventListener("dblclick", this);
+    this.node.addEventListener('change', this);
+    this.node.removeEventListener('click', this);
+    this.node.removeEventListener('dblclick', this);
   }
 
   /**

@@ -1,10 +1,10 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { Git } from "../git";
+import { Git } from '../git';
 
-import { CommitBox } from "./CommitBox";
+import { CommitBox } from './CommitBox';
 
-import { NewBranchBox } from "./NewBranchBox";
+import { NewBranchBox } from './NewBranchBox';
 
 import {
   branchStyle,
@@ -18,9 +18,9 @@ import {
   smallBranchStyle,
   expandedBranchStyle,
   openHistorySideBarButtonStyle
-} from "../components_style/BranchHeaderStyle";
+} from '../components_style/BranchHeaderStyle';
 
-import { classes } from "typestyle";
+import { classes } from 'typestyle';
 
 export interface IBranchHeaderState {
   topRepoPath: string;
@@ -68,7 +68,7 @@ export class BranchHeader extends React.Component<
 
   /** Commit all staged files */
   commitAllStagedFiles = (message: string, path: string): void => {
-    if (message && message !== "") {
+    if (message && message !== '') {
       let gitApi = new Git();
       gitApi.commit(message, path).then(response => {
         this.props.refresh();

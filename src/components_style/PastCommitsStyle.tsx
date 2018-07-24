@@ -1,5 +1,5 @@
-import { style } from "typestyle/lib";
+import { style } from 'typestyle';
 
 export const pastCommitsContainerStyle = style({
-  overflowX: "hidden"
+  overflowX: 'hidden'
 });

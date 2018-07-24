@@ -1,8 +1,8 @@
-import * as React from "react";
+import * as React from 'react';
 
-import ToggleDisplay from "react-toggle-display";
+import ToggleDisplay from 'react-toggle-display';
 
-import { JupyterLab } from "@jupyterlab/application";
+import { JupyterLab } from '@jupyterlab/application';
 
 import {
   Git,
@@ -12,20 +12,20 @@ import {
   GitAllHistory,
   GitLogResult,
   SingleCommitInfo
-} from "../git";
+} from '../git';
 
-import { PathHeader } from "./PathHeader";
+import { PathHeader } from './PathHeader';
 
-import { BranchHeader } from "./BranchHeader";
+import { BranchHeader } from './BranchHeader';
 
-import { PastCommits } from "./PastCommits";
+import { PastCommits } from './PastCommits';
 
-import { HistorySideBar } from "./HistorySideBar";
+import { HistorySideBar } from './HistorySideBar';
 
 import {
   gitContainerStyle,
   gitPushedContentStyle
-} from "../components_style/GitPanelStyle";
+} from '../components_style/GitPanelStyle';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -70,11 +70,11 @@ export class GitPanel extends React.Component<
   constructor(props: IGitSessionNodeProps) {
     super(props);
     this.state = {
-      currentFileBrowserPath: "",
-      topRepoPath: "",
+      currentFileBrowserPath: '',
+      topRepoPath: '',
       showWarning: false,
       branches: [],
-      currentBranch: "",
+      currentBranch: '',
       disableSwitchBranch: true,
       pastCommits: [],
       inNewRepo: true,
@@ -83,13 +83,13 @@ export class GitPanel extends React.Component<
       unstagedFiles: [],
       untrackedFiles: [],
       sideBarExpanded: false,
-      pastCommitInfo: "",
-      pastCommitFilesChanged: "",
-      pastCommitInsertionCount: "",
-      pastCommitDeletionCount: "",
-      pastCommitData: "",
-      pastCommitNumber: "",
-      pastCommitFilelist: ""
+      pastCommitInfo: '',
+      pastCommitFilesChanged: '',
+      pastCommitInsertionCount: '',
+      pastCommitDeletionCount: '',
+      pastCommitData: '',
+      pastCommitNumber: '',
+      pastCommitFilelist: ''
     };
   }
 
@@ -112,7 +112,7 @@ export class GitPanel extends React.Component<
         pastCommitInsertionCount: detailedLogData.number_of_insertions,
         pastCommitDeletionCount: detailedLogData.number_of_deletions,
         pastCommitData: pastCommit,
-        pastCommitNumber: pastCommitIndex + " commit(s) before",
+        pastCommitNumber: pastCommitIndex + ' commit(s) before',
         pastCommitFilelist: detailedLogData.modified_files
       });
     }
@@ -123,9 +123,9 @@ export class GitPanel extends React.Component<
    */
   refresh = async () => {
     try {
-      let leftSidebarItems = this.props.app.shell.widgets("left");
+      let leftSidebarItems = this.props.app.shell.widgets('left');
       let fileBrowser = leftSidebarItems.next();
-      while (fileBrowser && fileBrowser.id !== "filebrowser") {
+      while (fileBrowser && fileBrowser.id !== 'filebrowser') {
         fileBrowser = leftSidebarItems.next();
       }
       let gitApi = new Git();
@@ -143,7 +143,7 @@ export class GitPanel extends React.Component<
 
           // Get current git branch
           let branchData = (apiResult as GitAllHistory).data.branch;
-          let currentBranch = "master";
+          let currentBranch = 'master';
           if (branchData.code === 0) {
             let allBranches = (branchData as GitBranchResult).branches;
             for (var i = 0; i < allBranches.length; i++) {
@@ -172,19 +172,19 @@ export class GitPanel extends React.Component<
             let statusFiles = (statusData as GitStatusResult).files;
             for (let i = 0; i < statusFiles.length; i++) {
               // If file has been changed
-              if (statusFiles[i].x !== "?" && statusFiles[i].x !== "!") {
+              if (statusFiles[i].x !== '?' && statusFiles[i].x !== '!') {
                 changedFiles++;
               }
               // If file is untracked
-              if (statusFiles[i].x === "?" && statusFiles[i].y === "?") {
+              if (statusFiles[i].x === '?' && statusFiles[i].y === '?') {
                 untrackedFiles.push(statusFiles[i]);
               } else {
                 // If file is staged
-                if (statusFiles[i].x !== " " && statusFiles[i].y !== "D") {
+                if (statusFiles[i].x !== ' ' && statusFiles[i].y !== 'D') {
                   stagedFiles.push(statusFiles[i]);
                 }
                 // If file is unstaged but tracked
-                if (statusFiles[i].y !== " ") {
+                if (statusFiles[i].y !== ' ') {
                   unstagedFiles.push(statusFiles[i]);
                 }
               }
@@ -226,7 +226,7 @@ export class GitPanel extends React.Component<
         } else {
           this.setState({
             currentFileBrowserPath: (fileBrowser as any).model.path,
-            topRepoPath: "",
+            topRepoPath: '',
             showWarning: false
           });
         }
@@ -296,7 +296,7 @@ export class GitPanel extends React.Component<
           </ToggleDisplay>
           <ToggleDisplay show={!this.state.showWarning}>
             <div style={{ padding: 16 }}>
-              <span style={{ color: "red", fontWeight: "bold" }}>Error:</span>
+              <span style={{ color: 'red', fontWeight: 'bold' }}>Error:</span>
               <span>
                 The current folder is not a git repository. Please make sure you
                 are currently working in a git repository in order to use this

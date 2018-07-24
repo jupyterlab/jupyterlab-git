@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 
 import {
   textInputStyle,
@@ -6,9 +6,9 @@ import {
   stagedCommitButtonDisabledStyle,
   stagedCommitStyle,
   stagedCommitMessageStyle
-} from "../components_style/BranchHeaderStyle";
+} from '../components_style/BranchHeaderStyle';
 
-import { classes } from "typestyle";
+import { classes } from 'typestyle';
 
 export interface ICommitBoxProps {
   createNewBranch: Function;
@@ -25,7 +25,7 @@ export class NewBranchBox extends React.Component<
   constructor(props) {
     super(props);
     this.state = {
-      value: ""
+      value: ''
     };
   }
 
@@ -33,7 +33,7 @@ export class NewBranchBox extends React.Component<
   onKeyPress(event): void {
     if (event.which === 13) {
       event.preventDefault();
-      this.setState({ value: this.state.value + "\n" });
+      this.setState({ value: this.state.value + '\n' });
     }
   }
 
@@ -59,14 +59,14 @@ export class NewBranchBox extends React.Component<
       >
         <textarea
           className={classes(textInputStyle, stagedCommitMessageStyle)}
-          placeholder={"Name your new branch"}
+          placeholder={'Name your new branch'}
           value={this.state.value}
           onChange={this.handleChange}
         />
         <input
           className={this.checkReadyForSubmit()}
-          type="button"
-          title="Create New"
+          type='button'
+          title='Create New'
           disabled={this.state.value.length === 0}
           onClick={() => this.props.createNewBranch(this.state.value)}
         />

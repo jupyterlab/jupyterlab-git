@@ -1,19 +1,22 @@
-import { Git } from "../git";
+import { Git } from '../git';
 
-import { PastCommitNode } from "./PastCommitNode";
+import { PastCommitNode } from './PastCommitNode';
 
 import {
   historySideBarStyle,
-  historySideBarExpandedStyle,
+  historySideBarExpandedStyle
+} from '../components_style/HistorySideBarStyle';
+
+import {
   pastCommitNodeStyle,
   pastCommitLineStyle,
   pastCommitLastLineStyle,
   pastCommitWorkingNodeStyle
-} from "../components_style/HistorySideBarStyle";
+} from '../components_style/PastCommitNodeStyle';
 
-import { classes } from "typestyle";
+import { classes } from 'typestyle';
 
-import * as React from "react";
+import * as React from 'react';
 
 /** Interface for PastCommits component props */
 export interface IHistorySideBarProps {
@@ -58,9 +61,9 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
 
   getNodeContent(index: number): string | number {
     if (index === 0) {
-      return "Working";
+      return 'Working';
     } else if (index === 1) {
-      return "Head";
+      return 'Head';
     } else {
       return index;
     }

@@ -1,14 +1,14 @@
-import { JupyterLab } from "@jupyterlab/application";
+import { JupyterLab } from '@jupyterlab/application';
 
-import { FileList } from "./FileList";
+import { FileList } from './FileList';
 
-import { SinglePastCommitInfo } from "./SinglePastCommitInfo";
+import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 
-import { pastCommitsContainerStyle } from "../components_style/PastCommitsStyle";
+import { pastCommitsContainerStyle } from '../components_style/PastCommitsStyle';
 
-import * as React from "react";
+import * as React from 'react';
 
-import ToggleDisplay from "react-toggle-display";
+import ToggleDisplay from 'react-toggle-display';
 
 /** Interface for PastCommits component props */
 export interface IPastCommitsProps {

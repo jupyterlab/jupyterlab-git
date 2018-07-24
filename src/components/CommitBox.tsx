@@ -1,12 +1,12 @@
-import * as React from "react";
+import * as React from 'react';
 
 import {
   textInputStyle,
   stagedCommitStyle,
   stagedCommitMessageStyle
-} from "../components_style/BranchHeaderStyle";
+} from '../components_style/BranchHeaderStyle';
 
-import { classes } from "typestyle";
+import { classes } from 'typestyle';
 
 export interface ICommitBoxProps {
   checkReadyForSubmit: Function;
@@ -28,7 +28,7 @@ export class CommitBox extends React.Component<
   constructor(props) {
     super(props);
     this.state = {
-      value: "",
+      value: '',
       disableSubmit: true
     };
   }
@@ -37,21 +37,21 @@ export class CommitBox extends React.Component<
   onKeyPress(event): void {
     if (event.which === 13) {
       event.preventDefault();
-      this.setState({ value: this.state.value + "\n" });
+      this.setState({ value: this.state.value + '\n' });
     }
   }
 
   /** Initalize commit message input box */
   initializeInput = (): void => {
     this.setState({
-      value: "",
+      value: '',
       disableSubmit: true
     });
   };
 
   /** Handle input inside commit message box */
   handleChange = (event: any): void => {
-    if (event.target.value && event.target.value !== "") {
+    if (event.target.value && event.target.value !== '') {
       this.setState({
         value: event.target.value,
         disableSubmit: false
@@ -75,8 +75,8 @@ export class CommitBox extends React.Component<
           disabled={this.props.stagedFiles.length === 0}
           placeholder={
             this.props.stagedFiles.length === 0
-              ? "Stage your changes before commit"
-              : "Input message to commit staged changes"
+              ? 'Stage your changes before commit'
+              : 'Input message to commit staged changes'
           }
           value={this.state.value}
           onChange={this.handleChange}
@@ -86,8 +86,8 @@ export class CommitBox extends React.Component<
             this.state.disableSubmit,
             this.props.stagedFiles.length
           )}
-          type="button"
-          title="Commit"
+          type='button'
+          title='Commit'
           disabled={this.state.disableSubmit}
           onClick={() => {
             this.props.commitAllStagedFiles(

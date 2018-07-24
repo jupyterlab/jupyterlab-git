@@ -3,11 +3,11 @@ import {
   pastCommitLineStyle,
   pastCommitLastLineStyle,
   pastCommitWorkingNodeStyle
-} from "../components_style/HistorySideBarStyle";
+} from '../components_style/PastCommitNodeStyle';
 
-import { classes } from "typestyle";
+import { classes } from 'typestyle';
 
-import * as React from "react";
+import * as React from 'react';
 
 export interface IPastCommitNodeProps {
   index: number;
@@ -35,9 +35,9 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
 
   getNodeContent(): string | number {
     if (this.props.index === 0) {
-      return "Working";
+      return 'Working';
     } else if (this.props.index === 1) {
-      return "Head";
+      return 'Head';
     } else {
       return this.props.index;
     }

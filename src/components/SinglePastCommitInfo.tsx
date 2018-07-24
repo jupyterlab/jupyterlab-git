@@ -1,8 +1,8 @@
-import { JupyterLab } from "@jupyterlab/application";
+import { JupyterLab } from '@jupyterlab/application';
 
-import { SingleCommitInfo, CommitModifiedFile } from "../git";
+import { SingleCommitInfo, CommitModifiedFile } from '../git';
 
-import { parseFileExtension } from "./FileList";
+import { parseFileExtension } from './FileList';
 
 import {
   commitStyle,
@@ -19,13 +19,13 @@ import {
   insertionIconStyle,
   numberofChangedFilesStyle,
   deletionIconStyle
-} from "../components_style/SinglePastCommitInfoStyle";
+} from '../components_style/SinglePastCommitInfoStyle';
 
-import { fileIconStyle } from "../components_style/FileListStyle";
+import { fileIconStyle } from '../components_style/FileItemStyle';
 
-import * as React from "react";
+import * as React from 'react';
 
-import { classes } from "typestyle/";
+import { classes } from 'typestyle/';
 
 export interface ISinglePastCommitInfoProps {
   num: string;
@@ -60,7 +60,7 @@ export class SinglePastCommitInfo extends React.Component<
             <span className={commitNumberLabelStyle}>
               #{this.props.data.commit
                 ? this.props.data.commit.substring(0, 7)
-                : ""}
+                : ''}
             </span>
           </div>
           <div className={commitLabelMessageStyle}>
@@ -93,9 +93,9 @@ export class SinglePastCommitInfo extends React.Component<
                     )}`}
                     onDoubleClick={() => {
                       window.open(
-                        "https://github.com/search?q=" +
+                        'https://github.com/search?q=' +
                           this.props.data.commit +
-                          "&type=Commits&utf8=%E2%9C%93"
+                          '&type=Commits&utf8=%E2%9C%93'
                       );
                     }}
                   />
