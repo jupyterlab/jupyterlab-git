@@ -212,6 +212,9 @@ export class BranchHeader extends React.Component<
               refresh={this.props.refresh}
             />
           )}
+        {this.state.showNewBranchBox && (
+          <div>Branching from {this.props.currentBranch}</div>
+        )}
         {this.state.showNewBranchBox &&
           this.props.showList && (
             <NewBranchBox createNewBranch={this.createNewBranch} />
