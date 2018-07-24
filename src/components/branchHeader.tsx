@@ -163,6 +163,7 @@ export class BranchHeader extends React.Component<
         <button
           className={openHistorySideBarButtonStyle}
           onClick={() => this.props.toggleSidebar()}
+          title={'Show commit history'}
         >
           History
         </button>
@@ -173,6 +174,7 @@ export class BranchHeader extends React.Component<
               ? classes(headerButtonStyle, headerButtonDisabledStyle)
               : headerButtonStyle
           }
+          title={'Change the current branch'}
           onClick={() => this.toggleSelect()}
         >
           Change
@@ -183,6 +185,7 @@ export class BranchHeader extends React.Component<
               ? classes(headerButtonStyle, headerButtonDisabledStyle)
               : headerButtonStyle
           }
+          title={'Create a new branch'}
           onClick={() => this.toggleNewBranchBox()}
         >
           New
