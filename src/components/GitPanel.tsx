@@ -25,7 +25,9 @@ import { HistorySideBar } from './HistorySideBar';
 import {
   panelContainerStyle,
   panelPushedContentStyle,
-  panelContentStyle
+  panelContentStyle,
+  panelWarningStyle,
+  findRepoButtonStyle,
 } from '../components_style/GitPanelStyle';
 
 import { classes } from 'typestyle';
@@ -300,13 +302,14 @@ export class GitPanel extends React.Component<
             />
           </ToggleDisplay>
           <ToggleDisplay show={!this.state.showWarning}>
-            <div style={{ padding: 16 }}>
-              <span style={{ color: 'red', fontWeight: 'bold' }}>Error:</span>
-              <span>
-                The current folder is not a git repository. Please make sure you
-                are currently working in a git repository in order to use this
-                plugin.
-              </span>
+            <div className={panelWarningStyle}>
+              <div>
+                You aren’t in a git repository.
+              </div>
+              <button 
+              className={findRepoButtonStyle}
+              onClick={() => this.props.app.commands.execute('filebrowser:activate-main')}
+              >Go find a repo</button>
             </div>
           </ToggleDisplay>
         </div>

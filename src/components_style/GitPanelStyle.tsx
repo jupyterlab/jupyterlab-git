@@ -18,3 +18,14 @@ export const panelContentStyle = style({
   '-moz-transition': 'all 0.5s ease',
   transition: 'all 0.5s ease',
 })
+
+export const panelWarningStyle = style({
+  textAlign: 'center',
+  marginTop: '9px'
+})
+
+export const findRepoButtonStyle = style({
+  color: 'white',
+  backgroundColor: 'var(--jp-brand-color1)',
+  marginTop: '5px'
+});

@@ -2,7 +2,6 @@ import { style } from 'typestyle';
 
 export const branchStyle = style({
   zIndex: 1,
-  borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)',
   height: '100px',
   textAlign: 'center',
   overflowY: 'auto'

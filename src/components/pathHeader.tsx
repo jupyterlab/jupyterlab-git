@@ -36,22 +36,20 @@ export class PathHeader extends React.Component<
   render() {
     let relativePath = this.props.currentFileBrowserPath.split('/');
     return (
-      <div>
-        <li className={repoStyle}>
-          <span className={repoIconStyle} />
-          <span className={repoPathStyle}>
-            {relativePath.map(directory => (
-              <div key={directory} className={gitRepoPathContainerStyle}>
-                {relativePath[0] !== '' && <span className={arrowStyle} />}
-                <span className={directoryStyle}>{directory}</span>
-              </div>
-            ))}
-          </span>
-          <button
-            className={repoRefreshStyle}
-            onClick={() => this.props.refresh()}
-          />
-        </li>
+      <div className={repoStyle}>
+        <span className={repoIconStyle} />
+        <span className={repoPathStyle}>
+          {relativePath.map(directory => (
+            <div key={directory} className={gitRepoPathContainerStyle}>
+              {relativePath[0] !== '' && <span className={arrowStyle} />}
+              <span className={directoryStyle}>{directory}</span>
+            </div>
+          ))}
+        </span>
+        <button
+          className={repoRefreshStyle}
+          onClick={() => this.props.refresh()}
+        />
       </div>
     );
   }
