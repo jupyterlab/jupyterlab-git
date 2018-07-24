@@ -26,6 +26,7 @@ export const repoRefreshStyle = style({
   backgroundSize: "16px",
   backgroundRepeat: "no-repeat",
   backgroundPosition: "center",
+  outline: "none",
 
   $nest: {
     "&:hover": {
