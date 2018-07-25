@@ -19,11 +19,16 @@ export const pastCommitWorkingNodeStyle = style({
 });
 
 export const pastCommitContentStyle = style({
-  position: 'absolute'
+  fontFamily: 'Oswald'
 });
 
 export const pastCommitWorkingContentStyle = style({
-  left: '-7px'
+  left: '-5px',
+  backgroundColor: 'var(--jp-layout-color2)',
+  height: '13px',
+  position: 'absolute',
+  lineHeight: '100%',
+  marginTop: '11px'
 });
 
 export const pastCommitHeadContentStyle = style({
@@ -43,8 +48,4 @@ export const pastCommitLineStyle = style({
   height: '18px',
   width: '3px',
   margin: '0 auto'
-});
-
-export const pastCommitLastLineStyle = style({
-  display: 'none'
 });

@@ -6,8 +6,7 @@ import {
   pastCommitHeadContentStyle,
   pastCommitNumberContentStyle,
   pastCommitActiveContentStyle,
-  pastCommitLineStyle,
-  pastCommitLastLineStyle
+  pastCommitLineStyle
 } from '../components_style/PastCommitNodeStyle';
 
 import { classes } from 'typestyle';
@@ -23,6 +22,7 @@ export interface IPastCommitNodeProps {
   getPastCommit: Function;
   activeNode: number;
   updateActiveNode: Function;
+  isVisible: boolean;
 }
 
 export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
@@ -31,20 +31,26 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
   }
 
   getPastCommitNodeClass(): string {
+    if (!this.props.isVisible) {
+      return null;
+    }
     return this.props.index === -1
       ? classes(pastCommitWorkingNodeStyle, pastCommitNodeStyle)
-      : pastCommitNodeStyle;
+      : classes(pastCommitNodeStyle);
   }
 
   getPastCommitLineClass(): string {
-    return this.props.isLast ? pastCommitLastLineStyle : pastCommitLineStyle;
+    if (!this.props.isVisible) {
+      return null;
+    }
+    return this.props.isLast ? null : classes(pastCommitLineStyle);
   }
 
   getContent(): string | number {
     if (this.props.index === -1) {
-      return 'Working';
+      return 'WORKING';
     } else if (this.props.index === 0) {
-      return 'Head';
+      return 'HEAD';
     } else {
       return this.props.index;
     }
@@ -55,6 +61,9 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
       this.props.index === this.props.activeNode
         ? pastCommitActiveContentStyle
         : null;
+    if (!this.props.isVisible) {
+      return null;
+    }
     if (this.props.index === -1) {
       return classes(
         pastCommitWorkingContentStyle,
@@ -95,7 +104,9 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
           className={this.getPastCommitNodeClass()}
           onClick={() => this.handleClick()}
         >
-          <span className={this.getContentClass()}>{this.getContent()}</span>
+          <span className={this.getContentClass()}>
+            {this.props.isVisible && this.getContent()}
+          </span>
         </div>
         <div className={this.getPastCommitLineClass()} />
       </div>

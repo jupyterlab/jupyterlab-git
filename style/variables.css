@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+@import url('https://fonts.googleapis.com/css?family=Oswald');
 
 :root {
     --jp-Git-icon-add: url('./images/add.svg');
@@ -24,4 +25,8 @@
     --jp-git-repo-icon: url('./images/directory.svg');
     --jp-path-arrow-right: url('./images/path-arrow-right.svg');
     --jp-checkmark: url('./images/checkmark-icon.svg');
+    --jp-arrow-down: url('./images/arrow-down.svg');
+    --jp-plus: url('./images/plus.svg');
+    --jp-plus-white: url('./images/plus-white.svg');
+    --jp-clear-white: url('./images/clear-white.svg');
 }

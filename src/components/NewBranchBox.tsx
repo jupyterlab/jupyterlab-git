@@ -1,17 +1,18 @@
 import * as React from 'react';
 
 import {
-  textInputStyle,
-  stagedCommitButtonStyle,
-  stagedCommitButtonDisabledStyle,
-  stagedCommitStyle,
-  stagedCommitMessageStyle
-} from '../components_style/BranchHeaderStyle';
+  newBranchBoxStyle,
+  newBranchInputAreaStyle,
+  buttonStyle,
+  newBranchButtonStyle,
+  cancelNewBranchButtonStyle
+} from '../components_style/NewBranchBoxStyle';
 
 import { classes } from 'typestyle';
 
 export interface ICommitBoxProps {
   createNewBranch: Function;
+  toggleNewBranchBox: Function;
 }
 
 export interface ICommitBoxState {
@@ -44,33 +45,31 @@ export class NewBranchBox extends React.Component<
     });
   };
 
-  /** Update state of input box */
-  checkReadyForSubmit() {
-    return this.state.value.length === 0
-      ? classes(stagedCommitButtonStyle, stagedCommitButtonDisabledStyle)
-      : classes(stagedCommitButtonStyle, stagedCommitButtonStyle);
-  }
-
   render() {
     return (
-      <form
-        className={stagedCommitStyle}
+      <div
+        className={newBranchInputAreaStyle}
         onKeyPress={event => this.onKeyPress(event)}
       >
-        <textarea
-          className={classes(textInputStyle, stagedCommitMessageStyle)}
-          placeholder={'Name your new branch'}
+        <input
+          className={newBranchBoxStyle}
+          placeholder={'New branch'}
           value={this.state.value}
           onChange={this.handleChange}
         />
         <input
-          className={this.checkReadyForSubmit()}
-          type='button'
-          title='Create New'
-          disabled={this.state.value.length === 0}
+          className={classes(buttonStyle, newBranchButtonStyle)}
+          type="button"
+          title="Create New"
           onClick={() => this.props.createNewBranch(this.state.value)}
         />
-      </form>
+        <input
+          className={classes(buttonStyle, cancelNewBranchButtonStyle)}
+          type="button"
+          title="Cancel"
+          onClick={() => this.props.toggleNewBranchBox()}
+        />
+      </div>
     );
   }
 }

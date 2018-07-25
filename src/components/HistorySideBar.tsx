@@ -55,6 +55,7 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, IHisto
             getPastCommit={this.props.getPastCommit}
             activeNode={this.state.activeNode}
             updateActiveNode={this.updateActiveNode}
+            isVisible={this.props.isExpanded}
           />
         {this.props.pastCommits.map((pastCommit, pastCommitIndex) => (
           <PastCommitNode
@@ -67,6 +68,7 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, IHisto
             getPastCommit={this.props.getPastCommit}
             activeNode={this.state.activeNode}
             updateActiveNode={this.updateActiveNode}
+            isVisible={this.props.isExpanded}
           />
         ))}
       </div>
