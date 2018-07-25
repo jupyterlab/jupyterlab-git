@@ -61,7 +61,7 @@ export interface IFileItemState {
 }
 
 export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
-  constructor(props) {
+  constructor(props : any) {
     super(props);
     this.state = {
       showDiscardWarning: false

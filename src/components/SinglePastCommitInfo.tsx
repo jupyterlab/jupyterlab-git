@@ -37,6 +37,7 @@ export interface ISinglePastCommitInfoProps {
   list: [CommitModifiedFile];
   app: JupyterLab;
   diff: any;
+  display: boolean;
 }
 
 export class SinglePastCommitInfo extends React.Component<

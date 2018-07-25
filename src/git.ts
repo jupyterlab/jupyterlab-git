@@ -107,7 +107,7 @@ export interface GitLogResult {
 }
 
 /** Makes a HTTP request, sending a git command to the backend */
-function httpGitRequest(url, method, request): Promise<Response> {
+function httpGitRequest(url: string, method: string, request: Object): Promise<Response> {
   let fullRequest = {
     method: method,
     body: JSON.stringify(request)
@@ -146,7 +146,7 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then(data => {
+        return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
@@ -164,7 +164,7 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then(data => {
+        return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
@@ -181,7 +181,7 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then(data => {
+        return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
@@ -198,7 +198,7 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then(data => {
+        return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
@@ -220,7 +220,7 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then(data => {
+        return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
@@ -237,7 +237,7 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then(data => {
+        return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
@@ -265,7 +265,7 @@ export class Git {
         top_repo_path: path
       });
       if (response.status !== 200) {
-        return response.json().then(data => {
+        return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
@@ -298,7 +298,7 @@ export class Git {
         top_repo_path: path
       });
       if (response.status !== 200) {
-        return response.json().then(data => {
+        return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }

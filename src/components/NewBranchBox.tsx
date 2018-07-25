@@ -23,7 +23,7 @@ export class NewBranchBox extends React.Component<
   ICommitBoxProps,
   ICommitBoxState
 > {
-  constructor(props) {
+  constructor(props: ICommitBoxProps) {
     super(props);
     this.state = {
       value: ''
@@ -31,7 +31,7 @@ export class NewBranchBox extends React.Component<
   }
 
   /** Prevent enter key triggered 'submit' action during input */
-  onKeyPress(event): void {
+  onKeyPress(event: any): void {
     if (event.which === 13) {
       event.preventDefault();
       this.setState({ value: this.state.value + '\n' });

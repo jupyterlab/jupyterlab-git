@@ -25,7 +25,7 @@ export class CommitBox extends React.Component<
   ICommitBoxProps,
   ICommitBoxState
 > {
-  constructor(props) {
+  constructor(props : ICommitBoxProps) {
     super(props);
     this.state = {
       value: '',
@@ -34,7 +34,7 @@ export class CommitBox extends React.Component<
   }
 
   /** Prevent enter key triggered 'submit' action during commit message input */
-  onKeyPress(event): void {
+  onKeyPress(event : any): void {
     if (event.which === 13) {
       event.preventDefault();
       this.setState({ value: this.state.value + '\n' });

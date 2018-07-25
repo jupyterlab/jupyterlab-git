@@ -74,7 +74,7 @@ export const changeStageButtonStyle = style({
 });
 
 export const discardFileButtonStyle = style({
-  backgroundImage: 'var(--jp-discard-file)',
+  backgroundImage: 'var(--jp-icon-discard-file)',
   marginLeft: '6px',
   backgroundSize: '120%'
 });

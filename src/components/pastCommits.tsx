@@ -8,8 +8,6 @@ import { pastCommitsContainerStyle } from '../components_style/PastCommitsStyle'
 
 import * as React from 'react';
 
-import ToggleDisplay from 'react-toggle-display';
-
 /** Interface for PastCommits component props */
 export interface IPastCommitsProps {
   currentFileBrowserPath: string;
@@ -41,7 +39,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
   render() {
     return (
       <div className={pastCommitsContainerStyle}>
-        <ToggleDisplay show={!this.props.showList}>
+        {!this.props.showList &&
           <SinglePastCommitInfo
             num={this.props.pastCommitNumber}
             data={this.props.pastCommitData}
@@ -52,20 +50,20 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
             list={this.props.pastCommitFilelist}
             app={this.props.app}
             diff={this.props.diff}
+            display={!this.props.showList}
           />
-        </ToggleDisplay>
-        <ToggleDisplay show={this.props.showList}>
-          <FileList
-            currentFileBrowserPath={this.props.currentFileBrowserPath}
-            topRepoPath={this.props.topRepoPath}
-            stagedFiles={this.props.stagedFiles}
-            unstagedFiles={this.props.unstagedFiles}
-            untrackedFiles={this.props.untrackedFiles}
-            app={this.props.app}
-            refresh={this.props.refresh}
-            sideBarExpanded={this.props.sideBarExpanded}
-          />
-        </ToggleDisplay>
+        }
+        <FileList
+          currentFileBrowserPath={this.props.currentFileBrowserPath}
+          topRepoPath={this.props.topRepoPath}
+          stagedFiles={this.props.stagedFiles}
+          unstagedFiles={this.props.unstagedFiles}
+          untrackedFiles={this.props.untrackedFiles}
+          app={this.props.app}
+          refresh={this.props.refresh}
+          sideBarExpanded={this.props.sideBarExpanded}
+          display={this.props.showList}
+        />
       </div>
     );
   }

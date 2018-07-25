@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import { ServiceManager, Session, TerminalSession } from '@jupyterlab/services';
+import { ServiceManager } from '@jupyterlab/services';
 
 import { Message } from '@phosphor/messaging';
 
@@ -110,9 +110,6 @@ export class GitWidget extends Widget {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    this._manager = null;
-    this._runningSessions = null;
-    this._runningTerminals = null;
     this._renderer = null;
     clearTimeout(this._refreshId);
     super.dispose();
@@ -181,10 +178,7 @@ export class GitWidget extends Widget {
    */
   private _evtDblClick(event: MouseEvent): void {}
 
-  private _manager: ServiceManager.IManager = null;
   private _renderer: IRenderer = null;
-  private _runningSessions: Session.IModel[] = [];
-  private _runningTerminals: TerminalSession.IModel[] = [];
   private _refreshId = -1;
   private _refreshed = new Signal<this, void>(this);
 }

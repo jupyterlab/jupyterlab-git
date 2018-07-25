@@ -94,11 +94,11 @@ export const numberofChangedFilesStyle = style({
 });
 
 export const insertionIconStyle = style({
-  backgroundImage: 'var(--jp-insertions-made-icon)'
+  backgroundImage: 'var(--jp-icon-insertions-made)'
 });
 
 export const deletionIconStyle = style({
-  backgroundImage: 'var(--jp-deletions-made-icon)'
+  backgroundImage: 'var(--jp-icon-deletions-made)'
 });
 
 export const numberOfDeletionsStyle = style({

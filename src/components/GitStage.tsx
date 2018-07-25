@@ -1,6 +1,10 @@
 import { JupyterLab } from '@jupyterlab/application';
 
 import {
+  GitStatusFileResult
+} from '../git'
+
+import {
   sectionFileContainerStyle,
   sectionFileContainerDisabledStyle,
   sectionAreaStyle,
@@ -25,8 +29,6 @@ import { FileItem } from './FileItem';
 import { classes } from 'typestyle';
 
 import * as React from 'react';
-
-import ToggleDisplay from 'react-toggle-display';
 
 export interface IGitStageProps {
   heading: string;
@@ -63,7 +65,7 @@ export interface IGitStageState {
 }
 
 export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
-  constructor(props) {
+  constructor(props: IGitStageProps) {
     super(props);
     this.state = {
       selectedFile: -1,
@@ -109,7 +111,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
           <span className={sectionHeaderLabelStyle}>
             {this.props.heading}({this.props.files.length})
           </span>
-          <ToggleDisplay show={this.props.files.length > 0}>
+          {this.props.files.length > 0 &&
             <button
               className={
                 this.props.showFiles
@@ -118,7 +120,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
               }
               onClick={() => this.props.displayFiles()}
             />
-          </ToggleDisplay>
+          }
           <button
             disabled={this.checkContents()}
             className={`${this.props
@@ -143,7 +145,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
             />
           )}
         </div>
-        <ToggleDisplay show={this.props.showFiles}>
+        {this.props.showFiles &&
           <div className={sectionFileContainerStyle}>
             {this.state.showDiscardWarning && (
               <div
@@ -178,7 +180,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                 </div>
               </div>
             )}
-            {this.props.files.map((file, file_index) => {
+            {this.props.files.map((file: GitStatusFileResult, file_index: number) => {
               return (
                 <FileItem
                   key={file_index}
@@ -212,7 +214,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
               );
             })}
           </div>
-        </ToggleDisplay>
+        }
       </div>
     );
   }

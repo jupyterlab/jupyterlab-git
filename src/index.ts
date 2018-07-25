@@ -1,26 +1,26 @@
-import { addCommands, CommandIDs } from "./git_mainmenu_command";
+import { addCommands, CommandIDs } from './git_mainmenu_command';
 
-import { PathExt } from "@jupyterlab/coreutils";
+import { PathExt } from '@jupyterlab/coreutils';
 
-import { GitWidget } from "./components/GitWidget";
+import { GitWidget } from './components/GitWidget';
 
 import {
   ILayoutRestorer,
   JupyterLab,
   JupyterLabPlugin
-} from "@jupyterlab/application";
+} from '@jupyterlab/application';
 
-import { IMainMenu } from "@jupyterlab/mainmenu";
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Menu } from "@phosphor/widgets";
+import { Menu } from '@phosphor/widgets';
 
-import { Token } from "@phosphor/coreutils";
+import { Token } from '@phosphor/coreutils';
 
 /**
  * The default running sessions extension.
  */
 const plugin: JupyterLabPlugin<IGitExtension> = {
-  id: "jupyter.extensions.running-sessions-git",
+  id: 'jupyter.extensions.running-sessions-git',
   requires: [IMainMenu, ILayoutRestorer],
   activate,
   autoStart: true
@@ -31,13 +31,13 @@ const plugin: JupyterLabPlugin<IGitExtension> = {
  */
 export default plugin;
 
-export const EXTENSION_ID = "jupyter.extensions.git_plugin";
+export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
 export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
 
 /** Interface for extension class */
 export interface IGitExtension {
-  register_diff_provider(filetypes: string[], callback: IDiffCallback);
+  register_diff_provider(filetypes: string[], callback: IDiffCallback): void;
 }
 
 /** Function type for diffing a file's revisions */
@@ -49,25 +49,25 @@ export type IDiffCallback = (
 
 /** Main extension class */
 export class GitExtension implements IGitExtension {
-  git_plugin;
+  git_plugin: GitWidget;
   constructor(app: JupyterLab, restorer: ILayoutRestorer) {
     this.git_plugin = new GitWidget(
       app,
       { manager: app.serviceManager },
       this.performDiff.bind(this)
     );
-    this.git_plugin.id = "jp-git-sessions";
-    this.git_plugin.title.label = "Git";
+    this.git_plugin.id = 'jp-git-sessions';
+    this.git_plugin.title.label = 'Git';
 
     // Let the application restorer track the running panel for restoration of
     // application state (e.g. setting the running panel as the current side bar
     // widget).
 
-    restorer.add(this.git_plugin, "git-sessions");
+    restorer.add(this.git_plugin, 'git-sessions');
     app.shell.addToLeftArea(this.git_plugin, { rank: 200 });
   }
 
-  register_diff_provider(filetypes: string[], callback: IDiffCallback) {
+  register_diff_provider(filetypes: string[], callback: IDiffCallback): void {
     for (let fileType of filetypes) {
       this.diffProviders[fileType] = callback;
     }
@@ -83,8 +83,8 @@ export class GitExtension implements IGitExtension {
     if (this.diffProviders[extension] !== undefined) {
       this.diffProviders[extension](filename, revisionA, revisionB);
     } else {
-      app.commands.execute("git:terminal-cmd", {
-        cmd: "git diff " + revisionA + " " + revisionB
+      app.commands.execute('git:terminal-cmd', {
+        cmd: 'git diff ' + revisionA + ' ' + revisionB
       });
     }
   }
@@ -101,14 +101,14 @@ function activate(
 ): IGitExtension {
   const { commands } = app;
   let git_extension = new GitExtension(app, restorer);
-  const category = "Git";
+  const category = 'Git';
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   addCommands(app, app.serviceManager);
   let menu = new Menu({ commands });
   let tutorial = new Menu({ commands });
-  tutorial.title.label = " Tutorial ";
+  tutorial.title.label = ' Tutorial ';
   menu.title.label = category;
   [
     CommandIDs.gitUI,
@@ -121,7 +121,7 @@ function activate(
   [CommandIDs.setupRemotes, CommandIDs.googleLink].forEach(command => {
     tutorial.addItem({ command });
   });
-  menu.addItem({ type: "submenu", submenu: tutorial });
+  menu.addItem({ type: 'submenu', submenu: tutorial });
   mainMenu.addMenu(menu, { rank: 60 });
   return git_extension;
 }

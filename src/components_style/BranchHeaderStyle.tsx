@@ -21,8 +21,19 @@ export const openHistorySideBarButtonStyle = style({
   height: '15px',
   position: 'fixed',
   left: '33px',
-  outline: 'none'
+  outline: 'none',
+  border: 'none',
+  color: '#FFFFFF'
 });
+
+export const openHistorySideBarIconStyle = style({
+  backgroundImage: 'var(--jp-caret-right-white)',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: '100%',
+  width: '8px',
+  height: '8px'
+})
 
 export const branchLabelStyle = style({
   fontSize: 'var(--jp-ui-font-size1)',
@@ -64,7 +75,7 @@ export const headerButtonStyle = style({
 });
 
 export const branchDropdownButtonStyle = style({
-  backgroundImage: 'var(--jp-arrow-down)',
+  backgroundImage: 'var(--jp-icon-arrow-down)',
   backgroundSize: '100%',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
@@ -75,7 +86,7 @@ export const branchDropdownButtonStyle = style({
 })
 
 export const newBranchButtonStyle = style({
-  backgroundImage: 'var(--jp-plus)',
+  backgroundImage: 'var(--jp-icon-plus)',
   backgroundSize: '100%',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',

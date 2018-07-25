@@ -26,7 +26,7 @@ export interface IPastCommitNodeProps {
 }
 
 export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
-  constructor(props) {
+  constructor(props: IPastCommitNodeProps) {
     super(props);
   }
 

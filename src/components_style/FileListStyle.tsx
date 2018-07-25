@@ -1,19 +1,19 @@
 import { style } from 'typestyle';
 
 export const moveFileUpButtonStyle = style({
-  backgroundImage: 'var(--jp-move-file-up-icon)'
+  backgroundImage: 'var(--jp-icon-move-file-up)'
 });
 
 export const moveFileDownButtonStyle = style({
-  backgroundImage: 'var(--jp-move-file-down-icon)'
+  backgroundImage: 'var(--jp-icon-move-file-down)'
 });
 
 export const moveFileUpButtonSelectedStyle = style({
-  backgroundImage: 'var(--jp-move-file-up-hover-icon)'
+  backgroundImage: 'var(--jp-icon-move-file-up-hover)'
 });
 
 export const moveFileDownButtonSelectedStyle = style({
-  backgroundImage: 'var(--jp-move-file-down-hover-icon)'
+  backgroundImage: 'var(--jp-icon-move-file-down-hover)'
 });
 
 export const notebookFileIconStyle = style({

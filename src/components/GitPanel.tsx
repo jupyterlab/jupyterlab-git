@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import ToggleDisplay from 'react-toggle-display';
-
 import { JupyterLab } from '@jupyterlab/application';
 
 import {
@@ -11,7 +9,8 @@ import {
   GitShowTopLevelResult,
   GitAllHistory,
   GitLogResult,
-  SingleCommitInfo
+  SingleCommitInfo,
+  GitStatusFileResult
 } from '../git';
 
 import { PathHeader } from './PathHeader';
@@ -27,7 +26,7 @@ import {
   panelPushedContentStyle,
   panelContentStyle,
   panelWarningStyle,
-  findRepoButtonStyle,
+  findRepoButtonStyle
 } from '../components_style/GitPanelStyle';
 
 import { classes } from 'typestyle';
@@ -152,7 +151,7 @@ export class GitPanel extends React.Component<
           if (branchData.code === 0) {
             let allBranches = (branchData as GitBranchResult).branches;
             for (var i = 0; i < allBranches.length; i++) {
-              if (allBranches[i].current[0]) {
+              if (allBranches[i].current) {
                 currentBranch = allBranches[i].name;
                 break;
               }
@@ -161,15 +160,15 @@ export class GitPanel extends React.Component<
 
           // Get git log for current branch
           let logData = (apiResult as GitAllHistory).data.log;
-          let pastCommits = [];
+          let pastCommits = new Array<SingleCommitInfo>();
           if (logData.code === 0) {
             pastCommits = (logData as GitLogResult).commits;
           }
 
           // Get git status for current branch
-          let stagedFiles = [],
-            unstagedFiles = [],
-            untrackedFiles = [];
+          let stagedFiles = new Array<GitStatusFileResult>(),
+            unstagedFiles = new Array<GitStatusFileResult>(),
+            untrackedFiles = new Array<GitStatusFileResult>();
           let changedFiles = 0;
           let disableSwitchBranch = true;
           let statusData = (apiResult as GitAllHistory).data.status;
@@ -260,58 +259,61 @@ export class GitPanel extends React.Component<
           refresh={this.refresh}
         />
         <div className={this.getContentClass()}>
-          <ToggleDisplay show={this.state.showWarning}>
-            <HistorySideBar
-              isExpanded={this.state.sideBarExpanded}
-              currentFileBrowserPath={this.state.currentFileBrowserPath}
-              pastCommits={this.state.pastCommits}
-              setShowList={this.setShowList}
-              getPastCommit={this.showPastCommitWork}
-            />
-            <BranchHeader
-              currentFileBrowserPath={this.state.currentFileBrowserPath}
-              topRepoPath={this.state.topRepoPath}
-              refresh={this.refresh}
-              currentBranch={this.state.currentBranch}
-              stagedFiles={this.state.stagedFiles}
-              data={this.state.branches}
-              disabled={this.state.disableSwitchBranch}
-              toggleSidebar={this.toggleSidebar}
-              showList={this.state.showList}
-            />
-            <PastCommits
-              currentFileBrowserPath={this.state.currentFileBrowserPath}
-              topRepoPath={this.state.topRepoPath}
-              pastCommits={this.state.pastCommits}
-              inNewRepo={this.state.inNewRepo}
-              showList={this.state.showList}
-              stagedFiles={this.state.stagedFiles}
-              unstagedFiles={this.state.unstagedFiles}
-              untrackedFiles={this.state.untrackedFiles}
-              app={this.props.app}
-              refresh={this.refresh}
-              diff={this.props.diff}
-              pastCommitInfo={this.state.pastCommitInfo}
-              pastCommitFilesChanged={this.state.pastCommitFilesChanged}
-              pastCommitInsertionCount={this.state.pastCommitInsertionCount}
-              pastCommitDeletionCount={this.state.pastCommitDeletionCount}
-              pastCommitData={this.state.pastCommitData}
-              pastCommitNumber={this.state.pastCommitNumber}
-              pastCommitFilelist={this.state.pastCommitFilelist}
-              sideBarExpanded={this.state.sideBarExpanded}
-            />
-          </ToggleDisplay>
-          <ToggleDisplay show={!this.state.showWarning}>
-            <div className={panelWarningStyle}>
-              <div>
-                You aren’t in a git repository.
-              </div>
-              <button 
-              className={findRepoButtonStyle}
-              onClick={() => this.props.app.commands.execute('filebrowser:activate-main')}
-              >Go find a repo</button>
+          {this.state.showWarning && (
+            <div>
+              <HistorySideBar
+                isExpanded={this.state.sideBarExpanded}
+                currentFileBrowserPath={this.state.currentFileBrowserPath}
+                pastCommits={this.state.pastCommits}
+                setShowList={this.setShowList}
+                getPastCommit={this.showPastCommitWork}
+              />
+              <BranchHeader
+                currentFileBrowserPath={this.state.currentFileBrowserPath}
+                topRepoPath={this.state.topRepoPath}
+                refresh={this.refresh}
+                currentBranch={this.state.currentBranch}
+                stagedFiles={this.state.stagedFiles}
+                data={this.state.branches}
+                disabled={this.state.disableSwitchBranch}
+                toggleSidebar={this.toggleSidebar}
+                showList={this.state.showList}
+              />
+              <PastCommits
+                currentFileBrowserPath={this.state.currentFileBrowserPath}
+                topRepoPath={this.state.topRepoPath}
+                pastCommits={this.state.pastCommits}
+                inNewRepo={this.state.inNewRepo}
+                showList={this.state.showList}
+                stagedFiles={this.state.stagedFiles}
+                unstagedFiles={this.state.unstagedFiles}
+                untrackedFiles={this.state.untrackedFiles}
+                app={this.props.app}
+                refresh={this.refresh}
+                diff={this.props.diff}
+                pastCommitInfo={this.state.pastCommitInfo}
+                pastCommitFilesChanged={this.state.pastCommitFilesChanged}
+                pastCommitInsertionCount={this.state.pastCommitInsertionCount}
+                pastCommitDeletionCount={this.state.pastCommitDeletionCount}
+                pastCommitData={this.state.pastCommitData}
+                pastCommitNumber={this.state.pastCommitNumber}
+                pastCommitFilelist={this.state.pastCommitFilelist}
+                sideBarExpanded={this.state.sideBarExpanded}
+              />
             </div>
-          </ToggleDisplay>
+          )}
+          {!this.state.showWarning && (
+            <div className={panelWarningStyle}>
+              <div>You aren’t in a git repository.</div>
+              <button
+                className={findRepoButtonStyle}
+                onClick={() =>
+                  this.props.app.commands.execute('filebrowser:activate-main')}
+              >
+                Go find a repo
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );

@@ -18,18 +18,13 @@ import {
   stagedCommitButtonDisabledStyle,
   smallBranchStyle,
   expandedBranchStyle,
-  openHistorySideBarButtonStyle
+  openHistorySideBarButtonStyle,
+  openHistorySideBarIconStyle
 } from '../components_style/BranchHeaderStyle';
 
 import { classes } from 'typestyle';
 
 export interface IBranchHeaderState {
-  topRepoPath: string;
-  currentBranch: string;
-  data: any;
-  refresh: any;
-  disabled: boolean;
-  showNotice: boolean;
   dropdownOpen: boolean;
   showCommitBox: boolean;
   showNewBranchBox: boolean;
@@ -55,12 +50,6 @@ export class BranchHeader extends React.Component<
   constructor(props: IBranchHeaderProps) {
     super(props);
     this.state = {
-      topRepoPath: props.topRepoPath,
-      currentBranch: props.currentBranch,
-      data: [],
-      refresh: props.refresh,
-      disabled: props.disabled,
-      showNotice: false,
       dropdownOpen: false,
       showCommitBox: true,
       showNewBranchBox: false
@@ -128,12 +117,12 @@ export class BranchHeader extends React.Component<
 
   toggleSelect() {
     this.props.refresh();
-    // if (!this.props.disabled) {
-    this.setState({
-      showCommitBox: !this.state.showCommitBox,
-      dropdownOpen: !this.state.dropdownOpen
-    });
-    // }
+    if (!this.props.disabled) {
+      this.setState({
+        showCommitBox: !this.state.showCommitBox,
+        dropdownOpen: !this.state.dropdownOpen
+      });
+    }
   }
 
   getBranchStyle() {
@@ -146,15 +135,15 @@ export class BranchHeader extends React.Component<
     }
   }
 
-  toggleNewBranchBox = () : void => {
+  toggleNewBranchBox = (): void => {
     this.props.refresh();
-    // if (!this.props.disabled) {
-    this.setState({
-      showNewBranchBox: !this.state.showNewBranchBox,
-      dropdownOpen: false
-    });
-    // }
-  }
+    if (!this.props.disabled) {
+      this.setState({
+        showNewBranchBox: !this.state.showNewBranchBox,
+        dropdownOpen: false
+      });
+    }
+  };
 
   render() {
     return (
@@ -165,6 +154,7 @@ export class BranchHeader extends React.Component<
           title={'Show commit history'}
         >
           History
+          <span className={openHistorySideBarIconStyle} />
         </button>
         <h3 className={branchLabelStyle}>{this.props.currentBranch}</h3>
         <div
@@ -176,8 +166,8 @@ export class BranchHeader extends React.Component<
           title={'Change the current branch'}
           onClick={() => this.toggleSelect()}
         />
-        {!this.state.showNewBranchBox &&
-          <div 
+        {!this.state.showNewBranchBox && (
+          <div
             className={
               this.props.disabled
                 ? classes(newBranchButtonStyle, headerButtonDisabledStyle)
@@ -186,16 +176,17 @@ export class BranchHeader extends React.Component<
             title={'Create a new branch'}
             onClick={() => this.toggleNewBranchBox()}
           />
-        }
+        )}
         {this.state.showNewBranchBox &&
           this.props.showList && (
-            <NewBranchBox 
-            createNewBranch={this.createNewBranch}
-            toggleNewBranchBox={this.toggleNewBranchBox} />
+            <NewBranchBox
+              createNewBranch={this.createNewBranch}
+              toggleNewBranchBox={this.toggleNewBranchBox}
+            />
           )}
         {this.state.dropdownOpen && (
           <div>
-            {this.props.data.map((branch, branchIndex) => {
+            {this.props.data.map((branch: any, branchIndex: number) => {
               return (
                 <li
                   className={branchListItemStyle}
