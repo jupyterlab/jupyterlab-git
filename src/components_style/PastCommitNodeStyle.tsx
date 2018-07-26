@@ -15,7 +15,8 @@ export const pastCommitNodeStyle = style({
 
 export const pastCommitWorkingNodeStyle = style({
   border: '2px dashed #000',
-  borderRadius: '50%'
+  borderRadius: '50%',
+  marginTop: '5px'
 });
 
 export const pastCommitContentStyle = style({

@@ -114,7 +114,7 @@ export const cancelDiscardButtonStyle = style({
 });
 
 export const acceptDiscardButtonStyle = style({
-  backgroundColor: 'var(--jp-brand-color1)',
+  backgroundColor: 'var(--jp-error-color0)',
   border: 'none',
   marginLeft: '5px'
 });
