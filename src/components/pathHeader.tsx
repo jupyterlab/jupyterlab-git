@@ -1,49 +1,56 @@
 import {
-  gitRepoStyle,
-  gitRepoPathStyle,
-  gitRepoRefreshStyle
-} from '../components_style/PathHeaderStyle'
+  repoStyle,
+  repoPathStyle,
+  repoRefreshStyle,
+  repoIconStyle,
+  arrowStyle,
+  gitRepoPathContainerStyle,
+  directoryStyle
+} from '../components_style/PathHeaderStyle';
 
-import * as React from 'react'
-
-import '../../style/index.css'
+import * as React from 'react';
 
 export interface IPathHeaderState {
-  topRepoPath: string
-  refresh: any
+  topRepoPath: string;
+  refresh: any;
 }
 
 export interface IPathHeaderProps {
-  currentFileBrowserPath: string
-  topRepoPath: string
-  refresh: any
+  currentFileBrowserPath: string;
+  topRepoPath: string;
+  refresh: any;
 }
 
-export class PathHeader extends React.Component<IPathHeaderProps, IPathHeaderState> {
+export class PathHeader extends React.Component<
+  IPathHeaderProps,
+  IPathHeaderState
+> {
   constructor(props: IPathHeaderProps) {
-    super(props)
+    super(props);
     this.state = {
-      topRepoPath: props.topRepoPath, 
+      topRepoPath: props.topRepoPath,
       refresh: props.refresh
-    }
+    };
   }
 
   render() {
+    let relativePath = this.props.currentFileBrowserPath.split('/');
     return (
-        <div>
-          <li className={gitRepoStyle}>
-            <span className='jp-Git-repo-icon'/>
-            <span className={gitRepoPathStyle}> 
-              {this.props.topRepoPath}
-              </span> 
-            <button className={gitRepoRefreshStyle} onClick={()=>this.props.refresh()} />
-          </li>
-        </div>
-    )
+      <div className={repoStyle}>
+        <span className={repoIconStyle} />
+        <span className={repoPathStyle}>
+          {relativePath.map(directory => (
+            <div key={directory} className={gitRepoPathContainerStyle}>
+              {relativePath[0] !== '' && <span className={arrowStyle} />}
+              <span className={directoryStyle}>{directory}</span>
+            </div>
+          ))}
+        </span>
+        <button
+          className={repoRefreshStyle}
+          onClick={() => this.props.refresh()}
+        />
+      </div>
+    );
   }
 }
-
-
-
-
-

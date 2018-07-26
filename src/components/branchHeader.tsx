@@ -1,152 +1,218 @@
-import * as React from 'react'
+import * as React from 'react';
 
-import ToggleDisplay from 'react-toggle-display'
+import { Git } from '../git';
 
-import {
-  Widget
-} from '@phosphor/widgets'
+import { CommitBox } from './CommitBox';
 
-import {
-  Dialog, showDialog
-} from '@jupyterlab/apputils'
-
-import {
-  Git
-} from '../git'
+import { NewBranchBox } from './NewBranchBox';
 
 import {
   branchStyle,
   branchLabelStyle,
-  switchBranchStyle,
-  branchIconStyle,
-  branchDropdownStyle
-} from '../components_style/BranchHeaderStyle'
+  branchDropdownButtonStyle,
+  newBranchButtonStyle,
+  headerButtonDisabledStyle,
+  branchListItemStyle,
+  stagedCommitButtonStyle,
+  stagedCommitButtonReadyStyle,
+  stagedCommitButtonDisabledStyle,
+  smallBranchStyle,
+  expandedBranchStyle,
+  openHistorySideBarButtonStyle,
+  openHistorySideBarIconStyle
+} from '../components_style/BranchHeaderStyle';
 
-import '../../style/index.css'
+import { classes } from 'typestyle';
 
 export interface IBranchHeaderState {
-  topRepoPath: string,
-  currentBranch: string,
-  data: any,
-  refresh: any,
-  disabled: boolean,
-  showNotice: boolean
+  dropdownOpen: boolean;
+  showCommitBox: boolean;
+  showNewBranchBox: boolean;
 }
 
 export interface IBranchHeaderProps {
-  currentFileBrowserPath: string,
-  topRepoPath: string,
-  currentBranch: string,
-  data: any,
-  refresh: any,
-  disabled: boolean
+  currentFileBrowserPath: string;
+  topRepoPath: string;
+  currentBranch: string;
+  stagedFiles: any;
+  data: any;
+  refresh: any;
+  disabled: boolean;
+  toggleSidebar: Function;
+  showList: boolean;
 }
 
-export class BranchHeader extends React.Component<IBranchHeaderProps, IBranchHeaderState>{
-  interval: any
+export class BranchHeader extends React.Component<
+  IBranchHeaderProps,
+  IBranchHeaderState
+> {
+  interval: any;
   constructor(props: IBranchHeaderProps) {
-    super(props)
+    super(props);
     this.state = {
-      topRepoPath: props.topRepoPath, 
-      currentBranch: props.currentBranch, 
-      data: [], 
-      refresh: props.refresh, 
-      disabled: props.disabled, 
-      showNotice: false
-    }
+      dropdownOpen: false,
+      showCommitBox: true,
+      showNewBranchBox: false
+    };
   }
 
-/** Switch current working branch */
-  switchBranch(event, refresh) {
-    let gitApi = new Git()
-    if (event.target.value === '') {
-      let input = new Widget({ node: document.createElement('input') })
-      showDialog(
-        {        
-          title: 'Input a name to create a new branch and switch to it:',
-          body: input,
-          focusNodeSelector: 'input',
-          buttons: [Dialog.cancelButton(), 
-          Dialog.okButton({ label: 'Create'})]
-        }
-      ).then(result => {
-        let targetBranch = (input.node as HTMLInputElement).value 
-        if (result.button.accept && targetBranch) {
-          gitApi.checkout(true, true, targetBranch, false, null, this.props.currentFileBrowserPath)
-          .then(response => {
-            refresh()
-          })
-        }
-      })
+  /** Commit all staged files */
+  commitAllStagedFiles = (message: string, path: string): void => {
+    if (message && message !== '') {
+      let gitApi = new Git();
+      gitApi.commit(message, path).then(response => {
+        this.props.refresh();
+      });
+    }
+  };
+
+  /** Update state of commit message input box */
+  updateCommitBoxState(disable: boolean, numberOfFiles: number) {
+    if (disable) {
+      if (numberOfFiles === 0) {
+        return classes(
+          stagedCommitButtonStyle,
+          stagedCommitButtonDisabledStyle
+        );
+      } else {
+        return classes(stagedCommitButtonStyle, stagedCommitButtonReadyStyle);
+      }
     } else {
-      gitApi.checkout(true, false, event.target.value, false, null, this.props.currentFileBrowserPath)
-      .then(respones => {
-        refresh()
-      })
+      return stagedCommitButtonStyle;
     }
   }
 
-  /** Trigger notice that switching branches is currently disabled */
-  switchBranchDisableNotice() {
-    this.setState({showNotice: true})
-    setTimeout(function() {
-      this.setState({showNotice: false})
-    }
-    .bind(this), 3000)
+  /** Switch current working branch */
+  switchBranch(branchName: string) {
+    let gitApi = new Git();
+    gitApi
+      .checkout(
+        true,
+        false,
+        branchName,
+        false,
+        null,
+        this.props.currentFileBrowserPath
+      )
+      .then(respones => {
+        this.props.refresh();
+      });
   }
+
+  createNewBranch = (branchName: string): void => {
+    let gitApi = new Git();
+    gitApi
+      .checkout(
+        true,
+        true,
+        branchName,
+        false,
+        null,
+        this.props.currentFileBrowserPath
+      )
+      .then(response => {
+        this.props.refresh();
+      });
+  };
+
+  toggleSelect() {
+    this.props.refresh();
+    if (!this.props.disabled) {
+      this.setState({
+        showCommitBox: !this.state.showCommitBox,
+        dropdownOpen: !this.state.dropdownOpen
+      });
+    }
+  }
+
+  getBranchStyle() {
+    if (this.state.dropdownOpen) {
+      return classes(branchStyle, expandedBranchStyle);
+    } else {
+      return this.props.showList
+        ? branchStyle
+        : classes(branchStyle, smallBranchStyle);
+    }
+  }
+
+  toggleNewBranchBox = (): void => {
+    this.props.refresh();
+    if (!this.props.disabled) {
+      this.setState({
+        showNewBranchBox: !this.state.showNewBranchBox,
+        dropdownOpen: false
+      });
+    }
+  };
 
   render() {
     return (
-      <div className={branchStyle}>
-        <span className ={branchLabelStyle}>
-          <span className={branchIconStyle}/>
-          {this.state.showNotice ? 
-            'Stage and commit changes before switching branches' 
-            : this.props.currentBranch
+      <div className={this.getBranchStyle()}>
+        <button
+          className={openHistorySideBarButtonStyle}
+          onClick={() => this.props.toggleSidebar()}
+          title={'Show commit history'}
+        >
+          History
+          <span className={openHistorySideBarIconStyle} />
+        </button>
+        <h3 className={branchLabelStyle}>{this.props.currentBranch}</h3>
+        <div
+          className={
+            this.props.disabled
+              ? classes(branchDropdownButtonStyle, headerButtonDisabledStyle)
+              : branchDropdownButtonStyle
           }
-        </span>
-        <ToggleDisplay show={!this.props.disabled}>
-          <select 
-            ref="switch_branch_dropdown_button" 
-            value={this.props.currentBranch} 
-            disabled={this.props.disabled} 
-            title={this.props.disabled ? 
-              'Stage and commit changes before switching branches' 
-              : 'select branches'
-            } 
-            className={branchDropdownStyle}
-            onChange={event => this.switchBranch(event, this.props.refresh)} 
-          >
-            <option 
-              className={switchBranchStyle}
-              value=' '
-              disabled
-            >
-              **Switch Branches: 
-            </option>
-            {this.props.data.map((dj, dj_index) => {
-                <option value ={dj.name} key={dj_index}>
-                    {dj.name}
-                </option>
-              })
+          title={'Change the current branch'}
+          onClick={() => this.toggleSelect()}
+        />
+        {!this.state.showNewBranchBox && (
+          <div
+            className={
+              this.props.disabled
+                ? classes(newBranchButtonStyle, headerButtonDisabledStyle)
+                : newBranchButtonStyle
             }
-            <option className='jp-Git-create-branch-line' disabled />
-            <option className='jp-Git-create-branch' value=''>
-              Create New
-            </option>
-          </select>
-        </ToggleDisplay> 
-        <ToggleDisplay show={this.props.disabled && !this.state.showNotice}>
-          <select 
-            className={branchDropdownStyle}
-            onClick={()=>this.switchBranchDisableNotice()}
+            title={'Create a new branch'}
+            onClick={() => this.toggleNewBranchBox()}
           />
-        </ToggleDisplay> 
+        )}
+        {this.state.showNewBranchBox &&
+          this.props.showList && (
+            <NewBranchBox
+              createNewBranch={this.createNewBranch}
+              toggleNewBranchBox={this.toggleNewBranchBox}
+            />
+          )}
+        {this.state.dropdownOpen && (
+          <div>
+            {this.props.data.map((branch: any, branchIndex: number) => {
+              return (
+                <li
+                  className={branchListItemStyle}
+                  key={branchIndex}
+                  onClick={() => this.switchBranch(branch.name)}
+                >
+                  {branch.name}
+                </li>
+              );
+            })}
+          </div>
+        )}
+        {this.state.showNewBranchBox && (
+          <div>Branching from {this.props.currentBranch}</div>
+        )}
+        {this.state.showCommitBox &&
+          this.props.showList && (
+            <CommitBox
+              checkReadyForSubmit={this.updateCommitBoxState}
+              stagedFiles={this.props.stagedFiles}
+              commitAllStagedFiles={this.commitAllStagedFiles}
+              topRepoPath={this.props.topRepoPath}
+              refresh={this.props.refresh}
+            />
+          )}
       </div>
-    )
+    );
   }
 }
-
-
-
-

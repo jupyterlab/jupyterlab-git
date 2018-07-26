@@ -6,6 +6,7 @@ import os
 import subprocess
 from subprocess import Popen, PIPE
 
+
 class Git:
     """
     A single parent Git Class which has all the individual git methods in it.
@@ -92,7 +93,7 @@ class Git:
 
     def detailed_log(self, selected_hash, current_path):
         """
-        Execute the second git log command (used to get
+        Execute the detailed git log command (used to get
         insertions & deletions per file) & send back the result.
         """
         p = Popen(

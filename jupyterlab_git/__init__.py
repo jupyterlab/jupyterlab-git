@@ -9,9 +9,7 @@ def _jupyter_server_extension_paths():
     """
     Function to declare Jupyter Server Extension Paths.
     """
-    return [{
-        'module': 'jupyterlab_git',
-    }]
+    return [{"module": "jupyterlab_git"}]
 
 
 def _jupyter_nbextension_paths():
@@ -26,5 +24,5 @@ def load_jupyter_server_extension(nbapp):
     Function to load Jupyter Server Extension.
     """
     git = Git()
-    nbapp.web_app.settings['git'] = git
+    nbapp.web_app.settings["git"] = git
     setup_handlers(nbapp.web_app)
