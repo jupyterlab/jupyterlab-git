@@ -51,21 +51,16 @@ export interface IFileItemProps {
   updateSelectedFile: Function;
   fileIndex: number;
   selectedStage: string;
+  selectedDiscardFile: number;
+  updateSelectedDiscardFile: Function;
   disableFile: boolean;
   toggleDisableFiles: Function;
   sideBarExpanded: boolean;
 }
 
-export interface IFileItemState {
-  showDiscardWarning: boolean;
-}
-
-export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
-  constructor(props: any) {
+export class FileItem extends React.Component<IFileItemProps, {}> {
+  constructor(props: IFileItemProps) {
     super(props);
-    this.state = {
-      showDiscardWarning: false
-    };
   }
 
   checkSelected(): boolean {
@@ -87,9 +82,16 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
     }
   }
 
+  showDiscardWarning(): boolean {
+    return (
+      this.props.selectedDiscardFile === this.props.fileIndex &&
+      this.props.stage === 'Changed'
+    );
+  }
+
   getFileChangedLabelClass(change: string) {
     if (change === 'M') {
-      if (this.state.showDiscardWarning) {
+      if (this.showDiscardWarning()) {
         return classes(fileChangedLabelStyle, fileChangedLabelBrandStyle);
       } else {
         return this.checkSelected()
@@ -101,7 +103,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
           : classes(fileChangedLabelStyle, fileChangedLabelBrandStyle);
       }
     } else {
-      if (this.state.showDiscardWarning) {
+      if (this.showDiscardWarning()) {
         return classes(fileChangedLabelStyle, fileChangedLabelInfoStyle);
       } else {
         return this.checkSelected()
@@ -116,7 +118,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
   }
 
   getFileLableIconClass() {
-    if (this.state.showDiscardWarning) {
+    if (this.showDiscardWarning()) {
       return classes(
         fileIconStyle,
         this.props.parseFileExtension(this.props.file.to)
@@ -137,7 +139,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
   getFileClass() {
     if (!this.checkSelected() && this.props.disableFile) {
       return classes(fileStyle, disabledFileStyle);
-    } else if (this.state.showDiscardWarning) {
+    } else if (this.showDiscardWarning()) {
       classes(fileStyle, expandedFileStyle);
     } else {
       return this.checkSelected()
@@ -153,7 +155,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
   }
 
   getMoveFileIconClass() {
-    if (this.state.showDiscardWarning) {
+    if (this.showDiscardWarning()) {
       return classes(
         fileButtonStyle,
         changeStageButtonStyle,
@@ -181,7 +183,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
   }
 
   getDiscardFileIconClass() {
-    if (this.state.showDiscardWarning) {
+    if (this.showDiscardWarning()) {
       return classes(
         fileButtonStyle,
         changeStageButtonStyle,
@@ -205,12 +207,6 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
     }
   }
 
-  toggleDiscardChanges() {
-    this.setState({ showDiscardWarning: !this.state.showDiscardWarning }, () =>
-      this.props.toggleDisableFiles()
-    );
-  }
-
   getDiscardWarningClass() {
     return discardWarningStyle;
   }
@@ -219,7 +215,8 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
     return (
       <div
         className={this.getFileClass()}
-        onClick={() => this.props.updateSelectedFile(this.props.fileIndex)}
+        onClick={() =>
+          this.props.updateSelectedFile(this.props.fileIndex, this.props.stage)}
       >
         <button
           className={`jp-Git-button ${this.getMoveFileIconClass()}`}
@@ -240,7 +237,9 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
               e,
               this.props.file.x,
               this.props.file.y,
-              this.props.file.to
+              this.props.file.to,
+              this.props.fileIndex,
+              this.props.stage
             );
           }}
           onDoubleClick={() =>
@@ -259,11 +258,14 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
             <button
               className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
               title={'Discard this change'}
-              onClick={() => this.toggleDiscardChanges()}
+              onClick={() => {
+                this.props.toggleDisableFiles();
+                this.props.updateSelectedDiscardFile(this.props.fileIndex);
+              }}
             />
           )}
         </span>
-        {this.state.showDiscardWarning && (
+        {this.showDiscardWarning() && (
           <div className={this.getDiscardWarningClass()}>
             These changes will be gone forever
             <div>
@@ -272,7 +274,10 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
                   discardButtonStyle,
                   cancelDiscardButtonStyle
                 )}
-                onClick={() => this.toggleDiscardChanges()}
+                onClick={() => {
+                  this.props.toggleDisableFiles();
+                  this.props.updateSelectedDiscardFile(-1);
+                }}
               >
                 Cancel
               </button>
@@ -287,7 +292,8 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
                     this.props.topRepoPath,
                     this.props.refresh
                   ),
-                    this.toggleDiscardChanges();
+                    this.props.toggleDisableFiles(),
+                    this.props.updateSelectedDiscardFile(-1);
                 }}
               >
                 Discard

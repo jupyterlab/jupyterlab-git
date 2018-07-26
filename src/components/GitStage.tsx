@@ -49,7 +49,13 @@ export interface IGitStageProps {
   contextMenu: Function;
   parseFileExtension: Function;
   parseSelectedFileExtension: Function;
+  selectedFile: number;
+  updateSelectedFile: Function;
   selectedStage: string;
+  selectedDiscardFile: number
+  updateSelectedDiscardFile: Function;
+  disableFiles: boolean;
+  toggleDisableFiles: Function;
   updateSelectedStage: Function;
   isDisabled: boolean;
   disableOthers: Function;
@@ -57,18 +63,14 @@ export interface IGitStageProps {
 }
 
 export interface IGitStageState {
-  selectedFile: number;
   showDiscardWarning: boolean;
-  disableFiles: boolean;
 }
 
 export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
   constructor(props: IGitStageProps) {
     super(props);
     this.state = {
-      selectedFile: -1,
       showDiscardWarning: false,
-      disableFiles: false
     };
   }
 
@@ -86,21 +88,11 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
       : sectionFileContainerStyle;
   }
 
-  updateSelectedFile = (file: any) => {
-    this.setState({ selectedFile: file }, () =>
-      this.props.updateSelectedStage(this.props.heading)
-    );
-  };
-
   toggleDiscardChanges() {
     this.setState({ showDiscardWarning: !this.state.showDiscardWarning }, () =>
       this.props.disableOthers()
     );
   }
-
-  toggleDisableFiles = (): void => {
-    this.setState({ disableFiles: !this.state.disableFiles });
-  };
 
   render() {
     return (
@@ -202,12 +194,14 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                     parseSelectedFileExtension={
                       this.props.parseSelectedFileExtension
                     }
-                    selectedFile={this.state.selectedFile}
-                    updateSelectedFile={this.updateSelectedFile}
+                    selectedFile={this.props.selectedFile}
+                    updateSelectedFile={this.props.updateSelectedFile}
                     fileIndex={file_index}
                     selectedStage={this.props.selectedStage}
-                    disableFile={this.state.disableFiles}
-                    toggleDisableFiles={this.toggleDisableFiles}
+                    selectedDiscardFile={this.props.selectedDiscardFile}
+                    updateSelectedDiscardFile={this.props.updateSelectedDiscardFile}
+                    disableFile={this.props.disableFiles}
+                    toggleDisableFiles={this.props.toggleDisableFiles}
                     sideBarExpanded={this.props.sideBarExpanded}
                   />
                 );

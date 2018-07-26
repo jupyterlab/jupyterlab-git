@@ -58,10 +58,15 @@ export interface IFileListState {
   contextMenuTypeX: string;
   contextMenuTypeY: string;
   contextMenuFile: string;
+  contextMenuIndex: number;
+  contextMenuStage: string;
+  selectedFile: number;
   selectedStage: string;
+  selectedDiscardFile: number;
   disableStaged: boolean;
   disableUnstaged: boolean;
   disableUntracked: boolean;
+  disableFiles: boolean;
 }
 
 export interface IFileListProps {
@@ -94,10 +99,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       contextMenuTypeX: '',
       contextMenuTypeY: '',
       contextMenuFile: '',
+      contextMenuIndex: -1,
+      contextMenuStage: '',
+      selectedFile: -1,
       selectedStage: '',
+      selectedDiscardFile: -1,
       disableStaged: false,
       disableUnstaged: false,
-      disableUntracked: false
+      disableUntracked: false,
+      disableFiles: false
     };
 
     /** Add right-click menu options for files in repo 
@@ -164,11 +174,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       caption: 'Discard recent changes of selected file',
       execute: () => {
         try {
-          this.discardUnstagedFile(
-            this.state.contextMenuFile,
-            this.props.topRepoPath,
-            this.props.refresh
-          );
+          this.updateSelectedFile(this.state.contextMenuIndex, this.state.contextMenuStage)
+          this.updateSelectedDiscardFile(this.state.contextMenuIndex);
+          this.toggleDisableFiles()
         } catch (err) {}
       }
     });
@@ -219,7 +227,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event: any,
     typeX: string,
     typeY: string,
-    file: string
+    file: string,
+    index: number,
+    stage: string
   ) => {
     event.persist();
     event.preventDefault();
@@ -227,7 +237,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       {
         contextMenuTypeX: typeX,
         contextMenuTypeY: typeY,
-        contextMenuFile: file
+        contextMenuFile: file,
+        contextMenuIndex: index,
+        contextMenuStage: stage
       },
       () => this.state.contextMenuStaged.open(event.clientX, event.clientY)
     );
@@ -238,7 +250,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event: any,
     typeX: string,
     typeY: string,
-    file: string
+    file: string,
+    index: number,
+    stage: string
   ) => {
     event.persist();
     event.preventDefault();
@@ -246,7 +260,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       {
         contextMenuTypeX: typeX,
         contextMenuTypeY: typeY,
-        contextMenuFile: file
+        contextMenuFile: file,
+        contextMenuIndex: index,
+        contextMenuStage: stage
       },
       () => this.state.contextMenuUnstaged.open(event.clientX, event.clientY)
     );
@@ -257,7 +273,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event: any,
     typeX: string,
     typeY: string,
-    file: string
+    file: string,
+    index: number,
+    stage: string
   ) => {
     event.persist();
     event.preventDefault();
@@ -265,7 +283,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       {
         contextMenuTypeX: typeX,
         contextMenuTypeY: typeY,
-        contextMenuFile: file
+        contextMenuFile: file,
+        contextMenuIndex: index,
+        contextMenuStage: stage
       },
       () => this.state.contextMenuUntracked.open(event.clientX, event.clientY)
     );
@@ -414,6 +434,20 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
   };
 
+  updateSelectedDiscardFile = (index: number): void => {
+    this.setState({ selectedDiscardFile: index });
+  };
+
+  toggleDisableFiles = (): void => {
+    this.setState({ disableFiles: !this.state.disableFiles });
+  };
+
+  updateSelectedFile = (file: number, stage: string) => {
+    this.setState({ selectedFile: file }, () =>
+      this.updateSelectedStage(stage)
+    );
+  };
+
   render() {
     return (
       <div onContextMenu={event => event.preventDefault()}>
@@ -440,8 +474,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               contextMenu={this.contextMenuStaged}
               parseFileExtension={parseFileExtension}
               parseSelectedFileExtension={parseSelectedFileExtension}
+              selectedFile={this.state.selectedFile}
+              updateSelectedFile={this.updateSelectedFile}
               selectedStage={this.state.selectedStage}
               updateSelectedStage={this.updateSelectedStage}
+              selectedDiscardFile={this.state.selectedDiscardFile}
+              updateSelectedDiscardFile={this.updateSelectedDiscardFile}
+              disableFiles={this.state.disableFiles}
+              toggleDisableFiles={this.toggleDisableFiles}
               disableOthers={null}
               isDisabled={this.state.disableStaged}
               sideBarExpanded={this.props.sideBarExpanded}
@@ -467,8 +507,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               contextMenu={this.contextMenuUnstaged}
               parseFileExtension={parseFileExtension}
               parseSelectedFileExtension={parseSelectedFileExtension}
+              selectedFile={this.state.selectedFile}
+              updateSelectedFile={this.updateSelectedFile}
               selectedStage={this.state.selectedStage}
               updateSelectedStage={this.updateSelectedStage}
+              selectedDiscardFile={this.state.selectedDiscardFile}
+              updateSelectedDiscardFile={this.updateSelectedDiscardFile}
+              disableFiles={this.state.disableFiles}
+              toggleDisableFiles={this.toggleDisableFiles}
               disableOthers={this.disableStagesForDiscardAll}
               isDisabled={this.state.disableUnstaged}
               sideBarExpanded={this.props.sideBarExpanded}
@@ -494,8 +540,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               contextMenu={this.contextMenuUntracked}
               parseFileExtension={parseFileExtension}
               parseSelectedFileExtension={parseSelectedFileExtension}
+              selectedFile={this.state.selectedFile}
+              updateSelectedFile={this.updateSelectedFile}
               selectedStage={this.state.selectedStage}
               updateSelectedStage={this.updateSelectedStage}
+              selectedDiscardFile={this.state.selectedDiscardFile}
+              updateSelectedDiscardFile={this.updateSelectedDiscardFile}
+              disableFiles={this.state.disableFiles}
+              toggleDisableFiles={this.toggleDisableFiles}
               disableOthers={null}
               isDisabled={this.state.disableUntracked}
               sideBarExpanded={this.props.sideBarExpanded}
