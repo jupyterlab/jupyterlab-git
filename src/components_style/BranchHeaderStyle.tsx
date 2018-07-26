@@ -33,7 +33,7 @@ export const openHistorySideBarIconStyle = style({
   backgroundSize: '100%',
   width: '8px',
   height: '8px'
-})
+});
 
 export const branchLabelStyle = style({
   fontSize: 'var(--jp-ui-font-size1)',
@@ -83,7 +83,7 @@ export const branchDropdownButtonStyle = style({
   width: '18px',
   display: 'inline-block',
   verticalAlign: 'middle'
-})
+});
 
 export const newBranchButtonStyle = style({
   backgroundImage: 'var(--jp-icon-plus)',
@@ -94,7 +94,7 @@ export const newBranchButtonStyle = style({
   width: '18px',
   display: 'inline-block',
   verticalAlign: 'middle'
-})
+});
 
 export const headerButtonDisabledStyle = style({
   opacity: 0.5

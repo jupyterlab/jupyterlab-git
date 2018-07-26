@@ -1,8 +1,6 @@
 import { JupyterLab } from '@jupyterlab/application';
 
-import {
-  GitStatusFileResult
-} from '../git'
+import { GitStatusFileResult } from '../git';
 
 import {
   sectionFileContainerStyle,
@@ -111,7 +109,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
           <span className={sectionHeaderLabelStyle}>
             {this.props.heading}({this.props.files.length})
           </span>
-          {this.props.files.length > 0 &&
+          {this.props.files.length > 0 && (
             <button
               className={
                 this.props.showFiles
@@ -120,7 +118,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
               }
               onClick={() => this.props.displayFiles()}
             />
-          }
+          )}
           <button
             disabled={this.checkContents()}
             className={`${this.props
@@ -145,7 +143,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
             />
           )}
         </div>
-        {this.props.showFiles &&
+        {this.props.showFiles && (
           <div className={sectionFileContainerStyle}>
             {this.state.showDiscardWarning && (
               <div
@@ -180,41 +178,43 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                 </div>
               </div>
             )}
-            {this.props.files.map((file: GitStatusFileResult, file_index: number) => {
-              return (
-                <FileItem
-                  key={file_index}
-                  topRepoPath={this.props.topRepoPath}
-                  stage={this.props.heading}
-                  file={file}
-                  app={this.props.app}
-                  refresh={this.props.refresh}
-                  moveFile={this.props.moveFile}
-                  discardFile={this.props.discardFile}
-                  moveFileIconClass={this.props.moveFileIconClass}
-                  moveFileIconSelectedClass={
-                    this.props.moveFileIconSelectedClass
-                  }
-                  moveFileTitle={this.props.moveFileTitle}
-                  openFile={this.props.openFile}
-                  extractFilename={this.props.extractFilename}
-                  contextMenu={this.props.contextMenu}
-                  parseFileExtension={this.props.parseFileExtension}
-                  parseSelectedFileExtension={
-                    this.props.parseSelectedFileExtension
-                  }
-                  selectedFile={this.state.selectedFile}
-                  updateSelectedFile={this.updateSelectedFile}
-                  fileIndex={file_index}
-                  selectedStage={this.props.selectedStage}
-                  disableFile={this.state.disableFiles}
-                  toggleDisableFiles={this.toggleDisableFiles}
-                  sideBarExpanded={this.props.sideBarExpanded}
-                />
-              );
-            })}
+            {this.props.files.map(
+              (file: GitStatusFileResult, file_index: number) => {
+                return (
+                  <FileItem
+                    key={file_index}
+                    topRepoPath={this.props.topRepoPath}
+                    stage={this.props.heading}
+                    file={file}
+                    app={this.props.app}
+                    refresh={this.props.refresh}
+                    moveFile={this.props.moveFile}
+                    discardFile={this.props.discardFile}
+                    moveFileIconClass={this.props.moveFileIconClass}
+                    moveFileIconSelectedClass={
+                      this.props.moveFileIconSelectedClass
+                    }
+                    moveFileTitle={this.props.moveFileTitle}
+                    openFile={this.props.openFile}
+                    extractFilename={this.props.extractFilename}
+                    contextMenu={this.props.contextMenu}
+                    parseFileExtension={this.props.parseFileExtension}
+                    parseSelectedFileExtension={
+                      this.props.parseSelectedFileExtension
+                    }
+                    selectedFile={this.state.selectedFile}
+                    updateSelectedFile={this.updateSelectedFile}
+                    fileIndex={file_index}
+                    selectedStage={this.props.selectedStage}
+                    disableFile={this.state.disableFiles}
+                    toggleDisableFiles={this.toggleDisableFiles}
+                    sideBarExpanded={this.props.sideBarExpanded}
+                  />
+                );
+              }
+            )}
           </div>
-        }
+        )}
       </div>
     );
   }

@@ -36,14 +36,14 @@ export const buttonStyle = style({
   verticalAlign: 'middle',
   outline: 'none',
   border: 'none'
-})
+});
 
 export const newBranchButtonStyle = style({
   backgroundImage: 'var(--jp-icon-plus-white)',
-  backgroundColor: 'var(--jp-icon-brand-color1)',
-})
+  backgroundColor: 'var(--jp-icon-brand-color1)'
+});
 
 export const cancelNewBranchButtonStyle = style({
   backgroundImage: 'var(--jp-clear-white)',
-  backgroundColor: 'var(--jp-layout-color4)',
-})
+  backgroundColor: 'var(--jp-layout-color4)'
+});

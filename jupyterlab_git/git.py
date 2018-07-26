@@ -6,6 +6,7 @@ import os
 import subprocess
 from subprocess import Popen, PIPE
 
+
 class Git:
     """
     A single parent Git Class which has all the individual git methods in it.

@@ -39,7 +39,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
   render() {
     return (
       <div className={pastCommitsContainerStyle}>
-        {!this.props.showList &&
+        {!this.props.showList && (
           <SinglePastCommitInfo
             num={this.props.pastCommitNumber}
             data={this.props.pastCommitData}
@@ -52,7 +52,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
             diff={this.props.diff}
             display={!this.props.showList}
           />
-        }
+        )}
         <FileList
           currentFileBrowserPath={this.props.currentFileBrowserPath}
           topRepoPath={this.props.topRepoPath}

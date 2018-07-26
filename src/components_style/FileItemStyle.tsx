@@ -50,7 +50,6 @@ export const fileIconStyle = style({
   backgroundPosition: 'center'
 });
 
-
 export const fileLabelStyle = style({
   fontSize: 'var(--jp-ui-font-size1)',
   flex: '1 1 auto',

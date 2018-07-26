@@ -1,25 +1,25 @@
-import { Dialog, showDialog } from "@jupyterlab/apputils";
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import { JupyterLab } from "@jupyterlab/application";
+import { JupyterLab } from '@jupyterlab/application';
 
-import { ServiceManager } from "@jupyterlab/services";
+import { ServiceManager } from '@jupyterlab/services';
 
-import { InstanceTracker } from "@jupyterlab/apputils";
+import { InstanceTracker } from '@jupyterlab/apputils';
 
-import { Terminal } from "@jupyterlab/terminal";
+import { Terminal } from '@jupyterlab/terminal';
 
-import { Git } from "./git";
+import { Git } from './git';
 
 /**
  * The command IDs used by the git plugin.
  */
 export namespace CommandIDs {
-  export const gitUI = "git:ui";
-  export const gitTerminal = "git:create-new-terminal";
-  export const gitTerminalCommand = "git:terminal-command";
-  export const gitInit = "git:init";
-  export const setupRemotes = "git:tutorial-remotes";
-  export const googleLink = "git:google-link";
+  export const gitUI = 'git:ui';
+  export const gitTerminal = 'git:create-new-terminal';
+  export const gitTerminalCommand = 'git:terminal-command';
+  export const gitInit = 'git:init';
+  export const setupRemotes = 'git:tutorial-remotes';
+  export const googleLink = 'git:google-link';
 }
 
 /**
@@ -27,7 +27,7 @@ export namespace CommandIDs {
  */
 export function addCommands(app: JupyterLab, services: ServiceManager) {
   let { commands } = app;
-  const namespace = "terminal";
+  const namespace = 'terminal';
   const tracker = new InstanceTracker<Terminal>({ namespace });
   let gitApi = new Git();
 
@@ -36,9 +36,9 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
    */
   function findCurrentFileBrowserPath(): string {
     try {
-      let leftSidebarItems = app.shell.widgets("left");
+      let leftSidebarItems = app.shell.widgets('left');
       let fileBrowser = leftSidebarItems.next();
-      while (fileBrowser.id !== "filebrowser") {
+      while (fileBrowser.id !== 'filebrowser') {
         fileBrowser = leftSidebarItems.next();
       }
       return (fileBrowser as any).model.path;
@@ -47,14 +47,14 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
 
   /** Add open terminal command */
   commands.addCommand(CommandIDs.gitTerminal, {
-    label: "Open Terminal",
-    caption: "Start a new terminal session to directly use git command",
+    label: 'Open Terminal',
+    caption: 'Start a new terminal session to directly use git command',
     execute: args => {
       let currentFileBrowserPath = findCurrentFileBrowserPath();
-      let name = args ? args["name"] as string : "";
+      let name = args ? args['name'] as string : '';
       let terminal = new Terminal();
       terminal.title.closable = true;
-      terminal.title.label = "...";
+      terminal.title.label = '...';
       app.shell.addToMainArea(terminal);
       let promise = name
         ? services.terminals.connectTo(name)
@@ -66,8 +66,8 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
           tracker.add(terminal);
           app.shell.activateById(terminal.id);
           terminal.session.send({
-            type: "stdin",
-            content: ["cd " + currentFileBrowserPath + "\n"]
+            type: 'stdin',
+            content: ['cd ' + currentFileBrowserPath + '\n']
           });
           return terminal;
         })
@@ -79,18 +79,18 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
 
   /** Add open terminal and run command */
   commands.addCommand(CommandIDs.gitTerminalCommand, {
-    label: "Terminal Command",
-    caption: "Open a new terminal session and perform git command",
+    label: 'Terminal Command',
+    caption: 'Open a new terminal session and perform git command',
     execute: args => {
       let currentFileBrowserPath = findCurrentFileBrowserPath();
       let changeDirectoryCommand =
-        currentFileBrowserPath === " " ? "" : "cd " + currentFileBrowserPath;
-      let gitCommand = args ? args["cmd"] as string : "";
+        currentFileBrowserPath === ' ' ? '' : 'cd ' + currentFileBrowserPath;
+      let gitCommand = args ? args['cmd'] as string : '';
       let linkCommand =
-        changeDirectoryCommand !== "" && gitCommand !== "" ? "&&" : "";
+        changeDirectoryCommand !== '' && gitCommand !== '' ? '&&' : '';
       let terminal = new Terminal();
       terminal.title.closable = true;
-      terminal.title.label = "...";
+      terminal.title.label = '...';
       app.shell.addToMainArea(terminal);
       let promise = services.terminals.startNew();
 
@@ -100,8 +100,8 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
           tracker.add(terminal);
           app.shell.activateById(terminal.id);
           terminal.session.send({
-            type: "stdin",
-            content: [changeDirectoryCommand + linkCommand + gitCommand + "\n"]
+            type: 'stdin',
+            content: [changeDirectoryCommand + linkCommand + gitCommand + '\n']
           });
           return terminal;
         })
@@ -113,25 +113,25 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
 
   /** Add open/go to git interface command */
   commands.addCommand(CommandIDs.gitUI, {
-    label: "Git Interface",
-    caption: "Go to Git user interface",
+    label: 'Git Interface',
+    caption: 'Go to Git user interface',
     execute: () => {
       try {
-        app.shell.activateById("jp-git-sessions");
+        app.shell.activateById('jp-git-sessions');
       } catch (err) {}
     }
   });
 
   /** Add git init command */
   commands.addCommand(CommandIDs.gitInit, {
-    label: "Init",
-    caption: " Create an empty Git repository or reinitialize an existing one",
+    label: 'Init',
+    caption: ' Create an empty Git repository or reinitialize an existing one',
     execute: () => {
       let currentFileBrowserPath = findCurrentFileBrowserPath();
       showDialog({
-        title: "Initialize a Repository",
-        body: "Do you really want to make this directory a Git Repo?",
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: "Yes" })]
+        title: 'Initialize a Repository',
+        body: 'Do you really want to make this directory a Git Repo?',
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Yes' })]
       }).then(result => {
         if (result.button.accept) {
           gitApi.init(currentFileBrowserPath);
@@ -142,21 +142,21 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
 
   /** Add remote tutorial command */
   commands.addCommand(CommandIDs.setupRemotes, {
-    label: "Set Up Remotes",
-    caption: "Learn about Remotes",
+    label: 'Set Up Remotes',
+    caption: 'Learn about Remotes',
     execute: () => {
       window.open(
-        "https://www.atlassian.com/git/tutorials/setting-up-a-repository"
+        'https://www.atlassian.com/git/tutorials/setting-up-a-repository'
       );
     }
   });
 
   /** Add remote tutorial command */
   commands.addCommand(CommandIDs.googleLink, {
-    label: "Something Else",
-    caption: "Dummy Link ",
+    label: 'Something Else',
+    caption: 'Dummy Link ',
     execute: () => {
-      window.open("https://www.google.com");
+      window.open('https://www.google.com');
     }
   });
 }

@@ -5,7 +5,7 @@ export const repoStyle = style({
   flexDirection: 'row',
   backgroundColor: 'var(--jp-layout-color1)',
   lineHeight: 'var(--jp-private-running-item-height)',
-  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
 export const repoPathStyle = style({

@@ -417,7 +417,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   render() {
     return (
       <div onContextMenu={event => event.preventDefault()}>
-        {this.props.display && 
+        {this.props.display && (
           <div>
             <GitStage
               heading={'Staged'}
@@ -501,7 +501,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               sideBarExpanded={this.props.sideBarExpanded}
             />
           </div>
-        }
+        )}
       </div>
     );
   }

@@ -8,7 +8,8 @@ export const historySideBarStyle = style({
   position: 'fixed',
   backgroundColor: 'var(--jp-layout-color2)',
   transition: 'width 0.3s ease, visibility 0.3s ease, opacity 0.3s ease',
-  '-webkit-transition': 'width 0.3s ease, visibility 0.3s ease, opacity 0.3s ease',
+  '-webkit-transition':
+    'width 0.3s ease, visibility 0.3s ease, opacity 0.3s ease',
   '-moz-transition': 'width 0.3s ease, visibility 0.3s ease, opacity 0.3s ease',
   left: '33px',
   top: '70px',

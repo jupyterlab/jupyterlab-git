@@ -1,8 +1,8 @@
-import { ServerConnection } from "@jupyterlab/services";
+import { ServerConnection } from '@jupyterlab/services';
 
-import { URLExt } from "@jupyterlab/coreutils";
+import { URLExt } from '@jupyterlab/coreutils';
 
-"use strict";
+'use strict';
 
 /** Interface for GitAllHistory request result, 
   * has all repo information */
@@ -107,7 +107,11 @@ export interface GitLogResult {
 }
 
 /** Makes a HTTP request, sending a git command to the backend */
-function httpGitRequest(url: string, method: string, request: Object): Promise<Response> {
+function httpGitRequest(
+  url: string,
+  method: string,
+  request: Object
+): Promise<Response> {
   let fullRequest = {
     method: method,
     body: JSON.stringify(request)
@@ -125,7 +129,7 @@ export class Git {
   /** Make request for all git info of repository 'path' */
   async allHistory(path: string): Promise<GitAllHistory> {
     try {
-      let response = await httpGitRequest("/git/all_history", "POST", {
+      let response = await httpGitRequest('/git/all_history', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
@@ -142,7 +146,7 @@ export class Git {
   /** Make request for top level path of repository 'path' */
   async showTopLevel(path: string): Promise<GitShowTopLevelResult> {
     try {
-      let response = await httpGitRequest("/git/show_top_level", "POST", {
+      let response = await httpGitRequest('/git/show_top_level', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
@@ -160,7 +164,7 @@ export class Git {
     * with respect to the root directory of repository  */
   async showPrefix(path: string): Promise<GitShowPrefixResult> {
     try {
-      let response = await httpGitRequest("/git/show_prefix", "POST", {
+      let response = await httpGitRequest('/git/show_prefix', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
@@ -177,7 +181,7 @@ export class Git {
   /** Make request for git status of repository 'path' */
   async status(path: string): Promise<GitStatusResult> {
     try {
-      let response = await httpGitRequest("/git/status", "POST", {
+      let response = await httpGitRequest('/git/status', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
@@ -194,7 +198,7 @@ export class Git {
   /** Make request for git commit logs of repository 'path' */
   async log(path: string): Promise<GitLogResult> {
     try {
-      let response = await httpGitRequest("/git/log", "POST", {
+      let response = await httpGitRequest('/git/log', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
@@ -215,7 +219,7 @@ export class Git {
     path: string
   ): Promise<SingleCommitFilePathInfo> {
     try {
-      let response = await httpGitRequest("/git/detailed_log", "POST", {
+      let response = await httpGitRequest('/git/detailed_log', 'POST', {
         selected_hash: hash,
         current_path: path
       });
@@ -233,7 +237,7 @@ export class Git {
   /** Make request for a list of all git branches in repository 'path' */
   async branch(path: string): Promise<GitBranchResult> {
     try {
-      let response = await httpGitRequest("/git/branch", "POST", {
+      let response = await httpGitRequest('/git/branch', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
@@ -250,7 +254,7 @@ export class Git {
   /** Make request to add one or all files into 
     * the staging area in repository 'path' */
   add(check: boolean, filename: string, path: string): Promise<Response> {
-    return httpGitRequest("/git/add", "POST", {
+    return httpGitRequest('/git/add', 'POST', {
       add_all: check,
       filename: filename,
       top_repo_path: path
@@ -261,7 +265,7 @@ export class Git {
     * the staging area in repository 'path' */
   async addAllUntracked(path: string) {
     try {
-      let response = await httpGitRequest("/git/add_all_untracked", "POST", {
+      let response = await httpGitRequest('/git/add_all_untracked', 'POST', {
         top_repo_path: path
       });
       if (response.status !== 200) {
@@ -289,7 +293,7 @@ export class Git {
     path: string
   ): Promise<Response> {
     try {
-      let response = await httpGitRequest("/git/checkout", "POST", {
+      let response = await httpGitRequest('/git/checkout', 'POST', {
         checkout_branch: checkout_branch,
         new_check: new_check,
         branchname: branchname,
@@ -309,7 +313,7 @@ export class Git {
   }
   /** Make request to commit all staged files in repository 'path' */
   commit(message: string, path: string): Promise<Response> {
-    return httpGitRequest("/git/commit", "POST", {
+    return httpGitRequest('/git/commit', 'POST', {
       commit_msg: message,
       top_repo_path: path
     });
@@ -317,7 +321,7 @@ export class Git {
 
   /** Make request to move one or all files from the staged to the unstaged area */
   reset(check: boolean, filename: string, path: string): Promise<Response> {
-    return httpGitRequest("/git/reset", "POST", {
+    return httpGitRequest('/git/reset', 'POST', {
       reset_all: check,
       filename: filename,
       top_repo_path: path
@@ -326,6 +330,6 @@ export class Git {
 
   /** Make request to initialize a  new git repository at path 'path' */
   init(path: string): Promise<Response> {
-    return httpGitRequest("/git/init", "POST", { current_path: path });
+    return httpGitRequest('/git/init', 'POST', { current_path: path });
   }
 }

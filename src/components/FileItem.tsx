@@ -4,7 +4,7 @@ import {
   changeStageButtonStyle,
   changeStageButtonLeftStyle,
   discardFileButtonStyle
-} from '../components_style/GitStageStyle'
+} from '../components_style/GitStageStyle';
 
 import {
   fileStyle,
@@ -61,7 +61,7 @@ export interface IFileItemState {
 }
 
 export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
-  constructor(props : any) {
+  constructor(props: any) {
     super(props);
     this.state = {
       showDiscardWarning: false
@@ -253,7 +253,7 @@ export class FileItem extends React.Component<IFileItemProps, IFileItemState> {
         >
           {this.props.extractFilename(this.props.file.to)}
           <span className={this.getFileChangedLabelClass(this.props.file.y)}>
-          {this.getFileChangedLabel(this.props.file.y)}
+            {this.getFileChangedLabel(this.props.file.y)}
           </span>
           {this.props.stage === 'Changed' && (
             <button
