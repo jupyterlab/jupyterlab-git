@@ -40,10 +40,10 @@ export const buttonStyle = style({
 
 export const newBranchButtonStyle = style({
   backgroundImage: 'var(--jp-icon-plus-white)',
-  backgroundColor: 'var(--jp-icon-brand-color1)'
+  backgroundColor: 'var(--jp-brand-color1)'
 });
 
 export const cancelNewBranchButtonStyle = style({
-  backgroundImage: 'var(--jp-clear-white)',
+  backgroundImage: 'var(--jp-icon-clear-white)',
   backgroundColor: 'var(--jp-layout-color4)'
 });
