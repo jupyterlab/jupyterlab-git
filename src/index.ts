@@ -16,6 +16,8 @@ import { Menu } from '@phosphor/widgets';
 
 import { Token } from '@phosphor/coreutils';
 
+import '../style/variables.css';
+
 /**
  * The default running sessions extension.
  */
@@ -68,9 +70,9 @@ export class GitExtension implements IGitExtension {
   }
 
   register_diff_provider(filetypes: string[], callback: IDiffCallback): void {
-    for (let fileType of filetypes) {
+    filetypes.forEach(fileType => {
       this.diffProviders[fileType] = callback;
-    }
+    });
   }
 
   performDiff(
