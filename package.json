@@ -1,12 +1,14 @@
 {
-  "name": "jupyterlab-git",
-  "version": "1.0.0",
-  "description": "JLG",
-  "author": "Git Interns",
+  "name": "@jupyterlab/git",
+  "version": "0.1.0",
+  "description": "A JupyterLab extension for version control using git",
   "main": "lib/index.js",
+  "license": "BSD-3-Clause",
+  "author": "Git Intern Team, Jenna Landy, Noah Stapp, and Alena Mueller",
   "keywords": [
     "jupyter",
-    "jupyterlab"
+    "jupyterlab",
+    "jupyterlab-extension"
   ],
   "scripts": {
     "build": "tsc",
@@ -48,9 +50,8 @@
     "type": "git",
     "url": "git+https://github.com/zzhangjii/jupyterlab-git.git"
   },
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/zzhangjii/jupyterlab-git/issues"
   },
-  "homepage": "https://github.com/zzhangjii/jupyterlab-git#readme"
+  "homepage": "https://github.com/zzhangjii/jupyterlab-git"
 }
