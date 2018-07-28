@@ -17,7 +17,7 @@ A JupyterLab extension for version control using git
 ## Install
 
 ```bash
-jupyter labextension install jupyterlab-git
+jupyter labextension install @jupyterlab/git
 ```
 
 ```bash
