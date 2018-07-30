@@ -308,7 +308,7 @@ export class GitPanel extends React.Component<
               <button
                 className={findRepoButtonStyle}
                 onClick={() =>
-                  this.props.app.commands.execute('filebrowser:activate-main')}
+                  this.props.app.commands.execute('filebrowser:toggle-main')}
               >
                 Go find a repo
               </button>
