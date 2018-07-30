@@ -13,11 +13,11 @@ import {
   GitStatusFileResult
 } from '../git';
 
-import { PathHeader } from './PathHeader';
+import { PathHeader } from './pathHeader';
 
-import { BranchHeader } from './BranchHeader';
+import { BranchHeader } from './branchHeader';
 
-import { PastCommits } from './PastCommits';
+import { PastCommits } from './pastCommits';
 
 import { HistorySideBar } from './HistorySideBar';
 
