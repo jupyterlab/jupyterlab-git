@@ -14,7 +14,7 @@ import {
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser'
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
+import {IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -25,12 +25,33 @@ import { gitTabStyle } from './componentsStyle/GitWidgetStyle';
 import '../style/variables.css';
 import {GitClone} from "./gitClone";
 
+
+export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
+
+export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
+
+
+/** Function type for diffing a file's revisions */
+export type IDiffCallback = (
+  filename: string,
+  revisionA: string,
+  revisionB: string
+) => void;
+
+
+/** Interface for extension class */
+export interface IGitExtension {
+  registerDiffProvider(filetypes: string[], callback: IDiffCallback): void;
+}
+
+
 /**
  * The default running sessions extension.
  */
 const plugin: JupyterLabPlugin<IGitExtension> = {
   id: 'jupyter.extensions.running-sessions-git',
   requires: [IMainMenu, ILayoutRestorer, IFileBrowserFactory],
+  provides: IGitExtension,
   activate,
   autoStart: true
 };
@@ -40,21 +61,6 @@ const plugin: JupyterLabPlugin<IGitExtension> = {
  */
 export default plugin;
 
-export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
-
-export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
-
-/** Interface for extension class */
-export interface IGitExtension {
-  register_diff_provider(filetypes: string[], callback: IDiffCallback): void;
-}
-
-/** Function type for diffing a file's revisions */
-export type IDiffCallback = (
-  filename: string,
-  revisionA: string,
-  revisionB: string
-) => void;
 
 /** Main extension class */
 export class GitExtension implements IGitExtension {
@@ -80,7 +86,7 @@ export class GitExtension implements IGitExtension {
     this.git_clone_widget = new GitClone(factory);
   }
 
-  register_diff_provider(filetypes: string[], callback: IDiffCallback): void {
+  registerDiffProvider(filetypes: string[], callback: IDiffCallback): void {
     filetypes.forEach(fileType => {
       this.diffProviders[fileType] = callback;
     });
@@ -104,6 +110,8 @@ export class GitExtension implements IGitExtension {
 
   private diffProviders: { [key: string]: IDiffCallback } = {};
 }
+
+
 /**
  * Activate the running plugin.
  */
