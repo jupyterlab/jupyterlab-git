@@ -1,5 +1,5 @@
 """
-Handler Module with all the individual handlers for the jupyterlab-gitextension.
+Module with all the individual handlers, which execute git commands and return the results to the frontend.
 """
 import json
 
@@ -10,7 +10,7 @@ from notebook.base.handlers import APIHandler
 
 class Git_handler(APIHandler):
     """
-    Git Parent Handler.
+    Top-level parent class.
     """
 
     @property

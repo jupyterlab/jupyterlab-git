@@ -1,6 +1,5 @@
 """
-Module for executing git commands, their results
-are sent back to the caller.
+Module for executing git commands, sending results back to the handlers
 """
 import os
 import subprocess
@@ -9,12 +8,12 @@ from subprocess import Popen, PIPE
 
 class Git:
     """
-    A single parent Git Class which has all the individual git methods in it.
+    A single parent class containing all of the individual git methods in it.
     """
 
     def status(self, current_path):
         """
-        Execute git status command & send back the result.
+        Execute git status command & return the result.
         """
         p = Popen(
             ["git", "status", "--porcelain"],
@@ -51,7 +50,7 @@ class Git:
 
     def log(self, current_path):
         """
-        Execute git log command & send back the result.
+        Execute git log command & return the result.
         """
         p = Popen(
             ["git", "log", "--pretty=format:%H%n%an%n%ar%n%s", "-10"],
@@ -93,8 +92,8 @@ class Git:
 
     def detailed_log(self, selected_hash, current_path):
         """
-        Execute the detailed git log command (used to get
-        insertions & deletions per file) & send back the result.
+        Execute git log -1 --stat --numstat --oneline command (used to get
+        insertions & deletions per file) & return the result.
         """
         p = Popen(
             ["git", "log", "-1", "--stat", "--numstat", "--oneline", selected_hash],
@@ -156,7 +155,7 @@ class Git:
 
     def diff(self, top_repo_path):
         """
-        Execute git diff command & send back the result.
+        Execute git diff command & return the result.
         """
         p = Popen(
             ["git", "diff", "--numstat"], stdout=PIPE, stderr=PIPE, cwd=top_repo_path
@@ -180,7 +179,7 @@ class Git:
 
     def branch(self, current_path):
         """
-        Execute git branch status command & send back the result.
+        Execute git branch -a command & return the result.
         """
         p = Popen(
             ["git", "branch", "-a"],
@@ -234,7 +233,7 @@ class Git:
 
     def show_top_level(self, current_path):
         """
-        Execute git --show-toplevel command & send back the result.
+        Execute git --show-toplevel command & return the result.
         """
         p = Popen(
             ["git", "rev-parse", "--show-toplevel"],
@@ -258,7 +257,7 @@ class Git:
 
     def show_prefix(self, current_path):
         """
-        Execute git --show-prefix command & send back the result.
+        Execute git --show-prefix command & return the result.
         """
         p = Popen(
             ["git", "rev-parse", "--show-prefix"],
@@ -282,21 +281,21 @@ class Git:
 
     def add(self, filename, top_repo_path):
         """
-        Execute git add<filename> command & send back the result.
+        Execute git add<filename> command & return the result.
         """
         my_output = subprocess.check_output(["git", "add", filename], cwd=top_repo_path)
         return my_output
 
     def add_all(self, top_repo_path):
         """
-        Execute git add all command & send back the result.
+        Execute git add all command & return the result.
         """
         my_output = subprocess.check_output(["git", "add", "-u"], cwd=top_repo_path)
         return my_output
 
     def add_all_untracked(self, top_repo_path):
         """
-        Execute git add_all_untracked command & send back the result.
+        Execute git add_all_untracked command & return the result.
         """
         e = 'echo "a\n*\nq\n" | git add -i'
         my_output = subprocess.call(e, shell=True, cwd=top_repo_path)
@@ -304,7 +303,7 @@ class Git:
 
     def reset(self, filename, top_repo_path):
         """
-        Execute git reset <filename> command & send back the result.
+        Execute git reset <filename> command & return the result.
         """
         my_output = subprocess.check_output(
             ["git", "reset", filename], cwd=top_repo_path
@@ -313,14 +312,14 @@ class Git:
 
     def reset_all(self, top_repo_path):
         """
-        Execute git reset all command & send back the result.
+        Execute git reset all command & return the result.
         """
         my_output = subprocess.check_output(["git", "reset"], cwd=top_repo_path)
         return my_output
 
     def checkout_new_branch(self, branchname, current_path):
         """
-        Execute git checkout <make-branch> command & send back the result.
+        Execute git checkout <make-branch> command & return the result.
         """
         p = Popen(
             ["git", "checkout", "-b", branchname],
@@ -340,7 +339,7 @@ class Git:
 
     def checkout_branch(self, branchname, current_path):
         """
-        Execute git checkout <branch-name> command & send back the result.
+        Execute git checkout <branch-name> command & return the result.
         """
         p = Popen(
             ["git", "checkout", branchname],
@@ -360,7 +359,7 @@ class Git:
 
     def checkout(self, filename, top_repo_path):
         """
-        Execute git checkout command for the filename & send back the result.
+        Execute git checkout command for the filename & return the result.
         """
         my_output = subprocess.check_output(
             ["git", "checkout", "--", filename], cwd=top_repo_path
@@ -369,7 +368,7 @@ class Git:
 
     def checkout_all(self, top_repo_path):
         """
-        Execute git checkout command & send back the result.
+        Execute git checkout command & return the result.
         """
         my_output = subprocess.check_output(
             ["git", "checkout", "--", "."], cwd=top_repo_path
@@ -378,7 +377,7 @@ class Git:
 
     def commit(self, commit_msg, top_repo_path):
         """
-        Execute git commit <filename> command & send back the result.
+        Execute git commit <filename> command & return the result.
         """
         my_output = subprocess.check_output(
             ["git", "commit", "-m", commit_msg], cwd=top_repo_path
@@ -387,7 +386,7 @@ class Git:
 
     def pull(self, origin, master, curr_fb_path):
         """
-        Execute git pull <branch1> <branch2> command & send back the result.
+        Execute git pull <branch1> <branch2> command & return the result.
         """
         p = Popen(
             ["git", "pull", origin, master, "--no-commit"],
@@ -407,7 +406,7 @@ class Git:
 
     def push(self, origin, master, curr_fb_path):
         """
-        Execute git push <branch1> <branch2> command & send back the result.
+        Execute git push <branch1> <branch2> command & return the result.
         """
         p = Popen(
             ["git", "push", origin, master],
@@ -427,7 +426,7 @@ class Git:
 
     def init(self, current_path):
         """
-        Execute git init command & send back the result.
+        Execute git init command & return the result.
         """
         my_output = subprocess.check_output(
             ["git", "init"], cwd=os.getcwd() + "/" + current_path
