@@ -1,15 +1,14 @@
 # Specification of jupyterlab-git REST API
-This part of the REST API contains calls for working with the git-plugin of jupyterlab. 
+A description of all jupyterlab-git REST API endpoints
 Contents for each call include:
-1. URLS: Only POST can send data to server through Jupyterlab"s ServerConnection, so, all commands use POST
+1. URLS
 3. Request JSON
 4. Reply JSON
 5. How errors are handled (HTTP success codes, error JSON)
 
-### git all_history - Get all information of current repo
-Request with a "current_path", if it"s a git repo, return all the git repo information with a zero "code", if not, return error message with a non-zero "code".
-This request consists 4 seperate subprocess executions on server side (showtoplevel, branch, log, status) and may fail individually, so each part has its own "code" to indicate execution status(zero for success, none-zero for failure)   
-
+### /all_history - Get all git information of current repository
+Request with a current_path. If the current_path is a git repository, return all the git repository information. This request contains 4 seperate requests on server side (show_top_level, branch, log, status) 
+and may fail individually, so each request has its own code to indicate execution status (zero for success, non-zero for failure)
 URL:
 ```bash 
     POST /git/all_history
@@ -27,12 +26,12 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0,
     	"data":{
-            "showtoplevel": {
+            "show_top_level": {
                 "code": 0, 
                 "top_repo_path": "/absolute/path/to/root/of/repo"
             }
@@ -70,17 +69,17 @@ on git command success
         }
     }
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 128,
-        "command": "git showtoplevel"
+        "command": "git show_top_level"
         "message": "Not in a Git repository"
     }
 ```
 
-### git showtoplevel - Show the absolute path of the top-level directory
-Request with a "current_path", if it"s a git repo, return the absolute path of the top-level directory with a zero "code", if not, return error message with a non-zero "code".
+### /show_top_level - Show the absolute path of the top-level directory
+Request with a current_path. If the current_path is a git repository, return the absolute path of the top-level directory.
 
 URL:
 ```bash 
@@ -99,7 +98,7 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0, 
@@ -107,7 +106,7 @@ on git command success
      }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 128,
@@ -116,8 +115,8 @@ on git command failure
     }
 ```
 
-### git showprefix - Show the path of the current directory relative to the top-level directory
-Request with a "current_path", When the command is invoked from a subdirectory, show the path of the current directory relative to the top-level directory
+### /show_prefix - Show the relative path of the current directory
+Request with a current_path. Show the path of the current directory relative to the top-level directory.
 
 URL:
 ```bash 
@@ -136,7 +135,7 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0, 
@@ -144,7 +143,7 @@ on git command success
      }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 11,
@@ -153,8 +152,8 @@ on git command failure
     }
 ```
 
-### git branch - List branches
-Request with a "current_path" to get info of all the branches.
+### /branch - List all branches
+Request with a current_path. Get a list of all the branches.
 
 URL:
 ```bash 
@@ -173,7 +172,7 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0,
@@ -188,7 +187,7 @@ on git command success
      }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 11,
@@ -197,8 +196,8 @@ on git command failure
     }
 ```
 
-### git log - Show commit logs
-Request with a "current_path" to get the general info of all past commits.
+### /log - Show past commit logs
+Request with a current_path. Get general info on all past commits.
 
 URL:
 ```bash 
@@ -217,7 +216,7 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0,
@@ -232,7 +231,7 @@ on git command success
      }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 11,
@@ -241,8 +240,8 @@ on git command failure
     }
 ```
 
-### git detailed_log - Get detailed information of a specific past commit
-Request with a specified "selected_hash" and a "current_path" to get the detail info of this commit.
+### /detailed_log - Get detailed information of a specific past commit
+Request with a specified selected_hash and a current_path. Get the detailed info of the selected commit.
 
 URL:
 ```bash 
@@ -262,7 +261,7 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
 	"code": 0;
@@ -281,7 +280,7 @@ on git command success
     }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 11,
@@ -290,8 +289,8 @@ on git command failure
     }
 ```
 
-### git status - Show the working tree status
-Request with a "current_path" to get the full status of current working tree.
+### /status - Show the working tree's status
+Request with a current_path. Get the full status of the current working tree.
 
 URL:
 ```bash 
@@ -310,7 +309,7 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0,
@@ -324,7 +323,7 @@ on git command success
         ]
     }
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 10001,
@@ -333,8 +332,8 @@ on git command failure
     }
 ```
 
-### git add - Add file contents to the index
-Request with a "add_all" (check if add all changes), a target "filename", and a "top_repo_path" to add file contents to the index.
+### /add - Add new file or existing file's changes to git
+Request with add_all (check if add all changes), a target filename, and a top_repo_path. Add a new file or an existing file's changes to the current repository.
 
 URL:
 ```bash 
@@ -344,7 +343,7 @@ Request JSON:
 ```bash
     {
         "add_all": false, 
-        "filename": "file/or/folder/path", 
+        "file_name": "file/or/folder/path", 
         "top_repo_path": "/absolute/path/to/root/of/repo"
     }
 ```
@@ -355,14 +354,14 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0,
      }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 11,
@@ -371,8 +370,8 @@ on git command failure
     }
 ```
 
-### git add_all_untracked - Add all the untracked file contents to the index
-Request with a "top_repo_path" to add  and ONLY add all the untracked file contents to the index.
+### /add_all_untracked - Add all the untracked files to git
+Request with a top_repo_path. Add only all of the untracked files to git.
 
 URL:
 ```bash 
@@ -391,14 +390,14 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0,
      }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 11,
@@ -407,9 +406,8 @@ on git command failure
     }
 ```
 
-### git checkout - Switch branches or restore working tree files
-Request with a "checkout_branch" (if it"s a switch-branch request), a "new_check" (if the target branch needs to be created), a branch target "branchname",
-a "checkout_all" (if discard all changes), a restore target "filename" and a "top_repo_path" to determine the checkout action and target
+### /checkout - Switch branches or restore working tree files
+Request with a checkout_branch (boolean for if it's a switch branch request), a new_check (boolean for if the target branch needs to be created), a branch target branch_name, a checkout_all (boolean for if discarding all changes), a restore target file_name and a top_repo_path. Performs either a branch change, branch creation and change, checkout of all files, or checkout of a single file.
 
 URL:
 ```bash 
@@ -420,9 +418,9 @@ Request JSON:
     {
         "checkout_branch": false,
         "new_check": false,
-        "branchname": "target-branch-name",
+        "branch_name": "target-branch-name",
         "checkout_all": false, 
-        "filename": "file/or/folder/path", 
+        "file_name": "file/or/folder/path", 
         "top_repo_path": "/absolute/path/to/root/of/repo"
     }
 ```
@@ -433,14 +431,14 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0,
      }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 11,
@@ -449,8 +447,8 @@ on git command failure
     }
 ```
 
-### git reset - Reset current HEAD to the specified state
-Request with a "reset_all" (check if reset all changes), a target "filename", and a "top_repo_path" to reset file contents to the index.
+### /reset - Reset current HEAD to the specified state
+Request with a reset_all (boolean for if reset all changes), a target file_name, and a top_repo_path to reset the specificed file to the last stored version.
 
 URL:
 ```bash 
@@ -460,7 +458,7 @@ Request JSON:
 ```bash
     {
         "reset_all": false, 
-        "filename": "file/or/folder/path", 
+        "file_name": "file/or/folder/path", 
         "top_repo_path": "/absolute/path/to/root/of/repo"
     }
 ```
@@ -471,14 +469,14 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0,
      }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 11,
@@ -487,8 +485,8 @@ on git command failure
     }
 ```
 
-### git commit - Record changes to the repository
-Request with a "commit_msg" and a "top_repo_path" to commit changes.
+### /commit - Commit working changes to the repository
+Request with a commit_msg and a top_repo_path. Commit changes to the repository.
 
 URL:
 ```bash 
@@ -508,14 +506,14 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0,
      }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 11,
@@ -524,84 +522,8 @@ on git command failure
     }
 ```
 
-<!-- ### git pull - Fetch from and integrate with another repository or a local branch
-Request with a specified remote-repo "origin",  a specified branch "master", and a "curr_fb_path" to fetch.
-
-URL:
-```bash 
-    POST /git/pull
-```
-Request JSON:
-```bash
-    {
-        "origin": "remote-repository-to-Pull-from", 
-        "master": "branch-to-Pull-into",
-        "curr_fb_path": "current/path/in/filebrowser/widget"
-    }
-```
-HTTP response
-```bash
-Status: 200 OK
-```
-
-Reply JSON:
-
-on git command success
-```bash
-    {
-        "code": 0,
-     }
-
-```
-on git command failure
-```bash
-    {
-        "code": 11,
-        "command": "git pull origin master"
-        "message": "Git pull command error and help tips"
-    }
-``` -->
-
-<!-- ### git push - Update remote refs along with associated objects
-Request with a specified remote-repo "origin",  a specified branch "master", and a "curr_fb_path" to push.
-
-URL:
-```bash 
-    POST /git/push
-```
-Request JSON:
-```bash
-    {
-        "origin": "remote-repository-to-Push-into", 
-        "master": "branch-to-Push-from",
-        "curr_fb_path": "current/path/in/filebrowser/widget"
-    }
-```
-HTTP response
-```bash
-Status: 200 OK
-```
-
-Reply JSON:
-
-on git command success
-```bash
-    {
-        "code": 0,
-     }
-
-```
-on git command failure
-```bash
-    {
-        "code": 11,
-        "command": "git push origin master"
-        "message": "Git push command error and help tips"
-    }
-``` -->
-
-### git init - Create an empty Git repository or reinitialize an existing one
-Request with a "currrent_path" to init as a git repo.
+### /init - Create an empty Git repository or reinitialize an existing one
+Request with a currrent_path. Create an empty git repository in the current directory or reinitalize the current git repository. WARNING: this will completely wipe your existing local repository.
 
 URL:
 ```bash 
@@ -620,14 +542,14 @@ Status: 200 OK
 
 Reply JSON:
 
-on git command success
+On success
 ```bash
     {
         "code": 0,
      }
 
 ```
-on git command failure
+On failure
 ```bash
     {
         "code": 11,
