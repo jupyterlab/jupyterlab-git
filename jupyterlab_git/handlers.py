@@ -8,7 +8,7 @@ from notebook.utils import url_path_join as ujoin
 from notebook.base.handlers import APIHandler
 
 
-class Git_handler(APIHandler):
+class GitHandler(APIHandler):
     """
     Top-level parent class.
     """
@@ -18,7 +18,7 @@ class Git_handler(APIHandler):
         return self.settings["git"]
 
 
-class Git_all_history_handler(Git_handler):
+class GitAllHistoryHandler(GitHandler):
     """
     Parent handler for all four history/status git commands:
     1. git show_top_level
@@ -55,7 +55,7 @@ class Git_all_history_handler(Git_handler):
             self.finish(json.dumps(result))
 
 
-class Git_show_top_level_handler(Git_handler):
+class GitShowTopLevelHandler(GitHandler):
     """
     Handler for 'git rev-parse --show-toplevel'. 
     Displays the git root directory inside a repository.
@@ -71,7 +71,7 @@ class Git_show_top_level_handler(Git_handler):
         self.finish(json.dumps(result))
 
 
-class Git_show_prefix_handler(Git_handler):
+class GitShowPrefixHandler(GitHandler):
     """
     Handler for 'git rev-parse --show-prefix'. 
     Displays the prefix path of a directory in a repository, 
@@ -89,7 +89,7 @@ class Git_show_prefix_handler(Git_handler):
         self.finish(json.dumps(result))
 
 
-class Git_status_handler(Git_handler):
+class GitStatusHandler(GitHandler):
     """
     Handler for 'git status --porcelain', fetches the git status.
     """
@@ -114,7 +114,7 @@ class Git_status_handler(Git_handler):
         self.finish(json.dumps(result))
 
 
-class Git_log_handler(Git_handler):
+class GitLogHandler(GitHandler):
     """
     Handler for 'git log --pretty=format:%H-%an-%ar-%s'. 
     Fetches Commit SHA, Author Name, Commit Date & Commit Message.
@@ -131,7 +131,7 @@ class Git_log_handler(Git_handler):
         self.finish(json.dumps(result))
 
 
-class Git_detailed_log_handler(Git_handler):
+class GitDetailedLogHandler(GitHandler):
     """
     Handler for 'git log -1 --stat --numstat --oneline' command. 
     Fetches file names of committed files, Number of insertions &
@@ -150,7 +150,7 @@ class Git_detailed_log_handler(Git_handler):
         self.finish(json.dumps(result))
 
 
-class Git_diff_handler(Git_handler):
+class GitDiffHandler(GitHandler):
     """
     Handler for 'git diff --numstat'. Fetches changes between commits & working tree.
     """
@@ -168,7 +168,7 @@ class Git_diff_handler(Git_handler):
         print(my_output)
 
 
-class Git_branch_handler(Git_handler):
+class GitBranchHandler(GitHandler):
     """
     Handler for 'git branch -a'. Fetches list of all branches in current repository
     """
@@ -183,7 +183,7 @@ class Git_branch_handler(Git_handler):
         self.finish(json.dumps(result))
 
 
-class Git_add_handler(Git_handler):
+class GitAddHandler(GitHandler):
     """
     Handler for git add <filename>'. 
     Adds one or all files into to the staging area.
@@ -213,7 +213,7 @@ class Git_add_handler(Git_handler):
         self.finish(my_output)
 
 
-class Git_reset_handler(Git_handler):
+class GitResetHandler(GitHandler):
     """
     Handler for 'git reset <filename>'. 
     Moves one or all files from the staged to the unstaged area.
@@ -233,8 +233,33 @@ class Git_reset_handler(Git_handler):
             my_output = self.git.reset(filename, top_repo_path)
         self.finish(my_output)
 
+class GitDeleteCommitHandler(GitHandler):
+    """
+    Handler for 'git revert --no-commit <SHA>'.
+    Deletes the specified commit from the repository, leaving history intact.
+    """
 
-class Git_checkout_handler(Git_handler):
+    def post(self):
+        data = json.loads(self.request.body.decode("utf-8"))
+        top_repo_path = my_data["top_repo_path"]
+        commit_id = my_data["commit_id"]
+        output = self.git.delete_commit(commit_id, top_repo_path)
+        self.finish(output)
+
+class GitResetToCommitHandler(GitHandler):
+    """
+    Handler for 'git reset --hard <SHA>'.
+    Deletes all commits from head to the specified commit, making the specified commit the new head.
+    """
+
+    def post(self):
+        data = json.loads(self.request.body.decode("utf-8"))
+        top_repo_path = my_data["top_repo_path"]
+        commit_id = my_data["commit_id"]
+        output = self.git.reset_to_commit(commit_id, top_repo_path)
+        self.finish(output)
+
+class GitCheckoutHandler(GitHandler):
     """
     Handler for 'git checkout <branchname>'. Changes the current working branch.
     """
@@ -263,7 +288,7 @@ class Git_checkout_handler(Git_handler):
         self.finish(my_output)
 
 
-class Git_commit_handler(Git_handler):
+class GitCommitHandler(GitHandler):
     """
     Handler for 'git commit -m <message>'. Commits files.
     """
@@ -279,7 +304,7 @@ class Git_commit_handler(Git_handler):
         self.finish(my_output)
 
 
-class Git_pull_handler(Git_handler):
+class GitPullHandler(GitHandler):
     """
     Handler for 'git pull <first-branch> <second-branch>'. Pulls files from a remote branch.
     """
@@ -297,7 +322,7 @@ class Git_pull_handler(Git_handler):
         print("You Pulled")
 
 
-class Git_push_handler(Git_handler):
+class GitPushHandler(GitHandler):
     """
     Handler for 'git push <first-branch> <second-branch>. 
     Pushes committed files to a remote branch.
@@ -317,7 +342,7 @@ class Git_push_handler(Git_handler):
         print("You Pushed")
 
 
-class Git_init_handler(Git_handler):
+class GitInitHandler(GitHandler):
     """
     Handler for 'git init'. Initializes a repository.
     """
@@ -332,7 +357,7 @@ class Git_init_handler(Git_handler):
         self.finish(my_output)
 
 
-class Git_add_all_untracked_handler(Git_handler):
+class GitAddAllUntrackedHandler(GitHandler):
     """
     Handler for 'echo "a\n*\nq\n" | git add -i'. Adds ONLY all untracked files.
     """
@@ -355,22 +380,24 @@ def setup_handlers(web_app):
     """
 
     git_handlers = [
-        ("/git/show_top_level", Git_show_top_level_handler),
-        ("/git/show_prefix", Git_show_prefix_handler),
-        ("/git/add", Git_add_handler),
-        ("/git/status", Git_status_handler),
-        ("/git/branch", Git_branch_handler),
-        ("/git/reset", Git_reset_handler),
-        ("/git/checkout", Git_checkout_handler),
-        ("/git/commit", Git_commit_handler),
-        ("/git/pull", Git_pull_handler),
-        ("/git/push", Git_push_handler),
-        ("/git/diff", Git_diff_handler),
-        ("/git/log", Git_log_handler),
-        ("/git/detailed_log", Git_detailed_log_handler),
-        ("/git/init", Git_init_handler),
-        ("/git/all_history", Git_all_history_handler),
-        ("/git/add_all_untracked", Git_add_all_untracked_handler),
+        ("/git/show_top_level", GitShowTopLevelHandler),
+        ("/git/show_prefix", GitShowPrefixHandler),
+        ("/git/add", GitAddHandler),
+        ("/git/status", GitStatusHandler),
+        ("/git/branch", GitBranchHandler),
+        ("/git/reset", GitResetHandler),
+        ("/git/delete_commit", GitDeleteCommitHandler),
+        ("/git/reset_to_commit", GitResetToCommitHandler),
+        ("/git/checkout", GitCheckoutHandler),
+        ("/git/commit", GitCommitHandler),
+        ("/git/pull", GitPullHandler),
+        ("/git/push", GitPushHandler),
+        ("/git/diff", GitDiffHandler),
+        ("/git/log", GitLogHandler),
+        ("/git/detailed_log", GitDetailedLogHandler),
+        ("/git/init", GitInitHandler),
+        ("/git/all_history", GitAllHistoryHandler),
+        ("/git/add_all_untracked", GitAddAllUntrackedHandler),
     ]
 
     # add the baseurl to our paths
