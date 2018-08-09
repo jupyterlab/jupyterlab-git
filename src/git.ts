@@ -328,6 +328,34 @@ export class Git {
     });
   }
 
+  /** Make request to delete changes from selected commit */
+  async deleteCommit(
+    message: string,
+    path: string,
+    commitId: string
+  ): Promise<Response> {
+    const request = await httpGitRequest("/git/delete_commit", "POST", {
+      commit_id: commitId,
+      top_repo_path: path
+    });
+    await this.commit(message, path);
+    return request;
+  }
+
+  /** Make request to reset to selected commit */
+  async resetToCommit(
+    message: string,
+    path: string,
+    commitId: string
+  ): Promise<Response> {
+    const request = await httpGitRequest("/git/reset_to_commit", "POST", {
+      commit_id: commitId,
+      top_repo_path: path
+    });
+    await this.commit(message, path);
+    return request;
+  }
+
   /** Make request to initialize a  new git repository at path 'path' */
   init(path: string): Promise<Response> {
     return httpGitRequest('/git/init', 'POST', { current_path: path });
