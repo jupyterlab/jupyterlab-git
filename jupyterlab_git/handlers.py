@@ -243,7 +243,9 @@ class GitDeleteCommitHandler(GitHandler):
         data = json.loads(self.request.body.decode("utf-8"))
         top_repo_path = my_data["top_repo_path"]
         commit_id = my_data["commit_id"]
+        print(top_repo_path, commit_id)
         output = self.git.delete_commit(commit_id, top_repo_path)
+        print(output)
         self.finish(output)
 
 class GitResetToCommitHandler(GitHandler):

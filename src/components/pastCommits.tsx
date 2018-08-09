@@ -41,6 +41,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
       <div className={pastCommitsContainerStyle}>
         {!this.props.showList && (
           <SinglePastCommitInfo
+            topRepoPath={this.props.topRepoPath}
             num={this.props.pastCommitNumber}
             data={this.props.pastCommitData}
             info={this.props.pastCommitInfo}

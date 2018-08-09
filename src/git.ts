@@ -334,12 +334,15 @@ export class Git {
     path: string,
     commitId: string
   ): Promise<Response> {
-    const request = await httpGitRequest("/git/delete_commit", "POST", {
+    console.log('deleting commit', commitId, 'with path', path, 'and commit message', message)
+    const delete_request = await httpGitRequest('/git/delete_commit', 'POST', {
       commit_id: commitId,
       top_repo_path: path
     });
-    await this.commit(message, path);
-    return request;
+    console.log('deleted', delete_request)
+    // let commit_request = await this.commit(message, path);
+    // console.log('committed', commit_request)
+    return delete_request;
   }
 
   /** Make request to reset to selected commit */
@@ -352,7 +355,7 @@ export class Git {
       commit_id: commitId,
       top_repo_path: path
     });
-    await this.commit(message, path);
+    // await this.commit(message, path);
     return request;
   }
 

@@ -321,7 +321,9 @@ class Git:
         """
         Delete a specified commit from the repository.
         """
+        print('in git.py')
         my_output = subprocess.check_output(["git", "revert", "--no-commit", commit_id], cwd=top_repo_path)
+        print(my_output)
         return my_output
 
     def reset_to_commit(self, commit_id, top_repo_path):
