@@ -8,7 +8,7 @@ A JupyterLab extension for version control using git
 
 ## Prerequisites
 
-- JupyterLab
+- JupyterLab  
 
 ## Usage
 
