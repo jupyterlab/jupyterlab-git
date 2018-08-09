@@ -489,13 +489,13 @@ On failure
 Request with a commit_msg and a top_repo_path. Commit changes to the repository.
 
 URL:
-```bash 
+```bash
     POST /git/commit
 ```
 Request JSON:
 ```bash
     {
-        "commit_msg": "typed-in-message-for-commit", 
+        "commit_msg": "typed-in-message-for-commit",
         "top_repo_path": "/absolute/path/to/root/of/repo"
     }
 ```
@@ -519,6 +519,82 @@ On failure
         "code": 11,
         "command": "git commit -m commit_msg"
         "message": "Git command error info"
+    }
+```
+
+### git pull - Fetch from and integrate with another repository or a local branch
+Request with a specified remote-repo "origin",  a specified branch "master", and a "curr_fb_path" to fetch.
+
+URL:
+```bash
+    POST /git/pull
+```
+Request JSON:
+```bash
+    {
+        "origin": "remote-repository-to-Pull-from",
+        "master": "branch-to-Pull-into",
+        "curr_fb_path": "current/path/in/filebrowser/widget"
+    }
+```
+HTTP response
+```bash
+Status: 200 OK
+```
+
+Reply JSON:
+
+on git command success
+```bash
+    {
+        "code": 0,
+     }
+
+```
+on git command failure
+```bash
+    {
+        "code": 11,
+        "command": "git pull origin master"
+        "message": "Git pull command error and help tips"
+    }
+```
+
+### git push - Update remote refs along with associated objects
+Request with a specified remote-repo "origin",  a specified branch "master", and a "curr_fb_path" to push.
+
+URL:
+```bash
+    POST /git/push
+```
+Request JSON:
+```bash
+    {
+        "origin": "remote-repository-to-Push-into", 
+        "master": "branch-to-Push-from",
+        "curr_fb_path": "current/path/in/filebrowser/widget"
+    }
+```
+HTTP response
+```bash
+Status: 200 OK
+```
+
+Reply JSON:
+
+on git command success
+```bash
+    {
+        "code": 0,
+     }
+
+```
+on git command failure
+```bash
+    {
+        "code": 11,
+        "command": "git push origin master"
+        "message": "Git push command error and help tips"
     }
 ```
 

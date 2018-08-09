@@ -41,6 +41,9 @@ export interface IGitSessionNodeState {
   currentBranch: string;
   disableSwitchBranch: boolean;
 
+  enablePull: boolean;
+  enablePush: boolean;
+
   pastCommits: any;
   inNewRepo: boolean;
   showList: boolean;
@@ -80,6 +83,8 @@ export class GitPanel extends React.Component<
       branches: [],
       currentBranch: '',
       disableSwitchBranch: true,
+      enablePull: false,
+      enablePush: false,
       pastCommits: [],
       inNewRepo: true,
       showList: true,
@@ -171,6 +176,8 @@ export class GitPanel extends React.Component<
             untrackedFiles = new Array<GitStatusFileResult>();
           let changedFiles = 0;
           let disableSwitchBranch = true;
+          let enablePull = false;
+          let enablePush = true;
           let statusData = (apiResult as GitAllHistory).data.status;
           if (statusData.code === 0) {
             let statusFiles = (statusData as GitStatusResult).files;
@@ -193,14 +200,16 @@ export class GitPanel extends React.Component<
                 }
               }
             }
-            // No uncommitted changed files, allow switching branches
+            // No uncommitted changed files, allow switching branches and pulling
             if (changedFiles === 0) {
               disableSwitchBranch = false;
+              enablePull = true;
             }
           }
-          // No committed files ever, disable switching branches
+          // No committed files ever, disable switching branches and pushing
           if (pastCommits.length === 0) {
             disableSwitchBranch = true;
+            enablePush = false;
           }
 
           // If not in same repo as before refresh, display the current repo
@@ -220,6 +229,8 @@ export class GitPanel extends React.Component<
             branches: (branchData as GitBranchResult).branches,
             currentBranch: currentBranch,
             disableSwitchBranch: disableSwitchBranch,
+            enablePull: enablePull,
+            enablePush: enablePush,
             pastCommits: pastCommits,
             inNewRepo: inNewRepo,
             showList: showList,
@@ -231,7 +242,9 @@ export class GitPanel extends React.Component<
           this.setState({
             currentFileBrowserPath: (fileBrowser as any).model.path,
             topRepoPath: '',
-            showWarning: false
+            showWarning: false,
+            enablePull: false, 
+            enablePush: false
           });
         }
       }

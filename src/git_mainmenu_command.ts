@@ -8,7 +8,11 @@ import { InstanceTracker } from '@jupyterlab/apputils';
 
 import { Terminal } from '@jupyterlab/terminal';
 
+import { Widget } from '@phosphor/widgets';
+
 import { Git } from './git';
+
+import { GitWidget } from './components/GitWidget';
 
 /**
  * The command IDs used by the git plugin.
@@ -17,8 +21,12 @@ export namespace CommandIDs {
   export const gitUI = 'git:ui';
   export const gitTerminal = 'git:create-new-terminal';
   export const gitTerminalCommand = 'git:terminal-command';
+  export const gitPull = 'git:pull';
+  export const gitPush = 'git:push';
   export const gitInit = 'git:init';
   export const setupRemotes = 'git:tutorial-remotes';
+  export const tutorialPull = 'git:tutorial-pull';
+  export const tutorialPush = 'git:tutorial-push';
   export const googleLink = 'git:google-link';
 }
 
@@ -43,6 +51,52 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
       }
       return (fileBrowser as any).model.path;
     } catch (err) {}
+  }
+
+  /**
+   * Get the current branch of the working directory.
+   */
+  function findCurrentBranch(): string {
+    try {
+      let leftSidebarItems = app.shell.widgets('left')
+      let gitWidget = leftSidebarItems.next()
+      while(gitWidget.id !== 'jp-git-sessions') {
+        gitWidget = leftSidebarItems.next()
+      }
+      return (gitWidget as GitWidget).component.state.currentBranch;
+    } catch (err) {}
+  }
+
+   /**
+    * Check if the current branch is ready to pull from a remote
+   */
+  function pullReady() {
+    let isReady = false
+    try {
+      let leftSidebarItems = app.shell.widgets('left')
+      let gitWidget = leftSidebarItems.next()
+      while(gitWidget.id !== 'jp-git-sessions') {
+        gitWidget = leftSidebarItems.next()
+      }
+      isReady = (!(gitWidget.isHidden)) && (gitWidget as GitWidget).component.state.enablePull
+    } catch(err) {}
+    return isReady
+  }
+
+  /**
+   * Check if the current branch is ready to push to a remote
+   */
+  function pushReady() {
+    let isReady = false
+    try {
+      let leftSidebarItems = app.shell.widgets('left')
+      let gitWidget = leftSidebarItems.next()
+      while(gitWidget.id !== 'jp-git-sessions') {
+        gitWidget = leftSidebarItems.next()
+      }
+      isReady = (!(gitWidget.isHidden)) && (gitWidget as GitWidget).component.state.enablePush
+    } catch(err){}
+    return isReady
   }
 
   /** Add open terminal command */
@@ -122,6 +176,126 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
     }
   });
 
+  /** Add git pull command */
+  commands.addCommand(CommandIDs.gitPull, {
+    label: 'Pull',
+    caption: 'Update remote refs along with associated objects',
+    execute: () => {
+      let currentFileBrowserPath = findCurrentFileBrowserPath()
+      let currentBranch = findCurrentBranch()
+      let inputBlock = document.createElement("div")
+      let remoteRepoPrompt = document.createElement("li")
+      remoteRepoPrompt.textContent = 'Enter the name of remote repository to Pull from'
+      let remoteRepoInput = document.createElement("input")
+      let branchPrompt = document.createElement("li")
+      branchPrompt.textContent = 'Enter the name of branch to Pull into'
+      let branchInput = document.createElement("input")
+
+      remoteRepoInput.value = 'origin'
+      branchInput.value = currentBranch
+
+      inputBlock.appendChild(remoteRepoPrompt)
+      inputBlock.appendChild(remoteRepoInput)
+      inputBlock.appendChild(branchPrompt)
+      inputBlock.appendChild(branchInput)
+
+      let branchWidget = new Widget({ node: inputBlock })
+      showDialog({
+        title: " Fetch from and integrate with a repo or branch",
+        body: branchWidget,
+        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "OK" })]
+      }).then(result => {
+          let remoteRepoMessage = remoteRepoInput.value
+          let localBranchMessage = branchInput.value
+          if (result.button.accept){ 
+            if(remoteRepoMessage && remoteRepoMessage !== null && localBranchMessage && localBranchMessage !== null) {
+              gitApi.pull(remoteRepoMessage, localBranchMessage, currentFileBrowserPath).then(response => {
+                if(response.code !== 0) {
+                  showDialog({
+                    title: "Warning",
+                    body: response.message,
+                    buttons: [Dialog.warnButton({ label: "OK"})]
+                  })
+                } else {
+                  showDialog({
+                    title: "Git Pull success!",
+                    buttons: [Dialog.okButton({ label: "OK"})]
+                  })
+                }
+              }) 
+            } else {
+              showDialog({
+                title: "Repo and branch name cannot be empty",
+                buttons: [Dialog.okButton({ label: "OK"})]
+              })
+            }
+          }
+      })
+    },
+    isEnabled: pullReady
+  })
+
+  /** Add git push command */
+  commands.addCommand(CommandIDs.gitPush, {
+    label: 'Push',
+    caption: 'Update remote refs along with associated objects',
+    execute: () => {
+      let currentFileBrowserPath = findCurrentFileBrowserPath()
+      let currentBranch = findCurrentBranch()
+      let inputBlock = document.createElement("div")
+      let remoteRepoPrompt = document.createElement("li")
+      remoteRepoPrompt.textContent = 'Enter the name of remote repository to Push into'
+      let remoteRepoInput = document.createElement("input")
+      let branchPrompt = document.createElement("li")
+      branchPrompt.textContent = 'Enter the name of branch to Push from'
+      let branchInput = document.createElement("input")
+
+      remoteRepoInput.value = 'origin'
+      branchInput.value = currentBranch
+
+      inputBlock.appendChild(remoteRepoPrompt)
+      inputBlock.appendChild(remoteRepoInput)
+      inputBlock.appendChild(branchPrompt)
+      inputBlock.appendChild(branchInput)
+
+      let branchWidget = new Widget({node:inputBlock})
+      showDialog(
+        {
+          title: "Update remote refs along with associated objects",
+          body: branchWidget,
+          buttons: [Dialog.cancelButton(), Dialog.okButton({ label: "OK"})]
+        }
+      ).then(result => {
+          let remoteRepoMessage = remoteRepoInput.value
+          let localBranchMessage = branchInput.value
+          if (result.button.accept){
+            if(remoteRepoMessage && remoteRepoMessage !== null && localBranchMessage && localBranchMessage !== null) {
+              gitApi.push(remoteRepoMessage, localBranchMessage, currentFileBrowserPath).then(response => {
+                if(response.code !== 0){
+                  showDialog({
+                    title: "Warning",
+                    body: response.message,
+                    buttons: [Dialog.warnButton({ label: "OK" })]
+                  })
+                } else {
+                  showDialog({
+                    title: "Git Push success!",
+                    buttons: [Dialog.okButton({ label: "OK" })]
+                  })
+                }
+              }) 
+            } else{
+              showDialog({
+                title: "Repo and branch name cannot be empty",
+                buttons: [Dialog.okButton({ label: "OK" })]
+              })
+            }
+          }
+      })
+    },
+    isEnabled: pushReady
+  })
+
   /** Add git init command */
   commands.addCommand(CommandIDs.gitInit, {
     label: 'Init',
@@ -150,6 +324,24 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
       );
     }
   });
+
+  /** Add pull tutorial command */
+  commands.addCommand(CommandIDs.tutorialPull, {
+    label: 'How to use Pull',
+    caption: "What's Pull",
+    execute: () => {
+      window.open("https://git-scm.com/docs/git-pull")
+    },
+  })
+
+  /** Add push tutorial command */
+  commands.addCommand(CommandIDs.tutorialPush, {
+    label: "How to use Push",
+    caption: "What's Push",
+    execute: () => {
+      window.open("https://git-scm.com/docs/git-push")
+    },
+  })
 
   /** Add remote tutorial command */
   commands.addCommand(CommandIDs.googleLink, {

@@ -115,14 +115,22 @@ function activate(
   [
     CommandIDs.gitUI,
     CommandIDs.gitTerminal,
-    CommandIDs.gitInit
+    CommandIDs.gitPull,
+    CommandIDs.gitPush,
+    CommandIDs.gitInit,
+  ].forEach(command =>{
+    menu.addItem({command});
+  });
+
+  [
+    CommandIDs.setupRemotes,
+    CommandIDs.tutorialPull,
+    CommandIDs.tutorialPush,
+    CommandIDs.googleLink
   ].forEach(command => {
     menu.addItem({ command });
   });
 
-  [CommandIDs.setupRemotes, CommandIDs.googleLink].forEach(command => {
-    tutorial.addItem({ command });
-  });
   menu.addItem({ type: 'submenu', submenu: tutorial });
   mainMenu.addMenu(menu, { rank: 60 });
   return git_extension;
