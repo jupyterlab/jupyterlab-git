@@ -340,8 +340,8 @@ export class Git {
       top_repo_path: path
     });
     console.log('deleted', delete_request)
-    // let commit_request = await this.commit(message, path);
-    // console.log('committed', commit_request)
+    let commit_request = await this.commit(message, path);
+    console.log('committed', commit_request)
     return delete_request;
   }
 
@@ -355,7 +355,7 @@ export class Git {
       commit_id: commitId,
       top_repo_path: path
     });
-    // await this.commit(message, path);
+    await this.commit(message, path);
     return request;
   }
 

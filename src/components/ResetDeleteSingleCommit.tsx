@@ -56,12 +56,13 @@ export class ResetDeleteSingleCommit extends React.Component<IResetDeleteProps, 
     } else {
       gitApi.deleteCommit(this.state.message, this.props.path, this.props.commitId)
     }
+    this.props.onCancel();
   }
 
   render() {
     return (
       <div>
-        <div className={WarningLabel}>{this.props.action === 'reset' 
+        <div className={WarningLabel}>{this.props.action === 'delete' 
           ? 'These changes will be gone forever. Commit if you\'re sure?' 
           : 'All changes after this will be gone forever. Commit if you\'re sure?'
         }</div>
@@ -83,7 +84,7 @@ export class ResetDeleteSingleCommit extends React.Component<IResetDeleteProps, 
           disabled={this.state.resetDeleteDisabled}
           onClick={this.handleResetDelete}
         >
-          {this.props.action === 'reset'
+          {this.props.action === 'delete'
             ? 'Delete these changes'
             : 'Revert to this commit'
           }

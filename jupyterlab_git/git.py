@@ -321,16 +321,17 @@ class Git:
         """
         Delete a specified commit from the repository.
         """
-        print('in git.py')
+        print('in git.py, delete_commit')
         my_output = subprocess.check_output(["git", "revert", "--no-commit", commit_id], cwd=top_repo_path)
-        print(my_output)
         return my_output
 
     def reset_to_commit(self, commit_id, top_repo_path):
         """
         Reset the current branch to a specific past commit.
         """
+        print('in git.py, reset_to_commit')
         my_output = subprocess.check_output(["git", "reset", "--hard", commit_id], cwd=top_repo_path)
+        print(my_ouput)
         return my_output
 
     def checkout_new_branch(self, branchname, current_path):
@@ -395,6 +396,7 @@ class Git:
         """
         Execute git commit <filename> command & return the result.
         """
+        print('committing')
         my_output = subprocess.check_output(
             ["git", "commit", "-m", commit_msg], cwd=top_repo_path
         )
