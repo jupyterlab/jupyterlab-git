@@ -45,6 +45,7 @@ export interface ISinglePastCommitInfoProps {
   app: JupyterLab;
   diff: any;
   display: boolean;
+  refresh: Function;
 }
 
 export interface ISinglePastCommitInfoState {
@@ -141,6 +142,7 @@ export class SinglePastCommitInfo extends React.Component<
                 commitId={this.props.data.commit}
                 path={this.props.topRepoPath}
                 onCancel={this.hideDeleteCommit}
+                refresh={this.props.refresh}
               />
             }
             {this.state.displayReset && 
@@ -149,6 +151,7 @@ export class SinglePastCommitInfo extends React.Component<
                 commitId={this.props.data.commit}
                 path={this.props.topRepoPath}
                 onCancel={this.hideResetToCommit}
+                refresh={this.props.refresh}
               />
             }
           </div>
