@@ -45,6 +45,20 @@ export const commitLabelMessageStyle = style({
   paddingRight: '10px'
 });
 
+export const commitOverviewNumbers = style({
+  fontSize: '13px',
+  fontWeight: 'bold',
+  paddingTop: '5px',
+  $nest: {
+    '& span': {
+      marginLeft: '5px'
+    },
+    '& span:nth-of-type(1)' : {
+      marginLeft: '0px'
+    }
+  }
+})
+
 export const commitDetailStyle = style({
   flex: '1 1 auto',
   margin: '0',
@@ -55,7 +69,16 @@ export const commitDetailStyle = style({
 export const commitDetailHeader = style({
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   fontSize: '13px',
-  fontWeight: 'bold'
+  fontWeight: 'bold',
+
+  $nest: {
+    '& button': {
+      width: '15px'
+    },
+    '& button:nth-of-type(1)': {
+      marginLeft: '5px'
+    }
+  }
 });
 
 export const commitDetailFileStyle = style({
@@ -81,7 +104,7 @@ export const commitDetailFilePathStyle = style({
 
 export const iconStyle = style({
   display: 'inline-block',
-  width: '30px',
+  width: '20px',
   height: '13px',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
@@ -101,6 +124,18 @@ export const deletionIconStyle = style({
   backgroundImage: 'var(--jp-icon-deletions-made)'
 });
 
+export const trashButtonStyle = style({
+  backgroundImage: 'var(--jp-icon-discard-file)',
+  outline: 'none',
+  border: 'none'
+})
+
+export const revertButtonStyle = style({
+  backgroundImage: 'var(--jp-icon-rewind)',
+  outline: 'none',
+  border: 'none'
+})
+
 export const numberOfDeletionsStyle = style({
   position: 'absolute',
   right: '12px',
@@ -114,3 +149,36 @@ export const numberOfInsertionsStyle = style({
   width: '15px',
   marginTop: '1px'
 });
+
+export const confirmActionStyle = style({
+  
+})
+
+export const WarningLabel = style({
+  padding: '5px 1px 5px 0'
+})
+
+export const MessageInput = style({
+  boxSizing: 'border-box',
+  width:'95%',
+  marginBottom: '7px',
+})
+
+export const Button = style({
+  outline: 'none',
+  border: 'none',
+  color: 'var(--jp-layout-color0)'
+})
+
+export const ResetDeleteDisabledButton = style({
+  backgroundColor: 'var(--jp-error-color2)'
+})
+
+export const ResetDeleteButton = style({
+  backgroundColor: 'var(--jp-error-color1)',
+})
+
+export const CancelButton = style({
+  backgroundColor: 'var(--jp-layout-color4)',
+  marginRight: '4px',
+})
