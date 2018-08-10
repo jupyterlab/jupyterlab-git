@@ -79,6 +79,7 @@ export interface IFileListProps {
   refresh: any;
   sideBarExpanded: boolean;
   display: boolean;
+  currentTheme: string;
 }
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
@@ -485,6 +486,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               disableOthers={null}
               isDisabled={this.state.disableStaged}
               sideBarExpanded={this.props.sideBarExpanded}
+              currentTheme={this.props.currentTheme}
             />
             <GitStage
               heading={'Changed'}
@@ -518,6 +520,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               disableOthers={this.disableStagesForDiscardAll}
               isDisabled={this.state.disableUnstaged}
               sideBarExpanded={this.props.sideBarExpanded}
+              currentTheme={this.props.currentTheme}
             />
             <GitStage
               heading={'Untracked'}
@@ -551,6 +554,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               disableOthers={null}
               isDisabled={this.state.disableUntracked}
               sideBarExpanded={this.props.sideBarExpanded}
+              currentTheme={this.props.currentTheme}
             />
           </div>
         )}

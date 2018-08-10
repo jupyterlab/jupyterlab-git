@@ -40,7 +40,7 @@ export interface IGitStageProps {
   discardAllFiles: Function;
   discardFile: Function;
   moveFile: Function;
-  moveFileIconClass: string;
+  moveFileIconClass: Function;
   moveFileIconSelectedClass: string;
   moveAllFilesTitle: string;
   moveFileTitle: string;
@@ -52,7 +52,7 @@ export interface IGitStageProps {
   selectedFile: number;
   updateSelectedFile: Function;
   selectedStage: string;
-  selectedDiscardFile: number
+  selectedDiscardFile: number;
   updateSelectedDiscardFile: Function;
   disableFiles: boolean;
   toggleDisableFiles: Function;
@@ -60,6 +60,7 @@ export interface IGitStageProps {
   isDisabled: boolean;
   disableOthers: Function;
   sideBarExpanded: boolean;
+  currentTheme: string;
 }
 
 export interface IGitStageState {
@@ -70,7 +71,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
   constructor(props: IGitStageProps) {
     super(props);
     this.state = {
-      showDiscardWarning: false,
+      showDiscardWarning: false
     };
   }
 
@@ -113,9 +114,10 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
           )}
           <button
             disabled={this.checkContents()}
-            className={`${this.props
-              .moveFileIconClass} ${changeStageButtonStyle} 
-                      ${changeStageButtonLeftStyle}`}
+            className={`${this.props.moveFileIconClass(
+              this.props.currentTheme
+            )} ${changeStageButtonStyle} 
+               ${changeStageButtonLeftStyle}`}
             title={this.props.moveAllFilesTitle}
             onClick={() =>
               this.props.moveAllFiles(
@@ -128,7 +130,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
               disabled={this.checkContents()}
               className={classes(
                 changeStageButtonStyle,
-                discardFileButtonStyle
+                discardFileButtonStyle(this.props.currentTheme)
               )}
               title={'Discard All Changes'}
               onClick={() => this.toggleDiscardChanges()}
@@ -199,10 +201,13 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                     fileIndex={file_index}
                     selectedStage={this.props.selectedStage}
                     selectedDiscardFile={this.props.selectedDiscardFile}
-                    updateSelectedDiscardFile={this.props.updateSelectedDiscardFile}
+                    updateSelectedDiscardFile={
+                      this.props.updateSelectedDiscardFile
+                    }
                     disableFile={this.props.disableFiles}
                     toggleDisableFiles={this.props.toggleDisableFiles}
                     sideBarExpanded={this.props.sideBarExpanded}
+                    currentTheme={this.props.currentTheme}
                   />
                 );
               }

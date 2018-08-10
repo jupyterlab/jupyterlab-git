@@ -251,6 +251,7 @@ export class GitPanel extends React.Component<
   }
 
   render() {
+    console.log(this.props.app.shell.dataset);
     return (
       <div className={panelContainerStyle}>
         <PathHeader
@@ -278,6 +279,7 @@ export class GitPanel extends React.Component<
                 disabled={this.state.disableSwitchBranch}
                 toggleSidebar={this.toggleSidebar}
                 showList={this.state.showList}
+                currentTheme={this.props.app.shell.dataset.themeLight}
               />
               <PastCommits
                 currentFileBrowserPath={this.state.currentFileBrowserPath}
@@ -299,6 +301,7 @@ export class GitPanel extends React.Component<
                 pastCommitNumber={this.state.pastCommitNumber}
                 pastCommitFilelist={this.state.pastCommitFilelist}
                 sideBarExpanded={this.state.sideBarExpanded}
+                currentTheme={this.props.app.shell.dataset.themeLight}
               />
             </div>
           )}

@@ -39,7 +39,7 @@ export interface IFileItemProps {
   refresh: any;
   moveFile: Function;
   discardFile: Function;
-  moveFileIconClass: string;
+  moveFileIconClass: Function;
   moveFileIconSelectedClass: string;
   moveFileTitle: string;
   openFile: Function;
@@ -56,6 +56,7 @@ export interface IFileItemProps {
   disableFile: boolean;
   toggleDisableFiles: Function;
   sideBarExpanded: boolean;
+  currentTheme: string;
 }
 
 export class FileItem extends React.Component<IFileItemProps, {}> {
@@ -161,7 +162,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
         changeStageButtonStyle,
         changeStageButtonLeftStyle,
         fileGitButtonStyle,
-        this.props.moveFileIconClass
+        this.props.moveFileIconClass(this.props.currentTheme)
       );
     } else {
       return this.checkSelected()
@@ -177,7 +178,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
             changeStageButtonStyle,
             changeStageButtonLeftStyle,
             fileGitButtonStyle,
-            this.props.moveFileIconClass
+            this.props.moveFileIconClass(this.props.currentTheme)
           );
     }
   }
@@ -188,7 +189,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
         fileButtonStyle,
         changeStageButtonStyle,
         fileGitButtonStyle,
-        discardFileButtonStyle
+        discardFileButtonStyle(this.props.currentTheme)
       );
     } else {
       return this.checkSelected()
@@ -202,7 +203,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
             fileButtonStyle,
             changeStageButtonStyle,
             fileGitButtonStyle,
-            discardFileButtonStyle
+            discardFileButtonStyle(this.props.currentTheme)
           );
     }
   }

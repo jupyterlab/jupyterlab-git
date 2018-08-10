@@ -334,7 +334,7 @@ export class Git {
     path: string,
     commitId: string
   ): Promise<Response> {
-    const request = await httpGitRequest("/git/delete_commit", "POST", {
+    const request = await httpGitRequest('/git/delete_commit', 'POST', {
       commit_id: commitId,
       top_repo_path: path
     });
@@ -348,7 +348,7 @@ export class Git {
     path: string,
     commitId: string
   ): Promise<Response> {
-    const request = await httpGitRequest("/git/reset_to_commit", "POST", {
+    const request = await httpGitRequest('/git/reset_to_commit', 'POST', {
       commit_id: commitId,
       top_repo_path: path
     });
