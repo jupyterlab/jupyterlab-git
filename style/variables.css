@@ -5,26 +5,29 @@
 @import url('https://fonts.googleapis.com/css?family=Oswald');
 
 :root {
-    --jp-icon-discard-file: url('./images/discard.svg');
-    --jp-icon-discard-file-white: url('./images/discard-selected.svg');
-    --jp-icon-discard-file-selected: url('./images/discard-selected.svg');
-    --jp-icon-insertions-made: url('./images/insertions-made-icon.svg');
-    --jp-icon-deletions-made: url('./images/deletions-made-icon.svg');
-    --jp-Git-icon-author: url('./images/author.svg');
-    --jp-image-caretdownwhite: url('./images/caretdownwhite.svg');
-    --jp-caret-right-white: url('./images/caretrightwhite.svg');
-    --jp-icon-move-file-down: url('./images/move-file-down.svg');
-    --jp-icon-move-file-down-white: url('./images/move-file-down-hover.svg');
-    --jp-icon-move-file-down-hover: url('./images/move-file-down-hover.svg');
-    --jp-icon-move-file-up: url('./images/move-file-up.svg');
-    --jp-icon-move-file-up-white: url('./images/move-file-up-hover.svg');
-    --jp-icon-move-file-up-hover: url('./images/move-file-up-hover.svg');
-    --jp-icon-path-arrow-right: url('./images/path-arrow-right.svg');
-    --jp-checkmark: url('./images/checkmark-icon.svg');
-    --jp-icon-arrow-down: url('./images/arrow-down.svg');
-    --jp-icon-arrow-down-white: url('./images/arrow-down-white.svg');
-    --jp-icon-plus: url('./images/plus.svg');
-    --jp-icon-plus-white: url('./images/plus-white.svg');
-    --jp-icon-clear-white: url('./images/clear-white.svg');
-    --jp-icon-rewind: url('./images/rewind.svg')
+  --jp-icon-discard-file: url('./images/discard.svg');
+  --jp-icon-discard-file-white: url('./images/discard-selected.svg');
+  --jp-icon-discard-file-selected: url('./images/discard-selected.svg');
+  --jp-icon-insertions-made: url('./images/insertions-made-icon.svg');
+  --jp-icon-insertions-made-white: url('./images/insertions-made-icon-white.svg');
+  --jp-icon-deletions-made: url('./images/deletions-made-icon.svg');
+  --jp-icon-deletions-made-white: url('./images/deletions-made-icon-white.svg');
+  --jp-Git-icon-author: url('./images/author.svg');
+  --jp-image-caretdownwhite: url('./images/caretdownwhite.svg');
+  --jp-caret-right-white: url('./images/caretrightwhite.svg');
+  --jp-icon-move-file-down: url('./images/move-file-down.svg');
+  --jp-icon-move-file-down-white: url('./images/move-file-down-hover.svg');
+  --jp-icon-move-file-down-hover: url('./images/move-file-down-hover.svg');
+  --jp-icon-move-file-up: url('./images/move-file-up.svg');
+  --jp-icon-move-file-up-white: url('./images/move-file-up-hover.svg');
+  --jp-icon-move-file-up-hover: url('./images/move-file-up-hover.svg');
+  --jp-icon-path-arrow-right: url('./images/path-arrow-right.svg');
+  --jp-checkmark: url('./images/checkmark-icon.svg');
+  --jp-icon-arrow-down: url('./images/arrow-down.svg');
+  --jp-icon-arrow-down-white: url('./images/arrow-down-white.svg');
+  --jp-icon-plus: url('./images/plus.svg');
+  --jp-icon-plus-white: url('./images/plus-white.svg');
+  --jp-icon-clear-white: url('./images/clear-white.svg');
+  --jp-icon-rewind: url('./images/rewind.svg');
+  --jp-icon-rewind-white: url('./images/rewind-white.svg');
 }
