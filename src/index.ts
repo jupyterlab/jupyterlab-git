@@ -1,4 +1,4 @@
-import { addCommands, CommandIDs } from './git_mainmenu_command';
+import { addCommands, CommandIDs } from './gitMenuCommands';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
