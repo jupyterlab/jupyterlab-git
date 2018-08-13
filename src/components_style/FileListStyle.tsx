@@ -1,12 +1,28 @@
 import { style } from 'typestyle';
 
-export const moveFileUpButtonStyle = style({
-  backgroundImage: 'var(--jp-icon-move-file-up)'
-});
+export function moveFileUpButtonStyle(isLight: string) {
+  if (isLight === 'true') {
+    return style({
+      backgroundImage: 'var(--jp-icon-move-file-up)'
+    });
+  } else {
+    return style({
+      backgroundImage: 'var(--jp-icon-move-file-up-white)'
+    });
+  }
+}
 
-export const moveFileDownButtonStyle = style({
-  backgroundImage: 'var(--jp-icon-move-file-down)'
-});
+export function moveFileDownButtonStyle(isLight: string) {
+  if (isLight === 'true') {
+    return style({
+      backgroundImage: 'var(--jp-icon-move-file-down)'
+    });
+  } else {
+    return style({
+      backgroundImage: 'var(--jp-icon-move-file-down-white)'
+    });
+  }
+}
 
 export const moveFileUpButtonSelectedStyle = style({
   backgroundImage: 'var(--jp-icon-move-file-up-hover)'

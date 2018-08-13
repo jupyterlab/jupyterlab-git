@@ -74,27 +74,57 @@ export const headerButtonStyle = style({
   marginLeft: '5px'
 });
 
-export const branchDropdownButtonStyle = style({
-  backgroundImage: 'var(--jp-icon-arrow-down)',
-  backgroundSize: '100%',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  height: '18px',
-  width: '18px',
-  display: 'inline-block',
-  verticalAlign: 'middle'
-});
+export function branchDropdownButtonStyle(isLight: string) {
+  if (isLight === 'true') {
+    return style({
+      backgroundImage: 'var(--jp-icon-arrow-down)',
+      backgroundSize: '100%',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      height: '18px',
+      width: '18px',
+      display: 'inline-block',
+      verticalAlign: 'middle'
+    });
+  } else {
+    return style({
+      backgroundImage: 'var(--jp-icon-arrow-down-white)',
+      backgroundSize: '100%',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      height: '18px',
+      width: '18px',
+      display: 'inline-block',
+      verticalAlign: 'middle'
+    });
+  }
+}
 
-export const newBranchButtonStyle = style({
-  backgroundImage: 'var(--jp-icon-plus)',
-  backgroundSize: '100%',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  height: '18px',
-  width: '18px',
-  display: 'inline-block',
-  verticalAlign: 'middle'
-});
+export function newBranchButtonStyle(isLight: string) {
+  if (isLight === 'true') {
+    return style({
+      backgroundImage: 'var(--jp-icon-plus)',
+      backgroundSize: '100%',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      height: '18px',
+      width: '18px',
+      display: 'inline-block',
+      verticalAlign: 'middle'
+    });
+  } else {
+    return style({
+      backgroundImage: 'var(--jp-icon-plus-white)',
+      backgroundSize: '100%',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      height: '18px',
+      width: '18px',
+      display: 'inline-block',
+      verticalAlign: 'middle'
+    });
+  }
+}
 
 export const headerButtonDisabledStyle = style({
   opacity: 0.5

@@ -4,6 +4,8 @@ import { SingleCommitInfo, CommitModifiedFile } from '../git';
 
 import { parseFileExtension } from './FileList';
 
+import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
+
 import {
   commitStyle,
   commitNumberLabelStyle,
@@ -11,6 +13,7 @@ import {
   commitAuthorIconStyle,
   commitLabelDateStyle,
   commitLabelMessageStyle,
+  commitOverviewNumbers,
   commitDetailStyle,
   commitDetailHeader,
   commitDetailFileStyle,
@@ -18,8 +21,14 @@ import {
   iconStyle,
   insertionIconStyle,
   numberofChangedFilesStyle,
-  deletionIconStyle
+  deletionIconStyle,
+  revertButtonStyle
 } from '../components_style/SinglePastCommitInfoStyle';
+
+import {
+  changeStageButtonStyle,
+  discardFileButtonStyle
+} from '../components_style/GitStageStyle';
 
 import { fileIconStyle } from '../components_style/FileItemStyle';
 
@@ -28,6 +37,7 @@ import * as React from 'react';
 import { classes } from 'typestyle/';
 
 export interface ISinglePastCommitInfoProps {
+  topRepoPath: string;
   num: string;
   data: SingleCommitInfo;
   info: string;
@@ -38,15 +48,52 @@ export interface ISinglePastCommitInfoProps {
   app: JupyterLab;
   diff: any;
   display: boolean;
+  refresh: Function;
+  currentTheme: string;
+}
+
+export interface ISinglePastCommitInfoState {
+  displayDelete: boolean;
+  displayReset: boolean;
 }
 
 export class SinglePastCommitInfo extends React.Component<
   ISinglePastCommitInfoProps,
-  {}
+  ISinglePastCommitInfoState
 > {
   constructor(props: ISinglePastCommitInfoProps) {
     super(props);
+    this.state = {
+      displayDelete: false,
+      displayReset: false
+    };
   }
+
+  showDeleteCommit = () => {
+    this.setState({
+      displayDelete: true,
+      displayReset: false
+    });
+  };
+
+  hideDeleteCommit = () => {
+    this.setState({
+      displayDelete: false
+    });
+  };
+
+  showResetToCommit = () => {
+    this.setState({
+      displayReset: true,
+      displayDelete: false
+    });
+  };
+
+  hideResetToCommit = () => {
+    this.setState({
+      displayReset: false
+    });
+  };
 
   render() {
     return (
@@ -67,22 +114,68 @@ export class SinglePastCommitInfo extends React.Component<
           <div className={commitLabelMessageStyle}>
             {this.props.data.commit_msg}
           </div>
-        </div>
-        <div className={commitDetailStyle}>
-          <div className={commitDetailHeader}>
-            Changed
+          <div className={commitOverviewNumbers}>
             <span>
               <span className={classes(iconStyle, numberofChangedFilesStyle)} />
               {this.props.filesChanged}
             </span>
             <span>
-              <span className={classes(iconStyle, insertionIconStyle)} />
+              <span
+                className={classes(
+                  iconStyle,
+                  insertionIconStyle(this.props.currentTheme)
+                )}
+              />
               {this.props.insertionCount}
             </span>
             <span>
-              <span className={classes(iconStyle, deletionIconStyle)} />
+              <span
+                className={classes(
+                  iconStyle,
+                  deletionIconStyle(this.props.currentTheme)
+                )}
+              />
               {this.props.deletionCount}
             </span>
+          </div>
+        </div>
+        <div className={commitDetailStyle}>
+          <div className={commitDetailHeader}>
+            Changed
+            <button
+              className={classes(
+                changeStageButtonStyle,
+                discardFileButtonStyle(this.props.currentTheme)
+              )}
+              onClick={this.showDeleteCommit}
+            />
+            <button
+              className={classes(
+                changeStageButtonStyle,
+                revertButtonStyle(this.props.currentTheme)
+              )}
+              onClick={this.showResetToCommit}
+            />
+          </div>
+          <div>
+            {this.state.displayDelete && (
+              <ResetDeleteSingleCommit
+                action="delete"
+                commitId={this.props.data.commit}
+                path={this.props.topRepoPath}
+                onCancel={this.hideDeleteCommit}
+                refresh={this.props.refresh}
+              />
+            )}
+            {this.state.displayReset && (
+              <ResetDeleteSingleCommit
+                action="reset"
+                commitId={this.props.data.commit}
+                path={this.props.topRepoPath}
+                onCancel={this.hideResetToCommit}
+                refresh={this.props.refresh}
+              />
+            )}
           </div>
           {this.props.list.length > 0 &&
             this.props.list.map((modifiedFile, modifiedFileIndex) => {

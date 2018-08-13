@@ -253,12 +253,22 @@ export class Git {
 
   /** Make request to add one or all files into 
     * the staging area in repository 'path' */
-  add(check: boolean, filename: string, path: string): Promise<Response> {
-    return httpGitRequest('/git/add', 'POST', {
-      add_all: check,
-      filename: filename,
-      top_repo_path: path
-    });
+  async add(check: boolean, filename: string, path: string): Promise<Response> {
+    try {
+      let response = await httpGitRequest('/git/add', 'POST', {
+        add_all: check,
+        filename: filename,
+        top_repo_path: path
+      });
+      if (response.status !== 200) {
+        return response.json().then((data: any) => {
+          throw new ServerConnection.ResponseError(response, data.message);
+        });
+      }
+      return response.json();
+    } catch (err) {
+      throw ServerConnection.NetworkError;
+    }
   }
 
   /** Make request to add all untracked files into 
@@ -312,20 +322,44 @@ export class Git {
     }
   }
   /** Make request to commit all staged files in repository 'path' */
-  commit(message: string, path: string): Promise<Response> {
-    return httpGitRequest('/git/commit', 'POST', {
-      commit_msg: message,
-      top_repo_path: path
-    });
+  async commit(message: string, path: string): Promise<Response> {
+    try {
+      let response = await httpGitRequest('/git/commit', 'POST', {
+        commit_msg: message,
+        top_repo_path: path
+      });
+      if (response.status !== 200) {
+        return response.json().then((data: any) => {
+          throw new ServerConnection.ResponseError(response, data.message);
+        });
+      }
+      return response;
+    } catch (err) {
+      throw ServerConnection.NetworkError;
+    }
   }
 
   /** Make request to move one or all files from the staged to the unstaged area */
-  reset(check: boolean, filename: string, path: string): Promise<Response> {
-    return httpGitRequest('/git/reset', 'POST', {
-      reset_all: check,
-      filename: filename,
-      top_repo_path: path
-    });
+  async reset(
+    check: boolean,
+    filename: string,
+    path: string
+  ): Promise<Response> {
+    try {
+      let response = await httpGitRequest('/git/reset', 'POST', {
+        reset_all: check,
+        filename: filename,
+        top_repo_path: path
+      });
+      if (response.status !== 200) {
+        return response.json().then((data: any) => {
+          throw new ServerConnection.ResponseError(response, data.message);
+        });
+      }
+      return response;
+    } catch (err) {
+      throw ServerConnection.NetworkError;
+    }
   }
 
   /** Make request to delete changes from selected commit */
@@ -334,12 +368,21 @@ export class Git {
     path: string,
     commitId: string
   ): Promise<Response> {
-    const request = await httpGitRequest("/git/delete_commit", "POST", {
-      commit_id: commitId,
-      top_repo_path: path
-    });
-    await this.commit(message, path);
-    return request;
+    try {
+      let response = await httpGitRequest('/git/delete_commit', 'POST', {
+        commit_id: commitId,
+        top_repo_path: path
+      });
+      if (response.status !== 200) {
+        return response.json().then((data: any) => {
+          throw new ServerConnection.ResponseError(response, data.message);
+        });
+      }
+      await this.commit(message, path);
+      return response;
+    } catch (err) {
+      throw ServerConnection.NetworkError;
+    }
   }
 
   /** Make request to reset to selected commit */
@@ -348,16 +391,37 @@ export class Git {
     path: string,
     commitId: string
   ): Promise<Response> {
-    const request = await httpGitRequest("/git/reset_to_commit", "POST", {
-      commit_id: commitId,
-      top_repo_path: path
-    });
-    await this.commit(message, path);
-    return request;
+    try {
+      let response = await httpGitRequest('/git/reset_to_commit', 'POST', {
+        commit_id: commitId,
+        top_repo_path: path
+      });
+      if (response.status !== 200) {
+        return response.json().then((data: any) => {
+          throw new ServerConnection.ResponseError(response, data.message);
+        });
+      }
+      await this.commit(message, path);
+      return response;
+    } catch (err) {
+      throw ServerConnection.NetworkError;
+    }
   }
 
   /** Make request to initialize a  new git repository at path 'path' */
-  init(path: string): Promise<Response> {
-    return httpGitRequest('/git/init', 'POST', { current_path: path });
+  async init(path: string): Promise<Response> {
+    try {
+      let response = await httpGitRequest('/git/init', 'POST', {
+        current_path: path
+      });
+      if (response.status !== 200) {
+        return response.json().then((data: any) => {
+          throw new ServerConnection.ResponseError(response, data.message);
+        });
+      }
+      return response;
+    } catch (err) {
+      throw ServerConnection.NetworkError;
+    }
   }
 }

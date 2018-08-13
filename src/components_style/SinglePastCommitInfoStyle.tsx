@@ -45,6 +45,20 @@ export const commitLabelMessageStyle = style({
   paddingRight: '10px'
 });
 
+export const commitOverviewNumbers = style({
+  fontSize: '13px',
+  fontWeight: 'bold',
+  paddingTop: '5px',
+  $nest: {
+    '& span': {
+      marginLeft: '5px'
+    },
+    '& span:nth-of-type(1)': {
+      marginLeft: '0px'
+    }
+  }
+});
+
 export const commitDetailStyle = style({
   flex: '1 1 auto',
   margin: '0',
@@ -81,7 +95,7 @@ export const commitDetailFilePathStyle = style({
 
 export const iconStyle = style({
   display: 'inline-block',
-  width: '30px',
+  width: '20px',
   height: '13px',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
@@ -93,13 +107,45 @@ export const numberofChangedFilesStyle = style({
   backgroundImage: 'var(--jp-icon-file)'
 });
 
-export const insertionIconStyle = style({
-  backgroundImage: 'var(--jp-icon-insertions-made)'
-});
+export function insertionIconStyle(isLight: string) {
+  if (isLight === 'true') {
+    return style({
+      backgroundImage: 'var(--jp-icon-insertions-made)'
+    });
+  } else {
+    return style({
+      backgroundImage: 'var(--jp-icon-insertions-made-white)'
+    });
+  }
+}
 
-export const deletionIconStyle = style({
-  backgroundImage: 'var(--jp-icon-deletions-made)'
-});
+export function deletionIconStyle(isLight: string) {
+  if (isLight === 'true') {
+    return style({
+      backgroundImage: 'var(--jp-icon-deletions-made)'
+    });
+  } else {
+    return style({
+      backgroundImage: 'var(--jp-icon-deletions-made-white)'
+    });
+  }
+}
+
+export function revertButtonStyle(isLight: string) {
+  if (isLight === 'true') {
+    return style({
+      backgroundImage: 'var(--jp-icon-rewind)',
+      marginLeft: '6px',
+      backgroundSize: '120%'
+    });
+  } else {
+    return style({
+      backgroundImage: 'var(--jp-icon-rewind-white)',
+      marginLeft: '6px',
+      backgroundSize: '120%'
+    });
+  }
+}
 
 export const numberOfDeletionsStyle = style({
   position: 'absolute',
@@ -113,4 +159,33 @@ export const numberOfInsertionsStyle = style({
   right: '50px',
   width: '15px',
   marginTop: '1px'
+});
+
+export const WarningLabel = style({
+  padding: '5px 1px 5px 0'
+});
+
+export const MessageInput = style({
+  boxSizing: 'border-box',
+  width: '95%',
+  marginBottom: '7px'
+});
+
+export const Button = style({
+  outline: 'none',
+  border: 'none',
+  color: 'var(--jp-layout-color0)'
+});
+
+export const ResetDeleteDisabledButton = style({
+  backgroundColor: 'var(--jp-error-color2)'
+});
+
+export const ResetDeleteButton = style({
+  backgroundColor: 'var(--jp-error-color1)'
+});
+
+export const CancelButton = style({
+  backgroundColor: 'var(--jp-layout-color4)',
+  marginRight: '4px'
 });
