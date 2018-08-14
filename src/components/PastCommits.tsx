@@ -29,6 +29,7 @@ export interface IPastCommitsProps {
   pastCommitNumber: any;
   pastCommitFilelist: any;
   sideBarExpanded: boolean;
+  currentTheme: string;
 }
 
 export class PastCommits extends React.Component<IPastCommitsProps, {}> {
@@ -41,6 +42,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
       <div className={pastCommitsContainerStyle}>
         {!this.props.showList && (
           <SinglePastCommitInfo
+            topRepoPath={this.props.topRepoPath}
             num={this.props.pastCommitNumber}
             data={this.props.pastCommitData}
             info={this.props.pastCommitInfo}
@@ -51,6 +53,8 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
             app={this.props.app}
             diff={this.props.diff}
             display={!this.props.showList}
+            currentTheme={this.props.currentTheme}
+            refresh={this.props.refresh}
           />
         )}
         <FileList
@@ -63,6 +67,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
           refresh={this.props.refresh}
           sideBarExpanded={this.props.sideBarExpanded}
           display={this.props.showList}
+          currentTheme={this.props.currentTheme}
         />
       </div>
     );
