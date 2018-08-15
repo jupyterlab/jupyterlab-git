@@ -111,6 +111,7 @@ export class BranchHeader extends React.Component<
         this.props.currentFileBrowserPath
       )
       .then(response => {
+        console.log('new branch!');
         this.props.refresh();
       });
   };
