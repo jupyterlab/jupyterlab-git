@@ -1,7 +1,6 @@
 import { style, keyframes } from 'typestyle';
 
 export const newBranchInputAreaStyle = style({
-  display: 'inline-block',
   verticalAlign: 'middle'
 });
 

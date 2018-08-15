@@ -108,7 +108,7 @@ export const numberofChangedFilesStyle = style({
 });
 
 export function insertionIconStyle(isLight: string) {
-  if (isLight === 'true') {
+  if (isLight === 'true' || isLight === undefined) {
     return style({
       backgroundImage: 'var(--jp-icon-insertions-made)'
     });
@@ -120,7 +120,7 @@ export function insertionIconStyle(isLight: string) {
 }
 
 export function deletionIconStyle(isLight: string) {
-  if (isLight === 'true') {
+  if (isLight === 'true' || isLight === undefined) {
     return style({
       backgroundImage: 'var(--jp-icon-deletions-made)'
     });
@@ -132,7 +132,7 @@ export function deletionIconStyle(isLight: string) {
 }
 
 export function revertButtonStyle(isLight: string) {
-  if (isLight === 'true') {
+  if (isLight === 'true' || isLight === undefined) {
     return style({
       backgroundImage: 'var(--jp-icon-rewind)',
       marginLeft: '6px',

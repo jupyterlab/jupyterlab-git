@@ -251,7 +251,6 @@ export class GitPanel extends React.Component<
   }
 
   render() {
-    console.log(this.props.app.shell.dataset);
     return (
       <div className={panelContainerStyle}>
         <PathHeader

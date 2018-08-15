@@ -75,7 +75,7 @@ export const headerButtonStyle = style({
 });
 
 export function branchDropdownButtonStyle(isLight: string) {
-  if (isLight === 'true') {
+  if (isLight === 'true' || isLight === undefined) {
     return style({
       backgroundImage: 'var(--jp-icon-arrow-down)',
       backgroundSize: '100%',
@@ -101,7 +101,7 @@ export function branchDropdownButtonStyle(isLight: string) {
 }
 
 export function newBranchButtonStyle(isLight: string) {
-  if (isLight === 'true') {
+  if (isLight === 'true' || isLight === undefined) {
     return style({
       backgroundImage: 'var(--jp-icon-plus)',
       backgroundSize: '100%',
@@ -182,4 +182,8 @@ export const stagedCommitMessageStyle = style({
       outline: 'none'
     }
   }
+});
+
+export const branchHeaderCenterContent = style({
+  padding: '0 50px 0 50px'
 });

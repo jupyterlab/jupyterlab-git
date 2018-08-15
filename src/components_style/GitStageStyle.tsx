@@ -74,7 +74,7 @@ export const changeStageButtonStyle = style({
 });
 
 export function discardFileButtonStyle(isLight: string) {
-  if(isLight === 'true') {
+  if(isLight === 'true' || isLight === undefined) {
     return style({
       backgroundImage: 'var(--jp-icon-discard-file)',
       marginLeft: '6px',

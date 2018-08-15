@@ -19,7 +19,8 @@ import {
   smallBranchStyle,
   expandedBranchStyle,
   openHistorySideBarButtonStyle,
-  openHistorySideBarIconStyle
+  openHistorySideBarIconStyle,
+  branchHeaderCenterContent
 } from '../components_style/BranchHeaderStyle';
 
 import { classes } from 'typestyle';
@@ -84,20 +85,18 @@ export class BranchHeader extends React.Component<
   }
 
   /** Switch current working branch */
-  switchBranch(branchName: string) {
+  async switchBranch(branchName: string) {
     let gitApi = new Git();
-    gitApi
-      .checkout(
-        true,
-        false,
-        branchName,
-        false,
-        null,
-        this.props.currentFileBrowserPath
-      )
-      .then(respones => {
-        this.props.refresh();
-      });
+    await gitApi.checkout(
+      true,
+      false,
+      branchName,
+      false,
+      null,
+      this.props.currentFileBrowserPath
+    );
+    this.toggleSelect();
+    this.props.refresh();
   }
 
   createNewBranch = (branchName: string): void => {
@@ -157,34 +156,42 @@ export class BranchHeader extends React.Component<
           History
           <span className={openHistorySideBarIconStyle} />
         </button>
-        <h3 className={branchLabelStyle}>{this.props.currentBranch}</h3>
-        <div
-          className={
-            this.props.disabled
-              ? classes(branchDropdownButtonStyle(this.props.currentTheme), headerButtonDisabledStyle)
-              : branchDropdownButtonStyle(this.props.currentTheme)
-          }
-          title={'Change the current branch'}
-          onClick={() => this.toggleSelect()}
-        />
-        {!this.state.showNewBranchBox && (
+        <div className={branchHeaderCenterContent}>
+          <h3 className={branchLabelStyle}>{this.props.currentBranch}</h3>
           <div
             className={
               this.props.disabled
-                ? classes(newBranchButtonStyle(this.props.currentTheme), headerButtonDisabledStyle)
-                : newBranchButtonStyle(this.props.currentTheme)
+                ? classes(
+                    branchDropdownButtonStyle(this.props.currentTheme),
+                    headerButtonDisabledStyle
+                  )
+                : branchDropdownButtonStyle(this.props.currentTheme)
             }
-            title={'Create a new branch'}
-            onClick={() => this.toggleNewBranchBox()}
+            title={'Change the current branch'}
+            onClick={() => this.toggleSelect()}
           />
-        )}
-        {this.state.showNewBranchBox &&
-          this.props.showList && (
-            <NewBranchBox
-              createNewBranch={this.createNewBranch}
-              toggleNewBranchBox={this.toggleNewBranchBox}
+          {!this.state.showNewBranchBox && (
+            <div
+              className={
+                this.props.disabled
+                  ? classes(
+                      newBranchButtonStyle(this.props.currentTheme),
+                      headerButtonDisabledStyle
+                    )
+                  : newBranchButtonStyle(this.props.currentTheme)
+              }
+              title={'Create a new branch'}
+              onClick={() => this.toggleNewBranchBox()}
             />
           )}
+          {this.state.showNewBranchBox &&
+            this.props.showList && (
+              <NewBranchBox
+                createNewBranch={this.createNewBranch}
+                toggleNewBranchBox={this.toggleNewBranchBox}
+              />
+            )}
+        </div>
         {this.state.dropdownOpen && (
           <div>
             {this.props.data.map((branch: any, branchIndex: number) => {
