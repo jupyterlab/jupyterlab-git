@@ -1,7 +1,7 @@
 import { style } from 'typestyle';
 
 export function moveFileUpButtonStyle(isLight: string) {
-  if (isLight === 'true') {
+  if (isLight === 'true' || isLight === undefined) {
     return style({
       backgroundImage: 'var(--jp-icon-move-file-up)'
     });
@@ -13,7 +13,7 @@ export function moveFileUpButtonStyle(isLight: string) {
 }
 
 export function moveFileDownButtonStyle(isLight: string) {
-  if (isLight === 'true') {
+  if (isLight === 'true' || isLight === undefined) {
     return style({
       backgroundImage: 'var(--jp-icon-move-file-down)'
     });

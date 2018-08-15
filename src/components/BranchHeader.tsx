@@ -96,6 +96,7 @@ export class BranchHeader extends React.Component<
         this.props.currentFileBrowserPath
       )
       .then(respones => {
+        this.toggleSelect();
         this.props.refresh();
       });
   }
@@ -161,7 +162,10 @@ export class BranchHeader extends React.Component<
         <div
           className={
             this.props.disabled
-              ? classes(branchDropdownButtonStyle(this.props.currentTheme), headerButtonDisabledStyle)
+              ? classes(
+                  branchDropdownButtonStyle(this.props.currentTheme),
+                  headerButtonDisabledStyle
+                )
               : branchDropdownButtonStyle(this.props.currentTheme)
           }
           title={'Change the current branch'}
@@ -171,7 +175,10 @@ export class BranchHeader extends React.Component<
           <div
             className={
               this.props.disabled
-                ? classes(newBranchButtonStyle(this.props.currentTheme), headerButtonDisabledStyle)
+                ? classes(
+                    newBranchButtonStyle(this.props.currentTheme),
+                    headerButtonDisabledStyle
+                  )
                 : newBranchButtonStyle(this.props.currentTheme)
             }
             title={'Create a new branch'}
