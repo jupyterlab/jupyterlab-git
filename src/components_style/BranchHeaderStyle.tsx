@@ -183,3 +183,7 @@ export const stagedCommitMessageStyle = style({
     }
   }
 });
+
+export const branchHeaderCenterContent = style({
+  padding: '0 50px 0 50px'
+});
