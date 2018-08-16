@@ -196,16 +196,16 @@ class Git:
             """
             for line_full in line_array:
                 line_cut = (line_full.split(" -> "),)
-                tag = (None,)
-                current = (False,)
-                remote = (False,)
+                tag = None
+                current = False
+                remote = False
                 if len(line_cut[0]) > 1:
                     tag = line_cut[0][1]
                 line = (line_cut[0][0],)
                 if line_full[0] == "*":
-                    current = (True,)
+                    current = True
                 if (len(line_full) >= 10) and (line_full[2:10] == "remotes/"):
-                    remote = (True,)
+                    remote = True
                     result.append(
                         {
                             "current": current,

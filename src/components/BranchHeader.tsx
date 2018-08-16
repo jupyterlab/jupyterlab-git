@@ -99,21 +99,18 @@ export class BranchHeader extends React.Component<
     this.props.refresh();
   }
 
-  createNewBranch = (branchName: string): void => {
+  createNewBranch = async (branchName: string) => {
     let gitApi = new Git();
-    gitApi
-      .checkout(
-        true,
-        true,
-        branchName,
-        false,
-        null,
-        this.props.currentFileBrowserPath
-      )
-      .then(response => {
-        console.log('new branch!');
-        this.props.refresh();
-      });
+    await gitApi.checkout(
+      true,
+      true,
+      branchName,
+      false,
+      null,
+      this.props.currentFileBrowserPath
+    );
+    this.toggleNewBranchBox();
+    this.props.refresh();
   };
 
   toggleSelect() {
