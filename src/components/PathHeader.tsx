@@ -6,7 +6,7 @@ import {
   arrowStyle,
   gitRepoPathContainerStyle,
   directoryStyle
-} from '../components_style/PathHeaderStyle';
+} from '../componentsStyle/PathHeaderStyle';
 
 import * as React from 'react';
 

@@ -5,7 +5,7 @@ import { SingleCommitInfo } from '../git';
 import {
   historySideBarStyle,
   historySideBarExpandedStyle
-} from '../components_style/HistorySideBarStyle';
+} from '../componentsStyle/HistorySideBarStyle';
 
 import { classes } from 'typestyle';
 

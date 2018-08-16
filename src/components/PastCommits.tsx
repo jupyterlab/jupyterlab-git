@@ -4,7 +4,7 @@ import { FileList } from './FileList';
 
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 
-import { pastCommitsContainerStyle } from '../components_style/PastCommitsStyle';
+import { pastCommitsContainerStyle } from '../componentsStyle/PastCommitsStyle';
 
 import * as React from 'react';
 

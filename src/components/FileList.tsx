@@ -31,7 +31,7 @@ import {
   jsonFileIconSelectedStyle,
   pythonFileIconSelectedStyle,
   kernelFileIconSelectedStyle
-} from '../components_style/FileListStyle';
+} from '../componentsStyle/FileListStyle';
 
 import { GitStage } from './GitStage';
 

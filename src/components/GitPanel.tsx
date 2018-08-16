@@ -27,7 +27,7 @@ import {
   panelContentStyle,
   panelWarningStyle,
   findRepoButtonStyle
-} from '../components_style/GitPanelStyle';
+} from '../componentsStyle/GitPanelStyle';
 
 import { classes } from 'typestyle';
 

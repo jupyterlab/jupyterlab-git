@@ -23,14 +23,14 @@ import {
   numberofChangedFilesStyle,
   deletionIconStyle,
   revertButtonStyle
-} from '../components_style/SinglePastCommitInfoStyle';
+} from '../componentsStyle/SinglePastCommitInfoStyle';
 
 import {
   changeStageButtonStyle,
   discardFileButtonStyle
-} from '../components_style/GitStageStyle';
+} from '../componentsStyle/GitStageStyle';
 
-import { fileIconStyle } from '../components_style/FileItemStyle';
+import { fileIconStyle } from '../componentsStyle/FileItemStyle';
 
 import * as React from 'react';
 

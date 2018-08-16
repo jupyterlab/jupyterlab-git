@@ -6,7 +6,7 @@ import {
   buttonStyle,
   newBranchButtonStyle,
   cancelNewBranchButtonStyle
-} from '../components_style/NewBranchBoxStyle';
+} from '../componentsStyle/NewBranchBoxStyle';
 
 import { classes } from 'typestyle';
 
