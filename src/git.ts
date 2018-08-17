@@ -391,7 +391,6 @@ export class Git {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
-      await this.commit(message, path);
       return response;
     } catch (err) {
       throw ServerConnection.NetworkError;
