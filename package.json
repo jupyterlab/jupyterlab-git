@@ -29,7 +29,7 @@
     "@jupyterlab/console": "^0.18.0",
     "@jupyterlab/coreutils": "^2.0.2",
     "@jupyterlab/filebrowser": "^0.18.0",
-    "@jupyterlab/mainmenu": "^0.6.2",
+    "@jupyterlab/mainmenu": "^0.7.0",
     "@jupyterlab/terminal": "^0.18.0",
     "@jupyterlab/theming": "^0.9.0",
     "@jupyterlab/services": "^3.1.0",
