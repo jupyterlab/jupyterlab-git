@@ -9,7 +9,7 @@ import {
   ResetDeleteButton,
   CancelButton,
   ResetDeleteDisabledButton
-} from '../components_style/SinglePastCommitInfoStyle';
+} from '../componentsStyle/SinglePastCommitInfoStyle';
 
 import { Git } from '../git';
 

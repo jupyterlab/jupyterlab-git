@@ -13,14 +13,14 @@ import {
   changeStageButtonLeftStyle,
   discardFileButtonStyle,
   discardAllWarningStyle
-} from '../components_style/GitStageStyle';
+} from '../componentsStyle/GitStageStyle';
 
 import {
   cancelDiscardButtonStyle,
   acceptDiscardButtonStyle,
   discardButtonStyle,
   discardWarningStyle
-} from '../components_style/FileItemStyle';
+} from '../componentsStyle/FileItemStyle';
 
 import { FileItem } from './FileItem';
 

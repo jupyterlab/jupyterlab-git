@@ -21,7 +21,7 @@ import {
   openHistorySideBarButtonStyle,
   openHistorySideBarIconStyle,
   branchHeaderCenterContent
-} from '../components_style/BranchHeaderStyle';
+} from '../componentsStyle/BranchHeaderStyle';
 
 import { classes } from 'typestyle';
 

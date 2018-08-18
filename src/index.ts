@@ -16,6 +16,8 @@ import { Menu } from '@phosphor/widgets';
 
 import { Token } from '@phosphor/coreutils';
 
+import { gitTabStyle } from './componentsStyle/GitWidgetStyle';
+
 import '../style/variables.css';
 
 /**
@@ -59,7 +61,7 @@ export class GitExtension implements IGitExtension {
       this.performDiff.bind(this)
     );
     this.git_plugin.id = 'jp-git-sessions';
-    this.git_plugin.title.label = 'Git';
+    this.git_plugin.title.iconClass = `jp-SideBar-tabIcon ${gitTabStyle}`;
 
     // Let the application restorer track the running panel for restoration of
     // application state (e.g. setting the running panel as the current side bar

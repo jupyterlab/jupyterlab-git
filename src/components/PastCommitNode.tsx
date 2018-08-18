@@ -7,7 +7,7 @@ import {
   pastCommitNumberContentStyle,
   pastCommitActiveContentStyle,
   pastCommitLineStyle
-} from '../components_style/PastCommitNodeStyle';
+} from '../componentsStyle/PastCommitNodeStyle';
 
 import { classes } from 'typestyle';
 

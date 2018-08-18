@@ -53,7 +53,7 @@ export const repoIconStyle = style({
 });
 
 export const arrowStyle = style({
-  backgroundImage: 'var(--jp-path-arrow-right)',
+  backgroundImage: 'var(--jp-icon-path-arrow-right)',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
   width: '18px',

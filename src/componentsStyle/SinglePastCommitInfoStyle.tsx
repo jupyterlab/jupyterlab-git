@@ -136,13 +136,13 @@ export function revertButtonStyle(isLight: string) {
     return style({
       backgroundImage: 'var(--jp-icon-rewind)',
       marginLeft: '6px',
-      backgroundSize: '120%'
+      backgroundSize: '100%'
     });
   } else {
     return style({
       backgroundImage: 'var(--jp-icon-rewind-white)',
       marginLeft: '6px',
-      backgroundSize: '120%'
+      backgroundSize: '100%'
     });
   }
 }
