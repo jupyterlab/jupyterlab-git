@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='jupyterlab_git',
-    version='0.1.2',
+    version='0.2.1',
     author='Git Intern Team, Noah Stapp, Jenna Landy, Alena Mueller',
     description="A server extension for JupyterLab's git extension",
     long_description=long_description,
