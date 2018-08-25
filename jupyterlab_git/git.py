@@ -290,7 +290,7 @@ class Git:
         """
         Execute git add all command & return the result.
         """
-        my_output = subprocess.check_output(["git", "add", "-u"], cwd=top_repo_path)
+        my_output = subprocess.check_output(["git", "add", "-A"], cwd=top_repo_path)
         return my_output
 
     def add_all_untracked(self, top_repo_path):
