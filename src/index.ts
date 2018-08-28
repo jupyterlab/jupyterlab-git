@@ -62,6 +62,7 @@ export class GitExtension implements IGitExtension {
     );
     this.git_plugin.id = 'jp-git-sessions';
     this.git_plugin.title.iconClass = `jp-SideBar-tabIcon ${gitTabStyle}`;
+    this.git_plugin.title.caption = 'Git';
 
     // Let the application restorer track the running panel for restoration of
     // application state (e.g. setting the running panel as the current side bar
