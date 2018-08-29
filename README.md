@@ -1,5 +1,7 @@
 # jupyterlab-git
 
+[![Binder](https://beta.mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab)
+
 A JupyterLab extension for version control using git
 
 ![](http://g.recordit.co/N9Ikzbyk8P.gif)
