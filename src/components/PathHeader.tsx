@@ -2,13 +2,15 @@ import {
   repoStyle,
   repoPathStyle,
   repoRefreshStyle,
-  repoIconStyle,
-  arrowStyle,
-  gitRepoPathContainerStyle,
-  directoryStyle
+  // repoIconStyle,
+  // arrowStyle,
+  // gitRepoPathContainerStyle,
+  // directoryStyle
 } from '../componentsStyle/PathHeaderStyle';
 
 import * as React from 'react';
+
+import { classes } from 'typestyle';
 
 export interface IPathHeaderState {
   topRepoPath: string;
@@ -19,6 +21,7 @@ export interface IPathHeaderProps {
   currentFileBrowserPath: string;
   topRepoPath: string;
   refresh: any;
+  currentBranch: string;
 }
 
 export class PathHeader extends React.Component<
@@ -37,17 +40,18 @@ export class PathHeader extends React.Component<
     let relativePath = this.props.currentFileBrowserPath.split('/');
     return (
       <div className={repoStyle}>
-        <span className={repoIconStyle} />
+        {/* <span className={repoIconStyle} /> */}
         <span className={repoPathStyle}>
-          {relativePath.map(directory => (
+          {/* {relativePath.map(directory => (
             <div key={directory} className={gitRepoPathContainerStyle}>
               {relativePath[0] !== '' && <span className={arrowStyle} />}
               <span className={directoryStyle}>{directory}</span>
             </div>
-          ))}
+          ))} */}
+          {relativePath[relativePath.length - 1]+" / "+this.props.currentBranch}
         </span>
         <button
-          className={repoRefreshStyle}
+          className={classes(repoRefreshStyle, 'jp-Icon-16')}
           onClick={() => this.props.refresh()}
         />
       </div>
