@@ -17,7 +17,7 @@ export const repoPathStyle = style({
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   verticalAlign: 'middle',
-  lineHeight: '33px'
+  lineHeight: '33px',
 });
 
 export const repoRefreshStyle = style({
@@ -28,16 +28,18 @@ export const repoRefreshStyle = style({
   backgroundSize: '16px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
+  boxSizing: 'border-box',
   outline: 'none',
+  padding: '0px 6px',
+  margin: 'auto 5px auto auto',
+  height: '24px',
 
   $nest: {
     '&:hover': {
-      backgroundColor: 'lightgray'
+      backgroundColor: 'var(--jp-layout-color2)'
     },
     '&:active': {
-      backgroundColor: 'lightgray',
-      boxShadow: '0 1px #666',
-      transform: 'translateY(0.5px)'
+      backgroundColor: 'var(--jp-layout-color3)',
     }
   }
 });

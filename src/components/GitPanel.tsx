@@ -257,6 +257,7 @@ export class GitPanel extends React.Component<
           currentFileBrowserPath={this.state.currentFileBrowserPath}
           topRepoPath={this.state.topRepoPath}
           refresh={this.refresh}
+          currentBranch={this.state.currentBranch}
         />
         <div className={this.getContentClass()}>
           {this.state.showWarning && (
