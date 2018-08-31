@@ -56,6 +56,7 @@ export class NewBranchBox extends React.Component<
           placeholder={'New branch'}
           value={this.state.value}
           onChange={this.handleChange}
+          autoFocus
         />
         <input
           className={classes(buttonStyle, newBranchButtonStyle)}

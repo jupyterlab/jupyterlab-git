@@ -17,13 +17,21 @@ export const slideAnimation = keyframes({
 
 export const newBranchBoxStyle = style({
   width: '84px',
-  height: '13px',
+  height: '17px',
+  boxSizing: 'border-box',
   margin: '0',
-  padding: '0',
+  padding: '2px',
   verticalAlign: 'middle',
   animationDuration: '0.5s',
   animationTimingFunction: 'ease-out',
-  animationName: slideAnimation
+  animationName: slideAnimation,
+  outline: 'none',
+
+  $nest: {
+    '&:focus': {
+      border: '1px var(--jp-brand-color2) solid'
+    }
+  }
 });
 
 export const buttonStyle = style({
