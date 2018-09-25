@@ -23,6 +23,6 @@ def load_jupyter_server_extension(nbapp):
     """
     Load the Jupyter server extension.
     """
-    git = Git()
+    git = Git(nbapp.web_app.settings.get('server_root_dir'))
     nbapp.web_app.settings["git"] = git
     setup_handlers(nbapp.web_app)

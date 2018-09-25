@@ -11,6 +11,10 @@ class Git:
     A single parent class containing all of the individual git methods in it.
     """
 
+    def __init__(self, root_dir, *args, **kwargs):
+        super(Git, self).__init__(*args, **kwargs)
+        self.root_dir = os.path.realpath(os.path.expanduser(root_dir))
+
     def status(self, current_path):
         """
         Execute git status command & return the result.
@@ -19,7 +23,7 @@ class Git:
             ["git", "status", "--porcelain"],
             stdout=PIPE,
             stderr=PIPE,
-            cwd=os.getcwd() + "/" + current_path,
+            cwd=os.path.join(self.root_dir, current_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
@@ -56,7 +60,7 @@ class Git:
             ["git", "log", "--pretty=format:%H%n%an%n%ar%n%s", "-10"],
             stdout=PIPE,
             stderr=PIPE,
-            cwd=os.getcwd() + "/" + current_path,
+            cwd=os.path.join(self.root_dir, current_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
@@ -99,7 +103,7 @@ class Git:
             ["git", "log", "-1", "--stat", "--numstat", "--oneline", selected_hash],
             stdout=PIPE,
             stderr=PIPE,
-            cwd=os.getcwd() + "/" + current_path,
+            cwd=os.path.join(self.root_dir, current_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
@@ -185,7 +189,7 @@ class Git:
             ["git", "branch", "-a"],
             stdout=PIPE,
             stderr=PIPE,
-            cwd=os.getcwd() + "/" + current_path,
+            cwd=os.path.join(self.root_dir, current_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
@@ -239,7 +243,7 @@ class Git:
             ["git", "rev-parse", "--show-toplevel"],
             stdout=PIPE,
             stderr=PIPE,
-            cwd=os.getcwd() + "/" + current_path,
+            cwd=os.path.join(self.root_dir, current_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
@@ -263,7 +267,7 @@ class Git:
             ["git", "rev-parse", "--show-prefix"],
             stdout=PIPE,
             stderr=PIPE,
-            cwd=os.getcwd() + "/" + current_path,
+            cwd=os.path.join(self.root_dir, current_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
@@ -339,7 +343,7 @@ class Git:
             ["git", "checkout", "-b", branchname],
             stdout=PIPE,
             stderr=PIPE,
-            cwd=os.getcwd() + "/" + current_path,
+            cwd=os.path.join(self.root_dir, current_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
@@ -359,7 +363,7 @@ class Git:
             ["git", "checkout", branchname],
             stdout=PIPE,
             stderr=PIPE,
-            cwd=os.getcwd() + "/" + current_path,
+            cwd=os.path.join(self.root_dir, current_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
@@ -406,7 +410,7 @@ class Git:
             ["git", "pull", origin, master, "--no-commit"],
             stdout=PIPE,
             stderr=PIPE,
-            cwd=os.getcwd() + "/" + curr_fb_path,
+            cwd=os.path.join(self.root_dir, curr_fb_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
@@ -426,7 +430,7 @@ class Git:
             ["git", "push", origin, master],
             stdout=PIPE,
             stderr=PIPE,
-            cwd=os.getcwd() + "/" + curr_fb_path,
+            cwd=os.path.join(self.root_dir, curr_fb_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
@@ -443,6 +447,6 @@ class Git:
         Execute git init command & return the result.
         """
         my_output = subprocess.check_output(
-            ["git", "init"], cwd=os.getcwd() + "/" + current_path
+            ["git", "init"], cwd=os.path.join(self.root_dir, current_path)
         )
         return my_output
