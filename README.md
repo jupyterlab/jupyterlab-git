@@ -33,6 +33,27 @@ If you would like to contribute to the project, please read our [contributor doc
 
 JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
+### Team
+
+The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our maintainer team is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+
+JupyterLab Git's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
+
+- Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis).
+- Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
+  architecture).
+- Jenna Landy, Cal Poly (sofware engineering).
+- Alena Mueller, Cal Poly (UI/UX design).
+
+Maintainer emeritus:
+
+- Ashutosh Bondre, Cal Poly (software engineering).
+- Noah Stapp, Cal Poly (software engineering).
+- Ji Zhang, Cal Poly (software engineering).
+
+This list is provided to help provide context about who we are and how our team functions.
+If you would like to be listed, please submit a pull request with your information.
+
 ### Install
 
 Requires node 4+ and npm 4+
