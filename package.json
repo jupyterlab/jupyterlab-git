@@ -49,10 +49,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zzhangjii/jupyterlab-git.git"
+    "url": "https://github.com/jupyterlab/jupyterlab-git.git"
   },
   "bugs": {
-    "url": "https://github.com/zzhangjii/jupyterlab-git/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab-git/issues"
   },
-  "homepage": "https://github.com/zzhangjii/jupyterlab-git"
+  "homepage": "https://github.com/jupyterlab/jupyterlab-git"
 }
