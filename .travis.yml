@@ -1,6 +1,10 @@
 language: python
 python:
 - '3.6'
+cache:
+  pip: true
+  directories:
+    - /home/travis/.yarn-cache/
 install: pip install pytest jupyterlab psutil
 script:
 - pytest tests/unit
