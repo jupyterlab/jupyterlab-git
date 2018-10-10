@@ -1,6 +1,15 @@
 language: python
 python:
 - '3.6'
-install: pip install pytest notebook psutil
+cache:
+  pip: true
+  directories:
+    - /home/travis/.yarn-cache/
+install: pip install pytest jupyterlab psutil
 script:
 - pytest tests/unit
+- yarn
+- yarn build
+- pip install .
+- jupyter labextension install .
+- python -m jupyterlab.browser_check

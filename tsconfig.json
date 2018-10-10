@@ -7,7 +7,8 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "es2015",
-    "outDir": "./lib",
+    "rootDir": "src",
+    "outDir": "lib",
     "lib": ["es5", "es2015.promise", "es2015.collection","dom"],
     "types": [],
     "jsx": "react"
