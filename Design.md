@@ -4,8 +4,8 @@
 - Help establish a good working rhythm with Git that will help them develop a useful mental model .
   - Expose the most frequently used commands that cover the majority of daily git use.
 - Increase Usability of Git
-  - Shield user from repetitive actions; surface state-related information.
-  - Increase visibility of the state of Git Repos. 
+  - Shield user from repetitive actions.
+  - Increase visibility of the state of Git Repos; surface state-related information. 
   - Unblock advanced commands by easing transition to terminal when necessary.
 
 ## Research Requirements: 
@@ -14,7 +14,7 @@
 
 ## Design Requirements:
 ### First Stage
-- Add multi-user functionality (Push to Origin [default], Pull from Origin [default])
+- Add remote functionality (Push to Origin [default], Pull from Origin [default], Expose Remotes?)
   - Merge/diff conflicts handled in the terminal
 - Branches
   - Add new Branch
