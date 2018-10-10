@@ -1,6 +1,10 @@
 language: python
 python:
 - '3.6'
-install: pip install pytest notebook psutil
+install: pip install pytest jupyterlab psutil
 script:
 - pytest tests/unit
+- yarn
+- yarn build
+- jupyter labextension install .
+- python -m jupyterlab.browser_check

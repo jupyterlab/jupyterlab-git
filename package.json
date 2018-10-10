@@ -24,25 +24,25 @@
     "extension": true
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.18.0",
-    "@jupyterlab/apputils": "^0.18.0",
-    "@jupyterlab/console": "^0.18.0",
+    "@jupyterlab/application": "^0.19.1",
+    "@jupyterlab/apputils": "^0.19.1",
+    "@jupyterlab/console": "^0.19.1",
     "@jupyterlab/coreutils": "^2.0.2",
-    "@jupyterlab/filebrowser": "^0.18.0",
-    "@jupyterlab/mainmenu": "^0.7.0",
-    "@jupyterlab/terminal": "^0.18.0",
-    "@jupyterlab/theming": "^0.9.0",
+    "@jupyterlab/filebrowser": "^0.19.1",
+    "@jupyterlab/mainmenu": "^0.8.1",
     "@jupyterlab/services": "^3.1.0",
+    "@jupyterlab/terminal": "^0.19.1",
+    "@jupyterlab/theming": "^0.9.0",
     "@phosphor/widgets": "^1.6.0",
-    "nbdime": "^2.0.0",
-    "react": "^15.6.2",
-    "react-dom": "^15.6.2",
+    "nbdime": "^4.0.1",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
     "react-toggle-display": "^2.2.0",
     "typestyle": "^2.0.1"
   },
   "devDependencies": {
     "rimraf": "^2.6.1",
-    "typescript": "~2.4.0"
+    "typescript": "~3.1.2"
   },
   "directories": {
     "lib": "lib"
