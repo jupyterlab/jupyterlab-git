@@ -6,5 +6,6 @@ script:
 - pytest tests/unit
 - yarn
 - yarn build
+- pip install .
 - jupyter labextension install .
 - python -m jupyterlab.browser_check
