@@ -1,0 +1,6 @@
+language: python
+python:
+- '3.6'
+install: pip install pytest notebook psutil
+script:
+- pytest tests/unit

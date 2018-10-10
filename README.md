@@ -2,6 +2,8 @@
 
 [![Binder](https://beta.mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab)
 
+[![Build Status](https://travis-ci.org/jupyterlab/jupyterlab-git.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab-git)
+
 A JupyterLab extension for version control using git
 
 ![](http://g.recordit.co/N9Ikzbyk8P.gif)
