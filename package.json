@@ -21,7 +21,17 @@
     "style/images/*.svg"
   ],
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "discovery": {
+      "server": {
+        "managers": [
+          "pip"
+        ],
+        "base": {
+          "name": "jupyterlab-git"
+        }
+      }
+    }
   },
   "dependencies": {
     "@jupyterlab/application": "^0.19.1",
