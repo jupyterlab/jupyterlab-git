@@ -22,6 +22,9 @@ import { Token } from '@phosphor/coreutils';
 
 import { gitTabStyle } from './componentsStyle/GitWidgetStyle';
 
+import { IDiffCallback } from './git';
+export { IDiffCallback } from './git';
+
 import '../style/variables.css';
 import {GitClone} from "./gitClone";
 
@@ -29,14 +32,6 @@ import {GitClone} from "./gitClone";
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
 export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
-
-
-/** Function type for diffing a file's revisions */
-export type IDiffCallback = (
-  filename: string,
-  revisionA: string,
-  revisionB: string
-) => void;
 
 
 /** Interface for extension class */
@@ -67,6 +62,7 @@ export class GitExtension implements IGitExtension {
   git_plugin: GitWidget;
   git_clone_widget: GitClone;
   constructor(app: JupyterLab, restorer: ILayoutRestorer, factory: IFileBrowserFactory) {
+    this.app = app;
     this.git_plugin = new GitWidget(
       app,
       { manager: app.serviceManager },
@@ -93,7 +89,6 @@ export class GitExtension implements IGitExtension {
   }
 
   performDiff(
-    app: JupyterLab,
     filename: string,
     revisionA: string,
     revisionB: string
@@ -102,12 +97,13 @@ export class GitExtension implements IGitExtension {
     if (this.diffProviders[extension] !== undefined) {
       this.diffProviders[extension](filename, revisionA, revisionB);
     } else {
-      app.commands.execute('git:terminal-cmd', {
+      this.app.commands.execute('git:terminal-cmd', {
         cmd: 'git diff ' + revisionA + ' ' + revisionB
       });
     }
   }
 
+  private app: JupyterLab;
   private diffProviders: { [key: string]: IDiffCallback } = {};
 }
 

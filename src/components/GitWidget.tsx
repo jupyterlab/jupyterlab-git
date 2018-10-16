@@ -16,6 +16,9 @@ import { GitPanel } from './GitPanel';
 
 import { gitWidgetStyle } from '../componentsStyle/GitWidgetStyle';
 
+import { IDiffCallback } from '../git';
+
+
 import '../../style/variables.css';
 
 /**
@@ -66,7 +69,7 @@ export class GitWidget extends Widget {
   /**
    * Construct a new running widget.
    */
-  constructor(app: JupyterLab, options: IOptions, diff_function: any) {
+  constructor(app: JupyterLab, options: IOptions, diff_function: IDiffCallback) {
     super({
       node: (options.renderer || defaultRenderer).createNode()
     });

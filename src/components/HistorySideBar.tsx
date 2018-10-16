@@ -1,7 +1,7 @@
 import { JupyterLab } from "@jupyterlab/application";
 import * as React from "react";
 import { historySideBarStyle } from "../componentsStyle/HistorySideBarStyle";
-import { GitBranchResult, SingleCommitInfo } from "../git";
+import { GitBranchResult, SingleCommitInfo, IDiffCallback } from "../git";
 import { PastCommitNode } from "./PastCommitNode";
 
 /** Interface for PastCommits component props */
@@ -13,12 +13,7 @@ export interface IHistorySideBarProps {
   currentTheme: string;
   app: JupyterLab;
   refresh: () => void;
-  diff: (
-    app: JupyterLab,
-    filename: string,
-    revisionA: string,
-    revisionB: string
-  ) => void;
+  diff: IDiffCallback;
 }
 
 export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {

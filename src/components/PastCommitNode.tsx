@@ -14,7 +14,7 @@ import {
   remoteBranchStyle,
   workingBranchStyle
 } from "../componentsStyle/PastCommitNodeStyle";
-import { GitBranchResult, SingleCommitInfo } from "../git";
+import { GitBranchResult, SingleCommitInfo, IDiffCallback } from "../git";
 import { SinglePastCommitInfo } from "./SinglePastCommitInfo";
 
 export interface IPastCommitNodeProps {
@@ -23,12 +23,7 @@ export interface IPastCommitNodeProps {
   topRepoPath: string;
   currentTheme: string;
   app: JupyterLab;
-  diff: (
-    app: JupyterLab,
-    filename: string,
-    revisionA: string,
-    revisionB: string
-  ) => void;
+  diff: IDiffCallback;
   refresh: () => void;
 }
 
