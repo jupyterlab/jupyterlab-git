@@ -11,22 +11,16 @@ import {
   caretdownImageStyle,
   caretrightImageStyle,
   changeStageButtonLeftStyle,
-  discardFileButtonStyle,
-  discardAllWarningStyle
+  discardFileButtonStyle
 } from '../componentsStyle/GitStageStyle';
-
-import {
-  cancelDiscardButtonStyle,
-  acceptDiscardButtonStyle,
-  discardButtonStyle,
-  discardWarningStyle
-} from '../componentsStyle/FileItemStyle';
 
 import { FileItem } from './FileItem';
 
 import { classes } from 'typestyle';
 
 import * as React from 'react';
+
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 export interface IGitStageProps {
   heading: string;
@@ -95,6 +89,25 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
     );
   }
 
+  /**
+   * Callback method discarding all unstanged changes.
+   * It shows modal asking for confirmation and when confirmed make
+   * server side call to git checkout to discard all unstanged changes.
+   */
+  discardAllChanges() {
+    this.toggleDiscardChanges();
+    return showDialog({
+      title: 'Discard all changes',
+      body: `Are you sure you want to permanently discard changes to all files? This action cannot be undone.`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+    }).then(result => {
+      if (result.button.accept) {
+        this.props.discardAllFiles(this.props.topRepoPath, this.props.refresh);
+      }
+      this.toggleDiscardChanges();
+    });
+  }
+
   render() {
     return (
       <div className={this.checkDisabled()}>
@@ -116,14 +129,15 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
             disabled={this.checkContents()}
             className={`${this.props.moveFileIconClass(
               this.props.currentTheme
-            )} ${changeStageButtonStyle} 
+            )} ${changeStageButtonStyle}
                ${changeStageButtonLeftStyle}`}
             title={this.props.moveAllFilesTitle}
             onClick={() =>
               this.props.moveAllFiles(
                 this.props.topRepoPath,
                 this.props.refresh
-              )}
+              )
+            }
           />
           {this.props.heading === 'Changed' && (
             <button
@@ -133,45 +147,12 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                 discardFileButtonStyle(this.props.currentTheme)
               )}
               title={'Discard All Changes'}
-              onClick={() => this.toggleDiscardChanges()}
+              onClick={() => this.discardAllChanges()}
             />
           )}
         </div>
         {this.props.showFiles && (
           <div className={sectionFileContainerStyle}>
-            {this.state.showDiscardWarning && (
-              <div
-                className={classes(discardAllWarningStyle, discardWarningStyle)}
-              >
-                These changes will be gone forever
-                <div>
-                  <button
-                    className={classes(
-                      discardButtonStyle,
-                      cancelDiscardButtonStyle
-                    )}
-                    onClick={() => this.toggleDiscardChanges()}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className={classes(
-                      discardButtonStyle,
-                      acceptDiscardButtonStyle
-                    )}
-                    onClick={() => {
-                      this.props.discardAllFiles(
-                        this.props.topRepoPath,
-                        this.props.refresh
-                      );
-                      this.toggleDiscardChanges();
-                    }}
-                  >
-                    Discard
-                  </button>
-                </div>
-              </div>
-            )}
             {this.props.files.map(
               (file: GitStatusFileResult, file_index: number) => {
                 return (

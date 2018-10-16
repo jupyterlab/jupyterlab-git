@@ -21,15 +21,14 @@ import {
   fileButtonStyle,
   fileGitButtonStyle,
   discardFileButtonSelectedStyle,
-  cancelDiscardButtonStyle,
-  acceptDiscardButtonStyle,
-  discardButtonStyle,
   sideBarExpandedFileLabelStyle
 } from '../componentsStyle/FileItemStyle';
 
 import { classes } from 'typestyle';
 
 import * as React from 'react';
+
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 export interface IFileItemProps {
   topRepoPath: string;
@@ -212,12 +211,39 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     return discardWarningStyle;
   }
 
+  /**
+   * Callback method discarding unstanged changes for selected file.
+   * It shows modal asking for confirmation and when confirmed make
+   * server side call to git checkout to discard changes in selected file.
+   */
+  discardSelectedFileChanges() {
+    this.props.toggleDisableFiles();
+    this.props.updateSelectedDiscardFile(this.props.fileIndex);
+    return showDialog({
+      title: 'Discard changes',
+      body: `Are you sure you want to permanently discard changes to ${
+        this.props.file.from
+      }? This action cannot be undone.`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+    }).then(result => {
+      if (result.button.accept) {
+        this.props.discardFile(
+          this.props.file.to,
+          this.props.topRepoPath,
+          this.props.refresh
+        );
+      }
+      this.props.toggleDisableFiles();
+      this.props.updateSelectedDiscardFile(-1);
+    });
+  }
   render() {
     return (
       <div
         className={this.getFileClass()}
         onClick={() =>
-          this.props.updateSelectedFile(this.props.fileIndex, this.props.stage)}
+          this.props.updateSelectedFile(this.props.fileIndex, this.props.stage)
+        }
       >
         <button
           className={`jp-Git-button ${this.getMoveFileIconClass()}`}
@@ -249,7 +275,8 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
               this.props.file.y,
               this.props.file.to,
               this.props.app
-            )}
+            )
+          }
         >
           {this.props.extractFilename(this.props.file.to)}
           <span className={this.getFileChangedLabelClass(this.props.file.y)}>
@@ -260,48 +287,11 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
               className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
               title={'Discard this change'}
               onClick={() => {
-                this.props.toggleDisableFiles();
-                this.props.updateSelectedDiscardFile(this.props.fileIndex);
+                this.discardSelectedFileChanges();
               }}
             />
           )}
         </span>
-        {this.showDiscardWarning() && (
-          <div className={this.getDiscardWarningClass()}>
-            These changes will be gone forever
-            <div>
-              <button
-                className={classes(
-                  discardButtonStyle,
-                  cancelDiscardButtonStyle
-                )}
-                onClick={() => {
-                  this.props.toggleDisableFiles();
-                  this.props.updateSelectedDiscardFile(-1);
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                className={classes(
-                  discardButtonStyle,
-                  acceptDiscardButtonStyle
-                )}
-                onClick={() => {
-                  this.props.discardFile(
-                    this.props.file.to,
-                    this.props.topRepoPath,
-                    this.props.refresh
-                  ),
-                    this.props.toggleDisableFiles(),
-                    this.props.updateSelectedDiscardFile(-1);
-                }}
-              >
-                Discard
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
