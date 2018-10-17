@@ -4,6 +4,7 @@ Module for executing git commands, sending results back to the handlers
 import os
 import subprocess
 from subprocess import Popen, PIPE
+from urllib.parse import unquote
 
 
 class Git:
@@ -14,6 +15,31 @@ class Git:
     def __init__(self, root_dir, *args, **kwargs):
         super(Git, self).__init__(*args, **kwargs)
         self.root_dir = os.path.realpath(os.path.expanduser(root_dir))
+
+    def clone(self, current_path, repo_url):
+        """
+        Execute `git clone`. Disables prompts for the password to avoid the terminal hanging.
+        :param current_path: the directory where the clone will be performed.
+        :param repo_url: the URL of the repository to be cloned.
+        :return: response with status code and error message.
+        """
+        p = subprocess.Popen(
+            ['GIT_TERMINAL_PROMPT=0 git clone {}'.format(unquote(repo_url))],
+            shell=True,
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd=os.path.join(self.root_dir, current_path),
+        )
+        _, error = p.communicate()
+
+        response = {
+            'code': p.returncode
+        }
+
+        if p.returncode != 0:
+            response['message'] = error.decode('utf-8').strip()
+
+        return response
 
     def status(self, current_path):
         """

@@ -18,6 +18,22 @@ class GitHandler(APIHandler):
         return self.settings["git"]
 
 
+class GitCloneHandler(GitHandler):
+    def post(self):
+        """
+        Handler for the `git clone`
+
+        Input format:
+            {
+              'current_path': 'current_file_browser_path',
+              'repo_url': 'https://github.com/path/to/myrepo'
+            }
+        """
+        data = json.loads(self.request.body.decode('utf-8'))
+        response = self.git.clone(data['current_path'], data['clone_url'])
+        self.finish(json.dumps(response))
+
+
 class GitAllHistoryHandler(GitHandler):
     """
     Parent handler for all four history/status git commands:
@@ -33,8 +49,7 @@ class GitAllHistoryHandler(GitHandler):
         POST request handler, calls individual handlers for 
         'git show_top_level', 'git branch', 'git log', and 'git status'
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        current_path = data["current_path"]
+        current_path = self.get_json_body()["current_path"]
         show_top_level = self.git.show_top_level(current_path)
         if show_top_level["code"] != 0:
             self.finish(json.dumps(show_top_level))
@@ -65,8 +80,7 @@ class GitShowTopLevelHandler(GitHandler):
         """
         POST request handler, displays the git root directory inside a repository.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        current_path = data["current_path"]
+        current_path = self.get_json_body()["current_path"]
         result = self.git.show_top_level(current_path)
         self.finish(json.dumps(result))
 
@@ -83,8 +97,7 @@ class GitShowPrefixHandler(GitHandler):
         POST request handler, displays the prefix path of a directory in a repository, 
         with respect to the root directory.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        current_path = data["current_path"]
+        current_path = self.get_json_body()["current_path"]
         result = self.git.show_prefix(current_path)
         self.finish(json.dumps(result))
 
@@ -108,8 +121,7 @@ class GitStatusHandler(GitHandler):
         """
         POST request handler, fetches the git status.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        current_path = data["current_path"]
+        current_path = self.get_json_body()["current_path"]
         result = self.git.status(current_path)
         self.finish(json.dumps(result))
 
@@ -125,8 +137,7 @@ class GitLogHandler(GitHandler):
         POST request handler, 
         fetches Commit SHA, Author Name, Commit Date & Commit Message.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        current_path = data["current_path"]
+        current_path = self.get_json_body()["current_path"]
         result = self.git.log(current_path)
         self.finish(json.dumps(result))
 
@@ -143,7 +154,7 @@ class GitDetailedLogHandler(GitHandler):
         POST request handler, fetches file names of committed files, Number of
         insertions & deletions in that commit.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = self.get_json_body()
         selected_hash = data["selected_hash"]
         current_path = data["current_path"]
         result = self.git.detailed_log(selected_hash, current_path)
@@ -160,8 +171,7 @@ class GitDiffHandler(GitHandler):
         POST request handler, fetches differences between commits & current working
         tree.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        top_repo_path = data["top_repo_path"]
+        top_repo_path = self.get_json_body()["top_repo_path"]
         my_output = self.git.diff(top_repo_path)
         self.finish(my_output)
         print("GIT DIFF")
@@ -177,8 +187,7 @@ class GitBranchHandler(GitHandler):
         """
         POST request handler, fetches all branches in current repository.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        current_path = data["current_path"]
+        current_path = self.get_json_body()["current_path"]
         result = self.git.branch(current_path)
         self.finish(json.dumps(result))
 
@@ -203,7 +212,7 @@ class GitAddHandler(GitHandler):
         """
         POST request handler, adds one or all files into the staging area.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         if data["add_all"]:
             my_output = self.git.add_all(top_repo_path)
@@ -224,7 +233,7 @@ class GitResetHandler(GitHandler):
         POST request handler, 
         moves one or all files from the staged to the unstaged area.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         if data["reset_all"]:
             my_output = self.git.reset_all(top_repo_path)
@@ -240,7 +249,7 @@ class GitDeleteCommitHandler(GitHandler):
     """
 
     def post(self):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         commit_id = data["commit_id"]
         output = self.git.delete_commit(commit_id, top_repo_path)
@@ -253,7 +262,7 @@ class GitResetToCommitHandler(GitHandler):
     """
 
     def post(self):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         commit_id = data["commit_id"]
         output = self.git.reset_to_commit(commit_id, top_repo_path)
@@ -268,7 +277,7 @@ class GitCheckoutHandler(GitHandler):
         """
         POST request handler, changes between branches.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         if data["checkout_branch"]:
             if data["new_check"]:
@@ -297,7 +306,7 @@ class GitCommitHandler(GitHandler):
         """
         POST request handler, commits files.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         commit_msg = data["commit_msg"]
         my_output = self.git.commit(commit_msg, top_repo_path)
@@ -313,7 +322,7 @@ class GitPullHandler(GitHandler):
         """
         POST request handler, pulls files from a remote branch to your current branch.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = self.get_json_body()
         origin = data["origin"]
         master = data["master"]
         curr_fb_path = data["curr_fb_path"]
@@ -333,7 +342,7 @@ class GitPushHandler(GitHandler):
         POST request handler, 
         pushes comitted files from your current branch to a remote branch
         """
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = self.get_json_body()
         origin = data["origin"]
         master = data["master"]
         curr_fb_path = data["curr_fb_path"]
@@ -351,8 +360,7 @@ class GitInitHandler(GitHandler):
         """
         POST request handler, initializes a repository.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        current_path = data["current_path"]
+        current_path = self.get_json_body()["current_path"]
         my_output = self.git.init(current_path)
         self.finish(my_output)
 
@@ -366,8 +374,7 @@ class GitAddAllUntrackedHandler(GitHandler):
         """
         POST request handler, adds all the untracked files.
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        top_repo_path = data["top_repo_path"]
+        top_repo_path = self.get_json_body()["top_repo_path"]
         my_output = self.git.add_all_untracked(top_repo_path)
         print(my_output)
         self.finish(my_output)
@@ -398,12 +405,11 @@ def setup_handlers(web_app):
         ("/git/init", GitInitHandler),
         ("/git/all_history", GitAllHistoryHandler),
         ("/git/add_all_untracked", GitAddAllUntrackedHandler),
+        ("/git/clone", GitCloneHandler)
     ]
 
     # add the baseurl to our paths
     base_url = web_app.settings["base_url"]
     git_handlers = [(ujoin(base_url, x[0]), x[1]) for x in git_handlers]
-    print("base_url: {}".format(base_url))
-    print(git_handlers)
 
     web_app.add_handlers(".*", git_handlers)
