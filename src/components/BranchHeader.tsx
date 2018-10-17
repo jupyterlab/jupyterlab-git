@@ -25,6 +25,8 @@ import {
 
 import { classes } from 'typestyle';
 
+import { showErrorMessage } from '@jupyterlab/apputils';
+
 export interface IBranchHeaderState {
   dropdownOpen: boolean;
   showCommitBox: boolean;
@@ -120,6 +122,11 @@ export class BranchHeader extends React.Component<
         showCommitBox: !this.state.showCommitBox,
         dropdownOpen: !this.state.dropdownOpen
       });
+    } else {
+      showErrorMessage('Switching branch disabled', {
+        message:
+          'You have staged changes in current branch. Please commit / discard them before switching to another branch.'
+      });
     }
   }
 
@@ -139,6 +146,11 @@ export class BranchHeader extends React.Component<
       this.setState({
         showNewBranchBox: !this.state.showNewBranchBox,
         dropdownOpen: false
+      });
+    } else {
+      showErrorMessage('Creating new branch disabled', {
+        message:
+          'You have staged changes in current branch. Please commit / discard them before creating to another branch.'
       });
     }
   };

@@ -14,7 +14,8 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "prepublish": "npm run build",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "test": "jest"
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
@@ -49,10 +50,17 @@
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
     "react-toggle-display": "^2.2.0",
+    "tslint": "^5.11.0",
     "typestyle": "^2.0.1"
   },
   "devDependencies": {
+    "@types/jest": "^23.3.5",
+    "jest": "^23.6.0",
+    "jest-fetch-mock": "^1.6.6",
+    "prettier": "^1.14.3",
     "rimraf": "^2.6.1",
+    "ts-jest": "^23.10.4",
+    "tslint-plugin-prettier": "^2.0.0",
     "typescript": "~3.1.2"
   },
   "directories": {
