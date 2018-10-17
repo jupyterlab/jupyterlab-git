@@ -25,7 +25,7 @@ import {
  * 2. Includes the modal (UI + callbacks) which invoked to enable Git Clone functionality.
  */
 export class GitClone extends Widget {
-    file_browser: FileBrowser;
+    fileBrowser: FileBrowser;
 
     /**
      * Creates the Widget instance by attaching the clone button to the File Browser toolbar and Git Clone modal.
@@ -34,7 +34,7 @@ export class GitClone extends Widget {
     constructor(factory: IFileBrowserFactory) {
         super();
         this.id = 'git-clone-button'
-        this.file_browser = factory.defaultBrowser;
+        this.fileBrowser = factory.defaultBrowser;
 
         const gitClone = new ToolbarButton({
             iconClassName: `${this.gitTabStyle} jp-Icon jp-Icon-16`,
@@ -43,7 +43,7 @@ export class GitClone extends Widget {
             },
             tooltip: 'Git Clone'
         });
-        this.file_browser.toolbar.addItem('gitClone', gitClone);
+        this.fileBrowser.toolbar.addItem('gitClone', gitClone);
     }
 
     /**
@@ -52,7 +52,7 @@ export class GitClone extends Widget {
      * @param cloneUrl
      */
     private makeApiCall(cloneUrl: string) {
-        new Git().clone(this.file_browser.model.path, cloneUrl)
+        new Git().clone(this.fileBrowser.model.path, cloneUrl)
             .then(response => {
                 // TODO: Implement error handling with error message when the backend API is fleshed out.
             })
