@@ -142,9 +142,8 @@ export class Git {
                 clone_url: url
             });
             if (response.status !== 200) {
-                return response.text().then(data => {
-                    throw new ServerConnection.ResponseError(response, data);
-                });
+              const data = await response.json();
+              throw new ServerConnection.ResponseError(response, data.message);
             }
             return response.json();
         } catch (err) {
@@ -159,9 +158,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.text().then(data => {
+          const data = await response.text();
           throw new ServerConnection.ResponseError(response, data);
-        });
       }
       return response.json();
     } catch (err) {
@@ -176,9 +174,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then((data: any) => {
+          const data = await response.json();
           throw new ServerConnection.ResponseError(response, data.message);
-        });
       }
       return response.json();
     } catch (err) {
@@ -194,9 +191,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then((data: any) => {
+          const data = await response.json();
           throw new ServerConnection.ResponseError(response, data.message);
-        });
       }
       return response.json();
     } catch (err) {
@@ -211,9 +207,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then((data: any) => {
+          const data = await response.json();
           throw new ServerConnection.ResponseError(response, data.message);
-        });
       }
       return response.json();
     } catch (err) {
@@ -228,9 +223,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then((data: any) => {
+          const data = await response.json();
           throw new ServerConnection.ResponseError(response, data.message);
-        });
       }
       return response.json();
     } catch (err) {
@@ -250,9 +244,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then((data: any) => {
+          const data = await response.json();
           throw new ServerConnection.ResponseError(response, data.message);
-        });
       }
       return response.json();
     } catch (err) {
@@ -267,9 +260,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-        return response.json().then((data: any) => {
+          const data = await response.json();
           throw new ServerConnection.ResponseError(response, data.message);
-        });
       }
       return response.json();
     } catch (err) {
@@ -295,9 +287,8 @@ export class Git {
         top_repo_path: path
       });
       if (response.status !== 200) {
-        return response.json().then((data: any) => {
+          const data = await response.json();
           throw new ServerConnection.ResponseError(response, data.message);
-        });
       }
       return response.json();
     } catch (err) {
