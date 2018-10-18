@@ -14,6 +14,7 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "prepublish": "npm run build",
+    "watch": "tsc -w",
     "test": "jest"
   },
   "files": [

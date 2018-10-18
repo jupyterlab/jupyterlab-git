@@ -10,6 +10,10 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
+import {
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser'
+
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Menu } from '@phosphor/widgets';
@@ -19,13 +23,14 @@ import { Token } from '@phosphor/coreutils';
 import { gitTabStyle } from './componentsStyle/GitWidgetStyle';
 
 import '../style/variables.css';
+import {GitClone} from "./gitClone";
 
 /**
  * The default running sessions extension.
  */
 const plugin: JupyterLabPlugin<IGitExtension> = {
   id: 'jupyter.extensions.running-sessions-git',
-  requires: [IMainMenu, ILayoutRestorer],
+  requires: [IMainMenu, ILayoutRestorer, IFileBrowserFactory],
   activate,
   autoStart: true
 };
@@ -54,7 +59,8 @@ export type IDiffCallback = (
 /** Main extension class */
 export class GitExtension implements IGitExtension {
   git_plugin: GitWidget;
-  constructor(app: JupyterLab, restorer: ILayoutRestorer) {
+  git_clone_widget: GitClone;
+  constructor(app: JupyterLab, restorer: ILayoutRestorer, factory: IFileBrowserFactory) {
     this.git_plugin = new GitWidget(
       app,
       { manager: app.serviceManager },
@@ -70,6 +76,8 @@ export class GitExtension implements IGitExtension {
 
     restorer.add(this.git_plugin, 'git-sessions');
     app.shell.addToLeftArea(this.git_plugin, { rank: 200 });
+
+    this.git_clone_widget = new GitClone(factory);
   }
 
   register_diff_provider(filetypes: string[], callback: IDiffCallback): void {
@@ -102,10 +110,11 @@ export class GitExtension implements IGitExtension {
 function activate(
   app: JupyterLab,
   mainMenu: IMainMenu,
-  restorer: ILayoutRestorer
+  restorer: ILayoutRestorer,
+  factory: IFileBrowserFactory
 ): IGitExtension {
   const { commands } = app;
-  let git_extension = new GitExtension(app, restorer);
+  let git_extension = new GitExtension(app, restorer, factory);
   const category = 'Git';
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running
@@ -128,5 +137,6 @@ function activate(
   });
   menu.addItem({ type: 'submenu', submenu: tutorial });
   mainMenu.addMenu(menu, { rank: 60 });
+
   return git_extension;
 }
