@@ -111,9 +111,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       disableFiles: false
     };
 
-    /** Add right-click menu options for files in repo 
-      * 
-      */
+    /** Add right-click menu options for files in repo
+     *
+     */
 
     if (!commands.hasCommand(CommandIDs.gitFileOpen)) {
       commands.addCommand(CommandIDs.gitFileOpen, {
@@ -216,7 +216,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   /** Handle clicks on a staged file
-   * 
+   *
    */
   handleClickStaged(event: any) {
     event.preventDefault();
@@ -393,9 +393,19 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   /** Discard changes in all unstaged files */
   discardAllUnstagedFiles(path: string, refresh: Function) {
     let gitApi = new Git();
-    gitApi.checkout(false, false, null, true, null, path).then(response => {
-      refresh();
-    });
+    gitApi
+      .checkout(false, false, null, true, null, path)
+      .then(response => {
+        refresh();
+      })
+      .catch(() => {
+        showDialog({
+          title: 'Discard all changes failed.',
+          buttons: [Dialog.warnButton({ label: 'DISMISS' })]
+        }).then(() => {
+          /** no-op */
+        });
+      });
   }
 
   /** Add a specific unstaged file */
@@ -409,9 +419,19 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   /** Discard changes in a specific unstaged file */
   discardUnstagedFile(file: string, path: string, refresh: Function) {
     let gitApi = new Git();
-    gitApi.checkout(false, false, null, false, file, path).then(response => {
-      refresh();
-    });
+    gitApi
+      .checkout(false, false, null, false, file, path)
+      .then(response => {
+        refresh();
+      })
+      .catch(() => {
+        showDialog({
+          title: `Discard changes for ${file} failed.`,
+          buttons: [Dialog.warnButton({ label: 'DISMISS' })]
+        }).then(() => {
+          /** no-op */
+        });
+      });
   }
 
   /** Add all untracked files */
