@@ -17,7 +17,7 @@ def test_git_clone_success(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/tmp').clone(current_path='test_curr_path', repo_url='ghjkhjkl')
+    actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -25,7 +25,7 @@ def test_git_clone_success(mock_subproc_popen):
             ['GIT_TERMINAL_PROMPT=0 git clone ghjkhjkl'],
             stdout=PIPE,
             stderr=PIPE,
-            cwd='/private/tmp/test_curr_path',
+            cwd='/bin/test_curr_path',
             shell=True
         ),
         call().communicate()
@@ -50,7 +50,7 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/tmp').clone(current_path='test_curr_path', repo_url='ghjkhjkl')
+    actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -58,7 +58,7 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
             ['GIT_TERMINAL_PROMPT=0 git clone ghjkhjkl'],
             stdout=PIPE,
             stderr=PIPE,
-            cwd='/private/tmp/test_curr_path',
+            cwd='/bin/test_curr_path',
             shell=True
         ),
         call().communicate()
