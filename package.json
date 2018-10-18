@@ -14,6 +14,7 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "prepublish": "npm run build",
+    "watch": "tsc -w",
     "test": "jest"
   },
   "files": [
@@ -45,6 +46,7 @@
     "@jupyterlab/terminal": "^0.19.1",
     "@jupyterlab/theming": "^0.9.0",
     "@phosphor/widgets": "^1.6.0",
+    "identity-obj-proxy": "^3.0.0",
     "nbdime": "^4.0.1",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
