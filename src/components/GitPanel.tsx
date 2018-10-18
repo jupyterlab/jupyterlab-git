@@ -122,8 +122,8 @@ export class GitPanel extends React.Component<
     }
   };
 
-  /** 
-   * Refresh widget, update all content 
+  /**
+   * Refresh widget, update all content
    */
   refresh = async () => {
     try {
@@ -151,7 +151,7 @@ export class GitPanel extends React.Component<
           if (branchData.code === 0) {
             let allBranches = (branchData as GitBranchResult).branches;
             for (var i = 0; i < allBranches.length; i++) {
-              if (allBranches[i].current[0]) {
+              if (allBranches[i].current) {
                 currentBranch = allBranches[i].name;
                 break;
               }
@@ -311,7 +311,8 @@ export class GitPanel extends React.Component<
               <button
                 className={findRepoButtonStyle}
                 onClick={() =>
-                  this.props.app.commands.execute('filebrowser:toggle-main')}
+                  this.props.app.commands.execute('filebrowser:toggle-main')
+                }
               >
                 Go find a repo
               </button>
