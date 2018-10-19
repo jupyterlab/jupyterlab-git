@@ -26,6 +26,10 @@ import {
  */
 export class GitClone extends Widget {
     fileBrowser: FileBrowser;
+    gitApi: Git;
+    cloneButton: ToolbarButton;
+    disabledGitButton: HTMLSpanElement;
+    enabledGitButton: HTMLSpanElement;
 
     /**
      * Creates the Widget instance by attaching the clone button to the File Browser toolbar and Git Clone modal.
@@ -35,15 +39,47 @@ export class GitClone extends Widget {
         super();
         this.id = 'git-clone-button'
         this.fileBrowser = factory.defaultBrowser;
-
-        const gitClone = new ToolbarButton({
-            iconClassName: `${this.gitTabStyle} jp-Icon jp-Icon-16`,
+        this.gitApi = new Git();
+        this.cloneButton = new ToolbarButton({
+            iconClassName: `${this.gitTabStyleEnabled} jp-Icon jp-Icon-16`,
             onClick: () => {
                 this.doGitClone();
             },
             tooltip: 'Git Clone'
         });
-        this.fileBrowser.toolbar.addItem('gitClone', gitClone);
+        this.fileBrowser.toolbar.addItem('gitClone', this.cloneButton);
+
+        // Attached a listener on the pathChanged event.
+        factory.defaultBrowser.model.pathChanged.connect(() => this.disableIfInGitDirectory());
+
+        // Create the elements for the Git button toggling
+        let disabledGitButton = document.createElement('span');
+        disabledGitButton.className = `${this.gitTabStyleDisabled} jp-Icon jp-Icon-16`
+
+        let enabledGitButton = document.createElement('span');
+        enabledGitButton.className =  `${this.gitTabStyleEnabled} jp-Icon jp-Icon-16`
+        this.disabledGitButton = disabledGitButton;
+        this.enabledGitButton =  enabledGitButton;
+    }
+
+    /**
+     * Event listener for the `pathChanged` event in the file browser. Checks if the current file browser path is a
+     * Git repo and disables/enables the clone button accordingly.
+     */
+    disableIfInGitDirectory(): void {
+        this.gitApi.allHistory(
+            this.fileBrowser.model.path
+        ).then(response => {
+                if (response.code == 0) {
+                    this.cloneButton.node.firstChild.firstChild.replaceWith(this.disabledGitButton);
+                } else {
+                    this.cloneButton.node.firstChild.firstChild.replaceWith(this.enabledGitButton);
+                }
+            }
+        ).catch(() => {
+                // NOOP
+            }
+        );
     }
 
     /**
@@ -52,9 +88,11 @@ export class GitClone extends Widget {
      * @param cloneUrl
      */
     private makeApiCall(cloneUrl: string) {
-        new Git().clone(this.fileBrowser.model.path, cloneUrl)
+        this.gitApi.clone(this.fileBrowser.model.path, cloneUrl)
             .then(response => {
-                // TODO: Implement error handling with error message when the backend API is fleshed out.
+                if (response.code != 0) {
+                    this.showErrorDialog(response.message);
+                }
             })
             .catch(() => this.showErrorDialog())
     }
@@ -76,8 +114,15 @@ export class GitClone extends Widget {
     /**
      * Creates the CSS style for the Git Clone button image.
      */
-    private gitTabStyle = style({
+    private gitTabStyleEnabled = style({
         backgroundImage: 'var(--jp-icon-git-clone)'
+    });
+
+    /**
+     * Creates the CSS style for the Git Clone button image.
+     */
+    private gitTabStyleDisabled = style({
+        backgroundImage: 'var(--jp-icon-git-clone-disabled)'
     });
 
     /**
