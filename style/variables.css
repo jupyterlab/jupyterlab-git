@@ -32,4 +32,5 @@
   --jp-icon-rewind-white: url('./images/rewind-white.svg');
   --jp-icon-git: url('./images/git-icon.svg');
   --jp-icon-git-clone: url('./images/git-clone-icon.svg');
+  --jp-icon-git-clone-disabled: url('./images/git-clone-icon-disabled.svg');
 }

@@ -151,7 +151,9 @@ export class Git {
         }
     }
 
-  /** Make request for all git info of repository 'path' */
+  /** Make request for all git info of repository 'path'
+   * (This API is also implicitly used to check if the current repo is a Git repo)
+   */
   async allHistory(path: string): Promise<GitAllHistory> {
     try {
       let response = await httpGitRequest('/git/all_history', 'POST', {
