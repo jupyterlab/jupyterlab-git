@@ -27,9 +27,10 @@ import {
 export class GitClone extends Widget {
     fileBrowser: FileBrowser;
     gitApi: Git;
-    cloneButton: ToolbarButton;
+    enabledCloneButton: ToolbarButton;
     disabledGitButton: HTMLSpanElement;
     enabledGitButton: HTMLSpanElement;
+    disabledCloneButton: ToolbarButton;
 
     /**
      * Creates the Widget instance by attaching the clone button to the File Browser toolbar and Git Clone modal.
@@ -37,27 +38,33 @@ export class GitClone extends Widget {
      */
     constructor(factory: IFileBrowserFactory) {
         super();
-        this.id = 'git-clone-button'
+        this.id = 'git-clone-button';
         this.fileBrowser = factory.defaultBrowser;
         this.gitApi = new Git();
-        this.cloneButton = new ToolbarButton({
+
+        // Initialize the clone button in enabled state
+        this.enabledCloneButton = new ToolbarButton({
             iconClassName: `${this.gitTabStyleEnabled} jp-Icon jp-Icon-16`,
             onClick: () => {
                 this.doGitClone();
             },
             tooltip: 'Git Clone'
         });
-        this.fileBrowser.toolbar.addItem('gitClone', this.cloneButton);
+        this.disabledCloneButton = new ToolbarButton({
+            iconClassName: `${this.gitTabStyleDisabled} jp-Icon jp-Icon-16`,
+            tooltip: 'Cloning disabled within a git repository'
+        });
+        this.fileBrowser.toolbar.addItem('gitClone', this.enabledCloneButton);
 
         // Attached a listener on the pathChanged event.
         factory.defaultBrowser.model.pathChanged.connect(() => this.disableIfInGitDirectory());
 
         // Create the elements for the Git button toggling
         let disabledGitButton = document.createElement('span');
-        disabledGitButton.className = `${this.gitTabStyleDisabled} jp-Icon jp-Icon-16`
+        disabledGitButton.className = `${this.gitTabStyleDisabled} jp-Icon jp-Icon-16`;
 
         let enabledGitButton = document.createElement('span');
-        enabledGitButton.className =  `${this.gitTabStyleEnabled} jp-Icon jp-Icon-16`
+        enabledGitButton.className =  `${this.gitTabStyleEnabled} jp-Icon jp-Icon-16`;
         this.disabledGitButton = disabledGitButton;
         this.enabledGitButton =  enabledGitButton;
     }
@@ -71,9 +78,11 @@ export class GitClone extends Widget {
             this.fileBrowser.model.path
         ).then(response => {
                 if (response.code == 0) {
-                    this.cloneButton.node.firstChild.firstChild.replaceWith(this.disabledGitButton);
+                    this.enabledCloneButton.parent = null;
+                    this.fileBrowser.toolbar.addItem('disabledCloneButton', this.disabledCloneButton);
                 } else {
-                    this.cloneButton.node.firstChild.firstChild.replaceWith(this.enabledGitButton);
+                    this.disabledCloneButton.parent = null;
+                    this.fileBrowser.toolbar.addItem('enabledCloneButton', this.enabledCloneButton);
                 }
             }
         ).catch(() => {
