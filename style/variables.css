@@ -33,4 +33,5 @@
   --jp-icon-git: url('./images/git-icon.svg');
   --jp-icon-git-clone: url('./images/git-clone-icon.svg');
   --jp-icon-git-clone-disabled: url('./images/git-clone-icon-disabled.svg');
+  --jp-icon-branch-tracking: url('./images/icon-branch-tracking.svg');
 }

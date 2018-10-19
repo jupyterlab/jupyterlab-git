@@ -39,9 +39,10 @@ On success
                 "code": 0,
                 "branches": [
                     {
-                        "current":false, 
-                        "remote":true,
+                        "is_current_branch":false, 
+                        "is_remote_branch":true,
                         "name":"branch-name", 
+                        "upstream":"upstream-branch-name",
                         "tag":"branch-tag"
                     }
                 ]
@@ -178,9 +179,10 @@ On success
         "code": 0,
         "branches": [
             {
-                "current":false,
-                "remote":true,
+                "is_current_branch":false,
+                "is_remote_branch":true,
                 "name":"branch-name",
+                "upstream":"upstream-branch-name",
                 "tag":"branch-tag"
             }
         ]

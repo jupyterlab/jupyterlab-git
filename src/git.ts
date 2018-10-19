@@ -4,8 +4,8 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 'use strict';
 
-/** Interface for GitAllHistory request result, 
-  * has all repo information */
+/** Interface for GitAllHistory request result,
+ * has all repo information */
 export interface GitAllHistory {
   code: number;
   data?: {
@@ -16,45 +16,46 @@ export interface GitAllHistory {
   };
 }
 
-/** Interface for GitShowTopLevel request result, 
-  * has the git root directory inside a repository */
+/** Interface for GitShowTopLevel request result,
+ * has the git root directory inside a repository */
 export interface GitShowTopLevelResult {
   code: number;
   top_repo_path?: string;
 }
 
-/** Interface for GitShowPrefix request result, 
-  * has the prefix path of a directory in a repository, 
-  * with respect to the root directory. */
+/** Interface for GitShowPrefix request result,
+ * has the prefix path of a directory in a repository,
+ * with respect to the root directory. */
 export interface GitShowPrefixResult {
   code: number;
   under_repo_path?: string;
 }
 
-/** Interface for GitShowPrefix request result, 
-  * has the prefix path of a directory in a repository, 
-  * with respect to the root directory. */
+/** Interface for GitShowPrefix request result,
+ * has the prefix path of a directory in a repository,
+ * with respect to the root directory. */
 export interface GitCheckoutResult {
   code: number;
   message?: string;
 }
 
-/** Interface for GitBranch request result, 
-  * has the result of changing the current working branch */
+/** Interface for GitBranch request result,
+ * has the result of changing the current working branch */
 export interface GitBranchResult {
   code: number;
   branches?: [
     {
-      current: boolean;
-      remote: boolean;
+      is_current_branch: boolean;
+      is_remote_branch: boolean;
       name: string;
+      upstream: string;
       tag: string;
     }
   ];
 }
 
-/** Interface for GitStatus request result, 
-   * has the status of each changed file */
+/** Interface for GitStatus request result,
+ * has the status of each changed file */
 export interface GitStatusFileResult {
   x: string;
   y: string;
@@ -62,15 +63,15 @@ export interface GitStatusFileResult {
   from: string;
 }
 
-/** Interface for GitStatus request result, 
-  * has the status of the entire repo */
+/** Interface for GitStatus request result,
+ * has the status of the entire repo */
 export interface GitStatusResult {
   code: number;
   files?: [GitStatusFileResult];
 }
 
-/** Interface for GitLog request result, 
-  * has the info of a single past commit */
+/** Interface for GitLog request result,
+ * has the info of a single past commit */
 export interface SingleCommitInfo {
   commit: string;
   author: string;
@@ -79,8 +80,8 @@ export interface SingleCommitInfo {
   pre_commit: string;
 }
 
-/** Interface for GitCommit request result, 
-  * has the info of a committed file */
+/** Interface for GitCommit request result,
+ * has the info of a committed file */
 export interface CommitModifiedFile {
   modified_file_path: string;
   modified_file_name: string;
@@ -88,8 +89,8 @@ export interface CommitModifiedFile {
   deletion: string;
 }
 
-/** Interface for GitDetailedLog request result, 
-  * has the detailed info of a single past commit */
+/** Interface for GitDetailedLog request result,
+ * has the detailed info of a single past commit */
 export interface SingleCommitFilePathInfo {
   code: number;
   modified_file_note?: string;
@@ -99,8 +100,8 @@ export interface SingleCommitFilePathInfo {
   modified_files?: [CommitModifiedFile];
 }
 
-/** Interface for GitLog request result, 
-  * has the info of all past commits */
+/** Interface for GitLog request result,
+ * has the info of all past commits */
 export interface GitLogResult {
   code: number;
   commits?: [SingleCommitInfo];
@@ -134,22 +135,22 @@ export interface GitCloneResult {
 export class Git {
   constructor() {}
 
-    /** Placeholder for the Git Clone API. */
-    async clone(path: string, url: string): Promise<GitCloneResult> {
-        try {
-            let response = await httpGitRequest('/git/clone', 'POST', {
-                current_path: path,
-                clone_url: url
-            });
-            if (response.status !== 200) {
-              const data = await response.json();
-              throw new ServerConnection.ResponseError(response, data.message);
-            }
-            return response.json();
-        } catch (err) {
-            throw ServerConnection.NetworkError;
-        }
+  /** Placeholder for the Git Clone API. */
+  async clone(path: string, url: string): Promise<GitCloneResult> {
+    try {
+      let response = await httpGitRequest('/git/clone', 'POST', {
+        current_path: path,
+        clone_url: url
+      });
+      if (response.status !== 200) {
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
+      }
+      return response.json();
+    } catch (err) {
+      throw ServerConnection.NetworkError;
     }
+  }
 
   /** Make request for all git info of repository 'path'
    * (This API is also implicitly used to check if the current repo is a Git repo)
@@ -160,8 +161,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-          const data = await response.text();
-          throw new ServerConnection.ResponseError(response, data);
+        const data = await response.text();
+        throw new ServerConnection.ResponseError(response, data);
       }
       return response.json();
     } catch (err) {
@@ -176,8 +177,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-          const data = await response.json();
-          throw new ServerConnection.ResponseError(response, data.message);
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
       }
       return response.json();
     } catch (err) {
@@ -185,16 +186,16 @@ export class Git {
     }
   }
 
-  /** Make request for the prefix path of a directory 'path', 
-    * with respect to the root directory of repository  */
+  /** Make request for the prefix path of a directory 'path',
+   * with respect to the root directory of repository  */
   async showPrefix(path: string): Promise<GitShowPrefixResult> {
     try {
       let response = await httpGitRequest('/git/show_prefix', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
-          const data = await response.json();
-          throw new ServerConnection.ResponseError(response, data.message);
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
       }
       return response.json();
     } catch (err) {
@@ -209,8 +210,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-          const data = await response.json();
-          throw new ServerConnection.ResponseError(response, data.message);
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
       }
       return response.json();
     } catch (err) {
@@ -225,8 +226,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-          const data = await response.json();
-          throw new ServerConnection.ResponseError(response, data.message);
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
       }
       return response.json();
     } catch (err) {
@@ -234,8 +235,8 @@ export class Git {
     }
   }
 
-  /** Make request for detailed git commit info of 
-    * commit 'hash' in repository 'path' */
+  /** Make request for detailed git commit info of
+   * commit 'hash' in repository 'path' */
   async detailedLog(
     hash: string,
     path: string
@@ -246,8 +247,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-          const data = await response.json();
-          throw new ServerConnection.ResponseError(response, data.message);
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
       }
       return response.json();
     } catch (err) {
@@ -262,8 +263,8 @@ export class Git {
         current_path: path
       });
       if (response.status !== 200) {
-          const data = await response.json();
-          throw new ServerConnection.ResponseError(response, data.message);
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
       }
       return response.json();
     } catch (err) {
@@ -271,8 +272,8 @@ export class Git {
     }
   }
 
-  /** Make request to add one or all files into 
-    * the staging area in repository 'path' */
+  /** Make request to add one or all files into
+   * the staging area in repository 'path' */
   async add(check: boolean, filename: string, path: string): Promise<Response> {
     return httpGitRequest('/git/add', 'POST', {
       add_all: check,
@@ -281,16 +282,16 @@ export class Git {
     });
   }
 
-  /** Make request to add all untracked files into 
-    * the staging area in repository 'path' */
+  /** Make request to add all untracked files into
+   * the staging area in repository 'path' */
   async addAllUntracked(path: string): Promise<Response> {
     try {
       let response = await httpGitRequest('/git/add_all_untracked', 'POST', {
         top_repo_path: path
       });
       if (response.status !== 200) {
-          const data = await response.json();
-          throw new ServerConnection.ResponseError(response, data.message);
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
       }
       return response.json();
     } catch (err) {
@@ -298,11 +299,11 @@ export class Git {
     }
   }
 
-  /** Make request to switch current working branch, 
-    * create new branch if needed, 
-    * or discard all changes, 
-    * or discard a specific file change 
-    * TODO: Refactor into seperate endpoints for each kind of checkout request */
+  /** Make request to switch current working branch,
+   * create new branch if needed,
+   * or discard all changes,
+   * or discard a specific file change
+   * TODO: Refactor into seperate endpoints for each kind of checkout request */
   async checkout(
     checkout_branch: boolean,
     new_check: boolean,

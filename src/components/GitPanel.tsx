@@ -39,6 +39,7 @@ export interface IGitSessionNodeState {
 
   branches: any;
   currentBranch: string;
+  upstreamBranch: string;
   disableSwitchBranch: boolean;
 
   pastCommits: any;
@@ -79,6 +80,7 @@ export class GitPanel extends React.Component<
       showWarning: false,
       branches: [],
       currentBranch: '',
+      upstreamBranch: '',
       disableSwitchBranch: true,
       pastCommits: [],
       inNewRepo: true,
@@ -145,14 +147,16 @@ export class GitPanel extends React.Component<
           let apiShowTopLevel = (apiResult as GitAllHistory).data
             .show_top_level;
 
-          // Get current git branch
+          // Get current and upstream git branch
           let branchData = (apiResult as GitAllHistory).data.branch;
           let currentBranch = 'master';
+          let upstreamBranch = '';
           if (branchData.code === 0) {
             let allBranches = (branchData as GitBranchResult).branches;
             for (var i = 0; i < allBranches.length; i++) {
-              if (allBranches[i].current) {
+              if (allBranches[i].is_current_branch) {
                 currentBranch = allBranches[i].name;
+                upstreamBranch = allBranches[i].upstream;
                 break;
               }
             }
@@ -219,6 +223,7 @@ export class GitPanel extends React.Component<
             showWarning: true,
             branches: (branchData as GitBranchResult).branches,
             currentBranch: currentBranch,
+            upstreamBranch: upstreamBranch,
             disableSwitchBranch: disableSwitchBranch,
             pastCommits: pastCommits,
             inNewRepo: inNewRepo,
@@ -274,6 +279,7 @@ export class GitPanel extends React.Component<
                 topRepoPath={this.state.topRepoPath}
                 refresh={this.refresh}
                 currentBranch={this.state.currentBranch}
+                upstreamBranch={this.state.upstreamBranch}
                 stagedFiles={this.state.stagedFiles}
                 data={this.state.branches}
                 disabled={this.state.disableSwitchBranch}

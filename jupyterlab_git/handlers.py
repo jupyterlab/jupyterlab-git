@@ -46,7 +46,7 @@ class GitAllHistoryHandler(GitHandler):
 
     def post(self):
         """
-        POST request handler, calls individual handlers for 
+        POST request handler, calls individual handlers for
         'git show_top_level', 'git branch', 'git log', and 'git status'
         """
         current_path = self.get_json_body()["current_path"]
@@ -72,7 +72,7 @@ class GitAllHistoryHandler(GitHandler):
 
 class GitShowTopLevelHandler(GitHandler):
     """
-    Handler for 'git rev-parse --show-toplevel'. 
+    Handler for 'git rev-parse --show-toplevel'.
     Displays the git root directory inside a repository.
     """
 
@@ -87,14 +87,14 @@ class GitShowTopLevelHandler(GitHandler):
 
 class GitShowPrefixHandler(GitHandler):
     """
-    Handler for 'git rev-parse --show-prefix'. 
-    Displays the prefix path of a directory in a repository, 
+    Handler for 'git rev-parse --show-prefix'.
+    Displays the prefix path of a directory in a repository,
     with respect to the root directory.
     """
 
     def post(self):
         """
-        POST request handler, displays the prefix path of a directory in a repository, 
+        POST request handler, displays the prefix path of a directory in a repository,
         with respect to the root directory.
         """
         current_path = self.get_json_body()["current_path"]
@@ -128,13 +128,13 @@ class GitStatusHandler(GitHandler):
 
 class GitLogHandler(GitHandler):
     """
-    Handler for 'git log --pretty=format:%H-%an-%ar-%s'. 
+    Handler for 'git log --pretty=format:%H-%an-%ar-%s'.
     Fetches Commit SHA, Author Name, Commit Date & Commit Message.
     """
 
     def post(self):
         """
-        POST request handler, 
+        POST request handler,
         fetches Commit SHA, Author Name, Commit Date & Commit Message.
         """
         current_path = self.get_json_body()["current_path"]
@@ -144,7 +144,7 @@ class GitLogHandler(GitHandler):
 
 class GitDetailedLogHandler(GitHandler):
     """
-    Handler for 'git log -1 --stat --numstat --oneline' command. 
+    Handler for 'git log -1 --stat --numstat --oneline' command.
     Fetches file names of committed files, Number of insertions &
     deletions in that commit.
     """
@@ -194,7 +194,7 @@ class GitBranchHandler(GitHandler):
 
 class GitAddHandler(GitHandler):
     """
-    Handler for git add <filename>'. 
+    Handler for git add <filename>'.
     Adds one or all files into to the staging area.
     """
 
@@ -224,13 +224,13 @@ class GitAddHandler(GitHandler):
 
 class GitResetHandler(GitHandler):
     """
-    Handler for 'git reset <filename>'. 
+    Handler for 'git reset <filename>'.
     Moves one or all files from the staged to the unstaged area.
     """
 
     def post(self):
         """
-        POST request handler, 
+        POST request handler,
         moves one or all files from the staged to the unstaged area.
         """
         data = self.get_json_body()
@@ -241,6 +241,7 @@ class GitResetHandler(GitHandler):
             filename = data["filename"]
             my_output = self.git.reset(filename, top_repo_path)
         self.finish(my_output)
+
 
 class GitDeleteCommitHandler(GitHandler):
     """
@@ -255,6 +256,7 @@ class GitDeleteCommitHandler(GitHandler):
         output = self.git.delete_commit(commit_id, top_repo_path)
         self.finish(output)
 
+
 class GitResetToCommitHandler(GitHandler):
     """
     Handler for 'git reset --hard <SHA>'.
@@ -267,6 +269,7 @@ class GitResetToCommitHandler(GitHandler):
         commit_id = data["commit_id"]
         output = self.git.reset_to_commit(commit_id, top_repo_path)
         self.finish(output)
+
 
 class GitCheckoutHandler(GitHandler):
     """
@@ -333,13 +336,13 @@ class GitPullHandler(GitHandler):
 
 class GitPushHandler(GitHandler):
     """
-    Handler for 'git push <first-branch> <second-branch>. 
+    Handler for 'git push <first-branch> <second-branch>.
     Pushes committed files to a remote branch.
     """
 
     def post(self):
         """
-        POST request handler, 
+        POST request handler,
         pushes comitted files from your current branch to a remote branch
         """
         data = self.get_json_body()
