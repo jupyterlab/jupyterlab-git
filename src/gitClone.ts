@@ -28,8 +28,6 @@ export class GitClone extends Widget {
     fileBrowser: FileBrowser;
     gitApi: Git;
     enabledCloneButton: ToolbarButton;
-    disabledGitButton: HTMLSpanElement;
-    enabledGitButton: HTMLSpanElement;
     disabledCloneButton: ToolbarButton;
 
     /**
@@ -58,15 +56,6 @@ export class GitClone extends Widget {
 
         // Attached a listener on the pathChanged event.
         factory.defaultBrowser.model.pathChanged.connect(() => this.disableIfInGitDirectory());
-
-        // Create the elements for the Git button toggling
-        let disabledGitButton = document.createElement('span');
-        disabledGitButton.className = `${this.gitTabStyleDisabled} jp-Icon jp-Icon-16`;
-
-        let enabledGitButton = document.createElement('span');
-        enabledGitButton.className =  `${this.gitTabStyleEnabled} jp-Icon jp-Icon-16`;
-        this.disabledGitButton = disabledGitButton;
-        this.enabledGitButton =  enabledGitButton;
     }
 
     /**
