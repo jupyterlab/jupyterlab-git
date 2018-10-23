@@ -51,7 +51,7 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
     caption: 'Start a new terminal session to directly use git command',
     execute: args => {
       let currentFileBrowserPath = findCurrentFileBrowserPath();
-      let name = args ? args['name'] as string : '';
+      let name = args ? (args['name'] as string) : '';
       let terminal = new Terminal();
       terminal.title.closable = true;
       terminal.title.label = '...';
@@ -67,7 +67,7 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
           app.shell.activateById(terminal.id);
           terminal.session.send({
             type: 'stdin',
-            content: ['cd ' + currentFileBrowserPath + '\n']
+            content: ['cd "' + currentFileBrowserPath.split('"').join('\\"') + '"\n']
           });
           return terminal;
         })
@@ -84,8 +84,10 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
     execute: args => {
       let currentFileBrowserPath = findCurrentFileBrowserPath();
       let changeDirectoryCommand =
-        currentFileBrowserPath === ' ' ? '' : 'cd ' + currentFileBrowserPath;
-      let gitCommand = args ? args['cmd'] as string : '';
+        currentFileBrowserPath === ' '
+          ? ''
+          : 'cd "' + currentFileBrowserPath.split('"').join('\\"') + '"';
+      let gitCommand = args ? (args['cmd'] as string) : '';
       let linkCommand =
         changeDirectoryCommand !== '' && gitCommand !== '' ? '&&' : '';
       let terminal = new Terminal();
