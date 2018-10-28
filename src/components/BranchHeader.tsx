@@ -20,7 +20,9 @@ import {
   expandedBranchStyle,
   openHistorySideBarButtonStyle,
   openHistorySideBarIconStyle,
-  branchHeaderCenterContent
+  branchHeaderCenterContent,
+  branchTrackingButtonStyle,
+  branchTrackingLabelStyle
 } from '../componentsStyle/BranchHeaderStyle';
 
 import { classes } from 'typestyle';
@@ -37,6 +39,7 @@ export interface IBranchHeaderProps {
   currentFileBrowserPath: string;
   topRepoPath: string;
   currentBranch: string;
+  upstreamBranch: string;
   stagedFiles: any;
   data: any;
   refresh: any;
@@ -150,7 +153,7 @@ export class BranchHeader extends React.Component<
     } else {
       showErrorMessage('Creating new branch disabled', {
         message:
-          'You have staged changes in current branch. Please commit / discard them before creating to another branch.'
+          'You have staged changes in current branch. Please commit / discard them before creating a new branch.'
       });
     }
   };
@@ -201,6 +204,8 @@ export class BranchHeader extends React.Component<
                 toggleNewBranchBox={this.toggleNewBranchBox}
               />
             )}
+          {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<div className={branchTrackingButtonStyle}/>)}
+          {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<h3 className={branchTrackingLabelStyle}>{this.props.upstreamBranch}</h3>)}
         </div>
         {this.state.dropdownOpen && (
           <div>

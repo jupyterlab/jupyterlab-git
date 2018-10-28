@@ -42,6 +42,16 @@ export const branchLabelStyle = style({
   display: 'inline-block'
 });
 
+export const branchTrackingLabelStyle = style({
+  fontSize: 'var(--jp-ui-font-size1)',
+  marginTop: '5px',
+  marginBottom: '5px',
+  marginLeft: '5px',
+  display: 'inline-block',
+  color: '#828282',
+  fontWeight: 'normal'
+});
+
 export const branchIconStyle = style({
   backgroundImage: 'var(--jp-Git-icon-branch)',
   display: 'inline-block',
@@ -125,6 +135,17 @@ export function newBranchButtonStyle(isLight: string) {
     });
   }
 }
+
+export const branchTrackingButtonStyle = style({
+  backgroundImage: 'var(--jp-icon-branch-tracking)',
+  backgroundSize: '100%',
+  backgroundRepeat: 'no-repeat',
+  height: '18px',
+  width: '18px',
+  display: 'inline-block',
+  verticalAlign: 'middle',
+  marginTop: '5px'
+})
 
 export const headerButtonDisabledStyle = style({
   opacity: 0.5
