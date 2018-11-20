@@ -237,25 +237,25 @@ export class BranchHeader extends React.Component<
             {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<div className={branchTrackingButtonStyle}/>)}
             {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<h3 className={branchTrackingLabelStyle}>{this.props.upstreamBranch}</h3>)}
           </div>
-          {this.state.dropdownOpen && (
-            <div>
-              {this.props.data.map((branch: any, branchIndex: number) => {
-                return (
-                  <li
-                    className={branchListItemStyle}
-                    key={branchIndex}
-                    onClick={() => this.switchBranch(branch.name)}
-                  >
-                    {branch.name}
-                  </li>
-                );
-              })}
-            </div>
-          )}
-          {this.state.showNewBranchBox && (
-            <div>Branching from {this.props.currentBranch}</div>
-          )}
         </div>
+        {this.state.dropdownOpen && (
+          <div>
+            {this.props.data.map((branch: any, branchIndex: number) => {
+              return (
+                <li
+                  className={branchListItemStyle}
+                  key={branchIndex}
+                  onClick={() => this.switchBranch(branch.name)}
+                >
+                  {branch.name}
+                </li>
+              );
+            })}
+          </div>
+        )}
+        {this.state.showNewBranchBox && (
+          <div>Branching from {this.props.currentBranch}</div>
+        )}
         {!this.props.sideBarExpanded &&
           this.state.showCommitBox &&
           this.props.showList && (
