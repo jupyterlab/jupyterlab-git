@@ -276,15 +276,11 @@ export class GitPanel extends React.Component<
               />
               <HistorySideBar
                 isExpanded={this.state.sideBarExpanded}
-                currentFileBrowserPath={this.state.currentFileBrowserPath}
                 pastCommits={this.state.pastCommits}
-                setShowList={this.setShowList}
-                getPastCommit={this.showPastCommitWork}
               />
               <PastCommits
                 currentFileBrowserPath={this.state.currentFileBrowserPath}
                 topRepoPath={this.state.topRepoPath}
-                pastCommits={this.state.pastCommits}
                 inNewRepo={this.state.inNewRepo}
                 showList={this.state.showList}
                 stagedFiles={this.state.stagedFiles}
@@ -293,13 +289,6 @@ export class GitPanel extends React.Component<
                 app={this.props.app}
                 refresh={this.refresh}
                 diff={this.props.diff}
-                pastCommitInfo={this.state.pastCommitInfo}
-                pastCommitFilesChanged={this.state.pastCommitFilesChanged}
-                pastCommitInsertionCount={this.state.pastCommitInsertionCount}
-                pastCommitDeletionCount={this.state.pastCommitDeletionCount}
-                pastCommitData={this.state.pastCommitData}
-                pastCommitNumber={this.state.pastCommitNumber}
-                pastCommitFilelist={this.state.pastCommitFilelist}
                 sideBarExpanded={this.state.sideBarExpanded}
                 currentTheme={this.props.app.shell.dataset.themeLight}
               />

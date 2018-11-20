@@ -1,52 +1,25 @@
 import { style } from 'typestyle';
 
 export const pastCommitNodeStyle = style({
-  position: 'relative',
-  color: 'var(--jp-ui-font-color1)',
-  width: '36px',
-  height: '36px',
-  border: '2px solid #000',
-  borderRadius: '50%',
-  outline: 'none !important',
-  margin: '-1px auto -1px auto',
-  textAlign: 'center',
-  lineHeight: '36px'
+  flex: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  padding: "10px",
+  borderBottom: "var(--jp-border-width) solid var(--jp-border-color2)",
 });
 
-export const pastCommitWorkingNodeStyle = style({
-  border: '2px dashed #000',
-  borderRadius: '50%',
-  marginTop: '5px'
+export const pastCommitHeaderStyle = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  color: '#828282',
+  paddingBottom: "5px"
 });
 
-export const pastCommitContentStyle = style({
-  fontFamily: 'Oswald'
+
+export const pastCommitHeaderItemStyle = style({
 });
 
-export const pastCommitWorkingContentStyle = style({
-  left: '-5px',
-  backgroundColor: 'var(--jp-layout-color2)',
-  height: '13px',
-  position: 'absolute',
-  lineHeight: '100%',
-  marginTop: '11px'
-});
 
-export const pastCommitHeadContentStyle = style({
-  left: '5%'
-});
-
-export const pastCommitNumberContentStyle = style({
-  left: '38%'
-});
-
-export const pastCommitActiveContentStyle = style({
-  color: 'var(--jp-brand-color2)'
-});
-
-export const pastCommitLineStyle = style({
-  backgroundColor: '#000',
-  height: '18px',
-  width: '3px',
-  margin: '0 auto'
+export const pastCommitBodyStyle = style({
+  flex: 'auto',
 });
