@@ -238,35 +238,36 @@ export class BranchHeader extends React.Component<
             {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<h3 className={branchTrackingLabelStyle}>{this.props.upstreamBranch}</h3>)}
           </div>
         </div>
-        {this.state.dropdownOpen && (
-          <div>
-            {this.props.data.map((branch: any, branchIndex: number) => {
-              return (
-                <li
-                  className={branchListItemStyle}
-                  key={branchIndex}
-                  onClick={() => this.switchBranch(branch.name)}
-                >
-                  {branch.name}
-                </li>
-              );
-            })}
-          </div>
-        )}
-        {this.state.showNewBranchBox && (
-          <div>Branching from {this.props.currentBranch}</div>
-        )}
-        {!this.props.sideBarExpanded &&
-          this.state.showCommitBox &&
-          this.props.showList && (
-            <CommitBox
-              checkReadyForSubmit={this.updateCommitBoxState}
-              stagedFiles={this.props.stagedFiles}
-              commitAllStagedFiles={this.commitAllStagedFiles}
-              topRepoPath={this.props.topRepoPath}
-              refresh={this.props.refresh}
-            />
+        {!this.props.sideBarExpanded && (<>
+          {this.state.dropdownOpen && (
+            <div>
+              {this.props.data.map((branch: any, branchIndex: number) => {
+                return (
+                  <li
+                    className={branchListItemStyle}
+                    key={branchIndex}
+                    onClick={() => this.switchBranch(branch.name)}
+                  >
+                    {branch.name}
+                  </li>
+                );
+              })}
+            </div>
           )}
+          {this.state.showNewBranchBox && (
+            <div>Branching from {this.props.currentBranch}</div>
+          )}
+          {this.state.showCommitBox &&
+            this.props.showList && (
+              <CommitBox
+                checkReadyForSubmit={this.updateCommitBoxState}
+                stagedFiles={this.props.stagedFiles}
+                commitAllStagedFiles={this.commitAllStagedFiles}
+                topRepoPath={this.props.topRepoPath}
+                refresh={this.props.refresh}
+              />
+            )}
+        </>)}
       </div>
     );
   }
