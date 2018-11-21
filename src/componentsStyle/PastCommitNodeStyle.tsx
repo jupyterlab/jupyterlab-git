@@ -1,7 +1,7 @@
 import { style } from 'typestyle';
 
 export const pastCommitNodeStyle = style({
-  flex: 'auto',
+  flexGrow: 0,
   display: 'flex',
   flexDirection: 'column',
   padding: "10px",

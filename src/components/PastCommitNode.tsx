@@ -27,6 +27,7 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
     const branches = [];
     for (let i = 0; i < this.props.data.length; i++) {
       const branch = this.props.data[i];
+      // tag sent from describe command. Must unparse to find commit hash
       // https://git-scm.com/docs/git-describe#git-describe-ltcommit-ishgt82308203
       if (!branch.tag) {
         continue;
@@ -61,7 +62,10 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
           {this.getBranchesForCommit().map((branch, id) => (
             <>
               {branch.is_current_branch && (
-                <span className={classes(branchStyle, workingBranchStyle)} key={id}>
+                <span
+                  className={classes(branchStyle, workingBranchStyle)}
+                  key={id}
+                >
                   working
                 </span>
               )}
