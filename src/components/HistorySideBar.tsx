@@ -21,28 +21,12 @@ export interface IHistorySideBarProps {
   diff: any;
 }
 
-/** Interface for PastCommits component state */
-export interface IHistorySideBarState {
-  activeNode: number;
-}
+
 
 export class HistorySideBar extends React.Component<
   IHistorySideBarProps,
-  IHistorySideBarState
+  {}
 > {
-  constructor(props: IHistorySideBarProps) {
-    super(props);
-
-    this.state = {
-      activeNode: -1
-    };
-  }
-
-
-  updateActiveNode = (index: number): void => {
-    this.setState({ activeNode: index });
-  };
-
   render() {
     if (!this.props.isExpanded) {
       return null;
