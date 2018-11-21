@@ -43,10 +43,18 @@ export const workingBranchStyle = style({
   backgroundColor: "#ffce83"
 });
 
+export const pastCommitExpandedStyle = style({
+  backgroundColor: "#f9f9f9"
+});
 
 export const pastCommitHeaderItemStyle = style({
 });
 
+
+export const collapseStyle = style({
+  color: "#1a76d2",
+  float: "right"
+})
 
 export const pastCommitBodyStyle = style({
   flex: 'auto',

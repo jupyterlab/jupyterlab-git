@@ -14,6 +14,11 @@ export interface IHistorySideBarProps {
   pastCommits: SingleCommitInfo[];
   data: GitBranchResult["branches"];
   isExpanded: boolean;
+  topRepoPath: string;
+  currentTheme: string;
+  app: any;
+  refresh: any;
+  diff: any;
 }
 
 /** Interface for PastCommits component state */
@@ -50,6 +55,11 @@ export class HistorySideBar extends React.Component<
               key={pastCommitIndex}
               pastCommit={pastCommit}
               data={this.props.data}
+              topRepoPath={this.props.topRepoPath}
+              currentTheme={this.props.currentTheme}
+              app={this.props.app}
+              refresh={this.props.refresh}
+              diff={this.props.diff}
             />
           )
         )}

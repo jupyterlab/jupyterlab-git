@@ -49,13 +49,6 @@ export interface IGitSessionNodeState {
 
   sideBarExpanded: boolean;
 
-  pastCommitInfo: string;
-  pastCommitFilesChanged: string;
-  pastCommitInsertionCount: string;
-  pastCommitDeletionCount: string;
-  pastCommitData: any;
-  pastCommitNumber: any;
-  pastCommitFilelist: any;
 }
 
 /** Interface for GitPanel component props */
@@ -86,13 +79,6 @@ export class GitPanel extends React.Component<
       unstagedFiles: [],
       untrackedFiles: [],
       sideBarExpanded: false,
-      pastCommitInfo: '',
-      pastCommitFilesChanged: '',
-      pastCommitInsertionCount: '',
-      pastCommitDeletionCount: '',
-      pastCommitData: '',
-      pastCommitNumber: '',
-      pastCommitFilelist: ''
     };
   }
 
@@ -100,26 +86,6 @@ export class GitPanel extends React.Component<
     this.setState({ showList: state });
   };
 
-  /** Show the commit message and changes from a past commit */
-  showPastCommitWork = async (
-    pastCommit: SingleCommitInfo,
-    pastCommitIndex: number,
-    path: string
-  ) => {
-    let gitApi = new Git();
-    let detailedLogData = await gitApi.detailedLog(pastCommit.commit, path);
-    if (detailedLogData.code === 0) {
-      this.setState({
-        pastCommitInfo: detailedLogData.modified_file_note,
-        pastCommitFilesChanged: detailedLogData.modified_files_count,
-        pastCommitInsertionCount: detailedLogData.number_of_insertions,
-        pastCommitDeletionCount: detailedLogData.number_of_deletions,
-        pastCommitData: pastCommit,
-        pastCommitNumber: pastCommitIndex + ' commit(s) before',
-        pastCommitFilelist: detailedLogData.modified_files
-      });
-    }
-  };
 
   /**
    * Refresh widget, update all content
@@ -278,6 +244,11 @@ export class GitPanel extends React.Component<
                 isExpanded={this.state.sideBarExpanded}
                 data={this.state.branches}
                 pastCommits={this.state.pastCommits}
+                topRepoPath={this.state.topRepoPath}
+                currentTheme={this.props.app.shell.dataset.themeLight}
+                app={this.props.app}
+                refresh={this.refresh}
+                diff={this.props.diff}
               />
               <PastCommits
                 currentFileBrowserPath={this.state.currentFileBrowserPath}

@@ -3,9 +3,9 @@ import { style } from 'typestyle';
 export const commitStyle = style({
   flex: '0 0 auto',
   width: '100%',
-  paddingLeft: '10px',
   fontSize: '12px',
-  marginBottom: '10px'
+  marginBottom: '10px',
+  marginTop: '5px',
 });
 
 export const headerStyle = style({
@@ -16,34 +16,10 @@ export const headerStyle = style({
   height: '30px'
 });
 
-export const commitNumberLabelStyle = style({
+export const floatRightStyle = style({
   float: 'right',
-  paddingRight: '19px',
-  fontWeight: 'bold',
-  display: 'inline-block'
-});
+})
 
-export const commitAuthorLabelStyle = style({
-  fontSize: '10px'
-});
-
-export const commitAuthorIconStyle = style({
-  backgroundImage: 'var(--jp-Git-icon-author)',
-  display: 'inline-block',
-  height: '9px',
-  width: '9px'
-});
-
-export const commitLabelDateStyle = style({
-  fontSize: '13px',
-  display: 'inline-block'
-});
-
-export const commitLabelMessageStyle = style({
-  fontSize: '13px',
-  textAlign: 'left',
-  paddingRight: '10px'
-});
 
 export const commitOverviewNumbers = style({
   fontSize: '13px',
@@ -62,12 +38,10 @@ export const commitOverviewNumbers = style({
 export const commitDetailStyle = style({
   flex: '1 1 auto',
   margin: '0',
-  paddingLeft: '10px',
   overflow: 'auto'
 });
 
 export const commitDetailHeader = style({
-  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   fontSize: '13px',
   fontWeight: 'bold'
 });

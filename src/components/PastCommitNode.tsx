@@ -7,21 +7,43 @@ import {
   branchesStyle,
   remoteBranchStyle,
   localBranchStyle,
-  workingBranchStyle
+  workingBranchStyle,
+  pastCommitExpandedStyle,
+  collapseStyle
 } from "../componentsStyle/PastCommitNodeStyle";
 
 import { classes } from "typestyle";
 
 import { SingleCommitInfo, GitBranchResult } from "../git";
 
+import { SinglePastCommitInfo } from "./SinglePastCommitInfo";
+
 import * as React from "react";
 
 export interface IPastCommitNodeProps {
   pastCommit: SingleCommitInfo;
   data: GitBranchResult["branches"];
+  topRepoPath: string;
+  currentTheme: string;
+  app: any;
+  diff: any;
+  refresh: any;
 }
 
-export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
+export interface IPastCommitNodeState {
+  expanded: boolean;
+}
+
+export class PastCommitNode extends React.Component<
+  IPastCommitNodeProps,
+  IPastCommitNodeState
+> {
+  constructor(props: IPastCommitNodeProps) {
+    super(props);
+    this.state = {
+      expanded: false
+    };
+  }
   getBranchesForCommit() {
     const idAbrev = this.props.pastCommit.commit.slice(0, 7);
     const branches = [];
@@ -44,9 +66,26 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
     return branches;
   }
 
+  expand() {
+    this.setState({expanded: true});
+  }
+
+  collapse() {
+    this.setState({expanded: false});
+  }
+
+  getNodeClass() {
+    if (this.state.expanded) {
+      return classes(pastCommitNodeStyle, pastCommitExpandedStyle)
+    }
+    return pastCommitNodeStyle
+  }
   render() {
     return (
-      <div className={pastCommitNodeStyle}>
+      <div
+        onClick={() => {!this.state.expanded && this.expand()}}
+        className={this.getNodeClass()}
+      >
         <div className={pastCommitHeaderStyle}>
           <div className={pastCommitHeaderItemStyle}>
             {this.props.pastCommit.author}
@@ -60,12 +99,9 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
         </div>
         <div className={branchesStyle}>
           {this.getBranchesForCommit().map((branch, id) => (
-            <>
+            <React.Fragment key={id}>
               {branch.is_current_branch && (
-                <span
-                  className={classes(branchStyle, workingBranchStyle)}
-                  key={id}
-                >
+                <span className={classes(branchStyle, workingBranchStyle)}>
                   working
                 </span>
               )}
@@ -74,15 +110,29 @@ export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
                   branchStyle,
                   branch.is_remote_branch ? remoteBranchStyle : localBranchStyle
                 )}
-                key={id}
               >
                 {branch.name}
               </span>
-            </>
+            </React.Fragment>
           ))}
         </div>
         <div className={pastCommitBodyStyle}>
           {this.props.pastCommit.commit_msg}
+          {this.state.expanded && (
+            <>
+              <SinglePastCommitInfo
+                data={this.props.pastCommit}
+                topRepoPath={this.props.topRepoPath}
+                currentTheme={this.props.currentTheme}
+                app={this.props.app}
+                diff={this.props.diff}
+                refresh={this.props.refresh}
+              />
+              <div className={collapseStyle} onClick={() => this.collapse()}>
+                Collapse
+              </div>
+            </>
+          )}
         </div>
       </div>
     );

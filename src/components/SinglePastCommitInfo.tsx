@@ -1,6 +1,6 @@
 import { JupyterLab } from '@jupyterlab/application';
 
-import { SingleCommitInfo, CommitModifiedFile } from '../git';
+import { Git, SingleCommitInfo, CommitModifiedFile } from '../git';
 
 import { parseFileExtension } from './FileList';
 
@@ -8,11 +8,6 @@ import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
 
 import {
   commitStyle,
-  commitNumberLabelStyle,
-  commitAuthorLabelStyle,
-  commitAuthorIconStyle,
-  commitLabelDateStyle,
-  commitLabelMessageStyle,
   commitOverviewNumbers,
   commitDetailStyle,
   commitDetailHeader,
@@ -21,6 +16,7 @@ import {
   iconStyle,
   insertionIconStyle,
   numberofChangedFilesStyle,
+  floatRightStyle,
   deletionIconStyle,
   revertButtonStyle
 } from '../componentsStyle/SinglePastCommitInfoStyle';
@@ -38,16 +34,9 @@ import { classes } from 'typestyle/';
 
 export interface ISinglePastCommitInfoProps {
   topRepoPath: string;
-  num: string;
   data: SingleCommitInfo;
-  info: string;
-  filesChanged: string;
-  insertionCount: string;
-  deletionCount: string;
-  list: [CommitModifiedFile];
   app: JupyterLab;
   diff: any;
-  display: boolean;
   refresh: Function;
   currentTheme: string;
 }
@@ -55,6 +44,11 @@ export interface ISinglePastCommitInfoProps {
 export interface ISinglePastCommitInfoState {
   displayDelete: boolean;
   displayReset: boolean;
+  info: string;
+  filesChanged: string;
+  insertionCount: string;
+  deletionCount: string;
+  list: Array<CommitModifiedFile>;
 }
 
 export class SinglePastCommitInfo extends React.Component<
@@ -65,9 +59,30 @@ export class SinglePastCommitInfo extends React.Component<
     super(props);
     this.state = {
       displayDelete: false,
-      displayReset: false
+      displayReset: false,
+      info: "",
+      filesChanged: "",
+      insertionCount: "",
+      deletionCount: "",
+      list: [],
+    
     };
+    this.showPastCommitWork();
   }
+
+  showPastCommitWork = async () => {
+    let gitApi = new Git();
+    let detailedLogData = await gitApi.detailedLog(this.props.data.commit, this.props.topRepoPath);
+    if (detailedLogData.code === 0) {
+      this.setState({
+        info: detailedLogData.modified_file_note,
+        filesChanged: detailedLogData.modified_files_count,
+        insertionCount: detailedLogData.number_of_insertions,
+        deletionCount: detailedLogData.number_of_deletions,
+        list: detailedLogData.modified_files
+      });
+    }
+  };
 
   showDeleteCommit = () => {
     this.setState({
@@ -99,25 +114,10 @@ export class SinglePastCommitInfo extends React.Component<
     return (
       <div>
         <div className={commitStyle}>
-          <div>
-            <div className={commitAuthorLabelStyle}>
-              <span className={commitAuthorIconStyle} />
-              {this.props.data.author}
-            </div>
-            <div className={commitLabelDateStyle}>{this.props.data.date}</div>
-            <span className={commitNumberLabelStyle}>
-              #{this.props.data.commit
-                ? this.props.data.commit.substring(0, 7)
-                : ''}
-            </span>
-          </div>
-          <div className={commitLabelMessageStyle}>
-            {this.props.data.commit_msg}
-          </div>
           <div className={commitOverviewNumbers}>
             <span>
               <span className={classes(iconStyle, numberofChangedFilesStyle)} />
-              {this.props.filesChanged}
+              {this.state.filesChanged}
             </span>
             <span>
               <span
@@ -126,7 +126,7 @@ export class SinglePastCommitInfo extends React.Component<
                   insertionIconStyle(this.props.currentTheme)
                 )}
               />
-              {this.props.insertionCount}
+              {this.state.insertionCount}
             </span>
             <span>
               <span
@@ -135,7 +135,7 @@ export class SinglePastCommitInfo extends React.Component<
                   deletionIconStyle(this.props.currentTheme)
                 )}
               />
-              {this.props.deletionCount}
+              {this.state.deletionCount}
             </span>
           </div>
         </div>
@@ -145,6 +145,7 @@ export class SinglePastCommitInfo extends React.Component<
             <button
               className={classes(
                 changeStageButtonStyle,
+                floatRightStyle,
                 discardFileButtonStyle(this.props.currentTheme)
               )}
               onClick={this.showDeleteCommit}
@@ -152,6 +153,7 @@ export class SinglePastCommitInfo extends React.Component<
             <button
               className={classes(
                 changeStageButtonStyle,
+                floatRightStyle,
                 revertButtonStyle(this.props.currentTheme)
               )}
               onClick={this.showResetToCommit}
@@ -177,8 +179,8 @@ export class SinglePastCommitInfo extends React.Component<
               />
             )}
           </div>
-          {this.props.list.length > 0 &&
-            this.props.list.map((modifiedFile, modifiedFileIndex) => {
+          {this.state.list.length > 0 &&
+            this.state.list.map((modifiedFile, modifiedFileIndex) => {
               return (
                 <li className={commitDetailFileStyle} key={modifiedFileIndex}>
                   <span
