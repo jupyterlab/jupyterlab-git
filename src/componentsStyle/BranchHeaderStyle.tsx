@@ -213,7 +213,7 @@ export const stagedCommitMessageStyle = style({
 });
 
 export const branchHeaderCenterContent = style({
-  paddingLeft: '40px',
-  paddingRight: '40px',
+  paddingLeft: '5px',
+  paddingRight: '5px',
   flex: 'auto'
 });

@@ -276,6 +276,7 @@ export class GitPanel extends React.Component<
               />
               <HistorySideBar
                 isExpanded={this.state.sideBarExpanded}
+                data={this.state.branches}
                 pastCommits={this.state.pastCommits}
               />
               <PastCommits

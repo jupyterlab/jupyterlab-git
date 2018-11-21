@@ -1,6 +1,6 @@
 import { PastCommitNode } from "./PastCommitNode";
 
-import { SingleCommitInfo } from "../git";
+import { SingleCommitInfo, GitBranchResult } from "../git";
 
 import {
   historySideBarStyle,
@@ -12,6 +12,7 @@ import * as React from "react";
 /** Interface for PastCommits component props */
 export interface IHistorySideBarProps {
   pastCommits: SingleCommitInfo[];
+  data: GitBranchResult["branches"];
   isExpanded: boolean;
 }
 
@@ -48,6 +49,7 @@ export class HistorySideBar extends React.Component<
             <PastCommitNode
               key={pastCommitIndex}
               pastCommit={pastCommit}
+              data={this.props.data}
             />
           )
         )}
