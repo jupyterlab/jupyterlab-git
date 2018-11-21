@@ -221,7 +221,7 @@ class Git:
         if p.returncode == 0:
             results = []
             try:
-                current_branch = self._get_current_branch(current_path)
+                current_branch = self.get_current_branch(current_path)
                 for line in output.decode('utf-8').splitlines():
                     # The format for git show-ref is '<SHA-1 ID> <space> <reference name>'
                     # For this method we are only interested in reference name.
@@ -234,7 +234,7 @@ class Git:
                         is_remote_branch = self._is_remote_branch(reference_name)
                         upstream_branch_name = None
                         if not is_remote_branch:
-                            upstream_branch_name = self._get_upstream_branch(current_path, branch_name)
+                            upstream_branch_name = self.get_upstream_branch(current_path, branch_name)
                         tag = self._get_tag(current_path, commit_sha)
                         results.append({
                             'is_current_branch': is_current_branch,
@@ -442,45 +442,51 @@ class Git:
         )
         return my_output
 
-    def pull(self, origin, master, curr_fb_path):
+    def pull(self, curr_fb_path):
         """
-        Execute git pull <branch1> <branch2> command & return the result.
+        Execute git pull --no-commit.  Disables prompts for the password to avoid the terminal hanging while waiting
+        for auth.
         """
-        p = Popen(
-            ["git", "pull", origin, master, "--no-commit"],
+
+        p = subprocess.Popen(
+            ['GIT_TERMINAL_PROMPT=0 git pull --no-commit'],
+            shell=True,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, curr_fb_path),
         )
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            return {"code": p.returncode}
-        else:
-            return {
-                "code": p.returncode,
-                "command": "git pull " + origin + " " + master + " --no-commit",
-                "message": my_error.decode("utf-8"),
-            }
+        _, error = p.communicate()
+
+        response = {
+            'code': p.returncode
+        }
+
+        if p.returncode != 0:
+            response['message'] = error.decode('utf-8').strip()
+
+        return response
 
     def push(self, origin, master, curr_fb_path):
         """
-        Execute git push <branch1> <branch2> command & return the result.
+        Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
         """
-        p = Popen(
-            ["git", "push", origin, master],
+        p = subprocess.Popen(
+            ['GIT_TERMINAL_PROMPT=0 git push {} {}'.format(origin, master)],
+            shell=True,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, curr_fb_path),
         )
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            return {"code": p.returncode}
-        else:
-            return {
-                "code": p.returncode,
-                "command": "git push " + origin + " " + master,
-                "message": my_error.decode("utf-8"),
-            }
+        _, error = p.communicate()
+
+        response = {
+            'code': p.returncode
+        }
+
+        if p.returncode != 0:
+            response['message'] = error.decode('utf-8').strip()
+
+        return response
 
     def init(self, current_path):
         """
@@ -518,7 +524,7 @@ class Git:
         raise ValueError(
             'Reference [{}] is not a valid branch.', branch_reference)
 
-    def _get_current_branch(self, current_path):
+    def get_current_branch(self, current_path):
         """Execute 'git rev-parse --abbrev-ref HEAD' to
         check if given branch is current branch
         """
@@ -560,7 +566,7 @@ class Git:
                 ' '.join(command)
             ))
 
-    def _get_upstream_branch(self, current_path, branch_name):
+    def get_upstream_branch(self, current_path, branch_name):
         """Execute 'git rev-parse --abbrev-ref branch_name@{upstream}' to get
         upstream branch name tracked by given local branch.
         Reference : https://git-scm.com/docs/git-rev-parse#git-rev-parse-emltbranchnamegtupstreamemegemmasterupstreamememuem
