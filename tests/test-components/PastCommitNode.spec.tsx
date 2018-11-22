@@ -60,7 +60,7 @@ describe("PastCommitNode", () => {
   test("Includes commit info", () => {
     const pastCommitNode = shallow(<PastCommitNode {...props} />);
     expect(pastCommitNode.text()).toMatch(props.pastCommit.author);
-    expect(pastCommitNode.text()).toMatch(props.pastCommit.commit.slice(0, 9));
+    expect(pastCommitNode.text()).toMatch(props.pastCommit.commit.slice(0, 7));
     expect(pastCommitNode.text()).toMatch(props.pastCommit.date);
     expect(pastCommitNode.text()).toMatch(props.pastCommit.commit_msg);
   });

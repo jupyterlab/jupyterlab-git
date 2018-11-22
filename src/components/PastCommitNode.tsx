@@ -91,7 +91,7 @@ export class PastCommitNode extends React.Component<
             {this.props.pastCommit.author}
           </div>
           <div className={pastCommitHeaderItemStyle}>
-            {this.props.pastCommit.commit.slice(0, 9)}
+            {this.props.pastCommit.commit.slice(0, 7)}
           </div>
           <div className={pastCommitHeaderItemStyle}>
             {this.props.pastCommit.date}
