@@ -19,7 +19,7 @@ describe("HistorySideBar", () => {
         pre_commit: null
       }
     ],
-    data: [],
+    branches: [],
     isExpanded: true,
     topRepoPath: null,
     currentTheme: null,
