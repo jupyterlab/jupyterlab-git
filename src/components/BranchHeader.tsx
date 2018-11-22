@@ -21,7 +21,7 @@ import {
   openHistorySideBarButtonStyle,
   openHistorySideBarIconStyle,
   branchHeaderCenterContent,
-  branchTrackingButtonStyle,
+  branchTrackingIconStyle,
   branchTrackingLabelStyle
 } from '../componentsStyle/BranchHeaderStyle';
 
@@ -204,7 +204,7 @@ export class BranchHeader extends React.Component<
                 toggleNewBranchBox={this.toggleNewBranchBox}
               />
             )}
-          {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<div className={branchTrackingButtonStyle}/>)}
+          {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<div className={branchTrackingIconStyle}/>)}
           {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<h3 className={branchTrackingLabelStyle}>{this.props.upstreamBranch}</h3>)}
         </div>
         {this.state.dropdownOpen && (
