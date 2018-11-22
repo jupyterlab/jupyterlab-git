@@ -46,7 +46,6 @@ export const branchTrackingLabelStyle = style({
   fontSize: 'var(--jp-ui-font-size1)',
   marginTop: '5px',
   marginBottom: '5px',
-  marginLeft: '5px',
   display: 'inline-block',
   color: '#828282',
   fontWeight: 'normal'
@@ -144,7 +143,8 @@ export const branchTrackingIconStyle = style({
   width: '18px',
   display: 'inline-block',
   verticalAlign: 'middle',
-  marginTop: '8px'
+  marginTop: '8px',
+  marginLeft: '10px',
 })
 
 export const headerButtonDisabledStyle = style({
