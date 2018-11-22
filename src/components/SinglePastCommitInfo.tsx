@@ -49,6 +49,7 @@ export interface ISinglePastCommitInfoState {
   insertionCount: string;
   deletionCount: string;
   list: Array<CommitModifiedFile>;
+  loadingState: "loading" | "error" | "success"
 }
 
 export class SinglePastCommitInfo extends React.Component<
@@ -65,6 +66,7 @@ export class SinglePastCommitInfo extends React.Component<
       insertionCount: "",
       deletionCount: "",
       list: [],
+      loadingState: "loading"
     
     };
     this.showPastCommitWork();
@@ -77,6 +79,7 @@ export class SinglePastCommitInfo extends React.Component<
       detailedLogData = await gitApi.detailedLog(this.props.data.commit, this.props.topRepoPath);
     } catch(err) {
       console.error(`Error while gettting detailed log for commit ${this.props.data.commit} and path ${this.props.topRepoPath}`, err);
+      this.setState(() => ({loadingState: "error"}));
       return;
     }
     if (detailedLogData.code === 0) {
@@ -85,7 +88,8 @@ export class SinglePastCommitInfo extends React.Component<
         filesChanged: detailedLogData.modified_files_count,
         insertionCount: detailedLogData.number_of_insertions,
         deletionCount: detailedLogData.number_of_deletions,
-        list: detailedLogData.modified_files
+        list: detailedLogData.modified_files,
+        loadingState: "success"
       });
     }
   };
@@ -117,6 +121,12 @@ export class SinglePastCommitInfo extends React.Component<
   };
 
   render() {
+    if (this.state.loadingState == "loading") {
+      return <div>...</div>
+    }
+    if (this.state.loadingState == "error") {
+      return <div>Error loading commit data</div>
+    }
     return (
       <div>
         <div className={commitStyle}>
