@@ -45,7 +45,7 @@ export interface ISinglePastCommitInfoState {
   filesChanged: string;
   insertionCount: string;
   deletionCount: string;
-  list: Array<CommitModifiedFile>;
+  modifiedFiles: Array<CommitModifiedFile>;
   loadingState: "loading" | "error" | "success";
 }
 
@@ -62,7 +62,7 @@ export class SinglePastCommitInfo extends React.Component<
       filesChanged: "",
       insertionCount: "",
       deletionCount: "",
-      list: [],
+      modifiedFiles: [],
       loadingState: "loading"
     };
     this.showPastCommitWork();
@@ -92,7 +92,7 @@ export class SinglePastCommitInfo extends React.Component<
         filesChanged: detailedLogData.modified_files_count,
         insertionCount: detailedLogData.number_of_insertions,
         deletionCount: detailedLogData.number_of_deletions,
-        list: detailedLogData.modified_files,
+        modifiedFiles: detailedLogData.modified_files,
         loadingState: "success"
       });
     }
@@ -199,8 +199,8 @@ export class SinglePastCommitInfo extends React.Component<
               />
             )}
           </div>
-          {this.state.list.length > 0 &&
-            this.state.list.map((modifiedFile, modifiedFileIndex) => {
+          {this.state.modifiedFiles.length > 0 &&
+            this.state.modifiedFiles.map((modifiedFile, modifiedFileIndex) => {
               return (
                 <li className={commitDetailFileStyle} key={modifiedFileIndex}>
                   <span
