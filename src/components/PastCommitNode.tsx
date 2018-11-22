@@ -1,33 +1,35 @@
-import {
-  pastCommitNodeStyle,
-  pastCommitHeaderStyle,
-  pastCommitHeaderItemStyle,
-  pastCommitBodyStyle,
-  branchStyle,
-  branchesStyle,
-  remoteBranchStyle,
-  localBranchStyle,
-  workingBranchStyle,
-  pastCommitExpandedStyle,
-  collapseStyle
-} from "../componentsStyle/PastCommitNodeStyle";
-
-import { classes } from "typestyle";
-
-import { SingleCommitInfo, GitBranchResult } from "../git";
-
-import { SinglePastCommitInfo } from "./SinglePastCommitInfo";
-
+import { JupyterLab } from "@jupyterlab/application";
 import * as React from "react";
+import { classes } from "typestyle";
+import {
+  branchesStyle,
+  branchStyle,
+  collapseStyle,
+  localBranchStyle,
+  pastCommitBodyStyle,
+  pastCommitExpandedStyle,
+  pastCommitHeaderItemStyle,
+  pastCommitHeaderStyle,
+  pastCommitNodeStyle,
+  remoteBranchStyle,
+  workingBranchStyle
+} from "../componentsStyle/PastCommitNodeStyle";
+import { GitBranchResult, SingleCommitInfo } from "../git";
+import { SinglePastCommitInfo } from "./SinglePastCommitInfo";
 
 export interface IPastCommitNodeProps {
   pastCommit: SingleCommitInfo;
   branches: GitBranchResult["branches"];
   topRepoPath: string;
   currentTheme: string;
-  app: any;
-  diff: any;
-  refresh: any;
+  app: JupyterLab;
+  diff: (
+    app: JupyterLab,
+    filename: string,
+    revisionA: string,
+    revisionB: string
+  ) => void;
+  refresh: () => void;
 }
 
 export interface IPastCommitNodeState {
@@ -67,23 +69,25 @@ export class PastCommitNode extends React.Component<
   }
 
   expand() {
-    this.setState({expanded: true});
+    this.setState({ expanded: true });
   }
 
   collapse() {
-    this.setState({expanded: false});
+    this.setState({ expanded: false });
   }
 
   getNodeClass() {
     if (this.state.expanded) {
-      return classes(pastCommitNodeStyle, pastCommitExpandedStyle)
+      return classes(pastCommitNodeStyle, pastCommitExpandedStyle);
     }
-    return pastCommitNodeStyle
+    return pastCommitNodeStyle;
   }
   render() {
     return (
       <div
-        onClick={() => {!this.state.expanded && this.expand()}}
+        onClick={() => {
+          !this.state.expanded && this.expand();
+        }}
         className={this.getNodeClass()}
       >
         <div className={pastCommitHeaderStyle}>

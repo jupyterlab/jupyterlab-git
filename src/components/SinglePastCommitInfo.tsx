@@ -1,43 +1,40 @@
-import { JupyterLab } from '@jupyterlab/application';
-
-import { Git, SingleCommitInfo, CommitModifiedFile } from '../git';
-
-import { parseFileExtension } from './FileList';
-
-import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
-
-import {
-  commitStyle,
-  commitOverviewNumbers,
-  commitDetailStyle,
-  commitDetailHeader,
-  commitDetailFileStyle,
-  commitDetailFilePathStyle,
-  iconStyle,
-  insertionIconStyle,
-  numberofChangedFilesStyle,
-  floatRightStyle,
-  deletionIconStyle,
-  revertButtonStyle
-} from '../componentsStyle/SinglePastCommitInfoStyle';
-
+import { JupyterLab } from "@jupyterlab/application";
+import * as React from "react";
+import { classes } from "typestyle/";
+import { fileIconStyle } from "../componentsStyle/FileItemStyle";
 import {
   changeStageButtonStyle,
   discardFileButtonStyle
-} from '../componentsStyle/GitStageStyle';
-
-import { fileIconStyle } from '../componentsStyle/FileItemStyle';
-
-import * as React from 'react';
-
-import { classes } from 'typestyle/';
+} from "../componentsStyle/GitStageStyle";
+import {
+  commitDetailFilePathStyle,
+  commitDetailFileStyle,
+  commitDetailHeader,
+  commitDetailStyle,
+  commitOverviewNumbers,
+  commitStyle,
+  deletionIconStyle,
+  floatRightStyle,
+  iconStyle,
+  insertionIconStyle,
+  numberofChangedFilesStyle,
+  revertButtonStyle
+} from "../componentsStyle/SinglePastCommitInfoStyle";
+import { CommitModifiedFile, Git, SingleCommitInfo } from "../git";
+import { parseFileExtension } from "./FileList";
+import { ResetDeleteSingleCommit } from "./ResetDeleteSingleCommit";
 
 export interface ISinglePastCommitInfoProps {
   topRepoPath: string;
   data: SingleCommitInfo;
   app: JupyterLab;
-  diff: any;
-  refresh: Function;
+  diff: (
+    app: JupyterLab,
+    filename: string,
+    revisionA: string,
+    revisionB: string
+  ) => void;
+  refresh: () => void;
   currentTheme: string;
 }
 
@@ -49,7 +46,7 @@ export interface ISinglePastCommitInfoState {
   insertionCount: string;
   deletionCount: string;
   list: Array<CommitModifiedFile>;
-  loadingState: "loading" | "error" | "success"
+  loadingState: "loading" | "error" | "success";
 }
 
 export class SinglePastCommitInfo extends React.Component<
@@ -67,7 +64,6 @@ export class SinglePastCommitInfo extends React.Component<
       deletionCount: "",
       list: [],
       loadingState: "loading"
-    
     };
     this.showPastCommitWork();
   }
@@ -76,10 +72,18 @@ export class SinglePastCommitInfo extends React.Component<
     let gitApi = new Git();
     let detailedLogData;
     try {
-      detailedLogData = await gitApi.detailedLog(this.props.data.commit, this.props.topRepoPath);
-    } catch(err) {
-      console.error(`Error while gettting detailed log for commit ${this.props.data.commit} and path ${this.props.topRepoPath}`, err);
-      this.setState(() => ({loadingState: "error"}));
+      detailedLogData = await gitApi.detailedLog(
+        this.props.data.commit,
+        this.props.topRepoPath
+      );
+    } catch (err) {
+      console.error(
+        `Error while gettting detailed log for commit ${
+          this.props.data.commit
+        } and path ${this.props.topRepoPath}`,
+        err
+      );
+      this.setState(() => ({ loadingState: "error" }));
       return;
     }
     if (detailedLogData.code === 0) {
@@ -122,10 +126,10 @@ export class SinglePastCommitInfo extends React.Component<
 
   render() {
     if (this.state.loadingState == "loading") {
-      return <div>...</div>
+      return <div>...</div>;
     }
     if (this.state.loadingState == "error") {
-      return <div>Error loading commit data</div>
+      return <div>Error loading commit data</div>;
     }
     return (
       <div>
@@ -205,9 +209,9 @@ export class SinglePastCommitInfo extends React.Component<
                     )}`}
                     onDoubleClick={() => {
                       window.open(
-                        'https://github.com/search?q=' +
+                        "https://github.com/search?q=" +
                           this.props.data.commit +
-                          '&type=Commits&utf8=%E2%9C%93'
+                          "&type=Commits&utf8=%E2%9C%93"
                       );
                     }}
                   />

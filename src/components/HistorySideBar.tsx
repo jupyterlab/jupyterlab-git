@@ -1,13 +1,8 @@
-import { PastCommitNode } from "./PastCommitNode";
-
-import { SingleCommitInfo, GitBranchResult } from "../git";
-
-import {
-  historySideBarStyle,
-} from "../componentsStyle/HistorySideBarStyle";
-
-
+import { JupyterLab } from "@jupyterlab/application";
 import * as React from "react";
+import { historySideBarStyle } from "../componentsStyle/HistorySideBarStyle";
+import { GitBranchResult, SingleCommitInfo } from "../git";
+import { PastCommitNode } from "./PastCommitNode";
 
 /** Interface for PastCommits component props */
 export interface IHistorySideBarProps {
@@ -16,17 +11,17 @@ export interface IHistorySideBarProps {
   isExpanded: boolean;
   topRepoPath: string;
   currentTheme: string;
-  app: any;
-  refresh: any;
-  diff: any;
+  app: JupyterLab;
+  refresh: () => void;
+  diff: (
+    app: JupyterLab,
+    filename: string,
+    revisionA: string,
+    revisionB: string
+  ) => void;
 }
 
-
-
-export class HistorySideBar extends React.Component<
-  IHistorySideBarProps,
-  {}
-> {
+export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
   render() {
     if (!this.props.isExpanded) {
       return null;
