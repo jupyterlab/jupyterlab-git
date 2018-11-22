@@ -13,4 +13,4 @@ script:
   - yarn test
   - pip install .
   - jupyter labextension install .
-  - python -m jupyterlab.browser_check
+  - python -m tests.test-browser.run_browser_test
