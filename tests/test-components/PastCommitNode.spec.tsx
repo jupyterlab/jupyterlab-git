@@ -55,7 +55,7 @@ describe("PastCommitNode", () => {
       commit_msg: "message",
       pre_commit: "pre_commit"
     },
-    data: branches
+    branches: branches
   };
   test("Includes commit info", () => {
     const pastCommitNode = shallow(<PastCommitNode {...props} />);
