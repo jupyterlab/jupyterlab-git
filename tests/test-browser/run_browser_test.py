@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# This file is copied from https://github.com/jupyterlab/jupyterlab/blob/master/jupyterlab/browser_check.py
 from concurrent.futures import ThreadPoolExecutor
 import os
 import shutil

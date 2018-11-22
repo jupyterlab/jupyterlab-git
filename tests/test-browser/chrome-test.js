@@ -2,24 +2,18 @@ const assert = require('assert');
 const puppeteer = require('puppeteer');
 const inspect = require('util').inspect;
 
-const URL = process.argv[2];
+function getUrl() {
+  return process.argv[2];
+}
 
-async function main() {
-  console.info('Starting Chrome Headless');
-
-  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
-  const page = await browser.newPage();
-
-  console.info('Navigating to page:', URL);
-  await page.goto(URL);
-  console.info('Waiting for page to load...');
-
-  const html = await page.content();
+function testJupyterLabPage(html) {
   if (inspect(html).indexOf('jupyter-config-data') === -1) {
     console.error('Error loading JupyterLab page:');
     console.error(html);
   }
+}
 
+async function testApplication(page) {
   const el = await page.waitForSelector('#browserTest', { timeout: 100000 });
   console.log('Waiting for application to start...');
   let testError = null;
@@ -36,14 +30,39 @@ async function main() {
     console.error(`Parsed an error from text content: ${error.message}`, error);
   }
 
-  // Test git icons are present
-  try {
-    assert(html.includes('--jp-icon-git-clone'), 'Could not find git clone icon.');
-    assert(html.includes('--jp-icon-git-pull'), 'Could not find git pull icon.');
-    assert(html.includes('--jp-icon-git-push'), 'Could not find git push icon.');
-  } catch (e) {
-    testError = e;
-  }
+  return testError;
+}
+
+function testGitExtension(html) {
+    // Test git icons are present
+    try {
+      assert(html.includes('--jp-icon-git-clone'), 'Could not find git clone icon.');
+      assert(html.includes('--jp-icon-git-pull'), 'Could not find git pull icon.');
+      assert(html.includes('--jp-icon-git-push'), 'Could not find git push icon.');
+    } catch (e) {
+      return e;
+    }
+
+    return null;
+}
+
+async function main() {
+  console.info('Starting Chrome Headless');
+
+  const URL = getUrl();
+  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  const page = await browser.newPage();
+
+  console.info('Navigating to page:', URL);
+  await page.goto(URL);
+  console.info('Waiting for page to load...');
+
+  const html = await page.content();
+  testJupyterLabPage(html);
+
+  let testError = null;
+  testError = await testApplication(page);
+  testError = testGitExtension(html);
 
   await browser.close();
 
