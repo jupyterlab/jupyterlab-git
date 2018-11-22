@@ -19,7 +19,9 @@ import {
   smallBranchStyle,
   expandedBranchStyle,
   openHistorySideBarButtonStyle,
-  openHistorySideBarIconStyle,
+  historyLabelStyle,
+  selectedHeaderStyle,
+  unSelectedHeaderStyle,
   branchHeaderCenterContent,
   branchTrackingIconStyle,
   branchTrackingLabelStyle
@@ -47,6 +49,7 @@ export interface IBranchHeaderProps {
   toggleSidebar: Function;
   showList: boolean;
   currentTheme: string;
+  sideBarExpanded: boolean;
 }
 
 export class BranchHeader extends React.Component<
@@ -158,74 +161,103 @@ export class BranchHeader extends React.Component<
     }
   };
 
+  getHistoryHeaderStyle() {
+    if (this.props.sideBarExpanded) {
+      return classes(
+        openHistorySideBarButtonStyle,
+        selectedHeaderStyle
+      );
+    }
+    return classes(
+      unSelectedHeaderStyle,
+      openHistorySideBarButtonStyle
+    )
+  }
+
+  getBranchHeaderStyle() {
+    if (this.props.sideBarExpanded) {
+      return classes(
+        branchHeaderCenterContent,
+        unSelectedHeaderStyle
+      );
+    }
+    return classes(
+      selectedHeaderStyle,
+      branchHeaderCenterContent
+    )
+  }
+
   render() {
     return (
       <div className={this.getBranchStyle()}>
-        <button
-          className={openHistorySideBarButtonStyle}
-          onClick={() => this.props.toggleSidebar()}
-          title={'Show commit history'}
-        >
-          History
-          <span className={openHistorySideBarIconStyle} />
-        </button>
-        <div className={branchHeaderCenterContent}>
-          <h3 className={branchLabelStyle}>{this.props.currentBranch}</h3>
-          <div
-            className={
-              this.props.disabled
-                ? classes(
-                    branchDropdownButtonStyle(this.props.currentTheme),
-                    headerButtonDisabledStyle
-                  )
-                : branchDropdownButtonStyle(this.props.currentTheme)
-            }
-            title={'Change the current branch'}
-            onClick={() => this.toggleSelect()}
-          />
-          {!this.state.showNewBranchBox && (
+        <div style={{display: "flex"}}>
+          <div className={this.getHistoryHeaderStyle()}
+            onClick={this.props.sideBarExpanded ? null : () => this.props.toggleSidebar()}
+            title={'Show commit history'}
+          >
+            <h3 className={historyLabelStyle}>History</h3>
+          </div>
+          <div className={this.getBranchHeaderStyle()}
+            onClick={this.props.sideBarExpanded ? () => this.props.toggleSidebar() : null}
+          >
+            <h3 className={branchLabelStyle}>{this.props.currentBranch}</h3>
             <div
               className={
                 this.props.disabled
                   ? classes(
-                      newBranchButtonStyle(this.props.currentTheme),
+                      branchDropdownButtonStyle(this.props.currentTheme),
                       headerButtonDisabledStyle
                     )
-                  : newBranchButtonStyle(this.props.currentTheme)
+                  : branchDropdownButtonStyle(this.props.currentTheme)
               }
-              title={'Create a new branch'}
-              onClick={() => this.toggleNewBranchBox()}
+              title={'Change the current branch'}
+              onClick={() => this.toggleSelect()}
             />
-          )}
-          {this.state.showNewBranchBox &&
-            this.props.showList && (
-              <NewBranchBox
-                createNewBranch={this.createNewBranch}
-                toggleNewBranchBox={this.toggleNewBranchBox}
+            {!this.state.showNewBranchBox && (
+              <div
+                className={
+                  this.props.disabled
+                    ? classes(
+                        newBranchButtonStyle(this.props.currentTheme),
+                        headerButtonDisabledStyle
+                      )
+                    : newBranchButtonStyle(this.props.currentTheme)
+                }
+                title={'Create a new branch'}
+                onClick={() => this.toggleNewBranchBox()}
               />
             )}
-          {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<div className={branchTrackingIconStyle}/>)}
-          {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<h3 className={branchTrackingLabelStyle}>{this.props.upstreamBranch}</h3>)}
-        </div>
-        {this.state.dropdownOpen && (
-          <div>
-            {this.props.data.map((branch: any, branchIndex: number) => {
-              return (
-                <li
-                  className={branchListItemStyle}
-                  key={branchIndex}
-                  onClick={() => this.switchBranch(branch.name)}
-                >
-                  {branch.name}
-                </li>
-              );
-            })}
+            {this.state.showNewBranchBox &&
+              this.props.showList && (
+                <NewBranchBox
+                  createNewBranch={this.createNewBranch}
+                  toggleNewBranchBox={this.toggleNewBranchBox}
+                />
+              )}
+            {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<div className={branchTrackingButtonStyle}/>)}
+            {this.props.upstreamBranch != null && this.props.upstreamBranch != '' && (<h3 className={branchTrackingLabelStyle}>{this.props.upstreamBranch}</h3>)}
           </div>
-        )}
-        {this.state.showNewBranchBox && (
-          <div>Branching from {this.props.currentBranch}</div>
-        )}
-        {this.state.showCommitBox &&
+          {this.state.dropdownOpen && (
+            <div>
+              {this.props.data.map((branch: any, branchIndex: number) => {
+                return (
+                  <li
+                    className={branchListItemStyle}
+                    key={branchIndex}
+                    onClick={() => this.switchBranch(branch.name)}
+                  >
+                    {branch.name}
+                  </li>
+                );
+              })}
+            </div>
+          )}
+          {this.state.showNewBranchBox && (
+            <div>Branching from {this.props.currentBranch}</div>
+          )}
+        </div>
+        {!this.props.sideBarExpanded &&
+          this.state.showCommitBox &&
           this.props.showList && (
             <CommitBox
               checkReadyForSubmit={this.updateCommitBoxState}

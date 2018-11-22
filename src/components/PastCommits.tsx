@@ -38,6 +38,9 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
   }
 
   render() {
+    if (this.props.sideBarExpanded) {
+      return null;
+    }
     return (
       <div className={pastCommitsContainerStyle}>
         {!this.props.showList && (

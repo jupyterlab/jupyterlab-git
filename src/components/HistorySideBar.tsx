@@ -1,15 +1,15 @@
-import { PastCommitNode } from './PastCommitNode';
+import { PastCommitNode } from "./PastCommitNode";
 
-import { SingleCommitInfo } from '../git';
+import { SingleCommitInfo } from "../git";
 
 import {
   historySideBarStyle,
   historySideBarExpandedStyle
-} from '../componentsStyle/HistorySideBarStyle';
+} from "../componentsStyle/HistorySideBarStyle";
 
-import { classes } from 'typestyle';
+import { classes } from "typestyle";
 
-import * as React from 'react';
+import * as React from "react";
 
 /** Interface for PastCommits component props */
 export interface IHistorySideBarProps {
@@ -48,6 +48,9 @@ export class HistorySideBar extends React.Component<
   };
 
   render() {
+    if (!this.props.isExpanded) {
+      return null;
+    }
     return (
       <div className={this.getSideBarClass()}>
         <PastCommitNode

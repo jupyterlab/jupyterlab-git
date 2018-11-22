@@ -23,13 +23,10 @@ import { HistorySideBar } from './HistorySideBar';
 
 import {
   panelContainerStyle,
-  panelPushedContentStyle,
-  panelContentStyle,
   panelWarningStyle,
   findRepoButtonStyle
 } from '../componentsStyle/GitPanelStyle';
 
-import { classes } from 'typestyle';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -249,11 +246,7 @@ export class GitPanel extends React.Component<
     this.setState({ sideBarExpanded: !this.state.sideBarExpanded });
   };
 
-  getContentClass(): string {
-    return this.state.sideBarExpanded
-      ? classes(panelPushedContentStyle, panelContentStyle)
-      : panelContentStyle;
-  }
+
 
   render() {
     return (
@@ -264,16 +257,9 @@ export class GitPanel extends React.Component<
           refresh={this.refresh}
           currentBranch={this.state.currentBranch}
         />
-        <div className={this.getContentClass()}>
+        <div>
           {this.state.showWarning && (
             <div>
-              <HistorySideBar
-                isExpanded={this.state.sideBarExpanded}
-                currentFileBrowserPath={this.state.currentFileBrowserPath}
-                pastCommits={this.state.pastCommits}
-                setShowList={this.setShowList}
-                getPastCommit={this.showPastCommitWork}
-              />
               <BranchHeader
                 currentFileBrowserPath={this.state.currentFileBrowserPath}
                 topRepoPath={this.state.topRepoPath}
@@ -286,6 +272,14 @@ export class GitPanel extends React.Component<
                 toggleSidebar={this.toggleSidebar}
                 showList={this.state.showList}
                 currentTheme={this.props.app.shell.dataset.themeLight}
+                sideBarExpanded={this.state.sideBarExpanded}
+              />
+              <HistorySideBar
+                isExpanded={this.state.sideBarExpanded}
+                currentFileBrowserPath={this.state.currentFileBrowserPath}
+                pastCommits={this.state.pastCommits}
+                setShowList={this.setShowList}
+                getPastCommit={this.showPastCommitWork}
               />
               <PastCommits
                 currentFileBrowserPath={this.state.currentFileBrowserPath}
