@@ -72,7 +72,13 @@ export class SinglePastCommitInfo extends React.Component<
 
   showPastCommitWork = async () => {
     let gitApi = new Git();
-    let detailedLogData = await gitApi.detailedLog(this.props.data.commit, this.props.topRepoPath);
+    let detailedLogData;
+    try {
+      detailedLogData = await gitApi.detailedLog(this.props.data.commit, this.props.topRepoPath);
+    } catch(err) {
+      console.error(`Error while gettting detailed log for commit ${this.props.data.commit} and path ${this.props.topRepoPath}`, err);
+      return;
+    }
     if (detailedLogData.code === 0) {
       this.setState({
         info: detailedLogData.modified_file_note,
