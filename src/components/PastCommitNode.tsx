@@ -69,11 +69,11 @@ export class PastCommitNode extends React.Component<
   }
 
   expand() {
-    this.setState({ expanded: true });
+    this.setState(() => ({ expanded: true }));
   }
 
   collapse() {
-    this.setState({ expanded: false });
+    this.setState(() => ({ expanded: false }));
   }
 
   getNodeClass() {
