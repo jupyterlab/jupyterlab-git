@@ -22,7 +22,7 @@ import * as React from "react";
 
 export interface IPastCommitNodeProps {
   pastCommit: SingleCommitInfo;
-  data: GitBranchResult["branches"];
+  branches: GitBranchResult["branches"];
   topRepoPath: string;
   currentTheme: string;
   app: any;
@@ -47,8 +47,8 @@ export class PastCommitNode extends React.Component<
   getBranchesForCommit() {
     const idAbrev = this.props.pastCommit.commit.slice(0, 7);
     const branches = [];
-    for (let i = 0; i < this.props.data.length; i++) {
-      const branch = this.props.data[i];
+    for (let i = 0; i < this.props.branches.length; i++) {
+      const branch = this.props.branches[i];
       // tag sent from describe command. Must unparse to find commit hash
       // https://git-scm.com/docs/git-describe#git-describe-ltcommit-ishgt82308203
       if (!branch.tag) {
