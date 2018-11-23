@@ -361,26 +361,26 @@ class GitPushHandler(GitHandler):
         """
         current_path = self.get_json_body()['current_path']
 
-        current_branch = self.git.get_current_branch(current_path)
-        current_upstream = self.git.get_upstream_branch(current_path, current_branch)
+        current_local_branch = self.git.get_current_branch(current_path)
+        current_upstream_branch = self.git.get_upstream_branch(current_path, current_local_branch)
 
-        if current_upstream and current_upstream.strip():
-            upstream = current_upstream.split('/')
+        if current_upstream_branch and current_upstream_branch.strip():
+            upstream = current_upstream_branch.split('/')
             if len(upstream) == 1:
                 # If upstream is a local branch
-                origin = '.'
-                master = ':'.join(['HEAD', upstream[0]])
+                remote = '.'
+                branch = ':'.join(['HEAD', upstream[0]])
             else:
                 # If upstream is a remote branch
-                origin = upstream[0]
-                master = ':'.join(['HEAD', upstream[1]])
+                remote = upstream[0]
+                branch = ':'.join(['HEAD', upstream[1]])
 
-            response = self.git.push(origin, master, current_path)
+            response = self.git.push(remote, branch, current_path)
 
         else:
             response = {
                 'code': 128,
-                'message': 'fatal: The current branch {} has no upstream branch.'.format(current_branch)
+                'message': 'fatal: The current branch {} has no upstream branch.'.format(current_local_branch)
             }
         self.finish(json.dumps(response))
 

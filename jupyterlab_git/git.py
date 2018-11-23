@@ -466,12 +466,12 @@ class Git:
 
         return response
 
-    def push(self, origin, master, curr_fb_path):
+    def push(self, remote, branch, curr_fb_path):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
         """
         p = subprocess.Popen(
-            ['GIT_TERMINAL_PROMPT=0 git push {} {}'.format(origin, master)],
+            ['GIT_TERMINAL_PROMPT=0 git push {} {}'.format(remote, branch)],
             shell=True,
             stdout=PIPE,
             stderr=PIPE,
