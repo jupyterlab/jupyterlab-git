@@ -2,9 +2,20 @@ import { style } from 'typestyle';
 
 export const branchStyle = style({
   zIndex: 1,
-  height: '100px',
   textAlign: 'center',
-  overflowY: 'auto'
+  overflowY: 'auto',
+});
+
+
+export const selectedHeaderStyle = style({
+  borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  paddingBottom: 'var(--jp-border-width)',
+});
+
+export const unSelectedHeaderStyle = style({
+  backgroundColor: "#ededed",
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  paddingTop: 'var(--jp-border-width)',
 });
 
 export const smallBranchStyle = style({
@@ -16,23 +27,19 @@ export const expandedBranchStyle = style({
 });
 
 export const openHistorySideBarButtonStyle = style({
-  backgroundColor: 'var(--jp-layout-color3)',
   width: '50px',
-  height: '15px',
-  position: 'fixed',
-  left: '33px',
-  outline: 'none',
-  border: 'none',
-  color: '#FFFFFF'
+  flex: 'initial',
+  paddingLeft: '10px',
+  paddingRight: '10px',
+  borderRight: 'var(--jp-border-width) solid var(--jp-border-color2)',
 });
 
-export const openHistorySideBarIconStyle = style({
-  backgroundImage: 'var(--jp-caret-right-white)',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: '100%',
-  width: '8px',
-  height: '8px'
+export const historyLabelStyle = style({
+  fontSize: 'var(--jp-ui-font-size1)',
+  marginTop: '5px',
+  marginBottom: '5px',
+  display: 'inline-block',
+  fontWeight: 'normal',
 });
 
 export const branchLabelStyle = style({
@@ -206,5 +213,7 @@ export const stagedCommitMessageStyle = style({
 });
 
 export const branchHeaderCenterContent = style({
-  padding: '0 50px 0 50px'
+  paddingLeft: '5px',
+  paddingRight: '5px',
+  flex: 'auto'
 });

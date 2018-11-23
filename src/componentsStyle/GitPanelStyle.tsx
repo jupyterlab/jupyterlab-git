@@ -7,17 +7,7 @@ export const panelContainerStyle = style({
   height: '100%'
 });
 
-export const panelPushedContentStyle = style({
-  position: 'relative',
-  left: '50px',
-  width: 'calc(100% - 50px)'
-});
 
-export const panelContentStyle = style({
-  '-webkit-transition': 'all 0.5s ease',
-  '-moz-transition': 'all 0.5s ease',
-  transition: 'all 0.5s ease'
-});
 
 export const panelWarningStyle = style({
   textAlign: 'center',

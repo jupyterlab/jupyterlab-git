@@ -1,114 +1,143 @@
+import { JupyterLab } from "@jupyterlab/application";
+import * as React from "react";
+import { classes } from "typestyle";
 import {
+  branchesStyle,
+  branchStyle,
+  collapseStyle,
+  localBranchStyle,
+  pastCommitBodyStyle,
+  pastCommitExpandedStyle,
+  pastCommitHeaderItemStyle,
+  pastCommitHeaderStyle,
   pastCommitNodeStyle,
-  pastCommitWorkingNodeStyle,
-  pastCommitContentStyle,
-  pastCommitWorkingContentStyle,
-  pastCommitHeadContentStyle,
-  pastCommitNumberContentStyle,
-  pastCommitActiveContentStyle,
-  pastCommitLineStyle
-} from '../componentsStyle/PastCommitNodeStyle';
-
-import { classes } from 'typestyle';
-
-import * as React from 'react';
+  remoteBranchStyle,
+  workingBranchStyle
+} from "../componentsStyle/PastCommitNodeStyle";
+import { GitBranchResult, SingleCommitInfo } from "../git";
+import { SinglePastCommitInfo } from "./SinglePastCommitInfo";
 
 export interface IPastCommitNodeProps {
-  index: number;
-  isLast: boolean;
-  pastCommit: any;
-  currentFileBrowserPath: string;
-  setShowList: Function;
-  getPastCommit: Function;
-  activeNode: number;
-  updateActiveNode: Function;
-  isVisible: boolean;
+  pastCommit: SingleCommitInfo;
+  branches: GitBranchResult["branches"];
+  topRepoPath: string;
+  currentTheme: string;
+  app: JupyterLab;
+  diff: (
+    app: JupyterLab,
+    filename: string,
+    revisionA: string,
+    revisionB: string
+  ) => void;
+  refresh: () => void;
 }
 
-export class PastCommitNode extends React.Component<IPastCommitNodeProps, {}> {
+export interface IPastCommitNodeState {
+  expanded: boolean;
+}
+
+export class PastCommitNode extends React.Component<
+  IPastCommitNodeProps,
+  IPastCommitNodeState
+> {
   constructor(props: IPastCommitNodeProps) {
     super(props);
+    this.state = {
+      expanded: false
+    };
   }
-
-  getPastCommitNodeClass(): string {
-    if (!this.props.isVisible) {
-      return null;
+  getBranchesForCommit() {
+    const idAbrev = this.props.pastCommit.commit.slice(0, 7);
+    const branches = [];
+    for (let i = 0; i < this.props.branches.length; i++) {
+      const branch = this.props.branches[i];
+      // tag sent from describe command. Must unparse to find commit hash
+      // https://git-scm.com/docs/git-describe#git-describe-ltcommit-ishgt82308203
+      if (!branch.tag) {
+        continue;
+      }
+      const tagParts = branch.tag.split("-");
+      const lastTagPart = tagParts[tagParts.length - 1];
+      if (lastTagPart[0] == "g") {
+        const currentIdAbrev = lastTagPart.slice(1);
+        if (currentIdAbrev == idAbrev) {
+          branches.push(branch);
+        }
+      }
     }
-    return this.props.index === -1
-      ? classes(pastCommitWorkingNodeStyle, pastCommitNodeStyle)
-      : classes(pastCommitNodeStyle);
+    return branches;
   }
 
-  getPastCommitLineClass(): string {
-    if (!this.props.isVisible) {
-      return null;
+  expand() {
+    this.setState(() => ({ expanded: true }));
+  }
+
+  collapse() {
+    this.setState(() => ({ expanded: false }));
+  }
+
+  getNodeClass() {
+    if (this.state.expanded) {
+      return classes(pastCommitNodeStyle, pastCommitExpandedStyle);
     }
-    return this.props.isLast ? null : classes(pastCommitLineStyle);
+    return pastCommitNodeStyle;
   }
-
-  getContent(): string | number {
-    if (this.props.index === -1) {
-      return 'WORKING';
-    } else if (this.props.index === 0) {
-      return 'HEAD';
-    } else {
-      return this.props.index;
-    }
-  }
-
-  getContentClass(): string {
-    const activeContentStyle =
-      this.props.index === this.props.activeNode
-        ? pastCommitActiveContentStyle
-        : null;
-    if (!this.props.isVisible) {
-      return null;
-    }
-    if (this.props.index === -1) {
-      return classes(
-        pastCommitWorkingContentStyle,
-        pastCommitContentStyle,
-        activeContentStyle
-      );
-    } else if (this.props.index === 0) {
-      return classes(
-        pastCommitHeadContentStyle,
-        pastCommitContentStyle,
-        activeContentStyle
-      );
-    } else {
-      return classes(
-        pastCommitNumberContentStyle,
-        pastCommitContentStyle,
-        activeContentStyle
-      );
-    }
-  }
-
-  handleClick(): void {
-    this.props.index === -1
-      ? this.props.setShowList(true)
-      : (this.props.getPastCommit(
-          this.props.pastCommit,
-          this.props.index,
-          this.props.currentFileBrowserPath
-        ),
-        this.props.setShowList(false));
-    this.props.updateActiveNode(this.props.index);
-  }
-
   render() {
     return (
-      <div key={this.props.index}>
-        <div
-          className={this.getPastCommitNodeClass()}
-          onClick={() => this.handleClick()}
-        >
-          <span className={this.getContentClass()}>
-            {this.props.isVisible && this.getContent()}
-          </span>
+      <div
+        onClick={() => {
+          !this.state.expanded && this.expand();
+        }}
+        className={this.getNodeClass()}
+      >
+        <div className={pastCommitHeaderStyle}>
+          <div className={pastCommitHeaderItemStyle}>
+            {this.props.pastCommit.author}
+          </div>
+          <div className={pastCommitHeaderItemStyle}>
+            {this.props.pastCommit.commit.slice(0, 7)}
+          </div>
+          <div className={pastCommitHeaderItemStyle}>
+            {this.props.pastCommit.date}
+          </div>
         </div>
-        <div className={this.getPastCommitLineClass()} />
+        <div className={branchesStyle}>
+          {this.getBranchesForCommit().map((branch, id) => (
+            <React.Fragment key={id}>
+              {branch.is_current_branch && (
+                <span className={classes(branchStyle, workingBranchStyle)}>
+                  working
+                </span>
+              )}
+              <span
+                className={classes(
+                  branchStyle,
+                  branch.is_remote_branch ? remoteBranchStyle : localBranchStyle
+                )}
+              >
+                {branch.name}
+              </span>
+            </React.Fragment>
+          ))}
+        </div>
+        <div className={pastCommitBodyStyle}>
+          {this.props.pastCommit.commit_msg}
+          {this.state.expanded && (
+            <>
+              <SinglePastCommitInfo
+                data={this.props.pastCommit}
+                topRepoPath={this.props.topRepoPath}
+                currentTheme={this.props.currentTheme}
+                app={this.props.app}
+                diff={this.props.diff}
+                refresh={this.props.refresh}
+              />
+              <div className={collapseStyle} onClick={() => this.collapse()}>
+                Collapse
+              </div>
+            </>
+          )}
+        </div>
       </div>
     );
   }

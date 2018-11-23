@@ -23,13 +23,10 @@ import { HistorySideBar } from './HistorySideBar';
 
 import {
   panelContainerStyle,
-  panelPushedContentStyle,
-  panelContentStyle,
   panelWarningStyle,
   findRepoButtonStyle
 } from '../componentsStyle/GitPanelStyle';
 
-import { classes } from 'typestyle';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -52,13 +49,6 @@ export interface IGitSessionNodeState {
 
   sideBarExpanded: boolean;
 
-  pastCommitInfo: string;
-  pastCommitFilesChanged: string;
-  pastCommitInsertionCount: string;
-  pastCommitDeletionCount: string;
-  pastCommitData: any;
-  pastCommitNumber: any;
-  pastCommitFilelist: any;
 }
 
 /** Interface for GitPanel component props */
@@ -89,13 +79,6 @@ export class GitPanel extends React.Component<
       unstagedFiles: [],
       untrackedFiles: [],
       sideBarExpanded: false,
-      pastCommitInfo: '',
-      pastCommitFilesChanged: '',
-      pastCommitInsertionCount: '',
-      pastCommitDeletionCount: '',
-      pastCommitData: '',
-      pastCommitNumber: '',
-      pastCommitFilelist: ''
     };
   }
 
@@ -103,26 +86,6 @@ export class GitPanel extends React.Component<
     this.setState({ showList: state });
   };
 
-  /** Show the commit message and changes from a past commit */
-  showPastCommitWork = async (
-    pastCommit: SingleCommitInfo,
-    pastCommitIndex: number,
-    path: string
-  ) => {
-    let gitApi = new Git();
-    let detailedLogData = await gitApi.detailedLog(pastCommit.commit, path);
-    if (detailedLogData.code === 0) {
-      this.setState({
-        pastCommitInfo: detailedLogData.modified_file_note,
-        pastCommitFilesChanged: detailedLogData.modified_files_count,
-        pastCommitInsertionCount: detailedLogData.number_of_insertions,
-        pastCommitDeletionCount: detailedLogData.number_of_deletions,
-        pastCommitData: pastCommit,
-        pastCommitNumber: pastCommitIndex + ' commit(s) before',
-        pastCommitFilelist: detailedLogData.modified_files
-      });
-    }
-  };
 
   /**
    * Refresh widget, update all content
@@ -249,11 +212,7 @@ export class GitPanel extends React.Component<
     this.setState({ sideBarExpanded: !this.state.sideBarExpanded });
   };
 
-  getContentClass(): string {
-    return this.state.sideBarExpanded
-      ? classes(panelPushedContentStyle, panelContentStyle)
-      : panelContentStyle;
-  }
+
 
   render() {
     return (
@@ -264,16 +223,9 @@ export class GitPanel extends React.Component<
           refresh={this.refresh}
           currentBranch={this.state.currentBranch}
         />
-        <div className={this.getContentClass()}>
+        <div>
           {this.state.showWarning && (
             <div>
-              <HistorySideBar
-                isExpanded={this.state.sideBarExpanded}
-                currentFileBrowserPath={this.state.currentFileBrowserPath}
-                pastCommits={this.state.pastCommits}
-                setShowList={this.setShowList}
-                getPastCommit={this.showPastCommitWork}
-              />
               <BranchHeader
                 currentFileBrowserPath={this.state.currentFileBrowserPath}
                 topRepoPath={this.state.topRepoPath}
@@ -286,11 +238,21 @@ export class GitPanel extends React.Component<
                 toggleSidebar={this.toggleSidebar}
                 showList={this.state.showList}
                 currentTheme={this.props.app.shell.dataset.themeLight}
+                sideBarExpanded={this.state.sideBarExpanded}
+              />
+              <HistorySideBar
+                isExpanded={this.state.sideBarExpanded}
+                branches={this.state.branches}
+                pastCommits={this.state.pastCommits}
+                topRepoPath={this.state.topRepoPath}
+                currentTheme={this.props.app.shell.dataset.themeLight}
+                app={this.props.app}
+                refresh={this.refresh}
+                diff={this.props.diff}
               />
               <PastCommits
                 currentFileBrowserPath={this.state.currentFileBrowserPath}
                 topRepoPath={this.state.topRepoPath}
-                pastCommits={this.state.pastCommits}
                 inNewRepo={this.state.inNewRepo}
                 showList={this.state.showList}
                 stagedFiles={this.state.stagedFiles}
@@ -299,13 +261,6 @@ export class GitPanel extends React.Component<
                 app={this.props.app}
                 refresh={this.refresh}
                 diff={this.props.diff}
-                pastCommitInfo={this.state.pastCommitInfo}
-                pastCommitFilesChanged={this.state.pastCommitFilesChanged}
-                pastCommitInsertionCount={this.state.pastCommitInsertionCount}
-                pastCommitDeletionCount={this.state.pastCommitDeletionCount}
-                pastCommitData={this.state.pastCommitData}
-                pastCommitNumber={this.state.pastCommitNumber}
-                pastCommitFilelist={this.state.pastCommitFilelist}
                 sideBarExpanded={this.state.sideBarExpanded}
                 currentTheme={this.props.app.shell.dataset.themeLight}
               />

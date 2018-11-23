@@ -43,15 +43,13 @@ export interface GitCheckoutResult {
  * has the result of changing the current working branch */
 export interface GitBranchResult {
   code: number;
-  branches?: [
-    {
-      is_current_branch: boolean;
-      is_remote_branch: boolean;
-      name: string;
-      upstream: string;
-      tag: string;
-    }
-  ];
+  branches?: Array<{
+    is_current_branch: boolean;
+    is_remote_branch: boolean;
+    name: string;
+    upstream: string;
+    tag: string;
+  }>;
 }
 
 /** Interface for GitStatus request result,
@@ -252,7 +250,7 @@ export class Git {
       }
       return response.json();
     } catch (err) {
-      throw ServerConnection.NetworkError;
+      throw new ServerConnection.NetworkError(err);
     }
   }
 

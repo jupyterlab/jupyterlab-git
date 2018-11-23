@@ -1,52 +1,61 @@
 import { style } from 'typestyle';
 
 export const pastCommitNodeStyle = style({
-  position: 'relative',
-  color: 'var(--jp-ui-font-color1)',
-  width: '36px',
-  height: '36px',
-  border: '2px solid #000',
-  borderRadius: '50%',
-  outline: 'none !important',
-  margin: '-1px auto -1px auto',
-  textAlign: 'center',
-  lineHeight: '36px'
+  flexGrow: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  padding: "10px",
+  borderBottom: "var(--jp-border-width) solid var(--jp-border-color2)",
 });
 
-export const pastCommitWorkingNodeStyle = style({
-  border: '2px dashed #000',
-  borderRadius: '50%',
-  marginTop: '5px'
+export const pastCommitHeaderStyle = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  color: '#828282',
+  paddingBottom: "5px"
 });
 
-export const pastCommitContentStyle = style({
-  fontFamily: 'Oswald'
+
+
+export const branchesStyle = style({
+  display: "flex",
+  fontSize: "0.8em",
+  marginLeft: "-5px",
 });
 
-export const pastCommitWorkingContentStyle = style({
-  left: '-5px',
-  backgroundColor: 'var(--jp-layout-color2)',
-  height: '13px',
-  position: 'absolute',
-  lineHeight: '100%',
-  marginTop: '11px'
+export const branchStyle = style({
+  padding: "2px",
+  border: "var(--jp-border-width) solid #424242",
+  borderRadius: "4px",
+  margin: "3px",
 });
 
-export const pastCommitHeadContentStyle = style({
-  left: '5%'
+export const remoteBranchStyle = style({
+  backgroundColor: "#ffcdd3"
 });
 
-export const pastCommitNumberContentStyle = style({
-  left: '38%'
+export const localBranchStyle = style({
+  backgroundColor: "#b2ebf3"
 });
 
-export const pastCommitActiveContentStyle = style({
-  color: 'var(--jp-brand-color2)'
+
+export const workingBranchStyle = style({
+  backgroundColor: "#ffce83"
 });
 
-export const pastCommitLineStyle = style({
-  backgroundColor: '#000',
-  height: '18px',
-  width: '3px',
-  margin: '0 auto'
+export const pastCommitExpandedStyle = style({
+  backgroundColor: "#f9f9f9"
+});
+
+export const pastCommitHeaderItemStyle = style({
+});
+
+
+export const collapseStyle = style({
+  color: "#1a76d2",
+  float: "right"
+})
+
+export const pastCommitBodyStyle = style({
+  flex: 'auto',
 });
