@@ -83,7 +83,7 @@ def test_get_current_branch_success(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin')._get_current_branch(
+    actual_response = Git(root_dir='/bin').get_current_branch(
         current_path='test_curr_path')
 
     # Then
@@ -112,7 +112,7 @@ def test_get_current_branch_failure(mock_subproc_popen):
 
     # When
     with pytest.raises(Exception) as error:
-        Git(root_dir='/bin')._get_current_branch(current_path='test_curr_path')
+        Git(root_dir='/bin').get_current_branch(current_path='test_curr_path')
     
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -211,7 +211,7 @@ def test_get_upstream_branch_success(mock_subproc_popen):
         mock_subproc_popen.return_value = process_mock
 
         # When
-        actual_response = Git(root_dir='/bin')._get_upstream_branch(
+        actual_response = Git(root_dir='/bin').get_upstream_branch(
             current_path='test_curr_path', branch_name=test_case[0])
 
         # Then
@@ -242,13 +242,13 @@ def test_get_upstream_branch_failure(mock_subproc_popen):
 
     # When
     with pytest.raises(Exception) as error:
-        Git(root_dir='/bin')._get_upstream_branch(
+        Git(root_dir='/bin').get_upstream_branch(
             current_path='test_curr_path', branch_name='blah')
     
     assert "Error [fatal: no such branch: 'blah'] "\
     "occurred while executing [git rev-parse --abbrev-ref blah@{upstream}] command to get upstream branch." == str(error.value)
 
-    actual_response = Git(root_dir='/bin')._get_upstream_branch(
+    actual_response = Git(root_dir='/bin').get_upstream_branch(
             current_path='test_curr_path', branch_name='test')
 
     assert None == actual_response
