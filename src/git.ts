@@ -130,7 +130,7 @@ export interface GitCloneResult {
 }
 
 /**
- * Structure for the result of the Git Clone API.
+ * Structure for the result of the Git Push & Pull API.
  */
 export interface IGitPushPullResult {
   code: number;
