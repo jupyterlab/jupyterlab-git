@@ -594,7 +594,7 @@ class Git:
         nearest tag associated with lastest commit in branch.
         Reference : https://git-scm.com/docs/git-describe#git-describe-ltcommit-ishgt82308203
         """
-        command = ['git', 'describe', commit_sha]
+        command = ['git', 'describe', '--tags', commit_sha]
         p = subprocess.Popen(
             command,
             stdout=PIPE,
@@ -605,6 +605,8 @@ class Git:
         if p.returncode == 0:
             return output.decode('utf-8').strip()
         elif "fatal: No tags can describe '{}'.".format(commit_sha) in error.decode('utf-8'):
+            return None
+        elif "fatal: No names found" in error.decode('utf-8'):
             return None
         else:
             raise Exception('Error [{}] occurred while executing [{}] command to get nearest tag associated with branch.'.format(

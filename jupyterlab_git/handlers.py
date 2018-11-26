@@ -52,6 +52,7 @@ class GitAllHistoryHandler(GitHandler):
         current_path = self.get_json_body()["current_path"]
         show_top_level = self.git.show_top_level(current_path)
         if show_top_level["code"] != 0:
+            print('without show top level result', show_top_level)
             self.finish(json.dumps(show_top_level))
         else:
             branch = self.git.branch(current_path)
@@ -67,6 +68,7 @@ class GitAllHistoryHandler(GitHandler):
                     "status": status,
                 },
             }
+            print('With show top level result', result)
             self.finish(json.dumps(result))
 
 
