@@ -667,7 +667,6 @@ def test_no_tags(mock_subproc_popen):
     actual_response = Git(root_dir='/bin')._get_tag('/path/foo', '768c79ad661598889f29bdf8916f4cc488f5062a')
 
     # Then
-    # Then
     mock_subproc_popen.assert_has_calls([
         call(
             ['git', 'describe', '--tags', '768c79ad661598889f29bdf8916f4cc488f5062a'],
