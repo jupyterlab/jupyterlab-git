@@ -29,7 +29,9 @@ describe('PathHeader', function () {
     const buttons = node.find('button');
     expect(buttons).toHaveLength(3);
     expect(buttons.find(`.${gitPullStyle}`)).toHaveLength(1);
+    expect(buttons.find(`.${gitPullStyle}`).prop('title')).toEqual('Pull latest changes');
     expect(buttons.find(`.${gitPushStyle}`)).toHaveLength(1);
+    expect(buttons.find(`.${gitPushStyle}`).prop('title')).toEqual('Push committed changes');
     expect(buttons.find(`.${repoRefreshStyle}`)).toHaveLength(1);
   });
 

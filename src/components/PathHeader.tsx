@@ -47,12 +47,12 @@ export class PathHeader extends React.Component<IPathHeaderProps,
         </span>
         <button
           className={classes(gitPullStyle, 'jp-Icon-16')}
-          title={'Push committed changes'}
+          title={'Pull latest changes'}
           onClick={() => this.executeGitPull()}
         />
         <button
           className={classes(gitPushStyle, 'jp-Icon-16')}
-          title={'Pull latest changes'}
+          title={'Push committed changes'}
           onClick={() => this.executeGitPush()}
         />
         <button
