@@ -43,50 +43,68 @@ export const repoRefreshStyle = style({
   }
 });
 
-export const gitPushStyle = style({
-  width: 'var(--jp-private-running-button-width)',
-  background: 'var(--jp-layout-color1)',
-  border: 'none',
-  backgroundImage: 'var(--jp-icon-git-push)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  boxSizing: 'border-box',
-  outline: 'none',
-  padding: '0px 6px',
-  margin: 'auto 5px auto auto',
-  height: '24px',
+export function gitPushStyle(isLightTheme: string) {
 
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    '&:active': {
-      backgroundColor: 'var(--jp-layout-color3)',
-    }
+  let backgroundImage;
+  if (isLightTheme === undefined || isLightTheme === 'true') {
+    backgroundImage = 'var(--jp-icon-git-pull)';
+  } else {
+    backgroundImage = 'var(--jp-icon-git-pull-white)';
   }
-});
+  return style({
+    width: 'var(--jp-private-running-button-width)',
+    background: 'var(--jp-layout-color1)',
+    border: 'none',
+    backgroundImage: backgroundImage,
+    backgroundSize: '16px',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    boxSizing: 'border-box',
+    outline: 'none',
+    padding: '0px 6px',
+    margin: 'auto 5px auto auto',
+    height: '24px',
 
-export const gitPullStyle = style({
-  width: 'var(--jp-private-running-button-width)',
-  background: 'var(--jp-layout-color1)',
-  border: 'none',
-  backgroundImage: 'var(--jp-icon-git-pull)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  boxSizing: 'border-box',
-  outline: 'none',
-  padding: '0px 6px',
-  margin: 'auto 5px auto auto',
-  height: '24px',
-
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    '&:active': {
-      backgroundColor: 'var(--jp-layout-color3)',
+    $nest: {
+      '&:hover': {
+        backgroundColor: 'var(--jp-layout-color2)'
+      },
+      '&:active': {
+        backgroundColor: 'var(--jp-layout-color3)',
+      }
     }
+  });
+}
+
+export function gitPullStyle(isLightTheme: string) {
+
+  let backgroundImage;
+  if (isLightTheme === undefined || isLightTheme === 'true') {
+    backgroundImage = 'var(--jp-icon-git-pull)';
+  } else {
+    backgroundImage = 'var(--jp-icon-git-pull-white)';
   }
-});
+  return style({
+    width: 'var(--jp-private-running-button-width)',
+    background: 'var(--jp-layout-color1)',
+    border: 'none',
+    backgroundImage: backgroundImage,
+    backgroundSize: '16px',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    boxSizing: 'border-box',
+    outline: 'none',
+    padding: '0px 6px',
+    margin: 'auto 5px auto auto',
+    height: '24px',
+
+    $nest: {
+      '&:hover': {
+        backgroundColor: 'var(--jp-layout-color2)'
+      },
+      '&:active': {
+        backgroundColor: 'var(--jp-layout-color3)',
+      }
+    }
+  });
+}

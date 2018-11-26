@@ -222,6 +222,7 @@ export class GitPanel extends React.Component<
           topRepoPath={this.state.topRepoPath}
           refresh={this.refresh}
           currentBranch={this.state.currentBranch}
+          isLightTheme={this.props.app.shell.dataset.themeLight}
         />
         <div>
           {this.state.showWarning && (
