@@ -33,5 +33,8 @@
   --jp-icon-git: url('./images/git-icon.svg');
   --jp-icon-git-clone: url('./images/git-clone-icon.svg');
   --jp-icon-git-clone-disabled: url('./images/git-clone-icon-disabled.svg');
-  --jp-icon-branch-tracking: url('./images/icon-branch-tracking.svg');
+  --jp-icon-git-push: url('./images/git-push.svg');
+  --jp-icon-git-pull: url('./images/git-pull.svg');
+  --jp-icon-git-push-disabled: url('./images/git-clone-icon-disabled.svg');
+  --jp-icon-git-pull-disabled: url('./images/git-clone-icon-disabled.svg');
 }

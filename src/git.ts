@@ -129,11 +129,51 @@ export interface GitCloneResult {
   message?: string;
 }
 
+/**
+ * Structure for the result of the Git Push & Pull API.
+ */
+export interface IGitPushPullResult {
+  code: number;
+  message?: string;
+}
+
 /** Parent class for all API requests */
 export class Git {
   constructor() {}
 
-  /** Placeholder for the Git Clone API. */
+  /** Make request for the Git Pull API. */
+  async pull(path: string): Promise<IGitPushPullResult> {
+    try {
+      let response = await httpGitRequest('/git/pull', 'POST', {
+        current_path: path
+      });
+      if (response.status !== 200) {
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
+      }
+      return response.json();
+    } catch (err) {
+      throw ServerConnection.NetworkError;
+    }
+  }
+
+  /** Make request for the Git Push API. */
+  async push(path: string): Promise<IGitPushPullResult> {
+    try {
+      let response = await httpGitRequest('/git/push', 'POST', {
+        current_path: path
+      });
+      if (response.status !== 200) {
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
+      }
+      return response.json();
+    } catch (err) {
+      throw ServerConnection.NetworkError;
+    }
+  }
+
+  /** Make request for the Git Clone API. */
   async clone(path: string, url: string): Promise<GitCloneResult> {
     try {
       let response = await httpGitRequest('/git/clone', 'POST', {
