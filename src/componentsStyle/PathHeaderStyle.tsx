@@ -47,9 +47,9 @@ export function gitPushStyle(isLightTheme: string) {
 
   let backgroundImage;
   if (isLightTheme === undefined || isLightTheme === 'true') {
-    backgroundImage = 'var(--jp-icon-git-pull)';
+    backgroundImage = 'var(--jp-icon-git-push)';
   } else {
-    backgroundImage = 'var(--jp-icon-git-pull-white)';
+    backgroundImage = 'var(--jp-icon-git-push-white)';
   }
   return style({
     width: 'var(--jp-private-running-button-width)',
