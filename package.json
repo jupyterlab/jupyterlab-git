@@ -1,10 +1,10 @@
 {
   "name": "@jupyterlab/git",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "description": "A JupyterLab extension for version control using git",
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
-  "author": "Git Intern Team, Jenna Landy, Noah Stapp, and Alena Mueller",
+  "author": "Git Intern Team - Jenna Landy, Noah Stapp, Alena Mueller; AWS - Jaipreet Singh, Neelam Gehlot; Quansight - Saul Shanabrook",
   "keywords": [
     "jupyter",
     "jupyterlab",
