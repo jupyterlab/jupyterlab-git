@@ -13,6 +13,7 @@ describe("PastCommitNode", () => {
       is_remote_branch: false,
       name: "name1",
       upstream: "upstream",
+      top_commit: "abcdefghijklmnopqrstuvwxyz01234567890123",
       tag: "v1.0.4"
     },
     {
@@ -20,6 +21,7 @@ describe("PastCommitNode", () => {
       is_remote_branch: true,
       name: "name2",
       upstream: "upstream",
+      top_commit: "abcdefghijklmnopqrstuvwxyz01234567890123",
       tag: null
     }
   ];
@@ -29,6 +31,7 @@ describe("PastCommitNode", () => {
       is_remote_branch: false,
       name: "name3",
       upstream: "upstream",
+      top_commit: "2414721hijklmnopqrstuvwxyz01234567890123",
       tag: "v1.0.4-14-g2414721"
     },
     {
@@ -36,6 +39,7 @@ describe("PastCommitNode", () => {
       is_remote_branch: true,
       name: "name4",
       upstream: "upstream",
+      top_commit: "2414721hijklmnopqrstuvwxyz01234567890123",
       tag: "v1.0.5-0-g2414721"
     }
   ];

@@ -39,10 +39,11 @@ On success
                 "code": 0,
                 "branches": [
                     {
-                        "is_current_branch":false, 
+                        "is_current_branch":false,
                         "is_remote_branch":true,
-                        "name":"branch-name", 
+                        "name":"branch-name",
                         "upstream":"upstream-branch-name",
+                        "top_commit":"abcdefghijklmnopqrstuvwxyz01234567890123",
                         "tag":"branch-tag"
                     }
                 ]
@@ -183,6 +184,7 @@ On success
                 "is_remote_branch":true,
                 "name":"branch-name",
                 "upstream":"upstream-branch-name",
+                "top_commit":"abcdefghijklmnopqrstuvwxyz01234567890123",
                 "tag":"branch-tag"
             }
         ]

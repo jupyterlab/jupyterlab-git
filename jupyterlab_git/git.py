@@ -241,6 +241,7 @@ class Git:
                             'is_remote_branch': is_remote_branch,
                             'name': branch_name,
                             'upstream': upstream_branch_name,
+                            'top_commit': commit_sha,
                             'tag': tag,
                         })
                 
@@ -254,6 +255,7 @@ class Git:
                         'is_remote_branch': False,
                         'name': self._get_detached_head_name(current_path),
                         'upstream': None,
+                        'top_commit': None,
                         'tag': None,
                     })
                 return {'code': p.returncode, 'branches': results}
