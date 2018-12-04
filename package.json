@@ -49,7 +49,7 @@
     "identity-obj-proxy": "^3.0.0",
     "nbdime": "^4.0.1",
     "react": "~16.4.2",
-    "react-dom": "~16.4.2"
+    "react-dom": "~16.4.2",
     "react-toggle-display": "^2.2.0",
     "typestyle": "^2.0.1"
   },
