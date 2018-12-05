@@ -49,6 +49,7 @@ paths:
                         "is_remote_branch":true,
                         "name":"branch-name", 
                         "upstream":"upstream-branch-name",
+                        "top_commit":"abcdefghijklmnopqrstuvwxyz01234567890123",
                         "tag":"branch-tag"
                       }
                     ]
@@ -188,6 +189,7 @@ on git command success
                 "is_remote_branch":true,
                 "name":"branch-name",
                 "upstream":"upstream-branch-name",
+                "top_commit":"abcdefghijklmnopqrstuvwxyz01234567890123",
                 "tag":"branch-tag"
             }
         ]

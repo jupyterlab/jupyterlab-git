@@ -48,6 +48,7 @@ export interface GitBranchResult {
     is_remote_branch: boolean;
     name: string;
     upstream: string;
+    top_commit: string;
     tag: string;
   }>;
 }

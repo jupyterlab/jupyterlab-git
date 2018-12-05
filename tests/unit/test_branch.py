@@ -389,6 +389,7 @@ def test_branch_success(mock_subproc_popen):
                 'is_remote_branch': False,
                 'name': 'feature-foo',
                 'upstream': 'origin/master',
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
                 'tag': 'v0.3.0',
             },
             {
@@ -396,6 +397,7 @@ def test_branch_success(mock_subproc_popen):
                 'is_remote_branch': False,
                 'name': 'master',
                 'upstream': 'origin/master',
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
                 'tag': 'v0.3.0',
             },
             {
@@ -403,12 +405,14 @@ def test_branch_success(mock_subproc_popen):
                 'is_remote_branch': False,
                 'name': 'feature-bar',
                 'upstream': 'origin/master',
+                'top_commit': '01234567899999abcdefghijklmnopqrstuvwxyz',
                 'tag': 'v0.3.1'},
             {
                 'is_current_branch': False,
                 'is_remote_branch': True,
                 'name': 'origin/feature-foo',
                 'upstream': None,
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
                 'tag': 'v0.4.2',
             },
             {
@@ -416,6 +420,7 @@ def test_branch_success(mock_subproc_popen):
                 'is_remote_branch': True,
                 'name': 'origin/HEAD',
                 'upstream': None,
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
                 'tag': 'v0.4.1',
             }
         ]
@@ -577,6 +582,7 @@ def test_branch_success_detached_head(mock_subproc_popen):
                 'is_remote_branch': False,
                 'name': 'master',
                 'upstream': 'origin/master',
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
                 'tag': 'v0.3.0',
             },
             {
@@ -584,6 +590,7 @@ def test_branch_success_detached_head(mock_subproc_popen):
                 'is_remote_branch': True,
                 'name': 'origin/feature-foo',
                 'upstream': None,
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
                 'tag': 'v0.4.2',
             },
             {
@@ -591,6 +598,7 @@ def test_branch_success_detached_head(mock_subproc_popen):
                 'is_remote_branch': False,
                 'name': '(HEAD detached at origin/feature-foo)',
                 'upstream': None,
+                'top_commit': None,
                 'tag': None,
             }
         ]

@@ -47,22 +47,12 @@ export class PastCommitNode extends React.Component<
     };
   }
   getBranchesForCommit() {
-    const idAbrev = this.props.pastCommit.commit.slice(0, 7);
+    const current_commit = this.props.pastCommit.commit;
     const branches = [];
     for (let i = 0; i < this.props.branches.length; i++) {
       const branch = this.props.branches[i];
-      // tag sent from describe command. Must unparse to find commit hash
-      // https://git-scm.com/docs/git-describe#git-describe-ltcommit-ishgt82308203
-      if (!branch.tag) {
-        continue;
-      }
-      const tagParts = branch.tag.split("-");
-      const lastTagPart = tagParts[tagParts.length - 1];
-      if (lastTagPart[0] == "g") {
-        const currentIdAbrev = lastTagPart.slice(1);
-        if (currentIdAbrev == idAbrev) {
-          branches.push(branch);
-        }
+      if (branch.top_commit && branch.top_commit == current_commit) {
+        branches.push(branch);
       }
     }
     return branches;
