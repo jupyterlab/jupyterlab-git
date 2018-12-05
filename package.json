@@ -48,16 +48,16 @@
     "@phosphor/widgets": "^1.6.0",
     "identity-obj-proxy": "^3.0.0",
     "nbdime": "^4.0.1",
-    "react": "^16.5.2",
-    "react-dom": "^16.5.2",
+    "react": "~16.4.2",
+    "react-dom": "~16.4.2",
     "react-toggle-display": "^2.2.0",
-    "tslint": "^5.11.0",
     "typestyle": "^2.0.1"
   },
   "devDependencies": {
     "@types/enzyme": "3.1.15",
     "@types/jest": "^23.3.5",
-    "@types/react": "16.4.16",
+    "@types/react": "~16.4.13",
+    "@types/react-dom": "~16.0.5",
     "enzyme": "3.7.0",
     "enzyme-adapter-react-16": "1.7.0",
     "jest": "^23.6.0",
@@ -65,6 +65,7 @@
     "prettier": "^1.14.3",
     "rimraf": "^2.6.1",
     "ts-jest": "^23.10.4",
+    "tslint": "^5.11.0",
     "tslint-plugin-prettier": "^2.0.0",
     "typescript": "~3.1.2"
   },
@@ -78,5 +79,8 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab-git/issues"
   },
-  "homepage": "https://github.com/jupyterlab/jupyterlab-git"
+  "homepage": "https://github.com/jupyterlab/jupyterlab-git",
+  "resolutions": {
+    "@types/react": "~16.4.13"
+  }
 }
