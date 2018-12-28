@@ -18,11 +18,10 @@ A JupyterLab extension for version control using git
 
 ## Install
 
-```bash
-jupyter labextension install @jupyterlab/git
-```
+To install preform the following steps:
 
 ```bash
+jupyter labextension install @jupyterlab/git
 pip install jupyterlab-git
 jupyter serverextension enable --py jupyterlab_git
 ```
