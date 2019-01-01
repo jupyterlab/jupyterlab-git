@@ -16,34 +16,23 @@ function testJupyterLabPage(html) {
 async function testApplication(page) {
   const el = await page.waitForSelector('#browserTest', { timeout: 100000 });
   console.log('Waiting for application to start...');
-  let testError = null;
 
-  try {
-    await page.waitForSelector('.completed');
-  } catch (e) {
-    testError = e;
-  }
+  await page.waitForSelector('.completed');
+
   const textContent = await el.getProperty('textContent');
   const errors = JSON.parse(await textContent.jsonValue());
 
   for (let error of errors) {
     console.error(`Parsed an error from text content: ${error.message}`, error);
+    throw error;
   }
-
-  return testError;
 }
 
 function testGitExtension(html) {
     // Test git icons are present
-    try {
-      assert(html.includes('--jp-icon-git-clone'), 'Could not find git clone icon.');
-      assert(html.includes('--jp-icon-git-pull'), 'Could not find git pull icon.');
-      assert(html.includes('--jp-icon-git-push'), 'Could not find git push icon.');
-    } catch (e) {
-      return e;
-    }
-
-    return null;
+    assert(html.includes('--jp-icon-git-clone'), 'Could not find git clone icon.');
+    assert(html.includes('--jp-icon-git-pull'), 'Could not find git pull icon.');
+    assert(html.includes('--jp-icon-git-push'), 'Could not find git push icon.');
 }
 
 async function main() {
@@ -60,15 +49,10 @@ async function main() {
   const html = await page.content();
   testJupyterLabPage(html);
 
-  let testError = null;
-  testError = await testApplication(page);
-  testError = testGitExtension(html);
+  await testApplication(page);
+  testGitExtension(html);
 
   await browser.close();
-
-  if (testError) {
-    throw testError;
-  }
   console.info('Chrome test complete');
 }
 
