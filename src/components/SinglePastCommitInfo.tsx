@@ -20,7 +20,7 @@ import {
   numberofChangedFilesStyle,
   revertButtonStyle
 } from "../componentsStyle/SinglePastCommitInfoStyle";
-import { CommitModifiedFile, Git, SingleCommitInfo } from "../git";
+import { CommitModifiedFile, Git, SingleCommitInfo, IDiffCallback } from "../git";
 import { parseFileExtension } from "./FileList";
 import { ResetDeleteSingleCommit } from "./ResetDeleteSingleCommit";
 
@@ -28,12 +28,8 @@ export interface ISinglePastCommitInfoProps {
   topRepoPath: string;
   data: SingleCommitInfo;
   app: JupyterLab;
-  diff: (
-    app: JupyterLab,
-    filename: string,
-    revisionA: string,
-    revisionB: string
-  ) => void;
+  diff: IDiffCallback;
+
   refresh: () => void;
   currentTheme: string;
 }
@@ -219,7 +215,6 @@ export class SinglePastCommitInfo extends React.Component<
                     className={commitDetailFilePathStyle}
                     onDoubleClick={() => {
                       this.props.diff(
-                        this.props.app,
                         modifiedFile.modified_file_path,
                         this.props.data.commit,
                         this.props.data.pre_commit

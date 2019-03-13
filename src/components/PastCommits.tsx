@@ -4,6 +4,8 @@ import { FileList } from './FileList';
 
 import { pastCommitsContainerStyle } from '../componentsStyle/PastCommitsStyle';
 
+import { IDiffCallback } from '../git';
+
 import * as React from 'react';
 
 /** Interface for PastCommits component props */
@@ -17,7 +19,7 @@ export interface IPastCommitsProps {
   untrackedFiles: any;
   app: JupyterLab;
   refresh: any;
-  diff: any;
+  diff: IDiffCallback;
   sideBarExpanded: boolean;
   currentTheme: string;
 }

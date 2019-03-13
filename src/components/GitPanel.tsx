@@ -10,7 +10,8 @@ import {
   GitAllHistory,
   GitLogResult,
   SingleCommitInfo,
-  GitStatusFileResult
+  GitStatusFileResult,
+  IDiffCallback,
 } from '../git';
 
 import { PathHeader } from './PathHeader';
@@ -54,7 +55,7 @@ export interface IGitSessionNodeState {
 /** Interface for GitPanel component props */
 export interface IGitSessionNodeProps {
   app: JupyterLab;
-  diff: any;
+  diff: IDiffCallback;
 }
 
 /** A React component for the git extension's main display */

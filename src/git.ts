@@ -4,6 +4,15 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 'use strict';
 
+
+
+/** Function type for diffing a file's revisions */
+export type IDiffCallback = (
+  filename: string,
+  revisionA: string,
+  revisionB: string
+) => void;
+
 /** Interface for GitAllHistory request result,
  * has all repo information */
 export interface GitAllHistory {

@@ -14,7 +14,7 @@ import {
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser'
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
+import {IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -22,8 +22,23 @@ import { Token } from '@phosphor/coreutils';
 
 import { gitTabStyle } from './componentsStyle/GitWidgetStyle';
 
+import { IDiffCallback } from './git';
+export { IDiffCallback } from './git';
+
 import '../style/variables.css';
 import {GitClone} from "./gitClone";
+
+
+export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
+
+export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
+
+
+/** Interface for extension class */
+export interface IGitExtension {
+  registerDiffProvider(filetypes: string[], callback: IDiffCallback): void;
+}
+
 
 /**
  * The default running sessions extension.
@@ -31,6 +46,7 @@ import {GitClone} from "./gitClone";
 const plugin: JupyterLabPlugin<IGitExtension> = {
   id: 'jupyter.extensions.running-sessions-git',
   requires: [IMainMenu, ILayoutRestorer, IFileBrowserFactory],
+  provides: IGitExtension,
   activate,
   autoStart: true
 };
@@ -40,27 +56,13 @@ const plugin: JupyterLabPlugin<IGitExtension> = {
  */
 export default plugin;
 
-export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
-
-export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
-
-/** Interface for extension class */
-export interface IGitExtension {
-  register_diff_provider(filetypes: string[], callback: IDiffCallback): void;
-}
-
-/** Function type for diffing a file's revisions */
-export type IDiffCallback = (
-  filename: string,
-  revisionA: string,
-  revisionB: string
-) => void;
 
 /** Main extension class */
 export class GitExtension implements IGitExtension {
   git_plugin: GitWidget;
   git_clone_widget: GitClone;
   constructor(app: JupyterLab, restorer: ILayoutRestorer, factory: IFileBrowserFactory) {
+    this.app = app;
     this.git_plugin = new GitWidget(
       app,
       { manager: app.serviceManager },
@@ -80,14 +82,13 @@ export class GitExtension implements IGitExtension {
     this.git_clone_widget = new GitClone(factory);
   }
 
-  register_diff_provider(filetypes: string[], callback: IDiffCallback): void {
+  registerDiffProvider(filetypes: string[], callback: IDiffCallback): void {
     filetypes.forEach(fileType => {
       this.diffProviders[fileType] = callback;
     });
   }
 
   performDiff(
-    app: JupyterLab,
     filename: string,
     revisionA: string,
     revisionB: string
@@ -96,14 +97,17 @@ export class GitExtension implements IGitExtension {
     if (this.diffProviders[extension] !== undefined) {
       this.diffProviders[extension](filename, revisionA, revisionB);
     } else {
-      app.commands.execute('git:terminal-cmd', {
+      this.app.commands.execute('git:terminal-cmd', {
         cmd: 'git diff ' + revisionA + ' ' + revisionB
       });
     }
   }
 
+  private app: JupyterLab;
   private diffProviders: { [key: string]: IDiffCallback } = {};
 }
+
+
 /**
  * Activate the running plugin.
  */
