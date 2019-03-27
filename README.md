@@ -43,7 +43,7 @@ JupyterLab Git's current maintainers are listed in alphabetical order, with affi
 - Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis).
 - Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
   architecture).
-- Saul Shanabrook, Quansight(software engineering, UI/UX design)
+- Saul Shanabrook, Quansight(software engineering)
 - Jaipreet Singh, AWS (software engineering, UI/UX design, management)
 - William Wang, AWS (UI/UX design)
 
