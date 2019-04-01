@@ -54,7 +54,7 @@ export const branchTrackingLabelStyle = style({
   marginTop: '5px',
   marginBottom: '5px',
   display: 'inline-block',
-  color: '#828282',
+  color: 'var(--jp-ui-font-color2)',
   fontWeight: 'normal'
 });
 

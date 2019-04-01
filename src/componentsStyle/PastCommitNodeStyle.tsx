@@ -11,7 +11,7 @@ export const pastCommitNodeStyle = style({
 export const pastCommitHeaderStyle = style({
   display: 'flex',
   justifyContent: 'space-between',
-  color: '#828282',
+  color: 'var(--jp-ui-font-color2)',
   paddingBottom: "5px"
 });
 
@@ -25,6 +25,9 @@ export const branchesStyle = style({
 
 export const branchStyle = style({
   padding: "2px",
+  // Special case as black, regardless of theme, because
+  // backgrounds of colors are not based on theme either
+  color: '#000000de',
   border: "var(--jp-border-width) solid #424242",
   borderRadius: "4px",
   margin: "3px",
