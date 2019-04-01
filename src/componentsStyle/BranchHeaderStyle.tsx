@@ -13,7 +13,7 @@ export const selectedHeaderStyle = style({
 });
 
 export const unSelectedHeaderStyle = style({
-  backgroundColor: "#ededed",
+  backgroundColor: 'var(--jp-layout-color2)',
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   paddingTop: 'var(--jp-border-width)',
 });
