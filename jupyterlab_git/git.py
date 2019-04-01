@@ -349,7 +349,7 @@ class Git:
         Execute git reset <filename> command & return the result.
         """
         my_output = subprocess.check_output(
-            ["git", "reset", filename], cwd=top_repo_path
+            ["git", "reset", "--", filename], cwd=top_repo_path
         )
         return my_output
 
