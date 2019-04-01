@@ -174,10 +174,21 @@ export const stagedCommitMessageStyle = style({
   flex: '20 1 auto',
   resize: 'none',
   padding: '4px 8px',
+  backgroundColor: 'var(--jp-layout-color1)',
+  color: 'var(--jp-ui-font-color0)',
 
   $nest: {
     '&:focus': {
       outline: 'none'
+    },
+    '&::-webkit-input-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    },
+    '&::-moz-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    },
+    '&::-ms-input-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
     }
   }
 });
