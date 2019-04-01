@@ -48,7 +48,6 @@ export interface IBranchHeaderProps {
   disabled: boolean;
   toggleSidebar: Function;
   showList: boolean;
-  currentTheme: string;
   sideBarExpanded: boolean;
 }
 
@@ -205,10 +204,10 @@ export class BranchHeader extends React.Component<
               className={
                 this.props.disabled
                   ? classes(
-                      branchDropdownButtonStyle(this.props.currentTheme),
+                      branchDropdownButtonStyle,
                       headerButtonDisabledStyle
                     )
-                  : branchDropdownButtonStyle(this.props.currentTheme)
+                  : branchDropdownButtonStyle
               }
               title={'Change the current branch'}
               onClick={() => this.toggleSelect()}
@@ -218,10 +217,10 @@ export class BranchHeader extends React.Component<
                 className={
                   this.props.disabled
                     ? classes(
-                        newBranchButtonStyle(this.props.currentTheme),
+                        newBranchButtonStyle,
                         headerButtonDisabledStyle
                       )
-                    : newBranchButtonStyle(this.props.currentTheme)
+                    : newBranchButtonStyle
                 }
                 title={'Create a new branch'}
                 onClick={() => this.toggleNewBranchBox()}

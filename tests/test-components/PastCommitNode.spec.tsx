@@ -48,7 +48,6 @@ describe("PastCommitNode", () => {
   );
   const props = {
     topRepoPath: null,
-    currentTheme: null,
     app: null,
     diff: null,
     refresh: null,

@@ -21,7 +21,6 @@ export interface IPastCommitNodeProps {
   pastCommit: SingleCommitInfo;
   branches: GitBranchResult["branches"];
   topRepoPath: string;
-  currentTheme: string;
   app: JupyterLab;
   diff: IDiffCallback;
   refresh: () => void;
@@ -112,7 +111,6 @@ export class PastCommitNode extends React.Component<
               <SinglePastCommitInfo
                 data={this.props.pastCommit}
                 topRepoPath={this.props.topRepoPath}
-                currentTheme={this.props.currentTheme}
                 app={this.props.app}
                 diff={this.props.diff}
                 refresh={this.props.refresh}

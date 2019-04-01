@@ -27,8 +27,7 @@ describe('BranchHeader', () => {
     toggleSidebar: function() {
       return true;
     },
-    showList: true,
-    currentTheme: 'dark'
+    showList: true
   };
 
   describe('#constructor()', () => {
@@ -148,8 +147,7 @@ describe('BranchHeader', () => {
         toggleSidebar: function() {
           return true;
         },
-        showList: false,
-        currentTheme: 'dark'
+        showList: false
       });
       let actual = branchHeader.getBranchStyle();
       let expected = classes(branchStyle, smallBranchStyle);

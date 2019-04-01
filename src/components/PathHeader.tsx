@@ -24,7 +24,6 @@ export interface IPathHeaderProps {
   topRepoPath: string;
   refresh: any;
   currentBranch: string;
-  isLightTheme: string;
 }
 
 export class PathHeader extends React.Component<IPathHeaderProps,
@@ -47,12 +46,12 @@ export class PathHeader extends React.Component<IPathHeaderProps,
           this.props.currentBranch}
         </span>
         <button
-          className={classes(gitPullStyle(this.props.isLightTheme), 'jp-Icon-16')}
+          className={classes(gitPullStyle, 'jp-Icon-16')}
           title={'Pull latest changes'}
           onClick={() => this.executeGitPull()}
         />
         <button
-          className={classes(gitPushStyle(this.props.isLightTheme), 'jp-Icon-16')}
+          className={classes(gitPushStyle, 'jp-Icon-16')}
           title={'Push committed changes'}
           onClick={() => this.executeGitPush()}
         />

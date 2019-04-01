@@ -22,7 +22,6 @@ describe("HistorySideBar", () => {
     branches: [],
     isExpanded: true,
     topRepoPath: null,
-    currentTheme: null,
     app: null,
     refresh: null,
     diff: null

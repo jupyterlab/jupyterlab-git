@@ -21,7 +21,6 @@ export interface IPastCommitsProps {
   refresh: any;
   diff: IDiffCallback;
   sideBarExpanded: boolean;
-  currentTheme: string;
 }
 
 export class PastCommits extends React.Component<IPastCommitsProps, {}> {
@@ -41,7 +40,6 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
           refresh={this.props.refresh}
           sideBarExpanded={this.props.sideBarExpanded}
           display={this.props.showList}
-          currentTheme={this.props.currentTheme}
         />
       </div>
     );
