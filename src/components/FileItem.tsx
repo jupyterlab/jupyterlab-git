@@ -277,6 +277,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
               this.props.app
             )
           }
+          title={this.props.file.to}
         >
           {this.props.extractFilename(this.props.file.to)}
           <span className={this.getFileChangedLabelClass(this.props.file.y)}>
