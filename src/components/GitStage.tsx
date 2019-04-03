@@ -34,7 +34,7 @@ export interface IGitStageProps {
   discardAllFiles: Function;
   discardFile: Function;
   moveFile: Function;
-  moveFileIconClass: Function;
+  moveFileIconClass: string;
   moveFileIconSelectedClass: string;
   moveAllFilesTitle: string;
   moveFileTitle: string;
@@ -54,7 +54,6 @@ export interface IGitStageProps {
   isDisabled: boolean;
   disableOthers: Function;
   sideBarExpanded: boolean;
-  currentTheme: string;
 }
 
 export interface IGitStageState {
@@ -127,9 +126,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
           )}
           <button
             disabled={this.checkContents()}
-            className={`${this.props.moveFileIconClass(
-              this.props.currentTheme
-            )} ${changeStageButtonStyle}
+            className={`${this.props.moveFileIconClass} ${changeStageButtonStyle}
                ${changeStageButtonLeftStyle}`}
             title={this.props.moveAllFilesTitle}
             onClick={() =>
@@ -144,7 +141,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
               disabled={this.checkContents()}
               className={classes(
                 changeStageButtonStyle,
-                discardFileButtonStyle(this.props.currentTheme)
+                discardFileButtonStyle
               )}
               title={'Discard All Changes'}
               onClick={() => this.discardAllChanges()}
@@ -188,7 +185,6 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                     disableFile={this.props.disableFiles}
                     toggleDisableFiles={this.props.toggleDisableFiles}
                     sideBarExpanded={this.props.sideBarExpanded}
-                    currentTheme={this.props.currentTheme}
                   />
                 );
               }

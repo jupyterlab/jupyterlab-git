@@ -11,7 +11,6 @@ describe('PathHeader', function () {
     topRepoPath: '/foo',
     refresh: null,
     currentBranch: 'bar',
-    isLightTheme: 'true'
   };
 
   it('should have repo and branch details', function () {
@@ -22,40 +21,20 @@ describe('PathHeader', function () {
     expect(node.text()).toEqual('repo / bar');
   });
 
-  it('should have all buttons in light theme', function () {
+  it('should have all buttons', function () {
     // When
     const node = shallow(<PathHeader {...props} />);
 
     // Then
     const buttons = node.find('button');
     expect(buttons).toHaveLength(3);
-    expect(buttons.find(`.${gitPullStyle('true')}`)).toHaveLength(1);
-    expect(buttons.find(`.${gitPullStyle('true')}`).prop('title')).toEqual('Pull latest changes');
-    expect(buttons.find(`.${gitPushStyle('true')}`)).toHaveLength(1);
-    expect(buttons.find(`.${gitPushStyle('true')}`).prop('title')).toEqual('Push committed changes');
+    expect(buttons.find(`.${gitPullStyle}`)).toHaveLength(1);
+    expect(buttons.find(`.${gitPullStyle}`).prop('title')).toEqual('Pull latest changes');
+    expect(buttons.find(`.${gitPushStyle}`)).toHaveLength(1);
+    expect(buttons.find(`.${gitPushStyle}`).prop('title')).toEqual('Push committed changes');
     expect(buttons.find(`.${repoRefreshStyle}`)).toHaveLength(1);
   });
 
-  it('should have all buttons in dark theme', function () {
-      const props: IPathHeaderProps = {
-    currentFileBrowserPath: '/path/to/repo',
-    topRepoPath: '/foo',
-    refresh: null,
-    currentBranch: 'bar',
-    isLightTheme: 'false'
-  };
-    // When
-    const node = shallow(<PathHeader {...props} />);
-
-    // Then
-    const buttons = node.find('button');
-    expect(buttons).toHaveLength(3);
-    expect(buttons.find(`.${gitPullStyle('false')}`)).toHaveLength(1);
-    expect(buttons.find(`.${gitPullStyle('false')}`).prop('title')).toEqual('Pull latest changes');
-    expect(buttons.find(`.${gitPushStyle('false')}`)).toHaveLength(1);
-    expect(buttons.find(`.${gitPushStyle('false')}`).prop('title')).toEqual('Push committed changes');
-    expect(buttons.find(`.${repoRefreshStyle}`)).toHaveLength(1);
-  });
 
   it('should call API on button click', function () {
     // Given
@@ -68,11 +47,11 @@ describe('PathHeader', function () {
     // Then
     const buttons = node.find('button');
 
-    buttons.find(`.${gitPullStyle('true')}`).simulate('click');
+    buttons.find(`.${gitPullStyle}`).simulate('click');
     expect(spyPull).toHaveBeenCalledTimes(1);
     expect(spyPull).toHaveBeenCalledWith('/path/to/repo');
 
-    buttons.find(`.${gitPushStyle('true')}`).simulate('click');
+    buttons.find(`.${gitPushStyle}`).simulate('click');
     expect(spyPush).toHaveBeenCalledTimes(1);
     expect(spyPush).toHaveBeenCalledWith('/path/to/repo');
   });

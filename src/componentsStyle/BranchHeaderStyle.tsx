@@ -13,7 +13,7 @@ export const selectedHeaderStyle = style({
 });
 
 export const unSelectedHeaderStyle = style({
-  backgroundColor: "#ededed",
+  backgroundColor: 'var(--jp-layout-color2)',
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   paddingTop: 'var(--jp-border-width)',
 });
@@ -54,7 +54,7 @@ export const branchTrackingLabelStyle = style({
   marginTop: '5px',
   marginBottom: '5px',
   display: 'inline-block',
-  color: '#828282',
+  color: 'var(--jp-ui-font-color2)',
   fontWeight: 'normal'
 });
 
@@ -90,57 +90,27 @@ export const headerButtonStyle = style({
   marginLeft: '5px'
 });
 
-export function branchDropdownButtonStyle(isLight: string) {
-  if (isLight === 'true' || isLight === undefined) {
-    return style({
-      backgroundImage: 'var(--jp-icon-arrow-down)',
-      backgroundSize: '100%',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
-      height: '18px',
-      width: '18px',
-      display: 'inline-block',
-      verticalAlign: 'middle'
-    });
-  } else {
-    return style({
-      backgroundImage: 'var(--jp-icon-arrow-down-white)',
-      backgroundSize: '100%',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
-      height: '18px',
-      width: '18px',
-      display: 'inline-block',
-      verticalAlign: 'middle'
-    });
-  }
-}
+export const branchDropdownButtonStyle = style({
+  backgroundImage: 'var(--jp-icon-arrow-down)',
+  backgroundSize: '100%',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center',
+  height: '18px',
+  width: '18px',
+  display: 'inline-block',
+  verticalAlign: 'middle'
+});
 
-export function newBranchButtonStyle(isLight: string) {
-  if (isLight === 'true' || isLight === undefined) {
-    return style({
-      backgroundImage: 'var(--jp-icon-plus)',
-      backgroundSize: '100%',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
-      height: '18px',
-      width: '18px',
-      display: 'inline-block',
-      verticalAlign: 'middle'
-    });
-  } else {
-    return style({
-      backgroundImage: 'var(--jp-icon-plus-white)',
-      backgroundSize: '100%',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
-      height: '18px',
-      width: '18px',
-      display: 'inline-block',
-      verticalAlign: 'middle'
-    });
-  }
-}
+export const newBranchButtonStyle = style({
+  backgroundImage: 'var(--jp-icon-plus)',
+  backgroundSize: '100%',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center',
+  height: '18px',
+  width: '18px',
+  display: 'inline-block',
+  verticalAlign: 'middle'
+});
 
 export const branchTrackingIconStyle = style({
   backgroundImage: 'var(--jp-icon-branch-tracking)',
@@ -204,10 +174,21 @@ export const stagedCommitMessageStyle = style({
   flex: '20 1 auto',
   resize: 'none',
   padding: '4px 8px',
+  backgroundColor: 'var(--jp-layout-color1)',
+  color: 'var(--jp-ui-font-color0)',
 
   $nest: {
     '&:focus': {
       outline: 'none'
+    },
+    '&::-webkit-input-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    },
+    '&::-moz-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    },
+    '&::-ms-input-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
     }
   }
 });

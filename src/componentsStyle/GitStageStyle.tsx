@@ -73,21 +73,11 @@ export const changeStageButtonStyle = style({
   }
 });
 
-export function discardFileButtonStyle(isLight: string) {
-  if(isLight === 'true' || isLight === undefined) {
-    return style({
-      backgroundImage: 'var(--jp-icon-discard-file)',
-      marginLeft: '6px',
-      backgroundSize: '120%'
-    });
-  } else {
-    return style({
-      backgroundImage: 'var(--jp-icon-discard-file-white)',
-      marginLeft: '6px',
-      backgroundSize: '120%'
-    });
-  }
-}
+export const discardFileButtonStyle = style({
+  backgroundImage: 'var(--jp-icon-discard-file)',
+  marginLeft: '6px',
+  backgroundSize: '120%'
+});
 
 export const discardAllWarningStyle = style({
   height: '40px !important',

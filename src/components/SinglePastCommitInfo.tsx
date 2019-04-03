@@ -31,7 +31,6 @@ export interface ISinglePastCommitInfoProps {
   diff: IDiffCallback;
 
   refresh: () => void;
-  currentTheme: string;
 }
 
 export interface ISinglePastCommitInfoState {
@@ -139,7 +138,7 @@ export class SinglePastCommitInfo extends React.Component<
               <span
                 className={classes(
                   iconStyle,
-                  insertionIconStyle(this.props.currentTheme)
+                  insertionIconStyle
                 )}
               />
               {this.state.insertionCount}
@@ -148,7 +147,7 @@ export class SinglePastCommitInfo extends React.Component<
               <span
                 className={classes(
                   iconStyle,
-                  deletionIconStyle(this.props.currentTheme)
+                  deletionIconStyle
                 )}
               />
               {this.state.deletionCount}
@@ -162,7 +161,7 @@ export class SinglePastCommitInfo extends React.Component<
               className={classes(
                 changeStageButtonStyle,
                 floatRightStyle,
-                discardFileButtonStyle(this.props.currentTheme)
+                discardFileButtonStyle
               )}
               onClick={this.showDeleteCommit}
             />
@@ -170,7 +169,7 @@ export class SinglePastCommitInfo extends React.Component<
               className={classes(
                 changeStageButtonStyle,
                 floatRightStyle,
-                revertButtonStyle(this.props.currentTheme)
+                revertButtonStyle
               )}
               onClick={this.showResetToCommit}
             />

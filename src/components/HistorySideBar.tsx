@@ -10,7 +10,6 @@ export interface IHistorySideBarProps {
   branches: GitBranchResult["branches"];
   isExpanded: boolean;
   topRepoPath: string;
-  currentTheme: string;
   app: JupyterLab;
   refresh: () => void;
   diff: IDiffCallback;
@@ -30,7 +29,6 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
               pastCommit={pastCommit}
               branches={this.props.branches}
               topRepoPath={this.props.topRepoPath}
-              currentTheme={this.props.currentTheme}
               app={this.props.app}
               refresh={this.props.refresh}
               diff={this.props.diff}

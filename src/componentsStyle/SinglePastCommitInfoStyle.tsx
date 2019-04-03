@@ -81,45 +81,19 @@ export const numberofChangedFilesStyle = style({
   backgroundImage: 'var(--jp-icon-file)'
 });
 
-export function insertionIconStyle(isLight: string) {
-  if (isLight === 'true' || isLight === undefined) {
-    return style({
-      backgroundImage: 'var(--jp-icon-insertions-made)'
-    });
-  } else {
-    return style({
-      backgroundImage: 'var(--jp-icon-insertions-made-white)'
-    });
-  }
-}
+export const insertionIconStyle = style({
+  backgroundImage: 'var(--jp-icon-insertions-made)'
+});
 
-export function deletionIconStyle(isLight: string) {
-  if (isLight === 'true' || isLight === undefined) {
-    return style({
-      backgroundImage: 'var(--jp-icon-deletions-made)'
-    });
-  } else {
-    return style({
-      backgroundImage: 'var(--jp-icon-deletions-made-white)'
-    });
-  }
-}
+export const deletionIconStyle = style({
+  backgroundImage: 'var(--jp-icon-deletions-made)'
+});
 
-export function revertButtonStyle(isLight: string) {
-  if (isLight === 'true' || isLight === undefined) {
-    return style({
-      backgroundImage: 'var(--jp-icon-rewind)',
-      marginLeft: '6px',
-      backgroundSize: '100%'
-    });
-  } else {
-    return style({
-      backgroundImage: 'var(--jp-icon-rewind-white)',
-      marginLeft: '6px',
-      backgroundSize: '100%'
-    });
-  }
-}
+export const revertButtonStyle = style({
+  backgroundImage: 'var(--jp-icon-rewind)',
+  marginLeft: '6px',
+  backgroundSize: '100%'
+});
 
 export const numberOfDeletionsStyle = style({
   position: 'absolute',

@@ -223,7 +223,6 @@ export class GitPanel extends React.Component<
           topRepoPath={this.state.topRepoPath}
           refresh={this.refresh}
           currentBranch={this.state.currentBranch}
-          isLightTheme={this.props.app.shell.dataset.themeLight}
         />
         <div>
           {this.state.showWarning && (
@@ -239,7 +238,6 @@ export class GitPanel extends React.Component<
                 disabled={this.state.disableSwitchBranch}
                 toggleSidebar={this.toggleSidebar}
                 showList={this.state.showList}
-                currentTheme={this.props.app.shell.dataset.themeLight}
                 sideBarExpanded={this.state.sideBarExpanded}
               />
               <HistorySideBar
@@ -247,7 +245,6 @@ export class GitPanel extends React.Component<
                 branches={this.state.branches}
                 pastCommits={this.state.pastCommits}
                 topRepoPath={this.state.topRepoPath}
-                currentTheme={this.props.app.shell.dataset.themeLight}
                 app={this.props.app}
                 refresh={this.refresh}
                 diff={this.props.diff}
@@ -264,7 +261,6 @@ export class GitPanel extends React.Component<
                 refresh={this.refresh}
                 diff={this.props.diff}
                 sideBarExpanded={this.state.sideBarExpanded}
-                currentTheme={this.props.app.shell.dataset.themeLight}
               />
             </div>
           )}
