@@ -10,11 +10,9 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import {
-  IFileBrowserFactory
-} from '@jupyterlab/filebrowser'
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
-import {IMainMenu } from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -26,26 +24,29 @@ import { IDiffCallback } from './git';
 export { IDiffCallback } from './git';
 
 import '../style/variables.css';
-import {GitClone} from "./gitClone";
-
+import { GitClone } from './gitClone';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
 export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
-
 
 /** Interface for extension class */
 export interface IGitExtension {
   registerDiffProvider(filetypes: string[], callback: IDiffCallback): void;
 }
 
-
 /**
  * The default running sessions extension.
  */
 const plugin: JupyterLabPlugin<IGitExtension> = {
   id: 'jupyter.extensions.running-sessions-git',
-  requires: [IMainMenu, ILayoutRestorer, IFileBrowserFactory],
+  requires: [
+    IMainMenu,
+    ILayoutRestorer,
+    IFileBrowserFactory,
+    IRenderMimeRegistry
+  ],
   provides: IGitExtension,
   activate,
   autoStart: true
@@ -56,30 +57,33 @@ const plugin: JupyterLabPlugin<IGitExtension> = {
  */
 export default plugin;
 
-
 /** Main extension class */
 export class GitExtension implements IGitExtension {
-  git_plugin: GitWidget;
-  git_clone_widget: GitClone;
-  constructor(app: JupyterLab, restorer: ILayoutRestorer, factory: IFileBrowserFactory) {
+  gitPlugin: GitWidget;
+  gitCloneWidget: GitClone;
+  constructor(
+    app: JupyterLab,
+    restorer: ILayoutRestorer,
+    factory: IFileBrowserFactory
+  ) {
     this.app = app;
-    this.git_plugin = new GitWidget(
+    this.gitPlugin = new GitWidget(
       app,
       { manager: app.serviceManager },
       this.performDiff.bind(this)
     );
-    this.git_plugin.id = 'jp-git-sessions';
-    this.git_plugin.title.iconClass = `jp-SideBar-tabIcon ${gitTabStyle}`;
-    this.git_plugin.title.caption = 'Git';
+    this.gitPlugin.id = 'jp-git-sessions';
+    this.gitPlugin.title.iconClass = `jp-SideBar-tabIcon ${gitTabStyle}`;
+    this.gitPlugin.title.caption = 'Git';
 
     // Let the application restorer track the running panel for restoration of
     // application state (e.g. setting the running panel as the current side bar
     // widget).
 
-    restorer.add(this.git_plugin, 'git-sessions');
-    app.shell.addToLeftArea(this.git_plugin, { rank: 200 });
+    restorer.add(this.gitPlugin, 'git-sessions');
+    app.shell.addToLeftArea(this.gitPlugin, { rank: 200 });
 
-    this.git_clone_widget = new GitClone(factory);
+    this.gitCloneWidget = new GitClone(factory);
   }
 
   registerDiffProvider(filetypes: string[], callback: IDiffCallback): void {
@@ -88,11 +92,7 @@ export class GitExtension implements IGitExtension {
     });
   }
 
-  performDiff(
-    filename: string,
-    revisionA: string,
-    revisionB: string
-  ) {
+  performDiff(filename: string, revisionA: string, revisionB: string) {
     let extension = PathExt.extname(filename).toLocaleLowerCase();
     if (this.diffProviders[extension] !== undefined) {
       this.diffProviders[extension](filename, revisionA, revisionB);
@@ -106,7 +106,6 @@ export class GitExtension implements IGitExtension {
   private app: JupyterLab;
   private diffProviders: { [key: string]: IDiffCallback } = {};
 }
-
 
 /**
  * Activate the running plugin.
@@ -128,13 +127,11 @@ function activate(
   let tutorial = new Menu({ commands });
   tutorial.title.label = ' Tutorial ';
   menu.title.label = category;
-  [
-    CommandIDs.gitUI,
-    CommandIDs.gitTerminal,
-    CommandIDs.gitInit
-  ].forEach(command => {
-    menu.addItem({ command });
-  });
+  [CommandIDs.gitUI, CommandIDs.gitTerminal, CommandIDs.gitInit].forEach(
+    command => {
+      menu.addItem({ command });
+    }
+  );
 
   [CommandIDs.setupRemotes, CommandIDs.googleLink].forEach(command => {
     tutorial.addItem({ command });
