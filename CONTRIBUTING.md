@@ -10,7 +10,6 @@ The goal is to be transparent about these, so that anyone can see how to partici
 
 If you have suggestions on how these processes can be improved, please suggest that (see "Enhancement Request" below)!
 
-
 ## Bug Report
 
 If you are using this software and encounter some behavior that is unexpected, then you may have come accross a bug!
@@ -20,8 +19,7 @@ To get this fixed, first creation an issue that should have, ideally:
 * The actual behavior (screenshots can be helpful here)
 * How someone else could reproduce it (version of the software, as well as your browser and OS can help)
 
-
-Once you create this issue, someone with commit rights  should come by and try to reproduce the issue locally and comment if they are able to. If they are able to, then they will add the `type:Bug` label. If they are not able to, then they will add the `status: Needs info` label and wait for information from you.
+Once you create this issue, someone with commit rights should come by and try to reproduce the issue locally and comment if they are able to. If they are able to, then they will add the `type:Bug` label. If they are not able to, then they will add the `status: Needs info` label and wait for information from you.
 
 Hopefully, then some nice person will come by to fix your bug! This will likely be someone who already works on the project,
 but it could be anyone.
@@ -36,10 +34,10 @@ it in.
 
 ## Enhancement Request
 
-Maybe the current behavior ins't wrong, but you still have an idea on how it could be improved.
+Maybe the current behavior isn't wrong, but you still have an idea on how it could be improved.
 
 The flow will be similar to opening a bug, but the process could be longer, as we all work together to agree on what
-behavior should be added. So when you open an issue, it's helpful to give some context around what you are trying to achive,
+behavior should be added. So when you open an issue, it's helpful to give some context around what you are trying to achieve,
 why that is important, where the current functionality falls short, and any ideas you have on how it could be improved. 
 
 These issues should get a `type:Enhancement` label. If the solution seems obvious enough and you think others will agree,
@@ -49,4 +47,4 @@ However, if the issue is multifaceted or has many different good options, then t
 first. In this case, a maintainer should add a `status:Needs Discussion` label. Then there will be some period of time where
 anyone who has a stake in this issue or ideas on how to solve it should work together to come up with a coherent solution.
 
-Once there seem to be some concensus around how to move forward, then someone can proceed to implementing the changes.
+Once there seem to be some consensus around how to move forward, then someone can proceed to implementing the changes.
