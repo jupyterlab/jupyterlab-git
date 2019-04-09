@@ -4,8 +4,6 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 'use strict';
 
-
-
 /** Function type for diffing a file's revisions */
 export type IDiffCallback = (
   filename: string,

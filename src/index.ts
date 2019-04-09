@@ -117,7 +117,7 @@ function activate(
   factory: IFileBrowserFactory
 ): IGitExtension {
   const { commands } = app;
-  let git_extension = new GitExtension(app, restorer, factory);
+  let gitExtension = new GitExtension(app, restorer, factory);
   const category = 'Git';
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running
@@ -139,5 +139,5 @@ function activate(
   menu.addItem({ type: 'submenu', submenu: tutorial });
   mainMenu.addMenu(menu, { rank: 60 });
 
-  return git_extension;
+  return gitExtension;
 }
