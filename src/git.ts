@@ -2,8 +2,6 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-'use strict';
-
 /** Function type for diffing a file's revisions */
 export type IDiffCallback = (
   filename: string,
@@ -12,43 +10,48 @@ export type IDiffCallback = (
 ) => void;
 
 /** Interface for GitAllHistory request result,
- * has all repo information */
-export interface GitAllHistory {
+ * has all repo information
+ */
+export interface IGitAllHistory {
   code: number;
   data?: {
-    show_top_level?: GitShowTopLevelResult;
-    branch?: GitBranchResult;
-    log?: GitLogResult;
-    status?: GitStatusResult;
+    show_top_level?: IGitShowTopLevelResult;
+    branch?: IGitBranchResult;
+    log?: IGitLogResult;
+    status?: IGitStatusResult;
   };
 }
 
 /** Interface for GitShowTopLevel request result,
- * has the git root directory inside a repository */
-export interface GitShowTopLevelResult {
+ * has the git root directory inside a repository
+ */
+export interface IGitShowTopLevelResult {
   code: number;
   top_repo_path?: string;
 }
 
 /** Interface for GitShowPrefix request result,
  * has the prefix path of a directory in a repository,
- * with respect to the root directory. */
-export interface GitShowPrefixResult {
+ * with respect to the root directory.
+ */
+export interface IGitShowPrefixResult {
   code: number;
   under_repo_path?: string;
 }
 
 /** Interface for GitShowPrefix request result,
  * has the prefix path of a directory in a repository,
- * with respect to the root directory. */
-export interface GitCheckoutResult {
+ * with respect to the root directory.
+ */
+export interface IGitCheckoutResult {
   code: number;
   message?: string;
 }
 
 /** Interface for GitBranch request result,
- * has the result of changing the current working branch */
-export interface GitBranchResult {
+ * has the result of changing the current working branch
+ */
+export interface IGitBranchResult {
   code: number;
   branches?: Array<{
     is_current_branch: boolean;
@@ -61,8 +64,9 @@ export interface GitBranchResult {
 }
 
 /** Interface for GitStatus request result,
- * has the status of each changed file */
-export interface GitStatusFileResult {
+ * has the status of each changed file
+ */
+export interface IGitStatusFileResult {
   x: string;
   y: string;
   to: string;
@@ -70,15 +74,17 @@ export interface GitStatusFileResult {
 }
 
 /** Interface for GitStatus request result,
- * has the status of the entire repo */
-export interface GitStatusResult {
+ * has the status of the entire repo
+ */
+export interface IGitStatusResult {
   code: number;
-  files?: [GitStatusFileResult];
+  files?: [IGitStatusFileResult];
 }
 
 /** Interface for GitLog request result,
- * has the info of a single past commit */
-export interface SingleCommitInfo {
+ * has the info of a single past commit
+ */
+export interface ISingleCommitInfo {
   commit: string;
   author: string;
   date: string;
@@ -87,8 +93,9 @@ export interface SingleCommitInfo {
 }
 
 /** Interface for GitCommit request result,
- * has the info of a committed file */
-export interface CommitModifiedFile {
+ * has the info of a committed file
+ */
+export interface ICommitModifiedFile {
   modified_file_path: string;
   modified_file_name: string;
   insertion: string;
@@ -96,21 +103,23 @@ export interface CommitModifiedFile {
 }
 
 /** Interface for GitDetailedLog request result,
- * has the detailed info of a single past commit */
-export interface SingleCommitFilePathInfo {
+ * has the detailed info of a single past commit
+ */
+export interface ISingleCommitFilePathInfo {
   code: number;
   modified_file_note?: string;
   modified_files_count?: string;
   number_of_insertions?: string;
   number_of_deletions?: string;
-  modified_files?: [CommitModifiedFile];
+  modified_files?: [ICommitModifiedFile];
 }
 
 /** Interface for GitLog request result,
- * has the info of all past commits */
-export interface GitLogResult {
+ * has the info of all past commits
+ */
+export interface IGitLogResult {
   code: number;
-  commits?: [SingleCommitInfo];
+  commits?: [ISingleCommitInfo];
 }
 
 /** Makes a HTTP request, sending a git command to the backend */
@@ -132,7 +141,7 @@ function httpGitRequest(
 /**
  * Structure for the result of the Git Clone API.
  */
-export interface GitCloneResult {
+export interface IGitCloneResult {
   code: number;
   message?: string;
 }
@@ -182,7 +191,7 @@ export class Git {
   }
 
   /** Make request for the Git Clone API. */
-  async clone(path: string, url: string): Promise<GitCloneResult> {
+  async clone(path: string, url: string): Promise<IGitCloneResult> {
     try {
       let response = await httpGitRequest('/git/clone', 'POST', {
         current_path: path,
@@ -201,7 +210,7 @@ export class Git {
   /** Make request for all git info of repository 'path'
    * (This API is also implicitly used to check if the current repo is a Git repo)
    */
-  async allHistory(path: string): Promise<GitAllHistory> {
+  async allHistory(path: string): Promise<IGitAllHistory> {
     try {
       let response = await httpGitRequest('/git/all_history', 'POST', {
         current_path: path
@@ -217,7 +226,7 @@ export class Git {
   }
 
   /** Make request for top level path of repository 'path' */
-  async showTopLevel(path: string): Promise<GitShowTopLevelResult> {
+  async showTopLevel(path: string): Promise<IGitShowTopLevelResult> {
     try {
       let response = await httpGitRequest('/git/show_top_level', 'POST', {
         current_path: path
@@ -233,8 +242,9 @@ export class Git {
   }
 
   /** Make request for the prefix path of a directory 'path',
-   * with respect to the root directory of repository  */
-  async showPrefix(path: string): Promise<GitShowPrefixResult> {
+   * with respect to the root directory of repository
+   */
+  async showPrefix(path: string): Promise<IGitShowPrefixResult> {
     try {
       let response = await httpGitRequest('/git/show_prefix', 'POST', {
         current_path: path
@@ -250,7 +260,7 @@ export class Git {
   }
 
   /** Make request for git status of repository 'path' */
-  async status(path: string): Promise<GitStatusResult> {
+  async status(path: string): Promise<IGitStatusResult> {
     try {
       let response = await httpGitRequest('/git/status', 'POST', {
         current_path: path
@@ -266,7 +276,7 @@ export class Git {
   }
 
   /** Make request for git commit logs of repository 'path' */
-  async log(path: string): Promise<GitLogResult> {
+  async log(path: string): Promise<IGitLogResult> {
     try {
       let response = await httpGitRequest('/git/log', 'POST', {
         current_path: path
@@ -282,11 +292,12 @@ export class Git {
   }
 
   /** Make request for detailed git commit info of
-   * commit 'hash' in repository 'path' */
+   * commit 'hash' in repository 'path'
+   */
   async detailedLog(
     hash: string,
     path: string
-  ): Promise<SingleCommitFilePathInfo> {
+  ): Promise<ISingleCommitFilePathInfo> {
     try {
       let response = await httpGitRequest('/git/detailed_log', 'POST', {
         selected_hash: hash,
@@ -303,7 +314,7 @@ export class Git {
   }
 
   /** Make request for a list of all git branches in repository 'path' */
-  async branch(path: string): Promise<GitBranchResult> {
+  async branch(path: string): Promise<IGitBranchResult> {
     try {
       let response = await httpGitRequest('/git/branch', 'POST', {
         current_path: path
@@ -319,7 +330,8 @@ export class Git {
   }
 
   /** Make request to add one or all files into
-   * the staging area in repository 'path' */
+   * the staging area in repository 'path'
+   */
   async add(check: boolean, filename: string, path: string): Promise<Response> {
     return httpGitRequest('/git/add', 'POST', {
       add_all: check,
@@ -329,7 +341,8 @@ export class Git {
   }
 
   /** Make request to add all untracked files into
-   * the staging area in repository 'path' */
+   * the staging area in repository 'path'
+   */
   async addAllUntracked(path: string): Promise<Response> {
     try {
       let response = await httpGitRequest('/git/add_all_untracked', 'POST', {
@@ -349,21 +362,22 @@ export class Git {
    * create new branch if needed,
    * or discard all changes,
    * or discard a specific file change
-   * TODO: Refactor into seperate endpoints for each kind of checkout request */
+   * TODO: Refactor into seperate endpoints for each kind of checkout request
+   */
   async checkout(
-    checkout_branch: boolean,
-    new_check: boolean,
+    checkoutBranch: boolean,
+    newCheck: boolean,
     branchname: string,
-    checkout_all: boolean,
+    checkoutAll: boolean,
     filename: string,
     path: string
   ): Promise<Response> {
     try {
       let response = await httpGitRequest('/git/checkout', 'POST', {
-        checkout_branch: checkout_branch,
-        new_check: new_check,
+        checkout_branch: checkoutBranch,
+        new_check: newCheck,
         branchname: branchname,
-        checkout_all: checkout_all,
+        checkout_all: checkoutAll,
         filename: filename,
         top_repo_path: path
       });

@@ -21,9 +21,9 @@ import {
   revertButtonStyle
 } from '../componentsStyle/SinglePastCommitInfoStyle';
 import {
-  CommitModifiedFile,
+  ICommitModifiedFile,
   Git,
-  SingleCommitInfo,
+  ISingleCommitInfo,
   IDiffCallback
 } from '../git';
 import { parseFileExtension } from './FileList';
@@ -31,7 +31,7 @@ import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
 
 export interface ISinglePastCommitInfoProps {
   topRepoPath: string;
-  data: SingleCommitInfo;
+  data: ISingleCommitInfo;
   app: JupyterLab;
   diff: IDiffCallback;
 
@@ -45,7 +45,7 @@ export interface ISinglePastCommitInfoState {
   filesChanged: string;
   insertionCount: string;
   deletionCount: string;
-  modifiedFiles: Array<CommitModifiedFile>;
+  modifiedFiles: Array<ICommitModifiedFile>;
   loadingState: 'loading' | 'error' | 'success';
 }
 
@@ -125,10 +125,10 @@ export class SinglePastCommitInfo extends React.Component<
   };
 
   render() {
-    if (this.state.loadingState == 'loading') {
+    if (this.state.loadingState === 'loading') {
       return <div>...</div>;
     }
-    if (this.state.loadingState == 'error') {
+    if (this.state.loadingState === 'error') {
       return <div>Error loading commit data</div>;
     }
     return (

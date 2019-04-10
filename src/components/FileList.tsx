@@ -6,7 +6,7 @@ import { Menu } from '@phosphor/widgets';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { Git, GitShowPrefixResult } from '../git';
+import { Git, IGitShowPrefixResult } from '../git';
 
 import {
   moveFileUpButtonStyle,
@@ -214,26 +214,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
   }
 
-  /** Handle clicks on a staged file
-   *
-   */
-  handleClickStaged(event: any) {
-    event.preventDefault();
-    if (event.buttons === 2) {
-      <select>
-        <option className="jp-Git-switch-branch" value="" disabled>
-          Open
-        </option>
-        <option className="jp-Git-create-branch-line" disabled>
-          unstaged this file
-        </option>
-        <option className="jp-Git-create-branch" value="">
-          CREATE NEW
-        </option>
-      </select>;
-    }
-  }
-
   /** Handle right-click on a staged file */
   contextMenuStaged = (
     event: any,
@@ -349,7 +329,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       }
       let gitApi = new Git();
       let prefixData = await gitApi.showPrefix((fileBrowser as any).model.path);
-      let underRepoPath = (prefixData as GitShowPrefixResult).under_repo_path;
+      let underRepoPath = (prefixData as IGitShowPrefixResult).under_repo_path;
       let fileBrowserPath = (fileBrowser as any).model.path + '/';
       let openFilePath = fileBrowserPath.substring(
         0,

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 import { SinglePastCommitInfo } from '../../src/components/SinglePastCommitInfo';
 import { PastCommitNode } from '../../src/components/PastCommitNode';
-import { GitBranchResult } from '../../src/git';
+import { IGitBranchResult } from '../../src/git';
 import { collapseStyle } from '../../src/componentsStyle/PastCommitNodeStyle';
 import 'jest';
 
@@ -43,7 +43,7 @@ describe('PastCommitNode', () => {
       tag: 'v1.0.5-0-g2414721'
     }
   ];
-  const branches: GitBranchResult['branches'] = notMatchingBranches.concat(
+  const branches: IGitBranchResult['branches'] = notMatchingBranches.concat(
     matchingBranches
   );
   const props = {

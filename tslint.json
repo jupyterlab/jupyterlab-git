@@ -31,7 +31,6 @@
     "no-debugger": true,
     "no-default-export": false,
     "no-duplicate-variable": true,
-    "no-empty": true,
     "no-eval": true,
     "no-inferrable-types": false,
     "no-internal-module": true,

@@ -228,11 +228,11 @@ export class BranchHeader extends React.Component<
               />
             )}
             {this.props.upstreamBranch != null &&
-              this.props.upstreamBranch != '' && (
+              this.props.upstreamBranch !== '' && (
                 <div className={branchTrackingIconStyle} />
               )}
             {this.props.upstreamBranch != null &&
-              this.props.upstreamBranch != '' && (
+              this.props.upstreamBranch !== '' && (
                 <h3 className={branchTrackingLabelStyle}>
                   {this.props.upstreamBranch}
                 </h3>

@@ -72,7 +72,7 @@ export class PathHeader extends React.Component<
     this.state.gitApi
       .pull(this.props.currentFileBrowserPath)
       .then(response => {
-        if (response.code != 0) {
+        if (response.code !== 0) {
           this.showErrorDialog('Pull failed', response.message);
         }
       })
@@ -86,7 +86,7 @@ export class PathHeader extends React.Component<
     this.state.gitApi
       .push(this.props.currentFileBrowserPath)
       .then(response => {
-        if (response.code != 0) {
+        if (response.code !== 0) {
           this.showErrorDialog('Push failed', response.message);
         }
       })

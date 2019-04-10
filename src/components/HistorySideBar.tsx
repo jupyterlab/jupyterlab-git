@@ -1,13 +1,13 @@
 import { JupyterLab } from '@jupyterlab/application';
 import * as React from 'react';
 import { historySideBarStyle } from '../componentsStyle/HistorySideBarStyle';
-import { GitBranchResult, SingleCommitInfo, IDiffCallback } from '../git';
+import { IGitBranchResult, ISingleCommitInfo, IDiffCallback } from '../git';
 import { PastCommitNode } from './PastCommitNode';
 
 /** Interface for PastCommits component props */
 export interface IHistorySideBarProps {
-  pastCommits: SingleCommitInfo[];
-  branches: GitBranchResult['branches'];
+  pastCommits: ISingleCommitInfo[];
+  branches: IGitBranchResult['branches'];
   isExpanded: boolean;
   topRepoPath: string;
   app: JupyterLab;
@@ -23,7 +23,7 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
     return (
       <div className={historySideBarStyle}>
         {this.props.pastCommits.map(
-          (pastCommit: SingleCommitInfo, pastCommitIndex: number) => (
+          (pastCommit: ISingleCommitInfo, pastCommitIndex: number) => (
             <PastCommitNode
               key={pastCommitIndex}
               pastCommit={pastCommit}

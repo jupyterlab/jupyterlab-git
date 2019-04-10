@@ -1,6 +1,6 @@
 import { JupyterLab } from '@jupyterlab/application';
 
-import { GitStatusFileResult } from '../git';
+import { IGitStatusFileResult } from '../git';
 
 import {
   sectionFileContainerStyle,
@@ -153,10 +153,10 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
         {this.props.showFiles && (
           <div className={sectionFileContainerStyle}>
             {this.props.files.map(
-              (file: GitStatusFileResult, file_index: number) => {
+              (file: IGitStatusFileResult, fileIndex: number) => {
                 return (
                   <FileItem
-                    key={file_index}
+                    key={fileIndex}
                     topRepoPath={this.props.topRepoPath}
                     stage={this.props.heading}
                     file={file}
@@ -178,7 +178,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                     }
                     selectedFile={this.props.selectedFile}
                     updateSelectedFile={this.props.updateSelectedFile}
-                    fileIndex={file_index}
+                    fileIndex={fileIndex}
                     selectedStage={this.props.selectedStage}
                     selectedDiscardFile={this.props.selectedDiscardFile}
                     updateSelectedDiscardFile={
