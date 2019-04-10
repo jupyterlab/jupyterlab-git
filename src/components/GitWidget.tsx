@@ -18,7 +18,6 @@ import { gitWidgetStyle } from '../componentsStyle/GitWidgetStyle';
 
 import { IDiffCallback } from '../git';
 
-
 import '../../style/variables.css';
 
 /**
@@ -69,18 +68,18 @@ export class GitWidget extends Widget {
   /**
    * Construct a new running widget.
    */
-  constructor(app: JupyterLab, options: IOptions, diff_function: IDiffCallback) {
+  constructor(app: JupyterLab, options: IOptions, diffFunction: IDiffCallback) {
     super({
       node: (options.renderer || defaultRenderer).createNode()
     });
     this.addClass(gitWidgetStyle);
-    const element = <GitPanel app={app} diff={diff_function} />;
+    const element = <GitPanel app={app} diff={diffFunction} />;
     this.component = ReactDOM.render(element, this.node);
     this.component.refresh();
   }
 
   /**
-   * Override widget's default show() to 
+   * Override widget's default show() to
    * refresh content every time Git widget is shown.
    */
   show(): void {
@@ -132,6 +131,7 @@ export class GitWidget extends Widget {
     switch (event.type) {
       case 'change':
         this._evtChange(event as MouseEvent);
+        break;
       case 'click':
         this._evtClick(event as MouseEvent);
         break;

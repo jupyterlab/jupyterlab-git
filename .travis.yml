@@ -14,3 +14,4 @@ script:
   - pip install .
   - jupyter labextension install .
   - python -m jupyterlab.browser_check
+  - yarn run lint

@@ -1,14 +1,14 @@
-import * as React from "react";
-import { shallow } from "enzyme";
+import * as React from 'react';
+import { shallow } from 'enzyme';
 import {
   HistorySideBar,
   IHistorySideBarProps
-} from "../../src/components/HistorySideBar";
+} from '../../src/components/HistorySideBar';
 import 'jest';
 
-import { PastCommitNode } from "../../src/components/PastCommitNode";
+import { PastCommitNode } from '../../src/components/PastCommitNode';
 
-describe("HistorySideBar", () => {
+describe('HistorySideBar', () => {
   const props: IHistorySideBarProps = {
     pastCommits: [
       {
@@ -26,11 +26,11 @@ describe("HistorySideBar", () => {
     refresh: null,
     diff: null
   };
-  test("renders commit nodes when expanded", () => {
+  test('renders commit nodes when expanded', () => {
     const historySideBar = shallow(<HistorySideBar {...props} />);
     expect(historySideBar.find(PastCommitNode)).toHaveLength(1);
   });
-  test("does not render commit nodes when not expanded", () => {
+  test('does not render commit nodes when not expanded', () => {
     const historySideBar = shallow(
       <HistorySideBar {...props} isExpanded={false} />
     );

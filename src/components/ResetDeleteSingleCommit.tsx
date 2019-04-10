@@ -3,12 +3,12 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 
 import {
-  WarningLabel,
-  MessageInput,
-  Button,
-  ResetDeleteButton,
-  CancelButton,
-  ResetDeleteDisabledButton
+  warningLabel,
+  messageInput,
+  button,
+  resetDeleteButton,
+  cancelButton,
+  resetDeleteDisabledButton
 } from '../componentsStyle/SinglePastCommitInfoStyle';
 
 import { Git } from '../git';
@@ -74,19 +74,19 @@ export class ResetDeleteSingleCommit extends React.Component<
   render() {
     return (
       <div>
-        <div className={WarningLabel}>
+        <div className={warningLabel}>
           {this.props.action === 'delete'
             ? "These changes will be gone forever. Commit if you're sure?"
             : "All changes after this will be gone forever. Commit if you're sure?"}
         </div>
         <input
           type="text"
-          className={MessageInput}
+          className={messageInput}
           onChange={event => this.updateMessage(event.currentTarget.value)}
           placeholder="Add a commit message to make changes"
         />
         <button
-          className={classes(Button, CancelButton)}
+          className={classes(button, cancelButton)}
           onClick={this.onCancel}
         >
           Cancel
@@ -94,8 +94,8 @@ export class ResetDeleteSingleCommit extends React.Component<
         <button
           className={
             this.state.resetDeleteDisabled
-              ? classes(Button, ResetDeleteDisabledButton)
-              : classes(Button, ResetDeleteButton)
+              ? classes(button, resetDeleteDisabledButton)
+              : classes(button, resetDeleteButton)
           }
           disabled={this.state.resetDeleteDisabled}
           onClick={this.handleResetDelete}

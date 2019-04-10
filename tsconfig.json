@@ -10,7 +10,8 @@
     "outDir": "lib",
     "lib": ["es5", "es2015.promise", "es2015.collection", "dom"],
     "types": [],
-    "jsx": "react"
+    "jsx": "react",
+    "plugins": [{ "name": "typescript-tslint-plugin" }]
   },
   "include": ["src/*"]
 }

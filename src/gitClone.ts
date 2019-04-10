@@ -57,7 +57,7 @@ export class GitClone extends Widget {
     this.gitApi
       .allHistory(this.fileBrowser.model.path)
       .then(response => {
-        if (response.code == 0) {
+        if (response.code === 0) {
           this.enabledCloneButton.parent = null;
           this.fileBrowser.toolbar.addItem(
             'disabledCloneButton',
@@ -85,7 +85,7 @@ export class GitClone extends Widget {
     this.gitApi
       .clone(this.fileBrowser.model.path, cloneUrl)
       .then(response => {
-        if (response.code != 0) {
+        if (response.code !== 0) {
           this.showErrorDialog(response.message);
         }
       })
@@ -136,7 +136,7 @@ export class GitClone extends Widget {
     const result = await dialog.launch();
     dialog.dispose();
 
-    if (typeof result.value != 'undefined' && result.value) {
+    if (typeof result.value !== 'undefined' && result.value) {
       const cloneUrl: string = result.value;
       this.makeApiCall(cloneUrl);
     } else {

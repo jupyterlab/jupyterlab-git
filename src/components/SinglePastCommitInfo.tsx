@@ -1,11 +1,11 @@
-import { JupyterLab } from "@jupyterlab/application";
-import * as React from "react";
-import { classes } from "typestyle/";
-import { fileIconStyle } from "../componentsStyle/FileItemStyle";
+import { JupyterLab } from '@jupyterlab/application';
+import * as React from 'react';
+import { classes } from 'typestyle/';
+import { fileIconStyle } from '../componentsStyle/FileItemStyle';
 import {
   changeStageButtonStyle,
   discardFileButtonStyle
-} from "../componentsStyle/GitStageStyle";
+} from '../componentsStyle/GitStageStyle';
 import {
   commitDetailFilePathStyle,
   commitDetailFileStyle,
@@ -19,14 +19,19 @@ import {
   insertionIconStyle,
   numberofChangedFilesStyle,
   revertButtonStyle
-} from "../componentsStyle/SinglePastCommitInfoStyle";
-import { CommitModifiedFile, Git, SingleCommitInfo, IDiffCallback } from "../git";
-import { parseFileExtension } from "./FileList";
-import { ResetDeleteSingleCommit } from "./ResetDeleteSingleCommit";
+} from '../componentsStyle/SinglePastCommitInfoStyle';
+import {
+  ICommitModifiedFile,
+  Git,
+  ISingleCommitInfo,
+  IDiffCallback
+} from '../git';
+import { parseFileExtension } from './FileList';
+import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
 
 export interface ISinglePastCommitInfoProps {
   topRepoPath: string;
-  data: SingleCommitInfo;
+  data: ISingleCommitInfo;
   app: JupyterLab;
   diff: IDiffCallback;
 
@@ -40,8 +45,8 @@ export interface ISinglePastCommitInfoState {
   filesChanged: string;
   insertionCount: string;
   deletionCount: string;
-  modifiedFiles: Array<CommitModifiedFile>;
-  loadingState: "loading" | "error" | "success";
+  modifiedFiles: Array<ICommitModifiedFile>;
+  loadingState: 'loading' | 'error' | 'success';
 }
 
 export class SinglePastCommitInfo extends React.Component<
@@ -53,12 +58,12 @@ export class SinglePastCommitInfo extends React.Component<
     this.state = {
       displayDelete: false,
       displayReset: false,
-      info: "",
-      filesChanged: "",
-      insertionCount: "",
-      deletionCount: "",
+      info: '',
+      filesChanged: '',
+      insertionCount: '',
+      deletionCount: '',
       modifiedFiles: [],
-      loadingState: "loading"
+      loadingState: 'loading'
     };
     this.showPastCommitWork();
   }
@@ -78,7 +83,7 @@ export class SinglePastCommitInfo extends React.Component<
         } and path ${this.props.topRepoPath}`,
         err
       );
-      this.setState(() => ({ loadingState: "error" }));
+      this.setState(() => ({ loadingState: 'error' }));
       return;
     }
     if (detailedLogData.code === 0) {
@@ -88,7 +93,7 @@ export class SinglePastCommitInfo extends React.Component<
         insertionCount: detailedLogData.number_of_insertions,
         deletionCount: detailedLogData.number_of_deletions,
         modifiedFiles: detailedLogData.modified_files,
-        loadingState: "success"
+        loadingState: 'success'
       });
     }
   };
@@ -120,10 +125,10 @@ export class SinglePastCommitInfo extends React.Component<
   };
 
   render() {
-    if (this.state.loadingState == "loading") {
+    if (this.state.loadingState === 'loading') {
       return <div>...</div>;
     }
-    if (this.state.loadingState == "error") {
+    if (this.state.loadingState === 'error') {
       return <div>Error loading commit data</div>;
     }
     return (
@@ -135,21 +140,11 @@ export class SinglePastCommitInfo extends React.Component<
               {this.state.filesChanged}
             </span>
             <span>
-              <span
-                className={classes(
-                  iconStyle,
-                  insertionIconStyle
-                )}
-              />
+              <span className={classes(iconStyle, insertionIconStyle)} />
               {this.state.insertionCount}
             </span>
             <span>
-              <span
-                className={classes(
-                  iconStyle,
-                  deletionIconStyle
-                )}
-              />
+              <span className={classes(iconStyle, deletionIconStyle)} />
               {this.state.deletionCount}
             </span>
           </div>
@@ -204,9 +199,9 @@ export class SinglePastCommitInfo extends React.Component<
                     )}`}
                     onDoubleClick={() => {
                       window.open(
-                        "https://github.com/search?q=" +
+                        'https://github.com/search?q=' +
                           this.props.data.commit +
-                          "&type=Commits&utf8=%E2%9C%93"
+                          '&type=Commits&utf8=%E2%9C%93'
                       );
                     }}
                   />

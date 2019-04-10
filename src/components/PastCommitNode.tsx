@@ -1,6 +1,6 @@
-import { JupyterLab } from "@jupyterlab/application";
-import * as React from "react";
-import { classes } from "typestyle";
+import { JupyterLab } from '@jupyterlab/application';
+import * as React from 'react';
+import { classes } from 'typestyle';
 import {
   branchesStyle,
   branchStyle,
@@ -13,13 +13,13 @@ import {
   pastCommitNodeStyle,
   remoteBranchStyle,
   workingBranchStyle
-} from "../componentsStyle/PastCommitNodeStyle";
-import { GitBranchResult, SingleCommitInfo, IDiffCallback } from "../git";
-import { SinglePastCommitInfo } from "./SinglePastCommitInfo";
+} from '../componentsStyle/PastCommitNodeStyle';
+import { IGitBranchResult, ISingleCommitInfo, IDiffCallback } from '../git';
+import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 
 export interface IPastCommitNodeProps {
-  pastCommit: SingleCommitInfo;
-  branches: GitBranchResult["branches"];
+  pastCommit: ISingleCommitInfo;
+  branches: IGitBranchResult['branches'];
   topRepoPath: string;
   app: JupyterLab;
   diff: IDiffCallback;
@@ -41,11 +41,11 @@ export class PastCommitNode extends React.Component<
     };
   }
   getBranchesForCommit() {
-    const current_commit = this.props.pastCommit.commit;
+    const currentCommit = this.props.pastCommit.commit;
     const branches = [];
     for (let i = 0; i < this.props.branches.length; i++) {
       const branch = this.props.branches[i];
-      if (branch.top_commit && branch.top_commit == current_commit) {
+      if (branch.top_commit && branch.top_commit === currentCommit) {
         branches.push(branch);
       }
     }
@@ -70,6 +70,7 @@ export class PastCommitNode extends React.Component<
     return (
       <div
         onClick={() => {
+          // tslint:disable-next-line: no-unused-expression
           !this.state.expanded && this.expand();
         }}
         className={this.getNodeClass()}

@@ -4,14 +4,14 @@ import { JupyterLab } from '@jupyterlab/application';
 
 import {
   Git,
-  GitBranchResult,
-  GitStatusResult,
-  GitShowTopLevelResult,
-  GitAllHistory,
-  GitLogResult,
-  SingleCommitInfo,
-  GitStatusFileResult,
-  IDiffCallback,
+  IGitBranchResult,
+  IGitStatusResult,
+  IGitShowTopLevelResult,
+  IGitAllHistory,
+  IGitLogResult,
+  ISingleCommitInfo,
+  IGitStatusFileResult,
+  IDiffCallback
 } from '../git';
 
 import { PathHeader } from './PathHeader';
@@ -27,7 +27,6 @@ import {
   panelWarningStyle,
   findRepoButtonStyle
 } from '../componentsStyle/GitPanelStyle';
-
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -49,7 +48,6 @@ export interface IGitSessionNodeState {
   untrackedFiles: any;
 
   sideBarExpanded: boolean;
-
 }
 
 /** Interface for GitPanel component props */
@@ -79,14 +77,13 @@ export class GitPanel extends React.Component<
       stagedFiles: [],
       unstagedFiles: [],
       untrackedFiles: [],
-      sideBarExpanded: false,
+      sideBarExpanded: false
     };
   }
 
   setShowList = (state: boolean) => {
     this.setState({ showList: state });
   };
-
 
   /**
    * Refresh widget, update all content
@@ -108,16 +105,16 @@ export class GitPanel extends React.Component<
 
         if (apiResult.code === 0) {
           // Get top level path of repo
-          let apiShowTopLevel = (apiResult as GitAllHistory).data
+          let apiShowTopLevel = (apiResult as IGitAllHistory).data
             .show_top_level;
 
           // Get current and upstream git branch
-          let branchData = (apiResult as GitAllHistory).data.branch;
+          let branchData = (apiResult as IGitAllHistory).data.branch;
           let currentBranch = 'master';
           let upstreamBranch = '';
           if (branchData.code === 0) {
-            let allBranches = (branchData as GitBranchResult).branches;
-            for (var i = 0; i < allBranches.length; i++) {
+            let allBranches = (branchData as IGitBranchResult).branches;
+            for (let i = 0; i < allBranches.length; i++) {
               if (allBranches[i].is_current_branch) {
                 currentBranch = allBranches[i].name;
                 upstreamBranch = allBranches[i].upstream;
@@ -127,21 +124,21 @@ export class GitPanel extends React.Component<
           }
 
           // Get git log for current branch
-          let logData = (apiResult as GitAllHistory).data.log;
-          let pastCommits = new Array<SingleCommitInfo>();
+          let logData = (apiResult as IGitAllHistory).data.log;
+          let pastCommits = new Array<ISingleCommitInfo>();
           if (logData.code === 0) {
-            pastCommits = (logData as GitLogResult).commits;
+            pastCommits = (logData as IGitLogResult).commits;
           }
 
           // Get git status for current branch
-          let stagedFiles = new Array<GitStatusFileResult>(),
-            unstagedFiles = new Array<GitStatusFileResult>(),
-            untrackedFiles = new Array<GitStatusFileResult>();
+          let stagedFiles = new Array<IGitStatusFileResult>();
+          let unstagedFiles = new Array<IGitStatusFileResult>();
+          let untrackedFiles = new Array<IGitStatusFileResult>();
           let changedFiles = 0;
           let disableSwitchBranch = true;
-          let statusData = (apiResult as GitAllHistory).data.status;
+          let statusData = (apiResult as IGitAllHistory).data.status;
           if (statusData.code === 0) {
-            let statusFiles = (statusData as GitStatusResult).files;
+            let statusFiles = (statusData as IGitStatusResult).files;
             for (let i = 0; i < statusFiles.length; i++) {
               // If file has been changed
               if (statusFiles[i].x !== '?' && statusFiles[i].x !== '!') {
@@ -174,7 +171,7 @@ export class GitPanel extends React.Component<
           // If not in same repo as before refresh, display the current repo
           let inNewRepo =
             this.state.topRepoPath !==
-            (apiShowTopLevel as GitShowTopLevelResult).top_repo_path;
+            (apiShowTopLevel as IGitShowTopLevelResult).top_repo_path;
           let showList = this.state.showList;
           if (inNewRepo) {
             showList = true;
@@ -182,10 +179,10 @@ export class GitPanel extends React.Component<
 
           this.setState({
             currentFileBrowserPath: (fileBrowser as any).model.path,
-            topRepoPath: (apiShowTopLevel as GitShowTopLevelResult)
+            topRepoPath: (apiShowTopLevel as IGitShowTopLevelResult)
               .top_repo_path,
             showWarning: true,
-            branches: (branchData as GitBranchResult).branches,
+            branches: (branchData as IGitBranchResult).branches,
             currentBranch: currentBranch,
             upstreamBranch: upstreamBranch,
             disableSwitchBranch: disableSwitchBranch,
@@ -212,8 +209,6 @@ export class GitPanel extends React.Component<
   toggleSidebar = (): void => {
     this.setState({ sideBarExpanded: !this.state.sideBarExpanded });
   };
-
-
 
   render() {
     return (

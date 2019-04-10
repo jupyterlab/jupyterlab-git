@@ -5,7 +5,7 @@ export const commitStyle = style({
   width: '100%',
   fontSize: '12px',
   marginBottom: '10px',
-  marginTop: '5px',
+  marginTop: '5px'
 });
 
 export const headerStyle = style({
@@ -17,9 +17,8 @@ export const headerStyle = style({
 });
 
 export const floatRightStyle = style({
-  float: 'right',
-})
-
+  float: 'right'
+});
 
 export const commitOverviewNumbers = style({
   fontSize: '13px',
@@ -109,31 +108,31 @@ export const numberOfInsertionsStyle = style({
   marginTop: '1px'
 });
 
-export const WarningLabel = style({
+export const warningLabel = style({
   padding: '5px 1px 5px 0'
 });
 
-export const MessageInput = style({
+export const messageInput = style({
   boxSizing: 'border-box',
   width: '95%',
   marginBottom: '7px'
 });
 
-export const Button = style({
+export const button = style({
   outline: 'none',
   border: 'none',
   color: 'var(--jp-layout-color0)'
 });
 
-export const ResetDeleteDisabledButton = style({
+export const resetDeleteDisabledButton = style({
   backgroundColor: 'var(--jp-error-color2)'
 });
 
-export const ResetDeleteButton = style({
+export const resetDeleteButton = style({
   backgroundColor: 'var(--jp-error-color1)'
 });
 
-export const CancelButton = style({
+export const cancelButton = style({
   backgroundColor: 'var(--jp-layout-color4)',
   marginRight: '4px'
 });

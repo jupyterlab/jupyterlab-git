@@ -67,7 +67,9 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
           app.shell.activateById(terminal.id);
           terminal.session.send({
             type: 'stdin',
-            content: ['cd "' + currentFileBrowserPath.split('"').join('\\"') + '"\n']
+            content: [
+              'cd "' + currentFileBrowserPath.split('"').join('\\"') + '"\n'
+            ]
           });
           return terminal;
         })

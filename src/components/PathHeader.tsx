@@ -8,11 +8,11 @@ import {
 
 import * as React from 'react';
 
-import {classes} from 'typestyle';
+import { classes } from 'typestyle';
 
-import {Git} from '../git';
+import { Git } from '../git';
 
-import {Dialog, showDialog} from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 export interface IPathHeaderState {
   refresh: any;
@@ -26,8 +26,10 @@ export interface IPathHeaderProps {
   currentBranch: string;
 }
 
-export class PathHeader extends React.Component<IPathHeaderProps,
-  IPathHeaderState> {
+export class PathHeader extends React.Component<
+  IPathHeaderProps,
+  IPathHeaderState
+> {
   constructor(props: IPathHeaderProps) {
     super(props);
     this.state = {
@@ -42,8 +44,8 @@ export class PathHeader extends React.Component<IPathHeaderProps,
       <div className={repoStyle}>
         <span className={repoPathStyle}>
           {relativePath[relativePath.length - 1] +
-          ' / ' +
-          this.props.currentBranch}
+            ' / ' +
+            this.props.currentBranch}
         </span>
         <button
           className={classes(gitPullStyle, 'jp-Icon-16')}
@@ -67,9 +69,10 @@ export class PathHeader extends React.Component<IPathHeaderProps,
    * Execute the `/git/pull` API
    */
   private executeGitPull(): void {
-    this.state.gitApi.pull(this.props.currentFileBrowserPath)
+    this.state.gitApi
+      .pull(this.props.currentFileBrowserPath)
       .then(response => {
-        if (response.code != 0) {
+        if (response.code !== 0) {
           this.showErrorDialog('Pull failed', response.message);
         }
       })
@@ -80,9 +83,10 @@ export class PathHeader extends React.Component<IPathHeaderProps,
    * Execute the `/git/push` API
    */
   private executeGitPush(): void {
-    this.state.gitApi.push(this.props.currentFileBrowserPath)
+    this.state.gitApi
+      .push(this.props.currentFileBrowserPath)
       .then(response => {
-        if (response.code != 0) {
+        if (response.code !== 0) {
           this.showErrorDialog('Push failed', response.message);
         }
       })
@@ -98,7 +102,7 @@ export class PathHeader extends React.Component<IPathHeaderProps,
     return showDialog({
       title: title,
       body: body,
-      buttons: [Dialog.warnButton({label: 'DISMISS'})]
+      buttons: [Dialog.warnButton({ label: 'DISMISS' })]
     }).then(() => {
       // NO-OP
     });
