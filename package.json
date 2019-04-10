@@ -15,7 +15,8 @@
     "clean": "rimraf lib",
     "prepublish": "npm run build",
     "watch": "tsc -w",
-    "test": "jest"
+    "test": "jest",
+    "lint": "tslint --project .",
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
