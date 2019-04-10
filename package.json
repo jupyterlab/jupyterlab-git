@@ -85,6 +85,9 @@
   "lint-staged": {
     "*.{ts,tsx}": ["tslint --fix", "git add"]
   },
+  "prettier": {
+    "singleQuote": true
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab-git.git"
