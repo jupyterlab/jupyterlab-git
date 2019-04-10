@@ -596,7 +596,7 @@ export function parseFileExtension(path: string): string {
   if (path[path.length - 1] === '/') {
     return folderFileIconStyle;
   }
-  var fileExtension = PathExt.extname(path).toLocaleLowerCase();
+  let fileExtension = PathExt.extname(path).toLocaleLowerCase();
   switch (fileExtension) {
     case '.md':
       return markdownFileIconStyle;
@@ -638,7 +638,7 @@ export function parseSelectedFileExtension(path: string): string {
   if (path[path.length - 1] === '/') {
     return folderFileIconSelectedStyle;
   }
-  var fileExtension = PathExt.extname(path).toLocaleLowerCase();
+  let fileExtension = PathExt.extname(path).toLocaleLowerCase();
   switch (fileExtension) {
     case '.md':
       return markdownFileIconSelectedStyle;

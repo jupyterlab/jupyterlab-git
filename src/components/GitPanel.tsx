@@ -114,7 +114,7 @@ export class GitPanel extends React.Component<
           let upstreamBranch = '';
           if (branchData.code === 0) {
             let allBranches = (branchData as GitBranchResult).branches;
-            for (var i = 0; i < allBranches.length; i++) {
+            for (let i = 0; i < allBranches.length; i++) {
               if (allBranches[i].is_current_branch) {
                 currentBranch = allBranches[i].name;
                 upstreamBranch = allBranches[i].upstream;

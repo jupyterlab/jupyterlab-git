@@ -221,13 +221,12 @@ export class BranchHeader extends React.Component<
                 onClick={() => this.toggleNewBranchBox()}
               />
             )}
-            {this.state.showNewBranchBox &&
-              this.props.showList && (
-                <NewBranchBox
-                  createNewBranch={this.createNewBranch}
-                  toggleNewBranchBox={this.toggleNewBranchBox}
-                />
-              )}
+            {this.state.showNewBranchBox && this.props.showList && (
+              <NewBranchBox
+                createNewBranch={this.createNewBranch}
+                toggleNewBranchBox={this.toggleNewBranchBox}
+              />
+            )}
             {this.props.upstreamBranch != null &&
               this.props.upstreamBranch != '' && (
                 <div className={branchTrackingIconStyle} />
@@ -260,16 +259,15 @@ export class BranchHeader extends React.Component<
             {this.state.showNewBranchBox && (
               <div>Branching from {this.props.currentBranch}</div>
             )}
-            {this.state.showCommitBox &&
-              this.props.showList && (
-                <CommitBox
-                  checkReadyForSubmit={this.updateCommitBoxState}
-                  stagedFiles={this.props.stagedFiles}
-                  commitAllStagedFiles={this.commitAllStagedFiles}
-                  topRepoPath={this.props.topRepoPath}
-                  refresh={this.props.refresh}
-                />
-              )}
+            {this.state.showCommitBox && this.props.showList && (
+              <CommitBox
+                checkReadyForSubmit={this.updateCommitBoxState}
+                stagedFiles={this.props.stagedFiles}
+                commitAllStagedFiles={this.commitAllStagedFiles}
+                topRepoPath={this.props.topRepoPath}
+                refresh={this.props.refresh}
+              />
+            )}
           </>
         )}
       </div>
