@@ -72,7 +72,8 @@
     "tslint": "^5.11.0",
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "^2.0.0",
-    "typescript": "~3.1.2"
+    "typescript": "~3.1.2",
+    "typescript-tslint-plugin": "0.3.1"
   },
   "directories": {
     "lib": "lib"
@@ -83,7 +84,10 @@
     }
   },
   "lint-staged": {
-    "*.{ts,tsx}": ["tslint --fix", "git add"]
+    "*.{ts,tsx}": [
+      "tslint --fix",
+      "git add"
+    ]
   },
   "prettier": {
     "singleQuote": true
