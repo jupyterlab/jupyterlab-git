@@ -5,7 +5,7 @@ export const commitStyle = style({
   width: '100%',
   fontSize: '12px',
   marginBottom: '10px',
-  marginTop: '5px',
+  marginTop: '5px'
 });
 
 export const headerStyle = style({
@@ -17,9 +17,8 @@ export const headerStyle = style({
 });
 
 export const floatRightStyle = style({
-  float: 'right',
-})
-
+  float: 'right'
+});
 
 export const commitOverviewNumbers = style({
   fontSize: '13px',

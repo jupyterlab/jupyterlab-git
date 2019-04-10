@@ -3,19 +3,18 @@ import { style } from 'typestyle';
 export const branchStyle = style({
   zIndex: 1,
   textAlign: 'center',
-  overflowY: 'auto',
+  overflowY: 'auto'
 });
-
 
 export const selectedHeaderStyle = style({
   borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  paddingBottom: 'var(--jp-border-width)',
+  paddingBottom: 'var(--jp-border-width)'
 });
 
 export const unSelectedHeaderStyle = style({
   backgroundColor: 'var(--jp-layout-color2)',
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  paddingTop: 'var(--jp-border-width)',
+  paddingTop: 'var(--jp-border-width)'
 });
 
 export const smallBranchStyle = style({
@@ -31,7 +30,7 @@ export const openHistorySideBarButtonStyle = style({
   flex: 'initial',
   paddingLeft: '10px',
   paddingRight: '10px',
-  borderRight: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  borderRight: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
 export const historyLabelStyle = style({
@@ -39,7 +38,7 @@ export const historyLabelStyle = style({
   marginTop: '5px',
   marginBottom: '5px',
   display: 'inline-block',
-  fontWeight: 'normal',
+  fontWeight: 'normal'
 });
 
 export const branchLabelStyle = style({
@@ -121,8 +120,8 @@ export const branchTrackingIconStyle = style({
   display: 'inline-block',
   verticalAlign: 'middle',
   marginTop: '8px',
-  marginLeft: '10px',
-})
+  marginLeft: '10px'
+});
 
 export const headerButtonDisabledStyle = style({
   opacity: 0.5

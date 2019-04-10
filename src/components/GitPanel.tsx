@@ -11,7 +11,7 @@ import {
   GitLogResult,
   SingleCommitInfo,
   GitStatusFileResult,
-  IDiffCallback,
+  IDiffCallback
 } from '../git';
 
 import { PathHeader } from './PathHeader';
@@ -27,7 +27,6 @@ import {
   panelWarningStyle,
   findRepoButtonStyle
 } from '../componentsStyle/GitPanelStyle';
-
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -49,7 +48,6 @@ export interface IGitSessionNodeState {
   untrackedFiles: any;
 
   sideBarExpanded: boolean;
-
 }
 
 /** Interface for GitPanel component props */
@@ -79,14 +77,13 @@ export class GitPanel extends React.Component<
       stagedFiles: [],
       unstagedFiles: [],
       untrackedFiles: [],
-      sideBarExpanded: false,
+      sideBarExpanded: false
     };
   }
 
   setShowList = (state: boolean) => {
     this.setState({ showList: state });
   };
-
 
   /**
    * Refresh widget, update all content
@@ -212,8 +209,6 @@ export class GitPanel extends React.Component<
   toggleSidebar = (): void => {
     this.setState({ sideBarExpanded: !this.state.sideBarExpanded });
   };
-
-
 
   render() {
     return (

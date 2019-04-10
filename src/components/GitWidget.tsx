@@ -18,7 +18,6 @@ import { gitWidgetStyle } from '../componentsStyle/GitWidgetStyle';
 
 import { IDiffCallback } from '../git';
 
-
 import '../../style/variables.css';
 
 /**
@@ -69,7 +68,11 @@ export class GitWidget extends Widget {
   /**
    * Construct a new running widget.
    */
-  constructor(app: JupyterLab, options: IOptions, diff_function: IDiffCallback) {
+  constructor(
+    app: JupyterLab,
+    options: IOptions,
+    diff_function: IDiffCallback
+  ) {
     super({
       node: (options.renderer || defaultRenderer).createNode()
     });
@@ -80,7 +83,7 @@ export class GitWidget extends Widget {
   }
 
   /**
-   * Override widget's default show() to 
+   * Override widget's default show() to
    * refresh content every time Git widget is shown.
    */
   show(): void {

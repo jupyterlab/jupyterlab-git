@@ -1,6 +1,6 @@
-import { JupyterLab } from "@jupyterlab/application";
-import * as React from "react";
-import { classes } from "typestyle";
+import { JupyterLab } from '@jupyterlab/application';
+import * as React from 'react';
+import { classes } from 'typestyle';
 import {
   branchesStyle,
   branchStyle,
@@ -13,13 +13,13 @@ import {
   pastCommitNodeStyle,
   remoteBranchStyle,
   workingBranchStyle
-} from "../componentsStyle/PastCommitNodeStyle";
-import { GitBranchResult, SingleCommitInfo, IDiffCallback } from "../git";
-import { SinglePastCommitInfo } from "./SinglePastCommitInfo";
+} from '../componentsStyle/PastCommitNodeStyle';
+import { GitBranchResult, SingleCommitInfo, IDiffCallback } from '../git';
+import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 
 export interface IPastCommitNodeProps {
   pastCommit: SingleCommitInfo;
-  branches: GitBranchResult["branches"];
+  branches: GitBranchResult['branches'];
   topRepoPath: string;
   app: JupyterLab;
   diff: IDiffCallback;

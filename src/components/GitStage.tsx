@@ -126,7 +126,9 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
           )}
           <button
             disabled={this.checkContents()}
-            className={`${this.props.moveFileIconClass} ${changeStageButtonStyle}
+            className={`${
+              this.props.moveFileIconClass
+            } ${changeStageButtonStyle}
                ${changeStageButtonLeftStyle}`}
             title={this.props.moveAllFilesTitle}
             onClick={() =>

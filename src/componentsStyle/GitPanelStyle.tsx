@@ -7,8 +7,6 @@ export const panelContainerStyle = style({
   height: '100%'
 });
 
-
-
 export const panelWarningStyle = style({
   textAlign: 'center',
   marginTop: '9px'

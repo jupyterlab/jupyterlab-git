@@ -1,4 +1,4 @@
-import {style} from 'typestyle';
+import { style } from 'typestyle';
 
 export const repoStyle = style({
   display: 'flex',
@@ -16,7 +16,7 @@ export const repoPathStyle = style({
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   verticalAlign: 'middle',
-  lineHeight: '33px',
+  lineHeight: '33px'
 });
 
 export const repoRefreshStyle = style({
@@ -38,7 +38,7 @@ export const repoRefreshStyle = style({
       backgroundColor: 'var(--jp-layout-color2)'
     },
     '&:active': {
-      backgroundColor: 'var(--jp-layout-color3)',
+      backgroundColor: 'var(--jp-layout-color3)'
     }
   }
 });
@@ -62,7 +62,7 @@ export const gitPushStyle = style({
       backgroundColor: 'var(--jp-layout-color2)'
     },
     '&:active': {
-      backgroundColor: 'var(--jp-layout-color3)',
+      backgroundColor: 'var(--jp-layout-color3)'
     }
   }
 });
@@ -86,7 +86,7 @@ export const gitPullStyle = style({
       backgroundColor: 'var(--jp-layout-color2)'
     },
     '&:active': {
-      backgroundColor: 'var(--jp-layout-color3)',
+      backgroundColor: 'var(--jp-layout-color3)'
     }
   }
 });
