@@ -62,17 +62,28 @@
     "@types/react-dom": "~16.0.5",
     "enzyme": "3.7.0",
     "enzyme-adapter-react-16": "1.7.0",
+    "husky": "1.3.1",
     "jest": "^23.6.0",
     "jest-fetch-mock": "^1.6.6",
-    "prettier": "^1.14.3",
+    "lint-staged": "8.1.5",
+    "prettier": "1.16.4",
     "rimraf": "^2.6.1",
     "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",
+    "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "^2.0.0",
     "typescript": "~3.1.2"
   },
   "directories": {
     "lib": "lib"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": ["tslint --fix", "git add"]
   },
   "repository": {
     "type": "git",
