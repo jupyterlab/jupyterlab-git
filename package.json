@@ -17,6 +17,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "lint": "tslint --project .",
+    "tslint-check": "tslint-config-prettier-check ./tslint.json"
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",

@@ -1,8 +1,8 @@
 {
   "rulesDirectory": ["tslint-plugin-prettier"],
+  "extends": ["tslint-config-prettier"],
   "rules": {
     "prettier": [true, { "singleQuote": true }],
-    "align": [true, "parameters", "statements"],
     "ban": [
       true,
       ["_", "forEach"],
@@ -13,16 +13,13 @@
     "class-name": true,
     "comment-format": [true, "check-space"],
     "curly": true,
-    "eofline": true,
     "forin": false,
-    "indent": [true, "spaces", 2],
     "interface-name": [true, "always-prefix"],
     "jsdoc-format": true,
     "label-position": true,
     "max-line-length": [false],
     "member-access": false,
     "member-ordering": [false],
-    "new-parens": true,
     "no-angle-bracket-type-assertion": true,
     "no-any": false,
     "no-arg": true,
@@ -45,24 +42,13 @@
     "no-shadowed-variable": false,
     "no-string-literal": false,
     "no-switch-case-fall-through": true,
-    "no-trailing-whitespace": true,
     "no-unused-expression": true,
     "no-use-before-declare": false,
     "no-var-keyword": true,
     "no-var-requires": true,
     "object-literal-sort-keys": false,
-    "one-line": [
-      true,
-      "check-open-brace",
-      "check-catch",
-      "check-else",
-      "check-finally",
-      "check-whitespace"
-    ],
     "one-variable-per-declaration": [true, "ignore-for-loop"],
-    "quotemark": [true, "single", "avoid-escape"],
     "radix": true,
-    "semicolon": [true, "always", "ignore-bound-class-methods"],
     "switch-default": true,
     "trailing-comma": [
       false,
@@ -97,13 +83,6 @@
       "check-format",
       "allow-leading-underscore",
       "ban-keywords"
-    ],
-    "whitespace": [
-      true,
-      "check-branch",
-      "check-operator",
-      "check-separator",
-      "check-type"
     ]
   }
 }
