@@ -1,11 +1,7 @@
-import {
-  FileItem,
-  IFileItemProps
-} from '../../src/components/FileItem';
+import { FileItem, IFileItemProps } from '../../src/components/FileItem';
 import * as React from 'react';
 import 'jest';
-import { shallow } from "enzyme";
-
+import { shallow } from 'enzyme';
 
 describe('FileItem', () => {
   const props: IFileItemProps = {
@@ -18,7 +14,7 @@ describe('FileItem', () => {
     refresh: null,
     moveFile: () => {},
     discardFile: () => {},
-    moveFileIconClass: () => {},
+    moveFileIconClass: 'string',
     moveFileIconSelectedClass: 'string',
     moveFileTitle: '',
     openFile: () => {},
@@ -34,16 +30,15 @@ describe('FileItem', () => {
     updateSelectedDiscardFile: () => {},
     disableFile: false,
     toggleDisableFiles: () => {},
-    sideBarExpanded: false,
-    currentTheme: ''
+    sideBarExpanded: false
   };
 
-  describe("#render()", () => {
+  describe('#render()', () => {
     const component = shallow(<FileItem {...props} />);
-    it("should display the full path on hover", () => {
-      expect(
-        component.find('[title="some/file/path/file-name"]')
-      ).toHaveLength(1);
+    it('should display the full path on hover', () => {
+      expect(component.find('[title="some/file/path/file-name"]')).toHaveLength(
+        1
+      );
     });
   });
 });
