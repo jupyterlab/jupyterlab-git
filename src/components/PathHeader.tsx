@@ -55,8 +55,7 @@ export class PathHeader extends React.Component<
           onClick={() =>
             this.showGitPushPullDialog(
               this.props.currentFileBrowserPath,
-              Operation.Pull,
-              'Git Pull'
+              Operation.Pull
             )
           }
         />
@@ -66,8 +65,7 @@ export class PathHeader extends React.Component<
           onClick={() =>
             this.showGitPushPullDialog(
               this.props.currentFileBrowserPath,
-              Operation.Push,
-              'Git Push'
+              Operation.Push
             )
           }
         />
@@ -86,11 +84,10 @@ export class PathHeader extends React.Component<
    */
   private showGitPushPullDialog(
     currentFileBrowserPath: string,
-    operation: Operation,
-    title: string
+    operation: Operation
   ): Promise<void> {
     let dialog = new Dialog({
-      title: title,
+      title: `Git ${Operation}`,
       body: new GitPullPushDialog(currentFileBrowserPath, operation),
       buttons: [Dialog.okButton({ label: 'DISMISS' })]
     });
