@@ -1,4 +1,4 @@
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { FileList } from './FileList';
 
@@ -17,7 +17,7 @@ export interface IPastCommitsProps {
   stagedFiles: any;
   unstagedFiles: any;
   untrackedFiles: any;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
   refresh: any;
   diff: IDiffCallback;
   sideBarExpanded: boolean;

@@ -1,4 +1,4 @@
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { IGitStatusFileResult } from '../git';
 
@@ -26,7 +26,7 @@ export interface IGitStageProps {
   heading: string;
   topRepoPath: string;
   files: any;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
   refresh: any;
   showFiles: boolean;
   displayFiles: Function;

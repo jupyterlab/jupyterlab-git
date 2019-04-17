@@ -1,6 +1,6 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -25,7 +25,7 @@ export namespace CommandIDs {
 /**
  * Add the commands for the git extension.
  */
-export function addCommands(app: JupyterLab, services: ServiceManager) {
+export function addCommands(app: JupyterFrontEnd, services: ServiceManager) {
   let { commands } = app;
   const namespace = 'terminal';
   const tracker = new InstanceTracker<Terminal>({ namespace });
@@ -55,7 +55,7 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
       let terminal = new Terminal();
       terminal.title.closable = true;
       terminal.title.label = '...';
-      app.shell.addToMainArea(terminal);
+      app.shell.add(terminal, 'main');
       let promise = name
         ? services.terminals.connectTo(name)
         : services.terminals.startNew();
@@ -95,7 +95,7 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
       let terminal = new Terminal();
       terminal.title.closable = true;
       terminal.title.label = '...';
-      app.shell.addToMainArea(terminal);
+      app.shell.add(terminal, 'main');
       let promise = services.terminals.startNew();
 
       return promise

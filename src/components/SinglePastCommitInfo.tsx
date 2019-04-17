@@ -1,4 +1,4 @@
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import * as React from 'react';
 import { classes } from 'typestyle/';
 import { fileIconStyle } from '../componentsStyle/FileItemStyle';
@@ -32,7 +32,7 @@ import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
 export interface ISinglePastCommitInfoProps {
   topRepoPath: string;
   data: ISingleCommitInfo;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
   diff: IDiffCallback;
 
   refresh: () => void;

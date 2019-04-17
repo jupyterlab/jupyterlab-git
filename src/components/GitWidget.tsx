@@ -8,7 +8,7 @@ import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -68,7 +68,11 @@ export class GitWidget extends Widget {
   /**
    * Construct a new running widget.
    */
-  constructor(app: JupyterLab, options: IOptions, diffFunction: IDiffCallback) {
+  constructor(
+    app: JupyterFrontEnd,
+    options: IOptions,
+    diffFunction: IDiffCallback
+  ) {
     super({
       node: (options.renderer || defaultRenderer).createNode()
     });
