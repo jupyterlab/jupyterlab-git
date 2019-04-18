@@ -87,7 +87,7 @@ export class PathHeader extends React.Component<
     operation: Operation
   ): Promise<void> {
     let dialog = new Dialog({
-      title: `Git ${Operation}`,
+      title: `Git ${operation}`,
       body: new GitPullPushDialog(currentFileBrowserPath, operation),
       buttons: [Dialog.okButton({ label: 'DISMISS' })]
     });
