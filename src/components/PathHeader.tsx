@@ -12,7 +12,9 @@ import { classes } from 'typestyle';
 
 import { Git } from '../git';
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog } from '@jupyterlab/apputils';
+
+import { GitPullPushDialog, Operation } from '../gitPushPull';
 
 export interface IPathHeaderState {
   refresh: any;
@@ -50,12 +52,22 @@ export class PathHeader extends React.Component<
         <button
           className={classes(gitPullStyle, 'jp-Icon-16')}
           title={'Pull latest changes'}
-          onClick={() => this.executeGitPull()}
+          onClick={() =>
+            this.showGitPushPullDialog(
+              this.props.currentFileBrowserPath,
+              Operation.Pull
+            )
+          }
         />
         <button
           className={classes(gitPushStyle, 'jp-Icon-16')}
           title={'Push committed changes'}
-          onClick={() => this.executeGitPush()}
+          onClick={() =>
+            this.showGitPushPullDialog(
+              this.props.currentFileBrowserPath,
+              Operation.Push
+            )
+          }
         />
         <button
           className={classes(repoRefreshStyle, 'jp-Icon-16')}
@@ -66,45 +78,19 @@ export class PathHeader extends React.Component<
   }
 
   /**
-   * Execute the `/git/pull` API
-   */
-  private executeGitPull(): void {
-    this.state.gitApi
-      .pull(this.props.currentFileBrowserPath)
-      .then(response => {
-        if (response.code !== 0) {
-          this.showErrorDialog('Pull failed', response.message);
-        }
-      })
-      .catch(() => this.showErrorDialog('Pull failed'));
-  }
-
-  /**
-   * Execute the `/git/push` API
-   */
-  private executeGitPush(): void {
-    this.state.gitApi
-      .push(this.props.currentFileBrowserPath)
-      .then(response => {
-        if (response.code !== 0) {
-          this.showErrorDialog('Push failed', response.message);
-        }
-      })
-      .catch(() => this.showErrorDialog('Push failed'));
-  }
-
-  /**
    * Displays the error dialog when the Git Push/Pull operation fails.
    * @param title the title of the error dialog
    * @param body the message to be shown in the body of the modal.
    */
-  private showErrorDialog(title: string, body: string = ''): Promise<void> {
-    return showDialog({
-      title: title,
-      body: body,
-      buttons: [Dialog.warnButton({ label: 'DISMISS' })]
-    }).then(() => {
-      // NO-OP
+  private showGitPushPullDialog(
+    currentFileBrowserPath: string,
+    operation: Operation
+  ): Promise<void> {
+    let dialog = new Dialog({
+      title: `Git ${operation}`,
+      body: new GitPullPushDialog(currentFileBrowserPath, operation),
+      buttons: [Dialog.okButton({ label: 'DISMISS' })]
     });
+    return dialog.launch().then(() => {});
   }
 }
