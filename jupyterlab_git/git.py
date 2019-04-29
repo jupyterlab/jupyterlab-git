@@ -23,12 +23,15 @@ class Git:
         :param repo_url: the URL of the repository to be cloned.
         :return: response with status code and error message.
         """
+        env = os.environ.copy()
+        env['GIT_TERMINAL_PROMPT'] = '0'
         p = subprocess.Popen(
-            ['GIT_TERMINAL_PROMPT=0 git clone {}'.format(unquote(repo_url))],
+            ['git clone {}'.format(unquote(repo_url))],
             shell=True,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),
+            env=env,
         )
         _, error = p.communicate()
 
@@ -449,13 +452,15 @@ class Git:
         Execute git pull --no-commit.  Disables prompts for the password to avoid the terminal hanging while waiting
         for auth.
         """
-
+        env = os.environ.copy()
+        env['GIT_TERMINAL_PROMPT'] = '0'
         p = subprocess.Popen(
-            ['GIT_TERMINAL_PROMPT=0 git pull --no-commit'],
+            ['git pull --no-commit'],
             shell=True,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, curr_fb_path),
+            env=env,
         )
         _, error = p.communicate()
 
@@ -472,12 +477,15 @@ class Git:
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
         """
+        env = os.environ.copy()
+        env['GIT_TERMINAL_PROMPT'] = '0'
         p = subprocess.Popen(
-            ['GIT_TERMINAL_PROMPT=0 git push {} {}'.format(remote, branch)],
+            ['git push {} {}'.format(remote, branch)],
             shell=True,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, curr_fb_path),
+            env=env,
         )
         _, error = p.communicate()
 
