@@ -25,7 +25,7 @@ def test_git_pull_fail(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['git pull --no-commit'],
+            ['git', 'pull', '--no-commit'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
@@ -56,7 +56,7 @@ def test_git_pull_success(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['git pull --no-commit'],
+            ['git', 'pull', '--no-commit'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
@@ -87,7 +87,7 @@ def test_git_push_fail(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['git push test_origin HEAD:test_master'],
+            ['git', 'push', 'test_origin', 'HEAD:test_master'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
@@ -118,7 +118,7 @@ def test_git_push_success(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['git push . HEAD:test_master'],
+            ['git', 'push', '.', 'HEAD:test_master'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
