@@ -1,3 +1,4 @@
+import os
 from subprocess import PIPE
 
 from mock import patch, call, Mock
@@ -9,6 +10,8 @@ from jupyterlab_git.git import Git
 def test_git_clone_success(mock_subproc_popen):
     # Given
     process_mock = Mock()
+    env = os.environ.copy()
+    env['GIT_TERMINAL_PROMPT'] = '0'
     attrs = {
         'communicate.return_value': ('output', 'error'.encode('utf-8')),
         'returncode': 0
@@ -22,11 +25,12 @@ def test_git_clone_success(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['GIT_TERMINAL_PROMPT=0 git clone ghjkhjkl'],
+            ['git', 'clone', 'ghjkhjkl'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True
+            shell=True,
+            env=env,
         ),
         call().communicate()
     ])
@@ -42,6 +46,8 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
     """
     # Given
     process_mock = Mock()
+    env = os.environ.copy()
+    env['GIT_TERMINAL_PROMPT'] = '0'
     attrs = {
         'communicate.return_value': ('test_output', 'fatal: Not a git repository'.encode('utf-8')),
         'returncode': 128
@@ -55,11 +61,12 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['GIT_TERMINAL_PROMPT=0 git clone ghjkhjkl'],
+            ['git', 'clone', 'ghjkhjkl'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True
+            shell=True,
+            env=env,
         ),
         call().communicate()
     ])
