@@ -4,6 +4,7 @@ Module for executing git commands, sending results back to the handlers
 import os
 import subprocess
 from subprocess import Popen, PIPE, CalledProcessError
+import pexpect
 from urllib.parse import unquote
 
 from tornado.web import HTTPError
@@ -580,7 +581,7 @@ class Git:
                 "code": p.returncode,
                 "message": my_error.decode("utf-8").strip("\n"),
             }
-
+            
     def pull(self, curr_fb_path, auth=None):
         """
         Execute git pull --no-commit.  Disables prompts for the password to avoid the terminal hanging while waiting

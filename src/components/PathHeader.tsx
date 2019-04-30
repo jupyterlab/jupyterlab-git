@@ -18,6 +18,8 @@ import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 
 import { GitCredentialsForm } from './CredentialsBox';
 
+import { GitCredentialsForm } from './CredentialsBox';
+
 export interface IPathHeaderState {
   refresh: any;
   gitApi: Git;
