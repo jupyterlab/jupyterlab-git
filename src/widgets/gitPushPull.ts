@@ -1,6 +1,7 @@
 import { Spinner } from '@jupyterlab/apputils';
 import { Widget } from '@phosphor/widgets';
-import { Git, IGitPushPullResult } from '../git';
+import { Git, IGitPushPullResult, IGitAuth } from '../git';
+
 
 export enum Operation {
   Pull = 'Pull',
@@ -19,7 +20,11 @@ export class GitPullPushDialog extends Widget {
   /**
    * Instantiates the dialog and makes the relevant service API call.
    */
-  constructor(currentFileBrowserPath: string, operation: Operation) {
+  constructor(
+    currentFileBrowserPath: string,
+    operation: Operation,
+    auth: IGitAuth = undefined
+  ) {
     super();
     this.operation = operation;
 
@@ -30,18 +35,22 @@ export class GitPullPushDialog extends Widget {
     this.node.appendChild(this.spinner.node);
 
     this.gitApi = new Git();
-    this.executeGitApi(currentFileBrowserPath);
+
+    this.executeGitApi(currentFileBrowserPath, auth);
   }
 
   /**
    * Executes the relevant service API depending on the operation and handles response and errors.
    * @param currentFileBrowserPath the path to the current repo
    */
-  private executeGitApi(currentFileBrowserPath: string) {
+  private executeGitApi(
+    currentFileBrowserPath: string,
+    auth: IGitAuth = undefined
+  ) {
     switch (this.operation) {
       case Operation.Pull:
         this.gitApi
-          .pull(currentFileBrowserPath)
+          .pull(currentFileBrowserPath, auth)
           .then(response => {
             this.handleResponse(response);
           })
@@ -49,7 +58,7 @@ export class GitPullPushDialog extends Widget {
         break;
       case Operation.Push:
         this.gitApi
-          .push(currentFileBrowserPath)
+          .push(currentFileBrowserPath, auth)
           .then(response => {
             this.handleResponse(response);
           })
@@ -65,11 +74,19 @@ export class GitPullPushDialog extends Widget {
    * success or error message.
    * @param response the response from the server API call
    */
-  private handleResponse(response: IGitPushPullResult) {
+  private async handleResponse(response: IGitPushPullResult) {
     this.node.removeChild(this.spinner.node);
     this.spinner.dispose();
     if (response.code !== 0) {
-      this.handleError(response.message);
+      if (
+        response.message.indexOf('could not read Username') >= 0 ||
+        response.message.indexOf('Invalid username or password') >= 0
+      ) {
+        this.handleError(response.message);
+        this.parent!.parent!.close();
+      } else {
+        this.handleError(response.message);
+      }
     } else {
       this.handleSuccess();
     }

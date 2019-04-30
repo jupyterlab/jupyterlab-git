@@ -10,11 +10,13 @@ import * as React from 'react';
 
 import { classes } from 'typestyle';
 
-import { Git } from '../git';
+import { Git, IGitAuth } from '../git';
 
 import { Dialog } from '@jupyterlab/apputils';
 
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
+
+import { GitCredentialsForm } from './CredentialsBox';
 
 export interface IPathHeaderState {
   refresh: any;
@@ -82,7 +84,7 @@ export class PathHeader extends React.Component<
    * @param title the title of the error dialog
    * @param body the message to be shown in the body of the modal.
    */
-  private showGitPushPullDialog(
+  private async showGitPushPullDialog(
     currentFileBrowserPath: string,
     operation: Operation
   ): Promise<void> {
@@ -91,6 +93,47 @@ export class PathHeader extends React.Component<
       body: new GitPullPushDialog(currentFileBrowserPath, operation),
       buttons: [Dialog.okButton({ label: 'DISMISS' })]
     });
-    return dialog.launch().then(() => {});
+
+    let result = await dialog.launch();
+    dialog.dispose();
+    let retry = false;
+    while (result.button.label === 'CANCEL') {
+      let credentialsDialog = new Dialog({
+        title: 'Git credentials required',
+        body: new GitCredentialsForm(
+          'Enter credentials for remote repository',
+          retry ? 'Incorrect username or password.' : ''
+        ),
+        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
+      });
+      retry = true;
+
+      let response = await credentialsDialog.launch();
+      credentialsDialog.dispose();
+
+      if (response.button.label === 'OK') {
+        // user accepted attempt to login
+
+        let authJson = JSON.parse(decodeURIComponent(response.value));
+        // call gitApi.push again with credentials
+        let auth: IGitAuth = {
+          username: authJson.username,
+          password: authJson.password
+        };
+
+        dialog = new Dialog({
+          title: `Git ${operation}`,
+          body: new GitPullPushDialog(currentFileBrowserPath, operation, auth),
+          buttons: [Dialog.okButton({ label: 'DISMISS' })]
+        });
+        result = await dialog.launch();
+        dialog.dispose();
+      } else {
+        break;
+      }
+    }
+
+    dialog.dispose();
+    dialog.close();
   }
 }

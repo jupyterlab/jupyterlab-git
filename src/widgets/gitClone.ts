@@ -6,7 +6,9 @@ import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { style } from 'typestyle';
 
-import { Git } from '../git';
+import { Git, IGitAuth } from '../git';
+
+import { GitCredentialsForm } from '../components/CredentialsBox';
 
 /**
  * The widget encapsulating the Git Clone UI:
@@ -84,9 +86,46 @@ export class GitClone extends Widget {
   private makeApiCall(cloneUrl: string) {
     this.gitApi
       .clone(this.fileBrowser.model.path, cloneUrl)
-      .then(response => {
-        if (response.code !== 0) {
-          this.showErrorDialog(response.message);
+      .then(async response => {
+        let retry = false;
+        while (response.code !== 0) {
+          if (
+            response.code === 128 &&
+            (response.message.indexOf('could not read Username') >= 0 ||
+              response.message.indexOf('Invalid username or password') >= 0)
+          ) {
+            // request user credentials and try to clone again
+            const dialog = new Dialog({
+              title: 'Git credentials required',
+              body: new GitCredentialsForm(
+                'Enter credentials for remote repository',
+                retry ? 'Incorrect username or password.' : ''
+              ),
+              buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
+            });
+            retry = true;
+
+            const result = await dialog.launch();
+            dialog.dispose();
+            if (result.button.label === 'OK') {
+              // user accepted attempt to login
+              // now, we can try cloning again
+              let authJson = JSON.parse(decodeURIComponent(result.value));
+              // call gitApi.clone again with credentials
+              let auth: IGitAuth = {
+                username: authJson.username,
+                password: authJson.password
+              };
+              response = await this.gitApi.clone(
+                this.fileBrowser.model.path,
+                cloneUrl,
+                auth
+              );
+            } else {
+              this.showErrorDialog(response.message);
+              break;
+            }
+          }
         }
       })
       .catch(() => this.showErrorDialog());
