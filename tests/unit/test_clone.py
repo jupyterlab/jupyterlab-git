@@ -1,4 +1,4 @@
-import os
+import copy
 from subprocess import PIPE
 
 from mock import patch, call, Mock
@@ -7,11 +7,10 @@ from jupyterlab_git.git import Git
 
 
 @patch('subprocess.Popen')
+@patch('os.environ', {'TEST': 'test'})
 def test_git_clone_success(mock_subproc_popen):
     # Given
     process_mock = Mock()
-    env = os.environ.copy()
-    env['GIT_TERMINAL_PROMPT'] = '0'
     attrs = {
         'communicate.return_value': ('output', 'error'.encode('utf-8')),
         'returncode': 0
@@ -23,6 +22,7 @@ def test_git_clone_success(mock_subproc_popen):
     actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl')
 
     # Then
+    expected_environ = {'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'}
     mock_subproc_popen.assert_has_calls([
         call(
             ['git', 'clone', 'ghjkhjkl'],
@@ -30,7 +30,7 @@ def test_git_clone_success(mock_subproc_popen):
             stderr=PIPE,
             cwd='/bin/test_curr_path',
             shell=True,
-            env=env,
+            env=expected_environ,
         ),
         call().communicate()
     ])
@@ -38,6 +38,7 @@ def test_git_clone_success(mock_subproc_popen):
 
 
 @patch('subprocess.Popen')
+@patch('os.environ', {'TEST': 'test'})
 def test_git_clone_failure_from_git(mock_subproc_popen):
     """
     Git internally will throw an error if it is an invalid URL, or if there is a permissions issue. We want to just
@@ -46,8 +47,6 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
     """
     # Given
     process_mock = Mock()
-    env = os.environ.copy()
-    env['GIT_TERMINAL_PROMPT'] = '0'
     attrs = {
         'communicate.return_value': ('test_output', 'fatal: Not a git repository'.encode('utf-8')),
         'returncode': 128
@@ -59,6 +58,7 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
     actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl')
 
     # Then
+    expected_environ = {'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'}
     mock_subproc_popen.assert_has_calls([
         call(
             ['git', 'clone', 'ghjkhjkl'],
@@ -66,7 +66,7 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
             stderr=PIPE,
             cwd='/bin/test_curr_path',
             shell=True,
-            env=env,
+            env=expected_environ,
         ),
         call().communicate()
     ])
