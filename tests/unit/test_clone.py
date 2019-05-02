@@ -6,6 +6,7 @@ from jupyterlab_git.git import Git
 
 
 @patch('subprocess.Popen')
+@patch('os.environ', {'TEST': 'test'})
 def test_git_clone_success(mock_subproc_popen):
     # Given
     process_mock = Mock()
@@ -22,11 +23,12 @@ def test_git_clone_success(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['GIT_TERMINAL_PROMPT=0 git clone ghjkhjkl'],
+            ['git', 'clone', 'ghjkhjkl'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True
+            shell=True,
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
     ])
@@ -34,6 +36,7 @@ def test_git_clone_success(mock_subproc_popen):
 
 
 @patch('subprocess.Popen')
+@patch('os.environ', {'TEST': 'test'})
 def test_git_clone_failure_from_git(mock_subproc_popen):
     """
     Git internally will throw an error if it is an invalid URL, or if there is a permissions issue. We want to just
@@ -55,11 +58,12 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['GIT_TERMINAL_PROMPT=0 git clone ghjkhjkl'],
+            ['git', 'clone', 'ghjkhjkl'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True
+            shell=True,
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
     ])

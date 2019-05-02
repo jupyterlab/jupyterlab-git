@@ -6,6 +6,7 @@ from jupyterlab_git.git import Git
 
 
 @patch('subprocess.Popen')
+@patch('os.environ', {'TEST': 'test'})
 def test_git_pull_fail(mock_subproc_popen):
     # Given
     process_mock = Mock()
@@ -22,11 +23,12 @@ def test_git_pull_fail(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['GIT_TERMINAL_PROMPT=0 git pull --no-commit'],
+            ['git', 'pull', '--no-commit'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True
+            shell=True,
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
     ])
@@ -34,6 +36,7 @@ def test_git_pull_fail(mock_subproc_popen):
 
 
 @patch('subprocess.Popen')
+@patch('os.environ', {'TEST': 'test'})
 def test_git_pull_success(mock_subproc_popen):
     # Given
     process_mock = Mock()
@@ -50,11 +53,12 @@ def test_git_pull_success(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['GIT_TERMINAL_PROMPT=0 git pull --no-commit'],
+            ['git', 'pull', '--no-commit'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True
+            shell=True,
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
     ])
@@ -62,6 +66,7 @@ def test_git_pull_success(mock_subproc_popen):
 
 
 @patch('subprocess.Popen')
+@patch('os.environ', {'TEST': 'test'})
 def test_git_push_fail(mock_subproc_popen):
     # Given
     process_mock = Mock()
@@ -78,11 +83,12 @@ def test_git_push_fail(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['GIT_TERMINAL_PROMPT=0 git push test_origin HEAD:test_master'],
+            ['git', 'push', 'test_origin', 'HEAD:test_master'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True
+            shell=True,
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
     ])
@@ -90,6 +96,7 @@ def test_git_push_fail(mock_subproc_popen):
 
 
 @patch('subprocess.Popen')
+@patch('os.environ', {'TEST': 'test'})
 def test_git_push_success(mock_subproc_popen):
     # Given
     process_mock = Mock()
@@ -106,11 +113,12 @@ def test_git_push_success(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['GIT_TERMINAL_PROMPT=0 git push . HEAD:test_master'],
+            ['git', 'push', '.', 'HEAD:test_master'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True
+            shell=True,
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
     ])
