@@ -21,7 +21,6 @@ def test_git_pull_fail(mock_subproc_popen):
     actual_response = Git(root_dir='/bin').pull('test_curr_path')
 
     # Then
-    expected_environ = {'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'}
     mock_subproc_popen.assert_has_calls([
         call(
             ['git', 'pull', '--no-commit'],
@@ -29,7 +28,7 @@ def test_git_pull_fail(mock_subproc_popen):
             stderr=PIPE,
             cwd='/bin/test_curr_path',
             shell=True,
-            env=expected_environ,
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
     ])
@@ -52,7 +51,6 @@ def test_git_pull_success(mock_subproc_popen):
     actual_response = Git(root_dir='/bin').pull('test_curr_path')
 
     # Then
-    expected_environ = {'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'}
     mock_subproc_popen.assert_has_calls([
         call(
             ['git', 'pull', '--no-commit'],
@@ -60,7 +58,7 @@ def test_git_pull_success(mock_subproc_popen):
             stderr=PIPE,
             cwd='/bin/test_curr_path',
             shell=True,
-            env=expected_environ,
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
     ])
@@ -83,7 +81,6 @@ def test_git_push_fail(mock_subproc_popen):
     actual_response = Git(root_dir='/bin').push('test_origin', 'HEAD:test_master', 'test_curr_path')
 
     # Then
-    expected_environ = {'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'}
     mock_subproc_popen.assert_has_calls([
         call(
             ['git', 'push', 'test_origin', 'HEAD:test_master'],
@@ -91,7 +88,7 @@ def test_git_push_fail(mock_subproc_popen):
             stderr=PIPE,
             cwd='/bin/test_curr_path',
             shell=True,
-            env=expected_environ,
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
     ])
@@ -114,7 +111,6 @@ def test_git_push_success(mock_subproc_popen):
     actual_response = Git(root_dir='/bin').push('.', 'HEAD:test_master', 'test_curr_path')
 
     # Then
-    expected_environ = {'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'}
     mock_subproc_popen.assert_has_calls([
         call(
             ['git', 'push', '.', 'HEAD:test_master'],
@@ -122,7 +118,7 @@ def test_git_push_success(mock_subproc_popen):
             stderr=PIPE,
             cwd='/bin/test_curr_path',
             shell=True,
-            env=expected_environ,
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
     ])
