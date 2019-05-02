@@ -1,4 +1,3 @@
-import copy
 from subprocess import PIPE
 
 from mock import patch, call, Mock
