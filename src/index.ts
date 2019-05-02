@@ -1,31 +1,21 @@
-import { addCommands, CommandIDs } from './gitMenuCommands';
-
-import { PathExt } from '@jupyterlab/coreutils';
-
-import { GitWidget } from './components/GitWidget';
-
 import {
   ILayoutRestorer,
   JupyterLab,
   JupyterLabPlugin
 } from '@jupyterlab/application';
-
+import { PathExt } from '@jupyterlab/coreutils';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
-import { Menu } from '@phosphor/widgets';
-
-import { Token } from '@phosphor/coreutils';
-
-import { gitTabStyle } from './componentsStyle/GitWidgetStyle';
-
-import { IDiffCallback } from './git';
-export { IDiffCallback } from './git';
-
-import '../style/variables.css';
-import { GitClone } from './gitClone';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Token } from '@phosphor/coreutils';
+import '../style/variables.css';
+import { GitWidget } from './components/GitWidget';
+import { gitTabStyle } from './componentsStyle/GitWidgetStyle';
+import { IDiffCallback } from './git';
+import { GitClone } from './gitClone';
+import { addCommands, addMenuItems } from './gitMenuCommands';
+
+export { IDiffCallback } from './git';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
@@ -119,26 +109,11 @@ function activate(
 ): IGitExtension {
   const { commands } = app;
   let gitExtension = new GitExtension(app, restorer, factory);
-  const category = 'Git';
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   addCommands(app, app.serviceManager);
-  let menu = new Menu({ commands });
-  let tutorial = new Menu({ commands });
-  tutorial.title.label = ' Tutorial ';
-  menu.title.label = category;
-  [CommandIDs.gitUI, CommandIDs.gitTerminal, CommandIDs.gitInit].forEach(
-    command => {
-      menu.addItem({ command });
-    }
-  );
-
-  [CommandIDs.setupRemotes, CommandIDs.googleLink].forEach(command => {
-    tutorial.addItem({ command });
-  });
-  menu.addItem({ type: 'submenu', submenu: tutorial });
-  mainMenu.addMenu(menu, { rank: 60 });
+  addMenuItems(commands, mainMenu);
 
   return gitExtension;
 }

@@ -1,13 +1,9 @@
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-
 import { JupyterLab } from '@jupyterlab/application';
-
+import { Dialog, InstanceTracker, showDialog } from '@jupyterlab/apputils';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ServiceManager } from '@jupyterlab/services';
-
-import { InstanceTracker } from '@jupyterlab/apputils';
-
 import { Terminal } from '@jupyterlab/terminal';
-
+import { Menu } from '@phosphor/widgets';
 import { Git } from './git';
 
 /**
@@ -16,10 +12,34 @@ import { Git } from './git';
 export namespace CommandIDs {
   export const gitUI = 'git:ui';
   export const gitTerminal = 'git:create-new-terminal';
-  export const gitTerminalCommand = 'git:terminal-command';
   export const gitInit = 'git:init';
   export const setupRemotes = 'git:tutorial-remotes';
   export const googleLink = 'git:google-link';
+}
+
+/**
+ * Adds the Menu Items under the "Git" section.
+ *
+ * @param commands the commands in the JupyterLab App
+ * @param mainMenu the IMainMenu instance in the JupyterLab App
+ */
+export function addMenuItems(commands, mainMenu: IMainMenu) {
+  const category = 'Git';
+  let menu = new Menu({ commands });
+  let tutorial = new Menu({ commands });
+  tutorial.title.label = ' Tutorial ';
+  menu.title.label = category;
+  [CommandIDs.gitUI, CommandIDs.gitTerminal, CommandIDs.gitInit].forEach(
+    command => {
+      console.log('Adding command for something again again');
+      menu.addItem({ command });
+    }
+  );
+  [CommandIDs.setupRemotes, CommandIDs.googleLink].forEach(command => {
+    tutorial.addItem({ command });
+  });
+  menu.addItem({ type: 'submenu', submenu: tutorial });
+  mainMenu.addMenu(menu, { rank: 60 });
 }
 
 /**
@@ -32,7 +52,8 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
   let gitApi = new Git();
 
   /**
-   * Get the current path of the working directory.
+   * Get the current path of the working directory in the File Browser, relative to the Jupyter
+   * server root.
    */
   function findCurrentFileBrowserPath(): string {
     try {
@@ -68,44 +89,12 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
           terminal.session.send({
             type: 'stdin',
             content: [
-              'cd "' + currentFileBrowserPath.split('"').join('\\"') + '"\n'
+              'cd "' +
+                app.info.directories.serverRoot +
+                '/' +
+                currentFileBrowserPath.split('"').join('\\"') +
+                '"\n'
             ]
-          });
-          return terminal;
-        })
-        .catch(() => {
-          terminal.dispose();
-        });
-    }
-  });
-
-  /** Add open terminal and run command */
-  commands.addCommand(CommandIDs.gitTerminalCommand, {
-    label: 'Terminal Command',
-    caption: 'Open a new terminal session and perform git command',
-    execute: args => {
-      let currentFileBrowserPath = findCurrentFileBrowserPath();
-      let changeDirectoryCommand =
-        currentFileBrowserPath === ' '
-          ? ''
-          : 'cd "' + currentFileBrowserPath.split('"').join('\\"') + '"';
-      let gitCommand = args ? (args['cmd'] as string) : '';
-      let linkCommand =
-        changeDirectoryCommand !== '' && gitCommand !== '' ? '&&' : '';
-      let terminal = new Terminal();
-      terminal.title.closable = true;
-      terminal.title.label = '...';
-      app.shell.addToMainArea(terminal);
-      let promise = services.terminals.startNew();
-
-      return promise
-        .then(session => {
-          terminal.session = session;
-          tracker.add(terminal);
-          app.shell.activateById(terminal.id);
-          terminal.session.send({
-            type: 'stdin',
-            content: [changeDirectoryCommand + linkCommand + gitCommand + '\n']
           });
           return terminal;
         })
