@@ -13,6 +13,31 @@ from tornado.web import HTTPError
 ALLOWED_OPTIONS = ['user.name', 'user.email']
 
 
+class git_auth_input_wrapper:
+    """
+    Helper class which is meant to replace subprocess.Popen for communicating
+    with git CLI when also sending username and password for auth
+    """
+    def __init__(self, command, cwd, env, username, password, *args, **kwargs):
+        super(git_auth_input_wrapper, self).__init__(*args, **kwargs)
+        self.command = command
+        self.cwd = cwd
+        self.env = env
+        self.username = username
+        self.password = password
+    def communicate(self):
+        try:
+            p = pexpect.spawn(
+                self.command, 
+                cwd = self.cwd,
+                env = self.env
+            )
+            p.expect('Username for .*: ')
+            p.sendline(self.username)
+            p.expect('Password for .*:')
+            p.sendline(self.password)
+
+
 class Git:
     """
     A single parent class containing all of the individual git methods in it.
