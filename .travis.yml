@@ -15,3 +15,4 @@ script:
   - jupyter labextension install .
   - python -m jupyterlab.browser_check
   - yarn run lint
+  - python -m tests.test-browser.run_browser_test
