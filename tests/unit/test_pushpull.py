@@ -27,7 +27,6 @@ def test_git_pull_fail(mock_subproc_popen):
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True,
             env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
@@ -57,7 +56,6 @@ def test_git_pull_success(mock_subproc_popen):
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True,
             env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
@@ -87,7 +85,6 @@ def test_git_push_fail(mock_subproc_popen):
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True,
             env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
@@ -117,7 +114,6 @@ def test_git_push_success(mock_subproc_popen):
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True,
             env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
