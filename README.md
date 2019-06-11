@@ -21,7 +21,7 @@ To install perform the following steps:
 
 ```bash
 jupyter labextension install @jupyterlab/git
-pip install jupyterlab-git
+pip install --upgrade jupyterlab-git
 jupyter serverextension enable --py jupyterlab_git
 ```
 
