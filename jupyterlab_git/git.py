@@ -616,7 +616,7 @@ class Git:
         if (auth):
             env["GIT_TERMINAL_PROMPT"] = "1"
             p = git_auth_input_wrapper(
-                command = 'git pull --no-commit',
+                command = ['git', 'pull', '--no-commit'],
                 cwd = os.path.join(self.root_dir, curr_fb_path),
                 env = env,
                 username = auth['username'],
@@ -626,11 +626,12 @@ class Git:
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             p = subprocess.Popen(
-                ['git pull --no-commit'],
+                ['git', 'pull', '--no-commit'],
                 stdout=PIPE,
                 stderr=PIPE,
                 env = env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
+                env = env,
             )
             _, error = p.communicate()
 
@@ -649,7 +650,7 @@ class Git:
         if (auth):
             env["GIT_TERMINAL_PROMPT"] = "1"
             p = git_auth_input_wrapper(
-                command = 'git push {} {}'.format(remote, branch),
+                command = ['git', 'push', remote, branch],
                 cwd = os.path.join(self.root_dir, curr_fb_path),
                 env = env,
                 username = auth['username'],
@@ -659,11 +660,12 @@ class Git:
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             p = subprocess.Popen(
-                ['git push {} {}'.format(remote, branch)],
+                ['git', 'push', remote, branch],
                 stdout=PIPE,
                 stderr=PIPE,
                 env = env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
+                env = env,
             )
             _, error = p.communicate()
 
