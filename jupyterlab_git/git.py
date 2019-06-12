@@ -3,8 +3,10 @@ Module for executing git commands, sending results back to the handlers
 """
 import os
 import subprocess
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, CalledProcessError
 from urllib.parse import unquote
+
+from tornado.web import HTTPError
 
 
 class Git:
@@ -15,6 +17,55 @@ class Git:
     def __init__(self, root_dir, *args, **kwargs):
         super(Git, self).__init__(*args, **kwargs)
         self.root_dir = os.path.realpath(os.path.expanduser(root_dir))
+
+
+    def changed_files(self, base=None, remote=None, single_commit=None):
+        """Gets the list of changed files between two Git refs, or the files changed in a single commit
+
+        There are two reserved "refs" for the base
+            1. WORKING : Represents the Git working tree
+            2. INDEX: Represents the Git staging area / index
+        
+        Keyword Arguments:
+            single_commit {string} -- The single commit ref
+            base {string} -- the base Git ref
+            remote {string} -- the remote Git ref
+        
+        Returns:
+            dict -- the response of format {
+                "code": int, # Command status code
+                "files": [string, string], # List of files changed.
+                "message": [string] # Error response
+            }
+        """
+        if single_commit:
+            cmd = ['git', 'diff', f'{single_commit}^!', '--name-only']
+        elif base and remote:
+            if base == 'WORKING':
+                cmd = ['git', 'diff', remote, '--name-only']
+            elif base == 'INDEX':
+                cmd = ['git', 'diff', '--staged', remote, '--name-only']
+            else:
+                cmd = ['git', 'diff', base, remote, '--name-only']
+        else:
+            raise HTTPError(400, f'Either single_commit or (base and remote) must be provided')
+
+        
+        response = {}
+        try:
+            stdout = subprocess.check_output(
+                cmd, 
+                cwd=self.root_dir,
+                stderr=subprocess.STDOUT
+            )
+            response['files'] = stdout.decode('utf-8').strip().split('\n')
+            response['code'] = 0
+        except CalledProcessError as e:
+            response['message'] =  e.output.decode('utf-8')
+            response['code'] = e.returncode
+
+        return response
+
 
     def clone(self, current_path, repo_url):
         """
