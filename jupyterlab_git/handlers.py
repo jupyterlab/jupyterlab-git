@@ -413,6 +413,15 @@ class GitAddAllUntrackedHandler(GitHandler):
         print(my_output)
         self.finish(my_output)
 
+class GitChangedFilesHandler(GitHandler):
+
+    def post(self):
+        self.finish(
+            json.dumps(
+                self.git.changed_files(**self.get_json_body())
+            )
+        )
+
 
 def setup_handlers(web_app):
     """
@@ -440,7 +449,8 @@ def setup_handlers(web_app):
         ("/git/all_history", GitAllHistoryHandler),
         ("/git/add_all_untracked", GitAddAllUntrackedHandler),
         ("/git/clone", GitCloneHandler),
-        ("/git/upstream", GitUpstreamHandler)
+        ("/git/upstream", GitUpstreamHandler),
+        ("/git/changed_files", GitChangedFilesHandler)
     ]
 
     # add the baseurl to our paths
