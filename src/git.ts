@@ -129,7 +129,7 @@ export interface IIdentity {
 }
 
 /** Makes a HTTP request, sending a git command to the backend */
-function httpGitRequest(
+export function httpGitRequest(
   url: string,
   method: string,
   request: Object

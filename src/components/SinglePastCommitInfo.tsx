@@ -14,6 +14,7 @@ import {
   commitOverviewNumbers,
   commitStyle,
   deletionIconStyle,
+  diffIconStyle,
   floatRightStyle,
   iconStyle,
   insertionIconStyle,
@@ -28,12 +29,16 @@ import {
 } from '../git';
 import { parseFileExtension } from './FileList';
 import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
+import { openDiffView } from './diff/DiffWidget';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { isDiffSupported } from './diff/Diff';
 
 export interface ISinglePastCommitInfoProps {
   topRepoPath: string;
   data: ISingleCommitInfo;
   app: JupyterFrontEnd;
   diff: IDiffCallback;
+  renderMime: IRenderMimeRegistry;
 
   refresh: () => void;
 }
@@ -205,18 +210,26 @@ export class SinglePastCommitInfo extends React.Component<
                       );
                     }}
                   />
-                  <span
-                    className={commitDetailFilePathStyle}
-                    onDoubleClick={() => {
-                      this.props.diff(
-                        modifiedFile.modified_file_path,
-                        this.props.data.commit,
-                        this.props.data.pre_commit
-                      );
-                    }}
-                  >
+                  <span className={commitDetailFilePathStyle}>
                     {modifiedFile.modified_file_name}
                   </span>
+                  {isDiffSupported(modifiedFile.modified_file_path) && (
+                    <button
+                      className={`${diffIconStyle}`}
+                      title={'View file changes'}
+                      onClick={() => {
+                        openDiffView(
+                          modifiedFile.modified_file_path,
+                          this.props.app,
+                          {
+                            previousRef: { gitRef: this.props.data.pre_commit },
+                            currentRef: { gitRef: this.props.data.commit }
+                          },
+                          this.props.renderMime
+                        );
+                      }}
+                    />
+                  )}
                 </li>
               );
             })}

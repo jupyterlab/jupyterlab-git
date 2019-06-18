@@ -11,7 +11,8 @@
     "outDir": "lib",
     "types": ["jest"],
     "jsx": "react",
-    "plugins": [{ "name": "typescript-tslint-plugin" }]
+    "plugins": [{ "name": "typescript-tslint-plugin" }],
+    "resolveJsonModule": true
   },
   "include": ["src/*"]
 }

@@ -21,6 +21,7 @@ import { classes } from 'typestyle';
 import * as React from 'react';
 
 import { showDialog, Dialog } from '@jupyterlab/apputils';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 export interface IGitStageProps {
   heading: string;
@@ -54,6 +55,7 @@ export interface IGitStageProps {
   isDisabled: boolean;
   disableOthers: Function;
   sideBarExpanded: boolean;
+  renderMime: IRenderMimeRegistry;
 }
 
 export interface IGitStageState {
@@ -187,6 +189,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                     disableFile={this.props.disableFiles}
                     toggleDisableFiles={this.props.toggleDisableFiles}
                     sideBarExpanded={this.props.sideBarExpanded}
+                    renderMime={this.props.renderMime}
                   />
                 );
               }

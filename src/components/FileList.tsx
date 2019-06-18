@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
@@ -5,45 +6,44 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { Menu } from '@phosphor/widgets';
 
 import { PathExt } from '@jupyterlab/coreutils';
-
-import { Git, IGitShowPrefixResult } from '../git';
-
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import * as React from 'react';
+import { openDiffView } from './diff/DiffWidget';
 import {
-  moveFileUpButtonStyle,
+  folderFileIconSelectedStyle,
+  folderFileIconStyle,
+  genericFileIconSelectedStyle,
+  genericFileIconStyle,
+  imageFileIconSelectedStyle,
+  imageFileIconStyle,
+  jsonFileIconSelectedStyle,
+  jsonFileIconStyle,
+  kernelFileIconSelectedStyle,
+  kernelFileIconStyle,
+  markdownFileIconSelectedStyle,
+  markdownFileIconStyle,
+  moveFileDownButtonSelectedStyle,
   moveFileDownButtonStyle,
   moveFileUpButtonSelectedStyle,
-  moveFileDownButtonSelectedStyle,
-  folderFileIconStyle,
-  genericFileIconStyle,
-  yamlFileIconStyle,
-  markdownFileIconStyle,
-  imageFileIconStyle,
-  spreadsheetFileIconStyle,
-  jsonFileIconStyle,
-  pythonFileIconStyle,
-  kernelFileIconStyle,
-  folderFileIconSelectedStyle,
-  genericFileIconSelectedStyle,
-  yamlFileIconSelectedStyle,
-  markdownFileIconSelectedStyle,
-  imageFileIconSelectedStyle,
-  spreadsheetFileIconSelectedStyle,
-  jsonFileIconSelectedStyle,
+  moveFileUpButtonStyle,
   pythonFileIconSelectedStyle,
-  kernelFileIconSelectedStyle
+  pythonFileIconStyle,
+  spreadsheetFileIconSelectedStyle,
+  spreadsheetFileIconStyle,
+  yamlFileIconSelectedStyle,
+  yamlFileIconStyle
 } from '../componentsStyle/FileListStyle';
-
+import { Git, IGitShowPrefixResult } from '../git';
 import { GitStage } from './GitStage';
-
-import * as React from 'react';
 
 export namespace CommandIDs {
   export const gitFileOpen = 'gf:Open';
   export const gitFileUnstage = 'gf:Unstage';
   export const gitFileStage = 'gf:Stage';
   export const gitFileTrack = 'gf:Track';
-  export const gitFileUntrack = 'gf:Untrack';
   export const gitFileDiscard = 'gf:Discard';
+  export const gitFileDiffWorking = 'gf:DiffWorking';
+  export const gitFileDiffIndex = 'gf:DiffIndex';
 }
 
 export interface IFileListState {
@@ -79,6 +79,7 @@ export interface IFileListProps {
   refresh: any;
   sideBarExpanded: boolean;
   display: boolean;
+  renderMime: IRenderMimeRegistry;
 }
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
@@ -130,6 +131,43 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         }
       });
     }
+
+    if (!commands.hasCommand(CommandIDs.gitFileDiffWorking)) {
+      commands.addCommand(CommandIDs.gitFileDiffWorking, {
+        label: 'Diff',
+        caption: 'Diff selected file',
+        execute: () => {
+          openDiffView(
+            this.state.contextMenuFile,
+            this.props.app,
+            {
+              currentRef: { specialRef: 'WORKING' },
+              previousRef: { gitRef: 'HEAD' }
+            },
+            this.props.renderMime
+          );
+        }
+      });
+    }
+
+    if (!commands.hasCommand(CommandIDs.gitFileDiffIndex)) {
+      commands.addCommand(CommandIDs.gitFileDiffIndex, {
+        label: 'Diff',
+        caption: 'Diff selected file',
+        execute: () => {
+          openDiffView(
+            this.state.contextMenuFile,
+            this.props.app,
+            {
+              currentRef: { specialRef: 'INDEX' },
+              previousRef: { gitRef: 'HEAD' }
+            },
+            this.props.renderMime
+          );
+        }
+      });
+    }
+
     if (!commands.hasCommand(CommandIDs.gitFileStage)) {
       commands.addCommand(CommandIDs.gitFileStage, {
         label: 'Stage',
@@ -145,6 +183,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         }
       });
     }
+
     if (!commands.hasCommand(CommandIDs.gitFileTrack)) {
       commands.addCommand(CommandIDs.gitFileTrack, {
         label: 'Track',
@@ -197,6 +236,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this.state.contextMenuStaged.addItem({
       command: CommandIDs.gitFileUnstage
     });
+    this.state.contextMenuStaged.addItem({
+      command: CommandIDs.gitFileDiffIndex
+    });
 
     this.state.contextMenuUnstaged.addItem({ command: CommandIDs.gitFileOpen });
     this.state.contextMenuUnstaged.addItem({
@@ -204,6 +246,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
     this.state.contextMenuUnstaged.addItem({
       command: CommandIDs.gitFileDiscard
+    });
+    this.state.contextMenuUnstaged.addItem({
+      command: CommandIDs.gitFileDiffWorking
     });
 
     this.state.contextMenuUntracked.addItem({
@@ -301,7 +346,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   updateSelectedStage = (stage: string): void => {
     this.setState({ selectedStage: stage });
   };
-
   /** Open a file in the git listing */
   async openListedFile(
     typeX: string,
@@ -497,6 +541,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               disableOthers={null}
               isDisabled={this.state.disableStaged}
               sideBarExpanded={this.props.sideBarExpanded}
+              renderMime={this.props.renderMime}
             />
             <GitStage
               heading={'Changed'}
@@ -530,6 +575,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               disableOthers={this.disableStagesForDiscardAll}
               isDisabled={this.state.disableUnstaged}
               sideBarExpanded={this.props.sideBarExpanded}
+              renderMime={this.props.renderMime}
             />
             <GitStage
               heading={'Untracked'}
@@ -563,6 +609,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               disableOthers={null}
               isDisabled={this.state.disableUntracked}
               sideBarExpanded={this.props.sideBarExpanded}
+              renderMime={this.props.renderMime}
             />
           </div>
         )}

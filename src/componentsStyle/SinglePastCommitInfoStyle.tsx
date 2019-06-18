@@ -56,7 +56,6 @@ export const commitDetailFileStyle = style({
 
 export const commitDetailFilePathStyle = style({
   fontSize: 'var(--jp-ui-font-size1)',
-  flex: '1 1 auto',
   marginRight: '4px',
   paddingLeft: '4px',
   textOverflow: 'ellipsis',
@@ -86,6 +85,15 @@ export const insertionIconStyle = style({
 
 export const deletionIconStyle = style({
   backgroundImage: 'var(--jp-icon-deletions-made)'
+});
+
+export const diffIconStyle = style({
+  backgroundColor: 'transparent',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+  backgroundImage: 'var(--jp-icon-diff)',
+  border: 'none',
+  outline: 'none'
 });
 
 export const revertButtonStyle = style({
