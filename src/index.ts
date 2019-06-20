@@ -24,7 +24,7 @@ import { IDiffCallback } from './git';
 export { IDiffCallback } from './git';
 
 import '../style/variables.css';
-import { GitClone } from './gitClone';
+import { GitClone } from './widgets/gitClone';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';

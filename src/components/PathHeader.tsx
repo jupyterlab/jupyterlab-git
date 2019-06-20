@@ -14,7 +14,7 @@ import { Git } from '../git';
 
 import { Dialog } from '@jupyterlab/apputils';
 
-import { GitPullPushDialog, Operation } from '../gitPushPull';
+import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 
 export interface IPathHeaderState {
   refresh: any;
