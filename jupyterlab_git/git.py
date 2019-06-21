@@ -78,7 +78,6 @@ class Git:
         env['GIT_TERMINAL_PROMPT'] = '0'
         p = subprocess.Popen(
             ['git', 'clone', unquote(repo_url)],
-            shell=True,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),

@@ -27,7 +27,6 @@ def test_git_clone_success(mock_subproc_popen):
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True,
             env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
@@ -62,7 +61,6 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
-            shell=True,
             env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
         ),
         call().communicate()
