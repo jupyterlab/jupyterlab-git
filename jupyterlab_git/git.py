@@ -450,10 +450,26 @@ class Git:
                 "message": my_error.decode("utf-8"),
             }
 
+    def get_remotes(self, current_path):
+        """
+        Execute git remote command & return the list of remotes.
+        """
+        my_output = subprocess.check_output(
+            ["git", "remote"],
+            cwd=os.path.join(self.root_dir, current_path)
+        )
+        remotes = [x for x in my_output.decode("utf-8").split("\n") if x]
+        return remotes
+
     def checkout_branch(self, branchname, current_path):
         """
         Execute git checkout <branch-name> command & return the result.
         """
+        # if branch is remote and there is only one remote then remove remote prefix from branchname
+        remotes = self.get_remotes(current_path)
+        if len(remotes) == 1:
+            branchname = branchname.replace(remotes[0] + "/", "", 1)
+
         p = Popen(
             ["git", "checkout", branchname],
             stdout=PIPE,
