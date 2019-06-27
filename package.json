@@ -5,6 +5,14 @@
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
   "author": "Git Intern Team - Jenna Landy, Noah Stapp, Alena Mueller; AWS - Jaipreet Singh, Neelam Gehlot; Quansight - Saul Shanabrook",
+  "homepage": "https://github.com/jupyterlab/jupyterlab-git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab-git.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab-git/issues"
+  },
   "keywords": [
     "jupyter",
     "jupyterlab",
@@ -24,18 +32,8 @@
     "style/*.css",
     "style/images/*.svg"
   ],
-  "jupyterlab": {
-    "extension": true,
-    "discovery": {
-      "server": {
-        "managers": [
-          "pip"
-        ],
-        "base": {
-          "name": "jupyterlab-git"
-        }
-      }
-    }
+  "directories": {
+    "lib": "lib"
   },
   "dependencies": {
     "@jupyterlab/application": "^1.0.0-rc.0",
@@ -75,8 +73,25 @@
     "typescript": "~3.1.2",
     "typescript-tslint-plugin": "0.3.1"
   },
-  "directories": {
-    "lib": "lib"
+  "resolutions": {
+    "@types/react-dom": "^16.8.4",
+    "@types/react": "^16.8.4",
+    "@phosphor/commands": "^1.6.3",
+    "react": "~16.8.4",
+    "react-dom": "~16.8.4"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "discovery": {
+      "server": {
+        "managers": [
+          "pip"
+        ],
+        "base": {
+          "name": "jupyterlab-git"
+        }
+      }
+    }
   },
   "husky": {
     "hooks": {
@@ -91,16 +106,5 @@
   },
   "prettier": {
     "singleQuote": true
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab-git.git"
-  },
-  "bugs": {
-    "url": "https://github.com/jupyterlab/jupyterlab-git/issues"
-  },
-  "homepage": "https://github.com/jupyterlab/jupyterlab-git",
-  "resolutions": {
-    "@types/react-dom": "~16.8.2"
   }
 }
