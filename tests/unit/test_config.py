@@ -9,6 +9,10 @@ from jupyterlab_git.handlers import GitConfigHandler
 
 
 @patch("jupyterlab_git.handlers.GitConfigHandler.__init__", Mock(return_value=None))
+@patch(
+    "jupyterlab_git.handlers.GitConfigHandler.get_json_body",
+    Mock(return_value={"top_repo_path": "test_path"}),
+)
 @patch("jupyterlab_git.handlers.GitConfigHandler.git", Git("/bin"))
 @patch("jupyterlab_git.handlers.GitConfigHandler.finish")
 @patch("subprocess.Popen")
@@ -28,13 +32,14 @@ def test_git_get_config_success(popen, finish):
     popen.return_value = process_mock
 
     # When
-    GitConfigHandler().get()
+    GitConfigHandler().post()
 
     # Then
     popen.assert_called_once_with(
-        ["git", "config", "--global", "--list"],
+        ["git", "config", "--list"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        cwd="test_path",
     )
     process_mock.communicate.assert_called_once_with()
 
@@ -56,10 +61,11 @@ def test_git_get_config_success(popen, finish):
     "jupyterlab_git.handlers.GitConfigHandler.get_json_body",
     Mock(
         return_value={
+            "top_repo_path": "test_path",
             "options": {
                 "user.name": "John Snow",
                 "user.email": "john.snow@iscoming.com",
-            }
+            },
         }
     ),
 )
@@ -80,24 +86,19 @@ def test_git_set_config_success(popen, finish):
     assert popen.call_count == 2
     assert (
         call(
-            [
-                "git",
-                "config",
-                "--global",
-                "--add",
-                "user.email",
-                "john.snow@iscoming.com",
-            ],
+            ["git", "config", "--add", "user.email", "john.snow@iscoming.com"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            cwd="test_path",
         )
         in popen.call_args_list
     )
     assert (
         call(
-            ["git", "config", "--global", "--add", "user.name", "John Snow"],
+            ["git", "config", "--add", "user.name", "John Snow"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            cwd="test_path",
         )
         in popen.call_args_list
     )

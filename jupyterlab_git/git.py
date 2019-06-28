@@ -9,6 +9,9 @@ from urllib.parse import unquote
 from tornado.web import HTTPError
 
 
+ALLOWED_OPTIONS = ['user.name', 'user.email']
+
+
 class Git:
     """
     A single parent class containing all of the individual git methods in it.
@@ -18,7 +21,7 @@ class Git:
         super(Git, self).__init__(*args, **kwargs)
         self.root_dir = os.path.realpath(os.path.expanduser(root_dir))
 
-    def config(self, **kwargs):
+    def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
         
         If no kwargs, all options are returned. Otherwise kwargs are set.
@@ -27,9 +30,9 @@ class Git:
 
         if len(kwargs):
             output = []
-            for k, v in kwargs.items():
-                cmd = ["git", "config", "--global", "--add", k, v]
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            for k, v in filter(lambda t: True if t[0] in ALLOWED_OPTIONS else False, kwargs.items()):
+                cmd = ["git", "config", "--add", k, v]
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=top_repo_path)
                 out, err = p.communicate()
                 output.append(out.decode("utf-8").strip())
                 response["code"] = p.returncode
@@ -40,8 +43,8 @@ class Git:
 
             response["message"] = "\n".join(output).strip()
         else:
-            cmd = ["git", "config", "--global", "--list"]
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            cmd = ["git", "config", "--list"]
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=top_repo_path)
             output, error = p.communicate()
 
             response = {"code": p.returncode}
@@ -51,9 +54,11 @@ class Git:
                 response["message"] = error.decode("utf-8").strip()
             else:
                 raw = output.decode("utf-8").strip()
-                response["options"] = dict(
-                    [l.split("=", maxsplit=1) for l in raw.split("\n")]
-                )
+                response["options"] = dict()
+                for l in raw.split("\n"):
+                    k, v = l.split("=", maxsplit=1)
+                    if k in ALLOWED_OPTIONS:
+                        response["options"][k] = v
 
         return response
 

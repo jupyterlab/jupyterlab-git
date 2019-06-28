@@ -427,21 +427,15 @@ class GitConfigHandler(GitHandler):
     Handler for 'git config' commands
     """
 
-    def get(self):
-        """
-        GET all global configuration options
-        """
-        response = self.git.config()
-        if response["code"] != 0:
-            self.set_status(500)
-        self.finish(json.dumps(response))
-
     def post(self):
         """
-        POST add global configuration options
+        POST get (if no options are passed) or set configuration options
         """
-        data = self.get_json_body()["options"]
-        response = self.git.config(**data)
+        data = self.get_json_body()
+        top_repo_path = data["top_repo_path"]
+        options = data.get("options", {})
+        response = self.git.config(top_repo_path, **options)
+
         if response["code"] != 0:
             self.set_status(500)
         else:

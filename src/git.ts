@@ -418,12 +418,13 @@ export class Git {
   /**
    * Get or set Git configuration options
    *
-   * @param options
+   * @param path Top repository path
+   * @param options Configuration options to set (undefined to get)
    */
-  async config(options?: JSONObject): Promise<Response> {
+  async config(path: string, options?: JSONObject): Promise<Response> {
     try {
-      let method = options ? 'POST' : 'GET';
-      let body = options ? { options: options } : undefined;
+      let method = 'POST';
+      let body = { path, options };
 
       let response = await httpGitRequest('/git/config', method, body);
 
