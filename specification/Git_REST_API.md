@@ -291,43 +291,7 @@ On failure
     }
 ```
 
-### /config - Get or add global configuration options
-
-URL:
-
-```bash
-    GET /git/config
-```
-
-HTTP Response
-
-```bash
-Status: 200 OK
-```
-
-Reply JSON:
-
-On success
-
-```bash
-{
-    "code": "0",
-    "options": {
-        "key1": "value1",
-        "keyI": "valueI"
-    }
-}
-```
-
-On failure
-
-```bash
-    {
-        "code": 128,
-        "command": "git config --global --list"
-        "message": "Git command error info"
-    }
-```
+### /config - Get or set configuration options
 
 URL:
 
@@ -339,6 +303,7 @@ Request JSON:
 
 ```bash
     {
+        "top_repo_path": "/absolute/path/to/root/of/repo",
         "options": {
             "key1": "value1",
             "keyI": "valueI"
@@ -368,7 +333,7 @@ On failure
 ```bash
     {
         "code": 128,
-        "command": "git config --global --add name value"
+        "command": "git config --add name value"
         "message": "Git command error info"
     }
 ```
