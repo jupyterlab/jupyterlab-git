@@ -293,6 +293,9 @@ On failure
 
 ### /config - Get or set configuration options
 
+If no `options` in the request, get the `options` in the response.
+Otherwise set the provided options (if allowed) and return `message`.
+
 URL:
 
 ```bash
@@ -324,7 +327,11 @@ On success
 ```bash
 {
     "code": "0",
-    "message": "Git command output"
+    "message"?: "Git command output",
+    "options"?: {
+        "key1": "value1",
+        "keyI": "valueI"
+    }
 }
 ```
 

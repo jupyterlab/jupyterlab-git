@@ -1,3 +1,4 @@
+import * as apputils from '@jupyterlab/apputils';
 import {
   BranchHeader,
   IBranchHeaderProps
@@ -22,7 +23,7 @@ describe('BranchHeader', () => {
     upstreamBranch: 'origin/master',
     stagedFiles: ['test-1', 'test-2'],
     data: ['master', 'feature-1', 'feature-2', 'patch-007'],
-    refresh: 'update all content',
+    refresh: function() {},
     disabled: false,
     toggleSidebar: function() {
       return true;
@@ -32,9 +33,11 @@ describe('BranchHeader', () => {
 
   describe('#constructor()', () => {
     const branchHeader = new BranchHeader(props);
+
     it('should construct a new branch header', () => {
       expect(branchHeader).toBeInstanceOf(BranchHeader);
     });
+
     it('should set default values correctly', () => {
       expect(branchHeader.state.dropdownOpen).toEqual(false);
       expect(branchHeader.state.showCommitBox).toEqual(true);
@@ -43,25 +46,180 @@ describe('BranchHeader', () => {
   });
 
   describe('#commitAllStagedFiles()', () => {
-    const branchHeader = new BranchHeader(props);
-    it('should commit when commit message is provided', () => {
+    let branchHeader = null;
+
+    beforeEach(() => {
+      branchHeader = new BranchHeader(props);
+    });
+
+    it('should commit when commit message is provided', async () => {
       const spy = jest.spyOn(Git.prototype, 'commit');
-      branchHeader.commitAllStagedFiles(
+      // Mock identity look up
+      const identity = jest.spyOn(Git.prototype, 'config').mockImplementation(
+        () =>
+          new Response(
+            JSON.stringify({
+              options: {
+                'user.name': 'John Snow',
+                'user.email': 'john.snow@winteris.com'
+              }
+            }),
+            { status: 201 }
+          )
+      );
+      await branchHeader.commitAllStagedFiles(
         'Initial commit',
         '/absolute/path/to/git/repo'
       );
+      expect(identity).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith(
         'Initial commit',
         '/absolute/path/to/git/repo'
       );
-      spy.mockRestore();
+      jest.restoreAllMocks();
     });
-    it('should NOT commit when commit message is empty', () => {
+
+    it('should NOT commit when commit message is empty', async () => {
       const spy = jest.spyOn(Git.prototype, 'commit');
-      branchHeader.commitAllStagedFiles('', props.topRepoPath);
+      await branchHeader.commitAllStagedFiles('', props.topRepoPath);
       expect(spy).not.toHaveBeenCalled();
       spy.mockRestore();
+    });
+
+    it('should prompt for user identity if user.name is unset', async () => {
+      const spy = jest.spyOn(Git.prototype, 'commit');
+      // Mock identity look up
+      const identity = jest
+        .spyOn(Git.prototype, 'config')
+        .mockImplementation((path, options) => {
+          if (options === undefined) {
+            return new Response(
+              JSON.stringify({
+                options: {
+                  'user.email': 'john.snow@winteris.com'
+                }
+              }),
+              { status: 201 }
+            );
+          } else {
+            return new Response('', { status: 201 });
+          }
+        });
+      jest.spyOn(apputils, 'showDialog').mockReturnValue(
+        Promise.resolve({
+          button: {
+            accept: true
+          },
+          value: {
+            name: 'John Snow',
+            email: 'john.snow@winteris.com'
+          }
+        })
+      );
+
+      await branchHeader.commitAllStagedFiles(
+        'Initial commit',
+        '/absolute/path/to/git/repo'
+      );
+      expect(identity).toHaveBeenCalledTimes(2);
+      expect(identity.mock.calls[0]).toEqual(['/absolute/path/to/git/repo']);
+      expect(identity.mock.calls[1]).toEqual([
+        '/absolute/path/to/git/repo',
+        {
+          'user.name': 'John Snow',
+          'user.email': 'john.snow@winteris.com'
+        }
+      ]);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(
+        'Initial commit',
+        '/absolute/path/to/git/repo'
+      );
+      jest.restoreAllMocks();
+    });
+
+    it('should prompt for user identity if user.email is unset', async () => {
+      const spy = jest.spyOn(Git.prototype, 'commit');
+      // Mock identity look up
+      const identity = jest
+        .spyOn(Git.prototype, 'config')
+        .mockImplementation((path, options) => {
+          if (options === undefined) {
+            return new Response(
+              JSON.stringify({
+                options: {
+                  'user.name': 'John Snow'
+                }
+              }),
+              { status: 201 }
+            );
+          } else {
+            return new Response('', { status: 201 });
+          }
+        });
+      jest.spyOn(apputils, 'showDialog').mockReturnValue({
+        button: {
+          accept: true
+        },
+        value: {
+          name: 'John Snow',
+          email: 'john.snow@winteris.com'
+        }
+      });
+
+      await branchHeader.commitAllStagedFiles(
+        'Initial commit',
+        '/absolute/path/to/git/repo'
+      );
+      expect(identity).toHaveBeenCalledTimes(2);
+      expect(identity.mock.calls[0]).toEqual(['/absolute/path/to/git/repo']);
+      expect(identity.mock.calls[1]).toEqual([
+        '/absolute/path/to/git/repo',
+        {
+          'user.name': 'John Snow',
+          'user.email': 'john.snow@winteris.com'
+        }
+      ]);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(
+        'Initial commit',
+        '/absolute/path/to/git/repo'
+      );
+      jest.restoreAllMocks();
+    });
+
+    it('should NOT commit if no user identity is set and the user reject the dialog', async () => {
+      const spy = jest.spyOn(Git.prototype, 'commit');
+      // Mock identity look up
+      const identity = jest
+        .spyOn(Git.prototype, 'config')
+        .mockImplementation((path, options) => {
+          if (options === undefined) {
+            return new Response(
+              JSON.stringify({
+                options: {}
+              }),
+              { status: 201 }
+            );
+          } else {
+            return new Response('', { status: 201 });
+          }
+        });
+      jest.spyOn(apputils, 'showDialog').mockReturnValue({
+        button: {
+          accept: false
+        }
+      });
+
+      await branchHeader.commitAllStagedFiles(
+        'Initial commit',
+        '/absolute/path/to/git/repo'
+      );
+      expect(identity).toHaveBeenCalledTimes(1);
+      expect(identity).toHaveBeenCalledWith('/absolute/path/to/git/repo');
+      expect(spy).not.toHaveBeenCalled();
+      jest.restoreAllMocks();
     });
   });
 

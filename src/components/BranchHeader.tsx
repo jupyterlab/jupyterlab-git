@@ -72,7 +72,7 @@ export class BranchHeader extends React.Component<
   /** Commit all staged files */
   async commitAllStagedFiles(message: string, path: string): Promise<void> {
     try {
-      if (message && message !== '' && (await this._hasIdentity())) {
+      if (message && message !== '' && (await this._hasIdentity(path))) {
         let gitApi = new Git();
         const response = await gitApi.commit(message, path);
 
@@ -288,14 +288,15 @@ export class BranchHeader extends React.Component<
   /**
    * Does the user have an known git identity.
    *
+   * @param path Top repository path
    * @returns Success status
    */
-  private async _hasIdentity(): Promise<boolean> {
+  private async _hasIdentity(path: string): Promise<boolean> {
     // If the repository path changes, check the identity
-    if (this.props.topRepoPath !== this._previousTopRepoPath) {
+    if (path !== this._previousTopRepoPath) {
       let gitApi = new Git();
       try {
-        const apiResponse = await gitApi.config(this.props.topRepoPath);
+        const apiResponse = await gitApi.config(path);
         if (apiResponse.ok) {
           const options: JSONObject = (await apiResponse.json()).options;
           const keys = Object.keys(options);
@@ -310,7 +311,7 @@ export class BranchHeader extends React.Component<
               return false;
             }
             const identity = result.value;
-            const response = await gitApi.config(this.props.topRepoPath, {
+            const response = await gitApi.config(path, {
               'user.name': identity.name,
               'user.email': identity.email
             });
@@ -320,7 +321,7 @@ export class BranchHeader extends React.Component<
               return false;
             }
           }
-          this._previousTopRepoPath = this.props.topRepoPath;
+          this._previousTopRepoPath = path;
         }
       } catch (error) {
         throw new Error('Fail to set your identity. ' + error.message);
