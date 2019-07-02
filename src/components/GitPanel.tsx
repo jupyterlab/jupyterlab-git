@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import {
   Git,
@@ -52,7 +52,7 @@ export interface IGitSessionNodeState {
 
 /** Interface for GitPanel component props */
 export interface IGitSessionNodeProps {
-  app: JupyterLab;
+  app: JupyterFrontEnd;
   diff: IDiffCallback;
 }
 

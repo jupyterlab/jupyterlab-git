@@ -1,4 +1,4 @@
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import {
   changeStageButtonStyle,
@@ -34,7 +34,7 @@ export interface IFileItemProps {
   topRepoPath: string;
   file: any;
   stage: string;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
   refresh: any;
   moveFile: Function;
   discardFile: Function;

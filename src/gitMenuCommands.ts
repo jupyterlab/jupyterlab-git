@@ -1,12 +1,10 @@
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog, MainAreaWidget } from '@jupyterlab/apputils';
 
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { InstanceTracker } from '@jupyterlab/apputils';
-
-import { Terminal } from '@jupyterlab/terminal';
+import { ITerminal } from '@jupyterlab/terminal';
 
 import { Git } from './git';
 
@@ -25,10 +23,8 @@ export namespace CommandIDs {
 /**
  * Add the commands for the git extension.
  */
-export function addCommands(app: JupyterLab, services: ServiceManager) {
+export function addCommands(app: JupyterFrontEnd, services: ServiceManager) {
   let { commands } = app;
-  const namespace = 'terminal';
-  const tracker = new InstanceTracker<Terminal>({ namespace });
   let gitApi = new Git();
 
   /**
@@ -49,33 +45,28 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
   commands.addCommand(CommandIDs.gitTerminal, {
     label: 'Open Terminal',
     caption: 'Start a new terminal session to directly use git command',
-    execute: args => {
+    execute: async args => {
       let currentFileBrowserPath = findCurrentFileBrowserPath();
-      let name = args ? (args['name'] as string) : '';
-      let terminal = new Terminal();
-      terminal.title.closable = true;
-      terminal.title.label = '...';
-      app.shell.addToMainArea(terminal);
-      let promise = name
-        ? services.terminals.connectTo(name)
-        : services.terminals.startNew();
 
-      return promise
-        .then(session => {
-          terminal.session = session;
-          tracker.add(terminal);
-          app.shell.activateById(terminal.id);
-          terminal.session.send({
-            type: 'stdin',
-            content: [
-              'cd "' + currentFileBrowserPath.split('"').join('\\"') + '"\n'
-            ]
-          });
-          return terminal;
-        })
-        .catch(() => {
-          terminal.dispose();
+      const main = (await commands.execute(
+        'terminal:create-new',
+        args
+      )) as MainAreaWidget<ITerminal.ITerminal>;
+
+      const terminal = main.content;
+      try {
+        terminal.session.send({
+          type: 'stdin',
+          content: [
+            'cd "' + currentFileBrowserPath.split('"').join('\\"') + '"\n'
+          ]
         });
+
+        return main;
+      } catch (e) {
+        console.error(e);
+        main.dispose();
+      }
     }
   });
 
@@ -83,7 +74,7 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
   commands.addCommand(CommandIDs.gitTerminalCommand, {
     label: 'Terminal Command',
     caption: 'Open a new terminal session and perform git command',
-    execute: args => {
+    execute: async args => {
       let currentFileBrowserPath = findCurrentFileBrowserPath();
       let changeDirectoryCommand =
         currentFileBrowserPath === ' '
@@ -92,26 +83,24 @@ export function addCommands(app: JupyterLab, services: ServiceManager) {
       let gitCommand = args ? (args['cmd'] as string) : '';
       let linkCommand =
         changeDirectoryCommand !== '' && gitCommand !== '' ? '&&' : '';
-      let terminal = new Terminal();
-      terminal.title.closable = true;
-      terminal.title.label = '...';
-      app.shell.addToMainArea(terminal);
-      let promise = services.terminals.startNew();
 
-      return promise
-        .then(session => {
-          terminal.session = session;
-          tracker.add(terminal);
-          app.shell.activateById(terminal.id);
-          terminal.session.send({
-            type: 'stdin',
-            content: [changeDirectoryCommand + linkCommand + gitCommand + '\n']
-          });
-          return terminal;
-        })
-        .catch(() => {
-          terminal.dispose();
+      const main = (await commands.execute(
+        'terminal:create-new',
+        args
+      )) as MainAreaWidget<ITerminal.ITerminal>;
+
+      const terminal = main.content;
+      try {
+        terminal.session.send({
+          type: 'stdin',
+          content: [changeDirectoryCommand + linkCommand + gitCommand + '\n']
         });
+
+        return main;
+      } catch (e) {
+        console.error(e);
+        main.dispose();
+      }
     }
   });
 
