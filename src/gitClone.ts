@@ -166,7 +166,7 @@ class GitCloneForm extends Widget {
     node.className = 'jp-RedirectForm';
     warning.className = 'jp-RedirectForm-warning';
     text.textContent = 'Enter the Clone URI of the repository';
-    input.placeholder = 'https://github.com/jupyterlab/jupyterlab-git.git';
+    input.placeholder = 'https://host.com/org/repo.git';
 
     label.appendChild(text);
     label.appendChild(input);
