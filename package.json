@@ -3,6 +3,7 @@
   "version": "0.6.0",
   "description": "A JupyterLab extension for version control using git",
   "main": "lib/index.js",
+  "style": "style/index.css",
   "license": "BSD-3-Clause",
   "author": "Git Intern Team - Jenna Landy, Noah Stapp, Alena Mueller; AWS - Jaipreet Singh, Neelam Gehlot; Quansight - Saul Shanabrook",
   "keywords": [

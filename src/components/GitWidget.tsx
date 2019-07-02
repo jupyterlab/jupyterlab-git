@@ -18,8 +18,6 @@ import { gitWidgetStyle } from '../componentsStyle/GitWidgetStyle';
 
 import { IDiffCallback } from '../git';
 
-import '../../style/variables.css';
-
 /**
  * An options object for creating a running sessions widget.
  */

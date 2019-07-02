@@ -21,7 +21,7 @@
   --jp-icon-git-pull-disabled: url('./images/git-clone-icon-disabled.svg');
 }
 
-[data-theme-light="true"] {
+[data-jp-theme-light='true'] {
   --jp-icon-arrow-down: url('./images/arrow-down.svg');
   --jp-icon-deletions-made: url('./images/deletions-made-icon.svg');
   --jp-icon-discard-file: url('./images/discard.svg');
@@ -34,7 +34,7 @@
   --jp-icon-rewind: url('./images/rewind.svg');
 }
 
-[data-theme-light="false"] {
+[data-jp-theme-light='false'] {
   --jp-icon-arrow-down: url('./images/arrow-down-white.svg');
   --jp-icon-deletions-made: url('./images/deletions-made-icon-white.svg');
   --jp-icon-discard-file: url('./images/discard-selected.svg');
