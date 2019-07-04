@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "declaration": true,
+    "esModuleInterop": true,
     "noImplicitAny": false,
     "noEmitOnError": true,
     "noUnusedLocals": true,
@@ -8,8 +9,8 @@
     "moduleResolution": "node",
     "target": "es2015",
     "outDir": "lib",
-    "lib": ["es5", "es2015.promise", "es2015.collection", "dom"],
-    "types": [],
+    // "lib": ["es5", "es2015.promise", "es2015.collection", "dom"],
+    "types": ["jest"],
     "jsx": "react",
     "plugins": [{ "name": "typescript-tslint-plugin" }]
   },
