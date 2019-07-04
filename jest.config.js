@@ -1,17 +1,17 @@
 module.exports = {
-  transform: {
-    '\\.(ts|tsx)?$': 'ts-jest',
-    '\\.(js|jsx)?$': './transform.js'
-  },
-  transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
+  automock: false,
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy'
   },
-  testRegex: '/tests/test-.*/.*.spec.ts[x]?$',
+  preset: 'ts-jest/presets/js-with-babel',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  setupFiles: ['./setupJest.js'],
   testPathIgnorePatterns: ['/dev_mode/', '/lib/', '/node_modules/'],
-  automock: false,
-  setupFilesAfterEnv: ['@jupyterlab/testutils/lib/jest-script.js'],
-  setupFiles: ['./setupJest.js', '@jupyterlab/testutils/lib/jest-shim.js'],
-  globals: { 'ts-jest': { tsConfig: 'tsconfig.json' } }
+  testRegex: '/tests/test-.*/.*.spec.ts[x]?$',
+  transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
+  globals: {
+    'ts-jest': {
+      tsConfig: 'tsconfig.json'
+    }
+  }
 };
