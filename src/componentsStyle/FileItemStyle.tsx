@@ -104,8 +104,7 @@ export const discardButtonStyle = style({
 
 export const discardFileButtonSelectedStyle = style({
   backgroundImage: 'var(--jp-icon-discard-file-selected)',
-  marginLeft: '6px',
-  backgroundSize: '120%'
+  marginLeft: '6px'
 });
 
 export const cancelDiscardButtonStyle = style({

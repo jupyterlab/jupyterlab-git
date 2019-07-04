@@ -72,7 +72,7 @@ export const iconStyle = style({
   height: '13px',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
-  backgroundSize: '15px',
+  backgroundSize: '14px',
   right: '10px'
 });
 
@@ -90,8 +90,7 @@ export const deletionIconStyle = style({
 
 export const revertButtonStyle = style({
   backgroundImage: 'var(--jp-icon-rewind)',
-  marginLeft: '6px',
-  backgroundSize: '100%'
+  marginLeft: '6px'
 });
 
 export const numberOfDeletionsStyle = style({
