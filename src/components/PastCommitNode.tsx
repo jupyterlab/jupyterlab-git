@@ -1,4 +1,4 @@
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import {
@@ -21,7 +21,7 @@ export interface IPastCommitNodeProps {
   pastCommit: ISingleCommitInfo;
   branches: IGitBranchResult['branches'];
   topRepoPath: string;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
   diff: IDiffCallback;
   refresh: () => void;
 }

@@ -1,6 +1,6 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -75,7 +75,7 @@ export interface IFileListProps {
   stagedFiles: any;
   unstagedFiles: any;
   untrackedFiles: any;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
   refresh: any;
   sideBarExpanded: boolean;
   display: boolean;
@@ -307,7 +307,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     typeX: string,
     typeY: string,
     path: string,
-    app: JupyterLab
+    app: JupyterFrontEnd
   ) {
     if (typeX === 'D' || typeY === 'D') {
       showDialog({

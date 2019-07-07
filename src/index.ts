@@ -6,8 +6,8 @@ import { GitWidget } from './components/GitWidget';
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
@@ -40,7 +40,7 @@ export interface IGitExtension {
 /**
  * The default running sessions extension.
  */
-const plugin: JupyterLabPlugin<IGitExtension> = {
+const plugin: JupyterFrontEndPlugin<IGitExtension> = {
   id: 'jupyter.extensions.running-sessions-git',
   requires: [
     IMainMenu,
@@ -63,7 +63,7 @@ export class GitExtension implements IGitExtension {
   gitPlugin: GitWidget;
   gitCloneWidget: GitClone;
   constructor(
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     restorer: ILayoutRestorer,
     factory: IFileBrowserFactory
   ) {
@@ -82,7 +82,7 @@ export class GitExtension implements IGitExtension {
     // widget).
 
     restorer.add(this.gitPlugin, 'git-sessions');
-    app.shell.addToLeftArea(this.gitPlugin, { rank: 200 });
+    app.shell.add(this.gitPlugin, 'left', { rank: 200 });
 
     this.gitCloneWidget = new GitClone(factory);
   }
@@ -104,7 +104,7 @@ export class GitExtension implements IGitExtension {
     }
   }
 
-  private app: JupyterLab;
+  private app: JupyterFrontEnd;
   private diffProviders: { [key: string]: IDiffCallback } = {};
 }
 
@@ -112,7 +112,7 @@ export class GitExtension implements IGitExtension {
  * Activate the running plugin.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   restorer: ILayoutRestorer,
   factory: IFileBrowserFactory

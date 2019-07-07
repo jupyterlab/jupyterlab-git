@@ -1,4 +1,4 @@
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import * as React from 'react';
 import { historySideBarStyle } from '../componentsStyle/HistorySideBarStyle';
 import { IGitBranchResult, ISingleCommitInfo, IDiffCallback } from '../git';
@@ -10,7 +10,7 @@ export interface IHistorySideBarProps {
   branches: IGitBranchResult['branches'];
   isExpanded: boolean;
   topRepoPath: string;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
   refresh: () => void;
   diff: IDiffCallback;
 }
