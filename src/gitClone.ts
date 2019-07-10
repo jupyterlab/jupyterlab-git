@@ -55,7 +55,7 @@ export class GitClone extends Widget {
    */
   disableIfInGitDirectory(): void {
     this.gitApi
-      .allHistory(this.fileBrowser.model.path)
+      .showTopLevel(this.fileBrowser.model.path)
       .then(response => {
         if (response.code === 0) {
           this.enabledCloneButton.parent = null;
