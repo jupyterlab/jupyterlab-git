@@ -9,10 +9,9 @@ import { RefObject } from 'react';
 import { httpGitRequest } from '../../git';
 import { IDiffContext } from './model';
 import { NBDiffHeader } from './NBDiffHeader';
-import { IDiffProps } from './Diff';
+import { IDiffProps, RenderMimeConsumer } from './Diff';
 
 export interface ICellDiffProps {
-  renderMime: IRenderMimeRegistry;
   cellChunk: CellDiffModel[];
   mimeType: string;
 }
@@ -36,6 +35,7 @@ export class CellDiff extends React.Component<ICellDiffProps, {}> {
   private removedRef: RefObject<HTMLDivElement> = React.createRef<
     HTMLDivElement
   >();
+  private renderMimeRegistry: IRenderMimeRegistry;
 
   constructor(props: ICellDiffProps) {
     super(props);
@@ -48,7 +48,7 @@ export class CellDiff extends React.Component<ICellDiffProps, {}> {
     if (chunk.length === 1 && !(chunk[0].added || chunk[0].deleted)) {
       const widget = new CellDiffWidget(
         chunk[0],
-        this.props.renderMime,
+        this.renderMimeRegistry,
         this.props.mimeType
       );
       this.unAddedOrRemovedRef.current.appendChild(widget.node);
@@ -58,7 +58,7 @@ export class CellDiff extends React.Component<ICellDiffProps, {}> {
         const ref = cell.deleted ? this.removedRef : this.addedRef;
         const widget = new CellDiffWidget(
           cell,
-          this.props.renderMime,
+          this.renderMimeRegistry,
           this.props.mimeType
         );
         ref.current.appendChild(widget.node);
@@ -69,16 +69,26 @@ export class CellDiff extends React.Component<ICellDiffProps, {}> {
   render() {
     const chunk = this.props.cellChunk;
     return (
-      <React.Fragment>
-        {chunk.length === 1 && !(chunk[0].added || chunk[0].deleted) ? (
-          <div ref={this.unAddedOrRemovedRef} />
-        ) : (
-          <div className={'jp-Diff-addremchunk'}>
-            <div className={'jp-Diff-addedchunk'} ref={this.addedRef} />
-            <div className={'jp-Diff-removedchunk'} ref={this.removedRef} />
-          </div>
-        )}
-      </React.Fragment>
+      <RenderMimeConsumer>
+        {(value: IRenderMimeRegistry) => {
+          this.renderMimeRegistry = value;
+          return (
+            <React.Fragment>
+              {chunk.length === 1 && !(chunk[0].added || chunk[0].deleted) ? (
+                <div ref={this.unAddedOrRemovedRef} />
+              ) : (
+                <div className={'jp-Diff-addremchunk'}>
+                  <div className={'jp-Diff-addedchunk'} ref={this.addedRef} />
+                  <div
+                    className={'jp-Diff-removedchunk'}
+                    ref={this.removedRef}
+                  />
+                </div>
+              )}
+            </React.Fragment>
+          );
+        }}
+      </RenderMimeConsumer>
     );
   }
 }
@@ -123,7 +133,6 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
           <CellDiff
             key={index}
             cellChunk={cellChunk}
-            renderMime={this.props.renderMime}
             mimeType={this.state.nbdModel.mimetype}
           />
         )

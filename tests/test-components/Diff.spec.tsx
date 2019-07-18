@@ -12,7 +12,6 @@ describe('Diff', () => {
   it('should render diff provider component when supported', function() {
     // Given
     const props: IDiffProps = {
-      renderMime: null,
       path: '/path/to/File.ipynb',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },
@@ -30,7 +29,6 @@ describe('Diff', () => {
   it('should not render anything when not supported', function() {
     // Given
     const props: IDiffProps = {
-      renderMime: null,
       path: '/path/to/File.py',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },

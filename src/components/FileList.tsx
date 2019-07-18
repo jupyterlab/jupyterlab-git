@@ -111,127 +111,112 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       disableFiles: false
     };
 
-    /** Add right-click menu options for files in repo
-     *
-     */
-
-    if (!commands.hasCommand(CommandIDs.gitFileOpen)) {
-      commands.addCommand(CommandIDs.gitFileOpen, {
-        label: 'Open',
-        caption: 'Open selected file',
-        execute: () => {
-          try {
-            this.openListedFile(
-              this.state.contextMenuTypeX,
-              this.state.contextMenuTypeY,
-              this.state.contextMenuFile,
-              this.props.app
-            );
-          } catch (err) {}
-        }
-      });
-    }
-
-    if (!commands.hasCommand(CommandIDs.gitFileDiffWorking)) {
-      commands.addCommand(CommandIDs.gitFileDiffWorking, {
-        label: 'Diff',
-        caption: 'Diff selected file',
-        execute: () => {
-          openDiffView(
+    commands.addCommand(CommandIDs.gitFileOpen, {
+      label: 'Open',
+      caption: 'Open selected file',
+      execute: async () => {
+        try {
+          await this.openListedFile(
+            this.state.contextMenuTypeX,
+            this.state.contextMenuTypeY,
             this.state.contextMenuFile,
-            this.props.app,
-            {
-              currentRef: { specialRef: 'WORKING' },
-              previousRef: { gitRef: 'HEAD' }
-            },
-            this.props.renderMime
+            this.props.app
           );
-        }
-      });
-    }
+        } catch (err) {}
+      }
+    });
 
-    if (!commands.hasCommand(CommandIDs.gitFileDiffIndex)) {
-      commands.addCommand(CommandIDs.gitFileDiffIndex, {
-        label: 'Diff',
-        caption: 'Diff selected file',
-        execute: () => {
-          openDiffView(
+    commands.addCommand(CommandIDs.gitFileDiffWorking, {
+      label: 'Diff',
+      caption: 'Diff selected file',
+      execute: () => {
+        openDiffView(
+          this.state.contextMenuFile,
+          this.props.app,
+          {
+            currentRef: { specialRef: 'WORKING' },
+            previousRef: { gitRef: 'HEAD' }
+          },
+          this.props.renderMime
+        );
+      }
+    });
+
+    commands.addCommand(CommandIDs.gitFileDiffIndex, {
+      label: 'Diff',
+      caption: 'Diff selected file',
+      execute: () => {
+        openDiffView(
+          this.state.contextMenuFile,
+          this.props.app,
+          {
+            currentRef: { specialRef: 'INDEX' },
+            previousRef: { gitRef: 'HEAD' }
+          },
+          this.props.renderMime
+        );
+      }
+    });
+
+    commands.addCommand(CommandIDs.gitFileStage, {
+      label: 'Stage',
+      caption: 'Stage the changes of selected file',
+      execute: () => {
+        try {
+          this.addUnstagedFile(
             this.state.contextMenuFile,
-            this.props.app,
-            {
-              currentRef: { specialRef: 'INDEX' },
-              previousRef: { gitRef: 'HEAD' }
-            },
-            this.props.renderMime
+            this.props.topRepoPath,
+            this.props.refresh
           );
-        }
-      });
-    }
+        } catch (err) {}
+      }
+    });
 
-    if (!commands.hasCommand(CommandIDs.gitFileStage)) {
-      commands.addCommand(CommandIDs.gitFileStage, {
-        label: 'Stage',
-        caption: 'Stage the changes of selected file',
-        execute: () => {
-          try {
-            this.addUnstagedFile(
+    commands.addCommand(CommandIDs.gitFileTrack, {
+      label: 'Track',
+      caption: 'Start tracking selected file',
+      execute: () => {
+        try {
+          this.addUntrackedFile(
+            this.state.contextMenuFile,
+            this.props.topRepoPath,
+            this.props.refresh
+          );
+        } catch (err) {}
+      }
+    });
+
+    commands.addCommand(CommandIDs.gitFileUnstage, {
+      label: 'Unstage',
+      caption: 'Unstage the changes of selected file',
+      execute: () => {
+        try {
+          if (this.state.contextMenuTypeX !== 'D') {
+            this.resetStagedFile(
               this.state.contextMenuFile,
               this.props.topRepoPath,
               this.props.refresh
             );
-          } catch (err) {}
-        }
-      });
-    }
+          }
+        } catch (err) {}
+      }
+    });
 
-    if (!commands.hasCommand(CommandIDs.gitFileTrack)) {
-      commands.addCommand(CommandIDs.gitFileTrack, {
-        label: 'Track',
-        caption: 'Start tracking selected file',
-        execute: () => {
-          try {
-            this.addUntrackedFile(
-              this.state.contextMenuFile,
-              this.props.topRepoPath,
-              this.props.refresh
-            );
-          } catch (err) {}
-        }
-      });
-    }
-    if (!commands.hasCommand(CommandIDs.gitFileUnstage)) {
-      commands.addCommand(CommandIDs.gitFileUnstage, {
-        label: 'Unstage',
-        caption: 'Unstage the changes of selected file',
-        execute: () => {
-          try {
-            if (this.state.contextMenuTypeX !== 'D') {
-              this.resetStagedFile(
-                this.state.contextMenuFile,
-                this.props.topRepoPath,
-                this.props.refresh
-              );
-            }
-          } catch (err) {}
-        }
-      });
-    }
-    if (!commands.hasCommand(CommandIDs.gitFileDiscard)) {
-      commands.addCommand(CommandIDs.gitFileDiscard, {
-        label: 'Discard',
-        caption: 'Discard recent changes of selected file',
-        execute: () => {
-          try {
-            this.updateSelectedFile(
-              this.state.contextMenuIndex,
-              this.state.contextMenuStage
-            );
-            this.updateSelectedDiscardFile(this.state.contextMenuIndex);
-            this.toggleDisableFiles();
-          } catch (err) {}
-        }
-      });
-    }
+    commands.addCommand(CommandIDs.gitFileDiscard, {
+      label: 'Discard',
+      caption: 'Discard recent changes of selected file',
+      execute: () => {
+        try {
+          this.updateSelectedFile(
+            this.state.contextMenuIndex,
+            this.state.contextMenuStage
+          );
+          this.updateSelectedDiscardFile(this.state.contextMenuIndex);
+          this.toggleDisableFiles();
+        } catch (err) {}
+      }
+    });
+
     this.state.contextMenuStaged.addItem({ command: CommandIDs.gitFileOpen });
     this.state.contextMenuStaged.addItem({
       command: CommandIDs.gitFileUnstage

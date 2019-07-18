@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { getRefValue, IDiffContext } from './model';
-import { Diff, isDiffSupported } from './Diff';
+import { Diff, isDiffSupported, RenderMimeProvider } from './Diff';
 import { JupyterLab } from '@jupyterlab/application';
 import { showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -13,7 +13,7 @@ import { style } from 'typestyle';
 export class DiffWidget extends Widget {
   private readonly _renderMime: IRenderMimeRegistry;
   private readonly _path: string;
-  private readonly _gitContext: IDiffContext;
+  private readonly _diffContext: IDiffContext;
 
   constructor(
     renderMime: IRenderMimeRegistry,
@@ -23,7 +23,7 @@ export class DiffWidget extends Widget {
     super();
     this._renderMime = renderMime;
     this._path = path;
-    this._gitContext = gitContext;
+    this._diffContext = gitContext;
 
     this.title.label = PathExt.basename(path);
     this.title.iconClass = style({
@@ -33,11 +33,9 @@ export class DiffWidget extends Widget {
     this.addClass('jp-git-diff-parent-diff-widget');
 
     ReactDOM.render(
-      <Diff
-        renderMime={this._renderMime}
-        path={this._path}
-        diffContext={this._gitContext}
-      />,
+      <RenderMimeProvider value={this._renderMime}>
+        <Diff path={this._path} diffContext={this._diffContext} />
+      </RenderMimeProvider>,
       this.node
     );
   }
@@ -45,11 +43,9 @@ export class DiffWidget extends Widget {
   onUpdateRequest(): void {
     ReactDOM.unmountComponentAtNode(this.node);
     ReactDOM.render(
-      <Diff
-        renderMime={this._renderMime}
-        path={this._path}
-        diffContext={this._gitContext}
-      />,
+      <RenderMimeProvider value={this._renderMime}>
+        <Diff path={this._path} diffContext={this._diffContext} />
+      </RenderMimeProvider>,
       this.node
     );
   }

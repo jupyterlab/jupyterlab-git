@@ -24,7 +24,6 @@ export function isDiffSupported(path: string): boolean {
 }
 
 export interface IDiffProps {
-  renderMime: IRenderMimeRegistry;
   path: string;
   diffContext: IDiffContext;
 }
@@ -33,22 +32,20 @@ export interface IDiffProps {
  * The parent diff component which maintains a registry of various diff providers.
  * Based on the extension of the file, it delegates to the relevant diff provider.
  */
-export class Diff extends React.Component<IDiffProps, {}> {
-  constructor(props) {
-    super(props);
-  }
+export function Diff(props: IDiffProps) {
+  const fileExtension = PathExt.extname(props.path).toLocaleLowerCase();
 
-  render() {
-    const fileExtension = PathExt.extname(this.props.path).toLocaleLowerCase();
-
-    if (fileExtension in DIFF_PROVIDER_REGISTRY) {
-      const DiffProvider = DIFF_PROVIDER_REGISTRY[fileExtension];
-      return <DiffProvider {...this.props} />;
-    } else {
-      // This will be removed and delegated to a "Plaintext" diff provider for
-      // cases where the file extension does not have a dedicated diff provider.
-      console.log(`Diff is not supported for ${fileExtension} files`);
-      return null;
-    }
+  if (fileExtension in DIFF_PROVIDER_REGISTRY) {
+    const DiffProvider = DIFF_PROVIDER_REGISTRY[fileExtension];
+    return <DiffProvider {...props} />;
+  } else {
+    // This will be removed and delegated to a "Plaintext" diff provider for
+    // cases where the file extension does not have a dedicated diff provider.
+    console.log(`Diff is not supported for ${fileExtension} files`);
+    return null;
   }
 }
+
+const renderMimeContext = React.createContext<IRenderMimeRegistry | null>(null);
+export const RenderMimeProvider = renderMimeContext.Provider;
+export const RenderMimeConsumer = renderMimeContext.Consumer;

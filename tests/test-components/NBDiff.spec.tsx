@@ -13,7 +13,6 @@ describe('NBDiff', () => {
   it('should render error in if API response is failed', async function() {
     // Given
     const props: IDiffProps = {
-      renderMime: null,
       path: '/path/to/File.ipynb',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },
@@ -51,7 +50,6 @@ describe('NBDiff', () => {
   it('should render header and cell diff components in success case', async function() {
     // Given
     const props: IDiffProps = {
-      renderMime: null,
       path: '/path/to/File.ipynb',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },
