@@ -115,14 +115,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       label: 'Open',
       caption: 'Open selected file',
       execute: async () => {
-        try {
-          await this.openListedFile(
-            this.state.contextMenuTypeX,
-            this.state.contextMenuTypeY,
-            this.state.contextMenuFile,
-            this.props.app
-          );
-        } catch (err) {}
+        await this.openListedFile(
+          this.state.contextMenuTypeX,
+          this.state.contextMenuTypeY,
+          this.state.contextMenuFile,
+          this.props.app
+        );
       }
     });
 
