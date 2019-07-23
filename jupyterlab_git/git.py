@@ -646,7 +646,6 @@ class Git:
         )
 
         my_output, my_error = p.communicate()
-        p.returncode = 99
         if p.returncode == 0:
             return { "code": 0, "message": my_output.decode("utf-8") }
         else:
@@ -654,11 +653,8 @@ class Git:
                 "code": p.returncode,
                 "message": my_error.decode("utf-8"),
             }
-            response["command"] = "git checkout "
-            if is_remote_branch: response['command'] += "--track "
-            response['command'] += branchname
+            response["command"] = " ".join(cmd)
             return response
-
 
     def checkout(self, filename, top_repo_path):
         """
