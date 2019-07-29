@@ -14,6 +14,9 @@ import {
   smallBranchStyle
 } from '../../src/componentsStyle/BranchHeaderStyle';
 
+// Mock jupyterlab package
+jest.mock('@jupyterlab/apputils');
+
 describe('BranchHeader', () => {
   let props: IBranchHeaderProps = {
     currentFileBrowserPath: '/current/absolute/path',
@@ -55,17 +58,16 @@ describe('BranchHeader', () => {
     it('should commit when commit message is provided', async () => {
       const spy = jest.spyOn(Git.prototype, 'commit');
       // Mock identity look up
-      const identity = jest.spyOn(Git.prototype, 'config').mockImplementation(
-        () =>
-          new Response(
-            JSON.stringify({
-              options: {
-                'user.name': 'John Snow',
-                'user.email': 'john.snow@winteris.com'
-              }
-            }),
-            { status: 201 }
-          )
+      const identity = jest.spyOn(Git.prototype, 'config').mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            options: {
+              'user.name': 'John Snow',
+              'user.email': 'john.snow@winteris.com'
+            }
+          }),
+          { status: 201 }
+        )
       );
       await branchHeader.commitAllStagedFiles(
         'Initial commit',
@@ -93,8 +95,9 @@ describe('BranchHeader', () => {
       const identity = jest
         .spyOn(Git.prototype, 'config')
         .mockImplementation((path, options) => {
+          let response: Response = null;
           if (options === undefined) {
-            return new Response(
+            response = new Response(
               JSON.stringify({
                 options: {
                   'user.email': 'john.snow@winteris.com'
@@ -103,20 +106,26 @@ describe('BranchHeader', () => {
               { status: 201 }
             );
           } else {
-            return new Response('', { status: 201 });
+            response = new Response('', { status: 201 });
           }
+          return Promise.resolve(response);
         });
-      jest.spyOn(apputils, 'showDialog').mockReturnValue(
-        Promise.resolve({
-          button: {
-            accept: true
-          },
-          value: {
-            name: 'John Snow',
-            email: 'john.snow@winteris.com'
-          }
-        })
-      );
+      const mockApputils = apputils as jest.Mocked<typeof apputils>;
+      mockApputils.showDialog.mockResolvedValue({
+        button: {
+          accept: true,
+          caption: '',
+          className: '',
+          displayType: 'default',
+          iconClass: '',
+          iconLabel: '',
+          label: ''
+        },
+        value: {
+          name: 'John Snow',
+          email: 'john.snow@winteris.com'
+        }
+      });
 
       await branchHeader.commitAllStagedFiles(
         'Initial commit',
@@ -145,8 +154,9 @@ describe('BranchHeader', () => {
       const identity = jest
         .spyOn(Git.prototype, 'config')
         .mockImplementation((path, options) => {
+          let response: Response = null;
           if (options === undefined) {
-            return new Response(
+            response = new Response(
               JSON.stringify({
                 options: {
                   'user.name': 'John Snow'
@@ -155,12 +165,20 @@ describe('BranchHeader', () => {
               { status: 201 }
             );
           } else {
-            return new Response('', { status: 201 });
+            response = new Response('', { status: 201 });
           }
+          return Promise.resolve(response);
         });
-      jest.spyOn(apputils, 'showDialog').mockReturnValue({
+      const mockApputils = apputils as jest.Mocked<typeof apputils>;
+      mockApputils.showDialog.mockResolvedValue({
         button: {
-          accept: true
+          accept: true,
+          caption: '',
+          className: '',
+          displayType: 'default',
+          iconClass: '',
+          iconLabel: '',
+          label: ''
         },
         value: {
           name: 'John Snow',
@@ -195,21 +213,31 @@ describe('BranchHeader', () => {
       const identity = jest
         .spyOn(Git.prototype, 'config')
         .mockImplementation((path, options) => {
+          let response: Response = null;
           if (options === undefined) {
-            return new Response(
+            response = new Response(
               JSON.stringify({
                 options: {}
               }),
               { status: 201 }
             );
           } else {
-            return new Response('', { status: 201 });
+            response = new Response('', { status: 201 });
           }
+          return Promise.resolve(response);
         });
-      jest.spyOn(apputils, 'showDialog').mockReturnValue({
+      const mockApputils = apputils as jest.Mocked<typeof apputils>;
+      mockApputils.showDialog.mockResolvedValue({
         button: {
-          accept: false
-        }
+          accept: false,
+          caption: '',
+          className: '',
+          displayType: 'default',
+          iconClass: '',
+          iconLabel: '',
+          label: ''
+        },
+        value: null
       });
 
       await branchHeader.commitAllStagedFiles(
