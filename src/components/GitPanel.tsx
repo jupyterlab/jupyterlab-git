@@ -90,12 +90,13 @@ export class GitPanel extends React.Component<
    */
   refresh = async () => {
     try {
+      let gitApi = new Git();
+
       let leftSidebarItems = this.props.app.shell.widgets('left');
       let fileBrowser = leftSidebarItems.next();
       while (fileBrowser && fileBrowser.id !== 'filebrowser') {
         fileBrowser = leftSidebarItems.next();
       }
-      let gitApi = new Git();
       // If fileBrowser has loaded, make API request
       if (fileBrowser) {
         // Make API call to get all git info for repo
@@ -211,6 +212,64 @@ export class GitPanel extends React.Component<
   };
 
   render() {
+    let main: React.ReactElement<null>;
+
+    if (this.state.showWarning) {
+      main = (
+        <div>
+          <BranchHeader
+            currentFileBrowserPath={this.state.currentFileBrowserPath}
+            topRepoPath={this.state.topRepoPath}
+            refresh={this.refresh}
+            currentBranch={this.state.currentBranch}
+            upstreamBranch={this.state.upstreamBranch}
+            stagedFiles={this.state.stagedFiles}
+            data={this.state.branches}
+            disabled={this.state.disableSwitchBranch}
+            toggleSidebar={this.toggleSidebar}
+            showList={this.state.showList}
+            sideBarExpanded={this.state.sideBarExpanded}
+          />
+          <HistorySideBar
+            isExpanded={this.state.sideBarExpanded}
+            branches={this.state.branches}
+            pastCommits={this.state.pastCommits}
+            topRepoPath={this.state.topRepoPath}
+            app={this.props.app}
+            refresh={this.refresh}
+            diff={this.props.diff}
+          />
+          <PastCommits
+            currentFileBrowserPath={this.state.currentFileBrowserPath}
+            topRepoPath={this.state.topRepoPath}
+            inNewRepo={this.state.inNewRepo}
+            showList={this.state.showList}
+            stagedFiles={this.state.stagedFiles}
+            unstagedFiles={this.state.unstagedFiles}
+            untrackedFiles={this.state.untrackedFiles}
+            app={this.props.app}
+            refresh={this.refresh}
+            diff={this.props.diff}
+            sideBarExpanded={this.state.sideBarExpanded}
+          />
+        </div>
+      );
+    } else {
+      main = (
+        <div className={panelWarningStyle}>
+          <div>You aren’t in a git repository.</div>
+          <button
+            className={findRepoButtonStyle}
+            onClick={() =>
+              this.props.app.commands.execute('filebrowser:toggle-main')
+            }
+          >
+            Go find a repo
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div className={panelContainerStyle}>
         <PathHeader
@@ -219,60 +278,7 @@ export class GitPanel extends React.Component<
           refresh={this.refresh}
           currentBranch={this.state.currentBranch}
         />
-        <div>
-          {this.state.showWarning && (
-            <div>
-              <BranchHeader
-                currentFileBrowserPath={this.state.currentFileBrowserPath}
-                topRepoPath={this.state.topRepoPath}
-                refresh={this.refresh}
-                currentBranch={this.state.currentBranch}
-                upstreamBranch={this.state.upstreamBranch}
-                stagedFiles={this.state.stagedFiles}
-                data={this.state.branches}
-                disabled={this.state.disableSwitchBranch}
-                toggleSidebar={this.toggleSidebar}
-                showList={this.state.showList}
-                sideBarExpanded={this.state.sideBarExpanded}
-              />
-              <HistorySideBar
-                isExpanded={this.state.sideBarExpanded}
-                branches={this.state.branches}
-                pastCommits={this.state.pastCommits}
-                topRepoPath={this.state.topRepoPath}
-                app={this.props.app}
-                refresh={this.refresh}
-                diff={this.props.diff}
-              />
-              <PastCommits
-                currentFileBrowserPath={this.state.currentFileBrowserPath}
-                topRepoPath={this.state.topRepoPath}
-                inNewRepo={this.state.inNewRepo}
-                showList={this.state.showList}
-                stagedFiles={this.state.stagedFiles}
-                unstagedFiles={this.state.unstagedFiles}
-                untrackedFiles={this.state.untrackedFiles}
-                app={this.props.app}
-                refresh={this.refresh}
-                diff={this.props.diff}
-                sideBarExpanded={this.state.sideBarExpanded}
-              />
-            </div>
-          )}
-          {!this.state.showWarning && (
-            <div className={panelWarningStyle}>
-              <div>You aren’t in a git repository.</div>
-              <button
-                className={findRepoButtonStyle}
-                onClick={() =>
-                  this.props.app.commands.execute('filebrowser:toggle-main')
-                }
-              >
-                Go find a repo
-              </button>
-            </div>
-          )}
-        </div>
+        <div>{main}</div>
       </div>
     );
   }

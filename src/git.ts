@@ -1,6 +1,7 @@
 import { ServerConnection } from '@jupyterlab/services';
 
 import { URLExt } from '@jupyterlab/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
 /** Function type for diffing a file's revisions */
 export type IDiffCallback = (
@@ -120,6 +121,11 @@ export interface ISingleCommitFilePathInfo {
 export interface IGitLogResult {
   code: number;
   commits?: [ISingleCommitInfo];
+}
+
+export interface IIdentity {
+  name: string;
+  email: string;
 }
 
 /** Makes a HTTP request, sending a git command to the backend */
@@ -406,6 +412,30 @@ export class Git {
       return response;
     } catch (err) {
       throw ServerConnection.NetworkError;
+    }
+  }
+
+  /**
+   * Get or set Git configuration options
+   *
+   * @param path Top repository path
+   * @param options Configuration options to set (undefined to get)
+   */
+  async config(path: string, options?: JSONObject): Promise<Response> {
+    try {
+      let method = 'POST';
+      let body = { path, options };
+
+      let response = await httpGitRequest('/git/config', method, body);
+
+      if (!response.ok) {
+        const jsonData = await response.json();
+        throw new ServerConnection.ResponseError(response, jsonData.message);
+      }
+
+      return response;
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
     }
   }
 

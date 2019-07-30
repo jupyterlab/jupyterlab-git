@@ -6,7 +6,7 @@ import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { style } from 'typestyle';
 
-import { Git } from './git';
+import { Git } from '../git';
 
 /**
  * The widget encapsulating the Git Clone UI:

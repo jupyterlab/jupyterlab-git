@@ -3,7 +3,6 @@ Module with all the individual handlers, which execute git commands and return t
 """
 import json
 
-
 from notebook.utils import url_path_join as ujoin
 from notebook.base.handlers import APIHandler
 
@@ -29,8 +28,8 @@ class GitCloneHandler(GitHandler):
               'repo_url': 'https://github.com/path/to/myrepo'
             }
         """
-        data = json.loads(self.request.body.decode('utf-8'))
-        response = self.git.clone(data['current_path'], data['clone_url'])
+        data = json.loads(self.request.body.decode("utf-8"))
+        response = self.git.clone(data["current_path"], data["clone_url"])
         self.finish(json.dumps(response))
 
 
@@ -290,9 +289,7 @@ class GitCheckoutHandler(GitHandler):
                 )
             else:
                 print("switch to an old branch")
-                my_output = self.git.checkout_branch(
-                    data["branchname"], top_repo_path
-                )
+                my_output = self.git.checkout_branch(data["branchname"], top_repo_path)
         elif data["checkout_all"]:
             my_output = self.git.checkout_all(top_repo_path)
         else:
@@ -327,12 +324,10 @@ class GitUpstreamHandler(GitHandler):
               'current_path': 'current_file_browser_path',
             }
         """
-        current_path = self.get_json_body()['current_path']
+        current_path = self.get_json_body()["current_path"]
         current_branch = self.git.get_current_branch(current_path)
         upstream = self.git.get_upstream_branch(current_path, current_branch)
-        self.finish(json.dumps({
-            'upstream': upstream
-        }))
+        self.finish(json.dumps({"upstream": upstream}))
 
 
 class GitPullHandler(GitHandler):
@@ -344,7 +339,7 @@ class GitPullHandler(GitHandler):
         """
         POST request handler, pulls files from a remote branch to your current branch.
         """
-        output = self.git.pull(self.get_json_body()['current_path'])
+        output = self.git.pull(self.get_json_body()["current_path"])
         self.finish(json.dumps(output))
 
 
@@ -359,28 +354,32 @@ class GitPushHandler(GitHandler):
         POST request handler,
         pushes committed files from your current branch to a remote branch
         """
-        current_path = self.get_json_body()['current_path']
+        current_path = self.get_json_body()["current_path"]
 
         current_local_branch = self.git.get_current_branch(current_path)
-        current_upstream_branch = self.git.get_upstream_branch(current_path, current_local_branch)
+        current_upstream_branch = self.git.get_upstream_branch(
+            current_path, current_local_branch
+        )
 
         if current_upstream_branch and current_upstream_branch.strip():
-            upstream = current_upstream_branch.split('/')
+            upstream = current_upstream_branch.split("/")
             if len(upstream) == 1:
                 # If upstream is a local branch
-                remote = '.'
-                branch = ':'.join(['HEAD', upstream[0]])
+                remote = "."
+                branch = ":".join(["HEAD", upstream[0]])
             else:
                 # If upstream is a remote branch
                 remote = upstream[0]
-                branch = ':'.join(['HEAD', upstream[1]])
+                branch = ":".join(["HEAD", upstream[1]])
 
             response = self.git.push(remote, branch, current_path)
 
         else:
             response = {
-                'code': 128,
-                'message': 'fatal: The current branch {} has no upstream branch.'.format(current_local_branch)
+                "code": 128,
+                "message": "fatal: The current branch {} has no upstream branch.".format(
+                    current_local_branch
+                ),
             }
         self.finish(json.dumps(response))
 
@@ -423,6 +422,27 @@ class GitChangedFilesHandler(GitHandler):
         )
 
 
+class GitConfigHandler(GitHandler):
+    """
+    Handler for 'git config' commands
+    """
+
+    def post(self):
+        """
+        POST get (if no options are passed) or set configuration options
+        """
+        data = self.get_json_body()
+        top_repo_path = data["top_repo_path"]
+        options = data.get("options", {})
+        response = self.git.config(top_repo_path, **options)
+
+        if response["code"] != 0:
+            self.set_status(500)
+        else:
+            self.set_status(201)
+        self.finish(json.dumps(response))
+
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -450,6 +470,7 @@ def setup_handlers(web_app):
         ("/git/add_all_untracked", GitAddAllUntrackedHandler),
         ("/git/clone", GitCloneHandler),
         ("/git/upstream", GitUpstreamHandler),
+        ("/git/config", GitConfigHandler),
         ("/git/changed_files", GitChangedFilesHandler)
     ]
 

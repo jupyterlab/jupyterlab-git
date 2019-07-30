@@ -1,6 +1,6 @@
 import { Spinner } from '@jupyterlab/apputils';
 import { Widget } from '@phosphor/widgets';
-import { Git, IGitPushPullResult } from './git';
+import { Git, IGitPushPullResult } from '../git';
 
 export enum Operation {
   Pull = 'Pull',

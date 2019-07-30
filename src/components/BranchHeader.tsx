@@ -29,7 +29,9 @@ import {
 
 import { classes } from 'typestyle';
 
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { showErrorMessage, showDialog } from '@jupyterlab/apputils';
+import { GitAuthorForm } from '../widgets/AuthorBox';
+import { JSONObject } from '@phosphor/coreutils';
 
 export interface IBranchHeaderState {
   dropdownOpen: boolean;
@@ -63,17 +65,26 @@ export class BranchHeader extends React.Component<
       showCommitBox: true,
       showNewBranchBox: false
     };
+
+    this.commitAllStagedFiles = this.commitAllStagedFiles.bind(this);
   }
 
   /** Commit all staged files */
-  commitAllStagedFiles = (message: string, path: string): void => {
-    if (message && message !== '') {
-      let gitApi = new Git();
-      gitApi.commit(message, path).then(response => {
-        this.props.refresh();
-      });
+  async commitAllStagedFiles(message: string, path: string): Promise<void> {
+    try {
+      if (message && message !== '' && (await this._hasIdentity(path))) {
+        let gitApi = new Git();
+        const response = await gitApi.commit(message, path);
+
+        if (response.ok) {
+          this.props.refresh();
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorMessage('Fail to commit', error);
     }
-  };
+  }
 
   /** Update state of commit message input box */
   updateCommitBoxState(disable: boolean, numberOfFiles: number) {
@@ -273,4 +284,52 @@ export class BranchHeader extends React.Component<
       </div>
     );
   }
+
+  /**
+   * Does the user have an known git identity.
+   *
+   * @param path Top repository path
+   * @returns Success status
+   */
+  private async _hasIdentity(path: string): Promise<boolean> {
+    // If the repository path changes, check the identity
+    if (path !== this._previousTopRepoPath) {
+      let gitApi = new Git();
+      try {
+        const apiResponse = await gitApi.config(path);
+        if (apiResponse.ok) {
+          const options: JSONObject = (await apiResponse.json()).options;
+          const keys = Object.keys(options);
+          // If the user name or email is unknown, ask the user to set it.
+          if (keys.indexOf('user.name') < 0 || keys.indexOf('user.email') < 0) {
+            let result = await showDialog({
+              title: 'Who is committing?',
+              body: new GitAuthorForm()
+            });
+            if (!result.button.accept) {
+              console.log('User refuses to set his identity.');
+              return false;
+            }
+            const identity = result.value;
+            const response = await gitApi.config(path, {
+              'user.name': identity.name,
+              'user.email': identity.email
+            });
+
+            if (!response.ok) {
+              console.log(await response.text());
+              return false;
+            }
+          }
+          this._previousTopRepoPath = path;
+        }
+      } catch (error) {
+        throw new Error('Fail to set your identity. ' + error.message);
+      }
+    }
+
+    return true;
+  }
+
+  private _previousTopRepoPath: string = null;
 }
