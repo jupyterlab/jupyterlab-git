@@ -82,7 +82,7 @@ class Git:
             }
         """
         if single_commit:
-            cmd = ['git', 'diff', f'{single_commit}^!', '--name-only']
+            cmd = ['git', 'diff', '{}^!'.format(single_commit), '--name-only']
         elif base and remote:
             if base == 'WORKING':
                 cmd = ['git', 'diff', remote, '--name-only']
@@ -91,7 +91,7 @@ class Git:
             else:
                 cmd = ['git', 'diff', base, remote, '--name-only']
         else:
-            raise HTTPError(400, f'Either single_commit or (base and remote) must be provided')
+            raise HTTPError(400, 'Either single_commit or (base and remote) must be provided')
 
         
         response = {}
