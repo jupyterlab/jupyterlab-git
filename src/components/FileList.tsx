@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
