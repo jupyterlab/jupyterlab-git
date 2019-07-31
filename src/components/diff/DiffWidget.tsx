@@ -5,7 +5,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { getRefValue, IDiffContext } from './model';
 import { Diff, isDiffSupported, RenderMimeProvider } from './Diff';
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import { showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { style } from 'typestyle';
@@ -62,7 +62,7 @@ export class DiffWidget extends Widget {
  */
 export function openDiffView(
   path: string,
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   diffContext: IDiffContext,
   renderMime: IRenderMimeRegistry
 ) {
@@ -80,7 +80,7 @@ export function openDiffView(
     if (!mainAreaItem) {
       const nbDiffWidget = new DiffWidget(renderMime, path, diffContext);
       nbDiffWidget.id = id;
-      app.shell.addToMainArea(nbDiffWidget);
+      app.shell.add(nbDiffWidget, 'main');
       app.shell.activateById(nbDiffWidget.id);
     }
   } else {

@@ -76,7 +76,7 @@
     background-size: 20px;
     background-position: center;
     background-repeat: no-repeat;
-    height: 15px;
+    height: 10px;
     width: 15px;
     font-size: var(--jp-ui-font-size1);
     line-height: var(--jp-private-toolbar-height);
@@ -87,6 +87,7 @@
     text-decoration: none;
     transition: background-color 0.1s ease;
     margin-left: 5px;
+    border: transparent;
 }
 
 .jp-git-diff-Widget {
@@ -451,4 +452,57 @@
 
 .jp-git-Notebook-diff .jp-Diff-renderedOutput {
     min-height: 2em;
+}
+
+.jp-git-Notebook-diff .jp-CollapsiblePanel {
+    border: var(--jp-git-diff-output-border-color) solid 1pt;
+}
+
+.jp-git-Notebook-diff button.jp-CollapsiblePanel-header-icon::-moz-focus-inner {
+    border: none;
+}
+
+.jp-git-Notebook-diff .jp-CollapsiblePanel-header-icon-opened {
+    background-image: var(--jp-icon-caretup);
+}
+
+.jp-git-Notebook-diff .jp-CollapsiblePanel-header-icon-closed {
+    background-image: var(--jp-icon-caretdown);
+}
+
+.jp-git-Notebook-diff .jp-CollapsiblePanel-header {
+    padding-top: .2em;
+    padding-bottom: .2em;
+    background-color: var(--jp-git-diff-output-color);
+    padding-left: 2em;
+    padding-right: 2em;
+    color: var(--jp-ui-font-color1);
+}
+
+.jp-git-Notebook-diff .jp-CollapsiblePanel-container {
+    overflow: hidden;
+}
+
+.jp-git-Notebook-diff .jp-CollapsiblePanel-slider {
+    height:100%;
+    -webkit-transition: -webkit-transform .3s ease, height 0.3s;
+    -moz-transition:    -moz-transform .3s ease, height 0.3s;
+    -ms-transition:     -ms-transform .3s ease, height 0.3s;
+    transition:         transform .3s ease, height 0.3s;
+}
+
+.jp-git-Notebook-diff .jp-CollapsiblePanel-opened {
+    -webkit-transform: translate(0, 0%);
+    -moz-transform: translate(0, 0%);
+    -ms-transform: translate(0, 0%);
+    transform: translate(0, 0%);
+    height: 100%;
+}
+
+.jp-git-Notebook-diff .jp-CollapsiblePanel-closed {
+    -webkit-transform: translate(0, -100%);
+    -moz-transform: translate(0, -100%);
+    -ms-transform: translate(0, -100%);
+    transform: translate(0, -100%);
+    height: 0;
 }

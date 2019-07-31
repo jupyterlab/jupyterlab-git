@@ -173,8 +173,8 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
 
       httpGitRequest('/nbdime/api/gitdiff', 'POST', {
         file_path: this.props.path,
-        ref_prev: { git: diffContext.previousRef.gitRef },
-        ref_curr: currentRefValue
+        ref_local: { git: diffContext.previousRef.gitRef },
+        ref_remote: currentRefValue
       }).then((response: Response) => {
         response
           .json()

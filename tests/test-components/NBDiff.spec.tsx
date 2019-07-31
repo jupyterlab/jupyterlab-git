@@ -38,8 +38,8 @@ describe('NBDiff', () => {
       expect(httpGitRequest).toHaveBeenCalled();
       expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
         file_path: '/path/to/File.ipynb',
-        ref_curr: { special: 'WORKING' },
-        ref_prev: { git: '83baee' }
+        ref_remote: { special: 'WORKING' },
+        ref_local: { git: '83baee' }
       });
       expect(node.find('.jp-git-diff-error').text()).toContain(
         'TEST_ERROR_MESSAGE'
@@ -75,8 +75,8 @@ describe('NBDiff', () => {
       expect(httpGitRequest).toHaveBeenCalled();
       expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
         file_path: '/path/to/File.ipynb',
-        ref_curr: { special: 'WORKING' },
-        ref_prev: { git: '83baee' }
+        ref_remote: { special: 'WORKING' },
+        ref_local: { git: '83baee' }
       });
       expect(node.find('.jp-git-diff-error').html()).toBeNull();
       expect(node.find(NBDiffHeader)).toHaveLength(1);
@@ -99,13 +99,13 @@ function createTestResponse(
     trailer: Promise.resolve(Headers as any),
     type: 'basic',
     url: '/foo/bar',
-    clone: jest.fn<Response>(),
+    clone: jest.fn<Response, []>(),
     body: null,
     bodyUsed: false,
-    arrayBuffer: jest.fn<Promise<ArrayBuffer>>(),
-    blob: jest.fn<Promise<Blob>>(),
-    formData: jest.fn<Promise<FormData>>(),
-    text: jest.fn<Promise<String>>()
+    arrayBuffer: jest.fn<Promise<ArrayBuffer>, []>(),
+    blob: jest.fn<Promise<Blob>, []>(),
+    formData: jest.fn<Promise<FormData>, []>(),
+    text: jest.fn<Promise<string>, []>()
   };
   return Promise.resolve(testResponse);
 }
