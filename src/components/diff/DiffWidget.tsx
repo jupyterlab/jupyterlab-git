@@ -1,55 +1,12 @@
-import { Widget } from '@phosphor/widgets';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { getRefValue, IDiffContext } from './model';
 import { Diff, isDiffSupported, RenderMimeProvider } from './Diff';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { showDialog } from '@jupyterlab/apputils';
+import { ReactWidget, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { style } from 'typestyle';
-
-export class DiffWidget extends Widget {
-  private readonly _renderMime: IRenderMimeRegistry;
-  private readonly _path: string;
-  private readonly _diffContext: IDiffContext;
-
-  constructor(
-    renderMime: IRenderMimeRegistry,
-    path: string,
-    gitContext: IDiffContext
-  ) {
-    super();
-    this._renderMime = renderMime;
-    this._path = path;
-    this._diffContext = gitContext;
-
-    this.title.label = PathExt.basename(path);
-    this.title.iconClass = style({
-      backgroundImage: 'var(--jp-icon-diff)'
-    });
-    this.title.closable = true;
-    this.addClass('jp-git-diff-parent-diff-widget');
-
-    ReactDOM.render(
-      <RenderMimeProvider value={this._renderMime}>
-        <Diff path={this._path} diffContext={this._diffContext} />
-      </RenderMimeProvider>,
-      this.node
-    );
-  }
-
-  onUpdateRequest(): void {
-    ReactDOM.unmountComponentAtNode(this.node);
-    ReactDOM.render(
-      <RenderMimeProvider value={this._renderMime}>
-        <Diff path={this._path} diffContext={this._diffContext} />
-      </RenderMimeProvider>,
-      this.node
-    );
-  }
-}
 
 /**
  * Method to open a main menu panel to show the diff of a given Notebook file.
@@ -78,8 +35,19 @@ export function openDiffView(
       mainAreaItem = mainAreaItems.next();
     }
     if (!mainAreaItem) {
-      const nbDiffWidget = new DiffWidget(renderMime, path, diffContext);
+      const nbDiffWidget = ReactWidget.create(
+        <RenderMimeProvider value={renderMime}>
+          <Diff path={path} diffContext={diffContext} />
+        </RenderMimeProvider>
+      );
       nbDiffWidget.id = id;
+      nbDiffWidget.title.label = PathExt.basename(path);
+      nbDiffWidget.title.iconClass = style({
+        backgroundImage: 'var(--jp-icon-diff)'
+      });
+      nbDiffWidget.title.closable = true;
+      nbDiffWidget.addClass('jp-git-diff-parent-diff-widget');
+
       app.shell.add(nbDiffWidget, 'main');
       app.shell.activateById(nbDiffWidget.id);
     }
