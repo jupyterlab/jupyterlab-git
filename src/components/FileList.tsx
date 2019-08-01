@@ -5,45 +5,44 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { Menu } from '@phosphor/widgets';
 
 import { PathExt } from '@jupyterlab/coreutils';
-
-import { Git, IGitShowPrefixResult } from '../git';
-
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import * as React from 'react';
+import { openDiffView } from './diff/DiffWidget';
 import {
-  moveFileUpButtonStyle,
+  folderFileIconSelectedStyle,
+  folderFileIconStyle,
+  genericFileIconSelectedStyle,
+  genericFileIconStyle,
+  imageFileIconSelectedStyle,
+  imageFileIconStyle,
+  jsonFileIconSelectedStyle,
+  jsonFileIconStyle,
+  kernelFileIconSelectedStyle,
+  kernelFileIconStyle,
+  markdownFileIconSelectedStyle,
+  markdownFileIconStyle,
+  moveFileDownButtonSelectedStyle,
   moveFileDownButtonStyle,
   moveFileUpButtonSelectedStyle,
-  moveFileDownButtonSelectedStyle,
-  folderFileIconStyle,
-  genericFileIconStyle,
-  yamlFileIconStyle,
-  markdownFileIconStyle,
-  imageFileIconStyle,
-  spreadsheetFileIconStyle,
-  jsonFileIconStyle,
-  pythonFileIconStyle,
-  kernelFileIconStyle,
-  folderFileIconSelectedStyle,
-  genericFileIconSelectedStyle,
-  yamlFileIconSelectedStyle,
-  markdownFileIconSelectedStyle,
-  imageFileIconSelectedStyle,
-  spreadsheetFileIconSelectedStyle,
-  jsonFileIconSelectedStyle,
+  moveFileUpButtonStyle,
   pythonFileIconSelectedStyle,
-  kernelFileIconSelectedStyle
+  pythonFileIconStyle,
+  spreadsheetFileIconSelectedStyle,
+  spreadsheetFileIconStyle,
+  yamlFileIconSelectedStyle,
+  yamlFileIconStyle
 } from '../componentsStyle/FileListStyle';
-
+import { Git, IGitShowPrefixResult } from '../git';
 import { GitStage } from './GitStage';
-
-import * as React from 'react';
 
 export namespace CommandIDs {
   export const gitFileOpen = 'gf:Open';
   export const gitFileUnstage = 'gf:Unstage';
   export const gitFileStage = 'gf:Stage';
   export const gitFileTrack = 'gf:Track';
-  export const gitFileUntrack = 'gf:Untrack';
   export const gitFileDiscard = 'gf:Discard';
+  export const gitFileDiffWorking = 'gf:DiffWorking';
+  export const gitFileDiffIndex = 'gf:DiffIndex';
 }
 
 export interface IFileListState {
@@ -79,6 +78,7 @@ export interface IFileListProps {
   refresh: any;
   sideBarExpanded: boolean;
   display: boolean;
+  renderMime: IRenderMimeRegistry;
 }
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
@@ -110,92 +110,122 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       disableFiles: false
     };
 
-    /** Add right-click menu options for files in repo
-     *
-     */
-
     if (!commands.hasCommand(CommandIDs.gitFileOpen)) {
       commands.addCommand(CommandIDs.gitFileOpen, {
         label: 'Open',
         caption: 'Open selected file',
-        execute: () => {
-          try {
-            this.openListedFile(
-              this.state.contextMenuTypeX,
-              this.state.contextMenuTypeY,
-              this.state.contextMenuFile,
-              this.props.app
-            );
-          } catch (err) {}
+        execute: async () => {
+          await this.openListedFile(
+            this.state.contextMenuTypeX,
+            this.state.contextMenuTypeY,
+            this.state.contextMenuFile,
+            this.props.app
+          );
         }
       });
     }
+
+    if (!commands.hasCommand(CommandIDs.gitFileDiffWorking)) {
+      commands.addCommand(CommandIDs.gitFileDiffWorking, {
+        label: 'Diff',
+        caption: 'Diff selected file',
+        execute: () => {
+          openDiffView(
+            this.state.contextMenuFile,
+            this.props.app,
+            {
+              currentRef: { specialRef: 'WORKING' },
+              previousRef: { gitRef: 'HEAD' }
+            },
+            this.props.renderMime
+          );
+        }
+      });
+    }
+
+    if (!commands.hasCommand(CommandIDs.gitFileDiffIndex)) {
+      commands.addCommand(CommandIDs.gitFileDiffIndex, {
+        label: 'Diff',
+        caption: 'Diff selected file',
+        execute: () => {
+          openDiffView(
+            this.state.contextMenuFile,
+            this.props.app,
+            {
+              currentRef: { specialRef: 'INDEX' },
+              previousRef: { gitRef: 'HEAD' }
+            },
+            this.props.renderMime
+          );
+        }
+      });
+    }
+
     if (!commands.hasCommand(CommandIDs.gitFileStage)) {
       commands.addCommand(CommandIDs.gitFileStage, {
         label: 'Stage',
         caption: 'Stage the changes of selected file',
         execute: () => {
-          try {
-            this.addUnstagedFile(
-              this.state.contextMenuFile,
-              this.props.topRepoPath,
-              this.props.refresh
-            );
-          } catch (err) {}
+          this.addUnstagedFile(
+            this.state.contextMenuFile,
+            this.props.topRepoPath,
+            this.props.refresh
+          );
         }
       });
     }
+
     if (!commands.hasCommand(CommandIDs.gitFileTrack)) {
       commands.addCommand(CommandIDs.gitFileTrack, {
         label: 'Track',
         caption: 'Start tracking selected file',
         execute: () => {
-          try {
-            this.addUntrackedFile(
-              this.state.contextMenuFile,
-              this.props.topRepoPath,
-              this.props.refresh
-            );
-          } catch (err) {}
+          this.addUntrackedFile(
+            this.state.contextMenuFile,
+            this.props.topRepoPath,
+            this.props.refresh
+          );
         }
       });
     }
+
     if (!commands.hasCommand(CommandIDs.gitFileUnstage)) {
       commands.addCommand(CommandIDs.gitFileUnstage, {
         label: 'Unstage',
         caption: 'Unstage the changes of selected file',
         execute: () => {
-          try {
-            if (this.state.contextMenuTypeX !== 'D') {
-              this.resetStagedFile(
-                this.state.contextMenuFile,
-                this.props.topRepoPath,
-                this.props.refresh
-              );
-            }
-          } catch (err) {}
+          if (this.state.contextMenuTypeX !== 'D') {
+            this.resetStagedFile(
+              this.state.contextMenuFile,
+              this.props.topRepoPath,
+              this.props.refresh
+            );
+          }
         }
       });
     }
+
     if (!commands.hasCommand(CommandIDs.gitFileDiscard)) {
       commands.addCommand(CommandIDs.gitFileDiscard, {
         label: 'Discard',
         caption: 'Discard recent changes of selected file',
         execute: () => {
-          try {
-            this.updateSelectedFile(
-              this.state.contextMenuIndex,
-              this.state.contextMenuStage
-            );
-            this.updateSelectedDiscardFile(this.state.contextMenuIndex);
-            this.toggleDisableFiles();
-          } catch (err) {}
+          this.updateSelectedFile(
+            this.state.contextMenuIndex,
+            this.state.contextMenuStage
+          );
+          this.updateSelectedDiscardFile(this.state.contextMenuIndex);
+          this.toggleDisableFiles();
         }
       });
     }
+
     this.state.contextMenuStaged.addItem({ command: CommandIDs.gitFileOpen });
     this.state.contextMenuStaged.addItem({
       command: CommandIDs.gitFileUnstage
+    });
+    this.state.contextMenuStaged.addItem({
+      command: CommandIDs.gitFileDiffIndex
     });
 
     this.state.contextMenuUnstaged.addItem({ command: CommandIDs.gitFileOpen });
@@ -204,6 +234,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
     this.state.contextMenuUnstaged.addItem({
       command: CommandIDs.gitFileDiscard
+    });
+    this.state.contextMenuUnstaged.addItem({
+      command: CommandIDs.gitFileDiffWorking
     });
 
     this.state.contextMenuUntracked.addItem({
@@ -497,6 +530,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               disableOthers={null}
               isDisabled={this.state.disableStaged}
               sideBarExpanded={this.props.sideBarExpanded}
+              renderMime={this.props.renderMime}
             />
             <GitStage
               heading={'Changed'}
@@ -530,6 +564,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               disableOthers={this.disableStagesForDiscardAll}
               isDisabled={this.state.disableUnstaged}
               sideBarExpanded={this.props.sideBarExpanded}
+              renderMime={this.props.renderMime}
             />
             <GitStage
               heading={'Untracked'}
@@ -563,6 +598,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               disableOthers={null}
               isDisabled={this.state.disableUntracked}
               sideBarExpanded={this.props.sideBarExpanded}
+              renderMime={this.props.renderMime}
             />
           </div>
         )}

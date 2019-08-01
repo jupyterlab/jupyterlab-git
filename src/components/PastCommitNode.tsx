@@ -16,6 +16,7 @@ import {
 } from '../componentsStyle/PastCommitNodeStyle';
 import { IGitBranchResult, ISingleCommitInfo, IDiffCallback } from '../git';
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 export interface IPastCommitNodeProps {
   pastCommit: ISingleCommitInfo;
@@ -24,6 +25,7 @@ export interface IPastCommitNodeProps {
   app: JupyterFrontEnd;
   diff: IDiffCallback;
   refresh: () => void;
+  renderMime: IRenderMimeRegistry;
 }
 
 export interface IPastCommitNodeState {
@@ -115,6 +117,7 @@ export class PastCommitNode extends React.Component<
                 app={this.props.app}
                 diff={this.props.diff}
                 refresh={this.props.refresh}
+                renderMime={this.props.renderMime}
               />
               <div className={collapseStyle} onClick={() => this.collapse()}>
                 Collapse

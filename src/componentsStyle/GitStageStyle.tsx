@@ -56,7 +56,7 @@ export const changeStageButtonStyle = style({
   lineHeight: 'var(--jp-private-running-shutdown-button-height)',
   transition: 'background-color 0.1s ease',
   borderRadius: '2px',
-  height: '12px',
+  height: '13px',
   width: '12px',
   border: 'none',
   outline: 'none',
@@ -76,17 +76,13 @@ export const changeStageButtonStyle = style({
 
 export const discardFileButtonStyle = style({
   backgroundImage: 'var(--jp-icon-discard-file)',
-  marginLeft: '6px'
+  marginLeft: '6px',
+  paddingRight: '1px'
 });
 
-export const discardAllWarningStyle = style({
-  height: '40px !important',
-
-  $nest: {
-    '& button': {
-      marginTop: '5px'
-    }
-  }
+export const diffFileButtonStyle = style({
+  backgroundImage: 'var(--jp-icon-diff)',
+  paddingLeft: '0px'
 });
 
 export const caretdownImageStyle = style({

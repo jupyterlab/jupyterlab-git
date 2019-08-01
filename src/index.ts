@@ -24,6 +24,8 @@ import { IDiffCallback } from './git';
 export { IDiffCallback } from './git';
 
 import '../style/variables.css';
+import '../style/diff.css';
+import '../style/diff.css';
 import { GitClone } from './widgets/gitClone';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -65,13 +67,15 @@ export class GitExtension implements IGitExtension {
   constructor(
     app: JupyterFrontEnd,
     restorer: ILayoutRestorer,
-    factory: IFileBrowserFactory
+    factory: IFileBrowserFactory,
+    renderMime: IRenderMimeRegistry
   ) {
     this.app = app;
     this.gitPlugin = new GitWidget(
       app,
       { manager: app.serviceManager },
-      this.performDiff.bind(this)
+      this.performDiff.bind(this),
+      renderMime
     );
     this.gitPlugin.id = 'jp-git-sessions';
     this.gitPlugin.title.iconClass = `jp-SideBar-tabIcon ${gitTabStyle}`;
@@ -115,12 +119,13 @@ function activate(
   app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   restorer: ILayoutRestorer,
-  factory: IFileBrowserFactory
+  factory: IFileBrowserFactory,
+  renderMime: IRenderMimeRegistry
 ): IGitExtension {
   const { commands } = app;
-  let gitExtension = new GitExtension(app, restorer, factory);
-  const category = 'Git';
+  let gitExtension = new GitExtension(app, restorer, factory, renderMime);
 
+  const category = 'Git';
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   addCommands(app, app.serviceManager);

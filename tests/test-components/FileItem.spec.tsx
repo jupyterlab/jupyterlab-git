@@ -30,7 +30,8 @@ describe('FileItem', () => {
     updateSelectedDiscardFile: () => {},
     disableFile: false,
     toggleDisableFiles: () => {},
-    sideBarExpanded: false
+    sideBarExpanded: false,
+    renderMime: null
   };
 
   describe('#render()', () => {

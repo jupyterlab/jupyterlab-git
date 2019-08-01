@@ -3,7 +3,8 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   changeStageButtonStyle,
   changeStageButtonLeftStyle,
-  discardFileButtonStyle
+  discardFileButtonStyle,
+  diffFileButtonStyle
 } from '../componentsStyle/GitStageStyle';
 
 import {
@@ -17,7 +18,6 @@ import {
   selectedFileChangedLabelStyle,
   fileChangedLabelBrandStyle,
   fileChangedLabelInfoStyle,
-  discardWarningStyle,
   fileButtonStyle,
   fileGitButtonStyle,
   discardFileButtonSelectedStyle,
@@ -29,6 +29,10 @@ import { classes } from 'typestyle';
 import * as React from 'react';
 
 import { showDialog, Dialog } from '@jupyterlab/apputils';
+import { ISpecialRef } from './diff/model';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { isDiffSupported } from './diff/Diff';
+import { openDiffView } from './diff/DiffWidget';
 
 export interface IFileItemProps {
   topRepoPath: string;
@@ -55,6 +59,7 @@ export interface IFileItemProps {
   disableFile: boolean;
   toggleDisableFiles: Function;
   sideBarExpanded: boolean;
+  renderMime: IRenderMimeRegistry;
 }
 
 export class FileItem extends React.Component<IFileItemProps, {}> {
@@ -181,6 +186,15 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     }
   }
 
+  getDiffFileIconClass() {
+    return classes(
+      fileButtonStyle,
+      changeStageButtonStyle,
+      fileGitButtonStyle,
+      diffFileButtonStyle
+    );
+  }
+
   getDiscardFileIconClass() {
     if (this.showDiscardWarning()) {
       return classes(
@@ -204,10 +218,6 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
             discardFileButtonStyle
           );
     }
-  }
-
-  getDiscardWarningClass() {
-    return discardWarningStyle;
   }
 
   /**
@@ -236,6 +246,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
       this.props.updateSelectedDiscardFile(-1);
     });
   }
+
   render() {
     return (
       <div
@@ -283,16 +294,49 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
             {this.getFileChangedLabel(this.props.file.y)}
           </span>
           {this.props.stage === 'Changed' && (
-            <button
-              className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
-              title={'Discard this change'}
-              onClick={() => {
-                this.discardSelectedFileChanges();
-              }}
-            />
+            <React.Fragment>
+              <button
+                className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
+                title={'Discard this change'}
+                onClick={() => {
+                  this.discardSelectedFileChanges();
+                }}
+              />
+              {isDiffSupported(this.props.file.to) &&
+                this.diffButton({ specialRef: 'WORKING' })}
+            </React.Fragment>
           )}
+          {this.props.stage === 'Staged' &&
+            isDiffSupported(this.props.file.to) &&
+            this.diffButton({ specialRef: 'INDEX' })}
         </span>
       </div>
+    );
+  }
+
+  /**
+   * Creates a button element which is used to request diff from within the
+   * Git panel.
+   *
+   * @param currentRef the ref to diff against the git 'HEAD' ref
+   */
+  private diffButton(currentRef: ISpecialRef): JSX.Element {
+    return (
+      <button
+        className={`jp-Git-button ${this.getDiffFileIconClass()}`}
+        title={'Diff this file'}
+        onClick={() => {
+          openDiffView(
+            this.props.file.to,
+            this.props.app,
+            {
+              previousRef: { gitRef: 'HEAD' },
+              currentRef: { specialRef: currentRef.specialRef }
+            },
+            this.props.renderMime
+          );
+        }}
+      />
     );
   }
 }
