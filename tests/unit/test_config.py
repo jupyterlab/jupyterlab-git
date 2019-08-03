@@ -11,7 +11,7 @@ from jupyterlab_git.handlers import GitConfigHandler
 @patch("jupyterlab_git.handlers.GitConfigHandler.__init__", Mock(return_value=None))
 @patch(
     "jupyterlab_git.handlers.GitConfigHandler.get_json_body",
-    Mock(return_value={"top_repo_path": "test_path"}),
+    Mock(return_value={"path": "test_path"}),
 )
 @patch("jupyterlab_git.handlers.GitConfigHandler.git", Git("/bin"))
 @patch("jupyterlab_git.handlers.GitConfigHandler.finish")
@@ -61,7 +61,7 @@ def test_git_get_config_success(popen, finish):
     "jupyterlab_git.handlers.GitConfigHandler.get_json_body",
     Mock(
         return_value={
-            "top_repo_path": "test_path",
+            "path": "test_path",
             "options": {
                 "user.name": "John Snow",
                 "user.email": "john.snow@iscoming.com",

@@ -306,7 +306,7 @@ Request JSON:
 
 ```bash
     {
-        "top_repo_path": "/absolute/path/to/root/of/repo",
+        "path": "/absolute/path/to/root/of/repo",
         "options": {
             "key1": "value1",
             "keyI": "valueI"
