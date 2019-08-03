@@ -728,3 +728,53 @@ class Git:
                 )
             )
 
+    def show(self, filename, ref, top_repo_path):
+        """
+        Execute git show<ref:filename> command & return the result.
+        """
+        command = ["git", "show", f'{ref}:{filename}']
+        p = subprocess.Popen(
+            command,
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd=top_repo_path
+        )
+        output, error = p.communicate()
+        if p.returncode == 0:
+            return output.decode('utf-8')
+        elif "fatal: Path '{}' exists on disk, but not in '{}'".format(filename, ref) in error.decode('utf-8'):
+            return ""
+        elif "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename) in error.decode('utf-8'):
+            return ""
+        else:
+            raise Exception('Error [{}] occurred while executing [{}] command to retrieve plaintext diff.'.format(
+                error.decode('utf-8'),
+                ' '.join(command)
+            ))
+
+    def less(self, filename, top_repo_path):
+        """
+        Execute less -FX <filename> command & return the result.
+        """
+        my_output = subprocess.check_output(
+            ["less", "-FX", filename], cwd=top_repo_path)
+        return my_output.decode('utf-8')
+
+    def diff_content(self, filename, prev_ref, curr_ref, top_repo_path):
+        """
+        Collect get content of prev and curr and return.
+        """
+        try:
+            prev_content = self.show(filename, prev_ref["git"], top_repo_path)
+            if "special" in curr_ref:
+                if curr_ref["special"] == "WORKING":
+                    curr_content = self.less(filename, top_repo_path)
+                elif curr_ref["special"] == "INDEX":
+                    curr_content = self.show(filename, "", top_repo_path)
+                else:
+                    raise Exception("Error while retrieving plaintext diff, unknown special ref '{}'.".format(curr_ref["specialref"]))
+            else:
+                curr_content = self.show(filename, curr_ref["git"], top_repo_path)
+            return {"prev_content": prev_content, "curr_content": curr_content}
+        except:
+            raise 

@@ -28,6 +28,7 @@ import {
   findRepoButtonStyle
 } from '../componentsStyle/GitPanelStyle';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IThemeManager } from '@jupyterlab/apputils';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -56,6 +57,7 @@ export interface IGitSessionNodeProps {
   app: JupyterFrontEnd;
   diff: IDiffCallback;
   renderMime: IRenderMimeRegistry;
+  themeManager: IThemeManager;
 }
 
 /** A React component for the git extension's main display */
@@ -241,6 +243,7 @@ export class GitPanel extends React.Component<
             refresh={this.refresh}
             diff={this.props.diff}
             renderMime={this.props.renderMime}
+            themeManager={this.props.themeManager}
           />
           <PastCommits
             currentFileBrowserPath={this.state.currentFileBrowserPath}
@@ -255,6 +258,7 @@ export class GitPanel extends React.Component<
             diff={this.props.diff}
             sideBarExpanded={this.state.sideBarExpanded}
             renderMime={this.props.renderMime}
+            themeManager={this.props.themeManager}
           />
         </div>
       );

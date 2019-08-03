@@ -32,6 +32,7 @@ import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
 import { openDiffView } from './diff/DiffWidget';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { isDiffSupported } from './diff/Diff';
+import { IThemeManager } from '@jupyterlab/apputils';
 
 export interface ISinglePastCommitInfoProps {
   topRepoPath: string;
@@ -39,6 +40,7 @@ export interface ISinglePastCommitInfoProps {
   app: JupyterFrontEnd;
   diff: IDiffCallback;
   renderMime: IRenderMimeRegistry;
+  themeManager: IThemeManager;
 
   refresh: () => void;
 }
@@ -220,12 +222,14 @@ export class SinglePastCommitInfo extends React.Component<
                       onClick={() => {
                         openDiffView(
                           modifiedFile.modified_file_path,
+                          this.props.topRepoPath,
                           this.props.app,
                           {
                             previousRef: { gitRef: this.props.data.pre_commit },
                             currentRef: { gitRef: this.props.data.commit }
                           },
-                          this.props.renderMime
+                          this.props.renderMime,
+                          this.props.themeManager
                         );
                       }}
                     />

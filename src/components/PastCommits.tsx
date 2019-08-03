@@ -8,6 +8,7 @@ import { IDiffCallback } from '../git';
 
 import * as React from 'react';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IThemeManager } from '@jupyterlab/apputils';
 
 /** Interface for PastCommits component props */
 export interface IPastCommitsProps {
@@ -23,6 +24,7 @@ export interface IPastCommitsProps {
   diff: IDiffCallback;
   sideBarExpanded: boolean;
   renderMime: IRenderMimeRegistry;
+  themeManager: IThemeManager;
 }
 
 export class PastCommits extends React.Component<IPastCommitsProps, {}> {
@@ -43,6 +45,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
           sideBarExpanded={this.props.sideBarExpanded}
           display={this.props.showList}
           renderMime={this.props.renderMime}
+          themeManager={this.props.themeManager}
         />
       </div>
     );

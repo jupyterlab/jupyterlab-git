@@ -12,10 +12,10 @@
     "jupyterlab-extension"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "webpack && tsc",
     "clean": "rimraf lib",
     "prepublish": "npm run build",
-    "watch": "tsc -w",
+    "watch": "webpack && tsc -w",
     "test": "jest",
     "lint": "tslint --project .",
     "tslint-check": "tslint-config-prettier-check ./tslint.json"
@@ -48,6 +48,7 @@
     "@jupyterlab/services": "^4.0.0",
     "@jupyterlab/terminal": "^1.0.0",
     "@phosphor/widgets": "^1.8.0",
+    "monaco-editor": "^0.17.1",
     "nbdime": "~5.0.1",
     "react": "~16.8.4",
     "react-dom": "~16.8.4",
@@ -56,10 +57,12 @@
   "devDependencies": {
     "@babel/core": "^7.5.0",
     "@babel/preset-env": "^7.5.0",
+    "@types/d3-color": "^1.2.2",
     "@types/enzyme": "3.1.15",
     "@types/jest": "^24",
     "@types/react": "~16.8.13",
     "@types/react-dom": "~16.0.5",
+    "d3-color": "^1.3.0",
     "enzyme": "3.7.0",
     "enzyme-adapter-react-16": "1.7.0",
     "husky": "1.3.1",
@@ -75,7 +78,8 @@
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "^2.0.0",
     "typescript": "~3.5.1",
-    "typescript-tslint-plugin": "0.3.1"
+    "webpack": "^4.39.1",
+    "webpack-cli": "^3.3.6"
   },
   "directories": {
     "lib": "lib"

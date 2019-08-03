@@ -4,6 +4,7 @@ import { historySideBarStyle } from '../componentsStyle/HistorySideBarStyle';
 import { IGitBranchResult, ISingleCommitInfo, IDiffCallback } from '../git';
 import { PastCommitNode } from './PastCommitNode';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IThemeManager } from '@jupyterlab/apputils';
 
 /** Interface for PastCommits component props */
 export interface IHistorySideBarProps {
@@ -15,6 +16,7 @@ export interface IHistorySideBarProps {
   refresh: () => void;
   diff: IDiffCallback;
   renderMime: IRenderMimeRegistry;
+  themeManager: IThemeManager;
 }
 
 export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
@@ -35,6 +37,7 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
               refresh={this.props.refresh}
               diff={this.props.diff}
               renderMime={this.props.renderMime}
+              themeManager={this.props.themeManager}
             />
           )
         )}

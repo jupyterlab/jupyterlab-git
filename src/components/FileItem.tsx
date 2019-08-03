@@ -28,7 +28,7 @@ import { classes } from 'typestyle';
 
 import * as React from 'react';
 
-import { showDialog, Dialog } from '@jupyterlab/apputils';
+import { showDialog, Dialog, IThemeManager } from '@jupyterlab/apputils';
 import { ISpecialRef } from './diff/model';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { isDiffSupported } from './diff/Diff';
@@ -60,6 +60,7 @@ export interface IFileItemProps {
   toggleDisableFiles: Function;
   sideBarExpanded: boolean;
   renderMime: IRenderMimeRegistry;
+  themeManager: IThemeManager;
 }
 
 export class FileItem extends React.Component<IFileItemProps, {}> {
@@ -328,12 +329,14 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
         onClick={() => {
           openDiffView(
             this.props.file.to,
+            this.props.topRepoPath,
             this.props.app,
             {
               previousRef: { gitRef: 'HEAD' },
               currentRef: { specialRef: currentRef.specialRef }
             },
-            this.props.renderMime
+            this.props.renderMime,
+            this.props.themeManager
           );
         }}
       />

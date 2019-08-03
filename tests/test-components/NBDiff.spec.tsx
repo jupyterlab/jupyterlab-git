@@ -1,11 +1,11 @@
-import * as React from 'react';
 import { shallow } from 'enzyme';
 import 'jest';
+import * as React from 'react';
 import { IDiffProps } from '../../src/components/diff/Diff';
 import { CellDiff, NBDiff } from '../../src/components/diff/NbDiff';
-import * as diffResponse from '../test-components/data/diffResponse.json';
-import { httpGitRequest } from '../../src/git';
 import { NBDiffHeader } from '../../src/components/diff/NBDiffHeader';
+import { httpGitRequest } from '../../src/git';
+import * as diffResponse from '../test-components/data/diffResponse.json';
 
 jest.mock('../../src/git');
 
@@ -14,6 +14,7 @@ describe('NBDiff', () => {
     // Given
     const props: IDiffProps = {
       path: '/path/to/File.ipynb',
+      topRepoPath: '/top/repo/path',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },
         previousRef: { gitRef: '83baee' }
@@ -38,8 +39,8 @@ describe('NBDiff', () => {
       expect(httpGitRequest).toHaveBeenCalled();
       expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
         file_path: '/path/to/File.ipynb',
-        ref_remote: { special: 'WORKING' },
-        ref_local: { git: '83baee' }
+        ref_curr: { special: 'WORKING' },
+        ref_prev: { git: '83baee' }
       });
       expect(node.find('.jp-git-diff-error').text()).toContain(
         'TEST_ERROR_MESSAGE'
@@ -51,6 +52,7 @@ describe('NBDiff', () => {
     // Given
     const props: IDiffProps = {
       path: '/path/to/File.ipynb',
+      topRepoPath: '/top/repo/path',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },
         previousRef: { gitRef: '83baee' }
@@ -75,8 +77,8 @@ describe('NBDiff', () => {
       expect(httpGitRequest).toHaveBeenCalled();
       expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
         file_path: '/path/to/File.ipynb',
-        ref_remote: { special: 'WORKING' },
-        ref_local: { git: '83baee' }
+        ref_curr: { special: 'WORKING' },
+        ref_prev: { git: '83baee' }
       });
       expect(node.find('.jp-git-diff-error').html()).toBeNull();
       expect(node.find(NBDiffHeader)).toHaveLength(1);
@@ -99,13 +101,13 @@ function createTestResponse(
     trailer: Promise.resolve(Headers as any),
     type: 'basic',
     url: '/foo/bar',
-    clone: jest.fn<Response, []>(),
+    clone: jest.fn<Response>(),
     body: null,
     bodyUsed: false,
-    arrayBuffer: jest.fn<Promise<ArrayBuffer>, []>(),
-    blob: jest.fn<Promise<Blob>, []>(),
-    formData: jest.fn<Promise<FormData>, []>(),
-    text: jest.fn<Promise<string>, []>()
+    arrayBuffer: jest.fn<Promise<ArrayBuffer>>(),
+    blob: jest.fn<Promise<Blob>>(),
+    formData: jest.fn<Promise<FormData>>(),
+    text: jest.fn<Promise<String>>()
   };
   return Promise.resolve(testResponse);
 }

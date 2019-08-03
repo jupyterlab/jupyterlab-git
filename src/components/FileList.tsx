@@ -1,4 +1,4 @@
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog, IThemeManager } from '@jupyterlab/apputils';
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
@@ -79,6 +79,7 @@ export interface IFileListProps {
   sideBarExpanded: boolean;
   display: boolean;
   renderMime: IRenderMimeRegistry;
+  themeManager: IThemeManager;
 }
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
@@ -132,12 +133,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         execute: () => {
           openDiffView(
             this.state.contextMenuFile,
+            this.props.topRepoPath,
             this.props.app,
             {
               currentRef: { specialRef: 'WORKING' },
               previousRef: { gitRef: 'HEAD' }
             },
-            this.props.renderMime
+            this.props.renderMime,
+            this.props.themeManager
           );
         }
       });
@@ -150,12 +153,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         execute: () => {
           openDiffView(
             this.state.contextMenuFile,
+            this.props.topRepoPath,
             this.props.app,
             {
               currentRef: { specialRef: 'INDEX' },
               previousRef: { gitRef: 'HEAD' }
             },
-            this.props.renderMime
+            this.props.renderMime,
+            this.props.themeManager
           );
         }
       });
@@ -531,6 +536,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               isDisabled={this.state.disableStaged}
               sideBarExpanded={this.props.sideBarExpanded}
               renderMime={this.props.renderMime}
+              themeManager={this.props.themeManager}
             />
             <GitStage
               heading={'Changed'}
@@ -565,6 +571,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               isDisabled={this.state.disableUnstaged}
               sideBarExpanded={this.props.sideBarExpanded}
               renderMime={this.props.renderMime}
+              themeManager={this.props.themeManager}
             />
             <GitStage
               heading={'Untracked'}
@@ -599,6 +606,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               isDisabled={this.state.disableUntracked}
               sideBarExpanded={this.props.sideBarExpanded}
               renderMime={this.props.renderMime}
+              themeManager={this.props.themeManager}
             />
           </div>
         )}

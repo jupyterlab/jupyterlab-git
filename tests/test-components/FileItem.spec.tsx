@@ -31,7 +31,8 @@ describe('FileItem', () => {
     disableFile: false,
     toggleDisableFiles: () => {},
     sideBarExpanded: false,
-    renderMime: null
+    renderMime: null,
+    themeManager: null
   };
 
   describe('#render()', () => {

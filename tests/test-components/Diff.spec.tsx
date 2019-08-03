@@ -13,6 +13,7 @@ describe('Diff', () => {
     // Given
     const props: IDiffProps = {
       path: '/path/to/File.ipynb',
+      topRepoPath: 'top/repo/path',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },
         previousRef: { gitRef: '83baee' }
@@ -30,6 +31,7 @@ describe('Diff', () => {
     // Given
     const props: IDiffProps = {
       path: '/path/to/File.py',
+      topRepoPath: 'top/repo/path',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },
         previousRef: { gitRef: '83baee' }

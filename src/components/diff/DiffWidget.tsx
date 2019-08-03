@@ -2,9 +2,14 @@ import * as React from 'react';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { getRefValue, IDiffContext } from './model';
-import { Diff, isDiffSupported, RenderMimeProvider } from './Diff';
+import {
+  Diff,
+  isDiffSupported,
+  RenderMimeProvider,
+  ThemeManagerProvider
+} from './Diff';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { ReactWidget, showDialog } from '@jupyterlab/apputils';
+import { ReactWidget, showDialog, IThemeManager } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { style } from 'typestyle';
 
@@ -19,9 +24,11 @@ import { style } from 'typestyle';
  */
 export function openDiffView(
   path: string,
+  topRepoPath: string,
   app: JupyterFrontEnd,
   diffContext: IDiffContext,
-  renderMime: IRenderMimeRegistry
+  renderMime: IRenderMimeRegistry,
+  themeManager: IThemeManager
 ) {
   if (isDiffSupported(path)) {
     const id = `nbdiff-${path}-${getRefValue(diffContext.currentRef)}`;
@@ -37,7 +44,13 @@ export function openDiffView(
     if (!mainAreaItem) {
       const nbDiffWidget = ReactWidget.create(
         <RenderMimeProvider value={renderMime}>
-          <Diff path={path} diffContext={diffContext} />
+          <ThemeManagerProvider value={themeManager}>
+            <Diff
+              path={path}
+              diffContext={diffContext}
+              topRepoPath={topRepoPath}
+            />
+          </ThemeManagerProvider>
         </RenderMimeProvider>
       );
       nbDiffWidget.id = id;
