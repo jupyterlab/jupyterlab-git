@@ -1,4 +1,4 @@
-import { nbformat } from '@jupyterlab/coreutils';
+import { nbformat, PathExt } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ServerConnection } from '@jupyterlab/services/lib/serverconnection';
 import { IDiffEntry } from 'nbdime/lib/diff/diffentries';
@@ -178,7 +178,7 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
       }
 
       httpGitRequest('/nbdime/api/gitdiff', 'POST', {
-        file_path: this.props.path,
+        file_path: PathExt.join(this.props.topRepoPath, this.props.path),
         ref_local: { git: diffContext.previousRef.gitRef },
         ref_remote: currentRefValue
       }).then((response: Response) => {

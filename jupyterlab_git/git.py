@@ -64,8 +64,9 @@ class Git:
     A single parent class containing all of the individual git methods in it.
     """
 
-    def __init__(self, root_dir):
-        self.root_dir = os.path.expanduser(root_dir)
+    def __init__(self, contents_manager):
+        self.contents_manager = contents_manager
+        self.root_dir = os.path.realpath(os.path.expanduser(contents_manager.root_dir))
 
     def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
@@ -892,3 +893,58 @@ class Git:
                     error.decode("utf-8"), " ".join(command)
                 )
             )
+
+    def show(self, filename, ref, top_repo_path):
+        """
+        Execute git show<ref:filename> command & return the result.
+        """
+        command = ["git", "show", '{}:{}'.format(ref, filename)]
+        p = subprocess.Popen(
+            command,
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd=top_repo_path
+        )
+        output, error = p.communicate()
+
+        error_messages = map(lambda n: n.lower(), [
+            "fatal: Path '{}' exists on disk, but not in '{}'".format(filename, ref),
+            "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename)
+        ])
+        lower_error = error.decode('utf-8').lower()
+        if p.returncode == 0:
+            return output.decode('utf-8')
+        elif any([msg in lower_error for msg in error_messages]):
+            return ""
+        else:
+            raise Exception('Error [{}] occurred while executing [{}] command to retrieve plaintext diff.'.format(
+                error.decode('utf-8'),
+                ' '.join(command)
+            ))
+
+    def get_content(self, filename, top_repo_path):
+        """
+        Get the file content of filename.
+        """
+        relative_repo = os.path.relpath(top_repo_path, self.root_dir)
+        model = self.contents_manager.get(path=os.path.join(relative_repo, filename))
+        return model['content']
+
+    def diff_content(self, filename, prev_ref, curr_ref, top_repo_path):
+        """
+        Collect get content of prev and curr and return.
+        """
+        try:
+            prev_content = self.show(filename, prev_ref["git"], top_repo_path)
+            if "special" in curr_ref:
+                if curr_ref["special"] == "WORKING":
+                    curr_content = self.get_content(filename, top_repo_path)
+                elif curr_ref["special"] == "INDEX":
+                    curr_content = self.show(filename, "", top_repo_path)
+                else:
+                    raise Exception("Error while retrieving plaintext diff, unknown special ref '{}'.".format(curr_ref["specialref"]))
+            else:
+                curr_content = self.show(filename, curr_ref["git"], top_repo_path)
+            return {"prev_content": prev_content, "curr_content": curr_content}
+        except:
+            raise
