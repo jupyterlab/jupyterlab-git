@@ -432,7 +432,7 @@ class GitConfigHandler(GitHandler):
         POST get (if no options are passed) or set configuration options
         """
         data = self.get_json_body()
-        top_repo_path = data["top_repo_path"]
+        top_repo_path = data["path"]
         options = data.get("options", {})
         response = self.git.config(top_repo_path, **options)
 
