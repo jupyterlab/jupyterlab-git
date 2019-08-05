@@ -76,8 +76,8 @@
     background-size: 20px;
     background-position: center;
     background-repeat: no-repeat;
-    height: 10px;
-    width: 15px;
+    height: 2px;
+    width: 4px;
     font-size: var(--jp-ui-font-size1);
     line-height: var(--jp-private-toolbar-height);
     margin-top: .1em;
@@ -88,6 +88,7 @@
     transition: background-color 0.1s ease;
     margin-left: 5px;
     border: transparent;
+    float: none;
 }
 
 .jp-git-diff-Widget {
