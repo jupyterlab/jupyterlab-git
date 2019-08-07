@@ -16,7 +16,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'notebook',
-        'nbdime @ git+https://github.com/jupyter/nbdime.git@f96ac655cdb4fce33eb8a2de4ce06913b942a97b'
+        'nbdime >= 1.1.0'
     ],
     package_data={'jupyterlab_git': ['*']},
 )
