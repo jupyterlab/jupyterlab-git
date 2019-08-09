@@ -56,7 +56,7 @@ def test_git_pull_with_auth_fail(mock_git_auth_input_wrapper):
     # Then
     mock_git_auth_input_wrapper.assert_has_calls([
         call(
-            command = ['git', 'pull', '--no-commit'],
+            command = ['git pull --no-commit'],
             cwd='/bin/test_curr_path',
             env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '1'},
             username = 'asdf',
@@ -116,7 +116,7 @@ def test_git_pull_with_auth_success(mock_git_auth_input_wrapper):
     # Then
     mock_git_auth_input_wrapper.assert_has_calls([
         call(
-            command = ['git', 'pull', '--no-commit'],
+            command = ['git pull --no-commit'],
             cwd='/bin/test_curr_path',
             env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '1'},
             username = 'asdf',
@@ -176,7 +176,7 @@ def test_git_push_with_auth_fail(mock_git_auth_input_wrapper):
     # Then
     mock_git_auth_input_wrapper.assert_has_calls([
         call(
-            command = ['git', 'push', 'test_origin', 'HEAD:test_master'],
+            command = ['git push test_origin HEAD:test_master'],
             cwd='/bin/test_curr_path',
             env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '1'},
             username = 'asdf',
@@ -237,7 +237,7 @@ def test_git_push_with_auth_success(mock_git_auth_input_wrapper):
     # Then
     mock_git_auth_input_wrapper.assert_has_calls([
         call(
-            command = ['git', 'push', '.', 'HEAD:test_master'],
+            command = ['git push . HEAD:test_master'],
             cwd='/bin/test_curr_path',
             env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '1'},
             username = 'asdf',

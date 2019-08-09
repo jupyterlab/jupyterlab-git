@@ -23,7 +23,7 @@ def test_git_clone_success(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['git clone ghjkhjkl'],
+            ['git', 'clone', 'ghjkhjkl'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
@@ -57,7 +57,7 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['git clone ghjkhjkl'],
+            ['git', 'clone', 'ghjkhjkl'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path',
