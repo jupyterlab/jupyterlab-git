@@ -34,7 +34,7 @@ export interface IDiffProps {
  */
 export function Diff(props: IDiffProps) {
   const fileExtension = PathExt.extname(props.path).toLocaleLowerCase();
-
+  console.log(`Invoking Diff with Path ${props.path}`);
   if (fileExtension in DIFF_PROVIDER_REGISTRY) {
     const DiffProvider = DIFF_PROVIDER_REGISTRY[fileExtension];
     return <DiffProvider {...props} />;

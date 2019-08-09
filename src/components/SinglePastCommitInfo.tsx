@@ -217,15 +217,16 @@ export class SinglePastCommitInfo extends React.Component<
                     <button
                       className={`${diffIconStyle}`}
                       title={'View file changes'}
-                      onClick={() => {
-                        openDiffView(
+                      onClick={async () => {
+                        await openDiffView(
                           modifiedFile.modified_file_path,
                           this.props.app,
                           {
                             previousRef: { gitRef: this.props.data.pre_commit },
                             currentRef: { gitRef: this.props.data.commit }
                           },
-                          this.props.renderMime
+                          this.props.renderMime,
+                          this.props.topRepoPath
                         );
                       }}
                     />
