@@ -1,12 +1,8 @@
 import * as React from 'react';
 
-import { Dialog } from '@jupyterlab/apputils';
-
 import { Git } from '../git';
 
 import { CommitBox } from './CommitBox';
-
-import { GitAuthorForm } from './CommitAuthorBox';
 
 import { NewBranchBox } from './NewBranchBox';
 

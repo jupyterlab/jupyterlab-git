@@ -18,8 +18,6 @@ import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 
 import { GitCredentialsForm } from './CredentialsBox';
 
-import { GitCredentialsForm } from './CredentialsBox';
-
 export interface IPathHeaderState {
   refresh: any;
   gitApi: Git;
@@ -99,7 +97,7 @@ export class PathHeader extends React.Component<
     let result = await dialog.launch();
     dialog.dispose();
     let retry = false;
-    while (result.button.label === 'CANCEL') {
+    while (result.button.label === 'Cancel') {
       let credentialsDialog = new Dialog({
         title: 'Git credentials required',
         body: new GitCredentialsForm(

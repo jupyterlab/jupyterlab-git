@@ -126,6 +126,7 @@ export interface IGitLogResult {
 export interface IIdentity {
   name: string;
   email: string;
+}
 
 /**
  * Interface for the Git Auth request.
@@ -142,16 +143,6 @@ export interface IGitClone {
   current_path: string;
   clone_url: string;
   auth?: IGitAuth;
-}
-
-/**
- * Structure for the request to the Git Commit API.
- */
-export interface IGitCommit {
-  commit_msg: string;
-  top_repo_path: string;
-  author_name?: string;
-  author_email?: string;
 }
 
 /**
@@ -189,14 +180,6 @@ export function httpGitRequest(
  * Structure for the result of the Git Clone API.
  */
 export interface IGitCloneResult {
-  code: number;
-  message?: string;
-}
-
-/**
- * Structure for the result of the Git Commit API.
- */
-export interface IGitCommitResult {
   code: number;
   message?: string;
 }
@@ -474,30 +457,18 @@ export class Git {
     }
   }
   /** Make request to commit all staged files in repository 'path' */
-  async commit(
-    message: string,
-    path: string,
-    authorName: string = '',
-    authorEmail: string = ''
-  ): Promise<IGitCommitResult> {
+  async commit(message: string, path: string): Promise<Response> {
     try {
-      let obj: IGitCommit = {
+      let response = await httpGitRequest('/git/commit', 'POST', {
         commit_msg: message,
         top_repo_path: path
-      };
-
-      if (authorName !== '' && authorEmail !== '') {
-        obj.author_name = authorName;
-        obj.author_email = authorEmail;
-      }
-
-      let response = await httpGitRequest('/git/commit', 'POST', obj);
+      });
       if (response.status !== 200) {
         return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
-      return response.json();
+      return response;
     } catch (err) {
       throw ServerConnection.NetworkError;
     }

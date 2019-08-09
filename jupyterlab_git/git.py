@@ -37,6 +37,19 @@ class git_auth_input_wrapper:
             p.expect('Password for .*:')
             p.sendline(self.password)
 
+            p.expect(pexpect.EOF)
+            response = p.before
+
+            self.returncode = p.wait()
+            p.close()
+            
+            return response
+        except pexpect.exceptions.EOF: #In case of pexpect failure
+            response = p.before
+            self.returncode = p.exitstatus
+            p.close() #close process
+            return response
+
 
 class Git:
     """
@@ -160,7 +173,7 @@ class Git:
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             p = subprocess.Popen(
-                ['git clone {}'.format(unquote(repo_url))],
+                ['git', 'clone', unquote(repo_url)],
                 stdout=PIPE,
                 stderr=PIPE,
                 env = env,
@@ -616,7 +629,7 @@ class Git:
         if (auth):
             env["GIT_TERMINAL_PROMPT"] = "1"
             p = git_auth_input_wrapper(
-                command = ['git', 'pull', '--no-commit'],
+                command = 'git pull --no-commit',
                 cwd = os.path.join(self.root_dir, curr_fb_path),
                 env = env,
                 username = auth['username'],
@@ -631,7 +644,6 @@ class Git:
                 stderr=PIPE,
                 env = env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
-                env = env,
             )
             _, error = p.communicate()
 
@@ -650,7 +662,7 @@ class Git:
         if (auth):
             env["GIT_TERMINAL_PROMPT"] = "1"
             p = git_auth_input_wrapper(
-                command = ['git', 'push', remote, branch],
+                command = 'git push {} {}'.format(remote, branch),
                 cwd = os.path.join(self.root_dir, curr_fb_path),
                 env = env,
                 username = auth['username'],
@@ -665,7 +677,6 @@ class Git:
                 stderr=PIPE,
                 env = env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
-                env = env,
             )
             _, error = p.communicate()
 
