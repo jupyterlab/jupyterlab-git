@@ -5,7 +5,7 @@ cache:
   pip: true
   directories:
     - /home/travis/.yarn-cache/
-install: pip install pytest "jupyterlab>=1.0.3"
+install: pip install pytest
 script:
   - pytest tests/unit
   - yarn
