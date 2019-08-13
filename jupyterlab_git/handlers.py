@@ -306,16 +306,6 @@ class GitCheckoutHandler(GitHandler):
 class GitCommitHandler(GitHandler):
     """
     Handler for 'git commit -m <message>'. Commits files.
-    
-    When author information is sent, adds that information to commit
-
-    Input format:
-        {
-            'top_repo_path': 'top/repo/path',
-            'commit_msg': 'commit_message_to_add',
-            OPTIONAL: 'author_name' : 'Notebook User',
-            OPTIONAL: 'author_email' : 'email@domain.com'
-        }
     """
 
     def post(self):
@@ -325,12 +315,7 @@ class GitCommitHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         commit_msg = data["commit_msg"]
-        if "author_name" in data.keys() and "author_email" in data.keys():
-            author_name = data["author_name"]
-            author_email = data["author_email"]
-            my_output = self.git.commit(commit_msg, top_repo_path, author_name, author_email)
-        else:
-            my_output = self.git.commit(commit_msg, top_repo_path)
+        my_output = self.git.commit(commit_msg, top_repo_path)
         self.finish(my_output)
 
 
@@ -361,13 +346,7 @@ class GitPullHandler(GitHandler):
         POST request handler, pulls files from a remote branch to your current branch.
         """
         data = self.get_json_body()
-
-        #Different request with and without auth
-        if 'auth' in data.keys():
-            auth = data['auth']
-            response = self.git.pull(data['current_path'], data['auth'])
-        else:
-            response = self.git.pull(data['current_path'])
+        response = self.git.pull(data['current_path'], data.get('auth', None))
         
         self.finish(json.dumps(response))
 
@@ -402,12 +381,7 @@ class GitPushHandler(GitHandler):
                 remote = upstream[0]
                 branch = ":".join(["HEAD", upstream[1]])
 
-            #Different request with and without auth
-            if 'auth' in data.keys():
-                auth = data['auth']
-                response = self.git.push(remote, branch, current_path, auth)
-            else:
-                response = self.git.push(remote, branch, current_path)
+            response = self.git.push(remote, branch, current_path, data.get('auth', None))
 
         else:
             response = {

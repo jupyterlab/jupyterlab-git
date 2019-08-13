@@ -2,7 +2,7 @@ from subprocess import PIPE
 
 from mock import patch, call, Mock
 
-from jupyterlab_git.git import Git, git_auth_input_wrapper
+from jupyterlab_git.git import Git, GitAuthInputWrapper
 
 
 @patch('subprocess.Popen')

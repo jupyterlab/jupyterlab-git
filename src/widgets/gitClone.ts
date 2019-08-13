@@ -6,9 +6,9 @@ import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { style } from 'typestyle';
 
-import { Git, IGitAuth } from '../git';
+import { Git } from '../git';
 
-import { GitCredentialsForm } from '../components/CredentialsBox';
+import { GitCredentialsForm } from './CredentialsBox';
 
 /**
  * The widget encapsulating the Git Clone UI:
@@ -107,19 +107,14 @@ export class GitClone extends Widget {
 
             const result = await dialog.launch();
             dialog.dispose();
-            if (result.button.label === 'OK') {
+
+            if (result.button.accept) {
               // user accepted attempt to login
-              // now, we can try cloning again
-              let authJson = JSON.parse(decodeURIComponent(result.value));
-              // call gitApi.clone again with credentials
-              let auth: IGitAuth = {
-                username: authJson.username,
-                password: authJson.password
-              };
+              // try to clone again
               response = await this.gitApi.clone(
                 this.fileBrowser.model.path,
                 cloneUrl,
-                auth
+                result.value
               );
             } else {
               this.showErrorDialog(response.message);

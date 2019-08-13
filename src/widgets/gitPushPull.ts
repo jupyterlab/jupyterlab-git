@@ -22,7 +22,7 @@ export class GitPullPushDialog extends Widget {
   constructor(
     currentFileBrowserPath: string,
     operation: Operation,
-    auth: IGitAuth = undefined
+    auth?: IGitAuth
   ) {
     super();
     this.operation = operation;
@@ -42,10 +42,7 @@ export class GitPullPushDialog extends Widget {
    * Executes the relevant service API depending on the operation and handles response and errors.
    * @param currentFileBrowserPath the path to the current repo
    */
-  private executeGitApi(
-    currentFileBrowserPath: string,
-    auth: IGitAuth = undefined
-  ) {
+  private executeGitApi(currentFileBrowserPath: string, auth?: IGitAuth) {
     switch (this.operation) {
       case Operation.Pull:
         this.gitApi

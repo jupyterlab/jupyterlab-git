@@ -13,13 +13,12 @@ from tornado.web import HTTPError
 ALLOWED_OPTIONS = ['user.name', 'user.email']
 
 
-class git_auth_input_wrapper:
+class GitAuthInputWrapper:
     """
     Helper class which is meant to replace subprocess.Popen for communicating
     with git CLI when also sending username and password for auth
     """
-    def __init__(self, command, cwd, env, username, password, *args, **kwargs):
-        super(git_auth_input_wrapper, self).__init__(*args, **kwargs)
+    def __init__(self, command, cwd, env, username, password):
         self.command = command
         self.cwd = cwd
         self.env = env
@@ -162,7 +161,7 @@ class Git:
         env = os.environ.copy()
         if (auth):
             env["GIT_TERMINAL_PROMPT"] = "1"
-            p = git_auth_input_wrapper(
+            p = GitAuthInputWrapper(
                 command='git clone {} -q'.format(unquote(repo_url)),
                 cwd=os.path.join(self.root_dir, current_path),
                 env = env,
@@ -589,36 +588,14 @@ class Git:
         )
         return my_output
 
-    def commit(self, commit_msg, top_repo_path, author_name=None, author_email=None):
+    def commit(self, commit_msg, top_repo_path):
         """
         Execute git commit <filename> command & return the result.
         """
-        command = ["git", "commit", "-m", commit_msg]
-
-        if author_name != None and author_email != None:
-            command.insert(1, '-c')
-            command.insert(2, f'user.name=\'{author_name}\'')
-            command.insert(3, '-c')
-            command.insert(4, f'user.email=\'{author_email}\'')
-
-        p = Popen(
-            command,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=top_repo_path,
+        my_output = subprocess.check_output(
+            ["git", "commit", "-m", commit_msg], cwd=top_repo_path
         )
-        my_output, my_error = p.communicate()
-        
-        if p.returncode == 0:
-            return {
-                "code": p.returncode,
-                "message": my_output.decode("utf-8").strip("\n"),
-            }
-        else:
-            return {
-                "code": p.returncode,
-                "message": my_error.decode("utf-8").strip("\n"),
-            }
+        return my_output
             
     def pull(self, curr_fb_path, auth=None):
         """
@@ -628,7 +605,7 @@ class Git:
         env = os.environ.copy()
         if (auth):
             env["GIT_TERMINAL_PROMPT"] = "1"
-            p = git_auth_input_wrapper(
+            p = GitAuthInputWrapper(
                 command = 'git pull --no-commit',
                 cwd = os.path.join(self.root_dir, curr_fb_path),
                 env = env,
@@ -661,7 +638,7 @@ class Git:
         env = os.environ.copy()
         if (auth):
             env["GIT_TERMINAL_PROMPT"] = "1"
-            p = git_auth_input_wrapper(
+            p = GitAuthInputWrapper(
                 command = 'git push {} {}'.format(remote, branch),
                 cwd = os.path.join(self.root_dir, curr_fb_path),
                 env = env,

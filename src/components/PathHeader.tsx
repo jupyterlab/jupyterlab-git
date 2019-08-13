@@ -10,13 +10,13 @@ import * as React from 'react';
 
 import { classes } from 'typestyle';
 
-import { Git, IGitAuth } from '../git';
+import { Git } from '../git';
 
 import { Dialog } from '@jupyterlab/apputils';
 
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 
-import { GitCredentialsForm } from './CredentialsBox';
+import { GitCredentialsForm } from '../widgets/CredentialsBox';
 
 export interface IPathHeaderState {
   refresh: any;
@@ -97,7 +97,7 @@ export class PathHeader extends React.Component<
     let result = await dialog.launch();
     dialog.dispose();
     let retry = false;
-    while (result.button.label === 'Cancel') {
+    while (!result.button.accept) {
       let credentialsDialog = new Dialog({
         title: 'Git credentials required',
         body: new GitCredentialsForm(
@@ -111,19 +111,15 @@ export class PathHeader extends React.Component<
       let response = await credentialsDialog.launch();
       credentialsDialog.dispose();
 
-      if (response.button.label === 'OK') {
+      if (response.button.accept) {
         // user accepted attempt to login
-
-        let authJson = JSON.parse(decodeURIComponent(response.value));
-        // call gitApi.push again with credentials
-        let auth: IGitAuth = {
-          username: authJson.username,
-          password: authJson.password
-        };
-
         dialog = new Dialog({
           title: `Git ${operation}`,
-          body: new GitPullPushDialog(currentFileBrowserPath, operation, auth),
+          body: new GitPullPushDialog(
+            currentFileBrowserPath,
+            operation,
+            response.value
+          ),
           buttons: [Dialog.okButton({ label: 'DISMISS' })]
         });
         result = await dialog.launch();
