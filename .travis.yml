@@ -7,11 +7,11 @@ cache:
     - /home/travis/.yarn-cache/
 install: pip install pytest
 script:
+  - pip install .
   - pytest tests/unit
   - yarn
   - yarn build
   - yarn test
-  - pip install .
   - jupyter serverextension enable --py jupyterlab_git
   - jupyter labextension install .
   - python -m jupyterlab.browser_check
