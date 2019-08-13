@@ -15,7 +15,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     install_requires=[
-        'jupyterlab >= 1.0.0',
+        'jupyterlab >= 1.0.3',
         'nbdime >= 1.1.0'
     ],
     package_data={'jupyterlab_git': ['*']},
