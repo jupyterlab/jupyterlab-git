@@ -47,7 +47,7 @@ def test_push_handler_localbranch(mock_finish, mock_git):
     # Then
     mock_git.get_current_branch.assert_called_with('test_path')
     mock_git.get_upstream_branch.assert_called_with('test_path', 'foo')
-    mock_git.push.assert_called_with('.', 'HEAD:localbranch', 'test_path')
+    mock_git.push.assert_called_with('.', 'HEAD:localbranch', 'test_path', None)
     mock_finish.assert_called_with('{"code": 0}')
 
 
@@ -67,7 +67,7 @@ def test_push_handler_remotebranch(mock_finish, mock_git):
     # Then
     mock_git.get_current_branch.assert_called_with('test_path')
     mock_git.get_upstream_branch.assert_called_with('test_path', 'foo')
-    mock_git.push.assert_called_with('origin', 'HEAD:remotebranch', 'test_path')
+    mock_git.push.assert_called_with('origin', 'HEAD:remotebranch', 'test_path', None)
     mock_finish.assert_called_with('{"code": 0}')
 
 

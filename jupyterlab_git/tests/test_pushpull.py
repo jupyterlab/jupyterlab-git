@@ -33,9 +33,9 @@ def test_git_pull_fail(mock_subproc_popen):
     ])
     assert {'code': 1, 'message': 'Authentication failed'} == actual_response
 
-@patch('jupyterlab_git.git.git_auth_input_wrapper')
+@patch('jupyterlab_git.git.GitAuthInputWrapper')
 @patch('os.environ', {'TEST': 'test'})
-def test_git_pull_with_auth_fail(mock_git_auth_input_wrapper):
+def test_git_pull_with_auth_fail(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
@@ -43,7 +43,7 @@ def test_git_pull_with_auth_fail(mock_git_auth_input_wrapper):
         'returncode': 1
     }
     process_mock.configure_mock(**attrs)
-    mock_git_auth_input_wrapper.return_value = process_mock
+    mock_GitAuthInputWrapper.return_value = process_mock
 
     # When
     auth = {
@@ -54,7 +54,7 @@ def test_git_pull_with_auth_fail(mock_git_auth_input_wrapper):
 
 
     # Then
-    mock_git_auth_input_wrapper.assert_has_calls([
+    mock_GitAuthInputWrapper.assert_has_calls([
         call(
             command = 'git pull --no-commit',
             cwd='/bin/test_curr_path',
@@ -94,9 +94,9 @@ def test_git_pull_success(mock_subproc_popen):
     ])
     assert {'code': 0} == actual_response
 
-@patch('jupyterlab_git.git.git_auth_input_wrapper')
+@patch('jupyterlab_git.git.GitAuthInputWrapper')
 @patch('os.environ', {'TEST': 'test'})
-def test_git_pull_with_auth_success(mock_git_auth_input_wrapper):
+def test_git_pull_with_auth_success(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
@@ -104,7 +104,7 @@ def test_git_pull_with_auth_success(mock_git_auth_input_wrapper):
         'returncode': 0
     }
     process_mock.configure_mock(**attrs)
-    mock_git_auth_input_wrapper.return_value = process_mock
+    mock_GitAuthInputWrapper.return_value = process_mock
 
     # When
     auth = {
@@ -114,7 +114,7 @@ def test_git_pull_with_auth_success(mock_git_auth_input_wrapper):
     actual_response = Git(root_dir='/bin').pull('test_curr_path', auth)
 
     # Then
-    mock_git_auth_input_wrapper.assert_has_calls([
+    mock_GitAuthInputWrapper.assert_has_calls([
         call(
             command = 'git pull --no-commit',
             cwd='/bin/test_curr_path',
@@ -154,9 +154,9 @@ def test_git_push_fail(mock_subproc_popen):
     ])
     assert {'code': 1, 'message': 'Authentication failed'} == actual_response
 
-@patch('jupyterlab_git.git.git_auth_input_wrapper')
+@patch('jupyterlab_git.git.GitAuthInputWrapper')
 @patch('os.environ', {'TEST': 'test'})
-def test_git_push_with_auth_fail(mock_git_auth_input_wrapper):
+def test_git_push_with_auth_fail(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
@@ -164,7 +164,7 @@ def test_git_push_with_auth_fail(mock_git_auth_input_wrapper):
         'returncode': 1
     }
     process_mock.configure_mock(**attrs)
-    mock_git_auth_input_wrapper.return_value = process_mock
+    mock_GitAuthInputWrapper.return_value = process_mock
 
     # When
     auth = {
@@ -174,7 +174,7 @@ def test_git_push_with_auth_fail(mock_git_auth_input_wrapper):
     actual_response = Git(root_dir='/bin').push('test_origin', 'HEAD:test_master', 'test_curr_path', auth)
 
     # Then
-    mock_git_auth_input_wrapper.assert_has_calls([
+    mock_GitAuthInputWrapper.assert_has_calls([
         call(
             command = 'git push test_origin HEAD:test_master',
             cwd='/bin/test_curr_path',
@@ -215,9 +215,9 @@ def test_git_push_success(mock_subproc_popen):
     ])
     assert {'code': 0} == actual_response
 
-@patch('jupyterlab_git.git.git_auth_input_wrapper')
+@patch('jupyterlab_git.git.GitAuthInputWrapper')
 @patch('os.environ', {'TEST': 'test'})
-def test_git_push_with_auth_success(mock_git_auth_input_wrapper):
+def test_git_push_with_auth_success(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
@@ -225,7 +225,7 @@ def test_git_push_with_auth_success(mock_git_auth_input_wrapper):
         'returncode': 0
     }
     process_mock.configure_mock(**attrs)
-    mock_git_auth_input_wrapper.return_value = process_mock
+    mock_GitAuthInputWrapper.return_value = process_mock
 
     # When
     auth = {
@@ -235,7 +235,7 @@ def test_git_push_with_auth_success(mock_git_auth_input_wrapper):
     actual_response = Git(root_dir='/bin').push('.', 'HEAD:test_master', 'test_curr_path', auth)
 
     # Then
-    mock_git_auth_input_wrapper.assert_has_calls([
+    mock_GitAuthInputWrapper.assert_has_calls([
         call(
             command = 'git push . HEAD:test_master',
             cwd='/bin/test_curr_path',

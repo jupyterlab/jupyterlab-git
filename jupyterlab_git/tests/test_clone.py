@@ -67,9 +67,9 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
     ])
     assert {'code': 128, 'message': 'fatal: Not a git repository'} == actual_response
 
-@patch('jupyterlab_git.git.git_auth_input_wrapper')
+@patch('jupyterlab_git.git.GitAuthInputWrapper')
 @patch('os.environ', {'TEST': 'test'})
-def test_git_clone_with_auth_success(mock_git_auth_input_wrapper):
+def test_git_clone_with_auth_success(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
@@ -77,7 +77,7 @@ def test_git_clone_with_auth_success(mock_git_auth_input_wrapper):
         'returncode': 0
     }
     process_mock.configure_mock(**attrs)
-    mock_git_auth_input_wrapper.return_value = process_mock
+    mock_GitAuthInputWrapper.return_value = process_mock
 
     # When
     auth = {
@@ -87,7 +87,7 @@ def test_git_clone_with_auth_success(mock_git_auth_input_wrapper):
     actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl', auth=auth)
 
     # Then
-    mock_git_auth_input_wrapper.assert_has_calls([
+    mock_GitAuthInputWrapper.assert_has_calls([
         call(
             command = 'git clone ghjkhjkl -q',
             cwd = '/bin/test_curr_path',
@@ -99,9 +99,9 @@ def test_git_clone_with_auth_success(mock_git_auth_input_wrapper):
     ])
     assert {'code': 0} == actual_response
 
-@patch('jupyterlab_git.git.git_auth_input_wrapper')
+@patch('jupyterlab_git.git.GitAuthInputWrapper')
 @patch('os.environ', {'TEST': 'test'})
-def test_git_clone_with_auth_wrong_repo_url_failure_from_git(mock_git_auth_input_wrapper):
+def test_git_clone_with_auth_wrong_repo_url_failure_from_git(mock_GitAuthInputWrapper):
     """
     Git internally will throw an error if it is an invalid URL, or if there is a permissions issue. We want to just
     relay it back to the user.
@@ -114,7 +114,7 @@ def test_git_clone_with_auth_wrong_repo_url_failure_from_git(mock_git_auth_input
         'returncode': 128
     }
     process_mock.configure_mock(**attrs)
-    mock_git_auth_input_wrapper.return_value = process_mock
+    mock_GitAuthInputWrapper.return_value = process_mock
 
     # When
     auth = {
@@ -124,7 +124,7 @@ def test_git_clone_with_auth_wrong_repo_url_failure_from_git(mock_git_auth_input
     actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl', auth=auth)
 
     # Then
-    mock_git_auth_input_wrapper.assert_has_calls([
+    mock_GitAuthInputWrapper.assert_has_calls([
         call(
             command = 'git clone ghjkhjkl -q',
             cwd = '/bin/test_curr_path',
@@ -136,9 +136,9 @@ def test_git_clone_with_auth_wrong_repo_url_failure_from_git(mock_git_auth_input
     ])
     assert {'code': 128, 'message': "fatal: repository 'ghjkhjkl' does not exist"} == actual_response
 
-@patch('jupyterlab_git.git.git_auth_input_wrapper')
+@patch('jupyterlab_git.git.GitAuthInputWrapper')
 @patch('os.environ', {'TEST': 'test'})
-def test_git_clone_with_auth_auth_failure_from_git(mock_git_auth_input_wrapper):
+def test_git_clone_with_auth_auth_failure_from_git(mock_GitAuthInputWrapper):
     """
     Git internally will throw an error if it is an invalid URL, or if there is a permissions issue. We want to just
     relay it back to the user.
@@ -151,7 +151,7 @@ def test_git_clone_with_auth_auth_failure_from_git(mock_git_auth_input_wrapper):
         'returncode': 128
     }
     process_mock.configure_mock(**attrs)
-    mock_git_auth_input_wrapper.return_value = process_mock
+    mock_GitAuthInputWrapper.return_value = process_mock
 
     # When
     auth = {
@@ -161,7 +161,7 @@ def test_git_clone_with_auth_auth_failure_from_git(mock_git_auth_input_wrapper):
     actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl', auth=auth)
 
     # Then
-    mock_git_auth_input_wrapper.assert_has_calls([
+    mock_GitAuthInputWrapper.assert_has_calls([
         call(
             command = 'git clone ghjkhjkl -q',
             cwd = '/bin/test_curr_path',
