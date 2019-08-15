@@ -445,7 +445,7 @@ class GitConfigHandler(GitHandler):
 
 class GitServerRootHandler(GitHandler):
 
-    def post(self):
+    def get(self):
         # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
         self.finish(json.dumps({
             "server_root": getattr(self.contents_manager, 'root_dir', None)

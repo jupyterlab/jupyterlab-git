@@ -68,6 +68,7 @@ export async function openDiffView(
   }
 }
 
+let serverRootResultCache = null;
 /**
  * Gets the path of the file relative to the Jupyter server root. This resolves the server root path after calling
  * the `/git/server_root` REST API, and uses the Git repo root and the file path relative to the repo root to resolve
@@ -79,10 +80,15 @@ export async function getRelativeFilePath(
   path: string,
   topRepoPath: string
 ): Promise<string> {
-  const response = await httpGitRequest('/git/server_root', 'POST', {});
-  const responseData = await response.json();
-  return PathExt.join(
-    PathExt.relative(responseData['server_root'], topRepoPath),
-    path
-  );
+  if (serverRootResultCache !== null) {
+    return serverRootResultCache;
+  } else {
+    const response = await httpGitRequest('/git/server_root', 'GET', null);
+    const responseData = await response.json();
+    serverRootResultCache = PathExt.join(
+      PathExt.relative(responseData['server_root'], topRepoPath),
+      path
+    );
+    return serverRootResultCache;
+  }
 }

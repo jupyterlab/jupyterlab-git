@@ -132,12 +132,19 @@ export interface IIdentity {
 export function httpGitRequest(
   url: string,
   method: string,
-  request: Object
+  request: Object | null
 ): Promise<Response> {
-  let fullRequest = {
-    method: method,
-    body: JSON.stringify(request)
-  };
+  let fullRequest;
+  if (request === null) {
+    fullRequest = {
+      method: method
+    };
+  } else {
+    fullRequest = {
+      method: method,
+      body: JSON.stringify(request)
+    };
+  }
 
   let setting = ServerConnection.makeSettings();
   let fullUrl = URLExt.join(setting.baseUrl, url);
