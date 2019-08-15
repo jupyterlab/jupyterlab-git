@@ -6,6 +6,7 @@ import { CellDiff, NBDiff } from '../../src/components/diff/NbDiff';
 import * as diffResponse from '../test-components/data/diffResponse.json';
 import { httpGitRequest } from '../../src/git';
 import { NBDiffHeader } from '../../src/components/diff/NBDiffHeader';
+import { createTestResponse } from './testutils';
 
 jest.mock('../../src/git');
 
@@ -84,28 +85,3 @@ describe('NBDiff', () => {
     });
   });
 });
-
-function createTestResponse(
-  status: number,
-  json: Promise<any>
-): Promise<Response> {
-  const testResponse: Response = {
-    status: status,
-    json: () => json,
-    headers: Headers as any,
-    ok: true,
-    redirected: false,
-    statusText: 'foo',
-    trailer: Promise.resolve(Headers as any),
-    type: 'basic',
-    url: '/foo/bar',
-    clone: jest.fn<Response, []>(),
-    body: null,
-    bodyUsed: false,
-    arrayBuffer: jest.fn<Promise<ArrayBuffer>, []>(),
-    blob: jest.fn<Promise<Blob>, []>(),
-    formData: jest.fn<Promise<FormData>, []>(),
-    text: jest.fn<Promise<string>, []>()
-  };
-  return Promise.resolve(testResponse);
-}

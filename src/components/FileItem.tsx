@@ -1,26 +1,26 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import {
-  changeStageButtonStyle,
   changeStageButtonLeftStyle,
-  discardFileButtonStyle,
-  diffFileButtonStyle
+  changeStageButtonStyle,
+  diffFileButtonStyle,
+  discardFileButtonStyle
 } from '../componentsStyle/GitStageStyle';
 
 import {
-  fileStyle,
-  selectedFileStyle,
-  expandedFileStyle,
   disabledFileStyle,
-  fileIconStyle,
-  fileLabelStyle,
-  fileChangedLabelStyle,
-  selectedFileChangedLabelStyle,
+  discardFileButtonSelectedStyle,
+  expandedFileStyle,
+  fileButtonStyle,
   fileChangedLabelBrandStyle,
   fileChangedLabelInfoStyle,
-  fileButtonStyle,
+  fileChangedLabelStyle,
   fileGitButtonStyle,
-  discardFileButtonSelectedStyle,
+  fileIconStyle,
+  fileLabelStyle,
+  fileStyle,
+  selectedFileChangedLabelStyle,
+  selectedFileStyle,
   sideBarExpandedFileLabelStyle
 } from '../componentsStyle/FileItemStyle';
 
@@ -28,7 +28,7 @@ import { classes } from 'typestyle';
 
 import * as React from 'react';
 
-import { showDialog, Dialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ISpecialRef } from './diff/model';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { isDiffSupported } from './diff/Diff';
@@ -325,15 +325,16 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
       <button
         className={`jp-Git-button ${this.getDiffFileIconClass()}`}
         title={'Diff this file'}
-        onClick={() => {
-          openDiffView(
+        onClick={async () => {
+          await openDiffView(
             this.props.file.to,
             this.props.app,
             {
               previousRef: { gitRef: 'HEAD' },
               currentRef: { specialRef: currentRef.specialRef }
             },
-            this.props.renderMime
+            this.props.renderMime,
+            this.props.topRepoPath
           );
         }}
       />

@@ -129,15 +129,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       commands.addCommand(CommandIDs.gitFileDiffWorking, {
         label: 'Diff',
         caption: 'Diff selected file',
-        execute: () => {
-          openDiffView(
+        execute: async () => {
+          await openDiffView(
             this.state.contextMenuFile,
             this.props.app,
             {
               currentRef: { specialRef: 'WORKING' },
               previousRef: { gitRef: 'HEAD' }
             },
-            this.props.renderMime
+            this.props.renderMime,
+            this.props.topRepoPath
           );
         }
       });
@@ -147,15 +148,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       commands.addCommand(CommandIDs.gitFileDiffIndex, {
         label: 'Diff',
         caption: 'Diff selected file',
-        execute: () => {
-          openDiffView(
+        execute: async () => {
+          await openDiffView(
             this.state.contextMenuFile,
             this.props.app,
             {
               currentRef: { specialRef: 'INDEX' },
               previousRef: { gitRef: 'HEAD' }
             },
-            this.props.renderMime
+            this.props.renderMime,
+            this.props.topRepoPath
           );
         }
       });

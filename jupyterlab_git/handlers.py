@@ -443,6 +443,14 @@ class GitConfigHandler(GitHandler):
         self.finish(json.dumps(response))
 
 
+class GitServerRootHandler(GitHandler):
+
+    def get(self):
+        # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
+        self.finish(json.dumps({
+            "server_root": getattr(self.contents_manager, 'root_dir', None)
+        }))
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -471,7 +479,8 @@ def setup_handlers(web_app):
         ("/git/clone", GitCloneHandler),
         ("/git/upstream", GitUpstreamHandler),
         ("/git/config", GitConfigHandler),
-        ("/git/changed_files", GitChangedFilesHandler)
+        ("/git/changed_files", GitChangedFilesHandler),
+        ("/git/server_root", GitServerRootHandler)
     ]
 
     # add the baseurl to our paths
