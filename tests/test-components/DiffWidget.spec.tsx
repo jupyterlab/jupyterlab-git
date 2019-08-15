@@ -1,6 +1,7 @@
 import 'jest';
 import { httpGitRequest } from '../../src/git';
 import { getRelativeFilePath } from '../../src/components/diff/DiffWidget';
+import { clearCache } from '../../src/components/diff/DiffWidget';
 import { createTestResponse } from './testutils';
 
 jest.mock('../../src/git');
@@ -39,6 +40,7 @@ describe('DiffWidget', () => {
     );
 
     // When
+    clearCache();
     const result = await getRelativeFilePath(filePath, repoPath);
 
     // Then

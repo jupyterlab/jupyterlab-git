@@ -92,3 +92,10 @@ export async function getRelativeFilePath(
     return serverRootResultCache;
   }
 }
+
+/**
+ * Visible for testing.
+ */
+export function clearCache() {
+  serverRootResultCache = null;
+}
