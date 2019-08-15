@@ -44,6 +44,6 @@ describe('DiffWidget', () => {
     // Then
     expect(result).toBe(expectedResult);
     expect(httpGitRequest).toHaveBeenCalled();
-    expect(httpGitRequest).toBeCalledWith('/git/server_root', 'POST', {});
+    expect(httpGitRequest).toBeCalledWith('/git/server_root', 'GET', null);
   }
 });
