@@ -80,17 +80,16 @@ export async function getRelativeFilePath(
   path: string,
   topRepoPath: string
 ): Promise<string> {
-  if (serverRootResultCache !== null) {
-    return serverRootResultCache;
-  } else {
+  if (serverRootResultCache === null) {
     const response = await httpGitRequest('/git/server_root', 'GET', null);
     const responseData = await response.json();
-    serverRootResultCache = PathExt.join(
-      PathExt.relative(responseData['server_root'], topRepoPath),
-      path
-    );
-    return serverRootResultCache;
+    serverRootResultCache = responseData['server_root'];
   }
+
+  return PathExt.join(
+    PathExt.relative(serverRootResultCache, topRepoPath),
+    path
+  );
 }
 
 /**
