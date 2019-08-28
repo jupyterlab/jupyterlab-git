@@ -693,6 +693,8 @@ class Git:
             return output.decode("utf-8").strip()
         elif "fatal: no upstream configured for branch" in error.decode("utf-8").lower():
             return None
+        elif "unknown revision or path not in the working tree" in error.decode("utf-8"):
+            return None
         else:
             raise Exception(
                 "Error [{}] occurred while executing [{}] command to get upstream branch.".format(
