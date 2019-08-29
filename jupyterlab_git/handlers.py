@@ -32,10 +32,7 @@ class GitCloneHandler(GitHandler):
             }
         """
         data = json.loads(self.request.body.decode('utf-8'))
-        if 'auth' in data.keys():
-            response = self.git.clone(data['current_path'], data['clone_url'], data['auth'])
-        else:
-            response = self.git.clone(data['current_path'], data['clone_url'])
+        response = self.git.clone(data['current_path'], data['clone_url'], data.get('auth', None))
         self.finish(json.dumps(response))
 
 
