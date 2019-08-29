@@ -30,7 +30,7 @@ export class GitCredentialsForm extends Widget
     text.textContent = textContent;
     warning.textContent = warningContent;
     this._user.placeholder = 'username';
-    this._password.placeholder = 'password';
+    this._password.placeholder = 'password / personal access token';
 
     label.appendChild(text);
     label.appendChild(this._user);
