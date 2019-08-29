@@ -31,10 +31,19 @@ class GitAuthInputWrapper:
                 cwd = self.cwd,
                 env = self.env
             )
-            p.expect('Username for .*: ')
-            p.sendline(self.username)
-            p.expect('Password for .*:')
-            p.sendline(self.password)
+
+            # We expect a prompt from git
+            # In most of cases git will prompt for username and
+            #  then for password
+            # In some cases (Bitbucket) username is included in
+            #  remote URL, so git will not ask for username 
+            i = p.expect(['Username for .*: ', 'Password for .*:'])
+            if i==0: #ask for username then password
+                p.sendline(self.username)
+                p.expect('Password for .*:')
+                p.sendline(self.password)
+            elif i==1: #only ask for password
+                p.sendline(self.password)
 
             p.expect(pexpect.EOF)
             response = p.before
