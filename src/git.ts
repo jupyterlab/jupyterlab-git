@@ -192,6 +192,15 @@ export interface IGitPushPullResult {
   message?: string;
 }
 
+/**
+ * Array of Git Auth Error Messages
+ */
+export const AUTH_ERROR_MESSAGES = [
+  'Invalid username or password',
+  'could not read Username',
+  'could not read Password'
+];
+
 /** Parent class for all API requests */
 export class Git {
   constructor() {}

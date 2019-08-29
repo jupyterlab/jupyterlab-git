@@ -6,7 +6,7 @@ import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { style } from 'typestyle';
 
-import { Git } from '../git';
+import { Git, AUTH_ERROR_MESSAGES } from '../git';
 
 import { GitCredentialsForm } from './CredentialsBox';
 
@@ -91,8 +91,9 @@ export class GitClone extends Widget {
         while (response.code !== 0) {
           if (
             response.code === 128 &&
-            (response.message.indexOf('could not read Username') >= 0 ||
-              response.message.indexOf('Invalid username or password') >= 0)
+            AUTH_ERROR_MESSAGES.map(
+              message => response.message.indexOf(message) > -1
+            ).indexOf(true) > -1
           ) {
             // request user credentials and try to clone again
             const dialog = new Dialog({

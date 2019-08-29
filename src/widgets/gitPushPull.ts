@@ -1,6 +1,6 @@
 import { Spinner } from '@jupyterlab/apputils';
 import { Widget } from '@phosphor/widgets';
-import { Git, IGitPushPullResult, IGitAuth } from '../git';
+import { Git, IGitPushPullResult, IGitAuth, AUTH_ERROR_MESSAGES } from '../git';
 
 export enum Operation {
   Pull = 'Pull',
@@ -75,8 +75,9 @@ export class GitPullPushDialog extends Widget {
     this.spinner.dispose();
     if (response.code !== 0) {
       if (
-        response.message.indexOf('could not read Username') >= 0 ||
-        response.message.indexOf('Invalid username or password') >= 0
+        AUTH_ERROR_MESSAGES.map(
+          message => response.message.indexOf(message) > -1
+        ).indexOf(true) > -1
       ) {
         this.handleError(response.message);
         this.parent!.parent!.close();
