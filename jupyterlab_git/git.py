@@ -4,9 +4,9 @@ Module for executing git commands, sending results back to the handlers
 import os
 import subprocess
 from subprocess import Popen, PIPE, CalledProcessError
+
 import pexpect
 from urllib.parse import unquote
-
 from tornado.web import HTTPError
 
 
