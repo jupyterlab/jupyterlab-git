@@ -44,11 +44,10 @@ export class GitCredentialsForm extends Widget
    * Returns the input value.
    */
   getValue(): IGitAuth {
-    let credentials = {
+    return {
       username: this._user.value,
       password: this._password.value
     };
-    return credentials;
   }
 
   private _user: HTMLInputElement;
