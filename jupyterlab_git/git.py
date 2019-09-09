@@ -13,7 +13,7 @@ import datetime
 
 
 # Git configuration options exposed through the REST API
-ALLOWED_OPTIONS = ['user.name', 'user.email']
+ALLOWED_OPTIONS = ['user.name', 'user.email', 'push.default', 'remote.pushdefault']
 # Regex pattern to capture (key, value) of Git configuration options.
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
 CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")

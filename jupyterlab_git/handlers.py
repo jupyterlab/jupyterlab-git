@@ -457,12 +457,21 @@ class GitPushHandler(GitHandler):
             )
 
         else:
-            response = {
-                "code": 128,
-                "message": "fatal: The current branch {} has no upstream branch.".format(
-                    current_local_branch
-                ),
-            }
+            # Allow users to specify upstream through their configuration
+            # https://git-scm.com/docs/git-config#Documentation/git-config.txt-pushdefault
+            config_options = self.git.config(current_path)["options"]
+            default_remote = config_options.get('remote.pushdefault')
+            default_remote_branch = config_options.get('push.default') == 'current'
+
+            if default_remote_branch and default_remote:
+                response = self.git.push(default_remote, current_local_branch, current_path)
+            else:
+                response = {
+                    "code": 128,
+                    "message": "fatal: The current branch {} has no upstream branch.".format(
+                        current_local_branch
+                    ),
+                }
         self.finish(json.dumps(response))
 
 
