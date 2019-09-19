@@ -39,21 +39,14 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
 
 JupyterLab Git's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
-- Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis).
 - Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 - Saul Shanabrook, Quansight(software engineering)
 - Jaipreet Singh, AWS (software engineering, UI/UX design, management)
-- William Wang, AWS (UI/UX design)
+- Frederic Collonval, Safran Group (software engineering)
 
-Maintainer emeritus:
+A lot of awesome people have contributed to this repo  - See the contributors tab for more details!
 
-- Ashutosh Bondre, Cal Poly (software engineering).
-- Noah Stapp, Cal Poly (software engineering).
-- Ji Zhang, Cal Poly (software engineering).
-- Jenna Landy, Cal Poly (sofware engineering).
-- Alena Mueller, Cal Poly (UI/UX design).
-- Neelam Gehlot, AWS (software engineering)
 
 This list is provided to help provide context about who we are and how our team functions.
 If you would like to be listed, please submit a pull request with your information.
