@@ -16,7 +16,10 @@
  - Credentials
    - **What?** Credential management during push/pull/clone without actually storing credentials
    - **Why?** Better UX when a user doesn't have credentials for accessing a Git repo.
- 
+ - Merge resolution
+   - **What?** UI to handle the conflicts for notebook and plain text files.
+   - **Why?** Various Git operations may result in conflicts.
+
  ## Maintenance
  - Issue & Bug triage
     - **What?** Triage issues and fix bugs in existing featutes 
