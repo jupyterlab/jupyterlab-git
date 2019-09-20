@@ -1,0 +1,27 @@
+include LICENSE
+include README.md
+
+include setupbase.py
+
+include package.json
+include *.config.js
+include setupJest.js
+include ts*.json
+include jupyterlab_git/labextension/*.tgz
+
+# Tests
+graft tests
+prune tests/build
+
+# Javascript files
+graft src
+graft style
+prune **/node_modules
+prune lib
+
+# Patterns to exclude from any directory
+global-exclude *~
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude .git
+global-exclude .ipynb_checkpoints

@@ -20,9 +20,8 @@ A JupyterLab extension for version control using git
 To install perform the following steps:
 
 ```bash
-jupyter labextension install @jupyterlab/git
 pip install --upgrade jupyterlab-git
-jupyter serverextension enable --py jupyterlab_git
+jupyter lab build
 ```
 
 ## Development
@@ -59,24 +58,20 @@ Requires node 4+ and npm 4+
 # Clone the repo to your local environment
 git clone https://github.com/jupyterlab/jupyterlab-git.git
 cd jupyterlab-git
-# Install dependencies
-npm install # or yarn
+# Install the server extension in development mode
+pip install -e .
+jupyter serverextension enable --py jupyterlab_git
+# Install Javascript dependencies
+jlpm install
 # Build Typescript source
-npm run build # or yarn build
+jlpm run build
 # Link your development version of the extension with JupyterLab
 jupyter labextension link .
-# Rebuild Typescript source after making changes
-npm run build # or yarn build
 ```
 
-```bash
-pip install .
-jupyter serverextension enable --py jupyterlab_git
-```
-
-To rebuild the package and the JupyterLab app:
+To rebuild the package after a change and the JupyterLab app:
 
 ```bash
-npm run build
+jlpm run build
 jupyter lab build
 ```

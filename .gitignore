@@ -105,3 +105,5 @@ node_modules/
 .vscode/
 
 package-lock.json
+MANIFEST
+jupyterlab_git/labextension/*.tgz

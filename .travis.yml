@@ -5,15 +5,14 @@ cache:
   pip: true
   directories:
     - /home/travis/.yarn-cache/
-install: pip install pytest "jupyterlab>=1.0.3"
 script:
-  - pytest tests/unit
-  - yarn
-  - yarn build
-  - yarn test
-  - pip install .
-  - jupyter serverextension enable --py jupyterlab_git
-  - jupyter labextension install .
+  - python setup.py sdist
+  - pip install --find-links=dist jupyterlab_git[test]
+  - pytest jupyterlab_git
+  - jlpm install
+  - jlpm run build
+  - jlpm run test
+  - jupyter lab build
   - python -m jupyterlab.browser_check
-  - yarn run lint
-  - python -m tests.test-browser.run_browser_test
+  - jlpm run lint
+  - python tests/test-browser/run_browser_test.py
