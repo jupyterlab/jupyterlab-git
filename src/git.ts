@@ -132,8 +132,8 @@ export interface IIdentity {
  * Interface for the Git Auth request.
  */
 export interface IGitAuth {
-  username?: string;
-  password?: string;
+  username: string;
+  password: string;
 }
 
 /**
