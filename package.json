@@ -12,15 +12,15 @@
     "jupyterlab-extension"
   ],
   "scripts": {
-    "build": "jlpm run build:lib",
+    "build": "yarn run build:lib",
     "build:labextension": "cd jupyterlab_git && rimraf labextension && mkdirp labextension && cd labextension && npm pack ../..",
     "build:lib": "tsc",
-    "build:all": "jlpm run build:labextension",
-    "clean": "jlpm run clean:lib",
+    "build:all": "yarn run build:labextension",
+    "clean": "yarn run clean:lib",
     "clean:lib": "rimraf lib",
     "clean:labextension": "rimraf jupyterlab_git/labextension",
-    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
-    "prepare": "jlpm run clean && jlpm run build",
+    "clean:all": "yarn run clean:lib && yarn run clean:labextension",
+    "prepare": "yarn run clean && yarn run build",
     "watch": "tsc -w",
     "test": "jest",
     "lint": "tslint --project .",
@@ -36,7 +36,8 @@
     "discovery": {
       "server": {
         "managers": [
-          "pip"
+          "pip",
+          "conda"
         ],
         "base": {
           "name": "jupyterlab-git"
