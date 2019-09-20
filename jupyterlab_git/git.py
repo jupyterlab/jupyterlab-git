@@ -691,7 +691,7 @@ class Git:
         output, error = p.communicate()
         if p.returncode == 0:
             return output.decode("utf-8").strip()
-        elif "fatal: no upstream configured for branch" in error.decode("utf-8"):
+        elif "fatal: no upstream configured for branch" in error.decode("utf-8").lower():
             return None
         else:
             raise Exception(
@@ -715,11 +715,11 @@ class Git:
         output, error = p.communicate()
         if p.returncode == 0:
             return output.decode("utf-8").strip()
-        elif "fatal: No tags can describe '{}'.".format(commit_sha) in error.decode(
+        elif "fatal: no tags can describe '{}'.".format(commit_sha) in error.decode(
             "utf-8"
-        ):
+        ).lower():
             return None
-        elif "fatal: No names found" in error.decode("utf-8"):
+        elif "fatal: no names found" in error.decode("utf-8").lower():
             return None
         else:
             raise Exception(
