@@ -17,3 +17,17 @@ script:
   - python -m jupyterlab.browser_check
   - jlpm run lint
   - python tests/test-browser/run_browser_test.py
+
+deploy:
+  - provider: pypi
+    user: "Your username"
+    password:
+      secure: "Your encrypted password"
+    distributions: "sdist bdist_wheel"
+    on:
+      tags: true
+  - provider: npm
+    email: "YOUR_EMAIL_ADDRESS"
+    api_key: "YOUR_AUTH_TOKEN"
+    on:
+      tags: true

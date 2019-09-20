@@ -111,5 +111,8 @@
   "homepage": "https://github.com/jupyterlab/jupyterlab-git",
   "resolutions": {
     "@types/react": "~16.8.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
