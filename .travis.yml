@@ -20,14 +20,13 @@ script:
 
 deploy:
   - provider: pypi
-    user: "Your username"
-    password:
-      secure: "Your encrypted password"
+    user: "$PYPI_USER"
+    password: "$PYPI_TOKEN"
     distributions: "sdist bdist_wheel"
     on:
       tags: true
   - provider: npm
-    email: "YOUR_EMAIL_ADDRESS"
-    api_key: "YOUR_AUTH_TOKEN"
+    email: "$NPM_EMAIL"
+    api_key: "$NPM_TOKEN"
     on:
       tags: true

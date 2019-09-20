@@ -1,8 +1,8 @@
  ## CI/CD: 
- - ~~CD: Trigger releases on tags.~~ (#416)
+ - CD: Trigger releases on tags. (#416)
    - **What?** Add CD capabilities to trigger a release when a tag is pushed.
    - **Why?** Save maintainer manual effort on releases. Increase cadence of releases.
- - ~~Combining the Python and JS files into one installable package~~ (#415)
+ - Combining the Python and JS files into one installable package (#415)
    - **What?** Provide a single installation  for both the frontend and the server package
    - **Why?** Reduce number of issues from users have different versions of the NPM and Python packages. Easier installation for users
  - Integration Testing
