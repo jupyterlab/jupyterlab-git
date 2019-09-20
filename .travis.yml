@@ -6,7 +6,8 @@ cache:
   directories:
     - /home/travis/.yarn-cache/
 script:
-  - pip install .[test]
+  - python setup.py sdist
+  - pip install --find-links=dist jupyterlab_git[test]
   - pytest jupyterlab_git
   - jlpm install
   - jlpm run build
