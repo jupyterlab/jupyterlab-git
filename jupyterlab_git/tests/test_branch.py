@@ -239,23 +239,15 @@ def test_get_upstream_branch_failure(mock_subproc_popen):
     process_mock = Mock(returncode=128)
     process_mock.communicate.side_effect = [
         ('', "fatal: no such branch: 'blah'".encode('utf-8')),
-        ('', "fatal: no upstream configured for branch".encode('utf-8'))
+        ('', "fatal: no upstream configured for branch".encode('utf-8')),
+        ('', "fatal: ambiguous argument 'blah@origin': unknown revision or path not in the working tree.".encode('utf-8'))
     ]
     mock_subproc_popen.return_value = process_mock
 
-    # When
+    # When: fatal: no such branch: 'blah'
     with pytest.raises(Exception) as error:
         Git(root_dir='/bin').get_upstream_branch(
             current_path='test_curr_path', branch_name='blah')
-
-    assert "Error [fatal: no such branch: 'blah'] " \
-           "occurred while executing [git rev-parse --abbrev-ref blah@{upstream}] command to get upstream branch." == str(
-        error.value)
-
-    actual_response = Git(root_dir='/bin').get_upstream_branch(
-        current_path='test_curr_path', branch_name='test')
-
-    assert None == actual_response
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -266,7 +258,18 @@ def test_get_upstream_branch_failure(mock_subproc_popen):
             stderr=PIPE,
             cwd='/bin/test_curr_path'
         ),
-        call().communicate(),
+        call().communicate()
+    ], any_order=False)
+    assert "Error [fatal: no such branch: 'blah'] " \
+           "occurred while executing [git rev-parse --abbrev-ref blah@{upstream}] command to get upstream branch." == str(
+        error.value)
+
+    # When: fatal: no upstream configured for branch
+    actual_response = Git(root_dir='/bin').get_upstream_branch(
+        current_path='test_curr_path', branch_name='test')
+
+    # Then
+    mock_subproc_popen.assert_has_calls([
         call(
             ['git', 'rev-parse', '--abbrev-ref',
              'test@{upstream}'],
@@ -276,6 +279,24 @@ def test_get_upstream_branch_failure(mock_subproc_popen):
         ),
         call().communicate()
     ], any_order=False)
+    assert None == actual_response
+
+    # When: "fatal: ambiguous argument 'blah@origin': unknown revision or path not in the working tree.
+    actual_response = Git(root_dir='/bin').get_upstream_branch(
+        current_path='test_curr_path', branch_name='blah')
+
+    # Then
+    mock_subproc_popen.assert_has_calls([
+        call(
+            ['git', 'rev-parse', '--abbrev-ref',
+             'blah@{upstream}'],
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd='/bin/test_curr_path'
+        ),
+        call().communicate()
+    ], any_order=False)
+    assert None == actual_response
 
 
 @patch('subprocess.Popen')
