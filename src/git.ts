@@ -128,6 +128,31 @@ export interface IIdentity {
   email: string;
 }
 
+/**
+ * Interface for the Git Auth request.
+ */
+export interface IGitAuth {
+  username: string;
+  password: string;
+}
+
+/**
+ * Structure for the request to the Git Clone API.
+ */
+export interface IGitClone {
+  current_path: string;
+  clone_url: string;
+  auth?: IGitAuth;
+}
+
+/**
+ * Structure for the request to the Git Clone API.
+ */
+export interface IGitPushPull {
+  current_path: string;
+  auth?: IGitAuth;
+}
+
 /** Makes a HTTP request, sending a git command to the backend */
 export function httpGitRequest(
   url: string,
@@ -167,16 +192,28 @@ export interface IGitPushPullResult {
   message?: string;
 }
 
+/**
+ * Array of Git Auth Error Messages
+ */
+export const AUTH_ERROR_MESSAGES = [
+  'Invalid username or password',
+  'could not read Username',
+  'could not read Password'
+];
+
 /** Parent class for all API requests */
 export class Git {
   constructor() {}
 
   /** Make request for the Git Pull API. */
-  async pull(path: string): Promise<IGitPushPullResult> {
+  async pull(path: string, auth?: IGitAuth): Promise<IGitPushPullResult> {
     try {
-      let response = await httpGitRequest('/git/pull', 'POST', {
-        current_path: path
-      });
+      let obj: IGitPushPull = {
+        current_path: path,
+        auth
+      };
+
+      let response = await httpGitRequest('/git/pull', 'POST', obj);
       if (response.status !== 200) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
@@ -188,11 +225,14 @@ export class Git {
   }
 
   /** Make request for the Git Push API. */
-  async push(path: string): Promise<IGitPushPullResult> {
+  async push(path: string, auth?: IGitAuth): Promise<IGitPushPullResult> {
     try {
-      let response = await httpGitRequest('/git/push', 'POST', {
-        current_path: path
-      });
+      let obj: IGitPushPull = {
+        current_path: path,
+        auth
+      };
+
+      let response = await httpGitRequest('/git/push', 'POST', obj);
       if (response.status !== 200) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
@@ -204,12 +244,19 @@ export class Git {
   }
 
   /** Make request for the Git Clone API. */
-  async clone(path: string, url: string): Promise<IGitCloneResult> {
+  async clone(
+    path: string,
+    url: string,
+    auth?: IGitAuth
+  ): Promise<IGitCloneResult> {
     try {
-      let response = await httpGitRequest('/git/clone', 'POST', {
+      let obj: IGitClone = {
         current_path: path,
-        clone_url: url
-      });
+        clone_url: url,
+        auth
+      };
+
+      let response = await httpGitRequest('/git/clone', 'POST', obj);
       if (response.status !== 200) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);

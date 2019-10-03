@@ -25,11 +25,14 @@ class GitCloneHandler(GitHandler):
         Input format:
             {
               'current_path': 'current_file_browser_path',
-              'repo_url': 'https://github.com/path/to/myrepo'
+              'repo_url': 'https://github.com/path/to/myrepo',
+              OPTIONAL 'auth': '{ 'username': '<username>',
+                                  'password': '<password>'
+                                }'
             }
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        response = self.git.clone(data["current_path"], data["clone_url"])
+        data = json.loads(self.request.body.decode('utf-8'))
+        response = self.git.clone(data['current_path'], data['clone_url'], data.get('auth', None))
         self.finish(json.dumps(response))
 
 
@@ -339,8 +342,10 @@ class GitPullHandler(GitHandler):
         """
         POST request handler, pulls files from a remote branch to your current branch.
         """
-        output = self.git.pull(self.get_json_body()["current_path"])
-        self.finish(json.dumps(output))
+        data = self.get_json_body()
+        response = self.git.pull(data['current_path'], data.get('auth', None))
+        
+        self.finish(json.dumps(response))
 
 
 class GitPushHandler(GitHandler):
@@ -354,7 +359,8 @@ class GitPushHandler(GitHandler):
         POST request handler,
         pushes committed files from your current branch to a remote branch
         """
-        current_path = self.get_json_body()["current_path"]
+        data = self.get_json_body()
+        current_path = data['current_path']
 
         current_local_branch = self.git.get_current_branch(current_path)
         current_upstream_branch = self.git.get_upstream_branch(
@@ -372,7 +378,7 @@ class GitPushHandler(GitHandler):
                 remote = upstream[0]
                 branch = ":".join(["HEAD", upstream[1]])
 
-            response = self.git.push(remote, branch, current_path)
+            response = self.git.push(remote, branch, current_path, data.get('auth', None))
 
         else:
             response = {

@@ -4,12 +4,59 @@ Module for executing git commands, sending results back to the handlers
 import os
 import subprocess
 from subprocess import Popen, PIPE, CalledProcessError
-from urllib.parse import unquote
 
+import pexpect
+from urllib.parse import unquote
 from tornado.web import HTTPError
 
 
 ALLOWED_OPTIONS = ['user.name', 'user.email']
+
+
+class GitAuthInputWrapper:
+    """
+    Helper class which is meant to replace subprocess.Popen for communicating
+    with git CLI when also sending username and password for auth
+    """
+    def __init__(self, command, cwd, env, username, password):
+        self.command = command
+        self.cwd = cwd
+        self.env = env
+        self.username = username
+        self.password = password
+    def communicate(self):
+        try:
+            p = pexpect.spawn(
+                self.command, 
+                cwd = self.cwd,
+                env = self.env
+            )
+
+            # We expect a prompt from git
+            # In most of cases git will prompt for username and
+            #  then for password
+            # In some cases (Bitbucket) username is included in
+            #  remote URL, so git will not ask for username 
+            i = p.expect(['Username for .*: ', 'Password for .*:'])
+            if i==0: #ask for username then password
+                p.sendline(self.username)
+                p.expect('Password for .*:')
+                p.sendline(self.password)
+            elif i==1: #only ask for password
+                p.sendline(self.password)
+
+            p.expect(pexpect.EOF)
+            response = p.before
+
+            self.returncode = p.wait()
+            p.close()
+            
+            return response
+        except pexpect.exceptions.EOF: #In case of pexpect failure
+            response = p.before
+            self.returncode = p.exitstatus
+            p.close() #close process
+            return response
 
 
 class Git:
@@ -110,23 +157,37 @@ class Git:
         return response
 
 
-    def clone(self, current_path, repo_url):
+    def clone(self, current_path, repo_url, auth=None):
         """
-        Execute `git clone`. Disables prompts for the password to avoid the terminal hanging.
+        Execute `git clone`.
+        When no auth is provided, disables prompts for the password to avoid the terminal hanging.
+        When auth is provided, await prompts for username/passwords and sends them
         :param current_path: the directory where the clone will be performed.
         :param repo_url: the URL of the repository to be cloned.
+        :param auth: OPTIONAL dictionary with 'username' and 'password' fields
         :return: response with status code and error message.
         """
         env = os.environ.copy()
-        env["GIT_TERMINAL_PROMPT"] = "0"
-        p = subprocess.Popen(
-            ["git", "clone", unquote(repo_url)],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
-            env=env,
-        )
-        _, error = p.communicate()
+        if (auth):
+            env["GIT_TERMINAL_PROMPT"] = "1"
+            p = GitAuthInputWrapper(
+                command='git clone {} -q'.format(unquote(repo_url)),
+                cwd=os.path.join(self.root_dir, current_path),
+                env = env,
+                username=auth['username'],
+                password=auth['password'],
+            )
+            error = p.communicate()
+        else:
+            env["GIT_TERMINAL_PROMPT"] = "0"
+            p = subprocess.Popen(
+                ['git', 'clone', unquote(repo_url)],
+                stdout=PIPE,
+                stderr=PIPE,
+                env = env,
+                cwd=os.path.join(self.root_dir, current_path),
+            )
+            _, error = p.communicate()
 
         response = {"code": p.returncode}
 
@@ -544,22 +605,33 @@ class Git:
             ["git", "commit", "-m", commit_msg], cwd=top_repo_path
         )
         return my_output
-
-    def pull(self, curr_fb_path):
+            
+    def pull(self, curr_fb_path, auth=None):
         """
         Execute git pull --no-commit.  Disables prompts for the password to avoid the terminal hanging while waiting
         for auth.
         """
         env = os.environ.copy()
-        env["GIT_TERMINAL_PROMPT"] = "0"
-        p = subprocess.Popen(
-            ["git", "pull", "--no-commit"],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, curr_fb_path),
-            env=env,
-        )
-        _, error = p.communicate()
+        if (auth):
+            env["GIT_TERMINAL_PROMPT"] = "1"
+            p = GitAuthInputWrapper(
+                command = 'git pull --no-commit',
+                cwd = os.path.join(self.root_dir, curr_fb_path),
+                env = env,
+                username = auth['username'],
+                password = auth['password']
+            )
+            error = p.communicate()
+        else:
+            env["GIT_TERMINAL_PROMPT"] = "0"
+            p = subprocess.Popen(
+                ['git', 'pull', '--no-commit'],
+                stdout=PIPE,
+                stderr=PIPE,
+                env = env,
+                cwd=os.path.join(self.root_dir, curr_fb_path),
+            )
+            _, error = p.communicate()
 
         response = {"code": p.returncode}
 
@@ -568,20 +640,31 @@ class Git:
 
         return response
 
-    def push(self, remote, branch, curr_fb_path):
+    def push(self, remote, branch, curr_fb_path, auth=None):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
         """
         env = os.environ.copy()
-        env["GIT_TERMINAL_PROMPT"] = "0"
-        p = subprocess.Popen(
-            ["git", "push", remote, branch],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, curr_fb_path),
-            env=env,
-        )
-        _, error = p.communicate()
+        if (auth):
+            env["GIT_TERMINAL_PROMPT"] = "1"
+            p = GitAuthInputWrapper(
+                command = 'git push {} {}'.format(remote, branch),
+                cwd = os.path.join(self.root_dir, curr_fb_path),
+                env = env,
+                username = auth['username'],
+                password = auth['password']
+            )
+            error = p.communicate()
+        else:
+            env["GIT_TERMINAL_PROMPT"] = "0"
+            p = subprocess.Popen(
+                ['git', 'push', remote, branch],
+                stdout=PIPE,
+                stderr=PIPE,
+                env = env,
+                cwd=os.path.join(self.root_dir, curr_fb_path),
+            )
+            _, error = p.communicate()
 
         response = {"code": p.returncode}
 

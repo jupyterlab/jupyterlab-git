@@ -6,7 +6,9 @@ import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { style } from 'typestyle';
 
-import { Git } from '../git';
+import { Git, AUTH_ERROR_MESSAGES } from '../git';
+
+import { GitCredentialsForm } from './CredentialsBox';
 
 /**
  * The widget encapsulating the Git Clone UI:
@@ -84,9 +86,42 @@ export class GitClone extends Widget {
   private makeApiCall(cloneUrl: string) {
     this.gitApi
       .clone(this.fileBrowser.model.path, cloneUrl)
-      .then(response => {
-        if (response.code !== 0) {
-          this.showErrorDialog(response.message);
+      .then(async response => {
+        let retry = false;
+        while (response.code !== 0) {
+          if (
+            response.code === 128 &&
+            AUTH_ERROR_MESSAGES.map(
+              message => response.message.indexOf(message) > -1
+            ).indexOf(true) > -1
+          ) {
+            // request user credentials and try to clone again
+            const dialog = new Dialog({
+              title: 'Git credentials required',
+              body: new GitCredentialsForm(
+                'Enter credentials for remote repository',
+                retry ? 'Incorrect username or password.' : ''
+              ),
+              buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
+            });
+            retry = true;
+
+            const result = await dialog.launch();
+            dialog.dispose();
+
+            if (result.button.accept) {
+              // user accepted attempt to login
+              // try to clone again
+              response = await this.gitApi.clone(
+                this.fileBrowser.model.path,
+                cloneUrl,
+                result.value
+              );
+            } else {
+              this.showErrorDialog(response.message);
+              break;
+            }
+          }
         }
       })
       .catch(() => this.showErrorDialog());

@@ -16,6 +16,8 @@ import { Dialog } from '@jupyterlab/apputils';
 
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 
+import { GitCredentialsForm } from '../widgets/CredentialsBox';
+
 export interface IPathHeaderState {
   refresh: any;
   gitApi: Git;
@@ -82,7 +84,7 @@ export class PathHeader extends React.Component<
    * @param title the title of the error dialog
    * @param body the message to be shown in the body of the modal.
    */
-  private showGitPushPullDialog(
+  private async showGitPushPullDialog(
     currentFileBrowserPath: string,
     operation: Operation
   ): Promise<void> {
@@ -91,6 +93,43 @@ export class PathHeader extends React.Component<
       body: new GitPullPushDialog(currentFileBrowserPath, operation),
       buttons: [Dialog.okButton({ label: 'DISMISS' })]
     });
-    return dialog.launch().then(() => {});
+
+    let result = await dialog.launch();
+    dialog.dispose();
+    let retry = false;
+    while (!result.button.accept) {
+      let credentialsDialog = new Dialog({
+        title: 'Git credentials required',
+        body: new GitCredentialsForm(
+          'Enter credentials for remote repository',
+          retry ? 'Incorrect username or password.' : ''
+        ),
+        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
+      });
+      retry = true;
+
+      let response = await credentialsDialog.launch();
+      credentialsDialog.dispose();
+
+      if (response.button.accept) {
+        // user accepted attempt to login
+        dialog = new Dialog({
+          title: `Git ${operation}`,
+          body: new GitPullPushDialog(
+            currentFileBrowserPath,
+            operation,
+            response.value
+          ),
+          buttons: [Dialog.okButton({ label: 'DISMISS' })]
+        });
+        result = await dialog.launch();
+        dialog.dispose();
+      } else {
+        break;
+      }
+    }
+
+    dialog.dispose();
+    dialog.close();
   }
 }

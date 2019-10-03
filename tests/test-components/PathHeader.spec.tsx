@@ -56,10 +56,10 @@ describe('PathHeader', function() {
 
     buttons.find(`.${gitPullStyle}`).simulate('click');
     expect(spyPull).toHaveBeenCalledTimes(1);
-    expect(spyPull).toHaveBeenCalledWith('/path/to/repo');
+    expect(spyPull).toHaveBeenCalledWith('/path/to/repo', undefined);
 
     buttons.find(`.${gitPushStyle}`).simulate('click');
     expect(spyPush).toHaveBeenCalledTimes(1);
-    expect(spyPush).toHaveBeenCalledWith('/path/to/repo');
+    expect(spyPush).toHaveBeenCalledWith('/path/to/repo', undefined);
   });
 });
