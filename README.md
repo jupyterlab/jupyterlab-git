@@ -58,13 +58,13 @@ Requires node 4+ and npm 4+
 # Clone the repo to your local environment
 git clone https://github.com/jupyterlab/jupyterlab-git.git
 cd jupyterlab-git
-# Install the server extension in development mode
-pip install -e .
-jupyter serverextension enable --py jupyterlab_git
+# Install JupyterLab
+pip install jupyterlab
 # Install Javascript dependencies
 jlpm install
-# Build Typescript source
-jlpm run build
+# Install the server extension in development mode
+pip install -e .[test]
+jupyter serverextension enable --py jupyterlab_git
 # Link your development version of the extension with JupyterLab
 jupyter labextension link .
 ```
@@ -74,4 +74,11 @@ To rebuild the package after a change and the JupyterLab app:
 ```bash
 jlpm run build
 jupyter lab build
+```
+
+To execute the tests
+
+```bash
+pytest jupyterlab_git
+jlpm run test
 ```

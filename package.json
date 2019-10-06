@@ -74,6 +74,7 @@
     "jest": "^24",
     "jest-fetch-mock": "^1.6.6",
     "lint-staged": "8.1.5",
+    "mkdirp": "^0.5.1",
     "prettier": "1.16.4",
     "puppeteer": "^1.10.0",
     "rimraf": "^2.6.1",
@@ -82,7 +83,8 @@
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "^2.0.0",
     "typescript": "~3.5.1",
-    "typescript-tslint-plugin": "0.3.1"
+    "typescript-tslint-plugin": "0.3.1",
+    "yarn": "~1.15"
   },
   "directories": {
     "lib": "lib"
