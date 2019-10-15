@@ -44,11 +44,8 @@ cmdclass = create_cmdclass('jsdeps',
     data_files_spec=data_files_spec
 )
 
-# determine which pkg manager to use
-npm = 'jlpm' if which('jlpm') else 'yarn'
-
 cmdclass['jsdeps'] = combine_commands(
-    install_npm(HERE, build_cmd='build:all', npm=npm),
+    install_npm(HERE, build_cmd='build:all', npm='jlpm'),
     ensure_targets(jstargets),
 )
 
