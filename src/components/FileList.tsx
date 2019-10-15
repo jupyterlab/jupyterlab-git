@@ -519,12 +519,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       renderMime: this.props.renderMime
     };
 
-    const staged = () => (
+    const Staged = () => (
       <GitStage
         heading={'Staged'}
         files={
           this.props.settings.composite['simpleStaging']
-            ? { ...this.props.stagedFiles, ...this.props.unstagedFiles }
+            ? [...this.props.stagedFiles, ...this.props.unstagedFiles]
             : this.props.stagedFiles
         }
         showFiles={this.state.showStaged}
@@ -542,7 +542,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       />
     );
 
-    const changed = () => (
+    const Changed = () => (
       <GitStage
         heading={'Changed'}
         files={this.props.unstagedFiles}
@@ -561,7 +561,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       />
     );
 
-    const untracked = () => (
+    const Untracked = () => (
       <GitStage
         heading={'Untracked'}
         files={this.props.untrackedFiles}
@@ -584,9 +584,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       <div onContextMenu={event => event.preventDefault()}>
         {this.props.display &&
           (this.props.settings.composite['simpleStaging'] ? (
-            <div {...staged} />
+            <div>
+              <Staged />
+            </div>
           ) : (
-            <div {...staged} {...changed} {...untracked} />
+            <div>
+              <Staged />
+              <Changed />
+              <Untracked />
+            </div>
           ))}
       </div>
     );

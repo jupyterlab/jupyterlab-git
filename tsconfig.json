@@ -5,13 +5,15 @@
     "noImplicitAny": false,
     "noEmitOnError": true,
     "noUnusedLocals": true,
-    "module": "commonjs",
+    "module": "esnext",
     "moduleResolution": "node",
-    "target": "es2015",
+    "target": "es2019",
     "outDir": "lib",
     "types": ["jest"],
     "jsx": "react",
     "plugins": [{ "name": "typescript-tslint-plugin" }],
+    "rootDir": "src",
+    "sourceMap": true,
     "resolveJsonModule": true
   },
   "include": ["src/*"]

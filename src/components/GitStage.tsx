@@ -109,7 +109,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
     });
   }
 
-  header() {
+  Header = () => {
     return (
       <div className={sectionAreaStyle}>
         <span className={sectionHeaderLabelStyle}>
@@ -144,9 +144,9 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
         )}
       </div>
     );
-  }
+  };
 
-  filelist() {
+  FileItems = () => {
     return (
       <div className={sectionFileContainerStyle}>
         {this.props.files.map(
@@ -187,13 +187,13 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
         )}
       </div>
     );
-  }
+  };
 
   render() {
     return (
       <div className={this.checkDisabled()}>
-        {this.header}
-        {this.props.showFiles && this.filelist}
+        <this.Header />
+        {this.props.showFiles && <this.FileItems />}
       </div>
     );
   }
