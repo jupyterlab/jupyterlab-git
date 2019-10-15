@@ -6,7 +6,7 @@ cache:
   directories:
     - /home/travis/.yarn-cache/
 script:
-  - pip install "jupyterlab<2.0.0"
+  - pip install 'jupyterlab~=1.0'
   - python setup.py sdist
   - pip install --find-links=dist jupyterlab_git[test]
   - pytest jupyterlab_git

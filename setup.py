@@ -6,7 +6,7 @@ from os.path import join as pjoin
 from setupbase import (
     create_cmdclass, install_npm, ensure_targets,
     combine_commands, ensure_python, get_version,
-    HERE, which
+    HERE
 )
 
 import setuptools
@@ -85,7 +85,7 @@ setup_args = dict(
     extras_require = {
         'test': [
             'pytest',
-            'jupyterlab>=1.0.3',
+            'jupyterlab~=1.0',
         ],
     },
 )
