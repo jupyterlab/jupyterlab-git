@@ -1,5 +1,9 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
 import { FileList } from './FileList';
 
 import { pastCommitsContainerStyle } from '../style/PastCommitsStyle';
@@ -7,7 +11,6 @@ import { pastCommitsContainerStyle } from '../style/PastCommitsStyle';
 import { IDiffCallback } from '../git';
 
 import * as React from 'react';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 /** Interface for PastCommits component props */
 export interface IPastCommitsProps {
@@ -22,6 +25,7 @@ export interface IPastCommitsProps {
   refresh: any;
   diff: IDiffCallback;
   sideBarExpanded: boolean;
+  settings: ISettingRegistry.ISettings;
   renderMime: IRenderMimeRegistry;
 }
 
@@ -42,6 +46,7 @@ export class PastCommits extends React.Component<IPastCommitsProps, {}> {
           refresh={this.props.refresh}
           sideBarExpanded={this.props.sideBarExpanded}
           display={this.props.showList}
+          settings={this.props.settings}
           renderMime={this.props.renderMime}
         />
       </div>

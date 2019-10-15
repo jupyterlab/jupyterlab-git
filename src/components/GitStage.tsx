@@ -109,93 +109,91 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
     });
   }
 
+  header() {
+    return (
+      <div className={sectionAreaStyle}>
+        <span className={sectionHeaderLabelStyle}>
+          {this.props.heading}({this.props.files.length})
+        </span>
+        {this.props.files.length > 0 && (
+          <button
+            className={
+              this.props.showFiles
+                ? `${changeStageButtonStyle} ${caretdownImageStyle}`
+                : `${changeStageButtonStyle} ${caretrightImageStyle}`
+            }
+            onClick={() => this.props.displayFiles()}
+          />
+        )}
+        <button
+          disabled={this.checkContents()}
+          className={`${this.props.moveFileIconClass} ${changeStageButtonStyle}
+               ${changeStageButtonLeftStyle}`}
+          title={this.props.moveAllFilesTitle}
+          onClick={() =>
+            this.props.moveAllFiles(this.props.topRepoPath, this.props.refresh)
+          }
+        />
+        {this.props.heading === 'Changed' && (
+          <button
+            disabled={this.checkContents()}
+            className={classes(changeStageButtonStyle, discardFileButtonStyle)}
+            title={'Discard All Changes'}
+            onClick={() => this.discardAllChanges()}
+          />
+        )}
+      </div>
+    );
+  }
+
+  filelist() {
+    return (
+      <div className={sectionFileContainerStyle}>
+        {this.props.files.map(
+          (file: IGitStatusFileResult, fileIndex: number) => {
+            return (
+              <FileItem
+                key={fileIndex}
+                topRepoPath={this.props.topRepoPath}
+                stage={this.props.heading}
+                file={file}
+                app={this.props.app}
+                refresh={this.props.refresh}
+                moveFile={this.props.moveFile}
+                discardFile={this.props.discardFile}
+                moveFileIconClass={this.props.moveFileIconClass}
+                moveFileIconSelectedClass={this.props.moveFileIconSelectedClass}
+                moveFileTitle={this.props.moveFileTitle}
+                openFile={this.props.openFile}
+                extractFilename={this.props.extractFilename}
+                contextMenu={this.props.contextMenu}
+                parseFileExtension={this.props.parseFileExtension}
+                parseSelectedFileExtension={
+                  this.props.parseSelectedFileExtension
+                }
+                selectedFile={this.props.selectedFile}
+                updateSelectedFile={this.props.updateSelectedFile}
+                fileIndex={fileIndex}
+                selectedStage={this.props.selectedStage}
+                selectedDiscardFile={this.props.selectedDiscardFile}
+                updateSelectedDiscardFile={this.props.updateSelectedDiscardFile}
+                disableFile={this.props.disableFiles}
+                toggleDisableFiles={this.props.toggleDisableFiles}
+                sideBarExpanded={this.props.sideBarExpanded}
+                renderMime={this.props.renderMime}
+              />
+            );
+          }
+        )}
+      </div>
+    );
+  }
+
   render() {
     return (
       <div className={this.checkDisabled()}>
-        <div className={sectionAreaStyle}>
-          <span className={sectionHeaderLabelStyle}>
-            {this.props.heading}({this.props.files.length})
-          </span>
-          {this.props.files.length > 0 && (
-            <button
-              className={
-                this.props.showFiles
-                  ? `${changeStageButtonStyle} ${caretdownImageStyle}`
-                  : `${changeStageButtonStyle} ${caretrightImageStyle}`
-              }
-              onClick={() => this.props.displayFiles()}
-            />
-          )}
-          <button
-            disabled={this.checkContents()}
-            className={`${
-              this.props.moveFileIconClass
-            } ${changeStageButtonStyle}
-               ${changeStageButtonLeftStyle}`}
-            title={this.props.moveAllFilesTitle}
-            onClick={() =>
-              this.props.moveAllFiles(
-                this.props.topRepoPath,
-                this.props.refresh
-              )
-            }
-          />
-          {this.props.heading === 'Changed' && (
-            <button
-              disabled={this.checkContents()}
-              className={classes(
-                changeStageButtonStyle,
-                discardFileButtonStyle
-              )}
-              title={'Discard All Changes'}
-              onClick={() => this.discardAllChanges()}
-            />
-          )}
-        </div>
-        {this.props.showFiles && (
-          <div className={sectionFileContainerStyle}>
-            {this.props.files.map(
-              (file: IGitStatusFileResult, fileIndex: number) => {
-                return (
-                  <FileItem
-                    key={fileIndex}
-                    topRepoPath={this.props.topRepoPath}
-                    stage={this.props.heading}
-                    file={file}
-                    app={this.props.app}
-                    refresh={this.props.refresh}
-                    moveFile={this.props.moveFile}
-                    discardFile={this.props.discardFile}
-                    moveFileIconClass={this.props.moveFileIconClass}
-                    moveFileIconSelectedClass={
-                      this.props.moveFileIconSelectedClass
-                    }
-                    moveFileTitle={this.props.moveFileTitle}
-                    openFile={this.props.openFile}
-                    extractFilename={this.props.extractFilename}
-                    contextMenu={this.props.contextMenu}
-                    parseFileExtension={this.props.parseFileExtension}
-                    parseSelectedFileExtension={
-                      this.props.parseSelectedFileExtension
-                    }
-                    selectedFile={this.props.selectedFile}
-                    updateSelectedFile={this.props.updateSelectedFile}
-                    fileIndex={fileIndex}
-                    selectedStage={this.props.selectedStage}
-                    selectedDiscardFile={this.props.selectedDiscardFile}
-                    updateSelectedDiscardFile={
-                      this.props.updateSelectedDiscardFile
-                    }
-                    disableFile={this.props.disableFiles}
-                    toggleDisableFiles={this.props.toggleDisableFiles}
-                    sideBarExpanded={this.props.sideBarExpanded}
-                    renderMime={this.props.renderMime}
-                  />
-                );
-              }
-            )}
-          </div>
-        )}
+        {this.header}
+        {this.props.showFiles && this.filelist}
       </div>
     );
   }

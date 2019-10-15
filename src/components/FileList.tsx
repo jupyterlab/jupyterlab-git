@@ -4,7 +4,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { Menu } from '@phosphor/widgets';
 
-import { PathExt } from '@jupyterlab/coreutils';
+import { ISettingRegistry, PathExt } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
 import { openDiffView } from './diff/DiffWidget';
@@ -78,6 +78,7 @@ export interface IFileListProps {
   refresh: any;
   sideBarExpanded: boolean;
   display: boolean;
+  settings: ISettingRegistry.ISettings;
   renderMime: IRenderMimeRegistry;
 }
 
@@ -496,114 +497,97 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   render() {
+    const sharedProps = {
+      selectedFile: this.state.selectedFile,
+      updateSelectedFile: this.updateSelectedFile,
+      selectedStage: this.state.selectedStage,
+      updateSelectedStage: this.updateSelectedStage,
+      selectedDiscardFile: this.state.selectedDiscardFile,
+      updateSelectedDiscardFile: this.updateSelectedDiscardFile,
+      disableFiles: this.state.disableFiles,
+      toggleDisableFiles: this.toggleDisableFiles,
+      openFile: this.openListedFile,
+      extractFilename: this.extractFilename,
+      contextMenu: this.contextMenuStaged,
+      parseFileExtension: parseFileExtension,
+      parseSelectedFileExtension: parseSelectedFileExtension,
+      topRepoPath: this.props.topRepoPath,
+      app: this.props.app,
+      refresh: this.props.refresh,
+      isDisabled: this.state.disableStaged,
+      sideBarExpanded: this.props.sideBarExpanded,
+      renderMime: this.props.renderMime
+    };
+
+    const staged = () => (
+      <GitStage
+        heading={'Staged'}
+        files={
+          this.props.settings.composite['simpleStaging']
+            ? { ...this.props.stagedFiles, ...this.props.unstagedFiles }
+            : this.props.stagedFiles
+        }
+        showFiles={this.state.showStaged}
+        displayFiles={this.displayStaged}
+        moveAllFiles={this.resetAllStagedFiles}
+        discardAllFiles={null}
+        discardFile={null}
+        moveFile={this.resetStagedFile}
+        moveFileIconClass={moveFileDownButtonStyle}
+        moveFileIconSelectedClass={moveFileDownButtonSelectedStyle}
+        moveAllFilesTitle={'Unstage all changes'}
+        moveFileTitle={'Unstage this change'}
+        disableOthers={null}
+        {...sharedProps}
+      />
+    );
+
+    const changed = () => (
+      <GitStage
+        heading={'Changed'}
+        files={this.props.unstagedFiles}
+        showFiles={this.state.showUnstaged}
+        displayFiles={this.displayUnstaged}
+        moveAllFiles={this.addAllUnstagedFiles}
+        discardAllFiles={this.discardAllUnstagedFiles}
+        discardFile={this.discardUnstagedFile}
+        moveFile={this.addUnstagedFile}
+        moveFileIconClass={moveFileUpButtonStyle}
+        moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
+        moveAllFilesTitle={'Stage all changes'}
+        moveFileTitle={'Stage this change'}
+        disableOthers={this.disableStagesForDiscardAll}
+        {...sharedProps}
+      />
+    );
+
+    const untracked = () => (
+      <GitStage
+        heading={'Untracked'}
+        files={this.props.untrackedFiles}
+        showFiles={this.state.showUntracked}
+        displayFiles={this.displayUntracked}
+        moveAllFiles={this.addAllUntrackedFiles}
+        discardAllFiles={null}
+        discardFile={null}
+        moveFile={this.addUntrackedFile}
+        moveFileIconClass={moveFileUpButtonStyle}
+        moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
+        moveAllFilesTitle={'Track all untracked files'}
+        moveFileTitle={'Track this file'}
+        disableOthers={null}
+        {...sharedProps}
+      />
+    );
+
     return (
       <div onContextMenu={event => event.preventDefault()}>
-        {this.props.display && (
-          <div>
-            <GitStage
-              heading={'Staged'}
-              topRepoPath={this.props.topRepoPath}
-              files={this.props.stagedFiles}
-              app={this.props.app}
-              refresh={this.props.refresh}
-              showFiles={this.state.showStaged}
-              displayFiles={this.displayStaged}
-              moveAllFiles={this.resetAllStagedFiles}
-              discardAllFiles={null}
-              discardFile={null}
-              moveFile={this.resetStagedFile}
-              moveFileIconClass={moveFileDownButtonStyle}
-              moveFileIconSelectedClass={moveFileDownButtonSelectedStyle}
-              moveAllFilesTitle={'Unstage all changes'}
-              moveFileTitle={'Unstage this change'}
-              openFile={this.openListedFile}
-              extractFilename={this.extractFilename}
-              contextMenu={this.contextMenuStaged}
-              parseFileExtension={parseFileExtension}
-              parseSelectedFileExtension={parseSelectedFileExtension}
-              selectedFile={this.state.selectedFile}
-              updateSelectedFile={this.updateSelectedFile}
-              selectedStage={this.state.selectedStage}
-              updateSelectedStage={this.updateSelectedStage}
-              selectedDiscardFile={this.state.selectedDiscardFile}
-              updateSelectedDiscardFile={this.updateSelectedDiscardFile}
-              disableFiles={this.state.disableFiles}
-              toggleDisableFiles={this.toggleDisableFiles}
-              disableOthers={null}
-              isDisabled={this.state.disableStaged}
-              sideBarExpanded={this.props.sideBarExpanded}
-              renderMime={this.props.renderMime}
-            />
-            <GitStage
-              heading={'Changed'}
-              topRepoPath={this.props.topRepoPath}
-              files={this.props.unstagedFiles}
-              app={this.props.app}
-              refresh={this.props.refresh}
-              showFiles={this.state.showUnstaged}
-              displayFiles={this.displayUnstaged}
-              moveAllFiles={this.addAllUnstagedFiles}
-              discardAllFiles={this.discardAllUnstagedFiles}
-              discardFile={this.discardUnstagedFile}
-              moveFile={this.addUnstagedFile}
-              moveFileIconClass={moveFileUpButtonStyle}
-              moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
-              moveAllFilesTitle={'Stage all changes'}
-              moveFileTitle={'Stage this change'}
-              openFile={this.openListedFile}
-              extractFilename={this.extractFilename}
-              contextMenu={this.contextMenuUnstaged}
-              parseFileExtension={parseFileExtension}
-              parseSelectedFileExtension={parseSelectedFileExtension}
-              selectedFile={this.state.selectedFile}
-              updateSelectedFile={this.updateSelectedFile}
-              selectedStage={this.state.selectedStage}
-              updateSelectedStage={this.updateSelectedStage}
-              selectedDiscardFile={this.state.selectedDiscardFile}
-              updateSelectedDiscardFile={this.updateSelectedDiscardFile}
-              disableFiles={this.state.disableFiles}
-              toggleDisableFiles={this.toggleDisableFiles}
-              disableOthers={this.disableStagesForDiscardAll}
-              isDisabled={this.state.disableUnstaged}
-              sideBarExpanded={this.props.sideBarExpanded}
-              renderMime={this.props.renderMime}
-            />
-            <GitStage
-              heading={'Untracked'}
-              topRepoPath={this.props.topRepoPath}
-              files={this.props.untrackedFiles}
-              app={this.props.app}
-              refresh={this.props.refresh}
-              showFiles={this.state.showUntracked}
-              displayFiles={this.displayUntracked}
-              moveAllFiles={this.addAllUntrackedFiles}
-              discardAllFiles={null}
-              discardFile={null}
-              moveFile={this.addUntrackedFile}
-              moveFileIconClass={moveFileUpButtonStyle}
-              moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
-              moveAllFilesTitle={'Track all untracked files'}
-              moveFileTitle={'Track this file'}
-              openFile={this.openListedFile}
-              extractFilename={this.extractFilename}
-              contextMenu={this.contextMenuUntracked}
-              parseFileExtension={parseFileExtension}
-              parseSelectedFileExtension={parseSelectedFileExtension}
-              selectedFile={this.state.selectedFile}
-              updateSelectedFile={this.updateSelectedFile}
-              selectedStage={this.state.selectedStage}
-              updateSelectedStage={this.updateSelectedStage}
-              selectedDiscardFile={this.state.selectedDiscardFile}
-              updateSelectedDiscardFile={this.updateSelectedDiscardFile}
-              disableFiles={this.state.disableFiles}
-              toggleDisableFiles={this.toggleDisableFiles}
-              disableOthers={null}
-              isDisabled={this.state.disableUntracked}
-              sideBarExpanded={this.props.sideBarExpanded}
-              renderMime={this.props.renderMime}
-            />
-          </div>
-        )}
+        {this.props.display &&
+          (this.props.settings.composite['simpleStaging'] ? (
+            <div {...staged} />
+          ) : (
+            <div {...staged} {...changed} {...untracked} />
+          ))}
       </div>
     );
   }

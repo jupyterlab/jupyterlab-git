@@ -257,6 +257,7 @@ export class GitPanel extends React.Component<
             refresh={this.refresh}
             diff={this.props.diff}
             sideBarExpanded={this.state.sideBarExpanded}
+            settings={this.props.settings}
             renderMime={this.props.renderMime}
           />
         </div>
