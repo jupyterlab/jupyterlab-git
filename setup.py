@@ -44,7 +44,7 @@ cmdclass = create_cmdclass('jsdeps',
     data_files_spec=data_files_spec
 )
 cmdclass['jsdeps'] = combine_commands(
-    install_npm(HERE, build_cmd='build:all'),
+    install_npm(HERE, build_cmd='build:all', npm='jlpm'),
     ensure_targets(jstargets),
 )
 

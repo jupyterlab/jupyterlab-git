@@ -341,7 +341,7 @@ def install_npm(path=None, build_dir=None, source_dir=None, build_cmd='build', f
             node_modules = pjoin(node_package, 'node_modules')
             is_yarn = os.path.exists(pjoin(node_package, 'yarn.lock'))
 
-            npm_cmd = npm
+            npm_cmd = [npm] if isinstance(npm, str) else npm
 
             if npm is None:
                 if is_yarn:
