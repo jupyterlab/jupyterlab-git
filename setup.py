@@ -5,8 +5,8 @@ from os.path import join as pjoin
 
 from setupbase import (
     create_cmdclass, install_npm, ensure_targets,
-    find_packages, combine_commands, ensure_python,
-    get_version, HERE
+    combine_commands, ensure_python, get_version,
+    HERE, which
 )
 
 import setuptools
@@ -43,8 +43,12 @@ cmdclass = create_cmdclass('jsdeps',
     package_data_spec=package_data_spec,
     data_files_spec=data_files_spec
 )
+
+# determine which pkg manager to use
+npm = 'jlpm' if which('jlpm') else 'yarn'
+
 cmdclass['jsdeps'] = combine_commands(
-    install_npm(HERE, build_cmd='build:all', npm='jlpm'),
+    install_npm(HERE, build_cmd='build:all', npm=npm),
     ensure_targets(jstargets),
 )
 
