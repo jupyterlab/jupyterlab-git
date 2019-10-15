@@ -233,12 +233,12 @@ class Git:
                 "message": my_error.decode("utf-8"),
             }
 
-    def log(self, current_path):
+    def log(self, current_path, history_count=10):
         """
         Execute git log command & return the result.
         """
         p = Popen(
-            ["git", "log", "--pretty=format:%H%n%an%n%ar%n%s", "-10"],
+            ["git", "log", "--pretty=format:%H%n%an%n%ar%n%s", ("-%d" % history_count)],
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),

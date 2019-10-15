@@ -19,10 +19,16 @@ import { gitWidgetStyle } from '../style/GitWidgetStyle';
 import { IDiffCallback } from '../git';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 /**
  * An options object for creating a running sessions widget.
  */
 export interface IOptions {
+  /**
+   * A settings key.
+   */
+  key: string;
+
   /**
    * A service manager instance.
    */
@@ -33,6 +39,11 @@ export interface IOptions {
    * The default is a shared renderer instance.
    */
   renderer?: IRenderer;
+
+  /**
+   * The setings registry.
+   */
+  settings: ISettingRegistry;
 }
 
 /**
@@ -77,11 +88,25 @@ export class GitWidget extends Widget {
       node: (options.renderer || defaultRenderer).createNode()
     });
     this.addClass(gitWidgetStyle);
-    const element = (
-      <GitPanel app={app} diff={diffFunction} renderMime={renderMime} />
-    );
-    this.component = ReactDOM.render(element, this.node);
-    this.component.refresh();
+
+    const { key } = options;
+    const registry = options.settings;
+
+    void registry.load(key).then(settings => {
+      this._settings = settings;
+      // this._settings.changed.connect(this._loadSettings, this);
+
+      const element = (
+        <GitPanel
+          app={app}
+          diff={diffFunction}
+          renderMime={renderMime}
+          settings={this._settings}
+        />
+      );
+      this.component = ReactDOM.render(element, this.node);
+      this.component.refresh();
+    });
   }
 
   /**
@@ -190,4 +215,5 @@ export class GitWidget extends Widget {
   private _renderer: IRenderer = null;
   private _refreshId = -1;
   private _refreshed = new Signal<this, void>(this);
+  private _settings: ISettingRegistry.ISettings;
 }

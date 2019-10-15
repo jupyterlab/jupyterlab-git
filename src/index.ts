@@ -3,7 +3,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { PathExt } from '@jupyterlab/coreutils';
+import { ISettingRegistry, PathExt } from '@jupyterlab/coreutils';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -32,12 +32,13 @@ export interface IGitExtension {
  * The default running sessions extension.
  */
 const plugin: JupyterFrontEndPlugin<IGitExtension> = {
-  id: 'jupyter.extensions.running-sessions-git',
+  id: '@jupyterlab/git:plugin',
   requires: [
     IMainMenu,
     ILayoutRestorer,
     IFileBrowserFactory,
-    IRenderMimeRegistry
+    IRenderMimeRegistry,
+    ISettingRegistry
   ],
   provides: IGitExtension,
   activate,
@@ -55,6 +56,8 @@ export class GitExtension implements IGitExtension {
   gitCloneWidget: GitClone;
   constructor(
     app: JupyterFrontEnd,
+    key: string,
+    settings: ISettingRegistry,
     restorer: ILayoutRestorer,
     factory: IFileBrowserFactory,
     renderMime: IRenderMimeRegistry
@@ -62,7 +65,7 @@ export class GitExtension implements IGitExtension {
     this.app = app;
     this.gitPlugin = new GitWidget(
       app,
-      { manager: app.serviceManager },
+      { key, manager: app.serviceManager, settings },
       this.performDiff.bind(this),
       renderMime
     );
@@ -109,13 +112,22 @@ function activate(
   mainMenu: IMainMenu,
   restorer: ILayoutRestorer,
   factory: IFileBrowserFactory,
-  renderMime: IRenderMimeRegistry
+  renderMime: IRenderMimeRegistry,
+  settings: ISettingRegistry
 ): IGitExtension {
   const { commands } = app;
+  const key = plugin.id;
 
   registerGitIcons(defaultIconRegistry);
 
-  let gitExtension = new GitExtension(app, restorer, factory, renderMime);
+  let gitExtension = new GitExtension(
+    app,
+    key,
+    settings,
+    restorer,
+    factory,
+    renderMime
+  );
 
   const category = 'Git';
   // Rank has been chosen somewhat arbitrarily to give priority to the running

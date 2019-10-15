@@ -51,13 +51,16 @@ class GitAllHistoryHandler(GitHandler):
         POST request handler, calls individual handlers for
         'git show_top_level', 'git branch', 'git log', and 'git status'
         """
-        current_path = self.get_json_body()["current_path"]
+        body = self.get_json_body()
+        current_path = body["current_path"]
+        history_count = body["history_count"]
+
         show_top_level = self.git.show_top_level(current_path)
         if show_top_level["code"] != 0:
             self.finish(json.dumps(show_top_level))
         else:
             branch = self.git.branch(current_path)
-            log = self.git.log(current_path)
+            log = self.git.log(current_path, history_count)
             status = self.git.status(current_path)
 
             result = {
