@@ -5,8 +5,8 @@ from os.path import join as pjoin
 
 from setupbase import (
     create_cmdclass, install_npm, ensure_targets,
-    find_packages, combine_commands, ensure_python,
-    get_version, HERE
+    combine_commands, ensure_python, get_version,
+    HERE
 )
 
 import setuptools
@@ -43,8 +43,9 @@ cmdclass = create_cmdclass('jsdeps',
     package_data_spec=package_data_spec,
     data_files_spec=data_files_spec
 )
+
 cmdclass['jsdeps'] = combine_commands(
-    install_npm(HERE, build_cmd='build:all'),
+    install_npm(HERE, build_cmd='build:all', npm='jlpm'),
     ensure_targets(jstargets),
 )
 
@@ -84,7 +85,7 @@ setup_args = dict(
     extras_require = {
         'test': [
             'pytest',
-            'jupyterlab>=1.0.3',
+            'jupyterlab~=1.0',
         ],
     },
 )
