@@ -7,7 +7,7 @@ export const fileStyle = style({
   color: 'var(--jp-ui-font-color1)',
   height: '25px',
   lineHeight: 'var(--jp-private-running-item-height)',
-  paddingLeft: '4px',
+  padding: '0px 0px 0px 4px',
   listStyleType: 'none',
 
   $nest: {
@@ -18,6 +18,10 @@ export const fileStyle = style({
       visibility: 'visible'
     }
   }
+});
+
+export const fileStylePad = style({
+  padding: '4px 12px'
 });
 
 export const selectedFileStyle = style({

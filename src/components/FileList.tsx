@@ -5,9 +5,13 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { Menu } from '@phosphor/widgets';
 
 import { ISettingRegistry, PathExt } from '@jupyterlab/coreutils';
+
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
 import * as React from 'react';
+
 import { openDiffView } from './diff/DiffWidget';
+
 import {
   folderFileIconSelectedStyle,
   folderFileIconStyle,
@@ -32,8 +36,10 @@ import {
   yamlFileIconSelectedStyle,
   yamlFileIconStyle
 } from '../style/FileListStyle';
+
 import { Git, IGitShowPrefixResult } from '../git';
-import { GitStage } from './GitStage';
+
+import { GitStage, IGitStageProps } from './GitStage';
 
 export namespace CommandIDs {
   export const gitFileOpen = 'gf:Open';
@@ -519,14 +525,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       renderMime: this.props.renderMime
     };
 
-    const Staged = () => (
+    const Staged = (props: Partial<IGitStageProps> = {}) => (
       <GitStage
         heading={'Staged'}
-        files={
-          this.props.settings.composite['simpleStaging']
-            ? [...this.props.stagedFiles, ...this.props.unstagedFiles]
-            : this.props.stagedFiles
-        }
+        files={this.props.stagedFiles}
         showFiles={this.state.showStaged}
         displayFiles={this.displayStaged}
         moveAllFiles={this.resetAllStagedFiles}
@@ -539,10 +541,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         moveFileTitle={'Unstage this change'}
         disableOthers={null}
         {...sharedProps}
+        {...props}
       />
     );
 
-    const Changed = () => (
+    const Changed = (props: Partial<IGitStageProps> = {}) => (
       <GitStage
         heading={'Changed'}
         files={this.props.unstagedFiles}
@@ -558,10 +561,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         moveFileTitle={'Stage this change'}
         disableOthers={this.disableStagesForDiscardAll}
         {...sharedProps}
+        {...props}
       />
     );
 
-    const Untracked = () => (
+    const Untracked = (props: Partial<IGitStageProps> = {}) => (
       <GitStage
         heading={'Untracked'}
         files={this.props.untrackedFiles}
@@ -577,6 +581,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         moveFileTitle={'Track this file'}
         disableOthers={null}
         {...sharedProps}
+        {...props}
       />
     );
 
@@ -585,7 +590,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         {this.props.display &&
           (this.props.settings.composite['simpleStaging'] ? (
             <div>
-              <Staged />
+              <Changed
+                files={this.props.unstagedFiles}
+                moveFile={null}
+                moveFileIconClass={null}
+                moveFileIconSelectedClass={null}
+                moveAllFilesTitle={null}
+                moveFileTitle={null}
+              />
             </div>
           ) : (
             <div>

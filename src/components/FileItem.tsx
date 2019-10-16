@@ -19,6 +19,7 @@ import {
   fileIconStyle,
   fileLabelStyle,
   fileStyle,
+  fileStylePad,
   selectedFileChangedLabelStyle,
   selectedFileStyle,
   sideBarExpandedFileLabelStyle
@@ -141,14 +142,16 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
   }
 
   getFileClass() {
+    const baseStyle = classes(fileStyle, !this.props.moveFile && fileStylePad);
+
     if (!this.checkSelected() && this.props.disableFile) {
-      return classes(fileStyle, disabledFileStyle);
+      return classes(baseStyle, disabledFileStyle);
     } else if (this.showDiscardWarning()) {
-      classes(fileStyle, expandedFileStyle);
+      classes(baseStyle, expandedFileStyle);
     } else {
       return this.checkSelected()
-        ? classes(fileStyle, selectedFileStyle)
-        : classes(fileStyle);
+        ? classes(baseStyle, selectedFileStyle)
+        : classes(baseStyle);
     }
   }
 
@@ -248,6 +251,26 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
   }
 
   render() {
+    const MoveButton = () => {
+      if (this.props.moveFile) {
+        return (
+          <button
+            className={`jp-Git-button ${this.getMoveFileIconClass()}`}
+            title={this.props.moveFileTitle}
+            onClick={() => {
+              this.props.moveFile(
+                this.props.file.to,
+                this.props.topRepoPath,
+                this.props.refresh
+              );
+            }}
+          />
+        );
+      } else {
+        return <></>;
+      }
+    };
+
     return (
       <div
         className={this.getFileClass()}
@@ -255,17 +278,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
           this.props.updateSelectedFile(this.props.fileIndex, this.props.stage)
         }
       >
-        <button
-          className={`jp-Git-button ${this.getMoveFileIconClass()}`}
-          title={this.props.moveFileTitle}
-          onClick={() => {
-            this.props.moveFile(
-              this.props.file.to,
-              this.props.topRepoPath,
-              this.props.refresh
-            );
-          }}
-        />
+        <MoveButton />
         <span className={this.getFileLableIconClass()} />
         <span
           className={this.getFileLabelClass()}
