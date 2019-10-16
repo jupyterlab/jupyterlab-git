@@ -89,6 +89,10 @@ export class GitPanel extends React.Component<
     this.props.settings.changed.connect(this.refresh, this);
   }
 
+  componentDidMount(): void {
+    this.refresh();
+  }
+
   setShowList = (state: boolean) => {
     this.setState({ showList: state });
   };

@@ -79,7 +79,7 @@ export class BranchHeader extends React.Component<
       if (message && message !== '' && (await this._hasIdentity(path))) {
         let gitApi = new Git();
 
-        const response = await gitApi.addAllChanged(message);
+        const response = await gitApi.addAllChanged(path);
 
         if (response.ok) {
           this.props.refresh();
