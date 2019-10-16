@@ -404,6 +404,24 @@ export class Git {
     });
   }
 
+  /** Make request to add all changed files into
+   * the staging area in repository 'path'
+   */
+  async addAllChanged(path: string): Promise<Response> {
+    try {
+      let response = await httpGitRequest('/git/add_all_changed', 'POST', {
+        top_repo_path: path
+      });
+      if (response.status !== 200) {
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
+      }
+      return response.json();
+    } catch (err) {
+      throw ServerConnection.NetworkError;
+    }
+  }
+
   /** Make request to add all untracked files into
    * the staging area in repository 'path'
    */

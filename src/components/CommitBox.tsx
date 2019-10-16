@@ -1,24 +1,30 @@
-import * as React from 'react';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import {
-  textInputStyle,
-  stagedCommitStyle,
-  stagedCommitMessageStyle
-} from '../style/BranchHeaderStyle';
+import * as React from 'react';
 
 import { classes } from 'typestyle';
 
+import {
+  stagedCommitButtonStyle,
+  stagedCommitButtonReadyStyle,
+  stagedCommitButtonDisabledStyle,
+  stagedCommitMessageStyle,
+  stagedCommitStyle,
+  textInputStyle
+} from '../style/BranchHeaderStyle';
+
 export interface ICommitBoxProps {
-  checkReadyForSubmit: Function;
+  unstagedFiles: any;
   stagedFiles: any;
+  commitAllUnstagedFiles: Function;
   commitAllStagedFiles: Function;
   topRepoPath: string;
   refresh: Function;
+  settings: ISettingRegistry.ISettings;
 }
 
 export interface ICommitBoxState {
   value: string;
-  disableSubmit: boolean;
 }
 
 export class CommitBox extends React.Component<
@@ -28,9 +34,22 @@ export class CommitBox extends React.Component<
   constructor(props: ICommitBoxProps) {
     super(props);
     this.state = {
-      value: '',
-      disableSubmit: true
+      value: ''
     };
+  }
+
+  doCommit(message: string, path: string, refresh: Function) {
+    if (this.props.settings.composite['simpleStaging']) {
+      this.props.commitAllUnstagedFiles(message, path, refresh);
+    } else {
+      this.props.commitAllStagedFiles(message, path, refresh);
+    }
+  }
+
+  get fileCount() {
+    return this.props.settings.composite['simpleStaging']
+      ? this.props.unstagedFiles.length
+      : this.props.stagedFiles.length;
   }
 
   /** Prevent enter key triggered 'submit' action during commit message input */
@@ -44,25 +63,38 @@ export class CommitBox extends React.Component<
   /** Initalize commit message input box */
   initializeInput = (): void => {
     this.setState({
-      value: '',
-      disableSubmit: true
+      value: ''
     });
   };
 
   /** Handle input inside commit message box */
   handleChange = (event: any): void => {
-    if (event.target.value && event.target.value !== '') {
+    if (event.target.value) {
       this.setState({
-        value: event.target.value,
-        disableSubmit: false
+        value: event.target.value
       });
     } else {
       this.setState({
-        value: event.target.value,
-        disableSubmit: true
+        value: event.target.value
       });
     }
   };
+
+  /** Update state of commit message input box */
+  updateCommitBoxState(disable: boolean, numberOfFiles: number) {
+    if (disable) {
+      if (numberOfFiles === 0) {
+        return classes(
+          stagedCommitButtonStyle,
+          stagedCommitButtonDisabledStyle
+        );
+      } else {
+        return classes(stagedCommitButtonStyle, stagedCommitButtonReadyStyle);
+      }
+    } else {
+      return stagedCommitButtonStyle;
+    }
+  }
 
   render() {
     return (
@@ -72,30 +104,31 @@ export class CommitBox extends React.Component<
       >
         <textarea
           className={classes(textInputStyle, stagedCommitMessageStyle)}
-          disabled={this.props.stagedFiles.length === 0}
+          disabled={this.fileCount === 0}
           placeholder={
-            this.props.stagedFiles.length === 0
+            this.fileCount === 0
               ? 'Stage your changes before commit'
               : 'Input message to commit staged changes'
           }
-          value={this.state.value}
+          value={this.fileCount === 0 ? '' : this.state.value}
           onChange={this.handleChange}
         />
         <input
-          className={this.props.checkReadyForSubmit(
-            this.state.disableSubmit,
-            this.props.stagedFiles.length
+          className={this.updateCommitBoxState(
+            this.fileCount === 0 || !this.state.value,
+            this.fileCount
           )}
           type="button"
           title="Commit"
-          disabled={this.state.disableSubmit}
+          disabled={this.fileCount === 0 || !this.state.value}
           onClick={() => {
-            this.props.commitAllStagedFiles(
+            this.doCommit(
               this.state.value,
               this.props.topRepoPath,
               this.props.refresh
-            ),
-              this.initializeInput();
+            );
+
+            return this.initializeInput();
           }}
         />
       </form>

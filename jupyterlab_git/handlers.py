@@ -200,12 +200,12 @@ class GitBranchHandler(GitHandler):
 class GitAddHandler(GitHandler):
     """
     Handler for git add <filename>'.
-    Adds one or all files into to the staging area.
+    Adds one or all files into the staging area.
     """
 
     def get(self):
         """
-        GET request handler, adds files in the staging area.
+        GET request handler, adds files into the staging area.
         """
         self.finish(
             json.dumps(
@@ -406,6 +406,18 @@ class GitInitHandler(GitHandler):
         my_output = self.git.init(current_path)
         self.finish(my_output)
 
+class GitAddAllChangedHandler(GitHandler):
+    """
+    Handler for 'git add -u'. Adds ONLY all changed files.
+    """
+
+    def post(self):
+        """
+        POST request handler, adds all the changed files.
+        """
+        my_output = self.git.add_all_changed(self.get_json_body()["top_repo_path"])
+        print(my_output)
+        self.finish(my_output)
 
 class GitAddAllUntrackedHandler(GitHandler):
     """
@@ -484,6 +496,7 @@ def setup_handlers(web_app):
         ("/git/detailed_log", GitDetailedLogHandler),
         ("/git/init", GitInitHandler),
         ("/git/all_history", GitAllHistoryHandler),
+        ("/git/add_all_changed", GitAddAllChangedHandler),
         ("/git/add_all_untracked", GitAddAllUntrackedHandler),
         ("/git/clone", GitCloneHandler),
         ("/git/upstream", GitUpstreamHandler),

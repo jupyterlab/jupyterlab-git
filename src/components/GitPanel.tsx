@@ -1,6 +1,10 @@
-import * as React from 'react';
-
 import { JupyterFrontEnd } from '@jupyterlab/application';
+
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
+import * as React from 'react';
 
 import {
   Git,
@@ -27,8 +31,6 @@ import {
   panelWarningStyle,
   findRepoButtonStyle
 } from '../style/GitPanelStyle';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -231,11 +233,13 @@ export class GitPanel extends React.Component<
             currentBranch={this.state.currentBranch}
             upstreamBranch={this.state.upstreamBranch}
             stagedFiles={this.state.stagedFiles}
+            unstagedFiles={this.state.unstagedFiles}
             data={this.state.branches}
             disabled={this.state.disableSwitchBranch}
             toggleSidebar={this.toggleSidebar}
             showList={this.state.showList}
             sideBarExpanded={this.state.sideBarExpanded}
+            settings={this.props.settings}
           />
           <HistorySideBar
             isExpanded={this.state.sideBarExpanded}

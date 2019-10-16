@@ -1,4 +1,12 @@
+import { showErrorMessage, showDialog } from '@jupyterlab/apputils';
+
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+import { JSONObject } from '@phosphor/coreutils';
+
 import * as React from 'react';
+
+import { classes } from 'typestyle';
 
 import { Git } from '../git';
 
@@ -13,9 +21,6 @@ import {
   newBranchButtonStyle,
   headerButtonDisabledStyle,
   branchListItemStyle,
-  stagedCommitButtonStyle,
-  stagedCommitButtonReadyStyle,
-  stagedCommitButtonDisabledStyle,
   smallBranchStyle,
   expandedBranchStyle,
   openHistorySideBarButtonStyle,
@@ -27,11 +32,7 @@ import {
   branchTrackingLabelStyle
 } from '../style/BranchHeaderStyle';
 
-import { classes } from 'typestyle';
-
-import { showErrorMessage, showDialog } from '@jupyterlab/apputils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
-import { JSONObject } from '@phosphor/coreutils';
 
 export interface IBranchHeaderState {
   dropdownOpen: boolean;
@@ -45,12 +46,14 @@ export interface IBranchHeaderProps {
   currentBranch: string;
   upstreamBranch: string;
   stagedFiles: any;
+  unstagedFiles: any;
   data: any;
   refresh: any;
   disabled: boolean;
   toggleSidebar: Function;
   showList: boolean;
   sideBarExpanded: boolean;
+  settings: ISettingRegistry.ISettings;
 }
 
 export class BranchHeader extends React.Component<
@@ -67,6 +70,27 @@ export class BranchHeader extends React.Component<
     };
 
     this.commitAllStagedFiles = this.commitAllStagedFiles.bind(this);
+    this.commitAllUnstagedFiles = this.commitAllUnstagedFiles.bind(this);
+  }
+
+  /** Commit all files with changes that are tracked but unstaged */
+  async commitAllUnstagedFiles(message: string, path: string): Promise<void> {
+    try {
+      if (message && message !== '' && (await this._hasIdentity(path))) {
+        let gitApi = new Git();
+
+        const response = await gitApi.addAllChanged(message);
+
+        if (response.ok) {
+          this.props.refresh();
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorMessage('Fail to commit', error);
+    }
+
+    await this.commitAllStagedFiles(message, path);
   }
 
   /** Commit all staged files */
@@ -83,22 +107,6 @@ export class BranchHeader extends React.Component<
     } catch (error) {
       console.error(error);
       showErrorMessage('Fail to commit', error);
-    }
-  }
-
-  /** Update state of commit message input box */
-  updateCommitBoxState(disable: boolean, numberOfFiles: number) {
-    if (disable) {
-      if (numberOfFiles === 0) {
-        return classes(
-          stagedCommitButtonStyle,
-          stagedCommitButtonDisabledStyle
-        );
-      } else {
-        return classes(stagedCommitButtonStyle, stagedCommitButtonReadyStyle);
-      }
-    } else {
-      return stagedCommitButtonStyle;
     }
   }
 
@@ -272,11 +280,13 @@ export class BranchHeader extends React.Component<
             )}
             {this.state.showCommitBox && this.props.showList && (
               <CommitBox
-                checkReadyForSubmit={this.updateCommitBoxState}
                 stagedFiles={this.props.stagedFiles}
+                unstagedFiles={this.props.unstagedFiles}
+                commitAllUnstagedFiles={this.commitAllUnstagedFiles}
                 commitAllStagedFiles={this.commitAllStagedFiles}
                 topRepoPath={this.props.topRepoPath}
                 refresh={this.props.refresh}
+                settings={this.props.settings}
               />
             )}
           </>
