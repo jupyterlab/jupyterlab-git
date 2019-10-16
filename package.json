@@ -31,6 +31,9 @@
     "style/*.css",
     "style/images/*.svg"
   ],
+  "sideEffects": [
+    "style/*.css"
+  ],
   "jupyterlab": {
     "extension": true,
     "discovery": {
@@ -46,14 +49,15 @@
     }
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.0",
-    "@jupyterlab/apputils": "^1.0.0",
-    "@jupyterlab/console": "^1.0.0",
+    "@jupyterlab/application": "^1.1.0",
+    "@jupyterlab/apputils": "^1.1.0",
+    "@jupyterlab/console": "^1.1.0",
     "@jupyterlab/coreutils": "^3.0.0",
-    "@jupyterlab/filebrowser": "^1.0.0",
-    "@jupyterlab/mainmenu": "^1.0.0",
-    "@jupyterlab/services": "^4.0.0",
-    "@jupyterlab/terminal": "^1.0.0",
+    "@jupyterlab/filebrowser": "^1.1.0",
+    "@jupyterlab/mainmenu": "^1.1.0",
+    "@jupyterlab/services": "^4.1.0",
+    "@jupyterlab/terminal": "^1.1.0",
+    "@jupyterlab/ui-components": "^1.1.0",
     "@phosphor/widgets": "^1.8.0",
     "nbdime": "~5.0.1",
     "react": "~16.8.4",

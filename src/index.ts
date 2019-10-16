@@ -1,33 +1,22 @@
-import { addCommands, CommandIDs } from './gitMenuCommands';
-
-import { PathExt } from '@jupyterlab/coreutils';
-
-import { GitWidget } from './components/GitWidget';
-
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
+import { PathExt } from '@jupyterlab/coreutils';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
-import { Menu } from '@phosphor/widgets';
-
-import { Token } from '@phosphor/coreutils';
-
-import { gitTabStyle } from './componentsStyle/GitWidgetStyle';
-
-import { IDiffCallback } from './git';
-export { IDiffCallback } from './git';
-
-import '../style/variables.css';
-import '../style/diff.css';
-import '../style/diff.css';
-import { GitClone } from './widgets/gitClone';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { Token } from '@phosphor/coreutils';
+import { Menu } from '@phosphor/widgets';
+import { GitWidget } from './components/GitWidget';
+import { IDiffCallback } from './git';
+import { addCommands, CommandIDs } from './gitMenuCommands';
+import { registerGitIcons } from './icons';
+import { GitClone } from './widgets/gitClone';
+
+export { IDiffCallback } from './git';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
@@ -78,7 +67,7 @@ export class GitExtension implements IGitExtension {
       renderMime
     );
     this.gitPlugin.id = 'jp-git-sessions';
-    this.gitPlugin.title.iconClass = `jp-SideBar-tabIcon ${gitTabStyle}`;
+    this.gitPlugin.title.iconClass = `jp-SideBar-tabIcon jp-GitIcon`;
     this.gitPlugin.title.caption = 'Git';
 
     // Let the application restorer track the running panel for restoration of
@@ -123,6 +112,9 @@ function activate(
   renderMime: IRenderMimeRegistry
 ): IGitExtension {
   const { commands } = app;
+
+  registerGitIcons(defaultIconRegistry);
+
   let gitExtension = new GitExtension(app, restorer, factory, renderMime);
 
   const category = 'Git';
