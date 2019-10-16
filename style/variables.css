@@ -27,11 +27,9 @@
 
 [data-jp-theme-light='true'] {
   --jp-icon-arrow-down: url('./images/arrow-down.svg');
-  --jp-icon-deletions-made: url('./images/deletions-made-icon.svg');
   --jp-icon-discard-file: url('./images/discard.svg');
   --jp-icon-git-pull: url('./images/git-pull.svg');
   --jp-icon-git-push: url('./images/git-push.svg');
-  --jp-icon-insertions-made: url('./images/insertions-made-icon.svg');
   --jp-icon-move-file-down: url('./images/move-file-down.svg');
   --jp-icon-move-file-up: url('./images/move-file-up.svg');
   --jp-icon-plus: url('./images/plus.svg');
@@ -41,11 +39,9 @@
 
 [data-jp-theme-light='false'] {
   --jp-icon-arrow-down: url('./images/arrow-down-white.svg');
-  --jp-icon-deletions-made: url('./images/deletions-made-icon-white.svg');
   --jp-icon-discard-file: url('./images/discard-selected.svg');
   --jp-icon-git-pull: url('./images/git-pull-white.svg');
   --jp-icon-git-push: url('./images/git-push-white.svg');
-  --jp-icon-insertions-made: url('./images/insertions-made-icon-white.svg');
   --jp-icon-move-file-down-white: url('./images/move-file-down-hover.svg');
   --jp-icon-move-file-up: url('./images/move-file-up-hover.svg');
   --jp-icon-plus: url('./images/plus-white.svg');

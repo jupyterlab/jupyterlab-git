@@ -1,4 +1,6 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle/';
 import { fileIconStyle } from '../componentsStyle/FileItemStyle';
@@ -13,25 +15,21 @@ import {
   commitDetailStyle,
   commitOverviewNumbers,
   commitStyle,
-  deletionIconStyle,
   diffIconStyle,
   floatRightStyle,
   iconStyle,
-  insertionIconStyle,
-  numberofChangedFilesStyle,
   revertButtonStyle
 } from '../componentsStyle/SinglePastCommitInfoStyle';
 import {
-  ICommitModifiedFile,
   Git,
-  ISingleCommitInfo,
-  IDiffCallback
+  ICommitModifiedFile,
+  IDiffCallback,
+  ISingleCommitInfo
 } from '../git';
+import { isDiffSupported } from './diff/Diff';
+import { openDiffView } from './diff/DiffWidget';
 import { parseFileExtension } from './FileList';
 import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
-import { openDiffView } from './diff/DiffWidget';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { isDiffSupported } from './diff/Diff';
 
 export interface ISinglePastCommitInfoProps {
   topRepoPath: string;
@@ -141,15 +139,30 @@ export class SinglePastCommitInfo extends React.Component<
         <div className={commitStyle}>
           <div className={commitOverviewNumbers}>
             <span>
-              <span className={classes(iconStyle, numberofChangedFilesStyle)} />
+              {defaultIconRegistry.iconReact({
+                name: 'file',
+                className: classes(iconStyle),
+                tag: 'span',
+                title: '# Files Changed'
+              })}
               {this.state.filesChanged}
             </span>
             <span>
-              <span className={classes(iconStyle, insertionIconStyle)} />
+              {defaultIconRegistry.iconReact({
+                name: 'git-insertionsMade',
+                className: classes(iconStyle),
+                tag: 'span',
+                title: '# Insertions'
+              })}
               {this.state.insertionCount}
             </span>
             <span>
-              <span className={classes(iconStyle, deletionIconStyle)} />
+              {defaultIconRegistry.iconReact({
+                name: 'git-deletionsMade',
+                className: classes(iconStyle),
+                tag: 'span',
+                title: '# Deletions'
+              })}
               {this.state.deletionCount}
             </span>
           </div>
