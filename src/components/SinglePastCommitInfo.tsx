@@ -3,11 +3,11 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { defaultIconRegistry } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle/';
-import { fileIconStyle } from '../componentsStyle/FileItemStyle';
+import { fileIconStyle } from '../style/FileItemStyle';
 import {
   changeStageButtonStyle,
   discardFileButtonStyle
-} from '../componentsStyle/GitStageStyle';
+} from '../style/GitStageStyle';
 import {
   commitDetailFilePathStyle,
   commitDetailFileStyle,
@@ -19,7 +19,7 @@ import {
   floatRightStyle,
   iconStyle,
   revertButtonStyle
-} from '../componentsStyle/SinglePastCommitInfoStyle';
+} from '../style/SinglePastCommitInfoStyle';
 import {
   Git,
   ICommitModifiedFile,

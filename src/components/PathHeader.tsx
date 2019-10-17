@@ -4,7 +4,7 @@ import {
   repoPathStyle,
   repoRefreshStyle,
   repoStyle
-} from '../componentsStyle/PathHeaderStyle';
+} from '../style/PathHeaderStyle';
 
 import * as React from 'react';
 

@@ -31,7 +31,7 @@ import {
   spreadsheetFileIconStyle,
   yamlFileIconSelectedStyle,
   yamlFileIconStyle
-} from '../componentsStyle/FileListStyle';
+} from '../style/FileListStyle';
 import { Git, IGitShowPrefixResult } from '../git';
 import { GitStage } from './GitStage';
 

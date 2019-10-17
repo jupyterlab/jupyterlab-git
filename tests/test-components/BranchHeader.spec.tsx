@@ -12,7 +12,7 @@ import {
   stagedCommitButtonDisabledStyle,
   branchStyle,
   smallBranchStyle
-} from '../../src/componentsStyle/BranchHeaderStyle';
+} from '../../src/style/BranchHeaderStyle';
 
 // Mock jupyterlab package
 jest.mock('@jupyterlab/apputils');

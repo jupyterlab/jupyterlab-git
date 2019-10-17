@@ -13,7 +13,7 @@ import { Menu } from '@phosphor/widgets';
 import { GitWidget } from './components/GitWidget';
 import { IDiffCallback } from './git';
 import { addCommands, CommandIDs } from './gitMenuCommands';
-import { registerGitIcons } from './icons';
+import { registerGitIcons } from './style/icons';
 import { GitClone } from './widgets/gitClone';
 
 export { IDiffCallback } from './git';

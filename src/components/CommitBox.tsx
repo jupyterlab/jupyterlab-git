@@ -4,7 +4,7 @@ import {
   textInputStyle,
   stagedCommitStyle,
   stagedCommitMessageStyle
-} from '../componentsStyle/BranchHeaderStyle';
+} from '../style/BranchHeaderStyle';
 
 import { classes } from 'typestyle';
 

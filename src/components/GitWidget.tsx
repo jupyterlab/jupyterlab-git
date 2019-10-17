@@ -14,7 +14,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { GitPanel } from './GitPanel';
 
-import { gitWidgetStyle } from '../componentsStyle/GitWidgetStyle';
+import { gitWidgetStyle } from '../style/GitWidgetStyle';
 
 import { IDiffCallback } from '../git';
 

@@ -13,7 +13,7 @@ import {
   pastCommitNodeStyle,
   remoteBranchStyle,
   workingBranchStyle
-} from '../componentsStyle/PastCommitNodeStyle';
+} from '../style/PastCommitNodeStyle';
 import { IGitBranchResult, ISingleCommitInfo, IDiffCallback } from '../git';
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';

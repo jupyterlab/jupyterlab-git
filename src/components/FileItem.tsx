@@ -5,7 +5,7 @@ import {
   changeStageButtonStyle,
   diffFileButtonStyle,
   discardFileButtonStyle
-} from '../componentsStyle/GitStageStyle';
+} from '../style/GitStageStyle';
 
 import {
   disabledFileStyle,
@@ -22,7 +22,7 @@ import {
   selectedFileChangedLabelStyle,
   selectedFileStyle,
   sideBarExpandedFileLabelStyle
-} from '../componentsStyle/FileItemStyle';
+} from '../style/FileItemStyle';
 
 import { classes } from 'typestyle';
 
