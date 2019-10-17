@@ -52,7 +52,7 @@
     "@jupyterlab/application": "^1.1.0",
     "@jupyterlab/apputils": "^1.1.0",
     "@jupyterlab/console": "^1.1.0",
-    "@jupyterlab/coreutils": "^3.0.0",
+    "@jupyterlab/coreutils": "^3.1.0",
     "@jupyterlab/filebrowser": "^1.1.0",
     "@jupyterlab/mainmenu": "^1.1.0",
     "@jupyterlab/services": "^4.1.0",
