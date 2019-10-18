@@ -19,7 +19,7 @@ import {
   fileIconStyle,
   fileLabelStyle,
   fileStyle,
-  fileStylePad,
+  filePadStyle,
   selectedFileChangedLabelStyle,
   selectedFileStyle,
   sideBarExpandedFileLabelStyle
@@ -142,7 +142,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
   }
 
   getFileClass() {
-    const baseStyle = classes(fileStyle, !this.props.moveFile && fileStylePad);
+    const baseStyle = classes(fileStyle, !this.props.moveFile && filePadStyle);
 
     if (!this.checkSelected() && this.props.disableFile) {
       return classes(baseStyle, disabledFileStyle);

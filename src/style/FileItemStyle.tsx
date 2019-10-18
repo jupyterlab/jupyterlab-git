@@ -20,7 +20,7 @@ export const fileStyle = style({
   }
 });
 
-export const fileStylePad = style({
+export const filePadStyle = style({
   padding: '4px 12px'
 });
 

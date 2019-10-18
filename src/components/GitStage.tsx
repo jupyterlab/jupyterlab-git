@@ -109,6 +109,25 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
     });
   }
 
+  MoveAllButton = () => {
+    if (this.props.moveAllFiles) {
+      return (
+        <button
+          disabled={this.checkContents()}
+          className={`${
+            this.props.moveFileIconClass
+          } ${changeStageButtonStyle} ${changeStageButtonLeftStyle}`}
+          title={this.props.moveAllFilesTitle}
+          onClick={() =>
+            this.props.moveAllFiles(this.props.topRepoPath, this.props.refresh)
+          }
+        />
+      );
+    } else {
+      return <></>;
+    }
+  };
+
   Header = () => {
     return (
       <div className={sectionAreaStyle}>
@@ -125,15 +144,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
             onClick={() => this.props.displayFiles()}
           />
         )}
-        <button
-          disabled={this.checkContents()}
-          className={`${this.props.moveFileIconClass} ${changeStageButtonStyle}
-               ${changeStageButtonLeftStyle}`}
-          title={this.props.moveAllFilesTitle}
-          onClick={() =>
-            this.props.moveAllFiles(this.props.topRepoPath, this.props.refresh)
-          }
-        />
+        <this.MoveAllButton />
         {this.props.heading === 'Changed' && (
           <button
             disabled={this.checkContents()}
