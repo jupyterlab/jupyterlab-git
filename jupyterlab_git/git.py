@@ -280,7 +280,7 @@ class Git:
         Execute git log -1 --stat --numstat --oneline command (used to get
         insertions & deletions per file) & return the result.
         """
-        p = Popen(
+        p = subprocess.Popen(
             ["git", "log", "-1", "--stat", "--numstat", "--oneline", selected_hash],
             stdout=PIPE,
             stderr=PIPE,
@@ -305,7 +305,7 @@ class Git:
                         note[count] = words[i]
                         count += 1
                 for num in range(1, int(length / 2)):
-                    line_info = line_array[num].split()
+                    line_info = line_array[num].split(maxsplit=2)
                     words = line_info[2].split("/")
                     length = len(words)
                     result.append(
