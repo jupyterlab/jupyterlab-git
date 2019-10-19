@@ -1,6 +1,6 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { DefaultIconReact } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle/';
 import { fileIconStyle } from '../style/FileItemStyle';
@@ -139,30 +139,30 @@ export class SinglePastCommitInfo extends React.Component<
         <div className={commitStyle}>
           <div className={commitOverviewNumbers}>
             <span>
-              {defaultIconRegistry.iconReact({
-                name: 'file',
-                className: classes(iconStyle),
-                tag: 'span',
-                title: '# Files Changed'
-              })}
+              <DefaultIconReact
+                name="file"
+                className={iconStyle}
+                tag="span"
+                title="# Files Changed"
+              />
               {this.state.filesChanged}
             </span>
             <span>
-              {defaultIconRegistry.iconReact({
-                name: 'git-insertionsMade',
-                className: classes(iconStyle),
-                tag: 'span',
-                title: '# Insertions'
-              })}
+              <DefaultIconReact
+                name="git-insertionsMade"
+                className={iconStyle}
+                tag="span"
+                title="# Insertions"
+              />
               {this.state.insertionCount}
             </span>
             <span>
-              {defaultIconRegistry.iconReact({
-                name: 'git-deletionsMade',
-                className: classes(iconStyle),
-                tag: 'span',
-                title: '# Deletions'
-              })}
+              <DefaultIconReact
+                name="git-deletionsMade"
+                className={iconStyle}
+                tag="span"
+                title="# Deletions"
+              />
               {this.state.deletionCount}
             </span>
           </div>
