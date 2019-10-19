@@ -9,7 +9,7 @@
       "type": "integer",
       "title": "History count",
       "description": "Number of (most recent) commits shown in the history log",
-      "default": 100
+      "default": 25
     }
   }
 }

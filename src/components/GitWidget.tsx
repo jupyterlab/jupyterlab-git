@@ -94,7 +94,6 @@ export class GitWidget extends Widget {
 
     void registry.load(key).then(settings => {
       this._settings = settings;
-      // this._settings.changed.connect(this._loadSettings, this);
 
       const element = (
         <GitPanel
@@ -105,6 +104,8 @@ export class GitWidget extends Widget {
         />
       );
       this.component = ReactDOM.render(element, this.node);
+
+      this._settings.changed.connect(this.component.refresh, this);
       this.component.refresh();
     });
   }
