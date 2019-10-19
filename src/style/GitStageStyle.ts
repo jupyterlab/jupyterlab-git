@@ -47,13 +47,11 @@ export const sectionHeaderLabelStyle = style({
 });
 
 export const changeStageButtonStyle = style({
-  margin: '0px 2px',
   fontWeight: 600,
   backgroundColor: 'transparent',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
   backgroundSize: '14px',
-  lineHeight: 'var(--jp-private-running-shutdown-button-height)',
   transition: 'background-color 0.1s ease',
   borderRadius: '2px',
   height: '13px',

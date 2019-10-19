@@ -21,10 +21,8 @@ describe('HistorySideBar', () => {
     ],
     branches: [],
     isExpanded: true,
-    topRepoPath: null,
-    app: null,
-    refresh: null,
-    diff: null,
+    model: null,
+    refresh: () => Promise.resolve(),
     renderMime: null
   };
   test('renders commit nodes when expanded', () => {

@@ -17,7 +17,7 @@
     "build:lib": "tsc",
     "build:all": "jlpm run build:labextension",
     "clean": "jlpm run clean:lib",
-    "clean:lib": "rimraf lib",
+    "clean:lib": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "clean:labextension": "rimraf jupyterlab_git/labextension",
     "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
     "prepare": "jlpm run clean && jlpm run build",
@@ -68,6 +68,7 @@
   "devDependencies": {
     "@babel/core": "^7.5.0",
     "@babel/preset-env": "^7.5.0",
+    "@types/codemirror": "^0.0.79",
     "@types/enzyme": "3.1.15",
     "@types/jest": "^24",
     "@types/react": "~16.8.13",

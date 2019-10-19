@@ -1,3 +1,7 @@
+import { Dialog, showDialog, UseSignal } from '@jupyterlab/apputils';
+import { PathExt } from '@jupyterlab/coreutils';
+import * as React from 'react';
+import { classes } from 'typestyle';
 import {
   gitPullStyle,
   gitPushStyle,
@@ -5,59 +9,47 @@ import {
   repoRefreshStyle,
   repoStyle
 } from '../style/PathHeaderStyle';
-
-import * as React from 'react';
-
-import { classes } from 'typestyle';
-
-import { Git } from '../git';
-
-import { Dialog } from '@jupyterlab/apputils';
-
-import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
-
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
-
-export interface IPathHeaderState {
-  refresh: any;
-  gitApi: Git;
-}
+import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
+import { IGitExtension } from '../tokens';
 
 export interface IPathHeaderProps {
-  currentFileBrowserPath: string;
-  topRepoPath: string;
-  refresh: any;
-  currentBranch: string;
+  model: IGitExtension;
+  refresh: () => Promise<void>;
 }
 
-export class PathHeader extends React.Component<
-  IPathHeaderProps,
-  IPathHeaderState
-> {
+export class PathHeader extends React.Component<IPathHeaderProps> {
   constructor(props: IPathHeaderProps) {
     super(props);
-    this.state = {
-      refresh: props.refresh,
-      gitApi: new Git()
-    };
   }
 
   render() {
-    let relativePath = this.props.currentFileBrowserPath.split('/');
     return (
       <div className={repoStyle}>
-        <span className={repoPathStyle}>
-          {relativePath[relativePath.length - 1] +
-            ' / ' +
-            this.props.currentBranch}
-        </span>
+        <UseSignal
+          signal={this.props.model.repositoryChanged}
+          initialArgs={{
+            name: 'pathRepository',
+            oldValue: null,
+            newValue: this.props.model.pathRepository
+          }}
+        >
+          {(_, change) => (
+            <span className={repoPathStyle} title={change.newValue}>
+              {PathExt.basename(change.newValue || '')}
+            </span>
+          )}
+        </UseSignal>
         <button
           className={classes(gitPullStyle, 'jp-Icon-16')}
           title={'Pull latest changes'}
           onClick={() =>
-            this.showGitPushPullDialog(
-              this.props.currentFileBrowserPath,
-              Operation.Pull
+            this.showGitPushPullDialog(this.props.model, Operation.Pull).catch(
+              reason => {
+                console.error(
+                  `An error occurs when pulling the changes.\n${reason}`
+                );
+              }
             )
           }
         />
@@ -65,9 +57,12 @@ export class PathHeader extends React.Component<
           className={classes(gitPushStyle, 'jp-Icon-16')}
           title={'Push committed changes'}
           onClick={() =>
-            this.showGitPushPullDialog(
-              this.props.currentFileBrowserPath,
-              Operation.Push
+            this.showGitPushPullDialog(this.props.model, Operation.Push).catch(
+              reason => {
+                console.error(
+                  `An error occurs when pulling the changes.\n${reason}`
+                );
+              }
             )
           }
         />
@@ -85,20 +80,19 @@ export class PathHeader extends React.Component<
    * @param body the message to be shown in the body of the modal.
    */
   private async showGitPushPullDialog(
-    currentFileBrowserPath: string,
+    model: IGitExtension,
     operation: Operation
   ): Promise<void> {
-    let dialog = new Dialog({
+    let result = await showDialog({
       title: `Git ${operation}`,
-      body: new GitPullPushDialog(currentFileBrowserPath, operation),
+      body: new GitPullPushDialog(model, operation),
       buttons: [Dialog.okButton({ label: 'DISMISS' })]
     });
-
-    let result = await dialog.launch();
-    dialog.dispose();
     let retry = false;
     while (!result.button.accept) {
-      let credentialsDialog = new Dialog({
+      retry = true;
+
+      let response = await showDialog({
         title: 'Git credentials required',
         body: new GitCredentialsForm(
           'Enter credentials for remote repository',
@@ -106,30 +100,17 @@ export class PathHeader extends React.Component<
         ),
         buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
       });
-      retry = true;
-
-      let response = await credentialsDialog.launch();
-      credentialsDialog.dispose();
 
       if (response.button.accept) {
         // user accepted attempt to login
-        dialog = new Dialog({
+        result = await showDialog({
           title: `Git ${operation}`,
-          body: new GitPullPushDialog(
-            currentFileBrowserPath,
-            operation,
-            response.value
-          ),
+          body: new GitPullPushDialog(model, operation, response.value),
           buttons: [Dialog.okButton({ label: 'DISMISS' })]
         });
-        result = await dialog.launch();
-        dialog.dispose();
       } else {
         break;
       }
     }
-
-    dialog.dispose();
-    dialog.close();
   }
 }

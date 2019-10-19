@@ -1,6 +1,7 @@
-import { JupyterFrontEnd } from '@jupyterlab/application';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
 import { classes } from 'typestyle';
+import { GitExtension } from '../model';
 import {
   branchesStyle,
   branchStyle,
@@ -14,17 +15,13 @@ import {
   remoteBranchStyle,
   workingBranchStyle
 } from '../style/PastCommitNodeStyle';
-import { IGitBranchResult, ISingleCommitInfo, IDiffCallback } from '../git';
+import { Git } from '../tokens';
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 export interface IPastCommitNodeProps {
-  pastCommit: ISingleCommitInfo;
-  branches: IGitBranchResult['branches'];
-  topRepoPath: string;
-  app: JupyterFrontEnd;
-  diff: IDiffCallback;
-  refresh: () => void;
+  pastCommit: Git.ISingleCommitInfo;
+  branches: Git.IBranch[];
+  model: GitExtension;
   renderMime: IRenderMimeRegistry;
 }
 
@@ -70,7 +67,7 @@ export class PastCommitNode extends React.Component<
   }
   render() {
     return (
-      <div
+      <li
         onClick={() => {
           // tslint:disable-next-line: no-unused-expression
           !this.state.expanded && this.expand();
@@ -110,22 +107,19 @@ export class PastCommitNode extends React.Component<
         <div className={pastCommitBodyStyle}>
           {this.props.pastCommit.commit_msg}
           {this.state.expanded && (
-            <>
+            <React.Fragment>
               <SinglePastCommitInfo
                 data={this.props.pastCommit}
-                topRepoPath={this.props.topRepoPath}
-                app={this.props.app}
-                diff={this.props.diff}
-                refresh={this.props.refresh}
+                model={this.props.model}
                 renderMime={this.props.renderMime}
               />
               <div className={collapseStyle} onClick={() => this.collapse()}>
                 Collapse
               </div>
-            </>
+            </React.Fragment>
           )}
         </div>
-      </div>
+      </li>
     );
   }
 }

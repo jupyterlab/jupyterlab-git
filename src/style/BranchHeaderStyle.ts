@@ -17,10 +17,6 @@ export const unSelectedHeaderStyle = style({
   paddingTop: 'var(--jp-border-width)'
 });
 
-export const smallBranchStyle = style({
-  height: '35px'
-});
-
 export const expandedBranchStyle = style({
   height: '500px'
 });
@@ -57,38 +53,6 @@ export const branchTrackingLabelStyle = style({
   fontWeight: 'normal'
 });
 
-export const branchIconStyle = style({
-  backgroundImage: 'var(--jp-Git-icon-branch)',
-  display: 'inline-block',
-  height: '14px',
-  width: '14px',
-  margin: '6px 10px -2px 0px',
-  backgroundRepeat: 'no-repeat'
-});
-
-export const branchDropdownStyle = style({
-  backgroundImage: 'var(--jp-image-caretdownwhite)',
-  backgroundColor: 'transparent',
-  flex: '0 0 auto',
-  verticalAlign: 'middle',
-  border: 'var(--md-grey-700)',
-  borderRadius: '0',
-  outline: 'none',
-  width: '11px',
-  height: '11px',
-  marginTop: '8px',
-  marginBottom: '2px',
-  textIndent: '20px',
-  '-webkit-appearance': 'none',
-  '-moz-appearance': 'none'
-});
-
-export const headerButtonStyle = style({
-  color: 'var(--jp-content-link-color)',
-  fontSize: '10px',
-  marginLeft: '5px'
-});
-
 export const branchDropdownButtonStyle = style({
   backgroundImage: 'var(--jp-icon-arrow-down)',
   backgroundSize: '100%',
@@ -109,18 +73,6 @@ export const newBranchButtonStyle = style({
   width: '18px',
   display: 'inline-block',
   verticalAlign: 'middle'
-});
-
-export const branchTrackingIconStyle = style({
-  backgroundImage: 'var(--jp-icon-branch-tracking)',
-  backgroundSize: '70%',
-  backgroundRepeat: 'no-repeat',
-  height: '18px',
-  width: '18px',
-  display: 'inline-block',
-  verticalAlign: 'middle',
-  marginTop: '8px',
-  marginLeft: '10px'
 });
 
 export const headerButtonDisabledStyle = style({

@@ -1,60 +1,54 @@
-import { JupyterFrontEnd } from '@jupyterlab/application';
-
-import { IGitStatusFileResult } from '../git';
-
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import * as React from 'react';
+import { classes } from 'typestyle';
+import { GitExtension } from '../model';
 import {
-  sectionFileContainerStyle,
-  sectionFileContainerDisabledStyle,
-  sectionAreaStyle,
-  sectionHeaderLabelStyle,
-  changeStageButtonStyle,
   caretdownImageStyle,
   caretrightImageStyle,
   changeStageButtonLeftStyle,
-  discardFileButtonStyle
+  changeStageButtonStyle,
+  discardFileButtonStyle,
+  sectionAreaStyle,
+  sectionFileContainerDisabledStyle,
+  sectionFileContainerStyle,
+  sectionHeaderLabelStyle
 } from '../style/GitStageStyle';
-
+import { Git } from '../tokens';
 import { FileItem } from './FileItem';
-
-import { classes } from 'typestyle';
-
-import * as React from 'react';
-
-import { showDialog, Dialog } from '@jupyterlab/apputils';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 export interface IGitStageProps {
   heading: string;
-  topRepoPath: string;
-  files: any;
-  app: JupyterFrontEnd;
-  refresh: any;
+  files: Git.IGitStatusFileResult[];
+  model: GitExtension;
   showFiles: boolean;
-  displayFiles: Function;
-  moveAllFiles: Function;
-  discardAllFiles: Function;
-  discardFile: Function;
-  moveFile: Function;
+  displayFiles: () => void;
+  moveAllFiles: () => Promise<void>;
+  discardAllFiles: () => Promise<void>;
+  discardFile: (file: string) => Promise<void>;
+  moveFile: (file: string) => Promise<void>;
   moveFileIconClass: string;
   moveFileIconSelectedClass: string;
   moveAllFilesTitle: string;
   moveFileTitle: string;
-  openFile: Function;
-  extractFilename: Function;
-  contextMenu: Function;
-  parseFileExtension: Function;
-  parseSelectedFileExtension: Function;
+  contextMenu: (
+    event: any,
+    typeX: string,
+    typeY: string,
+    file: string,
+    index: number,
+    stage: string
+  ) => void;
   selectedFile: number;
-  updateSelectedFile: Function;
+  updateSelectedFile: (file: number, stage: string) => void;
   selectedStage: string;
   selectedDiscardFile: number;
-  updateSelectedDiscardFile: Function;
+  updateSelectedDiscardFile: (index: number) => void;
   disableFiles: boolean;
-  toggleDisableFiles: Function;
-  updateSelectedStage: Function;
+  toggleDisableFiles: () => void;
+  updateSelectedStage: (stage: string) => void;
   isDisabled: boolean;
-  disableOthers: Function;
-  sideBarExpanded: boolean;
+  disableOthers: () => void;
   renderMime: IRenderMimeRegistry;
 }
 
@@ -95,18 +89,17 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
    * It shows modal asking for confirmation and when confirmed make
    * server side call to git checkout to discard all unstanged changes.
    */
-  discardAllChanges() {
+  async discardAllChanges() {
     this.toggleDiscardChanges();
-    return showDialog({
+    const result = await showDialog({
       title: 'Discard all changes',
       body: `Are you sure you want to permanently discard changes to all files? This action cannot be undone.`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
-    }).then(result => {
-      if (result.button.accept) {
-        this.props.discardAllFiles(this.props.topRepoPath, this.props.refresh);
-      }
-      this.toggleDiscardChanges();
     });
+    if (result.button.accept) {
+      this.props.discardAllFiles();
+    }
+    this.toggleDiscardChanges();
   }
 
   render() {
@@ -133,12 +126,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
             } ${changeStageButtonStyle}
                ${changeStageButtonLeftStyle}`}
             title={this.props.moveAllFilesTitle}
-            onClick={() =>
-              this.props.moveAllFiles(
-                this.props.topRepoPath,
-                this.props.refresh
-              )
-            }
+            onClick={() => this.props.moveAllFiles()}
           />
           {this.props.heading === 'Changed' && (
             <button
@@ -153,17 +141,15 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
           )}
         </div>
         {this.props.showFiles && (
-          <div className={sectionFileContainerStyle}>
+          <ul className={sectionFileContainerStyle}>
             {this.props.files.map(
-              (file: IGitStatusFileResult, fileIndex: number) => {
+              (file: Git.IGitStatusFileResult, fileIndex: number) => {
                 return (
                   <FileItem
                     key={fileIndex}
-                    topRepoPath={this.props.topRepoPath}
                     stage={this.props.heading}
                     file={file}
-                    app={this.props.app}
-                    refresh={this.props.refresh}
+                    model={this.props.model}
                     moveFile={this.props.moveFile}
                     discardFile={this.props.discardFile}
                     moveFileIconClass={this.props.moveFileIconClass}
@@ -171,13 +157,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                       this.props.moveFileIconSelectedClass
                     }
                     moveFileTitle={this.props.moveFileTitle}
-                    openFile={this.props.openFile}
-                    extractFilename={this.props.extractFilename}
                     contextMenu={this.props.contextMenu}
-                    parseFileExtension={this.props.parseFileExtension}
-                    parseSelectedFileExtension={
-                      this.props.parseSelectedFileExtension
-                    }
                     selectedFile={this.props.selectedFile}
                     updateSelectedFile={this.props.updateSelectedFile}
                     fileIndex={fileIndex}
@@ -188,13 +168,12 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                     }
                     disableFile={this.props.disableFiles}
                     toggleDisableFiles={this.props.toggleDisableFiles}
-                    sideBarExpanded={this.props.sideBarExpanded}
                     renderMime={this.props.renderMime}
                   />
                 );
               }
             )}
-          </div>
+          </ul>
         )}
       </div>
     );

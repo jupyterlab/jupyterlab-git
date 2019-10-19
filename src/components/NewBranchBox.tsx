@@ -1,18 +1,16 @@
 import * as React from 'react';
-
+import { classes } from 'typestyle';
 import {
-  newBranchBoxStyle,
-  newBranchInputAreaStyle,
   buttonStyle,
+  cancelNewBranchButtonStyle,
+  newBranchBoxStyle,
   newBranchButtonStyle,
-  cancelNewBranchButtonStyle
+  newBranchInputAreaStyle
 } from '../style/NewBranchBoxStyle';
 
-import { classes } from 'typestyle';
-
 export interface ICommitBoxProps {
-  createNewBranch: Function;
-  toggleNewBranchBox: Function;
+  createNewBranch: (branchName: string) => Promise<void>;
+  toggleNewBranchBox: () => void;
 }
 
 export interface ICommitBoxState {

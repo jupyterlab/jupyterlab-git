@@ -1,38 +1,20 @@
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-
-import { JupyterFrontEnd } from '@jupyterlab/application';
-
-import { Menu } from '@phosphor/widgets';
-
-import { PathExt } from '@jupyterlab/coreutils';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { JSONObject } from '@phosphor/coreutils';
+import { Menu } from '@phosphor/widgets';
 import * as React from 'react';
-import { openDiffView } from './diff/DiffWidget';
+import { GitExtension } from '../model';
 import {
-  folderFileIconSelectedStyle,
-  folderFileIconStyle,
-  genericFileIconSelectedStyle,
-  genericFileIconStyle,
-  imageFileIconSelectedStyle,
-  imageFileIconStyle,
-  jsonFileIconSelectedStyle,
-  jsonFileIconStyle,
-  kernelFileIconSelectedStyle,
-  kernelFileIconStyle,
-  markdownFileIconSelectedStyle,
-  markdownFileIconStyle,
   moveFileDownButtonSelectedStyle,
   moveFileDownButtonStyle,
   moveFileUpButtonSelectedStyle,
-  moveFileUpButtonStyle,
-  pythonFileIconSelectedStyle,
-  pythonFileIconStyle,
-  spreadsheetFileIconSelectedStyle,
-  spreadsheetFileIconStyle,
-  yamlFileIconSelectedStyle,
-  yamlFileIconStyle
+  moveFileUpButtonStyle
 } from '../style/FileListStyle';
-import { Git, IGitShowPrefixResult } from '../git';
+import { Git } from '../tokens';
+import { openListedFile } from '../utils';
+import { GitAuthorForm } from '../widgets/AuthorBox';
+import { CommitBox } from './CommitBox';
+import { openDiffView } from './diff/DiffWidget';
 import { GitStage } from './GitStage';
 
 export namespace CommandIDs {
@@ -51,9 +33,9 @@ export interface IFileListState {
   showStaged: boolean;
   showUnstaged: boolean;
   showUntracked: boolean;
-  contextMenuStaged: any;
-  contextMenuUnstaged: any;
-  contextMenuUntracked: any;
+  contextMenuStaged: Menu;
+  contextMenuUnstaged: Menu;
+  contextMenuUntracked: Menu;
   contextMenuTypeX: string;
   contextMenuTypeY: string;
   contextMenuFile: string;
@@ -69,15 +51,10 @@ export interface IFileListState {
 }
 
 export interface IFileListProps {
-  currentFileBrowserPath: string;
-  topRepoPath: string;
-  stagedFiles: any;
-  unstagedFiles: any;
-  untrackedFiles: any;
-  app: JupyterFrontEnd;
-  refresh: any;
-  sideBarExpanded: boolean;
-  display: boolean;
+  stagedFiles: Git.IGitStatusFileResult[];
+  unstagedFiles: Git.IGitStatusFileResult[];
+  untrackedFiles: Git.IGitStatusFileResult[];
+  model: GitExtension;
   renderMime: IRenderMimeRegistry;
 }
 
@@ -85,7 +62,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   constructor(props: IFileListProps) {
     super(props);
 
-    const { commands } = this.props.app;
+    const commands = this.props.model.commands;
 
     this.state = {
       commitMessage: '',
@@ -115,11 +92,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Open',
         caption: 'Open selected file',
         execute: async () => {
-          await this.openListedFile(
+          await openListedFile(
             this.state.contextMenuTypeX,
             this.state.contextMenuTypeY,
             this.state.contextMenuFile,
-            this.props.app
+            this.props.model
           );
         }
       });
@@ -132,13 +109,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         execute: async () => {
           await openDiffView(
             this.state.contextMenuFile,
-            this.props.app,
+            this.props.model,
             {
               currentRef: { specialRef: 'WORKING' },
               previousRef: { gitRef: 'HEAD' }
             },
-            this.props.renderMime,
-            this.props.topRepoPath
+            this.props.renderMime
           );
         }
       });
@@ -151,13 +127,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         execute: async () => {
           await openDiffView(
             this.state.contextMenuFile,
-            this.props.app,
+            this.props.model,
             {
               currentRef: { specialRef: 'INDEX' },
               previousRef: { gitRef: 'HEAD' }
             },
-            this.props.renderMime,
-            this.props.topRepoPath
+            this.props.renderMime
           );
         }
       });
@@ -168,11 +143,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Stage',
         caption: 'Stage the changes of selected file',
         execute: () => {
-          this.addUnstagedFile(
-            this.state.contextMenuFile,
-            this.props.topRepoPath,
-            this.props.refresh
-          );
+          this.addUnstagedFile(this.state.contextMenuFile);
         }
       });
     }
@@ -182,11 +153,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Track',
         caption: 'Start tracking selected file',
         execute: () => {
-          this.addUntrackedFile(
-            this.state.contextMenuFile,
-            this.props.topRepoPath,
-            this.props.refresh
-          );
+          this.addUntrackedFile(this.state.contextMenuFile);
         }
       });
     }
@@ -197,11 +164,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         caption: 'Unstage the changes of selected file',
         execute: () => {
           if (this.state.contextMenuTypeX !== 'D') {
-            this.resetStagedFile(
-              this.state.contextMenuFile,
-              this.props.topRepoPath,
-              this.props.refresh
-            );
+            this.resetStagedFile(this.state.contextMenuFile);
           }
         }
       });
@@ -337,142 +300,57 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this.setState({ selectedStage: stage });
   };
 
-  /** Open a file in the git listing */
-  async openListedFile(
-    typeX: string,
-    typeY: string,
-    path: string,
-    app: JupyterFrontEnd
-  ) {
-    if (typeX === 'D' || typeY === 'D') {
-      showDialog({
-        title: 'Open File Failed',
-        body: 'This file has been deleted!',
-        buttons: [Dialog.warnButton({ label: 'OK' })]
-      }).then(result => {
-        if (result.button.accept) {
-          return;
-        }
-      });
-      return;
-    }
-    try {
-      const leftSidebarItems = app.shell.widgets('left');
-      let fileBrowser = leftSidebarItems.next();
-      while (fileBrowser.id !== 'filebrowser') {
-        fileBrowser = leftSidebarItems.next();
-      }
-      let gitApi = new Git();
-      let prefixData = await gitApi.showPrefix((fileBrowser as any).model.path);
-      let underRepoPath = (prefixData as IGitShowPrefixResult).under_repo_path;
-      let fileBrowserPath = (fileBrowser as any).model.path + '/';
-      let openFilePath = fileBrowserPath.substring(
-        0,
-        fileBrowserPath.length - underRepoPath.length
-      );
-      if (path[path.length - 1] !== '/') {
-        (fileBrowser as any)._listing._manager.openOrReveal(
-          openFilePath + path
-        );
-      } else {
-        console.log('Cannot open a folder here');
-      }
-    } catch (err) {}
-  }
-
   /** Reset all staged files */
-  resetAllStagedFiles(path: string, refresh: Function) {
-    let gitApi = new Git();
-    gitApi.reset(true, null, path).then(response => {
-      refresh();
-    });
-  }
+  resetAllStagedFiles = async () => {
+    await this.props.model.reset(true, null);
+  };
 
   /** Reset a specific staged file */
-  resetStagedFile(file: string, path: string, refresh: Function) {
-    let gitApi = new Git();
-    gitApi.reset(false, file, path).then(response => {
-      refresh();
-    });
-  }
+  resetStagedFile = async (file: string) => {
+    await this.props.model.reset(false, file);
+  };
 
   /** Add all unstaged files */
-  addAllUnstagedFiles(path: string, refresh: Function) {
-    let gitApi = new Git();
-    gitApi.add(true, null, path).then(response => {
-      refresh();
-    });
-  }
+  addAllUnstagedFiles = async () => {
+    await this.props.model.add(true, null);
+  };
 
   /** Discard changes in all unstaged files */
-  discardAllUnstagedFiles(path: string, refresh: Function) {
-    let gitApi = new Git();
-    gitApi
-      .checkout(false, false, null, true, null, path)
-      .then(response => {
-        refresh();
-      })
-      .catch(() => {
-        showDialog({
-          title: 'Discard all changes failed.',
-          buttons: [Dialog.warnButton({ label: 'DISMISS' })]
-        }).then(() => {
-          /** no-op */
-        });
-      });
-  }
+  discardAllUnstagedFiles = async () => {
+    try {
+      await this.props.model.checkout(false, false, null, true, null);
+    } catch (reason) {
+      showErrorMessage('Discard all changes failed.', reason, [
+        Dialog.warnButton({ label: 'DISMISS' })
+      ]);
+    }
+  };
 
   /** Add a specific unstaged file */
-  addUnstagedFile(file: string, path: string, refresh: Function) {
-    let gitApi = new Git();
-    gitApi.add(false, file, path).then(response => {
-      refresh();
-    });
-  }
+  addUnstagedFile = async (file: string) => {
+    await this.props.model.add(false, file);
+  };
 
   /** Discard changes in a specific unstaged file */
-  discardUnstagedFile(file: string, path: string, refresh: Function) {
-    let gitApi = new Git();
-    gitApi
-      .checkout(false, false, null, false, file, path)
-      .then(response => {
-        refresh();
-      })
-      .catch(() => {
-        showDialog({
-          title: `Discard changes for ${file} failed.`,
-          buttons: [Dialog.warnButton({ label: 'DISMISS' })]
-        }).then(() => {
-          /** no-op */
-        });
-      });
-  }
+  discardUnstagedFile = async (file: string) => {
+    try {
+      await this.props.model.checkout(false, false, null, false, file);
+    } catch (reason) {
+      showErrorMessage(`Discard changes for ${file} failed.`, reason, [
+        Dialog.warnButton({ label: 'DISMISS' })
+      ]);
+    }
+  };
 
   /** Add all untracked files */
-  addAllUntrackedFiles(path: string, refresh: Function) {
-    let gitApi = new Git();
-    gitApi.addAllUntracked(path).then(response => {
-      refresh();
-    });
-  }
+  addAllUntrackedFiles = async () => {
+    await this.props.model.addAllUntracked();
+  };
 
   /** Add a specific untracked file */
-  addUntrackedFile(file: string, path: string, refresh: Function) {
-    let gitApi = new Git();
-    gitApi.add(false, file, path).then(response => {
-      refresh();
-    });
-  }
-
-  /** Get the filename from a path */
-  extractFilename(path: string): string {
-    if (path[path.length - 1] === '/') {
-      return path;
-    } else {
-      let temp = path.split('/');
-      return temp[temp.length - 1];
-    }
-  }
+  addUntrackedFile = async (file: string) => {
+    await this.props.model.add(false, file);
+  };
 
   disableStagesForDiscardAll = () => {
     this.setState({
@@ -495,200 +373,158 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   };
 
+  /** Commit all staged files */
+  commitAllStagedFiles = async (message: string): Promise<void> => {
+    try {
+      if (
+        message &&
+        message !== '' &&
+        (await this._hasIdentity(this.props.model.pathRepository))
+      ) {
+        await this.props.model.commit(message);
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorMessage('Fail to commit', error);
+    }
+  };
+
   render() {
     return (
       <div onContextMenu={event => event.preventDefault()}>
-        {this.props.display && (
-          <div>
-            <GitStage
-              heading={'Staged'}
-              topRepoPath={this.props.topRepoPath}
-              files={this.props.stagedFiles}
-              app={this.props.app}
-              refresh={this.props.refresh}
-              showFiles={this.state.showStaged}
-              displayFiles={this.displayStaged}
-              moveAllFiles={this.resetAllStagedFiles}
-              discardAllFiles={null}
-              discardFile={null}
-              moveFile={this.resetStagedFile}
-              moveFileIconClass={moveFileDownButtonStyle}
-              moveFileIconSelectedClass={moveFileDownButtonSelectedStyle}
-              moveAllFilesTitle={'Unstage all changes'}
-              moveFileTitle={'Unstage this change'}
-              openFile={this.openListedFile}
-              extractFilename={this.extractFilename}
-              contextMenu={this.contextMenuStaged}
-              parseFileExtension={parseFileExtension}
-              parseSelectedFileExtension={parseSelectedFileExtension}
-              selectedFile={this.state.selectedFile}
-              updateSelectedFile={this.updateSelectedFile}
-              selectedStage={this.state.selectedStage}
-              updateSelectedStage={this.updateSelectedStage}
-              selectedDiscardFile={this.state.selectedDiscardFile}
-              updateSelectedDiscardFile={this.updateSelectedDiscardFile}
-              disableFiles={this.state.disableFiles}
-              toggleDisableFiles={this.toggleDisableFiles}
-              disableOthers={null}
-              isDisabled={this.state.disableStaged}
-              sideBarExpanded={this.props.sideBarExpanded}
-              renderMime={this.props.renderMime}
-            />
-            <GitStage
-              heading={'Changed'}
-              topRepoPath={this.props.topRepoPath}
-              files={this.props.unstagedFiles}
-              app={this.props.app}
-              refresh={this.props.refresh}
-              showFiles={this.state.showUnstaged}
-              displayFiles={this.displayUnstaged}
-              moveAllFiles={this.addAllUnstagedFiles}
-              discardAllFiles={this.discardAllUnstagedFiles}
-              discardFile={this.discardUnstagedFile}
-              moveFile={this.addUnstagedFile}
-              moveFileIconClass={moveFileUpButtonStyle}
-              moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
-              moveAllFilesTitle={'Stage all changes'}
-              moveFileTitle={'Stage this change'}
-              openFile={this.openListedFile}
-              extractFilename={this.extractFilename}
-              contextMenu={this.contextMenuUnstaged}
-              parseFileExtension={parseFileExtension}
-              parseSelectedFileExtension={parseSelectedFileExtension}
-              selectedFile={this.state.selectedFile}
-              updateSelectedFile={this.updateSelectedFile}
-              selectedStage={this.state.selectedStage}
-              updateSelectedStage={this.updateSelectedStage}
-              selectedDiscardFile={this.state.selectedDiscardFile}
-              updateSelectedDiscardFile={this.updateSelectedDiscardFile}
-              disableFiles={this.state.disableFiles}
-              toggleDisableFiles={this.toggleDisableFiles}
-              disableOthers={this.disableStagesForDiscardAll}
-              isDisabled={this.state.disableUnstaged}
-              sideBarExpanded={this.props.sideBarExpanded}
-              renderMime={this.props.renderMime}
-            />
-            <GitStage
-              heading={'Untracked'}
-              topRepoPath={this.props.topRepoPath}
-              files={this.props.untrackedFiles}
-              app={this.props.app}
-              refresh={this.props.refresh}
-              showFiles={this.state.showUntracked}
-              displayFiles={this.displayUntracked}
-              moveAllFiles={this.addAllUntrackedFiles}
-              discardAllFiles={null}
-              discardFile={null}
-              moveFile={this.addUntrackedFile}
-              moveFileIconClass={moveFileUpButtonStyle}
-              moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
-              moveAllFilesTitle={'Track all untracked files'}
-              moveFileTitle={'Track this file'}
-              openFile={this.openListedFile}
-              extractFilename={this.extractFilename}
-              contextMenu={this.contextMenuUntracked}
-              parseFileExtension={parseFileExtension}
-              parseSelectedFileExtension={parseSelectedFileExtension}
-              selectedFile={this.state.selectedFile}
-              updateSelectedFile={this.updateSelectedFile}
-              selectedStage={this.state.selectedStage}
-              updateSelectedStage={this.updateSelectedStage}
-              selectedDiscardFile={this.state.selectedDiscardFile}
-              updateSelectedDiscardFile={this.updateSelectedDiscardFile}
-              disableFiles={this.state.disableFiles}
-              toggleDisableFiles={this.toggleDisableFiles}
-              disableOthers={null}
-              isDisabled={this.state.disableUntracked}
-              sideBarExpanded={this.props.sideBarExpanded}
-              renderMime={this.props.renderMime}
-            />
-          </div>
-        )}
+        <CommitBox
+          hasStagedFiles={this.props.stagedFiles.length > 0}
+          commitAllStagedFiles={this.commitAllStagedFiles}
+        />
+        <GitStage
+          heading={'Staged'}
+          files={this.props.stagedFiles}
+          model={this.props.model}
+          showFiles={this.state.showStaged}
+          displayFiles={this.displayStaged}
+          moveAllFiles={this.resetAllStagedFiles}
+          discardAllFiles={null}
+          discardFile={null}
+          moveFile={this.resetStagedFile}
+          moveFileIconClass={moveFileDownButtonStyle}
+          moveFileIconSelectedClass={moveFileDownButtonSelectedStyle}
+          moveAllFilesTitle={'Unstage all changes'}
+          moveFileTitle={'Unstage this change'}
+          contextMenu={this.contextMenuStaged}
+          selectedFile={this.state.selectedFile}
+          updateSelectedFile={this.updateSelectedFile}
+          selectedStage={this.state.selectedStage}
+          updateSelectedStage={this.updateSelectedStage}
+          selectedDiscardFile={this.state.selectedDiscardFile}
+          updateSelectedDiscardFile={this.updateSelectedDiscardFile}
+          disableFiles={this.state.disableFiles}
+          toggleDisableFiles={this.toggleDisableFiles}
+          disableOthers={null}
+          isDisabled={this.state.disableStaged}
+          renderMime={this.props.renderMime}
+        />
+        <GitStage
+          heading={'Changed'}
+          files={this.props.unstagedFiles}
+          model={this.props.model}
+          showFiles={this.state.showUnstaged}
+          displayFiles={this.displayUnstaged}
+          moveAllFiles={this.addAllUnstagedFiles}
+          discardAllFiles={this.discardAllUnstagedFiles}
+          discardFile={this.discardUnstagedFile}
+          moveFile={this.addUnstagedFile}
+          moveFileIconClass={moveFileUpButtonStyle}
+          moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
+          moveAllFilesTitle={'Stage all changes'}
+          moveFileTitle={'Stage this change'}
+          contextMenu={this.contextMenuUnstaged}
+          selectedFile={this.state.selectedFile}
+          updateSelectedFile={this.updateSelectedFile}
+          selectedStage={this.state.selectedStage}
+          updateSelectedStage={this.updateSelectedStage}
+          selectedDiscardFile={this.state.selectedDiscardFile}
+          updateSelectedDiscardFile={this.updateSelectedDiscardFile}
+          disableFiles={this.state.disableFiles}
+          toggleDisableFiles={this.toggleDisableFiles}
+          disableOthers={this.disableStagesForDiscardAll}
+          isDisabled={this.state.disableUnstaged}
+          renderMime={this.props.renderMime}
+        />
+        <GitStage
+          heading={'Untracked'}
+          files={this.props.untrackedFiles}
+          model={this.props.model}
+          showFiles={this.state.showUntracked}
+          displayFiles={this.displayUntracked}
+          moveAllFiles={this.addAllUntrackedFiles}
+          discardAllFiles={null}
+          discardFile={null}
+          moveFile={this.addUntrackedFile}
+          moveFileIconClass={moveFileUpButtonStyle}
+          moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
+          moveAllFilesTitle={'Track all untracked files'}
+          moveFileTitle={'Track this file'}
+          contextMenu={this.contextMenuUntracked}
+          selectedFile={this.state.selectedFile}
+          updateSelectedFile={this.updateSelectedFile}
+          selectedStage={this.state.selectedStage}
+          updateSelectedStage={this.updateSelectedStage}
+          selectedDiscardFile={this.state.selectedDiscardFile}
+          updateSelectedDiscardFile={this.updateSelectedDiscardFile}
+          disableFiles={this.state.disableFiles}
+          toggleDisableFiles={this.toggleDisableFiles}
+          disableOthers={null}
+          isDisabled={this.state.disableUntracked}
+          renderMime={this.props.renderMime}
+        />
       </div>
     );
   }
-}
 
-/** Get the extension of a given file */
-export function parseFileExtension(path: string): string {
-  if (path[path.length - 1] === '/') {
-    return folderFileIconStyle;
-  }
-  let fileExtension = PathExt.extname(path).toLocaleLowerCase();
-  switch (fileExtension) {
-    case '.md':
-      return markdownFileIconStyle;
-    case '.py':
-      return pythonFileIconStyle;
-    case '.json':
-      return jsonFileIconStyle;
-    case '.csv':
-      return spreadsheetFileIconStyle;
-    case '.xls':
-      return spreadsheetFileIconStyle;
-    case '.r':
-      return kernelFileIconStyle;
-    case '.yml':
-      return yamlFileIconStyle;
-    case '.yaml':
-      return yamlFileIconStyle;
-    case '.svg':
-      return imageFileIconStyle;
-    case '.tiff':
-      return imageFileIconStyle;
-    case '.jpeg':
-      return imageFileIconStyle;
-    case '.jpg':
-      return imageFileIconStyle;
-    case '.gif':
-      return imageFileIconStyle;
-    case '.png':
-      return imageFileIconStyle;
-    case '.raw':
-      return imageFileIconStyle;
-    default:
-      return genericFileIconStyle;
-  }
-}
+  /**
+   * Does the user have an known git identity.
+   *
+   * @param path Top repository path
+   * @returns Success status
+   */
+  private async _hasIdentity(path: string): Promise<boolean> {
+    // If the repository path changes, check the identity
+    if (path !== this._previousTopRepoPath) {
+      try {
+        const apiResponse = await this.props.model.config();
+        if (apiResponse.ok) {
+          const options: JSONObject = (await apiResponse.json()).options;
+          const keys = Object.keys(options);
+          // If the user name or email is unknown, ask the user to set it.
+          if (keys.indexOf('user.name') < 0 || keys.indexOf('user.email') < 0) {
+            let result = await showDialog({
+              title: 'Who is committing?',
+              body: new GitAuthorForm()
+            });
+            if (!result.button.accept) {
+              console.log('User refuses to set his identity.');
+              return false;
+            }
+            const identity = result.value;
+            const response = await this.props.model.config({
+              'user.name': identity.name,
+              'user.email': identity.email
+            });
 
-/** Get the extension of a given selected file */
-export function parseSelectedFileExtension(path: string): string {
-  if (path[path.length - 1] === '/') {
-    return folderFileIconSelectedStyle;
+            if (!response.ok) {
+              console.log(await response.text());
+              return false;
+            }
+          }
+          this._previousTopRepoPath = path;
+        }
+      } catch (error) {
+        throw new Error('Fail to set your identity. ' + error.message);
+      }
+    }
+
+    return Promise.resolve(true);
   }
-  let fileExtension = PathExt.extname(path).toLocaleLowerCase();
-  switch (fileExtension) {
-    case '.md':
-      return markdownFileIconSelectedStyle;
-    case '.py':
-      return pythonFileIconSelectedStyle;
-    case '.json':
-      return jsonFileIconSelectedStyle;
-    case '.csv':
-      return spreadsheetFileIconSelectedStyle;
-    case '.xls':
-      return spreadsheetFileIconSelectedStyle;
-    case '.r':
-      return kernelFileIconSelectedStyle;
-    case '.yml':
-      return yamlFileIconSelectedStyle;
-    case '.yaml':
-      return yamlFileIconSelectedStyle;
-    case '.svg':
-      return imageFileIconSelectedStyle;
-    case '.tiff':
-      return imageFileIconSelectedStyle;
-    case '.jpeg':
-      return imageFileIconSelectedStyle;
-    case '.jpg':
-      return imageFileIconSelectedStyle;
-    case '.gif':
-      return imageFileIconSelectedStyle;
-    case '.png':
-      return imageFileIconSelectedStyle;
-    case '.raw':
-      return imageFileIconSelectedStyle;
-    default:
-      return genericFileIconSelectedStyle;
-  }
+
+  private _previousTopRepoPath: string = null;
 }

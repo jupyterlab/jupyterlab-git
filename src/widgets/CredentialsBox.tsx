@@ -1,12 +1,12 @@
 import { Dialog } from '@jupyterlab/apputils';
 import { Widget } from '@phosphor/widgets';
-import { IGitAuth } from '../git';
+import { Git } from '../tokens';
 
 /**
  * The UI for the credentials form
  */
 export class GitCredentialsForm extends Widget
-  implements Dialog.IBodyWidget<IGitAuth> {
+  implements Dialog.IBodyWidget<Git.IGitAuth> {
   constructor(
     textContent: string = 'Enter credentials for remote repository',
     warningContent: string = ''
@@ -43,7 +43,7 @@ export class GitCredentialsForm extends Widget
   /**
    * Returns the input value.
    */
-  getValue(): IGitAuth {
+  getValue(): Git.IGitAuth {
     return {
       username: this._user.value,
       password: this._password.value
