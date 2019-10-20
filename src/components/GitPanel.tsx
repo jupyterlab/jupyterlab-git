@@ -85,12 +85,6 @@ export class GitPanel extends React.Component<
       untrackedFiles: [],
       sideBarExpanded: false
     };
-
-    this.props.settings.changed.connect(this.refresh, this);
-  }
-
-  componentDidMount(): void {
-    this.refresh();
   }
 
   setShowList = (state: boolean) => {
