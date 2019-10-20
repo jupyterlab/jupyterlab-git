@@ -270,10 +270,14 @@ export class Git {
   /** Make request for all git info of repository 'path'
    * (This API is also implicitly used to check if the current repo is a Git repo)
    */
-  async allHistory(path: string): Promise<IGitAllHistory> {
+  async allHistory(
+    path: string,
+    historyCount: number
+  ): Promise<IGitAllHistory> {
     try {
       let response = await httpGitRequest('/git/all_history', 'POST', {
-        current_path: path
+        current_path: path,
+        history_count: historyCount
       });
       if (response.status !== 200) {
         const data = await response.text();

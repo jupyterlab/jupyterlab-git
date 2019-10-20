@@ -1,0 +1,15 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-GitIcon",
+  "jupyter.lab.setting-icon-label": "Git",
+  "title": "Git",
+  "description": "jupyterlab-git settings.",
+  "type": "object",
+  "properties": {
+    "historyCount": {
+      "type": "integer",
+      "title": "History count",
+      "description": "Number of (most recent) commits shown in the history log",
+      "default": 25
+    }
+  }
+}

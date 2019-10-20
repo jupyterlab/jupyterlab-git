@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/git",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "A JupyterLab extension for version control using git",
   "main": "lib/index.js",
   "style": "style/index.css",
@@ -28,14 +28,13 @@
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "style/*.css",
-    "style/images/*.svg"
+    "schema/**/*.{json,}",
+    "style/**/*.{css,svg}"
   ],
   "sideEffects": [
     "style/*.css"
   ],
   "jupyterlab": {
-    "extension": true,
     "discovery": {
       "server": {
         "managers": [
@@ -46,7 +45,9 @@
           "name": "jupyterlab-git"
         }
       }
-    }
+    },
+    "extension": true,
+    "schemaDir": "schema"
   },
   "dependencies": {
     "@jupyterlab/application": "^1.1.0",

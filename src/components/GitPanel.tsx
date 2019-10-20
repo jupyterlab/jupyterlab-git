@@ -28,6 +28,7 @@ import {
   findRepoButtonStyle
 } from '../style/GitPanelStyle';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -56,6 +57,7 @@ export interface IGitSessionNodeProps {
   app: JupyterFrontEnd;
   diff: IDiffCallback;
   renderMime: IRenderMimeRegistry;
+  settings: ISettingRegistry.ISettings;
 }
 
 /** A React component for the git extension's main display */
@@ -103,7 +105,8 @@ export class GitPanel extends React.Component<
       if (fileBrowser) {
         // Make API call to get all git info for repo
         let apiResult = await gitApi.allHistory(
-          (fileBrowser as any).model.path
+          (fileBrowser as any).model.path,
+          this.props.settings.composite['historyCount'] as number
         );
 
         if (apiResult.code === 0) {
