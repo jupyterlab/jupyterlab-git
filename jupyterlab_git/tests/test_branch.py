@@ -371,317 +371,6 @@ def test_get_tag_failure(mock_subproc_popen):
 
 
 @patch('subprocess.Popen')
-def test_branch_success(mock_subproc_popen):
-    # Given
-    process_output = [
-        'abcdefghijklmnopqrstuvwxyz01234567890123 refs/heads/feature-foo',
-        'abcdefghijklmnopqrstuvwxyz01234567890123 refs/heads/master',
-        '01234567899999abcdefghijklmnopqrstuvwxyz refs/heads/feature-bar',
-        'abcdefghijklmnopqrstuvwxyz01234567890123 refs/remotes/origin/feature-foo',
-        'abcdefghijklmnopqrstuvwxyz01234567890123 refs/remotes/origin/HEAD',
-        'abcdefghijklmnopqrstuvwxyz01234567890123 refs/stash',
-        '01234567890123abcdefghijklmnopqrstuvwxyz refs/tags/v0.1.0',
-        '01234567890123abcdefghijklmnopqrstuvwxyz refs/tags/blah@v0.2.0'
-    ]
-    process_mock = Mock(returncode=0)
-    process_mock.communicate.side_effect = [
-        # Response for get all refs
-        ('\n'.join(process_output).encode('utf-8'), ''.encode('utf-8')),
-        # Response for get current branch
-        ('feature-foo'.encode('utf-8'), ''.encode('utf-8')),
-        # Responses for get upstream branch and tag for each local branch
-        ('origin/master'.encode('utf-8'), ''.encode('utf-8')),
-        ('v0.3.0'.encode('utf-8'), ''.encode('utf-8')),
-        ('origin/master'.encode('utf-8'), ''.encode('utf-8')),
-        ('v0.3.0'.encode('utf-8'), ''.encode('utf-8')),
-        ('origin/master'.encode('utf-8'), ''.encode('utf-8')),
-        ('v0.3.1'.encode('utf-8'), ''.encode('utf-8')),
-        # Responses for get tag for remote branch
-        ('v0.4.2'.encode('utf-8'), ''.encode('utf-8')),
-        ('v0.4.1'.encode('utf-8'), ''.encode('utf-8')),
-    ]
-    mock_subproc_popen.return_value = process_mock
-
-    expected_response = {
-        'code': 0,
-        'branches': [
-            {
-                'is_current_branch': True,
-                'is_remote_branch': False,
-                'name': 'feature-foo',
-                'upstream': 'origin/master',
-                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
-                'tag': 'v0.3.0',
-            },
-            {
-                'is_current_branch': False,
-                'is_remote_branch': False,
-                'name': 'master',
-                'upstream': 'origin/master',
-                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
-                'tag': 'v0.3.0',
-            },
-            {
-                'is_current_branch': False,
-                'is_remote_branch': False,
-                'name': 'feature-bar',
-                'upstream': 'origin/master',
-                'top_commit': '01234567899999abcdefghijklmnopqrstuvwxyz',
-                'tag': 'v0.3.1'},
-            {
-                'is_current_branch': False,
-                'is_remote_branch': True,
-                'name': 'origin/feature-foo',
-                'upstream': None,
-                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
-                'tag': 'v0.4.2',
-            },
-            {
-                'is_current_branch': False,
-                'is_remote_branch': True,
-                'name': 'origin/HEAD',
-                'upstream': None,
-                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
-                'tag': 'v0.4.1',
-            }
-        ]
-    }
-
-    # When
-    actual_response = Git(root_dir='/bin').branch(
-        current_path='test_curr_path')
-
-    # Then
-    mock_subproc_popen.assert_has_calls([
-        call(
-            ['git', 'show-ref'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        # Call to get current branch
-        call(
-            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        # Calls to get upstream branch and tag for each local branch
-        call(
-            ['git', 'rev-parse', '--abbrev-ref', 'feature-foo@{upstream}'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        call(
-            ['git', 'describe', '--tags', 'abcdefghijklmnopqrstuvwxyz01234567890123'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        call(
-            ['git', 'rev-parse', '--abbrev-ref', 'master@{upstream}'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        call(
-            ['git', 'describe', '--tags', 'abcdefghijklmnopqrstuvwxyz01234567890123'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        call(
-            ['git', 'rev-parse', '--abbrev-ref', 'feature-bar@{upstream}'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        call(
-            ['git', 'describe', '--tags', '01234567899999abcdefghijklmnopqrstuvwxyz'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        # Calls to get tag for remote branch
-        call(
-            ['git', 'describe', '--tags', 'abcdefghijklmnopqrstuvwxyz01234567890123'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        call(
-            ['git', 'describe', '--tags', 'abcdefghijklmnopqrstuvwxyz01234567890123'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-    ], any_order=False)
-
-    assert expected_response == actual_response
-
-
-@patch('subprocess.Popen')
-def test_branch_failure(mock_subproc_popen):
-    # Given
-    process_mock = Mock()
-    attrs = {
-        'communicate.return_value': (
-            '', 'fatal: Not a git repository (or any of the parent directories): .git'.encode('utf-8')),
-        'returncode': 128
-    }
-    process_mock.configure_mock(**attrs)
-    mock_subproc_popen.return_value = process_mock
-    expected_response = {
-        'code': 128,
-        'command': 'git show-ref',
-        'message': 'fatal: Not a git repository (or any of the parent directories): .git',
-    }
-
-    # When
-    actual_response = Git(root_dir='/bin').branch(current_path='test_curr_path')
-
-    # Then
-    mock_subproc_popen.assert_has_calls([
-        call(
-            ['git', 'show-ref'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate()
-    ])
-    assert expected_response == actual_response
-
-
-@patch('subprocess.Popen')
-def test_branch_success_detached_head(mock_subproc_popen):
-    # Given
-    process_output = [
-        'abcdefghijklmnopqrstuvwxyz01234567890123 refs/heads/master',
-        'abcdefghijklmnopqrstuvwxyz01234567890123 refs/remotes/origin/feature-foo',
-        'abcdefghijklmnopqrstuvwxyz01234567890123 refs/stash',
-        '01234567890123abcdefghijklmnopqrstuvwxyz refs/tags/v0.1.0',
-        '01234567890123abcdefghijklmnopqrstuvwxyz refs/tags/blah@v0.2.0'
-    ]
-    detached_head_output = [
-        '* (HEAD detached at origin/feature-foo)',
-        '  master',
-        '  remotes/origin/feature-foo'
-    ]
-    process_mock = Mock(returncode=0)
-    process_mock.communicate.side_effect = [
-        # Response for get all refs
-        ('\n'.join(process_output).encode('utf-8'), ''.encode('utf-8')),
-        # Response for get current branch
-        ('HEAD'.encode('utf-8'), ''.encode('utf-8')),
-        # Responses for get upstream branch and tag for each local branch
-        ('origin/master'.encode('utf-8'), ''.encode('utf-8')),
-        ('v0.3.0'.encode('utf-8'), ''.encode('utf-8')),
-        # Responses for get tag for remote branch
-        ('v0.4.2'.encode('utf-8'), ''.encode('utf-8')),
-        # Responses for detached head name
-        ('\n'.join(detached_head_output).encode('utf-8'), ''.encode('utf-8')),
-    ]
-    mock_subproc_popen.return_value = process_mock
-
-    expected_response = {
-        'code': 0,
-        'branches': [
-            {
-                'is_current_branch': False,
-                'is_remote_branch': False,
-                'name': 'master',
-                'upstream': 'origin/master',
-                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
-                'tag': 'v0.3.0',
-            },
-            {
-                'is_current_branch': False,
-                'is_remote_branch': True,
-                'name': 'origin/feature-foo',
-                'upstream': None,
-                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
-                'tag': 'v0.4.2',
-            },
-            {
-                'is_current_branch': True,
-                'is_remote_branch': False,
-                'name': '(HEAD detached at origin/feature-foo)',
-                'upstream': None,
-                'top_commit': None,
-                'tag': None,
-            }
-        ]
-    }
-
-    # When
-    actual_response = Git(root_dir='/bin').branch(
-        current_path='test_curr_path')
-
-    # Then
-    mock_subproc_popen.assert_has_calls([
-        call(
-            ['git', 'show-ref'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        # Call to get current branch
-        call(
-            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        # Calls to get upstream branch and tag for each local branch
-        call(
-            ['git', 'rev-parse', '--abbrev-ref', 'master@{upstream}'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        call(
-            ['git', 'describe', '--tags', 'abcdefghijklmnopqrstuvwxyz01234567890123'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        # Calls to get tag for remote branch
-        call(
-            ['git', 'describe', '--tags', 'abcdefghijklmnopqrstuvwxyz01234567890123'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-        call(
-            ['git', 'branch', '-a'],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd='/bin/test_curr_path'
-        ),
-        call().communicate(),
-    ], any_order=False)
-
-    assert expected_response == actual_response
-
-
-@patch('subprocess.Popen')
 def test_no_tags(mock_subproc_popen):
     # Given
     process_mock = Mock()
@@ -706,3 +395,237 @@ def test_no_tags(mock_subproc_popen):
         call().communicate()
     ])
     assert actual_response is None
+
+
+@patch('subprocess.Popen')
+def test_branch_success(mock_subproc_popen):
+    # Given
+    process_output_heads = [
+        'feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/feature-foo\t*',
+        'master\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/master\t ',
+        'feature-bar\t01234567899999abcdefghijklmnopqrstuvwxyz\t\t ',
+    ]
+    process_output_remotes = [
+        'origin/feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123',
+        'origin/master\tabcdefghijklmnopqrstuvwxyz01234567890123',
+    ]
+    process_mock = Mock(returncode=0)
+    process_mock.communicate.side_effect = [
+        # Response for get all refs/heads
+        ('\n'.join(process_output_heads).encode('utf-8'), ''.encode('utf-8')),
+
+        # Response for get all refs/remotes
+        ('\n'.join(process_output_remotes).encode('utf-8'), ''.encode('utf-8')),
+    ]
+    mock_subproc_popen.return_value = process_mock
+
+    expected_response = {
+        'code': 0,
+        'branches': [
+            {
+                'is_current_branch': True,
+                'is_remote_branch': False,
+                'name': 'feature-foo',
+                'upstream': 'origin/feature-foo',
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
+                'tag': None,
+            },
+            {
+                'is_current_branch': False,
+                'is_remote_branch': False,
+                'name': 'master',
+                'upstream': 'origin/master',
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
+                'tag': None,
+            },
+            {
+                'is_current_branch': False,
+                'is_remote_branch': False,
+                'name': 'feature-bar',
+                'upstream': None,
+                'top_commit': '01234567899999abcdefghijklmnopqrstuvwxyz',
+                'tag': None},
+            {
+                'is_current_branch': False,
+                'is_remote_branch': True,
+                'name': 'origin/feature-foo',
+                'upstream': None,
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
+                'tag': None,
+            },
+            {
+                'is_current_branch': False,
+                'is_remote_branch': True,
+                'name': 'origin/master',
+                'upstream': None,
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
+                'tag': None,
+            }
+        ]
+    }
+
+    # When
+    actual_response = Git(root_dir='/bin').branch(
+        current_path='test_curr_path')
+
+    # Then
+    mock_subproc_popen.assert_has_calls([
+        # call to get refs/heads
+        call(
+            ["git", "for-each-ref", "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)", "refs/heads/"],
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd='/bin/test_curr_path'
+        ),
+        call().communicate(),
+
+        # call to get refs/remotes
+        call(
+            ["git", "for-each-ref", "--format=%(refname:short)%09%(objectname)", "refs/remotes/"],
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd='/bin/test_curr_path'
+        ),
+        call().communicate()
+    ], any_order=False)
+
+    assert expected_response == actual_response
+
+
+@patch('subprocess.Popen')
+def test_branch_failure(mock_subproc_popen):
+    # Given
+    expected_cmd = ["git", "for-each-ref", "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)", "refs/heads/"]
+    process_mock = Mock()
+    attrs = {
+        'communicate.return_value': (
+            '', 'fatal: Not a git repository (or any of the parent directories): .git'.encode('utf-8')),
+        'returncode': 128
+    }
+    process_mock.configure_mock(**attrs)
+    mock_subproc_popen.return_value = process_mock
+    expected_response = {
+        'code': 128,
+        'command': ' '.join(expected_cmd),
+        'message': 'fatal: Not a git repository (or any of the parent directories): .git',
+    }
+
+    # When
+    actual_response = Git(root_dir='/bin').branch(current_path='test_curr_path')
+
+    # Then
+    mock_subproc_popen.assert_has_calls([
+        call(
+            expected_cmd,
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd='/bin/test_curr_path'
+        ),
+        call().communicate()
+    ])
+
+    assert expected_response == actual_response
+
+
+@patch('subprocess.Popen')
+def test_branch_success_detached_head(mock_subproc_popen):
+    # Given
+    process_output_heads = [
+        'master\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/master\t '
+    ]
+    process_output_remotes = [
+        'origin/feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123'
+    ]
+    detached_head_output = [
+        '* (HEAD detached at origin/feature-foo)',
+        '  master',
+        '  remotes/origin/feature-foo'
+    ]
+    process_mock = Mock(returncode=0)
+    process_mock.communicate.side_effect = [
+        # Response for get all refs/heads
+        ('\n'.join(process_output_heads).encode('utf-8'), ''.encode('utf-8')),
+
+        # Response for get current branch
+        ('HEAD'.encode('utf-8'), ''.encode('utf-8')),
+        # Responses for detached head name
+        ('\n'.join(detached_head_output).encode('utf-8'), ''.encode('utf-8')),
+
+        # Response for get all refs/remotes
+        ('\n'.join(process_output_remotes).encode('utf-8'), ''.encode('utf-8')),
+    ]
+    mock_subproc_popen.return_value = process_mock
+
+    expected_response = {
+        'code': 0,
+        'branches': [
+            {
+                'is_current_branch': False,
+                'is_remote_branch': False,
+                'name': 'master',
+                'upstream': 'origin/master',
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
+                'tag': None,
+            },
+            {
+                'is_current_branch': True,
+                'is_remote_branch': False,
+                'name': '(HEAD detached at origin/feature-foo)',
+                'upstream': None,
+                'top_commit': None,
+                'tag': None,
+            },
+            {
+                'is_current_branch': False,
+                'is_remote_branch': True,
+                'name': 'origin/feature-foo',
+                'upstream': None,
+                'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
+                'tag': None,
+            }
+        ]
+    }
+
+    # When
+    actual_response = Git(root_dir='/bin').branch(
+        current_path='test_curr_path')
+
+    # Then
+    mock_subproc_popen.assert_has_calls([
+        # call to get refs/heads
+        call(
+            ["git", "for-each-ref", "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)", "refs/heads/"],
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd='/bin/test_curr_path'
+        ),
+        call().communicate(),
+
+        # call to get current branch
+        call(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd='/bin/test_curr_path'
+        ),
+        call().communicate(),
+        # call to get detached head name
+        call(
+            ['git', 'branch', '-a'],
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd='/bin/test_curr_path'
+        ),
+        call().communicate(),
+
+        # call to get refs/remotes
+        call(
+            ["git", "for-each-ref", "--format=%(refname:short)%09%(objectname)", "refs/remotes/"],
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd='/bin/test_curr_path'
+        ),
+        call().communicate()
+    ], any_order=False)
+
+    assert expected_response == actual_response
