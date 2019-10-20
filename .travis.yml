@@ -5,13 +5,13 @@ cache:
   pip: true
   directories:
     - /home/travis/.yarn-cache/
+install: pip install pytest "jupyterlab~=1.0"
 script:
-  - pip install 'jupyterlab~=1.0'
-  - python setup.py sdist
+  - python setup.py bdist_wheel
   - pip install --find-links=dist jupyterlab_git[test]
+  - jupyter lab build
   - pytest jupyterlab_git
   - jlpm run test
-  - jupyter lab build
   - python -m jupyterlab.browser_check
   - jlpm run lint
   - python tests/test-browser/run_browser_test.py
