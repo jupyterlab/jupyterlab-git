@@ -14,6 +14,7 @@ graft tests
 prune tests/build
 
 # Javascript files
+graft schema
 graft src
 graft style
 prune **/node_modules
