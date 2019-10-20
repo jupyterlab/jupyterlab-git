@@ -444,7 +444,8 @@ def test_branch_success(mock_subproc_popen):
                 'name': 'feature-bar',
                 'upstream': None,
                 'top_commit': '01234567899999abcdefghijklmnopqrstuvwxyz',
-                'tag': None},
+                'tag': None
+            },
             {
                 'is_current_branch': False,
                 'is_remote_branch': True,
