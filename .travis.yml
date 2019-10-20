@@ -10,7 +10,7 @@ script:
   - python setup.py bdist_wheel
   - pip install --find-links=dist jupyterlab_git[test]
   - jupyter lab build
-  - pytest jupyterlab_git
+  - pytest jupyterlab_git -r ap
   - jlpm run test
   - python -m jupyterlab.browser_check
   - jlpm run lint
