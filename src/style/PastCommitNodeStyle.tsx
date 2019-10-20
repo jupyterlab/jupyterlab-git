@@ -44,7 +44,7 @@ export const workingBranchStyle = style({
 });
 
 export const pastCommitExpandedStyle = style({
-  backgroundColor: '#f9f9f9'
+  backgroundColor: 'var(--jp-layout-color1)'
 });
 
 export const pastCommitHeaderItemStyle = style({});

@@ -3,7 +3,7 @@ import { shallow } from 'enzyme';
 import { SinglePastCommitInfo } from '../../src/components/SinglePastCommitInfo';
 import { PastCommitNode } from '../../src/components/PastCommitNode';
 import { IGitBranchResult } from '../../src/git';
-import { collapseStyle } from '../../src/componentsStyle/PastCommitNodeStyle';
+import { collapseStyle } from '../../src/style/PastCommitNodeStyle';
 import 'jest';
 
 describe('PastCommitNode', () => {

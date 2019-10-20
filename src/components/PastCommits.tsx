@@ -2,7 +2,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { FileList } from './FileList';
 
-import { pastCommitsContainerStyle } from '../componentsStyle/PastCommitsStyle';
+import { pastCommitsContainerStyle } from '../style/PastCommitsStyle';
 
 import { IDiffCallback } from '../git';
 

@@ -25,7 +25,7 @@ import {
   branchHeaderCenterContent,
   branchTrackingIconStyle,
   branchTrackingLabelStyle
-} from '../componentsStyle/BranchHeaderStyle';
+} from '../style/BranchHeaderStyle';
 
 import { classes } from 'typestyle';
 

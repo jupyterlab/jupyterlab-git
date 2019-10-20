@@ -12,7 +12,7 @@ import {
   caretrightImageStyle,
   changeStageButtonLeftStyle,
   discardFileButtonStyle
-} from '../componentsStyle/GitStageStyle';
+} from '../style/GitStageStyle';
 
 import { FileItem } from './FileItem';
 

@@ -26,7 +26,7 @@ import {
   panelContainerStyle,
   panelWarningStyle,
   findRepoButtonStyle
-} from '../componentsStyle/GitPanelStyle';
+} from '../style/GitPanelStyle';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 /** Interface for GitPanel component state */

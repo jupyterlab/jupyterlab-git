@@ -1,6 +1,6 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import * as React from 'react';
-import { historySideBarStyle } from '../componentsStyle/HistorySideBarStyle';
+import { historySideBarStyle } from '../style/HistorySideBarStyle';
 import { IGitBranchResult, ISingleCommitInfo, IDiffCallback } from '../git';
 import { PastCommitNode } from './PastCommitNode';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';

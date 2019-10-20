@@ -67,24 +67,9 @@ export const commitDetailFilePathStyle = style({
 
 export const iconStyle = style({
   display: 'inline-block',
-  width: '20px',
+  width: '13px',
   height: '13px',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: '14px',
   right: '10px'
-});
-
-export const numberofChangedFilesStyle = style({
-  backgroundImage: 'var(--jp-icon-file)'
-});
-
-export const insertionIconStyle = style({
-  backgroundImage: 'var(--jp-icon-insertions-made)'
-});
-
-export const deletionIconStyle = style({
-  backgroundImage: 'var(--jp-icon-deletions-made)'
 });
 
 export const diffIconStyle = style({

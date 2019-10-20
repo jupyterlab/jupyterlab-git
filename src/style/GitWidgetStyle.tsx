@@ -8,7 +8,3 @@ export const gitWidgetStyle = style({
   background: 'var(--jp-layout-color1)',
   fontSize: 'var(--jp-ui-font-size0)'
 });
-
-export const gitTabStyle = style({
-  backgroundImage: 'var(--jp-icon-git)'
-});
