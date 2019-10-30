@@ -5,6 +5,8 @@ cache:
   pip: true
   directories:
     - /home/travis/.yarn-cache/
+before_install:
+  - nvm install 10
 install: pip install pytest "jupyterlab~=1.0"
 script:
   - python setup.py sdist
