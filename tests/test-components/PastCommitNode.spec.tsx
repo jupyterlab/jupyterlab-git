@@ -49,7 +49,6 @@ describe('PastCommitNode', () => {
   const branches: Git.IBranch[] = notMatchingBranches.concat(matchingBranches);
   const props: IPastCommitNodeProps = {
     model: null,
-    refresh: async () => {},
     pastCommit: {
       commit: '2414721b194453f058079d897d13c4e377f92dc6',
       author: 'author',

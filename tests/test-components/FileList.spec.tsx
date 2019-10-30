@@ -12,7 +12,6 @@ jest.mock('@jupyterlab/apputils');
 describe('FileList', () => {
   const props: IFileListProps = {
     model: null,
-    refresh: async () => {},
     renderMime: null,
     stagedFiles: [],
     unstagedFiles: [],
@@ -100,7 +99,7 @@ describe('FileList', () => {
       // Mock identity look up
       const identity = jest
         .spyOn(GitExtension.prototype, 'config')
-        .mockImplementation((options, path) => {
+        .mockImplementation(options => {
           let response: Response = null;
           if (options === undefined) {
             response = new Response(
@@ -151,7 +150,7 @@ describe('FileList', () => {
       // Mock identity look up
       const identity = jest
         .spyOn(GitExtension.prototype, 'config')
-        .mockImplementation((options, path) => {
+        .mockImplementation(options => {
           let response: Response = null;
           if (options === undefined) {
             response = new Response(
@@ -202,7 +201,7 @@ describe('FileList', () => {
       // Mock identity look up
       const identity = jest
         .spyOn(GitExtension.prototype, 'config')
-        .mockImplementation((options, path) => {
+        .mockImplementation(options => {
           let response: Response = null;
           if (options === undefined) {
             response = new Response(
