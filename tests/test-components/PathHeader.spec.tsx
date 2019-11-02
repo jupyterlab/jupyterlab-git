@@ -20,28 +20,33 @@ describe('PathHeader', function() {
     const fakeRoot = '/foo';
     const mockGit = git as jest.Mocked<typeof git>;
     mockGit.httpGitRequest.mockImplementation((url, method, request) => {
-      if (url === '/git/show_top_level') {
-        return Promise.resolve(
-          new Response(
+      let response: Response;
+      switch (url) {
+        case '/git/show_top_level':
+          response = new Response(
             JSON.stringify({
               code: 0,
               top_repo_path: (request as any)['current_path']
             })
-          )
-        );
-      } else if (url === '/git/server_root') {
-        return Promise.resolve(
-          new Response(
+          );
+          break;
+        case '/git/server_root':
+          response = new Response(
             JSON.stringify({
               server_root: fakeRoot
             })
-          )
-        );
+          );
+          break;
+        default:
+          response = new Response(
+            `{"message": "No mock implementation for ${url}."}`,
+            { status: 404 }
+          );
       }
+      return Promise.resolve(response);
     });
 
     const model = new GitExtension();
-    await model.ready;
     model.pathRepository = fakePath;
     await model.ready;
 

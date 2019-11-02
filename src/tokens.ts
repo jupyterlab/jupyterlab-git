@@ -181,6 +181,16 @@ export interface IGitExtension {
   init(path: string): Promise<Response>;
 
   /**
+   * Gets the path of the file relative to the Jupyter server root.
+   *
+   * If no path is provided, returns the Git repository top folder relative path.
+   * If no Git repository selected, return null
+   *
+   * @param path the file path relative to Git repository top folder
+   */
+  getRelativeFilePath(path?: string): string | null;
+
+  /**
    * Register a new diff provider for specified file types
    *
    * @param filetypes File type list

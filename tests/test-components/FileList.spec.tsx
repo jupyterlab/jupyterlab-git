@@ -49,7 +49,10 @@ describe('FileList', () => {
             );
             break;
           default:
-            throw new Response(null, { status: 404 });
+            response = new Response(
+              `{"message": "No mock implementation for ${url}."}`,
+              { status: 404 }
+            );
         }
         return Promise.resolve(response);
       });
@@ -59,7 +62,6 @@ describe('FileList', () => {
         }
       };
       props.model = new GitExtension(app as any);
-      await props.model.ready;
       props.model.pathRepository = fakePath;
       await props.model.ready;
       fileList = new FileList(props);

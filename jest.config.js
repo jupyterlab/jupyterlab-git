@@ -14,7 +14,7 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
   testPathIgnorePatterns: ['/lib/', '/node_modules/'],
-  testRegex: '/tests/test-.*/.*.spec.ts[x]?$',
+  testRegex: '/tests/.*.spec.ts[x]?$',
   transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
   globals: {
     'ts-jest': {

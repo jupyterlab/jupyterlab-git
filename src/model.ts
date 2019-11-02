@@ -65,37 +65,40 @@ export class GitExtension implements IGitExtension, IDisposable {
       oldValue: this._pathRepository
     };
     if (v === null) {
-      this._pathRepository = null;
-      if (change.newValue !== change.oldValue) {
-        this._refreshStatus();
-        this._repositoryChanged.emit(change);
-      }
+      this._pendingReadyPromise += 1;
+      this._readyPromise.then(() => {
+        this._pathRepository = null;
+        this._pendingReadyPromise -= 1;
+
+        if (change.newValue !== change.oldValue) {
+          this.refreshStatus();
+          this._repositoryChanged.emit(change);
+        }
+      });
     } else {
-      void this.ready.then(() => {
-        this._isReady = false;
-        this._readyPromise = this.showTopLevel(v)
-          .then(results => {
-            if (results.code === 0) {
-              this._pathRepository = results.top_repo_path;
-              change.newValue = results.top_repo_path;
-            } else {
-              this._pathRepository = null;
-            }
+      const currentReady = this._readyPromise;
+      this._pendingReadyPromise += 1;
+      this._readyPromise = Promise.all([currentReady, this.showTopLevel(v)])
+        .then(r => {
+          const results = r[1];
+          if (results.code === 0) {
+            this._pathRepository = results.top_repo_path;
+            change.newValue = results.top_repo_path;
+          } else {
+            this._pathRepository = null;
+          }
 
-            if (change.newValue !== change.oldValue) {
-              this._refreshStatus();
-              this._repositoryChanged.emit(change);
-            }
-          })
-          .catch(reason => {
-            console.error(
-              `Fail to find git top level for path ${v}.\n${reason}`
-            );
+          if (change.newValue !== change.oldValue) {
+            this.refreshStatus();
+            this._repositoryChanged.emit(change);
+          }
+        })
+        .catch(reason => {
+          console.error(`Fail to find git top level for path ${v}.\n${reason}`);
+        });
 
-            void this._readyPromise.then(() => {
-              this._isReady = true;
-            });
-          });
+      void this._readyPromise.then(() => {
+        this._pendingReadyPromise -= 1;
       });
     }
   }
@@ -162,12 +165,9 @@ export class GitExtension implements IGitExtension, IDisposable {
       return null;
     }
 
-    return (
-      '/' +
-      PathExt.join(
-        PathExt.relative(this._serverRoot, this.pathRepository),
-        path || ''
-      )
+    return PathExt.join(
+      PathExt.relative(this._serverRoot, this.pathRepository),
+      path || ''
     );
   }
 
@@ -760,7 +760,7 @@ export class GitExtension implements IGitExtension, IDisposable {
    * Test whether the model is ready.
    */
   get isReady(): boolean {
-    return this._isReady;
+    return this._pendingReadyPromise === 0;
   }
 
   /**
@@ -787,7 +787,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
   private _isDisposed = false;
   private _readyPromise: Promise<void> = Promise.resolve();
-  private _isReady = true;
+  private _pendingReadyPromise = 0;
   private _poll: Poll;
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _repositoryChanged = new Signal<
