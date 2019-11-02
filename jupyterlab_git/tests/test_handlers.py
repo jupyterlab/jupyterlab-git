@@ -4,6 +4,7 @@ from mock import Mock, ANY, patch
 from jupyterlab_git.handlers import (
     GitAllHistoryHandler,
     GitBranchHandler,
+    GitLogHandler,
     GitPushHandler,
     GitUpstreamHandler,
     setup_handlers
@@ -120,6 +121,38 @@ def test_branch_handler_localbranch(mock_finish, mock_git):
         'branches': branch['branches']
     }))
 
+@patch('jupyterlab_git.handlers.GitLogHandler.__init__', Mock(return_value=None))
+@patch('jupyterlab_git.handlers.GitLogHandler.get_json_body', Mock(return_value={'current_path': 'test_path', 'history_count': 20}))
+@patch('jupyterlab_git.handlers.GitLogHandler.git')
+@patch('jupyterlab_git.handlers.GitLogHandler.finish')
+def test_log_handler(mock_finish, mock_git):
+    # Given
+    log = {'code': 0, 'commits': []}
+    mock_git.log.return_value = log
+
+    # When
+    GitLogHandler().post()
+
+    # Then
+    mock_git.log.assert_called_with('test_path', 20)
+    mock_finish.assert_called_with(json.dumps(log))
+
+
+@patch('jupyterlab_git.handlers.GitLogHandler.__init__', Mock(return_value=None))
+@patch('jupyterlab_git.handlers.GitLogHandler.get_json_body', Mock(return_value={'current_path': 'test_path'}))
+@patch('jupyterlab_git.handlers.GitLogHandler.git')
+@patch('jupyterlab_git.handlers.GitLogHandler.finish')
+def test_log_handler_no_history_count(mock_finish, mock_git):
+    # Given
+    log = {'code': 0, 'commits': []}
+    mock_git.log.return_value = log
+
+    # When
+    GitLogHandler().post()
+
+    # Then
+    mock_git.log.assert_called_with('test_path', 25)
+    mock_finish.assert_called_with(json.dumps(log))
 
 
 @patch('jupyterlab_git.handlers.GitPushHandler.__init__', Mock(return_value=None))
