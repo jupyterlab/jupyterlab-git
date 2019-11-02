@@ -272,26 +272,26 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
           title={this.props.file.to}
         >
           {extractFilename(this.props.file.to)}
-          <span className={this.getFileChangedLabelClass(this.props.file.y)}>
-            {this.getFileChangedLabel(this.props.file.y)}
-          </span>
-          {this.props.stage === 'Changed' && (
-            <React.Fragment>
-              <button
-                className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
-                title={'Discard this change'}
-                onClick={() => {
-                  this.discardSelectedFileChanges();
-                }}
-              />
-              {isDiffSupported(this.props.file.to) &&
-                this.diffButton({ specialRef: 'WORKING' })}
-            </React.Fragment>
-          )}
-          {this.props.stage === 'Staged' &&
-            isDiffSupported(this.props.file.to) &&
-            this.diffButton({ specialRef: 'INDEX' })}
         </span>
+        <span className={this.getFileChangedLabelClass(this.props.file.y)}>
+          {this.getFileChangedLabel(this.props.file.y)}
+        </span>
+        {this.props.stage === 'Changed' && (
+          <React.Fragment>
+            <button
+              className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
+              title={'Discard this change'}
+              onClick={() => {
+                this.discardSelectedFileChanges();
+              }}
+            />
+            {isDiffSupported(this.props.file.to) &&
+              this.diffButton({ specialRef: 'WORKING' })}
+          </React.Fragment>
+        )}
+        {this.props.stage === 'Staged' &&
+          isDiffSupported(this.props.file.to) &&
+          this.diffButton({ specialRef: 'INDEX' })}
       </li>
     );
   }
