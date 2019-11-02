@@ -23,9 +23,9 @@ export interface IGitSessionNodeState {
 
   pastCommits: Git.ISingleCommitInfo[];
 
-  stagedFiles: Git.IGitStatusFileResult[];
-  unstagedFiles: Git.IGitStatusFileResult[];
-  untrackedFiles: Git.IGitStatusFileResult[];
+  stagedFiles: Git.IStatusFileResult[];
+  unstagedFiles: Git.IStatusFileResult[];
+  untrackedFiles: Git.IStatusFileResult[];
   hasChangedFiles: boolean;
 
   isHistoryVisible: boolean;
@@ -124,9 +124,9 @@ export class GitPanel extends React.Component<
   setStatus = () => {
     if (this.props.model.pathRepository !== null) {
       // Get git status for current branch
-      let stagedFiles = new Array<Git.IGitStatusFileResult>();
-      let unstagedFiles = new Array<Git.IGitStatusFileResult>();
-      let untrackedFiles = new Array<Git.IGitStatusFileResult>();
+      let stagedFiles = new Array<Git.IStatusFileResult>();
+      let unstagedFiles = new Array<Git.IStatusFileResult>();
+      let untrackedFiles = new Array<Git.IStatusFileResult>();
       let changedFiles = 0;
       let statusFiles = this.props.model.status;
       if (statusFiles.length > 0) {

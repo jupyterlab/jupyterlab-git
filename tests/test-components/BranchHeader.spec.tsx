@@ -98,13 +98,9 @@ describe('BranchHeader', () => {
       const spy = jest.spyOn(GitExtension.prototype, 'checkout');
       branchHeader.switchBranch('new-feature');
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(
-        true, // Checkout branch
-        false, // Create new branch if it doesn't exist
-        'new-feature', // Branch name
-        false, // Discard all changes
-        null // File name to checkout
-      );
+      expect(spy).toHaveBeenCalledWith({
+        branchname: 'new-feature' // Branch name
+      });
       spy.mockRestore();
     });
   });
@@ -115,13 +111,10 @@ describe('BranchHeader', () => {
       const spy = jest.spyOn(GitExtension.prototype, 'checkout');
       branchHeader.createNewBranch('new-feature');
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(
-        true, // Checkout branch
-        true, // Create new branch if it doesn't exist
-        'new-feature', // Branch name
-        false, // Discard all changes
-        null // File name to checkout
-      );
+      expect(spy).toHaveBeenCalledWith({
+        newBranch: true, // Create new branch if it doesn't exist
+        branchname: 'new-feature' // Branch name
+      });
       spy.mockRestore();
     });
   });

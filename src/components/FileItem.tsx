@@ -37,7 +37,7 @@ import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
 
 export interface IFileItemProps {
-  file: Git.IGitStatusFileResult;
+  file: Git.IStatusFileResult;
   stage: string;
   model: GitExtension;
   moveFile: (file: string) => Promise<void>;

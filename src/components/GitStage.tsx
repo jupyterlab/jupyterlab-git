@@ -19,7 +19,7 @@ import { FileItem } from './FileItem';
 
 export interface IGitStageProps {
   heading: string;
-  files: Git.IGitStatusFileResult[];
+  files: Git.IStatusFileResult[];
   model: GitExtension;
   showFiles: boolean;
   displayFiles: () => void;
@@ -143,7 +143,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
         {this.props.showFiles && (
           <ul className={sectionFileContainerStyle}>
             {this.props.files.map(
-              (file: Git.IGitStatusFileResult, fileIndex: number) => {
+              (file: Git.IStatusFileResult, fileIndex: number) => {
                 return (
                   <FileItem
                     key={fileIndex}

@@ -20,7 +20,7 @@ export class GitPullPushDialog extends Widget {
   /**
    * Instantiates the dialog and makes the relevant service API call.
    */
-  constructor(model: IGitExtension, operation: Operation, auth?: Git.IGitAuth) {
+  constructor(model: IGitExtension, operation: Operation, auth?: Git.IAuth) {
     super();
     this._model = model;
     this._operation = operation;
@@ -38,7 +38,7 @@ export class GitPullPushDialog extends Widget {
    * Executes the relevant service API depending on the _operation and handles response and errors.
    * @param currentFileBrowserPath the path to the current repo
    */
-  private executeGitApi(auth?: Git.IGitAuth) {
+  private executeGitApi(auth?: Git.IAuth) {
     switch (this._operation) {
       case Operation.Pull:
         this._model
@@ -66,7 +66,7 @@ export class GitPullPushDialog extends Widget {
    * success or error message.
    * @param response the response from the server API call
    */
-  private async handleResponse(response: Git.IGitPushPullResult) {
+  private async handleResponse(response: Git.IPushPullResult) {
     this.node.removeChild(this._spinner.node);
     this._spinner.dispose();
     if (response.code !== 0) {

@@ -163,7 +163,7 @@ describe('IGitExtension', () => {
 
   describe('#status', () => {
     it('should be an empty list if not in a git repository', async () => {
-      let status: Git.IGitStatusFileResult[] = [];
+      let status: Git.IStatusFileResult[] = [];
       mockResponses = {
         ...mockResponses,
         '/git/status': {
@@ -186,7 +186,7 @@ describe('IGitExtension', () => {
     });
 
     it('should emit a signal if when set', async () => {
-      let status: Git.IGitStatusFileResult[] = [];
+      let status: Git.IStatusFileResult[] = [];
       mockResponses = {
         ...mockResponses,
         '/git/status': {
@@ -197,7 +197,7 @@ describe('IGitExtension', () => {
       const testSignal = testEmission(model.statusChanged, {
         test: (model, files) => {
           expect(files).toHaveLength(status.length);
-          expect(files[0]).toMatchObject<Git.IGitStatusFileResult>({
+          expect(files[0]).toMatchObject<Git.IStatusFileResult>({
             ...status[0]
           });
         }
@@ -256,7 +256,7 @@ describe('IGitExtension', () => {
         }
       });
 
-      await model.checkout(true, false, 'dummy', false, '');
+      await model.checkout({ branchname: 'dummy' });
       await testSignal;
     });
   });

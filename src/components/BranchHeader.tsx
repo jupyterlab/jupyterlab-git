@@ -28,7 +28,7 @@ export interface IBranchHeaderProps {
   model: IGitExtension;
   currentBranch: string;
   upstreamBranch: string;
-  stagedFiles: Git.IGitStatusFileResult[];
+  stagedFiles: Git.IStatusFileResult[];
   data: Git.IBranch[];
   refresh: () => Promise<void>;
   disabled: boolean;
@@ -50,12 +50,15 @@ export class BranchHeader extends React.Component<
 
   /** Switch current working branch */
   async switchBranch(branchName: string) {
-    await this.props.model.checkout(true, false, branchName, false, null);
+    await this.props.model.checkout({ branchname: branchName });
     this.toggleSelect();
   }
 
   createNewBranch = async (branchName: string) => {
-    await this.props.model.checkout(true, true, branchName, false, null);
+    await this.props.model.checkout({
+      newBranch: true,
+      branchname: branchName
+    });
     this.toggleNewBranchBox();
   };
 

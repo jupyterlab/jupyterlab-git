@@ -24,59 +24,61 @@ export interface IGitExtension {
    */
   readonly repositoryChanged: ISignal<IGitExtension, IChangedArgs<string>>;
 
-  readonly status: Git.IGitStatusFileResult[];
+  /**
+   * Files list resulting of a git status call.
+   */
+  readonly status: Git.IStatusFileResult[];
 
   /**
    * A signal emitted when the current status of the git repository changes.
    */
-  readonly statusChanged: ISignal<IGitExtension, Git.IGitStatusFileResult[]>;
+  readonly statusChanged: ISignal<IGitExtension, Git.IStatusFileResult[]>;
 
   /**
    * Make request for the Git Pull API.
    *
-   * @param auth
+   * @param auth Optional authentication information for the remote repository
    */
-  pull(auth?: Git.IGitAuth): Promise<Git.IGitPushPullResult>;
+  pull(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
 
   /**
    * Make request for the Git Push API.
    *
-   * @param auth
+   * @param auth Optional authentication information for the remote repository
    */
-  push(auth?: Git.IGitAuth): Promise<Git.IGitPushPullResult>;
+  push(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
 
   /**
    * Make request for the Git Clone API.
    *
-   * @param path
-   * @param url
-   * @param auth
+   * @param path Local path in which the repository will be cloned
+   * @param url Distant Git repository URL
+   * @param auth Optional authentication information for the remote repository
    */
-  clone(
-    path: string,
-    url: string,
-    auth?: Git.IGitAuth
-  ): Promise<Git.IGitCloneResult>;
+  clone(path: string, url: string, auth?: Git.IAuth): Promise<Git.ICloneResult>;
 
   /**
-   * Make request for all git info of repository 'path'
+   * Make request for all git info of the repository
    * (This API is also implicitly used to check if the current repo is a Git repo)
    *
+   * @param historyCount: Optional number of commits to get from git log
    */
-  allHistory(historyCount?: number): Promise<Git.IGitAllHistory>;
+  allHistory(historyCount?: number): Promise<Git.IAllHistory>;
 
   /**
    * Make request for top level path of repository 'path'
    *
-   * @param path Git repository path
+   * @param path Path from which the top Git repository needs to be found
    */
-  showTopLevel(path: string): Promise<Git.IGitShowTopLevelResult>;
+  showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
 
   /**
    * Make request for the prefix path of a directory 'path',
    * with respect to the root directory of repository
+   *
+   * @param path Path for which the prefix is searched for
    */
-  showPrefix(path: string): Promise<Git.IGitShowPrefixResult>;
+  showPrefix(path: string): Promise<Git.IShowPrefixResult>;
 
   /**
    * Request git status refresh
@@ -85,61 +87,57 @@ export interface IGitExtension {
 
   /**
    * Make request for git commit logs
+   *
+   * @param historyCount: Optional number of commits to get from git log
    */
-  log(): Promise<Git.IGitLogResult>;
+  log(historyCount?: number): Promise<Git.ILogResult>;
 
   /**
    * Make request for detailed git commit info of
    * commit 'hash'
    *
-   * @param hash
+   * @param hash Commit hash
    */
   detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo>;
 
   /**
    * Make request for a list of all git branches
    */
-  branch(): Promise<Git.IGitBranchResult>;
+  branch(): Promise<Git.IBranchResult>;
 
   /**
    * Make request to add one or all files into
-   * the staging area in repository 'path'
+   * the staging area in repository
    *
-   * @param check
-   * @param filename
+   * If filename is not provided, all files will be added.
+   *
+   * @param filename Optional name of the file to add
    */
-  add(check: boolean, filename: string): Promise<Response>;
+  add(filename?: string): Promise<Response>;
 
   /**
    * Make request to add all untracked files into
-   * the staging area in repository 'path'
+   * the staging area in repository
    */
   addAllUntracked(): Promise<Response>;
 
   /** Make request to switch current working branch,
    * create new branch if needed,
-   * or discard all changes,
-   * or discard a specific file change
+   * or discard a specific file change or all changes
    * TODO: Refactor into seperate endpoints for each kind of checkout request
    *
-   * @param checkoutBranch
-   * @param newCheck
-   * @param branchname
-   * @param checkoutAll
-   * @param filename
+   * If a branch name is provided, check it out (with or without creating it)
+   * If a filename is provided, check the file out
+   * If nothing is provided, check all files out
+   *
+   * @param options Checkout options
    */
-  checkout(
-    checkoutBranch: boolean,
-    newCheck: boolean,
-    branchname: string,
-    checkoutAll: boolean,
-    filename: string
-  ): Promise<Response>;
+  checkout(options?: Git.ICheckoutOptions): Promise<Response>;
 
   /**
-   * Make request to commit all staged files in repository 'path'
+   * Make request to commit all staged files in repository
    *
-   * @param message
+   * @param message Commit message
    */
   commit(message: string): Promise<Response>;
 
@@ -153,10 +151,11 @@ export interface IGitExtension {
   /**
    * Make request to move one or all files from the staged to the unstaged area
    *
-   * @param check
-   * @param filename
+   * If filename is not provided, all files will be reset.
+   *
+   * @param filename Optional name of the file to add
    */
-  reset(check: boolean, filename: string): Promise<Response>;
+  reset(filename?: string): Promise<Response>;
 
   /**
    * Make request to delete changes from selected commit
@@ -222,20 +221,20 @@ export namespace Git {
   /** Interface for GitAllHistory request result,
    * has all repo information
    */
-  export interface IGitAllHistory {
+  export interface IAllHistory {
     code: number;
     data?: {
-      show_top_level?: IGitShowTopLevelResult;
-      branch?: IGitBranchResult;
-      log?: IGitLogResult;
-      status?: IGitStatusResult;
+      show_top_level?: IShowTopLevelResult;
+      branch?: IBranchResult;
+      log?: ILogResult;
+      status?: IStatusResult;
     };
   }
 
   /** Interface for GitShowTopLevel request result,
    * has the git root directory inside a repository
    */
-  export interface IGitShowTopLevelResult {
+  export interface IShowTopLevelResult {
     code: number;
     top_repo_path?: string;
   }
@@ -244,16 +243,38 @@ export namespace Git {
    * has the prefix path of a directory in a repository,
    * with respect to the root directory.
    */
-  export interface IGitShowPrefixResult {
+  export interface IShowPrefixResult {
     code: number;
     under_repo_path?: string;
+  }
+
+  /**
+   * Interface to call the checkout method
+   *
+   * If a branch name is provided, check it out (with or without creating it)
+   * If a filename is provided, check the file out
+   * If nothing is provided, check all files out
+   */
+  export interface ICheckoutOptions {
+    /**
+     * Branch name
+     */
+    branchname?: string;
+    /**
+     * Is it a new branch?
+     */
+    newBranch?: boolean;
+    /**
+     * Filename
+     */
+    filename?: string;
   }
 
   /** Interface for GitShowPrefix request result,
    * has the prefix path of a directory in a repository,
    * with respect to the root directory.
    */
-  export interface IGitCheckoutResult {
+  export interface ICheckoutResult {
     code: number;
     message?: string;
   }
@@ -273,7 +294,7 @@ export namespace Git {
   /** Interface for GitBranch request result,
    * has the result of changing the current working branch
    */
-  export interface IGitBranchResult {
+  export interface IBranchResult {
     code: number;
     branches?: IBranch[];
   }
@@ -281,7 +302,7 @@ export namespace Git {
   /** Interface for GitStatus request result,
    * has the status of each changed file
    */
-  export interface IGitStatusFileResult {
+  export interface IStatusFileResult {
     x: string;
     y: string;
     to: string;
@@ -291,9 +312,9 @@ export namespace Git {
   /** Interface for GitStatus request result,
    * has the status of the entire repo
    */
-  export interface IGitStatusResult {
+  export interface IStatusResult {
     code: number;
-    files?: IGitStatusFileResult[];
+    files?: IStatusFileResult[];
   }
 
   /** Interface for GitLog request result,
@@ -332,7 +353,7 @@ export namespace Git {
   /** Interface for GitLog request result,
    * has the info of all past commits
    */
-  export interface IGitLogResult {
+  export interface ILogResult {
     code: number;
     commits?: [ISingleCommitInfo];
   }
@@ -345,7 +366,7 @@ export namespace Git {
   /**
    * Interface for the Git Auth request.
    */
-  export interface IGitAuth {
+  export interface IAuth {
     username: string;
     password: string;
   }
@@ -356,21 +377,21 @@ export namespace Git {
   export interface IGitClone {
     current_path: string;
     clone_url: string;
-    auth?: IGitAuth;
+    auth?: IAuth;
   }
 
   /**
    * Structure for the request to the Git Clone API.
    */
-  export interface IGitPushPull {
+  export interface IPushPull {
     current_path: string;
-    auth?: IGitAuth;
+    auth?: IAuth;
   }
 
   /**
    * Structure for the result of the Git Clone API.
    */
-  export interface IGitCloneResult {
+  export interface ICloneResult {
     code: number;
     message?: string;
   }
@@ -378,7 +399,7 @@ export namespace Git {
   /**
    * Structure for the result of the Git Push & Pull API.
    */
-  export interface IGitPushPullResult {
+  export interface IPushPullResult {
     code: number;
     message?: string;
   }

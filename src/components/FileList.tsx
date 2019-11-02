@@ -51,9 +51,9 @@ export interface IFileListState {
 }
 
 export interface IFileListProps {
-  stagedFiles: Git.IGitStatusFileResult[];
-  unstagedFiles: Git.IGitStatusFileResult[];
-  untrackedFiles: Git.IGitStatusFileResult[];
+  stagedFiles: Git.IStatusFileResult[];
+  unstagedFiles: Git.IStatusFileResult[];
+  untrackedFiles: Git.IStatusFileResult[];
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
 }
@@ -302,23 +302,23 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Reset all staged files */
   resetAllStagedFiles = async () => {
-    await this.props.model.reset(true, null);
+    await this.props.model.reset();
   };
 
   /** Reset a specific staged file */
   resetStagedFile = async (file: string) => {
-    await this.props.model.reset(false, file);
+    await this.props.model.reset(file);
   };
 
   /** Add all unstaged files */
   addAllUnstagedFiles = async () => {
-    await this.props.model.add(true, null);
+    await this.props.model.add();
   };
 
   /** Discard changes in all unstaged files */
   discardAllUnstagedFiles = async () => {
     try {
-      await this.props.model.checkout(false, false, null, true, null);
+      await this.props.model.checkout();
     } catch (reason) {
       showErrorMessage('Discard all changes failed.', reason, [
         Dialog.warnButton({ label: 'DISMISS' })
@@ -328,13 +328,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Add a specific unstaged file */
   addUnstagedFile = async (file: string) => {
-    await this.props.model.add(false, file);
+    await this.props.model.add(file);
   };
 
   /** Discard changes in a specific unstaged file */
   discardUnstagedFile = async (file: string) => {
     try {
-      await this.props.model.checkout(false, false, null, false, file);
+      await this.props.model.checkout({ filename: file });
     } catch (reason) {
       showErrorMessage(`Discard changes for ${file} failed.`, reason, [
         Dialog.warnButton({ label: 'DISMISS' })
@@ -349,7 +349,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Add a specific untracked file */
   addUntrackedFile = async (file: string) => {
-    await this.props.model.add(false, file);
+    await this.props.model.add(file);
   };
 
   disableStagesForDiscardAll = () => {

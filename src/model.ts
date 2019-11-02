@@ -110,10 +110,10 @@ export class GitExtension implements IGitExtension, IDisposable {
     return this._repositoryChanged;
   }
 
-  public get status(): Git.IGitStatusFileResult[] {
+  public get status(): Git.IStatusFileResult[] {
     return this._status;
   }
-  protected _setStatus(v: Git.IGitStatusFileResult[]) {
+  protected _setStatus(v: Git.IStatusFileResult[]) {
     this._status = v;
     this._statusChanged.emit(this._status);
   }
@@ -121,7 +121,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   /**
    * A signal emitted when the current status of the git repository changes.
    */
-  get statusChanged(): ISignal<IGitExtension, Git.IGitStatusFileResult[]> {
+  get statusChanged(): ISignal<IGitExtension, Git.IStatusFileResult[]> {
     return this._statusChanged;
   }
 
@@ -172,7 +172,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   /** Make request for the Git Pull API. */
-  async pull(auth?: Git.IGitAuth): Promise<Git.IGitPushPullResult> {
+  async pull(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -184,7 +184,7 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
 
     try {
-      let obj: Git.IGitPushPull = {
+      let obj: Git.IPushPull = {
         current_path: path,
         auth
       };
@@ -204,7 +204,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   /** Make request for the Git Push API. */
-  async push(auth?: Git.IGitAuth): Promise<Git.IGitPushPullResult> {
+  async push(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -216,7 +216,7 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
 
     try {
-      let obj: Git.IGitPushPull = {
+      let obj: Git.IPushPull = {
         current_path: path,
         auth
       };
@@ -237,8 +237,8 @@ export class GitExtension implements IGitExtension, IDisposable {
   async clone(
     path: string,
     url: string,
-    auth?: Git.IGitAuth
-  ): Promise<Git.IGitCloneResult> {
+    auth?: Git.IAuth
+  ): Promise<Git.ICloneResult> {
     try {
       let obj: Git.IGitClone = {
         current_path: path,
@@ -257,10 +257,10 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
   }
 
-  /** Make request for all git info of repository 'path'
+  /** Make request for all git info of the repository
    * (This API is also implicitly used to check if the current repo is a Git repo)
    */
-  async allHistory(historyCount: number = 25): Promise<Git.IGitAllHistory> {
+  async allHistory(historyCount: number = 25): Promise<Git.IAllHistory> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -287,7 +287,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   /** Make request for top level path of repository 'path' */
-  async showTopLevel(path: string): Promise<Git.IGitShowTopLevelResult> {
+  async showTopLevel(path: string): Promise<Git.IShowTopLevelResult> {
     try {
       let response = await httpGitRequest('/git/show_top_level', 'POST', {
         current_path: path
@@ -305,7 +305,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   /** Make request for the prefix path of a directory 'path',
    * with respect to the root directory of repository
    */
-  async showPrefix(path: string): Promise<Git.IGitShowPrefixResult> {
+  async showPrefix(path: string): Promise<Git.IShowPrefixResult> {
     try {
       let response = await httpGitRequest('/git/show_prefix', 'POST', {
         current_path: path
@@ -346,7 +346,7 @@ export class GitExtension implements IGitExtension, IDisposable {
         this._setStatus([]);
       }
 
-      this._setStatus((data as Git.IGitStatusResult).files);
+      this._setStatus((data as Git.IStatusResult).files);
     } catch (err) {
       console.error(err);
       // TODO should we notify the user
@@ -354,8 +354,8 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
   }
 
-  /** Make request for git commit logs of repository 'path' */
-  async log(historyCount: number = 25): Promise<Git.IGitLogResult> {
+  /** Make request for git commit logs of repository */
+  async log(historyCount: number = 25): Promise<Git.ILogResult> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -382,7 +382,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   /** Make request for detailed git commit info of
-   * commit 'hash' in repository 'path'
+   * commit 'hash' in the repository
    */
   async detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo> {
     await this.ready;
@@ -410,8 +410,8 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
   }
 
-  /** Make request for a list of all git branches in repository 'path' */
-  async branch(): Promise<Git.IGitBranchResult> {
+  /** Make request for a list of all git branches in the repository */
+  async branch(): Promise<Git.IBranchResult> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -437,9 +437,9 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   /** Make request to add one or all files into
-   * the staging area in repository 'path'
+   * the staging area in repository
    */
-  async add(check: boolean, filename: string): Promise<Response> {
+  async add(filename?: string): Promise<Response> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -455,8 +455,8 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
 
     const response = await httpGitRequest('/git/add', 'POST', {
-      add_all: check,
-      filename: filename,
+      add_all: filename === undefined,
+      filename: filename === undefined ? null : filename,
       top_repo_path: path
     });
 
@@ -465,7 +465,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   /** Make request to add all untracked files into
-   * the staging area in repository 'path'
+   * the staging area in the repository
    */
   async addAllUntracked(): Promise<Response> {
     await this.ready;
@@ -497,19 +497,17 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
   }
 
-  /** Make request to switch current working branch,
+  /**
+   * Make request to switch current working branch,
    * create new branch if needed,
-   * or discard all changes,
-   * or discard a specific file change
+   * or discard a specific file change or all changes
    * TODO: Refactor into seperate endpoints for each kind of checkout request
+   *
+   * If a branch name is provided, check it out (with or without creating it)
+   * If a filename is provided, check the file out
+   * If nothing is provided, check all files out
    */
-  async checkout(
-    checkoutBranch: boolean,
-    newCheck: boolean,
-    branchname: string,
-    checkoutAll: boolean,
-    filename: string
-  ): Promise<Response> {
+  async checkout(options?: Git.ICheckoutOptions): Promise<Response> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -524,22 +522,35 @@ export class GitExtension implements IGitExtension, IDisposable {
       );
     }
 
+    const body = {
+      checkout_branch: false,
+      new_check: false,
+      branchname: '',
+      checkout_all: true,
+      filename: '',
+      top_repo_path: path
+    };
+
+    if (options !== undefined) {
+      if (options.branchname) {
+        body.branchname = options.branchname;
+        body.checkout_branch = true;
+        body.new_check = options.newBranch === true;
+      } else if (options.filename) {
+        body.filename = options.filename;
+        body.checkout_all = false;
+      }
+    }
+
     try {
-      let response = await httpGitRequest('/git/checkout', 'POST', {
-        checkout_branch: checkoutBranch,
-        new_check: newCheck,
-        branchname: branchname,
-        checkout_all: checkoutAll,
-        filename: filename,
-        top_repo_path: path
-      });
+      let response = await httpGitRequest('/git/checkout', 'POST', body);
       if (response.status !== 200) {
         return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
 
-      if (checkoutBranch) {
+      if (body.checkout_branch) {
         this._headChanged.emit();
       } else {
         this.refreshStatus();
@@ -550,7 +561,7 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
   }
 
-  /** Make request to commit all staged files in repository 'path' */
+  /** Make request to commit all staged files in the repository */
   async commit(message: string): Promise<Response> {
     await this.ready;
     const path = this.pathRepository;
@@ -622,7 +633,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   /** Make request to move one or all files from the staged to the unstaged area */
-  async reset(check: boolean, filename: string): Promise<Response> {
+  async reset(filename?: string): Promise<Response> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -639,8 +650,8 @@ export class GitExtension implements IGitExtension, IDisposable {
 
     try {
       let response = await httpGitRequest('/git/reset', 'POST', {
-        reset_all: check,
-        filename: filename,
+        reset_all: filename === undefined,
+        filename: filename === undefined ? null : filename,
         top_repo_path: path
       });
       if (response.status !== 200) {
@@ -780,7 +791,7 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
   }
 
-  private _status: Git.IGitStatusFileResult[] = [];
+  private _status: Git.IStatusFileResult[] = [];
   private _pathRepository: string | null = null;
   private _serverRoot: string;
   private _app: JupyterFrontEnd | null;
@@ -794,8 +805,7 @@ export class GitExtension implements IGitExtension, IDisposable {
     IGitExtension,
     IChangedArgs<string | null>
   >(this);
-  private _statusChanged = new Signal<
-    IGitExtension,
-    Git.IGitStatusFileResult[]
-  >(this);
+  private _statusChanged = new Signal<IGitExtension, Git.IStatusFileResult[]>(
+    this
+  );
 }

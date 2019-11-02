@@ -6,7 +6,7 @@ import { Git } from '../tokens';
  * The UI for the credentials form
  */
 export class GitCredentialsForm extends Widget
-  implements Dialog.IBodyWidget<Git.IGitAuth> {
+  implements Dialog.IBodyWidget<Git.IAuth> {
   constructor(
     textContent: string = 'Enter credentials for remote repository',
     warningContent: string = ''
@@ -43,7 +43,7 @@ export class GitCredentialsForm extends Widget
   /**
    * Returns the input value.
    */
-  getValue(): Git.IGitAuth {
+  getValue(): Git.IAuth {
     return {
       username: this._user.value,
       password: this._password.value
