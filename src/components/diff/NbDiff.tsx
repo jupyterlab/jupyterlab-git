@@ -25,7 +25,7 @@ export interface ICellDiffProps {
  * During component render, a Ref is created for the ReactDOM and after the component
  * is mounted, the PhosporJS widget is created and attached to the Ref.
  */
-export class CellDiff extends React.Component<ICellDiffProps, {}> {
+export class CellDiff extends React.Component<ICellDiffProps> {
   private unAddedOrRemovedRef: RefObject<HTMLDivElement> = React.createRef<
     HTMLDivElement
   >();
@@ -39,7 +39,6 @@ export class CellDiff extends React.Component<ICellDiffProps, {}> {
 
   constructor(props: ICellDiffProps) {
     super(props);
-    this.state = {};
   }
 
   componentDidMount(): void {
@@ -118,7 +117,10 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
       nbdModel: undefined,
       errorMessage: undefined
     };
-    this.performDiff(props.diffContext);
+  }
+
+  componentDidMount() {
+    this.performDiff(this.props.diffContext);
   }
 
   render() {
@@ -166,7 +168,7 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
   private performDiff(diffContext: IDiffContext): void {
     try {
       // Resolve what API parameter to call.
-      let currentRefValue;
+      let currentRefValue: any;
       if ('specialRef' in diffContext.currentRef) {
         currentRefValue = {
           special: diffContext.currentRef.specialRef

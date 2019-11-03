@@ -32,7 +32,10 @@ export class PlainTextDiff extends React.Component<
   constructor(props: IPlainTextDiffProps) {
     super(props);
     this.state = { errorMessage: null };
-    this.performDiff(props.diffContext);
+  }
+
+  componentDidMount() {
+    this.performDiff(this.props.diffContext);
   }
 
   render() {
@@ -68,7 +71,7 @@ export class PlainTextDiff extends React.Component<
    * to
    * @param diffContext the context in which to perform the diff
    */
-  private async performDiff(diffContext: IDiffContext): Promise<void> {
+  private performDiff(diffContext: IDiffContext): void {
     try {
       // Resolve what API parameter to call.
       let currentRefValue: ICurrentReference;
@@ -82,33 +85,34 @@ export class PlainTextDiff extends React.Component<
         };
       }
 
-      try {
-        const response = await httpGitRequest('/git/diffcontent', 'POST', {
-          filename: this.props.path,
-          prev_ref: { git: diffContext.previousRef.gitRef },
-          curr_ref: currentRefValue,
-          top_repo_path: this.props.topRepoPath
-        });
-
-        const data = await response.json();
-
-        if (response.status !== 200) {
-          // Handle error
-          this.setState({
-            errorMessage:
-              data.message || 'Unknown error. Please check the server log.'
+      httpGitRequest('/git/diffcontent', 'POST', {
+        filename: this.props.path,
+        prev_ref: { git: diffContext.previousRef.gitRef },
+        curr_ref: currentRefValue,
+        top_repo_path: this.props.topRepoPath
+      }).then(response => {
+        response
+          .json()
+          .then(data => {
+            if (response.status !== 200) {
+              // Handle error
+              this.setState({
+                errorMessage:
+                  data.message || 'Unknown error. Please check the server log.'
+              });
+            } else {
+              this._addDiffViewer(data['prev_content'], data['curr_content']);
+            }
+          })
+          .catch(reason => {
+            console.error(reason);
+            // Handle error
+            this.setState({
+              errorMessage:
+                reason.message || 'Unknown error. Please check the server log.'
+            });
           });
-        } else {
-          this._addDiffViewer(data['prev_content'], data['curr_content']);
-        }
-      } catch (reason) {
-        console.error(reason);
-        // Handle error
-        this.setState({
-          errorMessage:
-            reason.message || 'Unknown error. Please check the server log.'
-        });
-      }
+      });
     } catch (err) {
       console.error(err);
       throw ServerConnection.NetworkError;
@@ -126,7 +130,7 @@ export class PlainTextDiff extends React.Component<
 
     mergeView(
       document.getElementById(
-        `diffviewer-${this.props.path}-${getRefValue(
+        `diffviewer-${this.props.path.replace('/', '-')}-${getRefValue(
           this.props.diffContext.currentRef
         )}`
       ),
