@@ -30,7 +30,7 @@ describe('Diff', () => {
   it('should not render anything when not supported', function() {
     // Given
     const props: IDiffProps = {
-      path: '/path/to/File.py',
+      path: '/path/to/File.unk',
       topRepoPath: 'top/repo/path',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },
@@ -45,7 +45,7 @@ describe('Diff', () => {
     expect(node.html()).toBe(null);
   });
 
-  it('should not support non-ipynb files', function() {
-    expect(isDiffSupported('/path/to/script.py')).toBeFalsy();
+  it('should not support non-ipynb and non text files', function() {
+    expect(isDiffSupported('/path/to/script.unk')).toBeFalsy();
   });
 });

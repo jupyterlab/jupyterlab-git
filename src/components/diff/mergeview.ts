@@ -256,7 +256,7 @@ class DiffView implements MergeView.IDiffView {
   private static registerUpdate(dv: DiffView): (mode?: string) => void {
     let edit: MergeView.IState = { from: 0, to: 0, marked: [] };
     let orig: MergeView.IState = { from: 0, to: 0, marked: [] };
-    let debounceChange: number;
+    let debounceChange: ReturnType<typeof setTimeout>;
     let updatingFast: boolean = false;
 
     function update(mode?: string) {
