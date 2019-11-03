@@ -364,10 +364,87 @@ class Git:
 
     def branch(self, current_path):
         """
-        Execute 'git show-ref' command & return the result.
+        Execute 'git for-each-ref' command & return the result.
         """
+        heads = self.branch_heads(current_path)
+        if heads["code"] != 0:
+            # error; bail
+            return heads
+
+        remotes = self.branch_remotes(current_path)
+        if remotes["code"] != 0:
+            # error; bail
+            return remotes
+
+        # all's good; concatenate results and return
+        return {"code": 0, "branches": heads["branches"] + remotes["branches"]}
+
+    def branch_heads(self, current_path):
+        """
+        Execute 'git for-each-ref' command on refs/heads & return the result.
+        """
+        formats = ['refname:short', 'objectname', 'upstream:short', 'HEAD']
+        cmd = ["git", "for-each-ref", "--format=" + "%09".join("%({})".format(f) for f in formats), "refs/heads/"]
         p = subprocess.Popen(
-            ["git", "show-ref"],
+            cmd,
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd=os.path.join(self.root_dir, current_path),
+        )
+        output, error = p.communicate()
+        if p.returncode == 0:
+            current_branch_seen = False
+            results = []
+            try:
+                for name,commit_sha,upstream_name,is_current_branch in (line.split('\t') for line in output.decode("utf-8").splitlines()):
+                    # Format reference : https://git-scm.com/docs/git-for-each-ref#_field_names
+                    is_current_branch = bool(is_current_branch.strip())
+                    current_branch_seen |= is_current_branch
+
+                    results.append({
+                        "is_current_branch": is_current_branch,
+                        "is_remote_branch": False,
+                        "name": name,
+                        "upstream": upstream_name if upstream_name else None,
+                        "top_commit": commit_sha,
+                        "tag": None,
+                    })
+
+                # Remote branch is seleted use 'git branch -a' as fallback machanism
+                # to get add detached head on remote branch to preserve older functionality
+                # TODO : Revisit this to checkout new local branch with same name as remote
+                # when the remote branch is seleted, VS Code git does the same thing.
+                if not current_branch_seen and self.get_current_branch(current_path) == "HEAD":
+                    results.append({
+                        "is_current_branch": True,
+                        "is_remote_branch": False,
+                        "name": self._get_detached_head_name(current_path),
+                        "upstream": None,
+                        "top_commit": None,
+                        "tag": None,
+                    })
+                return {"code": p.returncode, "branches": results}
+            except Exception as downstream_error:
+                return {
+                    "code": -1,
+                    "command": ' '.join(cmd),
+                    "message": str(downstream_error),
+                }
+        else:
+            return {
+                "code": p.returncode,
+                "command": ' '.join(cmd),
+                "message": error.decode("utf-8"),
+            }
+
+    def branch_remotes(self, current_path):
+        """
+        Execute 'git for-each-ref' command on refs/heads & return the result.
+        """
+        formats = ['refname:short', 'objectname']
+        cmd = ["git", "for-each-ref", "--format=" + "%09".join("%({})".format(f) for f in formats), "refs/remotes/"]
+        p = subprocess.Popen(
+            cmd,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),
@@ -376,62 +453,27 @@ class Git:
         if p.returncode == 0:
             results = []
             try:
-                current_branch = self.get_current_branch(current_path)
-                for line in output.decode("utf-8").splitlines():
-                    # The format for git show-ref is '<SHA-1 ID> <space> <reference name>'
-                    # For this method we are only interested in reference name.
-                    # Reference : https://git-scm.com/docs/git-show-ref#_output
-                    commit_sha = line.strip().split()[0].strip()
-                    reference_name = line.strip().split()[1].strip()
-                    if self._is_branch(reference_name):
-                        branch_name = self._get_branch_name(reference_name)
-                        is_current_branch = self._is_current_branch(
-                            branch_name, current_branch
-                        )
-                        is_remote_branch = self._is_remote_branch(reference_name)
-                        upstream_branch_name = None
-                        if not is_remote_branch:
-                            upstream_branch_name = self.get_upstream_branch(
-                                current_path, branch_name
-                            )
-                        tag = self._get_tag(current_path, commit_sha)
-                        results.append(
-                            {
-                                "is_current_branch": is_current_branch,
-                                "is_remote_branch": is_remote_branch,
-                                "name": branch_name,
-                                "upstream": upstream_branch_name,
-                                "top_commit": commit_sha,
-                                "tag": tag,
-                            }
-                        )
-
-                # Remote branch is seleted use 'git branch -a' as fallback machanism
-                # to get add detached head on remote branch to preserve older functionality
-                # TODO : Revisit this to checkout new local branch with same name as remote
-                # when the remote branch is seleted, VS Code git does the same thing.
-                if current_branch == "HEAD":
-                    results.append(
-                        {
-                            "is_current_branch": True,
-                            "is_remote_branch": False,
-                            "name": self._get_detached_head_name(current_path),
-                            "upstream": None,
-                            "top_commit": None,
-                            "tag": None,
-                        }
-                    )
+                for name,commit_sha in (line.split('\t') for line in output.decode("utf-8").splitlines()):
+                    # Format reference : https://git-scm.com/docs/git-for-each-ref#_field_names
+                    results.append({
+                        "is_current_branch": False,
+                        "is_remote_branch": True,
+                        "name": name,
+                        "upstream": None,
+                        "top_commit": commit_sha,
+                        "tag": None,
+                    })
                 return {"code": p.returncode, "branches": results}
             except Exception as downstream_error:
                 return {
-                    "code": p.returncode,
-                    "command": "git show-ref",
+                    "code": -1,
+                    "command": ' '.join(cmd),
                     "message": str(downstream_error),
                 }
         else:
             return {
                 "code": p.returncode,
-                "command": "git show-ref",
+                "command": ' '.join(cmd),
                 "message": error.decode("utf-8"),
             }
 
