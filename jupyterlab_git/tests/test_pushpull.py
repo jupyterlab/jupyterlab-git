@@ -3,6 +3,7 @@ from subprocess import PIPE
 from unittest.mock import patch, call, Mock
 
 from jupyterlab_git.git import Git
+from .testutils import FakeContentManager
 
 
 @patch('subprocess.Popen')
@@ -18,7 +19,7 @@ def test_git_pull_fail(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').pull('test_curr_path')
+    actual_response = Git(FakeContentManager('/bin')).pull('test_curr_path')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -50,7 +51,7 @@ def test_git_pull_with_auth_fail(mock_GitAuthInputWrapper):
         'username' : 'asdf', 
         'password' : 'qwerty'
     }
-    actual_response = Git(root_dir='/bin').pull('test_curr_path', auth)
+    actual_response = Git(FakeContentManager('/bin')).pull('test_curr_path', auth)
 
 
     # Then
@@ -79,7 +80,7 @@ def test_git_pull_success(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').pull('test_curr_path')
+    actual_response = Git(FakeContentManager('/bin')).pull('test_curr_path')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -111,7 +112,7 @@ def test_git_pull_with_auth_success(mock_GitAuthInputWrapper):
         'username' : 'asdf', 
         'password' : 'qwerty'
     }
-    actual_response = Git(root_dir='/bin').pull('test_curr_path', auth)
+    actual_response = Git(FakeContentManager('/bin')).pull('test_curr_path', auth)
 
     # Then
     mock_GitAuthInputWrapper.assert_has_calls([
@@ -139,7 +140,7 @@ def test_git_push_fail(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').push('test_origin', 'HEAD:test_master', 'test_curr_path')
+    actual_response = Git(FakeContentManager('/bin')).push('test_origin', 'HEAD:test_master', 'test_curr_path')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -171,7 +172,7 @@ def test_git_push_with_auth_fail(mock_GitAuthInputWrapper):
         'username' : 'asdf', 
         'password' : 'qwerty'
     }
-    actual_response = Git(root_dir='/bin').push('test_origin', 'HEAD:test_master', 'test_curr_path', auth)
+    actual_response = Git(FakeContentManager('/bin')).push('test_origin', 'HEAD:test_master', 'test_curr_path', auth)
 
     # Then
     mock_GitAuthInputWrapper.assert_has_calls([
@@ -200,7 +201,7 @@ def test_git_push_success(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').push('.', 'HEAD:test_master', 'test_curr_path')
+    actual_response = Git(FakeContentManager('/bin')).push('.', 'HEAD:test_master', 'test_curr_path')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -232,7 +233,7 @@ def test_git_push_with_auth_success(mock_GitAuthInputWrapper):
         'username' : 'asdf', 
         'password' : 'qwerty'
     }
-    actual_response = Git(root_dir='/bin').push('.', 'HEAD:test_master', 'test_curr_path', auth)
+    actual_response = Git(FakeContentManager('/bin')).push('.', 'HEAD:test_master', 'test_curr_path', auth)
 
     # Then
     mock_GitAuthInputWrapper.assert_has_calls([

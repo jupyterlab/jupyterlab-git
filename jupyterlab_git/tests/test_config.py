@@ -7,13 +7,15 @@ import pytest
 from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import GitConfigHandler
 
+from .testutils import FakeContentManager
+
 
 @patch("jupyterlab_git.handlers.GitConfigHandler.__init__", Mock(return_value=None))
 @patch(
     "jupyterlab_git.handlers.GitConfigHandler.get_json_body",
     Mock(return_value={"path": "test_path"}),
 )
-@patch("jupyterlab_git.handlers.GitConfigHandler.git", Git("/bin"))
+@patch("jupyterlab_git.handlers.GitConfigHandler.git", Git(FakeContentManager("/bin")))
 @patch("jupyterlab_git.handlers.GitConfigHandler.finish")
 @patch("subprocess.Popen")
 def test_git_get_config_success(popen, finish):
@@ -69,7 +71,7 @@ def test_git_get_config_success(popen, finish):
         }
     ),
 )
-@patch("jupyterlab_git.handlers.GitConfigHandler.git", Git("/bin"))
+@patch("jupyterlab_git.handlers.GitConfigHandler.git", Git(FakeContentManager('/bin')))
 @patch("jupyterlab_git.handlers.GitConfigHandler.finish")
 @patch("subprocess.Popen")
 def test_git_set_config_success(popen, finish):
