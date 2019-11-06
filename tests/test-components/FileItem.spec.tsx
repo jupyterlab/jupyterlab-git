@@ -5,23 +5,20 @@ import { shallow } from 'enzyme';
 
 describe('FileItem', () => {
   const props: IFileItemProps = {
-    topRepoPath: '',
     file: {
-      to: 'some/file/path/file-name'
+      x: '',
+      y: '',
+      to: 'some/file/path/file-name',
+      from: ''
     },
     stage: '',
-    app: null,
-    refresh: null,
-    moveFile: () => {},
-    discardFile: () => {},
+    model: null,
+    moveFile: () => Promise.resolve(),
+    discardFile: () => Promise.resolve(),
     moveFileIconClass: 'string',
     moveFileIconSelectedClass: 'string',
     moveFileTitle: '',
-    openFile: () => {},
-    extractFilename: () => {},
     contextMenu: () => {},
-    parseFileExtension: () => {},
-    parseSelectedFileExtension: () => {},
     selectedFile: 0,
     updateSelectedFile: () => {},
     fileIndex: 0,
@@ -30,7 +27,6 @@ describe('FileItem', () => {
     updateSelectedDiscardFile: () => {},
     disableFile: false,
     toggleDisableFiles: () => {},
-    sideBarExpanded: false,
     renderMime: null
   };
 

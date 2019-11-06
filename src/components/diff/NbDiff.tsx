@@ -98,6 +98,12 @@ export interface INBDiffState {
   errorMessage: string;
 }
 
+interface INbdimeDiff {
+  base?: nbformat.INotebookContent;
+  diff?: IDiffEntry[];
+  message?: string;
+}
+
 /**
  * A React component to render the diff of a single Notebook file.
  *
@@ -178,7 +184,7 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
       }).then((response: Response) => {
         response
           .json()
-          .then((data: any) => {
+          .then((data: INbdimeDiff) => {
             if (response.status !== 200) {
               // Handle error
               this.setState({
@@ -187,8 +193,8 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
               });
             } else {
               // Handle response
-              let base = data['base'] as nbformat.INotebookContent;
-              let diff = (data['diff'] as any) as IDiffEntry[];
+              let base = data.base;
+              let diff = data.diff;
               let nbdModel = new NotebookDiffModel(base, diff);
               this.setState({
                 nbdModel: nbdModel

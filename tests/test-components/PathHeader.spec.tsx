@@ -7,22 +7,53 @@ import {
   repoRefreshStyle
 } from '../../src/style/PathHeaderStyle';
 import 'jest';
-import { Git } from '../../src/git';
+import { GitExtension } from '../../src/model';
+import * as git from '../../src/git';
+
+jest.mock('../../src/git');
 
 describe('PathHeader', function() {
-  const props: IPathHeaderProps = {
-    currentFileBrowserPath: '/path/to/repo',
-    topRepoPath: '/foo',
-    refresh: null,
-    currentBranch: 'bar'
-  };
+  let props: IPathHeaderProps;
 
-  it('should have repo and branch details', function() {
-    // When
-    const node = shallow(<PathHeader {...props} />);
+  beforeEach(async () => {
+    const fakePath = '/path/to/repo';
+    const fakeRoot = '/foo';
+    const mockGit = git as jest.Mocked<typeof git>;
+    mockGit.httpGitRequest.mockImplementation((url, method, request) => {
+      let response: Response;
+      switch (url) {
+        case '/git/show_top_level':
+          response = new Response(
+            JSON.stringify({
+              code: 0,
+              top_repo_path: (request as any)['current_path']
+            })
+          );
+          break;
+        case '/git/server_root':
+          response = new Response(
+            JSON.stringify({
+              server_root: fakeRoot
+            })
+          );
+          break;
+        default:
+          response = new Response(
+            `{"message": "No mock implementation for ${url}."}`,
+            { status: 404 }
+          );
+      }
+      return Promise.resolve(response);
+    });
 
-    // Then
-    expect(node.text()).toEqual('repo / bar');
+    const model = new GitExtension();
+    model.pathRepository = fakePath;
+    await model.ready;
+
+    props = {
+      model: model,
+      refresh: async () => {}
+    };
   });
 
   it('should have all buttons', function() {
@@ -45,8 +76,8 @@ describe('PathHeader', function() {
 
   it('should call API on button click', function() {
     // Given
-    const spyPull = jest.spyOn(Git.prototype, 'pull');
-    const spyPush = jest.spyOn(Git.prototype, 'push');
+    const spyPull = jest.spyOn(GitExtension.prototype, 'pull');
+    const spyPush = jest.spyOn(GitExtension.prototype, 'push');
 
     // When
     const node = shallow(<PathHeader {...props} />);
@@ -56,10 +87,10 @@ describe('PathHeader', function() {
 
     buttons.find(`.${gitPullStyle}`).simulate('click');
     expect(spyPull).toHaveBeenCalledTimes(1);
-    expect(spyPull).toHaveBeenCalledWith('/path/to/repo', undefined);
+    expect(spyPull).toHaveBeenCalledWith(undefined);
 
     buttons.find(`.${gitPushStyle}`).simulate('click');
     expect(spyPush).toHaveBeenCalledTimes(1);
-    expect(spyPush).toHaveBeenCalledWith('/path/to/repo', undefined);
+    expect(spyPush).toHaveBeenCalledWith(undefined);
   });
 });

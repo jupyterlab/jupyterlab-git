@@ -128,3 +128,7 @@ export const cancelButton = style({
   backgroundColor: 'var(--jp-layout-color4)',
   marginRight: '4px'
 });
+
+export const fileList = style({
+  paddingLeft: 0
+});

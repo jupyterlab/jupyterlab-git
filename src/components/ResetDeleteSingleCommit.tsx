@@ -1,24 +1,20 @@
 import * as React from 'react';
-
 import { classes } from 'typestyle';
-
 import {
-  warningLabel,
-  messageInput,
   button,
-  resetDeleteButton,
   cancelButton,
-  resetDeleteDisabledButton
+  messageInput,
+  resetDeleteButton,
+  resetDeleteDisabledButton,
+  warningLabel
 } from '../style/SinglePastCommitInfoStyle';
-
-import { Git } from '../git';
+import { IGitExtension } from '../tokens';
 
 export interface IResetDeleteProps {
   action: 'reset' | 'delete';
   commitId: string;
-  path: string;
-  onCancel: Function;
-  refresh: Function;
+  model: IGitExtension;
+  onCancel: () => void;
 }
 
 export interface IResetDeleteState {
@@ -53,20 +49,14 @@ export class ResetDeleteSingleCommit extends React.Component<
     });
   };
 
-  handleResetDelete = () => {
-    let gitApi = new Git();
+  handleResetDelete = async () => {
     if (this.props.action === 'reset') {
-      gitApi
-        .resetToCommit(this.state.message, this.props.path, this.props.commitId)
-        .then(response => {
-          this.props.refresh();
-        });
+      await this.props.model.resetToCommit(this.props.commitId);
     } else {
-      gitApi
-        .deleteCommit(this.state.message, this.props.path, this.props.commitId)
-        .then(response => {
-          this.props.refresh();
-        });
+      await this.props.model.deleteCommit(
+        this.state.message,
+        this.props.commitId
+      );
     }
     this.props.onCancel();
   };

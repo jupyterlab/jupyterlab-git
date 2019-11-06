@@ -1,18 +1,25 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "composite": true,
     "declaration": true,
     "esModuleInterop": true,
-    "noImplicitAny": false,
-    "noEmitOnError": true,
-    "noUnusedLocals": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2015",
-    "outDir": "lib",
-    "types": ["jest"],
+    "incremental": true,
     "jsx": "react",
-    "plugins": [{ "name": "typescript-tslint-plugin" }],
-    "resolveJsonModule": true
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "outDir": "lib",
+    "preserveWatchOutput": true,
+    "resolveJsonModule": true,
+    "rootDir": "src",
+    "strict": true,
+    "strictNullChecks": false,
+    "target": "es2017",
+    "types": ["jest"],
+    "plugins": [{ "name": "typescript-tslint-plugin" }]
   },
-  "include": ["src/*"]
+  "include": ["src/**/*"]
 }

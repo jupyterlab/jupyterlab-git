@@ -7,10 +7,12 @@ cache:
     - /home/travis/.yarn-cache/
 before_install:
   - nvm install 10
-install: pip install pytest "jupyterlab~=1.0"
+install: pip install pytest "jupyterlab~=1.1"
 script:
   - python setup.py sdist
+  # Install the extension ensuring the cache is unused
   - pip install jupyterlab_git[test] --pre --no-index --find-links=dist --no-deps --no-cache-dir -v
+  # Install the extension dependencies
   - pip install jupyterlab_git[test]
   - jupyter labextension list
   - jupyter lab build

@@ -1,61 +1,39 @@
-import * as React from 'react';
-
-import { JupyterFrontEnd } from '@jupyterlab/application';
-
-import {
-  Git,
-  IGitBranchResult,
-  IGitStatusResult,
-  IGitShowTopLevelResult,
-  IGitAllHistory,
-  IGitLogResult,
-  ISingleCommitInfo,
-  IGitStatusFileResult,
-  IDiffCallback
-} from '../git';
-
-import { PathHeader } from './PathHeader';
-
-import { BranchHeader } from './BranchHeader';
-
-import { PastCommits } from './PastCommits';
-
-import { HistorySideBar } from './HistorySideBar';
-
-import {
-  panelContainerStyle,
-  panelWarningStyle,
-  findRepoButtonStyle
-} from '../style/GitPanelStyle';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import * as React from 'react';
+import { GitExtension } from '../model';
+import {
+  findRepoButtonStyle,
+  panelContainerStyle,
+  panelWarningStyle
+} from '../style/GitPanelStyle';
+import { Git } from '../tokens';
+import { BranchHeader } from './BranchHeader';
+import { FileList } from './FileList';
+import { HistorySideBar } from './HistorySideBar';
+import { PathHeader } from './PathHeader';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
-  currentFileBrowserPath: string;
-  topRepoPath: string;
-  showWarning: boolean;
+  inGitRepository: boolean;
 
-  branches: any;
+  branches: Git.IBranch[];
   currentBranch: string;
   upstreamBranch: string;
-  disableSwitchBranch: boolean;
 
-  pastCommits: any;
-  inNewRepo: boolean;
-  showList: boolean;
+  pastCommits: Git.ISingleCommitInfo[];
 
-  stagedFiles: any;
-  unstagedFiles: any;
-  untrackedFiles: any;
+  stagedFiles: Git.IStatusFileResult[];
+  unstagedFiles: Git.IStatusFileResult[];
+  untrackedFiles: Git.IStatusFileResult[];
+  hasChangedFiles: boolean;
 
-  sideBarExpanded: boolean;
+  isHistoryVisible: boolean;
 }
 
 /** Interface for GitPanel component props */
 export interface IGitSessionNodeProps {
-  app: JupyterFrontEnd;
-  diff: IDiffCallback;
+  model: GitExtension;
   renderMime: IRenderMimeRegistry;
   settings: ISettingRegistry.ISettings;
 }
@@ -68,198 +46,188 @@ export class GitPanel extends React.Component<
   constructor(props: IGitSessionNodeProps) {
     super(props);
     this.state = {
-      currentFileBrowserPath: '',
-      topRepoPath: '',
-      showWarning: false,
+      inGitRepository: false,
       branches: [],
       currentBranch: '',
       upstreamBranch: '',
-      disableSwitchBranch: true,
+      hasChangedFiles: false,
       pastCommits: [],
-      inNewRepo: true,
-      showList: true,
       stagedFiles: [],
       unstagedFiles: [],
       untrackedFiles: [],
-      sideBarExpanded: false
+      isHistoryVisible: false
     };
+
+    props.model.repositoryChanged.connect((_, args) => {
+      this.setState({
+        inGitRepository: args.newValue !== null
+      });
+      this.refresh();
+    }, this);
+    props.model.statusChanged.connect(() => {
+      this.setStatus();
+    }, this);
+    props.model.headChanged.connect(async () => {
+      await this.refreshBranch();
+      if (this.state.isHistoryVisible) {
+        this.refreshHistory();
+      } else {
+        this.refreshStatus();
+      }
+    }, this);
+
+    props.settings.changed.connect(this.refresh, this);
   }
 
-  setShowList = (state: boolean) => {
-    this.setState({ showList: state });
+  refreshBranch = async () => {
+    // Get current and upstream git branch
+    if (this.props.model.pathRepository !== null) {
+      const branchData = await this.props.model.branch();
+      let currentBranch = 'master';
+      let upstreamBranch = '';
+      if (branchData.code === 0) {
+        let allBranches = branchData.branches;
+        for (let i = 0; i < allBranches.length; i++) {
+          if (allBranches[i].is_current_branch) {
+            currentBranch = allBranches[i].name;
+            upstreamBranch = allBranches[i].upstream;
+            break;
+          }
+        }
+      }
+
+      this.setState({
+        branches: branchData.branches,
+        currentBranch: currentBranch,
+        upstreamBranch: upstreamBranch
+      });
+    }
+  };
+
+  refreshHistory = async () => {
+    if (this.props.model.pathRepository !== null) {
+      // Get git log for current branch
+      let logData = await this.props.model.log(this.props.settings.composite[
+        'historyCount'
+      ] as number);
+      let pastCommits = new Array<Git.ISingleCommitInfo>();
+      if (logData.code === 0) {
+        pastCommits = logData.commits;
+      }
+
+      this.setState({
+        pastCommits: pastCommits
+      });
+    }
+  };
+
+  setStatus = () => {
+    if (this.props.model.pathRepository !== null) {
+      // Get git status for current branch
+      let stagedFiles = new Array<Git.IStatusFileResult>();
+      let unstagedFiles = new Array<Git.IStatusFileResult>();
+      let untrackedFiles = new Array<Git.IStatusFileResult>();
+      let changedFiles = 0;
+      let statusFiles = this.props.model.status;
+      if (statusFiles.length > 0) {
+        for (let i = 0; i < statusFiles.length; i++) {
+          // If file has been changed
+          if (statusFiles[i].x !== '?' && statusFiles[i].x !== '!') {
+            changedFiles++;
+          }
+          // If file is untracked
+          if (statusFiles[i].x === '?' && statusFiles[i].y === '?') {
+            untrackedFiles.push(statusFiles[i]);
+          } else {
+            // If file is staged
+            if (statusFiles[i].x !== ' ' && statusFiles[i].y !== 'D') {
+              stagedFiles.push(statusFiles[i]);
+            }
+            // If file is unstaged but tracked
+            if (statusFiles[i].y !== ' ') {
+              unstagedFiles.push(statusFiles[i]);
+            }
+          }
+        }
+      }
+
+      this.setState({
+        stagedFiles: stagedFiles,
+        unstagedFiles: unstagedFiles,
+        untrackedFiles: untrackedFiles,
+        hasChangedFiles: changedFiles > 0
+      });
+    }
+  };
+
+  refreshStatus = async () => {
+    await this.props.model.refreshStatus();
   };
 
   /**
    * Refresh widget, update all content
    */
   refresh = async () => {
-    try {
-      let gitApi = new Git();
-
-      let leftSidebarItems = this.props.app.shell.widgets('left');
-      let fileBrowser = leftSidebarItems.next();
-      while (fileBrowser && fileBrowser.id !== 'filebrowser') {
-        fileBrowser = leftSidebarItems.next();
-      }
-      // If fileBrowser has loaded, make API request
-      if (fileBrowser) {
-        // Make API call to get all git info for repo
-        let apiResult = await gitApi.allHistory(
-          (fileBrowser as any).model.path,
-          this.props.settings.composite['historyCount'] as number
-        );
-
-        if (apiResult.code === 0) {
-          // Get top level path of repo
-          let apiShowTopLevel = (apiResult as IGitAllHistory).data
-            .show_top_level;
-
-          // Get current and upstream git branch
-          let branchData = (apiResult as IGitAllHistory).data.branch;
-          let currentBranch = 'master';
-          let upstreamBranch = '';
-          if (branchData.code === 0) {
-            let allBranches = (branchData as IGitBranchResult).branches;
-            for (let i = 0; i < allBranches.length; i++) {
-              if (allBranches[i].is_current_branch) {
-                currentBranch = allBranches[i].name;
-                upstreamBranch = allBranches[i].upstream;
-                break;
-              }
-            }
-          }
-
-          // Get git log for current branch
-          let logData = (apiResult as IGitAllHistory).data.log;
-          let pastCommits = new Array<ISingleCommitInfo>();
-          if (logData.code === 0) {
-            pastCommits = (logData as IGitLogResult).commits;
-          }
-
-          // Get git status for current branch
-          let stagedFiles = new Array<IGitStatusFileResult>();
-          let unstagedFiles = new Array<IGitStatusFileResult>();
-          let untrackedFiles = new Array<IGitStatusFileResult>();
-          let changedFiles = 0;
-          let disableSwitchBranch = true;
-          let statusData = (apiResult as IGitAllHistory).data.status;
-          if (statusData.code === 0) {
-            let statusFiles = (statusData as IGitStatusResult).files;
-            for (let i = 0; i < statusFiles.length; i++) {
-              // If file has been changed
-              if (statusFiles[i].x !== '?' && statusFiles[i].x !== '!') {
-                changedFiles++;
-              }
-              // If file is untracked
-              if (statusFiles[i].x === '?' && statusFiles[i].y === '?') {
-                untrackedFiles.push(statusFiles[i]);
-              } else {
-                // If file is staged
-                if (statusFiles[i].x !== ' ' && statusFiles[i].y !== 'D') {
-                  stagedFiles.push(statusFiles[i]);
-                }
-                // If file is unstaged but tracked
-                if (statusFiles[i].y !== ' ') {
-                  unstagedFiles.push(statusFiles[i]);
-                }
-              }
-            }
-            // No uncommitted changed files, allow switching branches
-            if (changedFiles === 0) {
-              disableSwitchBranch = false;
-            }
-          }
-          // No committed files ever, disable switching branches
-          if (pastCommits.length === 0) {
-            disableSwitchBranch = true;
-          }
-
-          // If not in same repo as before refresh, display the current repo
-          let inNewRepo =
-            this.state.topRepoPath !==
-            (apiShowTopLevel as IGitShowTopLevelResult).top_repo_path;
-          let showList = this.state.showList;
-          if (inNewRepo) {
-            showList = true;
-          }
-
-          this.setState({
-            currentFileBrowserPath: (fileBrowser as any).model.path,
-            topRepoPath: (apiShowTopLevel as IGitShowTopLevelResult)
-              .top_repo_path,
-            showWarning: true,
-            branches: (branchData as IGitBranchResult).branches,
-            currentBranch: currentBranch,
-            upstreamBranch: upstreamBranch,
-            disableSwitchBranch: disableSwitchBranch,
-            pastCommits: pastCommits,
-            inNewRepo: inNewRepo,
-            showList: showList,
-            stagedFiles: stagedFiles,
-            unstagedFiles: unstagedFiles,
-            untrackedFiles: untrackedFiles
-          });
-        } else {
-          this.setState({
-            currentFileBrowserPath: (fileBrowser as any).model.path,
-            topRepoPath: '',
-            showWarning: false
-          });
-        }
-      }
-    } catch (err) {
-      console.log(err);
+    if (this.props.model.pathRepository !== null) {
+      await this.refreshBranch();
+      await this.refreshHistory();
+      await this.refreshStatus();
     }
   };
 
   toggleSidebar = (): void => {
-    this.setState({ sideBarExpanded: !this.state.sideBarExpanded });
+    if (!this.state.isHistoryVisible) {
+      this.refreshHistory();
+    }
+    this.setState({ isHistoryVisible: !this.state.isHistoryVisible });
   };
 
   render() {
-    let main: React.ReactElement<null>;
+    let main: React.ReactElement;
+    let sub: React.ReactElement;
 
-    if (this.state.showWarning) {
+    if (this.state.isHistoryVisible) {
+      sub = (
+        <HistorySideBar
+          isExpanded={this.state.isHistoryVisible}
+          branches={this.state.branches}
+          pastCommits={this.state.pastCommits}
+          model={this.props.model}
+          renderMime={this.props.renderMime}
+        />
+      );
+    } else {
+      sub = (
+        <FileList
+          stagedFiles={this.state.stagedFiles}
+          unstagedFiles={this.state.unstagedFiles}
+          untrackedFiles={this.state.untrackedFiles}
+          model={this.props.model}
+          renderMime={this.props.renderMime}
+        />
+      );
+    }
+
+    if (this.state.inGitRepository) {
       main = (
-        <div>
+        <React.Fragment>
           <BranchHeader
-            currentFileBrowserPath={this.state.currentFileBrowserPath}
-            topRepoPath={this.state.topRepoPath}
-            refresh={this.refresh}
+            model={this.props.model}
+            refresh={this.refreshBranch}
             currentBranch={this.state.currentBranch}
             upstreamBranch={this.state.upstreamBranch}
             stagedFiles={this.state.stagedFiles}
             data={this.state.branches}
-            disabled={this.state.disableSwitchBranch}
+            // No uncommitted changed files, allow switching branches
+            // No committed files ever, disable switching branches
+            disabled={
+              this.state.hasChangedFiles || this.state.pastCommits.length === 0
+            }
             toggleSidebar={this.toggleSidebar}
-            showList={this.state.showList}
-            sideBarExpanded={this.state.sideBarExpanded}
+            sideBarExpanded={this.state.isHistoryVisible}
           />
-          <HistorySideBar
-            isExpanded={this.state.sideBarExpanded}
-            branches={this.state.branches}
-            pastCommits={this.state.pastCommits}
-            topRepoPath={this.state.topRepoPath}
-            app={this.props.app}
-            refresh={this.refresh}
-            diff={this.props.diff}
-            renderMime={this.props.renderMime}
-          />
-          <PastCommits
-            currentFileBrowserPath={this.state.currentFileBrowserPath}
-            topRepoPath={this.state.topRepoPath}
-            inNewRepo={this.state.inNewRepo}
-            showList={this.state.showList}
-            stagedFiles={this.state.stagedFiles}
-            unstagedFiles={this.state.unstagedFiles}
-            untrackedFiles={this.state.untrackedFiles}
-            app={this.props.app}
-            refresh={this.refresh}
-            diff={this.props.diff}
-            sideBarExpanded={this.state.sideBarExpanded}
-            renderMime={this.props.renderMime}
-          />
-        </div>
+          {sub}
+        </React.Fragment>
       );
     } else {
       main = (
@@ -268,7 +236,7 @@ export class GitPanel extends React.Component<
           <button
             className={findRepoButtonStyle}
             onClick={() =>
-              this.props.app.commands.execute('filebrowser:toggle-main')
+              this.props.model.commands.execute('filebrowser:toggle-main')
             }
           >
             Go find a repo
@@ -280,12 +248,17 @@ export class GitPanel extends React.Component<
     return (
       <div className={panelContainerStyle}>
         <PathHeader
-          currentFileBrowserPath={this.state.currentFileBrowserPath}
-          topRepoPath={this.state.topRepoPath}
-          refresh={this.refresh}
-          currentBranch={this.state.currentBranch}
+          model={this.props.model}
+          refresh={async () => {
+            await this.refreshBranch();
+            if (this.state.isHistoryVisible) {
+              this.refreshHistory();
+            } else {
+              this.refreshStatus();
+            }
+          }}
         />
-        <div>{main}</div>
+        {main}
       </div>
     );
   }

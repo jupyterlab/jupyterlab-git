@@ -142,8 +142,10 @@ class GitLogHandler(GitHandler):
         POST request handler,
         fetches Commit SHA, Author Name, Commit Date & Commit Message.
         """
-        current_path = self.get_json_body()["current_path"]
-        result = self.git.log(current_path)
+        body = self.get_json_body()
+        current_path = body["current_path"]
+        history_count = body.get("history_count", 25)
+        result = self.git.log(current_path, history_count)
         self.finish(json.dumps(result))
 
 
@@ -179,9 +181,6 @@ class GitDiffHandler(GitHandler):
         top_repo_path = self.get_json_body()["top_repo_path"]
         my_output = self.git.diff(top_repo_path)
         self.finish(my_output)
-        print("GIT DIFF")
-        print(my_output)
-
 
 class GitBranchHandler(GitHandler):
     """
@@ -289,12 +288,10 @@ class GitCheckoutHandler(GitHandler):
         top_repo_path = data["top_repo_path"]
         if data["checkout_branch"]:
             if data["new_check"]:
-                print("to create a new branch")
                 my_output = self.git.checkout_new_branch(
                     data["branchname"], top_repo_path
                 )
             else:
-                print("switch to an old branch")
                 my_output = self.git.checkout_branch(data["branchname"], top_repo_path)
         elif data["checkout_all"]:
             my_output = self.git.checkout_all(top_repo_path)
@@ -418,7 +415,6 @@ class GitAddAllUntrackedHandler(GitHandler):
         """
         top_repo_path = self.get_json_body()["top_repo_path"]
         my_output = self.git.add_all_untracked(top_repo_path)
-        print(my_output)
         self.finish(my_output)
 
 class GitChangedFilesHandler(GitHandler):

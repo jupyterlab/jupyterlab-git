@@ -1,13 +1,16 @@
 import * as React from 'react';
 import { shallow } from 'enzyme';
 import { SinglePastCommitInfo } from '../../src/components/SinglePastCommitInfo';
-import { PastCommitNode } from '../../src/components/PastCommitNode';
-import { IGitBranchResult } from '../../src/git';
+import {
+  PastCommitNode,
+  IPastCommitNodeProps
+} from '../../src/components/PastCommitNode';
+import { Git } from '../../src/tokens';
 import { collapseStyle } from '../../src/style/PastCommitNodeStyle';
 import 'jest';
 
 describe('PastCommitNode', () => {
-  const notMatchingBranches = [
+  const notMatchingBranches: Git.IBranch[] = [
     {
       is_current_branch: false,
       is_remote_branch: false,
@@ -25,7 +28,7 @@ describe('PastCommitNode', () => {
       tag: null
     }
   ];
-  const matchingBranches = [
+  const matchingBranches: Git.IBranch[] = [
     {
       is_current_branch: false,
       is_remote_branch: false,
@@ -43,14 +46,9 @@ describe('PastCommitNode', () => {
       tag: 'v1.0.5-0-g2414721'
     }
   ];
-  const branches: IGitBranchResult['branches'] = notMatchingBranches.concat(
-    matchingBranches
-  );
-  const props = {
-    topRepoPath: null,
-    app: null,
-    diff: null,
-    refresh: null,
+  const branches: Git.IBranch[] = notMatchingBranches.concat(matchingBranches);
+  const props: IPastCommitNodeProps = {
+    model: null,
     pastCommit: {
       commit: '2414721b194453f058079d897d13c4e377f92dc6',
       author: 'author',
@@ -61,6 +59,7 @@ describe('PastCommitNode', () => {
     branches: branches,
     renderMime: null
   };
+
   test('Includes commit info', () => {
     const pastCommitNode = shallow(<PastCommitNode {...props} />);
     expect(pastCommitNode.text()).toMatch(props.pastCommit.author);
@@ -68,6 +67,7 @@ describe('PastCommitNode', () => {
     expect(pastCommitNode.text()).toMatch(props.pastCommit.date);
     expect(pastCommitNode.text()).toMatch(props.pastCommit.commit_msg);
   });
+
   test('Includes only relevent branch info', () => {
     const pastCommitNode = shallow(<PastCommitNode {...props} />);
     expect(pastCommitNode.text()).toMatch('name3');
@@ -75,15 +75,18 @@ describe('PastCommitNode', () => {
     expect(pastCommitNode.text()).not.toMatch('name1');
     expect(pastCommitNode.text()).not.toMatch('name2');
   });
+
   test('Doesnt include details at first', () => {
     const pastCommitNode = shallow(<PastCommitNode {...props} />);
     expect(pastCommitNode.find(SinglePastCommitInfo)).toHaveLength(0);
   });
+
   test('includes details after click', () => {
     const pastCommitNode = shallow(<PastCommitNode {...props} />);
     pastCommitNode.simulate('click');
     expect(pastCommitNode.find(SinglePastCommitInfo)).toHaveLength(1);
   });
+
   test('hides details after collapse', () => {
     const pastCommitNode = shallow(<PastCommitNode {...props} />);
     pastCommitNode.simulate('click');

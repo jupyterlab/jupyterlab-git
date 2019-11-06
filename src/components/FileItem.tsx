@@ -1,12 +1,8 @@
-import { JupyterFrontEnd } from '@jupyterlab/application';
-
-import {
-  changeStageButtonLeftStyle,
-  changeStageButtonStyle,
-  diffFileButtonStyle,
-  discardFileButtonStyle
-} from '../style/GitStageStyle';
-
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import * as React from 'react';
+import { classes } from 'typestyle';
+import { GitExtension } from '../model';
 import {
   disabledFileStyle,
   discardFileButtonSelectedStyle,
@@ -23,42 +19,48 @@ import {
   selectedFileStyle,
   sideBarExpandedFileLabelStyle
 } from '../style/FileItemStyle';
-
-import { classes } from 'typestyle';
-
-import * as React from 'react';
-
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { ISpecialRef } from './diff/model';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  changeStageButtonLeftStyle,
+  changeStageButtonStyle,
+  diffFileButtonStyle,
+  discardFileButtonStyle
+} from '../style/GitStageStyle';
+import { Git } from '../tokens';
+import {
+  extractFilename,
+  openListedFile,
+  parseFileExtension,
+  parseSelectedFileExtension
+} from '../utils';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
+import { ISpecialRef } from './diff/model';
 
 export interface IFileItemProps {
-  topRepoPath: string;
-  file: any;
+  file: Git.IStatusFileResult;
   stage: string;
-  app: JupyterFrontEnd;
-  refresh: any;
-  moveFile: Function;
-  discardFile: Function;
+  model: GitExtension;
+  moveFile: (file: string) => Promise<void>;
+  discardFile: (file: string) => Promise<void>;
   moveFileIconClass: string;
   moveFileIconSelectedClass: string;
   moveFileTitle: string;
-  openFile: Function;
-  extractFilename: Function;
-  contextMenu: Function;
-  parseFileExtension: Function;
-  parseSelectedFileExtension: Function;
+  contextMenu: (
+    event: any,
+    typeX: string,
+    typeY: string,
+    file: string,
+    index: number,
+    stage: string
+  ) => void;
   selectedFile: number;
-  updateSelectedFile: Function;
+  updateSelectedFile: (file: number, stage: string) => void;
   fileIndex: number;
   selectedStage: string;
   selectedDiscardFile: number;
-  updateSelectedDiscardFile: Function;
+  updateSelectedDiscardFile: (index: number) => void;
   disableFile: boolean;
-  toggleDisableFiles: Function;
-  sideBarExpanded: boolean;
+  toggleDisableFiles: () => void;
   renderMime: IRenderMimeRegistry;
 }
 
@@ -123,20 +125,11 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
 
   getFileLableIconClass() {
     if (this.showDiscardWarning()) {
-      return classes(
-        fileIconStyle,
-        this.props.parseFileExtension(this.props.file.to)
-      );
+      return classes(fileIconStyle, parseFileExtension(this.props.file.to));
     } else {
       return this.checkSelected()
-        ? classes(
-            fileIconStyle,
-            this.props.parseSelectedFileExtension(this.props.file.to)
-          )
-        : classes(
-            fileIconStyle,
-            this.props.parseFileExtension(this.props.file.to)
-          );
+        ? classes(fileIconStyle, parseSelectedFileExtension(this.props.file.to))
+        : classes(fileIconStyle, parseFileExtension(this.props.file.to));
     }
   }
 
@@ -153,9 +146,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
   }
 
   getFileLabelClass() {
-    return this.props.sideBarExpanded
-      ? classes(fileLabelStyle, sideBarExpandedFileLabelStyle)
-      : fileLabelStyle;
+    return classes(fileLabelStyle, sideBarExpandedFileLabelStyle);
   }
 
   getMoveFileIconClass() {
@@ -225,31 +216,26 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
    * It shows modal asking for confirmation and when confirmed make
    * server side call to git checkout to discard changes in selected file.
    */
-  discardSelectedFileChanges() {
+  async discardSelectedFileChanges() {
     this.props.toggleDisableFiles();
     this.props.updateSelectedDiscardFile(this.props.fileIndex);
-    return showDialog({
+    const result = await showDialog({
       title: 'Discard changes',
       body: `Are you sure you want to permanently discard changes to ${
         this.props.file.from
       }? This action cannot be undone.`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
-    }).then(result => {
-      if (result.button.accept) {
-        this.props.discardFile(
-          this.props.file.to,
-          this.props.topRepoPath,
-          this.props.refresh
-        );
-      }
-      this.props.toggleDisableFiles();
-      this.props.updateSelectedDiscardFile(-1);
     });
+    if (result.button.accept) {
+      this.props.discardFile(this.props.file.to);
+    }
+    this.props.toggleDisableFiles();
+    this.props.updateSelectedDiscardFile(-1);
   }
 
   render() {
     return (
-      <div
+      <li
         className={this.getFileClass()}
         onClick={() =>
           this.props.updateSelectedFile(this.props.fileIndex, this.props.stage)
@@ -259,11 +245,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
           className={`jp-Git-button ${this.getMoveFileIconClass()}`}
           title={this.props.moveFileTitle}
           onClick={() => {
-            this.props.moveFile(
-              this.props.file.to,
-              this.props.topRepoPath,
-              this.props.refresh
-            );
+            this.props.moveFile(this.props.file.to);
           }}
         />
         <span className={this.getFileLableIconClass()} />
@@ -280,37 +262,37 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
             );
           }}
           onDoubleClick={() =>
-            this.props.openFile(
+            openListedFile(
               this.props.file.x,
               this.props.file.y,
               this.props.file.to,
-              this.props.app
+              this.props.model
             )
           }
           title={this.props.file.to}
         >
-          {this.props.extractFilename(this.props.file.to)}
-          <span className={this.getFileChangedLabelClass(this.props.file.y)}>
-            {this.getFileChangedLabel(this.props.file.y)}
-          </span>
-          {this.props.stage === 'Changed' && (
-            <React.Fragment>
-              <button
-                className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
-                title={'Discard this change'}
-                onClick={() => {
-                  this.discardSelectedFileChanges();
-                }}
-              />
-              {isDiffSupported(this.props.file.to) &&
-                this.diffButton({ specialRef: 'WORKING' })}
-            </React.Fragment>
-          )}
-          {this.props.stage === 'Staged' &&
-            isDiffSupported(this.props.file.to) &&
-            this.diffButton({ specialRef: 'INDEX' })}
+          {extractFilename(this.props.file.to)}
         </span>
-      </div>
+        <span className={this.getFileChangedLabelClass(this.props.file.y)}>
+          {this.getFileChangedLabel(this.props.file.y)}
+        </span>
+        {this.props.stage === 'Changed' && (
+          <React.Fragment>
+            <button
+              className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
+              title={'Discard this change'}
+              onClick={() => {
+                this.discardSelectedFileChanges();
+              }}
+            />
+            {isDiffSupported(this.props.file.to) &&
+              this.diffButton({ specialRef: 'WORKING' })}
+          </React.Fragment>
+        )}
+        {this.props.stage === 'Staged' &&
+          isDiffSupported(this.props.file.to) &&
+          this.diffButton({ specialRef: 'INDEX' })}
+      </li>
     );
   }
 
@@ -328,13 +310,12 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
         onClick={async () => {
           await openDiffView(
             this.props.file.to,
-            this.props.app,
+            this.props.model,
             {
               previousRef: { gitRef: 'HEAD' },
               currentRef: { specialRef: currentRef.specialRef }
             },
-            this.props.renderMime,
-            this.props.topRepoPath
+            this.props.renderMime
           );
         }}
       />

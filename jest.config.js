@@ -1,3 +1,9 @@
+var tsConfig = require ('./tsconfig.json');
+
+var tsOptions = tsConfig["compilerOptions"];
+// Need as the test folder is not visible from the src folder
+tsOptions["rootDir"] = null;
+
 module.exports = {
   automock: false,
   moduleNameMapper: {
@@ -7,12 +13,12 @@ module.exports = {
   preset: 'ts-jest/presets/js-with-babel',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
-  testPathIgnorePatterns: ['/dev_mode/', '/lib/', '/node_modules/'],
-  testRegex: '/tests/test-.*/.*.spec.ts[x]?$',
+  testPathIgnorePatterns: ['/lib/', '/node_modules/'],
+  testRegex: '/tests/.*.spec.ts[x]?$',
   transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
   globals: {
     'ts-jest': {
-      tsConfig: 'tsconfig.json'
+      tsConfig: tsOptions
     }
   }
 };

@@ -3,9 +3,7 @@ import { style } from 'typestyle';
 export const fileStyle = style({
   display: 'flex',
   flexDirection: 'row',
-  flexWrap: 'wrap',
   color: 'var(--jp-ui-font-color1)',
-  height: '25px',
   lineHeight: 'var(--jp-private-running-item-height)',
   paddingLeft: '4px',
   listStyleType: 'none',
