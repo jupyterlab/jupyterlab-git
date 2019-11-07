@@ -10,8 +10,8 @@ import {
 } from '../style/BranchHeaderStyle';
 
 export interface ICommitBoxProps {
-  hasStagedFiles: boolean;
-  commitAllStagedFiles: (message: string) => Promise<void>;
+  hasFiles: boolean;
+  commitFunc: (message: string) => Promise<void>;
 }
 
 export interface ICommitBoxState {
@@ -19,7 +19,6 @@ export interface ICommitBoxState {
    * Commit message
    */
   value: string;
-  disableSubmit: boolean;
 }
 
 export class CommitBox extends React.Component<
@@ -29,8 +28,7 @@ export class CommitBox extends React.Component<
   constructor(props: ICommitBoxProps) {
     super(props);
     this.state = {
-      value: '',
-      disableSubmit: true
+      value: ''
     };
   }
 
@@ -45,24 +43,15 @@ export class CommitBox extends React.Component<
   /** Initalize commit message input box */
   initializeInput = (): void => {
     this.setState({
-      value: '',
-      disableSubmit: true
+      value: ''
     });
   };
 
   /** Handle input inside commit message box */
   handleChange = (event: any): void => {
-    if (event.target.value && event.target.value !== '') {
-      this.setState({
-        value: event.target.value,
-        disableSubmit: false
-      });
-    } else {
-      this.setState({
-        value: event.target.value,
-        disableSubmit: true
-      });
-    }
+    this.setState({
+      value: event.target.value
+    });
   };
 
   /** Update state of commit message input box */
@@ -86,9 +75,9 @@ export class CommitBox extends React.Component<
       >
         <textarea
           className={classes(textInputStyle, stagedCommitMessageStyle)}
-          disabled={!this.props.hasStagedFiles}
+          disabled={!this.props.hasFiles}
           placeholder={
-            this.props.hasStagedFiles
+            this.props.hasFiles
               ? 'Input message to commit staged changes'
               : 'Stage your changes before commit'
           }
@@ -96,12 +85,12 @@ export class CommitBox extends React.Component<
           onChange={this.handleChange}
         />
         <input
-          className={this.checkReadyForSubmit(this.props.hasStagedFiles)}
+          className={this.checkReadyForSubmit(this.props.hasFiles)}
           type="button"
           title="Commit"
-          disabled={this.state.disableSubmit}
+          disabled={!(this.props.hasFiles && this.state.value)}
           onClick={() => {
-            this.props.commitAllStagedFiles(this.state.value);
+            this.props.commitFunc(this.state.value);
             this.initializeInput();
           }}
         />
