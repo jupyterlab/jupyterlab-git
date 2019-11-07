@@ -539,9 +539,17 @@ class Git:
         my_output = subprocess.check_output(["git", "add", "-A"], cwd=top_repo_path)
         return my_output
 
+    def add_all_unstaged(self, top_repo_path):
+        """
+        Execute git add all unstaged command & return the result.
+        """
+        e = 'git add -u'
+        my_output = subprocess.call(e, shell=True, cwd=top_repo_path)
+        return {"result": my_output}
+
     def add_all_untracked(self, top_repo_path):
         """
-        Execute git add_all_untracked command & return the result.
+        Execute git add all untracked command & return the result.
         """
         e = 'echo "a\n*\nq\n" | git add -i'
         my_output = subprocess.call(e, shell=True, cwd=top_repo_path)

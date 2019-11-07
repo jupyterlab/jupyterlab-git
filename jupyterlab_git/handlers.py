@@ -182,6 +182,7 @@ class GitDiffHandler(GitHandler):
         my_output = self.git.diff(top_repo_path)
         self.finish(my_output)
 
+
 class GitBranchHandler(GitHandler):
     """
     Handler for 'git branch -a'. Fetches list of all branches in current repository
@@ -199,12 +200,12 @@ class GitBranchHandler(GitHandler):
 class GitAddHandler(GitHandler):
     """
     Handler for git add <filename>'.
-    Adds one or all files into to the staging area.
+    Adds one or all files to the staging area.
     """
 
     def get(self):
         """
-        GET request handler, adds files in the staging area.
+        GET request handler, adds files to the staging area.
         """
         self.finish(
             json.dumps(
@@ -224,6 +225,40 @@ class GitAddHandler(GitHandler):
             filename = data["filename"]
             my_output = self.git.add(filename, top_repo_path)
         self.finish(my_output)
+
+
+class GitAddAllUnstagedHandler(GitHandler):
+    """
+    Handler for 'git add -u'. Adds ONLY all unstaged files, does not touch
+    untracked or staged files.
+    """
+
+    def post(self):
+        """
+        POST request handler, adds all the changed files.
+        """
+        self.finish(
+            self.git.add_all_unstaged(
+                self.get_json_body()["top_repo_path"]
+            )
+        )
+
+
+class GitAddAllUntrackedHandler(GitHandler):
+    """
+    Handler for 'echo "a\n*\nq\n" | git add -i'. Adds ONLY all
+    untracked files, does not touch unstaged or staged files.
+    """
+
+    def post(self):
+        """
+        POST request handler, adds all the untracked files.
+        """
+        self.finish(
+            self.git.add_all_untracked(
+                self.get_json_body()["top_repo_path"]
+            )
+        )
 
 
 class GitResetHandler(GitHandler):
@@ -344,7 +379,7 @@ class GitPullHandler(GitHandler):
         """
         data = self.get_json_body()
         response = self.git.pull(data['current_path'], data.get('auth', None))
-        
+
         self.finish(json.dumps(response))
 
 
@@ -404,18 +439,6 @@ class GitInitHandler(GitHandler):
         self.finish(my_output)
 
 
-class GitAddAllUntrackedHandler(GitHandler):
-    """
-    Handler for 'echo "a\n*\nq\n" | git add -i'. Adds ONLY all untracked files.
-    """
-
-    def post(self):
-        """
-        POST request handler, adds all the untracked files.
-        """
-        top_repo_path = self.get_json_body()["top_repo_path"]
-        my_output = self.git.add_all_untracked(top_repo_path)
-        self.finish(my_output)
 
 class GitChangedFilesHandler(GitHandler):
 
@@ -466,6 +489,8 @@ def setup_handlers(web_app):
         ("/git/show_top_level", GitShowTopLevelHandler),
         ("/git/show_prefix", GitShowPrefixHandler),
         ("/git/add", GitAddHandler),
+        ("/git/add_all_unstaged", GitAddAllUnstagedHandler),
+        ("/git/add_all_untracked", GitAddAllUntrackedHandler),
         ("/git/status", GitStatusHandler),
         ("/git/branch", GitBranchHandler),
         ("/git/reset", GitResetHandler),
@@ -480,7 +505,6 @@ def setup_handlers(web_app):
         ("/git/detailed_log", GitDetailedLogHandler),
         ("/git/init", GitInitHandler),
         ("/git/all_history", GitAllHistoryHandler),
-        ("/git/add_all_untracked", GitAddAllUntrackedHandler),
         ("/git/clone", GitCloneHandler),
         ("/git/upstream", GitUpstreamHandler),
         ("/git/config", GitConfigHandler),

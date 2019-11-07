@@ -312,7 +312,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Add all unstaged files */
   addAllUnstagedFiles = async () => {
-    await this.props.model.add();
+    await this.props.model.addAllUnstaged();
   };
 
   /** Discard changes in all unstaged files */

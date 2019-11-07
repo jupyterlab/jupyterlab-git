@@ -464,6 +464,38 @@ export class GitExtension implements IGitExtension, IDisposable {
     return Promise.resolve(response);
   }
 
+  /** Make request to add all unstaged files into
+   * the staging area in repository 'path'
+   */
+  async addAllUnstaged(): Promise<Response> {
+    await this.ready;
+    const path = this.pathRepository;
+
+    if (path === null) {
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            code: -1,
+            message: 'Not in a git repository.'
+          })
+        )
+      );
+    }
+
+    try {
+      let response = await httpGitRequest('/git/add_all_unstaged', 'POST', {
+        top_repo_path: path
+      });
+      if (response.status !== 200) {
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
+      }
+      return response.json();
+    } catch (err) {
+      throw ServerConnection.NetworkError;
+    }
+  }
+
   /** Make request to add all untracked files into
    * the staging area in the repository
    */
