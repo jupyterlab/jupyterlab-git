@@ -492,7 +492,7 @@ export class GitExtension implements IGitExtension, IDisposable {
       }
       return response.json();
     } catch (err) {
-      throw ServerConnection.NetworkError;
+      throw new ServerConnection.NetworkError(err);
     }
   }
 
