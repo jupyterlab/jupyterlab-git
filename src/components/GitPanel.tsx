@@ -204,6 +204,7 @@ export class GitPanel extends React.Component<
           untrackedFiles={this.state.untrackedFiles}
           model={this.props.model}
           renderMime={this.props.renderMime}
+          settings={this.props.settings}
         />
       );
     }
