@@ -1,13 +1,14 @@
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
-import { GitExtension, BranchMarker } from '../model';
+import { GitExtension } from '../model';
 import {
   findRepoButtonStyle,
   panelContainerStyle,
   panelWarningStyle
 } from '../style/GitPanelStyle';
 import { Git } from '../tokens';
+import { decodeStage } from '../utils';
 import { BranchHeader } from './BranchHeader';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
@@ -27,8 +28,6 @@ export interface IGitSessionNodeState {
   unstagedFiles: Git.IStatusFileResult[];
   untrackedFiles: Git.IStatusFileResult[];
   hasChangedFiles: boolean;
-
-  marker: BranchMarker;
 
   isHistoryVisible: boolean;
 }
@@ -57,7 +56,6 @@ export class GitPanel extends React.Component<
       stagedFiles: [],
       unstagedFiles: [],
       untrackedFiles: [],
-      marker: null,
       isHistoryVisible: false
     };
 
@@ -99,14 +97,15 @@ export class GitPanel extends React.Component<
         }
       }
 
+      this.props.model.getMarker(
+        this.props.model.pathRepository,
+        currentBranch
+      );
+
       this.setState({
         branches: branchData.branches,
         currentBranch: currentBranch,
-        upstreamBranch: upstreamBranch,
-        marker: this.props.model.getMarker(
-          this.props.model.pathRepository,
-          currentBranch
-        )
+        upstreamBranch: upstreamBranch
       });
     }
   };
@@ -138,31 +137,25 @@ export class GitPanel extends React.Component<
       let statusFiles = this.props.model.status;
       if (statusFiles.length > 0) {
         for (let i = 0; i < statusFiles.length; i++) {
+          const file = statusFiles[i];
+          const { x, y } = file;
+          const stage = decodeStage(x, y);
+
           // If file has been changed
-          if (statusFiles[i].x !== '?' && statusFiles[i].x !== '!') {
+          if (x !== '?' && x !== '!') {
             changedFiles++;
           }
+
           // If file is untracked
-          if (statusFiles[i].x === '?' && statusFiles[i].y === '?') {
-            untrackedFiles.push(statusFiles[i]);
-          } else {
-            // If file is staged
-            if (statusFiles[i].x !== ' ' && statusFiles[i].y !== 'D') {
-              stagedFiles.push(statusFiles[i]);
-            }
-            // If file is unstaged but tracked
-            if (statusFiles[i].y !== ' ') {
-              unstagedFiles.push(statusFiles[i]);
-            }
+          if (stage === 'untracked') {
+            untrackedFiles.push(file);
+          } else if (stage === 'unstaged') {
+            unstagedFiles.push(file);
+          } else if (stage === 'staged') {
+            stagedFiles.push(file);
           }
         }
       }
-
-      this.state.marker.addMarked(
-        ...stagedFiles.map(x => x.to),
-        ...unstagedFiles.map(x => x.to)
-      );
-      this.state.marker.addUnmarked(...untrackedFiles.map(x => x.to));
 
       this.setState({
         stagedFiles: stagedFiles,

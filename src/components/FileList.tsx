@@ -484,11 +484,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       />
     );
 
-    const allFilesExcludingUnmodified = () =>
-      this.props.untrackedFiles.concat(
+    const allFilesExcludingUnmodified = () => {
+      let files = this.props.untrackedFiles.concat(
         this.props.unstagedFiles,
         this.props.stagedFiles
       );
+
+      files.sort((a, b) => a.to.localeCompare(b.to));
+      return files;
+    };
 
     return (
       <div onContextMenu={event => event.preventDefault()}>
@@ -501,6 +505,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             <GitStageSimple
               heading={'Changed'}
               files={allFilesExcludingUnmodified()}
+              marker={this.props.model.getMarker(
+                this.props.model.pathRepository,
+                ''
+              )}
               model={this.props.model}
               discardAllFiles={this.discardAllChanges}
               discardFile={this.discardChanges}

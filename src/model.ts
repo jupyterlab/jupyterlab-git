@@ -879,15 +879,19 @@ export class BranchMarker {
   }
 
   addMarked(...fnames: string[]) {
-    for (let fname in fnames) {
+    for (let fname of fnames) {
       this.add(fname, true);
     }
   }
 
   addUnmarked(...fnames: string[]) {
-    for (let fname in fnames) {
+    for (let fname of fnames) {
       this.add(fname, false);
     }
+  }
+
+  get(fname: string) {
+    return this._marks[fname];
   }
 
   mark(fname: string) {

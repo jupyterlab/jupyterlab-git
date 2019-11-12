@@ -31,6 +31,24 @@ export function extractFilename(path: string): string {
   }
 }
 
+export function decodeStage(x: string, y: string) {
+  // If file is untracked
+  if (x === '?' && y === '?') {
+    return 'untracked';
+  } else {
+    // If file is staged
+    if (x !== ' ' && y !== 'D') {
+      return 'staged';
+    }
+    // If file is unstaged but tracked
+    if (y !== ' ') {
+      return 'unstaged';
+    }
+  }
+
+  return undefined;
+}
+
 /** Open a file in the git listing */
 export async function openListedFile(
   typeX: string,

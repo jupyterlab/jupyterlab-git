@@ -2,7 +2,7 @@ import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { GitExtension } from '../model';
+import { BranchMarker, GitExtension } from '../model';
 import {
   changeStageButtonStyle,
   discardFileButtonStyle,
@@ -12,10 +12,12 @@ import {
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
 import { FileItemSimple } from './FileItemSimple';
+import { decodeStage } from '../utils';
 
 export interface IGitStageSimpleProps {
   heading: string;
   files: Git.IStatusFileResult[];
+  marker: BranchMarker;
   model: GitExtension;
   discardAllFiles: () => Promise<void>;
   discardFile: (file: string) => Promise<void>;
@@ -80,7 +82,8 @@ export class GitStageSimple extends React.Component<IGitStageSimpleProps> {
                 <FileItemSimple
                   key={fileIndex}
                   file={file}
-                  stage={this.props.heading}
+                  stage={decodeStage(file.x, file.y)}
+                  marker={this.props.marker}
                   model={this.props.model}
                   discardFile={this.props.discardFile}
                   renderMime={this.props.renderMime}
