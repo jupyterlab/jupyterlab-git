@@ -125,6 +125,13 @@ export class GitExtension implements IGitExtension, IDisposable {
     return this._statusChanged;
   }
 
+  /**
+   * A signal emitted when the current marking of the git repository changes.
+   */
+  get markChanged(): ISignal<IGitExtension, void> {
+    return this._markChanged;
+  }
+
   public get commands(): CommandRegistry | null {
     return this._app ? this._app.commands : null;
   }
@@ -856,12 +863,13 @@ export class GitExtension implements IGitExtension, IDisposable {
   private _app: JupyterFrontEnd | null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
   private _isDisposed = false;
-  private _markerCache: Markers = new Markers();
+  private _markerCache: Markers = new Markers(() => this._markChanged.emit());
   private _currentMarker: BranchMarker = null;
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
   private _headChanged = new Signal<IGitExtension, void>(this);
+  private _markChanged = new Signal<IGitExtension, void>(this);
   private _repositoryChanged = new Signal<
     IGitExtension,
     IChangedArgs<string | null>
@@ -872,9 +880,11 @@ export class GitExtension implements IGitExtension, IDisposable {
 }
 
 export class BranchMarker {
+  constructor(private _refresh: () => void) {}
+
   add(fname: string, mark: boolean = true) {
     if (!(fname in this._marks)) {
-      this._marks[fname] = mark;
+      this.set(fname, mark);
     }
   }
 
@@ -895,28 +905,35 @@ export class BranchMarker {
   }
 
   mark(fname: string) {
-    this._marks[fname] = true;
+    this.set(fname, true);
   }
 
   unmark(fname: string) {
-    this._marks[fname] = false;
+    this.set(fname, false);
+  }
+
+  set(fname: string, mark: boolean) {
+    this._marks[fname] = mark;
+    this._refresh();
   }
 
   toggle(fname: string) {
-    this._marks[fname] = !this._marks[fname];
+    this.set(fname, !this._marks[fname]);
   }
 
   private _marks: { [key: string]: boolean } = {};
 }
 
 export class Markers {
+  constructor(private _refresh: () => void) {}
+
   get(path: string, branch: string): BranchMarker {
     const key = Markers.markerKey(path, branch);
     if (key in this._branchMarkers) {
       return this._branchMarkers[key];
     }
 
-    let marker = new BranchMarker();
+    let marker = new BranchMarker(this._refresh);
     this._branchMarkers[key] = marker;
     return marker;
   }

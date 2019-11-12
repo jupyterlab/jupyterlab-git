@@ -76,6 +76,7 @@ export class GitPanel extends React.Component<
         this.refreshStatus();
       }
     }, this);
+    props.model.markChanged.connect(() => this.forceUpdate());
 
     props.settings.changed.connect(this.refresh, this);
   }

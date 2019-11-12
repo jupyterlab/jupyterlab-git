@@ -36,8 +36,10 @@ export class GitMarkBox extends React.Component<IGitMarkBoxProps> {
   }
 
   protected _onClick(event: React.ChangeEvent<HTMLInputElement>) {
+    // toggle will force an update of GitPanel
     this.props.marker.toggle(this.props.fname);
-    console.log(this.props.marker);
+
+    // needed if not a descendent of a GitPanel
     this.forceUpdate();
   }
 
@@ -107,9 +109,9 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
     return (
       <li className={fileStyle}>
         <GitMarkBox
-          marker={this.props.marker}
-          stage={this.props.stage}
           fname={this.props.file.to}
+          stage={this.props.stage}
+          marker={this.props.marker}
         />
         <span
           className={classes(
