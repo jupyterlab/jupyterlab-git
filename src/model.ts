@@ -3,10 +3,10 @@ import { IChangedArgs, PathExt, Poll } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
+import { IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
-import { IDisposable } from '@phosphor/disposable';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -664,7 +664,13 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
   }
 
-  /** Make request to move one or all files from the staged to the unstaged area */
+  /**
+   * Make request to move one or all files from the staged to the unstaged area
+   *
+   * @param filename - Path to a file to be reset. Leave blank to reset all
+   *
+   * @returns a promise that resolves when the request is complete.
+   */
   async reset(filename?: string): Promise<Response> {
     await this.ready;
     const path = this.pathRepository;
@@ -732,8 +738,14 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
   }
 
-  /** Make request to reset to selected commit */
-  async resetToCommit(commitId: string): Promise<Response> {
+  /**
+   * Make request to reset to selected commit
+   *
+   * @param commitId - Git commit specification. Leave blank to reset to HEAD
+   *
+   * @returns a promise that resolves when the request is complete.
+   */
+  async resetToCommit(commitId: string = ''): Promise<Response> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -780,6 +792,21 @@ export class GitExtension implements IGitExtension, IDisposable {
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     }
+  }
+
+  /**
+   * get marker obj for repo path/branch combination
+   */
+  getMarker(path: string, branch: string): BranchMarker {
+    this._currentMarker = this._markerCache.get(path, branch);
+    return this._currentMarker;
+  }
+
+  /**
+   * get most recently fetched marker object
+   */
+  get currentMarker(): BranchMarker {
+    return this._currentMarker;
   }
 
   registerDiffProvider(filetypes: string[], callback: Git.IDiffCallback): void {
@@ -829,6 +856,8 @@ export class GitExtension implements IGitExtension, IDisposable {
   private _app: JupyterFrontEnd | null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
   private _isDisposed = false;
+  private _markerCache: Markers = new Markers();
+  private _currentMarker: BranchMarker = null;
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
@@ -840,4 +869,57 @@ export class GitExtension implements IGitExtension, IDisposable {
   private _statusChanged = new Signal<IGitExtension, Git.IStatusFileResult[]>(
     this
   );
+}
+
+export class BranchMarker {
+  add(fname: string, mark: boolean = true) {
+    if (!(fname in this._marks)) {
+      this._marks[fname] = mark;
+    }
+  }
+
+  addMarked(...fnames: string[]) {
+    for (let fname in fnames) {
+      this.add(fname, true);
+    }
+  }
+
+  addUnmarked(...fnames: string[]) {
+    for (let fname in fnames) {
+      this.add(fname, false);
+    }
+  }
+
+  mark(fname: string) {
+    this._marks[fname] = true;
+  }
+
+  unmark(fname: string) {
+    this._marks[fname] = false;
+  }
+
+  toggle(fname: string) {
+    this._marks[fname] = !this._marks[fname];
+  }
+
+  private _marks: { [key: string]: boolean } = {};
+}
+
+export class Markers {
+  get(path: string, branch: string): BranchMarker {
+    const key = Markers.markerKey(path, branch);
+    if (key in this._branchMarkers) {
+      return this._branchMarkers[key];
+    }
+
+    let marker = new BranchMarker();
+    this._branchMarkers[key] = marker;
+    return marker;
+  }
+
+  static markerKey(path: string, branch: string): string {
+    return [path, branch].join(':');
+  }
+
+  private _branchMarkers: { [key: string]: BranchMarker } = {};
 }

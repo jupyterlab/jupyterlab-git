@@ -1,7 +1,7 @@
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
-import { GitExtension } from '../model';
+import { GitExtension, BranchMarker } from '../model';
 import {
   findRepoButtonStyle,
   panelContainerStyle,
@@ -27,6 +27,8 @@ export interface IGitSessionNodeState {
   unstagedFiles: Git.IStatusFileResult[];
   untrackedFiles: Git.IStatusFileResult[];
   hasChangedFiles: boolean;
+
+  marker: BranchMarker;
 
   isHistoryVisible: boolean;
 }
@@ -55,6 +57,7 @@ export class GitPanel extends React.Component<
       stagedFiles: [],
       unstagedFiles: [],
       untrackedFiles: [],
+      marker: null,
       isHistoryVisible: false
     };
 
@@ -99,7 +102,11 @@ export class GitPanel extends React.Component<
       this.setState({
         branches: branchData.branches,
         currentBranch: currentBranch,
-        upstreamBranch: upstreamBranch
+        upstreamBranch: upstreamBranch,
+        marker: this.props.model.getMarker(
+          this.props.model.pathRepository,
+          currentBranch
+        )
       });
     }
   };
@@ -150,6 +157,12 @@ export class GitPanel extends React.Component<
           }
         }
       }
+
+      this.state.marker.addMarked(
+        ...stagedFiles.map(x => x.to),
+        ...unstagedFiles.map(x => x.to)
+      );
+      this.state.marker.addUnmarked(...untrackedFiles.map(x => x.to));
 
       this.setState({
         stagedFiles: stagedFiles,

@@ -17,6 +17,7 @@ import { GitAuthorForm } from '../widgets/AuthorBox';
 import { CommitBox } from './CommitBox';
 import { openDiffView } from './diff/DiffWidget';
 import { GitStage, IGitStageProps } from './GitStage';
+import { GitStageSimple } from './GitStageSimple';
 
 export namespace CommandIDs {
   export const gitFileOpen = 'gf:Open';
@@ -322,6 +323,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     try {
       await this.props.model.checkout();
     } catch (reason) {
+      showErrorMessage('Discard all unstaged changes failed.', reason, [
+        Dialog.warnButton({ label: 'DISMISS' })
+      ]);
+    }
+  };
+
+  /** Discard changes in all unstaged and staged files */
+  discardAllChanges = async () => {
+    try {
+      await this.props.model.resetToCommit();
+    } catch (reason) {
       showErrorMessage('Discard all changes failed.', reason, [
         Dialog.warnButton({ label: 'DISMISS' })
       ]);
@@ -333,9 +345,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.props.model.add(file);
   };
 
-  /** Discard changes in a specific unstaged file */
-  discardUnstagedFile = async (file: string) => {
+  /** Discard changes in a specific unstaged or staged file */
+  discardChanges = async (file: string) => {
     try {
+      await this.props.model.reset(file);
       await this.props.model.checkout({ filename: file });
     } catch (reason) {
       showErrorMessage(`Discard changes for ${file} failed.`, reason, [
@@ -435,7 +448,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         displayFiles={this.displayUnstaged}
         moveAllFiles={this.addAllUnstagedFiles}
         discardAllFiles={this.discardAllUnstagedFiles}
-        discardFile={this.discardUnstagedFile}
+        discardFile={this.discardChanges}
         moveFile={this.addUnstagedFile}
         moveFileIconClass={moveFileUpButtonStyle}
         moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
@@ -485,15 +498,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         />
         {this.props.settings.composite['simpleStaging'] ? (
           <div>
-            <Changed
+            <GitStageSimple
+              heading={'Changed'}
               files={allFilesExcludingUnmodified()}
-              discardAllFiles={null}
-              discardFile={null}
-              moveFile={null}
-              moveFileIconClass={null}
-              moveFileIconSelectedClass={null}
-              moveAllFilesTitle={null}
-              moveFileTitle={null}
+              model={this.props.model}
+              discardAllFiles={this.discardAllChanges}
+              discardFile={this.discardChanges}
+              renderMime={this.props.renderMime}
             />
           </div>
         ) : (
