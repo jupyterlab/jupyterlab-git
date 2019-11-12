@@ -529,6 +529,10 @@ class Git:
         """
         Execute git add<filename> command & return the result.
         """
+        if not isinstance(filename, str):
+            # assume filename is a sequence
+            filename = ' '.join(filename)
+
         my_output = subprocess.check_output(["git", "add", filename], cwd=top_repo_path)
         return my_output
 

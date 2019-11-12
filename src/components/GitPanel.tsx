@@ -208,6 +208,10 @@ export class GitPanel extends React.Component<
           stagedFiles={this.state.stagedFiles}
           unstagedFiles={this.state.unstagedFiles}
           untrackedFiles={this.state.untrackedFiles}
+          marker={this.props.model.getMarker(
+            this.props.model.pathRepository,
+            this.state.currentBranch
+          )}
           model={this.props.model}
           renderMime={this.props.renderMime}
           settings={this.props.settings}

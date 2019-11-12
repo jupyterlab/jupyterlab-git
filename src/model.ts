@@ -439,7 +439,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   /** Make request to add one or all files into
    * the staging area in repository
    */
-  async add(filename?: string): Promise<Response> {
+  async add(...filename: string[]): Promise<Response> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -455,8 +455,8 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
 
     const response = await httpGitRequest('/git/add', 'POST', {
-      add_all: filename === undefined,
-      filename: filename === undefined ? null : filename,
+      add_all: !filename,
+      filename: filename || '',
       top_repo_path: path
     });
 

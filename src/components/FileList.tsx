@@ -4,7 +4,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { JSONObject } from '@phosphor/coreutils';
 import { Menu } from '@phosphor/widgets';
 import * as React from 'react';
-import { GitExtension } from '../model';
+import { BranchMarker, GitExtension } from '../model';
 import {
   moveFileDownButtonSelectedStyle,
   moveFileDownButtonStyle,
@@ -56,6 +56,7 @@ export interface IFileListProps {
   stagedFiles: Git.IStatusFileResult[];
   unstagedFiles: Git.IStatusFileResult[];
   untrackedFiles: Git.IStatusFileResult[];
+  marker: BranchMarker;
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
   settings: ISettingRegistry.ISettings;
@@ -146,7 +147,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Stage',
         caption: 'Stage the changes of selected file',
         execute: () => {
-          this.addUnstagedFile(this.state.contextMenuFile);
+          this.addFile(this.state.contextMenuFile);
         }
       });
     }
@@ -156,7 +157,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Track',
         caption: 'Start tracking selected file',
         execute: () => {
-          this.addUntrackedFile(this.state.contextMenuFile);
+          this.addFile(this.state.contextMenuFile);
         }
       });
     }
@@ -341,8 +342,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Add a specific unstaged file */
-  addUnstagedFile = async (file: string) => {
-    await this.props.model.add(file);
+  addFile = async (...file: string[]) => {
+    await this.props.model.add(...file);
   };
 
   /** Discard changes in a specific unstaged or staged file */
@@ -362,9 +363,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.props.model.addAllUntracked();
   };
 
-  /** Add a specific untracked file */
-  addUntrackedFile = async (file: string) => {
-    await this.props.model.add(file);
+  addAllMarkedFiles = async () => {
+    await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
   disableStagesForDiscardAll = () => {
@@ -403,6 +403,29 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       showErrorMessage('Fail to commit', error);
     }
   };
+
+  /** Commit all marked files */
+  commitAllMarkedFiles = async (message: string): Promise<void> => {
+    await this.resetAllStagedFiles();
+    await this.addAllMarkedFiles();
+    await this.commitAllStagedFiles(message);
+  };
+
+  get markedFiles() {
+    return this.allFilesExcludingUnmodified.filter(file =>
+      this.props.marker.get(file.to)
+    );
+  }
+
+  get allFilesExcludingUnmodified() {
+    let files = this.props.untrackedFiles.concat(
+      this.props.unstagedFiles,
+      this.props.stagedFiles
+    );
+
+    files.sort((a, b) => a.to.localeCompare(b.to));
+    return files;
+  }
 
   render() {
     const sharedProps = {
@@ -449,7 +472,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         moveAllFiles={this.addAllUnstagedFiles}
         discardAllFiles={this.discardAllUnstagedFiles}
         discardFile={this.discardChanges}
-        moveFile={this.addUnstagedFile}
+        moveFile={this.addFile}
         moveFileIconClass={moveFileUpButtonStyle}
         moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
         moveAllFilesTitle={'Stage all changes'}
@@ -471,7 +494,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         moveAllFiles={this.addAllUntrackedFiles}
         discardAllFiles={null}
         discardFile={null}
-        moveFile={this.addUntrackedFile}
+        moveFile={this.addFile}
         moveFileIconClass={moveFileUpButtonStyle}
         moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
         moveAllFilesTitle={'Track all untracked files'}
@@ -484,46 +507,41 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       />
     );
 
-    const allFilesExcludingUnmodified = () => {
-      let files = this.props.untrackedFiles.concat(
-        this.props.unstagedFiles,
-        this.props.stagedFiles
-      );
-
-      files.sort((a, b) => a.to.localeCompare(b.to));
-      return files;
-    };
-
-    return (
-      <div onContextMenu={event => event.preventDefault()}>
-        <CommitBox
-          hasFiles={this.props.stagedFiles.length > 0}
-          commitFunc={this.commitAllStagedFiles}
-        />
-        {this.props.settings.composite['simpleStaging'] ? (
+    if (this.props.settings.composite['simpleStaging']) {
+      return (
+        <div>
+          <CommitBox
+            hasFiles={this.markedFiles.length > 0}
+            commitFunc={this.commitAllMarkedFiles}
+          />
           <div>
             <GitStageSimple
               heading={'Changed'}
-              files={allFilesExcludingUnmodified()}
-              marker={this.props.model.getMarker(
-                this.props.model.pathRepository,
-                ''
-              )}
+              files={this.allFilesExcludingUnmodified}
+              marker={this.props.marker}
               model={this.props.model}
               discardAllFiles={this.discardAllChanges}
               discardFile={this.discardChanges}
               renderMime={this.props.renderMime}
             />
           </div>
-        ) : (
+        </div>
+      );
+    } else {
+      return (
+        <div onContextMenu={event => event.preventDefault()}>
+          <CommitBox
+            hasFiles={this.props.stagedFiles.length > 0}
+            commitFunc={this.commitAllStagedFiles}
+          />
           <div>
             <Staged />
             <Changed />
             <Untracked />
           </div>
-        )}
-      </div>
-    );
+        </div>
+      );
+    }
   }
 
   /**

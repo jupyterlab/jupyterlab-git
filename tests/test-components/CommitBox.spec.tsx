@@ -15,7 +15,7 @@ describe('CommitBox', () => {
         hasFiles: true
       });
 
-      let actual = box.checkReadyForSubmit(true);
+      let actual = box.commitButtonStyle(true);
 
       let expected = classes(
         stagedCommitButtonStyle,
@@ -30,7 +30,7 @@ describe('CommitBox', () => {
         hasFiles: true
       });
 
-      let actual = box.checkReadyForSubmit(false);
+      let actual = box.commitButtonStyle(false);
       let expected = classes(
         stagedCommitButtonStyle,
         stagedCommitButtonDisabledStyle
@@ -48,7 +48,7 @@ describe('CommitBox', () => {
           value: 'message'
         },
         () => {
-          let actual = box.checkReadyForSubmit(true);
+          let actual = box.commitButtonStyle(true);
 
           let expected = stagedCommitButtonStyle;
           expect(actual).toEqual(expected);

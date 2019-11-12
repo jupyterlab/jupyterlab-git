@@ -55,7 +55,7 @@ export class CommitBox extends React.Component<
   };
 
   /** Update state of commit message input box */
-  checkReadyForSubmit = (hasStagedFiles: boolean) => {
+  commitButtonStyle = (hasStagedFiles: boolean) => {
     if (hasStagedFiles) {
       if (this.state.value.length === 0) {
         return classes(stagedCommitButtonStyle, stagedCommitButtonReadyStyle);
@@ -85,7 +85,7 @@ export class CommitBox extends React.Component<
           onChange={this.handleChange}
         />
         <input
-          className={this.checkReadyForSubmit(this.props.hasFiles)}
+          className={this.commitButtonStyle(this.props.hasFiles)}
           type="button"
           title="Commit"
           disabled={!(this.props.hasFiles && this.state.value)}
