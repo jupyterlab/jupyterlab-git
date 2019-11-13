@@ -10,6 +10,12 @@
       "title": "History count",
       "description": "Number of (most recent) commits shown in the history log",
       "default": 25
+    },
+    "disableBranchWithChanges": {
+      "type": "boolean",
+      "title": "Disable branch with changes",
+      "description": "Disable all branch operations (new, switch) when there are changed/staged files",
+      "default": false
     }
   }
 }
