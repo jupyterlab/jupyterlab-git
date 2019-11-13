@@ -423,7 +423,6 @@ def test_branch_success(mock_subproc_popen):
         'code': 0,
         'branches': [
             {
-                'is_current_branch': True,
                 'is_remote_branch': False,
                 'name': 'feature-foo',
                 'upstream': 'origin/feature-foo',
@@ -431,7 +430,6 @@ def test_branch_success(mock_subproc_popen):
                 'tag': None,
             },
             {
-                'is_current_branch': False,
                 'is_remote_branch': False,
                 'name': 'master',
                 'upstream': 'origin/master',
@@ -439,7 +437,6 @@ def test_branch_success(mock_subproc_popen):
                 'tag': None,
             },
             {
-                'is_current_branch': False,
                 'is_remote_branch': False,
                 'name': 'feature-bar',
                 'upstream': None,
@@ -447,7 +444,6 @@ def test_branch_success(mock_subproc_popen):
                 'tag': None
             },
             {
-                'is_current_branch': False,
                 'is_remote_branch': True,
                 'name': 'origin/feature-foo',
                 'upstream': None,
@@ -455,14 +451,20 @@ def test_branch_success(mock_subproc_popen):
                 'tag': None,
             },
             {
-                'is_current_branch': False,
                 'is_remote_branch': True,
                 'name': 'origin/master',
                 'upstream': None,
                 'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
                 'tag': None,
             }
-        ]
+        ],
+        'current_branch': {
+            'is_remote_branch': False,
+            'name': 'feature-foo',
+            'upstream': 'origin/feature-foo',
+            'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
+            'tag': None,
+        }
     }
 
     # When
@@ -561,7 +563,6 @@ def test_branch_success_detached_head(mock_subproc_popen):
         'code': 0,
         'branches': [
             {
-                'is_current_branch': False,
                 'is_remote_branch': False,
                 'name': 'master',
                 'upstream': 'origin/master',
@@ -569,7 +570,6 @@ def test_branch_success_detached_head(mock_subproc_popen):
                 'tag': None,
             },
             {
-                'is_current_branch': True,
                 'is_remote_branch': False,
                 'name': '(HEAD detached at origin/feature-foo)',
                 'upstream': None,
@@ -577,14 +577,20 @@ def test_branch_success_detached_head(mock_subproc_popen):
                 'tag': None,
             },
             {
-                'is_current_branch': False,
                 'is_remote_branch': True,
                 'name': 'origin/feature-foo',
                 'upstream': None,
                 'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
                 'tag': None,
             }
-        ]
+        ],
+        'current_branch': {
+            'is_remote_branch': False,
+            'name': '(HEAD detached at origin/feature-foo)',
+            'upstream': None,
+            'top_commit': None,
+            'tag': None,
+        }
     }
 
     # When
