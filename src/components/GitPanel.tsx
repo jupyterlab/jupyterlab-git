@@ -26,7 +26,6 @@ export interface IGitSessionNodeState {
   stagedFiles: Git.IStatusFileResult[];
   unstagedFiles: Git.IStatusFileResult[];
   untrackedFiles: Git.IStatusFileResult[];
-  hasChangedFiles: boolean;
 
   isHistoryVisible: boolean;
 }
@@ -50,7 +49,6 @@ export class GitPanel extends React.Component<
       branches: [],
       currentBranch: '',
       upstreamBranch: '',
-      hasChangedFiles: false,
       pastCommits: [],
       stagedFiles: [],
       unstagedFiles: [],
@@ -127,14 +125,9 @@ export class GitPanel extends React.Component<
       let stagedFiles = new Array<Git.IStatusFileResult>();
       let unstagedFiles = new Array<Git.IStatusFileResult>();
       let untrackedFiles = new Array<Git.IStatusFileResult>();
-      let changedFiles = 0;
       let statusFiles = this.props.model.status;
       if (statusFiles.length > 0) {
         for (let i = 0; i < statusFiles.length; i++) {
-          // If file has been changed
-          if (statusFiles[i].x !== '?' && statusFiles[i].x !== '!') {
-            changedFiles++;
-          }
           // If file is untracked
           if (statusFiles[i].x === '?' && statusFiles[i].y === '?') {
             untrackedFiles.push(statusFiles[i]);
@@ -154,8 +147,7 @@ export class GitPanel extends React.Component<
       this.setState({
         stagedFiles: stagedFiles,
         unstagedFiles: unstagedFiles,
-        untrackedFiles: untrackedFiles,
-        hasChangedFiles: changedFiles > 0
+        untrackedFiles: untrackedFiles
       });
     }
   };
@@ -218,11 +210,7 @@ export class GitPanel extends React.Component<
             upstreamBranch={this.state.upstreamBranch}
             stagedFiles={this.state.stagedFiles}
             data={this.state.branches}
-            // No uncommitted changed files, allow switching branches
-            // No committed files ever, disable switching branches
-            disabled={
-              this.state.hasChangedFiles || this.state.pastCommits.length === 0
-            }
+            disabled={this.state.pastCommits.length === 0}
             toggleSidebar={this.toggleSidebar}
             sideBarExpanded={this.state.isHistoryVisible}
           />
