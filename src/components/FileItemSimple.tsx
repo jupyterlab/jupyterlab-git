@@ -2,7 +2,7 @@ import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { BranchMarker, GitExtension } from '../model';
+import { GitExtension } from '../model';
 import {
   fileButtonStyle,
   fileGitButtonStyle,
@@ -24,8 +24,8 @@ import { ISpecialRef } from './diff/model';
 
 export interface IGitMarkBoxProps {
   fname: string;
+  model: GitExtension;
   stage: string;
-  marker: BranchMarker;
 }
 
 export class GitMarkBox extends React.Component<IGitMarkBoxProps> {
@@ -36,23 +36,26 @@ export class GitMarkBox extends React.Component<IGitMarkBoxProps> {
   }
 
   protected _onClick(event: React.ChangeEvent<HTMLInputElement>) {
-    // toggle will force an update of GitPanel
-    this.props.marker.toggle(this.props.fname);
+    // toggle will emit a markChanged signal
+    this.props.model.toggleMark(this.props.fname);
 
-    // needed if not a descendent of a GitPanel
+    // needed if markChanged doesn't force an update of a parent
     this.forceUpdate();
   }
 
   render() {
     // idempotent, will only run once per file
-    this.props.marker.add(this.props.fname, this.props.stage !== 'untracked');
+    this.props.model.addMark(
+      this.props.fname,
+      this.props.stage !== 'untracked'
+    );
 
     return (
       <input
         name="gitMark"
         className={gitMarkBoxStyle}
         type="checkbox"
-        checked={this.props.marker.get(this.props.fname)}
+        checked={this.props.model.getMark(this.props.fname)}
         onChange={this._onClick}
       />
     );
@@ -62,7 +65,6 @@ export class GitMarkBox extends React.Component<IGitMarkBoxProps> {
 export interface IFileItemSimpleProps {
   file: Git.IStatusFileResult;
   stage: string;
-  marker: BranchMarker;
   model: GitExtension;
   discardFile: (file: string) => Promise<void>;
   renderMime: IRenderMimeRegistry;
@@ -111,7 +113,7 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
         <GitMarkBox
           fname={this.props.file.to}
           stage={this.props.stage}
-          marker={this.props.marker}
+          model={this.props.model}
         />
         <span
           className={classes(

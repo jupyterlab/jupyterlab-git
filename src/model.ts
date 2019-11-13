@@ -71,8 +71,7 @@ export class GitExtension implements IGitExtension, IDisposable {
         this._pendingReadyPromise -= 1;
 
         if (change.newValue !== change.oldValue) {
-          this.refreshStatus();
-          this._repositoryChanged.emit(change);
+          this.refresh().then(() => this._repositoryChanged.emit(change));
         }
       });
     } else {
@@ -89,7 +88,7 @@ export class GitExtension implements IGitExtension, IDisposable {
           }
 
           if (change.newValue !== change.oldValue) {
-            this.refreshStatus();
+            this.refresh().then(() => this._repositoryChanged.emit(change));
             this._repositoryChanged.emit(change);
           }
         })
@@ -327,6 +326,11 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
   }
 
+  async refresh(): Promise<void> {
+    await this.refreshBranch();
+    await this.refreshStatus();
+  }
+
   async refreshStatus(): Promise<void> {
     await this._poll.refresh();
     await this._poll.tick;
@@ -418,7 +422,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   /** Make request for a list of all git branches in the repository */
-  async branch(): Promise<Git.IBranchResult> {
+  async _branch(): Promise<Git.IBranchResult> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -441,6 +445,29 @@ export class GitExtension implements IGitExtension, IDisposable {
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     }
+  }
+
+  async refreshBranch(): Promise<void> {
+    const response = await this._branch();
+
+    if (response.code === 0) {
+      this._branches = response.branches;
+      this._currentBranch = response.current_branch;
+
+      // set up the marker obj for this particular repo/branch
+      this._setMarker(this.pathRepository, this._currentBranch.name);
+    } else {
+      this._branches = [];
+      this._currentBranch = null;
+    }
+  }
+
+  get branches() {
+    return this._branches;
+  }
+
+  get currentBranch() {
+    return this._currentBranch;
   }
 
   /** Make request to add one or all files into
@@ -590,6 +617,7 @@ export class GitExtension implements IGitExtension, IDisposable {
       }
 
       if (body.checkout_branch) {
+        await this.refreshBranch();
         this._headChanged.emit();
       } else {
         this.refreshStatus();
@@ -777,6 +805,7 @@ export class GitExtension implements IGitExtension, IDisposable {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
+      await this.refreshBranch();
       this._headChanged.emit();
       return response;
     } catch (err) {
@@ -799,21 +828,6 @@ export class GitExtension implements IGitExtension, IDisposable {
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     }
-  }
-
-  /**
-   * get marker obj for repo path/branch combination
-   */
-  getMarker(path: string, branch: string): BranchMarker {
-    this._currentMarker = this._markerCache.get(path, branch);
-    return this._currentMarker;
-  }
-
-  /**
-   * get most recently fetched marker object
-   */
-  get currentMarker(): BranchMarker {
-    return this._currentMarker;
   }
 
   registerDiffProvider(filetypes: string[], callback: Git.IDiffCallback): void {
@@ -847,6 +861,27 @@ export class GitExtension implements IGitExtension, IDisposable {
     return this._readyPromise;
   }
 
+  /**
+   * Add file named fname to current marker obj
+   */
+  addMark(fname: string, mark: boolean) {
+    this._currentMarker.add(fname, mark);
+  }
+
+  /**
+   * get current mark of fname
+   */
+  getMark(fname: string): boolean {
+    return this._currentMarker.get(fname);
+  }
+
+  /**
+   * Toggle mark for file named fname in current marker obj
+   */
+  toggleMark(fname: string) {
+    this._currentMarker.toggle(fname);
+  }
+
   private async _getServerRoot(): Promise<string> {
     try {
       const response = await httpGitRequest('/git/server_root', 'GET', null);
@@ -857,8 +892,18 @@ export class GitExtension implements IGitExtension, IDisposable {
     }
   }
 
+  /**
+   * set marker obj for repo path/branch combination
+   */
+  private _setMarker(path: string, branch: string): BranchMarker {
+    this._currentMarker = this._markerCache.get(path, branch);
+    return this._currentMarker;
+  }
+
   private _status: Git.IStatusFileResult[] = [];
   private _pathRepository: string | null = null;
+  private _branches: Git.IBranch[];
+  private _currentBranch: Git.IBranch;
   private _serverRoot: string;
   private _app: JupyterFrontEnd | null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
@@ -879,7 +924,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   );
 }
 
-export class BranchMarker {
+export class BranchMarker implements Git.IBranchMarker {
   constructor(private _refresh: () => void) {}
 
   add(fname: string, mark: boolean = true) {
@@ -888,28 +933,8 @@ export class BranchMarker {
     }
   }
 
-  addMarked(...fnames: string[]) {
-    for (let fname of fnames) {
-      this.add(fname, true);
-    }
-  }
-
-  addUnmarked(...fnames: string[]) {
-    for (let fname of fnames) {
-      this.add(fname, false);
-    }
-  }
-
   get(fname: string) {
     return this._marks[fname];
-  }
-
-  mark(fname: string) {
-    this.set(fname, true);
-  }
-
-  unmark(fname: string) {
-    this.set(fname, false);
   }
 
   set(fname: string, mark: boolean) {

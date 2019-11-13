@@ -82,33 +82,13 @@ export class GitPanel extends React.Component<
   }
 
   refreshBranch = async () => {
-    // Get current and upstream git branch
-    if (this.props.model.pathRepository !== null) {
-      const branchData = await this.props.model.branch();
-      let currentBranch = 'master';
-      let upstreamBranch = '';
-      if (branchData.code === 0) {
-        let allBranches = branchData.branches;
-        for (let i = 0; i < allBranches.length; i++) {
-          if (allBranches[i].is_current_branch) {
-            currentBranch = allBranches[i].name;
-            upstreamBranch = allBranches[i].upstream;
-            break;
-          }
-        }
-      }
+    const { currentBranch } = this.props.model;
 
-      this.props.model.getMarker(
-        this.props.model.pathRepository,
-        currentBranch
-      );
-
-      this.setState({
-        branches: branchData.branches,
-        currentBranch: currentBranch,
-        upstreamBranch: upstreamBranch
-      });
-    }
+    this.setState({
+      branches: this.props.model.branches,
+      currentBranch: currentBranch ? currentBranch.name : 'master',
+      upstreamBranch: currentBranch ? currentBranch.upstream : ''
+    });
   };
 
   refreshHistory = async () => {
@@ -209,10 +189,6 @@ export class GitPanel extends React.Component<
           stagedFiles={this.state.stagedFiles}
           unstagedFiles={this.state.unstagedFiles}
           untrackedFiles={this.state.untrackedFiles}
-          marker={this.props.model.getMarker(
-            this.props.model.pathRepository,
-            this.state.currentBranch
-          )}
           model={this.props.model}
           renderMime={this.props.renderMime}
           settings={this.props.settings}

@@ -4,7 +4,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { JSONObject } from '@phosphor/coreutils';
 import { Menu } from '@phosphor/widgets';
 import * as React from 'react';
-import { BranchMarker, GitExtension } from '../model';
+import { GitExtension } from '../model';
 import {
   moveFileDownButtonSelectedStyle,
   moveFileDownButtonStyle,
@@ -56,7 +56,6 @@ export interface IFileListProps {
   stagedFiles: Git.IStatusFileResult[];
   unstagedFiles: Git.IStatusFileResult[];
   untrackedFiles: Git.IStatusFileResult[];
-  marker: BranchMarker;
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
   settings: ISettingRegistry.ISettings;
@@ -413,7 +412,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   get markedFiles() {
     return this.allFilesExcludingUnmodified.filter(file =>
-      this.props.marker.get(file.to)
+      this.props.model.getMark(file.to)
     );
   }
 
@@ -518,7 +517,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             <GitStageSimple
               heading={'Changed'}
               files={this.allFilesExcludingUnmodified}
-              marker={this.props.marker}
               model={this.props.model}
               discardAllFiles={this.discardAllChanges}
               discardFile={this.discardChanges}
