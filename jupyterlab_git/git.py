@@ -594,8 +594,12 @@ class Git:
         """
         Reset the current branch to a specific past commit.
         """
+        cmd = ["git", "reset", "--hard"]
+        if commit_id:
+            cmd.append(commit_id)
+
         my_output = subprocess.check_output(
-            ["git", "reset", "--hard", commit_id], cwd=top_repo_path
+            cmd, cwd=top_repo_path
         )
         return my_output
 
