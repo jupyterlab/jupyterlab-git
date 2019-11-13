@@ -398,7 +398,10 @@ class Git:
             try:
                 for name,commit_sha,upstream_name,is_current_branch in (line.split('\t') for line in output.decode("utf-8").splitlines()):
                     # Format reference : https://git-scm.com/docs/git-for-each-ref#_field_names
+                    is_current_branch = bool(is_current_branch.strip())
+
                     branch = {
+                        "is_current_branch": is_current_branch,
                         "is_remote_branch": False,
                         "name": name,
                         "upstream": upstream_name if upstream_name else None,
@@ -406,7 +409,7 @@ class Git:
                         "tag": None,
                     }
                     results.append(branch)
-                    if is_current_branch.strip():
+                    if is_current_branch:
                         current_branch = branch
 
                 # Remote branch is seleted use 'git branch -a' as fallback machanism
@@ -415,6 +418,7 @@ class Git:
                 # when the remote branch is seleted, VS Code git does the same thing.
                 if not current_branch and self.get_current_branch(current_path) == "HEAD":
                     branch = {
+                        "is_current_branch": True,
                         "is_remote_branch": False,
                         "name": self._get_detached_head_name(current_path),
                         "upstream": None,
@@ -458,6 +462,7 @@ class Git:
                 for name,commit_sha in (line.split('\t') for line in output.decode("utf-8").splitlines()):
                     # Format reference : https://git-scm.com/docs/git-for-each-ref#_field_names
                     results.append({
+                        "is_current_branch": False,
                         "is_remote_branch": True,
                         "name": name,
                         "upstream": None,

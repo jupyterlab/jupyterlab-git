@@ -21,6 +21,14 @@ describe('IGitExtension', () => {
     jest.restoreAllMocks();
 
     mockResponses = {
+      '/git/branch': {
+        body: request =>
+          JSON.stringify({
+            code: 0,
+            branches: [],
+            current_branch: null
+          })
+      },
       '/git/show_top_level': {
         body: request =>
           JSON.stringify({
@@ -32,6 +40,13 @@ describe('IGitExtension', () => {
         body: () =>
           JSON.stringify({
             server_root: fakeRoot
+          })
+      },
+      '/git/status': {
+        body: () =>
+          JSON.stringify({
+            code: 0,
+            files: []
           })
       }
     };

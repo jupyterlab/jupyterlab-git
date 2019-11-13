@@ -88,7 +88,7 @@ export class PastCommitNode extends React.Component<
         <div className={branchesStyle}>
           {this.getBranchesForCommit().map((branch, id) => (
             <React.Fragment key={id}>
-              {branch.name === this.props.model.currentBranch.name && (
+              {branch.is_current_branch && (
                 <span className={classes(branchStyle, workingBranchStyle)}>
                   working
                 </span>

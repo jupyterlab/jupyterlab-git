@@ -454,8 +454,10 @@ export class GitExtension implements IGitExtension, IDisposable {
       this._branches = response.branches;
       this._currentBranch = response.current_branch;
 
-      // set up the marker obj for this particular repo/branch
-      this._setMarker(this.pathRepository, this._currentBranch.name);
+      if (this._currentBranch) {
+        // set up the marker obj for the current (valid) repo/branch combination
+        this._setMarker(this.pathRepository, this._currentBranch.name);
+      }
     } else {
       this._branches = [];
       this._currentBranch = null;

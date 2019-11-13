@@ -313,6 +313,7 @@ export namespace Git {
    * Branch description interface
    */
   export interface IBranch {
+    is_current_branch: boolean;
     is_remote_branch: boolean;
     name: string;
     upstream: string;
