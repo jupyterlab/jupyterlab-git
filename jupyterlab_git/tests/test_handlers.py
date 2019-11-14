@@ -1,5 +1,7 @@
 import json
-from unittest.mock import Mock, ANY, patch
+import os
+import subprocess
+from unittest.mock import ANY, call, Mock, patch
 
 from jupyterlab_git.handlers import (
     GitAllHistoryHandler,
@@ -9,6 +11,8 @@ from jupyterlab_git.handlers import (
     GitUpstreamHandler,
     setup_handlers
 )
+
+from .testutils import assert_http_error, ServerTest
 
 def test_mapping_added():
     mock_web_app = Mock()
@@ -231,3 +235,284 @@ def test_upstream_handler_localbranch(mock_finish, mock_git):
     mock_git.get_current_branch.assert_called_with('test_path')
     mock_git.get_upstream_branch.assert_called_with('test_path', 'foo')
     mock_finish.assert_called_with('{"upstream": "bar"}')
+
+class TestDiffContent(ServerTest):
+
+    @patch("subprocess.Popen")
+    def test_diffcontent(self, popen):
+        # Given
+        top_repo_path = "path/to/repo"
+        filename = "my/file"
+        content = "dummy content file\nwith multiplelines"
+
+        process_mock = Mock()
+        attrs = {
+            "communicate": Mock(
+                return_value=(
+                    bytes(content, encoding="utf-8"),
+                    b"",
+                )
+            ),
+            "returncode": 0,
+        }
+        process_mock.configure_mock(**attrs)
+        popen.return_value = process_mock
+
+        # When
+        body = {
+            "filename": filename,
+            "prev_ref": {"git": "previous"},
+            "curr_ref": {"git": "current"},
+            "top_repo_path" : top_repo_path
+        }
+        response = self.tester.post(["diffcontent"], body=body)
+
+        # Then
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["prev_content"] == content
+        assert payload["curr_content"] == content
+        popen.assert_has_calls([
+            call(
+                ["git", "show", '{}:{}'.format("previous", filename)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=os.path.join(self.notebook_dir, top_repo_path)
+            ),
+            call().communicate(),
+            call(
+                ["git", "show", '{}:{}'.format("current", filename)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=os.path.join(self.notebook_dir, top_repo_path)
+            ),
+            call().communicate()
+        ])
+
+    @patch("subprocess.Popen")
+    def test_diffcontent_working(self, popen):
+        # Given
+        top_repo_path = "path/to/repo"
+        filename = "my/file"
+        content = "dummy content file\nwith multiplelines"
+
+        process_mock = Mock()
+        attrs = {
+            "communicate": Mock(
+                return_value=(
+                    bytes(content, encoding="utf-8"),
+                    b"",
+                )
+            ),
+            "returncode": 0,
+        }
+        process_mock.configure_mock(**attrs)
+        popen.return_value = process_mock
+
+        dummy_file = os.path.join(self.notebook_dir, top_repo_path, filename)
+        os.makedirs(os.path.dirname(dummy_file))
+        with open(dummy_file, 'w') as f:
+            f.write(content)
+
+        # When
+        body = {
+            "filename": filename,
+            "prev_ref": {"git": "previous"},
+            "curr_ref": {"special": "WORKING"},
+            "top_repo_path" : top_repo_path
+        }
+        response = self.tester.post(["diffcontent"], body=body)
+
+        # Then
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["prev_content"] == content
+        assert payload["curr_content"] == content
+        popen.assert_has_calls([
+            call(
+                ["git", "show", '{}:{}'.format("previous", filename)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=os.path.join(self.notebook_dir, top_repo_path)
+            ),
+            call().communicate()
+        ])
+
+    @patch("subprocess.Popen")
+    def test_diffcontent_index(self, popen):
+        # Given
+        top_repo_path = "path/to/repo"
+        filename = "my/file"
+        content = "dummy content file\nwith multiplelines"
+
+        process_mock = Mock()
+        attrs = {
+            "communicate": Mock(
+                return_value=(
+                    bytes(content, encoding="utf-8"),
+                    b"",
+                )
+            ),
+            "returncode": 0,
+        }
+        process_mock.configure_mock(**attrs)
+        popen.return_value = process_mock
+
+        # When
+        body = {
+            "filename": filename,
+            "prev_ref": {"git": "previous"},
+            "curr_ref": {"special": "INDEX"},
+            "top_repo_path" : top_repo_path
+        }
+        response = self.tester.post(["diffcontent"], body=body)
+
+        # Then
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["prev_content"] == content
+        assert payload["curr_content"] == content
+        popen.assert_has_calls([
+            call(
+                ["git", "show", '{}:{}'.format("previous", filename)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=os.path.join(self.notebook_dir, top_repo_path)
+            ),
+            call().communicate(),
+            call(
+                ["git", "show", '{}:{}'.format("", filename)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=os.path.join(self.notebook_dir, top_repo_path)
+            ),
+            call().communicate()
+        ])
+
+    @patch("subprocess.Popen")
+    def test_diffcontent_unknown_special(self, popen):
+        # Given
+        top_repo_path = "path/to/repo"
+        filename = "my/file"
+        content = "dummy content file\nwith multiplelines"
+
+        process_mock = Mock()
+        attrs = {
+            "communicate": Mock(
+                return_value=(
+                    bytes(content, encoding="utf-8"),
+                    b"",
+                )
+            ),
+            "returncode": 0,
+        }
+        process_mock.configure_mock(**attrs)
+        popen.return_value = process_mock
+
+        # When
+        body = {
+            "filename": filename,
+            "prev_ref": {"git": "previous"},
+            "curr_ref": {"special": "unknown"},
+            "top_repo_path" : top_repo_path
+        }
+
+        with assert_http_error(500, msg="unknown special ref"):
+            self.tester.post(["diffcontent"], body=body)
+
+    @patch("subprocess.Popen")
+    def test_diffcontent_show_handled_error(self, popen):
+        # Given
+        top_repo_path = "path/to/repo"
+        filename = "my/file"
+
+        process_mock = Mock()
+        attrs = {
+            "communicate": Mock(
+                return_value=(
+                    b"",
+                    bytes("fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename), encoding="utf-8"),
+                )
+            ),
+            "returncode": -1,
+        }
+        process_mock.configure_mock(**attrs)
+        popen.return_value = process_mock
+
+        # When
+        body = {
+            "filename": filename,
+            "prev_ref": {"git": "previous"},
+            "curr_ref": {"git": "current"},
+            "top_repo_path" : top_repo_path
+        }
+        response = self.tester.post(["diffcontent"], body=body)
+
+        # Then
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["prev_content"] == ""
+        assert payload["curr_content"] == ""
+
+    @patch("subprocess.Popen")
+    def test_diffcontent_show_unhandled_error(self, popen):
+        # Given
+        top_repo_path = "path/to/repo"
+        filename = "my/file"
+
+        process_mock = Mock()
+        attrs = {
+            "communicate": Mock(
+                return_value=(
+                    b"",
+                    b"Dummy error",
+                )
+            ),
+            "returncode": -1,
+        }
+        process_mock.configure_mock(**attrs)
+        popen.return_value = process_mock
+
+        # When
+        body = {
+            "filename": filename,
+            "prev_ref": {"git": "previous"},
+            "curr_ref": {"git": "current"},
+            "top_repo_path" : top_repo_path
+        }
+
+        # Then
+        with assert_http_error(500, msg="command to retrieve plaintext diff"):
+            self.tester.post(["diffcontent"], body=body)
+
+    @patch("subprocess.Popen")
+    def test_diffcontent_getcontent_error(self, popen):
+        # Given
+        top_repo_path = "path/to/repo"
+        filename = "my/absent_file"
+        content = "dummy content file\nwith multiplelines"
+
+        process_mock = Mock()
+        attrs = {
+            "communicate": Mock(
+                return_value=(
+                    bytes(content, encoding="utf-8"),
+                    b"",
+                )
+            ),
+            "returncode": 0,
+        }
+        process_mock.configure_mock(**attrs)
+        popen.return_value = process_mock
+
+        # When
+        body = {
+            "filename": filename,
+            "prev_ref": {"git": "previous"},
+            "curr_ref": {"special": "WORKING"},
+            "top_repo_path" : top_repo_path
+        }
+        # Then
+        with assert_http_error(404, msg="No such file or directory"):
+            r = self.tester.post(["diffcontent"], body=body)
+            print(r.json())

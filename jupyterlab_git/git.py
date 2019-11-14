@@ -24,6 +24,7 @@ class GitAuthInputWrapper:
         self.env = env
         self.username = username
         self.password = password
+
     def communicate(self):
         try:
             p = pexpect.spawn(
@@ -896,7 +897,7 @@ class Git:
 
     def show(self, filename, ref, top_repo_path):
         """
-        Execute git show<ref:filename> command & return the result.
+        Execute git show <ref:filename> command & return the result.
         """
         command = ["git", "show", '{}:{}'.format(ref, filename)]
         p = subprocess.Popen(
@@ -917,7 +918,7 @@ class Git:
         elif any([msg in lower_error for msg in error_messages]):
             return ""
         else:
-            raise Exception('Error [{}] occurred while executing [{}] command to retrieve plaintext diff.'.format(
+            raise HTTPError(log_message='Error [{}] occurred while executing [{}] command to retrieve plaintext diff.'.format(
                 error.decode('utf-8'),
                 ' '.join(command)
             ))
@@ -934,17 +935,14 @@ class Git:
         """
         Collect get content of prev and curr and return.
         """
-        try:
-            prev_content = self.show(filename, prev_ref["git"], top_repo_path)
-            if "special" in curr_ref:
-                if curr_ref["special"] == "WORKING":
-                    curr_content = self.get_content(filename, top_repo_path)
-                elif curr_ref["special"] == "INDEX":
-                    curr_content = self.show(filename, "", top_repo_path)
-                else:
-                    raise Exception("Error while retrieving plaintext diff, unknown special ref '{}'.".format(curr_ref["specialref"]))
+        prev_content = self.show(filename, prev_ref["git"], top_repo_path)
+        if "special" in curr_ref:
+            if curr_ref["special"] == "WORKING":
+                curr_content = self.get_content(filename, top_repo_path)
+            elif curr_ref["special"] == "INDEX":
+                curr_content = self.show(filename, "", top_repo_path)
             else:
-                curr_content = self.show(filename, curr_ref["git"], top_repo_path)
-            return {"prev_content": prev_content, "curr_content": curr_content}
-        except:
-            raise
+                raise HTTPError(log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(curr_ref["special"]))
+        else:
+            curr_content = self.show(filename, curr_ref["git"], top_repo_path)
+        return {"prev_content": prev_content, "curr_content": curr_content}
