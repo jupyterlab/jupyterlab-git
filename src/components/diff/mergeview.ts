@@ -266,7 +266,7 @@ class DiffView implements MergeView.IDiffView {
   private static registerUpdate(dv: DiffView): (mode?: string) => void {
     let edit: MergeView.IState = { from: 0, to: 0, marked: [] };
     let orig: MergeView.IState = { from: 0, to: 0, marked: [] };
-    let debounceChange: ReturnType<typeof setTimeout>;
+    let debounceChange: number;
     let updatingFast: boolean = false;
 
     function update(mode?: string) {
@@ -1479,6 +1479,7 @@ function collapseSingle(
     mark.clear();
     cm.removeLineClass(from, 'wrap', 'CodeMirror-merge-collapsed-line');
   }
+  // @ts-ignore
   if (mark.explicitlyCleared) {
     clear();
   }
@@ -1735,8 +1736,7 @@ class TrackAlignable {
   /* tslint:enable:no-bitwise */
 
   hasMarker(n: number): boolean {
-    // @ts-ignore
-    let handle = this.cm.getLineHandle(n);
+    let handle = this.cm.getLineHandle(n) as any;
     if (handle.markedSpans) {
       for (let i = 0; i < handle.markedSpans.length; i++) {
         if (
@@ -1751,8 +1751,7 @@ class TrackAlignable {
   }
 
   hasWidget(n: number): boolean {
-    // @ts-ignore
-    let handle = this.cm.getLineHandle(n);
+    let handle = this.cm.getLineHandle(n) as any;
     if (handle.widgets) {
       for (let i = 0; i < handle.widgets.length; i++) {
         if (!handle.widgets[i].above && !handle.widgets[i].mergeSpacer) {
@@ -1768,8 +1767,8 @@ class TrackAlignable {
     if (n == this.cm.lastLine()) {
       return false;
     }
-    // @ts-ignore
-    let handle = this.cm.getLineHandle(n + 1);
+
+    let handle = this.cm.getLineHandle(n + 1) as any;
     if (handle.widgets) {
       for (let i = 0; i < handle.widgets.length; i++) {
         if (handle.widgets[i].above && !handle.widgets[i].mergeSpacer) {
