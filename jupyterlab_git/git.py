@@ -610,7 +610,10 @@ class Git:
             }
 
     def _get_branch_reference(self, branchname, current_path):
-        p = Popen(
+        """
+        Execute git rev-parse --symbolic-full-name <branch-name> and return the result (or None).
+        """
+        p = subprocess.Popen(
             ["git", "rev-parse", "--symbolic-full-name", branchname],
             stdout=PIPE,
             stderr=PIPE,
@@ -638,7 +641,7 @@ class Git:
         else:
             cmd = ["git", "checkout", branchname]
 
-        p = Popen(
+        p = subprocess.Popen(
             cmd,
             stdout=PIPE,
             stderr=PIPE,
