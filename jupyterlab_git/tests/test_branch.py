@@ -102,6 +102,7 @@ def test_get_current_branch_success(mock_subproc_popen):
 @patch.object(Git, '_get_branch_reference', return_value=None)
 def test_checkout_branch_noref_success(mock__get_branch_reference, mock_subproc_popen):
     branch='test-branch'
+    curr_path='test_curr_path'
     stdout_message='checkout output from git'
     stderr_message=''
     rc=0
@@ -116,16 +117,17 @@ def test_checkout_branch_noref_success(mock__get_branch_reference, mock_subproc_
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(
-        branchname=branch,
-        current_path='test_curr_path')
+    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
+    mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
+
     cmd=['git', 'checkout', branch]
     mock_subproc_popen.assert_has_calls([
-        call(cmd, stdout=PIPE, stderr=PIPE, cwd='/bin/test_curr_path'),
+        call(cmd, stdout=PIPE, stderr=PIPE, cwd='/bin/{}'.format(curr_path)),
         call().communicate()
     ])
+
     assert { "code": rc, "message": stdout_message } == actual_response
 
 
@@ -133,8 +135,9 @@ def test_checkout_branch_noref_success(mock__get_branch_reference, mock_subproc_
 @patch.object(Git, '_get_branch_reference', return_value=None)
 def test_checkout_branch_noref_failure(mock__get_branch_reference, mock_subproc_popen):
     branch='test-branch'
+    curr_path='test_curr_path'
     stdout_message=''
-    stderr_message="error: pathspec '"+branch+"' did not match any file(s) known to git"
+    stderr_message="error: pathspec '{}' did not match any file(s) known to git".format(branch)
     rc=1
 
     # Given
@@ -144,14 +147,17 @@ def test_checkout_branch_noref_failure(mock__get_branch_reference, mock_subproc_
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path='test_curr_path')
+    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
+    mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
+
     cmd=['git', 'checkout', branch]
     mock_subproc_popen.assert_has_calls([
-        call(cmd, stdout=PIPE, stderr=PIPE, cwd='/bin/test_curr_path'),
+        call(cmd, stdout=PIPE, stderr=PIPE, cwd='/bin/{}'.format(curr_path)),
         call().communicate()
     ])
+
     assert { "code": rc, "message": stderr_message,  "command": ' '.join(cmd) } == actual_response
 
 
@@ -159,6 +165,7 @@ def test_checkout_branch_noref_failure(mock__get_branch_reference, mock_subproc_
 @patch.object(Git, '_get_branch_reference', return_value="refs/remotes/remote_branch")
 def test_checkout_branch_remoteref_success(mock__get_branch_reference, mock_subproc_popen):
     branch='test-branch'
+    curr_path='test_curr_path'
     stdout_message='checkout output from git'
     stderr_message=''
     rc=0
@@ -173,14 +180,14 @@ def test_checkout_branch_remoteref_success(mock__get_branch_reference, mock_subp
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(
-        branchname=branch,
-        current_path='test_curr_path')
+    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
+    mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
+
     cmd=['git', 'checkout', '--track', branch]
     mock_subproc_popen.assert_has_calls([
-        call(cmd, stdout=PIPE, stderr=PIPE, cwd='/bin/test_curr_path'),
+        call(cmd, stdout=PIPE, stderr=PIPE, cwd='/bin/{}'.format(curr_path)),
         call().communicate()
     ])
     assert { "code": rc, "message": stdout_message } == actual_response
@@ -190,8 +197,9 @@ def test_checkout_branch_remoteref_success(mock__get_branch_reference, mock_subp
 @patch.object(Git, '_get_branch_reference', return_value="refs/heads/local_branch")
 def test_checkout_branch_headsref_failure(mock__get_branch_reference, mock_subproc_popen):
     branch='test-branch'
+    curr_path='test_curr_path'
     stdout_message=''
-    stderr_message="error: pathspec '"+branch+"' did not match any file(s) known to git"
+    stderr_message="error: pathspec '{}' did not match any file(s) known to git".format(branch)
     rc=1
 
     # Given
@@ -201,12 +209,14 @@ def test_checkout_branch_headsref_failure(mock__get_branch_reference, mock_subpr
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path='test_curr_path')
+    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
+    mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
+
     cmd=['git', 'checkout', branch]
     mock_subproc_popen.assert_has_calls([
-        call(cmd, stdout=PIPE, stderr=PIPE, cwd='/bin/test_curr_path'),
+        call(cmd, stdout=PIPE, stderr=PIPE, cwd='/bin/{}'.format(curr_path)),
         call().communicate()
     ])
     assert { "code": rc, "message": stderr_message,  "command": ' '.join(cmd) } == actual_response
@@ -248,7 +258,7 @@ def test_checkout_branch_headsref_success(mock__get_branch_reference, mock_subpr
 def test_checkout_branch_remoteref_failure(mock__get_branch_reference, mock_subproc_popen):
     branch='test-branch'
     stdout_message=''
-    stderr_message="error: pathspec '"+branch+"' did not match any file(s) known to git"
+    stderr_message="error: pathspec '{}' did not match any file(s) known to git".format(branch)
     rc=1
 
     # Given
@@ -303,15 +313,17 @@ def test_get_branch_reference_success(mock_subproc_popen):
 
 
 @patch('subprocess.Popen')
-def test_get_branch_reference_faillure(mock_subproc_popen):
+def test_get_branch_reference_failure(mock_subproc_popen):
     actual_response = 0
     branch='test-branch'
     reference = 'test-branch'
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': (reference.encode('utf-8'),
-        ("fatal: ambiguous argument '"+branch+"': unknown revision or path not in the working tree.").encode('utf-8')),
+        'communicate.return_value': (
+            reference.encode('utf-8'),
+            "fatal: ambiguous argument '{}': unknown revision or path not in the working tree.".format(branch).encode('utf-8')
+        ),
         'returncode': 128
     }
     process_mock.configure_mock(**attrs)

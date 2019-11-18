@@ -652,12 +652,7 @@ class Git:
         if p.returncode == 0:
             return { "code": 0, "message": my_output.decode("utf-8") }
         else:
-            response = {
-                "code": p.returncode,
-                "message": my_error.decode("utf-8"),
-            }
-            response["command"] = " ".join(cmd)
-            return response
+            return { "code": p.returncode, "message": my_error.decode("utf-8"), "command":  " ".join(cmd) }
 
     def checkout(self, filename, top_repo_path):
         """
