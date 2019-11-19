@@ -609,25 +609,50 @@ class Git:
                 "message": my_error.decode("utf-8"),
             }
 
-    def checkout_branch(self, branchname, current_path):
+    def _get_branch_reference(self, branchname, current_path):
         """
-        Execute git checkout <branch-name> command & return the result.
+        Execute git rev-parse --symbolic-full-name <branch-name> and return the result (or None).
         """
-        p = Popen(
-            ["git", "checkout", branchname],
+        p = subprocess.Popen(
+            ["git", "rev-parse", "--symbolic-full-name", branchname],
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),
         )
         my_output, my_error = p.communicate()
         if p.returncode == 0:
-            return {"code": p.returncode, "message": my_output.decode("utf-8")}
+            return my_output.decode("utf-8").strip("\n")
         else:
-            return {
-                "code": p.returncode,
-                "command": "git checkout " + branchname,
-                "message": my_error.decode("utf-8"),
-            }
+            return None
+
+    def checkout_branch(self, branchname, current_path):
+        """
+        Execute git checkout <branch-name> command & return the result.
+        Use the --track parameter for a remote branch.
+        """
+        reference_name = self._get_branch_reference(branchname, current_path)
+        if reference_name is None:
+            is_remote_branch = False
+        else:
+            is_remote_branch = self._is_remote_branch(reference_name)
+
+        if is_remote_branch:
+            cmd = ["git", "checkout", "--track", branchname]
+        else:
+            cmd = ["git", "checkout", branchname]
+
+        p = subprocess.Popen(
+            cmd,
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd=os.path.join(self.root_dir, current_path),
+        )
+
+        my_output, my_error = p.communicate()
+        if p.returncode == 0:
+            return { "code": 0, "message": my_output.decode("utf-8") }
+        else:
+            return { "code": p.returncode, "message": my_error.decode("utf-8"), "command":  " ".join(cmd) }
 
     def checkout(self, filename, top_repo_path):
         """
