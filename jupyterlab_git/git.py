@@ -377,7 +377,7 @@ class Git:
             return remotes
 
         # all's good; concatenate results and return
-        return {"code": 0, "branches": heads["branches"] + remotes["branches"]}
+        return {"code": 0, "branches": heads["branches"] + remotes["branches"], "current_branch": heads["current_branch"]}
 
     def branch_heads(self, current_path):
         """
@@ -393,37 +393,43 @@ class Git:
         )
         output, error = p.communicate()
         if p.returncode == 0:
-            current_branch_seen = False
+            current_branch = None
             results = []
             try:
                 for name,commit_sha,upstream_name,is_current_branch in (line.split('\t') for line in output.decode("utf-8").splitlines()):
                     # Format reference : https://git-scm.com/docs/git-for-each-ref#_field_names
                     is_current_branch = bool(is_current_branch.strip())
-                    current_branch_seen |= is_current_branch
 
-                    results.append({
+                    branch = {
                         "is_current_branch": is_current_branch,
                         "is_remote_branch": False,
                         "name": name,
                         "upstream": upstream_name if upstream_name else None,
                         "top_commit": commit_sha,
                         "tag": None,
-                    })
+                    }
+                    results.append(branch)
+                    if is_current_branch:
+                        current_branch = branch
 
                 # Remote branch is seleted use 'git branch -a' as fallback machanism
                 # to get add detached head on remote branch to preserve older functionality
                 # TODO : Revisit this to checkout new local branch with same name as remote
                 # when the remote branch is seleted, VS Code git does the same thing.
-                if not current_branch_seen and self.get_current_branch(current_path) == "HEAD":
-                    results.append({
+                if not current_branch and self.get_current_branch(current_path) == "HEAD":
+                    branch = {
                         "is_current_branch": True,
                         "is_remote_branch": False,
                         "name": self._get_detached_head_name(current_path),
                         "upstream": None,
                         "top_commit": None,
                         "tag": None,
-                    })
-                return {"code": p.returncode, "branches": results}
+                    }
+                    results.append(branch)
+                    current_branch = branch
+
+                return {"code": p.returncode, "branches": results, "current_branch": current_branch}
+
             except Exception as downstream_error:
                 return {
                     "code": -1,
@@ -529,6 +535,10 @@ class Git:
         """
         Execute git add<filename> command & return the result.
         """
+        if not isinstance(filename, str):
+            # assume filename is a sequence
+            filename = ' '.join(filename)
+
         my_output = subprocess.check_output(["git", "add", filename], cwd=top_repo_path)
         return my_output
 
@@ -584,8 +594,12 @@ class Git:
         """
         Reset the current branch to a specific past commit.
         """
+        cmd = ["git", "reset", "--hard"]
+        if commit_id:
+            cmd.append(commit_id)
+
         my_output = subprocess.check_output(
-            ["git", "reset", "--hard", commit_id], cwd=top_repo_path
+            cmd, cwd=top_repo_path
         )
         return my_output
 

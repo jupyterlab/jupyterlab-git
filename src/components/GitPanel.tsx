@@ -8,6 +8,7 @@ import {
   panelWarningStyle
 } from '../style/GitPanelStyle';
 import { Git } from '../tokens';
+import { decodeStage } from '../utils';
 import { BranchHeader } from './BranchHeader';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
@@ -75,33 +76,19 @@ export class GitPanel extends React.Component<
         this.refreshStatus();
       }
     }, this);
+    props.model.markChanged.connect(() => this.forceUpdate());
 
     props.settings.changed.connect(this.refresh, this);
   }
 
   refreshBranch = async () => {
-    // Get current and upstream git branch
-    if (this.props.model.pathRepository !== null) {
-      const branchData = await this.props.model.branch();
-      let currentBranch = 'master';
-      let upstreamBranch = '';
-      if (branchData.code === 0) {
-        let allBranches = branchData.branches;
-        for (let i = 0; i < allBranches.length; i++) {
-          if (allBranches[i].is_current_branch) {
-            currentBranch = allBranches[i].name;
-            upstreamBranch = allBranches[i].upstream;
-            break;
-          }
-        }
-      }
+    const { currentBranch } = this.props.model;
 
-      this.setState({
-        branches: branchData.branches,
-        currentBranch: currentBranch,
-        upstreamBranch: upstreamBranch
-      });
-    }
+    this.setState({
+      branches: this.props.model.branches,
+      currentBranch: currentBranch ? currentBranch.name : 'master',
+      upstreamBranch: currentBranch ? currentBranch.upstream : ''
+    });
   };
 
   refreshHistory = async () => {
@@ -131,22 +118,22 @@ export class GitPanel extends React.Component<
       let statusFiles = this.props.model.status;
       if (statusFiles.length > 0) {
         for (let i = 0; i < statusFiles.length; i++) {
+          const file = statusFiles[i];
+          const { x, y } = file;
+          const stage = decodeStage(x, y);
+
           // If file has been changed
-          if (statusFiles[i].x !== '?' && statusFiles[i].x !== '!') {
+          if (x !== '?' && x !== '!') {
             changedFiles++;
           }
+
           // If file is untracked
-          if (statusFiles[i].x === '?' && statusFiles[i].y === '?') {
-            untrackedFiles.push(statusFiles[i]);
-          } else {
-            // If file is staged
-            if (statusFiles[i].x !== ' ' && statusFiles[i].y !== 'D') {
-              stagedFiles.push(statusFiles[i]);
-            }
-            // If file is unstaged but tracked
-            if (statusFiles[i].y !== ' ') {
-              unstagedFiles.push(statusFiles[i]);
-            }
+          if (stage === 'untracked') {
+            untrackedFiles.push(file);
+          } else if (stage === 'unstaged') {
+            unstagedFiles.push(file);
+          } else if (stage === 'staged') {
+            stagedFiles.push(file);
           }
         }
       }
@@ -204,6 +191,7 @@ export class GitPanel extends React.Component<
           untrackedFiles={this.state.untrackedFiles}
           model={this.props.model}
           renderMime={this.props.renderMime}
+          settings={this.props.settings}
         />
       );
     }

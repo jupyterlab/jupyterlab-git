@@ -710,7 +710,15 @@ def test_branch_success(mock_subproc_popen):
                 'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
                 'tag': None,
             }
-        ]
+        ],
+        'current_branch': {
+            'is_current_branch': True,
+            'is_remote_branch': False,
+            'name': 'feature-foo',
+            'upstream': 'origin/feature-foo',
+            'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
+            'tag': None,
+        }
     }
 
     # When
@@ -832,7 +840,15 @@ def test_branch_success_detached_head(mock_subproc_popen):
                 'top_commit': 'abcdefghijklmnopqrstuvwxyz01234567890123',
                 'tag': None,
             }
-        ]
+        ],
+        'current_branch': {
+            'is_current_branch': True,
+            'is_remote_branch': False,
+            'name': '(HEAD detached at origin/feature-foo)',
+            'upstream': None,
+            'top_commit': None,
+            'tag': None,
+        }
     }
 
     # When

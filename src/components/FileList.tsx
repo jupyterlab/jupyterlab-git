@@ -1,4 +1,5 @@
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { JSONObject } from '@phosphor/coreutils';
 import { Menu } from '@phosphor/widgets';
@@ -15,7 +16,8 @@ import { openListedFile } from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import { CommitBox } from './CommitBox';
 import { openDiffView } from './diff/DiffWidget';
-import { GitStage } from './GitStage';
+import { GitStage, IGitStageProps } from './GitStage';
+import { GitStageSimple } from './GitStageSimple';
 
 export namespace CommandIDs {
   export const gitFileOpen = 'gf:Open';
@@ -56,6 +58,7 @@ export interface IFileListProps {
   untrackedFiles: Git.IStatusFileResult[];
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
+  settings: ISettingRegistry.ISettings;
 }
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
@@ -143,7 +146,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Stage',
         caption: 'Stage the changes of selected file',
         execute: () => {
-          this.addUnstagedFile(this.state.contextMenuFile);
+          this.addFile(this.state.contextMenuFile);
         }
       });
     }
@@ -153,7 +156,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Track',
         caption: 'Start tracking selected file',
         execute: () => {
-          this.addUntrackedFile(this.state.contextMenuFile);
+          this.addFile(this.state.contextMenuFile);
         }
       });
     }
@@ -320,6 +323,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     try {
       await this.props.model.checkout();
     } catch (reason) {
+      showErrorMessage('Discard all unstaged changes failed.', reason, [
+        Dialog.warnButton({ label: 'DISMISS' })
+      ]);
+    }
+  };
+
+  /** Discard changes in all unstaged and staged files */
+  discardAllChanges = async () => {
+    try {
+      await this.props.model.resetToCommit();
+    } catch (reason) {
       showErrorMessage('Discard all changes failed.', reason, [
         Dialog.warnButton({ label: 'DISMISS' })
       ]);
@@ -327,13 +341,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Add a specific unstaged file */
-  addUnstagedFile = async (file: string) => {
-    await this.props.model.add(file);
+  addFile = async (...file: string[]) => {
+    await this.props.model.add(...file);
   };
 
-  /** Discard changes in a specific unstaged file */
-  discardUnstagedFile = async (file: string) => {
+  /** Discard changes in a specific unstaged or staged file */
+  discardChanges = async (file: string) => {
     try {
+      await this.props.model.reset(file);
       await this.props.model.checkout({ filename: file });
     } catch (reason) {
       showErrorMessage(`Discard changes for ${file} failed.`, reason, [
@@ -347,9 +362,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.props.model.addAllUntracked();
   };
 
-  /** Add a specific untracked file */
-  addUntrackedFile = async (file: string) => {
-    await this.props.model.add(file);
+  addAllMarkedFiles = async () => {
+    await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
   disableStagesForDiscardAll = () => {
@@ -389,96 +403,143 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
-  render() {
-    return (
-      <div onContextMenu={event => event.preventDefault()}>
-        <CommitBox
-          hasStagedFiles={this.props.stagedFiles.length > 0}
-          commitAllStagedFiles={this.commitAllStagedFiles}
-        />
-        <GitStage
-          heading={'Staged'}
-          files={this.props.stagedFiles}
-          model={this.props.model}
-          showFiles={this.state.showStaged}
-          displayFiles={this.displayStaged}
-          moveAllFiles={this.resetAllStagedFiles}
-          discardAllFiles={null}
-          discardFile={null}
-          moveFile={this.resetStagedFile}
-          moveFileIconClass={moveFileDownButtonStyle}
-          moveFileIconSelectedClass={moveFileDownButtonSelectedStyle}
-          moveAllFilesTitle={'Unstage all changes'}
-          moveFileTitle={'Unstage this change'}
-          contextMenu={this.contextMenuStaged}
-          selectedFile={this.state.selectedFile}
-          updateSelectedFile={this.updateSelectedFile}
-          selectedStage={this.state.selectedStage}
-          updateSelectedStage={this.updateSelectedStage}
-          selectedDiscardFile={this.state.selectedDiscardFile}
-          updateSelectedDiscardFile={this.updateSelectedDiscardFile}
-          disableFiles={this.state.disableFiles}
-          toggleDisableFiles={this.toggleDisableFiles}
-          disableOthers={null}
-          isDisabled={this.state.disableStaged}
-          renderMime={this.props.renderMime}
-        />
-        <GitStage
-          heading={'Changed'}
-          files={this.props.unstagedFiles}
-          model={this.props.model}
-          showFiles={this.state.showUnstaged}
-          displayFiles={this.displayUnstaged}
-          moveAllFiles={this.addAllUnstagedFiles}
-          discardAllFiles={this.discardAllUnstagedFiles}
-          discardFile={this.discardUnstagedFile}
-          moveFile={this.addUnstagedFile}
-          moveFileIconClass={moveFileUpButtonStyle}
-          moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
-          moveAllFilesTitle={'Stage all changes'}
-          moveFileTitle={'Stage this change'}
-          contextMenu={this.contextMenuUnstaged}
-          selectedFile={this.state.selectedFile}
-          updateSelectedFile={this.updateSelectedFile}
-          selectedStage={this.state.selectedStage}
-          updateSelectedStage={this.updateSelectedStage}
-          selectedDiscardFile={this.state.selectedDiscardFile}
-          updateSelectedDiscardFile={this.updateSelectedDiscardFile}
-          disableFiles={this.state.disableFiles}
-          toggleDisableFiles={this.toggleDisableFiles}
-          disableOthers={this.disableStagesForDiscardAll}
-          isDisabled={this.state.disableUnstaged}
-          renderMime={this.props.renderMime}
-        />
-        <GitStage
-          heading={'Untracked'}
-          files={this.props.untrackedFiles}
-          model={this.props.model}
-          showFiles={this.state.showUntracked}
-          displayFiles={this.displayUntracked}
-          moveAllFiles={this.addAllUntrackedFiles}
-          discardAllFiles={null}
-          discardFile={null}
-          moveFile={this.addUntrackedFile}
-          moveFileIconClass={moveFileUpButtonStyle}
-          moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
-          moveAllFilesTitle={'Track all untracked files'}
-          moveFileTitle={'Track this file'}
-          contextMenu={this.contextMenuUntracked}
-          selectedFile={this.state.selectedFile}
-          updateSelectedFile={this.updateSelectedFile}
-          selectedStage={this.state.selectedStage}
-          updateSelectedStage={this.updateSelectedStage}
-          selectedDiscardFile={this.state.selectedDiscardFile}
-          updateSelectedDiscardFile={this.updateSelectedDiscardFile}
-          disableFiles={this.state.disableFiles}
-          toggleDisableFiles={this.toggleDisableFiles}
-          disableOthers={null}
-          isDisabled={this.state.disableUntracked}
-          renderMime={this.props.renderMime}
-        />
-      </div>
+  /** Commit all marked files */
+  commitAllMarkedFiles = async (message: string): Promise<void> => {
+    await this.resetAllStagedFiles();
+    await this.addAllMarkedFiles();
+    await this.commitAllStagedFiles(message);
+  };
+
+  get markedFiles() {
+    return this.allFilesExcludingUnmodified.filter(file =>
+      this.props.model.getMark(file.to)
     );
+  }
+
+  get allFilesExcludingUnmodified() {
+    let files = this.props.untrackedFiles.concat(
+      this.props.unstagedFiles,
+      this.props.stagedFiles
+    );
+
+    files.sort((a, b) => a.to.localeCompare(b.to));
+    return files;
+  }
+
+  render() {
+    const sharedProps = {
+      model: this.props.model,
+      selectedFile: this.state.selectedFile,
+      updateSelectedFile: this.updateSelectedFile,
+      selectedStage: this.state.selectedStage,
+      updateSelectedStage: this.updateSelectedStage,
+      selectedDiscardFile: this.state.selectedDiscardFile,
+      updateSelectedDiscardFile: this.updateSelectedDiscardFile,
+      disableFiles: this.state.disableFiles,
+      toggleDisableFiles: this.toggleDisableFiles,
+      renderMime: this.props.renderMime
+    };
+
+    const Staged = (props: Partial<IGitStageProps> = {}) => (
+      <GitStage
+        heading={'Staged'}
+        files={this.props.stagedFiles}
+        showFiles={this.state.showStaged}
+        displayFiles={this.displayStaged}
+        moveAllFiles={this.resetAllStagedFiles}
+        discardAllFiles={null}
+        discardFile={null}
+        moveFile={this.resetStagedFile}
+        moveFileIconClass={moveFileDownButtonStyle}
+        moveFileIconSelectedClass={moveFileDownButtonSelectedStyle}
+        moveAllFilesTitle={'Unstage all changes'}
+        moveFileTitle={'Unstage this change'}
+        contextMenu={this.contextMenuStaged}
+        disableOthers={null}
+        isDisabled={this.state.disableStaged}
+        {...sharedProps}
+        {...props}
+      />
+    );
+
+    const Changed = (props: Partial<IGitStageProps> = {}) => (
+      <GitStage
+        heading={'Changed'}
+        files={this.props.unstagedFiles}
+        showFiles={this.state.showUnstaged}
+        displayFiles={this.displayUnstaged}
+        moveAllFiles={this.addAllUnstagedFiles}
+        discardAllFiles={this.discardAllUnstagedFiles}
+        discardFile={this.discardChanges}
+        moveFile={this.addFile}
+        moveFileIconClass={moveFileUpButtonStyle}
+        moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
+        moveAllFilesTitle={'Stage all changes'}
+        moveFileTitle={'Stage this change'}
+        contextMenu={this.contextMenuUnstaged}
+        disableOthers={this.disableStagesForDiscardAll}
+        isDisabled={this.state.disableUnstaged}
+        {...sharedProps}
+        {...props}
+      />
+    );
+
+    const Untracked = (props: Partial<IGitStageProps> = {}) => (
+      <GitStage
+        heading={'Untracked'}
+        files={this.props.untrackedFiles}
+        showFiles={this.state.showUntracked}
+        displayFiles={this.displayUntracked}
+        moveAllFiles={this.addAllUntrackedFiles}
+        discardAllFiles={null}
+        discardFile={null}
+        moveFile={this.addFile}
+        moveFileIconClass={moveFileUpButtonStyle}
+        moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
+        moveAllFilesTitle={'Track all untracked files'}
+        moveFileTitle={'Track this file'}
+        contextMenu={this.contextMenuUntracked}
+        disableOthers={null}
+        isDisabled={this.state.disableUntracked}
+        {...sharedProps}
+        {...props}
+      />
+    );
+
+    if (this.props.settings.composite['simpleStaging']) {
+      return (
+        <div>
+          <CommitBox
+            hasFiles={this.markedFiles.length > 0}
+            commitFunc={this.commitAllMarkedFiles}
+          />
+          <div>
+            <GitStageSimple
+              heading={'Changed'}
+              files={this.allFilesExcludingUnmodified}
+              model={this.props.model}
+              discardAllFiles={this.discardAllChanges}
+              discardFile={this.discardChanges}
+              renderMime={this.props.renderMime}
+            />
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div onContextMenu={event => event.preventDefault()}>
+          <CommitBox
+            hasFiles={this.props.stagedFiles.length > 0}
+            commitFunc={this.commitAllStagedFiles}
+          />
+          <div>
+            <Staged />
+            <Changed />
+            <Untracked />
+          </div>
+        </div>
+      );
+    }
   }
 
   /**
