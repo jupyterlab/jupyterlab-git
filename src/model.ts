@@ -89,7 +89,6 @@ export class GitExtension implements IGitExtension, IDisposable {
 
           if (change.newValue !== change.oldValue) {
             this.refresh().then(() => this._repositoryChanged.emit(change));
-            this._repositoryChanged.emit(change);
           }
         })
         .catch(reason => {
@@ -337,7 +336,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   /** Refresh the git repository status */
-  async _refreshStatus(): Promise<void> {
+  protected async _refreshStatus(): Promise<void> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -422,7 +421,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   /** Make request for a list of all git branches in the repository */
-  async _branch(): Promise<Git.IBranchResult> {
+  protected async _branch(): Promise<Git.IBranchResult> {
     await this.ready;
     const path = this.pathRepository;
 

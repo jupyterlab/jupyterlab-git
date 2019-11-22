@@ -31,7 +31,7 @@ export function extractFilename(path: string): string {
   }
 }
 
-export function decodeStage(x: string, y: string) {
+export function decodeStage(x: string, y: string): string | null {
   // If file is untracked
   if (x === '?' && y === '?') {
     return 'untracked';
@@ -46,7 +46,7 @@ export function decodeStage(x: string, y: string) {
     }
   }
 
-  return undefined;
+  return null;
 }
 
 /** Open a file in the git listing */
