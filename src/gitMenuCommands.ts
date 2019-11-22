@@ -3,6 +3,7 @@ import { Dialog, MainAreaWidget, showDialog } from '@jupyterlab/apputils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
 import { ITerminal } from '@jupyterlab/terminal';
 import { IGitExtension } from './tokens';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 /**
  * The command IDs used by the git plugin.
@@ -12,6 +13,7 @@ export namespace CommandIDs {
   export const gitTerminalCommand = 'git:terminal-command';
   export const gitInit = 'git:init';
   export const gitOpenUrl = 'git:open-url';
+  export const gitToggleSimpleStaging = 'git:toggle-simple-staging';
 }
 
 /**
@@ -20,7 +22,8 @@ export namespace CommandIDs {
 export function addCommands(
   app: JupyterFrontEnd,
   model: IGitExtension,
-  fileBrowser: FileBrowser
+  fileBrowser: FileBrowser,
+  settings: ISettingRegistry.ISettings
 ) {
   const { commands, shell } = app;
 
@@ -97,6 +100,15 @@ export function addCommands(
     execute: args => {
       const url = args['url'] as string;
       window.open(url);
+    }
+  });
+
+  /** add toggle for simple staging */
+  commands.addCommand(CommandIDs.gitToggleSimpleStaging, {
+    label: 'Simple staging',
+    isToggled: () => !!settings.composite['simpleStaging'],
+    execute: args => {
+      settings.set('simpleStaging', !settings.composite['simpleStaging']);
     }
   });
 }

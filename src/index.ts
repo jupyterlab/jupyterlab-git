@@ -4,7 +4,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IChangedArgs, ISettingRegistry } from '@jupyterlab/coreutils';
-import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import {
+  FileBrowser,
+  FileBrowserModel,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { defaultIconRegistry } from '@jupyterlab/ui-components';
@@ -60,9 +64,8 @@ function activate(
   restorer: ILayoutRestorer,
   factory: IFileBrowserFactory,
   renderMime: IRenderMimeRegistry,
-  settings: ISettingRegistry
+  settingRegistry: ISettingRegistry
 ): IGitExtension {
-  const { commands } = app;
   const key = plugin.id;
 
   registerGitIcons(defaultIconRegistry);
@@ -81,7 +84,7 @@ function activate(
   });
 
   /* Create the widgets */
-  settings
+  settingRegistry
     .load(key)
     .then(settings => {
       // Create the Git widget sidebar
@@ -97,6 +100,12 @@ function activate(
       // Rank has been chosen somewhat arbitrarily to give priority to the running
       // sessions widget in the sidebar.
       app.shell.add(gitPlugin, 'left', { rank: 200 });
+
+      // add a menu for the plugin
+      mainMenu.addMenu(
+        createGitMenu(app, gitExtension, factory.defaultBrowser, settings),
+        { rank: 60 }
+      );
     })
     .catch(reason => {
       console.error(
@@ -105,29 +114,42 @@ function activate(
     });
 
   addCloneButton(gitExtension, factory.defaultBrowser);
+  return gitExtension;
+}
 
-  /* Add commands and menu items */
-  const category = 'Git';
-  addCommands(app, gitExtension, factory.defaultBrowser);
+/**
+ * Add commands and menu items
+ */
+function createGitMenu(
+  app: JupyterFrontEnd,
+  gitExtension: IGitExtension,
+  fileBrowser: FileBrowser,
+  settings: ISettingRegistry.ISettings
+): Menu {
+  const { commands } = app;
+  addCommands(app, gitExtension, fileBrowser, settings);
+
   let menu = new Menu({ commands });
-  let tutorial = new Menu({ commands });
-  tutorial.title.label = ' Tutorial ';
-  menu.title.label = category;
+  menu.title.label = 'Git';
   [CommandIDs.gitUI, CommandIDs.gitTerminalCommand, CommandIDs.gitInit].forEach(
     command => {
       menu.addItem({ command });
     }
   );
 
+  let tutorial = new Menu({ commands });
+  tutorial.title.label = ' Tutorial ';
   RESOURCES.map(args => {
     tutorial.addItem({
       args,
       command: CommandIDs.gitOpenUrl
     });
   });
-
   menu.addItem({ type: 'submenu', submenu: tutorial });
-  mainMenu.addMenu(menu, { rank: 60 });
 
-  return gitExtension;
+  menu.addItem({ type: 'separator' });
+
+  menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
+
+  return menu;
 }
