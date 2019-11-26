@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse as argpar
 import json
 import subprocess
 
@@ -9,14 +10,17 @@ def buildBundle():
     subprocess.run(['jlpm', 'clean:slate'])
     subprocess.run(['jlpm', 'build:labextension'])
 
-def tag(version, kind=None):
+def tag(version, dryrun=False, kind=None):
     """git tagging
     """
     kw = {'version': version, 'kind': kind}
-    tag = "{kind}_v{version}".format(**kw) if kind else "v{version}".format(**kw)
+    tag = '{kind}_v{version}'.format(**kw) if kind else 'v{version}'.format(**kw)
 
-    subprocess.run(['git', 'tag', tag])
-    subprocess.run(['git', 'push', 'origin', tag])
+    if dryrun:
+        print("Would tag: {}".format(tag))
+    else:
+        subprocess.run(['git', 'tag', tag])
+        subprocess.run(['git', 'push', 'origin', tag])
 
 def pypi(bdist=True, test=False):
     """release on pypi
@@ -45,10 +49,14 @@ def npmjs(dryRun=False):
         # build and release
         subprocess.run(['npm', 'publish', '--access', 'public'])
 
-def labExtensionVersion(version=None):
+def labExtensionVersion(dryrun=False, version=None):
     if version:
-        # force the labextension version to match the supplied version
-        subprocess.run(['npm', '--no-git-tag-version', 'version', version, '--force', '--allow-same-version'])
+        force_ver_cmd = ['npm', '--no-git-tag-version', 'version', version, '--force', '--allow-same-version']
+        if dryrun:
+            print("Would force npm version with: {}".format(' '.join(force_ver_cmd)))
+        else:
+            # force the labextension version to match the supplied version
+            subprocess.run(force_ver_cmd)
     else:
         # get single source of truth from the Typescript labextension
         with open('package.json') as f:
@@ -62,7 +70,7 @@ def serverExtensionVersion():
     # get single source of truth from the Python serverextension
     return get_version('jupyterlab_hdf/_version.py')
 
-def doRelease():
+def doRelease(test=False):
     # do a clean build of the bundle
     buildBundle()
 
@@ -72,11 +80,21 @@ def doRelease():
     labExtensionVersion(version=version)
 
     # tag with version and push the tag
-    tag(version=version)
+    tag(dryrun=test, version=version)
 
     # release to pypi and npmjs
-    pypi()
-    npmjs()
+    pypi(test=test)
+    npmjs(dryRun=test)
 
-if __name__=="__main__":
-    doRelease()
+def main():
+    parser = argpar.ArgumentParser()
+
+    parser.add_argument('--test', action='store_true',
+        help='Release to Pypi test server; performs a dryrun of all other release actions')
+
+    parsed = vars(parser.parse_args())
+
+    doRelease(test=parsed['test'])
+
+if __name__=='__main__':
+    main()
