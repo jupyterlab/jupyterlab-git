@@ -21,7 +21,7 @@
       "type": "integer",
       "title": "Refresh interval",
       "description": "Number of milliseconds between polling the file system for changes.",
-      "default": 4000
+      "default": 3000
     }
   }
 }

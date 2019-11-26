@@ -924,7 +924,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
-  private _refreshInterval = 4000; // ms
+  private _refreshInterval = 3000; // ms
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _repositoryChanged = new Signal<
