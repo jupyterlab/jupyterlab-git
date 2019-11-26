@@ -72,13 +72,21 @@ function activate(
 
   // Create the Git model
   let gitExtension = new GitExtension(app);
+
   // Connect file browser with git model
   const filebrowser = factory.defaultBrowser;
+
+  // Whenever the file browser path changes, sync the Git extension path
   filebrowser.model.pathChanged.connect(
     (model: FileBrowserModel, change: IChangedArgs<string>) => {
       gitExtension.pathRepository = change.newValue;
     }
   );
+
+  // Whenever a user adds/renames/saves/deletes/modifies a file within the lab environment, refresh the Git status
+  filebrowser.model.fileChanged.connect(() => gitExtension.refreshStatus());
+
+  // Whenever we restore the application, sync the Git extension path
   Promise.all([app.restored, filebrowser.model.restored]).then(() => {
     gitExtension.pathRepository = filebrowser.model.path;
   });
@@ -106,6 +114,12 @@ function activate(
         createGitMenu(app, gitExtension, factory.defaultBrowser, settings),
         { rank: 60 }
       );
+
+      // Listen for changes to extension settings:
+      settings.changed.connect((settings: ISettingRegistry.ISettings) => {
+        gitExtension.refreshInterval = settings.composite
+          .refreshInterval as number;
+      });
     })
     .catch(reason => {
       console.error(

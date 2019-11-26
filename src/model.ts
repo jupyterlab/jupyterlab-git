@@ -8,11 +8,6 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
 
-/**
- * The default duration of the auto-refresh in ms
- */
-const DEFAULT_REFRESH_INTERVAL = 2000;
-
 /** Main extension class */
 export class GitExtension implements IGitExtension, IDisposable {
   constructor(app: JupyterFrontEnd = null) {
@@ -27,18 +22,33 @@ export class GitExtension implements IGitExtension, IDisposable {
         console.error(`Fail to get the server root path.\n${reason}`);
       });
 
-    const refreshInterval = DEFAULT_REFRESH_INTERVAL;
-
     // Start watching the repository
     this._poll = new Poll({
       factory: () => this._refreshStatus(),
       frequency: {
-        interval: refreshInterval,
+        interval: this._refreshInterval,
         backoff: true,
         max: 300 * 1000
       },
       standby: 'when-hidden'
     });
+  }
+
+  /**
+   * Number of milliseconds between polling the file system for changes.
+   */
+  public get refreshInterval(): number {
+    return this._refreshInterval;
+  }
+
+  public set refreshInterval(v: number) {
+    const freq = this._poll.frequency;
+    this._poll.frequency = {
+      interval: v,
+      backoff: freq.backoff,
+      max: freq.max
+    };
+    this._refreshInterval = v;
   }
 
   /**
@@ -914,6 +924,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
+  private _refreshInterval = 4000; // ms
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _repositoryChanged = new Signal<
