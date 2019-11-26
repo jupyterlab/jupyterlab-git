@@ -9,11 +9,14 @@ before_install:
   - nvm install 10
 install: pip install pytest "jupyterlab~=1.1"
 script:
+  # Build the labextension and bundle it
+  - jlpm build:labextension
+  # Build the sdist (identical to what will be uploaded to eg pypi on release)
   - python setup.py sdist
-  # Install the extension ensuring the cache is unused
+  # Install the extension from the sdist ensuring the cache is unused
   - pip install jupyterlab_git[test] --pre --no-index --find-links=dist --no-deps --no-cache-dir -v
-  # Install the extension dependencies
-  - pip install jupyterlab_git[test]
+  # Install the extension dependencies based on the current setup.py
+  - pip install .[test]
   - jupyter labextension list
   - jupyter lab build
   - pytest jupyterlab_git -r ap

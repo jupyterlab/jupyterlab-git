@@ -4,8 +4,7 @@ Setup Module to setup Python Handlers (Git Handlers) for the Git Plugin.
 from os.path import join as pjoin
 
 from setupbase import (
-    create_cmdclass, install_npm, ensure_targets,
-    combine_commands, ensure_python, get_version,
+    create_cmdclass, ensure_python, get_version,
     HERE
 )
 
@@ -22,32 +21,13 @@ version = get_version(pjoin(name, '_version.py'))
 
 lab_path = pjoin(HERE, name, 'labextension')
 
-# Representative files that should exist after a successful build
-jstargets = [
-    pjoin(HERE, 'lib', 'git.js'),
-]
-
-package_data_spec = {
-    name: [
-        '*'
-    ]
-}
-
 data_files_spec = [
     ('share/jupyter/lab/extensions', lab_path, '*.tgz'),
     ('etc/jupyter/jupyter_notebook_config.d',
      'jupyter-config/jupyter_notebook_config.d', 'jupyterlab_git.json'),
 ]
 
-cmdclass = create_cmdclass('jsdeps', 
-    package_data_spec=package_data_spec,
-    data_files_spec=data_files_spec
-)
-
-cmdclass['jsdeps'] = combine_commands(
-    install_npm(HERE, build_cmd='build:all', npm='jlpm'),
-    ensure_targets(jstargets),
-)
+cmdclass = create_cmdclass(data_files_spec=data_files_spec)
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -76,7 +56,7 @@ setup_args = dict(
         'Programming Language :: Python :: 3.7',
         'Framework :: Jupyter',
     ],
-    include_package_data = True,
+    # include_package_data = True,
     install_requires = [
         'notebook',
         'nbdime >= 1.1.0',
@@ -85,7 +65,7 @@ setup_args = dict(
     extras_require = {
         'test': [
             'pytest',
-            'jupyterlab~=1.0',
+            'jupyterlab~=1.1',
         ],
     },
 )

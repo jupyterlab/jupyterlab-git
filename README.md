@@ -24,6 +24,14 @@ pip install --upgrade jupyterlab-git
 jupyter lab build
 ```
 
+### Troubleshoot
+
+- When you run JupyterLab, if you can see the Git sidepanel UI but you cannot get it to work, you may need to explicitly enable the serverextension. Do:
+
+```bash
+jupyter serverextension enable --py jupyterlab_git
+```
+
 ## Development
 
 ### Contributing
@@ -55,17 +63,19 @@ If you would like to be listed, please submit a pull request with your informati
 Requires node 4+ and npm 4+
 
 ```bash
+# Install new-ish JupyterLab
+pip install -U jupyterlab
+
 # Clone the repo to your local environment
 git clone https://github.com/jupyterlab/jupyterlab-git.git
 cd jupyterlab-git
-# Install JupyterLab
-pip install jupyterlab
-# Install Javascript dependencies
-jlpm install
-# Install the server extension in development mode
+
+# Install the server extension in development mode and enable it
 pip install -e .[test]
 jupyter serverextension enable --py jupyterlab_git
-# Link your development version of the extension with JupyterLab
+
+# Build the labextension and dev-mode link it to jlab
+jlpm build
 jupyter labextension link .
 ```
 
