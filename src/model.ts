@@ -11,7 +11,7 @@ import { IGitExtension, Git } from './tokens';
 /**
  * The default duration of the auto-refresh in ms
  */
-const DEFAULT_REFRESH_INTERVAL = 10000;
+const DEFAULT_REFRESH_INTERVAL = 2000;
 
 /** Main extension class */
 export class GitExtension implements IGitExtension, IDisposable {
