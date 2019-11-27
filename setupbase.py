@@ -179,7 +179,7 @@ def create_cmdclass(prerelease_cmd=None, package_data_spec=None,
     cmdclass = dict(
         build_py=wrapper(build_py, strict=is_repo),
         bdist_egg=egg,
-        sdist=wrapper(sdist, strict=True),
+        sdist=sdist,
         handle_files=handle_files,
     )
 
