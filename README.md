@@ -24,9 +24,9 @@ pip install --upgrade jupyterlab-git
 jupyter lab build
 ```
 
-### Troubleshoot
+### Troubleshooting
 
-- When you run JupyterLab, if you can see the Git sidepanel UI but you cannot get it to work, you may need to explicitly enable the serverextension. Do:
+- When you run JupyterLab, if you can see the Git sidepanel UI but you cannot get it to work, you may need to explicitly enable the serverextension by running:
 
 ```bash
 jupyter serverextension enable --py jupyterlab_git

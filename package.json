@@ -13,10 +13,9 @@
   ],
   "scripts": {
     "build": "jlpm install && tsc",
-    "build:clean": "jlpm install && jlpm clean && tsc",
-    "build:labextension": "jlpm build:clean && jlpm clean:labextension && mkdirp jupyterlab_git/labextension && cd jupyterlab_git/labextension && npm pack ../..",
+    "build:labextension": "jlpm build && jlpm clean:labextension && mkdirp jupyterlab_git/labextension && cd jupyterlab_git/labextension && npm pack ../..",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "clean:more": "jlpm clean && rimraf build && rimraf dist && rimraf package && rimraf *.tgz",
+    "clean:more": "jlpm clean && rimraf build && rimraf dist",
     "clean:labextension": "rimraf jupyterlab_git/labextension",
     "clean:slate": "jlpm clean:more && jlpm clean:labextension && rimraf node_modules",
     "watch": "tsc -w",

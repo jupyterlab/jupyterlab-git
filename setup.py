@@ -1,11 +1,12 @@
 """
 Setup Module to setup Python Handlers (Git Handlers) for the Git Plugin.
 """
-from os.path import join as pjoin
+from pathlib import Path
+from subprocess import CalledProcessError
 
 from setupbase import (
-    create_cmdclass, ensure_python, get_version,
-    HERE
+    command_for_func, create_cmdclass, ensure_python,
+    get_version, HERE, run
 )
 
 import setuptools
@@ -17,17 +18,27 @@ name='jupyterlab_git'
 ensure_python('>=3.5')
 
 # Get our version
-version = get_version(pjoin(name, '_version.py'))
+version = get_version(str(Path(name) / '_version.py'))
 
-lab_path = pjoin(HERE, name, 'labextension')
+lab_path = Path(HERE) / name / 'labextension'
 
 data_files_spec = [
-    ('share/jupyter/lab/extensions', lab_path, '*.tgz'),
+    ('share/jupyter/lab/extensions', str(lab_path), '*.tgz'),
     ('etc/jupyter/jupyter_notebook_config.d',
      'jupyter-config/jupyter_notebook_config.d', 'jupyterlab_git.json'),
 ]
 
-cmdclass = create_cmdclass(data_files_spec=data_files_spec)
+def runPackLabextension():
+    if Path('package.json').is_file():
+        try:
+            run(['jlpm', 'build:labextension'])
+        except CalledProcessError:
+            pass
+pack_labext = command_for_func(runPackLabextension)
+
+cmdclass = create_cmdclass('pack_labext', data_files_spec=data_files_spec)
+cmdclass['pack_labext'] = pack_labext
+cmdclass.pop('develop')
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
