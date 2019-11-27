@@ -6,7 +6,9 @@ import subprocess
 
 from setupbase import get_version
 
-def buildBundle():
+VERSION_PY = 'jupyterlab_git/_version.py'
+
+def buildLabextensionBundle():
     subprocess.run(['jlpm', 'clean:slate'])
     subprocess.run(['jlpm', 'build:labextension'])
 
@@ -22,11 +24,11 @@ def tag(version, dryrun=False, kind=None):
         subprocess.run(['git', 'tag', tag])
         subprocess.run(['git', 'push', 'origin', tag])
 
-def pypi(bdist=True, test=False):
+def pypi(wheel=True, test=False):
     """release on pypi
     """
-    if bdist:
-        # build the source (sdist) and binary wheel (bdist) releases
+    if wheel:
+        # build the source (sdist) and binary wheel (bdist_wheel) releases
         subprocess.run(['python', 'setup.py', 'sdist', 'bdist_wheel'])
     else:
         # build just the source release
@@ -39,10 +41,10 @@ def pypi(bdist=True, test=False):
         # release to the production server
         subprocess.run(['twine', 'upload', 'dist/*'])
 
-def npmjs(dryRun=False):
+def npmjs(dryrun=False):
     """release on npmjs
     """
-    if dryRun:
+    if dryrun:
         # dry run build and release
         subprocess.run(['npm', 'publish', '--access', 'public', '--dry-run'])
     else:
@@ -68,23 +70,23 @@ def labExtensionVersion(dryrun=False, version=None):
 
 def serverExtensionVersion():
     # get single source of truth from the Python serverextension
-    return get_version('jupyterlab_hdf/_version.py')
+    return get_version(VERSION_PY)
 
 def doRelease(test=False):
     # do a clean build of the bundle
-    buildBundle()
+    buildLabextensionBundle()
 
     # treat the serverextension version as the "real" single source of truth
     version = serverExtensionVersion()
     # force the labextension version to agree with the serverextension version
-    labExtensionVersion(version=version)
+    labExtensionVersion(dryrun=test, version=version)
 
     # tag with version and push the tag
     tag(dryrun=test, version=version)
 
     # release to pypi and npmjs
     pypi(test=test)
-    npmjs(dryRun=test)
+    npmjs(dryrun=test)
 
 def main():
     parser = argpar.ArgumentParser()
