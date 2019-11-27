@@ -5,7 +5,6 @@ include setupbase.py
 
 include package.json
 include *.config.js
-include setupJest.js
 include ts*.json
 include jupyterlab_git/labextension/*.tgz
 recursive-include jupyter-config *.json
