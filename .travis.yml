@@ -14,6 +14,7 @@ script:
   - pip install jupyterlab_git[test] --pre --no-index --find-links=dist --no-deps --no-cache-dir -v
   # Install the extension dependencies
   - pip install jupyterlab_git[test]
+  - jupyter serverextension list
   - jupyter labextension list
   - jupyter lab build
   - pytest jupyterlab_git -r ap
