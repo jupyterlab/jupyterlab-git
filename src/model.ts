@@ -8,6 +8,9 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
 
+// Refresh interval (note: this should be the same as in the plugin settings schema):
+let REFRESH_INTERVAL = 3000; // ms
+
 /** Main extension class */
 export class GitExtension implements IGitExtension, IDisposable {
   constructor(app: JupyterFrontEnd = null) {
@@ -26,7 +29,7 @@ export class GitExtension implements IGitExtension, IDisposable {
     this._poll = new Poll({
       factory: () => this._refreshStatus(),
       frequency: {
-        interval: this._refreshInterval,
+        interval: REFRESH_INTERVAL,
         backoff: true,
         max: 300 * 1000
       },
@@ -36,19 +39,19 @@ export class GitExtension implements IGitExtension, IDisposable {
 
   /**
    * Number of milliseconds between polling the file system for changes.
+   *
+   * ## Notes
+   *
+   * -   WARNING: this should only be set upon changes to plugin settings. If the refresh interval is set independently of plugin settings (e.g., programmatically set by internal extension logic irrespective of whether plugin settings have changed), we run the risk of being out-of-sync with user expectation.
    */
-  public get refreshInterval(): number {
-    return this._refreshInterval;
-  }
-
-  public set refreshInterval(v: number) {
+  set refreshInterval(v: number) {
     const freq = this._poll.frequency;
     this._poll.frequency = {
       interval: v,
       backoff: freq.backoff,
       max: freq.max
     };
-    this._refreshInterval = v;
+    REFRESH_INTERVAL = v;
   }
 
   /**
@@ -924,7 +927,6 @@ export class GitExtension implements IGitExtension, IDisposable {
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
-  private _refreshInterval = 3000; // ms
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _repositoryChanged = new Signal<
