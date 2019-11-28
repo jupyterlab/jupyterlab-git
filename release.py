@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import argparse as argpar
 import json
 import subprocess
@@ -8,9 +7,8 @@ from setupbase import get_version
 
 VERSION_PY = 'jupyterlab_git/_version.py'
 
-def buildLabextensionBundle():
+def prepLabextensionBundle():
     subprocess.run(['jlpm', 'clean:slate'])
-    subprocess.run(['jlpm', 'build:labextension'])
 
 def tag(version, dryrun=False, kind=None):
     """git tagging
@@ -73,8 +71,8 @@ def serverExtensionVersion():
     return get_version(VERSION_PY)
 
 def doRelease(test=False):
-    # do a clean build of the bundle
-    buildLabextensionBundle()
+    # prep the build area for the labextension bundle
+    prepLabextensionBundle()
 
     # treat the serverextension version as the "real" single source of truth
     version = serverExtensionVersion()
