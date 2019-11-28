@@ -1,5 +1,10 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { IChangedArgs, PathExt, Poll } from '@jupyterlab/coreutils';
+import {
+  IChangedArgs,
+  PathExt,
+  Poll,
+  ISettingRegistry
+} from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
@@ -7,9 +12,6 @@ import { IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
-
-// Refresh interval (note: this should be the same as in the plugin settings schema):
-let REFRESH_INTERVAL = 3000; // ms
 
 /** Main extension class */
 export class GitExtension implements IGitExtension, IDisposable {
@@ -24,34 +26,35 @@ export class GitExtension implements IGitExtension, IDisposable {
       .catch(reason => {
         console.error(`Fail to get the server root path.\n${reason}`);
       });
-
-    // Start watching the repository
-    this._poll = new Poll({
-      factory: () => this._refreshStatus(),
-      frequency: {
-        interval: REFRESH_INTERVAL,
-        backoff: true,
-        max: 300 * 1000
-      },
-      standby: 'when-hidden'
-    });
   }
 
   /**
-   * Number of milliseconds between polling the file system for changes.
-   *
-   * ## Notes
-   *
-   * -   WARNING: this should only be set upon changes to plugin settings. If the refresh interval is set independently of plugin settings (e.g., programmatically set by internal extension logic irrespective of whether plugin settings have changed), we run the risk of being out-of-sync with user expectation.
+   * Plugin settings.
    */
-  set refreshInterval(v: number) {
-    const freq = this._poll.frequency;
-    this._poll.frequency = {
-      interval: v,
-      backoff: freq.backoff,
-      max: freq.max
-    };
-    REFRESH_INTERVAL = v;
+  set settings(settings: ISettingRegistry.ISettings) {
+    if (this._settings) {
+      this._settings.changed.disconnect(this._onSettingsChange, this);
+    }
+    settings.changed.connect(this._onSettingsChange, this);
+    if (this._poll) {
+      const freq = this._poll.frequency;
+      this._poll.frequency = {
+        interval: settings.composite.refreshInterval as number,
+        backoff: freq.backoff,
+        max: freq.max
+      };
+    } else {
+      this._poll = new Poll({
+        factory: () => this._refreshStatus(),
+        frequency: {
+          interval: settings.composite.refreshInterval as number,
+          backoff: true,
+          max: 300 * 1000
+        },
+        standby: 'when-hidden'
+      });
+    }
+    this._settings = settings;
   }
 
   /**
@@ -914,6 +917,21 @@ export class GitExtension implements IGitExtension, IDisposable {
     return this._currentMarker;
   }
 
+  /**
+   * Callback invoked upon a change to plugin settings.
+   *
+   * @private
+   * @param settings - settings registry
+   */
+  private _onSettingsChange(settings: ISettingRegistry.ISettings) {
+    const freq = this._poll.frequency;
+    this._poll.frequency = {
+      interval: settings.composite.refreshInterval as number,
+      backoff: freq.backoff,
+      max: freq.max
+    };
+  }
+
   private _status: Git.IStatusFileResult[] = [];
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[];
@@ -927,6 +945,7 @@ export class GitExtension implements IGitExtension, IDisposable {
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
+  private _settings: ISettingRegistry.ISettings | null = null;
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _repositoryChanged = new Signal<

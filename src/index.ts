@@ -115,15 +115,8 @@ function activate(
         { rank: 60 }
       );
 
-      // Sync the refresh interval to the current settings:
-      gitExtension.refreshInterval = settings.composite
-        .refreshInterval as number;
-
-      // Listen for changes to extension settings:
-      settings.changed.connect((settings: ISettingRegistry.ISettings) => {
-        gitExtension.refreshInterval = settings.composite
-          .refreshInterval as number;
-      });
+      // Pass along the plugin settings to the Git model:
+      gitExtension.settings = settings;
     })
     .catch(reason => {
       console.error(
