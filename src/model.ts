@@ -169,7 +169,9 @@ export class GitExtension implements IGitExtension, IDisposable {
       return;
     }
     this._isDisposed = true;
-    this._poll.dispose();
+    if (this._poll) {
+      this._poll.dispose();
+    }
     Signal.clearData(this);
   }
 
@@ -347,8 +349,12 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   async refreshStatus(): Promise<void> {
-    await this._poll.refresh();
-    await this._poll.tick;
+    if (this._poll) {
+      await this._poll.refresh();
+      await this._poll.tick;
+    } else {
+      await Promise.resolve();
+    }
   }
 
   /** Refresh the git repository status */
