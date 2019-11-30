@@ -113,18 +113,18 @@ export const textInputStyle = style({
 export const stagedCommitStyle = style({
   resize: 'none',
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   margin: '8px'
 });
 
 export const stagedCommitMessageStyle = style({
   width: '75%',
   fontWeight: 300,
-  height: '32px',
+  height: '35px',
   overflowX: 'auto',
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   flex: '20 1 auto',
-  resize: 'none',
+  resize: 'vertical',
   padding: '4px 8px',
   backgroundColor: 'var(--jp-layout-color1)',
   color: 'var(--jp-ui-font-color0)',
