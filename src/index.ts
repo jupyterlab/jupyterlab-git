@@ -58,23 +58,36 @@ export default plugin;
 /**
  * Activate the running plugin.
  */
-function activate(
+async function activate(
   app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   restorer: ILayoutRestorer,
   factory: IFileBrowserFactory,
   renderMime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry
-): IGitExtension {
-  const key = plugin.id;
+): Promise<IGitExtension> {
+  let settings: ISettingRegistry.ISettings;
 
+  // Register Git icons with the icon registry
   registerGitIcons(defaultIconRegistry);
 
-  // Create the Git model
-  let gitExtension = new GitExtension(app);
-
-  // Connect file browser with git model
+  // Get a reference to the default file browser extension
   const filebrowser = factory.defaultBrowser;
+
+  // Wait for the application and file browser extension to be restored:
+  await Promise.all([app.restored, filebrowser.model.restored]);
+
+  // Attempt to load application settings
+  try {
+    settings = await settingRegistry.load(plugin.id);
+  } catch (error) {
+    console.error(`Failed to load settings for the Git Exetnsion.\n${error}`);
+  }
+  // Create the Git model
+  const gitExtension = new GitExtension(app, settings);
+
+  // Sync the Git extension path with the file browser extension's current path
+  gitExtension.pathRepository = filebrowser.model.path;
 
   // Whenever the file browser path changes, sync the Git extension path
   filebrowser.model.pathChanged.connect(
@@ -82,49 +95,35 @@ function activate(
       gitExtension.pathRepository = change.newValue;
     }
   );
-
   // Whenever a user adds/renames/saves/deletes/modifies a file within the lab environment, refresh the Git status
   filebrowser.model.fileChanged.connect(() => gitExtension.refreshStatus());
 
-  // Whenever we restore the application, sync the Git extension path
-  Promise.all([app.restored, filebrowser.model.restored]).then(() => {
-    gitExtension.pathRepository = filebrowser.model.path;
-  });
+  // Provided we were able to load application settings, create the extension widgets
+  if (typeof settings !== void 0) {
+    // Create the Git widget sidebar
+    const gitPlugin = new GitWidget(gitExtension, settings, renderMime);
+    gitPlugin.id = 'jp-git-sessions';
+    gitPlugin.title.iconClass = 'jp-SideBar-tabIcon jp-GitIcon';
+    gitPlugin.title.caption = 'Git';
 
-  /* Create the widgets */
-  settingRegistry
-    .load(key)
-    .then(settings => {
-      // Create the Git widget sidebar
-      const gitPlugin = new GitWidget(gitExtension, settings, renderMime);
-      gitPlugin.id = 'jp-git-sessions';
-      gitPlugin.title.iconClass = `jp-SideBar-tabIcon jp-GitIcon`;
-      gitPlugin.title.caption = 'Git';
+    // Let the application restorer track the running panel for restoration of
+    // application state (e.g. setting the running panel as the current side bar
+    // widget).
+    restorer.add(gitPlugin, 'git-sessions');
 
-      // Let the application restorer track the running panel for restoration of
-      // application state (e.g. setting the running panel as the current side bar
-      // widget).
-      restorer.add(gitPlugin, 'git-sessions');
-      // Rank has been chosen somewhat arbitrarily to give priority to the running
-      // sessions widget in the sidebar.
-      app.shell.add(gitPlugin, 'left', { rank: 200 });
+    // Rank has been chosen somewhat arbitrarily to give priority to the running
+    // sessions widget in the sidebar.
+    app.shell.add(gitPlugin, 'left', { rank: 200 });
 
-      // add a menu for the plugin
-      mainMenu.addMenu(
-        createGitMenu(app, gitExtension, factory.defaultBrowser, settings),
-        { rank: 60 }
-      );
-
-      // Pass along the plugin settings to the Git model:
-      gitExtension.settings = settings;
-    })
-    .catch(reason => {
-      console.error(
-        `Failed to load settings for the Git Exetnsion.\n${reason}`
-      );
-    });
-
+    // Add a menu for the plugin
+    mainMenu.addMenu(
+      createGitMenu(app, gitExtension, factory.defaultBrowser, settings),
+      { rank: 60 }
+    );
+  }
+  // Add a clone button to the file browser extension toolbar
   addCloneButton(gitExtension, factory.defaultBrowser);
+
   return gitExtension;
 }
 

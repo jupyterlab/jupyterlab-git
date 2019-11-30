@@ -13,9 +13,16 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
 
+// Default refresh interval (in milliseconds) for polling the current Git status:
+const DEFAULT_REFRESH_INTERVAL = 3000; // ms
+
 /** Main extension class */
 export class GitExtension implements IGitExtension, IDisposable {
-  constructor(app: JupyterFrontEnd = null) {
+  constructor(
+    app: JupyterFrontEnd = null,
+    settings?: ISettingRegistry.ISettings
+  ) {
+    const model = this;
     this._app = app;
 
     // Load the server root path
@@ -26,35 +33,39 @@ export class GitExtension implements IGitExtension, IDisposable {
       .catch(reason => {
         console.error(`Fail to get the server root path.\n${reason}`);
       });
-  }
 
-  /**
-   * Plugin settings.
-   */
-  set settings(settings: ISettingRegistry.ISettings) {
-    if (this._settings) {
-      this._settings.changed.disconnect(this._onSettingsChange, this);
+    let interval: number;
+    if (settings) {
+      interval = settings.composite.refreshInterval as number;
+      settings.changed.connect(onSettingsChange, this);
+    } else {
+      interval = DEFAULT_REFRESH_INTERVAL;
     }
-    settings.changed.connect(this._onSettingsChange, this);
-    if (this._poll) {
-      const freq = this._poll.frequency;
-      this._poll.frequency = {
+    const poll = new Poll({
+      factory: () => model._refreshStatus(),
+      frequency: {
+        interval: interval,
+        backoff: true,
+        max: 300 * 1000
+      },
+      standby: 'when-hidden'
+    });
+    this._poll = poll;
+
+    /**
+     * Callback invoked upon a change to plugin settings.
+     *
+     * @private
+     * @param settings - settings registry
+     */
+    function onSettingsChange(settings: ISettingRegistry.ISettings) {
+      const freq = poll.frequency;
+      poll.frequency = {
         interval: settings.composite.refreshInterval as number,
         backoff: freq.backoff,
         max: freq.max
       };
-    } else {
-      this._poll = new Poll({
-        factory: () => this._refreshStatus(),
-        frequency: {
-          interval: settings.composite.refreshInterval as number,
-          backoff: true,
-          max: 300 * 1000
-        },
-        standby: 'when-hidden'
-      });
     }
-    this._settings = settings;
   }
 
   /**
@@ -169,9 +180,7 @@ export class GitExtension implements IGitExtension, IDisposable {
       return;
     }
     this._isDisposed = true;
-    if (this._poll) {
-      this._poll.dispose();
-    }
+    this._poll.dispose();
     Signal.clearData(this);
   }
 
@@ -349,13 +358,8 @@ export class GitExtension implements IGitExtension, IDisposable {
   }
 
   async refreshStatus(): Promise<void> {
-    if (this._poll) {
-      await this._poll.refresh();
-      await this._poll.tick;
-    } else {
-      await this._refreshStatus();
-      await Promise.resolve();
-    }
+    await this._poll.refresh();
+    await this._poll.tick;
   }
 
   /** Refresh the git repository status */
@@ -924,21 +928,6 @@ export class GitExtension implements IGitExtension, IDisposable {
     return this._currentMarker;
   }
 
-  /**
-   * Callback invoked upon a change to plugin settings.
-   *
-   * @private
-   * @param settings - settings registry
-   */
-  private _onSettingsChange(settings: ISettingRegistry.ISettings) {
-    const freq = this._poll.frequency;
-    this._poll.frequency = {
-      interval: settings.composite.refreshInterval as number,
-      backoff: freq.backoff,
-      max: freq.max
-    };
-  }
-
   private _status: Git.IStatusFileResult[] = [];
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[];
@@ -952,7 +941,6 @@ export class GitExtension implements IGitExtension, IDisposable {
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
-  private _settings: ISettingRegistry.ISettings | null = null;
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _repositoryChanged = new Signal<
