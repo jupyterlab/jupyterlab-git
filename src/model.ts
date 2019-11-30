@@ -354,6 +354,7 @@ export class GitExtension implements IGitExtension, IDisposable {
       await this._poll.tick;
     } else {
       await this._refreshStatus();
+      await Promise.resolve();
     }
   }
 
