@@ -74,9 +74,6 @@ async function activate(
   // Get a reference to the default file browser extension
   const filebrowser = factory.defaultBrowser;
 
-  // Wait for the application and file browser extension to be restored:
-  await Promise.all([app.restored, filebrowser.model.restored]);
-
   // Attempt to load application settings
   try {
     settings = await settingRegistry.load(plugin.id);
@@ -86,8 +83,10 @@ async function activate(
   // Create the Git model
   const gitExtension = new GitExtension(app, settings);
 
-  // Sync the Git extension path with the file browser extension's current path
-  gitExtension.pathRepository = filebrowser.model.path;
+  // Whenever we restore the application, sync the Git extension path
+  Promise.all([app.restored, filebrowser.model.restored]).then(() => {
+    gitExtension.pathRepository = filebrowser.model.path;
+  });
 
   // Whenever the file browser path changes, sync the Git extension path
   filebrowser.model.pathChanged.connect(
