@@ -3,8 +3,6 @@ include README.md
 
 include setupbase.py
 
-include jupyterlab_git/labextension/*.tgz
-
 # Patterns to exclude from any directory
 global-exclude *~
 global-exclude *.pyc

@@ -1,5 +1,7 @@
-"""
-Setup Module to setup Python Handlers (Git Handlers) for the Git Plugin.
+"""Setup Module to setup Python serverextension for the jupyterlab git
+extension. For non-dev installs, will also automatically
+build (if package.json is present) and install (if the labextension exists,
+eg the build succeeded) the corresponding labextension.
 """
 from pathlib import Path
 from subprocess import CalledProcessError
