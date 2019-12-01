@@ -383,6 +383,7 @@ class Git:
         """
         Execute 'git for-each-ref' command on refs/heads & return the result.
         """
+        # Format reference: https://git-scm.com/docs/git-for-each-ref#_field_names
         formats = ['refname:short', 'objectname', 'upstream:short', 'HEAD']
         cmd = ["git", "for-each-ref", "--format=" + "%09".join("%({})".format(f) for f in formats), "refs/heads/"]
         p = subprocess.Popen(
@@ -397,7 +398,6 @@ class Git:
             results = []
             try:
                 for name,commit_sha,upstream_name,is_current_branch in (line.split('\t') for line in output.decode("utf-8").splitlines()):
-                    # Format reference : https://git-scm.com/docs/git-for-each-ref#_field_names
                     is_current_branch = bool(is_current_branch.strip())
 
                     branch = {
@@ -446,6 +446,7 @@ class Git:
         """
         Execute 'git for-each-ref' command on refs/heads & return the result.
         """
+        # Format reference: https://git-scm.com/docs/git-for-each-ref#_field_names
         formats = ['refname:short', 'objectname']
         cmd = ["git", "for-each-ref", "--format=" + "%09".join("%({})".format(f) for f in formats), "refs/remotes/"]
         p = subprocess.Popen(
@@ -459,7 +460,6 @@ class Git:
             results = []
             try:
                 for name,commit_sha in (line.split('\t') for line in output.decode("utf-8").splitlines()):
-                    # Format reference : https://git-scm.com/docs/git-for-each-ref#_field_names
                     results.append({
                         "is_current_branch": False,
                         "is_remote_branch": True,
