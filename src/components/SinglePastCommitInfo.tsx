@@ -167,6 +167,7 @@ export class SinglePastCommitInfo extends React.Component<
                 discardFileButtonStyle
               )}
               onClick={this.showDeleteCommit}
+              title="Discard changes introduced by this commit"
             />
             <button
               className={classes(
@@ -175,6 +176,7 @@ export class SinglePastCommitInfo extends React.Component<
                 revertButtonStyle
               )}
               onClick={this.showResetToCommit}
+              title="Discard changes introduced *after* this commit"
             />
           </div>
           <div>
