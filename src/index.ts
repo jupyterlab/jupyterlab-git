@@ -98,7 +98,7 @@ async function activate(
   filebrowser.model.fileChanged.connect(() => gitExtension.refreshStatus());
 
   // Provided we were able to load application settings, create the extension widgets
-  if (typeof settings !== void 0) {
+  if (settings) {
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(gitExtension, settings, renderMime);
     gitPlugin.id = 'jp-git-sessions';
