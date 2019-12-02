@@ -78,7 +78,7 @@ async function activate(
   try {
     settings = await settingRegistry.load(plugin.id);
   } catch (error) {
-    console.error(`Failed to load settings for the Git Exetnsion.\n${error}`);
+    console.error(`Failed to load settings for the Git Extension.\n${error}`);
   }
   // Create the Git model
   const gitExtension = new GitExtension(app, settings);
