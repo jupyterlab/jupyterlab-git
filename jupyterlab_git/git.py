@@ -802,7 +802,7 @@ class Git:
         output, error = p.communicate()
         if p.returncode == 0:
             return output.decode("utf-8").split('/')[-1].strip()
-        elif "not a symbolic ref" in error.decode("utf-8"):
+        elif "not a symbolic ref" in error.decode("utf-8").lower():
             return self._get_current_branch_detached(current_path)
         else:
             raise Exception(
@@ -892,4 +892,3 @@ class Git:
                     error.decode("utf-8"), " ".join(command)
                 )
             )
-
