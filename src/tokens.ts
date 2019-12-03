@@ -147,7 +147,7 @@ export interface IGitExtension {
    *
    * @param options Checkout options
    */
-  checkout(options?: Git.ICheckoutOptions): Promise<Response>;
+  checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult>;
 
   /**
    * Make request to commit all staged files in repository
@@ -300,9 +300,8 @@ export namespace Git {
     filename?: string;
   }
 
-  /** Interface for GitShowPrefix request result,
-   * has the prefix path of a directory in a repository,
-   * with respect to the root directory.
+  /** Interface for GitCheckout request result.
+   * For reporting errors in checkout
    */
   export interface ICheckoutResult {
     code: number;
@@ -322,7 +321,7 @@ export namespace Git {
   }
 
   /** Interface for GitBranch request result,
-   * has the result of changing the current working branch
+   * has the result of fetching info on all branches
    */
   export interface IBranchResult {
     code: number;

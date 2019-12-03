@@ -601,19 +601,15 @@ export class GitExtension implements IGitExtension, IDisposable {
    * If a filename is provided, check the file out
    * If nothing is provided, check all files out
    */
-  async checkout(options?: Git.ICheckoutOptions): Promise<Response> {
+  async checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult> {
     await this.ready;
     const path = this.pathRepository;
 
     if (path === null) {
-      return Promise.resolve(
-        new Response(
-          JSON.stringify({
-            code: -1,
-            message: 'Not in a git repository.'
-          })
-        )
-      );
+      return Promise.resolve({
+        code: -1,
+        message: 'Not in a git repository.'
+      });
     }
 
     const body = {
@@ -650,7 +646,7 @@ export class GitExtension implements IGitExtension, IDisposable {
       } else {
         this.refreshStatus();
       }
-      return response;
+      return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     }

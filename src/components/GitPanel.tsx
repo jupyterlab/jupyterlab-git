@@ -27,7 +27,6 @@ export interface IGitSessionNodeState {
   stagedFiles: Git.IStatusFileResult[];
   unstagedFiles: Git.IStatusFileResult[];
   untrackedFiles: Git.IStatusFileResult[];
-  hasChangedFiles: boolean;
 
   isHistoryVisible: boolean;
 }
@@ -51,7 +50,6 @@ export class GitPanel extends React.Component<
       branches: [],
       currentBranch: '',
       upstreamBranch: '',
-      hasChangedFiles: false,
       pastCommits: [],
       stagedFiles: [],
       unstagedFiles: [],
@@ -114,18 +112,12 @@ export class GitPanel extends React.Component<
       let stagedFiles = new Array<Git.IStatusFileResult>();
       let unstagedFiles = new Array<Git.IStatusFileResult>();
       let untrackedFiles = new Array<Git.IStatusFileResult>();
-      let changedFiles = 0;
       let statusFiles = this.props.model.status;
       if (statusFiles.length > 0) {
         for (let i = 0; i < statusFiles.length; i++) {
           const file = statusFiles[i];
           const { x, y } = file;
           const stage = decodeStage(x, y);
-
-          // If file has been changed
-          if (x !== '?' && x !== '!') {
-            changedFiles++;
-          }
 
           // If file is untracked
           if (stage === 'untracked') {
@@ -141,8 +133,7 @@ export class GitPanel extends React.Component<
       this.setState({
         stagedFiles: stagedFiles,
         unstagedFiles: unstagedFiles,
-        untrackedFiles: untrackedFiles,
-        hasChangedFiles: changedFiles > 0
+        untrackedFiles: untrackedFiles
       });
     }
   };
@@ -206,10 +197,11 @@ export class GitPanel extends React.Component<
             upstreamBranch={this.state.upstreamBranch}
             stagedFiles={this.state.stagedFiles}
             data={this.state.branches}
-            // No uncommitted changed files, allow switching branches
-            // No committed files ever, disable switching branches
             disabled={
-              this.state.hasChangedFiles || this.state.pastCommits.length === 0
+              this.state.pastCommits.length === 0 ||
+              (this.props.settings.composite[
+                'disableBranchWithChanges'
+              ] as boolean)
             }
             toggleSidebar={this.toggleSidebar}
             sideBarExpanded={this.state.isHistoryVisible}

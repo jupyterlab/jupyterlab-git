@@ -50,15 +50,23 @@ export class BranchHeader extends React.Component<
 
   /** Switch current working branch */
   async switchBranch(branchName: string) {
-    await this.props.model.checkout({ branchname: branchName });
+    const result = await this.props.model.checkout({ branchname: branchName });
+    if (result.code !== 0) {
+      showErrorMessage('Error switching branch', result.message);
+    }
+
     this.toggleSelect();
   }
 
   createNewBranch = async (branchName: string) => {
-    await this.props.model.checkout({
+    const result = await this.props.model.checkout({
       newBranch: true,
       branchname: branchName
     });
+    if (result.code !== 0) {
+      showErrorMessage('Error creating new branch', result.message);
+    }
+
     this.toggleNewBranchBox();
   };
 
