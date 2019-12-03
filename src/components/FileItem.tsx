@@ -123,7 +123,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     }
   }
 
-  getFileLableIconClass() {
+  getFileLabelIconClass() {
     if (this.showDiscardWarning()) {
       return classes(fileIconStyle, parseFileExtension(this.props.file.to));
     } else {
@@ -248,7 +248,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
             this.props.moveFile(this.props.file.to);
           }}
         />
-        <span className={this.getFileLableIconClass()} />
+        <span className={this.getFileLabelIconClass()} />
         <span
           className={this.getFileLabelClass()}
           onContextMenu={e => {

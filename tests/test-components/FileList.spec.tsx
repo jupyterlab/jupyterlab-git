@@ -15,7 +15,8 @@ describe('FileList', () => {
     renderMime: null,
     stagedFiles: [],
     unstagedFiles: [],
-    untrackedFiles: []
+    untrackedFiles: [],
+    settings: null
   };
 
   describe('#commitAllStagedFiles()', () => {

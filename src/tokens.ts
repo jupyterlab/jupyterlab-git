@@ -81,6 +81,11 @@ export interface IGitExtension {
   showPrefix(path: string): Promise<Git.IShowPrefixResult>;
 
   /**
+   * General git refresh
+   */
+  refresh(): Promise<void>;
+
+  /**
    * Request git status refresh
    */
   refreshStatus(): Promise<void>;
@@ -103,7 +108,17 @@ export interface IGitExtension {
   /**
    * Make request for a list of all git branches
    */
-  branch(): Promise<Git.IBranchResult>;
+  refreshBranch(): Promise<void>;
+
+  /**
+   * The list of branch in the current repo
+   */
+  branches: Git.IBranch[];
+
+  /**
+   * The current branch
+   */
+  currentBranch: Git.IBranch;
 
   /**
    * Make request to add one or all files into
@@ -208,6 +223,21 @@ export interface IGitExtension {
    * i.e. if the top folder repository has been found.
    */
   isReady: boolean;
+
+  /**
+   * Add the file named fname to the current marker with given mark
+   */
+  addMark(fname: string, mark: boolean): void;
+
+  /**
+   * Get current mark of file named fname
+   */
+  getMark(fname: string): boolean;
+
+  /**
+   * Toggle the mark for the file named fname
+   */
+  toggleMark(fname: string): void;
 }
 
 export namespace Git {
@@ -296,6 +326,7 @@ export namespace Git {
   export interface IBranchResult {
     code: number;
     branches?: IBranch[];
+    current_branch?: IBranch;
   }
 
   /** Interface for GitStatus request result,
@@ -401,5 +432,18 @@ export namespace Git {
   export interface IPushPullResult {
     code: number;
     message?: string;
+  }
+
+  /**
+   * Interface for a marker obj
+   */
+  export interface IBranchMarker {
+    add(fname: string, mark: boolean): void;
+
+    get(fname: string): boolean;
+
+    set(fname: string, mark: boolean): void;
+
+    toggle(fname: string): void;
   }
 }

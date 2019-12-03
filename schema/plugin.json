@@ -5,16 +5,28 @@
   "description": "jupyterlab-git settings.",
   "type": "object",
   "properties": {
+    "disableBranchWithChanges": {
+      "type": "boolean",
+      "title": "Disable branch with changes",
+      "description": "Disable all branch operations (new, switch) when there are changed/staged files",
+      "default": false
+    },
     "historyCount": {
       "type": "integer",
       "title": "History count",
       "description": "Number of (most recent) commits shown in the history log",
       "default": 25
     },
-    "disableBranchWithChanges": {
+    "refreshInterval": {
+      "type": "integer",
+      "title": "Refresh interval",
+      "description": "Number of milliseconds between polling the file system for changes.",
+      "default": 3000
+    },
+    "simpleStaging": {
       "type": "boolean",
-      "title": "Disable branch with changes",
-      "description": "Disable all branch operations (new, switch) when there are changed/staged files",
+      "title": "Simple staging flag",
+      "description": "If true, use a simplified concept of staging. Only files with changes are shown (instead of showing staged/changed/untracked), and all files with changes will be automatically staged",
       "default": false
     }
   }
