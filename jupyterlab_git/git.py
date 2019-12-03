@@ -383,6 +383,7 @@ class Git:
         """
         Execute 'git for-each-ref' command on refs/heads & return the result.
         """
+        # Format reference: https://git-scm.com/docs/git-for-each-ref#_field_names
         formats = ['refname:short', 'objectname', 'upstream:short', 'HEAD']
         cmd = ["git", "for-each-ref", "--format=" + "%09".join("%({})".format(f) for f in formats), "refs/heads/"]
         p = subprocess.Popen(
@@ -397,7 +398,6 @@ class Git:
             results = []
             try:
                 for name,commit_sha,upstream_name,is_current_branch in (line.split('\t') for line in output.decode("utf-8").splitlines()):
-                    # Format reference : https://git-scm.com/docs/git-for-each-ref#_field_names
                     is_current_branch = bool(is_current_branch.strip())
 
                     branch = {
@@ -412,15 +412,14 @@ class Git:
                     if is_current_branch:
                         current_branch = branch
 
-                # Remote branch is seleted use 'git branch -a' as fallback machanism
-                # to get add detached head on remote branch to preserve older functionality
-                # TODO : Revisit this to checkout new local branch with same name as remote
-                # when the remote branch is seleted, VS Code git does the same thing.
-                if not current_branch and self.get_current_branch(current_path) == "HEAD":
+                # Above can fail in certain cases, such as an empty repo with
+                # no commits. In that case, just fall back to determining
+                # current branch
+                if not current_branch:
                     branch = {
                         "is_current_branch": True,
                         "is_remote_branch": False,
-                        "name": self._get_detached_head_name(current_path),
+                        "name": self.get_current_branch(current_path),
                         "upstream": None,
                         "top_commit": None,
                         "tag": None,
@@ -447,6 +446,7 @@ class Git:
         """
         Execute 'git for-each-ref' command on refs/heads & return the result.
         """
+        # Format reference: https://git-scm.com/docs/git-for-each-ref#_field_names
         formats = ['refname:short', 'objectname']
         cmd = ["git", "for-each-ref", "--format=" + "%09".join("%({})".format(f) for f in formats), "refs/remotes/"]
         p = subprocess.Popen(
@@ -460,7 +460,6 @@ class Git:
             results = []
             try:
                 for name,commit_sha in (line.split('\t') for line in output.decode("utf-8").splitlines()):
-                    # Format reference : https://git-scm.com/docs/git-for-each-ref#_field_names
                     results.append({
                         "is_current_branch": False,
                         "is_remote_branch": True,
@@ -771,18 +770,6 @@ class Git:
         )
         return my_output
 
-    def _is_branch(self, reference_name):
-        """Check if the given reference is a branch
-        """
-        return reference_name.startswith("refs/heads/") or reference_name.startswith(
-            "refs/remotes/"
-        )
-
-    def _is_current_branch(self, branch_name, current_branch_name):
-        """Check if given branch is current branch
-        """
-        return branch_name == current_branch_name
-
     def _is_remote_branch(self, branch_reference):
         """Check if given branch is remote branch by comparing with 'remotes/',
         TODO : Consider a better way to check remote branch
@@ -800,10 +787,12 @@ class Git:
         raise ValueError("Reference [{}] is not a valid branch.", branch_reference)
 
     def get_current_branch(self, current_path):
-        """Execute 'git rev-parse --abbrev-ref HEAD' to
-        check if given branch is current branch
+        """Use `symbolic-ref` to get the current branch name. In case of
+        failure, assume that the HEAD is currently detached, and fall back
+        to the `branch` command to get the name.
+        See https://git-blame.blogspot.com/2013/06/checking-current-branch-programatically.html
         """
-        command = ["git", "rev-parse", "--abbrev-ref", "HEAD"]
+        command = ["git", "symbolic-ref", "HEAD"]
         p = subprocess.Popen(
             command,
             stdout=PIPE,
@@ -812,7 +801,9 @@ class Git:
         )
         output, error = p.communicate()
         if p.returncode == 0:
-            return output.decode("utf-8").strip()
+            return output.decode("utf-8").split('/')[-1].strip()
+        elif "not a symbolic ref" in error.decode("utf-8").lower():
+            return self._get_current_branch_detached(current_path)
         else:
             raise Exception(
                 "Error [{}] occurred while executing [{}] command to get current branch.".format(
@@ -820,7 +811,7 @@ class Git:
                 )
             )
 
-    def _get_detached_head_name(self, current_path):
+    def _get_current_branch_detached(self, current_path):
         """Execute 'git branch -a' to get current branch details in case of detached HEAD
         """
         command = ["git", "branch", "-a"]
@@ -901,4 +892,3 @@ class Git:
                     error.decode("utf-8"), " ".join(command)
                 )
             )
-

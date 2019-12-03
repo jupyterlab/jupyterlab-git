@@ -7,34 +7,6 @@ from mock import patch, call, Mock
 from jupyterlab_git.git import Git
 
 
-def test_is_branch():
-    test_cases = [
-        ('refs/heads/feature-foo', True),
-        ('refs/heads/master', True),
-        ('refs/remotes/origin/feature-foo', True),
-        ('refs/remotes/origin/HEAD', True),
-        ('refs/stash', False),
-        ('refs/tags/v0.1.0', False),
-        ('refs/tags/blah@0.2.0', False)
-    ]
-    for test_case in test_cases:
-        actual_response = Git(root_dir='/bin')._is_branch(test_case[0])
-        assert test_case[1] == actual_response
-
-
-def test_is_current_branch():
-    current_branch = 'feature-foo'
-    test_cases = [
-        ('feature-foo', True),
-        ('master', False),
-        ('origin/feature-foo', False),
-        ('origin/HEAD', False)
-    ]
-    for test_case in test_cases:
-        actual_response = Git(root_dir='/bin')._is_current_branch(test_case[0], current_branch)
-        assert test_case[1] == actual_response
-
-
 def test_is_remote_branch():
     test_cases = [
         ('refs/heads/feature-foo', False),
@@ -89,7 +61,7 @@ def test_get_current_branch_success(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            ['git', 'symbolic-ref', 'HEAD'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path'
@@ -366,7 +338,7 @@ def test_get_current_branch_failure(mock_subproc_popen):
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
-            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            ['git', 'symbolic-ref', 'HEAD'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path'
@@ -374,12 +346,12 @@ def test_get_current_branch_failure(mock_subproc_popen):
         call().communicate()
     ])
     assert 'Error [fatal: Not a git repository (or any of the parent directories): .git] ' \
-           'occurred while executing [git rev-parse --abbrev-ref HEAD] command to get current branch.' == str(
+           'occurred while executing [git symbolic-ref HEAD] command to get current branch.' == str(
         error.value)
 
 
 @patch('subprocess.Popen')
-def test_get_detached_head_name_success(mock_subproc_popen):
+def test_get_current_branch_detached_success(mock_subproc_popen):
     # Given
     process_output = [
         '* (HEAD detached at origin/feature-foo)',
@@ -396,7 +368,7 @@ def test_get_detached_head_name_success(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin')._get_detached_head_name(
+    actual_response = Git(root_dir='/bin')._get_current_branch_detached(
         current_path='test_curr_path')
 
     # Then
@@ -413,7 +385,7 @@ def test_get_detached_head_name_success(mock_subproc_popen):
 
 
 @patch('subprocess.Popen')
-def test_get_detached_head_name_failure(mock_subproc_popen):
+def test_get_current_branch_detached_failure(mock_subproc_popen):
     # Given
     process_mock = Mock()
     attrs = {
@@ -426,7 +398,7 @@ def test_get_detached_head_name_failure(mock_subproc_popen):
 
     # When
     with pytest.raises(Exception) as error:
-        Git(root_dir='/bin')._get_detached_head_name(current_path='test_curr_path')
+        Git(root_dir='/bin')._get_current_branch_detached(current_path='test_curr_path')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -798,19 +770,23 @@ def test_branch_success_detached_head(mock_subproc_popen):
         '  master',
         '  remotes/origin/feature-foo'
     ]
-    process_mock = Mock(returncode=0)
-    process_mock.communicate.side_effect = [
+
+    process_mock = Mock()
+    com_returncodes = [0, 128, 0, 0]
+    com_returns = [
         # Response for get all refs/heads
         ('\n'.join(process_output_heads).encode('utf-8'), ''.encode('utf-8')),
-
         # Response for get current branch
-        ('HEAD'.encode('utf-8'), ''.encode('utf-8')),
-        # Responses for detached head name
+        (''.encode('utf-8'), 'fatal: ref HEAD is not a symbolic ref'.encode('utf-8')),
+        # Response for get current branch detached
         ('\n'.join(detached_head_output).encode('utf-8'), ''.encode('utf-8')),
-
         # Response for get all refs/remotes
         ('\n'.join(process_output_remotes).encode('utf-8'), ''.encode('utf-8')),
     ]
+    def com_mock_side_effect():
+        process_mock.returncode = com_returncodes.pop(0)
+        return com_returns.pop(0)
+    process_mock.communicate.side_effect = com_mock_side_effect
     mock_subproc_popen.return_value = process_mock
 
     expected_response = {
@@ -868,13 +844,14 @@ def test_branch_success_detached_head(mock_subproc_popen):
 
         # call to get current branch
         call(
-            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            ['git', 'symbolic-ref', 'HEAD'],
             stdout=PIPE,
             stderr=PIPE,
             cwd='/bin/test_curr_path'
         ),
         call().communicate(),
-        # call to get detached head name
+
+        # call to get current branch name given a detached head
         call(
             ['git', 'branch', '-a'],
             stdout=PIPE,
