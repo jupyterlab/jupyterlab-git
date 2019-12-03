@@ -1,5 +1,10 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { IChangedArgs, PathExt, Poll } from '@jupyterlab/coreutils';
+import {
+  IChangedArgs,
+  PathExt,
+  Poll,
+  ISettingRegistry
+} from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
@@ -8,14 +13,16 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
 
-/**
- * The default duration of the auto-refresh in ms
- */
-const DEFAULT_REFRESH_INTERVAL = 10000;
+// Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
+const DEFAULT_REFRESH_INTERVAL = 3000; // ms
 
 /** Main extension class */
 export class GitExtension implements IGitExtension, IDisposable {
-  constructor(app: JupyterFrontEnd = null) {
+  constructor(
+    app: JupyterFrontEnd = null,
+    settings?: ISettingRegistry.ISettings
+  ) {
+    const model = this;
     this._app = app;
 
     // Load the server root path
@@ -27,18 +34,38 @@ export class GitExtension implements IGitExtension, IDisposable {
         console.error(`Fail to get the server root path.\n${reason}`);
       });
 
-    const refreshInterval = DEFAULT_REFRESH_INTERVAL;
-
-    // Start watching the repository
-    this._poll = new Poll({
-      factory: () => this._refreshStatus(),
+    let interval: number;
+    if (settings) {
+      interval = settings.composite.refreshInterval as number;
+      settings.changed.connect(onSettingsChange, this);
+    } else {
+      interval = DEFAULT_REFRESH_INTERVAL;
+    }
+    const poll = new Poll({
+      factory: () => model._refreshStatus(),
       frequency: {
-        interval: refreshInterval,
+        interval: interval,
         backoff: true,
         max: 300 * 1000
       },
       standby: 'when-hidden'
     });
+    this._poll = poll;
+
+    /**
+     * Callback invoked upon a change to plugin settings.
+     *
+     * @private
+     * @param settings - settings registry
+     */
+    function onSettingsChange(settings: ISettingRegistry.ISettings) {
+      const freq = poll.frequency;
+      poll.frequency = {
+        interval: settings.composite.refreshInterval as number,
+        backoff: freq.backoff,
+        max: freq.max
+      };
+    }
   }
 
   /**
