@@ -118,7 +118,7 @@ export class GitPanel extends React.Component<
           const file = statusFiles[i];
           const { x, y } = file;
           const stage = decodeStage(x, y);
-        
+
           // If file is untracked
           if (stage === 'untracked') {
             untrackedFiles.push(file);
