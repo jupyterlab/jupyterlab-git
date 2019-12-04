@@ -20,7 +20,7 @@ def tag(version, dryrun=False, kind=None):
         print("Would tag: {}".format(tag))
     else:
         subprocess.run(['git', 'tag', tag])
-        subprocess.run(['git', 'push', 'origin', tag])
+        subprocess.run(['git', 'push', 'upstream', tag])
 
 def pypi(wheel=True, test=False):
     """release on pypi
@@ -51,11 +51,18 @@ def npmjs(dryrun=False):
 
 def labExtensionVersion(dryrun=False, version=None):
     if version:
+        if 'rc' in version:
+            version,rc = version.split('rc')
+            version = version + '-rc.{}'.format(rc)
+
         force_ver_cmd = ['npm', '--no-git-tag-version', 'version', version, '--force', '--allow-same-version']
+        force_ver_info = ' '.join(force_ver_cmd)
+
         if dryrun:
-            print("Would force npm version with: {}".format(' '.join(force_ver_cmd)))
+            print("Would force npm version with: {}".format(force_ver_info))
         else:
             # force the labextension version to match the supplied version
+            print("> {}".format(force_ver_info))
             subprocess.run(force_ver_cmd)
     else:
         # get single source of truth from the Typescript labextension
@@ -71,16 +78,16 @@ def serverExtensionVersion():
     return get_version(VERSION_PY)
 
 def doRelease(test=False):
-    # prep the build area for the labextension bundle
-    prepLabextensionBundle()
-
     # treat the serverextension version as the "real" single source of truth
     version = serverExtensionVersion()
     # force the labextension version to agree with the serverextension version
-    labExtensionVersion(dryrun=test, version=version)
+    labExtensionVersion(version=version)
 
     # tag with version and push the tag
     tag(dryrun=test, version=version)
+
+    # prep the build area for the labextension bundle
+    prepLabextensionBundle()
 
     # release to pypi and npmjs
     pypi(test=test)
