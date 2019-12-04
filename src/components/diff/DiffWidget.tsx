@@ -35,10 +35,14 @@ export async function openDiffView(
       mainAreaItem = mainAreaItems.next();
     }
     if (!mainAreaItem) {
-      const relativeFilePath = model.getRelativeFilePath(filePath);
+      const serverRepoPath = model.getRelativeFilePath();
       const nbDiffWidget = ReactWidget.create(
         <RenderMimeProvider value={renderMime}>
-          <Diff path={relativeFilePath} diffContext={diffContext} />
+          <Diff
+            diffContext={diffContext}
+            path={filePath}
+            topRepoPath={serverRepoPath}
+          />
         </RenderMimeProvider>
       );
       nbDiffWidget.id = id;

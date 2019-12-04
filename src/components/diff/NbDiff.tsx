@@ -1,4 +1,4 @@
-import { nbformat } from '@jupyterlab/coreutils';
+import { nbformat, PathExt } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ServerConnection } from '@jupyterlab/services/lib/serverconnection';
 import { IDiffEntry } from 'nbdime/lib/diff/diffentries';
@@ -25,7 +25,7 @@ export interface ICellDiffProps {
  * During component render, a Ref is created for the ReactDOM and after the component
  * is mounted, the PhosporJS widget is created and attached to the Ref.
  */
-export class CellDiff extends React.Component<ICellDiffProps, {}> {
+export class CellDiff extends React.Component<ICellDiffProps> {
   private unAddedOrRemovedRef: RefObject<HTMLDivElement> = React.createRef<
     HTMLDivElement
   >();
@@ -39,7 +39,6 @@ export class CellDiff extends React.Component<ICellDiffProps, {}> {
 
   constructor(props: ICellDiffProps) {
     super(props);
-    this.state = {};
   }
 
   componentDidMount(): void {
@@ -118,7 +117,10 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
       nbdModel: undefined,
       errorMessage: undefined
     };
-    this.performDiff(props.diffContext);
+  }
+
+  componentDidMount() {
+    this.performDiff(this.props.diffContext);
   }
 
   render() {
@@ -178,7 +180,7 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
       }
 
       httpGitRequest('/nbdime/api/gitdiff', 'POST', {
-        file_path: this.props.path,
+        file_path: PathExt.join(this.props.topRepoPath, this.props.path),
         ref_local: { git: diffContext.previousRef.gitRef },
         ref_remote: currentRefValue
       }).then((response: Response) => {
