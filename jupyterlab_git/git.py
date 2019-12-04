@@ -535,11 +535,12 @@ class Git:
         Execute git add<filename> command & return the result.
         """
         if not isinstance(filename, str):
-            # assume filename is a sequence
-            filename = ' '.join(filename)
+            # assume filename is a sequence of str
+            cmd = ["git", "add"] + list(filename)
+        else:
+            cmd = ["git", "add", filename]
 
-        my_output = subprocess.check_output(["git", "add", filename], cwd=top_repo_path)
-        return my_output
+        return subprocess.check_output(cmd, cwd=top_repo_path)
 
     def add_all(self, top_repo_path):
         """
