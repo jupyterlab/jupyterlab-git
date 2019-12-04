@@ -1,6 +1,6 @@
 from subprocess import PIPE
 
-from mock import patch, call, Mock
+from unittest.mock import patch, call, Mock
 
 from jupyterlab_git.git import Git
 

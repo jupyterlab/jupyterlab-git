@@ -107,4 +107,5 @@ node_modules/
 package-lock.json
 MANIFEST
 jupyterlab_git/labextension/*.tgz
+.pytest_cache/
 *.tsbuildinfo

@@ -64,9 +64,8 @@ class Git:
     A single parent class containing all of the individual git methods in it.
     """
 
-    def __init__(self, root_dir, *args, **kwargs):
-        super(Git, self).__init__(*args, **kwargs)
-        self.root_dir = os.path.realpath(os.path.expanduser(root_dir))
+    def __init__(self, root_dir):
+        self.root_dir = os.path.expanduser(root_dir)
 
     def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
