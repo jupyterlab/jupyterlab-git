@@ -19,6 +19,9 @@ import {
 import { Git, IGitExtension } from '../tokens';
 import { NewBranchBox } from './NewBranchBox';
 
+const CHANGES_ERR_MSG =
+  'You have files with changes in current branch. Please commit or discard changed files before';
+
 export interface IBranchHeaderState {
   dropdownOpen: boolean;
   showNewBranchBox: boolean;
@@ -79,7 +82,7 @@ export class BranchHeader extends React.Component<
     } else {
       showErrorMessage(
         'Switching branch disabled',
-        'You have staged changes in current branch. Please commit / discard them before switching to another branch.'
+        CHANGES_ERR_MSG + 'switching to another branch.'
       );
     }
   }
@@ -102,7 +105,7 @@ export class BranchHeader extends React.Component<
     } else {
       showErrorMessage(
         'Creating new branch disabled',
-        'You have staged changes in current branch. Please commit / discard them before creating a new branch.'
+        CHANGES_ERR_MSG + 'creating a new branch.'
       );
     }
   };

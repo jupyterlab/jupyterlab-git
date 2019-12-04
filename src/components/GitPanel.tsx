@@ -198,10 +198,10 @@ export class GitPanel extends React.Component<
             stagedFiles={this.state.stagedFiles}
             data={this.state.branches}
             disabled={
-              this.state.pastCommits.length === 0 ||
               (this.props.settings.composite[
                 'disableBranchWithChanges'
-              ] as boolean)
+              ] as boolean) &&
+              (!!this.state.unstagedFiles || !!this.state.stagedFiles)
             }
             toggleSidebar={this.toggleSidebar}
             sideBarExpanded={this.state.isHistoryVisible}
