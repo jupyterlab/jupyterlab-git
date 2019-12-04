@@ -15,6 +15,7 @@ describe('NBDiff', () => {
     // Given
     const props: IDiffProps = {
       path: '/path/to/File.ipynb',
+      topRepoPath: '/top/repo/path',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },
         previousRef: { gitRef: '83baee' }
@@ -33,34 +34,32 @@ describe('NBDiff', () => {
     const node = shallow(<NBDiff {...props} />);
 
     // Then
-    jsonResult.then(() => {
-      node.update();
+    await jsonResult;
+    node.update();
 
-      expect(httpGitRequest).toHaveBeenCalled();
-      expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
-        file_path: '/path/to/File.ipynb',
-        ref_remote: { special: 'WORKING' },
-        ref_local: { git: '83baee' }
-      });
-      expect(node.find('.jp-git-diff-error').text()).toContain(
-        'TEST_ERROR_MESSAGE'
-      );
+    expect(httpGitRequest).toHaveBeenCalled();
+    expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
+      file_path: 'top/repo/path/path/to/File.ipynb',
+      ref_remote: { special: 'WORKING' },
+      ref_local: { git: '83baee' }
     });
+    expect(node.find('.jp-git-diff-error').text()).toContain(
+      'TEST_ERROR_MESSAGE'
+    );
   });
 
   it('should render header and cell diff components in success case', async function() {
     // Given
     const props: IDiffProps = {
       path: '/path/to/File.ipynb',
+      topRepoPath: '/top/repo/path',
       diffContext: {
         currentRef: { specialRef: 'WORKING' },
         previousRef: { gitRef: '83baee' }
       }
     };
 
-    const jsonResult: Promise<any> = Promise.resolve({
-      diffResponse
-    });
+    const jsonResult: Promise<any> = Promise.resolve(diffResponse);
 
     (httpGitRequest as jest.Mock).mockReturnValue(
       createTestResponse(200, jsonResult)
@@ -70,18 +69,17 @@ describe('NBDiff', () => {
     const node = shallow(<NBDiff {...props} />);
 
     // Then
-    jsonResult.then(() => {
-      node.update();
+    await jsonResult;
+    node.update();
 
-      expect(httpGitRequest).toHaveBeenCalled();
-      expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
-        file_path: '/path/to/File.ipynb',
-        ref_remote: { special: 'WORKING' },
-        ref_local: { git: '83baee' }
-      });
-      expect(node.find('.jp-git-diff-error').html()).toBeNull();
-      expect(node.find(NBDiffHeader)).toHaveLength(1);
-      expect(node.find(CellDiff)).toHaveLength(2);
+    expect(httpGitRequest).toHaveBeenCalled();
+    expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
+      file_path: 'top/repo/path/path/to/File.ipynb',
+      ref_remote: { special: 'WORKING' },
+      ref_local: { git: '83baee' }
     });
+    expect(node.find('.jp-git-diff-error')).toHaveLength(0);
+    expect(node.find(NBDiffHeader)).toHaveLength(1);
+    expect(node.find(CellDiff)).toHaveLength(3);
   });
 });
