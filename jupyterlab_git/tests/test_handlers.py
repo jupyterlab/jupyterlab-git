@@ -1,5 +1,5 @@
 import json
-from mock import Mock, ANY, patch
+from unittest.mock import Mock, ANY, patch
 
 from jupyterlab_git.handlers import (
     GitAllHistoryHandler,

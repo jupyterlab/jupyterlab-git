@@ -1,7 +1,7 @@
 import json
 import subprocess
 
-from mock import patch, call, Mock
+from unittest.mock import patch, call, Mock
 import pytest
 
 from jupyterlab_git.git import Git

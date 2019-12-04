@@ -1,6 +1,6 @@
 from subprocess import PIPE, STDOUT, CalledProcessError
 
-from mock import Mock, call, patch
+from unittest.mock import Mock, call, patch
 import pytest
 from tornado.web import HTTPError
 
