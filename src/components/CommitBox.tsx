@@ -1,5 +1,7 @@
 import * as React from 'react';
+import TextareaAutosize from 'react-textarea-autosize';
 import { classes } from 'typestyle';
+
 import {
   stagedCommitButtonDisabledStyle,
   stagedCommitButtonReadyStyle,
@@ -73,7 +75,7 @@ export class CommitBox extends React.Component<
         className={stagedCommitStyle}
         onKeyPress={event => this.onKeyPress(event)}
       >
-        <textarea
+        <TextareaAutosize
           className={classes(textInputStyle, stagedCommitMessageStyle)}
           disabled={!this.props.hasFiles}
           placeholder={
