@@ -201,7 +201,10 @@ export class GitPanel extends React.Component<
               (this.props.settings.composite[
                 'disableBranchWithChanges'
               ] as boolean) &&
-              (!!this.state.unstagedFiles || !!this.state.stagedFiles)
+(
+   (this.state.unstagedFiles && this.state.unstagedFiles.length) ||
+   (this.state.stagedFiles && this.state.stagedFiles.length)
+)
             }
             toggleSidebar={this.toggleSidebar}
             sideBarExpanded={this.state.isHistoryVisible}
