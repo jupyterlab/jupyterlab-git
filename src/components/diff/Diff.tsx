@@ -31,7 +31,7 @@ export interface IDiffProps {
    */
   path: string;
   /**
-   * Git respository folder path.
+   * Git repository folder path.
    * It is relative to the server root.
    */
   topRepoPath: string;
