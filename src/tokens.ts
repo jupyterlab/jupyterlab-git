@@ -1,5 +1,6 @@
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { Token, JSONObject } from '@phosphor/coreutils';
+import { IDisposable } from '@phosphor/disposable';
 import { ISignal } from '@phosphor/signaling';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
@@ -8,7 +9,17 @@ export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
 
 /** Interface for extension class */
-export interface IGitExtension {
+export interface IGitExtension extends IDisposable {
+  /**
+   * The list of branch in the current repo
+   */
+  branches: Git.IBranch[];
+
+  /**
+   * The current branch
+   */
+  currentBranch: Git.IBranch;
+
   /**
    * A signal emitted when the HEAD of the git repository changes.
    */
@@ -25,6 +36,18 @@ export interface IGitExtension {
   readonly repositoryChanged: ISignal<IGitExtension, IChangedArgs<string>>;
 
   /**
+   * Test whether the model is ready;
+   * i.e. if the top folder repository has been found.
+   */
+  isReady: boolean;
+
+  /**
+   * A promise that fulfills when the model is ready;
+   * i.e. if the top folder repository has been found.
+   */
+  ready: Promise<void>;
+
+  /**
    * Files list resulting of a git status call.
    */
   readonly status: Git.IStatusFileResult[];
@@ -35,106 +58,58 @@ export interface IGitExtension {
   readonly statusChanged: ISignal<IGitExtension, Git.IStatusFileResult[]>;
 
   /**
-   * Make request for the Git Pull API.
-   *
-   * @param auth Optional authentication information for the remote repository
-   */
-  pull(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
-
-  /**
-   * Make request for the Git Push API.
-   *
-   * @param auth Optional authentication information for the remote repository
-   */
-  push(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
-
-  /**
-   * Make request for the Git Clone API.
-   *
-   * @param path Local path in which the repository will be cloned
-   * @param url Distant Git repository URL
-   * @param auth Optional authentication information for the remote repository
-   */
-  clone(path: string, url: string, auth?: Git.IAuth): Promise<Git.ICloneResult>;
-
-  /**
-   * Make request for all git info of the repository
-   * (This API is also implicitly used to check if the current repo is a Git repo)
-   *
-   * @param historyCount: Optional number of commits to get from git log
-   */
-  allHistory(historyCount?: number): Promise<Git.IAllHistory>;
-
-  /**
-   * Make request for top level path of repository 'path'
-   *
-   * @param path Path from which the top Git repository needs to be found
-   */
-  showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
-
-  /**
-   * Make request for the prefix path of a directory 'path',
-   * with respect to the root directory of repository
-   *
-   * @param path Path for which the prefix is searched for
-   */
-  showPrefix(path: string): Promise<Git.IShowPrefixResult>;
-
-  /**
-   * General git refresh
-   */
-  refresh(): Promise<void>;
-
-  /**
-   * Request git status refresh
-   */
-  refreshStatus(): Promise<void>;
-
-  /**
-   * Make request for git commit logs
-   *
-   * @param historyCount: Optional number of commits to get from git log
-   */
-  log(historyCount?: number): Promise<Git.ILogResult>;
-
-  /**
-   * Make request for detailed git commit info of
-   * commit 'hash'
-   *
-   * @param hash Commit hash
-   */
-  detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo>;
-
-  /**
-   * Make request for a list of all git branches
-   */
-  refreshBranch(): Promise<void>;
-
-  /**
-   * The list of branch in the current repo
-   */
-  branches: Git.IBranch[];
-
-  /**
-   * The current branch
-   */
-  currentBranch: Git.IBranch;
-
-  /**
    * Make request to add one or all files into
    * the staging area in repository
    *
    * If filename is not provided, all files will be added.
    *
-   * @param filename Optional name of the file to add
+   * @param filename Optional name of the files to add
    */
-  add(filename?: string): Promise<Response>;
+  add(...filename: string[]): Promise<Response>;
+
+  /**
+   * Make request to add all unstaged files into
+   * the staging area in repository 'path'
+   */
+  addAllUnstaged(): Promise<Response>;
 
   /**
    * Make request to add all untracked files into
    * the staging area in repository
    */
   addAllUntracked(): Promise<Response>;
+
+  /**
+   * Add the file named fname to the current marker with given mark
+   *
+   * @param fname Filename
+   * @param mark Mark to set
+   */
+  addMark(fname: string, mark: boolean): void;
+
+  /**
+   * Get current mark of file named fname
+   *
+   * @param fname Filename
+   * @returns Mark of the file
+   */
+  getMark(fname: string): boolean;
+
+  /**
+   * Toggle the mark for the file named fname
+   *
+   * @param fname Filename
+   */
+  toggleMark(fname: string): void;
+
+  /**
+   * Make request for all git info of the repository
+   * (This API is also implicitly used to check if the current repo is a Git repo)
+   *
+   * @param historyCount: Optional number of commits to get from git log
+   * @returns Repository history
+   */
+  allHistory(historyCount?: number): Promise<Git.IAllHistory>;
 
   /** Make request to switch current working branch,
    * create new branch if needed,
@@ -146,8 +121,19 @@ export interface IGitExtension {
    * If nothing is provided, check all files out
    *
    * @param options Checkout options
+   * @returns Command execution status
    */
   checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult>;
+
+  /**
+   * Make request for the Git Clone API.
+   *
+   * @param path Local path in which the repository will be cloned
+   * @param url Distant Git repository URL
+   * @param auth Optional authentication information for the remote repository
+   * @returns Command execution status
+   */
+  clone(path: string, url: string, auth?: Git.IAuth): Promise<Git.ICloneResult>;
 
   /**
    * Make request to commit all staged files in repository
@@ -164,15 +150,6 @@ export interface IGitExtension {
   config(options?: JSONObject): Promise<Response>;
 
   /**
-   * Make request to move one or all files from the staged to the unstaged area
-   *
-   * If filename is not provided, all files will be reset.
-   *
-   * @param filename Optional name of the file to add
-   */
-  reset(filename?: string): Promise<Response>;
-
-  /**
    * Make request to delete changes from selected commit
    *
    * @param message Commit message to use for the new repository state
@@ -181,11 +158,24 @@ export interface IGitExtension {
   deleteCommit(message: string, commitId: string): Promise<Response>;
 
   /**
-   * Make request to reset to selected commit
+   * Make request for detailed git commit info of
+   * commit 'hash'
    *
-   * @param commitId Selected commit ID
+   * @param hash Commit hash
+   * @returns Detailed log of the commit
    */
-  resetToCommit(commitId: string): Promise<Response>;
+  detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo>;
+
+  /**
+   * Gets the path of the file relative to the Jupyter server root.
+   *
+   * If no path is provided, returns the Git repository top folder relative path.
+   * If no Git repository selected, return null
+   *
+   * @param path the file path relative to Git repository top folder
+   * @returns Relative file path to the server root
+   */
+  getRelativeFilePath(path?: string): string | null;
 
   /**
    * Make request to initialize a  new git repository at path 'path'
@@ -195,14 +185,43 @@ export interface IGitExtension {
   init(path: string): Promise<Response>;
 
   /**
-   * Gets the path of the file relative to the Jupyter server root.
+   * Make request for git commit logs
    *
-   * If no path is provided, returns the Git repository top folder relative path.
-   * If no Git repository selected, return null
-   *
-   * @param path the file path relative to Git repository top folder
+   * @param historyCount: Optional number of commits to get from git log
+   * @returns Repository logs
    */
-  getRelativeFilePath(path?: string): string | null;
+  log(historyCount?: number): Promise<Git.ILogResult>;
+
+  /**
+   * Make request for the Git Pull API.
+   *
+   * @param auth Optional authentication information for the remote repository
+   * @returns Command execution status
+   */
+  pull(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
+
+  /**
+   * Make request for the Git Push API.
+   *
+   * @param auth Optional authentication information for the remote repository
+   * @returns Command execution status
+   */
+  push(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
+
+  /**
+   * General git refresh
+   */
+  refresh(): Promise<void>;
+
+  /**
+   * Make request for a list of all git branches
+   */
+  refreshBranch(): Promise<void>;
+
+  /**
+   * Request git status refresh
+   */
+  refreshStatus(): Promise<void>;
 
   /**
    * Register a new diff provider for specified file types
@@ -213,31 +232,36 @@ export interface IGitExtension {
   registerDiffProvider(filetypes: string[], callback: Git.IDiffCallback): void;
 
   /**
-   * A promise that fulfills when the model is ready;
-   * i.e. if the top folder repository has been found.
+   * Make request to move one or all files from the staged to the unstaged area
+   *
+   * If filename is not provided, all files will be reset.
+   *
+   * @param filename Optional name of the file to add
    */
-  ready: Promise<void>;
+  reset(filename?: string): Promise<Response>;
 
   /**
-   * Test whether the model is ready;
-   * i.e. if the top folder repository has been found.
+   * Make request to reset to selected commit
+   *
+   * @param commitId Selected commit ID
    */
-  isReady: boolean;
+  resetToCommit(commitId: string): Promise<Response>;
 
   /**
-   * Add the file named fname to the current marker with given mark
+   * Make request for the prefix path of a directory 'path',
+   * with respect to the root directory of repository
+   *
+   * @param path Path for which the prefix is searched for
+   * @returns Path prefix
    */
-  addMark(fname: string, mark: boolean): void;
+  showPrefix(path: string): Promise<Git.IShowPrefixResult>;
 
   /**
-   * Get current mark of file named fname
+   * Make request for top level path of repository 'path'
+   *
+   * @param path Path from which the top Git repository needs to be found
    */
-  getMark(fname: string): boolean;
-
-  /**
-   * Toggle the mark for the file named fname
-   */
-  toggleMark(fname: string): void;
+  showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
 }
 
 export namespace Git {
@@ -248,7 +272,8 @@ export namespace Git {
     revisionB: string
   ) => void;
 
-  /** Interface for GitAllHistory request result,
+  /**
+   * Interface for GitAllHistory request result,
    * has all repo information
    */
   export interface IAllHistory {
