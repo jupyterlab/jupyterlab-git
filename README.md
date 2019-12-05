@@ -5,7 +5,7 @@
 
 A JupyterLab extension for version control using git
 
-![](http://g.recordit.co/N9Ikzbyk8P.gif)
+![ui_glow_up](./docs/gifs/ui_glow_up_090.gif)
 
 To see the extension in action, open the example notebook included in the Binder [demo](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab).
 
