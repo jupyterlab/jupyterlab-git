@@ -90,7 +90,7 @@ def test_checkout_branch_noref_success(mock__get_branch_reference, mock_subproc_
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
     mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
@@ -120,7 +120,7 @@ def test_checkout_branch_noref_failure(mock__get_branch_reference, mock_subproc_
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
     mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
@@ -153,7 +153,7 @@ def test_checkout_branch_remoteref_success(mock__get_branch_reference, mock_subp
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
     mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
@@ -182,7 +182,7 @@ def test_checkout_branch_headsref_failure(mock__get_branch_reference, mock_subpr
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
     mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
@@ -213,7 +213,7 @@ def test_checkout_branch_headsref_success(mock__get_branch_reference, mock_subpr
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(
         branchname=branch,
         current_path='test_curr_path')
 
@@ -241,7 +241,7 @@ def test_checkout_branch_remoteref_failure(mock__get_branch_reference, mock_subp
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path='test_curr_path')
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(branchname=branch, current_path='test_curr_path')
 
     # Then
     cmd=['git', 'checkout', '--track', branch]
@@ -268,7 +268,7 @@ def test_get_branch_reference_success(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin')._get_branch_reference(
+    actual_response = Git(FakeContentManager('/bin'))._get_branch_reference(
         branchname=branch,
         current_path='test_curr_path')
 
@@ -303,7 +303,7 @@ def test_get_branch_reference_failure(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin')._get_branch_reference(
+    actual_response = Git(FakeContentManager('/bin'))._get_branch_reference(
         branchname=branch,
         current_path='test_curr_path')
 
