@@ -1,12 +1,12 @@
-import { ServerConnection } from '@jupyterlab/services';
 import { Mode } from '@jupyterlab/codemirror';
+import { ServerConnection } from '@jupyterlab/services';
+
 import * as React from 'react';
 
-import { httpGitRequest } from '../../git';
 import { IDiffProps } from './Diff';
-import { getRefValue, IDiffContext } from './model';
-
+import { httpGitRequest } from '../../git';
 import { mergeView } from './mergeview';
+import { getRefValue, IDiffContext } from './model';
 
 interface ICurrentReference {
   special?: 'WORKING' | 'INDEX';
