@@ -1,0 +1,139 @@
+.jp-git-diff-parent-diff-widget {
+    overflow: auto;
+}
+
+.jp-git-diff-error {
+    width: auto;
+    padding: 16px;
+    left: 10px;
+    top: 5px;
+    color: var(--jp-ui-font-color1);
+    font-size: var(--jp-ui-font-size1);
+    background: var(--jp-error-color3);
+    position: absolute;
+}
+
+.jp-git-diff-error-message {
+    color: var(--jp-error-color1);
+    margin-left: 5px;
+}
+
+.jp-git-diff-root {
+    padding: var(--jp-notebook-padding);
+    min-width: 50px;
+    min-height: 50px;
+    outline: none;
+    overflow: auto;
+    background: var(--jp-layout-color0);
+    color: var(--jp-ui-font-color0);
+    flex: 1 1 auto;
+}
+
+
+.jp-git-diff-root .CodeMirror-merge {
+    position: relative;
+    white-space: pre;
+    border: var(--codemirror-border);
+    border-radius: 0px;
+    background: var(--jp-cell-editor-background);
+}
+
+.jp-git-diff-root .CodeMirror {
+    background: var(--jp-layout-color0);
+}
+
+.jp-git-diff-root .CodeMirror-merge, .CodeMirror-merge .CodeMirror {
+    height: auto;
+}
+
+.jp-git-diff-root .CodeMirror-merge-4pane .CodeMirror-merge-pane-deleted {
+    display: none;
+}
+
+.jp-git-diff-root .CodeMirror-merge-pane-unchanged {
+    width: 100%;
+}
+
+.jp-git-diff-root .CodeMirror-merge-1pane .CodeMirror-merge-gap {
+    width: 6%;
+}
+
+.jp-git-diff-root .CodeMirror-merge-2pane .CodeMirror-merge-pane {
+    width: 47%;
+}
+
+.jp-git-diff-root .CodeMirror-merge-2pane .CodeMirror-merge-gap {
+    width: 6%;
+}
+
+.jp-git-diff-root .CodeMirror-merge-3pane .CodeMirror-merge-pane {
+    width: 31%;
+}
+
+.jp-git-diff-root .CodeMirror-merge-3pane .CodeMirror-merge-gap {
+    width: 3.5%;
+}
+
+.jp-git-diff-root .CodeMirror-merge-pane {
+    display: inline-block;
+    white-space: normal;
+    vertical-align: top;
+    width: 100%;
+}
+
+.jp-git-diff-root .CodeMirror-merge-pane-rightmost {
+    position: absolute;
+    right: 0px;
+    z-index: 1;
+}
+
+.jp-git-diff-root .CodeMirror-merge-scrolllock-wrap {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+}
+
+.jp-git-diff-root .CodeMirror-merge-scrolllock {
+    position: relative;
+    left: -50%;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.jp-git-diff-root .CodeMirror-merge-r-inserted, 
+.jp-git-diff-root .CodeMirror-merge-l-inserted {
+    background-color: var(--jp-diff-added-color1);
+}
+
+.jp-git-diff-root .CodeMirror-merge-r-deleted, 
+.jp-git-diff-root .CodeMirror-merge-l-deleted {
+    background-color: var(--jp-diff-deleted-color1);
+}
+
+.jp-git-diff-root .CodeMirror-merge-collapsed-widget:before {
+    content: "(...)";
+}
+
+.jp-git-diff-root .CodeMirror-merge-collapsed-widget {
+    cursor: pointer;
+    color: var(--jp-ui-font-color1);
+    background: var(--jp-layout-color2);
+    border: 1px solid var(--jp-border-color1);
+    font-size: 90%;
+    padding: 0 3px;
+    border-radius: 4px;
+}
+
+.jp-git-diff-root .CodeMirror-merge-collapsed-line .CodeMirror-gutter-elt {
+    display: none;
+}
+
+.jp-git-diff-root .CodeMirror-merge-spacer {
+    background-image: repeating-linear-gradient(
+        -45deg, 
+        transparent, 
+        transparent 1em, 
+        var(--jp-border-color0) 1em, 
+        var(--jp-border-color0) 1.3em
+    )
+}

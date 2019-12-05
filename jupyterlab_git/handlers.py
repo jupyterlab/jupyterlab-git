@@ -2,8 +2,9 @@
 Module with all the individual handlers, which execute git commands and return the results to the frontend.
 """
 import json
+import os
 
-from notebook.utils import url_path_join as ujoin
+from notebook.utils import url_path_join as ujoin, url2path
 from notebook.base.handlers import APIHandler
 
 
@@ -470,6 +471,22 @@ class GitConfigHandler(GitHandler):
             self.set_status(201)
         self.finish(json.dumps(response))
 
+class GitDiffContentHandler(GitHandler):
+    """
+    Handler for plain text diffs. Uses git show $REF:$FILE
+    Returns `prev_content` and `curr_content` with content of given file.
+    """
+
+    def post(self):
+        cm = self.contents_manager
+        data = self.get_json_body()
+        filename = data["filename"]
+        prev_ref = data["prev_ref"]
+        curr_ref = data["curr_ref"]
+        top_repo_path = os.path.join(cm.root_dir, url2path(data["top_repo_path"]))
+        response = self.git.diff_content(filename, prev_ref, curr_ref, top_repo_path)
+        self.finish(json.dumps(response))
+
 
 class GitServerRootHandler(GitHandler):
 
@@ -509,7 +526,8 @@ def setup_handlers(web_app):
         ("/git/upstream", GitUpstreamHandler),
         ("/git/config", GitConfigHandler),
         ("/git/changed_files", GitChangedFilesHandler),
-        ("/git/server_root", GitServerRootHandler)
+        ("/git/server_root", GitServerRootHandler),
+        ("/git/diffcontent", GitDiffContentHandler)
     ]
 
     # add the baseurl to our paths

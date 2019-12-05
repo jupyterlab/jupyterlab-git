@@ -4,6 +4,8 @@ from unittest.mock import patch, call, Mock
 
 from jupyterlab_git.git import Git, GitAuthInputWrapper
 
+from .testutils import FakeContentManager
+
 
 @patch('subprocess.Popen')
 @patch('os.environ', {'TEST': 'test'})
@@ -18,7 +20,7 @@ def test_git_clone_success(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl')
+    actual_response = Git(FakeContentManager('/bin')).clone(current_path='test_curr_path', repo_url='ghjkhjkl')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -52,7 +54,7 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl')
+    actual_response = Git(FakeContentManager('/bin')).clone(current_path='test_curr_path', repo_url='ghjkhjkl')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -84,7 +86,7 @@ def test_git_clone_with_auth_success(mock_GitAuthInputWrapper):
         'username' : 'asdf', 
         'password' : 'qwerty'
     }
-    actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl', auth=auth)
+    actual_response = Git(FakeContentManager('/bin')).clone(current_path='test_curr_path', repo_url='ghjkhjkl', auth=auth)
 
     # Then
     mock_GitAuthInputWrapper.assert_has_calls([
@@ -121,7 +123,7 @@ def test_git_clone_with_auth_wrong_repo_url_failure_from_git(mock_GitAuthInputWr
         'username' : 'asdf', 
         'password' : 'qwerty'
     }
-    actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl', auth=auth)
+    actual_response = Git(FakeContentManager('/bin')).clone(current_path='test_curr_path', repo_url='ghjkhjkl', auth=auth)
 
     # Then
     mock_GitAuthInputWrapper.assert_has_calls([
@@ -158,7 +160,7 @@ def test_git_clone_with_auth_auth_failure_from_git(mock_GitAuthInputWrapper):
         'username' : 'asdf', 
         'password' : 'qwerty'
     }
-    actual_response = Git(root_dir='/bin').clone(current_path='test_curr_path', repo_url='ghjkhjkl', auth=auth)
+    actual_response = Git(FakeContentManager('/bin')).clone(current_path='test_curr_path', repo_url='ghjkhjkl', auth=auth)
 
     # Then
     mock_GitAuthInputWrapper.assert_has_calls([

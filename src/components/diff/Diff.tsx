@@ -3,6 +3,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
 import { IDiffContext } from './model';
 import { NBDiff } from './NbDiff';
+import { isText, PlainTextDiff } from './PlainTextDiff';
 
 /**
  * A registry which maintains mappings of file extension to diff provider components.
@@ -14,17 +15,30 @@ const DIFF_PROVIDER_REGISTRY: { [key: string]: typeof React.Component } = {
 /**
  * Determines if a given file is supported for diffs.
  *
- * This will be removed when "Plaintext" diffs are supported since that will be used
- * for cases where there is not a dedicated diff provider.
- *
  * @param path the file path
  */
 export function isDiffSupported(path: string): boolean {
-  return PathExt.extname(path).toLocaleLowerCase() in DIFF_PROVIDER_REGISTRY;
+  return (
+    PathExt.extname(path).toLocaleLowerCase() in DIFF_PROVIDER_REGISTRY ||
+    isText(path)
+  );
 }
 
+/** Diff component properties */
 export interface IDiffProps {
+  /**
+   * Path of the file to diff.
+   * It is relative to the git repository root folder
+   */
   path: string;
+  /**
+   * Git respository folder path.
+   * It is relative to the server root.
+   */
+  topRepoPath: string;
+  /**
+   * References to show the diff for.
+   */
   diffContext: IDiffContext;
 }
 
@@ -37,9 +51,9 @@ export function Diff(props: IDiffProps) {
   if (fileExtension in DIFF_PROVIDER_REGISTRY) {
     const DiffProvider = DIFF_PROVIDER_REGISTRY[fileExtension];
     return <DiffProvider {...props} />;
+  } else if (isText(props.path)) {
+    return <PlainTextDiff {...props} />;
   } else {
-    // This will be removed and delegated to a "Plaintext" diff provider for
-    // cases where the file extension does not have a dedicated diff provider.
     console.log(`Diff is not supported for ${fileExtension} files`);
     return null;
   }

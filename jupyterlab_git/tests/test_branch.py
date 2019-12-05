@@ -5,6 +5,7 @@ from unittest.mock import patch, call, Mock
 
 # local lib
 from jupyterlab_git.git import Git
+from .testutils import FakeContentManager
 
 
 def test_is_remote_branch():
@@ -18,7 +19,7 @@ def test_is_remote_branch():
         ('refs/tags/blah@0.2.0', False)
     ]
     for test_case in test_cases:
-        actual_response = Git(root_dir='/bin')._is_remote_branch(test_case[0])
+        actual_response = Git(FakeContentManager('/bin'))._is_remote_branch(test_case[0])
         assert test_case[1] == actual_response
 
 
@@ -35,12 +36,12 @@ def test_get_branch_name():
         'refs/tags/blah@0.2.0'
     ]
     for test_case in good_test_cases:
-        actual_response = Git(root_dir='/bin')._get_branch_name(test_case[0])
+        actual_response = Git(FakeContentManager('/bin'))._get_branch_name(test_case[0])
         assert test_case[1] == actual_response
 
     for test_case in bad_test_cases:
         with pytest.raises(ValueError):
-            Git(root_dir='/bin')._get_branch_name(test_case)
+            Git(FakeContentManager('/bin'))._get_branch_name(test_case)
 
 
 @patch('subprocess.Popen')
@@ -55,7 +56,7 @@ def test_get_current_branch_success(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').get_current_branch(
+    actual_response = Git(FakeContentManager('/bin')).get_current_branch(
         current_path='test_curr_path')
 
     # Then
@@ -89,7 +90,7 @@ def test_checkout_branch_noref_success(mock__get_branch_reference, mock_subproc_
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
     mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
@@ -119,7 +120,7 @@ def test_checkout_branch_noref_failure(mock__get_branch_reference, mock_subproc_
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
     mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
@@ -152,7 +153,7 @@ def test_checkout_branch_remoteref_success(mock__get_branch_reference, mock_subp
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
     mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
@@ -181,7 +182,7 @@ def test_checkout_branch_headsref_failure(mock__get_branch_reference, mock_subpr
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path=curr_path)
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(branchname=branch, current_path=curr_path)
 
     # Then
     mock__get_branch_reference.assert_has_calls([ call(branch, curr_path) ])
@@ -212,7 +213,7 @@ def test_checkout_branch_headsref_success(mock__get_branch_reference, mock_subpr
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(
         branchname=branch,
         current_path='test_curr_path')
 
@@ -240,7 +241,7 @@ def test_checkout_branch_remoteref_failure(mock__get_branch_reference, mock_subp
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin').checkout_branch(branchname=branch, current_path='test_curr_path')
+    actual_response = Git(FakeContentManager('/bin')).checkout_branch(branchname=branch, current_path='test_curr_path')
 
     # Then
     cmd=['git', 'checkout', '--track', branch]
@@ -265,12 +266,12 @@ def test_get_branch_reference_success(mock_subproc_popen):
     }
     process_mock.configure_mock(**attrs)
     mock_subproc_popen.return_value = process_mock
- 
+
     # When
-    actual_response = Git(root_dir='/bin')._get_branch_reference(
+    actual_response = Git(FakeContentManager('/bin'))._get_branch_reference(
         branchname=branch,
         current_path='test_curr_path')
- 
+
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
@@ -300,12 +301,12 @@ def test_get_branch_reference_failure(mock_subproc_popen):
     }
     process_mock.configure_mock(**attrs)
     mock_subproc_popen.return_value = process_mock
- 
+
     # When
-    actual_response = Git(root_dir='/bin')._get_branch_reference(
+    actual_response = Git(FakeContentManager('/bin'))._get_branch_reference(
         branchname=branch,
         current_path='test_curr_path')
- 
+
     # Then
     mock_subproc_popen.assert_has_calls([
         call(
@@ -333,7 +334,7 @@ def test_get_current_branch_failure(mock_subproc_popen):
 
     # When
     with pytest.raises(Exception) as error:
-        Git(root_dir='/bin').get_current_branch(current_path='test_curr_path')
+        Git(FakeContentManager('/bin')).get_current_branch(current_path='test_curr_path')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -368,7 +369,7 @@ def test_get_current_branch_detached_success(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin')._get_current_branch_detached(
+    actual_response = Git(FakeContentManager('/bin'))._get_current_branch_detached(
         current_path='test_curr_path')
 
     # Then
@@ -398,7 +399,7 @@ def test_get_current_branch_detached_failure(mock_subproc_popen):
 
     # When
     with pytest.raises(Exception) as error:
-        Git(root_dir='/bin')._get_current_branch_detached(current_path='test_curr_path')
+        Git(FakeContentManager('/bin'))._get_current_branch_detached(current_path='test_curr_path')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -434,7 +435,7 @@ def test_get_upstream_branch_success(mock_subproc_popen):
         mock_subproc_popen.return_value = process_mock
 
         # When
-        actual_response = Git(root_dir='/bin').get_upstream_branch(
+        actual_response = Git(FakeContentManager('/bin')).get_upstream_branch(
             current_path='test_curr_path', branch_name=test_case[0])
 
         # Then
@@ -466,7 +467,7 @@ def test_get_upstream_branch_failure(mock_subproc_popen):
 
     # When: fatal: no such branch: 'blah'
     with pytest.raises(Exception) as error:
-        Git(root_dir='/bin').get_upstream_branch(
+        Git(FakeContentManager('/bin')).get_upstream_branch(
             current_path='test_curr_path', branch_name='blah')
 
     # Then
@@ -485,7 +486,7 @@ def test_get_upstream_branch_failure(mock_subproc_popen):
         error.value)
 
     # When: fatal: no upstream configured for branch
-    actual_response = Git(root_dir='/bin').get_upstream_branch(
+    actual_response = Git(FakeContentManager('/bin')).get_upstream_branch(
         current_path='test_curr_path', branch_name='test')
 
     # Then
@@ -502,7 +503,7 @@ def test_get_upstream_branch_failure(mock_subproc_popen):
     assert None == actual_response
 
     # When: "fatal: ambiguous argument 'blah@origin': unknown revision or path not in the working tree.
-    actual_response = Git(root_dir='/bin').get_upstream_branch(
+    actual_response = Git(FakeContentManager('/bin')).get_upstream_branch(
         current_path='test_curr_path', branch_name='blah')
 
     # Then
@@ -531,7 +532,7 @@ def test_get_tag_success(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin')._get_tag(
+    actual_response = Git(FakeContentManager('/bin'))._get_tag(
         current_path='test_curr_path', commit_sha='abcdefghijklmnopqrstuvwxyz01234567890123')
 
     # Then
@@ -559,14 +560,14 @@ def test_get_tag_failure(mock_subproc_popen):
 
     # When
     with pytest.raises(Exception) as error:
-        Git(root_dir='/bin')._get_tag(
+        Git(FakeContentManager('/bin'))._get_tag(
             current_path='test_curr_path', commit_sha='blah')
 
     assert "Error [fatal: Not a valid object name blah] " \
            "occurred while executing [git describe --tags blah] command to get nearest tag associated with branch." == str(
         error.value)
 
-    actual_response = Git(root_dir='/bin')._get_tag(
+    actual_response = Git(FakeContentManager('/bin'))._get_tag(
         current_path='test_curr_path', commit_sha='01234567899999abcdefghijklmnopqrstuvwxyz')
 
     assert None == actual_response
@@ -602,7 +603,7 @@ def test_no_tags(mock_subproc_popen):
     mock_subproc_popen.return_value = process_mock
 
     # When
-    actual_response = Git(root_dir='/bin')._get_tag('/path/foo', '768c79ad661598889f29bdf8916f4cc488f5062a')
+    actual_response = Git(FakeContentManager('/bin'))._get_tag('/path/foo', '768c79ad661598889f29bdf8916f4cc488f5062a')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -694,7 +695,7 @@ def test_branch_success(mock_subproc_popen):
     }
 
     # When
-    actual_response = Git(root_dir='/bin').branch(
+    actual_response = Git(FakeContentManager('/bin')).branch(
         current_path='test_curr_path')
 
     # Then
@@ -740,7 +741,7 @@ def test_branch_failure(mock_subproc_popen):
     }
 
     # When
-    actual_response = Git(root_dir='/bin').branch(current_path='test_curr_path')
+    actual_response = Git(FakeContentManager('/bin')).branch(current_path='test_curr_path')
 
     # Then
     mock_subproc_popen.assert_has_calls([
@@ -828,7 +829,7 @@ def test_branch_success_detached_head(mock_subproc_popen):
     }
 
     # When
-    actual_response = Git(root_dir='/bin').branch(
+    actual_response = Git(FakeContentManager('/bin')).branch(
         current_path='test_curr_path')
 
     # Then

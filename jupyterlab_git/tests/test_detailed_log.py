@@ -5,6 +5,8 @@ from unittest.mock import patch, call, Mock
 # local lib
 from jupyterlab_git.git import Git
 
+from .testutils import FakeContentManager
+
 
 @patch('subprocess.Popen')
 def test_detailed_log(mock_subproc_popen):
@@ -62,7 +64,7 @@ def test_detailed_log(mock_subproc_popen):
     }
 
     # When
-    actual_response = Git(root_dir='/bin').detailed_log(
+    actual_response = Git(FakeContentManager('/bin')).detailed_log(
         selected_hash='f29660a2472e24164906af8653babeb48e4bf2ab',
         current_path='test_curr_path')
 

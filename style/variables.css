@@ -20,8 +20,8 @@
   --jp-icon-git-clone-disabled: url('./images/git-clone-icon-disabled.svg');
   --jp-icon-git-push-disabled: url('./images/git-clone-icon-disabled.svg');
   --jp-icon-git-pull-disabled: url('./images/git-clone-icon-disabled.svg');
-  --jp-git-diff-deleted-color: rgba(255, 193, 193, 0.5);
-  --jp-git-diff-added-color: rgba(201, 243, 194, 0.5);
+  --jp-git-diff-deleted-color: rgba(255, 0, 0, 0.2);
+  --jp-git-diff-added-color: rgba(155, 185, 85, 0.2);
   --jp-git-diff-output-color: rgba(0, 141, 255, 0.3);
   --jp-git-diff-output-border-color: rgba(0, 141, 255, 0.7);
 }

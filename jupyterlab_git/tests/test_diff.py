@@ -7,10 +7,12 @@ from tornado.web import HTTPError
 
 from jupyterlab_git.git import Git
 
+from .testutils import FakeContentManager
+
 
 def test_changed_files_invalid_input():
     with pytest.raises(HTTPError):
-        actual_response = Git(root_dir="/bin").changed_files(
+        actual_response = Git(FakeContentManager('/bin')).changed_files(
             base="64950a634cd11d1a01ddfedaeffed67b531cb11e"
         )
 
@@ -21,7 +23,7 @@ def test_changed_files_single_commit(mock_call):
     mock_call.return_value = b"file1.ipynb\nfile2.py"
 
     # When
-    actual_response = Git(root_dir="/bin").changed_files(
+    actual_response = Git(FakeContentManager('/bin')).changed_files(
         single_commit="64950a634cd11d1a01ddfedaeffed67b531cb11e"
     )
 
@@ -40,7 +42,7 @@ def test_changed_files_working_tree(mock_call):
     mock_call.return_value = b"file1.ipynb\nfile2.py"
 
     # When
-    actual_response = Git(root_dir="/bin").changed_files(base="WORKING", remote="HEAD")
+    actual_response = Git(FakeContentManager('/bin')).changed_files(base="WORKING", remote="HEAD")
 
     # Then
     mock_call.assert_called_with(
@@ -55,7 +57,7 @@ def test_changed_files_index(mock_call):
     mock_call.return_value = b"file1.ipynb\nfile2.py"
 
     # When
-    actual_response = Git(root_dir="/bin").changed_files(base="INDEX", remote="HEAD")
+    actual_response = Git(FakeContentManager('/bin')).changed_files(base="INDEX", remote="HEAD")
 
     # Then
     mock_call.assert_called_with(
@@ -70,7 +72,7 @@ def test_changed_files_two_commits(mock_call):
     mock_call.return_value = b"file1.ipynb\nfile2.py"
 
     # When
-    actual_response = Git(root_dir="/bin").changed_files(
+    actual_response = Git(FakeContentManager('/bin')).changed_files(
         base="HEAD", remote="origin/HEAD"
     )
 
@@ -87,7 +89,7 @@ def test_changed_files_git_diff_error(mock_call):
     mock_call.side_effect = CalledProcessError(128, "cmd", b"error message")
 
     # When
-    actual_response = Git(root_dir="/bin").changed_files(
+    actual_response = Git(FakeContentManager('/bin')).changed_files(
         base="HEAD", remote="origin/HEAD"
     )
 

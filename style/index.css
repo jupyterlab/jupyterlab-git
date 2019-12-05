@@ -3,5 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import 'diff.css';
+@import 'diff-common.css';
+@import 'diff-nb.css';
+@import 'diff-text.css';
 @import 'variables.css';
