@@ -6,7 +6,7 @@ import * as React from 'react';
 import { IDiffProps } from './Diff';
 import { httpGitRequest } from '../../git';
 import { mergeView } from './mergeview';
-import { getRefValue, IDiffContext } from './model';
+import { getRefValue, IDiffContext, IGitRef, ISpecialRef } from './model';
 
 interface ICurrentReference {
   special?: 'WORKING' | 'INDEX';
@@ -35,7 +35,7 @@ export class PlainTextDiff extends React.Component<
   }
 
   componentDidMount() {
-    this.performDiff(this.props.diffContext);
+    this._performDiff(this.props.diffContext);
   }
 
   render() {
@@ -55,9 +55,10 @@ export class PlainTextDiff extends React.Component<
         <div className="jp-git-diff-Widget">
           <div className="jp-git-diff-root">
             <div
-              id={`diffviewer-${this.props.path}-${getRefValue(
+              id={this._generateID(
+                this.props.path,
                 this.props.diffContext.currentRef
-              )}`}
+              )}
               className="jp-git-PlainText-diff"
             />
           </div>
@@ -71,7 +72,7 @@ export class PlainTextDiff extends React.Component<
    * to
    * @param diffContext the context in which to perform the diff
    */
-  private performDiff(diffContext: IDiffContext): void {
+  private _performDiff(diffContext: IDiffContext): void {
     try {
       // Resolve what API parameter to call.
       let currentRefValue: ICurrentReference;
@@ -119,6 +120,12 @@ export class PlainTextDiff extends React.Component<
     }
   }
 
+  private _generateID(path: string, currentRef: IGitRef | ISpecialRef): string {
+    return `diffviewer-${this.props.path.replace('/', '-')}-${getRefValue(
+      this.props.diffContext.currentRef
+    )}`;
+  }
+
   /**
    * Creates and adds a diff viewer to the DOM with given content
    *
@@ -130,9 +137,7 @@ export class PlainTextDiff extends React.Component<
 
     mergeView(
       document.getElementById(
-        `diffviewer-${this.props.path.replace('/', '-')}-${getRefValue(
-          this.props.diffContext.currentRef
-        )}`
+        this._generateID(this.props.path, this.props.diffContext.currentRef)
       ),
       {
         value: currContent,
