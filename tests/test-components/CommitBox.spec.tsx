@@ -46,6 +46,7 @@ describe('CommitBox', () => {
         hasFiles: true,
         settings: { composite: {} } as any
       });
+      // can't use setState here, since the box hasn't actually mounted
       box.state = { value: 'message' };
 
       let actual = box.commitButtonStyle(true);
