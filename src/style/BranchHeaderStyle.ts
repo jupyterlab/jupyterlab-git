@@ -96,7 +96,7 @@ export const stagedCommitButtonStyle = style({
   color: 'white',
   flex: '1 1 auto',
   fontSize: 'var(--jp-ui-font-size1)',
-  height: 'calc(3em + 9px)',
+  height: 'calc(2 * (1.25em - 1px))',
   padding: 'calc(var(--jp-code-padding) + 1px) 7px',
   width: '40px'
 });
