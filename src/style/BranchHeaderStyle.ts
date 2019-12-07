@@ -82,6 +82,8 @@ export const headerButtonDisabledStyle = style({
 
 export const branchListItemStyle = style({
   listStyle: 'none',
+  textAlign: 'left',
+  marginLeft: '1em',
   color: 'var(--jp-ui-font-color1)'
 });
 
