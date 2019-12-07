@@ -5,8 +5,11 @@ import json
 import os
 from pathlib import Path
 
-from notebook.utils import url_path_join as ujoin, url2path
 from notebook.base.handlers import APIHandler
+from notebook.utils import url2path
+from notebook.utils import url_path_join as ujoin
+
+import tornado
 
 
 class GitHandler(APIHandler):
@@ -20,6 +23,7 @@ class GitHandler(APIHandler):
 
 
 class GitCloneHandler(GitHandler):
+    @tornado.gen.coroutine
     def post(self):
         """
         Handler for the `git clone`
@@ -33,8 +37,8 @@ class GitCloneHandler(GitHandler):
                                 }'
             }
         """
-        data = json.loads(self.request.body.decode("utf-8"))
-        response = self.git.clone(
+        data = self.get_json_body()
+        response = yield self.git.clone(
             data["current_path"], data["clone_url"], data.get("auth", None)
         )
         self.finish(json.dumps(response))
@@ -50,6 +54,7 @@ class GitAllHistoryHandler(GitHandler):
     Called on refresh of extension's widget
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, calls individual handlers for
@@ -59,13 +64,13 @@ class GitAllHistoryHandler(GitHandler):
         current_path = body["current_path"]
         history_count = body["history_count"]
 
-        show_top_level = self.git.show_top_level(current_path)
+        show_top_level = yield self.git.show_top_level(current_path)
         if show_top_level["code"] != 0:
             self.finish(json.dumps(show_top_level))
         else:
-            branch = self.git.branch(current_path)
-            log = self.git.log(current_path, history_count)
-            status = self.git.status(current_path)
+            branch = yield self.git.branch(current_path)
+            log = yield self.git.log(current_path, history_count)
+            status = yield self.git.status(current_path)
 
             result = {
                 "code": show_top_level["code"],
@@ -85,12 +90,13 @@ class GitShowTopLevelHandler(GitHandler):
     Displays the git root directory inside a repository.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, displays the git root directory inside a repository.
         """
         current_path = self.get_json_body()["current_path"]
-        result = self.git.show_top_level(current_path)
+        result = yield self.git.show_top_level(current_path)
         self.finish(json.dumps(result))
 
 
@@ -101,13 +107,14 @@ class GitShowPrefixHandler(GitHandler):
     with respect to the root directory.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, displays the prefix path of a directory in a repository,
         with respect to the root directory.
         """
         current_path = self.get_json_body()["current_path"]
-        result = self.git.show_prefix(current_path)
+        result = yield self.git.show_prefix(current_path)
         self.finish(json.dumps(result))
 
 
@@ -116,22 +123,13 @@ class GitStatusHandler(GitHandler):
     Handler for 'git status --porcelain', fetches the git status.
     """
 
-    def get(self):
-        """
-        GET request handler, shows file status, used in refresh method.
-        """
-        self.finish(
-            json.dumps(
-                {"add_all": "check", "filename": "filename", "top_repo_path": "path"}
-            )
-        )
-
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, fetches the git status.
         """
         current_path = self.get_json_body()["current_path"]
-        result = self.git.status(current_path)
+        result = yield self.git.status(current_path)
         self.finish(json.dumps(result))
 
 
@@ -141,6 +139,7 @@ class GitLogHandler(GitHandler):
     Fetches Commit SHA, Author Name, Commit Date & Commit Message.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler,
@@ -149,7 +148,7 @@ class GitLogHandler(GitHandler):
         body = self.get_json_body()
         current_path = body["current_path"]
         history_count = body.get("history_count", 25)
-        result = self.git.log(current_path, history_count)
+        result = yield self.git.log(current_path, history_count)
         self.finish(json.dumps(result))
 
 
@@ -160,6 +159,7 @@ class GitDetailedLogHandler(GitHandler):
     deletions in that commit.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, fetches file names of committed files, Number of
@@ -168,7 +168,7 @@ class GitDetailedLogHandler(GitHandler):
         data = self.get_json_body()
         selected_hash = data["selected_hash"]
         current_path = data["current_path"]
-        result = self.git.detailed_log(selected_hash, current_path)
+        result = yield self.git.detailed_log(selected_hash, current_path)
         self.finish(json.dumps(result))
 
 
@@ -177,13 +177,14 @@ class GitDiffHandler(GitHandler):
     Handler for 'git diff --numstat'. Fetches changes between commits & working tree.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, fetches differences between commits & current working
         tree.
         """
         top_repo_path = self.get_json_body()["top_repo_path"]
-        my_output = self.git.diff(top_repo_path)
+        my_output = yield self.git.diff(top_repo_path)
         self.finish(my_output)
 
 
@@ -192,12 +193,13 @@ class GitBranchHandler(GitHandler):
     Handler for 'git branch -a'. Fetches list of all branches in current repository
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, fetches all branches in current repository.
         """
         current_path = self.get_json_body()["current_path"]
-        result = self.git.branch(current_path)
+        result = yield self.git.branch(current_path)
         self.finish(json.dumps(result))
 
 
@@ -207,16 +209,7 @@ class GitAddHandler(GitHandler):
     Adds one or all files to the staging area.
     """
 
-    def get(self):
-        """
-        GET request handler, adds files to the staging area.
-        """
-        self.finish(
-            json.dumps(
-                {"add_all": "check", "filename": "filename", "top_repo_path": "path"}
-            )
-        )
-
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, adds one or all files into the staging area.
@@ -224,10 +217,10 @@ class GitAddHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         if data["add_all"]:
-            my_output = self.git.add_all(top_repo_path)
+            my_output = yield self.git.add_all(top_repo_path)
         else:
             filename = data["filename"]
-            my_output = self.git.add(filename, top_repo_path)
+            my_output = yield self.git.add(filename, top_repo_path)
         self.finish(my_output)
 
 
@@ -237,11 +230,13 @@ class GitAddAllUnstagedHandler(GitHandler):
     untracked or staged files.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, adds all the changed files.
         """
-        self.finish(self.git.add_all_unstaged(self.get_json_body()["top_repo_path"]))
+        body = yield self.git.add_all_unstaged(self.get_json_body()["top_repo_path"])
+        self.finish(body)
 
 
 class GitAddAllUntrackedHandler(GitHandler):
@@ -250,11 +245,13 @@ class GitAddAllUntrackedHandler(GitHandler):
     untracked files, does not touch unstaged or staged files.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, adds all the untracked files.
         """
-        self.finish(self.git.add_all_untracked(self.get_json_body()["top_repo_path"]))
+        body = yield self.git.add_all_untracked(self.get_json_body()["top_repo_path"])
+        self.finish(body)
 
 
 class GitResetHandler(GitHandler):
@@ -263,6 +260,7 @@ class GitResetHandler(GitHandler):
     Moves one or all files from the staged to the unstaged area.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler,
@@ -271,10 +269,10 @@ class GitResetHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         if data["reset_all"]:
-            my_output = self.git.reset_all(top_repo_path)
+            my_output = yield self.git.reset_all(top_repo_path)
         else:
             filename = data["filename"]
-            my_output = self.git.reset(filename, top_repo_path)
+            my_output = yield self.git.reset(filename, top_repo_path)
         self.finish(my_output)
 
 
@@ -284,11 +282,12 @@ class GitDeleteCommitHandler(GitHandler):
     Deletes the specified commit from the repository, leaving history intact.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         commit_id = data["commit_id"]
-        output = self.git.delete_commit(commit_id, top_repo_path)
+        output = yield self.git.delete_commit(commit_id, top_repo_path)
         self.finish(output)
 
 
@@ -298,11 +297,12 @@ class GitResetToCommitHandler(GitHandler):
     Deletes all commits from head to the specified commit, making the specified commit the new head.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         commit_id = data["commit_id"]
-        output = self.git.reset_to_commit(commit_id, top_repo_path)
+        output = yield self.git.reset_to_commit(commit_id, top_repo_path)
         self.finish(output)
 
 
@@ -311,6 +311,7 @@ class GitCheckoutHandler(GitHandler):
     Handler for 'git checkout <branchname>'. Changes the current working branch.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, changes between branches.
@@ -319,15 +320,15 @@ class GitCheckoutHandler(GitHandler):
         top_repo_path = data["top_repo_path"]
         if data["checkout_branch"]:
             if data["new_check"]:
-                my_output = self.git.checkout_new_branch(
+                my_output = yield self.git.checkout_new_branch(
                     data["branchname"], top_repo_path
                 )
             else:
-                my_output = self.git.checkout_branch(data["branchname"], top_repo_path)
+                my_output = yield self.git.checkout_branch(data["branchname"], top_repo_path)
         elif data["checkout_all"]:
-            my_output = self.git.checkout_all(top_repo_path)
+            my_output = yield self.git.checkout_all(top_repo_path)
         else:
-            my_output = self.git.checkout(data["filename"], top_repo_path)
+            my_output = yield self.git.checkout(data["filename"], top_repo_path)
         self.finish(my_output)
 
 
@@ -336,6 +337,7 @@ class GitCommitHandler(GitHandler):
     Handler for 'git commit -m <message>'. Commits files.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, commits files.
@@ -343,11 +345,12 @@ class GitCommitHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         commit_msg = data["commit_msg"]
-        my_output = self.git.commit(commit_msg, top_repo_path)
+        my_output = yield self.git.commit(commit_msg, top_repo_path)
         self.finish(my_output)
 
 
 class GitUpstreamHandler(GitHandler):
+    @tornado.gen.coroutine
     def post(self):
         """
         Handler for the `git rev-parse --abbrev-ref $CURRENT_BRANCH_NAME@{upstream}` on the repo. Used to check if there
@@ -359,8 +362,8 @@ class GitUpstreamHandler(GitHandler):
             }
         """
         current_path = self.get_json_body()["current_path"]
-        current_branch = self.git.get_current_branch(current_path)
-        upstream = self.git.get_upstream_branch(current_path, current_branch)
+        current_branch = yield self.git.get_current_branch(current_path)
+        upstream = yield self.git.get_upstream_branch(current_path, current_branch)
         self.finish(json.dumps({"upstream": upstream}))
 
 
@@ -369,12 +372,13 @@ class GitPullHandler(GitHandler):
     Handler for 'git pull'. Pulls files from a remote branch.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, pulls files from a remote branch to your current branch.
         """
         data = self.get_json_body()
-        response = self.git.pull(data["current_path"], data.get("auth", None))
+        response = yield self.git.pull(data["current_path"], data.get("auth", None))
 
         self.finish(json.dumps(response))
 
@@ -385,6 +389,7 @@ class GitPushHandler(GitHandler):
     Pushes committed files to a remote branch.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler,
@@ -393,8 +398,8 @@ class GitPushHandler(GitHandler):
         data = self.get_json_body()
         current_path = data["current_path"]
 
-        current_local_branch = self.git.get_current_branch(current_path)
-        current_upstream_branch = self.git.get_upstream_branch(
+        current_local_branch = yield self.git.get_current_branch(current_path)
+        current_upstream_branch = yield self.git.get_upstream_branch(
             current_path, current_local_branch
         )
 
@@ -409,7 +414,7 @@ class GitPushHandler(GitHandler):
                 remote = upstream[0]
                 branch = ":".join(["HEAD", upstream[1]])
 
-            response = self.git.push(
+            response = yield self.git.push(
                 remote, branch, current_path, data.get("auth", None)
             )
 
@@ -428,18 +433,21 @@ class GitInitHandler(GitHandler):
     Handler for 'git init'. Initializes a repository.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST request handler, initializes a repository.
         """
         current_path = self.get_json_body()["current_path"]
-        my_output = self.git.init(current_path)
+        my_output = yield self.git.init(current_path)
         self.finish(my_output)
 
 
 class GitChangedFilesHandler(GitHandler):
+    @tornado.gen.coroutine
     def post(self):
-        self.finish(json.dumps(self.git.changed_files(**self.get_json_body())))
+        body = yield self.git.changed_files(**self.get_json_body())
+        self.finish(json.dumps(body))
 
 
 class GitConfigHandler(GitHandler):
@@ -447,6 +455,7 @@ class GitConfigHandler(GitHandler):
     Handler for 'git config' commands
     """
 
+    @tornado.gen.coroutine
     def post(self):
         """
         POST get (if no options are passed) or set configuration options
@@ -454,7 +463,7 @@ class GitConfigHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["path"]
         options = data.get("options", {})
-        response = self.git.config(top_repo_path, **options)
+        response = yield self.git.config(top_repo_path, **options)
 
         if response["code"] != 0:
             self.set_status(500)
@@ -469,6 +478,7 @@ class GitDiffContentHandler(GitHandler):
     Returns `prev_content` and `curr_content` with content of given file.
     """
 
+    @tornado.gen.coroutine
     def post(self):
         cm = self.contents_manager
         data = self.get_json_body()
@@ -476,7 +486,7 @@ class GitDiffContentHandler(GitHandler):
         prev_ref = data["prev_ref"]
         curr_ref = data["curr_ref"]
         top_repo_path = os.path.join(cm.root_dir, url2path(data["top_repo_path"]))
-        response = self.git.diff_content(filename, prev_ref, curr_ref, top_repo_path)
+        response = yield self.git.diff_content(filename, prev_ref, curr_ref, top_repo_path)
         self.finish(json.dumps(response))
 
 
@@ -484,7 +494,8 @@ class GitServerRootHandler(GitHandler):
     def get(self):
         # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
         root_dir = getattr(self.contents_manager, "root_dir", None)
-        self.finish(json.dumps({"server_root": Path(root_dir).as_posix()}))
+        server_root = None if root_dir is None else Path(root_dir).as_posix()
+        self.finish(json.dumps({"server_root": server_root}))
 
 
 def setup_handlers(web_app):
