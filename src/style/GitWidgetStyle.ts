@@ -6,5 +6,5 @@ export const gitWidgetStyle = style({
   minWidth: '300px',
   color: 'var(--jp-ui-font-color1)',
   background: 'var(--jp-layout-color1)',
-  fontSize: 'var(--jp-ui-font-size0)'
+  fontSize: 'var(--jp-ui-font-size1)'
 });

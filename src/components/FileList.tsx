@@ -512,6 +512,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           <CommitBox
             hasFiles={this.markedFiles.length > 0}
             commitFunc={this.commitAllMarkedFiles}
+            settings={this.props.settings}
           />
           <div>
             <GitStageSimple
@@ -531,6 +532,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           <CommitBox
             hasFiles={this.props.stagedFiles.length > 0}
             commitFunc={this.commitAllStagedFiles}
+            settings={this.props.settings}
           />
           <div>
             <Staged />

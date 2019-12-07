@@ -1,5 +1,9 @@
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
 import * as React from 'react';
+import TextareaAutosize from 'react-textarea-autosize';
 import { classes } from 'typestyle';
+
 import {
   stagedCommitButtonDisabledStyle,
   stagedCommitButtonReadyStyle,
@@ -12,6 +16,7 @@ import {
 export interface ICommitBoxProps {
   hasFiles: boolean;
   commitFunc: (message: string) => Promise<void>;
+  settings: ISettingRegistry.ISettings;
 }
 
 export interface ICommitBoxState {
@@ -73,16 +78,13 @@ export class CommitBox extends React.Component<
         className={stagedCommitStyle}
         onKeyPress={event => this.onKeyPress(event)}
       >
-        <textarea
+        <TextareaAutosize
           className={classes(textInputStyle, stagedCommitMessageStyle)}
           disabled={!this.props.hasFiles}
-          placeholder={
-            this.props.hasFiles
-              ? 'Input message to commit staged changes'
-              : 'Stage your changes before commit'
-          }
-          value={this.state.value}
+          minRows={2}
           onChange={this.handleChange}
+          placeholder={this._placeholder()}
+          value={this.state.value}
         />
         <input
           className={this.commitButtonStyle(this.props.hasFiles)}
@@ -97,4 +99,16 @@ export class CommitBox extends React.Component<
       </form>
     );
   }
+
+  protected _placeholder = (): string => {
+    if (this.props.settings.composite['simpleStaging']) {
+      return this.props.hasFiles
+        ? 'Input message to commit selected changes'
+        : 'Select changes to enable commit';
+    } else {
+      return this.props.hasFiles
+        ? 'Input message to commit staged changes'
+        : 'Stage your changes before commit';
+    }
+  };
 }

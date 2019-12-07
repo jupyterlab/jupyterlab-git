@@ -28,7 +28,7 @@ export const sectionAreaStyle = style({
 });
 
 export const sectionHeaderLabelStyle = style({
-  fontSize: 'var(--jp-ui-font-size)',
+  fontSize: 'var(--jp-ui-font-size1)',
   flex: '1 1 auto',
   textOverflow: 'ellipsis',
   overflow: 'hidden',

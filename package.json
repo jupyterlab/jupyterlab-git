@@ -63,6 +63,7 @@
     "nbdime": "~5.0.1",
     "react": "~16.8.4",
     "react-dom": "~16.8.4",
+    "react-textarea-autosize": "^7.1.2",
     "typestyle": "^2.0.1"
   },
   "devDependencies": {
@@ -75,6 +76,7 @@
     "@types/jest": "^24",
     "@types/react": "~16.8.13",
     "@types/react-dom": "~16.0.5",
+    "@types/react-textarea-autosize": "^4.3.5",
     "enzyme": "3.7.0",
     "enzyme-adapter-react-16": "1.7.0",
     "husky": "1.3.1",
