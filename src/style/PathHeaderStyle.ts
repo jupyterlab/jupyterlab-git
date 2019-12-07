@@ -30,7 +30,7 @@ export const repoRefreshStyle = style({
   boxSizing: 'border-box',
   outline: 'none',
   padding: '0px 6px',
-  margin: 'auto 5px auto auto',
+  margin: 'auto 5px auto 5px',
   height: '24px',
 
   $nest: {
@@ -54,7 +54,7 @@ export const gitPushStyle = style({
   boxSizing: 'border-box',
   outline: 'none',
   padding: '0px 6px',
-  margin: 'auto 5px auto auto',
+  margin: 'auto 5px auto 5px',
   height: '24px',
 
   $nest: {
