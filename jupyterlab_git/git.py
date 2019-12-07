@@ -67,7 +67,7 @@ class Git:
 
     def __init__(self, contents_manager):
         self.contents_manager = contents_manager
-        self.root_dir = os.path.realpath(os.path.expanduser(contents_manager.root_dir))
+        self.root_dir = os.path.expanduser(contents_manager.root_dir)
 
     def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
