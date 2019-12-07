@@ -12,7 +12,8 @@ describe('CommitBox', () => {
     it('should update commit box state to be ready when changes are staged', () => {
       const box = new CommitBox({
         commitFunc: async () => {},
-        hasFiles: true
+        hasFiles: true,
+        settings: { composite: {} } as any
       });
 
       let actual = box.commitButtonStyle(true);
@@ -27,7 +28,8 @@ describe('CommitBox', () => {
     it('should update commit box state to be disabled when no changes are staged', () => {
       const box = new CommitBox({
         commitFunc: async () => {},
-        hasFiles: true
+        hasFiles: true,
+        settings: { composite: {} } as any
       });
 
       let actual = box.commitButtonStyle(false);
@@ -41,19 +43,14 @@ describe('CommitBox', () => {
     it('should be ready to commit with a message set.', () => {
       const box = new CommitBox({
         commitFunc: async () => {},
-        hasFiles: true
+        hasFiles: true,
+        settings: { composite: {} } as any
       });
-      box.setState(
-        {
-          value: 'message'
-        },
-        () => {
-          let actual = box.commitButtonStyle(true);
+      box.state = { value: 'message' };
 
-          let expected = stagedCommitButtonStyle;
-          expect(actual).toEqual(expected);
-        }
-      );
+      let actual = box.commitButtonStyle(true);
+      let expected = stagedCommitButtonStyle;
+      expect(actual).toEqual(expected);
     });
   });
 });
