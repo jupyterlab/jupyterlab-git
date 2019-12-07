@@ -85,17 +85,20 @@ export const branchListItemStyle = style({
   color: 'var(--jp-ui-font-color1)'
 });
 
+// need to override font-size from user agent stylesheet
 export const stagedCommitButtonStyle = style({
   backgroundColor: 'var(--jp-brand-color1)',
   backgroundImage: 'var(--jp-checkmark)',
   backgroundSize: '100%',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
-  color: 'white',
-  height: '42px',
-  width: '40px',
   border: '0',
-  flex: '1 1 auto'
+  color: 'white',
+  flex: '1 1 auto',
+  fontSize: 'var(--jp-ui-font-size1)',
+  height: 'calc(3em + 9px)',
+  padding: 'calc(var(--jp-code-padding) + 1px) 7px',
+  width: '40px'
 });
 
 export const stagedCommitButtonReadyStyle = style({
@@ -117,17 +120,18 @@ export const stagedCommitStyle = style({
   margin: '8px'
 });
 
+// need to override font-size from user agent stylesheet
 export const stagedCommitMessageStyle = style({
-  width: '75%',
-  fontWeight: 300,
-  height: '35px',
-  overflowX: 'auto',
-  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  flex: '20 1 auto',
-  resize: 'vertical',
-  padding: '4px 8px',
   backgroundColor: 'var(--jp-layout-color1)',
+  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   color: 'var(--jp-ui-font-color0)',
+  fontSize: 'var(--jp-ui-font-size1)',
+  fontWeight: 300,
+  flex: '20 1 auto',
+  overflowX: 'auto',
+  padding: 'var(--jp-code-padding)',
+  resize: 'none',
+  width: '75%',
 
   $nest: {
     '&:focus': {

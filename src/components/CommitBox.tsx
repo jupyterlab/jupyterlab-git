@@ -78,13 +78,14 @@ export class CommitBox extends React.Component<
         <TextareaAutosize
           className={classes(textInputStyle, stagedCommitMessageStyle)}
           disabled={!this.props.hasFiles}
+          minRows={3}
+          onChange={this.handleChange}
           placeholder={
             this.props.hasFiles
               ? 'Input message to commit staged changes'
               : 'Stage your changes before commit'
           }
           value={this.state.value}
-          onChange={this.handleChange}
         />
         <input
           className={this.commitButtonStyle(this.props.hasFiles)}
