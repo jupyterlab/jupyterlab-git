@@ -201,8 +201,8 @@ class Git:
 
         response = {}
         try:
-            _, output, error = yield execute(cmd, cwd=self.root_dir)
-            response["files"] = output.strip().split("\n") + error.strip().split("\n")
+            _, output, _ = yield execute(cmd, cwd=self.root_dir)
+            response["files"] = output.strip().split("\n")
             response["code"] = 0
         except subprocess.CalledProcessError as e:
             response["message"] = e.output.decode("utf-8")
@@ -751,7 +751,7 @@ class Git:
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, error = yield execute_with_authentication(
-                ["git", "pull" "--no-commit"],
+                ["git", "pull", "--no-commit"],
                 username=auth["username"],
                 password=auth["password"],
                 cwd=os.path.join(self.root_dir, curr_fb_path),
