@@ -17,8 +17,7 @@ ALLOWED_OPTIONS = ['user.name', 'user.email']
 CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
 
 
-@tornado.gen.coroutine
-def execute(
+async def execute(
     cmdline: "List[str]",
     cwd: "Optional[str]" = None,
     env: "Optional[Dict[str, str]]" = None,
@@ -45,15 +44,14 @@ def execute(
         return (process.returncode, output, error)
 
     current_loop = tornado.ioloop.IOLoop.current()
-    returncode, output, error = yield current_loop.run_in_executor(
+    returncode, output, error = await current_loop.run_in_executor(
         None, call_subprocess, cmdline, cwd, env
     )
 
     return returncode, output.decode("utf-8"), error.decode("utf-8")
 
 
-@tornado.gen.coroutine
-def execute_with_authentication(
+async def execute_with_authentication(
     cmdline: "List[str]",
     username: "str",
     password: "str",
@@ -111,7 +109,7 @@ def execute_with_authentication(
             return returncode, response
 
     current_loop = tornado.ioloop.IOLoop.current()
-    returncode, output = yield current_loop.run_in_executor(
+    returncode, output = await current_loop.run_in_executor(
         None, call_subprocess, cmdline, username, password, cwd, env
     )
 
@@ -127,8 +125,7 @@ class Git:
         self.contents_manager = contents_manager
         self.root_dir = os.path.expanduser(contents_manager.root_dir)
 
-    @tornado.gen.coroutine
-    def config(self, top_repo_path, **kwargs):
+    async def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
         
         If no kwargs, all options are returned. Otherwise kwargs are set.
@@ -141,7 +138,7 @@ class Git:
                 lambda t: True if t[0] in ALLOWED_OPTIONS else False, kwargs.items()
             ):
                 cmd = ["git", "config", "--add", k, v]
-                code, out, err = yield execute(cmd, cwd=top_repo_path)
+                code, out, err = await execute(cmd, cwd=top_repo_path)
                 output.append(out.strip())
                 response["code"] = code
                 if code != 0:
@@ -152,7 +149,7 @@ class Git:
             response["message"] = "\n".join(output).strip()
         else:
             cmd = ["git", "config", "--list"]
-            code, output, error = yield execute(cmd, cwd=top_repo_path)
+            code, output, error = await execute(cmd, cwd=top_repo_path)
             response = {"code": code}
 
             if code != 0:
@@ -165,8 +162,7 @@ class Git:
 
         return response
 
-    @tornado.gen.coroutine
-    def changed_files(self, base=None, remote=None, single_commit=None):
+    async def changed_files(self, base=None, remote=None, single_commit=None):
         """Gets the list of changed files between two Git refs, or the files changed in a single commit
 
         There are two reserved "refs" for the base
@@ -201,7 +197,7 @@ class Git:
 
         response = {}
         try:
-            _, output, _ = yield execute(cmd, cwd=self.root_dir)
+            _, output, _ = await execute(cmd, cwd=self.root_dir)
             response["files"] = output.strip().split("\n")
             response["code"] = 0
         except subprocess.CalledProcessError as e:
@@ -210,8 +206,7 @@ class Git:
 
         return response
 
-    @tornado.gen.coroutine
-    def clone(self, current_path, repo_url, auth=None):
+    async def clone(self, current_path, repo_url, auth=None):
         """
         Execute `git clone`.
         When no auth is provided, disables prompts for the password to avoid the terminal hanging.
@@ -224,7 +219,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, error = yield execute_with_authentication(
+            code, error = await execute_with_authentication(
                 ["git", "clone", unquote(repo_url), "-q"],
                 username=auth["username"],
                 password=auth["password"],
@@ -233,7 +228,7 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, _, error = yield execute(
+            code, _, error = await execute(
                 ["git", "clone", unquote(repo_url)],
                 cwd=os.path.join(self.root_dir, current_path),
                 env=env,
@@ -246,12 +241,11 @@ class Git:
 
         return response
 
-    @tornado.gen.coroutine
-    def status(self, current_path):
+    async def status(self, current_path):
         """
         Execute git status command & return the result.
         """
-        code, my_output, my_error = yield execute(
+        code, my_output, my_error = await execute(
             ["git", "status", "--porcelain", "-u"],
             cwd=os.path.join(self.root_dir, current_path),
         )
@@ -281,12 +275,11 @@ class Git:
                 "message": my_error,
             }
 
-    @tornado.gen.coroutine
-    def log(self, current_path, history_count=10):
+    async def log(self, current_path, history_count=10):
         """
         Execute git log command & return the result.
         """
-        code, my_output, my_error = yield execute(
+        code, my_output, my_error = await execute(
             ["git", "log", "--pretty=format:%H%n%an%n%ar%n%s", ("-%d" % history_count)],
             cwd=os.path.join(self.root_dir, current_path),
         )
@@ -321,13 +314,12 @@ class Git:
         else:
             return {"code": code, "message": my_error}
 
-    @tornado.gen.coroutine
-    def detailed_log(self, selected_hash, current_path):
+    async def detailed_log(self, selected_hash, current_path):
         """
         Execute git log -1 --stat --numstat --oneline command (used to get
         insertions & deletions per file) & return the result.
         """
-        code, my_output, my_error = yield execute(
+        code, my_output, my_error = await execute(
             ["git", "log", "-1", "--stat", "--numstat", "--oneline", selected_hash],
             cwd=os.path.join(self.root_dir, current_path),
         )
@@ -378,12 +370,11 @@ class Git:
         else:
             return {"code": code, "command": "git log_1", "message": my_error}
 
-    @tornado.gen.coroutine
-    def diff(self, top_repo_path):
+    async def diff(self, top_repo_path):
         """
         Execute git diff command & return the result.
         """
-        code, my_output, my_error = yield execute(
+        code, my_output, my_error = await execute(
             ["git", "diff", "--numstat"], cwd=top_repo_path
         )
         if code == 0:
@@ -402,17 +393,16 @@ class Git:
         else:
             return {"code": code, "message": my_error}
 
-    @tornado.gen.coroutine
-    def branch(self, current_path):
+    async def branch(self, current_path):
         """
         Execute 'git for-each-ref' command & return the result.
         """
-        heads = yield self.branch_heads(current_path)
+        heads = await self.branch_heads(current_path)
         if heads["code"] != 0:
             # error; bail
             return heads
 
-        remotes = yield self.branch_remotes(current_path)
+        remotes = await self.branch_remotes(current_path)
         if remotes["code"] != 0:
             # error; bail
             return remotes
@@ -424,8 +414,7 @@ class Git:
             "current_branch": heads["current_branch"],
         }
 
-    @tornado.gen.coroutine
-    def branch_heads(self, current_path):
+    async def branch_heads(self, current_path):
         """
         Execute 'git for-each-ref' command on refs/heads & return the result.
         """
@@ -438,7 +427,7 @@ class Git:
             "refs/heads/",
         ]
 
-        code, output, error = yield execute(
+        code, output, error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path)
         )
         if code == 0:
@@ -466,10 +455,11 @@ class Git:
                 # no commits. In that case, just fall back to determining
                 # current branch
                 if not current_branch:
+                    current_name = await self.get_current_branch(current_path)
                     branch = {
                         "is_current_branch": True,
                         "is_remote_branch": False,
-                        "name": self.get_current_branch(current_path),
+                        "name": current_name,
                         "upstream": None,
                         "top_commit": None,
                         "tag": None,
@@ -492,8 +482,7 @@ class Git:
         else:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
-    @tornado.gen.coroutine
-    def branch_remotes(self, current_path):
+    async def branch_remotes(self, current_path):
         """
         Execute 'git for-each-ref' command on refs/heads & return the result.
         """
@@ -506,7 +495,7 @@ class Git:
             "refs/remotes/",
         ]
 
-        code, output, error = yield execute(
+        code, output, error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path)
         )
         if code == 0:
@@ -535,12 +524,11 @@ class Git:
         else:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
-    @tornado.gen.coroutine
-    def show_top_level(self, current_path):
+    async def show_top_level(self, current_path):
         """
         Execute git --show-toplevel command & return the result.
         """
-        code, my_output, my_error = yield execute(
+        code, my_output, my_error = await execute(
             ["git", "rev-parse", "--show-toplevel"],
             cwd=os.path.join(self.root_dir, current_path),
         )
@@ -554,12 +542,11 @@ class Git:
                 "message": my_error,
             }
 
-    @tornado.gen.coroutine
-    def show_prefix(self, current_path):
+    async def show_prefix(self, current_path):
         """
         Execute git --show-prefix command & return the result.
         """
-        code, my_output, my_error = yield execute(
+        code, my_output, my_error = await execute(
             ["git", "rev-parse", "--show-prefix"],
             cwd=os.path.join(self.root_dir, current_path),
         )
@@ -573,8 +560,7 @@ class Git:
                 "message": my_error,
             }
 
-    @tornado.gen.coroutine
-    def add(self, filename, top_repo_path):
+    async def add(self, filename, top_repo_path):
         """
         Execute git add<filename> command & return the result.
         """
@@ -584,65 +570,58 @@ class Git:
         else:
             cmd = ["git", "add", filename]
 
-        _, output, _ = yield execute(cmd, cwd=top_repo_path)
+        _, output, _ = await execute(cmd, cwd=top_repo_path)
         return output
 
-    @tornado.gen.coroutine
-    def add_all(self, top_repo_path):
+    async def add_all(self, top_repo_path):
         """
         Execute git add all command & return the result.
         """
-        _, output, _ = yield execute(["git", "add", "-A"], cwd=top_repo_path)
+        _, output, _ = await execute(["git", "add", "-A"], cwd=top_repo_path)
         return output
 
-    @tornado.gen.coroutine
-    def add_all_unstaged(self, top_repo_path):
+    async def add_all_unstaged(self, top_repo_path):
         """
         Execute git add all unstaged command & return the result.
         """
-        code, _, _ = yield execute(["git", "add", "-u"], cwd=top_repo_path)
+        code, _, _ = await execute(["git", "add", "-u"], cwd=top_repo_path)
         return {"result": code}
 
-    @tornado.gen.coroutine
-    def add_all_untracked(self, top_repo_path):
+    async def add_all_untracked(self, top_repo_path):
         """
         Execute git add all untracked command & return the result.
         """
-        code, _, _ = yield execute(
+        code, _, _ = await execute(
             ["echo", "a\n*\nq\n", "|", "git", "add", "-i"], cwd=top_repo_path
         )
         return {"result": code}
 
-    @tornado.gen.coroutine
-    def reset(self, filename, top_repo_path):
+    async def reset(self, filename, top_repo_path):
         """
         Execute git reset <filename> command & return the result.
         """
-        _, my_output, _ = yield execute(
+        _, my_output, _ = await execute(
             ["git", "reset", "--", filename], cwd=top_repo_path
         )
         return my_output
 
-    @tornado.gen.coroutine
-    def reset_all(self, top_repo_path):
+    async def reset_all(self, top_repo_path):
         """
         Execute git reset command & return the result.
         """
-        _, my_output, _ = yield execute(["git", "reset"], cwd=top_repo_path)
+        _, my_output, _ = await execute(["git", "reset"], cwd=top_repo_path)
         return my_output
 
-    @tornado.gen.coroutine
-    def delete_commit(self, commit_id, top_repo_path):
+    async def delete_commit(self, commit_id, top_repo_path):
         """
         Delete a specified commit from the repository.
         """
-        _, my_output, _ = yield execute(
+        _, my_output, _ = await execute(
             ["git", "revert", "--no-commit", commit_id], cwd=top_repo_path
         )
         return my_output
 
-    @tornado.gen.coroutine
-    def reset_to_commit(self, commit_id, top_repo_path):
+    async def reset_to_commit(self, commit_id, top_repo_path):
         """
         Reset the current branch to a specific past commit.
         """
@@ -650,15 +629,14 @@ class Git:
         if commit_id:
             cmd.append(commit_id)
 
-        _, my_output, _ = yield execute(cmd, cwd=top_repo_path)
+        _, my_output, _ = await execute(cmd, cwd=top_repo_path)
         return my_output
 
-    @tornado.gen.coroutine
-    def checkout_new_branch(self, branchname, current_path):
+    async def checkout_new_branch(self, branchname, current_path):
         """
         Execute git checkout <make-branch> command & return the result.
         """
-        code, my_output, my_error = yield execute(
+        code, my_output, my_error = await execute(
             ["git", "checkout", "-b", branchname],
             cwd=os.path.join(self.root_dir, current_path),
         )
@@ -671,12 +649,11 @@ class Git:
                 "message": my_error,
             }
 
-    @tornado.gen.coroutine
-    def _get_branch_reference(self, branchname, current_path):
+    async def _get_branch_reference(self, branchname, current_path):
         """
         Execute git rev-parse --symbolic-full-name <branch-name> and return the result (or None).
         """
-        code, my_output, _ = yield execute(
+        code, my_output, _ = await execute(
             ["git", "rev-parse", "--symbolic-full-name", branchname],
             cwd=os.path.join(self.root_dir, current_path),
         )
@@ -685,13 +662,12 @@ class Git:
         else:
             return None
 
-    @tornado.gen.coroutine
-    def checkout_branch(self, branchname, current_path):
+    async def checkout_branch(self, branchname, current_path):
         """
         Execute git checkout <branch-name> command & return the result.
         Use the --track parameter for a remote branch.
         """
-        reference_name = yield self._get_branch_reference(branchname, current_path)
+        reference_name = await self._get_branch_reference(branchname, current_path)
         if reference_name is None:
             is_remote_branch = False
         else:
@@ -702,7 +678,7 @@ class Git:
         else:
             cmd = ["git", "checkout", branchname]
 
-        code, my_output, my_error = yield execute(
+        code, my_output, my_error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path)
         )
 
@@ -711,38 +687,34 @@ class Git:
         else:
             return {"code": code, "message": my_error, "command": " ".join(cmd)}
 
-    @tornado.gen.coroutine
-    def checkout(self, filename, top_repo_path):
+    async def checkout(self, filename, top_repo_path):
         """
         Execute git checkout command for the filename & return the result.
         """
-        _, my_output, _ = yield execute(
+        _, my_output, _ = await execute(
             ["git", "checkout", "--", filename], cwd=top_repo_path
         )
         return my_output
 
-    @tornado.gen.coroutine
-    def checkout_all(self, top_repo_path):
+    async def checkout_all(self, top_repo_path):
         """
         Execute git checkout command & return the result.
         """
-        _, my_output, _ = yield execute(
+        _, my_output, _ = await execute(
             ["git", "checkout", "--", "."], cwd=top_repo_path
         )
         return my_output
 
-    @tornado.gen.coroutine
-    def commit(self, commit_msg, top_repo_path):
+    async def commit(self, commit_msg, top_repo_path):
         """
         Execute git commit <filename> command & return the result.
         """
-        _, my_output, _ = yield execute(
+        _, my_output, _ = await execute(
             ["git", "commit", "-m", commit_msg], cwd=top_repo_path
         )
         return my_output
 
-    @tornado.gen.coroutine
-    def pull(self, curr_fb_path, auth=None):
+    async def pull(self, curr_fb_path, auth=None):
         """
         Execute git pull --no-commit.  Disables prompts for the password to avoid the terminal hanging while waiting
         for auth.
@@ -750,7 +722,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, error = yield execute_with_authentication(
+            code, error = await execute_with_authentication(
                 ["git", "pull", "--no-commit"],
                 username=auth["username"],
                 password=auth["password"],
@@ -759,7 +731,7 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, _, error = yield execute(
+            code, _, error = await execute(
                 ["git", "pull", "--no-commit"],
                 env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
@@ -772,15 +744,14 @@ class Git:
 
         return response
 
-    @tornado.gen.coroutine
-    def push(self, remote, branch, curr_fb_path, auth=None):
+    async def push(self, remote, branch, curr_fb_path, auth=None):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
         """
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, error = yield execute_with_authentication(
+            code, error = await execute_with_authentication(
                 ["git", "push", remote, branch],
                 username=auth["username"],
                 password=auth["password"],
@@ -789,7 +760,7 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, _, error = yield execute(
+            code, _, error = await execute(
                 ["git", "push", remote, branch],
                 env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
@@ -802,12 +773,11 @@ class Git:
 
         return response
 
-    @tornado.gen.coroutine
-    def init(self, current_path):
+    async def init(self, current_path):
         """
         Execute git init command & return the result.
         """
-        _, my_output, _ = yield execute(
+        _, my_output, _ = await execute(
             ["git", "init"], cwd=os.path.join(self.root_dir, current_path)
         )
         return my_output
@@ -818,21 +788,21 @@ class Git:
         """
         return branch_reference.startswith("refs/remotes/")
 
-    @tornado.gen.coroutine
-    def get_current_branch(self, current_path):
+    async def get_current_branch(self, current_path):
         """Use `symbolic-ref` to get the current branch name. In case of
         failure, assume that the HEAD is currently detached, and fall back
         to the `branch` command to get the name.
         See https://git-blame.blogspot.com/2013/06/checking-current-branch-programatically.html
         """
         command = ["git", "symbolic-ref", "HEAD"]
-        code, output, error = yield execute(
+        code, output, error = await execute(
             command, cwd=os.path.join(self.root_dir, current_path)
         )
         if code == 0:
             return output.split("/")[-1].strip()
         elif "not a symbolic ref" in error.lower():
-            return self._get_current_branch_detached(current_path)
+            current_branch = await self._get_current_branch_detached(current_path)
+            return current_branch
         else:
             raise Exception(
                 "Error [{}] occurred while executing [{}] command to get current branch.".format(
@@ -840,12 +810,11 @@ class Git:
                 )
             )
 
-    @tornado.gen.coroutine
-    def _get_current_branch_detached(self, current_path):
+    async def _get_current_branch_detached(self, current_path):
         """Execute 'git branch -a' to get current branch details in case of detached HEAD
         """
         command = ["git", "branch", "-a"]
-        code, output, error = yield execute(
+        code, output, error = await execute(
             command, cwd=os.path.join(self.root_dir, current_path)
         )
         if code == 0:
@@ -860,8 +829,7 @@ class Git:
                 )
             )
 
-    @tornado.gen.coroutine
-    def get_upstream_branch(self, current_path, branch_name):
+    async def get_upstream_branch(self, current_path, branch_name):
         """Execute 'git rev-parse --abbrev-ref branch_name@{upstream}' to get
         upstream branch name tracked by given local branch.
         Reference : https://git-scm.com/docs/git-rev-parse#git-rev-parse-emltbranchnamegtupstreamemegemmasterupstreamememuem
@@ -872,7 +840,7 @@ class Git:
             "--abbrev-ref",
             "{}@{{upstream}}".format(branch_name),
         ]
-        code, output, error = yield execute(
+        code, output, error = await execute(
             command, cwd=os.path.join(self.root_dir, current_path)
         )
         if code == 0:
@@ -888,14 +856,13 @@ class Git:
                 )
             )
 
-    @tornado.gen.coroutine
-    def _get_tag(self, current_path, commit_sha):
+    async def _get_tag(self, current_path, commit_sha):
         """Execute 'git describe commit_sha' to get
         nearest tag associated with lastest commit in branch.
         Reference : https://git-scm.com/docs/git-describe#git-describe-ltcommit-ishgt82308203
         """
         command = ["git", "describe", "--tags", commit_sha]
-        code, output, error = yield execute(
+        code, output, error = await execute(
             command, cwd=os.path.join(self.root_dir, current_path)
         )
         if code == 0:
@@ -911,14 +878,13 @@ class Git:
                 )
             )
 
-    @tornado.gen.coroutine
-    def show(self, filename, ref, top_repo_path):
+    async def show(self, filename, ref, top_repo_path):
         """
         Execute git show <ref:filename> command & return the result.
         """
         command = ["git", "show", "{}:{}".format(ref, filename)]
 
-        code, output, error = yield execute(command, cwd=top_repo_path)
+        code, output, error = await execute(command, cwd=top_repo_path)
 
         error_messages = map(
             lambda n: n.lower(),
@@ -951,17 +917,16 @@ class Git:
         model = self.contents_manager.get(path=os.path.join(relative_repo, filename))
         return model["content"]
 
-    @tornado.gen.coroutine
-    def diff_content(self, filename, prev_ref, curr_ref, top_repo_path):
+    async def diff_content(self, filename, prev_ref, curr_ref, top_repo_path):
         """
         Collect get content of prev and curr and return.
         """
-        prev_content = yield self.show(filename, prev_ref["git"], top_repo_path)
+        prev_content = await self.show(filename, prev_ref["git"], top_repo_path)
         if "special" in curr_ref:
             if curr_ref["special"] == "WORKING":
                 curr_content = self.get_content(filename, top_repo_path)
             elif curr_ref["special"] == "INDEX":
-                curr_content = yield self.show(filename, "", top_repo_path)
+                curr_content = await self.show(filename, "", top_repo_path)
             else:
                 raise tornado.web.HTTPError(
                     log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(
@@ -969,5 +934,5 @@ class Git:
                     )
                 )
         else:
-            curr_content = yield self.show(filename, curr_ref["git"], top_repo_path)
+            curr_content = await self.show(filename, curr_ref["git"], top_repo_path)
         return {"prev_content": prev_content, "curr_content": curr_content}

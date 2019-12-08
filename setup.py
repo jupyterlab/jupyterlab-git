@@ -77,6 +77,7 @@ setup_args = dict(
     extras_require = {
         'test': [
             'pytest',
+            'pytest-asyncio',
             'jupyterlab~=1.1',
         ],
     },
