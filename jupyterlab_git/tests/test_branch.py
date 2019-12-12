@@ -590,9 +590,9 @@ async def test_branch_success():
 
         mock_execute.side_effect = [
             # Response for get all refs/heads
-            tornado.gen.maybe_future((128, "\n".join(process_output_heads), "")),
+            tornado.gen.maybe_future((0, "\n".join(process_output_heads), "")),
             # Response for get all refs/remotes
-            tornado.gen.maybe_future((128, "\n".join(process_output_remotes), "")),
+            tornado.gen.maybe_future((0, "\n".join(process_output_remotes), "")),
         ]
 
         expected_response = {
