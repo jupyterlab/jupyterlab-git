@@ -528,7 +528,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       );
     } else {
       return (
-        <div onContextMenu={event => event.preventDefault()}>
+        <div>
           <CommitBox
             hasFiles={this.props.stagedFiles.length > 0}
             commitFunc={this.commitAllStagedFiles}
