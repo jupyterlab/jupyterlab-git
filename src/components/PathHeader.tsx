@@ -68,6 +68,7 @@ export class PathHeader extends React.Component<IPathHeaderProps> {
         />
         <button
           className={classes(repoRefreshStyle, 'jp-Icon-16')}
+          title={'Refresh the repository to detect local and remote changes'}
           onClick={() => this.props.refresh()}
         />
       </div>
