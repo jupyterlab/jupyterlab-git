@@ -681,17 +681,6 @@ export class GitExtension implements IGitExtension {
     }
   }
 
-  performDiff(filename: string, revisionA: string, revisionB: string) {
-    let extension = PathExt.extname(filename).toLocaleLowerCase();
-    if (this._diffProviders[extension] !== undefined) {
-      this._diffProviders[extension](filename, revisionA, revisionB);
-    } else if (this.commands) {
-      this.commands.execute('git:terminal-cmd', {
-        cmd: 'git diff ' + revisionA + ' ' + revisionB
-      });
-    }
-  }
-
   /**
    * Register a new diff provider for specified file types
    *
