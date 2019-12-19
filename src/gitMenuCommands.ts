@@ -28,33 +28,25 @@ export function addCommands(
   const { commands, shell } = app;
 
   /**
-   * Add open terminal and run command
-   *
-   * Argument 'cmd' can be passed at the execute function to specify the command to execute
+   * Add open terminal in the Git repository
    */
   commands.addCommand(CommandIDs.gitTerminalCommand, {
-    label: 'Git Command in Terminal',
-    caption: 'Open a new terminal to perform git command',
+    label: 'Open Terminal in Git Repository',
+    caption: 'Open a New Terminal in the Git Repository',
     execute: async args => {
-      let changeDirectoryCommand =
-        model.pathRepository === null
-          ? ''
-          : 'cd "' + model.pathRepository.split('"').join('\\"') + '"';
-      let gitCommand = (args['cmd'] as string) || '';
-      let linkCommand =
-        changeDirectoryCommand !== '' && gitCommand !== '' ? '&&' : '';
-
       const main = (await commands.execute(
         'terminal:create-new',
         args
       )) as MainAreaWidget<ITerminal.ITerminal>;
 
-      const terminal = main.content;
       try {
-        terminal.session.send({
-          type: 'stdin',
-          content: [changeDirectoryCommand + linkCommand + gitCommand + '\n']
-        });
+        if (model.pathRepository !== null) {
+          const terminal = main.content;
+          terminal.session.send({
+            type: 'stdin',
+            content: [`cd "${model.pathRepository.split('"').join('\\"')}"\n`]
+          });
+        }
 
         return main;
       } catch (e) {
