@@ -1,9 +1,14 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { Dialog, MainAreaWidget, showDialog } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  InputDialog,
+  MainAreaWidget,
+  showDialog
+} from '@jupyterlab/apputils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
 import { ITerminal } from '@jupyterlab/terminal';
 import { IGitExtension } from './tokens';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 /**
  * The command IDs used by the git plugin.
@@ -14,6 +19,7 @@ export namespace CommandIDs {
   export const gitInit = 'git:init';
   export const gitOpenUrl = 'git:open-url';
   export const gitToggleSimpleStaging = 'git:toggle-simple-staging';
+  export const gitAddRemote = 'git:add-remote';
 }
 
 /**
@@ -101,6 +107,36 @@ export function addCommands(
     isToggled: () => !!settings.composite['simpleStaging'],
     execute: args => {
       settings.set('simpleStaging', !settings.composite['simpleStaging']);
+    }
+  });
+
+  /** Command to add a remote Git repository */
+  commands.addCommand(CommandIDs.gitAddRemote, {
+    label: 'Add remote repository',
+    caption: 'Add a Git remote repository',
+    isEnabled: () => model.pathRepository !== null,
+    execute: async args => {
+      if (model.pathRepository === null) {
+        console.warn('Not in a Git repository. Unable to add a remote.');
+        return;
+      }
+      let url = args['url'] as string;
+      let name = (args['name'] as string) || 'origin';
+
+      if (!url) {
+        const result = await InputDialog.getText({
+          title: 'Add a remote repository',
+          placeholder: 'Remote Git URL'
+        });
+
+        if (result.button.accept) {
+          url = result.value;
+        }
+      }
+
+      if (url) {
+        await model.addRemote(url, name);
+      }
     }
   });
 }

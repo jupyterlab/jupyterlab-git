@@ -249,6 +249,23 @@ class GitAddAllUntrackedHandler(GitHandler):
         self.finish(json.dumps(body))
 
 
+class GitRemoteAddHandler(GitHandler):
+    """Handler for 'git remote add <name> <url>'."""
+
+    def post(self):
+        """POST request handler to add a remote."""
+        data = self.get_json_body()
+        top_repo_path = data["top_repo_path"]
+        name = data.get("name", "origin")
+        url = data["url"]
+        output = self.git.remote.add(top_repo_path, url, name)
+        if(output["code"] == 0):
+            self.set_status(201)
+        else:
+            self.set_status(500)
+        self.finish(json.dumps(output))
+
+
 class GitResetHandler(GitHandler):
     """
     Handler for 'git reset <filename>'.
@@ -527,6 +544,7 @@ def setup_handlers(web_app):
         ("/git/log", GitLogHandler),
         ("/git/pull", GitPullHandler),
         ("/git/push", GitPushHandler),
+        ("/git/remote/add", GitRemoteAddHandler),
         ("/git/reset", GitResetHandler),
         ("/git/reset_to_commit", GitResetToCommitHandler),
         ("/git/server_root", GitServerRootHandler),

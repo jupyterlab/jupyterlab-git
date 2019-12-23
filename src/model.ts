@@ -329,6 +329,35 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Add a remote Git repository to the current repository
+   *
+   * @param url Remote repository URL
+   * @param name Remote name
+   */
+  async addRemote(url: string, name?: string): Promise<void> {
+    await this.ready;
+    const path = this.pathRepository;
+
+    if (path === null) {
+      return Promise.resolve();
+    }
+
+    try {
+      let response = await httpGitRequest('/git/remote/add', 'POST', {
+        top_repo_path: path,
+        url,
+        name
+      });
+      if (response.status !== 200) {
+        const data = await response.text();
+        throw new ServerConnection.ResponseError(response, data);
+      }
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    }
+  }
+
+  /**
    * Make request for all git info of the repository
    * (This API is also implicitly used to check if the current repo is a Git repo)
    *
