@@ -28,20 +28,20 @@ jupyter lab build
 
 ### Troubleshooting
 
-Before looking in the following list, be sure the server extension and the frontend extension have the same version. For that you can execute the following commands:
+Before consulting the following list, be sure the server extension and the frontend extension have the same version by executing the following commands:
 
 ```bash
 jupyter serverextension list
 jupyter labextension list
 ```
 
-- The Git panel does not recognized you are in a Git repository
+- **Issue**: the Git panel does not recognize that you are in a Git repository.
 
   Possible fixes:
   
   - Be sure to be in a Git repository in the filebrowser tab
   
-  - Check the server log, if you see a warning with a 404 code similar to:  
+  - Check the server log. If you see a warning with a 404 code similar to:  
     `[W 00:27:41.800 LabApp] 404 GET /git/server_root?1576081660665`
     
     Explicitly enable the server extension by running:
@@ -49,9 +49,9 @@ jupyter labextension list
     jupyter serverextension enable --py jupyterlab_git
     ```
     
-  - If you are using JupyterHub or some other technologies requiring to set an initialization script including the jupyterlab-git extension, be sure to install the frontend and the server extension before launching JupyterLab.
+  - If you are using JupyterHub or some other technologies requiring an initialization script which includes the jupyterlab-git extension, be sure to install both the frontend and the server extension **before** launching JupyterLab.
   
-- The Git panel is not visible
+- **Issue**: the Git panel is not visible.
 
   Possible fixes:
   
