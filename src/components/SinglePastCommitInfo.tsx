@@ -172,7 +172,10 @@ export class SinglePastCommitInfo extends React.Component<
                 floatRightStyle,
                 discardFileButtonStyle
               )}
-              onClick={() => {
+              onClick={(
+                event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+              ) => {
+                event.stopPropagation();
                 this.deleteCommit(this.props.data.commit);
               }}
               title="Discard changes introduced by this commit"
@@ -183,7 +186,10 @@ export class SinglePastCommitInfo extends React.Component<
                 floatRightStyle,
                 revertButtonStyle
               )}
-              onClick={() => {
+              onClick={(
+                event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+              ) => {
+                event.stopPropagation();
                 this.resetToCommit(this.props.data.commit);
               }}
               title="Discard changes introduced *after* this commit"
