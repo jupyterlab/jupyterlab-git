@@ -40,7 +40,7 @@ class TestAddRemote(ServerTest):
         payload = response.json()
         assert payload == {
             "code": 0,
-            "cmd": " ".join(["git", "remote", "add", "origin", url]),
+            "command": " ".join(["git", "remote", "add", "origin", url]),
         }
 
     @patch("subprocess.Popen")
@@ -58,10 +58,7 @@ class TestAddRemote(ServerTest):
         popen.return_value = process_mock
 
         # When
-        body = {
-            "top_repo_path": path,
-            "url": url,
-        }
+        body = {"top_repo_path": path, "url": url, "name": name}
         response = self.tester.post(["remote", "add"], body=body)
 
         # Then
@@ -77,7 +74,7 @@ class TestAddRemote(ServerTest):
         payload = response.json()
         assert payload == {
             "code": 0,
-            "cmd": " ".join(["git", "remote", "add", name, url]),
+            "command": " ".join(["git", "remote", "add", name, url]),
         }
 
     @patch("subprocess.Popen")
@@ -89,7 +86,7 @@ class TestAddRemote(ServerTest):
         error_msg = "Fake failure"
         error_code = 128
         attrs = {
-            "communicate": Mock(return_value=(b"", bytes(error_msg))),
+            "communicate": Mock(return_value=(b"", bytes(error_msg, encoding="utf-8"))),
             "returncode": error_code,
         }
         process_mock.configure_mock(**attrs)
@@ -100,7 +97,8 @@ class TestAddRemote(ServerTest):
             "top_repo_path": path,
             "url": url,
         }
-        response = self.tester.post(["remote", "add"], body=body)
+        with assert_http_error(500):
+            self.tester.post(["remote", "add"], body=body)
 
         # Then
         popen.assert_called_once_with(
@@ -110,12 +108,3 @@ class TestAddRemote(ServerTest):
             cwd=path,
         )
         process_mock.communicate.assert_called_once_with()
-
-        assert response.status_code == 500
-        payload = response.json()
-        assert payload == {
-            "code": error_code,
-            "cmd": " ".join(["git", "remote", "add", "origin", url]),
-            "message": error_msg,
-        }
-
