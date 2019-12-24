@@ -208,8 +208,8 @@ export class GitPanel extends React.Component<
       }
       sub = (
         <React.Fragment>
-          {msg}
           {filelist}
+          {msg}
         </React.Fragment>
       );
     }

@@ -74,7 +74,7 @@ export class CommitBox extends React.Component<
       <form className={stagedCommitStyle}>
         <textarea
           className={classes(textInputStyle, stagedCommitMessageStyle)}
-          placeholder={'Summary (required)'}
+          placeholder="Summary (required)"
           value={this.state.summary}
           onChange={this._onSummaryChange}
           onKeyPress={this._onSummaryKeyPress}
@@ -82,7 +82,7 @@ export class CommitBox extends React.Component<
         <TextareaAutosize
           className={classes(textInputStyle, stagedCommitMessageStyle)}
           minRows={2}
-          placeholder={'Description'}
+          placeholder="Description"
           value={this.state.description}
           onChange={this._onDescriptionChange}
           onKeyPress={this._onDescriptionKeyPress}
@@ -99,7 +99,7 @@ export class CommitBox extends React.Component<
   }
 
   /**
-   * Returns classes for toggling the commit button.
+   * Returns classes for toggling (and styling) the commit button.
    *
    * @returns classes to apply
    */
