@@ -92,7 +92,8 @@ export class SinglePastCommitInfo extends React.Component<
   deleteCommit = async (commitId: string) => {
     const result = await InputDialog.getText({
       title: 'Delete Commit',
-      placeholder: 'Deletion commit message'
+      placeholder: 'Deletion Commit Message',
+      okLabel: 'Delete'
     });
     if (result.button.accept) {
       const msg = result.value;
@@ -101,9 +102,10 @@ export class SinglePastCommitInfo extends React.Component<
   };
 
   resetToCommit = async (commitId: string) => {
+    const shortCommit = commitId.slice(0, 7);
     const result = await showDialog({
       title: 'Reset to Commit',
-      body: '',
+      body: `All changes after commit ${shortCommit} will be gone forever. Confirm you want to reset to it?`,
       buttons: [
         Dialog.cancelButton(),
         Dialog.warnButton({
