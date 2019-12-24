@@ -271,14 +271,24 @@ export class GitPanel extends React.Component<
     );
   }
 
-  /** Commit all marked files */
+  /**
+   * Commits all marked files.
+   *
+   * @param message - commit message
+   * @returns a promise which commits the files
+   */
   private _commitMarkedFiles = async (message: string): Promise<void> => {
     await this.props.model.reset();
     await this.props.model.add(...this._markedFiles.map(file => file.to));
     await this._commitStagedFiles(message);
   };
 
-  /** Commit all staged files */
+  /**
+   * Commits all staged files.
+   *
+   * @param message - commit message
+   * @returns a promise which commits the files
+   */
   private _commitStagedFiles = async (message: string): Promise<void> => {
     try {
       if (
@@ -294,7 +304,10 @@ export class GitPanel extends React.Component<
     }
   };
 
-  private get _modifiedFiles() {
+  /**
+   * List of modified files (both staged and unstaged).
+   */
+  private get _modifiedFiles(): Git.IStatusFileResult[] {
     let files = this.state.untrackedFiles.concat(
       this.state.unstagedFiles,
       this.state.stagedFiles
@@ -304,7 +317,10 @@ export class GitPanel extends React.Component<
     return files;
   }
 
-  private get _markedFiles() {
+  /**
+   * List of marked files.
+   */
+  private get _markedFiles(): Git.IStatusFileResult[] {
     return this._modifiedFiles.filter(file =>
       this.props.model.getMark(file.to)
     );
