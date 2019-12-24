@@ -192,10 +192,33 @@ export class SinglePastCommitInfo extends React.Component<
           <ul className={fileList}>
             {this.state.modifiedFiles.length > 0 &&
               this.state.modifiedFiles.map(modifiedFile => {
+                const diffSupported = isDiffSupported(
+                  modifiedFile.modified_file_path
+                );
+
                 return (
                   <li
                     className={commitDetailFileStyle}
                     key={modifiedFile.modified_file_path}
+                    onClick={async (
+                      event: React.MouseEvent<HTMLLIElement, MouseEvent>
+                    ) => {
+                      // Avoid commit node to be collapsed
+                      event.stopPropagation();
+                      if (diffSupported) {
+                        await openDiffView(
+                          modifiedFile.modified_file_path,
+                          this.props.model,
+                          {
+                            previousRef: {
+                              gitRef: this.props.data.pre_commit
+                            },
+                            currentRef: { gitRef: this.props.data.commit }
+                          },
+                          this.props.renderMime
+                        );
+                      }
+                    }}
                   >
                     <span
                       className={`${fileIconStyle} ${parseFileExtension(
@@ -205,23 +228,10 @@ export class SinglePastCommitInfo extends React.Component<
                     <span className={commitDetailFilePathStyle}>
                       {modifiedFile.modified_file_name}
                     </span>
-                    {isDiffSupported(modifiedFile.modified_file_path) && (
+                    {diffSupported && (
                       <button
                         className={`${diffIconStyle}`}
                         title={'View file changes'}
-                        onClick={async () => {
-                          await openDiffView(
-                            modifiedFile.modified_file_path,
-                            this.props.model,
-                            {
-                              previousRef: {
-                                gitRef: this.props.data.pre_commit
-                              },
-                              currentRef: { gitRef: this.props.data.commit }
-                            },
-                            this.props.renderMime
-                          );
-                        }}
                       />
                     )}
                   </li>

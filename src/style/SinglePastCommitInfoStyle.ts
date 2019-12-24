@@ -62,7 +62,7 @@ export const commitDetailFilePathStyle = style({
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   borderRadius: '2px',
-  transition: 'background-color 0.1s ease'
+  flex: '1 1 auto'
 });
 
 export const iconStyle = style({
@@ -94,7 +94,8 @@ export const diffIconStyle = style({
   backgroundRepeat: 'no-repeat',
   backgroundImage: 'var(--jp-icon-diff)',
   border: 'none',
-  outline: 'none'
+  outline: 'none',
+  width: '2px'
 });
 
 export const revertButtonStyle = style({
