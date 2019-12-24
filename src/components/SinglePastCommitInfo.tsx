@@ -32,6 +32,7 @@ import { InputDialog, showDialog, Dialog } from '@jupyterlab/apputils';
 export interface ISinglePastCommitInfoProps {
   data: Git.ISingleCommitInfo;
   model: GitExtension;
+  refreshHistory: () => Promise<void>;
   renderMime: IRenderMimeRegistry;
 }
 
@@ -98,6 +99,7 @@ export class SinglePastCommitInfo extends React.Component<
     if (result.button.accept) {
       const msg = result.value;
       await this.props.model.deleteCommit(msg, commitId);
+      await this.props.refreshHistory();
     }
   };
 
@@ -117,6 +119,7 @@ export class SinglePastCommitInfo extends React.Component<
 
     if (result.button.accept) {
       await this.props.model.resetToCommit(commitId);
+      await this.props.refreshHistory();
     }
   };
 

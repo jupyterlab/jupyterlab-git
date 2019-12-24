@@ -11,6 +11,7 @@ export interface IHistorySideBarProps {
   branches: Git.IBranch[];
   isExpanded: boolean;
   model: GitExtension;
+  refreshHistory: () => Promise<void>;
   renderMime: IRenderMimeRegistry;
 }
 
@@ -27,6 +28,7 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
             pastCommit={pastCommit}
             branches={this.props.branches}
             model={this.props.model}
+            refreshHistory={this.props.refreshHistory}
             renderMime={this.props.renderMime}
           />
         ))}

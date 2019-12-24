@@ -22,6 +22,7 @@ export interface IPastCommitNodeProps {
   pastCommit: Git.ISingleCommitInfo;
   branches: Git.IBranch[];
   model: GitExtension;
+  refreshHistory: () => Promise<void>;
   renderMime: IRenderMimeRegistry;
 }
 
@@ -111,6 +112,7 @@ export class PastCommitNode extends React.Component<
               <SinglePastCommitInfo
                 data={this.props.pastCommit}
                 model={this.props.model}
+                refreshHistory={this.props.refreshHistory}
                 renderMime={this.props.renderMime}
               />
               <div className={collapseStyle} onClick={() => this.collapse()}>
