@@ -11,12 +11,12 @@ describe('CommitBox', () => {
   describe('#checkReadyForSubmit()', () => {
     it('should update commit box state to be ready when changes are staged', () => {
       const box = new CommitBox({
-        commitFunc: async () => {},
-        hasFiles: true,
-        settings: { composite: {} } as any
+        onCommit: async () => {},
+        hasFiles: true
       });
 
-      let actual = box.commitButtonStyle(true);
+      // TODO: this sort of testing should be performed during UI/UX testing, not unit testing
+      let actual = box._commitButtonStyle(true);
 
       let expected = classes(
         stagedCommitButtonStyle,
@@ -27,12 +27,12 @@ describe('CommitBox', () => {
 
     it('should update commit box state to be disabled when no changes are staged', () => {
       const box = new CommitBox({
-        commitFunc: async () => {},
-        hasFiles: true,
-        settings: { composite: {} } as any
+        onCommit: async () => {},
+        hasFiles: true
       });
 
-      let actual = box.commitButtonStyle(false);
+      // TODO: this sort of testing should be performed during UI/UX testing, not unit testing
+      let actual = box._commitButtonStyle(false);
       let expected = classes(
         stagedCommitButtonStyle,
         stagedCommitButtonDisabledStyle
@@ -40,16 +40,16 @@ describe('CommitBox', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should be ready to commit with a message set.', () => {
+    it('should be ready to commit with a message set', () => {
       const box = new CommitBox({
-        commitFunc: async () => {},
-        hasFiles: true,
-        settings: { composite: {} } as any
+        onCommit: async () => {},
+        hasFiles: true
       });
       // can't use setState here, since the box hasn't actually mounted
       box.state = { value: 'message' };
 
-      let actual = box.commitButtonStyle(true);
+      // TODO: this sort of testing should be performed during UI/UX testing, not unit testing
+      let actual = box._commitButtonStyle(true);
       let expected = stagedCommitButtonStyle;
       expect(actual).toEqual(expected);
     });
