@@ -3,7 +3,8 @@ import {
   Dialog,
   InputDialog,
   MainAreaWidget,
-  showDialog
+  showDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
@@ -135,7 +136,12 @@ export function addCommands(
       }
 
       if (url) {
-        await model.addRemote(url, name);
+        try {
+          await model.addRemote(url, name);
+        } catch (error) {
+          console.error(error);
+          showErrorMessage('Error when adding remote repository', error);
+        }
       }
     }
   });
