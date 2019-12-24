@@ -3,6 +3,7 @@ Module with all the individual handlers, which execute git commands and return t
 """
 import json
 import os
+from pathlib import Path
 
 from notebook.utils import url_path_join as ujoin, url2path
 from notebook.base.handlers import APIHandler
@@ -32,8 +33,10 @@ class GitCloneHandler(GitHandler):
                                 }'
             }
         """
-        data = json.loads(self.request.body.decode('utf-8'))
-        response = self.git.clone(data['current_path'], data['clone_url'], data.get('auth', None))
+        data = json.loads(self.request.body.decode("utf-8"))
+        response = self.git.clone(
+            data["current_path"], data["clone_url"], data.get("auth", None)
+        )
         self.finish(json.dumps(response))
 
 
@@ -238,11 +241,7 @@ class GitAddAllUnstagedHandler(GitHandler):
         """
         POST request handler, adds all the changed files.
         """
-        self.finish(
-            self.git.add_all_unstaged(
-                self.get_json_body()["top_repo_path"]
-            )
-        )
+        self.finish(self.git.add_all_unstaged(self.get_json_body()["top_repo_path"]))
 
 
 class GitAddAllUntrackedHandler(GitHandler):
@@ -255,11 +254,7 @@ class GitAddAllUntrackedHandler(GitHandler):
         """
         POST request handler, adds all the untracked files.
         """
-        self.finish(
-            self.git.add_all_untracked(
-                self.get_json_body()["top_repo_path"]
-            )
-        )
+        self.finish(self.git.add_all_untracked(self.get_json_body()["top_repo_path"]))
 
 
 class GitResetHandler(GitHandler):
@@ -379,7 +374,7 @@ class GitPullHandler(GitHandler):
         POST request handler, pulls files from a remote branch to your current branch.
         """
         data = self.get_json_body()
-        response = self.git.pull(data['current_path'], data.get('auth', None))
+        response = self.git.pull(data["current_path"], data.get("auth", None))
 
         self.finish(json.dumps(response))
 
@@ -396,7 +391,7 @@ class GitPushHandler(GitHandler):
         pushes committed files from your current branch to a remote branch
         """
         data = self.get_json_body()
-        current_path = data['current_path']
+        current_path = data["current_path"]
 
         current_local_branch = self.git.get_current_branch(current_path)
         current_upstream_branch = self.git.get_upstream_branch(
@@ -414,7 +409,9 @@ class GitPushHandler(GitHandler):
                 remote = upstream[0]
                 branch = ":".join(["HEAD", upstream[1]])
 
-            response = self.git.push(remote, branch, current_path, data.get('auth', None))
+            response = self.git.push(
+                remote, branch, current_path, data.get("auth", None)
+            )
 
         else:
             response = {
@@ -440,15 +437,9 @@ class GitInitHandler(GitHandler):
         self.finish(my_output)
 
 
-
 class GitChangedFilesHandler(GitHandler):
-
     def post(self):
-        self.finish(
-            json.dumps(
-                self.git.changed_files(**self.get_json_body())
-            )
-        )
+        self.finish(json.dumps(self.git.changed_files(**self.get_json_body())))
 
 
 class GitConfigHandler(GitHandler):
@@ -471,6 +462,7 @@ class GitConfigHandler(GitHandler):
             self.set_status(201)
         self.finish(json.dumps(response))
 
+
 class GitDiffContentHandler(GitHandler):
     """
     Handler for plain text diffs. Uses git show $REF:$FILE
@@ -489,12 +481,11 @@ class GitDiffContentHandler(GitHandler):
 
 
 class GitServerRootHandler(GitHandler):
-
     def get(self):
         # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
-        self.finish(json.dumps({
-            "server_root": getattr(self.contents_manager, 'root_dir', None)
-        }))
+        root_dir = getattr(self.contents_manager, "root_dir", None)
+        self.finish(json.dumps({"server_root": Path(root_dir).as_posix()}))
+
 
 def setup_handlers(web_app):
     """
