@@ -195,14 +195,14 @@ export class GitPanel extends React.Component<
         msg = (
           <CommitBox
             hasFiles={this._markedFiles.length > 0}
-            onCommit={this._commitAllMarkedFiles}
+            onCommit={this._commitMarkedFiles}
           />
         );
       } else {
         msg = (
           <CommitBox
             hasFiles={this.state.stagedFiles.length > 0}
-            onCommit={this._commitAllStagedFiles}
+            onCommit={this._commitStagedFiles}
           />
         );
       }
@@ -272,14 +272,14 @@ export class GitPanel extends React.Component<
   }
 
   /** Commit all marked files */
-  private _commitAllMarkedFiles = async (message: string): Promise<void> => {
+  private _commitMarkedFiles = async (message: string): Promise<void> => {
     await this.props.model.reset();
     await this.props.model.add(...this._markedFiles.map(file => file.to));
-    await this._commitAllStagedFiles(message);
+    await this._commitStagedFiles(message);
   };
 
   /** Commit all staged files */
-  private _commitAllStagedFiles = async (message: string): Promise<void> => {
+  private _commitStagedFiles = async (message: string): Promise<void> => {
     try {
       if (
         message &&
@@ -294,7 +294,7 @@ export class GitPanel extends React.Component<
     }
   };
 
-  private get _allFilesExcludingUnmodified() {
+  private get _modifiedFiles() {
     let files = this.state.untrackedFiles.concat(
       this.state.unstagedFiles,
       this.state.stagedFiles
@@ -305,7 +305,7 @@ export class GitPanel extends React.Component<
   }
 
   private get _markedFiles() {
-    return this._allFilesExcludingUnmodified.filter(file =>
+    return this._modifiedFiles.filter(file =>
       this.props.model.getMark(file.to)
     );
   }
