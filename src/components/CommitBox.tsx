@@ -8,7 +8,7 @@ import {
   stagedCommitMessageStyle,
   stagedCommitStyle,
   textInputStyle
-} from '../style/BranchHeaderStyle';
+} from '../style/CommitBox';
 
 /**
  * Interface describing component properties.
