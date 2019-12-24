@@ -21,17 +21,15 @@ export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
     }
     return (
       <ol className={historySideBarStyle}>
-        {this.props.pastCommits.map(
-          (pastCommit: Git.ISingleCommitInfo, pastCommitIndex: number) => (
-            <PastCommitNode
-              key={pastCommitIndex}
-              pastCommit={pastCommit}
-              branches={this.props.branches}
-              model={this.props.model}
-              renderMime={this.props.renderMime}
-            />
-          )
-        )}
+        {this.props.pastCommits.map((pastCommit: Git.ISingleCommitInfo) => (
+          <PastCommitNode
+            key={pastCommit.commit}
+            pastCommit={pastCommit}
+            branches={this.props.branches}
+            model={this.props.model}
+            renderMime={this.props.renderMime}
+          />
+        ))}
       </ol>
     );
   }
