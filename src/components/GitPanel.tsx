@@ -1,6 +1,8 @@
+import * as React from 'react';
+import { showErrorMessage, showDialog } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import * as React from 'react';
+import { JSONObject } from '@phosphor/coreutils';
 import { GitExtension } from '../model';
 import {
   findRepoButtonStyle,
@@ -9,10 +11,12 @@ import {
 } from '../style/GitPanelStyle';
 import { Git } from '../tokens';
 import { decodeStage } from '../utils';
+import { GitAuthorForm } from '../widgets/AuthorBox';
 import { BranchHeader } from './BranchHeader';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
 import { PathHeader } from './PathHeader';
+import { CommitBox } from './CommitBox';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -161,8 +165,10 @@ export class GitPanel extends React.Component<
   };
 
   render() {
+    let filelist: React.ReactElement;
     let main: React.ReactElement;
     let sub: React.ReactElement;
+    let msg: React.ReactElement;
 
     if (this.state.isHistoryVisible) {
       sub = (
@@ -175,7 +181,7 @@ export class GitPanel extends React.Component<
         />
       );
     } else {
-      sub = (
+      filelist = (
         <FileList
           stagedFiles={this.state.stagedFiles}
           unstagedFiles={this.state.unstagedFiles}
@@ -184,6 +190,27 @@ export class GitPanel extends React.Component<
           renderMime={this.props.renderMime}
           settings={this.props.settings}
         />
+      );
+      if (this.props.settings.composite['simpleStaging']) {
+        msg = (
+          <CommitBox
+            hasFiles={this._markedFiles.length > 0}
+            onCommit={this._commitAllMarkedFiles}
+          />
+        );
+      } else {
+        msg = (
+          <CommitBox
+            hasFiles={this.state.stagedFiles.length > 0}
+            onCommit={this._commitAllStagedFiles}
+          />
+        );
+      }
+      sub = (
+        <React.Fragment>
+          {msg}
+          {filelist}
+        </React.Fragment>
       );
     }
 
@@ -243,4 +270,104 @@ export class GitPanel extends React.Component<
       </div>
     );
   }
+
+  /** Add an unstaged file */
+  private _addFile = async (...file: string[]) => {
+    await this.props.model.add(...file);
+  };
+
+  private _addAllMarkedFiles = async () => {
+    await this._addFile(...this._markedFiles.map(file => file.to));
+  };
+
+  /** Reset all staged files */
+  private _resetAllStagedFiles = async () => {
+    await this.props.model.reset();
+  };
+
+  /** Commit all marked files */
+  private _commitAllMarkedFiles = async (message: string): Promise<void> => {
+    await this._resetAllStagedFiles();
+    await this._addAllMarkedFiles();
+    await this._commitAllStagedFiles(message);
+  };
+
+  /** Commit all staged files */
+  private _commitAllStagedFiles = async (message: string): Promise<void> => {
+    try {
+      if (
+        message &&
+        message !== '' &&
+        (await this._hasIdentity(this.props.model.pathRepository))
+      ) {
+        await this.props.model.commit(message);
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorMessage('Fail to commit', error);
+    }
+  };
+
+  private get _allFilesExcludingUnmodified() {
+    let files = this.state.untrackedFiles.concat(
+      this.state.unstagedFiles,
+      this.state.stagedFiles
+    );
+
+    files.sort((a, b) => a.to.localeCompare(b.to));
+    return files;
+  }
+
+  private get _markedFiles() {
+    return this._allFilesExcludingUnmodified.filter(file =>
+      this.props.model.getMark(file.to)
+    );
+  }
+
+  /**
+   * Determines whether a user has a known Git identity.
+   *
+   * @param path - repository path
+   * @returns a promise which returns a success status
+   */
+  private async _hasIdentity(path: string): Promise<boolean> {
+    // If the repository path changes, check the user identity
+    if (path !== this._previousRepoPath) {
+      try {
+        let res = await this.props.model.config();
+        if (res.ok) {
+          const options: JSONObject = (await res.json()).options;
+          const keys = Object.keys(options);
+
+          // If the user name or e-mail is unknown, ask the user to set it
+          if (keys.indexOf('user.name') < 0 || keys.indexOf('user.email') < 0) {
+            const result = await showDialog({
+              title: 'Who is committing?',
+              body: new GitAuthorForm()
+            });
+            if (!result.button.accept) {
+              console.log('User refuses to set identity.');
+              return false;
+            }
+            const identity = result.value;
+            res = await this.props.model.config({
+              'user.name': identity.name,
+              'user.email': identity.email
+            });
+            if (!res.ok) {
+              console.log(await res.text());
+              return false;
+            }
+          }
+          this._previousRepoPath = path;
+        }
+      } catch (error) {
+        throw new Error('Failed to set your identity. ' + error.message);
+      }
+    }
+
+    return Promise.resolve(true);
+  }
+
+  private _previousRepoPath: string = null;
 }
