@@ -1,6 +1,7 @@
 """
 Module for executing git commands, sending results back to the handlers
 """
+import logging
 import os
 import subprocess
 from subprocess import Popen, PIPE, CalledProcessError
@@ -8,6 +9,9 @@ from subprocess import Popen, PIPE, CalledProcessError
 import pexpect
 from urllib.parse import unquote
 from tornado.web import HTTPError
+
+
+logger = logging.getLogger(__name__)
 
 
 ALLOWED_OPTIONS = ['user.name', 'user.email']
@@ -103,10 +107,17 @@ class Git:
             else:
                 raw = output.decode("utf-8").strip()
                 response["options"] = dict()
+                previous_key = None
                 for l in raw.split("\n"):
-                    k, v = l.split("=", maxsplit=1)
-                    if k in ALLOWED_OPTIONS:
-                        response["options"][k] = v
+                    if l.startswith('"') and previous_key in ALLOWED_OPTIONS:
+                        response["options"][previous_key] += l
+                    elif "=" in l:
+                        key, v = l.split("=", maxsplit=1)
+                        previous_key = key
+                        if key in ALLOWED_OPTIONS:
+                            response["options"][key] = v
+                    else:
+                        logger.debug("[jupyterlab-git] Unable to interpret git option {}.".format(l))
 
         return response
 
