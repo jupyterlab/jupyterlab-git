@@ -271,24 +271,10 @@ export class GitPanel extends React.Component<
     );
   }
 
-  /** Add an unstaged file */
-  private _addFile = async (...file: string[]) => {
-    await this.props.model.add(...file);
-  };
-
-  private _addAllMarkedFiles = async () => {
-    await this._addFile(...this._markedFiles.map(file => file.to));
-  };
-
-  /** Reset all staged files */
-  private _resetAllStagedFiles = async () => {
-    await this.props.model.reset();
-  };
-
   /** Commit all marked files */
   private _commitAllMarkedFiles = async (message: string): Promise<void> => {
-    await this._resetAllStagedFiles();
-    await this._addAllMarkedFiles();
+    await this.props.model.reset();
+    await this.props.model.add(...this._markedFiles.map(file => file.to));
     await this._commitAllStagedFiles(message);
   };
 
