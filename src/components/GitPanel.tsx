@@ -167,7 +167,6 @@ export class GitPanel extends React.Component<
     if (this.state.isHistoryVisible) {
       sub = (
         <HistorySideBar
-          isExpanded={this.state.isHistoryVisible}
           branches={this.state.branches}
           pastCommits={this.state.pastCommits}
           model={this.props.model}
