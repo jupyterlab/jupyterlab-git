@@ -2,12 +2,11 @@ import * as React from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { classes } from 'typestyle';
 import {
-  stagedCommitButtonDisabledStyle,
-  stagedCommitButtonReadyStyle,
-  stagedCommitButtonStyle,
-  stagedCommitMessageStyle,
-  stagedCommitStyle,
-  textInputStyle
+  commitFormClass,
+  commitSummaryClass,
+  commitDescriptionClass,
+  commitButtonClass,
+  commitButtonDisabledClass
 } from '../style/CommitBox';
 
 /**
@@ -70,48 +69,38 @@ export class CommitBox extends React.Component<
    * @returns fragment
    */
   render() {
+    const disabled = !(this.props.hasFiles && this.state.summary);
     return (
-      <form className={stagedCommitStyle}>
-        <textarea
-          className={classes(textInputStyle, stagedCommitMessageStyle)}
+      <form className={commitFormClass}>
+        <input
+          className={commitSummaryClass}
+          type="text"
           placeholder="Summary (required)"
           value={this.state.summary}
           onChange={this._onSummaryChange}
           onKeyPress={this._onSummaryKeyPress}
         />
         <TextareaAutosize
-          className={classes(textInputStyle, stagedCommitMessageStyle)}
-          minRows={2}
+          className={commitDescriptionClass}
+          minRows={5}
           placeholder="Description"
           value={this.state.description}
           onChange={this._onDescriptionChange}
-          onKeyPress={this._onDescriptionKeyPress}
         />
         <input
-          className={this._commitButtonStyle()}
+          className={classes(
+            commitButtonClass,
+            disabled ? commitButtonDisabledClass : null
+          )}
           type="button"
           title="Commit"
-          disabled={!(this.props.hasFiles && this.state.summary)}
+          value="Commit"
+          disabled={disabled}
           onClick={this._onCommitClick}
         />
       </form>
     );
   }
-
-  /**
-   * Returns classes for toggling (and styling) the commit button.
-   *
-   * @returns classes to apply
-   */
-  private _commitButtonStyle = (): string => {
-    if (this.props.hasFiles) {
-      if (this.state.summary.length === 0) {
-        return classes(stagedCommitButtonStyle, stagedCommitButtonReadyStyle);
-      }
-      return stagedCommitButtonStyle;
-    }
-    return classes(stagedCommitButtonStyle, stagedCommitButtonDisabledStyle);
-  };
 
   /**
    * Callback invoked upon clicking a commit message submit button.
@@ -136,24 +125,6 @@ export class CommitBox extends React.Component<
       description: event.target.value
     });
   };
-
-  /**
-   * Callback invoked upon a `'keypress'` event when entering a commit message description.
-   *
-   * ## Notes
-   *
-   * -   Prevents triggering a `'submit'` action when hitting the `ENTER` key while entering a commit message description.
-   *
-   * @param event - event object
-   */
-  private _onDescriptionKeyPress(event: any): void {
-    if (event.which === 13) {
-      event.preventDefault();
-      this.setState({
-        description: this.state.description + '\n'
-      });
-    }
-  }
 
   /**
    * Callback invoked upon updating a commit message summary.
