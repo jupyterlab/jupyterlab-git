@@ -2,6 +2,7 @@ import * as React from 'react';
 import 'jest';
 import { shallow } from 'enzyme';
 import { CommitBox } from '../../src/components/CommitBox';
+import { commitButtonDisabledClass } from '../../src/style/CommitBox';
 
 describe('CommitBox', () => {
   describe('#constructor()', () => {
@@ -42,6 +43,53 @@ describe('CommitBox', () => {
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('TextareaAutosize').first();
       expect(node.prop('placeholder')).toEqual('Description');
+    });
+
+    it('should display a button to commit changes', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="button"]').first();
+      expect(node.prop('value')).toEqual('Commit');
+    });
+
+    it('should apply a class to disable the commit button when no files have changes to commit', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="button"]').first();
+      const idx = node.prop('className').indexOf(commitButtonDisabledClass);
+      expect(idx >= 0).toEqual(true);
+    });
+
+    it('should apply a class to disable the commit button when files have changes to commit, but the user has not entered a commit message summary', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: true
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="button"]').first();
+      const idx = node.prop('className').indexOf(commitButtonDisabledClass);
+      expect(idx >= 0).toEqual(true);
+    });
+
+    it('should not apply a class to disable the commit button when files have changes to commit and the user has entered a commit message summary', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: true
+      };
+      const component = shallow(<CommitBox {...props} />);
+      component.setState({
+        summary: 'beep boop'
+      });
+
+      const node = component.find('input[type="button"]').first();
+      const idx = node.prop('className').indexOf(commitButtonDisabledClass);
+      expect(idx >= 0).toEqual(false);
     });
   });
 });
