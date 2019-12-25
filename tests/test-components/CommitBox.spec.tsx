@@ -14,12 +14,19 @@ describe('CommitBox', () => {
       expect(box).toBeInstanceOf(CommitBox);
     });
 
-    it('should set default commit message values to empty strings', () => {
+    it('should set the default commit message summary to an empty string', () => {
       const box = new CommitBox({
         onCommit: async () => {},
         hasFiles: false
       });
       expect(box.state.summary).toEqual('');
+    });
+
+    it('should set the default commit message description to an empty string', () => {
+      const box = new CommitBox({
+        onCommit: async () => {},
+        hasFiles: false
+      });
       expect(box.state.description).toEqual('');
     });
   });
