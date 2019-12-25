@@ -164,6 +164,39 @@ export class GitPanel extends React.Component<
     this.setState({ isHistoryVisible: !this.state.isHistoryVisible });
   };
 
+  /**
+   * Commits all marked files.
+   *
+   * @param message - commit message
+   * @returns a promise which commits the files
+   */
+  commitMarkedFiles = async (message: string): Promise<void> => {
+    await this.props.model.reset();
+    await this.props.model.add(...this._markedFiles.map(file => file.to));
+    await this.commitStagedFiles(message);
+  };
+
+  /**
+   * Commits all staged files.
+   *
+   * @param message - commit message
+   * @returns a promise which commits the files
+   */
+  commitStagedFiles = async (message: string): Promise<void> => {
+    try {
+      if (
+        message &&
+        message !== '' &&
+        (await this._hasIdentity(this.props.model.pathRepository))
+      ) {
+        await this.props.model.commit(message);
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorMessage('Fail to commit', error);
+    }
+  };
+
   render() {
     let filelist: React.ReactElement;
     let main: React.ReactElement;
@@ -195,14 +228,14 @@ export class GitPanel extends React.Component<
         msg = (
           <CommitBox
             hasFiles={this._markedFiles.length > 0}
-            onCommit={this._commitMarkedFiles}
+            onCommit={this.commitMarkedFiles}
           />
         );
       } else {
         msg = (
           <CommitBox
             hasFiles={this.state.stagedFiles.length > 0}
-            onCommit={this._commitStagedFiles}
+            onCommit={this.commitStagedFiles}
           />
         );
       }
@@ -270,39 +303,6 @@ export class GitPanel extends React.Component<
       </div>
     );
   }
-
-  /**
-   * Commits all marked files.
-   *
-   * @param message - commit message
-   * @returns a promise which commits the files
-   */
-  private _commitMarkedFiles = async (message: string): Promise<void> => {
-    await this.props.model.reset();
-    await this.props.model.add(...this._markedFiles.map(file => file.to));
-    await this._commitStagedFiles(message);
-  };
-
-  /**
-   * Commits all staged files.
-   *
-   * @param message - commit message
-   * @returns a promise which commits the files
-   */
-  private _commitStagedFiles = async (message: string): Promise<void> => {
-    try {
-      if (
-        message &&
-        message !== '' &&
-        (await this._hasIdentity(this.props.model.pathRepository))
-      ) {
-        await this.props.model.commit(message);
-      }
-    } catch (error) {
-      console.error(error);
-      showErrorMessage('Fail to commit', error);
-    }
-  };
 
   /**
    * List of modified files (both staged and unstaged).
