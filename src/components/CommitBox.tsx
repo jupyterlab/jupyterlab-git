@@ -76,6 +76,7 @@ export class CommitBox extends React.Component<
           className={commitSummaryClass}
           type="text"
           placeholder="Summary (required)"
+          title="Enter a commit message summary"
           value={this.state.summary}
           onChange={this._onSummaryChange}
           onKeyPress={this._onSummaryKeyPress}
@@ -84,6 +85,7 @@ export class CommitBox extends React.Component<
           className={commitDescriptionClass}
           minRows={5}
           placeholder="Description"
+          title="Enter a commit message description"
           value={this.state.description}
           onChange={this._onDescriptionChange}
         />
