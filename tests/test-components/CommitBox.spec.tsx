@@ -1,57 +1,47 @@
+import * as React from 'react';
 import 'jest';
+import { shallow } from 'enzyme';
 import { CommitBox } from '../../src/components/CommitBox';
-import { classes } from 'typestyle';
-import {
-  stagedCommitButtonStyle,
-  stagedCommitButtonReadyStyle,
-  stagedCommitButtonDisabledStyle
-} from '../../src/style/BranchHeaderStyle';
 
 describe('CommitBox', () => {
-  describe('#checkReadyForSubmit()', () => {
-    it('should update commit box state to be ready when changes are staged', () => {
+  describe('#constructor()', () => {
+    it('should return a new instance', () => {
       const box = new CommitBox({
         onCommit: async () => {},
-        hasFiles: true
+        hasFiles: false
       });
-
-      // TODO: this sort of testing should be performed during UI/UX testing, not unit testing
-      let actual = box._commitButtonStyle(true);
-
-      let expected = classes(
-        stagedCommitButtonStyle,
-        stagedCommitButtonReadyStyle
-      );
-      expect(actual).toEqual(expected);
+      expect(box).toBeInstanceOf(CommitBox);
     });
 
-    it('should update commit box state to be disabled when no changes are staged', () => {
+    it('should set correct default commit message values', () => {
       const box = new CommitBox({
         onCommit: async () => {},
-        hasFiles: true
+        hasFiles: false
       });
+      expect(box.state.summary).toEqual('');
+      expect(box.state.description).toEqual('');
+    });
+  });
 
-      // TODO: this sort of testing should be performed during UI/UX testing, not unit testing
-      let actual = box._commitButtonStyle(false);
-      let expected = classes(
-        stagedCommitButtonStyle,
-        stagedCommitButtonDisabledStyle
-      );
-      expect(actual).toEqual(expected);
+  describe('#render()', () => {
+    it('should display placeholder text for the commit message summary', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="text"]').first();
+      expect(node.prop('placeholder')).toEqual('Summary (required)');
     });
 
-    it('should be ready to commit with a message set', () => {
-      const box = new CommitBox({
+    it('should display placeholder text for the commit message description', () => {
+      const props = {
         onCommit: async () => {},
-        hasFiles: true
-      });
-      // can't use setState here, since the box hasn't actually mounted
-      box.state = { value: 'message' };
-
-      // TODO: this sort of testing should be performed during UI/UX testing, not unit testing
-      let actual = box._commitButtonStyle(true);
-      let expected = stagedCommitButtonStyle;
-      expect(actual).toEqual(expected);
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('TextareaAutosize').first();
+      expect(node.prop('placeholder')).toEqual('Description');
     });
   });
 });
