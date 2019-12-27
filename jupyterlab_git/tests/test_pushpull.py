@@ -35,13 +35,12 @@ async def test_git_pull_fail():
 @pytest.mark.asyncio
 async def test_git_pull_with_auth_fail():
     with patch("os.environ", {"TEST": "test"}):
-        with patch(
-            "jupyterlab_git.git.execute_with_authentication"
-        ) as mock_execute_with_authentication:
+        with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
             mock_execute_with_authentication.return_value = tornado.gen.maybe_future(
                 (
                     1,
+                    "",
                     "remote: Invalid username or password.\r\nfatal: Authentication failed for 'repo_url'",
                 )
             )
@@ -92,12 +91,10 @@ async def test_git_pull_success():
 async def test_git_pull_with_auth_success():
 
     with patch("os.environ", {"TEST": "test"}):
-        with patch(
-            "jupyterlab_git.git.execute_with_authentication"
-        ) as mock_execute_with_authentication:
+        with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
             mock_execute_with_authentication.return_value = tornado.gen.maybe_future(
-                (0, "output")
+                (0, "", "output")
             )
 
             # When
@@ -145,13 +142,12 @@ async def test_git_push_fail():
 async def test_git_push_with_auth_fail():
 
     with patch("os.environ", {"TEST": "test"}):
-        with patch(
-            "jupyterlab_git.git.execute_with_authentication"
-        ) as mock_execute_with_authentication:
+        with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
             mock_execute_with_authentication.return_value = tornado.gen.maybe_future(
                 (
                     1,
+                    "",
                     "remote: Invalid username or password.\r\nfatal: Authentication failed for 'repo_url'",
                 )
             )
@@ -204,12 +200,10 @@ async def test_git_push_success():
 async def test_git_push_with_auth_success():
 
     with patch("os.environ", {"TEST": "test"}):
-        with patch(
-            "jupyterlab_git.git.execute_with_authentication"
-        ) as mock_execute_with_authentication:
+        with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
             mock_execute_with_authentication.return_value = tornado.gen.maybe_future(
-                (0, "does not matter")
+                (0, "", "does not matter")
             )
 
             # When

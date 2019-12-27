@@ -21,62 +21,28 @@ async def execute(
     cmdline: "List[str]",
     cwd: "Optional[str]" = None,
     env: "Optional[Dict[str, str]]" = None,
+    username: "Optional[str]" = None,
+    password: "Optional[str]" = None,
 ) -> "Tuple[int, str, str]":
     """Asynchronously execute a command.
     
     Args:
         cmdline (List[str]): Command line to be executed
         cwd (Optional[str]): Current working directory
-        env (Optional[Dict[str, str]]): Defines the environment variables for the new process.
+        env (Optional[Dict[str, str]]): Defines the environment variables for the new process
+        username (Optional[str]): User name
+        password (Optional[str]): User password
     Returns:
         (int, str, str): (return code, stdout, stderr)
     """
 
-    def call_subprocess(
-        cmdline: "List[str]",
-        cwd: "Optional[str]" = None,
-        env: "Optional[Dict[str, str]]" = None,
-    ) -> "Tuple[int, bytes, bytes]":
-        process = subprocess.Popen(
-            cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env
-        )
-        output, error = process.communicate()
-        return (process.returncode, output, error)
-
-    current_loop = tornado.ioloop.IOLoop.current()
-    returncode, output, error = await current_loop.run_in_executor(
-        None, call_subprocess, cmdline, cwd, env
-    )
-
-    return returncode, output.decode("utf-8"), error.decode("utf-8")
-
-
-async def execute_with_authentication(
-    cmdline: "List[str]",
-    username: "str",
-    password: "str",
-    cwd: "Optional[str]" = None,
-    env: "Optional[Dict[str, str]]" = None,
-) -> "Tuple[int, str]":
-    """Asynchronously execute a command.
-    
-    Args:
-        cmdline (List[str]): Command line to be executed
-        username (str): User name
-        password (str): User password
-        cwd (Optional[str]): Current working directory
-        env (Optional[Dict[str, str]]): Defines the environment variables for the new process.
-    Returns:
-        (int, str): (return code, output)
-    """
-
-    def call_subprocess(
+    def call_subprocess_with_authentication(
         cmdline: "List[str]",
         username: "str",
         password: "str",
         cwd: "Optional[str]" = None,
         env: "Optional[Dict[str, str]]" = None,
-    ) -> "Tuple[int, str]":
+    ) -> "Tuple[int, str, str]":
         try:
             p = pexpect.spawn(
                 cmdline[0], cmdline[1:], cwd=cwd, env=env, encoding="utf-8"
@@ -101,19 +67,34 @@ async def execute_with_authentication(
             returncode = p.wait()
             p.close()
 
-            return returncode, response
+            return returncode, "", response
         except pexpect.exceptions.EOF:  # In case of pexpect failure
             response = p.before
             returncode = p.exitstatus
             p.close()  # close process
-            return returncode, response
+            return returncode, "", response
+
+
+    def call_subprocess(
+        cmdline: "List[str]",
+        cwd: "Optional[str]" = None,
+        env: "Optional[Dict[str, str]]" = None,
+    ) -> "Tuple[int, str, str]":
+        process = subprocess.Popen(
+            cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env
+        )
+        output, error = process.communicate()
+        return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
 
     current_loop = tornado.ioloop.IOLoop.current()
-    returncode, output = await current_loop.run_in_executor(
-        None, call_subprocess, cmdline, username, password, cwd, env
-    )
-
-    return returncode, output
+    if username is not None and password is not None:
+        return await current_loop.run_in_executor(
+            None, call_subprocess_with_authentication, cmdline, username, password, cwd, env
+        )
+    else:
+        return await current_loop.run_in_executor(
+            None, call_subprocess, cmdline, cwd, env
+        )
 
 
 class Git:
@@ -219,7 +200,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, error = await execute_with_authentication(
+            code, _, error = await execute(
                 ["git", "clone", unquote(repo_url), "-q"],
                 username=auth["username"],
                 password=auth["password"],
@@ -722,7 +703,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, error = await execute_with_authentication(
+            code, _, error = await execute(
                 ["git", "pull", "--no-commit"],
                 username=auth["username"],
                 password=auth["password"],
@@ -751,7 +732,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, error = await execute_with_authentication(
+            code, _, error = await execute(
                 ["git", "push", remote, branch],
                 username=auth["username"],
                 password=auth["password"],

@@ -64,11 +64,9 @@ async def test_git_clone_failure_from_git():
 @pytest.mark.asyncio
 async def test_git_clone_with_auth_success():
     with patch("os.environ", {"TEST": "test"}):
-        with patch(
-            "jupyterlab_git.git.execute_with_authentication"
-        ) as mock_authentication:
+        with patch("jupyterlab_git.git.execute") as mock_authentication:
             # Given
-            mock_authentication.return_value = tornado.gen.maybe_future((0, ""))
+            mock_authentication.return_value = tornado.gen.maybe_future((0, "", ""))
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
@@ -95,12 +93,10 @@ async def test_git_clone_with_auth_wrong_repo_url_failure_from_git():
 
     """
     with patch("os.environ", {"TEST": "test"}):
-        with patch(
-            "jupyterlab_git.git.execute_with_authentication"
-        ) as mock_authentication:
+        with patch("jupyterlab_git.git.execute") as mock_authentication:
             # Given
             mock_authentication.return_value = tornado.gen.maybe_future(
-                (128, "fatal: repository 'ghjkhjkl' does not exist")
+                (128, "", "fatal: repository 'ghjkhjkl' does not exist")
             )
 
             # When
@@ -131,13 +127,12 @@ async def test_git_clone_with_auth_auth_failure_from_git():
 
     """
     with patch("os.environ", {"TEST": "test"}):
-        with patch(
-            "jupyterlab_git.git.execute_with_authentication"
-        ) as mock_authentication:
+        with patch("jupyterlab_git.git.execute") as mock_authentication:
             # Given
             mock_authentication.return_value = tornado.gen.maybe_future(
                 (
                     128,
+                    "",
                     "remote: Invalid username or password.\r\nfatal: Authentication failed for 'ghjkhjkl'",
                 )
             )
