@@ -134,30 +134,23 @@ export class SinglePastCommitInfo extends React.Component<
       <div>
         <div className={commitStyle}>
           <div className={commitOverviewNumbers}>
-            <span>
-              <DefaultIconReact
-                name="file"
-                className={iconStyle}
-                tag="span"
-                title="# Files Changed"
-              />
+            <span title="# Files Changed">
+              <DefaultIconReact name="file" className={iconStyle} tag="span" />
               {this.state.filesChanged}
             </span>
-            <span>
+            <span title="# Insertions">
               <DefaultIconReact
                 name="git-insertionsMade"
                 className={classes(iconStyle, insertionsIconStyle)}
                 tag="span"
-                title="# Insertions"
               />
               {this.state.insertionCount}
             </span>
-            <span>
+            <span title="# Deletions">
               <DefaultIconReact
                 name="git-deletionsMade"
                 className={classes(iconStyle, deletionsIconStyle)}
                 tag="span"
-                title="# Deletions"
               />
               {this.state.deletionCount}
             </span>
@@ -225,6 +218,7 @@ export class SinglePastCommitInfo extends React.Component<
                         );
                       }
                     }}
+                    title={modifiedFile.modified_file_path}
                   >
                     <span
                       className={`${fileIconStyle} ${parseFileExtension(
