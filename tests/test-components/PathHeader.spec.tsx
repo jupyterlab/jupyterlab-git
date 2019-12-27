@@ -2,9 +2,9 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 import { IPathHeaderProps, PathHeader } from '../../src/components/PathHeader';
 import {
-  gitPullStyle,
-  gitPushStyle,
-  repoRefreshStyle
+  pullIcon,
+  pushIcon,
+  refreshIcon
 } from '../../src/style/PathHeaderStyle';
 import 'jest';
 import { GitExtension } from '../../src/model';
@@ -63,15 +63,15 @@ describe('PathHeader', function() {
     // Then
     const buttons = node.find('button');
     expect(buttons).toHaveLength(3);
-    expect(buttons.find(`.${gitPullStyle}`)).toHaveLength(1);
-    expect(buttons.find(`.${gitPullStyle}`).prop('title')).toEqual(
+    expect(buttons.find(`.${pullIcon}`)).toHaveLength(1);
+    expect(buttons.find(`.${pullIcon}`).prop('title')).toEqual(
       'Pull latest changes'
     );
-    expect(buttons.find(`.${gitPushStyle}`)).toHaveLength(1);
-    expect(buttons.find(`.${gitPushStyle}`).prop('title')).toEqual(
+    expect(buttons.find(`.${pushIcon}`)).toHaveLength(1);
+    expect(buttons.find(`.${pushIcon}`).prop('title')).toEqual(
       'Push committed changes'
     );
-    expect(buttons.find(`.${repoRefreshStyle}`)).toHaveLength(1);
+    expect(buttons.find(`.${refreshIcon}`)).toHaveLength(1);
   });
 
   it('should call API on button click', function() {
@@ -85,11 +85,11 @@ describe('PathHeader', function() {
     // Then
     const buttons = node.find('button');
 
-    buttons.find(`.${gitPullStyle}`).simulate('click');
+    buttons.find(`.${pullIcon}`).simulate('click');
     expect(spyPull).toHaveBeenCalledTimes(1);
     expect(spyPull).toHaveBeenCalledWith(undefined);
 
-    buttons.find(`.${gitPushStyle}`).simulate('click');
+    buttons.find(`.${pushIcon}`).simulate('click');
     expect(spyPush).toHaveBeenCalledTimes(1);
     expect(spyPush).toHaveBeenCalledWith(undefined);
   });

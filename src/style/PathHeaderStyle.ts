@@ -20,14 +20,17 @@ export const repoPathStyle = style({
   lineHeight: '33px'
 });
 
-export const repoRefreshStyle = classes(toolbarButtonStyle, {
+export const refreshIcon = style({
   backgroundImage: 'var(--jp-icon-refresh)'
 });
+export const repoRefreshStyle = classes(toolbarButtonStyle, refreshIcon);
 
-export const gitPushStyle = classes(toolbarButtonStyle, {
+export const pushIcon = style({
   backgroundImage: 'var(--jp-icon-git-push)'
 });
+export const gitPushStyle = classes(toolbarButtonStyle, pushIcon);
 
-export const gitPullStyle = classes(toolbarButtonStyle, {
+export const pullIcon = style({
   backgroundImage: 'var(--jp-icon-git-pull)'
 });
+export const gitPullStyle = classes(toolbarButtonStyle, pullIcon);
