@@ -207,11 +207,14 @@ class GitAddHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         if data["add_all"]:
-            my_output = await self.git.add_all(top_repo_path)
+            body = await self.git.add_all(top_repo_path)
         else:
             filename = data["filename"]
-            my_output = await self.git.add(filename, top_repo_path)
-        self.finish(my_output)
+            body = await self.git.add(filename, top_repo_path)
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
 
 
 class GitAddAllUnstagedHandler(GitHandler):
@@ -225,7 +228,9 @@ class GitAddAllUnstagedHandler(GitHandler):
         POST request handler, adds all the changed files.
         """
         body = await self.git.add_all_unstaged(self.get_json_body()["top_repo_path"])
-        self.finish(body)
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
 
 
 class GitAddAllUntrackedHandler(GitHandler):
@@ -239,7 +244,9 @@ class GitAddAllUntrackedHandler(GitHandler):
         POST request handler, adds all the untracked files.
         """
         body = await self.git.add_all_untracked(self.get_json_body()["top_repo_path"])
-        self.finish(body)
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
 
 
 class GitResetHandler(GitHandler):
@@ -256,11 +263,14 @@ class GitResetHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         if data["reset_all"]:
-            my_output = await self.git.reset_all(top_repo_path)
+            body = await self.git.reset_all(top_repo_path)
         else:
             filename = data["filename"]
-            my_output = await self.git.reset(filename, top_repo_path)
-        self.finish(my_output)
+            body = await self.git.reset(filename, top_repo_path)
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
 
 
 class GitDeleteCommitHandler(GitHandler):
@@ -273,8 +283,11 @@ class GitDeleteCommitHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         commit_id = data["commit_id"]
-        output = await self.git.delete_commit(commit_id, top_repo_path)
-        self.finish(output)
+        body = await self.git.delete_commit(commit_id, top_repo_path)
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
 
 
 class GitResetToCommitHandler(GitHandler):
@@ -287,8 +300,11 @@ class GitResetToCommitHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         commit_id = data["commit_id"]
-        output = await self.git.reset_to_commit(commit_id, top_repo_path)
-        self.finish(output)
+        body = await self.git.reset_to_commit(commit_id, top_repo_path)
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
 
 
 class GitCheckoutHandler(GitHandler):
@@ -304,16 +320,19 @@ class GitCheckoutHandler(GitHandler):
         top_repo_path = data["top_repo_path"]
         if data["checkout_branch"]:
             if data["new_check"]:
-                my_output = await self.git.checkout_new_branch(
+                body = await self.git.checkout_new_branch(
                     data["branchname"], top_repo_path
                 )
             else:
-                my_output = await self.git.checkout_branch(data["branchname"], top_repo_path)
+                body = await self.git.checkout_branch(data["branchname"], top_repo_path)
         elif data["checkout_all"]:
-            my_output = await self.git.checkout_all(top_repo_path)
+            body = await self.git.checkout_all(top_repo_path)
         else:
-            my_output = await self.git.checkout(data["filename"], top_repo_path)
-        self.finish(my_output)
+            body = await self.git.checkout(data["filename"], top_repo_path)
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
 
 
 class GitCommitHandler(GitHandler):
@@ -328,8 +347,11 @@ class GitCommitHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         commit_msg = data["commit_msg"]
-        my_output = await self.git.commit(commit_msg, top_repo_path)
-        self.finish(my_output)
+        body = await self.git.commit(commit_msg, top_repo_path)
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
 
 
 class GitUpstreamHandler(GitHandler):
@@ -418,8 +440,12 @@ class GitInitHandler(GitHandler):
         POST request handler, initializes a repository.
         """
         current_path = self.get_json_body()["current_path"]
-        my_output = await self.git.init(current_path)
-        self.finish(my_output)
+        body = await self.git.init(current_path)
+
+        if body["code"] != 0:
+            self.set_status(500)
+
+        self.finish(json.dumps(body))
 
 
 class GitChangedFilesHandler(GitHandler):
@@ -462,7 +488,9 @@ class GitDiffContentHandler(GitHandler):
         prev_ref = data["prev_ref"]
         curr_ref = data["curr_ref"]
         top_repo_path = os.path.join(cm.root_dir, url2path(data["top_repo_path"]))
-        response = await self.git.diff_content(filename, prev_ref, curr_ref, top_repo_path)
+        response = await self.git.diff_content(
+            filename, prev_ref, curr_ref, top_repo_path
+        )
         self.finish(json.dumps(response))
 
 
