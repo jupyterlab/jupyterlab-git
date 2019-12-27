@@ -85,5 +85,6 @@ export const commitButtonClass = style({
 });
 
 export const commitButtonDisabledClass = style({
-  backgroundColor: '#d3d3d3' // lightgrey
+  color: 'var(--jp-ui-inverse-font-color0)',
+  backgroundColor: 'var(--jp-layout-color3)'
 });
