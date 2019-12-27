@@ -74,6 +74,8 @@ export const commitButtonClass = style({
   width: '100%',
   height: '2em',
 
+  marginBottom: '0.5em',
+
   color: 'white',
   fontSize: 'var(--jp-ui-font-size1)',
 
