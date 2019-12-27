@@ -4,10 +4,7 @@ export const commitFormClass = style({
   display: 'flex',
   flexWrap: 'wrap',
 
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-
+  marginTop: 'auto',
   padding: '8px',
   paddingTop: '1em',
 
