@@ -51,7 +51,16 @@ export const commitDetailFileStyle = style({
   color: 'var(--jp-ui-font-color1)',
   height: 'var(--jp-private-running-item-height)',
   lineHeight: 'var(--jp-private-running-item-height)',
-  whiteSpace: 'nowrap'
+  whiteSpace: 'nowrap',
+
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--jp-layout-color3)'
+    }
+  }
 });
 
 export const commitDetailFilePathStyle = style({
@@ -101,49 +110,6 @@ export const diffIconStyle = style({
 export const revertButtonStyle = style({
   backgroundImage: 'var(--jp-icon-rewind)',
   marginLeft: '6px'
-});
-
-export const numberOfDeletionsStyle = style({
-  position: 'absolute',
-  right: '12px',
-  width: '15px',
-  marginTop: '1px'
-});
-
-export const numberOfInsertionsStyle = style({
-  position: 'absolute',
-  right: '50px',
-  width: '15px',
-  marginTop: '1px'
-});
-
-export const warningLabel = style({
-  padding: '5px 1px 5px 0'
-});
-
-export const messageInput = style({
-  boxSizing: 'border-box',
-  width: '95%',
-  marginBottom: '7px'
-});
-
-export const button = style({
-  outline: 'none',
-  border: 'none',
-  color: 'var(--jp-layout-color0)'
-});
-
-export const resetDeleteDisabledButton = style({
-  backgroundColor: 'var(--jp-error-color2)'
-});
-
-export const resetDeleteButton = style({
-  backgroundColor: 'var(--jp-error-color1)'
-});
-
-export const cancelButton = style({
-  backgroundColor: 'var(--jp-layout-color4)',
-  marginRight: '4px'
 });
 
 export const fileList = style({

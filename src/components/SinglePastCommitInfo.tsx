@@ -1,6 +1,7 @@
+import * as React from 'react';
+import { Dialog, InputDialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { DefaultIconReact } from '@jupyterlab/ui-components';
-import * as React from 'react';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import { fileIconStyle } from '../style/FileItemStyle';
@@ -15,19 +16,18 @@ import {
   commitDetailStyle,
   commitOverviewNumbers,
   commitStyle,
+  deletionsIconStyle,
   diffIconStyle,
   fileList,
   floatRightStyle,
   iconStyle,
   insertionsIconStyle,
-  deletionsIconStyle,
   revertButtonStyle
 } from '../style/SinglePastCommitInfoStyle';
 import { Git } from '../tokens';
 import { parseFileExtension } from '../utils';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
-import { InputDialog, showDialog, Dialog } from '@jupyterlab/apputils';
 
 export interface ISinglePastCommitInfoProps {
   data: Git.ISingleCommitInfo;
@@ -236,7 +236,7 @@ export class SinglePastCommitInfo extends React.Component<
                     </span>
                     {diffSupported && (
                       <button
-                        className={`${diffIconStyle}`}
+                        className={diffIconStyle}
                         title={'View file changes'}
                       />
                     )}

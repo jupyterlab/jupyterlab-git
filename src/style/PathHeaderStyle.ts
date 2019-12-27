@@ -1,4 +1,5 @@
-import { style } from 'typestyle';
+import { style, classes } from 'typestyle';
+import { toolbarButtonStyle } from './common';
 
 export const repoStyle = style({
   display: 'flex',
@@ -19,74 +20,14 @@ export const repoPathStyle = style({
   lineHeight: '33px'
 });
 
-export const repoRefreshStyle = style({
-  width: 'var(--jp-private-running-button-width)',
-  background: 'var(--jp-layout-color1)',
-  border: 'none',
-  backgroundImage: 'var(--jp-icon-refresh)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  boxSizing: 'border-box',
-  outline: 'none',
-  padding: '0px 6px',
-  margin: 'auto 5px auto 5px',
-  height: '24px',
-
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    '&:active': {
-      backgroundColor: 'var(--jp-layout-color3)'
-    }
-  }
+export const repoRefreshStyle = classes(toolbarButtonStyle, {
+  backgroundImage: 'var(--jp-icon-refresh)'
 });
 
-export const gitPushStyle = style({
-  width: 'var(--jp-private-running-button-width)',
-  background: 'var(--jp-layout-color1)',
-  border: 'none',
-  backgroundImage: 'var(--jp-icon-git-push)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  boxSizing: 'border-box',
-  outline: 'none',
-  padding: '0px 6px',
-  margin: 'auto 5px auto 5px',
-  height: '24px',
-
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    '&:active': {
-      backgroundColor: 'var(--jp-layout-color3)'
-    }
-  }
+export const gitPushStyle = classes(toolbarButtonStyle, {
+  backgroundImage: 'var(--jp-icon-git-push)'
 });
 
-export const gitPullStyle = style({
-  width: 'var(--jp-private-running-button-width)',
-  background: 'var(--jp-layout-color1)',
-  border: 'none',
-  backgroundImage: 'var(--jp-icon-git-pull)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  boxSizing: 'border-box',
-  outline: 'none',
-  padding: '0px 6px',
-  margin: 'auto 5px auto auto',
-  height: '24px',
-
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    '&:active': {
-      backgroundColor: 'var(--jp-layout-color3)'
-    }
-  }
+export const gitPullStyle = classes(toolbarButtonStyle, {
+  backgroundImage: 'var(--jp-icon-git-pull)'
 });
