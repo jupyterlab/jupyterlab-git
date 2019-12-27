@@ -13,6 +13,7 @@ export const commitFormClass = style({
 
   alignItems: 'flex-start',
 
+  backgroundColor: 'var(--jp-layout-color1)',
   borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
@@ -30,7 +31,6 @@ export const commitSummaryClass = style({
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 
-  backgroundColor: 'var(--jp-layout-color1)',
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   borderRadius: '3px'
 });
@@ -49,7 +49,6 @@ export const commitDescriptionClass = style({
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 
-  backgroundColor: 'var(--jp-layout-color1)',
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   borderRadius: '3px',
 
