@@ -1,8 +1,8 @@
 """
 Module for executing git commands, sending results back to the handlers
 """
-import logging
 import os
+import re
 import subprocess
 from subprocess import Popen, PIPE, CalledProcessError
 
@@ -11,10 +11,10 @@ from urllib.parse import unquote
 from tornado.web import HTTPError
 
 
-logger = logging.getLogger(__name__)
-
-
+# Git configuration options exposed through the REST API
 ALLOWED_OPTIONS = ['user.name', 'user.email']
+# Regex pattern to capture (key, value) of Git configuration options
+CONFIG_PATTERN = re.compile(r"(?:^|\n)(\S+)\=")
 
 
 class GitAuthInputWrapper:
@@ -106,18 +106,8 @@ class Git:
                 response["message"] = error.decode("utf-8").strip()
             else:
                 raw = output.decode("utf-8").strip()
-                response["options"] = dict()
-                previous_key = None
-                for l in raw.split("\n"):
-                    if l.startswith('"') and previous_key in ALLOWED_OPTIONS:
-                        response["options"][previous_key] += l
-                    elif "=" in l:
-                        key, v = l.split("=", maxsplit=1)
-                        previous_key = key
-                        if key in ALLOWED_OPTIONS:
-                            response["options"][key] = v
-                    else:
-                        logger.debug("[jupyterlab-git] Unable to interpret git option {}.".format(l))
+                s = CONFIG_PATTERN.split(raw)
+                response["options"] = {k:v for k, v in zip(s[1::2], s[2::2]) if k in ALLOWED_OPTIONS}
 
         return response
 

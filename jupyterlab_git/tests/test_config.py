@@ -59,6 +59,11 @@ class TestConfig(ServerTest):
                 return_value=(
                     b"user.name=John Snow\n"
                     b"user.email=john.snow@iscoming.com\n"
+                    b'alias.summary=!f() {     printf "Summary of this branch...\n'
+                    b'";     printf "%s\n'
+                    b'" $(git rev-parse --abbrev-ref HEAD);     printf "\n'
+                    b"Most-active files, with churn count\n"
+                    b'"; git churn | head -7;   }; f\n'
                     b'alias.topic-base-branch-name=!f(){     printf "master\n'
                     b'";   };f\n'
                     b'alias.topic-start=!f(){     topic_branch="$1";     git topic-create "$topic_branch";     git topic-push;   };f',
@@ -94,7 +99,10 @@ class TestConfig(ServerTest):
         }
 
     @patch("subprocess.Popen")
-    @patch("jupyterlab_git.git.ALLOWED_OPTIONS", ["user.name", "alias.topic-base-branch-name"])
+    @patch(
+        "jupyterlab_git.git.ALLOWED_OPTIONS",
+        ["alias.summary", "alias.topic-base-branch-name"],
+    )
     def test_git_get_config_accepted_multiline(self, popen):
         # Given
         process_mock = Mock()
@@ -103,6 +111,11 @@ class TestConfig(ServerTest):
                 return_value=(
                     b"user.name=John Snow\n"
                     b"user.email=john.snow@iscoming.com\n"
+                    b'alias.summary=!f() {     printf "Summary of this branch...\n'
+                    b'";     printf "%s\n'
+                    b'" $(git rev-parse --abbrev-ref HEAD);     printf "\n'
+                    b"Most-active files, with churn count\n"
+                    b'"; git churn | head -7;   }; f\n'
                     b'alias.topic-base-branch-name=!f(){     printf "master\n'
                     b'";   };f\n'
                     b'alias.topic-start=!f(){     topic_branch="$1";     git topic-create "$topic_branch";     git topic-push;   };f',
@@ -132,8 +145,12 @@ class TestConfig(ServerTest):
         assert payload == {
             "code": 0,
             "options": {
-                "user.name": "John Snow",
-                "alias.topic-base-branch-name": '!f(){     printf "master";   };f',
+                "alias.summary": '!f() {     printf "Summary of this branch...\n'
+                '";     printf "%s\n'
+                '" $(git rev-parse --abbrev-ref HEAD);     printf "\n'
+                "Most-active files, with churn count\n"
+                '"; git churn | head -7;   }; f',
+                "alias.topic-base-branch-name": '!f(){     printf "master\n";   };f',
             },
         }
 
