@@ -4,6 +4,7 @@ import { IIconRegistry } from '@jupyterlab/ui-components';
 import gitSvg from '../../style/images/git-icon.svg';
 import deletionsMadeSvg from '../../style/images/deletions-made-icon.svg';
 import insertionsMadeSvg from '../../style/images/insertions-made-icon.svg';
+import pinSvg from '../../style/images/pin.svg';
 
 export function registerGitIcons(iconRegistry: IIconRegistry) {
   iconRegistry.addIcon(
@@ -18,6 +19,10 @@ export function registerGitIcons(iconRegistry: IIconRegistry) {
     {
       name: 'git-insertionsMade',
       svg: insertionsMadeSvg
+    },
+    {
+      name: 'git-pin',
+      svg: pinSvg
     }
   );
 }

@@ -26,16 +26,6 @@ export interface IGitExtension extends IDisposable {
   readonly headChanged: ISignal<IGitExtension, void>;
 
   /**
-   * Top level path of the current git repository
-   */
-  pathRepository: string | null;
-
-  /**
-   * A signal emitted when the current git repository changes.
-   */
-  readonly repositoryChanged: ISignal<IGitExtension, IChangedArgs<string>>;
-
-  /**
    * Test whether the model is ready;
    * i.e. if the top folder repository has been found.
    */
@@ -46,6 +36,26 @@ export interface IGitExtension extends IDisposable {
    * i.e. if the top folder repository has been found.
    */
   ready: Promise<void>;
+
+  /**
+   * Top level path of the current git repository
+   */
+  pathRepository: string | null;
+
+  /**
+   * A signal emitted when the current git repository changes.
+   */
+  readonly repositoryChanged: ISignal<IGitExtension, IChangedArgs<string>>;
+
+  /**
+   * Is the Git repository path pinned?
+   */
+  repositoryPinned: boolean;
+
+  /**
+   * Promise that resolves when state is first restored.
+   */
+  readonly restored: Promise<void>;
 
   /**
    * Files list resulting of a git status call.

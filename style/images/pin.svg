@@ -1,0 +1,4 @@
+<!-- pin icon from https://github.com/primer/octicons - Under MIT License -->
+<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path class="jp-icon3" fill-rule="evenodd" clip-rule="evenodd" d="M9 1.2V2L9.5 3L5 6H1.2C0.76 6 0.53 6.53 0.86 6.86L4 10L0 15L5 11L8.14 14.14C8.47 14.47 9 14.23 9 13.8V10L12 5.5L13 6H13.8C14.24 6 14.47 5.47 14.14 5.14L9.86 0.860002C9.53 0.530002 9 0.770002 9 1.2Z" fill="#1B1F23"/>
+</svg>

@@ -17,6 +17,7 @@ import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
 import { PathHeader } from './PathHeader';
 import { CommitBox } from './CommitBox';
+import { FileBrowserModel } from '@jupyterlab/filebrowser';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -40,6 +41,7 @@ export interface IGitSessionNodeProps {
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
   settings: ISettingRegistry.ISettings;
+  fileBrowserModel: FileBrowserModel;
 }
 
 /** A React component for the git extension's main display */
@@ -290,6 +292,7 @@ export class GitPanel extends React.Component<
       <div className={panelContainerStyle}>
         <PathHeader
           model={this.props.model}
+          fileBrowserModel={this.props.fileBrowserModel}
           refresh={async () => {
             await this.refreshBranch();
             if (this.state.isHistoryVisible) {
