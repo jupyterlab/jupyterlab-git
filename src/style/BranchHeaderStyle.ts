@@ -8,7 +8,6 @@ export const branchStyle = style({
 });
 
 export const selectedHeaderStyle = style({
-  borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)',
   paddingBottom: 'var(--jp-border-width)'
 });
 
