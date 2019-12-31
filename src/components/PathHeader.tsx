@@ -1,31 +1,46 @@
+import * as React from 'react';
 import { Dialog, showDialog, UseSignal } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { FileDialog, FileBrowserModel } from '@jupyterlab/filebrowser';
+import { FileBrowserModel, FileDialog } from '@jupyterlab/filebrowser';
 import { DefaultIconReact } from '@jupyterlab/ui-components';
-import * as React from 'react';
 import { classes } from 'typestyle';
 import {
   gitPullStyle,
   gitPushStyle,
+  noRepoPathStyle,
   pinIconStyle,
   repoPathStyle,
+  repoPinStyle,
   repoRefreshStyle,
   repoStyle,
-  repoPinStyle,
-  repoPinnedStyle
+  separatorStyle,
+  toolBarStyle
 } from '../style/PathHeaderStyle';
+import { IGitExtension } from '../tokens';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
-import { IGitExtension } from '../tokens';
 
+/**
+ * Properties of the PathHeader React component
+ */
 export interface IPathHeaderProps {
+  /**
+   * Git extension model
+   */
   model: IGitExtension;
+  /**
+   * File browser model
+   */
   fileBrowserModel: FileBrowserModel;
+  /**
+   * Refresh UI callback
+   */
   refresh: () => Promise<void>;
 }
 
 /**
  * Displays the error dialog when the Git Push/Pull operation fails.
+ *
  * @param title the title of the error dialog
  * @param body the message to be shown in the body of the modal.
  */
@@ -86,7 +101,8 @@ async function selectGitRepository(
       model.pathRepository = folder.path;
     } else if (fileModel.path !== folder.path) {
       // Change current filebrowser path
-      fileModel.cd('/' + folder.path);
+      //  => will be propagated to path repository
+      fileModel.cd(`/${folder.path}`);
     }
   }
 }
@@ -107,14 +123,9 @@ export const PathHeader: React.FunctionComponent<IPathHeaderProps> = (
     });
   });
 
-  const pinStyles = [repoPinStyle, 'jp-Icon-16'];
-  if (pin) {
-    pinStyles.push(repoPinnedStyle);
-  }
-
   return (
-    <div>
-      <div className={repoStyle}>
+    <React.Fragment>
+      <div className={toolBarStyle}>
         <button
           className={classes(gitPullStyle, 'jp-Icon-16')}
           title={'Pull latest changes'}
@@ -143,58 +154,61 @@ export const PathHeader: React.FunctionComponent<IPathHeaderProps> = (
           onClick={() => props.refresh()}
         />
       </div>
-      <div>
-        <UseSignal
-          signal={props.model.repositoryChanged}
-          initialArgs={{
-            name: 'pathRepository',
-            oldValue: null,
-            newValue: props.model.pathRepository
-          }}
-        >
-          {(_, change) => {
-            const pathStyles = [repoPathStyle];
-            let pinTitle = 'the repository path';
-            if (props.model.repositoryPinned) {
-              pinTitle = 'Unpin ' + pinTitle;
-            } else {
-              pinTitle = 'Pin ' + pinTitle;
-            }
+      <UseSignal
+        signal={props.model.repositoryChanged}
+        initialArgs={{
+          name: 'pathRepository',
+          oldValue: null,
+          newValue: props.model.pathRepository
+        }}
+      >
+        {(_, change) => {
+          const pathStyles = [repoPathStyle];
+          if (!change.newValue) {
+            pathStyles.push(noRepoPathStyle);
+          }
 
-            return (
-              <React.Fragment>
-                <label className={repoPinStyle} title={pinTitle}>
-                  <input
-                    type="checkbox"
-                    checked={props.model.repositoryPinned}
-                    onChange={() => {
-                      props.model.repositoryPinned = !props.model
-                        .repositoryPinned;
-                      setPin(props.model.repositoryPinned);
-                    }}
-                  />
-                  <DefaultIconReact
-                    className={pinIconStyle}
-                    tag="span"
-                    name="git-pin"
-                  />
-                </label>
-                <span
-                  className={classes(...pathStyles)}
-                  title={change.newValue}
-                  onClick={() => {
-                    selectGitRepository(props.model, props.fileBrowserModel);
+          let pinTitle = 'the repository path';
+          if (pin) {
+            pinTitle = 'Unpin ' + pinTitle;
+          } else {
+            pinTitle = 'Pin ' + pinTitle;
+          }
+
+          return (
+            <div className={repoStyle}>
+              <label className={repoPinStyle} title={pinTitle}>
+                <input
+                  type="checkbox"
+                  checked={pin}
+                  onChange={() => {
+                    props.model.repositoryPinned = !props.model
+                      .repositoryPinned;
+                    setPin(props.model.repositoryPinned);
                   }}
-                >
-                  {PathExt.basename(
-                    change.newValue || 'Click to select a Git repository.'
-                  )}
-                </span>
-              </React.Fragment>
-            );
-          }}
-        </UseSignal>
-      </div>
-    </div>
+                />
+                <DefaultIconReact
+                  className={pinIconStyle}
+                  tag="span"
+                  name="git-pin"
+                />
+              </label>
+              <span
+                className={classes(...pathStyles)}
+                title={change.newValue}
+                onClick={() => {
+                  selectGitRepository(props.model, props.fileBrowserModel);
+                }}
+              >
+                {change.newValue
+                  ? PathExt.basename(change.newValue)
+                  : 'Click to select a Git repository.'}
+              </span>
+            </div>
+          );
+        }}
+      </UseSignal>
+      <div className={separatorStyle} />
+    </React.Fragment>
   );
 };
