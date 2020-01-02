@@ -8,7 +8,7 @@ import {
   repoPathStyle,
   repoRefreshStyle,
   repoStyle
-} from '../style/PathHeaderStyle';
+} from '../style/PathHeader';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 import { IGitExtension } from '../tokens';

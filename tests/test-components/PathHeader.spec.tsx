@@ -5,7 +5,7 @@ import {
   gitPullStyle,
   gitPushStyle,
   repoRefreshStyle
-} from '../../src/style/PathHeaderStyle';
+} from '../../src/style/PathHeader';
 import 'jest';
 import { GitExtension } from '../../src/model';
 import * as git from '../../src/git';
