@@ -61,6 +61,14 @@ export const pushButtonClass = style({
   backgroundPosition: 'center'
 });
 
+export const branchButtonClass = style({
+  background: 'var(--jp-layout-color1)',
+  backgroundImage: 'var(--jp-icon-git-branch)',
+  backgroundSize: '16px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
+});
+
 export const pullButtonClass = style({
   margin: 'auto 5px auto auto',
 

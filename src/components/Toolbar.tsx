@@ -3,6 +3,7 @@ import { PathExt } from '@jupyterlab/coreutils';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import {
+  branchButtonClass,
   pullButtonClass,
   pushButtonClass,
   refreshButtonClass,
@@ -76,6 +77,15 @@ export class Toolbar extends React.Component<IToolbarProps> {
         <button
           className={classes(
             toolbarButtonClass,
+            branchButtonClass,
+            'jp-Icon-16'
+          )}
+          title={'Change the current branch'}
+          onClick={this._onBranchClick}
+        />
+        <button
+          className={classes(
+            toolbarButtonClass,
             refreshButtonClass,
             'jp-Icon-16'
           )}
@@ -125,6 +135,15 @@ export class Toolbar extends React.Component<IToolbarProps> {
         `Encountered an error when pushing changes. Error: ${reason}`
       );
     });
+  };
+
+  /**
+   * Callback invoked upon clicking a button to change the current branch.
+   *
+   * @param event - event object
+   */
+  private _onBranchClick = () => {
+    console.log('Branch button clicked');
   };
 
   /**
