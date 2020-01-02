@@ -1,19 +1,19 @@
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { IPathHeaderProps, PathHeader } from '../../src/components/PathHeader';
+import { IToolbarProps, Toolbar } from '../../src/components/Toolbar';
 import {
   gitPullStyle,
   gitPushStyle,
   repoRefreshStyle
-} from '../../src/style/PathHeader';
+} from '../../src/style/Toolbar';
 import 'jest';
 import { GitExtension } from '../../src/model';
 import * as git from '../../src/git';
 
 jest.mock('../../src/git');
 
-describe('PathHeader', function() {
-  let props: IPathHeaderProps;
+describe('Toolbar', function() {
+  let props: IToolbarProps;
 
   beforeEach(async () => {
     const fakePath = '/path/to/repo';
@@ -58,7 +58,7 @@ describe('PathHeader', function() {
 
   it('should have all buttons', function() {
     // When
-    const node = shallow(<PathHeader {...props} />);
+    const node = shallow(<Toolbar {...props} />);
 
     // Then
     const buttons = node.find('button');
@@ -80,7 +80,7 @@ describe('PathHeader', function() {
     const spyPush = jest.spyOn(GitExtension.prototype, 'push');
 
     // When
-    const node = shallow(<PathHeader {...props} />);
+    const node = shallow(<Toolbar {...props} />);
 
     // Then
     const buttons = node.find('button');

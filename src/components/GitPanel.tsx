@@ -12,7 +12,7 @@ import { decodeStage } from '../utils';
 import { BranchHeader } from './BranchHeader';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
-import { PathHeader } from './PathHeader';
+import { Toolbar } from './Toolbar';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -228,7 +228,7 @@ export class GitPanel extends React.Component<
 
     return (
       <div className={panelContainerStyle}>
-        <PathHeader
+        <Toolbar
           model={this.props.model}
           refresh={async () => {
             await this.refreshBranch();

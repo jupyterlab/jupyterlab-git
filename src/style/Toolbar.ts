@@ -1,6 +1,6 @@
 import { style } from 'typestyle';
 
-export const repoStyle = style({
+export const toolbarClass = style({
   display: 'flex',
   flexDirection: 'row',
   backgroundColor: 'var(--jp-layout-color1)',
@@ -8,7 +8,7 @@ export const repoStyle = style({
   minHeight: '35px'
 });
 
-export const repoPathStyle = style({
+export const repoPathClass = style({
   fontSize: 'var(--jp-ui-font-size1)',
   marginRight: '4px',
   paddingLeft: '4px',

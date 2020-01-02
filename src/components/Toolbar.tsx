@@ -5,27 +5,43 @@ import { classes } from 'typestyle';
 import {
   gitPullStyle,
   gitPushStyle,
-  repoPathStyle,
+  repoPathClass,
   repoRefreshStyle,
-  repoStyle
-} from '../style/PathHeader';
+  pathHeaderClass
+} from '../style/Toolbar';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 import { IGitExtension } from '../tokens';
 
-export interface IPathHeaderProps {
+/**
+ * Interface describing component properties.
+ */
+export interface IToolbarProps {
+  /**
+   * Git extension data model.
+   */
   model: IGitExtension;
+
+  /**
+   * Callback to invoke in order to refresh a repository.
+   *
+   * @returns promise which refreshes a repository
+   */
+
   refresh: () => Promise<void>;
 }
 
-export class PathHeader extends React.Component<IPathHeaderProps> {
-  constructor(props: IPathHeaderProps) {
+/**
+ * React component for rendering a panel toolbar.
+ */
+export class Toolbar extends React.Component<IToolbarProps> {
+  constructor(props: IToolbarProps) {
     super(props);
   }
 
   render() {
     return (
-      <div className={repoStyle}>
+      <div className={pathHeaderClass}>
         <UseSignal
           signal={this.props.model.repositoryChanged}
           initialArgs={{
@@ -34,11 +50,7 @@ export class PathHeader extends React.Component<IPathHeaderProps> {
             newValue: this.props.model.pathRepository
           }}
         >
-          {(_, change) => (
-            <span className={repoPathStyle} title={change.newValue}>
-              {PathExt.basename(change.newValue || '')}
-            </span>
-          )}
+          {this._onRepositoryPathChange}
         </UseSignal>
         <button
           className={classes(gitPullStyle, 'jp-Icon-16')}
@@ -74,6 +86,22 @@ export class PathHeader extends React.Component<IPathHeaderProps> {
       </div>
     );
   }
+
+  /**
+   * Callback invoked upon a change to the repository path.
+   *
+   * @private
+   * @param _ - event object
+   * @param change - change
+   * @returns React component
+   */
+  private _onRepositoryPathChange = (_, change) => {
+    return (
+      <span className={repoPathClass} title={change.newValue}>
+        {PathExt.basename(change.newValue || '')}
+      </span>
+    );
+  };
 
   /**
    * Displays the error dialog when the Git Push/Pull operation fails.
