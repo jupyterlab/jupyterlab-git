@@ -26,4 +26,13 @@ export class BranchMenu extends React.Component<
   constructor(props: IBranchMenuProps) {
     super(props);
   }
+
+  /**
+   * Renders the component.
+   *
+   * @returns fragment
+   */
+  render() {
+    return <span />;
+  }
 }

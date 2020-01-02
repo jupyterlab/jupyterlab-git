@@ -14,6 +14,7 @@ import {
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 import { IGitExtension } from '../tokens';
+import { BranchMenu } from './BranchMenu';
 
 /**
  * Interface describing component properties.
@@ -105,9 +106,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           title={'Refresh the repository to detect local and remote changes'}
           onClick={this._onRefreshClick}
         />
-        {this.state.branchMenu
-          ? null // TODO
-          : null}
+        {this.state.branchMenu ? <BranchMenu /> : null}
       </div>
     );
   }
