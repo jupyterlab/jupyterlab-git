@@ -105,6 +105,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           title={'Refresh the repository to detect local and remote changes'}
           onClick={this._onRefreshClick}
         />
+        {this.state.branchMenu
+          ? null // TODO
+          : null}
       </div>
     );
   }
@@ -190,7 +193,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     let retry = false;
     while (!result.button.accept) {
       retry = true;
-      const response = await showDialog({
+      const credentials = await showDialog({
         title: 'Git credentials required',
         body: new GitCredentialsForm(
           'Enter credentials for remote repository',
@@ -198,19 +201,18 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         ),
         buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
       });
-      if (response.button.accept) {
-        result = await showDialog({
-          title: title,
-          body: new GitPullPushDialog(
-            this.props.model,
-            operation,
-            response.value
-          ),
-          buttons: [Dialog.okButton({ label: 'DISMISS' })]
-        });
-      } else {
+      if (!credentials.button.accept) {
         break;
       }
+      result = await showDialog({
+        title: title,
+        body: new GitPullPushDialog(
+          this.props.model,
+          operation,
+          credentials.value
+        ),
+        buttons: [Dialog.okButton({ label: 'DISMISS' })]
+      });
     }
   }
 }
