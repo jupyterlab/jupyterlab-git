@@ -1,9 +1,15 @@
 import * as React from 'react';
+import { IGitExtension } from '../tokens';
 
 /**
  * Interface describing component properties.
  */
-export interface IBranchMenuProps {}
+export interface IBranchMenuProps {
+  /**
+   * Git extension data model.
+   */
+  model: IGitExtension;
+}
 
 /**
  * Interface describing component state.

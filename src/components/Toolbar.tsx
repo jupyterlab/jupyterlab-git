@@ -106,7 +106,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           title={'Refresh the repository to detect local and remote changes'}
           onClick={this._onRefreshClick}
         />
-        {this.state.branchMenu ? <BranchMenu /> : null}
+        {this.state.branchMenu ? <BranchMenu model={this.props.model} /> : null}
       </div>
     );
   }
