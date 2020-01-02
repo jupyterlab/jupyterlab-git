@@ -1,4 +1,4 @@
-import { Dialog, showDialog, UseSignal } from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import * as React from 'react';
 import { classes } from 'typestyle';
@@ -41,6 +41,11 @@ export interface IToolbarState {
    * Boolean indicating whether a branch menu is shown.
    */
   branchMenu: boolean;
+
+  /**
+   * Current repository path.
+   */
+  repository: string;
 }
 
 /**
@@ -55,8 +60,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    */
   constructor(props: IToolbarProps) {
     super(props);
+    this.props.model.repositoryChanged.connect(this._onRepositoryChange);
     this.state = {
-      branchMenu: false
+      branchMenu: false,
+      repository: ''
     };
   }
 
@@ -68,16 +75,12 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   render() {
     return (
       <div className={toolbarClass}>
-        <UseSignal
-          signal={this.props.model.repositoryChanged}
-          initialArgs={{
-            name: 'pathRepository',
-            oldValue: null,
-            newValue: this.props.model.pathRepository
-          }}
+        <span
+          className={repoPathClass}
+          title={`Current repository: ${this.state.repository}`}
         >
-          {this._onRepositoryPathChange}
-        </UseSignal>
+          {PathExt.basename(this.state.repository)}
+        </span>
         <button
           className={classes(toolbarButtonClass, pullButtonClass, 'jp-Icon-16')}
           title={'Pull latest changes'}
@@ -118,15 +121,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param change - change object
    * @returns React component
    */
-  private _onRepositoryPathChange = (_: any, change: any) => {
-    return (
-      <span
-        className={repoPathClass}
-        title={`Current repository: ${change.newValue}`}
-      >
-        {PathExt.basename(change.newValue || '')}
-      </span>
-    );
+  private _onRepositoryChange = (_: any, change: any) => {
+    this.setState({
+      repository: change.newValue || ''
+    });
   };
 
   /**
