@@ -45,9 +45,11 @@ export const toolbarButtonClass = style({
   }
 });
 
-export const refreshButtonClass = style({
+export const pullButtonClass = style({
+  margin: 'auto 0 auto auto',
+
   background: 'var(--jp-layout-color1)',
-  backgroundImage: 'var(--jp-icon-refresh)',
+  backgroundImage: 'var(--jp-icon-git-pull)',
   backgroundSize: '16px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
@@ -69,11 +71,9 @@ export const branchButtonClass = style({
   backgroundPosition: 'center'
 });
 
-export const pullButtonClass = style({
-  margin: 'auto 0 auto auto',
-
+export const refreshButtonClass = style({
   background: 'var(--jp-layout-color1)',
-  backgroundImage: 'var(--jp-icon-git-pull)',
+  backgroundImage: 'var(--jp-icon-refresh)',
   backgroundSize: '16px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
