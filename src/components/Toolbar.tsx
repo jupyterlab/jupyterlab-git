@@ -105,7 +105,10 @@ export class Toolbar extends React.Component<IToolbarProps> {
    */
   private _onRepositoryPathChange = (_: any, change: any) => {
     return (
-      <span className={repoPathClass} title={change.newValue}>
+      <span
+        className={repoPathClass}
+        title={`Current repository: ${change.newValue}`}
+      >
         {PathExt.basename(change.newValue || '')}
       </span>
     );
