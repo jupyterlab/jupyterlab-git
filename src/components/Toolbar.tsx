@@ -27,7 +27,6 @@ export interface IToolbarProps {
    *
    * @returns promise which refreshes a repository
    */
-
   refresh: () => Promise<void>;
 }
 
@@ -148,7 +147,6 @@ export class Toolbar extends React.Component<IToolbarProps> {
     let retry = false;
     while (!result.button.accept) {
       retry = true;
-
       const response = await showDialog({
         title: 'Git credentials required',
         body: new GitCredentialsForm(
@@ -157,7 +155,6 @@ export class Toolbar extends React.Component<IToolbarProps> {
         ),
         buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
       });
-
       if (response.button.accept) {
         result = await showDialog({
           title: title,
