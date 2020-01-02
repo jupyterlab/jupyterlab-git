@@ -7,7 +7,7 @@ import {
   gitPushStyle,
   repoPathClass,
   repoRefreshStyle,
-  pathHeaderClass
+  toolbarClass
 } from '../style/Toolbar';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
@@ -35,13 +35,24 @@ export interface IToolbarProps {
  * React component for rendering a panel toolbar.
  */
 export class Toolbar extends React.Component<IToolbarProps> {
+  /**
+   * Returns a React component for rendering a panel toolbar.
+   *
+   * @param props - component properties
+   * @returns React component
+   */
   constructor(props: IToolbarProps) {
     super(props);
   }
 
+  /**
+   * Renders the component.
+   *
+   * @returns fragment
+   */
   render() {
     return (
-      <div className={pathHeaderClass}>
+      <div className={toolbarClass}>
         <UseSignal
           signal={this.props.model.repositoryChanged}
           initialArgs={{
@@ -55,33 +66,17 @@ export class Toolbar extends React.Component<IToolbarProps> {
         <button
           className={classes(gitPullStyle, 'jp-Icon-16')}
           title={'Pull latest changes'}
-          onClick={() =>
-            this.showGitPushPullDialog(this.props.model, Operation.Pull).catch(
-              reason => {
-                console.error(
-                  `An error occurs when pulling the changes.\n${reason}`
-                );
-              }
-            )
-          }
+          onClick={this._onPullClick}
         />
         <button
           className={classes(gitPushStyle, 'jp-Icon-16')}
           title={'Push committed changes'}
-          onClick={() =>
-            this.showGitPushPullDialog(this.props.model, Operation.Push).catch(
-              reason => {
-                console.error(
-                  `An error occurs when pulling the changes.\n${reason}`
-                );
-              }
-            )
-          }
+          onClick={this._onPushClick}
         />
         <button
           className={classes(repoRefreshStyle, 'jp-Icon-16')}
           title={'Refresh the repository to detect local and remote changes'}
-          onClick={() => this.props.refresh()}
+          onClick={this._onRefreshClick}
         />
       </div>
     );
@@ -90,12 +85,11 @@ export class Toolbar extends React.Component<IToolbarProps> {
   /**
    * Callback invoked upon a change to the repository path.
    *
-   * @private
-   * @param _ - event object
-   * @param change - change
+   * @param _ - unused argument
+   * @param change - change object
    * @returns React component
    */
-  private _onRepositoryPathChange = (_, change) => {
+  private _onRepositoryPathChange = (_: any, change: any) => {
     return (
       <span className={repoPathClass} title={change.newValue}>
         {PathExt.basename(change.newValue || '')}
@@ -104,24 +98,58 @@ export class Toolbar extends React.Component<IToolbarProps> {
   };
 
   /**
-   * Displays the error dialog when the Git Push/Pull operation fails.
-   * @param title the title of the error dialog
-   * @param body the message to be shown in the body of the modal.
+   * Callback invoked upon clicking a button to pull the latest changes.
+   *
+   * @param event - event object
    */
-  private async showGitPushPullDialog(
-    model: IGitExtension,
-    operation: Operation
-  ): Promise<void> {
+  private _onPullClick = () => {
+    this._showDialog(Operation.Pull).catch(reason => {
+      console.error(
+        `Encountered an error when pulling changes. Error: ${reason}`
+      );
+    });
+  };
+
+  /**
+   * Callback invoked upon clicking a button to push the latest changes.
+   *
+   * @param event - event object
+   */
+  private _onPushClick = () => {
+    this._showDialog(Operation.Push).catch(reason => {
+      console.error(
+        `Encountered an error when pushing changes. Error: ${reason}`
+      );
+    });
+  };
+
+  /**
+   * Callback invoked upon clicking a button to refresh a repository.
+   *
+   * @param event - event object
+   */
+  private _onRefreshClick = () => {
+    this.props.refresh();
+  };
+
+  /**
+   * Displays an error dialog when a Git operation fails.
+   *
+   * @param operation - Git operation name
+   * @returns Promise for displaying a dialog
+   */
+  private async _showDialog(operation: Operation): Promise<void> {
+    const title = `Git ${operation}`;
     let result = await showDialog({
-      title: `Git ${operation}`,
-      body: new GitPullPushDialog(model, operation),
+      title: title,
+      body: new GitPullPushDialog(this.props.model, operation),
       buttons: [Dialog.okButton({ label: 'DISMISS' })]
     });
     let retry = false;
     while (!result.button.accept) {
       retry = true;
 
-      let response = await showDialog({
+      const response = await showDialog({
         title: 'Git credentials required',
         body: new GitCredentialsForm(
           'Enter credentials for remote repository',
@@ -131,10 +159,13 @@ export class Toolbar extends React.Component<IToolbarProps> {
       });
 
       if (response.button.accept) {
-        // user accepted attempt to login
         result = await showDialog({
-          title: `Git ${operation}`,
-          body: new GitPullPushDialog(model, operation, response.value),
+          title: title,
+          body: new GitPullPushDialog(
+            this.props.model,
+            operation,
+            response.value
+          ),
           buttons: [Dialog.okButton({ label: 'DISMISS' })]
         });
       } else {
