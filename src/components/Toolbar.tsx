@@ -6,6 +6,7 @@ import {
   pullButtonClass,
   pushButtonClass,
   refreshButtonClass,
+  toolbarButtonClass,
   repoPathClass,
   toolbarClass
 } from '../style/Toolbar';
@@ -63,17 +64,21 @@ export class Toolbar extends React.Component<IToolbarProps> {
           {this._onRepositoryPathChange}
         </UseSignal>
         <button
-          className={classes(pullButtonClass, 'jp-Icon-16')}
+          className={classes(toolbarButtonClass, pullButtonClass, 'jp-Icon-16')}
           title={'Pull latest changes'}
           onClick={this._onPullClick}
         />
         <button
-          className={classes(pushButtonClass, 'jp-Icon-16')}
+          className={classes(toolbarButtonClass, pushButtonClass, 'jp-Icon-16')}
           title={'Push committed changes'}
           onClick={this._onPushClick}
         />
         <button
-          className={classes(refreshButtonClass, 'jp-Icon-16')}
+          className={classes(
+            toolbarButtonClass,
+            refreshButtonClass,
+            'jp-Icon-16'
+          )}
           title={'Refresh the repository to detect local and remote changes'}
           onClick={this._onRefreshClick}
         />
