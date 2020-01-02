@@ -19,7 +19,7 @@ export const repoPathClass = style({
   lineHeight: '33px'
 });
 
-export const repoRefreshStyle = style({
+export const refreshButtonClass = style({
   width: 'var(--jp-private-running-button-width)',
   background: 'var(--jp-layout-color1)',
   border: 'none',
@@ -43,7 +43,7 @@ export const repoRefreshStyle = style({
   }
 });
 
-export const gitPushStyle = style({
+export const pushButtonClass = style({
   width: 'var(--jp-private-running-button-width)',
   background: 'var(--jp-layout-color1)',
   border: 'none',
@@ -67,7 +67,7 @@ export const gitPushStyle = style({
   }
 });
 
-export const gitPullStyle = style({
+export const pullButtonClass = style({
   width: 'var(--jp-private-running-button-width)',
   background: 'var(--jp-layout-color1)',
   border: 'none',

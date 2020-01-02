@@ -2,9 +2,9 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 import { IToolbarProps, Toolbar } from '../../src/components/Toolbar';
 import {
-  gitPullStyle,
-  gitPushStyle,
-  repoRefreshStyle
+  pullButtonClass,
+  pushButtonClass,
+  refreshButtonClass
 } from '../../src/style/Toolbar';
 import 'jest';
 import { GitExtension } from '../../src/model';
@@ -63,15 +63,15 @@ describe('Toolbar', function() {
     // Then
     const buttons = node.find('button');
     expect(buttons).toHaveLength(3);
-    expect(buttons.find(`.${gitPullStyle}`)).toHaveLength(1);
-    expect(buttons.find(`.${gitPullStyle}`).prop('title')).toEqual(
+    expect(buttons.find(`.${pullButtonClass}`)).toHaveLength(1);
+    expect(buttons.find(`.${pullButtonClass}`).prop('title')).toEqual(
       'Pull latest changes'
     );
-    expect(buttons.find(`.${gitPushStyle}`)).toHaveLength(1);
-    expect(buttons.find(`.${gitPushStyle}`).prop('title')).toEqual(
+    expect(buttons.find(`.${pushButtonClass}`)).toHaveLength(1);
+    expect(buttons.find(`.${pushButtonClass}`).prop('title')).toEqual(
       'Push committed changes'
     );
-    expect(buttons.find(`.${repoRefreshStyle}`)).toHaveLength(1);
+    expect(buttons.find(`.${refreshButtonClass}`)).toHaveLength(1);
   });
 
   it('should call API on button click', function() {
@@ -85,11 +85,11 @@ describe('Toolbar', function() {
     // Then
     const buttons = node.find('button');
 
-    buttons.find(`.${gitPullStyle}`).simulate('click');
+    buttons.find(`.${pullButtonClass}`).simulate('click');
     expect(spyPull).toHaveBeenCalledTimes(1);
     expect(spyPull).toHaveBeenCalledWith(undefined);
 
-    buttons.find(`.${gitPushStyle}`).simulate('click');
+    buttons.find(`.${pushButtonClass}`).simulate('click');
     expect(spyPush).toHaveBeenCalledTimes(1);
     expect(spyPush).toHaveBeenCalledWith(undefined);
   });
