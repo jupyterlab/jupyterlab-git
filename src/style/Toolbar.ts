@@ -29,7 +29,7 @@ export const toolbarButtonClass = style({
   height: '24px',
   width: 'var(--jp-private-running-button-width)',
 
-  margin: 'auto 5px auto 5px',
+  margin: 'auto 0 auto 0',
   padding: '0px 6px',
 
   border: 'none',
@@ -70,7 +70,7 @@ export const branchButtonClass = style({
 });
 
 export const pullButtonClass = style({
-  margin: 'auto 5px auto auto',
+  margin: 'auto 0 auto auto',
 
   background: 'var(--jp-layout-color1)',
   backgroundImage: 'var(--jp-icon-git-pull)',
