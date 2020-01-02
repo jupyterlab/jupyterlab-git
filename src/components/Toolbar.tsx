@@ -33,9 +33,19 @@ export interface IToolbarProps {
 }
 
 /**
+ * Interface describing component state.
+ */
+export interface IToolbarState {
+  /**
+   * Boolean indicating whether a branch menu is shown.
+   */
+  branchMenu: boolean;
+}
+
+/**
  * React component for rendering a panel toolbar.
  */
-export class Toolbar extends React.Component<IToolbarProps> {
+export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   /**
    * Returns a React component for rendering a panel toolbar.
    *
@@ -44,6 +54,9 @@ export class Toolbar extends React.Component<IToolbarProps> {
    */
   constructor(props: IToolbarProps) {
     super(props);
+    this.state = {
+      branchMenu: false
+    };
   }
 
   /**
@@ -146,7 +159,10 @@ export class Toolbar extends React.Component<IToolbarProps> {
    * @param event - event object
    */
   private _onBranchClick = () => {
-    console.log('Branch button clicked');
+    // Toggle the branch menu:
+    this.setState({
+      branchMenu: !this.state.branchMenu
+    });
   };
 
   /**
