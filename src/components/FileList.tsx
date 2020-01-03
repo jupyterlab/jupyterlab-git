@@ -1,7 +1,6 @@
-import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { JSONObject } from '@phosphor/coreutils';
 import { Menu } from '@phosphor/widgets';
 import * as React from 'react';
 import { GitExtension } from '../model';
@@ -13,8 +12,6 @@ import {
 } from '../style/FileListStyle';
 import { Git } from '../tokens';
 import { openListedFile } from '../utils';
-import { GitAuthorForm } from '../widgets/AuthorBox';
-import { CommitBox } from './CommitBox';
 import { openDiffView } from './diff/DiffWidget';
 import { GitStage, IGitStageProps } from './GitStage';
 import { GitStageSimple } from './GitStageSimple';
@@ -387,29 +384,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   };
 
-  /** Commit all staged files */
-  commitAllStagedFiles = async (message: string): Promise<void> => {
-    try {
-      if (
-        message &&
-        message !== '' &&
-        (await this._hasIdentity(this.props.model.pathRepository))
-      ) {
-        await this.props.model.commit(message);
-      }
-    } catch (error) {
-      console.error(error);
-      showErrorMessage('Fail to commit', error);
-    }
-  };
-
-  /** Commit all marked files */
-  commitAllMarkedFiles = async (message: string): Promise<void> => {
-    await this.resetAllStagedFiles();
-    await this.addAllMarkedFiles();
-    await this.commitAllStagedFiles(message);
-  };
-
   get markedFiles() {
     return this.allFilesExcludingUnmodified.filter(file =>
       this.props.model.getMark(file.to)
@@ -509,11 +483,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     if (this.props.settings.composite['simpleStaging']) {
       return (
         <div>
-          <CommitBox
-            hasFiles={this.markedFiles.length > 0}
-            commitFunc={this.commitAllMarkedFiles}
-            settings={this.props.settings}
-          />
           <div>
             <GitStageSimple
               heading={'Changed'}
@@ -529,11 +498,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     } else {
       return (
         <div onContextMenu={event => event.preventDefault()}>
-          <CommitBox
-            hasFiles={this.props.stagedFiles.length > 0}
-            commitFunc={this.commitAllStagedFiles}
-            settings={this.props.settings}
-          />
           <div>
             <Staged />
             <Changed />
@@ -543,51 +507,4 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       );
     }
   }
-
-  /**
-   * Does the user have an known git identity.
-   *
-   * @param path Top repository path
-   * @returns Success status
-   */
-  private async _hasIdentity(path: string): Promise<boolean> {
-    // If the repository path changes, check the identity
-    if (path !== this._previousTopRepoPath) {
-      try {
-        const apiResponse = await this.props.model.config();
-        if (apiResponse.ok) {
-          const options: JSONObject = (await apiResponse.json()).options;
-          const keys = Object.keys(options);
-          // If the user name or email is unknown, ask the user to set it.
-          if (keys.indexOf('user.name') < 0 || keys.indexOf('user.email') < 0) {
-            let result = await showDialog({
-              title: 'Who is committing?',
-              body: new GitAuthorForm()
-            });
-            if (!result.button.accept) {
-              console.log('User refuses to set his identity.');
-              return false;
-            }
-            const identity = result.value;
-            const response = await this.props.model.config({
-              'user.name': identity.name,
-              'user.email': identity.email
-            });
-
-            if (!response.ok) {
-              console.log(await response.text());
-              return false;
-            }
-          }
-          this._previousTopRepoPath = path;
-        }
-      } catch (error) {
-        throw new Error('Fail to set your identity. ' + error.message);
-      }
-    }
-
-    return Promise.resolve(true);
-  }
-
-  private _previousTopRepoPath: string = null;
 }
