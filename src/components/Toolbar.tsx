@@ -155,7 +155,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <div className={toolbarMenuWrapperClass}>
           <button
             className={toolbarMenuButtonClass}
-            title={`Current Repository: ${repo}`}
+            title={`Current repository: ${repo}`}
             onClick={this._onRepositoryClick}
           >
             <p className={toolbarMenuButtonTitleClass}>Current Repository</p>

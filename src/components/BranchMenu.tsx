@@ -97,7 +97,9 @@ export class BranchMenu extends React.Component<
    * @param event - event object
    */
   private _onFilterChange = (event: any) => {
-    console.log(event.target.value);
+    this.setState({
+      filter: event.target.value
+    });
   };
 
   /**
