@@ -49,14 +49,13 @@ export class GitExtension implements IGitExtension {
     };
 
     // Load state extension
-    this._restored = app.restored.then(() => {
-      if (state) {
-        return state
-          .fetch(PLUGIN_ID)
-          .then(value => {
+    if (app) {
+      this._restored = app.restored.then(async () => {
+        if (state) {
+          try {
+            const value = await state.fetch(PLUGIN_ID);
             if (value) {
               const stateExtension: IGitState = value as any;
-
               if (stateExtension.isRepositoryPin) {
                 const change: IChangedArgs<string> = {
                   name: 'pathRepository',
@@ -67,16 +66,18 @@ export class GitExtension implements IGitExtension {
                 this._repositoryChanged.emit(change);
               }
             }
-          })
-          .catch(reason => {
+          } catch (reason) {
             console.error(
               `Fail to fetch the state for ${PLUGIN_ID}.\n${reason}`
             );
-          });
-      } else {
-        return Promise.resolve();
-      }
-    });
+          }
+        } else {
+          return Promise.resolve();
+        }
+      });
+    } else {
+      this._restored = Promise.resolve();
+    }
 
     // Load the server root path
     this._getServerRoot()

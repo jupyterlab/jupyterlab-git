@@ -55,6 +55,7 @@ function MockSettings() {
 describe('GitPanel', () => {
   describe('#commitStagedFiles()', () => {
     const props: IGitSessionNodeProps = {
+      fileBrowserModel: null,
       model: null,
       renderMime: null,
       settings: null
@@ -69,7 +70,8 @@ describe('GitPanel', () => {
       const app = {
         commands: {
           hasCommand: jest.fn().mockReturnValue(true)
-        }
+        },
+        restored: Promise.resolve()
       };
       props.model = new GitModel(app as any);
       props.model.pathRepository = '/path/to/repo';

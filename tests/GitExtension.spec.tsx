@@ -74,7 +74,8 @@ describe('IGitExtension', () => {
     const app = {
       commands: {
         hasCommand: jest.fn().mockReturnValue(true)
-      }
+      },
+      restored: Promise.resolve()
     };
     model = new GitExtension(app as any);
   });

@@ -52,6 +52,7 @@ describe('PathHeader', function() {
 
     props = {
       model: model,
+      fileBrowserModel: null,
       refresh: async () => {}
     };
   });
