@@ -36,18 +36,19 @@ interface IGitState {
 export class GitExtension implements IGitExtension {
   constructor(
     app: JupyterFrontEnd = null,
-    settings?: ISettingRegistry.ISettings,
-    state?: IStateDB
+    settings: ISettingRegistry.ISettings = null,
+    state: IStateDB = null
   ) {
     const model = this;
     this._app = app;
+    this._stateDB = state;
 
-    // Load state extension
     this._state = {
       isRepositoryPin: false,
       pathRepository: null
     };
 
+    // Load state extension
     this._restored = app.restored.then(() => {
       if (state) {
         return state
@@ -111,11 +112,9 @@ export class GitExtension implements IGitExtension {
      * @param settings - settings registry
      */
     function onSettingsChange(settings: ISettingRegistry.ISettings) {
-      const freq = poll.frequency;
       poll.frequency = {
-        interval: settings.composite.refreshInterval as number,
-        backoff: freq.backoff,
-        max: freq.max
+        ...poll.frequency,
+        interval: settings.composite.refreshInterval as number
       };
     }
   }
@@ -123,7 +122,7 @@ export class GitExtension implements IGitExtension {
   /**
    * The list of branch in the current repo
    */
-  get branches() {
+  get branches(): Git.IBranch[] {
     return this._branches;
   }
 
@@ -134,7 +133,7 @@ export class GitExtension implements IGitExtension {
   /**
    * The current branch
    */
-  get currentBranch() {
+  get currentBranch(): Git.IBranch | null {
     return this._currentBranch;
   }
 
@@ -391,7 +390,9 @@ export class GitExtension implements IGitExtension {
    * @param mark Mark to set
    */
   addMark(fname: string, mark: boolean) {
-    this._currentMarker.add(fname, mark);
+    if (this._currentMarker) {
+      this._currentMarker.add(fname, mark);
+    }
   }
 
   /**
@@ -401,7 +402,11 @@ export class GitExtension implements IGitExtension {
    * @returns Mark of the file
    */
   getMark(fname: string): boolean {
-    return this._currentMarker.get(fname);
+    if (this._currentMarker) {
+      return this._currentMarker.get(fname);
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -410,7 +415,9 @@ export class GitExtension implements IGitExtension {
    * @param fname Filename
    */
   toggleMark(fname: string) {
-    this._currentMarker.toggle(fname);
+    if (this._currentMarker) {
+      this._currentMarker.toggle(fname);
+    }
   }
 
   /**
@@ -1079,27 +1086,27 @@ export class GitExtension implements IGitExtension {
     return this._currentMarker;
   }
 
-  private _status: Git.IStatusFileResult[] = [];
-  private _branches: Git.IBranch[];
-  private _currentBranch: Git.IBranch;
-  private _serverRoot: string;
   private _app: JupyterFrontEnd | null;
+  private _branches: Git.IBranch[] = [];
+  private _currentBranch: Git.IBranch | null = null;
+  private _currentMarker: BranchMarker = null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
+  private _headChanged = new Signal<IGitExtension, void>(this);
   private _isDisposed = false;
   private _markerCache: Markers = new Markers(() => this._markChanged.emit());
-  private _currentMarker: BranchMarker = null;
-  private _readyPromise: Promise<void> = Promise.resolve();
+  private _markChanged = new Signal<IGitExtension, void>(this);
   private _pendingReadyPromise = 0;
   private _poll: Poll;
-  private _headChanged = new Signal<IGitExtension, void>(this);
-  private _markChanged = new Signal<IGitExtension, void>(this);
+  private _readyPromise: Promise<void> = Promise.resolve();
   private _repositoryChanged = new Signal<
     IGitExtension,
     IChangedArgs<string | null>
   >(this);
   private _restored: Promise<void>;
+  private _serverRoot: string;
   private _state: IGitState;
   private _stateDB: IStateDB | null = null;
+  private _status: Git.IStatusFileResult[] = [];
   private _statusChanged = new Signal<IGitExtension, Git.IStatusFileResult[]>(
     this
   );

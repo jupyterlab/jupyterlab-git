@@ -18,7 +18,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * The current branch
    */
-  currentBranch: Git.IBranch;
+  currentBranch: Git.IBranch | null;
 
   /**
    * A signal emitted when the HEAD of the git repository changes.
@@ -124,7 +124,7 @@ export interface IGitExtension extends IDisposable {
   /** Make request to switch current working branch,
    * create new branch if needed,
    * or discard a specific file change or all changes
-   * TODO: Refactor into seperate endpoints for each kind of checkout request
+   * TODO: Refactor into separate endpoints for each kind of checkout request
    *
    * If a branch name is provided, check it out (with or without creating it)
    * If a filename is provided, check the file out
