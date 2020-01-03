@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { IGitExtension } from '../tokens';
+import { branchMenuWrapperClass } from '../style/BranchMenu';
 
 /**
  * Interface describing component properties.
@@ -39,6 +40,6 @@ export class BranchMenu extends React.Component<
    * @returns fragment
    */
   render() {
-    return <span />;
+    return <div className={branchMenuWrapperClass} />;
   }
 }

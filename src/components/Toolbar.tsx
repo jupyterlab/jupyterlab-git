@@ -118,7 +118,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Callback invoked upon a change to the repository path.
    *
    * @param _ - unused argument
-   * @param change - change object
+   * @param change - event object
    * @returns React component
    */
   private _onRepositoryChange = (_: any, change: any) => {
