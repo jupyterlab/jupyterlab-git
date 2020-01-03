@@ -1,114 +1,166 @@
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import * as React from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { classes } from 'typestyle';
-
 import {
-  stagedCommitButtonDisabledStyle,
-  stagedCommitButtonReadyStyle,
-  stagedCommitButtonStyle,
-  stagedCommitMessageStyle,
-  stagedCommitStyle,
-  textInputStyle
-} from '../style/BranchHeaderStyle';
+  commitFormClass,
+  commitSummaryClass,
+  commitDescriptionClass,
+  commitButtonClass,
+  commitButtonDisabledClass
+} from '../style/CommitBox';
 
+/**
+ * Interface describing component properties.
+ */
 export interface ICommitBoxProps {
+  /**
+   * Boolean indicating whether files currently exist which have changes to commit.
+   */
   hasFiles: boolean;
-  commitFunc: (message: string) => Promise<void>;
-  settings: ISettingRegistry.ISettings;
+
+  /**
+   * Callback to invoke in order to commit changes.
+   *
+   * @param msg - commit message
+   * @returns a promise which commits changes
+   */
+  onCommit: (msg: string) => Promise<void>;
 }
 
+/**
+ * Interface describing component state.
+ */
 export interface ICommitBoxState {
   /**
-   * Commit message
+   * Commit message summary.
    */
-  value: string;
+  summary: string;
+
+  /**
+   * Commit message description.
+   */
+  description: string;
 }
 
+/**
+ * React component for entering a commit message.
+ */
 export class CommitBox extends React.Component<
   ICommitBoxProps,
   ICommitBoxState
 > {
+  /**
+   * Returns a React component for entering a commit message.
+   *
+   * @param props - component properties
+   * @returns React component
+   */
   constructor(props: ICommitBoxProps) {
     super(props);
     this.state = {
-      value: ''
+      summary: '',
+      description: ''
     };
   }
 
-  /** Prevent enter key triggered 'submit' action during commit message input */
-  onKeyPress(event: any): void {
-    if (event.which === 13) {
-      event.preventDefault();
-      this.setState({ value: this.state.value + '\n' });
-    }
-  }
-
-  /** Initalize commit message input box */
-  initializeInput = (): void => {
-    this.setState({
-      value: ''
-    });
-  };
-
-  /** Handle input inside commit message box */
-  handleChange = (event: any): void => {
-    this.setState({
-      value: event.target.value
-    });
-  };
-
-  /** Update state of commit message input box */
-  commitButtonStyle = (hasStagedFiles: boolean) => {
-    if (hasStagedFiles) {
-      if (this.state.value.length === 0) {
-        return classes(stagedCommitButtonStyle, stagedCommitButtonReadyStyle);
-      } else {
-        return stagedCommitButtonStyle;
-      }
-    } else {
-      return classes(stagedCommitButtonStyle, stagedCommitButtonDisabledStyle);
-    }
-  };
-
+  /**
+   * Renders the component.
+   *
+   * @returns fragment
+   */
   render() {
+    const disabled = !(this.props.hasFiles && this.state.summary);
     return (
-      <form
-        className={stagedCommitStyle}
-        onKeyPress={event => this.onKeyPress(event)}
-      >
+      <form className={commitFormClass}>
+        <input
+          className={commitSummaryClass}
+          type="text"
+          placeholder="Summary (required)"
+          title="Enter a commit message summary (a single line, preferably less than 50 characters)"
+          value={this.state.summary}
+          onChange={this._onSummaryChange}
+          onKeyPress={this._onSummaryKeyPress}
+        />
         <TextareaAutosize
-          className={classes(textInputStyle, stagedCommitMessageStyle)}
-          disabled={!this.props.hasFiles}
-          minRows={2}
-          onChange={this.handleChange}
-          placeholder={this._placeholder()}
-          value={this.state.value}
+          className={commitDescriptionClass}
+          minRows={5}
+          placeholder="Description"
+          title="Enter a commit message description"
+          value={this.state.description}
+          onChange={this._onDescriptionChange}
         />
         <input
-          className={this.commitButtonStyle(this.props.hasFiles)}
+          className={classes(
+            commitButtonClass,
+            disabled ? commitButtonDisabledClass : null
+          )}
           type="button"
           title="Commit"
-          disabled={!(this.props.hasFiles && this.state.value)}
-          onClick={() => {
-            this.props.commitFunc(this.state.value);
-            this.initializeInput();
-          }}
+          value="Commit"
+          disabled={disabled}
+          onClick={this._onCommitClick}
         />
       </form>
     );
   }
 
-  protected _placeholder = (): string => {
-    if (this.props.settings.composite['simpleStaging']) {
-      return this.props.hasFiles
-        ? 'Input message to commit selected changes'
-        : 'Select changes to enable commit';
-    } else {
-      return this.props.hasFiles
-        ? 'Input message to commit staged changes'
-        : 'Stage your changes before commit';
+  /**
+   * Callback invoked upon clicking a commit message submit button.
+   *
+   * @param event - event object
+   */
+  private _onCommitClick = () => {
+    const msg = this.state.summary + '\n' + this.state.description + '\n';
+    this.props.onCommit(msg);
+
+    // NOTE: we assume here that committing changes always works and we can safely clear component state
+    this._reset();
+  };
+
+  /**
+   * Callback invoked upon updating a commit message description.
+   *
+   * @param event - event object
+   */
+  private _onDescriptionChange = (event: any): void => {
+    this.setState({
+      description: event.target.value
+    });
+  };
+
+  /**
+   * Callback invoked upon updating a commit message summary.
+   *
+   * @param event - event object
+   */
+  private _onSummaryChange = (event: any): void => {
+    this.setState({
+      summary: event.target.value
+    });
+  };
+
+  /**
+   * Callback invoked upon a `'keypress'` event when entering a commit message summary.
+   *
+   * ## Notes
+   *
+   * -   Prevents triggering a `'submit'` action when hitting the `ENTER` key while entering a commit message summary.
+   *
+   * @param event - event object
+   */
+  private _onSummaryKeyPress(event: any): void {
+    if (event.which === 13) {
+      event.preventDefault();
     }
+  }
+
+  /**
+   * Resets component state (e.g., in order to re-initialize the commit message input box).
+   */
+  private _reset = (): void => {
+    this.setState({
+      summary: '',
+      description: ''
+    });
   };
 }
