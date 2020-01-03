@@ -22,45 +22,41 @@ export const toolbarNavClass = style({
   borderBottomColor: 'var(--jp-border-color2)'
 });
 
-export const repoMenuWrapperClass = style({});
-
-export const repoMenuButtonClass = style({
-  marginRight: '4px',
-  paddingLeft: '4px',
-
-  lineHeight: '33px',
-  verticalAlign: 'middle',
-
-  overflow: 'hidden',
-
-  fontSize: 'var(--jp-ui-font-size1)',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap'
+export const toolbarMenuWrapperClass = style({
+  borderBottomStyle: 'solid',
+  borderBottomWidth: 'var(--jp-border-width)',
+  borderBottomColor: 'var(--jp-border-color2)'
 });
 
-export const repoMenuTitleClass = style({});
+export const toolbarMenuButtonClass = style({
+  boxSizing: 'border-box',
+  width: '100%',
 
-export const repoMenuCurrentClass = style({});
+  padding: '4px 11px 4px',
 
-export const branchMenuWrapperClass = style({});
+  lineHeight: '1.5em',
 
-export const branchMenuButtonClass = style({
-  marginRight: '4px',
-  paddingLeft: '4px',
+  border: 'none',
+  borderRadius: 0,
 
-  lineHeight: '33px',
-  verticalAlign: 'middle',
-
-  overflow: 'hidden',
-
+  textAlign: 'left',
   fontSize: 'var(--jp-ui-font-size1)',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap'
+
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--jp-layout-color3)'
+    }
+  }
 });
 
-export const branchMenuTitleClass = style({});
+export const toolbarMenuButtonTitleClass = style({});
 
-export const branchMenuCurrentClass = style({});
+export const toolbarMenuButtonSubtitleClass = style({
+  fontWeight: 700
+});
 
 export const toolbarButtonClass = style({
   boxSizing: 'border-box',

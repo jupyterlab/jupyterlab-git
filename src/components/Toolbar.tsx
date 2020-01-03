@@ -5,19 +5,15 @@ import { classes } from 'typestyle';
 import {
   // NOTE: keep in alphabetical order
   branchIconClass,
-  branchMenuButtonClass,
-  branchMenuCurrentClass,
-  branchMenuTitleClass,
-  branchMenuWrapperClass,
   pullButtonClass,
   pushButtonClass,
   refreshButtonClass,
-  repoMenuButtonClass,
-  repoMenuCurrentClass,
-  repoMenuTitleClass,
-  repoMenuWrapperClass,
   toolbarButtonClass,
   toolbarClass,
+  toolbarMenuButtonClass,
+  toolbarMenuButtonSubtitleClass,
+  toolbarMenuButtonTitleClass,
+  toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
@@ -156,28 +152,28 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             onClick={this._onRefreshClick}
           />
         </div>
-        <div className={repoMenuWrapperClass}>
+        <div className={toolbarMenuWrapperClass}>
           <button
-            className={repoMenuButtonClass}
+            className={toolbarMenuButtonClass}
             title={`Current Repository: ${repo}`}
             onClick={this._onRepositoryClick}
           >
-            <p className={repoMenuTitleClass}>Current Repository</p>
-            <p
-              className={repoMenuCurrentClass}
-            >{`Repository: ${PathExt.basename(repo)}`}</p>
+            <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
+            <p className={toolbarMenuButtonSubtitleClass}>
+              {PathExt.basename(repo)}
+            </p>
           </button>
           {this.state.repoMenu ? null : null}
         </div>
-        <div className={branchMenuWrapperClass}>
+        <div className={toolbarMenuWrapperClass}>
           <button
-            className={branchMenuButtonClass}
+            className={toolbarMenuButtonClass}
             title={`Change the current branch: ${branch}`}
             onClick={this._onBranchClick}
           >
             <span className={classes(branchIconClass, 'jp-Icon-16')} />
-            <p className={branchMenuTitleClass}>Current Branch</p>
-            <p className={branchMenuCurrentClass}>{branch}</p>
+            <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
+            <p className={toolbarMenuButtonSubtitleClass}>{branch}</p>
           </button>
           {this.state.branchMenu ? (
             <BranchMenu model={this.props.model} />
