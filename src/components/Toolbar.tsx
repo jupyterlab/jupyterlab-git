@@ -3,18 +3,67 @@ import { PathExt } from '@jupyterlab/coreutils';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import {
-  branchButtonClass,
+  // NOTE: keep in alphabetical order
+  branchIconClass,
+  branchMenuButtonClass,
+  branchMenuCurrentClass,
+  branchMenuTitleClass,
+  branchMenuWrapperClass,
   pullButtonClass,
   pushButtonClass,
   refreshButtonClass,
+  repoMenuButtonClass,
+  repoMenuCurrentClass,
+  repoMenuTitleClass,
+  repoMenuWrapperClass,
   toolbarButtonClass,
-  repoPathClass,
-  toolbarClass
+  toolbarClass,
+  toolbarNavClass
 } from '../style/Toolbar';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 import { IGitExtension } from '../tokens';
 import { BranchMenu } from './BranchMenu';
+
+/**
+ * Displays an error dialog when a Git operation fails.
+ *
+ * @private
+ * @param model - Git extension model
+ * @param operation - Git operation name
+ * @returns Promise for displaying a dialog
+ */
+async function showGitOperationDialog(
+  model: IGitExtension,
+  operation: Operation
+): Promise<void> {
+  const title = `Git ${operation}`;
+  let result = await showDialog({
+    title: title,
+    body: new GitPullPushDialog(model, operation),
+    buttons: [Dialog.okButton({ label: 'DISMISS' })]
+  });
+  let retry = false;
+  while (!result.button.accept) {
+    retry = true;
+    const credentials = await showDialog({
+      title: 'Git credentials required',
+      body: new GitCredentialsForm(
+        'Enter credentials for remote repository',
+        retry ? 'Incorrect username or password.' : ''
+      ),
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
+    });
+    if (!credentials.button.accept) {
+      break;
+    }
+    result = await showDialog({
+      title: title,
+      body: new GitPullPushDialog(model, operation, credentials.value),
+      buttons: [Dialog.okButton({ label: 'DISMISS' })]
+    });
+  }
+}
 
 /**
  * Interface describing component properties.
@@ -43,9 +92,9 @@ export interface IToolbarState {
   branchMenu: boolean;
 
   /**
-   * Current repository path.
+   * Boolean indicating whether a repository menu is shown.
    */
-  repository: string;
+  repoMenu: boolean;
 }
 
 /**
@@ -60,10 +109,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    */
   constructor(props: IToolbarProps) {
     super(props);
-    this.props.model.repositoryChanged.connect(this._onRepositoryChange);
+    this.props.model.repositoryChanged.connect(this._onRepositoryChange, this);
+    this.props.model.headChanged.connect(this._onHeadChange, this);
     this.state = {
       branchMenu: false,
-      repository: ''
+      repoMenu: false
     };
   }
 
@@ -73,58 +123,82 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns fragment
    */
   render() {
+    const repo = this.props.model.pathRepository || '';
+    const branch = repo ? this.props.model.currentBranch.name : '';
     return (
       <div className={toolbarClass}>
-        <span
-          className={repoPathClass}
-          title={`Current repository: ${this.state.repository}`}
-        >
-          {PathExt.basename(this.state.repository)}
-        </span>
-        <button
-          className={classes(toolbarButtonClass, pullButtonClass, 'jp-Icon-16')}
-          title={'Pull latest changes'}
-          onClick={this._onPullClick}
-        />
-        <button
-          className={classes(toolbarButtonClass, pushButtonClass, 'jp-Icon-16')}
-          title={'Push committed changes'}
-          onClick={this._onPushClick}
-        />
-        <button
-          className={classes(
-            toolbarButtonClass,
-            branchButtonClass,
-            'jp-Icon-16'
-          )}
-          title={'Change the current branch'}
-          onClick={this._onBranchClick}
-        />
-        <button
-          className={classes(
-            toolbarButtonClass,
-            refreshButtonClass,
-            'jp-Icon-16'
-          )}
-          title={'Refresh the repository to detect local and remote changes'}
-          onClick={this._onRefreshClick}
-        />
-        {this.state.branchMenu ? <BranchMenu model={this.props.model} /> : null}
+        <div className={toolbarNavClass}>
+          <button
+            className={classes(
+              toolbarButtonClass,
+              pullButtonClass,
+              'jp-Icon-16'
+            )}
+            title={'Pull latest changes'}
+            onClick={this._onPullClick}
+          />
+          <button
+            className={classes(
+              toolbarButtonClass,
+              pushButtonClass,
+              'jp-Icon-16'
+            )}
+            title={'Push committed changes'}
+            onClick={this._onPushClick}
+          />
+          <button
+            className={classes(
+              toolbarButtonClass,
+              refreshButtonClass,
+              'jp-Icon-16'
+            )}
+            title={'Refresh the repository to detect local and remote changes'}
+            onClick={this._onRefreshClick}
+          />
+        </div>
+        <div className={repoMenuWrapperClass}>
+          <button
+            className={repoMenuButtonClass}
+            title={`Current Repository: ${repo}`}
+            onClick={this._onRepositoryClick}
+          >
+            <p className={repoMenuTitleClass}>Current Repository</p>
+            <p
+              className={repoMenuCurrentClass}
+            >{`Repository: ${PathExt.basename(repo)}`}</p>
+          </button>
+          {this.state.repoMenu ? null : null}
+        </div>
+        <div className={branchMenuWrapperClass}>
+          <button
+            className={branchMenuButtonClass}
+            title={`Change the current branch: ${branch}`}
+            onClick={this._onBranchClick}
+          >
+            <span className={classes(branchIconClass, 'jp-Icon-16')} />
+            <p className={branchMenuTitleClass}>Current Branch</p>
+            <p className={branchMenuCurrentClass}>{branch}</p>
+          </button>
+          {this.state.branchMenu ? (
+            <BranchMenu model={this.props.model} />
+          ) : null}
+        </div>
       </div>
     );
   }
 
   /**
    * Callback invoked upon a change to the repository path.
-   *
-   * @param _ - unused argument
-   * @param change - event object
-   * @returns React component
    */
-  private _onRepositoryChange = (_: any, change: any) => {
-    this.setState({
-      repository: change.newValue || ''
-    });
+  private _onRepositoryChange = () => {
+    this.forceUpdate();
+  };
+
+  /**
+   * Callback invoked upon a change to the current HEAD.
+   */
+  private _onHeadChange = () => {
+    this.forceUpdate();
   };
 
   /**
@@ -133,7 +207,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param event - event object
    */
   private _onPullClick = () => {
-    this._showDialog(Operation.Pull).catch(reason => {
+    showGitOperationDialog(this.props.model, Operation.Pull).catch(reason => {
       console.error(
         `Encountered an error when pulling changes. Error: ${reason}`
       );
@@ -146,10 +220,22 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param event - event object
    */
   private _onPushClick = () => {
-    this._showDialog(Operation.Push).catch(reason => {
+    showGitOperationDialog(this.props.model, Operation.Push).catch(reason => {
       console.error(
         `Encountered an error when pushing changes. Error: ${reason}`
       );
+    });
+  };
+
+  /**
+   * Callback invoked upon clicking a button to change the current repository.
+   *
+   * @param event - event object
+   */
+  private _onRepositoryClick = () => {
+    // Toggle the repository menu:
+    this.setState({
+      repoMenu: !this.state.repoMenu
     });
   };
 
@@ -173,43 +259,4 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   private _onRefreshClick = () => {
     this.props.refresh();
   };
-
-  /**
-   * Displays an error dialog when a Git operation fails.
-   *
-   * @param operation - Git operation name
-   * @returns Promise for displaying a dialog
-   */
-  private async _showDialog(operation: Operation): Promise<void> {
-    const title = `Git ${operation}`;
-    let result = await showDialog({
-      title: title,
-      body: new GitPullPushDialog(this.props.model, operation),
-      buttons: [Dialog.okButton({ label: 'DISMISS' })]
-    });
-    let retry = false;
-    while (!result.button.accept) {
-      retry = true;
-      const credentials = await showDialog({
-        title: 'Git credentials required',
-        body: new GitCredentialsForm(
-          'Enter credentials for remote repository',
-          retry ? 'Incorrect username or password.' : ''
-        ),
-        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
-      });
-      if (!credentials.button.accept) {
-        break;
-      }
-      result = await showDialog({
-        title: title,
-        body: new GitPullPushDialog(
-          this.props.model,
-          operation,
-          credentials.value
-        ),
-        buttons: [Dialog.okButton({ label: 'DISMISS' })]
-      });
-    }
-  }
 }
