@@ -115,6 +115,9 @@ export class BranchMenu extends React.Component<
    * @returns fragment
    */
   private _renderItem = (branch: Git.IBranch, idx: number) => {
+    if (this.state.filter && !branch.name.includes(this.state.filter)) {
+      return null;
+    }
     return (
       <ListItem
         button
