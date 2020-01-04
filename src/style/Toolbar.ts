@@ -32,9 +32,14 @@ export const toolbarMenuWrapperClass = style({
 
 export const toolbarMenuButtonClass = style({
   boxSizing: 'border-box',
-  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  flexWrap: 'wrap',
 
-  padding: '4px 11px 4px',
+  width: '100%',
+  height: '55px',
+
+  padding: '0 11px 0',
 
   fontSize: 'var(--jp-ui-font-size1)',
   lineHeight: '1.5em',
@@ -56,9 +61,21 @@ export const toolbarMenuButtonClass = style({
   }
 });
 
-export const toolbarMenuButtonTitleClass = style({});
+export const toolbarMenuButtonIconClass = style({
+  width: '16px',
+  height: '100%',
+
+  /* top | right | bottom | left */
+  margin: 'auto 4px auto 0'
+});
+
+export const toolbarMenuButtonTitleClass = style({
+  marginTop: 'auto'
+});
 
 export const toolbarMenuButtonSubtitleClass = style({
+  marginBottom: 'auto',
+
   fontWeight: 700
 });
 
@@ -101,8 +118,14 @@ export const pushButtonClass = style({
   backgroundPosition: 'center'
 });
 
+export const repoIconClass = style({
+  backgroundImage: 'var(--jp-icon-git-repo)',
+  backgroundSize: '16px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
+});
+
 export const branchIconClass = style({
-  background: 'var(--jp-layout-color1)',
   backgroundImage: 'var(--jp-icon-git-branch)',
   backgroundSize: '16px',
   backgroundRepeat: 'no-repeat',

@@ -1,16 +1,18 @@
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { PathExt } from '@jupyterlab/coreutils';
 import * as React from 'react';
 import { classes } from 'typestyle';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { PathExt } from '@jupyterlab/coreutils';
 import {
   // NOTE: keep in alphabetical order
   branchIconClass,
   pullButtonClass,
   pushButtonClass,
   refreshButtonClass,
+  repoIconClass,
   toolbarButtonClass,
   toolbarClass,
   toolbarMenuButtonClass,
+  toolbarMenuButtonIconClass,
   toolbarMenuButtonSubtitleClass,
   toolbarMenuButtonTitleClass,
   toolbarMenuWrapperClass,
@@ -158,6 +160,13 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             title={`Current repository: ${repo}`}
             onClick={this._onRepositoryClick}
           >
+            <span
+              className={classes(
+                toolbarMenuButtonIconClass,
+                repoIconClass,
+                'jp-Icon-16'
+              )}
+            />
             <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
             <p className={toolbarMenuButtonSubtitleClass}>
               {PathExt.basename(repo)}
@@ -171,7 +180,13 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             title={`Change the current branch: ${branch}`}
             onClick={this._onBranchClick}
           >
-            <span className={classes(branchIconClass, 'jp-Icon-16')} />
+            <span
+              className={classes(
+                toolbarMenuButtonIconClass,
+                branchIconClass,
+                'jp-Icon-16'
+              )}
+            />
             <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
             <p className={toolbarMenuButtonSubtitleClass}>{branch}</p>
           </button>
