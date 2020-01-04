@@ -180,13 +180,36 @@ export class BranchMenu extends React.Component<
      * @private
      * @param event - event object
      */
-    async function onClick() {
-      const result = await self.props.model.checkout({
+    function onClick() {
+      const opts = {
         branchname: branch
-      });
+      };
+      self.props.model
+        .checkout(opts)
+        .then(onResolve)
+        .catch(onError);
+    }
+
+    /**
+     * Callback invoked upon promise resolution.
+     *
+     * @private
+     * @param result - result
+     */
+    function onResolve(result: any) {
       if (result.code !== 0) {
         showErrorMessage('Error switching branch', result.message);
       }
+    }
+
+    /**
+     * Callback invoked upon encountering an error.
+     *
+     * @private
+     * @param err - error
+     */
+    function onError(err: any) {
+      showErrorMessage('Error switching branch', err.message);
     }
   };
 }
