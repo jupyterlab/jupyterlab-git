@@ -6,6 +6,7 @@ import {
   branchMenuFilterClass,
   branchMenuFilterClearClass,
   branchMenuFilterInputClass,
+  branchMenuFilterWrapperClass,
   branchMenuListWrapperClass,
   branchMenuNewBranchButtonClass,
   branchMenuWrapperClass
@@ -59,22 +60,26 @@ export class BranchMenu extends React.Component<
   render() {
     return (
       <div className={branchMenuWrapperClass}>
-        <div className={branchMenuFilterClass}>
-          <input
-            className={branchMenuFilterInputClass}
-            type="text"
-            onChange={this._onFilterChange}
-            value={this.state.filter}
-            placeholder="Filter..."
-            title="Filter branch menu"
-          />
-          {this.state.filter ? (
-            <ClearIcon
-              className={branchMenuFilterClearClass}
-              titleAccess="Clear the current filter"
-              onClick={this._resetFilter}
+        <div className={branchMenuFilterWrapperClass}>
+          <div className={branchMenuFilterClass}>
+            <input
+              className={branchMenuFilterInputClass}
+              type="text"
+              onChange={this._onFilterChange}
+              value={this.state.filter}
+              placeholder="Filter"
+              title="Filter branch menu"
             />
-          ) : null}
+            {this.state.filter ? (
+              <button className={branchMenuFilterClearClass}>
+                <ClearIcon
+                  titleAccess="Clear the current filter"
+                  fontSize="small"
+                  onClick={this._resetFilter}
+                />
+              </button>
+            ) : null}
+          </div>
           <input
             className={branchMenuNewBranchButtonClass}
             type="button"
