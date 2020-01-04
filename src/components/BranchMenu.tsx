@@ -2,6 +2,7 @@ import * as React from 'react';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
+import { showErrorMessage } from '@jupyterlab/apputils';
 import { Git, IGitExtension } from '../tokens';
 import {
   branchMenuFilterClass,
@@ -159,6 +160,8 @@ export class BranchMenu extends React.Component<
    */
   private _onNewBranchClick = () => {
     console.log('Create a new branch...');
+
+    // TODO: implement via a dialog
   };
 
   /**
@@ -168,7 +171,7 @@ export class BranchMenu extends React.Component<
    * @returns callback
    */
   private _onBranchClickFactory = (branch: string) => {
-    // const self = this;
+    const self = this;
     return onClick;
 
     /**
@@ -177,8 +180,13 @@ export class BranchMenu extends React.Component<
      * @private
      * @param event - event object
      */
-    function onClick() {
-      console.log(branch);
+    async function onClick() {
+      const result = await self.props.model.checkout({
+        branchname: branch
+      });
+      if (result.code !== 0) {
+        showErrorMessage('Error switching branch', result.message);
+      }
     }
   };
 }
