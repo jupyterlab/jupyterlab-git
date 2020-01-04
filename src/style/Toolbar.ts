@@ -39,7 +39,8 @@ export const toolbarMenuButtonClass = style({
   width: '100%',
   minHeight: '55px',
 
-  padding: '0 11px 0',
+  /* top | right | bottom | left */
+  padding: '4px 11px 4px 11px',
 
   fontSize: 'var(--jp-ui-font-size1)',
   lineHeight: '1.5em',
@@ -70,12 +71,12 @@ export const toolbarMenuButtonIconClass = style({
 });
 
 export const toolbarMenuButtonTitleWrapperClass = style({
+  flexBasis: 0,
+  flexGrow: 1,
+
   marginTop: 'auto',
   marginBottom: 'auto',
-  marginRight: 'auto',
-
-  overflow: 'hidden',
-  whiteSpace: 'nowrap'
+  marginRight: 'auto'
 });
 
 export const toolbarMenuButtonTitleClass = style({});
