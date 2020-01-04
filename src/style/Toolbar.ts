@@ -37,7 +37,7 @@ export const toolbarMenuButtonClass = style({
   flexWrap: 'wrap',
 
   width: '100%',
-  height: '55px',
+  minHeight: '55px',
 
   padding: '0 11px 0',
 
@@ -72,7 +72,10 @@ export const toolbarMenuButtonIconClass = style({
 export const toolbarMenuButtonTitleWrapperClass = style({
   marginTop: 'auto',
   marginBottom: 'auto',
-  marginRight: 'auto'
+  marginRight: 'auto',
+
+  overflow: 'hidden',
+  whiteSpace: 'nowrap'
 });
 
 export const toolbarMenuButtonTitleClass = style({});
