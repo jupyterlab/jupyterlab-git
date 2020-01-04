@@ -38,6 +38,7 @@ export const toolbarMenuButtonClass = style({
 
   fontSize: 'var(--jp-ui-font-size1)',
   lineHeight: '1.5em',
+  color: 'var(--jp-ui-font-color0)',
   textAlign: 'left',
 
   border: 'none',

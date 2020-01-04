@@ -95,9 +95,9 @@ export const branchMenuListWrapperClass = style({
 });
 
 export const branchMenuListItemClass = style({
-  paddingTop: '4px',
-  paddingBottom: '4px',
-  paddingLeft: '10px'
+  paddingTop: '4px!important',
+  paddingBottom: '4px!important',
+  paddingLeft: '11px!important'
 });
 
 export const branchMenuListItemIconClass = style({
