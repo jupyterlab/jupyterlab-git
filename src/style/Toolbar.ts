@@ -23,6 +23,8 @@ export const toolbarNavClass = style({
 });
 
 export const toolbarMenuWrapperClass = style({
+  background: 'var(--jp-layout-color1)',
+
   borderBottomStyle: 'solid',
   borderBottomWidth: 'var(--jp-border-width)',
   borderBottomColor: 'var(--jp-border-color2)'
@@ -34,13 +36,14 @@ export const toolbarMenuButtonClass = style({
 
   padding: '4px 11px 4px',
 
+  fontSize: 'var(--jp-ui-font-size1)',
   lineHeight: '1.5em',
+  textAlign: 'left',
 
   border: 'none',
   borderRadius: 0,
 
-  textAlign: 'left',
-  fontSize: 'var(--jp-ui-font-size1)',
+  background: 'var(--jp-layout-color1)',
 
   $nest: {
     '&:hover': {
@@ -80,7 +83,7 @@ export const toolbarButtonClass = style({
 });
 
 export const pullButtonClass = style({
-  margin: 'auto 0 auto auto',
+  marginLeft: 'auto',
 
   background: 'var(--jp-layout-color1)',
   backgroundImage: 'var(--jp-icon-git-pull)',
@@ -106,6 +109,8 @@ export const branchIconClass = style({
 });
 
 export const refreshButtonClass = style({
+  marginRight: '4px',
+
   background: 'var(--jp-layout-color1)',
   backgroundImage: 'var(--jp-icon-refresh)',
   backgroundSize: '16px',
