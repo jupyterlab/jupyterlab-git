@@ -66,7 +66,7 @@ export const toolbarMenuButtonIconClass = style({
   height: '100%',
 
   /* top | right | bottom | left */
-  margin: 'auto 4px auto 0'
+  margin: 'auto 8px auto 0'
 });
 
 export const toolbarMenuButtonTitleClass = style({
@@ -118,6 +118,16 @@ export const pushButtonClass = style({
   backgroundPosition: 'center'
 });
 
+export const refreshButtonClass = style({
+  marginRight: '4px',
+
+  background: 'var(--jp-layout-color1)',
+  backgroundImage: 'var(--jp-icon-refresh)',
+  backgroundSize: '16px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
+});
+
 export const repoIconClass = style({
   backgroundImage: 'var(--jp-icon-git-repo)',
   backgroundSize: '16px',
@@ -127,16 +137,6 @@ export const repoIconClass = style({
 
 export const branchIconClass = style({
   backgroundImage: 'var(--jp-icon-git-branch)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});
-
-export const refreshButtonClass = style({
-  marginRight: '4px',
-
-  background: 'var(--jp-layout-color1)',
-  backgroundImage: 'var(--jp-icon-refresh)',
   backgroundSize: '16px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
