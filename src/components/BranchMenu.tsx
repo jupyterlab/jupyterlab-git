@@ -7,6 +7,7 @@ import {
   branchMenuFilterClearClass,
   branchMenuFilterInputClass,
   branchMenuListWrapperClass,
+  branchMenuNewBranchButtonClass,
   branchMenuWrapperClass
 } from '../style/BranchMenu';
 
@@ -74,6 +75,13 @@ export class BranchMenu extends React.Component<
               onClick={this._resetFilter}
             />
           ) : null}
+          <input
+            className={branchMenuNewBranchButtonClass}
+            type="button"
+            title="Create a new branch"
+            value="New Branch"
+            onClick={this._onNewBranchClick}
+          />
         </div>
         <div className={branchMenuListWrapperClass}>
           <List disablePadding>{this._renderItems()}</List>
@@ -109,5 +117,14 @@ export class BranchMenu extends React.Component<
     this.setState({
       filter: ''
     });
+  };
+
+  /**
+   * Callback invoked upon clicking a button to create a new branch.
+   *
+   * @param event - event object
+   */
+  private _onNewBranchClick = () => {
+    console.log('Create a new branch...');
   };
 }
