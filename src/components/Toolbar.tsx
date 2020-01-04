@@ -176,6 +176,13 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
                 {PathExt.basename(repo)}
               </p>
             </div>
+            <span
+              className={classes(
+                toolbarMenuButtonIconClass,
+                this.state.repoMenu ? closeMenuIconClass : openMenuIconClass,
+                'jp-Icon-16'
+              )}
+            />
           </button>
           {this.state.repoMenu ? null : null}
         </div>
