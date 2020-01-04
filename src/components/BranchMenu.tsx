@@ -115,6 +115,7 @@ export class BranchMenu extends React.Component<
    * @returns fragment
    */
   private _renderItem = (branch: Git.IBranch, idx: number) => {
+    // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     if (this.state.filter && !branch.name.includes(this.state.filter)) {
       return null;
     }
