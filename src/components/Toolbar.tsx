@@ -5,6 +5,8 @@ import { PathExt } from '@jupyterlab/coreutils';
 import {
   // NOTE: keep in alphabetical order
   branchIconClass,
+  closeMenuIconClass,
+  openMenuIconClass,
   pullButtonClass,
   pushButtonClass,
   refreshButtonClass,
@@ -15,6 +17,7 @@ import {
   toolbarMenuButtonIconClass,
   toolbarMenuButtonSubtitleClass,
   toolbarMenuButtonTitleClass,
+  toolbarMenuButtonTitleWrapperClass,
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
@@ -167,10 +170,12 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
                 'jp-Icon-16'
               )}
             />
-            <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
-            <p className={toolbarMenuButtonSubtitleClass}>
-              {PathExt.basename(repo)}
-            </p>
+            <div className={toolbarMenuButtonTitleWrapperClass}>
+              <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
+              <p className={toolbarMenuButtonSubtitleClass}>
+                {PathExt.basename(repo)}
+              </p>
+            </div>
           </button>
           {this.state.repoMenu ? null : null}
         </div>
@@ -187,8 +192,17 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
                 'jp-Icon-16'
               )}
             />
-            <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
-            <p className={toolbarMenuButtonSubtitleClass}>{branch}</p>
+            <div className={toolbarMenuButtonTitleWrapperClass}>
+              <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
+              <p className={toolbarMenuButtonSubtitleClass}>{branch}</p>
+            </div>
+            <span
+              className={classes(
+                toolbarMenuButtonIconClass,
+                this.state.branchMenu ? closeMenuIconClass : openMenuIconClass,
+                'jp-Icon-16'
+              )}
+            />
           </button>
           {this.state.branchMenu ? (
             <BranchMenu model={this.props.model} />

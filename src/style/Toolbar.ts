@@ -33,7 +33,7 @@ export const toolbarMenuWrapperClass = style({
 export const toolbarMenuButtonClass = style({
   boxSizing: 'border-box',
   display: 'flex',
-  flexDirection: 'column',
+  flexDirection: 'row',
   flexWrap: 'wrap',
 
   width: '100%',
@@ -63,15 +63,19 @@ export const toolbarMenuButtonClass = style({
 
 export const toolbarMenuButtonIconClass = style({
   width: '16px',
-  height: '100%',
+  height: '16px',
 
   /* top | right | bottom | left */
   margin: 'auto 8px auto 0'
 });
 
-export const toolbarMenuButtonTitleClass = style({
-  marginTop: 'auto'
+export const toolbarMenuButtonTitleWrapperClass = style({
+  marginTop: 'auto',
+  marginBottom: 'auto',
+  marginRight: 'auto'
 });
+
+export const toolbarMenuButtonTitleClass = style({});
 
 export const toolbarMenuButtonSubtitleClass = style({
   marginBottom: 'auto',
@@ -138,6 +142,20 @@ export const repoIconClass = style({
 export const branchIconClass = style({
   backgroundImage: 'var(--jp-icon-git-branch)',
   backgroundSize: '16px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
+});
+
+export const openMenuIconClass = style({
+  backgroundImage: 'var(--jp-icon-caretdown)',
+  backgroundSize: '20px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
+});
+
+export const closeMenuIconClass = style({
+  backgroundImage: 'var(--jp-icon-caretup)',
+  backgroundSize: '20px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
 });
