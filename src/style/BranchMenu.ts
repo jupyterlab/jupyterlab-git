@@ -87,5 +87,27 @@ export const branchMenuNewBranchButtonClass = style({
 
 export const branchMenuListWrapperClass = style({
   display: 'block',
-  width: '100%'
+  width: '100%',
+  maxHeight: '400px',
+
+  overflow: 'hidden',
+  overflowY: 'scroll'
+});
+
+export const branchMenuListItemClass = style({
+  paddingTop: '4px',
+  paddingBottom: '4px',
+  paddingLeft: '10px'
+});
+
+export const branchMenuListItemIconClass = style({
+  width: '16px',
+  height: '16px',
+
+  marginRight: '4px',
+
+  backgroundImage: 'var(--jp-icon-git-branch)',
+  backgroundSize: '16px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
 });

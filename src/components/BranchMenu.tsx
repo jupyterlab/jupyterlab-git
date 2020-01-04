@@ -1,12 +1,15 @@
 import * as React from 'react';
 import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
-import { IGitExtension } from '../tokens';
+import { Git, IGitExtension } from '../tokens';
 import {
   branchMenuFilterClass,
   branchMenuFilterClearClass,
   branchMenuFilterInputClass,
   branchMenuFilterWrapperClass,
+  branchMenuListItemClass,
+  branchMenuListItemIconClass,
   branchMenuListWrapperClass,
   branchMenuNewBranchButtonClass,
   branchMenuWrapperClass
@@ -101,7 +104,28 @@ export class BranchMenu extends React.Component<
    * @returns fragment
    */
   private _renderItems = () => {
-    return <li />;
+    return this.props.model.branches.map(this._renderItem);
+  };
+
+  /**
+   * Renders a menu item.
+   *
+   * @param branch - branch
+   * @param idx - item index
+   * @returns fragment
+   */
+  private _renderItem = (branch: Git.IBranch, idx: number) => {
+    return (
+      <ListItem
+        button
+        className={branchMenuListItemClass}
+        key={idx}
+        onClick={this._onBranchClickFactory(branch.name)}
+      >
+        <span className={branchMenuListItemIconClass} />
+        {branch.name}
+      </ListItem>
+    );
   };
 
   /**
@@ -131,5 +155,26 @@ export class BranchMenu extends React.Component<
    */
   private _onNewBranchClick = () => {
     console.log('Create a new branch...');
+  };
+
+  /**
+   * Returns a callback which is invoked upon clicking a branch name.
+   *
+   * @param branch - branch name
+   * @returns callback
+   */
+  private _onBranchClickFactory = (branch: string) => {
+    // const self = this;
+    return onClick;
+
+    /**
+     * Callback invoked upon clicking a branch name.
+     *
+     * @private
+     * @param event - event object
+     */
+    function onClick() {
+      console.log(branch);
+    }
   };
 }
