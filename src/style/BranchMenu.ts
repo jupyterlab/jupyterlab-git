@@ -100,6 +100,12 @@ export const branchMenuListItemClass = style({
   paddingLeft: '11px!important'
 });
 
+export const branchMenuActiveListItemClass = style({
+  color: 'white!important',
+
+  backgroundColor: 'var(--jp-brand-color1)!important'
+});
+
 export const branchMenuListItemIconClass = style({
   width: '16px',
   height: '16px',

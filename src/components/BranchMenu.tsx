@@ -1,10 +1,12 @@
 import * as React from 'react';
+import { classes } from 'typestyle';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { Git, IGitExtension } from '../tokens';
 import {
+  branchMenuActiveListItemClass,
   branchMenuFilterClass,
   branchMenuFilterClearClass,
   branchMenuFilterInputClass,
@@ -123,7 +125,12 @@ export class BranchMenu extends React.Component<
     return (
       <ListItem
         button
-        className={branchMenuListItemClass}
+        className={classes(
+          branchMenuListItemClass,
+          branch.name === this.props.model.currentBranch.name
+            ? branchMenuActiveListItemClass
+            : null
+        )}
         key={idx}
         onClick={this._onBranchClickFactory(branch.name)}
       >
