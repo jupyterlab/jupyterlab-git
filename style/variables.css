@@ -23,6 +23,7 @@
   --jp-icon-git-branch: url('./images/git-branch.svg');
   --jp-icon-git-pull: url('./images/git-pull.svg');
   --jp-icon-git-push: url('./images/git-push.svg');
+  --jp-icon-git-repo: url('./images/desktop.svg');
   --jp-icon-move-file-down: url('./images/move-file-down.svg');
   --jp-icon-move-file-up: url('./images/move-file-up.svg');
   --jp-icon-plus: url('./images/plus.svg');
@@ -36,6 +37,7 @@
   --jp-icon-git-branch: url('./images/git-branch-white.svg');
   --jp-icon-git-pull: url('./images/git-pull-white.svg');
   --jp-icon-git-push: url('./images/git-push-white.svg');
+  --jp-icon-git-repo: url('./images/desktop-white.svg');
   --jp-icon-move-file-down: url('./images/move-file-down-hover.svg');
   --jp-icon-move-file-up: url('./images/move-file-up-hover.svg');
   --jp-icon-plus: url('./images/plus-white.svg');
