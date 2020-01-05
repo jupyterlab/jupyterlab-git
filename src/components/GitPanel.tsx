@@ -247,13 +247,12 @@ export class GitPanel extends React.Component<
       );
     }
 
+    const disableBranching = Boolean(
+      this.props.settings.composite['disableBranchWithChanges'] &&
+        ((this.state.unstagedFiles && this.state.unstagedFiles.length) ||
+          (this.state.stagedFiles && this.state.stagedFiles.length))
+    );
     if (this.state.inGitRepository) {
-      const disableBranchOps = Boolean(
-        this.props.settings.composite['disableBranchWithChanges'] &&
-          ((this.state.unstagedFiles && this.state.unstagedFiles.length) ||
-            (this.state.stagedFiles && this.state.stagedFiles.length))
-      );
-
       main = (
         <React.Fragment>
           <BranchHeader
@@ -263,7 +262,6 @@ export class GitPanel extends React.Component<
             upstreamBranch={this.state.upstreamBranch}
             stagedFiles={this.state.stagedFiles}
             data={this.state.branches}
-            disabled={disableBranchOps}
             toggleSidebar={this.toggleSidebar}
             sideBarExpanded={this.state.isHistoryVisible}
           />
@@ -290,6 +288,7 @@ export class GitPanel extends React.Component<
       <div className={panelContainerStyle}>
         <Toolbar
           model={this.props.model}
+          branching={!disableBranching}
           refresh={async () => {
             await this.refreshBranch();
             if (this.state.isHistoryVisible) {

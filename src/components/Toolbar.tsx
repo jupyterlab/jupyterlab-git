@@ -76,6 +76,11 @@ export interface IToolbarProps {
   model: IGitExtension;
 
   /**
+   * Boolean indicating whether branching is disabled.
+   */
+  branching: boolean;
+
+  /**
    * Callback to invoke in order to refresh a repository.
    *
    * @returns promise which refreshes a repository
@@ -212,7 +217,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             />
           </button>
           {this.state.branchMenu ? (
-            <BranchMenu model={this.props.model} />
+            <BranchMenu
+              model={this.props.model}
+              branching={this.props.branching}
+            />
           ) : null}
         </div>
       </div>

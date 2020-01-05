@@ -19,6 +19,9 @@ import {
 } from '../style/BranchMenu';
 import { NewBranchDialog } from './NewBranchDialog';
 
+const CHANGES_ERR_MSG =
+  'The current branch contains files with uncommitted changes. Please commit or discard these changes before switching to or creating another branch.';
+
 /**
  * Interface describing component properties.
  */
@@ -27,6 +30,11 @@ export interface IBranchMenuProps {
    * Git extension data model.
    */
   model: IGitExtension;
+
+  /**
+   * Boolean indicating whether branching is disabled.
+   */
+  branching: boolean;
 }
 
 /**
@@ -178,6 +186,10 @@ export class BranchMenu extends React.Component<
    * @param event - event object
    */
   private _onNewBranchClick = () => {
+    if (!this.props.branching) {
+      showErrorMessage('Creating a new branch is disabled', CHANGES_ERR_MSG);
+      return;
+    }
     this.setState({
       branchDialog: true
     });
@@ -209,6 +221,10 @@ export class BranchMenu extends React.Component<
      * @param event - event object
      */
     function onClick() {
+      if (!self.props.branching) {
+        showErrorMessage('Switching branches is disabled', CHANGES_ERR_MSG);
+        return;
+      }
       const opts = {
         branchname: branch
       };

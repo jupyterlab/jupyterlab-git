@@ -1,4 +1,3 @@
-import { showErrorMessage } from '@jupyterlab/apputils';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import {
@@ -11,9 +10,6 @@ import {
 } from '../style/BranchHeaderStyle';
 import { Git, IGitExtension } from '../tokens';
 
-const CHANGES_ERR_MSG =
-  'You have files with changes in current branch. Please commit or discard changed files before';
-
 export interface IBranchHeaderState {}
 
 export interface IBranchHeaderProps {
@@ -23,7 +19,6 @@ export interface IBranchHeaderProps {
   stagedFiles: Git.IStatusFileResult[];
   data: Git.IBranch[];
   refresh: () => Promise<void>;
-  disabled: boolean;
   toggleSidebar: () => void;
   sideBarExpanded: boolean;
 }
@@ -39,16 +34,6 @@ export class BranchHeader extends React.Component<
 
   toggleSelect() {
     this.props.refresh();
-    if (!this.props.disabled) {
-      // this.setState({
-      //   dropdownOpen: !this.state.dropdownOpen
-      // });
-    } else {
-      showErrorMessage(
-        'Switching branch disabled',
-        CHANGES_ERR_MSG + 'switching to another branch.'
-      );
-    }
   }
 
   getHistoryHeaderStyle() {
