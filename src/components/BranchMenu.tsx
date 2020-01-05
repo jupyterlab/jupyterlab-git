@@ -2,33 +2,22 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
 import ClearIcon from '@material-ui/icons/Clear';
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { Git, IGitExtension } from '../tokens';
 import {
-  branchDialogActionsWrapperClass,
-  branchDialogBranchNameInputClass,
-  branchDialogButtonClass,
-  branchDialogCancelButtonClass,
-  branchDialogClass,
-  branchDialogCloseClass,
-  branchDialogContentWrapperClass,
-  branchDialogCreateButtonClass,
-  branchDialogTitleClass,
-  branchDialogTitleWrapperClass,
-  branchMenuActiveListItemClass,
-  branchMenuFilterClass,
-  branchMenuFilterClearClass,
-  branchMenuFilterInputClass,
-  branchMenuFilterWrapperClass,
-  branchMenuListItemClass,
-  branchMenuListItemIconClass,
-  branchMenuListWrapperClass,
-  branchMenuNewBranchButtonClass,
-  branchMenuWrapperClass
+  activeListItemClass,
+  filterClass,
+  filterClearClass,
+  filterInputClass,
+  filterWrapperClass,
+  listItemClass,
+  listItemIconClass,
+  listWrapperClass,
+  newBranchButtonClass,
+  wrapperClass
 } from '../style/BranchMenu';
+import { NewBranchDialog } from './NewBranchDialog';
 
 /**
  * Interface describing component properties.
@@ -53,11 +42,6 @@ export interface IBranchMenuState {
    * Boolean indicating whether to show a dialog to create a new branch.
    */
   branchDialog: boolean;
-
-  /**
-   * Branch name.
-   */
-  branchName: string;
 }
 
 /**
@@ -77,8 +61,7 @@ export class BranchMenu extends React.Component<
     super(props);
     this.state = {
       filter: '',
-      branchDialog: false,
-      branchName: ''
+      branchDialog: false
     };
   }
 
@@ -89,11 +72,11 @@ export class BranchMenu extends React.Component<
    */
   render() {
     return (
-      <div className={branchMenuWrapperClass}>
-        <div className={branchMenuFilterWrapperClass}>
-          <div className={branchMenuFilterClass}>
+      <div className={wrapperClass}>
+        <div className={filterWrapperClass}>
+          <div className={filterClass}>
             <input
-              className={branchMenuFilterInputClass}
+              className={filterInputClass}
               type="text"
               onChange={this._onFilterChange}
               value={this.state.filter}
@@ -101,7 +84,7 @@ export class BranchMenu extends React.Component<
               title="Filter branch menu"
             />
             {this.state.filter ? (
-              <button className={branchMenuFilterClearClass}>
+              <button className={filterClearClass}>
                 <ClearIcon
                   titleAccess="Clear the current filter"
                   fontSize="small"
@@ -111,69 +94,21 @@ export class BranchMenu extends React.Component<
             ) : null}
           </div>
           <input
-            className={branchMenuNewBranchButtonClass}
+            className={newBranchButtonClass}
             type="button"
             title="Create a new branch"
             value="New Branch"
             onClick={this._onNewBranchClick}
           />
         </div>
-        <div className={branchMenuListWrapperClass}>
+        <div className={listWrapperClass}>
           <List disablePadding>{this._renderItems()}</List>
         </div>
-        <Dialog
-          classes={{
-            paper: branchDialogClass
-          }}
+        <NewBranchDialog
           open={this.state.branchDialog}
-          onClose={this._onBranchDialogClose}
-          aria-labelledby="new-branch-dialog"
-        >
-          <div className={branchDialogTitleWrapperClass}>
-            <p className={branchDialogTitleClass}>Create a Branch</p>
-            <button className={branchDialogCloseClass}>
-              <ClearIcon
-                titleAccess="Close this dialog"
-                fontSize="small"
-                onClick={this._onBranchDialogClose}
-              />
-            </button>
-          </div>
-          <div className={branchDialogContentWrapperClass}>
-            <p>Name</p>
-            <input
-              className={branchDialogBranchNameInputClass}
-              type="text"
-              onChange={this._onBranchNameChange}
-              value={this.state.branchName}
-              placeholder=""
-              title="Enter a branch name"
-            />
-            <p>Create branch based on...</p>
-          </div>
-          <DialogActions className={branchDialogActionsWrapperClass}>
-            <input
-              className={classes(
-                branchDialogButtonClass,
-                branchDialogCancelButtonClass
-              )}
-              type="button"
-              title="Close this dialog without creating a new branch"
-              value="Cancel"
-              onClick={this._onBranchDialogClose}
-            />
-            <input
-              className={classes(
-                branchDialogButtonClass,
-                branchDialogCreateButtonClass
-              )}
-              type="button"
-              title="Create a new branch"
-              value="Create Branch"
-              onClick={this._onBranchDialogCreate}
-            />
-          </DialogActions>
-        </Dialog>
+          model={this.props.model}
+          onClose={this._onNewBranchDialogClose}
+        />
       </div>
     );
   }
@@ -181,7 +116,7 @@ export class BranchMenu extends React.Component<
   /**
    * Renders menu items.
    *
-   * @returns fragment
+   * @returns fragment array
    */
   private _renderItems = () => {
     return this.props.model.branches.map(this._renderItem);
@@ -203,15 +138,15 @@ export class BranchMenu extends React.Component<
       <ListItem
         button
         className={classes(
-          branchMenuListItemClass,
+          listItemClass,
           branch.name === this.props.model.currentBranch.name
-            ? branchMenuActiveListItemClass
+            ? activeListItemClass
             : null
         )}
         key={idx}
         onClick={this._onBranchClickFactory(branch.name)}
       >
-        <span className={branchMenuListItemIconClass} />
+        <span className={listItemIconClass} />
         {branch.name}
       </ListItem>
     );
@@ -245,6 +180,15 @@ export class BranchMenu extends React.Component<
   private _onNewBranchClick = () => {
     this.setState({
       branchDialog: true
+    });
+  };
+
+  /**
+   * Callback invoked upon closing a dialog to create a new branch.
+   */
+  private _onNewBranchDialogClose = () => {
+    this.setState({
+      branchDialog: false
     });
   };
 
@@ -294,89 +238,6 @@ export class BranchMenu extends React.Component<
      */
     function onError(err: any) {
       showErrorMessage('Error switching branch', err.message);
-    }
-  };
-
-  /**
-   * Callback invoked upon a change to the branch name input element.
-   *
-   * @param event - event object
-   */
-  private _onBranchNameChange = (event: any) => {
-    this.setState({
-      branchName: event.target.value
-    });
-  };
-
-  /**
-   * Callback invoked upon closing a dialog to create a new branch.
-   *
-   * @param event - event object
-   */
-  private _onBranchDialogClose = () => {
-    this.setState({
-      branchDialog: false
-    });
-  };
-
-  /**
-   * Callback invoked upon clicking a button to create a new branch.
-   *
-   * @param event - event object
-   */
-  private _onBranchDialogCreate = () => {
-    const branch = this.state.branchName;
-
-    // Close the branch dialog:
-    this._onBranchDialogClose();
-
-    // Reset the branch name:
-    this.setState({
-      branchName: ''
-    });
-
-    let foo = this._createBranch; // FIXME: invoke
-    if (!foo) {
-      console.log('Huh?');
-    }
-    console.log(branch);
-  };
-
-  /**
-   * Creates a new branch.
-   *
-   * @param branch - branch name
-   */
-  private _createBranch = (branch: string) => {
-    const opts = {
-      newBranch: true,
-      branchname: branch
-    };
-    this.props.model
-      .checkout(opts)
-      .then(onResolve)
-      .catch(onError);
-
-    /**
-     * Callback invoked upon promise resolution.
-     *
-     * @private
-     * @param result - result
-     */
-    function onResolve(result: any) {
-      if (result.code !== 0) {
-        showErrorMessage('Error creating branch', result.message);
-      }
-    }
-
-    /**
-     * Callback invoked upon encountering an error.
-     *
-     * @private
-     * @param err - error
-     */
-    function onError(err: any) {
-      showErrorMessage('Error creating branch', err.message);
     }
   };
 }
