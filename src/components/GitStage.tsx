@@ -6,7 +6,6 @@ import { GitExtension } from '../model';
 import {
   caretdownImageStyle,
   caretrightImageStyle,
-  changeStageButtonLeftStyle,
   changeStageButtonStyle,
   discardFileButtonStyle,
   sectionAreaStyle,
@@ -109,28 +108,18 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
     return (
       <div className={this.checkDisabled()}>
         <div className={sectionAreaStyle}>
-          <span className={sectionHeaderLabelStyle}>
-            {this.props.heading}({this.props.files.length})
-          </span>
           {this.props.files.length > 0 && (
             <button
-              className={
+              className={classes(
+                changeStageButtonStyle,
                 this.props.showFiles
-                  ? `${changeStageButtonStyle} ${caretdownImageStyle}`
-                  : `${changeStageButtonStyle} ${caretrightImageStyle}`
-              }
+                  ? caretdownImageStyle
+                  : caretrightImageStyle
+              )}
               onClick={() => this.props.displayFiles()}
             />
           )}
-          <button
-            disabled={this.checkContents()}
-            className={`${
-              this.props.moveFileIconClass
-            } ${changeStageButtonStyle}
-               ${changeStageButtonLeftStyle}`}
-            title={this.props.moveAllFilesTitle}
-            onClick={() => this.props.moveAllFiles()}
-          />
+          <span className={sectionHeaderLabelStyle}>{this.props.heading}</span>
           {this.props.heading === 'Changed' && (
             <button
               disabled={this.checkContents()}
@@ -142,6 +131,18 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
               onClick={() => this.discardAllChanges()}
             />
           )}
+          <button
+            disabled={this.checkContents()}
+            className={classes(
+              this.props.moveFileIconClass,
+              changeStageButtonStyle
+            )}
+            title={this.props.moveAllFilesTitle}
+            onClick={() => this.props.moveAllFiles()}
+          />
+          <span className={sectionHeaderLabelStyle}>
+            ({this.props.files.length})
+          </span>
         </div>
         {this.props.showFiles && (
           <ul className={sectionFileContainerStyle}>

@@ -90,7 +90,3 @@ export const caretdownImageStyle = style({
 export const caretrightImageStyle = style({
   backgroundImage: 'var(--jp-image-caretright)'
 });
-
-export const changeStageButtonLeftStyle = style({
-  float: 'left'
-});

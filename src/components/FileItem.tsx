@@ -20,7 +20,6 @@ import {
   sideBarExpandedFileLabelStyle
 } from '../style/FileItemStyle';
 import {
-  changeStageButtonLeftStyle,
   changeStageButtonStyle,
   diffFileButtonStyle,
   discardFileButtonStyle
@@ -35,6 +34,18 @@ import {
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
+
+// Git status codes https://git-scm.com/docs/git-status
+export const STATUS_CODES = {
+  M: 'Modified',
+  A: 'Added',
+  D: 'Deleted',
+  R: 'Renamed',
+  C: 'Copied',
+  U: 'Updated',
+  '?': 'Untracked',
+  '!': 'Ignored'
+};
 
 export interface IFileItemProps {
   file: Git.IStatusFileResult;
@@ -76,16 +87,8 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     );
   }
 
-  getFileChangedLabel(change: string): string {
-    if (change === 'M') {
-      return 'Mod';
-    } else if (change === 'A') {
-      return 'Add';
-    } else if (change === 'D') {
-      return 'Rmv';
-    } else if (change === 'R') {
-      return 'Rnm';
-    }
+  getFileChangedLabel(change: keyof typeof STATUS_CODES): string {
+    return STATUS_CODES[change];
   }
 
   showDiscardWarning(): boolean {
@@ -154,7 +157,6 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
       return classes(
         fileButtonStyle,
         changeStageButtonStyle,
-        changeStageButtonLeftStyle,
         fileGitButtonStyle,
         this.props.moveFileIconClass
       );
@@ -163,14 +165,12 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
         ? classes(
             fileButtonStyle,
             changeStageButtonStyle,
-            changeStageButtonLeftStyle,
             fileGitButtonStyle,
             this.props.moveFileIconSelectedClass
           )
         : classes(
             fileButtonStyle,
             changeStageButtonStyle,
-            changeStageButtonLeftStyle,
             fileGitButtonStyle,
             this.props.moveFileIconClass
           );
@@ -212,7 +212,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
   }
 
   /**
-   * Callback method discarding unstanged changes for selected file.
+   * Callback method discarding unstaged changes for selected file.
    * It shows modal asking for confirmation and when confirmed make
    * server side call to git checkout to discard changes in selected file.
    */
@@ -234,54 +234,49 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
   }
 
   render() {
+    const status =
+      this.getFileChangedLabel(this.props.file.y as any) ||
+      this.getFileChangedLabel(this.props.file.x as any);
+
     return (
       <li
         className={this.getFileClass()}
         onClick={() =>
           this.props.updateSelectedFile(this.props.fileIndex, this.props.stage)
         }
+        onContextMenu={e => {
+          this.props.contextMenu(
+            e,
+            this.props.file.x,
+            this.props.file.y,
+            this.props.file.to,
+            this.props.fileIndex,
+            this.props.stage
+          );
+        }}
+        onDoubleClick={() =>
+          openListedFile(
+            this.props.file.x,
+            this.props.file.y,
+            this.props.file.to,
+            this.props.model
+          )
+        }
+        title={`${this.props.file.to} ● ${status}`}
       >
-        <button
-          className={`jp-Git-button ${this.getMoveFileIconClass()}`}
-          title={this.props.moveFileTitle}
-          onClick={() => {
-            this.props.moveFile(this.props.file.to);
-          }}
-        />
         <span className={this.getFileLabelIconClass()} />
-        <span
-          className={this.getFileLabelClass()}
-          onContextMenu={e => {
-            this.props.contextMenu(
-              e,
-              this.props.file.x,
-              this.props.file.y,
-              this.props.file.to,
-              this.props.fileIndex,
-              this.props.stage
-            );
-          }}
-          onDoubleClick={() =>
-            openListedFile(
-              this.props.file.x,
-              this.props.file.y,
-              this.props.file.to,
-              this.props.model
-            )
-          }
-          title={this.props.file.to}
-        >
+        <span className={this.getFileLabelClass()}>
           {extractFilename(this.props.file.to)}
-        </span>
-        <span className={this.getFileChangedLabelClass(this.props.file.y)}>
-          {this.getFileChangedLabel(this.props.file.y)}
         </span>
         {this.props.stage === 'Changed' && (
           <React.Fragment>
             <button
               className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
-              title={'Discard this change'}
-              onClick={() => {
+              title={'Discard changes'}
+              onClick={(
+                event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+              ) => {
+                event.stopPropagation();
                 this.discardSelectedFileChanges();
               }}
             />
@@ -292,6 +287,19 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
         {this.props.stage === 'Staged' &&
           isDiffSupported(this.props.file.to) &&
           this.diffButton({ specialRef: 'INDEX' })}
+        <button
+          className={`jp-Git-button ${this.getMoveFileIconClass()}`}
+          title={this.props.moveFileTitle}
+          onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+            event.stopPropagation();
+            this.props.moveFile(this.props.file.to);
+          }}
+        />
+        <span className={this.getFileChangedLabelClass(this.props.file.y)}>
+          {this.props.file.y === '?'
+            ? 'U'
+            : this.props.file.y.trim() || this.props.file.x}
+        </span>
       </li>
     );
   }
@@ -307,8 +315,9 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
       <button
         className={`jp-Git-button ${this.getDiffFileIconClass()}`}
         title={'Diff this file'}
-        onClick={async () => {
-          await openDiffView(
+        onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+          event.stopPropagation();
+          openDiffView(
             this.props.file.to,
             this.props.model,
             {
@@ -316,7 +325,11 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
               currentRef: { specialRef: currentRef.specialRef }
             },
             this.props.renderMime
-          );
+          ).catch(reason => {
+            console.error(
+              `Fail to open diff view for ${this.props.file.to}.\n${reason}`
+            );
+          });
         }}
       />
     );
