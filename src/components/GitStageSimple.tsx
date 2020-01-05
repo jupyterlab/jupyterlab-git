@@ -75,20 +75,18 @@ export class GitStageSimple extends React.Component<IGitStageSimpleProps> {
           )}
         </div>
         <ul className={sectionFileContainerStyle}>
-          {this.props.files.map(
-            (file: Git.IStatusFileResult, fileIndex: number) => {
-              return (
-                <FileItemSimple
-                  key={fileIndex}
-                  file={file}
-                  stage={decodeStage(file.x, file.y)}
-                  model={this.props.model}
-                  discardFile={this.props.discardFile}
-                  renderMime={this.props.renderMime}
-                />
-              );
-            }
-          )}
+          {this.props.files.map((file: Git.IStatusFileResult) => {
+            return (
+              <FileItemSimple
+                key={file.to}
+                file={file}
+                stage={decodeStage(file.x, file.y)}
+                model={this.props.model}
+                discardFile={this.props.discardFile}
+                renderMime={this.props.renderMime}
+              />
+            );
+          })}
         </ul>
       </div>
     );

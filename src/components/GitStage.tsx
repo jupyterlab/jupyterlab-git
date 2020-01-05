@@ -149,7 +149,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
               (file: Git.IStatusFileResult, fileIndex: number) => {
                 return (
                   <FileItem
-                    key={fileIndex}
+                    key={file.to}
                     stage={this.props.heading}
                     file={file}
                     model={this.props.model}
