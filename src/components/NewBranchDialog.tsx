@@ -238,11 +238,8 @@ export class NewBranchDialog extends React.Component<
       name: ''
     });
 
-    let foo = this._createBranch; // FIXME: invoke
-    if (!foo) {
-      console.log('Huh?');
-    }
-    console.log(branch);
+    // Create the branch:
+    this._createBranch(branch);
   };
 
   /**
