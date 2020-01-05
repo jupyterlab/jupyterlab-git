@@ -47,7 +47,7 @@ export const sectionHeaderLabelStyle = style({
 });
 
 export const changeStageButtonStyle = style({
-  fontWeight: 600,
+  flex: '0 0 auto',
   backgroundColor: 'transparent',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',

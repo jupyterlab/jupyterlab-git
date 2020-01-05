@@ -87,9 +87,9 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
   }
 
   /**
-   * Callback method discarding all unstanged changes.
+   * Callback method discarding all unstaged changes.
    * It shows modal asking for confirmation and when confirmed make
-   * server side call to git checkout to discard all unstanged changes.
+   * server side call to git checkout to discard all unstaged changes.
    */
   async discardAllChanges() {
     this.toggleDiscardChanges();
@@ -108,17 +108,15 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
     return (
       <div className={this.checkDisabled()}>
         <div className={sectionAreaStyle}>
-          {this.props.files.length > 0 && (
-            <button
-              className={classes(
-                changeStageButtonStyle,
-                this.props.showFiles
-                  ? caretdownImageStyle
-                  : caretrightImageStyle
-              )}
-              onClick={() => this.props.displayFiles()}
-            />
-          )}
+          <button
+            className={classes(
+              changeStageButtonStyle,
+              this.props.showFiles && this.props.files.length > 0
+                ? caretdownImageStyle
+                : caretrightImageStyle
+            )}
+            onClick={() => this.props.displayFiles()}
+          />
           <span className={sectionHeaderLabelStyle}>{this.props.heading}</span>
           {this.props.heading === 'Changed' && (
             <button
