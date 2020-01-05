@@ -79,15 +79,70 @@ export const nameInputClass = style({
   }
 });
 
-export const menuWrapperClass = style({});
+export const listWrapperClass = style({
+  display: 'block',
+  width: '100%',
+  maxHeight: '400px',
 
-export const menuListItemClass = style({});
+  overflow: 'hidden',
+  overflowY: 'scroll'
+});
 
-export const menuListItemDescClass = style({});
+export const listItemClass = style({
+  boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'row',
+  flexWrap: 'wrap',
 
-export const menuListItemIconClass = style({});
+  width: '100%',
+  minHeight: '55px',
 
-export const menuListItemTitleClass = style({});
+  /* top | right | bottom | left */
+  padding: '4px 11px 4px 11px',
+
+  fontSize: 'var(--jp-ui-font-size1)',
+  lineHeight: '1.5em',
+  textAlign: 'left',
+
+  border: 'none',
+  borderRadius: 0
+});
+
+export const activeListItemClass = style({
+  color: 'white!important',
+
+  backgroundColor: 'var(--jp-brand-color1)!important'
+});
+
+export const listItemContentClass = style({
+  flexBasis: 0,
+  flexGrow: 1,
+
+  marginTop: 'auto',
+  marginBottom: 'auto',
+  marginRight: 'auto'
+});
+
+export const listItemDescClass = style({
+  marginBottom: 'auto'
+});
+
+export const listItemIconClass = style({
+  width: '16px',
+  height: '16px',
+
+  /* top | right | bottom | left */
+  margin: 'auto 8px auto 0',
+
+  backgroundImage: 'var(--jp-icon-git-branch)',
+  backgroundSize: '16px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
+});
+
+export const listItemTitleClass = style({
+  fontWeight: 700
+});
 
 export const actionsWrapperClass = style({
   padding: '15px!important',

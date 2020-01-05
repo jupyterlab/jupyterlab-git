@@ -9,17 +9,19 @@ import { showErrorMessage } from '@jupyterlab/apputils';
 import { Git, IGitExtension } from '../tokens';
 import {
   actionsWrapperClass,
+  activeListItemClass,
   branchDialogClass,
   buttonClass,
   cancelButtonClass,
   closeButtonClass,
   contentWrapperClass,
   createButtonClass,
-  menuListItemClass,
-  menuListItemDescClass,
-  menuListItemIconClass,
-  menuListItemTitleClass,
-  menuWrapperClass,
+  listItemClass,
+  listItemContentClass,
+  listItemDescClass,
+  listItemIconClass,
+  listItemTitleClass,
+  listWrapperClass,
   nameInputClass,
   titleClass,
   titleWrapperClass
@@ -117,7 +119,7 @@ export class NewBranchDialog extends React.Component<
             title="Enter a branch name"
           />
           <p>Create branch based on...</p>
-          <div className={menuWrapperClass}>
+          <div className={listWrapperClass}>
             <List disablePadding>{this._renderItems()}</List>
           </div>
         </div>
@@ -165,18 +167,23 @@ export class NewBranchDialog extends React.Component<
     return (
       <ListItem
         button
-        className={menuListItemClass}
+        className={classes(
+          listItemClass,
+          branch.name === this.state.base ? activeListItemClass : null
+        )}
         key={idx}
         onClick={this._onBranchClickFactory(branch.name)}
       >
-        <span className={menuListItemIconClass} />
-        <p className={menuListItemTitleClass}>branch.name</p>
-        {branch.name === this.props.model.currentBranch.name ? (
-          <p className={menuListItemDescClass}>
-            The current branch. Pick this if you want to build on work done in
-            this branch.
-          </p>
-        ) : null}
+        <span className={classes(listItemIconClass, 'jp-Icon-16')} />
+        <div className={listItemContentClass}>
+          <p className={listItemTitleClass}>{branch.name}</p>
+          {branch.name === this.props.model.currentBranch.name ? (
+            <p className={listItemDescClass}>
+              The current branch. Pick this if you want to build on work done in
+              this branch.
+            </p>
+          ) : null}
+        </div>
       </ListItem>
     );
   };
