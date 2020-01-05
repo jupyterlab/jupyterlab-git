@@ -121,16 +121,18 @@ export const branchMenuListItemIconClass = style({
 export const branchDialogClass = style({
   width: '400px',
 
-  borderRadius: '0!important'
+  borderRadius: '3px!important'
 });
 
 export const branchDialogCloseClass = style({
   position: 'absolute',
-  top: '12px',
+  top: '10px',
   right: '12px',
 
   height: '30px',
   width: '30px',
+
+  padding: 0,
 
   border: 'none',
   borderRadius: '50%',
@@ -151,7 +153,7 @@ export const branchDialogTitleWrapperClass = style({
 
   padding: '15px',
 
-  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
+  borderBottom: 'var(--jp-border-width) solid #e0e0e0'
 });
 
 export const branchDialogTitleClass = style({
