@@ -117,3 +117,64 @@ export const branchMenuListItemIconClass = style({
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
 });
+
+export const branchDialogClass = style({
+  width: '400px',
+
+  borderRadius: '0!important'
+});
+
+export const branchDialogCloseClass = style({
+  position: 'absolute',
+  top: '12px',
+  right: '12px',
+
+  height: '30px',
+  width: '30px',
+
+  border: 'none',
+  borderRadius: '50%',
+
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--jp-toolbar-active-background)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--jp-toolbar-active-background)'
+    }
+  }
+});
+
+export const branchDialogTitleWrapperClass = style({
+  boxSizing: 'border-box',
+  position: 'relative',
+
+  padding: '15px',
+
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
+});
+
+export const branchDialogTitleClass = style({
+  fontWeight: 700
+});
+
+export const branchDialogButtonClass = style({
+  boxSizing: 'border-box',
+
+  width: '9em',
+  height: '2em',
+
+  color: 'white',
+  fontSize: 'var(--jp-ui-font-size1)',
+
+  border: '0',
+  borderRadius: '3px'
+});
+
+export const branchDialogCancelButtonClass = style({
+  backgroundColor: 'var(--jp-inverse-layout-color4)'
+});
+
+export const branchDialogCreateButtonClass = style({
+  backgroundColor: 'var(--jp-brand-color1)'
+});
