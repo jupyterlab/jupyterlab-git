@@ -13,7 +13,7 @@ import {
 import { Git } from '../tokens';
 import { openListedFile } from '../utils';
 import { openDiffView } from './diff/DiffWidget';
-import { GitStage, IGitStageProps } from './GitStage';
+import { GitStage, IGitStageSharedProps } from './GitStage';
 import { GitStageSimple } from './GitStageSimple';
 
 export namespace CommandIDs {
@@ -400,21 +400,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     return files;
   }
 
-  render() {
-    const sharedProps = {
-      model: this.props.model,
-      selectedFile: this.state.selectedFile,
-      updateSelectedFile: this.updateSelectedFile,
-      selectedStage: this.state.selectedStage,
-      updateSelectedStage: this.updateSelectedStage,
-      selectedDiscardFile: this.state.selectedDiscardFile,
-      updateSelectedDiscardFile: this.updateSelectedDiscardFile,
-      disableFiles: this.state.disableFiles,
-      toggleDisableFiles: this.toggleDisableFiles,
-      renderMime: this.props.renderMime
-    };
-
-    const Staged = (props: Partial<IGitStageProps> = {}) => (
+  private _renderStaged(sharedProps: IGitStageSharedProps) {
+    return (
       <GitStage
         heading={'Staged'}
         files={this.props.stagedFiles}
@@ -432,11 +419,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         disableOthers={null}
         isDisabled={this.state.disableStaged}
         {...sharedProps}
-        {...props}
       />
     );
+  }
 
-    const Changed = (props: Partial<IGitStageProps> = {}) => (
+  private _renderChanged(sharedProps: IGitStageSharedProps) {
+    return (
       <GitStage
         heading={'Changed'}
         files={this.props.unstagedFiles}
@@ -454,11 +442,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         disableOthers={this.disableStagesForDiscardAll}
         isDisabled={this.state.disableUnstaged}
         {...sharedProps}
-        {...props}
       />
     );
+  }
 
-    const Untracked = (props: Partial<IGitStageProps> = {}) => (
+  private _renderUntracked(sharedProps: IGitStageSharedProps) {
+    return (
       <GitStage
         heading={'Untracked'}
         files={this.props.untrackedFiles}
@@ -476,33 +465,43 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         disableOthers={null}
         isDisabled={this.state.disableUntracked}
         {...sharedProps}
-        {...props}
       />
     );
+  }
+
+  render() {
+    const sharedProps: IGitStageSharedProps = {
+      model: this.props.model,
+      selectedFile: this.state.selectedFile,
+      updateSelectedFile: this.updateSelectedFile,
+      selectedStage: this.state.selectedStage,
+      updateSelectedStage: this.updateSelectedStage,
+      selectedDiscardFile: this.state.selectedDiscardFile,
+      updateSelectedDiscardFile: this.updateSelectedDiscardFile,
+      disableFiles: this.state.disableFiles,
+      toggleDisableFiles: this.toggleDisableFiles,
+      renderMime: this.props.renderMime
+    };
 
     if (this.props.settings.composite['simpleStaging']) {
       return (
         <div>
-          <div>
-            <GitStageSimple
-              heading={'Changed'}
-              files={this.allFilesExcludingUnmodified}
-              model={this.props.model}
-              discardAllFiles={this.discardAllChanges}
-              discardFile={this.discardChanges}
-              renderMime={this.props.renderMime}
-            />
-          </div>
+          <GitStageSimple
+            heading={'Changed'}
+            files={this.allFilesExcludingUnmodified}
+            model={this.props.model}
+            discardAllFiles={this.discardAllChanges}
+            discardFile={this.discardChanges}
+            renderMime={this.props.renderMime}
+          />
         </div>
       );
     } else {
       return (
         <div onContextMenu={event => event.preventDefault()}>
-          <div>
-            <Staged />
-            <Changed />
-            <Untracked />
-          </div>
+          {this._renderStaged(sharedProps)}
+          {this._renderChanged(sharedProps)}
+          {this._renderUntracked(sharedProps)}
         </div>
       );
     }

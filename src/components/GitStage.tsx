@@ -17,20 +17,20 @@ import {
 import { Git } from '../tokens';
 import { FileItem } from './FileItem';
 
-export interface IGitStageProps {
-  heading: string;
-  files: Git.IStatusFileResult[];
+export interface IGitStageSharedProps {
+  disableFiles: boolean;
   model: GitExtension;
-  showFiles: boolean;
-  displayFiles: () => void;
-  moveAllFiles: () => Promise<void>;
-  discardAllFiles: () => Promise<void>;
-  discardFile: (file: string) => Promise<void>;
-  moveFile: (file: string) => Promise<void>;
-  moveFileIconClass: string;
-  moveFileIconSelectedClass: string;
-  moveAllFilesTitle: string;
-  moveFileTitle: string;
+  renderMime: IRenderMimeRegistry;
+  selectedDiscardFile: number;
+  selectedFile: number;
+  selectedStage: string;
+  toggleDisableFiles: () => void;
+  updateSelectedDiscardFile: (index: number) => void;
+  updateSelectedFile: (file: number, stage: string) => void;
+  updateSelectedStage: (stage: string) => void;
+}
+
+export interface IGitStageProps extends IGitStageSharedProps {
   contextMenu: (
     event: any,
     typeX: string,
@@ -39,17 +39,20 @@ export interface IGitStageProps {
     index: number,
     stage: string
   ) => void;
-  selectedFile: number;
-  updateSelectedFile: (file: number, stage: string) => void;
-  selectedStage: string;
-  selectedDiscardFile: number;
-  updateSelectedDiscardFile: (index: number) => void;
-  disableFiles: boolean;
-  toggleDisableFiles: () => void;
-  updateSelectedStage: (stage: string) => void;
-  isDisabled: boolean;
   disableOthers: () => void;
-  renderMime: IRenderMimeRegistry;
+  discardAllFiles: () => Promise<void>;
+  discardFile: (file: string) => Promise<void>;
+  displayFiles: () => void;
+  files: Git.IStatusFileResult[];
+  heading: string;
+  isDisabled: boolean;
+  moveAllFiles: () => Promise<void>;
+  moveFile: (file: string) => Promise<void>;
+  moveFileIconClass: string;
+  moveFileIconSelectedClass: string;
+  moveAllFilesTitle: string;
+  moveFileTitle: string;
+  showFiles: boolean;
 }
 
 export interface IGitStageState {
