@@ -8,10 +8,13 @@ import ClearIcon from '@material-ui/icons/Clear';
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { Git, IGitExtension } from '../tokens';
 import {
+  branchDialogActionsWrapperClass,
+  branchDialogBranchNameInputClass,
   branchDialogButtonClass,
   branchDialogCancelButtonClass,
   branchDialogClass,
   branchDialogCloseClass,
+  branchDialogContentWrapperClass,
   branchDialogCreateButtonClass,
   branchDialogTitleClass,
   branchDialogTitleWrapperClass,
@@ -50,6 +53,11 @@ export interface IBranchMenuState {
    * Boolean indicating whether to show a dialog to create a new branch.
    */
   branchDialog: boolean;
+
+  /**
+   * Branch name.
+   */
+  branchName: string;
 }
 
 /**
@@ -69,7 +77,8 @@ export class BranchMenu extends React.Component<
     super(props);
     this.state = {
       filter: '',
-      branchDialog: false
+      branchDialog: false,
+      branchName: ''
     };
   }
 
@@ -130,7 +139,19 @@ export class BranchMenu extends React.Component<
               />
             </button>
           </div>
-          <DialogActions>
+          <div className={branchDialogContentWrapperClass}>
+            <p>Name</p>
+            <input
+              className={branchDialogBranchNameInputClass}
+              type="text"
+              onChange={this._onBranchNameChange}
+              value={this.state.branchName}
+              placeholder=""
+              title="Enter a branch name"
+            />
+            <p>Create branch based on...</p>
+          </div>
+          <DialogActions className={branchDialogActionsWrapperClass}>
             <input
               className={classes(
                 branchDialogButtonClass,
@@ -277,6 +298,17 @@ export class BranchMenu extends React.Component<
   };
 
   /**
+   * Callback invoked upon a change to the branch name input element.
+   *
+   * @param event - event object
+   */
+  private _onBranchNameChange = (event: any) => {
+    this.setState({
+      branchName: event.target.value
+    });
+  };
+
+  /**
    * Callback invoked upon closing a dialog to create a new branch.
    *
    * @param event - event object
@@ -293,9 +325,21 @@ export class BranchMenu extends React.Component<
    * @param event - event object
    */
   private _onBranchDialogCreate = () => {
+    const branch = this.state.branchName;
+
+    // Close the branch dialog:
     this._onBranchDialogClose();
+
+    // Reset the branch name:
+    this.setState({
+      branchName: ''
+    });
+
     let foo = this._createBranch; // FIXME: invoke
-    console.log(foo);
+    if (!foo) {
+      console.log('Huh?');
+    }
+    console.log(branch);
   };
 
   /**

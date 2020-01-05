@@ -37,7 +37,16 @@ export const branchMenuFilterInputClass = style({
   backgroundColor: 'var(--jp-layout-color1)',
 
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  borderRadius: '3px'
+  borderRadius: '3px',
+
+  $nest: {
+    '&:active': {
+      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+    },
+    '&:focus': {
+      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+    }
+  }
 });
 
 export const branchMenuFilterClearClass = style({
@@ -158,6 +167,48 @@ export const branchDialogTitleWrapperClass = style({
 
 export const branchDialogTitleClass = style({
   fontWeight: 700
+});
+
+export const branchDialogContentWrapperClass = style({
+  padding: '15px',
+
+  $nest: {
+    p: {
+      marginBottom: '10px'
+    },
+    input: {
+      marginBottom: '16px'
+    }
+  }
+});
+
+export const branchDialogBranchNameInputClass = style({
+  boxSizing: 'border-box',
+
+  width: '100%',
+  height: '2em',
+
+  /* top | right | bottom | left */
+  padding: '1px 18px 2px 7px',
+
+  fontSize: 'var(--jp-ui-font-size1)',
+  fontWeight: 300,
+
+  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  borderRadius: '3px',
+
+  $nest: {
+    '&:active': {
+      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+    },
+    '&:focus': {
+      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+    }
+  }
+});
+
+export const branchDialogActionsWrapperClass = style({
+  borderTop: 'var(--jp-border-width) solid #e0e0e0'
 });
 
 export const branchDialogButtonClass = style({
