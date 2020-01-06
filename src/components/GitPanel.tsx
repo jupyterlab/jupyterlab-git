@@ -1,18 +1,23 @@
 import * as React from 'react';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 import { showErrorMessage, showDialog } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { JSONObject } from '@phosphor/coreutils';
 import { GitExtension } from '../model';
 import {
-  findRepoButtonStyle,
-  panelContainerStyle,
-  panelWarningStyle
-} from '../style/GitPanelStyle';
+  panelWrapperClass,
+  repoButtonClass,
+  selectedTabClass,
+  tabClass,
+  tabsClass,
+  tabIndicatorClass,
+  warningWrapperClass
+} from '../style/GitPanel';
 import { Git } from '../tokens';
 import { decodeStage } from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
-import { BranchHeader } from './BranchHeader';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
@@ -24,7 +29,6 @@ export interface IGitSessionNodeState {
 
   branches: Git.IBranch[];
   currentBranch: string;
-  upstreamBranch: string;
 
   pastCommits: Git.ISingleCommitInfo[];
 
@@ -33,6 +37,7 @@ export interface IGitSessionNodeState {
   untrackedFiles: Git.IStatusFileResult[];
 
   isHistoryVisible: boolean;
+  tab: number;
 }
 
 /** Interface for GitPanel component props */
@@ -53,12 +58,12 @@ export class GitPanel extends React.Component<
       inGitRepository: false,
       branches: [],
       currentBranch: '',
-      upstreamBranch: '',
       pastCommits: [],
       stagedFiles: [],
       unstagedFiles: [],
       untrackedFiles: [],
-      isHistoryVisible: false
+      isHistoryVisible: false,
+      tab: 0
     };
 
     props.model.repositoryChanged.connect((_, args) => {
@@ -88,8 +93,7 @@ export class GitPanel extends React.Component<
 
     this.setState({
       branches: this.props.model.branches,
-      currentBranch: currentBranch ? currentBranch.name : 'master',
-      upstreamBranch: currentBranch ? currentBranch.upstream : ''
+      currentBranch: currentBranch ? currentBranch.name : 'master'
     });
   };
 
@@ -155,13 +159,6 @@ export class GitPanel extends React.Component<
       await this.refreshHistory();
       await this.refreshStatus();
     }
-  };
-
-  toggleSidebar = (): void => {
-    if (!this.state.isHistoryVisible) {
-      this.refreshHistory();
-    }
-    this.setState({ isHistoryVisible: !this.state.isHistoryVisible });
   };
 
   /**
@@ -255,25 +252,45 @@ export class GitPanel extends React.Component<
     if (this.state.inGitRepository) {
       main = (
         <React.Fragment>
-          <BranchHeader
-            model={this.props.model}
-            refresh={this.refreshBranch}
-            currentBranch={this.state.currentBranch}
-            upstreamBranch={this.state.upstreamBranch}
-            stagedFiles={this.state.stagedFiles}
-            data={this.state.branches}
-            toggleSidebar={this.toggleSidebar}
-            sideBarExpanded={this.state.isHistoryVisible}
-          />
+          <Tabs
+            classes={{
+              root: tabsClass,
+              indicator: tabIndicatorClass
+            }}
+            value={this.state.tab}
+            aria-label="Panel tabs"
+            onChange={this._onTabChange}
+          >
+            <Tab
+              classes={{
+                root: tabClass,
+                selected: selectedTabClass
+              }}
+              title="View changed files"
+              label="Changes"
+              disableFocusRipple={true}
+              disableRipple={true}
+            />
+            <Tab
+              classes={{
+                root: tabClass,
+                selected: selectedTabClass
+              }}
+              title="View commit history"
+              label="History"
+              disableFocusRipple={true}
+              disableRipple={true}
+            />
+          </Tabs>
           {sub}
         </React.Fragment>
       );
     } else {
       main = (
-        <div className={panelWarningStyle}>
+        <div className={warningWrapperClass}>
           <div>You aren’t in a git repository.</div>
           <button
-            className={findRepoButtonStyle}
+            className={repoButtonClass}
             onClick={() =>
               this.props.model.commands.execute('filebrowser:toggle-main')
             }
@@ -285,7 +302,7 @@ export class GitPanel extends React.Component<
     }
 
     return (
-      <div className={panelContainerStyle}>
+      <div className={panelWrapperClass}>
         <Toolbar
           model={this.props.model}
           branching={!disableBranching}
@@ -302,6 +319,26 @@ export class GitPanel extends React.Component<
       </div>
     );
   }
+
+  /**
+   * Callback invoked upon changing the active panel tab.
+   *
+   * @param event - event object
+   * @param tab - tab number
+   */
+  private _onTabChange = (event: any, tab: number): void => {
+    let isHistoryVisible;
+    if (tab === 1) {
+      this.refreshHistory();
+      isHistoryVisible = true;
+    } else {
+      isHistoryVisible = false;
+    }
+    this.setState({
+      tab: tab,
+      isHistoryVisible: isHistoryVisible
+    });
+  };
 
   /**
    * List of modified files (both staged and unstaged).
