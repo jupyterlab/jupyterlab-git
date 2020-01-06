@@ -11,6 +11,7 @@ import { JSONObject } from '@phosphor/coreutils';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
+import { normalize } from 'upath';
 
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
@@ -623,8 +624,10 @@ export class GitExtension implements IGitExtension {
       return null;
     }
 
+    let serverRoot = normalize(this._serverRoot);
+    let pathRepository = normalize(this.pathRepository);
     return PathExt.join(
-      PathExt.relative(this._serverRoot, this.pathRepository),
+      PathExt.relative(serverRoot, pathRepository),
       path || ''
     );
   }

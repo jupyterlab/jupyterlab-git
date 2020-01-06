@@ -64,7 +64,8 @@
     "react": "~16.8.4",
     "react-dom": "~16.8.4",
     "react-textarea-autosize": "^7.1.2",
-    "typestyle": "^2.0.1"
+    "typestyle": "^2.0.1",
+    "upath": "^1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",
