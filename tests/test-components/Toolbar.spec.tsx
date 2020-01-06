@@ -57,10 +57,8 @@ describe('Toolbar', function() {
   });
 
   it('should have all buttons', function() {
-    // When
     const node = shallow(<Toolbar {...props} />);
 
-    // Then
     const buttons = node.find('button');
     expect(buttons).toHaveLength(3);
     expect(buttons.find(`.${pullButtonClass}`)).toHaveLength(1);
@@ -75,14 +73,10 @@ describe('Toolbar', function() {
   });
 
   it('should call API on button click', function() {
-    // Given
     const spyPull = jest.spyOn(GitExtension.prototype, 'pull');
     const spyPush = jest.spyOn(GitExtension.prototype, 'push');
 
-    // When
     const node = shallow(<Toolbar {...props} />);
-
-    // Then
     const buttons = node.find('button');
 
     buttons.find(`.${pullButtonClass}`).simulate('click');
