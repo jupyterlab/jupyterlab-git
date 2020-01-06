@@ -55,6 +55,16 @@ export class BranchHeader extends React.Component<
       <div className={branchStyle}>
         <div style={{ display: 'flex' }}>
           <div
+            className={this.getBranchHeaderStyle()}
+            onClick={
+              this.props.sideBarExpanded
+                ? () => this.props.toggleSidebar()
+                : null
+            }
+          >
+            <h3 className={historyLabelStyle}>Changes</h3>
+          </div>
+          <div
             className={this.getHistoryHeaderStyle()}
             onClick={
               this.props.sideBarExpanded
@@ -64,16 +74,6 @@ export class BranchHeader extends React.Component<
             title={'Show commit history'}
           >
             <h3 className={historyLabelStyle}>History</h3>
-          </div>
-          <div
-            className={this.getBranchHeaderStyle()}
-            onClick={
-              this.props.sideBarExpanded
-                ? () => this.props.toggleSidebar()
-                : null
-            }
-          >
-            <h3 className={historyLabelStyle}>Changes</h3>
           </div>
         </div>
       </div>
