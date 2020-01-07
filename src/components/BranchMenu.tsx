@@ -145,6 +145,7 @@ export class BranchMenu extends React.Component<
     return (
       <ListItem
         button
+        title={`Switch to branch: ${branch.name}`}
         className={classes(
           listItemClass,
           branch.name === this.props.model.currentBranch.name
