@@ -13,8 +13,9 @@ from tornado.web import HTTPError
 
 # Git configuration options exposed through the REST API
 ALLOWED_OPTIONS = ['user.name', 'user.email']
-# Regex pattern to capture (key, value) of Git configuration options
-CONFIG_PATTERN = re.compile(r"(?:^|\n)(\S+)\=")
+# Regex pattern to capture (key, value) of Git configuration options.
+# See https://git-scm.com/docs/git-config#_syntax for git var syntax
+CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
 
 
 class GitAuthInputWrapper:
