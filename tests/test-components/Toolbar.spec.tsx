@@ -237,6 +237,42 @@ describe('Toolbar', () => {
     });
   });
 
+  describe('branch menu', () => {
+    let model: GitExtension;
+
+    beforeEach(async () => {
+      const mock = git as jest.Mocked<typeof git>;
+      mock.httpGitRequest.mockImplementation(request);
+
+      model = await createModel();
+    });
+
+    it('should not, by default, display a branch menu', () => {
+      const props = {
+        model: model,
+        branching: false,
+        refresh: async () => {}
+      };
+      const node = shallow(<Toolbar {...props} />);
+      const nodes = node.find('BranchMenu');
+
+      expect(nodes.length).toEqual(0);
+    });
+
+    it('should display a branch menu when the button to display a branch menu is clicked', () => {
+      const props = {
+        model: model,
+        branching: false,
+        refresh: async () => {}
+      };
+      const node = shallow(<Toolbar {...props} />);
+      const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
+
+      button.simulate('click');
+      expect(node.find('BranchMenu').length).toEqual(1);
+    });
+  });
+
   describe('pull changes', () => {
     let model: GitExtension;
 
