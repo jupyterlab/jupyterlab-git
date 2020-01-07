@@ -7,7 +7,8 @@ import { Toolbar } from '../../src/components/Toolbar';
 import {
   pullButtonClass,
   pushButtonClass,
-  refreshButtonClass
+  refreshButtonClass,
+  toolbarMenuButtonClass
 } from '../../src/style/Toolbar';
 
 jest.mock('../../src/git');
@@ -179,6 +180,59 @@ describe('Toolbar', () => {
 
       expect(button.prop('title')).toEqual(
         'Refresh the repository to detect local and remote changes'
+      );
+    });
+
+    it('should display a button to toggle a repository menu', () => {
+      const props = {
+        model: model,
+        branching: false,
+        refresh: async () => {}
+      };
+      const node = shallow(<Toolbar {...props} />);
+      const button = node.find(`.${toolbarMenuButtonClass}`).first();
+
+      const text = button.text();
+      expect(text.includes('Current Repository')).toEqual(true);
+    });
+
+    it('should set the `title` attribute on the button to toggle a repository menu', () => {
+      const props = {
+        model: model,
+        branching: false,
+        refresh: async () => {}
+      };
+      const node = shallow(<Toolbar {...props} />);
+      const button = node.find(`.${toolbarMenuButtonClass}`).first();
+
+      const bool = button.prop('title').includes('Current repository: ');
+      expect(bool).toEqual(true);
+    });
+
+    it('should display a button to toggle a branch menu', () => {
+      const props = {
+        model: model,
+        branching: false,
+        refresh: async () => {}
+      };
+      const node = shallow(<Toolbar {...props} />);
+      const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
+
+      const text = button.text();
+      expect(text.includes('Current Branch')).toEqual(true);
+    });
+
+    it('should set the `title` attribute on the button to toggle a branch menu', () => {
+      const props = {
+        model: model,
+        branching: false,
+        refresh: async () => {}
+      };
+      const node = shallow(<Toolbar {...props} />);
+      const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
+
+      expect(button.prop('title')).toEqual(
+        `Change the current branch: ${model.currentBranch.name}`
       );
     });
   });
