@@ -129,103 +129,131 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns fragment
    */
   render() {
-    const repo = this.props.model.pathRepository || '';
-    const branch = repo ? this.props.model.currentBranch.name : '';
     return (
       <div className={toolbarClass}>
-        <div className={toolbarNavClass}>
-          <button
-            className={classes(
-              toolbarButtonClass,
-              pullButtonClass,
-              'jp-Icon-16'
-            )}
-            title={'Pull latest changes'}
-            onClick={this._onPullClick}
-          />
-          <button
-            className={classes(
-              toolbarButtonClass,
-              pushButtonClass,
-              'jp-Icon-16'
-            )}
-            title={'Push committed changes'}
-            onClick={this._onPushClick}
-          />
-          <button
-            className={classes(
-              toolbarButtonClass,
-              refreshButtonClass,
-              'jp-Icon-16'
-            )}
-            title={'Refresh the repository to detect local and remote changes'}
-            onClick={this._onRefreshClick}
-          />
-        </div>
-        <div className={toolbarMenuWrapperClass}>
-          <button
-            className={toolbarMenuButtonClass}
-            title={`Current repository: ${repo}`}
-            onClick={this._onRepositoryClick}
-          >
-            <span
-              className={classes(
-                toolbarMenuButtonIconClass,
-                repoIconClass,
-                'jp-Icon-16'
-              )}
-            />
-            <div className={toolbarMenuButtonTitleWrapperClass}>
-              <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
-              <p className={toolbarMenuButtonSubtitleClass}>
-                {PathExt.basename(repo)}
-              </p>
-            </div>
-            <span
-              className={classes(
-                toolbarMenuButtonIconClass,
-                this.state.repoMenu ? closeMenuIconClass : openMenuIconClass,
-                'jp-Icon-16'
-              )}
-            />
-          </button>
-          {this.state.repoMenu ? null : null}
-        </div>
-        <div className={toolbarMenuWrapperClass}>
-          <button
-            className={toolbarMenuButtonClass}
-            title={`Change the current branch: ${branch}`}
-            onClick={this._onBranchClick}
-          >
-            <span
-              className={classes(
-                toolbarMenuButtonIconClass,
-                branchIconClass,
-                'jp-Icon-16'
-              )}
-            />
-            <div className={toolbarMenuButtonTitleWrapperClass}>
-              <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
-              <p className={toolbarMenuButtonSubtitleClass}>{branch}</p>
-            </div>
-            <span
-              className={classes(
-                toolbarMenuButtonIconClass,
-                this.state.branchMenu ? closeMenuIconClass : openMenuIconClass,
-                'jp-Icon-16'
-              )}
-            />
-          </button>
-          {this.state.branchMenu ? (
-            <BranchMenu
-              model={this.props.model}
-              branching={this.props.branching}
-            />
-          ) : null}
-        </div>
+        {this._renderTopNav()}
+        {this._renderRepoMenu()}
+        {this._renderBranchMenu()}
       </div>
     );
   }
+
+  /**
+   * Renders the top navigation.
+   *
+   * @returns fragment
+   */
+  private _renderTopNav = () => {
+    return (
+      <div className={toolbarNavClass}>
+        <button
+          className={classes(toolbarButtonClass, pullButtonClass, 'jp-Icon-16')}
+          title={'Pull latest changes'}
+          onClick={this._onPullClick}
+        />
+        <button
+          className={classes(toolbarButtonClass, pushButtonClass, 'jp-Icon-16')}
+          title={'Push committed changes'}
+          onClick={this._onPushClick}
+        />
+        <button
+          className={classes(
+            toolbarButtonClass,
+            refreshButtonClass,
+            'jp-Icon-16'
+          )}
+          title={'Refresh the repository to detect local and remote changes'}
+          onClick={this._onRefreshClick}
+        />
+      </div>
+    );
+  };
+
+  /**
+   * Renders a repository menu.
+   *
+   * @returns fragment
+   */
+  private _renderRepoMenu = () => {
+    const repo = this.props.model.pathRepository || '';
+    return (
+      <div className={toolbarMenuWrapperClass}>
+        <button
+          className={toolbarMenuButtonClass}
+          title={`Current repository: ${repo}`}
+          onClick={this._onRepositoryClick}
+        >
+          <span
+            className={classes(
+              toolbarMenuButtonIconClass,
+              repoIconClass,
+              'jp-Icon-16'
+            )}
+          />
+          <div className={toolbarMenuButtonTitleWrapperClass}>
+            <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
+            <p className={toolbarMenuButtonSubtitleClass}>
+              {PathExt.basename(repo)}
+            </p>
+          </div>
+          <span
+            className={classes(
+              toolbarMenuButtonIconClass,
+              this.state.repoMenu ? closeMenuIconClass : openMenuIconClass,
+              'jp-Icon-16'
+            )}
+          />
+        </button>
+        {this.state.repoMenu ? null : null}
+      </div>
+    );
+  };
+
+  /**
+   * Renders a branch menu.
+   *
+   * @returns fragment
+   */
+  private _renderBranchMenu = () => {
+    if (!this.props.model.pathRepository) {
+      return null;
+    }
+    const branch = this.props.model.currentBranch.name || '';
+    return (
+      <div className={toolbarMenuWrapperClass}>
+        <button
+          className={toolbarMenuButtonClass}
+          title={`Change the current branch: ${branch}`}
+          onClick={this._onBranchClick}
+        >
+          <span
+            className={classes(
+              toolbarMenuButtonIconClass,
+              branchIconClass,
+              'jp-Icon-16'
+            )}
+          />
+          <div className={toolbarMenuButtonTitleWrapperClass}>
+            <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
+            <p className={toolbarMenuButtonSubtitleClass}>{branch}</p>
+          </div>
+          <span
+            className={classes(
+              toolbarMenuButtonIconClass,
+              this.state.branchMenu ? closeMenuIconClass : openMenuIconClass,
+              'jp-Icon-16'
+            )}
+          />
+        </button>
+        {this.state.branchMenu ? (
+          <BranchMenu
+            model={this.props.model}
+            branching={this.props.branching}
+          />
+        ) : null}
+      </div>
+    );
+  };
 
   /**
    * Callback invoked upon a change to the repository path.
