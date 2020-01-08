@@ -60,6 +60,11 @@ export interface INewBranchDialogState {
    * Base branch.
    */
   base: string;
+
+  /**
+   * Current branch name.
+   */
+  current: string;
 }
 
 /**
@@ -77,9 +82,12 @@ export class NewBranchDialog extends React.Component<
    */
   constructor(props: INewBranchDialogProps) {
     super(props);
+    this.props.model.repositoryChanged.connect(this._onRepositoryChange, this);
+    this.props.model.headChanged.connect(this._onHeadChange, this);
     this.state = {
       name: '',
-      base: this.props.model.currentBranch.name
+      base: this.props.model.currentBranch.name,
+      current: this.props.model.currentBranch.name
     };
   }
 
@@ -161,7 +169,7 @@ export class NewBranchDialog extends React.Component<
    */
   private _renderItem = (branch: Git.IBranch, idx: number) => {
     // TODO: consider allowing users to branch from any branch, rather than just the current branch...
-    if (branch.name !== this.props.model.currentBranch.name) {
+    if (branch.name !== this.state.current) {
       return null;
     }
     return (
@@ -177,7 +185,7 @@ export class NewBranchDialog extends React.Component<
         <span className={classes(listItemIconClass, 'jp-Icon-16')} />
         <div className={listItemContentClass}>
           <p className={listItemTitleClass}>{branch.name}</p>
-          {branch.name === this.props.model.currentBranch.name ? (
+          {branch.name === this.state.current ? (
             <p className={listItemDescClass}>
               The current branch. Pick this if you want to build on work done in
               this branch.
@@ -186,6 +194,31 @@ export class NewBranchDialog extends React.Component<
         </div>
       </ListItem>
     );
+  };
+
+  /**
+   * Callback invoked upon a change to the repository path.
+   */
+  private _onRepositoryChange = () => {
+    this._syncState();
+  };
+
+  /**
+   * Callback invoked upon a change to the current HEAD.
+   */
+  private _onHeadChange = () => {
+    this._syncState();
+  };
+
+  /**
+   * Syncs the component state with the underlying model.
+   */
+  private _syncState = () => {
+    this.setState({
+      current: this.props.model.pathRepository
+        ? this.props.model.currentBranch.name
+        : ''
+    });
   };
 
   /**
