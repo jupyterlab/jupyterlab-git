@@ -150,7 +150,7 @@ export class BranchMenu extends React.Component<
    * @returns fragment array
    */
   private _renderItems() {
-    return this.state.branches.map(this._renderItem);
+    return this.state.branches.map(this._renderItem, this);
   }
 
   /**
@@ -221,27 +221,27 @@ export class BranchMenu extends React.Component<
    *
    * @param event - event object
    */
-  private _onFilterChange(event: any) {
+  private _onFilterChange = (event: any): void => {
     this.setState({
       filter: event.target.value
     });
-  }
+  };
 
   /**
    * Callback invoked to reset the menu filter.
    */
-  private _resetFilter() {
+  private _resetFilter = (): void => {
     this.setState({
       filter: ''
     });
-  }
+  };
 
   /**
    * Callback invoked upon clicking a button to create a new branch.
    *
    * @param event - event object
    */
-  private _onNewBranchClick() {
+  private _onNewBranchClick = (): void => {
     if (!this.props.branching) {
       showErrorMessage('Creating a new branch is disabled', CHANGES_ERR_MSG);
       return;
@@ -249,16 +249,16 @@ export class BranchMenu extends React.Component<
     this.setState({
       branchDialog: true
     });
-  }
+  };
 
   /**
    * Callback invoked upon closing a dialog to create a new branch.
    */
-  private _onNewBranchDialogClose() {
+  private _onNewBranchDialogClose = (): void => {
     this.setState({
       branchDialog: false
     });
-  }
+  };
 
   /**
    * Returns a callback which is invoked upon clicking a branch name.
