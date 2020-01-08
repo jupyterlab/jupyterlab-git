@@ -171,9 +171,9 @@ export class NewBranchDialog extends React.Component<
    *
    * @returns fragment array
    */
-  private _renderItems = () => {
+  private _renderItems() {
     return this.state.branches.map(this._renderItem);
-  };
+  }
 
   /**
    * Renders a branch menu item.
@@ -182,7 +182,7 @@ export class NewBranchDialog extends React.Component<
    * @param idx - item index
    * @returns fragment
    */
-  private _renderItem = (branch: Git.IBranch, idx: number) => {
+  private _renderItem(branch: Git.IBranch, idx: number) {
     // TODO: consider allowing users to branch from any branch, rather than just the current branch...
     if (branch.name !== this.state.current) {
       return null;
@@ -209,12 +209,12 @@ export class NewBranchDialog extends React.Component<
         </div>
       </ListItem>
     );
-  };
+  }
 
   /**
    * Adds model listeners.
    */
-  private _addListeners = () => {
+  private _addListeners() {
     // When the repository changes, we're likely to have a new set of branches:
     this.props.model.repositoryChanged.connect(this._syncState, this);
 
@@ -223,28 +223,28 @@ export class NewBranchDialog extends React.Component<
 
     // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension):
     this.props.model.statusChanged.connect(this._syncState, this);
-  };
+  }
 
   /**
    * Removes model listeners.
    */
-  private _removeListeners = () => {
+  private _removeListeners() {
     this.props.model.repositoryChanged.disconnect(this._syncState, this);
     this.props.model.headChanged.disconnect(this._syncState, this);
     this.props.model.statusChanged.disconnect(this._syncState, this);
-  };
+  }
 
   /**
    * Syncs the component state with the underlying model.
    */
-  private _syncState = () => {
+  private _syncState() {
     const repo = this.props.model.pathRepository;
     this.setState({
       base: repo ? this.props.model.currentBranch.name : '',
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : []
     });
-  };
+  }
 
   /**
    * Returns a callback which is invoked upon clicking a branch name.
@@ -252,7 +252,7 @@ export class NewBranchDialog extends React.Component<
    * @param branch - branch name
    * @returns callback
    */
-  private _onBranchClickFactory = (branch: string) => {
+  private _onBranchClickFactory(branch: string) {
     const self = this;
     return onClick;
 
@@ -267,25 +267,25 @@ export class NewBranchDialog extends React.Component<
         base: branch
       });
     }
-  };
+  }
 
   /**
    * Callback invoked upon a change to the branch name input element.
    *
    * @param event - event object
    */
-  private _onNameChange = (event: any) => {
+  private _onNameChange(event: any) {
     this.setState({
       name: event.target.value
     });
-  };
+  }
 
   /**
    * Callback invoked upon clicking a button to create a new branch.
    *
    * @param event - event object
    */
-  private _onCreate = () => {
+  private _onCreate() {
     const branch = this.state.name;
 
     // Close the branch dialog:
@@ -298,14 +298,14 @@ export class NewBranchDialog extends React.Component<
 
     // Create the branch:
     this._createBranch(branch);
-  };
+  }
 
   /**
    * Creates a new branch.
    *
    * @param branch - branch name
    */
-  private _createBranch = (branch: string) => {
+  private _createBranch(branch: string) {
     const opts = {
       newBranch: true,
       branchname: branch
@@ -336,5 +336,5 @@ export class NewBranchDialog extends React.Component<
     function onError(err: any) {
       showErrorMessage('Error creating branch', err.message);
     }
-  };
+  }
 }
