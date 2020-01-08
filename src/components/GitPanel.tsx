@@ -208,7 +208,7 @@ export class GitPanel extends React.Component<
    *
    * @returns fragment
    */
-  private _renderToolbar = () => {
+  private _renderToolbar() {
     const disableBranching = Boolean(
       this.props.settings.composite['disableBranchWithChanges'] &&
         ((this.state.unstagedFiles && this.state.unstagedFiles.length) ||
@@ -221,14 +221,14 @@ export class GitPanel extends React.Component<
         refresh={this._onRefresh}
       />
     );
-  };
+  }
 
   /**
    * Renders the main panel.
    *
    * @returns fragment
    */
-  private _renderMain = () => {
+  private _renderMain() {
     if (this.state.inGitRepository) {
       return (
         <React.Fragment>
@@ -240,14 +240,14 @@ export class GitPanel extends React.Component<
       );
     }
     return this._renderWarning();
-  };
+  }
 
   /**
    * Renders panel tabs.
    *
    * @returns fragment
    */
-  private _renderTabs = () => {
+  private _renderTabs() {
     return (
       <Tabs
         classes={{
@@ -280,14 +280,14 @@ export class GitPanel extends React.Component<
         />
       </Tabs>
     );
-  };
+  }
 
   /**
    * Renders a panel for viewing and committing file changes.
    *
    * @returns fragment
    */
-  private _renderChanges = () => {
+  private _renderChanges() {
     return (
       <React.Fragment>
         <FileList
@@ -311,14 +311,14 @@ export class GitPanel extends React.Component<
         )}
       </React.Fragment>
     );
-  };
+  }
 
   /**
    * Renders a panel for viewing commit history.
    *
    * @returns fragment
    */
-  private _renderHistory = () => {
+  private _renderHistory() {
     return (
       <HistorySideBar
         isExpanded={this.state.isHistoryVisible}
@@ -328,14 +328,14 @@ export class GitPanel extends React.Component<
         renderMime={this.props.renderMime}
       />
     );
-  };
+  }
 
   /**
    * Renders a panel for prompting a user to find a Git repository.
    *
    * @returns fragment
    */
-  private _renderWarning = () => {
+  private _renderWarning() {
     return (
       <div className={warningWrapperClass}>
         <div>Unable to detect a Git repository.</div>
@@ -349,7 +349,7 @@ export class GitPanel extends React.Component<
         </button>
       </div>
     );
-  };
+  }
 
   /**
    * Callback invoked upon changing the active panel tab.
@@ -357,7 +357,7 @@ export class GitPanel extends React.Component<
    * @param event - event object
    * @param tab - tab number
    */
-  private _onTabChange = (event: any, tab: number): void => {
+  private _onTabChange(event: any, tab: number): void {
     let isHistoryVisible;
     if (tab === 1) {
       this.refreshHistory();
@@ -369,21 +369,21 @@ export class GitPanel extends React.Component<
       tab: tab,
       isHistoryVisible: isHistoryVisible
     });
-  };
+  }
 
   /**
    * Callback invoked upon refreshing a repository.
    *
    * @returns promise which refreshes a repository
    */
-  private _onRefresh = async () => {
+  private async _onRefresh() {
     await this.refreshBranch();
     if (this.state.isHistoryVisible) {
       this.refreshHistory();
     } else {
       this.refreshStatus();
     }
-  };
+  }
 
   /**
    * List of modified files (both staged and unstaged).
