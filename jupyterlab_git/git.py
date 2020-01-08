@@ -204,7 +204,7 @@ class Git:
         Execute git status command & return the result.
         """
         p = Popen(
-            ["git", "status", "--porcelain"],
+            ["git", "status", "--porcelain", "-u"],
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),
@@ -232,7 +232,7 @@ class Git:
         else:
             return {
                 "code": p.returncode,
-                "command": "git status --porcelain",
+                "command": "git status --porcelain -u",
                 "message": my_error.decode("utf-8"),
             }
 
