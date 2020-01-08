@@ -294,9 +294,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Removes model listeners.
    */
   private _removeListeners = () => {
-    this.props.model.repositoryChanged.disconnect(this._syncState);
-    this.props.model.headChanged.disconnect(this._syncState);
-    this.props.model.statusChanged.disconnect(this._syncState);
+    this.props.model.repositoryChanged.disconnect(this._syncState, this);
+    this.props.model.headChanged.disconnect(this._syncState, this);
+    this.props.model.statusChanged.disconnect(this._syncState, this);
   };
 
   /**
