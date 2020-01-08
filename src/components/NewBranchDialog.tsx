@@ -82,8 +82,16 @@ export class NewBranchDialog extends React.Component<
    */
   constructor(props: INewBranchDialogProps) {
     super(props);
-    this.props.model.repositoryChanged.connect(this._onRepositoryChange, this);
-    this.props.model.headChanged.connect(this._onHeadChange, this);
+
+    // When the repository changes, we're likely to have a new set of branches:
+    this.props.model.repositoryChanged.connect(this._syncState, this);
+
+    // When the HEAD changes, decent probability that we've switched branches:
+    this.props.model.headChanged.connect(this._syncState, this);
+
+    // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension):
+    this.props.model.statusChanged.connect(this._syncState, this);
+
     this.state = {
       name: '',
       base: this.props.model.currentBranch.name,
@@ -194,20 +202,6 @@ export class NewBranchDialog extends React.Component<
         </div>
       </ListItem>
     );
-  };
-
-  /**
-   * Callback invoked upon a change to the repository path.
-   */
-  private _onRepositoryChange = () => {
-    this._syncState();
-  };
-
-  /**
-   * Callback invoked upon a change to the current HEAD.
-   */
-  private _onHeadChange = () => {
-    this._syncState();
   };
 
   /**
