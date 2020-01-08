@@ -149,9 +149,9 @@ export class BranchMenu extends React.Component<
    *
    * @returns fragment array
    */
-  private _renderItems = () => {
+  private _renderItems() {
     return this.state.branches.map(this._renderItem);
-  };
+  }
 
   /**
    * Renders a menu item.
@@ -160,7 +160,7 @@ export class BranchMenu extends React.Component<
    * @param idx - item index
    * @returns fragment
    */
-  private _renderItem = (branch: Git.IBranch, idx: number) => {
+  private _renderItem(branch: Git.IBranch, idx: number) {
     // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     if (this.state.filter && !branch.name.includes(this.state.filter)) {
       return null;
@@ -180,12 +180,12 @@ export class BranchMenu extends React.Component<
         {branch.name}
       </ListItem>
     );
-  };
+  }
 
   /**
    * Adds model listeners.
    */
-  private _addListeners = () => {
+  private _addListeners() {
     // When the repository changes, we're likely to have a new set of branches:
     this.props.model.repositoryChanged.connect(this._syncState, this);
 
@@ -194,54 +194,54 @@ export class BranchMenu extends React.Component<
 
     // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension):
     this.props.model.statusChanged.connect(this._syncState, this);
-  };
+  }
 
   /**
    * Removes model listeners.
    */
-  private _removeListeners = () => {
+  private _removeListeners() {
     this.props.model.repositoryChanged.disconnect(this._syncState, this);
     this.props.model.headChanged.disconnect(this._syncState, this);
     this.props.model.statusChanged.disconnect(this._syncState, this);
-  };
+  }
 
   /**
    * Syncs the component state with the underlying model.
    */
-  private _syncState = () => {
+  private _syncState() {
     const repo = this.props.model.pathRepository;
     this.setState({
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : []
     });
-  };
+  }
 
   /**
    * Callback invoked upon a change to the menu filter.
    *
    * @param event - event object
    */
-  private _onFilterChange = (event: any) => {
+  private _onFilterChange(event: any) {
     this.setState({
       filter: event.target.value
     });
-  };
+  }
 
   /**
    * Callback invoked to reset the menu filter.
    */
-  private _resetFilter = () => {
+  private _resetFilter() {
     this.setState({
       filter: ''
     });
-  };
+  }
 
   /**
    * Callback invoked upon clicking a button to create a new branch.
    *
    * @param event - event object
    */
-  private _onNewBranchClick = () => {
+  private _onNewBranchClick() {
     if (!this.props.branching) {
       showErrorMessage('Creating a new branch is disabled', CHANGES_ERR_MSG);
       return;
@@ -249,16 +249,16 @@ export class BranchMenu extends React.Component<
     this.setState({
       branchDialog: true
     });
-  };
+  }
 
   /**
    * Callback invoked upon closing a dialog to create a new branch.
    */
-  private _onNewBranchDialogClose = () => {
+  private _onNewBranchDialogClose() {
     this.setState({
       branchDialog: false
     });
-  };
+  }
 
   /**
    * Returns a callback which is invoked upon clicking a branch name.
@@ -266,7 +266,7 @@ export class BranchMenu extends React.Component<
    * @param branch - branch name
    * @returns callback
    */
-  private _onBranchClickFactory = (branch: string) => {
+  private _onBranchClickFactory(branch: string) {
     const self = this;
     return onClick;
 
@@ -311,5 +311,5 @@ export class BranchMenu extends React.Component<
     function onError(err: any) {
       showErrorMessage('Error switching branch', err.message);
     }
-  };
+  }
 }
