@@ -50,6 +50,11 @@ export interface IBranchMenuState {
    * Boolean indicating whether to show a dialog to create a new branch.
    */
   branchDialog: boolean;
+
+  /**
+   * Current branch name.
+   */
+  branch: string;
 }
 
 /**
@@ -67,9 +72,14 @@ export class BranchMenu extends React.Component<
    */
   constructor(props: IBranchMenuProps) {
     super(props);
+    this.props.model.repositoryChanged.connect(this._onRepositoryChange, this);
+    this.props.model.headChanged.connect(this._onHeadChange, this);
     this.state = {
       filter: '',
-      branchDialog: false
+      branchDialog: false,
+      branch: this.props.model.pathRepository
+        ? this.props.model.currentBranch.name
+        : ''
     };
   }
 
@@ -148,9 +158,7 @@ export class BranchMenu extends React.Component<
         title={`Switch to branch: ${branch.name}`}
         className={classes(
           listItemClass,
-          branch.name === this.props.model.currentBranch.name
-            ? activeListItemClass
-            : null
+          branch.name === this.state.branch ? activeListItemClass : null
         )}
         key={idx}
         onClick={this._onBranchClickFactory(branch.name)}
@@ -159,6 +167,31 @@ export class BranchMenu extends React.Component<
         {branch.name}
       </ListItem>
     );
+  };
+
+  /**
+   * Callback invoked upon a change to the repository path.
+   */
+  private _onRepositoryChange = () => {
+    this._syncState();
+  };
+
+  /**
+   * Callback invoked upon a change to the current HEAD.
+   */
+  private _onHeadChange = () => {
+    this._syncState();
+  };
+
+  /**
+   * Syncs the component state with the underlying model.
+   */
+  private _syncState = () => {
+    this.setState({
+      branch: this.props.model.pathRepository
+        ? this.props.model.currentBranch.name
+        : ''
+    });
   };
 
   /**
