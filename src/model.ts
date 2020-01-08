@@ -41,7 +41,7 @@ export class GitExtension implements IGitExtension {
       interval = DEFAULT_REFRESH_INTERVAL;
     }
     const poll = new Poll({
-      factory: () => model._refreshStatus(),
+      factory: () => model.refresh(),
       frequency: {
         interval: interval,
         backoff: true,
@@ -787,8 +787,31 @@ export class GitExtension implements IGitExtension {
    * Request git status refresh
    */
   async refreshStatus(): Promise<void> {
-    await this._poll.refresh();
-    await this._poll.tick;
+    await this.ready;
+    const path = this.pathRepository;
+
+    if (path === null) {
+      this._setStatus([]);
+      return Promise.resolve();
+    }
+
+    try {
+      let response = await httpGitRequest('/git/status', 'POST', {
+        current_path: path
+      });
+      const data = await response.json();
+      if (response.status !== 200) {
+        console.error(data.message);
+        // TODO should we notify the user
+        this._setStatus([]);
+      }
+
+      this._setStatus((data as Git.IStatusResult).files);
+    } catch (err) {
+      console.error(err);
+      // TODO should we notify the user
+      this._setStatus([]);
+    }
   }
 
   /**
@@ -933,35 +956,6 @@ export class GitExtension implements IGitExtension {
       return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
-    }
-  }
-
-  /** Refresh the git repository status */
-  protected async _refreshStatus(): Promise<void> {
-    await this.ready;
-    const path = this.pathRepository;
-
-    if (path === null) {
-      this._setStatus([]);
-      return Promise.resolve();
-    }
-
-    try {
-      let response = await httpGitRequest('/git/status', 'POST', {
-        current_path: path
-      });
-      const data = await response.json();
-      if (response.status !== 200) {
-        console.error(data.message);
-        // TODO should we notify the user
-        this._setStatus([]);
-      }
-
-      this._setStatus((data as Git.IStatusResult).files);
-    } catch (err) {
-      console.error(err);
-      // TODO should we notify the user
-      this._setStatus([]);
     }
   }
 
