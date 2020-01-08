@@ -187,9 +187,7 @@ export class BranchMenu extends React.Component<
    * Syncs the component state with the underlying model.
    */
   private _syncState = () => {
-    console.log('SYNCING STATE');
     const repo = this.props.model.pathRepository;
-    console.log(this.props.model.branches);
     this.setState({
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : []
