@@ -101,6 +101,16 @@ export interface IToolbarState {
    * Boolean indicating whether a repository menu is shown.
    */
   repoMenu: boolean;
+
+  /**
+   * Current repository.
+   */
+  repository: string;
+
+  /**
+   * Current branch name.
+   */
+  branch: string;
 }
 
 /**
@@ -119,7 +129,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     this.props.model.headChanged.connect(this._onHeadChange, this);
     this.state = {
       branchMenu: false,
-      repoMenu: false
+      repoMenu: false,
+      repository: this.props.model.pathRepository || '',
+      branch: this.props.model.pathRepository
+        ? this.props.model.currentBranch.name
+        : ''
     };
   }
 
@@ -175,12 +189,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns fragment
    */
   private _renderRepoMenu = () => {
-    const repo = this.props.model.pathRepository || '';
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
           className={toolbarMenuButtonClass}
-          title={`Current repository: ${repo}`}
+          title={`Current repository: ${this.state.repository}`}
           onClick={this._onRepositoryClick}
         >
           <span
@@ -193,7 +206,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
             <p className={toolbarMenuButtonSubtitleClass}>
-              {PathExt.basename(repo)}
+              {PathExt.basename(this.state.repository)}
             </p>
           </div>
           <span
@@ -215,15 +228,14 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns fragment
    */
   private _renderBranchMenu = () => {
-    if (!this.props.model.pathRepository) {
+    if (!this.state.repository) {
       return null;
     }
-    const branch = this.props.model.currentBranch.name || '';
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
           className={toolbarMenuButtonClass}
-          title={`Change the current branch: ${branch}`}
+          title={`Change the current branch: ${this.state.branch}`}
           onClick={this._onBranchClick}
         >
           <span
@@ -235,7 +247,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
-            <p className={toolbarMenuButtonSubtitleClass}>{branch}</p>
+            <p className={toolbarMenuButtonSubtitleClass}>
+              {this.state.branch}
+            </p>
           </div>
           <span
             className={classes(
@@ -259,14 +273,26 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Callback invoked upon a change to the repository path.
    */
   private _onRepositoryChange = () => {
-    this.forceUpdate();
+    this._syncState();
   };
 
   /**
    * Callback invoked upon a change to the current HEAD.
    */
   private _onHeadChange = () => {
-    this.forceUpdate();
+    this._syncState();
+  };
+
+  /**
+   * Syncs the repository state with the underlying model.
+   */
+  private _syncState = () => {
+    this.setState({
+      repository: this.props.model.pathRepository || '',
+      branch: this.props.model.pathRepository
+        ? this.props.model.currentBranch.name
+        : ''
+    });
   };
 
   /**
