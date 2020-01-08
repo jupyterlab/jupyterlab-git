@@ -89,15 +89,7 @@ export class NewBranchDialog extends React.Component<
     super(props);
 
     const repo = this.props.model.pathRepository;
-
-    // When the repository changes, we're likely to have a new set of branches:
-    this.props.model.repositoryChanged.connect(this._syncState, this);
-
-    // When the HEAD changes, decent probability that we've switched branches:
-    this.props.model.headChanged.connect(this._syncState, this);
-
-    // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension):
-    this.props.model.statusChanged.connect(this._syncState, this);
+    this._addListeners();
 
     this.state = {
       name: '',
@@ -105,6 +97,13 @@ export class NewBranchDialog extends React.Component<
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : []
     };
+  }
+
+  /**
+   * Callback invoked when a component will no longer be mounted.
+   */
+  componentWillUnmount() {
+    this._removeListeners();
   }
 
   /**
@@ -210,6 +209,29 @@ export class NewBranchDialog extends React.Component<
         </div>
       </ListItem>
     );
+  };
+
+  /**
+   * Adds model listeners.
+   */
+  private _addListeners = () => {
+    // When the repository changes, we're likely to have a new set of branches:
+    this.props.model.repositoryChanged.connect(this._syncState, this);
+
+    // When the HEAD changes, decent probability that we've switched branches:
+    this.props.model.headChanged.connect(this._syncState, this);
+
+    // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension):
+    this.props.model.statusChanged.connect(this._syncState, this);
+  };
+
+  /**
+   * Removes model listeners.
+   */
+  private _removeListeners = () => {
+    this.props.model.repositoryChanged.disconnect(this._syncState);
+    this.props.model.headChanged.disconnect(this._syncState);
+    this.props.model.statusChanged.disconnect(this._syncState);
   };
 
   /**
