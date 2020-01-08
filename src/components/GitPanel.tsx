@@ -357,7 +357,7 @@ export class GitPanel extends React.Component<
    * @param event - event object
    * @param tab - tab number
    */
-  private _onTabChange(event: any, tab: number): void {
+  private _onTabChange = (event: any, tab: number): void => {
     let isHistoryVisible;
     if (tab === 1) {
       this.refreshHistory();
@@ -369,21 +369,21 @@ export class GitPanel extends React.Component<
       tab: tab,
       isHistoryVisible: isHistoryVisible
     });
-  }
+  };
 
   /**
    * Callback invoked upon refreshing a repository.
    *
    * @returns promise which refreshes a repository
    */
-  private async _onRefresh() {
+  private _onRefresh = async () => {
     await this.refreshBranch();
     if (this.state.isHistoryVisible) {
       this.refreshHistory();
     } else {
       this.refreshStatus();
     }
-  }
+  };
 
   /**
    * List of modified files (both staged and unstaged).
