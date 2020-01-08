@@ -109,35 +109,35 @@ export class CommitBox extends React.Component<
    *
    * @param event - event object
    */
-  private _onCommitClick() {
+  private _onCommitClick = (): void => {
     const msg = this.state.summary + '\n' + this.state.description + '\n';
     this.props.onCommit(msg);
 
     // NOTE: we assume here that committing changes always works and we can safely clear component state
     this._reset();
-  }
+  };
 
   /**
    * Callback invoked upon updating a commit message description.
    *
    * @param event - event object
    */
-  private _onDescriptionChange(event: any): void {
+  private _onDescriptionChange = (event: any): void => {
     this.setState({
       description: event.target.value
     });
-  }
+  };
 
   /**
    * Callback invoked upon updating a commit message summary.
    *
    * @param event - event object
    */
-  private _onSummaryChange(event: any): void {
+  private _onSummaryChange = (event: any): void => {
     this.setState({
       summary: event.target.value
     });
-  }
+  };
 
   /**
    * Callback invoked upon a `'keypress'` event when entering a commit message summary.
