@@ -44,14 +44,30 @@ const BRANCHES = [
 ];
 
 function request(url: string, method: string, request: Object | null) {
-  if (url === '/git/server_root') {
-    const res = new Response(
-      JSON.stringify({
-        server_root: '/foo'
-      })
-    );
-    return Promise.resolve(res);
+  let response: Response;
+  switch (url) {
+    case '/git/show_top_level':
+      response = new Response(
+        JSON.stringify({
+          code: 0,
+          top_repo_path: (request as any)['current_path']
+        })
+      );
+      break;
+    case '/git/server_root':
+      response = new Response(
+        JSON.stringify({
+          server_root: '/foo'
+        })
+      );
+      break;
+    default:
+      response = new Response(
+        `{"message": "No mock implementation for ${url}."}`,
+        { status: 404 }
+      );
   }
+  return Promise.resolve(response);
 }
 
 async function createModel() {
@@ -59,6 +75,7 @@ async function createModel() {
 
   jest.spyOn(model, 'branches', 'get').mockReturnValue(BRANCHES);
   jest.spyOn(model, 'currentBranch', 'get').mockReturnValue(BRANCHES[0]);
+  model.pathRepository = '/path/to/repo';
 
   await model.ready;
   return model;
