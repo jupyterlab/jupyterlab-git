@@ -2,7 +2,7 @@ import { style } from 'typestyle';
 
 export const wrapperClass = style({
   marginTop: '6px',
-  marginBottom: '10px'
+  marginBottom: '0'
 });
 
 export const filterWrapperClass = style({
