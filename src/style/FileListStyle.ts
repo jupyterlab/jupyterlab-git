@@ -1,5 +1,10 @@
 import { style } from 'typestyle';
 
+export const fileListWrapperClass = style({
+  height: 'auto',
+  paddingBottom: '40px'
+});
+
 export const moveFileUpButtonStyle = style({
   backgroundImage: 'var(--jp-icon-move-file-up)'
 });
