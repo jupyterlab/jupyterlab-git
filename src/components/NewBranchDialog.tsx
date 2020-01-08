@@ -65,6 +65,11 @@ export interface INewBranchDialogState {
    * Current branch name.
    */
   current: string;
+
+  /**
+   * Current list of branches.
+   */
+  branches: Git.IBranch[];
 }
 
 /**
@@ -83,6 +88,8 @@ export class NewBranchDialog extends React.Component<
   constructor(props: INewBranchDialogProps) {
     super(props);
 
+    const repo = this.props.model.pathRepository;
+
     // When the repository changes, we're likely to have a new set of branches:
     this.props.model.repositoryChanged.connect(this._syncState, this);
 
@@ -94,8 +101,9 @@ export class NewBranchDialog extends React.Component<
 
     this.state = {
       name: '',
-      base: this.props.model.currentBranch.name,
-      current: this.props.model.currentBranch.name
+      base: repo ? this.props.model.currentBranch.name : '',
+      current: repo ? this.props.model.currentBranch.name : '',
+      branches: repo ? this.props.model.branches : []
     };
   }
 
@@ -165,7 +173,7 @@ export class NewBranchDialog extends React.Component<
    * @returns fragment array
    */
   private _renderItems = () => {
-    return this.props.model.branches.map(this._renderItem);
+    return this.state.branches.map(this._renderItem);
   };
 
   /**
@@ -208,10 +216,11 @@ export class NewBranchDialog extends React.Component<
    * Syncs the component state with the underlying model.
    */
   private _syncState = () => {
+    const repo = this.props.model.pathRepository;
     this.setState({
-      current: this.props.model.pathRepository
-        ? this.props.model.currentBranch.name
-        : ''
+      base: repo ? this.props.model.currentBranch.name : '',
+      current: repo ? this.props.model.currentBranch.name : '',
+      branches: repo ? this.props.model.branches : []
     });
   };
 

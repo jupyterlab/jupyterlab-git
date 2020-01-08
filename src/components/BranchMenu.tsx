@@ -54,7 +54,12 @@ export interface IBranchMenuState {
   /**
    * Current branch name.
    */
-  branch: string;
+  current: string;
+
+  /**
+   * Current list of branches.
+   */
+  branches: Git.IBranch[];
 }
 
 /**
@@ -73,6 +78,8 @@ export class BranchMenu extends React.Component<
   constructor(props: IBranchMenuProps) {
     super(props);
 
+    const repo = this.props.model.pathRepository;
+
     // When the repository changes, we're likely to have a new set of branches:
     this.props.model.repositoryChanged.connect(this._syncState, this);
 
@@ -85,9 +92,8 @@ export class BranchMenu extends React.Component<
     this.state = {
       filter: '',
       branchDialog: false,
-      branch: this.props.model.pathRepository
-        ? this.props.model.currentBranch.name
-        : ''
+      current: repo ? this.props.model.currentBranch.name : '',
+      branches: repo ? this.props.model.branches : []
     };
   }
 
@@ -145,7 +151,7 @@ export class BranchMenu extends React.Component<
    * @returns fragment array
    */
   private _renderItems = () => {
-    return this.props.model.branches.map(this._renderItem);
+    return this.state.branches.map(this._renderItem);
   };
 
   /**
@@ -166,7 +172,7 @@ export class BranchMenu extends React.Component<
         title={`Switch to branch: ${branch.name}`}
         className={classes(
           listItemClass,
-          branch.name === this.state.branch ? activeListItemClass : null
+          branch.name === this.state.current ? activeListItemClass : null
         )}
         key={idx}
         onClick={this._onBranchClickFactory(branch.name)}
@@ -181,11 +187,10 @@ export class BranchMenu extends React.Component<
    * Syncs the component state with the underlying model.
    */
   private _syncState = () => {
-    console.log('SYNCING STATE');
+    const repo = this.props.model.pathRepository;
     this.setState({
-      branch: this.props.model.pathRepository
-        ? this.props.model.currentBranch.name
-        : ''
+      current: repo ? this.props.model.currentBranch.name : '',
+      branches: repo ? this.props.model.branches : []
     });
   };
 

@@ -126,6 +126,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   constructor(props: IToolbarProps) {
     super(props);
 
+    const repo = this.props.model.pathRepository;
+
     // When the repository changes, we're likely to have a new set of branches:
     this.props.model.repositoryChanged.connect(this._syncState, this);
 
@@ -138,10 +140,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     this.state = {
       branchMenu: false,
       repoMenu: false,
-      repository: this.props.model.pathRepository || '',
-      branch: this.props.model.pathRepository
-        ? this.props.model.currentBranch.name
-        : ''
+      repository: repo || '',
+      branch: repo ? this.props.model.currentBranch.name : ''
     };
   }
 
@@ -281,11 +281,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Syncs the component state with the underlying model.
    */
   private _syncState = () => {
+    const repo = this.props.model.pathRepository;
     this.setState({
-      repository: this.props.model.pathRepository || '',
-      branch: this.props.model.pathRepository
-        ? this.props.model.currentBranch.name
-        : ''
+      repository: repo || '',
+      branch: repo ? this.props.model.currentBranch.name : ''
     });
   };
 
