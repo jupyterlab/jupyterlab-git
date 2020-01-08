@@ -302,7 +302,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   /**
    * Syncs the component state with the underlying model.
    */
-  private _syncState() {
+  private _syncState(): void {
     const repo = this.props.model.pathRepository;
     this.setState({
       repository: repo || '',
