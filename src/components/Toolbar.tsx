@@ -279,7 +279,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   /**
    * Adds model listeners.
    */
-  private _addListeners() {
+  private _addListeners(): void {
     // When the repository changes, we're likely to have a new set of branches:
     this.props.model.repositoryChanged.connect(this._syncState, this);
 
@@ -293,7 +293,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   /**
    * Removes model listeners.
    */
-  private _removeListeners() {
+  private _removeListeners(): void {
     this.props.model.repositoryChanged.disconnect(this._syncState, this);
     this.props.model.headChanged.disconnect(this._syncState, this);
     this.props.model.statusChanged.disconnect(this._syncState, this);
@@ -315,57 +315,57 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    *
    * @param event - event object
    */
-  private _onPullClick() {
+  private _onPullClick = (): void => {
     showGitOperationDialog(this.props.model, Operation.Pull).catch(reason => {
       console.error(
         `Encountered an error when pulling changes. Error: ${reason}`
       );
     });
-  }
+  };
 
   /**
    * Callback invoked upon clicking a button to push the latest changes.
    *
    * @param event - event object
    */
-  private _onPushClick() {
+  private _onPushClick = (): void => {
     showGitOperationDialog(this.props.model, Operation.Push).catch(reason => {
       console.error(
         `Encountered an error when pushing changes. Error: ${reason}`
       );
     });
-  }
+  };
 
   /**
    * Callback invoked upon clicking a button to change the current repository.
    *
    * @param event - event object
    */
-  private _onRepositoryClick() {
+  private _onRepositoryClick = (): void => {
     // Toggle the repository menu:
     this.setState({
       repoMenu: !this.state.repoMenu
     });
-  }
+  };
 
   /**
    * Callback invoked upon clicking a button to change the current branch.
    *
    * @param event - event object
    */
-  private _onBranchClick() {
+  private _onBranchClick = (): void => {
     // Toggle the branch menu:
     this.setState({
       branchMenu: !this.state.branchMenu
     });
-  }
+  };
 
   /**
    * Callback invoked upon clicking a button to refresh a repository.
    *
    * @param event - event object
    */
-  private _onRefreshClick() {
+  private _onRefreshClick = (): void => {
     this.props.refresh();
-  }
+  };
 }
