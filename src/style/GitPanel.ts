@@ -19,6 +19,8 @@ export const repoButtonClass = style({
 });
 
 export const tabsClass = style({
+  minHeight: '36px!important',
+
   $nest: {
     'button:last-of-type': {
       borderRight: 'none'
@@ -30,6 +32,7 @@ export const tabClass = style({
   width: '50%',
   minWidth: '0!important',
   maxWidth: '50%!important',
+  minHeight: '36px!important',
 
   backgroundColor: 'var(--jp-layout-color2)!important',
 
