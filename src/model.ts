@@ -973,6 +973,7 @@ export class GitExtension implements IGitExtension {
   protected _setStatus(v: Git.IStatusFileResult[]) {
     this._status = v;
     this._statusChanged.emit(this._status);
+    console.log('HERE');
   }
 
   private async _getServerRoot(): Promise<string> {
