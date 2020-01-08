@@ -37,7 +37,7 @@ export const toolbarMenuButtonClass = style({
   flexWrap: 'wrap',
 
   width: '100%',
-  minHeight: '55px',
+  minHeight: '50px',
 
   /* top | right | bottom | left */
   padding: '4px 11px 4px 11px',
