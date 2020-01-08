@@ -164,7 +164,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    *
    * @returns fragment
    */
-  private _renderTopNav = () => {
+  private _renderTopNav() {
     return (
       <div className={toolbarNavClass}>
         <button
@@ -188,14 +188,14 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         />
       </div>
     );
-  };
+  }
 
   /**
    * Renders a repository menu.
    *
    * @returns fragment
    */
-  private _renderRepoMenu = () => {
+  private _renderRepoMenu() {
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
@@ -227,14 +227,14 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         {this.state.repoMenu ? null : null}
       </div>
     );
-  };
+  }
 
   /**
    * Renders a branch menu.
    *
    * @returns fragment
    */
-  private _renderBranchMenu = () => {
+  private _renderBranchMenu() {
     if (!this.state.repository) {
       return null;
     }
@@ -274,12 +274,12 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         ) : null}
       </div>
     );
-  };
+  }
 
   /**
    * Adds model listeners.
    */
-  private _addListeners = () => {
+  private _addListeners() {
     // When the repository changes, we're likely to have a new set of branches:
     this.props.model.repositoryChanged.connect(this._syncState, this);
 
@@ -288,84 +288,84 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
 
     // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension):
     this.props.model.statusChanged.connect(this._syncState, this);
-  };
+  }
 
   /**
    * Removes model listeners.
    */
-  private _removeListeners = () => {
+  private _removeListeners() {
     this.props.model.repositoryChanged.disconnect(this._syncState, this);
     this.props.model.headChanged.disconnect(this._syncState, this);
     this.props.model.statusChanged.disconnect(this._syncState, this);
-  };
+  }
 
   /**
    * Syncs the component state with the underlying model.
    */
-  private _syncState = () => {
+  private _syncState() {
     const repo = this.props.model.pathRepository;
     this.setState({
       repository: repo || '',
       branch: repo ? this.props.model.currentBranch.name : ''
     });
-  };
+  }
 
   /**
    * Callback invoked upon clicking a button to pull the latest changes.
    *
    * @param event - event object
    */
-  private _onPullClick = () => {
+  private _onPullClick() {
     showGitOperationDialog(this.props.model, Operation.Pull).catch(reason => {
       console.error(
         `Encountered an error when pulling changes. Error: ${reason}`
       );
     });
-  };
+  }
 
   /**
    * Callback invoked upon clicking a button to push the latest changes.
    *
    * @param event - event object
    */
-  private _onPushClick = () => {
+  private _onPushClick() {
     showGitOperationDialog(this.props.model, Operation.Push).catch(reason => {
       console.error(
         `Encountered an error when pushing changes. Error: ${reason}`
       );
     });
-  };
+  }
 
   /**
    * Callback invoked upon clicking a button to change the current repository.
    *
    * @param event - event object
    */
-  private _onRepositoryClick = () => {
+  private _onRepositoryClick() {
     // Toggle the repository menu:
     this.setState({
       repoMenu: !this.state.repoMenu
     });
-  };
+  }
 
   /**
    * Callback invoked upon clicking a button to change the current branch.
    *
    * @param event - event object
    */
-  private _onBranchClick = () => {
+  private _onBranchClick() {
     // Toggle the branch menu:
     this.setState({
       branchMenu: !this.state.branchMenu
     });
-  };
+  }
 
   /**
    * Callback invoked upon clicking a button to refresh a repository.
    *
    * @param event - event object
    */
-  private _onRefreshClick = () => {
+  private _onRefreshClick() {
     this.props.refresh();
-  };
+  }
 }
