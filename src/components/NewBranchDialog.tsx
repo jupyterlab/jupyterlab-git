@@ -172,7 +172,7 @@ export class NewBranchDialog extends React.Component<
    * @returns fragment array
    */
   private _renderItems() {
-    return this.state.branches.map(this._renderItem);
+    return this.state.branches.map(this._renderItem, this);
   }
 
   /**
@@ -214,7 +214,7 @@ export class NewBranchDialog extends React.Component<
   /**
    * Adds model listeners.
    */
-  private _addListeners() {
+  private _addListeners(): void {
     // When the repository changes, we're likely to have a new set of branches:
     this.props.model.repositoryChanged.connect(this._syncState, this);
 
@@ -228,7 +228,7 @@ export class NewBranchDialog extends React.Component<
   /**
    * Removes model listeners.
    */
-  private _removeListeners() {
+  private _removeListeners(): void {
     this.props.model.repositoryChanged.disconnect(this._syncState, this);
     this.props.model.headChanged.disconnect(this._syncState, this);
     this.props.model.statusChanged.disconnect(this._syncState, this);
@@ -237,7 +237,7 @@ export class NewBranchDialog extends React.Component<
   /**
    * Syncs the component state with the underlying model.
    */
-  private _syncState() {
+  private _syncState(): void {
     const repo = this.props.model.pathRepository;
     this.setState({
       base: repo ? this.props.model.currentBranch.name : '',
@@ -274,18 +274,18 @@ export class NewBranchDialog extends React.Component<
    *
    * @param event - event object
    */
-  private _onNameChange(event: any) {
+  private _onNameChange = (event: any): void => {
     this.setState({
       name: event.target.value
     });
-  }
+  };
 
   /**
    * Callback invoked upon clicking a button to create a new branch.
    *
    * @param event - event object
    */
-  private _onCreate() {
+  private _onCreate = (): void => {
     const branch = this.state.name;
 
     // Close the branch dialog:
@@ -298,14 +298,14 @@ export class NewBranchDialog extends React.Component<
 
     // Create the branch:
     this._createBranch(branch);
-  }
+  };
 
   /**
    * Creates a new branch.
    *
    * @param branch - branch name
    */
-  private _createBranch(branch: string) {
+  private _createBranch(branch: string): void {
     const opts = {
       newBranch: true,
       branchname: branch
