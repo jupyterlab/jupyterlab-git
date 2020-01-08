@@ -2,6 +2,7 @@
 Module for executing git commands, sending results back to the handlers
 """
 import os
+import re
 import subprocess
 from subprocess import Popen, PIPE, CalledProcessError
 
@@ -10,7 +11,11 @@ from urllib.parse import unquote
 from tornado.web import HTTPError
 
 
+# Git configuration options exposed through the REST API
 ALLOWED_OPTIONS = ['user.name', 'user.email']
+# Regex pattern to capture (key, value) of Git configuration options.
+# See https://git-scm.com/docs/git-config#_syntax for git var syntax
+CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
 
 
 class GitAuthInputWrapper:
@@ -102,11 +107,8 @@ class Git:
                 response["message"] = error.decode("utf-8").strip()
             else:
                 raw = output.decode("utf-8").strip()
-                response["options"] = dict()
-                for l in raw.split("\n"):
-                    k, v = l.split("=", maxsplit=1)
-                    if k in ALLOWED_OPTIONS:
-                        response["options"][k] = v
+                s = CONFIG_PATTERN.split(raw)
+                response["options"] = {k:v for k, v in zip(s[1::2], s[2::2]) if k in ALLOWED_OPTIONS}
 
         return response
 

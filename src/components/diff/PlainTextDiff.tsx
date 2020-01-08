@@ -6,7 +6,7 @@ import * as React from 'react';
 import { IDiffProps } from './Diff';
 import { httpGitRequest } from '../../git';
 import { mergeView } from './mergeview';
-import { getRefValue, IDiffContext, IGitRef, ISpecialRef } from './model';
+import { IDiffContext } from './model';
 
 interface ICurrentReference {
   special?: 'WORKING' | 'INDEX';
@@ -32,6 +32,7 @@ export class PlainTextDiff extends React.Component<
   constructor(props: IPlainTextDiffProps) {
     super(props);
     this.state = { errorMessage: null };
+    this._mergeViewRef = React.createRef<HTMLDivElement>();
   }
 
   componentDidMount() {
@@ -54,13 +55,7 @@ export class PlainTextDiff extends React.Component<
       return (
         <div className="jp-git-diff-Widget">
           <div className="jp-git-diff-root">
-            <div
-              id={this._generateID(
-                this.props.path,
-                this.props.diffContext.currentRef
-              )}
-              className="jp-git-PlainText-diff"
-            />
+            <div ref={this._mergeViewRef} className="jp-git-PlainText-diff" />
           </div>
         </div>
       );
@@ -120,12 +115,6 @@ export class PlainTextDiff extends React.Component<
     }
   }
 
-  private _generateID(path: string, currentRef: IGitRef | ISpecialRef): string {
-    return `diffviewer-${this.props.path.replace('/', '-')}-${getRefValue(
-      this.props.diffContext.currentRef
-    )}`;
-  }
-
   /**
    * Creates and adds a diff viewer to the DOM with given content
    *
@@ -135,22 +124,19 @@ export class PlainTextDiff extends React.Component<
   private _addDiffViewer(prevContent: string, currContent: string) {
     const mode = Mode.findByFileName(this.props.path);
 
-    mergeView(
-      document.getElementById(
-        this._generateID(this.props.path, this.props.diffContext.currentRef)
-      ),
-      {
-        value: currContent,
-        orig: prevContent,
-        lineNumbers: true,
-        mode: mode.mime,
-        theme: 'jupyter',
-        connect: 'align',
-        collapseIdentical: true,
-        revertButtons: false
-      }
-    );
+    mergeView(this._mergeViewRef.current, {
+      value: currContent,
+      orig: prevContent,
+      lineNumbers: true,
+      mode: mode.mime,
+      theme: 'jupyter',
+      connect: 'align',
+      collapseIdentical: true,
+      revertButtons: false
+    });
   }
+
+  private _mergeViewRef: React.RefObject<HTMLDivElement>;
 }
 
 /**
