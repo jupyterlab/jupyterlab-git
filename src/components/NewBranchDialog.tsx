@@ -271,7 +271,7 @@ export class NewBranchDialog extends React.Component<
   private _syncState(): void {
     const repo = this.props.model.pathRepository;
     this.setState({
-      base: repo ? this.props.model.currentBranch.name : '',
+      base: repo ? this.state.base : '',
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : []
     });
