@@ -106,11 +106,8 @@ export const filterInputClass = style({
   /* top | right | bottom | left */
   padding: '1px 18px 2px 7px',
 
-  color: 'var(--jp-ui-font-color0)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
-
-  backgroundColor: 'var(--jp-layout-color1)',
 
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   borderRadius: '3px',
