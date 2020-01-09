@@ -606,12 +606,13 @@ class Git:
         )
         return my_output
 
-    def checkout_new_branch(self, branchname, current_path):
+    def checkout_new_branch(self, branchname, startpoint, current_path):
         """
         Execute git checkout <make-branch> command & return the result.
         """
+        cmd = ["git", "checkout", "-b", branchname, startpoint]
         p = Popen(
-            ["git", "checkout", "-b", branchname],
+            cmd,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),
