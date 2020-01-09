@@ -172,7 +172,26 @@ export class NewBranchDialog extends React.Component<
    * @returns fragment array
    */
   private _renderItems() {
-    return this.state.branches.map(this._renderItem, this);
+    const current = this.props.model.currentBranch.name;
+    return this.state.branches
+      .slice()
+      .sort(comparator)
+      .map(this._renderItem, this);
+
+    /**
+     * Comparator function for sorting branches.
+     *
+     * @private
+     * @param a - first branch
+     * @param b - second branch
+     * @returns integer indicating sort order
+     */
+    function comparator(a: Git.IBranch, b: Git.IBranch): number {
+      if (a.name === current) {
+        return -1;
+      }
+      return 0;
+    }
   }
 
   /**
@@ -183,10 +202,6 @@ export class NewBranchDialog extends React.Component<
    * @returns fragment
    */
   private _renderItem(branch: Git.IBranch, idx: number) {
-    // TODO: consider allowing users to branch from any branch, rather than just the current branch...
-    if (branch.name !== this.state.current) {
-      return null;
-    }
     return (
       <ListItem
         button
