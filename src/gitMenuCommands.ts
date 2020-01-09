@@ -3,7 +3,7 @@ import { Dialog, MainAreaWidget, showDialog } from '@jupyterlab/apputils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
 import { ITerminal } from '@jupyterlab/terminal';
 import { IGitExtension } from './tokens';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * The command IDs used by the git plugin.

@@ -1,4 +1,5 @@
-import { nbformat, PathExt } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ServerConnection } from '@jupyterlab/services/lib/serverconnection';
 import { IDiffEntry } from 'nbdime/lib/diff/diffentries';

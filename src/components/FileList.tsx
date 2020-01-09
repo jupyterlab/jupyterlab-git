@@ -1,7 +1,7 @@
 import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 import * as React from 'react';
 import { GitExtension } from '../model';
 import {
