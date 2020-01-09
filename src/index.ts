@@ -3,7 +3,8 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IChangedArgs, ISettingRegistry } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   FileBrowser,
   FileBrowserModel,
@@ -11,11 +12,9 @@ import {
 } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
 import { Menu } from '@phosphor/widgets';
 import { addCommands, CommandIDs } from './gitMenuCommands';
 import { GitExtension } from './model';
-import { registerGitIcons } from './style/icons';
 import { IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
@@ -67,9 +66,6 @@ async function activate(
   settingRegistry: ISettingRegistry
 ): Promise<IGitExtension> {
   let settings: ISettingRegistry.ISettings;
-
-  // Register Git icons with the icon registry
-  registerGitIcons(defaultIconRegistry);
 
   // Get a reference to the default file browser extension
   const filebrowser = factory.defaultBrowser;

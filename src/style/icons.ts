@@ -1,4 +1,4 @@
-import { IIconRegistry } from '@jupyterlab/ui-components';
+import { JLIcon } from '@jupyterlab/ui-components';
 
 // icon svg import statements
 import gitSvg from '../../style/images/git-icon.svg';
@@ -10,39 +10,38 @@ import addSvg from '../../style/images/move-file-up.svg';
 import removeSvg from '../../style/images/move-file-down.svg';
 import rewindSvg from '../../style/images/rewind.svg';
 
-export function registerGitIcons(iconRegistry: IIconRegistry) {
-  iconRegistry.addIcon(
-    {
-      name: 'git',
-      svg: gitSvg
-    },
+export const gitIcon = new JLIcon({ name: 'git', svgstr: gitSvg });
+export const deletionsMadeIcon = new JLIcon({
+  name: 'git-deletionsMade',
+  svgstr: deletionsMadeSvg
+});
+export const insertionsMadeIcon = new JLIcon({
+  name: 'git-insertionsMade',
+  svgstr: insertionsMadeSvg
+});
+export const addIcon  = new JLIcon(
     {
       name: 'git-add',
-      svg: addSvg
-    },
-    {
-      name: 'git-deletionsMade',
-      svg: deletionsMadeSvg
-    },
+      svgstr: addSvg
+    });
+
+export const diffIcon  = new JLIcon(
     {
       name: 'git-diff',
-      svg: diffSvg
-    },
+      svgstr: diffSvg
+    });
+export const discardIcon  = new JLIcon(
     {
       name: 'git-discard',
-      svg: discardSvg
-    },
-    {
-      name: 'git-insertionsMade',
-      svg: insertionsMadeSvg
-    },
+      svgstr: discardSvg
+    });
+export const removeIcon  = new JLIcon(
     {
       name: 'git-remove',
-      svg: removeSvg
-    },
+      svgstr: removeSvg
+    });
+export const rewindIcon = new JLIcon(
     {
       name: 'git-rewind',
-      svg: rewindSvg
-    }
-  );
-}
+      svgstr: rewindSvg
+    });

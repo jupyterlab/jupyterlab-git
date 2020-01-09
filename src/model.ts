@@ -1,14 +1,11 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import {
-  IChangedArgs,
-  PathExt,
-  Poll,
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
+import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
-import { CommandRegistry } from '@phosphor/commands';
-import { JSONObject } from '@phosphor/coreutils';
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { CommandRegistry } from '@lumino/commands';
+import { JSONObject } from '@lumino/coreutils';
+import { Poll } from '@lumino/polling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
 import { decodeStage } from './utils';

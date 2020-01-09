@@ -6,8 +6,8 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { IGitExtension } from './tokens';
 import { doGitClone } from './widgets/gitClone';
