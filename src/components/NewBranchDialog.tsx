@@ -16,6 +16,10 @@ import {
   closeButtonClass,
   contentWrapperClass,
   createButtonClass,
+  filterClass,
+  filterClearClass,
+  filterInputClass,
+  filterWrapperClass,
   listItemBoldTitleClass,
   listItemClass,
   listItemContentClass,
@@ -70,6 +74,11 @@ export interface INewBranchDialogState {
   base: string;
 
   /**
+   * Menu filter.
+   */
+  filter: string;
+
+  /**
    * Current branch name.
    */
   current: string;
@@ -102,6 +111,7 @@ export class NewBranchDialog extends React.Component<
     this.state = {
       name: '',
       base: repo ? this.props.model.currentBranch.name : '',
+      filter: '',
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : []
     };
@@ -150,6 +160,27 @@ export class NewBranchDialog extends React.Component<
             title="Enter a branch name"
           />
           <p>Create branch based on...</p>
+          <div className={filterWrapperClass}>
+            <div className={filterClass}>
+              <input
+                className={filterInputClass}
+                type="text"
+                onChange={this._onFilterChange}
+                value={this.state.filter}
+                placeholder="Filter"
+                title="Filter branch menu"
+              />
+              {this.state.filter ? (
+                <button className={filterClearClass}>
+                  <ClearIcon
+                    titleAccess="Clear the current filter"
+                    fontSize="small"
+                    onClick={this._resetFilter}
+                  />
+                </button>
+              ) : null}
+            </div>
+          </div>
           <div className={listWrapperClass}>
             <List disablePadding>{this._renderItems()}</List>
           </div>
@@ -210,6 +241,10 @@ export class NewBranchDialog extends React.Component<
    * @returns fragment
    */
   private _renderItem(branch: Git.IBranch, idx: number) {
+    // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
+    if (this.state.filter && !branch.name.includes(this.state.filter)) {
+      return null;
+    }
     const isBase = branch.name === this.state.base;
     const isCurr = branch.name === this.state.current;
 
@@ -276,6 +311,26 @@ export class NewBranchDialog extends React.Component<
       branches: repo ? this.props.model.branches : []
     });
   }
+
+  /**
+   * Callback invoked upon a change to the menu filter.
+   *
+   * @param event - event object
+   */
+  private _onFilterChange = (event: any): void => {
+    this.setState({
+      filter: event.target.value
+    });
+  };
+
+  /**
+   * Callback invoked to reset the menu filter.
+   */
+  private _resetFilter = (): void => {
+    this.setState({
+      filter: ''
+    });
+  };
 
   /**
    * Returns a callback which is invoked upon clicking a branch name.

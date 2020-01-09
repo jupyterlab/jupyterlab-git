@@ -2,6 +2,7 @@ import { style } from 'typestyle';
 
 export const branchDialogClass = style({
   width: '400px',
+  height: '460px',
 
   borderRadius: '3px!important'
 });
@@ -47,7 +48,7 @@ export const contentWrapperClass = style({
 
   $nest: {
     '> p': {
-      marginBottom: '10px'
+      marginBottom: '7px'
     }
   }
 });
@@ -79,10 +80,88 @@ export const nameInputClass = style({
   }
 });
 
-export const listWrapperClass = style({
-  display: 'block',
+export const filterWrapperClass = style({
+  padding: 0,
+  paddingBottom: '4px'
+});
+
+export const filterClass = style({
+  boxSizing: 'border-box',
+  display: 'inline-block',
+  position: 'relative',
+
   width: '100%',
-  maxHeight: '400px',
+
+  marginRight: '11px',
+
+  fontSize: 'var(--jp-ui-font-size1)'
+});
+
+export const filterInputClass = style({
+  boxSizing: 'border-box',
+
+  width: '100%',
+  height: '2em',
+
+  /* top | right | bottom | left */
+  padding: '1px 18px 2px 7px',
+
+  color: 'var(--jp-ui-font-color0)',
+  fontSize: 'var(--jp-ui-font-size1)',
+  fontWeight: 300,
+
+  backgroundColor: 'var(--jp-layout-color1)',
+
+  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  borderRadius: '3px',
+
+  $nest: {
+    '&:active': {
+      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+    },
+    '&:focus': {
+      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+    }
+  }
+});
+
+export const filterClearClass = style({
+  position: 'absolute',
+  right: '5px',
+  top: '0.6em',
+
+  height: '1.1em',
+  width: '1.1em',
+
+  padding: 0,
+
+  backgroundColor: 'var(--jp-inverse-layout-color4)',
+
+  border: 'none',
+  borderRadius: '50%',
+
+  $nest: {
+    svg: {
+      width: '0.5em!important',
+      height: '0.5em!important',
+
+      fill: 'var(--jp-ui-inverse-font-color0)'
+    },
+    '&:hover': {
+      backgroundColor: 'var(--jp-inverse-layout-color3)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--jp-inverse-layout-color2)'
+    }
+  }
+});
+
+export const listWrapperClass = style({
+  boxSizing: 'border-box',
+  display: 'block',
+
+  width: '100%',
+  height: '200px',
 
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   borderRadius: '3px',
