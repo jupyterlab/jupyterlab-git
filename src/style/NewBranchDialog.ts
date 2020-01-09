@@ -92,23 +92,16 @@ export const listWrapperClass = style({
 });
 
 export const listItemClass = style({
-  boxSizing: 'border-box',
-  display: 'flex',
   flexDirection: 'row',
   flexWrap: 'wrap',
 
   width: '100%',
-  minHeight: '55px',
 
   /* top | right | bottom | left */
-  padding: '4px 11px 4px 11px',
+  padding: '4px 11px 4px 11px!important',
 
   fontSize: 'var(--jp-ui-font-size1)',
-  lineHeight: '1.5em',
-  textAlign: 'left',
-
-  border: 'none',
-  borderRadius: 0
+  lineHeight: '1.5em'
 });
 
 export const activeListItemClass = style({
