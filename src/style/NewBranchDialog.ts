@@ -84,6 +84,9 @@ export const listWrapperClass = style({
   width: '100%',
   maxHeight: '400px',
 
+  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  borderRadius: '3px',
+
   overflow: 'hidden',
   overflowY: 'scroll'
 });
