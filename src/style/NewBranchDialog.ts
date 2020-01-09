@@ -136,7 +136,9 @@ export const listItemIconClass = style({
   backgroundPosition: 'center'
 });
 
-export const listItemTitleClass = style({
+export const listItemTitleClass = style({});
+
+export const listItemBoldTitleClass = style({
   fontWeight: 700
 });
 

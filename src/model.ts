@@ -387,6 +387,7 @@ export class GitExtension implements IGitExtension {
       checkout_branch: false,
       new_check: false,
       branchname: '',
+      startpoint: '',
       checkout_all: true,
       filename: '',
       top_repo_path: path
@@ -397,6 +398,9 @@ export class GitExtension implements IGitExtension {
         body.branchname = options.branchname;
         body.checkout_branch = true;
         body.new_check = options.newBranch === true;
+        if (options.newBranch) {
+          body.startpoint = options.startpoint || this._currentBranch.name;
+        }
       } else if (options.filename) {
         body.filename = options.filename;
         body.checkout_all = false;

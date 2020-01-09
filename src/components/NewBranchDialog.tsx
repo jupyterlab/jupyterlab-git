@@ -16,6 +16,7 @@ import {
   closeButtonClass,
   contentWrapperClass,
   createButtonClass,
+  listItemBoldTitleClass,
   listItemClass,
   listItemContentClass,
   listItemDescClass,
@@ -26,6 +27,13 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
+
+const BRANCH_DESC = {
+  current:
+    'The current branch. Pick this if you want to build on work done in this branch.',
+  default:
+    'The default branch. Pick this if you want to start fresh from the default branch.'
+};
 
 /**
  * Interface describing component properties.
@@ -202,25 +210,33 @@ export class NewBranchDialog extends React.Component<
    * @returns fragment
    */
   private _renderItem(branch: Git.IBranch, idx: number) {
+    const isBase = branch.name === this.state.base;
+    const isCurr = branch.name === this.state.current;
+
+    let isBold;
+    let desc;
+    if (isCurr) {
+      isBold = true;
+      desc = BRANCH_DESC['current'];
+    }
     return (
       <ListItem
         button
-        className={classes(
-          listItemClass,
-          branch.name === this.state.base ? activeListItemClass : null
-        )}
+        className={classes(listItemClass, isBase ? activeListItemClass : null)}
         key={idx}
         onClick={this._onBranchClickFactory(branch.name)}
       >
         <span className={classes(listItemIconClass, 'jp-Icon-16')} />
         <div className={listItemContentClass}>
-          <p className={listItemTitleClass}>{branch.name}</p>
-          {branch.name === this.state.current ? (
-            <p className={listItemDescClass}>
-              The current branch. Pick this if you want to build on work done in
-              this branch.
-            </p>
-          ) : null}
+          <p
+            className={classes(
+              listItemTitleClass,
+              isBold ? listItemBoldTitleClass : null
+            )}
+          >
+            {branch.name}
+          </p>
+          {desc ? <p className={listItemDescClass}>{desc}</p> : null}
         </div>
       </ListItem>
     );
