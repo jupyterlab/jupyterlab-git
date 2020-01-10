@@ -136,7 +136,7 @@ export class NewBranchDialog extends React.Component<
           paper: branchDialogClass
         }}
         open={this.props.open}
-        onClose={this.props.onClose}
+        onClose={this._onClose}
         aria-labelledby="new-branch-dialog"
       >
         <div className={titleWrapperClass}>
@@ -145,7 +145,7 @@ export class NewBranchDialog extends React.Component<
             <ClearIcon
               titleAccess="Close this dialog"
               fontSize="small"
-              onClick={this.props.onClose}
+              onClick={this._onClose}
             />
           </button>
         </div>
@@ -191,7 +191,7 @@ export class NewBranchDialog extends React.Component<
             type="button"
             title="Close this dialog without creating a new branch"
             value="Cancel"
-            onClick={this.props.onClose}
+            onClick={this._onClose}
           />
           <input
             className={classes(buttonClass, createButtonClass)}
@@ -311,6 +311,19 @@ export class NewBranchDialog extends React.Component<
       branches: repo ? this.props.model.branches : []
     });
   }
+
+  /**
+   * Callback invoked upon closing the dialog.
+   *
+   * @param event - event object
+   */
+  private _onClose = (): void => {
+    this.props.onClose();
+    this.setState({
+      name: '',
+      filter: ''
+    });
+  };
 
   /**
    * Callback invoked upon a change to the menu filter.
