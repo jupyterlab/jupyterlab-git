@@ -22,10 +22,10 @@ export const closeButtonClass = style({
 
   $nest: {
     '&:hover': {
-      backgroundColor: 'var(--jp-toolbar-active-background)'
+      backgroundColor: '#e0e0e0'
     },
     '&:active': {
-      backgroundColor: 'var(--jp-toolbar-active-background)'
+      backgroundColor: '#e0e0e0'
     }
   }
 });
@@ -67,7 +67,7 @@ export const nameInputClass = style({
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 
-  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  border: 'var(--jp-border-width) solid #e0e0e0',
   borderRadius: '3px',
 
   $nest: {
@@ -109,7 +109,7 @@ export const filterInputClass = style({
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 
-  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  border: 'var(--jp-border-width) solid #e0e0e0',
   borderRadius: '3px',
 
   $nest: {
@@ -132,7 +132,7 @@ export const filterClearClass = style({
 
   padding: 0,
 
-  backgroundColor: 'var(--jp-inverse-layout-color4)',
+  backgroundColor: '#757575',
 
   border: 'none',
   borderRadius: '50%',
@@ -142,13 +142,13 @@ export const filterClearClass = style({
       width: '0.5em!important',
       height: '0.5em!important',
 
-      fill: 'var(--jp-ui-inverse-font-color0)'
+      fill: 'white'
     },
     '&:hover': {
-      backgroundColor: 'var(--jp-inverse-layout-color3)'
+      backgroundColor: '#616161'
     },
     '&:active': {
-      backgroundColor: 'var(--jp-inverse-layout-color2)'
+      backgroundColor: '#424242'
     }
   }
 });
@@ -160,7 +160,7 @@ export const listWrapperClass = style({
   width: '100%',
   height: '200px',
 
-  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  border: 'var(--jp-border-width) solid #e0e0e0',
   borderRadius: '3px',
 
   overflow: 'hidden',
@@ -206,7 +206,7 @@ export const listItemIconClass = style({
   /* top | right | bottom | left */
   margin: 'auto 8px auto 0',
 
-  backgroundImage: 'var(--jp-icon-git-branch)',
+  backgroundImage: 'var(--jp-icon-git-branch-light-theme)',
   backgroundSize: '16px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
@@ -238,7 +238,7 @@ export const buttonClass = style({
 });
 
 export const cancelButtonClass = style({
-  backgroundColor: 'var(--jp-inverse-layout-color4)'
+  backgroundColor: '#757575'
 });
 
 export const createButtonClass = style({
