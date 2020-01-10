@@ -377,9 +377,10 @@ export class NewBranchDialog extends React.Component<
     // Close the branch dialog:
     this.props.onClose();
 
-    // Reset the branch name:
+    // Reset the branch name and filter:
     this.setState({
-      name: ''
+      name: '',
+      filter: ''
     });
 
     // Create the branch:
