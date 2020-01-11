@@ -13,9 +13,10 @@ import {
   fileIconStyle,
   fileLabelStyle,
   fileStyle,
+  fileItemButtonStyle,
+  folderLabelStyle,
   selectedFileChangedLabelStyle,
-  selectedFileStyle,
-  fileItemButtonStyle
+  selectedFileStyle
 } from '../style/FileItemStyle';
 import { Git } from '../tokens';
 import {
@@ -169,9 +170,9 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     let diffButton = null;
     if (isDiffSupported(this.props.file.to)) {
       if (this.props.stage === 'Changed') {
-        diffButton = this.createDiffButton({ specialRef: 'WORKING' });
+        diffButton = this._createDiffButton({ specialRef: 'WORKING' });
       } else if (this.props.stage === 'Staged') {
-        diffButton = this.createDiffButton({ specialRef: 'INDEX' });
+        diffButton = this._createDiffButton({ specialRef: 'INDEX' });
       }
     }
 
@@ -203,7 +204,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
       >
         <span className={this.getFileLabelIconClass()} />
         <span className={fileLabelStyle}>
-          {extractFilename(this.props.file.to)}
+          {this._splitPath(this.props.file.to)}
         </span>
         {this.props.stage === 'Changed' && (
           <button
@@ -242,13 +243,27 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     );
   }
 
+  private _splitPath(path: string): React.ReactElement {
+    const filename = extractFilename(path);
+    const folder = path
+      .slice(0, path.length - filename.length)
+      .replace(/^\/|\/$/g, ''); // Remove leading and trailing '/'
+
+    return (
+      <React.Fragment>
+        {filename}
+        <span className={folderLabelStyle}>{folder}</span>
+      </React.Fragment>
+    );
+  }
+
   /**
    * Creates a button element which is used to request diff from within the
    * Git panel.
    *
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
-  private createDiffButton(currentRef: ISpecialRef): JSX.Element {
+  private _createDiffButton(currentRef: ISpecialRef): JSX.Element {
     return (
       <button
         className={classes(fileItemButtonStyle, 'jp-Git-button')}

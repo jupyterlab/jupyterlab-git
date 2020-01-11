@@ -17,7 +17,7 @@ export const fileStyle = style({
       backgroundColor: 'var(--jp-layout-color2)'
     },
     '&:hover .jp-Git-button': {
-      visibility: 'visible'
+      display: 'block'
     }
   }
 });
@@ -66,6 +66,12 @@ export const fileLabelStyle = style({
   whiteSpace: 'nowrap'
 });
 
+export const folderLabelStyle = style({
+  fontSize: 'var(--jp-ui-font-size0)',
+  color: 'var(--jp-ui-font-color2)',
+  margin: '0px 4px'
+});
+
 export const fileChangedLabelStyle = style({
   fontSize: '10px',
   marginLeft: '5px'
@@ -84,8 +90,7 @@ export const fileChangedLabelInfoStyle = style({
 });
 
 export const fileGitButtonStyle = style({
-  visibility: 'hidden',
-  display: 'inline'
+  display: 'none'
 });
 
 export const fileButtonStyle = style({

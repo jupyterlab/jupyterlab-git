@@ -8,7 +8,7 @@ export const hiddenButtonStyle = style({
   width: '16px',
   border: 'none',
   outline: 'none',
-  visibility: 'hidden'
+  display: 'none'
 });
 
 export const sectionFileContainerStyle = style({
@@ -43,7 +43,7 @@ export const sectionAreaStyle = style({
       backgroundColor: 'var(--jp-layout-color2)'
     },
     '&:hover .jp-Git-button': {
-      visibility: 'visible'
+      display: 'block'
     }
   }
 });
