@@ -43,7 +43,6 @@ export interface IGitStageProps extends IGitStageSharedProps {
   disableOthers: () => void;
   discardAllFiles: () => Promise<void>;
   discardFile: (file: string) => Promise<void>;
-  displayFiles: () => void;
   files: Git.IStatusFileResult[];
   heading: string;
   isDisabled: boolean;
@@ -51,18 +50,19 @@ export interface IGitStageProps extends IGitStageSharedProps {
   moveFile: (file: string) => Promise<void>;
   moveAllFilesTitle: string;
   moveFileTitle: string;
-  showFiles: boolean;
 }
 
 export interface IGitStageState {
   showDiscardWarning: boolean;
+  showFiles: boolean;
 }
 
 export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
   constructor(props: IGitStageProps) {
     super(props);
     this.state = {
-      showDiscardWarning: false
+      showDiscardWarning: false,
+      showFiles: true
     };
   }
 
@@ -84,6 +84,10 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
     this.setState({ showDiscardWarning: !this.state.showDiscardWarning }, () =>
       this.props.disableOthers()
     );
+  }
+
+  private _setShowFiles(value: boolean) {
+    this.setState({ showFiles: value });
   }
 
   /**
@@ -111,11 +115,15 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
           <button
             className={classes(
               changeStageButtonStyle,
-              this.props.showFiles && this.props.files.length > 0
+              this.state.showFiles && this.props.files.length > 0
                 ? caretdownImageStyle
                 : caretrightImageStyle
             )}
-            onClick={() => this.props.displayFiles()}
+            onClick={() => {
+              if (this.props.files.length > 0) {
+                this._setShowFiles(!this.state.showFiles);
+              }
+            }}
           />
           <span className={sectionHeaderLabelStyle}>{this.props.heading}</span>
           {this.props.heading === 'Changed' && (
@@ -143,7 +151,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
             ({this.props.files.length})
           </span>
         </div>
-        {this.props.showFiles && (
+        {this.state.showFiles && (
           <ul className={sectionFileContainerStyle}>
             {this.props.files.map(
               (file: Git.IStatusFileResult, fileIndex: number) => {

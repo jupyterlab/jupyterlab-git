@@ -23,9 +23,6 @@ export namespace CommandIDs {
 export interface IFileListState {
   commitMessage: string;
   disableCommit: boolean;
-  showStaged: boolean;
-  showUnstaged: boolean;
-  showUntracked: boolean;
   contextMenuStaged: Menu;
   contextMenuUnstaged: Menu;
   contextMenuUntracked: Menu;
@@ -61,9 +58,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this.state = {
       commitMessage: '',
       disableCommit: true,
-      showStaged: true,
-      showUnstaged: true,
-      showUntracked: true,
       contextMenuStaged: new Menu({ commands }),
       contextMenuUnstaged: new Menu({ commands }),
       contextMenuUntracked: new Menu({ commands }),
@@ -275,21 +269,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   };
 
-  /** Toggle display of staged files */
-  displayStaged = (): void => {
-    this.setState({ showStaged: !this.state.showStaged });
-  };
-
-  /** Toggle display of unstaged files */
-  displayUnstaged = (): void => {
-    this.setState({ showUnstaged: !this.state.showUnstaged });
-  };
-
-  /** Toggle display of untracked files */
-  displayUntracked = (): void => {
-    this.setState({ showUntracked: !this.state.showUntracked });
-  };
-
   updateSelectedStage = (stage: string): void => {
     this.setState({ selectedStage: stage });
   };
@@ -399,8 +378,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       <GitStage
         heading={'Staged'}
         files={this.props.stagedFiles}
-        showFiles={this.state.showStaged}
-        displayFiles={this.displayStaged}
         moveAllFiles={this.resetAllStagedFiles}
         discardAllFiles={null}
         discardFile={null}
@@ -420,8 +397,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       <GitStage
         heading={'Changed'}
         files={this.props.unstagedFiles}
-        showFiles={this.state.showUnstaged}
-        displayFiles={this.displayUnstaged}
         moveAllFiles={this.addAllUnstagedFiles}
         discardAllFiles={this.discardAllUnstagedFiles}
         discardFile={this.discardChanges}
@@ -441,8 +416,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       <GitStage
         heading={'Untracked'}
         files={this.props.untrackedFiles}
-        showFiles={this.state.showUntracked}
-        displayFiles={this.displayUntracked}
         moveAllFiles={this.addAllUntrackedFiles}
         discardAllFiles={null}
         discardFile={null}
