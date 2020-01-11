@@ -26,6 +26,12 @@ export const selectedFileStyle = style({
     '&:hover': {
       color: 'white',
       background: 'var(--jp-brand-color1) !important'
+    },
+    '&:hover .jp-Git-button .jp-icon3[fill]': {
+      fill: 'var(--jp-layout-color2)'
+    },
+    '&:hover .jp-Git-button .jp-icon3[stroke]': {
+      stroke: 'var(--jp-layout-color2)'
     }
   }
 });
@@ -86,6 +92,24 @@ export const fileGitButtonStyle = style({
   display: 'inline'
 });
 
+export const fileItemButtonStyle = style({
+  flex: '0 0 auto',
+  background: 'none',
+  lineHeight: '0px',
+  padding: '0px 4px',
+  width: '16px',
+  border: 'none',
+  outline: 'none',
+  visibility: 'hidden',
+
+  $nest: {
+    '&:hover': {
+      outline: 'none',
+      visibility: 'visible'
+    }
+  }
+});
+
 export const fileButtonStyle = style({
   marginTop: '5px'
 });
@@ -97,8 +121,4 @@ export const discardButtonStyle = style({
 export const discardFileButtonSelectedStyle = style({
   backgroundImage: 'var(--jp-icon-discard-file-selected)',
   marginLeft: '6px'
-});
-
-export const sideBarExpandedFileLabelStyle = style({
-  maxWidth: '75%'
 });

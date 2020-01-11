@@ -1,29 +1,22 @@
+import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import * as React from 'react';
+import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import {
   disabledFileStyle,
-  discardFileButtonSelectedStyle,
   expandedFileStyle,
-  fileButtonStyle,
   fileChangedLabelBrandStyle,
   fileChangedLabelInfoStyle,
   fileChangedLabelStyle,
-  fileGitButtonStyle,
   fileIconStyle,
   fileLabelStyle,
   fileStyle,
   selectedFileChangedLabelStyle,
   selectedFileStyle,
-  sideBarExpandedFileLabelStyle
+  fileItemButtonStyle
 } from '../style/FileItemStyle';
-import {
-  changeStageButtonStyle,
-  diffFileButtonStyle,
-  discardFileButtonStyle
-} from '../style/GitStageStyle';
 import { Git } from '../tokens';
 import {
   extractFilename,
@@ -148,69 +141,6 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     }
   }
 
-  getFileLabelClass() {
-    return classes(fileLabelStyle, sideBarExpandedFileLabelStyle);
-  }
-
-  getMoveFileIconClass() {
-    if (this.showDiscardWarning()) {
-      return classes(
-        fileButtonStyle,
-        changeStageButtonStyle,
-        fileGitButtonStyle,
-        this.props.moveFileIconClass
-      );
-    } else {
-      return this.checkSelected()
-        ? classes(
-            fileButtonStyle,
-            changeStageButtonStyle,
-            fileGitButtonStyle,
-            this.props.moveFileIconSelectedClass
-          )
-        : classes(
-            fileButtonStyle,
-            changeStageButtonStyle,
-            fileGitButtonStyle,
-            this.props.moveFileIconClass
-          );
-    }
-  }
-
-  getDiffFileIconClass() {
-    return classes(
-      fileButtonStyle,
-      changeStageButtonStyle,
-      fileGitButtonStyle,
-      diffFileButtonStyle
-    );
-  }
-
-  getDiscardFileIconClass() {
-    if (this.showDiscardWarning()) {
-      return classes(
-        fileButtonStyle,
-        changeStageButtonStyle,
-        fileGitButtonStyle,
-        discardFileButtonStyle
-      );
-    } else {
-      return this.checkSelected()
-        ? classes(
-            fileButtonStyle,
-            changeStageButtonStyle,
-            fileGitButtonStyle,
-            discardFileButtonSelectedStyle
-          )
-        : classes(
-            fileButtonStyle,
-            changeStageButtonStyle,
-            fileGitButtonStyle,
-            discardFileButtonStyle
-          );
-    }
-  }
-
   /**
    * Callback method discarding unstaged changes for selected file.
    * It shows modal asking for confirmation and when confirmed make
@@ -237,6 +167,15 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     const status =
       this.getFileChangedLabel(this.props.file.y as any) ||
       this.getFileChangedLabel(this.props.file.x as any);
+
+    let diffButton = null;
+    if (isDiffSupported(this.props.file.to)) {
+      if (this.props.stage === 'Changed') {
+        diffButton = this.createDiffButton({ specialRef: 'WORKING' });
+      } else if (this.props.stage === 'Staged') {
+        diffButton = this.createDiffButton({ specialRef: 'INDEX' });
+      }
+    }
 
     return (
       <li
@@ -265,36 +204,37 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
         title={`${this.props.file.to} ● ${status}`}
       >
         <span className={this.getFileLabelIconClass()} />
-        <span className={this.getFileLabelClass()}>
+        <span className={fileLabelStyle}>
           {extractFilename(this.props.file.to)}
         </span>
         {this.props.stage === 'Changed' && (
-          <React.Fragment>
-            <button
-              className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
-              title={'Discard changes'}
-              onClick={(
-                event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-              ) => {
-                event.stopPropagation();
-                this.discardSelectedFileChanges();
-              }}
-            />
-            {isDiffSupported(this.props.file.to) &&
-              this.diffButton({ specialRef: 'WORKING' })}
-          </React.Fragment>
+          <button
+            className={classes(fileItemButtonStyle, 'jp-Git-button')}
+            title={'Discard changes'}
+            onClick={(
+              event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+            ) => {
+              event.stopPropagation();
+              this.discardSelectedFileChanges();
+            }}
+          >
+            <DefaultIconReact tag="span" name="git-discard" />
+          </button>
         )}
-        {this.props.stage === 'Staged' &&
-          isDiffSupported(this.props.file.to) &&
-          this.diffButton({ specialRef: 'INDEX' })}
+        {diffButton}
         <button
-          className={`jp-Git-button ${this.getMoveFileIconClass()}`}
+          className={classes(fileItemButtonStyle, 'jp-Git-button')}
           title={this.props.moveFileTitle}
           onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
             event.stopPropagation();
             this.props.moveFile(this.props.file.to);
           }}
-        />
+        >
+          <DefaultIconReact
+            tag="span"
+            name={this.props.stage === 'Staged' ? 'git-remove' : 'git-add'}
+          />
+        </button>
         <span className={this.getFileChangedLabelClass(this.props.file.y)}>
           {this.props.file.y === '?'
             ? 'U'
@@ -310,10 +250,10 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
    *
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
-  private diffButton(currentRef: ISpecialRef): JSX.Element {
+  private createDiffButton(currentRef: ISpecialRef): JSX.Element {
     return (
       <button
-        className={`jp-Git-button ${this.getDiffFileIconClass()}`}
+        className={classes(fileItemButtonStyle, 'jp-Git-button')}
         title={'Diff this file'}
         onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
           event.stopPropagation();
@@ -331,7 +271,9 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
             );
           });
         }}
-      />
+      >
+        <DefaultIconReact tag="span" name="git-diff" />
+      </button>
     );
   }
 }
