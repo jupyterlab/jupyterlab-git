@@ -46,8 +46,6 @@ export interface IFileItemProps {
   model: GitExtension;
   moveFile: (file: string) => Promise<void>;
   discardFile: (file: string) => Promise<void>;
-  moveFileIconClass: string;
-  moveFileIconSelectedClass: string;
   moveFileTitle: string;
   contextMenu: (
     event: any,

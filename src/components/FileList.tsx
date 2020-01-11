@@ -4,12 +4,6 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Menu } from '@phosphor/widgets';
 import * as React from 'react';
 import { GitExtension } from '../model';
-import {
-  moveFileDownButtonSelectedStyle,
-  moveFileDownButtonStyle,
-  moveFileUpButtonSelectedStyle,
-  moveFileUpButtonStyle
-} from '../style/FileListStyle';
 import { Git } from '../tokens';
 import { openListedFile } from '../utils';
 import { openDiffView } from './diff/DiffWidget';
@@ -411,8 +405,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         discardAllFiles={null}
         discardFile={null}
         moveFile={this.resetStagedFile}
-        moveFileIconClass={moveFileDownButtonStyle}
-        moveFileIconSelectedClass={moveFileDownButtonSelectedStyle}
         moveAllFilesTitle={'Unstage all changes'}
         moveFileTitle={'Unstage this change'}
         contextMenu={this.contextMenuStaged}
@@ -434,8 +426,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         discardAllFiles={this.discardAllUnstagedFiles}
         discardFile={this.discardChanges}
         moveFile={this.addFile}
-        moveFileIconClass={moveFileUpButtonStyle}
-        moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
         moveAllFilesTitle={'Stage all changes'}
         moveFileTitle={'Stage this change'}
         contextMenu={this.contextMenuUnstaged}
@@ -457,8 +447,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         discardAllFiles={null}
         discardFile={null}
         moveFile={this.addFile}
-        moveFileIconClass={moveFileUpButtonStyle}
-        moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
         moveAllFilesTitle={'Track all untracked files'}
         moveFileTitle={'Track this file'}
         contextMenu={this.contextMenuUntracked}

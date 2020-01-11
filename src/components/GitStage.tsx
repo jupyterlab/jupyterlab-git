@@ -1,13 +1,15 @@
+import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import * as React from 'react';
+import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import {
   caretdownImageStyle,
   caretrightImageStyle,
   changeStageButtonStyle,
-  discardFileButtonStyle,
+  hiddenButtonStyle,
+  sectionHeaderSizeStyle,
   sectionAreaStyle,
   sectionFileContainerDisabledStyle,
   sectionFileContainerStyle,
@@ -47,8 +49,6 @@ export interface IGitStageProps extends IGitStageSharedProps {
   isDisabled: boolean;
   moveAllFiles: () => Promise<void>;
   moveFile: (file: string) => Promise<void>;
-  moveFileIconClass: string;
-  moveFileIconSelectedClass: string;
   moveAllFilesTitle: string;
   moveFileTitle: string;
   showFiles: boolean;
@@ -121,24 +121,25 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
           {this.props.heading === 'Changed' && (
             <button
               disabled={this.checkContents()}
-              className={classes(
-                changeStageButtonStyle,
-                discardFileButtonStyle
-              )}
+              className={classes(hiddenButtonStyle, 'jp-Git-button')}
               title={'Discard All Changes'}
               onClick={() => this.discardAllChanges()}
-            />
+            >
+              <DefaultIconReact tag="span" name="git-discard" />
+            </button>
           )}
           <button
             disabled={this.checkContents()}
-            className={classes(
-              this.props.moveFileIconClass,
-              changeStageButtonStyle
-            )}
+            className={classes(hiddenButtonStyle, 'jp-Git-button')}
             title={this.props.moveAllFilesTitle}
             onClick={() => this.props.moveAllFiles()}
-          />
-          <span className={sectionHeaderLabelStyle}>
+          >
+            <DefaultIconReact
+              tag="span"
+              name={this.props.heading === 'Staged' ? 'git-remove' : 'git-add'}
+            />
+          </button>
+          <span className={sectionHeaderSizeStyle}>
             ({this.props.files.length})
           </span>
         </div>
@@ -154,10 +155,6 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                     model={this.props.model}
                     moveFile={this.props.moveFile}
                     discardFile={this.props.discardFile}
-                    moveFileIconClass={this.props.moveFileIconClass}
-                    moveFileIconSelectedClass={
-                      this.props.moveFileIconSelectedClass
-                    }
                     moveFileTitle={this.props.moveFileTitle}
                     contextMenu={this.props.contextMenu}
                     selectedFile={this.props.selectedFile}

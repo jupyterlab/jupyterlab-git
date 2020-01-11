@@ -1,16 +1,20 @@
 import { style } from 'typestyle';
+import { hiddenButtonStyle } from './GitStageStyle';
+
+export const fileItemButtonStyle = hiddenButtonStyle;
 
 export const fileStyle = style({
   display: 'flex',
   flexDirection: 'row',
+  alignItems: 'center',
   color: 'var(--jp-ui-font-color1)',
   lineHeight: 'var(--jp-private-running-item-height)',
-  paddingLeft: '4px',
+  padding: '0px 4px',
   listStyleType: 'none',
 
   $nest: {
     '&:hover': {
-      backgroundColor: 'rgba(153,153,153,.1)'
+      backgroundColor: 'var(--jp-layout-color2)'
     },
     '&:hover .jp-Git-button': {
       visibility: 'visible'
@@ -48,10 +52,10 @@ export const fileIconStyle = style({
   flex: '0 0 auto',
   padding: '0px 8px',
   marginRight: '4px',
-  verticalAlign: 'baseline',
   backgroundSize: '16px',
   backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
+  backgroundPosition: 'center',
+  height: '16px'
 });
 
 export const fileLabelStyle = style({
@@ -59,15 +63,7 @@ export const fileLabelStyle = style({
   flex: '1 1 auto',
   textOverflow: 'ellipsis',
   overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  borderRadius: '2px',
-  transition: 'background-color 0.1s ease',
-
-  $nest: {
-    '&:focus': {
-      backgroundColor: 'var(--jp-layout-color3)'
-    }
-  }
+  whiteSpace: 'nowrap'
 });
 
 export const fileChangedLabelStyle = style({
@@ -90,24 +86,6 @@ export const fileChangedLabelInfoStyle = style({
 export const fileGitButtonStyle = style({
   visibility: 'hidden',
   display: 'inline'
-});
-
-export const fileItemButtonStyle = style({
-  flex: '0 0 auto',
-  background: 'none',
-  lineHeight: '0px',
-  padding: '0px 4px',
-  width: '16px',
-  border: 'none',
-  outline: 'none',
-  visibility: 'hidden',
-
-  $nest: {
-    '&:hover': {
-      outline: 'none',
-      visibility: 'visible'
-    }
-  }
 });
 
 export const fileButtonStyle = style({

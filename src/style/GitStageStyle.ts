@@ -1,7 +1,17 @@
 import { style } from 'typestyle';
 
+export const hiddenButtonStyle = style({
+  flex: '0 0 auto',
+  background: 'none',
+  lineHeight: '0px',
+  padding: '0px 4px',
+  width: '16px',
+  border: 'none',
+  outline: 'none',
+  visibility: 'hidden'
+});
+
 export const sectionFileContainerStyle = style({
-  flex: '1 1 auto',
   margin: '0',
   padding: '0',
   overflow: 'auto',
@@ -18,13 +28,24 @@ export const sectionFileContainerDisabledStyle = style({
 });
 
 export const sectionAreaStyle = style({
-  flex: '0 0 auto',
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
   margin: '4px 0px',
-  padding: '4px 1px 4px 4px',
+  padding: '4px',
   fontWeight: 600,
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   letterSpacing: '1px',
-  fontSize: '12px'
+  fontSize: '12px',
+
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2)'
+    },
+    '&:hover .jp-Git-button': {
+      visibility: 'visible'
+    }
+  }
 });
 
 export const sectionHeaderLabelStyle = style({
@@ -32,18 +53,14 @@ export const sectionHeaderLabelStyle = style({
   flex: '1 1 auto',
   textOverflow: 'ellipsis',
   overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  borderRadius: '2px',
-  transition: 'background-color 0.1s ease',
+  whiteSpace: 'nowrap'
+});
 
-  $nest: {
-    '&:hover': {
-      backgroundColor: '0'
-    },
-    '&:focus': {
-      backgroundColor: '0'
-    }
-  }
+export const sectionHeaderSizeStyle = style({
+  fontSize: 'var(--jp-ui-font-size1)',
+  flex: '0 0 auto',
+  whiteSpace: 'nowrap',
+  borderRadius: '2px'
 });
 
 export const changeStageButtonStyle = style({
@@ -53,23 +70,10 @@ export const changeStageButtonStyle = style({
   backgroundRepeat: 'no-repeat',
   backgroundSize: '14px',
   transition: 'background-color 0.1s ease',
-  borderRadius: '2px',
   height: '13px',
   width: '12px',
   border: 'none',
-  outline: 'none',
-
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'none',
-      outline: 'none'
-    },
-    '&:focus': {
-      border: 'none',
-      boxShadow: 'none',
-      backgroundColor: 'none'
-    }
-  }
+  outline: 'none'
 });
 
 export const discardFileButtonStyle = style({
