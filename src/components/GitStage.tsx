@@ -14,10 +14,7 @@ export interface IGitStageProps {
   actions: React.ReactElement[];
   collapsible?: boolean;
   heading: string;
-  // discardAllFiles?: () => Promise<void>;
-  // moveAllFiles?: () => Promise<void>;
   nFiles: number;
-  // status: Git.Status;
 }
 
 export interface IGitStageState {
