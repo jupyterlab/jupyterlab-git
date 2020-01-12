@@ -17,7 +17,7 @@ import {
   discardFileButtonStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
-import { openListedFile, parseFileExtension } from '../utils';
+import { openListedFile, getFileIconClassName } from '../utils';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
@@ -118,7 +118,7 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
         <span
           className={classes(
             fileIconStyle,
-            parseFileExtension(this.props.file.to)
+            getFileIconClassName(this.props.file.to)
           )}
         />
         <span

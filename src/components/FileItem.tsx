@@ -20,8 +20,7 @@ import { Git } from '../tokens';
 import {
   extractFilename,
   openListedFile,
-  parseFileExtension,
-  parseSelectedFileExtension
+  getFileIconClassName
 } from '../utils';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
@@ -39,17 +38,20 @@ export const STATUS_CODES = {
   '!': 'Ignored'
 };
 
-export interface IFileItemProps {
-  file: Git.IStatusFileResult;
-  stage: string;
+export interface IFileItemSharedProps {
   model: GitExtension;
-  moveFile: (file: string) => Promise<void>;
-  discardFile: (file: string) => Promise<void>;
-  moveFileTitle: string;
-  contextMenu: (event: React.MouseEvent) => void;
-  selected: boolean;
-  selectFile: (file: Git.IStatusFileResult | null) => void;
   renderMime: IRenderMimeRegistry;
+  selectFile: (file: Git.IStatusFileResult | null) => void;
+}
+
+export interface IFileItemProps extends IFileItemSharedProps {
+  contextMenu: (event: React.MouseEvent) => void;
+  discardFile: (file: string) => Promise<void>;
+  file: Git.IStatusFileResult;
+  moveFile: (file: string) => Promise<void>;
+  moveFileTitle: string;
+  selected: boolean;
+  status: Git.Status;
 }
 
 export class FileItem extends React.Component<IFileItemProps> {
@@ -78,15 +80,16 @@ export class FileItem extends React.Component<IFileItemProps> {
   }
 
   getFileLabelIconClass() {
-    return this.props.selected
-      ? classes(fileIconStyle, parseSelectedFileExtension(this.props.file.to))
-      : classes(fileIconStyle, parseFileExtension(this.props.file.to));
+    return classes(
+      fileIconStyle,
+      getFileIconClassName(this.props.file.to, this.props.selected)
+    );
   }
 
   getFileClass() {
     return this.props.selected
       ? classes(fileStyle, selectedFileStyle)
-      : classes(fileStyle);
+      : fileStyle;
   }
 
   /**
@@ -114,9 +117,9 @@ export class FileItem extends React.Component<IFileItemProps> {
 
     let diffButton = null;
     if (isDiffSupported(this.props.file.to)) {
-      if (this.props.stage === 'Changed') {
+      if (this.props.status === 'unstaged') {
         diffButton = this._createDiffButton({ specialRef: 'WORKING' });
-      } else if (this.props.stage === 'Staged') {
+      } else if (this.props.status === 'staged') {
         diffButton = this._createDiffButton({ specialRef: 'INDEX' });
       }
     }
@@ -138,13 +141,11 @@ export class FileItem extends React.Component<IFileItemProps> {
         <span className={fileLabelStyle}>
           {this._showPath(this.props.file.to)}
         </span>
-        {this.props.stage === 'Changed' && (
+        {this.props.status === 'unstaged' && (
           <button
             className={classes(fileItemButtonStyle, 'jp-Git-button')}
             title={'Discard changes'}
-            onClick={(
-              event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-            ) => {
+            onClick={() => {
               this.discardSelectedFileChanges();
             }}
           >
@@ -155,13 +156,13 @@ export class FileItem extends React.Component<IFileItemProps> {
         <button
           className={classes(fileItemButtonStyle, 'jp-Git-button')}
           title={this.props.moveFileTitle}
-          onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+          onClick={() => {
             this.props.moveFile(this.props.file.to);
           }}
         >
           <DefaultIconReact
             tag="span"
-            name={this.props.stage === 'Staged' ? 'git-remove' : 'git-add'}
+            name={this.props.status === 'staged' ? 'git-remove' : 'git-add'}
           />
         </button>
         <span className={this.getFileChangedLabelClass(this.props.file.y)}>
@@ -198,7 +199,7 @@ export class FileItem extends React.Component<IFileItemProps> {
       <button
         className={classes(fileItemButtonStyle, 'jp-Git-button')}
         title={'Diff this file'}
-        onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        onClick={() => {
           openDiffView(
             this.props.file.to,
             this.props.model,

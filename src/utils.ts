@@ -32,7 +32,7 @@ export function extractFilename(path: string): string {
   }
 }
 
-export function decodeStage(x: string, y: string): string | null {
+export function decodeStage(x: string, y: string): Git.Status | null {
   // If file is untracked
   if (x === '?' && y === '?') {
     return 'untracked';
@@ -75,86 +75,47 @@ export async function openListedFile(
   } catch (err) {}
 }
 
-/** Get the extension of a given file */
-export function parseFileExtension(path: string): string {
+/**
+ * Get the extension of a given file
+ *
+ * @param path File path for which the icon should be found
+ * @param selected Is the file selected? Optional: default is false
+ */
+export function getFileIconClassName(
+  path: string,
+  selected: boolean = false
+): string {
   if (path[path.length - 1] === '/') {
-    return folderFileIconStyle;
+    return selected ? folderFileIconSelectedStyle : folderFileIconStyle;
   }
   let fileExtension = PathExt.extname(path).toLocaleLowerCase();
   switch (fileExtension) {
     case '.md':
-      return markdownFileIconStyle;
+      return selected ? markdownFileIconSelectedStyle : markdownFileIconStyle;
     case '.py':
-      return pythonFileIconStyle;
+      return selected ? pythonFileIconSelectedStyle : pythonFileIconStyle;
     case '.json':
-      return jsonFileIconStyle;
+      return selected ? jsonFileIconSelectedStyle : jsonFileIconStyle;
     case '.csv':
-      return spreadsheetFileIconStyle;
     case '.xls':
-      return spreadsheetFileIconStyle;
+    case '.xlsx':
+      return selected
+        ? spreadsheetFileIconSelectedStyle
+        : spreadsheetFileIconStyle;
     case '.r':
-      return kernelFileIconStyle;
+      return selected ? kernelFileIconSelectedStyle : kernelFileIconStyle;
     case '.yml':
-      return yamlFileIconStyle;
     case '.yaml':
-      return yamlFileIconStyle;
+      return selected ? yamlFileIconSelectedStyle : yamlFileIconStyle;
     case '.svg':
-      return imageFileIconStyle;
     case '.tiff':
-      return imageFileIconStyle;
     case '.jpeg':
-      return imageFileIconStyle;
     case '.jpg':
-      return imageFileIconStyle;
     case '.gif':
-      return imageFileIconStyle;
     case '.png':
-      return imageFileIconStyle;
     case '.raw':
-      return imageFileIconStyle;
+      return selected ? imageFileIconSelectedStyle : imageFileIconStyle;
     default:
-      return genericFileIconStyle;
-  }
-}
-
-/** Get the extension of a given selected file */
-export function parseSelectedFileExtension(path: string): string {
-  if (path[path.length - 1] === '/') {
-    return folderFileIconSelectedStyle;
-  }
-  let fileExtension = PathExt.extname(path).toLocaleLowerCase();
-  switch (fileExtension) {
-    case '.md':
-      return markdownFileIconSelectedStyle;
-    case '.py':
-      return pythonFileIconSelectedStyle;
-    case '.json':
-      return jsonFileIconSelectedStyle;
-    case '.csv':
-      return spreadsheetFileIconSelectedStyle;
-    case '.xls':
-      return spreadsheetFileIconSelectedStyle;
-    case '.r':
-      return kernelFileIconSelectedStyle;
-    case '.yml':
-      return yamlFileIconSelectedStyle;
-    case '.yaml':
-      return yamlFileIconSelectedStyle;
-    case '.svg':
-      return imageFileIconSelectedStyle;
-    case '.tiff':
-      return imageFileIconSelectedStyle;
-    case '.jpeg':
-      return imageFileIconSelectedStyle;
-    case '.jpg':
-      return imageFileIconSelectedStyle;
-    case '.gif':
-      return imageFileIconSelectedStyle;
-    case '.png':
-      return imageFileIconSelectedStyle;
-    case '.raw':
-      return imageFileIconSelectedStyle;
-    default:
-      return genericFileIconSelectedStyle;
+      return selected ? genericFileIconSelectedStyle : genericFileIconStyle;
   }
 }

@@ -1,5 +1,5 @@
 import { style } from 'typestyle';
-import { hiddenButtonStyle } from './GitStageStyle';
+import { hiddenButtonStyle } from './ActionButtonStyle';
 
 export const fileItemButtonStyle = hiddenButtonStyle;
 

@@ -24,7 +24,7 @@ import {
   revertButtonStyle
 } from '../style/SinglePastCommitInfoStyle';
 import { Git } from '../tokens';
-import { parseFileExtension } from '../utils';
+import { getFileIconClassName } from '../utils';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
@@ -209,7 +209,7 @@ export class SinglePastCommitInfo extends React.Component<
                       key={modifiedFileIndex}
                     >
                       <span
-                        className={`${fileIconStyle} ${parseFileExtension(
+                        className={`${fileIconStyle} ${getFileIconClassName(
                           modifiedFile.modified_file_path
                         )}`}
                         onDoubleClick={() => {

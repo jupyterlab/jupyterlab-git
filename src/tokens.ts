@@ -471,4 +471,6 @@ export namespace Git {
 
     toggle(fname: string): void;
   }
+
+  export type Status = 'untracked' | 'staged' | 'unstaged';
 }
