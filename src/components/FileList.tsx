@@ -5,12 +5,12 @@ import { Menu } from '@phosphor/widgets';
 import * as React from 'react';
 import { GitExtension } from '../model';
 import { Git } from '../tokens';
-import { openListedFile } from '../utils';
+import { openListedFile, decodeStage } from '../utils';
 import { openDiffView } from './diff/DiffWidget';
 import { GitStage } from './GitStage';
-import { GitStageSimple } from './GitStageSimple';
 import { FileItem, IFileItemSharedProps } from './FileItem';
 import { ActionButton } from './ActionButton';
+import { FileItemSimple } from './FileItemSimple';
 
 export namespace CommandIDs {
   export const gitFileOpen = 'git:context-open';
@@ -209,12 +209,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Discard changes in all unstaged and staged files */
   discardAllChanges = async () => {
-    try {
-      await this.props.model.resetToCommit();
-    } catch (reason) {
-      showErrorMessage('Discard all changes failed.', reason, [
-        Dialog.warnButton({ label: 'DISMISS' })
-      ]);
+    const result = await showDialog({
+      title: 'Discard all changes',
+      body: `Are you sure you want to permanently discard changes to all files? This action cannot be undone.`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+    });
+    if (result.button.accept) {
+      try {
+        await this.props.model.resetToCommit();
+      } catch (reason) {
+        showErrorMessage('Discard all changes failed.', reason);
+      }
     }
   };
 
@@ -284,7 +289,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           return (
             <FileItem
               key={file.to}
-              status={'staged'}
+              stage={'staged'}
               file={file}
               moveFile={this.resetStagedFile}
               discardFile={null}
@@ -327,7 +332,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           return (
             <FileItem
               key={file.to}
-              status={'unstaged'}
+              stage={'unstaged'}
               file={file}
               moveFile={this.addFile}
               discardFile={this.discardChanges}
@@ -362,7 +367,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           return (
             <FileItem
               key={file.to}
-              status={'untracked'}
+              stage={'untracked'}
               file={file}
               moveFile={this.addFile}
               discardFile={null}
@@ -385,16 +390,35 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     };
 
     if (this.props.settings.composite['simpleStaging']) {
+      const files = this.allFilesExcludingUnmodified;
       return (
         <div>
-          <GitStageSimple
+          <GitStage
+            actions={[
+              <ActionButton
+                key={0}
+                disabled={files.length === 0}
+                iconName={'git-discard'}
+                title={'Discard All Changes'}
+                onClick={this.discardAllChanges}
+              />
+            ]}
             heading={'Changed'}
-            files={this.allFilesExcludingUnmodified}
-            model={this.props.model}
-            discardAllFiles={this.discardAllChanges}
-            discardFile={this.discardChanges}
-            renderMime={this.props.renderMime}
-          />
+            nFiles={files.length}
+          >
+            {files.map((file: Git.IStatusFileResult) => {
+              return (
+                <FileItemSimple
+                  key={file.to}
+                  file={file}
+                  stage={decodeStage(file.x, file.y)}
+                  model={this.props.model}
+                  discardFile={this.discardChanges}
+                  renderMime={this.props.renderMime}
+                />
+              );
+            })}
+          </GitStage>
         </div>
       );
     } else {

@@ -51,7 +51,7 @@ export interface IFileItemProps extends IFileItemSharedProps {
   moveFile: (file: string) => Promise<void>;
   moveFileTitle: string;
   selected: boolean;
-  status: Git.Status;
+  stage: Git.Status;
 }
 
 export class FileItem extends React.Component<IFileItemProps> {
@@ -117,9 +117,9 @@ export class FileItem extends React.Component<IFileItemProps> {
 
     let diffButton = null;
     if (isDiffSupported(this.props.file.to)) {
-      if (this.props.status === 'unstaged') {
+      if (this.props.stage === 'unstaged') {
         diffButton = this._createDiffButton({ specialRef: 'WORKING' });
-      } else if (this.props.status === 'staged') {
+      } else if (this.props.stage === 'staged') {
         diffButton = this._createDiffButton({ specialRef: 'INDEX' });
       }
     }
@@ -141,7 +141,7 @@ export class FileItem extends React.Component<IFileItemProps> {
         <span className={fileLabelStyle}>
           {this._showPath(this.props.file.to)}
         </span>
-        {this.props.status === 'unstaged' && (
+        {this.props.stage === 'unstaged' && (
           <button
             className={classes(fileItemButtonStyle, 'jp-Git-button')}
             title={'Discard changes'}
@@ -162,7 +162,7 @@ export class FileItem extends React.Component<IFileItemProps> {
         >
           <DefaultIconReact
             tag="span"
-            name={this.props.status === 'staged' ? 'git-remove' : 'git-add'}
+            name={this.props.stage === 'staged' ? 'git-remove' : 'git-add'}
           />
         </button>
         <span className={this.getFileChangedLabelClass(this.props.file.y)}>
