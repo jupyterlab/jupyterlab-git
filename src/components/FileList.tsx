@@ -157,48 +157,21 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   /** Handle right-click on a staged file */
-  contextMenuStaged = (
-    event: React.MouseEvent,
-    file: Git.IStatusFileResult
-  ) => {
-    event.persist();
+  contextMenuStaged = (event: React.MouseEvent) => {
     event.preventDefault();
-    this.setState(
-      {
-        selectedFile: file
-      },
-      () => this._contextMenuStaged.open(event.clientX, event.clientY)
-    );
+    this._contextMenuStaged.open(event.clientX, event.clientY);
   };
 
   /** Handle right-click on an unstaged file */
-  contextMenuUnstaged = (
-    event: React.MouseEvent,
-    file: Git.IStatusFileResult
-  ) => {
-    event.persist();
+  contextMenuUnstaged = (event: React.MouseEvent) => {
     event.preventDefault();
-    this.setState(
-      {
-        selectedFile: file
-      },
-      () => this._contextMenuUnstaged.open(event.clientX, event.clientY)
-    );
+    this._contextMenuUnstaged.open(event.clientX, event.clientY);
   };
 
   /** Handle right-click on an untracked file */
-  contextMenuUntracked = (
-    event: React.MouseEvent,
-    file: Git.IStatusFileResult
-  ) => {
-    event.persist();
+  contextMenuUntracked = (event: React.MouseEvent) => {
     event.preventDefault();
-    this.setState(
-      {
-        selectedFile: file
-      },
-      () => this._contextMenuUntracked.open(event.clientX, event.clientY)
-    );
+    this._contextMenuUntracked.open(event.clientX, event.clientY);
   };
 
   /** Reset all staged files */

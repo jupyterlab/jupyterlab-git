@@ -25,7 +25,7 @@ export interface IGitStageSharedProps {
 }
 
 export interface IGitStageProps extends IGitStageSharedProps {
-  contextMenu: (event: React.MouseEvent, file: Git.IStatusFileResult) => void;
+  contextMenu: (event: React.MouseEvent) => void;
   discardAllFiles: () => Promise<void>;
   discardFile: (file: string) => Promise<void>;
   files: Git.IStatusFileResult[];
@@ -113,25 +113,23 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
         </div>
         {this.state.showFiles && (
           <ul className={sectionFileContainerStyle}>
-            {this.props.files.map(
-              (file: Git.IStatusFileResult, fileIndex: number) => {
-                return (
-                  <FileItem
-                    key={file.to}
-                    stage={this.props.heading}
-                    file={file}
-                    model={this.props.model}
-                    moveFile={this.props.moveFile}
-                    discardFile={this.props.discardFile}
-                    moveFileTitle={this.props.moveFileTitle}
-                    contextMenu={this.props.contextMenu}
-                    selected={this._isSelectedFile(file)}
-                    selectFile={this.props.selectFile}
-                    renderMime={this.props.renderMime}
-                  />
-                );
-              }
-            )}
+            {this.props.files.map((file: Git.IStatusFileResult) => {
+              return (
+                <FileItem
+                  key={file.to}
+                  stage={this.props.heading}
+                  file={file}
+                  model={this.props.model}
+                  moveFile={this.props.moveFile}
+                  discardFile={this.props.discardFile}
+                  moveFileTitle={this.props.moveFileTitle}
+                  contextMenu={this.props.contextMenu}
+                  selected={this._isSelectedFile(file)}
+                  selectFile={this.props.selectFile}
+                  renderMime={this.props.renderMime}
+                />
+              );
+            })}
           </ul>
         )}
       </div>

@@ -46,7 +46,7 @@ export interface IFileItemProps {
   moveFile: (file: string) => Promise<void>;
   discardFile: (file: string) => Promise<void>;
   moveFileTitle: string;
-  contextMenu: (event: React.MouseEvent, file: Git.IStatusFileResult) => void;
+  contextMenu: (event: React.MouseEvent) => void;
   selected: boolean;
   selectFile: (file: Git.IStatusFileResult | null) => void;
   renderMime: IRenderMimeRegistry;
@@ -127,7 +127,7 @@ export class FileItem extends React.Component<IFileItemProps> {
         onClick={() => this.props.selectFile(this.props.file)}
         onContextMenu={event => {
           this.props.selectFile(this.props.file);
-          this.props.contextMenu(event, this.props.file);
+          this.props.contextMenu(event);
         }}
         onDoubleClick={() => {
           openListedFile(this.props.file, this.props.model);
