@@ -5,8 +5,6 @@ import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import {
-  disabledFileStyle,
-  expandedFileStyle,
   fileChangedLabelBrandStyle,
   fileChangedLabelInfoStyle,
   fileChangedLabelStyle,
@@ -48,96 +46,47 @@ export interface IFileItemProps {
   moveFile: (file: string) => Promise<void>;
   discardFile: (file: string) => Promise<void>;
   moveFileTitle: string;
-  contextMenu: (
-    event: any,
-    typeX: string,
-    typeY: string,
-    file: string,
-    index: number,
-    stage: string
-  ) => void;
-  selectedFile: number;
-  updateSelectedFile: (file: number, stage: string) => void;
-  fileIndex: number;
-  selectedStage: string;
-  selectedDiscardFile: number;
-  updateSelectedDiscardFile: (index: number) => void;
-  disableFile: boolean;
-  toggleDisableFiles: () => void;
+  contextMenu: (event: React.MouseEvent, file: Git.IStatusFileResult) => void;
+  selected: boolean;
+  selectFile: (file: Git.IStatusFileResult | null) => void;
   renderMime: IRenderMimeRegistry;
 }
 
-export class FileItem extends React.Component<IFileItemProps, {}> {
-  constructor(props: IFileItemProps) {
-    super(props);
-  }
-
-  checkSelected(): boolean {
-    return (
-      this.props.selectedFile === this.props.fileIndex &&
-      this.props.selectedStage === this.props.stage
-    );
-  }
-
+export class FileItem extends React.Component<IFileItemProps> {
   getFileChangedLabel(change: keyof typeof STATUS_CODES): string {
     return STATUS_CODES[change];
   }
 
-  showDiscardWarning(): boolean {
-    return (
-      this.props.selectedDiscardFile === this.props.fileIndex &&
-      this.props.stage === 'Changed'
-    );
-  }
-
   getFileChangedLabelClass(change: string) {
     if (change === 'M') {
-      if (this.showDiscardWarning()) {
-        return classes(fileChangedLabelStyle, fileChangedLabelBrandStyle);
-      } else {
-        return this.checkSelected()
-          ? classes(
-              fileChangedLabelStyle,
-              fileChangedLabelBrandStyle,
-              selectedFileChangedLabelStyle
-            )
-          : classes(fileChangedLabelStyle, fileChangedLabelBrandStyle);
-      }
+      return this.props.selected
+        ? classes(
+            fileChangedLabelStyle,
+            fileChangedLabelBrandStyle,
+            selectedFileChangedLabelStyle
+          )
+        : classes(fileChangedLabelStyle, fileChangedLabelBrandStyle);
     } else {
-      if (this.showDiscardWarning()) {
-        return classes(fileChangedLabelStyle, fileChangedLabelInfoStyle);
-      } else {
-        return this.checkSelected()
-          ? classes(
-              fileChangedLabelStyle,
-              fileChangedLabelInfoStyle,
-              selectedFileChangedLabelStyle
-            )
-          : classes(fileChangedLabelStyle, fileChangedLabelInfoStyle);
-      }
+      return this.props.selected
+        ? classes(
+            fileChangedLabelStyle,
+            fileChangedLabelInfoStyle,
+            selectedFileChangedLabelStyle
+          )
+        : classes(fileChangedLabelStyle, fileChangedLabelInfoStyle);
     }
   }
 
   getFileLabelIconClass() {
-    if (this.showDiscardWarning()) {
-      return classes(fileIconStyle, parseFileExtension(this.props.file.to));
-    } else {
-      return this.checkSelected()
-        ? classes(fileIconStyle, parseSelectedFileExtension(this.props.file.to))
-        : classes(fileIconStyle, parseFileExtension(this.props.file.to));
-    }
+    return this.props.selected
+      ? classes(fileIconStyle, parseSelectedFileExtension(this.props.file.to))
+      : classes(fileIconStyle, parseFileExtension(this.props.file.to));
   }
 
   getFileClass() {
-    if (!this.checkSelected() && this.props.disableFile) {
-      return classes(fileStyle, disabledFileStyle);
-    } else if (this.showDiscardWarning()) {
-      classes(fileStyle, expandedFileStyle);
-    } else {
-      return this.checkSelected()
-        ? classes(fileStyle, selectedFileStyle)
-        : classes(fileStyle);
-    }
+    return this.props.selected
+      ? classes(fileStyle, selectedFileStyle)
+      : classes(fileStyle);
   }
 
   /**
@@ -146,8 +95,6 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
    * server side call to git checkout to discard changes in selected file.
    */
   async discardSelectedFileChanges() {
-    this.props.toggleDisableFiles();
-    this.props.updateSelectedDiscardFile(this.props.fileIndex);
     const result = await showDialog({
       title: 'Discard changes',
       body: `Are you sure you want to permanently discard changes to ${
@@ -158,8 +105,6 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     if (result.button.accept) {
       this.props.discardFile(this.props.file.to);
     }
-    this.props.toggleDisableFiles();
-    this.props.updateSelectedDiscardFile(-1);
   }
 
   render() {
@@ -179,32 +124,19 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     return (
       <li
         className={this.getFileClass()}
-        onClick={() =>
-          this.props.updateSelectedFile(this.props.fileIndex, this.props.stage)
-        }
-        onContextMenu={e => {
-          this.props.contextMenu(
-            e,
-            this.props.file.x,
-            this.props.file.y,
-            this.props.file.to,
-            this.props.fileIndex,
-            this.props.stage
-          );
+        onClick={() => this.props.selectFile(this.props.file)}
+        onContextMenu={event => {
+          this.props.selectFile(this.props.file);
+          this.props.contextMenu(event, this.props.file);
         }}
-        onDoubleClick={() =>
-          openListedFile(
-            this.props.file.x,
-            this.props.file.y,
-            this.props.file.to,
-            this.props.model
-          )
-        }
+        onDoubleClick={() => {
+          openListedFile(this.props.file, this.props.model);
+        }}
         title={`${this.props.file.to} ● ${status}`}
       >
         <span className={this.getFileLabelIconClass()} />
         <span className={fileLabelStyle}>
-          {this._splitPath(this.props.file.to)}
+          {this._showPath(this.props.file.to)}
         </span>
         {this.props.stage === 'Changed' && (
           <button
@@ -213,7 +145,6 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
             onClick={(
               event: React.MouseEvent<HTMLButtonElement, MouseEvent>
             ) => {
-              event.stopPropagation();
               this.discardSelectedFileChanges();
             }}
           >
@@ -225,7 +156,6 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
           className={classes(fileItemButtonStyle, 'jp-Git-button')}
           title={this.props.moveFileTitle}
           onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-            event.stopPropagation();
             this.props.moveFile(this.props.file.to);
           }}
         >
@@ -243,7 +173,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     );
   }
 
-  private _splitPath(path: string): React.ReactElement {
+  private _showPath(path: string): React.ReactElement {
     const filename = extractFilename(path);
     const folder = path
       .slice(0, path.length - filename.length)
@@ -269,7 +199,6 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
         className={classes(fileItemButtonStyle, 'jp-Git-button')}
         title={'Diff this file'}
         onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-          event.stopPropagation();
           openDiffView(
             this.props.file.to,
             this.props.model,

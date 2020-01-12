@@ -11,7 +11,6 @@ import {
   hiddenButtonStyle,
   sectionHeaderSizeStyle,
   sectionAreaStyle,
-  sectionFileContainerDisabledStyle,
   sectionFileContainerStyle,
   sectionHeaderLabelStyle
 } from '../style/GitStageStyle';
@@ -19,33 +18,18 @@ import { Git } from '../tokens';
 import { FileItem } from './FileItem';
 
 export interface IGitStageSharedProps {
-  disableFiles: boolean;
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
-  selectedDiscardFile: number;
-  selectedFile: number;
-  selectedStage: string;
-  toggleDisableFiles: () => void;
-  updateSelectedDiscardFile: (index: number) => void;
-  updateSelectedFile: (file: number, stage: string) => void;
-  updateSelectedStage: (stage: string) => void;
+  selectedFile: Git.IStatusFileResult | null;
+  selectFile: (file: Git.IStatusFileResult | null) => void;
 }
 
 export interface IGitStageProps extends IGitStageSharedProps {
-  contextMenu: (
-    event: any,
-    typeX: string,
-    typeY: string,
-    file: string,
-    index: number,
-    stage: string
-  ) => void;
-  disableOthers: () => void;
+  contextMenu: (event: React.MouseEvent, file: Git.IStatusFileResult) => void;
   discardAllFiles: () => Promise<void>;
   discardFile: (file: string) => Promise<void>;
   files: Git.IStatusFileResult[];
   heading: string;
-  isDisabled: boolean;
   moveAllFiles: () => Promise<void>;
   moveFile: (file: string) => Promise<void>;
   moveAllFilesTitle: string;
@@ -53,7 +37,6 @@ export interface IGitStageProps extends IGitStageSharedProps {
 }
 
 export interface IGitStageState {
-  showDiscardWarning: boolean;
   showFiles: boolean;
 }
 
@@ -61,29 +44,8 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
   constructor(props: IGitStageProps) {
     super(props);
     this.state = {
-      showDiscardWarning: false,
       showFiles: true
     };
-  }
-
-  checkContents() {
-    if (this.props.files.length > 0) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  checkDisabled() {
-    return this.props.isDisabled
-      ? classes(sectionFileContainerStyle, sectionFileContainerDisabledStyle)
-      : sectionFileContainerStyle;
-  }
-
-  toggleDiscardChanges() {
-    this.setState({ showDiscardWarning: !this.state.showDiscardWarning }, () =>
-      this.props.disableOthers()
-    );
   }
 
   private _setShowFiles(value: boolean) {
@@ -96,7 +58,6 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
    * server side call to git checkout to discard all unstaged changes.
    */
   async discardAllChanges() {
-    this.toggleDiscardChanges();
     const result = await showDialog({
       title: 'Discard all changes',
       body: `Are you sure you want to permanently discard changes to all files? This action cannot be undone.`,
@@ -105,12 +66,11 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
     if (result.button.accept) {
       this.props.discardAllFiles();
     }
-    this.toggleDiscardChanges();
   }
 
   render() {
     return (
-      <div className={this.checkDisabled()}>
+      <div className={sectionFileContainerStyle}>
         <div className={sectionAreaStyle}>
           <button
             className={classes(
@@ -128,7 +88,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
           <span className={sectionHeaderLabelStyle}>{this.props.heading}</span>
           {this.props.heading === 'Changed' && (
             <button
-              disabled={this.checkContents()}
+              disabled={this.props.files.length === 0}
               className={classes(hiddenButtonStyle, 'jp-Git-button')}
               title={'Discard All Changes'}
               onClick={() => this.discardAllChanges()}
@@ -137,7 +97,7 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
             </button>
           )}
           <button
-            disabled={this.checkContents()}
+            disabled={this.props.files.length === 0}
             className={classes(hiddenButtonStyle, 'jp-Git-button')}
             title={this.props.moveAllFilesTitle}
             onClick={() => this.props.moveAllFiles()}
@@ -165,16 +125,8 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
                     discardFile={this.props.discardFile}
                     moveFileTitle={this.props.moveFileTitle}
                     contextMenu={this.props.contextMenu}
-                    selectedFile={this.props.selectedFile}
-                    updateSelectedFile={this.props.updateSelectedFile}
-                    fileIndex={fileIndex}
-                    selectedStage={this.props.selectedStage}
-                    selectedDiscardFile={this.props.selectedDiscardFile}
-                    updateSelectedDiscardFile={
-                      this.props.updateSelectedDiscardFile
-                    }
-                    disableFile={this.props.disableFiles}
-                    toggleDisableFiles={this.props.toggleDisableFiles}
+                    selected={this._isSelectedFile(file)}
+                    selectFile={this.props.selectFile}
                     renderMime={this.props.renderMime}
                   />
                 );
@@ -183,6 +135,19 @@ export class GitStage extends React.Component<IGitStageProps, IGitStageState> {
           </ul>
         )}
       </div>
+    );
+  }
+
+  private _isSelectedFile(candidate: Git.IStatusFileResult): boolean {
+    if (this.props.selectedFile === null) {
+      return false;
+    }
+
+    return (
+      this.props.selectedFile.x === candidate.x &&
+      this.props.selectedFile.y === candidate.y &&
+      this.props.selectedFile.from === candidate.from &&
+      this.props.selectedFile.to === candidate.to
     );
   }
 }

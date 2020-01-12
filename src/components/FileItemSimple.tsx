@@ -124,12 +124,7 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
         <span
           className={fileLabelStyle}
           onDoubleClick={() =>
-            openListedFile(
-              this.props.file.x,
-              this.props.file.y,
-              this.props.file.to,
-              this.props.model
-            )
+            openListedFile(this.props.file, this.props.model)
           }
           title={this.props.file.to}
         >

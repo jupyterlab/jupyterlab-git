@@ -11,33 +11,17 @@ import { GitStage, IGitStageSharedProps } from './GitStage';
 import { GitStageSimple } from './GitStageSimple';
 
 export namespace CommandIDs {
-  export const gitFileOpen = 'gf:Open';
-  export const gitFileUnstage = 'gf:Unstage';
-  export const gitFileStage = 'gf:Stage';
-  export const gitFileTrack = 'gf:Track';
-  export const gitFileDiscard = 'gf:Discard';
-  export const gitFileDiffWorking = 'gf:DiffWorking';
-  export const gitFileDiffIndex = 'gf:DiffIndex';
+  export const gitFileOpen = 'git:context-open';
+  export const gitFileUnstage = 'git:context-unstage';
+  export const gitFileStage = 'git:context-stage';
+  export const gitFileTrack = 'git:context-track';
+  export const gitFileDiscard = 'git:context-discard';
+  export const gitFileDiffWorking = 'git:context-diffWorking';
+  export const gitFileDiffIndex = 'git:context-diffIndex';
 }
 
 export interface IFileListState {
-  commitMessage: string;
-  disableCommit: boolean;
-  contextMenuStaged: Menu;
-  contextMenuUnstaged: Menu;
-  contextMenuUntracked: Menu;
-  contextMenuTypeX: string;
-  contextMenuTypeY: string;
-  contextMenuFile: string;
-  contextMenuIndex: number;
-  contextMenuStage: string;
-  selectedFile: number;
-  selectedStage: string;
-  selectedDiscardFile: number;
-  disableStaged: boolean;
-  disableUnstaged: boolean;
-  disableUntracked: boolean;
-  disableFiles: boolean;
+  selectedFile: Git.IStatusFileResult | null;
 }
 
 export interface IFileListProps {
@@ -54,25 +38,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     super(props);
 
     const commands = this.props.model.commands;
+    this._contextMenuStaged = new Menu({ commands });
+    this._contextMenuUnstaged = new Menu({ commands });
+    this._contextMenuUntracked = new Menu({ commands });
 
     this.state = {
-      commitMessage: '',
-      disableCommit: true,
-      contextMenuStaged: new Menu({ commands }),
-      contextMenuUnstaged: new Menu({ commands }),
-      contextMenuUntracked: new Menu({ commands }),
-      contextMenuTypeX: '',
-      contextMenuTypeY: '',
-      contextMenuFile: '',
-      contextMenuIndex: -1,
-      contextMenuStage: '',
-      selectedFile: -1,
-      selectedStage: '',
-      selectedDiscardFile: -1,
-      disableStaged: false,
-      disableUnstaged: false,
-      disableUntracked: false,
-      disableFiles: false
+      selectedFile: null
     };
 
     if (!commands.hasCommand(CommandIDs.gitFileOpen)) {
@@ -80,12 +51,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Open',
         caption: 'Open selected file',
         execute: async () => {
-          await openListedFile(
-            this.state.contextMenuTypeX,
-            this.state.contextMenuTypeY,
-            this.state.contextMenuFile,
-            this.props.model
-          );
+          await openListedFile(this.state.selectedFile, this.props.model);
         }
       });
     }
@@ -96,7 +62,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         caption: 'Diff selected file',
         execute: async () => {
           await openDiffView(
-            this.state.contextMenuFile,
+            this.state.selectedFile.to,
             this.props.model,
             {
               currentRef: { specialRef: 'WORKING' },
@@ -114,7 +80,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         caption: 'Diff selected file',
         execute: async () => {
           await openDiffView(
-            this.state.contextMenuFile,
+            this.state.selectedFile.to,
             this.props.model,
             {
               currentRef: { specialRef: 'INDEX' },
@@ -131,7 +97,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Stage',
         caption: 'Stage the changes of selected file',
         execute: () => {
-          this.addFile(this.state.contextMenuFile);
+          this.addFile(this.state.selectedFile.to);
         }
       });
     }
@@ -141,7 +107,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Track',
         caption: 'Start tracking selected file',
         execute: () => {
-          this.addFile(this.state.contextMenuFile);
+          this.addFile(this.state.selectedFile.to);
         }
       });
     }
@@ -151,8 +117,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Unstage',
         caption: 'Unstage the changes of selected file',
         execute: () => {
-          if (this.state.contextMenuTypeX !== 'D') {
-            this.resetStagedFile(this.state.contextMenuFile);
+          if (this.state.selectedFile.x !== 'D') {
+            this.resetStagedFile(this.state.selectedFile.to);
           }
         }
       });
@@ -163,114 +129,76 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Discard',
         caption: 'Discard recent changes of selected file',
         execute: () => {
-          this.updateSelectedFile(
-            this.state.contextMenuIndex,
-            this.state.contextMenuStage
-          );
-          this.updateSelectedDiscardFile(this.state.contextMenuIndex);
-          this.toggleDisableFiles();
+          this.discardChanges(this.state.selectedFile.to);
         }
       });
     }
 
-    this.state.contextMenuStaged.addItem({ command: CommandIDs.gitFileOpen });
-    this.state.contextMenuStaged.addItem({
-      command: CommandIDs.gitFileUnstage
-    });
-    this.state.contextMenuStaged.addItem({
-      command: CommandIDs.gitFileDiffIndex
-    });
-
-    this.state.contextMenuUnstaged.addItem({ command: CommandIDs.gitFileOpen });
-    this.state.contextMenuUnstaged.addItem({
-      command: CommandIDs.gitFileStage
-    });
-    this.state.contextMenuUnstaged.addItem({
-      command: CommandIDs.gitFileDiscard
-    });
-    this.state.contextMenuUnstaged.addItem({
-      command: CommandIDs.gitFileDiffWorking
+    [
+      CommandIDs.gitFileOpen,
+      CommandIDs.gitFileUnstage,
+      CommandIDs.gitFileDiffIndex
+    ].forEach(command => {
+      this._contextMenuStaged.addItem({ command });
     });
 
-    this.state.contextMenuUntracked.addItem({
-      command: CommandIDs.gitFileOpen
+    [
+      CommandIDs.gitFileOpen,
+      CommandIDs.gitFileStage,
+      CommandIDs.gitFileDiscard,
+      CommandIDs.gitFileDiffWorking
+    ].forEach(command => {
+      this._contextMenuUnstaged.addItem({ command });
     });
-    this.state.contextMenuUntracked.addItem({
-      command: CommandIDs.gitFileTrack
+
+    [CommandIDs.gitFileOpen, CommandIDs.gitFileTrack].forEach(command => {
+      this._contextMenuUntracked.addItem({ command });
     });
   }
 
   /** Handle right-click on a staged file */
   contextMenuStaged = (
-    event: any,
-    typeX: string,
-    typeY: string,
-    file: string,
-    index: number,
-    stage: string
+    event: React.MouseEvent,
+    file: Git.IStatusFileResult
   ) => {
     event.persist();
     event.preventDefault();
     this.setState(
       {
-        contextMenuTypeX: typeX,
-        contextMenuTypeY: typeY,
-        contextMenuFile: file,
-        contextMenuIndex: index,
-        contextMenuStage: stage
+        selectedFile: file
       },
-      () => this.state.contextMenuStaged.open(event.clientX, event.clientY)
+      () => this._contextMenuStaged.open(event.clientX, event.clientY)
     );
   };
 
   /** Handle right-click on an unstaged file */
   contextMenuUnstaged = (
-    event: any,
-    typeX: string,
-    typeY: string,
-    file: string,
-    index: number,
-    stage: string
+    event: React.MouseEvent,
+    file: Git.IStatusFileResult
   ) => {
     event.persist();
     event.preventDefault();
     this.setState(
       {
-        contextMenuTypeX: typeX,
-        contextMenuTypeY: typeY,
-        contextMenuFile: file,
-        contextMenuIndex: index,
-        contextMenuStage: stage
+        selectedFile: file
       },
-      () => this.state.contextMenuUnstaged.open(event.clientX, event.clientY)
+      () => this._contextMenuUnstaged.open(event.clientX, event.clientY)
     );
   };
 
   /** Handle right-click on an untracked file */
   contextMenuUntracked = (
-    event: any,
-    typeX: string,
-    typeY: string,
-    file: string,
-    index: number,
-    stage: string
+    event: React.MouseEvent,
+    file: Git.IStatusFileResult
   ) => {
     event.persist();
     event.preventDefault();
     this.setState(
       {
-        contextMenuTypeX: typeX,
-        contextMenuTypeY: typeY,
-        contextMenuFile: file,
-        contextMenuIndex: index,
-        contextMenuStage: stage
+        selectedFile: file
       },
-      () => this.state.contextMenuUntracked.open(event.clientX, event.clientY)
+      () => this._contextMenuUntracked.open(event.clientX, event.clientY)
     );
-  };
-
-  updateSelectedStage = (stage: string): void => {
-    this.setState({ selectedStage: stage });
   };
 
   /** Reset all staged files */
@@ -336,25 +264,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
-  disableStagesForDiscardAll = () => {
-    this.setState({
-      disableStaged: !this.state.disableStaged,
-      disableUntracked: !this.state.disableUntracked
-    });
-  };
-
-  updateSelectedDiscardFile = (index: number): void => {
-    this.setState({ selectedDiscardFile: index });
-  };
-
-  toggleDisableFiles = (): void => {
-    this.setState({ disableFiles: !this.state.disableFiles });
-  };
-
-  updateSelectedFile = (file: number, stage: string) => {
-    this.setState({ selectedFile: file }, () =>
-      this.updateSelectedStage(stage)
-    );
+  updateSelectedFile = (file: Git.IStatusFileResult | null) => {
+    this.setState({ selectedFile: file });
   };
 
   get markedFiles() {
@@ -385,8 +296,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         moveAllFilesTitle={'Unstage all changes'}
         moveFileTitle={'Unstage this change'}
         contextMenu={this.contextMenuStaged}
-        disableOthers={null}
-        isDisabled={this.state.disableStaged}
         {...sharedProps}
       />
     );
@@ -404,8 +313,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         moveAllFilesTitle={'Stage all changes'}
         moveFileTitle={'Stage this change'}
         contextMenu={this.contextMenuUnstaged}
-        disableOthers={this.disableStagesForDiscardAll}
-        isDisabled={this.state.disableUnstaged}
         {...sharedProps}
       />
     );
@@ -423,8 +330,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         moveAllFilesTitle={'Track all untracked files'}
         moveFileTitle={'Track this file'}
         contextMenu={this.contextMenuUntracked}
-        disableOthers={null}
-        isDisabled={this.state.disableUntracked}
         {...sharedProps}
       />
     );
@@ -434,13 +339,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const sharedProps: IGitStageSharedProps = {
       model: this.props.model,
       selectedFile: this.state.selectedFile,
-      updateSelectedFile: this.updateSelectedFile,
-      selectedStage: this.state.selectedStage,
-      updateSelectedStage: this.updateSelectedStage,
-      selectedDiscardFile: this.state.selectedDiscardFile,
-      updateSelectedDiscardFile: this.updateSelectedDiscardFile,
-      disableFiles: this.state.disableFiles,
-      toggleDisableFiles: this.toggleDisableFiles,
+      selectFile: this.updateSelectedFile,
       renderMime: this.props.renderMime
     };
 
@@ -467,4 +366,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       );
     }
   }
+
+  private _contextMenuStaged: Menu;
+  private _contextMenuUnstaged: Menu;
+  private _contextMenuUntracked: Menu;
 }

@@ -23,10 +23,6 @@ export const sectionFileContainerStyle = style({
   }
 });
 
-export const sectionFileContainerDisabledStyle = style({
-  opacity: 0.5
-});
-
 export const sectionAreaStyle = style({
   display: 'flex',
   flexDirection: 'row',

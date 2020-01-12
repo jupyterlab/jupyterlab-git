@@ -40,14 +40,6 @@ export const selectedFileStyle = style({
   }
 });
 
-export const expandedFileStyle = style({
-  height: '75px'
-});
-
-export const disabledFileStyle = style({
-  opacity: 0.5
-});
-
 export const fileIconStyle = style({
   flex: '0 0 auto',
   padding: '0px 8px',

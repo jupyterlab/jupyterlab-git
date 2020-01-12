@@ -21,6 +21,7 @@ import {
   yamlFileIconSelectedStyle,
   yamlFileIconStyle
 } from './style/FileListStyle';
+import { Git } from './tokens';
 
 /** Get the filename from a path */
 export function extractFilename(path: string): string {
@@ -51,12 +52,11 @@ export function decodeStage(x: string, y: string): string | null {
 
 /** Open a file in the git listing */
 export async function openListedFile(
-  typeX: string,
-  typeY: string,
-  path: string,
+  file: Git.IStatusFileResult,
   model: GitExtension
 ) {
-  if (typeX === 'D' || typeY === 'D') {
+  const { x, y, to } = file;
+  if (x === 'D' || y === 'D') {
     await showDialog({
       title: 'Open File Failed',
       body: 'This file has been deleted!',
@@ -65,9 +65,9 @@ export async function openListedFile(
     return;
   }
   try {
-    if (path[path.length - 1] !== '/') {
+    if (to[to.length - 1] !== '/') {
       model.commands.execute('docmanager:open', {
-        path: model.getRelativeFilePath(path)
+        path: model.getRelativeFilePath(to)
       });
     } else {
       console.log('Cannot open a folder here');
