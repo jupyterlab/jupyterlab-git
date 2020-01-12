@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import {
@@ -11,7 +10,6 @@ import {
   fileIconStyle,
   fileLabelStyle,
   fileStyle,
-  fileItemButtonStyle,
   folderLabelStyle,
   selectedFileChangedLabelStyle,
   selectedFileStyle
@@ -25,6 +23,7 @@ import {
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
+import { ActionButton } from './ActionButton';
 
 // Git status codes https://git-scm.com/docs/git-status
 export const STATUS_CODES = {
@@ -97,7 +96,7 @@ export class FileItem extends React.Component<IFileItemProps> {
    * It shows modal asking for confirmation and when confirmed make
    * server side call to git checkout to discard changes in selected file.
    */
-  async discardSelectedFileChanges() {
+  discardSelectedFileChanges = async () => {
     const result = await showDialog({
       title: 'Discard changes',
       body: `Are you sure you want to permanently discard changes to ${
@@ -108,7 +107,7 @@ export class FileItem extends React.Component<IFileItemProps> {
     if (result.button.accept) {
       this.props.discardFile(this.props.file.to);
     }
-  }
+  };
 
   render() {
     const status =
@@ -142,29 +141,20 @@ export class FileItem extends React.Component<IFileItemProps> {
           {this._showPath(this.props.file.to)}
         </span>
         {this.props.stage === 'unstaged' && (
-          <button
-            className={classes(fileItemButtonStyle, 'jp-Git-button')}
+          <ActionButton
+            iconName={'git-discard'}
             title={'Discard changes'}
-            onClick={() => {
-              this.discardSelectedFileChanges();
-            }}
-          >
-            <DefaultIconReact tag="span" name="git-discard" />
-          </button>
+            onClick={this.discardSelectedFileChanges}
+          />
         )}
         {diffButton}
-        <button
-          className={classes(fileItemButtonStyle, 'jp-Git-button')}
+        <ActionButton
+          iconName={this.props.stage === 'staged' ? 'git-remove' : 'git-add'}
           title={this.props.moveFileTitle}
           onClick={() => {
             this.props.moveFile(this.props.file.to);
           }}
-        >
-          <DefaultIconReact
-            tag="span"
-            name={this.props.stage === 'staged' ? 'git-remove' : 'git-add'}
-          />
-        </button>
+        />
         <span className={this.getFileChangedLabelClass(this.props.file.y)}>
           {this.props.file.y === '?'
             ? 'U'
@@ -196,27 +186,27 @@ export class FileItem extends React.Component<IFileItemProps> {
    */
   private _createDiffButton(currentRef: ISpecialRef): JSX.Element {
     return (
-      <button
-        className={classes(fileItemButtonStyle, 'jp-Git-button')}
+      <ActionButton
+        iconName={'git-diff'}
         title={'Diff this file'}
-        onClick={() => {
-          openDiffView(
-            this.props.file.to,
-            this.props.model,
-            {
-              previousRef: { gitRef: 'HEAD' },
-              currentRef: { specialRef: currentRef.specialRef }
-            },
-            this.props.renderMime
-          ).catch(reason => {
+        onClick={async () => {
+          try {
+            await openDiffView(
+              this.props.file.to,
+              this.props.model,
+              {
+                previousRef: { gitRef: 'HEAD' },
+                currentRef: { specialRef: currentRef.specialRef }
+              },
+              this.props.renderMime
+            );
+          } catch (reason) {
             console.error(
               `Fail to open diff view for ${this.props.file.to}.\n${reason}`
             );
-          });
+          }
         }}
-      >
-        <DefaultIconReact tag="span" name="git-diff" />
-      </button>
+      />
     );
   }
 }

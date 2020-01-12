@@ -1,7 +1,4 @@
 import { style } from 'typestyle';
-import { hiddenButtonStyle } from './ActionButtonStyle';
-
-export const fileItemButtonStyle = hiddenButtonStyle;
 
 export const fileStyle = style({
   display: 'flex',

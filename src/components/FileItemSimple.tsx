@@ -21,6 +21,7 @@ import { openListedFile, getFileIconClassName } from '../utils';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
+import { ActionButton } from './ActionButton';
 
 export interface IGitMarkBoxProps {
   fname: string;
@@ -35,13 +36,13 @@ export class GitMarkBox extends React.Component<IGitMarkBoxProps> {
     this._onClick = this._onClick.bind(this);
   }
 
-  protected _onClick(event: React.ChangeEvent<HTMLInputElement>) {
+  protected _onClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     // toggle will emit a markChanged signal
     this.props.model.toggleMark(this.props.fname);
 
     // needed if markChanged doesn't force an update of a parent
     this.forceUpdate();
-  }
+  };
 
   render() {
     // idempotent, will only run once per file
@@ -90,11 +91,11 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
   }
 
   /**
-   * Callback method discarding unstanged changes for selected file.
+   * Callback method discarding unstaged changes for selected file.
    * It shows modal asking for confirmation and when confirmed make
    * server side call to git checkout to discard changes in selected file.
    */
-  async discardSelectedFileChanges() {
+  discardSelectedFileChanges = async () => {
     const result = await showDialog({
       title: 'Discard changes',
       body: `Are you sure you want to permanently discard changes to ${
@@ -105,9 +106,18 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
     if (result.button.accept) {
       this.props.discardFile(this.props.file.to);
     }
-  }
+  };
 
   render() {
+    let diffButton = null;
+    if (isDiffSupported(this.props.file.to)) {
+      if (this.props.stage === 'unstaged') {
+        diffButton = this._createDiffButton({ specialRef: 'WORKING' });
+      } else if (this.props.stage === 'staged') {
+        diffButton = this._createDiffButton({ specialRef: 'INDEX' });
+      }
+    }
+
     return (
       <li className={fileStyle}>
         <GitMarkBox
@@ -131,21 +141,13 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
           {this.props.file.to}
         </span>
         {this.props.stage === 'unstaged' && (
-          <React.Fragment>
-            <button
-              className={`jp-Git-button ${this.getDiscardFileIconClass()}`}
-              title={'Discard this change'}
-              onClick={() => {
-                this.discardSelectedFileChanges();
-              }}
-            />
-            {isDiffSupported(this.props.file.to) &&
-              this.diffButton({ specialRef: 'WORKING' })}
-          </React.Fragment>
+          <ActionButton
+            iconName={'git-discard'}
+            title={'Discard changes'}
+            onClick={this.discardSelectedFileChanges}
+          />
         )}
-        {this.props.stage === 'staged' &&
-          isDiffSupported(this.props.file.to) &&
-          this.diffButton({ specialRef: 'INDEX' })}
+        {diffButton}
       </li>
     );
   }
@@ -156,21 +158,27 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
    *
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
-  private diffButton(currentRef: ISpecialRef): JSX.Element {
+  private _createDiffButton(currentRef: ISpecialRef): JSX.Element {
     return (
-      <button
-        className={`jp-Git-button ${this.getDiffFileIconClass()}`}
+      <ActionButton
+        iconName={'git-diff'}
         title={'Diff this file'}
         onClick={async () => {
-          await openDiffView(
-            this.props.file.to,
-            this.props.model,
-            {
-              previousRef: { gitRef: 'HEAD' },
-              currentRef: { specialRef: currentRef.specialRef }
-            },
-            this.props.renderMime
-          );
+          try {
+            await openDiffView(
+              this.props.file.to,
+              this.props.model,
+              {
+                previousRef: { gitRef: 'HEAD' },
+                currentRef: { specialRef: currentRef.specialRef }
+              },
+              this.props.renderMime
+            );
+          } catch (reason) {
+            console.error(
+              `Fail to open diff view for ${this.props.file.to}.\n${reason}`
+            );
+          }
         }}
       />
     );
