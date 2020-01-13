@@ -8,8 +8,10 @@ import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { Git } from '../tokens';
 import { openListedFile } from '../utils';
 import { ActionButton } from './ActionButton';
+import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
-import { FileItem, IFileItemSharedProps } from './FileItem';
+import { ISpecialRef } from './diff/model';
+import { FileItem } from './FileItem';
 import { FileItemSimple } from './FileItemSimple';
 import { GitStage } from './GitStage';
 
@@ -229,13 +231,20 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Discard changes in a specific unstaged or staged file */
   discardChanges = async (file: string) => {
-    try {
-      await this.props.model.reset(file);
-      await this.props.model.checkout({ filename: file });
-    } catch (reason) {
-      showErrorMessage(`Discard changes for ${file} failed.`, reason, [
-        Dialog.warnButton({ label: 'DISMISS' })
-      ]);
+    const result = await showDialog({
+      title: 'Discard changes',
+      body: `Are you sure you want to permanently discard changes to ${file}? This action cannot be undone.`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+    });
+    if (result.button.accept) {
+      try {
+        await this.props.model.reset(file);
+        await this.props.model.checkout({ filename: file });
+      } catch (reason) {
+        showErrorMessage(`Discard changes for ${file} failed.`, reason, [
+          Dialog.warnButton({ label: 'DISMISS' })
+        ]);
+      }
     }
   };
 
@@ -257,12 +266,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   render() {
-    const sharedProps: IFileItemSharedProps = {
-      model: this.props.model,
-      selectFile: this.updateSelectedFile,
-      renderMime: this.props.renderMime
-    };
-
     if (this.props.settings.composite['simpleStaging']) {
       return <div>{this._renderSimpleStage(this.props.files)}</div>;
     } else {
@@ -289,9 +292,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
       return (
         <div onContextMenu={event => event.preventDefault()}>
-          {this._renderStaged(stagedFiles, sharedProps)}
-          {this._renderChanged(unstagedFiles, sharedProps)}
-          {this._renderUntracked(untrackedFiles, sharedProps)}
+          {this._renderStaged(stagedFiles)}
+          {this._renderChanged(unstagedFiles)}
+          {this._renderUntracked(untrackedFiles)}
         </div>
       );
     }
@@ -310,10 +313,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   }
 
-  private _renderStaged(
-    files: Git.IStatusFile[],
-    sharedProps: IFileItemSharedProps
-  ) {
+  private _renderStaged(files: Git.IStatusFile[]) {
     return (
       <GitStage
         actions={
@@ -333,13 +333,24 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           return (
             <FileItem
               key={file.to}
+              actions={
+                <React.Fragment>
+                  {this._createDiffButton(file.to, 'INDEX')}
+                  <ActionButton
+                    className={hiddenButtonStyle}
+                    iconName={'git-remove'}
+                    title={'Unstage this change'}
+                    onClick={() => {
+                      this.resetStagedFile(file.to);
+                    }}
+                  />
+                </React.Fragment>
+              }
               file={file}
-              moveFile={this.resetStagedFile}
-              discardFile={null}
-              moveFileTitle={'Unstage this change'}
               contextMenu={this.contextMenuStaged}
+              model={this.props.model}
               selected={this._isSelectedFile(file)}
-              {...sharedProps}
+              selectFile={this.updateSelectedFile}
             />
           );
         })}
@@ -347,10 +358,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   }
 
-  private _renderChanged(
-    files: Git.IStatusFile[],
-    sharedProps: IFileItemSharedProps
-  ) {
+  private _renderChanged(files: Git.IStatusFile[]) {
     const disabled = files.length === 0;
     return (
       <GitStage
@@ -380,13 +388,32 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           return (
             <FileItem
               key={file.to}
+              actions={
+                <React.Fragment>
+                  <ActionButton
+                    className={hiddenButtonStyle}
+                    iconName={'git-discard'}
+                    title={'Discard changes'}
+                    onClick={() => {
+                      this.discardChanges(file.to);
+                    }}
+                  />
+                  {this._createDiffButton(file.to, 'WORKING')}
+                  <ActionButton
+                    className={hiddenButtonStyle}
+                    iconName={'git-add'}
+                    title={'Stage this change'}
+                    onClick={() => {
+                      this.addFile(file.to);
+                    }}
+                  />
+                </React.Fragment>
+              }
               file={file}
-              moveFile={this.addFile}
-              discardFile={this.discardChanges}
-              moveFileTitle={'Stage this change'}
               contextMenu={this.contextMenuUnstaged}
+              model={this.props.model}
               selected={this._isSelectedFile(file)}
-              {...sharedProps}
+              selectFile={this.updateSelectedFile}
             />
           );
         })}
@@ -394,10 +421,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   }
 
-  private _renderUntracked(
-    files: Git.IStatusFile[],
-    sharedProps: IFileItemSharedProps
-  ) {
+  private _renderUntracked(files: Git.IStatusFile[]) {
     return (
       <GitStage
         actions={
@@ -417,13 +441,21 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           return (
             <FileItem
               key={file.to}
+              actions={
+                <ActionButton
+                  className={hiddenButtonStyle}
+                  iconName={'git-add'}
+                  title={'Track this file'}
+                  onClick={() => {
+                    this.addFile(file.to);
+                  }}
+                />
+              }
               file={file}
-              moveFile={this.addFile}
-              discardFile={null}
-              moveFileTitle={'Track this file'}
               contextMenu={this.contextMenuUntracked}
+              model={this.props.model}
               selected={this._isSelectedFile(file)}
-              {...sharedProps}
+              selectFile={this.updateSelectedFile}
             />
           );
         })}
@@ -447,17 +479,71 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         nFiles={files.length}
       >
         {files.map((file: Git.IStatusFile) => {
+          let actions = null;
+          if (file.status === 'unstaged') {
+            actions = (
+              <React.Fragment>
+                <ActionButton
+                  className={hiddenButtonStyle}
+                  iconName={'git-discard'}
+                  title={'Discard changes'}
+                  onClick={() => {
+                    this.discardChanges(file.to);
+                  }}
+                />
+                {this._createDiffButton(file.to, 'WORKING')}
+              </React.Fragment>
+            );
+          } else if (file.status === 'staged') {
+            actions = this._createDiffButton(file.to, 'INDEX');
+          }
+
           return (
             <FileItemSimple
               key={file.to}
+              actions={actions}
               file={file}
               model={this.props.model}
-              discardFile={this.discardChanges}
-              renderMime={this.props.renderMime}
             />
           );
         })}
       </GitStage>
+    );
+  }
+
+  /**
+   * Creates a button element which is used to request diff of a file.
+   *
+   * @param path File path of interest
+   * @param currentRef the ref to diff against the git 'HEAD' ref
+   */
+  private _createDiffButton(
+    path: string,
+    currentRef: ISpecialRef['specialRef']
+  ): JSX.Element {
+    return (
+      isDiffSupported(path) && (
+        <ActionButton
+          className={hiddenButtonStyle}
+          iconName={'git-diff'}
+          title={'Diff this file'}
+          onClick={async () => {
+            try {
+              await openDiffView(
+                path,
+                this.props.model,
+                {
+                  previousRef: { gitRef: 'HEAD' },
+                  currentRef: { specialRef: currentRef }
+                },
+                this.props.renderMime
+              );
+            } catch (reason) {
+              console.error(`Fail to open diff view for ${path}.\n${reason}`);
+            }
+          }}
+        />
+      )
     );
   }
 

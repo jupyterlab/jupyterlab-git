@@ -15,7 +15,7 @@ import {
  */
 export interface IGitStageProps {
   /**
-   * Actions component to display at the far left of the stage
+   * Actions component to display at the far right of the stage
    */
   actions: React.ReactElement;
   /**
