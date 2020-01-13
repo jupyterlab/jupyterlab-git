@@ -3,31 +3,23 @@ import { DefaultIconReact } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle/';
 import { GitExtension } from '../model';
-import { fileIconStyle } from '../style/FilePathStyle';
 import {
-  changeStageButtonStyle,
-  discardFileButtonStyle
-} from '../style/GitStageStyle';
-import {
-  commitDetailFilePathStyle,
   commitDetailFileStyle,
   commitDetailHeader,
   commitDetailStyle,
   commitOverviewNumbers,
   commitStyle,
-  diffIconStyle,
   fileList,
-  floatRightStyle,
   iconStyle,
   insertionsIconStyle,
-  deletionsIconStyle,
-  revertButtonStyle
+  deletionsIconStyle
 } from '../style/SinglePastCommitInfoStyle';
 import { Git } from '../tokens';
-import { getFileIconClassName } from '../utils';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
+import { FilePath } from './FilePath';
+import { ActionButton } from './ActionButton';
 
 export interface ISinglePastCommitInfoProps {
   data: Git.ISingleCommitInfo;
@@ -162,23 +154,15 @@ export class SinglePastCommitInfo extends React.Component<
         <div className={commitDetailStyle}>
           <div className={commitDetailHeader}>
             Changed
-            <button
-              className={classes(
-                changeStageButtonStyle,
-                floatRightStyle,
-                discardFileButtonStyle
-              )}
-              onClick={this.showDeleteCommit}
-              title="Discard changes introduced by this commit"
-            />
-            <button
-              className={classes(
-                changeStageButtonStyle,
-                floatRightStyle,
-                revertButtonStyle
-              )}
+            <ActionButton
+              iconName={'git-rewind'}
               onClick={this.showResetToCommit}
               title="Discard changes introduced *after* this commit"
+            />
+            <ActionButton
+              iconName={'git-discard'}
+              onClick={this.showDeleteCommit}
+              title="Discard changes introduced by this commit"
             />
           </div>
           <div>
@@ -201,33 +185,20 @@ export class SinglePastCommitInfo extends React.Component<
           </div>
           <ul className={fileList}>
             {this.state.modifiedFiles.length > 0 &&
-              this.state.modifiedFiles.map(
-                (modifiedFile, modifiedFileIndex) => {
-                  return (
-                    <li
-                      className={commitDetailFileStyle}
-                      key={modifiedFileIndex}
-                    >
-                      <span
-                        className={`${fileIconStyle} ${getFileIconClassName(
-                          modifiedFile.modified_file_path
-                        )}`}
-                        onDoubleClick={() => {
-                          window.open(
-                            'https://github.com/search?q=' +
-                              this.props.data.commit +
-                              '&type=Commits&utf8=%E2%9C%93'
-                          );
-                        }}
-                      />
-                      <span className={commitDetailFilePathStyle}>
-                        {modifiedFile.modified_file_name}
-                      </span>
-                      {isDiffSupported(modifiedFile.modified_file_path) && (
-                        <button
-                          className={`${diffIconStyle}`}
-                          title={'View file changes'}
-                          onClick={async () => {
+              this.state.modifiedFiles.map(modifiedFile => {
+                return (
+                  <li
+                    className={commitDetailFileStyle}
+                    key={modifiedFile.modified_file_path}
+                    title={modifiedFile.modified_file_path}
+                  >
+                    <FilePath filepath={modifiedFile.modified_file_path} />
+                    {isDiffSupported(modifiedFile.modified_file_path) && (
+                      <ActionButton
+                        iconName={'git-diff'}
+                        title={'View file changes'}
+                        onClick={async () => {
+                          try {
                             await openDiffView(
                               modifiedFile.modified_file_path,
                               this.props.model,
@@ -239,13 +210,19 @@ export class SinglePastCommitInfo extends React.Component<
                               },
                               this.props.renderMime
                             );
-                          }}
-                        />
-                      )}
-                    </li>
-                  );
-                }
-              )}
+                          } catch (reason) {
+                            console.error(
+                              `Fail to open diff view for ${
+                                modifiedFile.modified_file_path
+                              }.\n${reason}`
+                            );
+                          }
+                        }}
+                      />
+                    )}
+                  </li>
+                );
+              })}
           </ul>
         </div>
       </div>

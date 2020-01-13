@@ -8,18 +8,6 @@ export const commitStyle = style({
   marginTop: '5px'
 });
 
-export const headerStyle = style({
-  backgroundColor: 'var(--md-green-500)',
-  color: 'white',
-  display: 'inline-block',
-  width: '100%',
-  height: '30px'
-});
-
-export const floatRightStyle = style({
-  float: 'right'
-});
-
 export const commitOverviewNumbers = style({
   fontSize: '13px',
   fontWeight: 'bold',
@@ -54,17 +42,6 @@ export const commitDetailFileStyle = style({
   whiteSpace: 'nowrap'
 });
 
-export const commitDetailFilePathStyle = style({
-  fontSize: 'var(--jp-ui-font-size1)',
-  marginRight: '4px',
-  paddingLeft: '4px',
-  textOverflow: 'ellipsis',
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  borderRadius: '2px',
-  transition: 'background-color 0.1s ease'
-});
-
 export const iconStyle = style({
   display: 'inline-block',
   width: '13px',
@@ -86,34 +63,6 @@ export const deletionsIconStyle = style({
       fill: '#ff0000'
     }
   }
-});
-
-export const diffIconStyle = style({
-  backgroundColor: 'transparent',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  backgroundImage: 'var(--jp-icon-diff)',
-  border: 'none',
-  outline: 'none'
-});
-
-export const revertButtonStyle = style({
-  backgroundImage: 'var(--jp-icon-rewind)',
-  marginLeft: '6px'
-});
-
-export const numberOfDeletionsStyle = style({
-  position: 'absolute',
-  right: '12px',
-  width: '15px',
-  marginTop: '1px'
-});
-
-export const numberOfInsertionsStyle = style({
-  position: 'absolute',
-  right: '50px',
-  width: '15px',
-  marginTop: '1px'
 });
 
 export const warningLabel = style({
