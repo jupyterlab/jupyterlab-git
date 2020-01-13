@@ -3,7 +3,7 @@ import { DefaultIconReact } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle/';
 import { GitExtension } from '../model';
-import { fileIconStyle } from '../style/FileItemStyle';
+import { fileIconStyle } from '../style/FilePathStyle';
 import {
   changeStageButtonStyle,
   discardFileButtonStyle

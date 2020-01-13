@@ -8,23 +8,17 @@ import {
   fileChangedLabelBrandStyle,
   fileChangedLabelInfoStyle,
   fileChangedLabelStyle,
-  fileIconStyle,
-  fileLabelStyle,
   fileStyle,
-  folderLabelStyle,
   selectedFileChangedLabelStyle,
   selectedFileStyle
 } from '../style/FileItemStyle';
 import { Git } from '../tokens';
-import {
-  extractFilename,
-  getFileIconClassName,
-  openListedFile
-} from '../utils';
+import { openListedFile } from '../utils';
 import { ActionButton } from './ActionButton';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
+import { FilePath } from './FilePath';
 
 // Git status codes https://git-scm.com/docs/git-status
 export const STATUS_CODES = {
@@ -79,13 +73,6 @@ export class FileItem extends React.Component<IFileItemProps> {
     }
   }
 
-  getFileLabelIconClass() {
-    return classes(
-      fileIconStyle,
-      getFileIconClassName(this.props.file.to, this.props.selected)
-    );
-  }
-
   getFileClass() {
     return this.props.selected
       ? classes(fileStyle, selectedFileStyle)
@@ -137,10 +124,10 @@ export class FileItem extends React.Component<IFileItemProps> {
         }}
         title={`${this.props.file.to} ● ${status}`}
       >
-        <span className={this.getFileLabelIconClass()} />
-        <span className={fileLabelStyle}>
-          {this._showPath(this.props.file.to)}
-        </span>
+        <FilePath
+          filepath={this.props.file.to}
+          selected={this.props.selected}
+        />
         {this.props.stage === 'unstaged' && (
           <ActionButton
             className={hiddenButtonStyle}
@@ -164,20 +151,6 @@ export class FileItem extends React.Component<IFileItemProps> {
             : this.props.file.y.trim() || this.props.file.x}
         </span>
       </li>
-    );
-  }
-
-  private _showPath(path: string): React.ReactElement {
-    const filename = extractFilename(path);
-    const folder = path
-      .slice(0, path.length - filename.length)
-      .replace(/^\/|\/$/g, ''); // Remove leading and trailing '/'
-
-    return (
-      <React.Fragment>
-        {filename}
-        <span className={folderLabelStyle}>{folder}</span>
-      </React.Fragment>
     );
   }
 

@@ -8,8 +8,6 @@ import { gitMarkBoxStyle } from '../style/FileItemSimpleStyle';
 import {
   fileButtonStyle,
   fileGitButtonStyle,
-  fileIconStyle,
-  fileLabelStyle,
   fileStyle
 } from '../style/FileItemStyle';
 import {
@@ -18,11 +16,12 @@ import {
   discardFileButtonStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
-import { getFileIconClassName, openListedFile } from '../utils';
+import { openListedFile } from '../utils';
 import { ActionButton } from './ActionButton';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
+import { FilePath } from './FilePath';
 
 export interface IGitMarkBoxProps {
   fname: string;
@@ -120,27 +119,17 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
     }
 
     return (
-      <li className={fileStyle}>
+      <li
+        className={fileStyle}
+        onDoubleClick={() => openListedFile(this.props.file, this.props.model)}
+        title={this.props.file.to}
+      >
         <GitMarkBox
           fname={this.props.file.to}
           stage={this.props.stage}
           model={this.props.model}
         />
-        <span
-          className={classes(
-            fileIconStyle,
-            getFileIconClassName(this.props.file.to)
-          )}
-        />
-        <span
-          className={fileLabelStyle}
-          onDoubleClick={() =>
-            openListedFile(this.props.file, this.props.model)
-          }
-          title={this.props.file.to}
-        >
-          {this.props.file.to}
-        </span>
+        <FilePath filepath={this.props.file.to} />
         {this.props.stage === 'unstaged' && (
           <ActionButton
             className={hiddenButtonStyle}
