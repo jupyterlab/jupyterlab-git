@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
-import { hiddenButtonStyle } from '../style/ActionButtonStyle';
+import { actionButtonStyle } from '../style/ActionButtonStyle';
 
 /**
  * Action button properties interface
@@ -40,7 +40,7 @@ export const ActionButton: React.FunctionComponent<IActionButtonProps> = (
   return (
     <button
       disabled={props.disabled}
-      className={classes(hiddenButtonStyle, 'jp-Git-button', props.className)}
+      className={classes(actionButtonStyle, props.className)}
       title={props.title}
       onClick={props.onClick}
     >

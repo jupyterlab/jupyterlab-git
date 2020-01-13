@@ -10,13 +10,31 @@ import {
   sectionHeaderLabelStyle
 } from '../style/GitStageStyle';
 
+/**
+ * Git stage component properties
+ */
 export interface IGitStageProps {
-  actions: React.ReactElement[];
+  /**
+   * Actions component to display at the far left of the stage
+   */
+  actions: React.ReactElement;
+  /**
+   * Is this group collapsible
+   */
   collapsible?: boolean;
+  /**
+   * Group title
+   */
   heading: string;
+  /**
+   * Number of files in the group
+   */
   nFiles: number;
 }
 
+/**
+ * Git stage component state
+ */
 export interface IGitStageState {
   showFiles: boolean;
 }

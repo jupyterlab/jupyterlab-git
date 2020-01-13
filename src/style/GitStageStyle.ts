@@ -1,4 +1,5 @@
 import { style } from 'typestyle';
+import { showButtonOnHover } from './ActionButtonStyle';
 
 export const sectionFileContainerStyle = style({
   margin: '0',
@@ -12,26 +13,26 @@ export const sectionFileContainerStyle = style({
   }
 });
 
-export const sectionAreaStyle = style({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  margin: '4px 0px',
-  padding: '4px',
-  fontWeight: 600,
-  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  letterSpacing: '1px',
-  fontSize: '12px',
+export const sectionAreaStyle = style(
+  {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: '4px 0px',
+    padding: '4px',
+    fontWeight: 600,
+    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+    letterSpacing: '1px',
+    fontSize: '12px',
 
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    '&:hover .jp-Git-button': {
-      display: 'block'
+    $nest: {
+      '&:hover': {
+        backgroundColor: 'var(--jp-layout-color2)'
+      }
     }
-  }
-});
+  },
+  showButtonOnHover
+);
 
 export const sectionHeaderLabelStyle = style({
   fontSize: 'var(--jp-ui-font-size1)',

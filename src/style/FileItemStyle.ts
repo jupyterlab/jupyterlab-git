@@ -1,23 +1,24 @@
 import { style } from 'typestyle';
+import { showButtonOnHover } from './ActionButtonStyle';
 
-export const fileStyle = style({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  color: 'var(--jp-ui-font-color1)',
-  lineHeight: 'var(--jp-private-running-item-height)',
-  padding: '0px 4px',
-  listStyleType: 'none',
+export const fileStyle = style(
+  {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    color: 'var(--jp-ui-font-color1)',
+    lineHeight: 'var(--jp-private-running-item-height)',
+    padding: '0px 4px',
+    listStyleType: 'none',
 
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    '&:hover .jp-Git-button': {
-      display: 'block'
+    $nest: {
+      '&:hover': {
+        backgroundColor: 'var(--jp-layout-color2)'
+      }
     }
-  }
-});
+  },
+  showButtonOnHover
+);
 
 export const selectedFileStyle = style({
   color: 'white',
@@ -28,10 +29,10 @@ export const selectedFileStyle = style({
       color: 'white',
       background: 'var(--jp-brand-color1) !important'
     },
-    '&:hover .jp-Git-button .jp-icon3[fill]': {
+    '&:hover .jp-icon3[fill]': {
       fill: 'var(--jp-layout-color2)'
     },
-    '&:hover .jp-Git-button .jp-icon3[stroke]': {
+    '&:hover .jp-icon3[stroke]': {
       stroke: 'var(--jp-layout-color2)'
     }
   }

@@ -1,8 +1,10 @@
+import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import * as React from 'react';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
+import { hiddenButtonStyle } from '../style/ActionButtonStyle';
+import { gitMarkBoxStyle } from '../style/FileItemSimpleStyle';
 import {
   fileButtonStyle,
   fileGitButtonStyle,
@@ -10,18 +12,17 @@ import {
   fileLabelStyle,
   fileStyle
 } from '../style/FileItemStyle';
-import { gitMarkBoxStyle } from '../style/FileItemSimpleStyle';
 import {
   changeStageButtonStyle,
   diffFileButtonStyle,
   discardFileButtonStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
-import { openListedFile, getFileIconClassName } from '../utils';
+import { getFileIconClassName, openListedFile } from '../utils';
+import { ActionButton } from './ActionButton';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
-import { ActionButton } from './ActionButton';
 
 export interface IGitMarkBoxProps {
   fname: string;
@@ -142,6 +143,7 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
         </span>
         {this.props.stage === 'unstaged' && (
           <ActionButton
+            className={hiddenButtonStyle}
             iconName={'git-discard'}
             title={'Discard changes'}
             onClick={this.discardSelectedFileChanges}
@@ -161,6 +163,7 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
   private _createDiffButton(currentRef: ISpecialRef): JSX.Element {
     return (
       <ActionButton
+        className={hiddenButtonStyle}
         iconName={'git-diff'}
         title={'Diff this file'}
         onClick={async () => {

@@ -1,16 +1,17 @@
-import { Dialog, showErrorMessage, showDialog } from '@jupyterlab/apputils';
+import * as React from 'react';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Menu } from '@phosphor/widgets';
-import * as React from 'react';
 import { GitExtension } from '../model';
+import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { Git } from '../tokens';
-import { openListedFile, decodeStage } from '../utils';
-import { openDiffView } from './diff/DiffWidget';
-import { GitStage } from './GitStage';
-import { FileItem, IFileItemSharedProps } from './FileItem';
+import { decodeStage, openListedFile } from '../utils';
 import { ActionButton } from './ActionButton';
+import { openDiffView } from './diff/DiffWidget';
+import { FileItem, IFileItemSharedProps } from './FileItem';
 import { FileItemSimple } from './FileItemSimple';
+import { GitStage } from './GitStage';
 
 export namespace CommandIDs {
   export const gitFileOpen = 'git:context-open';
@@ -272,15 +273,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderStaged(sharedProps: IFileItemSharedProps) {
     return (
       <GitStage
-        actions={[
+        actions={
           <ActionButton
-            key={0}
+            className={hiddenButtonStyle}
             disabled={this.props.stagedFiles.length === 0}
             iconName={'git-remove'}
             title={'Unstage all changes'}
             onClick={this.resetAllStagedFiles}
           />
-        ]}
+        }
         collapsible
         heading={'Staged'}
         nFiles={this.props.stagedFiles.length}
@@ -308,22 +309,24 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const disabled = this.props.unstagedFiles.length === 0;
     return (
       <GitStage
-        actions={[
-          <ActionButton
-            key={0}
-            disabled={disabled}
-            iconName={'git-discard'}
-            title={'Discard All Changes'}
-            onClick={this.discardAllUnstagedFiles}
-          />,
-          <ActionButton
-            key={1}
-            disabled={disabled}
-            iconName={'git-add'}
-            title={'Stage all changes'}
-            onClick={this.addAllUnstagedFiles}
-          />
-        ]}
+        actions={
+          <React.Fragment>
+            <ActionButton
+              className={hiddenButtonStyle}
+              disabled={disabled}
+              iconName={'git-discard'}
+              title={'Discard All Changes'}
+              onClick={this.discardAllUnstagedFiles}
+            />
+            <ActionButton
+              className={hiddenButtonStyle}
+              disabled={disabled}
+              iconName={'git-add'}
+              title={'Stage all changes'}
+              onClick={this.addAllUnstagedFiles}
+            />
+          </React.Fragment>
+        }
         collapsible
         heading={'Changed'}
         nFiles={this.props.unstagedFiles.length}
@@ -350,15 +353,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderUntracked(sharedProps: IFileItemSharedProps) {
     return (
       <GitStage
-        actions={[
+        actions={
           <ActionButton
-            key={0}
+            className={hiddenButtonStyle}
             disabled={this.props.untrackedFiles.length === 0}
             iconName={'git-add'}
             title={'Track all untracked files'}
             onClick={this.addAllUntrackedFiles}
           />
-        ]}
+        }
         collapsible
         heading={'Untracked'}
         nFiles={this.props.untrackedFiles.length}
@@ -394,15 +397,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       return (
         <div>
           <GitStage
-            actions={[
+            actions={
               <ActionButton
-                key={0}
+                className={hiddenButtonStyle}
                 disabled={files.length === 0}
                 iconName={'git-discard'}
                 title={'Discard All Changes'}
                 onClick={this.discardAllChanges}
               />
-            ]}
+            }
             heading={'Changed'}
             nFiles={files.length}
           >
