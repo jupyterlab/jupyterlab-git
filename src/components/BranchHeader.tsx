@@ -31,7 +31,6 @@ export interface IBranchHeaderProps {
   model: IGitExtension;
   currentBranch: string;
   upstreamBranch: string;
-  stagedFiles: Git.IStatusFileResult[];
   data: Git.IBranch[];
   refresh: () => Promise<void>;
   disabled: boolean;

@@ -54,8 +54,7 @@ export class GitMarkBox extends React.Component<IGitMarkBoxProps> {
 }
 
 export interface IFileItemSimpleProps {
-  file: Git.IStatusFileResult;
-  stage: string;
+  file: Git.IStatusFile;
   model: GitExtension;
   discardFile: (file: string) => Promise<void>;
   renderMime: IRenderMimeRegistry;
@@ -83,9 +82,9 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
   render() {
     let diffButton = null;
     if (isDiffSupported(this.props.file.to)) {
-      if (this.props.stage === 'unstaged') {
+      if (this.props.file.status === 'unstaged') {
         diffButton = this._createDiffButton({ specialRef: 'WORKING' });
-      } else if (this.props.stage === 'staged') {
+      } else if (this.props.file.status === 'staged') {
         diffButton = this._createDiffButton({ specialRef: 'INDEX' });
       }
     }
@@ -98,11 +97,11 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
       >
         <GitMarkBox
           fname={this.props.file.to}
-          stage={this.props.stage}
+          stage={this.props.file.status}
           model={this.props.model}
         />
         <FilePath filepath={this.props.file.to} />
-        {this.props.stage === 'unstaged' && (
+        {this.props.file.status === 'unstaged' && (
           <ActionButton
             className={hiddenButtonStyle}
             iconName={'git-discard'}

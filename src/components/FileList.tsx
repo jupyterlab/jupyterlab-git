@@ -6,7 +6,7 @@ import { Menu } from '@phosphor/widgets';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { Git } from '../tokens';
-import { decodeStage, openListedFile } from '../utils';
+import { openListedFile } from '../utils';
 import { ActionButton } from './ActionButton';
 import { openDiffView } from './diff/DiffWidget';
 import { FileItem, IFileItemSharedProps } from './FileItem';
@@ -24,13 +24,11 @@ export namespace CommandIDs {
 }
 
 export interface IFileListState {
-  selectedFile: Git.IStatusFileResult | null;
+  selectedFile: Git.IStatusFile | null;
 }
 
 export interface IFileListProps {
-  stagedFiles: Git.IStatusFileResult[];
-  unstagedFiles: Git.IStatusFileResult[];
-  untrackedFiles: Git.IStatusFileResult[];
+  files: Git.IStatusFile[];
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
   settings: ISettingRegistry.ISettings;
@@ -250,33 +248,78 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
-  updateSelectedFile = (file: Git.IStatusFileResult | null) => {
+  updateSelectedFile = (file: Git.IStatusFile | null) => {
     this.setState({ selectedFile: file });
   };
 
   get markedFiles() {
-    return this.allFilesExcludingUnmodified.filter(file =>
-      this.props.model.getMark(file.to)
+    return this.props.files.filter(file => this.props.model.getMark(file.to));
+  }
+
+  render() {
+    const sharedProps: IFileItemSharedProps = {
+      model: this.props.model,
+      selectFile: this.updateSelectedFile,
+      renderMime: this.props.renderMime
+    };
+
+    if (this.props.settings.composite['simpleStaging']) {
+      return <div>{this._renderSimpleStage(this.props.files)}</div>;
+    } else {
+      const stagedFiles: Git.IStatusFile[] = [];
+      const unstagedFiles: Git.IStatusFile[] = [];
+      const untrackedFiles: Git.IStatusFile[] = [];
+
+      this.props.files.forEach(file => {
+        switch (file.status) {
+          case 'staged':
+            stagedFiles.push(file);
+            break;
+          case 'unstaged':
+            unstagedFiles.push(file);
+            break;
+          case 'untracked':
+            untrackedFiles.push(file);
+            break;
+
+          default:
+            break;
+        }
+      });
+
+      return (
+        <div onContextMenu={event => event.preventDefault()}>
+          {this._renderStaged(stagedFiles, sharedProps)}
+          {this._renderChanged(unstagedFiles, sharedProps)}
+          {this._renderUntracked(untrackedFiles, sharedProps)}
+        </div>
+      );
+    }
+  }
+
+  private _isSelectedFile(candidate: Git.IStatusFile): boolean {
+    if (this.state.selectedFile === null) {
+      return false;
+    }
+
+    return (
+      this.state.selectedFile.x === candidate.x &&
+      this.state.selectedFile.y === candidate.y &&
+      this.state.selectedFile.from === candidate.from &&
+      this.state.selectedFile.to === candidate.to
     );
   }
 
-  get allFilesExcludingUnmodified() {
-    let files = this.props.untrackedFiles.concat(
-      this.props.unstagedFiles,
-      this.props.stagedFiles
-    );
-
-    files.sort((a, b) => a.to.localeCompare(b.to));
-    return files;
-  }
-
-  private _renderStaged(sharedProps: IFileItemSharedProps) {
+  private _renderStaged(
+    files: Git.IStatusFile[],
+    sharedProps: IFileItemSharedProps
+  ) {
     return (
       <GitStage
         actions={
           <ActionButton
             className={hiddenButtonStyle}
-            disabled={this.props.stagedFiles.length === 0}
+            disabled={files.length === 0}
             iconName={'git-remove'}
             title={'Unstage all changes'}
             onClick={this.resetAllStagedFiles}
@@ -284,13 +327,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         }
         collapsible
         heading={'Staged'}
-        nFiles={this.props.stagedFiles.length}
+        nFiles={files.length}
       >
-        {this.props.stagedFiles.map((file: Git.IStatusFileResult) => {
+        {files.map((file: Git.IStatusFile) => {
           return (
             <FileItem
               key={file.to}
-              stage={'staged'}
               file={file}
               moveFile={this.resetStagedFile}
               discardFile={null}
@@ -305,8 +347,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   }
 
-  private _renderChanged(sharedProps: IFileItemSharedProps) {
-    const disabled = this.props.unstagedFiles.length === 0;
+  private _renderChanged(
+    files: Git.IStatusFile[],
+    sharedProps: IFileItemSharedProps
+  ) {
+    const disabled = files.length === 0;
     return (
       <GitStage
         actions={
@@ -329,13 +374,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         }
         collapsible
         heading={'Changed'}
-        nFiles={this.props.unstagedFiles.length}
+        nFiles={files.length}
       >
-        {this.props.unstagedFiles.map((file: Git.IStatusFileResult) => {
+        {files.map((file: Git.IStatusFile) => {
           return (
             <FileItem
               key={file.to}
-              stage={'unstaged'}
               file={file}
               moveFile={this.addFile}
               discardFile={this.discardChanges}
@@ -350,13 +394,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   }
 
-  private _renderUntracked(sharedProps: IFileItemSharedProps) {
+  private _renderUntracked(
+    files: Git.IStatusFile[],
+    sharedProps: IFileItemSharedProps
+  ) {
     return (
       <GitStage
         actions={
           <ActionButton
             className={hiddenButtonStyle}
-            disabled={this.props.untrackedFiles.length === 0}
+            disabled={files.length === 0}
             iconName={'git-add'}
             title={'Track all untracked files'}
             onClick={this.addAllUntrackedFiles}
@@ -364,13 +411,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         }
         collapsible
         heading={'Untracked'}
-        nFiles={this.props.untrackedFiles.length}
+        nFiles={files.length}
       >
-        {this.props.untrackedFiles.map((file: Git.IStatusFileResult) => {
+        {files.map((file: Git.IStatusFile) => {
           return (
             <FileItem
               key={file.to}
-              stage={'untracked'}
               file={file}
               moveFile={this.addFile}
               discardFile={null}
@@ -385,66 +431,33 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   }
 
-  render() {
-    const sharedProps: IFileItemSharedProps = {
-      model: this.props.model,
-      selectFile: this.updateSelectedFile,
-      renderMime: this.props.renderMime
-    };
-
-    if (this.props.settings.composite['simpleStaging']) {
-      const files = this.allFilesExcludingUnmodified;
-      return (
-        <div>
-          <GitStage
-            actions={
-              <ActionButton
-                className={hiddenButtonStyle}
-                disabled={files.length === 0}
-                iconName={'git-discard'}
-                title={'Discard All Changes'}
-                onClick={this.discardAllChanges}
-              />
-            }
-            heading={'Changed'}
-            nFiles={files.length}
-          >
-            {files.map((file: Git.IStatusFileResult) => {
-              return (
-                <FileItemSimple
-                  key={file.to}
-                  file={file}
-                  stage={decodeStage(file.x, file.y)}
-                  model={this.props.model}
-                  discardFile={this.discardChanges}
-                  renderMime={this.props.renderMime}
-                />
-              );
-            })}
-          </GitStage>
-        </div>
-      );
-    } else {
-      return (
-        <div onContextMenu={event => event.preventDefault()}>
-          {this._renderStaged(sharedProps)}
-          {this._renderChanged(sharedProps)}
-          {this._renderUntracked(sharedProps)}
-        </div>
-      );
-    }
-  }
-
-  private _isSelectedFile(candidate: Git.IStatusFileResult): boolean {
-    if (this.state.selectedFile === null) {
-      return false;
-    }
-
+  private _renderSimpleStage(files: Git.IStatusFile[]) {
     return (
-      this.state.selectedFile.x === candidate.x &&
-      this.state.selectedFile.y === candidate.y &&
-      this.state.selectedFile.from === candidate.from &&
-      this.state.selectedFile.to === candidate.to
+      <GitStage
+        actions={
+          <ActionButton
+            className={hiddenButtonStyle}
+            disabled={files.length === 0}
+            iconName={'git-discard'}
+            title={'Discard All Changes'}
+            onClick={this.discardAllChanges}
+          />
+        }
+        heading={'Changed'}
+        nFiles={files.length}
+      >
+        {files.map((file: Git.IStatusFile) => {
+          return (
+            <FileItemSimple
+              key={file.to}
+              file={file}
+              model={this.props.model}
+              discardFile={this.discardChanges}
+              renderMime={this.props.renderMime}
+            />
+          );
+        })}
+      </GitStage>
     );
   }
 

@@ -10,7 +10,6 @@ import {
   panelWarningStyle
 } from '../style/GitPanelStyle';
 import { Git } from '../tokens';
-import { decodeStage } from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import { BranchHeader } from './BranchHeader';
 import { FileList } from './FileList';
@@ -23,16 +22,16 @@ export interface IGitSessionNodeState {
   inGitRepository: boolean;
 
   branches: Git.IBranch[];
+
   currentBranch: string;
+
+  files: Git.IStatusFile[];
+
+  isHistoryVisible: boolean;
+
   upstreamBranch: string;
 
   pastCommits: Git.ISingleCommitInfo[];
-
-  stagedFiles: Git.IStatusFileResult[];
-  unstagedFiles: Git.IStatusFileResult[];
-  untrackedFiles: Git.IStatusFileResult[];
-
-  isHistoryVisible: boolean;
 }
 
 /** Interface for GitPanel component props */
@@ -53,24 +52,26 @@ export class GitPanel extends React.Component<
       inGitRepository: false,
       branches: [],
       currentBranch: '',
-      upstreamBranch: '',
+      files: [],
+      isHistoryVisible: false,
       pastCommits: [],
-      stagedFiles: [],
-      unstagedFiles: [],
-      untrackedFiles: [],
-      isHistoryVisible: false
+      upstreamBranch: ''
     };
+  }
 
-    props.model.repositoryChanged.connect((_, args) => {
+  componentDidMount() {
+    const { model, settings } = this.props;
+
+    model.repositoryChanged.connect((_, args) => {
       this.setState({
         inGitRepository: args.newValue !== null
       });
       this.refresh();
     }, this);
-    props.model.statusChanged.connect(() => {
-      this.setStatus();
+    model.statusChanged.connect(() => {
+      this.setState({ files: model.status });
     }, this);
-    props.model.headChanged.connect(async () => {
+    model.headChanged.connect(async () => {
       await this.refreshBranch();
       if (this.state.isHistoryVisible) {
         this.refreshHistory();
@@ -78,9 +79,9 @@ export class GitPanel extends React.Component<
         this.refreshStatus();
       }
     }, this);
-    props.model.markChanged.connect(() => this.forceUpdate());
+    model.markChanged.connect(() => this.forceUpdate());
 
-    props.settings.changed.connect(this.refresh, this);
+    settings.changed.connect(this.refresh, this);
   }
 
   refreshBranch = async () => {
@@ -106,38 +107,6 @@ export class GitPanel extends React.Component<
 
       this.setState({
         pastCommits: pastCommits
-      });
-    }
-  };
-
-  setStatus = () => {
-    if (this.props.model.pathRepository !== null) {
-      // Get git status for current branch
-      let stagedFiles = new Array<Git.IStatusFileResult>();
-      let unstagedFiles = new Array<Git.IStatusFileResult>();
-      let untrackedFiles = new Array<Git.IStatusFileResult>();
-      let statusFiles = this.props.model.status;
-      if (statusFiles.length > 0) {
-        for (let i = 0; i < statusFiles.length; i++) {
-          const file = statusFiles[i];
-          const { x, y } = file;
-          const stage = decodeStage(x, y);
-
-          // If file is untracked
-          if (stage === 'untracked') {
-            untrackedFiles.push(file);
-          } else if (stage === 'unstaged') {
-            unstagedFiles.push(file);
-          } else if (stage === 'staged') {
-            stagedFiles.push(file);
-          }
-        }
-      }
-
-      this.setState({
-        stagedFiles: stagedFiles,
-        unstagedFiles: unstagedFiles,
-        untrackedFiles: untrackedFiles
       });
     }
   };
@@ -216,9 +185,7 @@ export class GitPanel extends React.Component<
     } else {
       filelist = (
         <FileList
-          stagedFiles={this.state.stagedFiles}
-          unstagedFiles={this.state.unstagedFiles}
-          untrackedFiles={this.state.untrackedFiles}
+          files={this._sortedFiles}
           model={this.props.model}
           renderMime={this.props.renderMime}
           settings={this.props.settings}
@@ -234,7 +201,7 @@ export class GitPanel extends React.Component<
       } else {
         msg = (
           <CommitBox
-            hasFiles={this.state.stagedFiles.length > 0}
+            hasFiles={this._hasStagedFile()}
             onCommit={this.commitStagedFiles}
           />
         );
@@ -250,8 +217,7 @@ export class GitPanel extends React.Component<
     if (this.state.inGitRepository) {
       const disableBranchOps = Boolean(
         this.props.settings.composite['disableBranchWithChanges'] &&
-          ((this.state.unstagedFiles && this.state.unstagedFiles.length) ||
-            (this.state.stagedFiles && this.state.stagedFiles.length))
+          (this._hasUnStagedFile() || this._hasStagedFile())
       );
 
       main = (
@@ -261,7 +227,6 @@ export class GitPanel extends React.Component<
             refresh={this.refreshBranch}
             currentBranch={this.state.currentBranch}
             upstreamBranch={this.state.upstreamBranch}
-            stagedFiles={this.state.stagedFiles}
             data={this.state.branches}
             disabled={disableBranchOps}
             toggleSidebar={this.toggleSidebar}
@@ -301,28 +266,6 @@ export class GitPanel extends React.Component<
         />
         {main}
       </div>
-    );
-  }
-
-  /**
-   * List of modified files (both staged and unstaged).
-   */
-  private get _modifiedFiles(): Git.IStatusFileResult[] {
-    let files = this.state.untrackedFiles.concat(
-      this.state.unstagedFiles,
-      this.state.stagedFiles
-    );
-
-    files.sort((a, b) => a.to.localeCompare(b.to));
-    return files;
-  }
-
-  /**
-   * List of marked files.
-   */
-  private get _markedFiles(): Git.IStatusFileResult[] {
-    return this._modifiedFiles.filter(file =>
-      this.props.model.getMark(file.to)
     );
   }
 
@@ -369,6 +312,31 @@ export class GitPanel extends React.Component<
     }
 
     return Promise.resolve(true);
+  }
+
+  private _hasStagedFile(): boolean {
+    return this.state.files.some(file => file.status === 'staged');
+  }
+
+  private _hasUnStagedFile(): boolean {
+    return this.state.files.some(file => file.status === 'unstaged');
+  }
+
+  /**
+   * List of marked files.
+   */
+  private get _markedFiles(): Git.IStatusFile[] {
+    return this._sortedFiles.filter(file => this.props.model.getMark(file.to));
+  }
+
+  /**
+   * List of sorted modified files.
+   */
+  private get _sortedFiles(): Git.IStatusFile[] {
+    let { files } = this.state;
+
+    files.sort((a, b) => a.to.localeCompare(b.to));
+    return files;
   }
 
   private _previousRepoPath: string = null;

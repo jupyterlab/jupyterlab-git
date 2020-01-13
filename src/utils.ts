@@ -34,7 +34,7 @@ export function extractFilename(path: string): string {
   }
 }
 
-export function decodeStage(x: string, y: string): Git.Status | null {
+export function decodeStage(x: string, y: string): Git.Status {
   // If file is untracked
   if (x === '?' && y === '?') {
     return 'untracked';

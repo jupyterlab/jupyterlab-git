@@ -364,6 +364,13 @@ export namespace Git {
     from: string;
   }
 
+  /**
+   * Changed file attributes
+   */
+  export interface IStatusFile extends IStatusFileResult {
+    status: Status;
+  }
+
   /** Interface for GitStatus request result,
    * has the status of the entire repo
    */
@@ -472,5 +479,5 @@ export namespace Git {
     toggle(fname: string): void;
   }
 
-  export type Status = 'untracked' | 'staged' | 'unstaged';
+  export type Status = 'untracked' | 'staged' | 'unstaged' | null;
 }

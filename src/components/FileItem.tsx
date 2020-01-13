@@ -35,17 +35,16 @@ export const STATUS_CODES = {
 export interface IFileItemSharedProps {
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
-  selectFile: (file: Git.IStatusFileResult | null) => void;
+  selectFile: (file: Git.IStatusFile | null) => void;
 }
 
 export interface IFileItemProps extends IFileItemSharedProps {
   contextMenu: (event: React.MouseEvent) => void;
   discardFile: (file: string) => Promise<void>;
-  file: Git.IStatusFileResult;
+  file: Git.IStatusFile;
   moveFile: (file: string) => Promise<void>;
   moveFileTitle: string;
   selected: boolean;
-  stage: Git.Status;
 }
 
 export class FileItem extends React.Component<IFileItemProps> {
@@ -104,9 +103,9 @@ export class FileItem extends React.Component<IFileItemProps> {
 
     let diffButton = null;
     if (isDiffSupported(this.props.file.to)) {
-      if (this.props.stage === 'unstaged') {
+      if (this.props.file.status === 'unstaged') {
         diffButton = this._createDiffButton({ specialRef: 'WORKING' });
-      } else if (this.props.stage === 'staged') {
+      } else if (this.props.file.status === 'staged') {
         diffButton = this._createDiffButton({ specialRef: 'INDEX' });
       }
     }
@@ -128,7 +127,7 @@ export class FileItem extends React.Component<IFileItemProps> {
           filepath={this.props.file.to}
           selected={this.props.selected}
         />
-        {this.props.stage === 'unstaged' && (
+        {this.props.file.status === 'unstaged' && (
           <ActionButton
             className={hiddenButtonStyle}
             iconName={'git-discard'}
@@ -139,7 +138,9 @@ export class FileItem extends React.Component<IFileItemProps> {
         {diffButton}
         <ActionButton
           className={hiddenButtonStyle}
-          iconName={this.props.stage === 'staged' ? 'git-remove' : 'git-add'}
+          iconName={
+            this.props.file.status === 'staged' ? 'git-remove' : 'git-add'
+          }
           title={this.props.moveFileTitle}
           onClick={() => {
             this.props.moveFile(this.props.file.to);
