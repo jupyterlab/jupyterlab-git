@@ -19,7 +19,9 @@ import {
   spreadsheetFileIconSelectedStyle,
   spreadsheetFileIconStyle,
   yamlFileIconSelectedStyle,
-  yamlFileIconStyle
+  yamlFileIconStyle,
+  notebookFileIconSelectedStyle,
+  notebookFileIconStyle
 } from './style/FileListStyle';
 import { Git } from './tokens';
 
@@ -94,6 +96,8 @@ export function getFileIconClassName(
       return selected ? markdownFileIconSelectedStyle : markdownFileIconStyle;
     case '.py':
       return selected ? pythonFileIconSelectedStyle : pythonFileIconStyle;
+    case '.ipynb':
+      return selected ? notebookFileIconSelectedStyle : notebookFileIconStyle;
     case '.json':
       return selected ? jsonFileIconSelectedStyle : jsonFileIconStyle;
     case '.csv':

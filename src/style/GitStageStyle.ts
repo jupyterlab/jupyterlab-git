@@ -62,17 +62,6 @@ export const changeStageButtonStyle = style({
   outline: 'none'
 });
 
-export const discardFileButtonStyle = style({
-  backgroundImage: 'var(--jp-icon-discard-file)',
-  marginLeft: '6px',
-  paddingRight: '1px'
-});
-
-export const diffFileButtonStyle = style({
-  backgroundImage: 'var(--jp-icon-diff)',
-  paddingLeft: '0px'
-});
-
 export const caretdownImageStyle = style({
   backgroundImage: 'var(--jp-image-caretdown)'
 });

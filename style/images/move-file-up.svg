@@ -4,7 +4,7 @@
    viewBox="0 0 24 24"
    version="1.1">
   <g
-     class="jp-icon3"
+     class="jp-icon3 jp-icon-selectable"
      fill="#4F4F4F">
     <path
        d="m 22,13 h -9 v 9 H 11 V 13 H 2 v -2 h 9 V 2 h 2 v 9 h 9 z"/>

@@ -1,20 +1,10 @@
 import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { gitMarkBoxStyle } from '../style/FileItemSimpleStyle';
-import {
-  fileButtonStyle,
-  fileGitButtonStyle,
-  fileStyle
-} from '../style/FileItemStyle';
-import {
-  changeStageButtonStyle,
-  diffFileButtonStyle,
-  discardFileButtonStyle
-} from '../style/GitStageStyle';
+import { fileStyle } from '../style/FileItemStyle';
 import { Git } from '../tokens';
 import { openListedFile } from '../utils';
 import { ActionButton } from './ActionButton';
@@ -72,24 +62,6 @@ export interface IFileItemSimpleProps {
 }
 
 export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
-  getDiffFileIconClass() {
-    return classes(
-      fileButtonStyle,
-      changeStageButtonStyle,
-      fileGitButtonStyle,
-      diffFileButtonStyle
-    );
-  }
-
-  getDiscardFileIconClass() {
-    return classes(
-      fileButtonStyle,
-      changeStageButtonStyle,
-      fileGitButtonStyle,
-      discardFileButtonStyle
-    );
-  }
-
   /**
    * Callback method discarding unstaged changes for selected file.
    * It shows modal asking for confirmation and when confirmed make

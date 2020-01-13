@@ -8,6 +8,7 @@ import discardSvg from '../../style/images/discard.svg';
 import insertionsMadeSvg from '../../style/images/insertions-made-icon.svg';
 import addSvg from '../../style/images/move-file-up.svg';
 import removeSvg from '../../style/images/move-file-down.svg';
+import rewindSvg from '../../style/images/rewind.svg';
 
 export function registerGitIcons(iconRegistry: IIconRegistry) {
   iconRegistry.addIcon(
@@ -38,6 +39,10 @@ export function registerGitIcons(iconRegistry: IIconRegistry) {
     {
       name: 'git-remove',
       svg: removeSvg
+    },
+    {
+      name: 'git-rewind',
+      svg: rewindSvg
     }
   );
 }

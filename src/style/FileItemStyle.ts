@@ -29,10 +29,10 @@ export const selectedFileStyle = style({
       color: 'white',
       background: 'var(--jp-brand-color1) !important'
     },
-    '&:hover .jp-icon3[fill]': {
+    '&:hover .jp-icon-selectable[fill]': {
       fill: 'var(--jp-layout-color2)'
     },
-    '&:hover .jp-icon3[stroke]': {
+    '&:hover .jp-icon-selectable[stroke]': {
       stroke: 'var(--jp-layout-color2)'
     }
   }
@@ -61,13 +61,4 @@ export const fileGitButtonStyle = style({
 
 export const fileButtonStyle = style({
   marginTop: '5px'
-});
-
-export const discardButtonStyle = style({
-  color: 'white'
-});
-
-export const discardFileButtonSelectedStyle = style({
-  backgroundImage: 'var(--jp-icon-discard-file-selected)',
-  marginLeft: '6px'
 });

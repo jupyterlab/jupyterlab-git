@@ -3,7 +3,7 @@
    xmlns="http://www.w3.org/2000/svg"
    viewBox="0 0 24 24"
    version="1.1">
-  <g class="jp-icon3" stroke="#4F4F4F" stroke-width="2px">
+  <g class="jp-icon3 jp-icon-selectable" stroke="#4F4F4F" stroke-width="2px">
   <path
      fill="none"
      d="M 2,12 H 22" />
