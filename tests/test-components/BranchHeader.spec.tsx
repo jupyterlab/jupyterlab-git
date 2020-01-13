@@ -15,10 +15,6 @@ describe('BranchHeader', () => {
     currentBranch: 'master',
     sideBarExpanded: false,
     upstreamBranch: 'origin/master',
-    stagedFiles: [
-      { x: '', y: '', to: '', from: 'test-1' },
-      { x: '', y: '', to: '', from: 'test-2' }
-    ],
     data: [
       {
         is_current_branch: true,
