@@ -3,7 +3,8 @@ import {
   IChangedArgs,
   PathExt,
   Poll,
-  ISettingRegistry
+  ISettingRegistry,
+  IStateDB
 } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { CommandRegistry } from '@phosphor/commands';
@@ -15,14 +16,68 @@ import { IGitExtension, Git } from './tokens';
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
 
+export const PLUGIN_ID = '@jupyterlab/git:plugin';
+
+/**
+ * State variables of @jupyterlab/git extension
+ */
+interface IGitState {
+  /**
+   * Is the repository path pinned? i.e. not connected to the file browser
+   */
+  isRepositoryPin: boolean;
+  /**
+   * Git path repository
+   */
+  pathRepository: string | null;
+}
+
 /** Main extension class */
 export class GitExtension implements IGitExtension {
   constructor(
     app: JupyterFrontEnd = null,
-    settings?: ISettingRegistry.ISettings
+    settings: ISettingRegistry.ISettings = null,
+    state: IStateDB = null
   ) {
     const model = this;
     this._app = app;
+    this._stateDB = state;
+
+    this._state = {
+      isRepositoryPin: false,
+      pathRepository: null
+    };
+
+    // Load state extension
+    if (app) {
+      this._restored = app.restored.then(async () => {
+        if (state) {
+          try {
+            const value = await state.fetch(PLUGIN_ID);
+            if (value) {
+              const stateExtension: IGitState = value as any;
+              if (stateExtension.isRepositoryPin) {
+                const change: IChangedArgs<string> = {
+                  name: 'pathRepository',
+                  newValue: stateExtension.pathRepository,
+                  oldValue: this._state.pathRepository
+                };
+                this._state = stateExtension;
+                this._repositoryChanged.emit(change);
+              }
+            }
+          } catch (reason) {
+            console.error(
+              `Fail to fetch the state for ${PLUGIN_ID}.\n${reason}`
+            );
+          }
+        } else {
+          return Promise.resolve();
+        }
+      });
+    } else {
+      this._restored = Promise.resolve();
+    }
 
     // Load the server root path
     this._getServerRoot()
@@ -58,11 +113,9 @@ export class GitExtension implements IGitExtension {
      * @param settings - settings registry
      */
     function onSettingsChange(settings: ISettingRegistry.ISettings) {
-      const freq = poll.frequency;
       poll.frequency = {
-        interval: settings.composite.refreshInterval as number,
-        backoff: freq.backoff,
-        max: freq.max
+        ...poll.frequency,
+        interval: settings.composite.refreshInterval as number
       };
     }
   }
@@ -70,7 +123,7 @@ export class GitExtension implements IGitExtension {
   /**
    * The list of branch in the current repo
    */
-  get branches() {
+  get branches(): Git.IBranch[] {
     return this._branches;
   }
 
@@ -81,7 +134,7 @@ export class GitExtension implements IGitExtension {
   /**
    * The current branch
    */
-  get currentBranch() {
+  get currentBranch(): Git.IBranch | null {
     return this._currentBranch;
   }
 
@@ -127,22 +180,25 @@ export class GitExtension implements IGitExtension {
    * null if not defined.
    */
   get pathRepository(): string | null {
-    return this._pathRepository;
+    return this._state.pathRepository;
   }
 
   set pathRepository(v: string | null) {
     const change: IChangedArgs<string> = {
       name: 'pathRepository',
       newValue: null,
-      oldValue: this._pathRepository
+      oldValue: this._state.pathRepository
     };
     if (v === null) {
       this._pendingReadyPromise += 1;
       this._readyPromise.then(() => {
-        this._pathRepository = null;
+        this._state.pathRepository = null;
         this._pendingReadyPromise -= 1;
 
         if (change.newValue !== change.oldValue) {
+          if (this._stateDB) {
+            this._stateDB.save(PLUGIN_ID, this._state as any);
+          }
           this.refresh().then(() => this._repositoryChanged.emit(change));
         }
       });
@@ -153,13 +209,16 @@ export class GitExtension implements IGitExtension {
         .then(r => {
           const results = r[1];
           if (results.code === 0) {
-            this._pathRepository = results.top_repo_path;
+            this._state.pathRepository = results.top_repo_path;
             change.newValue = results.top_repo_path;
           } else {
-            this._pathRepository = null;
+            this._state.pathRepository = null;
           }
 
           if (change.newValue !== change.oldValue) {
+            if (this._stateDB) {
+              this._stateDB.save(PLUGIN_ID, this._state as any);
+            }
             this.refresh().then(() => this._repositoryChanged.emit(change));
           }
         })
@@ -178,6 +237,33 @@ export class GitExtension implements IGitExtension {
    */
   get repositoryChanged(): ISignal<IGitExtension, IChangedArgs<string | null>> {
     return this._repositoryChanged;
+  }
+
+  /**
+   * Is the Git repository path pinned?
+   */
+  get repositoryPinned(): boolean {
+    return this._state.isRepositoryPin;
+  }
+
+  set repositoryPinned(status: boolean) {
+    if (this._state.isRepositoryPin !== status) {
+      this._state.isRepositoryPin = status;
+      if (this._stateDB) {
+        this._stateDB
+          .save(PLUGIN_ID, this._state as any)
+          .catch(reason =>
+            console.error(`Fail to save the ${PLUGIN_ID} state.\n${reason}`)
+          );
+      }
+    }
+  }
+
+  /**
+   * Promise that resolves when state is first restored.
+   */
+  get restored(): Promise<void> {
+    return this._restored;
   }
 
   get shell(): JupyterFrontEnd.IShell | null {
@@ -305,7 +391,9 @@ export class GitExtension implements IGitExtension {
    * @param mark Mark to set
    */
   addMark(fname: string, mark: boolean) {
-    this._currentMarker.add(fname, mark);
+    if (this._currentMarker) {
+      this._currentMarker.add(fname, mark);
+    }
   }
 
   /**
@@ -315,7 +403,11 @@ export class GitExtension implements IGitExtension {
    * @returns Mark of the file
    */
   getMark(fname: string): boolean {
-    return this._currentMarker.get(fname);
+    if (this._currentMarker) {
+      return this._currentMarker.get(fname);
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -324,7 +416,9 @@ export class GitExtension implements IGitExtension {
    * @param fname Filename
    */
   toggleMark(fname: string) {
-    this._currentMarker.toggle(fname);
+    if (this._currentMarker) {
+      this._currentMarker.toggle(fname);
+    }
   }
 
   /**
@@ -993,25 +1087,27 @@ export class GitExtension implements IGitExtension {
     return this._currentMarker;
   }
 
-  private _status: Git.IStatusFileResult[] = [];
-  private _pathRepository: string | null = null;
-  private _branches: Git.IBranch[];
-  private _currentBranch: Git.IBranch;
-  private _serverRoot: string;
   private _app: JupyterFrontEnd | null;
+  private _branches: Git.IBranch[] = [];
+  private _currentBranch: Git.IBranch | null = null;
+  private _currentMarker: BranchMarker = null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
+  private _headChanged = new Signal<IGitExtension, void>(this);
   private _isDisposed = false;
   private _markerCache: Markers = new Markers(() => this._markChanged.emit());
-  private _currentMarker: BranchMarker = null;
-  private _readyPromise: Promise<void> = Promise.resolve();
+  private _markChanged = new Signal<IGitExtension, void>(this);
   private _pendingReadyPromise = 0;
   private _poll: Poll;
-  private _headChanged = new Signal<IGitExtension, void>(this);
-  private _markChanged = new Signal<IGitExtension, void>(this);
+  private _readyPromise: Promise<void> = Promise.resolve();
   private _repositoryChanged = new Signal<
     IGitExtension,
     IChangedArgs<string | null>
   >(this);
+  private _restored: Promise<void>;
+  private _serverRoot: string;
+  private _state: IGitState;
+  private _stateDB: IStateDB | null = null;
+  private _status: Git.IStatusFileResult[] = [];
   private _statusChanged = new Signal<IGitExtension, Git.IStatusFileResult[]>(
     this
   );

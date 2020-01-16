@@ -20,22 +20,18 @@ export function addCloneButton(model: IGitExtension, filebrowser: FileBrowser) {
     'gitClone',
     ReactWidget.create(
       <UseSignal
-        signal={model.repositoryChanged}
+        signal={filebrowser.model.pathChanged}
         initialArgs={{
-          name: 'pathRepository',
-          oldValue: null,
-          newValue: model.pathRepository
+          name: 'path',
+          oldValue: '/',
+          newValue: filebrowser.model.path
         }}
       >
-        {(_, change: IChangedArgs<string | null>) => (
-          <ToolbarButtonComponent
-            enabled={change.newValue === null}
-            iconClassName={`${cloneButtonStyle} jp-Icon jp-Icon-16`}
-            onClick={async () => {
-              await doGitClone(model, filebrowser.model.path);
-              filebrowser.model.refresh();
-            }}
-            tooltip={'Git Clone'}
+        {(_, change: IChangedArgs<string>) => (
+          <GitCloneButton
+            model={model}
+            filebrowser={filebrowser}
+            change={change}
           />
         )}
       </UseSignal>
@@ -151,3 +147,54 @@ class GitCloneForm extends Widget {
     return encodeURIComponent(this.node.querySelector('input').value);
   }
 }
+
+/**
+ * Git clone toolbar button properties
+ */
+interface IGitCloneButtonProps {
+  /**
+   * Git extension model
+   */
+  model: IGitExtension;
+  /**
+   * File browser object
+   */
+  filebrowser: FileBrowser;
+  /**
+   * File browser path change
+   */
+  change: IChangedArgs<string>;
+}
+
+const GitCloneButton: React.FunctionComponent<IGitCloneButtonProps> = (
+  props: IGitCloneButtonProps
+) => {
+  const [enable, setEnable] = React.useState(false);
+
+  React.useEffect(() => {
+    model
+      .showTopLevel(change.newValue)
+      .then(answer => {
+        setEnable(answer.code !== 0);
+      })
+      .catch(reason => {
+        console.error(
+          `Fail to get the top level path for ${change.newValue}.\n${reason}`
+        );
+      });
+  });
+
+  const { model, filebrowser, change } = props;
+
+  return (
+    <ToolbarButtonComponent
+      enabled={enable}
+      iconClassName={`${cloneButtonStyle} jp-Icon jp-Icon-16`}
+      onClick={async () => {
+        await doGitClone(model, filebrowser.model.path);
+        filebrowser.model.refresh();
+      }}
+      tooltip={'Git Clone'}
+    />
+  );
+};

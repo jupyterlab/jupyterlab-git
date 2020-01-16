@@ -18,22 +18,12 @@ export interface IGitExtension extends IDisposable {
   /**
    * The current branch
    */
-  currentBranch: Git.IBranch;
+  currentBranch: Git.IBranch | null;
 
   /**
    * A signal emitted when the HEAD of the git repository changes.
    */
   readonly headChanged: ISignal<IGitExtension, void>;
-
-  /**
-   * Top level path of the current git repository
-   */
-  pathRepository: string | null;
-
-  /**
-   * A signal emitted when the current git repository changes.
-   */
-  readonly repositoryChanged: ISignal<IGitExtension, IChangedArgs<string>>;
 
   /**
    * Test whether the model is ready;
@@ -46,6 +36,26 @@ export interface IGitExtension extends IDisposable {
    * i.e. if the top folder repository has been found.
    */
   ready: Promise<void>;
+
+  /**
+   * Top level path of the current git repository
+   */
+  pathRepository: string | null;
+
+  /**
+   * A signal emitted when the current git repository changes.
+   */
+  readonly repositoryChanged: ISignal<IGitExtension, IChangedArgs<string>>;
+
+  /**
+   * Is the Git repository path pinned?
+   */
+  repositoryPinned: boolean;
+
+  /**
+   * Promise that resolves when state is first restored.
+   */
+  readonly restored: Promise<void>;
 
   /**
    * Files list resulting of a git status call.
@@ -114,7 +124,7 @@ export interface IGitExtension extends IDisposable {
   /** Make request to switch current working branch,
    * create new branch if needed,
    * or discard a specific file change or all changes
-   * TODO: Refactor into seperate endpoints for each kind of checkout request
+   * TODO: Refactor into separate endpoints for each kind of checkout request
    *
    * If a branch name is provided, check it out (with or without creating it)
    * If a filename is provided, check the file out

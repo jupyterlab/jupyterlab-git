@@ -3,7 +3,11 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IChangedArgs, ISettingRegistry } from '@jupyterlab/coreutils';
+import {
+  IChangedArgs,
+  ISettingRegistry,
+  IStateDB
+} from '@jupyterlab/coreutils';
 import {
   FileBrowser,
   FileBrowserModel,
@@ -14,11 +18,11 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { defaultIconRegistry } from '@jupyterlab/ui-components';
 import { Menu } from '@phosphor/widgets';
 import { addCommands, CommandIDs } from './gitMenuCommands';
-import { GitExtension } from './model';
+import { GitExtension, PLUGIN_ID } from './model';
 import { registerGitIcons } from './style/icons';
 import { IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
-import { GitWidget } from './widgets/GitWidget';
+import { createGitWidget } from './widgets/GitWidget';
 
 export { Git, IGitExtension } from './tokens';
 
@@ -37,13 +41,14 @@ const RESOURCES = [
  * The default running sessions extension.
  */
 const plugin: JupyterFrontEndPlugin<IGitExtension> = {
-  id: '@jupyterlab/git:plugin',
+  id: PLUGIN_ID,
   requires: [
     IMainMenu,
     ILayoutRestorer,
     IFileBrowserFactory,
     IRenderMimeRegistry,
-    ISettingRegistry
+    ISettingRegistry,
+    IStateDB
   ],
   provides: IGitExtension,
   activate,
@@ -64,7 +69,8 @@ async function activate(
   restorer: ILayoutRestorer,
   factory: IFileBrowserFactory,
   renderMime: IRenderMimeRegistry,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  state: IStateDB
 ): Promise<IGitExtension> {
   let settings: ISettingRegistry.ISettings;
 
@@ -81,17 +87,25 @@ async function activate(
     console.error(`Failed to load settings for the Git Extension.\n${error}`);
   }
   // Create the Git model
-  const gitExtension = new GitExtension(app, settings);
+  const gitExtension = new GitExtension(app, settings, state);
 
   // Whenever we restore the application, sync the Git extension path
-  Promise.all([app.restored, filebrowser.model.restored]).then(() => {
-    gitExtension.pathRepository = filebrowser.model.path;
+  Promise.all([
+    app.restored,
+    gitExtension.restored,
+    filebrowser.model.restored
+  ]).then(() => {
+    if (!gitExtension.repositoryPinned) {
+      gitExtension.pathRepository = filebrowser.model.path;
+    }
   });
 
   // Whenever the file browser path changes, sync the Git extension path
   filebrowser.model.pathChanged.connect(
     (model: FileBrowserModel, change: IChangedArgs<string>) => {
-      gitExtension.pathRepository = change.newValue;
+      if (!gitExtension.repositoryPinned) {
+        gitExtension.pathRepository = change.newValue;
+      }
     }
   );
   // Whenever a user adds/renames/saves/deletes/modifies a file within the lab environment, refresh the Git status
@@ -100,7 +114,12 @@ async function activate(
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Create the Git widget sidebar
-    const gitPlugin = new GitWidget(gitExtension, settings, renderMime);
+    const gitPlugin = createGitWidget(
+      gitExtension,
+      settings,
+      renderMime,
+      filebrowser.model
+    );
     gitPlugin.id = 'jp-git-sessions';
     gitPlugin.title.iconClass = 'jp-SideBar-tabIcon jp-GitIcon';
     gitPlugin.title.caption = 'Git';

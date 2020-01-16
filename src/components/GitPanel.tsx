@@ -1,22 +1,19 @@
 import * as React from 'react';
 import { showErrorMessage, showDialog } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { JSONObject } from '@phosphor/coreutils';
 import { GitExtension } from '../model';
-import {
-  findRepoButtonStyle,
-  panelContainerStyle,
-  panelWarningStyle
-} from '../style/GitPanelStyle';
+import { panelContainerStyle } from '../style/GitPanelStyle';
 import { Git } from '../tokens';
 import { decodeStage } from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import { BranchHeader } from './BranchHeader';
+import { CommitBox } from './CommitBox';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
 import { PathHeader } from './PathHeader';
-import { CommitBox } from './CommitBox';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -40,6 +37,7 @@ export interface IGitSessionNodeProps {
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
   settings: ISettingRegistry.ISettings;
+  fileBrowserModel: FileBrowserModel;
 }
 
 /** A React component for the git extension's main display */
@@ -199,7 +197,7 @@ export class GitPanel extends React.Component<
 
   render() {
     let filelist: React.ReactElement;
-    let main: React.ReactElement;
+    let main: React.ReactElement = null;
     let sub: React.ReactElement;
     let msg: React.ReactElement;
 
@@ -270,26 +268,13 @@ export class GitPanel extends React.Component<
           {sub}
         </React.Fragment>
       );
-    } else {
-      main = (
-        <div className={panelWarningStyle}>
-          <div>You aren’t in a git repository.</div>
-          <button
-            className={findRepoButtonStyle}
-            onClick={() =>
-              this.props.model.commands.execute('filebrowser:toggle-main')
-            }
-          >
-            Go find a repo
-          </button>
-        </div>
-      );
     }
 
     return (
       <div className={panelContainerStyle}>
         <PathHeader
           model={this.props.model}
+          fileBrowserModel={this.props.fileBrowserModel}
           refresh={async () => {
             await this.refreshBranch();
             if (this.state.isHistoryVisible) {
