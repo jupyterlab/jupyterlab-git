@@ -144,7 +144,7 @@ class Git:
                 response["command"] = " ".join(cmd)
                 response["message"] = error.strip()
             else:
-                raw = output.decode("utf-8").strip()
+                raw = output.strip()
                 s = CONFIG_PATTERN.split(raw)
                 response["options"] = {k:v for k, v in zip(s[1::2], s[2::2]) if k in ALLOWED_OPTIONS}
 
