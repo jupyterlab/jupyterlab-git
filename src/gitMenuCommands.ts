@@ -122,12 +122,12 @@ export function addCommands(
         return;
       }
       let url = args['url'] as string;
-      let name = (args['name'] as string) || 'origin';
+      let name = args['name'] as string;
 
       if (!url) {
         const result = await InputDialog.getText({
           title: 'Add a remote repository',
-          placeholder: 'Remote Git URL'
+          placeholder: 'Remote Git repository URL'
         });
 
         if (result.button.accept) {
