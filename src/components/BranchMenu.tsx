@@ -173,7 +173,7 @@ export class BranchMenu extends React.Component<
           listItemClass,
           branch.name === this.state.current ? activeListItemClass : null
         )}
-        key={idx}
+        key={branch.name}
         onClick={this._onBranchClickFactory(branch.name)}
       >
         <span className={listItemIconClass} />
