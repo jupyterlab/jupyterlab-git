@@ -263,6 +263,7 @@ export class NewBranchDialog extends React.Component<
     return (
       <ListItem
         button
+        title={`Create a new branch based on: ${branch.name}`}
         className={classes(listItemClass, isBase ? activeListItemClass : null)}
         key={branch.name}
         onClick={this._onBranchClickFactory(branch.name)}
