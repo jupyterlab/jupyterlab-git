@@ -106,7 +106,6 @@ export class NewBranchDialog extends React.Component<
     super(props);
 
     const repo = this.props.model.pathRepository;
-    this._addListeners();
 
     this.state = {
       name: '',
@@ -115,6 +114,13 @@ export class NewBranchDialog extends React.Component<
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : []
     };
+  }
+
+  /**
+   * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
+   */
+  componentDidMount(): void {
+    this._addListeners();
   }
 
   /**
@@ -281,9 +287,6 @@ export class NewBranchDialog extends React.Component<
    * Adds model listeners.
    */
   private _addListeners(): void {
-    // When the repository changes, we're likely to have a new set of branches:
-    this.props.model.repositoryChanged.connect(this._syncState, this);
-
     // When the HEAD changes, decent probability that we've switched branches:
     this.props.model.headChanged.connect(this._syncState, this);
 
@@ -295,7 +298,6 @@ export class NewBranchDialog extends React.Component<
    * Removes model listeners.
    */
   private _removeListeners(): void {
-    this.props.model.repositoryChanged.disconnect(this._syncState, this);
     this.props.model.headChanged.disconnect(this._syncState, this);
     this.props.model.statusChanged.disconnect(this._syncState, this);
   }
