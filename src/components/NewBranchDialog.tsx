@@ -264,7 +264,7 @@ export class NewBranchDialog extends React.Component<
       <ListItem
         button
         className={classes(listItemClass, isBase ? activeListItemClass : null)}
-        key={idx}
+        key={branch.name}
         onClick={this._onBranchClickFactory(branch.name)}
       >
         <span className={classes(listItemIconClass, 'jp-Icon-16')} />
