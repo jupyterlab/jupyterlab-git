@@ -36,7 +36,6 @@ export interface IGitSessionNodeState {
   unstagedFiles: Git.IStatusFileResult[];
   untrackedFiles: Git.IStatusFileResult[];
 
-  isHistoryVisible: boolean;
   tab: number;
 }
 
@@ -62,7 +61,6 @@ export class GitPanel extends React.Component<
       stagedFiles: [],
       unstagedFiles: [],
       untrackedFiles: [],
-      isHistoryVisible: false,
       tab: 0
     };
 
@@ -77,7 +75,7 @@ export class GitPanel extends React.Component<
     }, this);
     props.model.headChanged.connect(async () => {
       await this.refreshBranch();
-      if (this.state.isHistoryVisible) {
+      if (this.state.tab === 1) {
         this.refreshHistory();
       } else {
         this.refreshStatus();
@@ -233,9 +231,7 @@ export class GitPanel extends React.Component<
       return (
         <React.Fragment>
           {this._renderTabs()}
-          {this.state.isHistoryVisible
-            ? this._renderHistory()
-            : this._renderChanges()}
+          {this.state.tab === 1 ? this._renderHistory() : this._renderChanges()}
         </React.Fragment>
       );
     }
@@ -321,7 +317,7 @@ export class GitPanel extends React.Component<
   private _renderHistory() {
     return (
       <HistorySideBar
-        isExpanded={this.state.isHistoryVisible}
+        isExpanded={this.state.tab === 1}
         branches={this.state.branches}
         pastCommits={this.state.pastCommits}
         model={this.props.model}
@@ -358,16 +354,11 @@ export class GitPanel extends React.Component<
    * @param tab - tab number
    */
   private _onTabChange = (event: any, tab: number): void => {
-    let isHistoryVisible;
     if (tab === 1) {
       this.refreshHistory();
-      isHistoryVisible = true;
-    } else {
-      isHistoryVisible = false;
     }
     this.setState({
-      tab: tab,
-      isHistoryVisible: isHistoryVisible
+      tab: tab
     });
   };
 
@@ -378,7 +369,7 @@ export class GitPanel extends React.Component<
    */
   private _onRefresh = async () => {
     await this.refreshBranch();
-    if (this.state.isHistoryVisible) {
+    if (this.state.tab === 1) {
       this.refreshHistory();
     } else {
       this.refreshStatus();
