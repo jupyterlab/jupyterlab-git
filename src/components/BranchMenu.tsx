@@ -79,7 +79,6 @@ export class BranchMenu extends React.Component<
     super(props);
 
     const repo = this.props.model.pathRepository;
-    this._addListeners();
 
     this.state = {
       filter: '',
@@ -87,6 +86,13 @@ export class BranchMenu extends React.Component<
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : []
     };
+  }
+
+  /**
+   * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
+   */
+  componentDidMount(): void {
+    this._addListeners();
   }
 
   /**
