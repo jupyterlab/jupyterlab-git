@@ -127,7 +127,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     super(props);
 
     const repo = this.props.model.pathRepository;
-    this._addListeners();
 
     this.state = {
       branchMenu: false,
@@ -138,9 +137,16 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   /**
+   * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
+   */
+  componentDidMount(): void {
+    this._addListeners();
+  }
+
+  /**
    * Callback invoked when a component will no longer be mounted.
    */
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     this._removeListeners();
   }
 
@@ -280,9 +286,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Adds model listeners.
    */
   private _addListeners(): void {
-    // When the repository changes, we're likely to have a new set of branches:
-    this.props.model.repositoryChanged.connect(this._syncState, this);
-
     // When the HEAD changes, decent probability that we've switched branches:
     this.props.model.headChanged.connect(this._syncState, this);
 
@@ -294,7 +297,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Removes model listeners.
    */
   private _removeListeners(): void {
-    this.props.model.repositoryChanged.disconnect(this._syncState, this);
     this.props.model.headChanged.disconnect(this._syncState, this);
     this.props.model.statusChanged.disconnect(this._syncState, this);
   }

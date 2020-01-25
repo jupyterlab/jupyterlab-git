@@ -98,7 +98,7 @@ export class BranchMenu extends React.Component<
   /**
    * Callback invoked when a component will no longer be mounted.
    */
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     this._removeListeners();
   }
 
