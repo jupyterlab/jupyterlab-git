@@ -97,6 +97,7 @@ export const newBranchButtonClass = style({
 export const listWrapperClass = style({
   display: 'block',
   width: '100%',
+  minHeight: '150px',
   maxHeight: '400px',
 
   overflow: 'hidden',

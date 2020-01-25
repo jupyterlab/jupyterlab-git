@@ -2,7 +2,12 @@ import { style } from 'typestyle';
 
 export const fileListWrapperClass = style({
   height: 'auto',
-  paddingBottom: '40px'
+  minHeight: '150px',
+  maxHeight: '400px',
+  paddingBottom: '40px',
+
+  overflow: 'hidden',
+  overflowY: 'scroll'
 });
 
 export const moveFileUpButtonStyle = style({
