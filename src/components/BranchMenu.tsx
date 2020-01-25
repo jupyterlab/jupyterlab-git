@@ -186,9 +186,6 @@ export class BranchMenu extends React.Component<
    * Adds model listeners.
    */
   private _addListeners(): void {
-    // When the repository changes, we're likely to have a new set of branches:
-    this.props.model.repositoryChanged.connect(this._syncState, this);
-
     // When the HEAD changes, decent probability that we've switched branches:
     this.props.model.headChanged.connect(this._syncState, this);
 
@@ -200,7 +197,6 @@ export class BranchMenu extends React.Component<
    * Removes model listeners.
    */
   private _removeListeners(): void {
-    this.props.model.repositoryChanged.disconnect(this._syncState, this);
     this.props.model.headChanged.disconnect(this._syncState, this);
     this.props.model.statusChanged.disconnect(this._syncState, this);
   }
