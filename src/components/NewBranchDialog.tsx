@@ -290,7 +290,7 @@ export class NewBranchDialog extends React.Component<
     // When the HEAD changes, decent probability that we've switched branches:
     this.props.model.headChanged.connect(this._syncState, this);
 
-    // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension):
+    // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension) or changed repositories:
     this.props.model.statusChanged.connect(this._syncState, this);
   }
 
