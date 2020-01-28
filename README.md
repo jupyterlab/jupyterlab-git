@@ -151,3 +151,7 @@ To execute the tests
 pytest jupyterlab_git
 jlpm run test
 ```
+
+## History
+
+The JupyterLab Git extension was created by [Ji Zhang](https://github.com/zzhangjii), [Hana Zarea](https://github.com/hzarea), [Noah Stapp](https://github.com/NoahStapp), and [Ashutosh Bondre](https://github.com/ashutoshbondre) as a part of the [Jupyter Cal Poly](https://github.com/jupytercalpoly) summer internship program. [Jaipreet Singh](https://github.com/jaipreet-s) and [Neelam Gehlot](https://github.com/neelamgehlot) then pushed forward on adding a number of features as part of AWS's investment in the extension. Both [Konstantin Taletskiy](https://github.com/ktaletsk) at LabShare and [Frédéric Collonval](https://github.com/fcollonval) have been contributing since then, as well as [Max Klein](https://github.com/telamonian) and [Athan](https://github.com/kgryte) at Quansight, paid for by xxx.
