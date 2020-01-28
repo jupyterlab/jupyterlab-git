@@ -36,7 +36,7 @@ async def execute(
         (int, str, str): (return code, stdout, stderr)
     """
 
-    def call_subprocess_with_authentication(
+    async def call_subprocess_with_authentication(
         cmdline: "List[str]",
         username: "str",
         password: "str",
@@ -45,7 +45,7 @@ async def execute(
     ) -> "Tuple[int, str, str]":
         try:
             p = pexpect.spawn(
-                cmdline[0], cmdline[1:], cwd=cwd, env=env, encoding="utf-8"
+                cmdline[0], cmdline[1:], cwd=cwd, env=env, encoding="utf-8", timeout=None
             )
 
             # We expect a prompt from git
@@ -53,15 +53,15 @@ async def execute(
             #  then for password
             # In some cases (Bitbucket) username is included in
             #  remote URL, so git will not ask for username
-            i = p.expect(["Username for .*: ", "Password for .*:"])
+            i = await p.expect(["Username for .*: ", "Password for .*:"], async_=True)
             if i == 0:  # ask for username then password
                 p.sendline(username)
-                p.expect("Password for .*:")
+                await p.expect("Password for .*:", async_=True)
                 p.sendline(password)
             elif i == 1:  # only ask for password
                 p.sendline(password)
 
-            p.expect(pexpect.EOF)
+            await p.expect(pexpect.EOF, async_=True)
             response = p.before
 
             returncode = p.wait()
@@ -85,11 +85,8 @@ async def execute(
         output, error = process.communicate()
         return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
 
-    current_loop = tornado.ioloop.IOLoop.current()
     if username is not None and password is not None:
-        code, output, error = await current_loop.run_in_executor(
-            None,
-            call_subprocess_with_authentication,
+        code, output, error = await call_subprocess_with_authentication(
             cmdline,
             username,
             password,
@@ -97,6 +94,7 @@ async def execute(
             env,
         )
     else:
+        current_loop = tornado.ioloop.IOLoop.current()
         code, output, error = await current_loop.run_in_executor(
             None, call_subprocess, cmdline, cwd, env
         )
