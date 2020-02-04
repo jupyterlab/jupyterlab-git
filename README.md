@@ -152,6 +152,8 @@ pytest jupyterlab_git
 jlpm run test
 ```
 
+Whenever you release a new version of this extension please update the history section below as needed.
+
 ## History
 
 *Up to date as of February 2020*
