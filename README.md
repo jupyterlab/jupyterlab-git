@@ -154,6 +154,8 @@ jlpm run test
 
 ## History
 
+*Up to date as of February 2020*
+
 The JupyterLab Git extension was created by [Ji Zhang](https://github.com/zzhangjii), [Hana Zarea](https://github.com/hzarea), [Noah Stapp](https://github.com/NoahStapp), and [Ashutosh Bondre](https://github.com/ashutoshbondre) as a part of the [Jupyter Cal Poly](https://github.com/jupytercalpoly) summer internship program. [Jaipreet Singh](https://github.com/jaipreet-s) and [Neelam Gehlot](https://github.com/neelamgehlot) then pushed forward on adding a number of features as part of AWS's investment in the extension, with help from [Saul Shanabrook](https://github.com/saulshanabrook) at Quansight (funded by AWS as well). Both [Konstantin Taletskiy](https://github.com/ktaletsk) at LabShare and [Frédéric Collonval](https://github.com/fcollonval) have been contributing since then, as well as [Max Klein](https://github.com/telamonian) and [Athan](https://github.com/kgryte) at Quansight, paid for by xxx.
 
 Many others have contributed as well, in [code contributions](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors), funding, design, and guidance. Of course this project also exists only because of the monumental efforts at all levels of open source, in particular to the JupyterLab and Jupyter ecosystems, which this directly builds on.
