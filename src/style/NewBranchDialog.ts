@@ -1,10 +1,11 @@
 import { style } from 'typestyle';
 
 export const branchDialogClass = style({
-  width: '400px',
+  backgroundColor: 'var(--jp-layout-color1)!important',
+  borderRadius: '3px!important',
+  color: 'var(--jp-ui-font-color1)!important',
   height: '460px',
-
-  borderRadius: '3px!important'
+  width: '400px'
 });
 
 export const closeButtonClass = style({
@@ -54,21 +55,17 @@ export const contentWrapperClass = style({
 });
 
 export const nameInputClass = style({
-  boxSizing: 'border-box',
-
-  width: '100%',
-  height: '2em',
-
-  marginBottom: '16px',
-
-  /* top | right | bottom | left */
-  padding: '1px 18px 2px 7px',
-
-  fontSize: 'var(--jp-ui-font-size1)',
-  fontWeight: 300,
-
+  backgroundColor: 'var(--jp-layout-color0)',
   border: 'var(--jp-border-width) solid #e0e0e0',
   borderRadius: '3px',
+  boxSizing: 'border-box',
+  color: 'var(--jp-ui-font-color1)',
+  fontSize: 'var(--jp-ui-font-size1)',
+  fontWeight: 300,
+  height: '2em',
+  marginBottom: '16px',
+  padding: '1px 18px 2px 7px' /* top | right | bottom | left */,
+  width: '100%',
 
   $nest: {
     '&:active': {
@@ -98,19 +95,16 @@ export const filterClass = style({
 });
 
 export const filterInputClass = style({
-  boxSizing: 'border-box',
-
-  width: '100%',
-  height: '2em',
-
-  /* top | right | bottom | left */
-  padding: '1px 18px 2px 7px',
-
-  fontSize: 'var(--jp-ui-font-size1)',
-  fontWeight: 300,
-
+  backgroundColor: 'var(--jp-layout-color0)',
   border: 'var(--jp-border-width) solid #e0e0e0',
   borderRadius: '3px',
+  boxSizing: 'border-box',
+  color: 'var(--jp-ui-font-color1)',
+  fontSize: 'var(--jp-ui-font-size1)',
+  fontWeight: 300,
+  height: '2em',
+  padding: '1px 18px 2px 7px' /* top | right | bottom | left */,
+  width: '100%',
 
   $nest: {
     '&:active': {
