@@ -256,7 +256,6 @@ export class GitPanel extends React.Component<
           indicator: tabIndicatorClass
         }}
         value={this.state.tab}
-        aria-label="Panel tabs"
         onChange={this._onTabChange}
       >
         <Tab

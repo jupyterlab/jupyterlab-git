@@ -143,7 +143,6 @@ export class NewBranchDialog extends React.Component<
         }}
         open={this.props.open}
         onClose={this._onClose}
-        aria-labelledby="new-branch-dialog"
       >
         <div className={titleWrapperClass}>
           <p className={titleClass}>Create a Branch</p>
