@@ -205,6 +205,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
+          disabled
           className={toolbarMenuButtonClass}
           title={`Current repository: ${this.state.repository}`}
           onClick={this._onRepositoryClick}
@@ -222,13 +223,13 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
               {PathExt.basename(this.state.repository)}
             </p>
           </div>
-          <span
+          {/*<span
             className={classes(
               toolbarMenuButtonIconClass,
               this.state.repoMenu ? closeMenuIconClass : openMenuIconClass,
               'jp-Icon-16'
             )}
-          />
+          />*/}
         </button>
         {this.state.repoMenu ? null : null}
       </div>
