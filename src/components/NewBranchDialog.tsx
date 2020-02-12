@@ -133,9 +133,9 @@ export class NewBranchDialog extends React.Component<
   /**
    * Renders the component.
    *
-   * @returns fragment
+   * @returns React element
    */
-  render() {
+  render(): React.ReactElement {
     return (
       <Dialog
         classes={{
@@ -214,9 +214,9 @@ export class NewBranchDialog extends React.Component<
   /**
    * Renders branch menu items.
    *
-   * @returns fragment array
+   * @returns array of React elements
    */
-  private _renderItems() {
+  private _renderItems(): React.ReactElement[] {
     const current = this.props.model.currentBranch.name;
     return this.state.branches
       .slice()
@@ -244,9 +244,12 @@ export class NewBranchDialog extends React.Component<
    *
    * @param branch - branch
    * @param idx - item index
-   * @returns fragment
+   * @returns React element
    */
-  private _renderItem(branch: Git.IBranch, idx: number) {
+  private _renderItem(
+    branch: Git.IBranch,
+    idx: number
+  ): React.ReactElement | null {
     // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     if (this.state.filter && !branch.name.includes(this.state.filter)) {
       return null;
@@ -364,7 +367,7 @@ export class NewBranchDialog extends React.Component<
      * @private
      * @param event - event object
      */
-    function onClick() {
+    function onClick(): void {
       self.setState({
         base: branch
       });
@@ -424,7 +427,7 @@ export class NewBranchDialog extends React.Component<
      * @private
      * @param result - result
      */
-    function onResolve(result: any) {
+    function onResolve(result: any): void {
       if (result.code !== 0) {
         showErrorMessage('Error creating branch', result.message);
       }
@@ -436,7 +439,7 @@ export class NewBranchDialog extends React.Component<
      * @private
      * @param err - error
      */
-    function onError(err: any) {
+    function onError(err: any): void {
       showErrorMessage('Error creating branch', err.message);
     }
   }
