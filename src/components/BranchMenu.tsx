@@ -105,9 +105,9 @@ export class BranchMenu extends React.Component<
   /**
    * Renders the component.
    *
-   * @returns fragment
+   * @returns React element
    */
-  render() {
+  render(): React.ReactElement {
     return (
       <div className={wrapperClass}>
         <div className={filterWrapperClass}>
@@ -155,7 +155,7 @@ export class BranchMenu extends React.Component<
    *
    * @returns fragment array
    */
-  private _renderItems() {
+  private _renderItems(): React.ReactElement[] {
     return this.state.branches.map(this._renderItem, this);
   }
 
@@ -166,7 +166,10 @@ export class BranchMenu extends React.Component<
    * @param idx - item index
    * @returns fragment
    */
-  private _renderItem(branch: Git.IBranch, idx: number) {
+  private _renderItem(
+    branch: Git.IBranch,
+    idx: number
+  ): React.ReactElement | null {
     // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     if (this.state.filter && !branch.name.includes(this.state.filter)) {
       return null;
@@ -278,7 +281,7 @@ export class BranchMenu extends React.Component<
      * @private
      * @param event - event object
      */
-    function onClick() {
+    function onClick(): void {
       if (!self.props.branching) {
         showErrorMessage('Switching branches is disabled', CHANGES_ERR_MSG);
         return;
@@ -298,7 +301,7 @@ export class BranchMenu extends React.Component<
      * @private
      * @param result - result
      */
-    function onResolve(result: any) {
+    function onResolve(result: any): void {
       if (result.code !== 0) {
         showErrorMessage('Error switching branch', result.message);
       }
@@ -310,7 +313,7 @@ export class BranchMenu extends React.Component<
      * @private
      * @param err - error
      */
-    function onError(err: any) {
+    function onError(err: any): void {
       showErrorMessage('Error switching branch', err.message);
     }
   }
