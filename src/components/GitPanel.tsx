@@ -192,7 +192,12 @@ export class GitPanel extends React.Component<
     }
   };
 
-  render() {
+  /**
+   * Renders the component.
+   *
+   * @returns React element
+   */
+  render(): React.ReactElement {
     return (
       <div className={panelWrapperClass}>
         {this._renderToolbar()}
@@ -204,9 +209,9 @@ export class GitPanel extends React.Component<
   /**
    * Renders a toolbar.
    *
-   * @returns fragment
+   * @returns React element
    */
-  private _renderToolbar() {
+  private _renderToolbar(): React.ReactElement {
     const disableBranching = Boolean(
       this.props.settings.composite['disableBranchWithChanges'] &&
         ((this.state.unstagedFiles && this.state.unstagedFiles.length) ||
@@ -224,9 +229,9 @@ export class GitPanel extends React.Component<
   /**
    * Renders the main panel.
    *
-   * @returns fragment
+   * @returns React element
    */
-  private _renderMain() {
+  private _renderMain(): React.ReactElement {
     if (this.state.inGitRepository) {
       return (
         <React.Fragment>
@@ -241,9 +246,9 @@ export class GitPanel extends React.Component<
   /**
    * Renders panel tabs.
    *
-   * @returns fragment
+   * @returns React element
    */
-  private _renderTabs() {
+  private _renderTabs(): React.ReactElement {
     return (
       <Tabs
         classes={{
@@ -281,9 +286,9 @@ export class GitPanel extends React.Component<
   /**
    * Renders a panel for viewing and committing file changes.
    *
-   * @returns fragment
+   * @returns React element
    */
-  private _renderChanges() {
+  private _renderChanges(): React.ReactElement {
     return (
       <React.Fragment>
         <FileList
@@ -312,9 +317,9 @@ export class GitPanel extends React.Component<
   /**
    * Renders a panel for viewing commit history.
    *
-   * @returns fragment
+   * @returns React element
    */
-  private _renderHistory() {
+  private _renderHistory(): React.ReactElement {
     return (
       <HistorySideBar
         isExpanded={this.state.tab === 1}
@@ -329,9 +334,9 @@ export class GitPanel extends React.Component<
   /**
    * Renders a panel for prompting a user to find a Git repository.
    *
-   * @returns fragment
+   * @returns React element
    */
-  private _renderWarning() {
+  private _renderWarning(): React.ReactElement {
     return (
       <div className={warningWrapperClass}>
         <div>Unable to detect a Git repository.</div>
