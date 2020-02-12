@@ -153,9 +153,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   /**
    * Renders the component.
    *
-   * @returns fragment
+   * @returns React element
    */
-  render() {
+  render(): React.ReactElement {
     return (
       <div className={toolbarClass}>
         {this._renderTopNav()}
@@ -168,9 +168,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   /**
    * Renders the top navigation.
    *
-   * @returns fragment
+   * @returns React element
    */
-  private _renderTopNav() {
+  private _renderTopNav(): React.ReactElement {
     return (
       <div className={toolbarNavClass}>
         <button
@@ -199,9 +199,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   /**
    * Renders a repository menu.
    *
-   * @returns fragment
+   * @returns React element
    */
-  private _renderRepoMenu() {
+  private _renderRepoMenu(): React.ReactElement {
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
@@ -238,9 +238,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   /**
    * Renders a branch menu.
    *
-   * @returns fragment
+   * @returns React element
    */
-  private _renderBranchMenu() {
+  private _renderBranchMenu(): React.ReactElement | null {
     if (!this.state.repository) {
       return null;
     }
