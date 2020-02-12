@@ -1,11 +1,14 @@
 import { style } from 'typestyle';
 
 export const branchDialogClass = style({
-  backgroundColor: 'var(--jp-layout-color1)!important',
-  borderRadius: '3px!important',
-  color: 'var(--jp-ui-font-color1)!important',
   height: '460px',
-  width: '400px'
+  width: '400px',
+
+  color: 'var(--jp-ui-font-color1)!important',
+
+  borderRadius: '3px!important',
+
+  backgroundColor: 'var(--jp-layout-color1)!important'
 });
 
 export const closeButtonClass = style({
@@ -21,12 +24,17 @@ export const closeButtonClass = style({
   border: 'none',
   borderRadius: '50%',
 
+  backgroundColor: 'var(--jp-layout-color1)',
+
   $nest: {
+    svg: {
+      fill: 'var(--jp-ui-font-color1)'
+    },
     '&:hover': {
-      backgroundColor: '#e0e0e0'
+      backgroundColor: 'var(--jp-border-color2)'
     },
     '&:active': {
-      backgroundColor: '#e0e0e0'
+      backgroundColor: 'var(--jp-border-color2)'
     }
   }
 });
@@ -37,7 +45,7 @@ export const titleWrapperClass = style({
 
   padding: '15px',
 
-  borderBottom: 'var(--jp-border-width) solid #e0e0e0'
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
 export const titleClass = style({
@@ -55,17 +63,24 @@ export const contentWrapperClass = style({
 });
 
 export const nameInputClass = style({
-  backgroundColor: 'var(--jp-layout-color0)',
-  border: 'var(--jp-border-width) solid #e0e0e0',
-  borderRadius: '3px',
   boxSizing: 'border-box',
-  color: 'var(--jp-ui-font-color1)',
+
+  width: '100%',
+  height: '2em',
+
+  marginBottom: '16px',
+
+  /* top | right | bottom | left */
+  padding: '1px 18px 2px 7px',
+
+  color: 'var(--jp-ui-font-color0)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
-  height: '2em',
-  marginBottom: '16px',
-  padding: '1px 18px 2px 7px' /* top | right | bottom | left */,
-  width: '100%',
+
+  backgroundColor: 'var(--jp-layout-color1)',
+
+  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  borderRadius: '3px',
 
   $nest: {
     '&:active': {
@@ -95,16 +110,22 @@ export const filterClass = style({
 });
 
 export const filterInputClass = style({
-  backgroundColor: 'var(--jp-layout-color0)',
-  border: 'var(--jp-border-width) solid #e0e0e0',
-  borderRadius: '3px',
   boxSizing: 'border-box',
-  color: 'var(--jp-ui-font-color1)',
+
+  width: '100%',
+  height: '2em',
+
+  /* top | right | bottom | left */
+  padding: '1px 18px 2px 7px',
+
+  color: 'var(--jp-ui-font-color0)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
-  height: '2em',
-  padding: '1px 18px 2px 7px' /* top | right | bottom | left */,
-  width: '100%',
+
+  backgroundColor: 'var(--jp-layout-color1)',
+
+  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  borderRadius: '3px',
 
   $nest: {
     '&:active': {
@@ -126,7 +147,7 @@ export const filterClearClass = style({
 
   padding: 0,
 
-  backgroundColor: '#757575',
+  backgroundColor: 'var(--jp-inverse-layout-color4)',
 
   border: 'none',
   borderRadius: '50%',
@@ -136,13 +157,13 @@ export const filterClearClass = style({
       width: '0.5em!important',
       height: '0.5em!important',
 
-      fill: 'white'
+      fill: 'var(--jp-ui-inverse-font-color0)'
     },
     '&:hover': {
-      backgroundColor: '#616161'
+      backgroundColor: 'var(--jp-inverse-layout-color3)'
     },
     '&:active': {
-      backgroundColor: '#424242'
+      backgroundColor: 'var(--jp-inverse-layout-color2)'
     }
   }
 });
@@ -154,7 +175,7 @@ export const listWrapperClass = style({
   width: '100%',
   height: '200px',
 
-  border: 'var(--jp-border-width) solid #e0e0e0',
+  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   borderRadius: '3px',
 
   overflow: 'hidden',
@@ -200,7 +221,7 @@ export const listItemIconClass = style({
   /* top | right | bottom | left */
   margin: 'auto 8px auto 0',
 
-  backgroundImage: 'var(--jp-icon-git-branch-light-theme)',
+  backgroundImage: 'var(--jp-icon-git-branch)',
   backgroundSize: '16px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
@@ -215,7 +236,7 @@ export const listItemBoldTitleClass = style({
 export const actionsWrapperClass = style({
   padding: '15px!important',
 
-  borderTop: 'var(--jp-border-width) solid #e0e0e0'
+  borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
 export const buttonClass = style({

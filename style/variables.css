@@ -11,7 +11,6 @@
   --jp-git-diff-output-color: rgba(0, 141, 255, 0.3);
   --jp-icon-clear-white: url('./images/clear-white.svg');
   --jp-icon-discard-file-selected: url('./images/discard-selected.svg');
-  --jp-icon-git-branch-light-theme: url('./images/git-branch.svg');
   --jp-icon-git-clone: url('./images/git-clone-icon.svg');
   --jp-icon-move-file-down-hover: url('./images/move-file-down-hover.svg');
   --jp-icon-move-file-up-hover: url('./images/move-file-up-hover.svg');
