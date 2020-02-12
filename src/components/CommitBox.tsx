@@ -66,9 +66,9 @@ export class CommitBox extends React.Component<
   /**
    * Renders the component.
    *
-   * @returns fragment
+   * @returns React element
    */
-  render() {
+  render(): React.ReactElement {
     const disabled = !(this.props.hasFiles && this.state.summary);
     return (
       <form className={commitFormClass}>
