@@ -153,7 +153,7 @@ export class BranchMenu extends React.Component<
   /**
    * Renders menu items.
    *
-   * @returns fragment array
+   * @returns array of React elements
    */
   private _renderItems(): React.ReactElement[] {
     return this.state.branches.map(this._renderItem, this);
@@ -164,7 +164,7 @@ export class BranchMenu extends React.Component<
    *
    * @param branch - branch
    * @param idx - item index
-   * @returns fragment
+   * @returns React element
    */
   private _renderItem(
     branch: Git.IBranch,
