@@ -30,7 +30,16 @@ export const commitSummaryClass = style({
 
   backgroundColor: 'var(--jp-layout-color1)',
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  borderRadius: '3px'
+  borderRadius: '3px',
+
+  $nest: {
+    '&:active': {
+      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+    },
+    '&:focus': {
+      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+    }
+  }
 });
 
 export const commitDescriptionClass = style({
@@ -53,7 +62,12 @@ export const commitDescriptionClass = style({
 
   $nest: {
     '&:focus': {
-      outline: 'none'
+      outline: 'none',
+      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+    },
+    '&:active': {
+      outline: 'none',
+      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
     },
     '&::placeholder': {
       color: 'var(--jp-ui-font-color3)'

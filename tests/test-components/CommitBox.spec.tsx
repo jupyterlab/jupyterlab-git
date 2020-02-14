@@ -42,6 +42,16 @@ describe('CommitBox', () => {
       expect(node.prop('placeholder')).toEqual('Summary (required)');
     });
 
+    it('should set a `title` attribute on the input element to provide a commit message summary', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="text"]').first();
+      expect(node.prop('title').length > 0).toEqual(true);
+    });
+
     it('should display placeholder text for the commit message description', () => {
       const props = {
         onCommit: async () => {},
@@ -52,6 +62,16 @@ describe('CommitBox', () => {
       expect(node.prop('placeholder')).toEqual('Description');
     });
 
+    it('should set a `title` attribute on the input element to provide a commit message description', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('TextareaAutosize').first();
+      expect(node.prop('title').length > 0).toEqual(true);
+    });
+
     it('should display a button to commit changes', () => {
       const props = {
         onCommit: async () => {},
@@ -60,6 +80,16 @@ describe('CommitBox', () => {
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
       expect(node.prop('value')).toEqual('Commit');
+    });
+
+    it('should set a `title` attribute on the button to commit changes', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="button"]').first();
+      expect(node.prop('title').length > 0).toEqual(true);
     });
 
     it('should apply a class to disable the commit button when no files have changes to commit', () => {

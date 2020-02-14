@@ -320,6 +320,10 @@ export namespace Git {
      */
     newBranch?: boolean;
     /**
+     * The commit (branch name, tag, or commit id) to which a new branch HEAD will point.
+     */
+    startpoint?: string;
+    /**
      * Filename
      */
     filename?: string;

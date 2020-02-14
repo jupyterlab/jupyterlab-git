@@ -66,9 +66,9 @@ export class CommitBox extends React.Component<
   /**
    * Renders the component.
    *
-   * @returns fragment
+   * @returns React element
    */
-  render() {
+  render(): React.ReactElement {
     const disabled = !(this.props.hasFiles && this.state.summary);
     return (
       <form className={commitFormClass}>
@@ -109,7 +109,7 @@ export class CommitBox extends React.Component<
    *
    * @param event - event object
    */
-  private _onCommitClick = () => {
+  private _onCommitClick = (): void => {
     const msg = this.state.summary + '\n' + this.state.description + '\n';
     this.props.onCommit(msg);
 
@@ -157,10 +157,10 @@ export class CommitBox extends React.Component<
   /**
    * Resets component state (e.g., in order to re-initialize the commit message input box).
    */
-  private _reset = (): void => {
+  private _reset(): void {
     this.setState({
       summary: '',
       description: ''
     });
-  };
+  }
 }
