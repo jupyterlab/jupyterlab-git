@@ -50,8 +50,10 @@ export const toolbarMenuButtonClass = style({
   border: 'none',
   borderRadius: 0,
 
-  background: 'var(--jp-layout-color1)',
+  background: 'var(--jp-layout-color1)'
+});
 
+export const toolbarMenuButtonEnabledClass = style({
   $nest: {
     '&:hover': {
       backgroundColor: 'var(--jp-layout-color2)'

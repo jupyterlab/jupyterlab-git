@@ -2,6 +2,7 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+
 import {
   // NOTE: keep in alphabetical order
   branchIconClass,
@@ -14,6 +15,7 @@ import {
   toolbarButtonClass,
   toolbarClass,
   toolbarMenuButtonClass,
+  toolbarMenuButtonEnabledClass,
   toolbarMenuButtonIconClass,
   toolbarMenuButtonSubtitleClass,
   toolbarMenuButtonTitleClass,
@@ -248,7 +250,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
-          className={toolbarMenuButtonClass}
+          className={classes(
+            toolbarMenuButtonClass,
+            toolbarMenuButtonEnabledClass
+          )}
           title={`Change the current branch: ${this.state.branch}`}
           onClick={this._onBranchClick}
         >
