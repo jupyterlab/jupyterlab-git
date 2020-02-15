@@ -651,11 +651,11 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
-    async def checkout_new_branch(self, branchname, current_path):
+    async def checkout_new_branch(self, branchname, startpoint, current_path):
         """
         Execute git checkout <make-branch> command & return the result.
         """
-        cmd = ["git", "checkout", "-b", branchname]
+        cmd = ["git", "checkout", "-b", branchname, startpoint]
         code, my_output, my_error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path),
         )

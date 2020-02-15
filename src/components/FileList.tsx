@@ -5,6 +5,7 @@ import { Menu } from '@phosphor/widgets';
 import * as React from 'react';
 import { GitExtension } from '../model';
 import {
+  fileListWrapperClass,
   moveFileDownButtonSelectedStyle,
   moveFileDownButtonStyle,
   moveFileUpButtonSelectedStyle,
@@ -482,7 +483,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
     if (this.props.settings.composite['simpleStaging']) {
       return (
-        <div>
+        <div className={fileListWrapperClass}>
           <div>
             <GitStageSimple
               heading={'Changed'}
@@ -495,16 +496,18 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           </div>
         </div>
       );
-    } else {
-      return (
-        <div onContextMenu={event => event.preventDefault()}>
-          <div>
-            <Staged />
-            <Changed />
-            <Untracked />
-          </div>
-        </div>
-      );
     }
+    return (
+      <div
+        className={fileListWrapperClass}
+        onContextMenu={event => event.preventDefault()}
+      >
+        <div>
+          <Staged />
+          <Changed />
+          <Untracked />
+        </div>
+      </div>
+    );
   }
 }

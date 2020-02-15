@@ -321,7 +321,7 @@ class GitCheckoutHandler(GitHandler):
         if data["checkout_branch"]:
             if data["new_check"]:
                 body = await self.git.checkout_new_branch(
-                    data["branchname"], top_repo_path
+                    data["branchname"], data["startpoint"], top_repo_path
                 )
             else:
                 body = await self.git.checkout_branch(data["branchname"], top_repo_path)
