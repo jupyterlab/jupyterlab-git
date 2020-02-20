@@ -120,6 +120,11 @@ jlpm run build
 jupyter lab build
 ```
 
+Or start in watch mode. Then after ever change, refresh the page and click "build".
+```bash
+jlpm run watch
+```
+
 To execute the tests
 
 ```bash
