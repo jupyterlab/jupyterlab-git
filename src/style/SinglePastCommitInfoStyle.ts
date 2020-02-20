@@ -132,10 +132,6 @@ export const button = style({
   color: 'var(--jp-layout-color0)'
 });
 
-export const resetDeleteDisabledButton = style({
-  backgroundColor: 'var(--jp-error-color2)'
-});
-
 export const resetDeleteButton = style({
   backgroundColor: 'var(--jp-error-color1)'
 });

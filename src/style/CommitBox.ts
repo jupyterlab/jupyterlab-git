@@ -42,48 +42,6 @@ export const commitSummaryClass = style({
   }
 });
 
-export const commitDescriptionClass = style({
-  width: '100%',
-
-  marginBottom: '1em',
-  padding: 'var(--jp-code-padding)',
-
-  outline: 'none',
-  overflowX: 'auto',
-  resize: 'none',
-
-  color: 'var(--jp-ui-font-color0)',
-  fontSize: 'var(--jp-ui-font-size1)',
-  fontWeight: 300,
-
-  backgroundColor: 'var(--jp-layout-color1)',
-  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  borderRadius: '3px',
-
-  $nest: {
-    '&:focus': {
-      outline: 'none',
-      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
-    },
-    '&:active': {
-      outline: 'none',
-      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
-    },
-    '&::placeholder': {
-      color: 'var(--jp-ui-font-color3)'
-    },
-    '&::-webkit-input-placeholder': {
-      color: 'var(--jp-ui-font-color3)'
-    },
-    '&::-moz-placeholder': {
-      color: 'var(--jp-ui-font-color3)'
-    },
-    '&::-ms-input-placeholder': {
-      color: 'var(--jp-ui-font-color3)'
-    }
-  }
-});
-
 export const commitButtonClass = style({
   width: '100%',
   height: '2em',

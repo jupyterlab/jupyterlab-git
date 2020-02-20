@@ -169,7 +169,7 @@ export class SinglePastCommitInfo extends React.Component<
                 discardFileButtonStyle
               )}
               onClick={this.showDeleteCommit}
-              title="Discard changes introduced by this commit"
+              title="Revert changes introduced by this commit"
             />
             <button
               className={classes(
@@ -178,14 +178,14 @@ export class SinglePastCommitInfo extends React.Component<
                 revertButtonStyle
               )}
               onClick={this.showResetToCommit}
-              title="Discard changes introduced *after* this commit"
+              title="Discard changes introduced *after* this commit (hard reset)"
             />
           </div>
           <div>
             {this.state.displayDelete && (
               <ResetDeleteSingleCommit
                 action="delete"
-                commitId={this.props.data.commit}
+                commit={this.props.data}
                 model={this.props.model}
                 onCancel={this.hideDeleteCommit}
               />
@@ -193,7 +193,7 @@ export class SinglePastCommitInfo extends React.Component<
             {this.state.displayReset && (
               <ResetDeleteSingleCommit
                 action="reset"
-                commitId={this.props.data.commit}
+                commit={this.props.data}
                 model={this.props.model}
                 onCancel={this.hideResetToCommit}
               />

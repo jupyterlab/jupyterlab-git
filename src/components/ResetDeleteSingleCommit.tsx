@@ -5,21 +5,21 @@ import {
   cancelButton,
   messageInput,
   resetDeleteButton,
-  resetDeleteDisabledButton,
   warningLabel
 } from '../style/SinglePastCommitInfoStyle';
-import { IGitExtension } from '../tokens';
+import TextareaAutosize from 'react-textarea-autosize';
+import { Git, IGitExtension } from '../tokens';
+import { showErrorMessage } from '@jupyterlab/apputils';
 
 export interface IResetDeleteProps {
   action: 'reset' | 'delete';
-  commitId: string;
+  commit: Git.ISingleCommitInfo;
   model: IGitExtension;
   onCancel: () => void;
 }
 
 export interface IResetDeleteState {
   message: string;
-  resetDeleteDisabled: boolean;
 }
 
 export class ResetDeleteSingleCommit extends React.Component<
@@ -29,34 +29,46 @@ export class ResetDeleteSingleCommit extends React.Component<
   constructor(props: IResetDeleteProps) {
     super(props);
     this.state = {
-      message: '',
-      resetDeleteDisabled: true
+      message: ''
     };
   }
 
   onCancel = () => {
     this.setState({
-      message: '',
-      resetDeleteDisabled: true
+      message: ''
     });
     this.props.onCancel();
   };
 
   updateMessage = (value: string) => {
     this.setState({
-      message: value,
-      resetDeleteDisabled: value === ''
+      message: value
     });
   };
 
   handleResetDelete = async () => {
-    if (this.props.action === 'reset') {
-      await this.props.model.resetToCommit(this.props.commitId);
-    } else {
-      await this.props.model.deleteCommit(
-        this.state.message,
-        this.props.commitId
-      );
+    try {
+      if (this.props.action === 'reset') {
+        await this.props.model.resetToCommit(this.props.commit.commit);
+      } else {
+        await this.props.model.deleteCommit(
+          this.state.message || this._defaultRevertMessage(),
+          this.props.commit.commit
+        );
+      }
+    } catch (err) {
+      const shortCommit = this.props.commit.commit.slice(0, 7);
+      if (this.props.action === 'reset') {
+        showErrorMessage(
+          'Error Removing Changes',
+          `Failed to discard changes after ${shortCommit}: ${err}`
+        );
+      } else {
+        showErrorMessage(
+          'Error Reverting Changes',
+          `Failed to revert ${shortCommit}: ${err}`
+        );
+      }
     }
     this.props.onCancel();
   };
@@ -66,15 +78,18 @@ export class ResetDeleteSingleCommit extends React.Component<
       <div>
         <div className={warningLabel}>
           {this.props.action === 'delete'
-            ? "These changes will be gone forever. Commit if you're sure?"
-            : "All changes after this will be gone forever. Commit if you're sure?"}
+            ? "These changes will be reverted. Commit if you're sure?"
+            : 'All changes after this will be gone forever (hard reset). Are you sure?'}
         </div>
-        <input
-          type="text"
-          className={messageInput}
-          onChange={event => this.updateMessage(event.currentTarget.value)}
-          placeholder="Add a commit message to make changes"
-        />
+        {this.props.action === 'delete' ? (
+          <TextareaAutosize
+            className={classes('jp-git-diff-commit-description', messageInput)}
+            minRows={3}
+            title={'Enter commit message'}
+            onChange={event => this.updateMessage(event.currentTarget.value)}
+            placeholder={this._defaultRevertMessage()}
+          />
+        ) : null}
         <button
           className={classes(button, cancelButton)}
           onClick={this.onCancel}
@@ -82,19 +97,21 @@ export class ResetDeleteSingleCommit extends React.Component<
           Cancel
         </button>
         <button
-          className={
-            this.state.resetDeleteDisabled
-              ? classes(button, resetDeleteDisabledButton)
-              : classes(button, resetDeleteButton)
-          }
-          disabled={this.state.resetDeleteDisabled}
+          className={classes(button, resetDeleteButton)}
           onClick={this.handleResetDelete}
         >
           {this.props.action === 'delete'
-            ? 'Delete these changes'
-            : 'Revert to this commit'}
+            ? 'Revert this commit'
+            : 'Remove changes after this commit'}
         </button>
       </div>
     );
+  }
+
+  _defaultRevertMessage() {
+    const summary = this.props.commit.commit_msg.split('\n')[0];
+    return `Revert "${summary}"\n\nThis reverts commit ${
+      this.props.commit.commit
+    }`;
   }
 }

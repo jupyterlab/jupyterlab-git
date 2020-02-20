@@ -4,7 +4,6 @@ import { classes } from 'typestyle';
 import {
   commitFormClass,
   commitSummaryClass,
-  commitDescriptionClass,
   commitButtonClass,
   commitButtonDisabledClass
 } from '../style/CommitBox';
@@ -82,7 +81,7 @@ export class CommitBox extends React.Component<
           onKeyPress={this._onSummaryKeyPress}
         />
         <TextareaAutosize
-          className={commitDescriptionClass}
+          className="jp-git-diff-commit-description"
           minRows={5}
           placeholder="Description"
           title="Enter a commit message description"
