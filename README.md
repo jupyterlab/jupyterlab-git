@@ -122,7 +122,7 @@ jupyter lab build
 
 Or start jupyter in watch mode:
 ```bash
-jupyter-lab --watch
+jupyter lab --watch
 ```
 And in a separate session, start this project in watch mode:
 ```bash
