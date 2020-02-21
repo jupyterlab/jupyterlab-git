@@ -120,10 +120,15 @@ jlpm run build
 jupyter lab build
 ```
 
-Or start in watch mode. Then after ever change, refresh the page and click "build".
+Or start jupyter in watch mode:
+```bash
+jupyter-lab --watch
+```
+And in a separate session, start this project in watch mode:
 ```bash
 jlpm run watch
 ```
+Now every change will be built locally then bundled into Jupyter Lab. Refresh the page after any save to see your change (note: you'll need to wait for webpack to finish, which can take 10s+ at times).
 
 To execute the tests
 
