@@ -142,7 +142,7 @@ And in a separate session, begin watching the source directory for changes:
 jlpm run watch
 ```
 
-Now every change will be built locally and bundled into JupyterLab. Refresh your browser page after saving file changes (note: you'll need to wait for webpack to finish, which can take 10s+ at times).
+Now every change will be built locally and bundled into JupyterLab. Be sure to refresh your browser page after saving file changes to reload the extension (note: you'll need to wait for webpack to finish, which can take 10s+ at times).
 
 To execute the tests
 
