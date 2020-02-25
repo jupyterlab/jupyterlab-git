@@ -83,13 +83,14 @@ JupyterLab Git's current maintainers are listed in alphabetical order, with affi
 
 - Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
   architecture).
-- Saul Shanabrook, Quansight(software engineering)
+- Saul Shanabrook, Quansight (software engineering)
 - Jaipreet Singh, AWS (software engineering, UI/UX design, management)
 - Frederic Collonval, Safran Group (software engineering)
 
 A lot of awesome people have contributed to this repo - See the contributors tab for more details!
 
 This list is provided to help provide context about who we are and how our team functions.
+
 If you would like to be listed, please submit a pull request with your information.
 
 ### Install
