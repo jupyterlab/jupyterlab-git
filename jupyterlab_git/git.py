@@ -699,20 +699,20 @@ class Git:
         )
         return my_output
             
-    def pull(self, curr_fb_path, auth=None):
+    def pull(self, curr_fb_path, auth=None, cancel_on_conflict=False):
         """
         Execute git pull --no-commit.  Disables prompts for the password to avoid the terminal hanging while waiting
         for auth.
         """
         env = os.environ.copy()
-        if (auth):
+        if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
             p = GitAuthInputWrapper(
-                command = 'git pull --no-commit',
-                cwd = os.path.join(self.root_dir, curr_fb_path),
-                env = env,
-                username = auth['username'],
-                password = auth['password']
+                command='git pull --no-commit',
+                cwd=os.path.join(self.root_dir, curr_fb_path),
+                env=env,
+                username=auth['username'],
+                password=auth['password']
             )
             error = p.communicate()
         else:
@@ -721,7 +721,16 @@ class Git:
                 ['git', 'pull', '--no-commit'],
                 stdout=PIPE,
                 stderr=PIPE,
-                env = env,
+                env=env,
+                cwd=os.path.join(self.root_dir, curr_fb_path),
+            )
+            _, error = p.communicate()
+
+        if p.returncode != 0 and cancel_on_conflict:
+            p = subprocess.Popen(
+                ['git', 'reset', '--merge', 'ORIG_HEAD'],
+                stdout=PIPE,
+                stderr=PIPE,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
             )
             _, error = p.communicate()
@@ -741,11 +750,11 @@ class Git:
         if (auth):
             env["GIT_TERMINAL_PROMPT"] = "1"
             p = GitAuthInputWrapper(
-                command = 'git push {} {}'.format(remote, branch),
-                cwd = os.path.join(self.root_dir, curr_fb_path),
-                env = env,
-                username = auth['username'],
-                password = auth['password']
+                command='git push {} {}'.format(remote, branch),
+                cwd=os.path.join(self.root_dir, curr_fb_path),
+                env=env,
+                username=auth['username'],
+                password=auth['password']
             )
             error = p.communicate()
         else:
@@ -754,7 +763,7 @@ class Git:
                 ['git', 'push', remote, branch],
                 stdout=PIPE,
                 stderr=PIPE,
-                env = env,
+                env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
             )
             _, error = p.communicate()
