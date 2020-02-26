@@ -708,17 +708,17 @@ class Git:
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
             p = GitAuthInputWrapper(
-                command='git pull --no-commit',
+                command="git pull --no-commit",
                 cwd=os.path.join(self.root_dir, curr_fb_path),
                 env=env,
-                username=auth['username'],
-                password=auth['password']
+                username=auth["username"],
+                password=auth["password"]
             )
             output, error = p.communicate()
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             p = subprocess.Popen(
-                ['git', 'pull', '--no-commit'],
+                ["git", "pull", "--no-commit"],
                 stdout=PIPE,
                 stderr=PIPE,
                 env=env,
@@ -730,18 +730,22 @@ class Git:
         response = {"code": code}
 
         if code != 0:
-            if cancel_on_conflict and "automatic merge failed; fix conflicts and then commit the result." in output.decode("utf-8").lower():
+            output = output.decode("utf-8").strip()
+            has_conflict = "automatic merge failed; fix conflicts and then commit the result." in output.lower()
+            if cancel_on_conflict and has_conflict:
                 p = subprocess.Popen(
-                    ['git', 'merge', '--abort'],
+                    ["git", "merge", "--abort"],
                     stdout=PIPE,
                     stderr=PIPE,
                     cwd=os.path.join(self.root_dir, curr_fb_path),
                 )
                 _, error = p.communicate()
                 if p.returncode == 0:
-                    response["message"] = 'Unable to pull latest changes as doing so would result in a merge conflict. In order to push your local changes, you may want to consider creating a new branch based on your current work and pushing the new branch. Provided your repository is hosted (e.g., on GitHub), once pushed, you can create a pull request against the original branch on the remote repository and manually resolve the conflicts during pull request review.'
+                    response["message"] = "Unable to pull latest changes as doing so would result in a merge conflict. In order to push your local changes, you may want to consider creating a new branch based on your current work and pushing the new branch. Provided your repository is hosted (e.g., on GitHub), once pushed, you can create a pull request against the original branch on the remote repository and manually resolve the conflicts during pull request review."
                 else:
                     response["message"] = error.decode("utf-8").strip()
+            elif has_conflict:
+                response["message"] = output
             else:
                 response["message"] = error.decode("utf-8").strip()
 
@@ -758,14 +762,14 @@ class Git:
                 command='git push {} {}'.format(remote, branch),
                 cwd=os.path.join(self.root_dir, curr_fb_path),
                 env=env,
-                username=auth['username'],
-                password=auth['password']
+                username=auth["username"],
+                password=auth["password"]
             )
             _, error = p.communicate()
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             p = subprocess.Popen(
-                ['git', 'push', remote, branch],
+                ["git", "push", remote, branch],
                 stdout=PIPE,
                 stderr=PIPE,
                 env=env,
