@@ -12,7 +12,7 @@ def test_git_pull_fail(mock_subproc_popen):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': ('output', 'Authentication failed'.encode('utf-8')),
+        'communicate.return_value': ('output'.encode('utf-8'), 'Authentication failed'.encode('utf-8')),
         'returncode': 1
     }
     process_mock.configure_mock(**attrs)
@@ -40,7 +40,7 @@ def test_git_pull_with_auth_fail(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': "remote: Invalid username or password.\r\nfatal: Authentication failed for 'repo_url'".encode('utf-8'),
+        'communicate.return_value': ('output'.encode('utf-8'), "remote: Invalid username or password.\r\nfatal: Authentication failed for 'repo_url'".encode('utf-8')),
         'returncode': 1
     }
     process_mock.configure_mock(**attrs)
@@ -73,7 +73,7 @@ def test_git_pull_success(mock_subproc_popen):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': ('output', ''.encode('utf-8')),
+        'communicate.return_value': ('output'.encode('utf-8'), ''.encode('utf-8')),
         'returncode': 0
     }
     process_mock.configure_mock(**attrs)
@@ -101,7 +101,7 @@ def test_git_pull_with_auth_success(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': ('output', ''.encode('utf-8')),
+        'communicate.return_value': ('output'.encode('utf-8'), ''.encode('utf-8')),
         'returncode': 0
     }
     process_mock.configure_mock(**attrs)
@@ -133,7 +133,7 @@ def test_git_push_fail(mock_subproc_popen):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': ('output', 'Authentication failed'.encode('utf-8')),
+        'communicate.return_value': ('output'.encode('utf-8'), 'Authentication failed'.encode('utf-8')),
         'returncode': 1
     }
     process_mock.configure_mock(**attrs)
@@ -161,7 +161,7 @@ def test_git_push_with_auth_fail(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': "remote: Invalid username or password.\r\nfatal: Authentication failed for 'repo_url'".encode('utf-8'),
+        'communicate.return_value': ('output'.encode('utf-8'), "remote: Invalid username or password.\r\nfatal: Authentication failed for 'repo_url'".encode('utf-8')),
         'returncode': 1
     }
     process_mock.configure_mock(**attrs)
@@ -194,7 +194,7 @@ def test_git_push_success(mock_subproc_popen):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': ('output', 'does not matter'.encode('utf-8')),
+        'communicate.return_value': ('output'.encode('utf-8'), 'does not matter'.encode('utf-8')),
         'returncode': 0
     }
     process_mock.configure_mock(**attrs)
@@ -222,7 +222,7 @@ def test_git_push_with_auth_success(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': 'does not matter'.encode('utf-8'),
+        'communicate.return_value': ('output'.encode('utf-8'), 'does not matter'.encode('utf-8')),
         'returncode': 0
     }
     process_mock.configure_mock(**attrs)

@@ -13,7 +13,7 @@ def test_git_clone_success(mock_subproc_popen):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': ('output', 'error'.encode('utf-8')),
+        'communicate.return_value': ('output'.encode('utf-8'), 'error'.encode('utf-8')),
         'returncode': 0
     }
     process_mock.configure_mock(**attrs)
@@ -47,7 +47,7 @@ def test_git_clone_failure_from_git(mock_subproc_popen):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': ('test_output', 'fatal: Not a git repository'.encode('utf-8')),
+        'communicate.return_value': ('test_output'.encode('utf-8'), 'fatal: Not a git repository'.encode('utf-8')),
         'returncode': 128
     }
     process_mock.configure_mock(**attrs)
@@ -75,7 +75,7 @@ def test_git_clone_with_auth_success(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': '',
+        'communicate.return_value': ('output'.encode('utf-8'), ''.encode('utf-8')),
         'returncode': 0
     }
     process_mock.configure_mock(**attrs)
@@ -112,7 +112,7 @@ def test_git_clone_with_auth_wrong_repo_url_failure_from_git(mock_GitAuthInputWr
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': "fatal: repository 'ghjkhjkl' does not exist".encode('utf-8'),
+        'communicate.return_value': ('output'.encode('utf-8'), "fatal: repository 'ghjkhjkl' does not exist".encode('utf-8')),
         'returncode': 128
     }
     process_mock.configure_mock(**attrs)
@@ -149,7 +149,7 @@ def test_git_clone_with_auth_auth_failure_from_git(mock_GitAuthInputWrapper):
     # Given
     process_mock = Mock()
     attrs = {
-        'communicate.return_value': "remote: Invalid username or password.\r\nfatal: Authentication failed for 'ghjkhjkl'".encode('utf-8'),
+        'communicate.return_value': ('output'.encode('utf-8'), "remote: Invalid username or password.\r\nfatal: Authentication failed for 'ghjkhjkl'".encode('utf-8')),
         'returncode': 128
     }
     process_mock.configure_mock(**attrs)
