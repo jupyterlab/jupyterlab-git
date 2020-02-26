@@ -57,12 +57,12 @@ class GitAuthInputWrapper:
             self.returncode = p.wait()
             p.close()
             
-            return response
+            return ('', response)
         except pexpect.exceptions.EOF: #In case of pexpect failure
             response = p.before
             self.returncode = p.exitstatus
             p.close() #close process
-            return response
+            return ('', response)
 
 
 class Git:
@@ -180,7 +180,7 @@ class Git:
                 username=auth['username'],
                 password=auth['password'],
             )
-            error = p.communicate()
+            _, error = p.communicate()
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             p = subprocess.Popen(
@@ -714,7 +714,7 @@ class Git:
                 username=auth['username'],
                 password=auth['password']
             )
-            error = p.communicate()
+            output, error = p.communicate()
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             p = subprocess.Popen(
@@ -724,15 +724,15 @@ class Git:
                 env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
             )
-            _, error = p.communicate()
+            output, error = p.communicate()
 
         code = p.returncode
         response = {"code": code}
 
         if code != 0:
-            if cancel_on_conflict:
+            if cancel_on_conflict and "automatic merge failed; fix conflicts and then commit the result." in output.decode("utf-8").lower():
                 p = subprocess.Popen(
-                    ['git', 'reset', '--merge', 'ORIG_HEAD'],
+                    ['git', 'merge', '--abort'],
                     stdout=PIPE,
                     stderr=PIPE,
                     cwd=os.path.join(self.root_dir, curr_fb_path),
@@ -761,7 +761,7 @@ class Git:
                 username=auth['username'],
                 password=auth['password']
             )
-            error = p.communicate()
+            _, error = p.communicate()
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             p = subprocess.Popen(
