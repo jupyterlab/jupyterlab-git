@@ -57,12 +57,12 @@ class GitAuthInputWrapper:
             self.returncode = p.wait()
             p.close()
             
-            return ('', response)
+            return (''.encode('utf-8'), response)
         except pexpect.exceptions.EOF: #In case of pexpect failure
             response = p.before
             self.returncode = p.exitstatus
             p.close() #close process
-            return ('', response)
+            return (''.encode('utf-8'), response)
 
 
 class Git:
