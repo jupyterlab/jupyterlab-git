@@ -34,6 +34,35 @@ def test_git_pull_fail(mock_subproc_popen):
     ])
     assert {'code': 1, 'message': 'Authentication failed'} == actual_response
 
+
+@patch('subprocess.Popen')
+@patch('os.environ', {'TEST': 'test'})
+def test_git_pull_with_conflict_fail(mock_subproc_popen):
+    # Given
+    process_mock = Mock()
+    attrs = {
+        'communicate.return_value': ('Automatic merge failed; fix conflicts and then commit the result.'.encode('utf-8'), ''.encode('utf-8')),
+        'returncode': 1
+    }
+    process_mock.configure_mock(**attrs)
+    mock_subproc_popen.return_value = process_mock
+
+    # When
+    actual_response = Git(FakeContentManager('/bin')).pull('test_curr_path')
+
+    # Then
+    mock_subproc_popen.assert_has_calls([
+        call(
+            ['git', 'pull', '--no-commit'],
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd='/bin/test_curr_path',
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '0'},
+        ),
+        call().communicate()
+    ])
+    assert {'code': 1, 'message': 'Automatic merge failed; fix conflicts and then commit the result.'} == actual_response
+
 @patch('jupyterlab_git.git.GitAuthInputWrapper')
 @patch('os.environ', {'TEST': 'test'})
 def test_git_pull_with_auth_fail(mock_GitAuthInputWrapper):
@@ -126,6 +155,38 @@ def test_git_pull_with_auth_success(mock_GitAuthInputWrapper):
         call().communicate()
     ])
     assert {'code': 0} == actual_response
+
+@patch('jupyterlab_git.git.GitAuthInputWrapper')
+@patch('os.environ', {'TEST': 'test'})
+def test_git_pull_with_auth_success_and_conflict_fail(mock_GitAuthInputWrapper):
+    # Given
+    process_mock = Mock()
+    attrs = {
+        'communicate.return_value': ('output'.encode('utf-8'), 'Automatic merge failed; fix conflicts and then commit the result.'.encode('utf-8')),
+        'returncode': 1
+    }
+    process_mock.configure_mock(**attrs)
+    mock_GitAuthInputWrapper.return_value = process_mock
+
+    # When
+    auth = {
+        'username' : 'asdf', 
+        'password' : 'qwerty'
+    }
+    actual_response = Git(FakeContentManager('/bin')).pull('test_curr_path', auth)
+
+    # Then
+    mock_GitAuthInputWrapper.assert_has_calls([
+        call(
+            command = 'git pull --no-commit',
+            cwd='/bin/test_curr_path',
+            env={'TEST': 'test', 'GIT_TERMINAL_PROMPT': '1'},
+            username = 'asdf',
+            password = 'qwerty'
+        ),
+        call().communicate()
+    ])
+    assert {'code': 1, 'message': 'Automatic merge failed; fix conflicts and then commit the result.'} == actual_response
 
 @patch('subprocess.Popen')
 @patch('os.environ', {'TEST': 'test'})
