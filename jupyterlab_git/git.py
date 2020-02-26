@@ -726,19 +726,24 @@ class Git:
             )
             _, error = p.communicate()
 
-        if p.returncode != 0 and cancel_on_conflict:
-            p = subprocess.Popen(
-                ['git', 'reset', '--merge', 'ORIG_HEAD'],
-                stdout=PIPE,
-                stderr=PIPE,
-                cwd=os.path.join(self.root_dir, curr_fb_path),
-            )
-            _, error = p.communicate()
+        code = p.returncode
+        response = {"code": code}
 
-        response = {"code": p.returncode}
-
-        if p.returncode != 0:
-            response["message"] = error.decode("utf-8").strip()
+        if code != 0:
+            if cancel_on_conflict:
+                p = subprocess.Popen(
+                    ['git', 'reset', '--merge', 'ORIG_HEAD'],
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=os.path.join(self.root_dir, curr_fb_path),
+                )
+                _, error = p.communicate()
+                if p.returncode == 0:
+                    response["message"] = 'Unable to pull latest changes as doing so would result in a merge conflict. In order to push your local changes, you may want to consider creating a new branch based on your current work and pushing the new branch. Provided your repository is hosted (e.g., on GitHub), once pushed, you can create a pull request against the original branch on the remote repository and manually resolve the conflicts during pull request review.'
+                else:
+                    response["message"] = error.decode("utf-8").strip()
+            else:
+                response["message"] = error.decode("utf-8").strip()
 
         return response
 
