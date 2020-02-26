@@ -715,7 +715,7 @@ export class GitExtension implements IGitExtension {
         current_path: path,
         auth,
         cancel_on_conflict: this._settings
-          ? (this._settings.composite['resetPullMergeConflict'] as boolean)
+          ? (this._settings.composite['cancelPullMergeConflict'] as boolean)
           : false
       };
 
