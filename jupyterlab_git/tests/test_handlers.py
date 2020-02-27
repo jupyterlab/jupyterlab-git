@@ -478,7 +478,7 @@ class TestDiffContent(ServerTest):
         }
 
         # Then
-        with assert_http_error(500, msg="command to retrieve plaintext diff"):
+        with assert_http_error(500, msg="Dummy error"):
             self.tester.post(["diffcontent"], body=body)
 
     @patch("subprocess.Popen")

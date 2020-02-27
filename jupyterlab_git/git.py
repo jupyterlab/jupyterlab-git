@@ -939,10 +939,10 @@ class Git:
         Collect get content of prev and curr and return.
         """
         if self._is_binary(filename, curr_ref, top_repo_path):
-            raise HTTPError(log_message="Error while retrieving plaintext diff as file is not UTF-8.")
+            raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
 
         if self._is_binary(filename, prev_ref, top_repo_path):
-            raise HTTPError(log_message="Error while retrieving plaintext diff as file is not UTF-8.")
+            raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
 
         prev_content = self.show(filename, prev_ref["git"], top_repo_path)
         if "special" in curr_ref:
@@ -976,7 +976,7 @@ class Git:
         output, error = p.communicate()
 
         if p.returncode != 0:
-            err_msg = "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename)
+            err_msg = "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename).lower()
             err = error.decode('utf-8')
             if err_msg in err.lower():
                 return False
