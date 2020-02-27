@@ -938,6 +938,23 @@ class Git:
         """
         Collect get content of prev and curr and return.
         """
+        # Determine if Git handles the file as binary or text (see https://stackoverflow.com/questions/6119956/how-to-determine-if-git-handles-a-file-as-binary-or-as-text/6134127#6134127):
+        command = ["git", "diff", "--numstat", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", "HEAD", "--", filename]  # where 4b825... is a magic SHA which represents the empty tree
+        p = subprocess.Popen(
+            command,
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd=top_repo_path
+        )
+        output, error = p.communicate()
+
+        if p.returncode != 0:
+            raise HTTPError(log_message="Error while retrieving plaintext diff as unable to determine if file is binary or text '{}'.".format(error.decode('utf-8')))
+
+        # For binary files, `--numstat` outputs two `-` characters separated by TABs (see https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---numstat and https://git-scm.com/docs/git-diff#_other_diff_formats):
+        if output.decode('utf-8').startswith('-\t-\t'):
+            raise HTTPError(log_message="Error while retrieving plaintext diff as file is not UTF-8.")
+
         prev_content = self.show(filename, prev_ref["git"], top_repo_path)
         if "special" in curr_ref:
             if curr_ref["special"] == "WORKING":
