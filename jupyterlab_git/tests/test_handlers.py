@@ -456,6 +456,32 @@ class TestDiffContent(ServerTest):
         assert payload["curr_content"] == ""
 
     @patch("subprocess.Popen")
+    def test_diffcontent_binary(self, popen):
+        # Given
+        top_repo_path = "path/to/repo"
+        filename = "my/file"
+
+        process_mock = Mock()
+        attrs = {
+            "communicate": Mock(return_value=(b"-\t-\tmy/file",b"")),
+            "returncode": 0,
+        }
+        process_mock.configure_mock(**attrs)
+        popen.return_value = process_mock
+
+        # When
+        body = {
+            "filename": filename,
+            "prev_ref": {"git": "previous"},
+            "curr_ref": {"git": "current"},
+            "top_repo_path": top_repo_path,
+        }
+        
+        # Then
+        with assert_http_error(500, msg="file is not UTF-8"):
+            self.tester.post(["diffcontent"], body=body)
+
+    @patch("subprocess.Popen")
     def test_diffcontent_show_unhandled_error(self, popen):
         # Given
         top_repo_path = "path/to/repo"
