@@ -463,7 +463,7 @@ class TestDiffContent(ServerTest):
 
         process_mock = Mock()
         attrs = {
-            "communicate": Mock(return_value=(b"-\t-\tmy/file",b"")),
+            "communicate": Mock(return_value=(bytes("-\t-\t{}".format(filename), encoding="utf-8"),b"")),
             "returncode": 0,
         }
         process_mock.configure_mock(**attrs)
