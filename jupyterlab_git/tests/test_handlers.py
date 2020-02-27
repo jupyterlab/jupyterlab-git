@@ -253,11 +253,16 @@ class TestDiffContent(ServerTest):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
-        content = "dummy content file\nwith multiplelines"
+        content = "dummy content file\nwith multiple lines"
 
         process_mock = Mock()
         attrs = {
-            "communicate": Mock(return_value=(bytes(content, encoding="utf-8"), b"")),
+            "communicate": Mock(side_effect=[
+                (bytes("1\t1\t{}".format(filename), encoding="utf-8"), b""),
+                (bytes(content, encoding="utf-8"), b""),
+                (bytes("1\t1\t{}".format(filename), encoding="utf-8"), b""),
+                (bytes(content, encoding="utf-8"), b"")
+            ]),
             "returncode": 0,
         }
         process_mock.configure_mock(**attrs)
@@ -293,7 +298,8 @@ class TestDiffContent(ServerTest):
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
                 ),
                 call().communicate(),
-            ]
+            ],
+            any_order=True
         )
 
     @patch("subprocess.Popen")
@@ -301,11 +307,15 @@ class TestDiffContent(ServerTest):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
-        content = "dummy content file\nwith multiplelines"
+        content = "dummy content file\nwith multiple lines"
 
         process_mock = Mock()
         attrs = {
-            "communicate": Mock(return_value=(bytes(content, encoding="utf-8"), b"")),
+            "communicate": Mock(side_effect=[
+                (bytes("1\t1\t{}".format(filename), encoding="utf-8"), b""),
+                (bytes(content, encoding="utf-8"), b""),
+                (bytes(content, encoding="utf-8"), b"")
+            ]),
             "returncode": 0,
         }
         process_mock.configure_mock(**attrs)
@@ -347,11 +357,16 @@ class TestDiffContent(ServerTest):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
-        content = "dummy content file\nwith multiplelines"
+        content = "dummy content file\nwith multiple lines"
 
         process_mock = Mock()
         attrs = {
-            "communicate": Mock(return_value=(bytes(content, encoding="utf-8"), b"")),
+            "communicate": Mock(side_effect=[
+                (bytes("1\t1\t{}".format(filename), encoding="utf-8"), b""),
+                (bytes(content, encoding="utf-8"), b""),
+                (bytes("1\t1\t{}".format(filename), encoding="utf-8"), b""),
+                (bytes(content, encoding="utf-8"), b"")
+            ]),
             "returncode": 0,
         }
         process_mock.configure_mock(**attrs)
@@ -386,8 +401,9 @@ class TestDiffContent(ServerTest):
                     stderr=subprocess.PIPE,
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
                 ),
-                call().communicate(),
-            ]
+                call().communicate()
+            ],
+            any_order=True
         )
 
     @patch("subprocess.Popen")
@@ -395,11 +411,16 @@ class TestDiffContent(ServerTest):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
-        content = "dummy content file\nwith multiplelines"
+        content = "dummy content file\nwith multiple lines"
 
         process_mock = Mock()
         attrs = {
-            "communicate": Mock(return_value=(bytes(content, encoding="utf-8"), b"")),
+            "communicate": Mock(side_effect=[
+                (bytes("1\t1\t{}".format(filename), encoding="utf-8"), b""),
+                (bytes(content, encoding="utf-8"), b""),
+                (bytes("1\t1\t{}".format(filename), encoding="utf-8"), b""),
+                (bytes(content, encoding="utf-8"), b"")
+            ]),
             "returncode": 0,
         }
         process_mock.configure_mock(**attrs)
@@ -512,11 +533,15 @@ class TestDiffContent(ServerTest):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/absent_file"
-        content = "dummy content file\nwith multiplelines"
+        content = "dummy content file\nwith multiple lines"
 
         process_mock = Mock()
         attrs = {
-            "communicate": Mock(return_value=(bytes(content, encoding="utf-8"), b"")),
+            "communicate": Mock(side_effect=[
+                (bytes("1\t1\t{}".format(filename), encoding="utf-8"), b""),
+                (bytes(content, encoding="utf-8"), b""),
+                (bytes(content, encoding="utf-8"), b"")
+            ]),
             "returncode": 0,
         }
         process_mock.configure_mock(**attrs)

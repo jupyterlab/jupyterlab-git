@@ -938,21 +938,25 @@ class Git:
         """
         Collect get content of prev and curr and return.
         """
-        if self._is_binary(filename, curr_ref["git"], top_repo_path):
-            raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
-
         if self._is_binary(filename, prev_ref["git"], top_repo_path):
             raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
 
         prev_content = self.show(filename, prev_ref["git"], top_repo_path)
+
         if "special" in curr_ref:
             if curr_ref["special"] == "WORKING":
                 curr_content = self.get_content(filename, top_repo_path)
             elif curr_ref["special"] == "INDEX":
+                if self._is_binary(filename, "", top_repo_path):
+                    raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+                    
                 curr_content = self.show(filename, "", top_repo_path)
             else:
                 raise HTTPError(log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(curr_ref["special"]))
         else:
+            if self._is_binary(filename, curr_ref["git"], top_repo_path):
+                raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+
             curr_content = self.show(filename, curr_ref["git"], top_repo_path)
         return {"prev_content": prev_content, "curr_content": curr_content}
 
