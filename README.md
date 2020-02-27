@@ -11,7 +11,7 @@ To see the extension in action, open the example notebook included in the Binder
 ## Prerequisites
 
 - JupyterLab
-- Git (version `>=1.7.0`)
+- Git (version `>=1.7.4`)
 
 ## Usage
 
