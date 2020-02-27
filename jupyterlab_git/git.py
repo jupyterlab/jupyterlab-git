@@ -938,10 +938,10 @@ class Git:
         """
         Collect get content of prev and curr and return.
         """
-        if self._is_binary(filename, curr_ref, top_repo_path):
+        if self._is_binary(filename, curr_ref["git"], top_repo_path):
             raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
 
-        if self._is_binary(filename, prev_ref, top_repo_path):
+        if self._is_binary(filename, prev_ref["git"], top_repo_path):
             raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
 
         prev_content = self.show(filename, prev_ref["git"], top_repo_path)
