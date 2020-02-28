@@ -3,6 +3,7 @@ import { style } from 'typestyle';
 export const pastCommitNodeStyle = style({
   flexGrow: 0,
   display: 'flex',
+  flexShrink: 0,
   flexDirection: 'column',
   padding: '10px',
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
