@@ -1,7 +1,8 @@
 import json
 import os
-import subprocess
-from unittest.mock import ANY, call, Mock, patch
+from unittest.mock import ANY, Mock, call, patch
+
+import tornado
 
 from jupyterlab_git.handlers import (
     GitAllHistoryHandler,
@@ -12,7 +13,7 @@ from jupyterlab_git.handlers import (
     setup_handlers,
 )
 
-from .testutils import assert_http_error, ServerTest
+from .testutils import ServerTest, assert_http_error
 
 
 def test_mapping_added():
@@ -32,10 +33,10 @@ class TestAllHistory(ServerTest):
         log = "log_foo"
         status = "status_foo"
 
-        mock_git.show_top_level.return_value = show_top_level
-        mock_git.branch.return_value = branch
-        mock_git.log.return_value = log
-        mock_git.status.return_value = status
+        mock_git.show_top_level.return_value = tornado.gen.maybe_future(show_top_level)
+        mock_git.branch.return_value = tornado.gen.maybe_future(branch)
+        mock_git.log.return_value = tornado.gen.maybe_future(log)
+        mock_git.status.return_value = tornado.gen.maybe_future(status)
 
         # When
         body = {"current_path": "test_path", "history_count": 25}
@@ -110,7 +111,7 @@ class TestBranch(ServerTest):
             ],
         }
 
-        mock_git.branch.return_value = branch
+        mock_git.branch.return_value = tornado.gen.maybe_future(branch)
 
         # When
         body = {"current_path": "test_path"}
@@ -129,7 +130,7 @@ class TestLog(ServerTest):
     def test_log_handler(self, mock_git):
         # Given
         log = {"code": 0, "commits": []}
-        mock_git.log.return_value = log
+        mock_git.log.return_value = tornado.gen.maybe_future(log)
 
         # When
         body = {"current_path": "test_path", "history_count": 20}
@@ -146,7 +147,7 @@ class TestLog(ServerTest):
     def test_log_handler_no_history_count(self, mock_git):
         # Given
         log = {"code": 0, "commits": []}
-        mock_git.log.return_value = log
+        mock_git.log.return_value = tornado.gen.maybe_future(log)
 
         # When
         body = {"current_path": "test_path"}
@@ -164,9 +165,11 @@ class TestPush(ServerTest):
     @patch("jupyterlab_git.handlers.GitPushHandler.git")
     def test_push_handler_localbranch(self, mock_git):
         # Given
-        mock_git.get_current_branch.return_value = "foo"
-        mock_git.get_upstream_branch.return_value = "localbranch"
-        mock_git.push.return_value = {"code": 0}
+        mock_git.get_current_branch.return_value = tornado.gen.maybe_future("foo")
+        mock_git.get_upstream_branch.return_value = tornado.gen.maybe_future(
+            "localbranch"
+        )
+        mock_git.push.return_value = tornado.gen.maybe_future({"code": 0})
 
         # When
         body = {"current_path": "test_path"}
@@ -184,9 +187,11 @@ class TestPush(ServerTest):
     @patch("jupyterlab_git.handlers.GitPushHandler.git")
     def test_push_handler_remotebranch(self, mock_git):
         # Given
-        mock_git.get_current_branch.return_value = "foo"
-        mock_git.get_upstream_branch.return_value = "origin/remotebranch"
-        mock_git.push.return_value = {"code": 0}
+        mock_git.get_current_branch.return_value = tornado.gen.maybe_future("foo")
+        mock_git.get_upstream_branch.return_value = tornado.gen.maybe_future(
+            "origin/remotebranch"
+        )
+        mock_git.push.return_value = tornado.gen.maybe_future({"code": 0})
 
         # When
         body = {"current_path": "test_path"}
@@ -206,9 +211,9 @@ class TestPush(ServerTest):
     @patch("jupyterlab_git.handlers.GitPushHandler.git")
     def test_push_handler_noupstream(self, mock_git):
         # Given
-        mock_git.get_current_branch.return_value = "foo"
-        mock_git.get_upstream_branch.return_value = ""
-        mock_git.push.return_value = {"code": 0}
+        mock_git.get_current_branch.return_value = tornado.gen.maybe_future("foo")
+        mock_git.get_upstream_branch.return_value = tornado.gen.maybe_future("")
+        mock_git.push.return_value = tornado.gen.maybe_future({"code": 0})
 
         # When
         body = {"current_path": "test_path"}
@@ -231,8 +236,8 @@ class TestUpstream(ServerTest):
     @patch("jupyterlab_git.handlers.GitUpstreamHandler.git")
     def test_upstream_handler_localbranch(self, mock_git):
         # Given
-        mock_git.get_current_branch.return_value = "foo"
-        mock_git.get_upstream_branch.return_value = "bar"
+        mock_git.get_current_branch.return_value = tornado.gen.maybe_future("foo")
+        mock_git.get_upstream_branch.return_value = tornado.gen.maybe_future("bar")
 
         # When
         body = {"current_path": "test_path"}
@@ -248,20 +253,14 @@ class TestUpstream(ServerTest):
 
 
 class TestDiffContent(ServerTest):
-    @patch("subprocess.Popen")
-    def test_diffcontent(self, popen):
+    @patch("jupyterlab_git.git.execute")
+    def test_diffcontent(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
         content = "dummy content file\nwith multiplelines"
 
-        process_mock = Mock()
-        attrs = {
-            "communicate": Mock(return_value=(bytes(content, encoding="utf-8"), b"")),
-            "returncode": 0,
-        }
-        process_mock.configure_mock(**attrs)
-        popen.return_value = process_mock
+        mock_execute.return_value = tornado.gen.maybe_future((0, content, ""))
 
         # When
         body = {
@@ -277,39 +276,27 @@ class TestDiffContent(ServerTest):
         payload = response.json()
         assert payload["prev_content"] == content
         assert payload["curr_content"] == content
-        popen.assert_has_calls(
+        mock_execute.assert_has_calls(
             [
                 call(
                     ["git", "show", "{}:{}".format("previous", filename)],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
                 ),
-                call().communicate(),
                 call(
                     ["git", "show", "{}:{}".format("current", filename)],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
                 ),
-                call().communicate(),
             ]
         )
 
-    @patch("subprocess.Popen")
-    def test_diffcontent_working(self, popen):
+    @patch("jupyterlab_git.git.execute")
+    def test_diffcontent_working(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
         content = "dummy content file\nwith multiplelines"
 
-        process_mock = Mock()
-        attrs = {
-            "communicate": Mock(return_value=(bytes(content, encoding="utf-8"), b"")),
-            "returncode": 0,
-        }
-        process_mock.configure_mock(**attrs)
-        popen.return_value = process_mock
+        mock_execute.return_value = tornado.gen.maybe_future((0, content, ""))
 
         dummy_file = os.path.join(self.notebook_dir, top_repo_path, filename)
         os.makedirs(os.path.dirname(dummy_file))
@@ -330,32 +317,19 @@ class TestDiffContent(ServerTest):
         payload = response.json()
         assert payload["prev_content"] == content
         assert payload["curr_content"] == content
-        popen.assert_has_calls(
-            [
-                call(
-                    ["git", "show", "{}:{}".format("previous", filename)],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    cwd=os.path.join(self.notebook_dir, top_repo_path),
-                ),
-                call().communicate(),
-            ]
+        mock_execute.assert_called_once_with(
+            ["git", "show", "{}:{}".format("previous", filename)],
+            cwd=os.path.join(self.notebook_dir, top_repo_path),
         )
 
-    @patch("subprocess.Popen")
-    def test_diffcontent_index(self, popen):
+    @patch("jupyterlab_git.git.execute")
+    def test_diffcontent_index(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
         content = "dummy content file\nwith multiplelines"
 
-        process_mock = Mock()
-        attrs = {
-            "communicate": Mock(return_value=(bytes(content, encoding="utf-8"), b"")),
-            "returncode": 0,
-        }
-        process_mock.configure_mock(**attrs)
-        popen.return_value = process_mock
+        mock_execute.return_value = tornado.gen.maybe_future((0, content, ""))
 
         # When
         body = {
@@ -371,39 +345,27 @@ class TestDiffContent(ServerTest):
         payload = response.json()
         assert payload["prev_content"] == content
         assert payload["curr_content"] == content
-        popen.assert_has_calls(
+        mock_execute.assert_has_calls(
             [
                 call(
                     ["git", "show", "{}:{}".format("previous", filename)],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
                 ),
-                call().communicate(),
                 call(
                     ["git", "show", "{}:{}".format("", filename)],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
                 ),
-                call().communicate(),
             ]
         )
 
-    @patch("subprocess.Popen")
-    def test_diffcontent_unknown_special(self, popen):
+    @patch("jupyterlab_git.git.execute")
+    def test_diffcontent_unknown_special(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
         content = "dummy content file\nwith multiplelines"
 
-        process_mock = Mock()
-        attrs = {
-            "communicate": Mock(return_value=(bytes(content, encoding="utf-8"), b"")),
-            "returncode": 0,
-        }
-        process_mock.configure_mock(**attrs)
-        popen.return_value = process_mock
+        mock_execute.return_value = tornado.gen.maybe_future((0, content, ""))
 
         # When
         body = {
@@ -416,29 +378,21 @@ class TestDiffContent(ServerTest):
         with assert_http_error(500, msg="unknown special ref"):
             self.tester.post(["diffcontent"], body=body)
 
-    @patch("subprocess.Popen")
-    def test_diffcontent_show_handled_error(self, popen):
+    @patch("jupyterlab_git.git.execute")
+    def test_diffcontent_show_handled_error(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
 
-        process_mock = Mock()
-        attrs = {
-            "communicate": Mock(
-                return_value=(
-                    b"",
-                    bytes(
-                        "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(
-                            filename
-                        ),
-                        encoding="utf-8",
-                    ),
-                )
-            ),
-            "returncode": -1,
-        }
-        process_mock.configure_mock(**attrs)
-        popen.return_value = process_mock
+        mock_execute.return_value = tornado.gen.maybe_future(
+            (
+                -1,
+                "",
+                "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(
+                    filename
+                ),
+            )
+        )
 
         # When
         body = {
@@ -455,19 +409,13 @@ class TestDiffContent(ServerTest):
         assert payload["prev_content"] == ""
         assert payload["curr_content"] == ""
 
-    @patch("subprocess.Popen")
-    def test_diffcontent_show_unhandled_error(self, popen):
+    @patch("jupyterlab_git.git.execute")
+    def test_diffcontent_show_unhandled_error(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
 
-        process_mock = Mock()
-        attrs = {
-            "communicate": Mock(return_value=(b"", b"Dummy error")),
-            "returncode": -1,
-        }
-        process_mock.configure_mock(**attrs)
-        popen.return_value = process_mock
+        mock_execute.return_value = tornado.gen.maybe_future((-1, "", "Dummy error"))
 
         # When
         body = {
@@ -481,20 +429,14 @@ class TestDiffContent(ServerTest):
         with assert_http_error(500, msg="command to retrieve plaintext diff"):
             self.tester.post(["diffcontent"], body=body)
 
-    @patch("subprocess.Popen")
-    def test_diffcontent_getcontent_error(self, popen):
+    @patch("jupyterlab_git.git.execute")
+    def test_diffcontent_getcontent_error(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/absent_file"
         content = "dummy content file\nwith multiplelines"
 
-        process_mock = Mock()
-        attrs = {
-            "communicate": Mock(return_value=(bytes(content, encoding="utf-8"), b"")),
-            "returncode": 0,
-        }
-        process_mock.configure_mock(**attrs)
-        popen.return_value = process_mock
+        mock_execute.return_value = tornado.gen.maybe_future((0, content, ""))
 
         # When
         body = {
@@ -505,4 +447,4 @@ class TestDiffContent(ServerTest):
         }
         # Then
         with assert_http_error(404, msg="No such file or directory"):
-            r = self.tester.post(["diffcontent"], body=body)
+            self.tester.post(["diffcontent"], body=body)
