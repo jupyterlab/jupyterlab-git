@@ -16,13 +16,14 @@
     "build": "jlpm install && tsc",
     "build:labextension": "jlpm build && jlpm clean:labextension && mkdirp jupyterlab_git/labextension && cd jupyterlab_git/labextension && npm pack ../..",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
-    "clean:more": "jlpm clean && rimraf build dist MANIFEST",
     "clean:labextension": "rimraf jupyterlab_git/labextension",
+    "clean:more": "jlpm clean && rimraf build dist MANIFEST",
     "clean:slate": "jlpm clean:more && jlpm clean:labextension && rimraf node_modules",
-    "watch": "tsc -w",
-    "test": "jest",
+    "deduplicate": "jlpm yarn-deduplicate -s fewer",
     "lint": "tslint --project .",
-    "tslint-check": "tslint-config-prettier-check ./tslint.json"
+    "test": "jest",
+    "tslint-check": "tslint-config-prettier-check ./tslint.json",
+    "watch": "tsc -w"
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
@@ -48,39 +49,39 @@
     "schemaDir": "schema"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.0.0-beta.2",
-    "@jupyterlab/apputils": "^2.0.0-beta.2",
-    "@jupyterlab/codemirror": "^2.0.0-beta.2",
-    "@jupyterlab/console": "^2.0.0-beta.2",
-    "@jupyterlab/coreutils": "^4.0.0-beta.2",
-    "@jupyterlab/filebrowser": "^2.0.0-beta.2",
-    "@jupyterlab/mainmenu": "^2.0.0-beta.2",
-    "@jupyterlab/nbformat": "^2.0.0-beta.2",
-    "@jupyterlab/services": "^5.0.0-beta.2",
-    "@jupyterlab/settingregistry": "^2.0.0-beta.2",
-    "@jupyterlab/terminal": "^2.0.0-beta.2",
-    "@jupyterlab/ui-components": "^2.0.0-beta.2",
-    "@lumino/polling": "^1.0.0",
-    "@lumino/widgets": "^1.8.0",
+    "@jupyterlab/application": "^2.0.0",
+    "@jupyterlab/apputils": "^2.0.0",
+    "@jupyterlab/codemirror": "^2.0.0",
+    "@jupyterlab/console": "^2.0.0",
+    "@jupyterlab/coreutils": "^4.0.0",
+    "@jupyterlab/filebrowser": "^2.0.0",
+    "@jupyterlab/mainmenu": "^2.0.0",
+    "@jupyterlab/nbformat": "^2.0.0",
+    "@jupyterlab/services": "^5.0.0",
+    "@jupyterlab/settingregistry": "^2.0.0",
+    "@jupyterlab/terminal": "^2.0.0",
+    "@jupyterlab/ui-components": "^2.0.0",
+    "@lumino/polling": "^1.0.4",
+    "@lumino/widgets": "^1.11.1",
     "@material-ui/core": "^4.8.2",
     "@material-ui/icons": "^4.5.1",
     "diff-match-patch": "^1.0.4",
     "nbdime": "~5.0.1",
-    "react": "~16.8.4",
-    "react-dom": "~16.8.4",
+    "react": "~16.9.0",
+    "react-dom": "~16.9.0",
     "react-textarea-autosize": "^7.1.2",
-    "typestyle": "^2.0.1"
+    "typestyle": "^2.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",
     "@babel/preset-env": "^7.5.0",
-    "@jupyterlab/testutils": "^2.0.0-beta.2",
+    "@jupyterlab/testutils": "^2.0.0",
     "@types/codemirror": "^0.0.79",
     "@types/diff-match-patch": "^1.0.32",
     "@types/enzyme": "3.1.15",
     "@types/jest": "^24",
-    "@types/react": "~16.8.13",
-    "@types/react-dom": "~16.0.5",
+    "@types/react": "~16.9.16",
+    "@types/react-dom": "~16.9.4",
     "@types/react-textarea-autosize": "^4.3.5",
     "enzyme": "3.7.0",
     "enzyme-adapter-react-16": "1.7.0",
@@ -97,8 +98,9 @@
     "tslint": "^5.11.0",
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "^2.0.0",
-    "typescript": "~3.7.1",
-    "typescript-tslint-plugin": "^0.5.4"
+    "typescript": "~3.7.3",
+    "typescript-tslint-plugin": "^0.5.4",
+    "yarn-deduplicate": "^1.1.1"
   },
   "peerDependencies": {
     "codemirror": "^5.0.0"
@@ -127,8 +129,5 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab-git/issues"
   },
-  "homepage": "https://github.com/jupyterlab/jupyterlab-git",
-  "resolutions": {
-    "@types/react": "~16.8.4"
-  }
+  "homepage": "https://github.com/jupyterlab/jupyterlab-git.git"
 }
