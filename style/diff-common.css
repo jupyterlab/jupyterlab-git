@@ -137,31 +137,3 @@
         var(--jp-border-color0) 1.3em
     )
 }
-
-.jp-git-diff-commit-description {
-    width: 100%;
-
-    margin-bottom: 1em;
-    padding: var(--jp-code-padding);
-
-    outline: none;
-    overflow-x: auto;
-    resize: none;
-
-    color: var(--jp-ui-font-color0);
-    font-size: var(--jp-ui-font-size1);
-    font-weight: 300;
-
-    background-color: var(--jp-layout-color1);
-    border: var(--jp-border-width) solid var(--jp-border-color2);
-    border-radius: 3px;
-}
-
-.jp-git-diff-commit-description:focus, .jp-git-diff-commit-description:active {
-    outline: none;
-    border: var(--jp-border-width) solid var(--jp-brand-color1);
-}
-
-.jp-git-diff-commit-description::placeholder, .jp-git-diff-commit-description::-webkit-input-placeholder, .jp-git-diff-commit-description::-moz-placeholder, .jp-git-diff-commit-description::-ms-input-placeholder {
-    color: var(--jp-ui-font-color3);
-}

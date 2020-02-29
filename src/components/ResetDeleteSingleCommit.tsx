@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { classes } from 'typestyle';
+import TextareaAutosize from 'react-textarea-autosize';
+import { showErrorMessage } from '@jupyterlab/apputils';
 import {
   button,
   cancelButton,
@@ -7,9 +9,8 @@ import {
   resetDeleteButton,
   warningLabel
 } from '../style/SinglePastCommitInfoStyle';
-import TextareaAutosize from 'react-textarea-autosize';
+import { commitDescriptionClass } from '../style/CommitBox';
 import { Git, IGitExtension } from '../tokens';
-import { showErrorMessage } from '@jupyterlab/apputils';
 
 export interface IResetDeleteProps {
   action: 'reset' | 'delete';
@@ -78,12 +79,12 @@ export class ResetDeleteSingleCommit extends React.Component<
       <div>
         <div className={warningLabel}>
           {this.props.action === 'delete'
-            ? "These changes will be reverted. Commit if you're sure?"
+            ? "These changes will be reverted. Only commit if you're sure you're okay losing these changes."
             : 'All changes after this will be gone forever (hard reset). Are you sure?'}
         </div>
         {this.props.action === 'delete' ? (
           <TextareaAutosize
-            className={classes('jp-git-diff-commit-description', messageInput)}
+            className={classes(commitDescriptionClass, messageInput)}
             minRows={3}
             title={'Enter commit message'}
             onChange={event => this.updateMessage(event.currentTarget.value)}
@@ -102,7 +103,7 @@ export class ResetDeleteSingleCommit extends React.Component<
         >
           {this.props.action === 'delete'
             ? 'Revert this commit'
-            : 'Remove changes after this commit'}
+            : 'Discard changes after this commit'}
         </button>
       </div>
     );
