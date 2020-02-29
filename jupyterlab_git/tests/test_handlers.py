@@ -260,12 +260,12 @@ class TestDiffContent(ServerTest):
         filename = "my/file"
         content = "dummy content file\nwith multiple lines"
 
-        mock_execute.return_value = Mock(side_effect=[
-            tornado.get.maybe_future((0, bytes("1\t1\t{}".format(filename), encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes(content, encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes("1\t1\t{}".format(filename), encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes(content, encoding="utf-8"), b""))
-        ])
+        mock_execute.side_effect = [
+            tornado.gen.maybe_future((0, "1\t1\t{}".format(filename), "")),
+            tornado.gen.maybe_future((0, content, "")),
+            tornado.gen.maybe_future((0, "1\t1\t{}".format(filename), "")),
+            tornado.gen.maybe_future((0, content, ""))
+        ]
 
         # When
         body = {
@@ -302,11 +302,11 @@ class TestDiffContent(ServerTest):
         filename = "my/file"
         content = "dummy content file\nwith multiple lines"
 
-        mock_execute.return_value = Mock(side_effect=[
-            tornado.get.maybe_future((0, bytes("1\t1\t{}".format(filename), encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes(content, encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes(content, encoding="utf-8"), b""))
-        ])
+        mock_execute.side_effect = [
+            tornado.gen.maybe_future((0, "1\t1\t{}".format(filename), "")),
+            tornado.gen.maybe_future((0, content, "")),
+            tornado.gen.maybe_future((0, content, ""))
+        ]
 
         dummy_file = os.path.join(self.notebook_dir, top_repo_path, filename)
         os.makedirs(os.path.dirname(dummy_file))
@@ -327,9 +327,13 @@ class TestDiffContent(ServerTest):
         payload = response.json()
         assert payload["prev_content"] == content
         assert payload["curr_content"] == content
-        mock_execute.assert_called_once_with(
-            ["git", "show", "{}:{}".format("previous", filename)],
-            cwd=os.path.join(self.notebook_dir, top_repo_path),
+        mock_execute.assert_has_calls(
+            [
+                call(
+                    ["git", "show", "{}:{}".format("previous", filename)],
+                    cwd=os.path.join(self.notebook_dir, top_repo_path),
+                )
+            ]
         )
 
     @patch("jupyterlab_git.git.execute")
@@ -339,12 +343,12 @@ class TestDiffContent(ServerTest):
         filename = "my/file"
         content = "dummy content file\nwith multiple lines"
 
-        mock_execute.return_value = Mock(side_effect=[
-            tornado.get.maybe_future((0, bytes("1\t1\t{}".format(filename), encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes(content, encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes("1\t1\t{}".format(filename), encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes(content, encoding="utf-8"), b""))
-        ])
+        mock_execute.side_effect = [
+            tornado.gen.maybe_future((0, "1\t1\t{}".format(filename), "")),
+            tornado.gen.maybe_future((0, content, "")),
+            tornado.gen.maybe_future((0, "1\t1\t{}".format(filename), "")),
+            tornado.gen.maybe_future((0, content, ""))
+        ]
 
         # When
         body = {
@@ -381,12 +385,12 @@ class TestDiffContent(ServerTest):
         filename = "my/file"
         content = "dummy content file\nwith multiple lines"
 
-        mock_execute.return_value = Mock(side_effect=[
-            tornado.get.maybe_future((0, bytes("1\t1\t{}".format(filename), encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes(content, encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes("1\t1\t{}".format(filename), encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes(content, encoding="utf-8"), b""))
-        ])
+        mock_execute.side_effect = [
+            tornado.gen.maybe_future((0, "1\t1\t{}".format(filename), "")),
+            tornado.gen.maybe_future((0, content, "")),
+            tornado.gen.maybe_future((0, "1\t1\t{}".format(filename), "")),
+            tornado.gen.maybe_future((0, content, ""))
+        ]
 
         # When
         body = {
@@ -436,7 +440,7 @@ class TestDiffContent(ServerTest):
         top_repo_path = "path/to/repo"
         filename = "my/file"
 
-        mock_execute.return_value = tornado.get.maybe_future((0, bytes("-\t-\t{}".format(filename), encoding="utf-8"), b""))
+        mock_execute.return_value = tornado.gen.maybe_future((0, "-\t-\t{}".format(filename), ""))
 
         # When
         body = {
@@ -477,11 +481,11 @@ class TestDiffContent(ServerTest):
         filename = "my/absent_file"
         content = "dummy content file\nwith multiple lines"
 
-        mock_execute.return_value = Mock(side_effect=[
-            tornado.get.maybe_future((0, bytes("1\t1\t{}".format(filename), encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes(content, encoding="utf-8"), b"")),
-            tornado.get.maybe_future((0, bytes(content, encoding="utf-8"), b""))
-        ])
+        mock_execute.side_effect = [
+            tornado.gen.maybe_future((0, "1\t1\t{}".format(filename), "")),
+            tornado.gen.maybe_future((0, content, "")),
+            tornado.gen.maybe_future((0, content, ""))
+        ]
 
         # When
         body = {

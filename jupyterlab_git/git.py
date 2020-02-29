@@ -952,7 +952,7 @@ class Git:
         """
         is_binary = await self._is_binary(filename, prev_ref["git"], top_repo_path)
         if is_binary:
-            raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+            raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
 
         prev_content = await self.show(filename, prev_ref["git"], top_repo_path)
         if "special" in curr_ref:
@@ -961,19 +961,17 @@ class Git:
             elif curr_ref["special"] == "INDEX":
                 is_binary = await self._is_binary(filename, "", top_repo_path)
                 if is_binary:
-                    raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+                    raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
                     
                 curr_content = await self.show(filename, "", top_repo_path)
             else:
                 raise tornado.web.HTTPError(
-                    log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(
-                        curr_ref["special"]
-                    )
+                    log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(curr_ref["special"])
                 )
         else:
             is_binary = await self._is_binary(filename, curr_ref["git"], top_repo_path)
             if is_binary:
-                raise HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+                raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
 
             curr_content = await self.show(filename, curr_ref["git"], top_repo_path)
 
@@ -994,14 +992,13 @@ class Git:
 
         if code != 0:
             err_msg = "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename).lower()
-            err = error.decode('utf-8')
-            if err_msg in err.lower():
+            if err_msg in error.lower():
                 return False
 
-            raise HTTPError(log_message="Error while determining if file is binary or text '{}'.".format(err))
+            raise tornado.web.HTTPError(log_message="Error while determining if file is binary or text '{}'.".format(error))
 
         # For binary files, `--numstat` outputs two `-` characters separated by TABs:
-        if output.decode('utf-8').startswith('-\t-\t'):
+        if output.startswith('-\t-\t'):
             return True
 
         return False
