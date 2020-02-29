@@ -4,11 +4,10 @@ Module for executing git commands, sending results back to the handlers
 import os
 import re
 import subprocess
-from subprocess import Popen, PIPE, CalledProcessError
+from urllib.parse import unquote
 
 import pexpect
-from urllib.parse import unquote
-from tornado.web import HTTPError
+import tornado
 
 
 # Git configuration options exposed through the REST API
@@ -18,51 +17,89 @@ ALLOWED_OPTIONS = ['user.name', 'user.email']
 CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
 
 
-class GitAuthInputWrapper:
+async def execute(
+    cmdline: "List[str]",
+    cwd: "Optional[str]" = None,
+    env: "Optional[Dict[str, str]]" = None,
+    username: "Optional[str]" = None,
+    password: "Optional[str]" = None,
+) -> "Tuple[int, str, str]":
+    """Asynchronously execute a command.
+    
+    Args:
+        cmdline (List[str]): Command line to be executed
+        cwd (Optional[str]): Current working directory
+        env (Optional[Dict[str, str]]): Defines the environment variables for the new process
+        username (Optional[str]): User name
+        password (Optional[str]): User password
+    Returns:
+        (int, str, str): (return code, stdout, stderr)
     """
-    Helper class which is meant to replace subprocess.Popen for communicating
-    with git CLI when also sending username and password for auth
-    """
-    def __init__(self, command, cwd, env, username, password):
-        self.command = command
-        self.cwd = cwd
-        self.env = env
-        self.username = username
-        self.password = password
 
-    def communicate(self):
+    async def call_subprocess_with_authentication(
+        cmdline: "List[str]",
+        username: "str",
+        password: "str",
+        cwd: "Optional[str]" = None,
+        env: "Optional[Dict[str, str]]" = None,
+    ) -> "Tuple[int, str, str]":
         try:
             p = pexpect.spawn(
-                self.command, 
-                cwd = self.cwd,
-                env = self.env
+                cmdline[0], cmdline[1:], cwd=cwd, env=env, encoding="utf-8", timeout=None
             )
 
             # We expect a prompt from git
             # In most of cases git will prompt for username and
             #  then for password
             # In some cases (Bitbucket) username is included in
-            #  remote URL, so git will not ask for username 
-            i = p.expect(['Username for .*: ', 'Password for .*:'])
-            if i==0: #ask for username then password
-                p.sendline(self.username)
-                p.expect('Password for .*:')
-                p.sendline(self.password)
-            elif i==1: #only ask for password
-                p.sendline(self.password)
+            #  remote URL, so git will not ask for username
+            i = await p.expect(["Username for .*: ", "Password for .*:"], async_=True)
+            if i == 0:  # ask for username then password
+                p.sendline(username)
+                await p.expect("Password for .*:", async_=True)
+                p.sendline(password)
+            elif i == 1:  # only ask for password
+                p.sendline(password)
 
-            p.expect(pexpect.EOF)
+            await p.expect(pexpect.EOF, async_=True)
             response = p.before
 
-            self.returncode = p.wait()
+            returncode = p.wait()
             p.close()
-            
-            return response
-        except pexpect.exceptions.EOF: #In case of pexpect failure
+
+            return returncode, "", response
+        except pexpect.exceptions.EOF:  # In case of pexpect failure
             response = p.before
-            self.returncode = p.exitstatus
-            p.close() #close process
-            return response
+            returncode = p.exitstatus
+            p.close()  # close process
+            return returncode, "", response
+
+    def call_subprocess(
+        cmdline: "List[str]",
+        cwd: "Optional[str]" = None,
+        env: "Optional[Dict[str, str]]" = None,
+    ) -> "Tuple[int, str, str]":
+        process = subprocess.Popen(
+            cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env
+        )
+        output, error = process.communicate()
+        return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
+
+    if username is not None and password is not None:
+        code, output, error = await call_subprocess_with_authentication(
+            cmdline,
+            username,
+            password,
+            cwd,
+            env,
+        )
+    else:
+        current_loop = tornado.ioloop.IOLoop.current()
+        code, output, error = await current_loop.run_in_executor(
+            None, call_subprocess, cmdline, cwd, env
+        )
+
+    return code, output, error
 
 
 class Git:
@@ -74,7 +111,7 @@ class Git:
         self.contents_manager = contents_manager
         self.root_dir = os.path.expanduser(contents_manager.root_dir)
 
-    def config(self, top_repo_path, **kwargs):
+    async def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
         
         If no kwargs, all options are returned. Otherwise kwargs are set.
@@ -83,36 +120,35 @@ class Git:
 
         if len(kwargs):
             output = []
-            for k, v in filter(lambda t: True if t[0] in ALLOWED_OPTIONS else False, kwargs.items()):
+            for k, v in filter(
+                lambda t: True if t[0] in ALLOWED_OPTIONS else False, kwargs.items()
+            ):
                 cmd = ["git", "config", "--add", k, v]
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=top_repo_path)
-                out, err = p.communicate()
-                output.append(out.decode("utf-8").strip())
-                response["code"] = p.returncode
-                if p.returncode != 0:
+                code, out, err = await execute(cmd, cwd=top_repo_path)
+                output.append(out.strip())
+                response["code"] = code
+                if code != 0:
                     response["command"] = " ".join(cmd)
-                    response["message"] = err.decode("utf-8").strip()
+                    response["message"] = err.strip()
                     return response
 
             response["message"] = "\n".join(output).strip()
         else:
             cmd = ["git", "config", "--list"]
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=top_repo_path)
-            output, error = p.communicate()
+            code, output, error = await execute(cmd, cwd=top_repo_path)
+            response = {"code": code}
 
-            response = {"code": p.returncode}
-
-            if p.returncode != 0:
+            if code != 0:
                 response["command"] = " ".join(cmd)
-                response["message"] = error.decode("utf-8").strip()
+                response["message"] = error.strip()
             else:
-                raw = output.decode("utf-8").strip()
+                raw = output.strip()
                 s = CONFIG_PATTERN.split(raw)
                 response["options"] = {k:v for k, v in zip(s[1::2], s[2::2]) if k in ALLOWED_OPTIONS}
 
         return response
 
-    def changed_files(self, base=None, remote=None, single_commit=None):
+    async def changed_files(self, base=None, remote=None, single_commit=None):
         """Gets the list of changed files between two Git refs, or the files changed in a single commit
 
         There are two reserved "refs" for the base
@@ -132,35 +168,36 @@ class Git:
             }
         """
         if single_commit:
-            cmd = ['git', 'diff', '{}^!'.format(single_commit), '--name-only']
+            cmd = ["git", "diff", "{}^!".format(single_commit), "--name-only"]
         elif base and remote:
-            if base == 'WORKING':
-                cmd = ['git', 'diff', remote, '--name-only']
-            elif base == 'INDEX':
-                cmd = ['git', 'diff', '--staged', remote, '--name-only']
+            if base == "WORKING":
+                cmd = ["git", "diff", remote, "--name-only"]
+            elif base == "INDEX":
+                cmd = ["git", "diff", "--staged", remote, "--name-only"]
             else:
-                cmd = ['git', 'diff', base, remote, '--name-only']
+                cmd = ["git", "diff", base, remote, "--name-only"]
         else:
-            raise HTTPError(400, 'Either single_commit or (base and remote) must be provided')
+            raise tornado.web.HTTPError(
+                400, "Either single_commit or (base and remote) must be provided"
+            )
 
-        
         response = {}
         try:
-            stdout = subprocess.check_output(
-                cmd, 
-                cwd=self.root_dir,
-                stderr=subprocess.STDOUT
-            )
-            response['files'] = stdout.decode('utf-8').strip().split('\n')
-            response['code'] = 0
-        except CalledProcessError as e:
-            response['message'] =  e.output.decode('utf-8')
-            response['code'] = e.returncode
+            code, output, error = await execute(cmd, cwd=self.root_dir)
+        except subprocess.CalledProcessError as e:
+            response["code"] = e.returncode
+            response["message"] = e.output.decode("utf-8")
+        else:
+            response["code"] = code
+            if code != 0:
+                response["command"] = " ".join(cmd)
+                response["message"] = error
+            else:
+                response["files"] = output.strip().split("\n")
 
         return response
 
-
-    def clone(self, current_path, repo_url, auth=None):
+    async def clone(self, current_path, repo_url, auth=None):
         """
         Execute `git clone`.
         When no auth is provided, disables prompts for the password to avoid the terminal hanging.
@@ -171,369 +208,356 @@ class Git:
         :return: response with status code and error message.
         """
         env = os.environ.copy()
-        if (auth):
+        if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            p = GitAuthInputWrapper(
-                command='git clone {} -q'.format(unquote(repo_url)),
+            code, _, error = await execute(
+                ["git", "clone", unquote(repo_url), "-q"],
+                username=auth["username"],
+                password=auth["password"],
                 cwd=os.path.join(self.root_dir, current_path),
-                env = env,
-                username=auth['username'],
-                password=auth['password'],
+                env=env,
             )
-            error = p.communicate()
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            p = subprocess.Popen(
-                ['git', 'clone', unquote(repo_url)],
-                stdout=PIPE,
-                stderr=PIPE,
-                env = env,
+            code, _, error = await execute(
+                ["git", "clone", unquote(repo_url)],
                 cwd=os.path.join(self.root_dir, current_path),
+                env=env,
             )
-            _, error = p.communicate()
 
-        response = {"code": p.returncode}
+        response = {"code": code}
 
-        if p.returncode != 0:
-            response["message"] = error.decode("utf-8").strip()
+        if code != 0:
+            response["message"] = error.strip()
 
         return response
 
-    def status(self, current_path):
+    async def status(self, current_path):
         """
         Execute git status command & return the result.
         """
-        p = Popen(
-            ["git", "status", "--porcelain", "-u"],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        cmd = ["git", "status", "--porcelain", "-u"]
+        code, my_output, my_error = await execute(
+            cmd, cwd=os.path.join(self.root_dir, current_path),
         )
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            result = []
-            line_array = my_output.decode("utf-8").splitlines()
-            for line in line_array:
-                to1 = None
-                from_path = line[3:]
-                if line[0] == "R":
-                    to0 = line[3:].split(" -> ")
-                    to1 = to0[len(to0) - 1]
-                else:
-                    to1 = line[3:]
-                if to1.startswith('"'):
-                    to1 = to1[1:]
-                if to1.endswith('"'):
-                    to1 = to1[:-1]
-                result.append(
-                    {"x": line[0], "y": line[1], "to": to1, "from": from_path}
-                )
-            return {"code": p.returncode, "files": result}
-        else:
+
+        if code != 0:
             return {
-                "code": p.returncode,
-                "command": "git status --porcelain -u",
-                "message": my_error.decode("utf-8"),
+                "code": code,
+                "command": " ".join(cmd),
+                "message": my_error,
             }
 
-    def log(self, current_path, history_count=10):
+        result = []
+        line_array = my_output.splitlines()
+        for line in line_array:
+            to1 = None
+            from_path = line[3:]
+            if line[0] == "R":
+                to0 = line[3:].split(" -> ")
+                to1 = to0[len(to0) - 1]
+            else:
+                to1 = line[3:]
+            if to1.startswith('"'):
+                to1 = to1[1:]
+            if to1.endswith('"'):
+                to1 = to1[:-1]
+            result.append({"x": line[0], "y": line[1], "to": to1, "from": from_path})
+        return {"code": code, "files": result}
+
+    async def log(self, current_path, history_count=10):
         """
         Execute git log command & return the result.
         """
-        p = Popen(
-            ["git", "log", "--pretty=format:%H%n%an%n%ar%n%s", ("-%d" % history_count)],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        cmd = [
+            "git",
+            "log",
+            "--pretty=format:%H%n%an%n%ar%n%s",
+            ("-%d" % history_count),
+        ]
+        code, my_output, my_error = await execute(
+            cmd, cwd=os.path.join(self.root_dir, current_path),
         )
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            result = []
-            line_array = my_output.decode("utf-8").splitlines()
-            i = 0
-            PREVIOUS_COMMIT_OFFSET = 4
-            while i < len(line_array):
-                if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
-                    result.append(
-                        {
-                            "commit": line_array[i],
-                            "author": line_array[i + 1],
-                            "date": line_array[i + 2],
-                            "commit_msg": line_array[i + 3],
-                            "pre_commit": line_array[i + PREVIOUS_COMMIT_OFFSET],
-                        }
-                    )
-                else:
-                    result.append(
-                        {
-                            "commit": line_array[i],
-                            "author": line_array[i + 1],
-                            "date": line_array[i + 2],
-                            "commit_msg": line_array[i + 3],
-                            "pre_commit": "",
-                        }
-                    )
-                i += PREVIOUS_COMMIT_OFFSET
-            return {"code": p.returncode, "commits": result}
-        else:
-            return {"code": p.returncode, "message": my_error.decode("utf-8")}
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": my_error}
 
-    def detailed_log(self, selected_hash, current_path):
+        result = []
+        line_array = my_output.splitlines()
+        i = 0
+        PREVIOUS_COMMIT_OFFSET = 4
+        while i < len(line_array):
+            if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
+                result.append(
+                    {
+                        "commit": line_array[i],
+                        "author": line_array[i + 1],
+                        "date": line_array[i + 2],
+                        "commit_msg": line_array[i + 3],
+                        "pre_commit": line_array[i + PREVIOUS_COMMIT_OFFSET],
+                    }
+                )
+            else:
+                result.append(
+                    {
+                        "commit": line_array[i],
+                        "author": line_array[i + 1],
+                        "date": line_array[i + 2],
+                        "commit_msg": line_array[i + 3],
+                        "pre_commit": "",
+                    }
+                )
+            i += PREVIOUS_COMMIT_OFFSET
+        return {"code": code, "commits": result}
+
+    async def detailed_log(self, selected_hash, current_path):
         """
         Execute git log -1 --stat --numstat --oneline command (used to get
         insertions & deletions per file) & return the result.
         """
-        p = subprocess.Popen(
-            ["git", "log", "-1", "--stat", "--numstat", "--oneline", selected_hash],
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        cmd = ["git", "log", "-1", "--stat", "--numstat", "--oneline", selected_hash]
+        code, my_output, my_error = await execute(
+            cmd, cwd=os.path.join(self.root_dir, current_path),
         )
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            result = []
-            note = [0] * 3
-            count = 0
-            temp = ""
-            line_array = my_output.decode("utf-8").splitlines()
-            length = len(line_array)
-            INSERTION_INDEX = 0
-            DELETION_INDEX = 1
-            MODIFIED_FILE_PATH_INDEX = 2
-            if length > 1:
-                temp = line_array[length - 1]
-                words = temp.split()
-                for i in range(0, len(words)):
-                    if words[i].isdigit():
-                        note[count] = words[i]
-                        count += 1
-                for num in range(1, int(length / 2)):
-                    line_info = line_array[num].split(maxsplit=2)
-                    words = line_info[2].split("/")
-                    length = len(words)
-                    result.append(
-                        {
-                            "modified_file_path": line_info[MODIFIED_FILE_PATH_INDEX],
-                            "modified_file_name": words[length - 1],
-                            "insertion": line_info[INSERTION_INDEX],
-                            "deletion": line_info[DELETION_INDEX],
-                        }
-                    )
 
-            if note[2] == 0 and length > 1:
-                if "-" in temp:
-                    exchange = note[1]
-                    note[1] = note[2]
-                    note[2] = exchange
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": my_error}
 
-            return {
-                "code": p.returncode,
-                "modified_file_note": temp,
-                "modified_files_count": note[0],
-                "number_of_insertions": note[1],
-                "number_of_deletions": note[2],
-                "modified_files": result,
-            }
-        else:
-            return {
-                "code": p.returncode,
-                "command": "git log_1",
-                "message": my_error.decode("utf-8"),
-            }
+        result = []
+        note = [0] * 3
+        count = 0
+        temp = ""
+        line_array = my_output.splitlines()
+        length = len(line_array)
+        INSERTION_INDEX = 0
+        DELETION_INDEX = 1
+        MODIFIED_FILE_PATH_INDEX = 2
+        if length > 1:
+            temp = line_array[length - 1]
+            words = temp.split()
+            for i in range(0, len(words)):
+                if words[i].isdigit():
+                    note[count] = words[i]
+                    count += 1
+            for num in range(1, int(length / 2)):
+                line_info = line_array[num].split(maxsplit=2)
+                words = line_info[2].split("/")
+                length = len(words)
+                result.append(
+                    {
+                        "modified_file_path": line_info[MODIFIED_FILE_PATH_INDEX],
+                        "modified_file_name": words[length - 1],
+                        "insertion": line_info[INSERTION_INDEX],
+                        "deletion": line_info[DELETION_INDEX],
+                    }
+                )
 
-    def diff(self, top_repo_path):
+        if note[2] == 0 and length > 1:
+            if "-" in temp:
+                exchange = note[1]
+                note[1] = note[2]
+                note[2] = exchange
+
+        return {
+            "code": code,
+            "modified_file_note": temp,
+            "modified_files_count": note[0],
+            "number_of_insertions": note[1],
+            "number_of_deletions": note[2],
+            "modified_files": result,
+        }
+
+    async def diff(self, top_repo_path):
         """
         Execute git diff command & return the result.
         """
-        p = Popen(
-            ["git", "diff", "--numstat"], stdout=PIPE, stderr=PIPE, cwd=top_repo_path
-        )
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            result = []
-            line_array = my_output.decode("utf-8").splitlines()
-            for line in line_array:
-                linesplit = line.split()
-                result.append(
-                    {
-                        "insertions": linesplit[0],
-                        "deletions": linesplit[1],
-                        "filename": linesplit[2],
-                    }
-                )
-            return {"code": p.returncode, "result": result}
-        else:
-            return {"code": p.returncode, "message": my_error.decode("utf-8")}
+        cmd = ["git", "diff", "--numstat"]
+        code, my_output, my_error = await execute(cmd, cwd=top_repo_path)
 
-    def branch(self, current_path):
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": my_error}
+
+        result = []
+        line_array = my_output.splitlines()
+        for line in line_array:
+            linesplit = line.split()
+            result.append(
+                {
+                    "insertions": linesplit[0],
+                    "deletions": linesplit[1],
+                    "filename": linesplit[2],
+                }
+            )
+        return {"code": code, "result": result}
+
+    async def branch(self, current_path):
         """
         Execute 'git for-each-ref' command & return the result.
         """
-        heads = self.branch_heads(current_path)
+        heads = await self.branch_heads(current_path)
         if heads["code"] != 0:
             # error; bail
             return heads
 
-        remotes = self.branch_remotes(current_path)
+        remotes = await self.branch_remotes(current_path)
         if remotes["code"] != 0:
             # error; bail
             return remotes
 
         # all's good; concatenate results and return
-        return {"code": 0, "branches": heads["branches"] + remotes["branches"], "current_branch": heads["current_branch"]}
+        return {
+            "code": 0,
+            "branches": heads["branches"] + remotes["branches"],
+            "current_branch": heads["current_branch"],
+        }
 
-    def branch_heads(self, current_path):
+    async def branch_heads(self, current_path):
         """
         Execute 'git for-each-ref' command on refs/heads & return the result.
         """
         # Format reference: https://git-scm.com/docs/git-for-each-ref#_field_names
-        formats = ['refname:short', 'objectname', 'upstream:short', 'HEAD']
-        cmd = ["git", "for-each-ref", "--format=" + "%09".join("%({})".format(f) for f in formats), "refs/heads/"]
-        p = subprocess.Popen(
-            cmd,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        formats = ["refname:short", "objectname", "upstream:short", "HEAD"]
+        cmd = [
+            "git",
+            "for-each-ref",
+            "--format=" + "%09".join("%({})".format(f) for f in formats),
+            "refs/heads/",
+        ]
+
+        code, output, error = await execute(
+            cmd, cwd=os.path.join(self.root_dir, current_path)
         )
-        output, error = p.communicate()
-        if p.returncode == 0:
-            current_branch = None
-            results = []
-            try:
-                for name,commit_sha,upstream_name,is_current_branch in (line.split('\t') for line in output.decode("utf-8").splitlines()):
-                    is_current_branch = bool(is_current_branch.strip())
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
 
-                    branch = {
-                        "is_current_branch": is_current_branch,
-                        "is_remote_branch": False,
-                        "name": name,
-                        "upstream": upstream_name if upstream_name else None,
-                        "top_commit": commit_sha,
-                        "tag": None,
-                    }
-                    results.append(branch)
-                    if is_current_branch:
-                        current_branch = branch
+        current_branch = None
+        results = []
+        try:
+            for name, commit_sha, upstream_name, is_current_branch in (
+                line.split("\t") for line in output.splitlines()
+            ):
+                is_current_branch = bool(is_current_branch.strip())
 
-                # Above can fail in certain cases, such as an empty repo with
-                # no commits. In that case, just fall back to determining
-                # current branch
-                if not current_branch:
-                    branch = {
-                        "is_current_branch": True,
-                        "is_remote_branch": False,
-                        "name": self.get_current_branch(current_path),
-                        "upstream": None,
-                        "top_commit": None,
-                        "tag": None,
-                    }
-                    results.append(branch)
+                branch = {
+                    "is_current_branch": is_current_branch,
+                    "is_remote_branch": False,
+                    "name": name,
+                    "upstream": upstream_name if upstream_name else None,
+                    "top_commit": commit_sha,
+                    "tag": None,
+                }
+                results.append(branch)
+                if is_current_branch:
                     current_branch = branch
 
-                return {"code": p.returncode, "branches": results, "current_branch": current_branch}
-
-            except Exception as downstream_error:
-                return {
-                    "code": -1,
-                    "command": ' '.join(cmd),
-                    "message": str(downstream_error),
+            # Above can fail in certain cases, such as an empty repo with
+            # no commits. In that case, just fall back to determining
+            # current branch
+            if not current_branch:
+                current_name = await self.get_current_branch(current_path)
+                branch = {
+                    "is_current_branch": True,
+                    "is_remote_branch": False,
+                    "name": current_name,
+                    "upstream": None,
+                    "top_commit": None,
+                    "tag": None,
                 }
-        else:
+                results.append(branch)
+                current_branch = branch
+
             return {
-                "code": p.returncode,
-                "command": ' '.join(cmd),
-                "message": error.decode("utf-8"),
+                "code": code,
+                "branches": results,
+                "current_branch": current_branch,
             }
 
-    def branch_remotes(self, current_path):
+        except Exception as downstream_error:
+            return {
+                "code": -1,
+                "command": " ".join(cmd),
+                "message": str(downstream_error),
+            }
+
+    async def branch_remotes(self, current_path):
         """
         Execute 'git for-each-ref' command on refs/heads & return the result.
         """
         # Format reference: https://git-scm.com/docs/git-for-each-ref#_field_names
-        formats = ['refname:short', 'objectname']
-        cmd = ["git", "for-each-ref", "--format=" + "%09".join("%({})".format(f) for f in formats), "refs/remotes/"]
-        p = subprocess.Popen(
-            cmd,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        formats = ["refname:short", "objectname"]
+        cmd = [
+            "git",
+            "for-each-ref",
+            "--format=" + "%09".join("%({})".format(f) for f in formats),
+            "refs/remotes/",
+        ]
+
+        code, output, error = await execute(
+            cmd, cwd=os.path.join(self.root_dir, current_path)
         )
-        output, error = p.communicate()
-        if p.returncode == 0:
-            results = []
-            try:
-                for name,commit_sha in (line.split('\t') for line in output.decode("utf-8").splitlines()):
-                    results.append({
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        results = []
+        try:
+            for name, commit_sha in (
+                line.split("\t") for line in output.splitlines()
+            ):
+                results.append(
+                    {
                         "is_current_branch": False,
                         "is_remote_branch": True,
                         "name": name,
                         "upstream": None,
                         "top_commit": commit_sha,
                         "tag": None,
-                    })
-                return {"code": p.returncode, "branches": results}
-            except Exception as downstream_error:
-                return {
-                    "code": -1,
-                    "command": ' '.join(cmd),
-                    "message": str(downstream_error),
-                }
-        else:
+                    }
+                )
+            return {"code": code, "branches": results}
+        except Exception as downstream_error:
             return {
-                "code": p.returncode,
-                "command": ' '.join(cmd),
-                "message": error.decode("utf-8"),
+                "code": -1,
+                "command": " ".join(cmd),
+                "message": str(downstream_error),
             }
 
-    def show_top_level(self, current_path):
+    async def show_top_level(self, current_path):
         """
         Execute git --show-toplevel command & return the result.
         """
-        p = Popen(
-            ["git", "rev-parse", "--show-toplevel"],
-            stdout=PIPE,
-            stderr=PIPE,
+        cmd = ["git", "rev-parse", "--show-toplevel"]
+        code, my_output, my_error = await execute(
+            cmd,
             cwd=os.path.join(self.root_dir, current_path),
         )
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            result = {
-                "code": p.returncode,
-                "top_repo_path": my_output.decode("utf-8").strip("\n"),
-            }
-            return result
+        if code == 0:
+            return {"code": code, "top_repo_path": my_output.strip("\n")}
         else:
             return {
-                "code": p.returncode,
-                "command": "git rev-parse --show-toplevel",
-                "message": my_error.decode("utf-8"),
+                "code": code,
+                "command": " ".join(cmd),
+                "message": my_error,
             }
 
-    def show_prefix(self, current_path):
+    async def show_prefix(self, current_path):
         """
         Execute git --show-prefix command & return the result.
         """
-        p = Popen(
-            ["git", "rev-parse", "--show-prefix"],
-            stdout=PIPE,
-            stderr=PIPE,
+        cmd = ["git", "rev-parse", "--show-prefix"]
+        code, my_output, my_error = await execute(
+            cmd,
             cwd=os.path.join(self.root_dir, current_path),
         )
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            result = {
-                "code": p.returncode,
-                "under_repo_path": my_output.decode("utf-8").strip("\n"),
-            }
+        if code == 0:
+            result = {"code": code, "under_repo_path": my_output.strip("\n")}
             return result
         else:
             return {
-                "code": p.returncode,
-                "command": "git rev-parse --show-prefix",
-                "message": my_error.decode("utf-8"),
+                "code": code,
+                "command": " ".join(cmd),
+                "message": my_error,
             }
 
-    def add(self, filename, top_repo_path):
+    async def add(self, filename, top_repo_path):
         """
         Execute git add<filename> command & return the result.
         """
@@ -542,113 +566,127 @@ class Git:
             cmd = ["git", "add"] + list(filename)
         else:
             cmd = ["git", "add", filename]
+        code, _, error = await execute(cmd, cwd=top_repo_path)
 
-        return subprocess.check_output(cmd, cwd=top_repo_path)
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
 
-    def add_all(self, top_repo_path):
+    async def add_all(self, top_repo_path):
         """
         Execute git add all command & return the result.
         """
-        my_output = subprocess.check_output(["git", "add", "-A"], cwd=top_repo_path)
-        return my_output
+        cmd = ["git", "add", "-A"]
+        code, _, error = await execute(cmd, cwd=top_repo_path)
 
-    def add_all_unstaged(self, top_repo_path):
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
+
+    async def add_all_unstaged(self, top_repo_path):
         """
         Execute git add all unstaged command & return the result.
         """
-        e = 'git add -u'
-        my_output = subprocess.call(e, shell=True, cwd=top_repo_path)
-        return {"result": my_output}
+        cmd = ["git", "add", "-u"]
+        code, _, error = await execute(cmd, cwd=top_repo_path)
 
-    def add_all_untracked(self, top_repo_path):
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"result": code}
+
+    async def add_all_untracked(self, top_repo_path):
         """
         Execute git add all untracked command & return the result.
         """
-        e = 'echo "a\n*\nq\n" | git add -i'
-        my_output = subprocess.call(e, shell=True, cwd=top_repo_path)
-        return {"result": my_output}
+        cmd = ["echo", "a\n*\nq\n", "|", "git", "add", "-i"]
+        code, _, error = await execute(cmd, cwd=top_repo_path)
 
-    def reset(self, filename, top_repo_path):
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
+
+    async def reset(self, filename, top_repo_path):
         """
         Execute git reset <filename> command & return the result.
         """
-        my_output = subprocess.check_output(
-            ["git", "reset", "--", filename], cwd=top_repo_path
-        )
-        return my_output
+        cmd = ["git", "reset", "--", filename]
+        code, _, error = await execute(cmd, cwd=top_repo_path)
 
-    def reset_all(self, top_repo_path):
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
+
+    async def reset_all(self, top_repo_path):
         """
         Execute git reset command & return the result.
         """
-        my_output = subprocess.check_output(["git", "reset"], cwd=top_repo_path)
-        return my_output
+        cmd = ["git", "reset"]
+        code, _, error = await execute(cmd, cwd=top_repo_path)
 
-    def delete_commit(self, commit_id, top_repo_path):
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
+
+    async def delete_commit(self, commit_id, top_repo_path):
         """
         Delete a specified commit from the repository.
         """
-        my_output = subprocess.check_output(
-            ["git", "revert", "--no-commit", commit_id], cwd=top_repo_path
-        )
-        return my_output
+        cmd = ["git", "revert", "--no-commit", commit_id]
+        code, _, error = await execute(cmd, cwd=top_repo_path)
 
-    def reset_to_commit(self, commit_id, top_repo_path):
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
+
+    async def reset_to_commit(self, commit_id, top_repo_path):
         """
         Reset the current branch to a specific past commit.
         """
         cmd = ["git", "reset", "--hard"]
         if commit_id:
             cmd.append(commit_id)
+        code, _, error = await execute(cmd, cwd=top_repo_path)
 
-        my_output = subprocess.check_output(
-            cmd, cwd=top_repo_path
-        )
-        return my_output
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
 
-    def checkout_new_branch(self, branchname, startpoint, current_path):
+    async def checkout_new_branch(self, branchname, startpoint, current_path):
         """
         Execute git checkout <make-branch> command & return the result.
         """
         cmd = ["git", "checkout", "-b", branchname, startpoint]
-        p = Popen(
-            cmd,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        code, my_output, my_error = await execute(
+            cmd, cwd=os.path.join(self.root_dir, current_path),
         )
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            return {"code": p.returncode, "message": my_output.decode("utf-8")}
+        if code == 0:
+            return {"code": code, "message": my_output}
         else:
             return {
-                "code": p.returncode,
-                "command": "git checkout " + "-b" + branchname,
-                "message": my_error.decode("utf-8"),
+                "code": code,
+                "command": " ".join(cmd),
+                "message": my_error,
             }
 
-    def _get_branch_reference(self, branchname, current_path):
+    async def _get_branch_reference(self, branchname, current_path):
         """
         Execute git rev-parse --symbolic-full-name <branch-name> and return the result (or None).
         """
-        p = subprocess.Popen(
+        code, my_output, _ = await execute(
             ["git", "rev-parse", "--symbolic-full-name", branchname],
-            stdout=PIPE,
-            stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),
         )
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            return my_output.decode("utf-8").strip("\n")
+        if code == 0:
+            return my_output.strip("\n")
         else:
             return None
 
-    def checkout_branch(self, branchname, current_path):
+    async def checkout_branch(self, branchname, current_path):
         """
         Execute git checkout <branch-name> command & return the result.
         Use the --track parameter for a remote branch.
         """
-        reference_name = self._get_branch_reference(branchname, current_path)
+        reference_name = await self._get_branch_reference(branchname, current_path)
         if reference_name is None:
             is_remote_branch = False
         else:
@@ -659,121 +697,119 @@ class Git:
         else:
             cmd = ["git", "checkout", branchname]
 
-        p = subprocess.Popen(
-            cmd,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        code, my_output, my_error = await execute(
+            cmd, cwd=os.path.join(self.root_dir, current_path)
         )
 
-        my_output, my_error = p.communicate()
-        if p.returncode == 0:
-            return { "code": 0, "message": my_output.decode("utf-8") }
+        if code == 0:
+            return {"code": 0, "message": my_output}
         else:
-            return { "code": p.returncode, "message": my_error.decode("utf-8"), "command":  " ".join(cmd) }
+            return {"code": code, "message": my_error, "command": " ".join(cmd)}
 
-    def checkout(self, filename, top_repo_path):
+    async def checkout(self, filename, top_repo_path):
         """
         Execute git checkout command for the filename & return the result.
         """
-        my_output = subprocess.check_output(
-            ["git", "checkout", "--", filename], cwd=top_repo_path
-        )
-        return my_output
+        cmd = ["git", "checkout", "--", filename]
+        code, _, error = await execute(cmd, cwd=top_repo_path)
 
-    def checkout_all(self, top_repo_path):
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
+
+    async def checkout_all(self, top_repo_path):
         """
         Execute git checkout command & return the result.
         """
-        my_output = subprocess.check_output(
-            ["git", "checkout", "--", "."], cwd=top_repo_path
-        )
-        return my_output
+        cmd = ["git", "checkout", "--", "."]
+        code, _, error = await execute(cmd, cwd=top_repo_path)
 
-    def commit(self, commit_msg, top_repo_path):
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
+
+    async def commit(self, commit_msg, top_repo_path):
         """
         Execute git commit <filename> command & return the result.
         """
-        my_output = subprocess.check_output(
-            ["git", "commit", "-m", commit_msg], cwd=top_repo_path
-        )
-        return my_output
-            
-    def pull(self, curr_fb_path, auth=None):
+        cmd = ["git", "commit", "-m", commit_msg]
+        code, _, error = await execute(cmd, cwd=top_repo_path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
+
+    async def pull(self, curr_fb_path, auth=None):
         """
         Execute git pull --no-commit.  Disables prompts for the password to avoid the terminal hanging while waiting
         for auth.
         """
         env = os.environ.copy()
-        if (auth):
+        if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            p = GitAuthInputWrapper(
-                command = 'git pull --no-commit',
-                cwd = os.path.join(self.root_dir, curr_fb_path),
-                env = env,
-                username = auth['username'],
-                password = auth['password']
+            code, _, error = await execute(
+                ["git", "pull", "--no-commit"],
+                username=auth["username"],
+                password=auth["password"],
+                cwd=os.path.join(self.root_dir, curr_fb_path),
+                env=env,
             )
-            error = p.communicate()
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            p = subprocess.Popen(
-                ['git', 'pull', '--no-commit'],
-                stdout=PIPE,
-                stderr=PIPE,
-                env = env,
+            code, _, error = await execute(
+                ["git", "pull", "--no-commit"],
+                env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
             )
-            _, error = p.communicate()
 
-        response = {"code": p.returncode}
+        response = {"code": code}
 
-        if p.returncode != 0:
-            response["message"] = error.decode("utf-8").strip()
+        if code != 0:
+            response["message"] = error.strip()
 
         return response
 
-    def push(self, remote, branch, curr_fb_path, auth=None):
+    async def push(self, remote, branch, curr_fb_path, auth=None):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
         """
         env = os.environ.copy()
-        if (auth):
+        if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            p = GitAuthInputWrapper(
-                command = 'git push {} {}'.format(remote, branch),
-                cwd = os.path.join(self.root_dir, curr_fb_path),
-                env = env,
-                username = auth['username'],
-                password = auth['password']
+            code, _, error = await execute(
+                ["git", "push", remote, branch],
+                username=auth["username"],
+                password=auth["password"],
+                cwd=os.path.join(self.root_dir, curr_fb_path),
+                env=env,
             )
-            error = p.communicate()
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            p = subprocess.Popen(
-                ['git', 'push', remote, branch],
-                stdout=PIPE,
-                stderr=PIPE,
-                env = env,
+            code, _, error = await execute(
+                ["git", "push", remote, branch],
+                env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
             )
-            _, error = p.communicate()
 
-        response = {"code": p.returncode}
+        response = {"code": code}
 
-        if p.returncode != 0:
-            response["message"] = error.decode("utf-8").strip()
+        if code != 0:
+            response["message"] = error.strip()
 
         return response
 
-    def init(self, current_path):
+    async def init(self, current_path):
         """
         Execute git init command & return the result.
         """
-        my_output = subprocess.check_output(
-            ["git", "init"], cwd=os.path.join(self.root_dir, current_path)
+        cmd = ["git", "init"]
+        code, _, error = await execute(
+            cmd, cwd=os.path.join(self.root_dir, current_path)
         )
-        return my_output
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
 
     def _is_remote_branch(self, branch_reference):
         """Check if given branch is remote branch by comparing with 'remotes/',
@@ -781,65 +817,48 @@ class Git:
         """
         return branch_reference.startswith("refs/remotes/")
 
-    def _get_branch_name(self, branch_reference):
-        """Get branch name for given branch
-        """
-        if branch_reference.startswith("refs/heads/"):
-            return branch_reference.split("refs/heads/")[1]
-        if branch_reference.startswith("refs/remotes/"):
-            return branch_reference.split("refs/remotes/")[1]
-
-        raise ValueError("Reference [{}] is not a valid branch.", branch_reference)
-
-    def get_current_branch(self, current_path):
+    async def get_current_branch(self, current_path):
         """Use `symbolic-ref` to get the current branch name. In case of
         failure, assume that the HEAD is currently detached, and fall back
         to the `branch` command to get the name.
         See https://git-blame.blogspot.com/2013/06/checking-current-branch-programatically.html
         """
         command = ["git", "symbolic-ref", "HEAD"]
-        p = subprocess.Popen(
-            command,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        code, output, error = await execute(
+            command, cwd=os.path.join(self.root_dir, current_path)
         )
-        output, error = p.communicate()
-        if p.returncode == 0:
-            return output.decode("utf-8").split('/')[-1].strip()
-        elif "not a symbolic ref" in error.decode("utf-8").lower():
-            return self._get_current_branch_detached(current_path)
+        if code == 0:
+            return output.split("/")[-1].strip()
+        elif "not a symbolic ref" in error.lower():
+            current_branch = await self._get_current_branch_detached(current_path)
+            return current_branch
         else:
             raise Exception(
                 "Error [{}] occurred while executing [{}] command to get current branch.".format(
-                    error.decode("utf-8"), " ".join(command)
+                    error, " ".join(command)
                 )
             )
 
-    def _get_current_branch_detached(self, current_path):
+    async def _get_current_branch_detached(self, current_path):
         """Execute 'git branch -a' to get current branch details in case of detached HEAD
         """
         command = ["git", "branch", "-a"]
-        p = subprocess.Popen(
-            command,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        code, output, error = await execute(
+            command, cwd=os.path.join(self.root_dir, current_path)
         )
-        output, error = p.communicate()
-        if p.returncode == 0:
-            for branch in output.decode("utf-8").splitlines():
+        if code == 0:
+            for branch in output.splitlines():
                 branch = branch.strip()
                 if branch.startswith("*"):
                     return branch.lstrip("* ")
         else:
             raise Exception(
                 "Error [{}] occurred while executing [{}] command to get detached HEAD name.".format(
-                    error.decode("utf-8"), " ".join(command)
+                    error, " ".join(command)
                 )
             )
 
-    def get_upstream_branch(self, current_path, branch_name):
+    async def get_upstream_branch(self, current_path, branch_name):
         """Execute 'git rev-parse --abbrev-ref branch_name@{upstream}' to get
         upstream branch name tracked by given local branch.
         Reference : https://git-scm.com/docs/git-rev-parse#git-rev-parse-emltbranchnamegtupstreamemegemmasterupstreamememuem
@@ -850,81 +869,74 @@ class Git:
             "--abbrev-ref",
             "{}@{{upstream}}".format(branch_name),
         ]
-        p = subprocess.Popen(
-            command,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        code, output, error = await execute(
+            command, cwd=os.path.join(self.root_dir, current_path)
         )
-        output, error = p.communicate()
-        if p.returncode == 0:
-            return output.decode("utf-8").strip()
-        elif "fatal: no upstream configured for branch" in error.decode("utf-8").lower():
+        if code == 0:
+            return output.strip()
+        elif "fatal: no upstream configured for branch" in error.lower():
             return None
-        elif "unknown revision or path not in the working tree" in error.decode("utf-8").lower():
+        elif "unknown revision or path not in the working tree" in error.lower():
             return None
         else:
             raise Exception(
                 "Error [{}] occurred while executing [{}] command to get upstream branch.".format(
-                    error.decode("utf-8"), " ".join(command)
+                    error, " ".join(command)
                 )
             )
 
-    def _get_tag(self, current_path, commit_sha):
+    async def _get_tag(self, current_path, commit_sha):
         """Execute 'git describe commit_sha' to get
         nearest tag associated with lastest commit in branch.
         Reference : https://git-scm.com/docs/git-describe#git-describe-ltcommit-ishgt82308203
         """
         command = ["git", "describe", "--tags", commit_sha]
-        p = subprocess.Popen(
-            command,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
+        code, output, error = await execute(
+            command, cwd=os.path.join(self.root_dir, current_path)
         )
-        output, error = p.communicate()
-        if p.returncode == 0:
-            return output.decode("utf-8").strip()
-        elif "fatal: no tags can describe '{}'.".format(commit_sha) in error.decode(
-            "utf-8"
-        ).lower():
+        if code == 0:
+            return output.strip()
+        elif "fatal: no tags can describe '{}'.".format(commit_sha) in error.lower():
             return None
-        elif "fatal: no names found" in error.decode("utf-8").lower():
+        elif "fatal: no names found" in error.lower():
             return None
         else:
             raise Exception(
                 "Error [{}] occurred while executing [{}] command to get nearest tag associated with branch.".format(
-                    error.decode("utf-8"), " ".join(command)
+                    error, " ".join(command)
                 )
             )
 
-    def show(self, filename, ref, top_repo_path):
+    async def show(self, filename, ref, top_repo_path):
         """
         Execute git show <ref:filename> command & return the result.
         """
-        command = ["git", "show", '{}:{}'.format(ref, filename)]
-        p = subprocess.Popen(
-            command,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=top_repo_path
-        )
-        output, error = p.communicate()
+        command = ["git", "show", "{}:{}".format(ref, filename)]
 
-        error_messages = map(lambda n: n.lower(), [
-            "fatal: Path '{}' exists on disk, but not in '{}'".format(filename, ref),
-            "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename)
-        ])
-        lower_error = error.decode('utf-8').lower()
-        if p.returncode == 0:
-            return output.decode('utf-8')
+        code, output, error = await execute(command, cwd=top_repo_path)
+
+        error_messages = map(
+            lambda n: n.lower(),
+            [
+                "fatal: Path '{}' exists on disk, but not in '{}'".format(
+                    filename, ref
+                ),
+                "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(
+                    filename
+                ),
+            ],
+        )
+        lower_error = error.lower()
+        if code == 0:
+            return output
         elif any([msg in lower_error for msg in error_messages]):
             return ""
         else:
-            raise HTTPError(log_message='Error [{}] occurred while executing [{}] command to retrieve plaintext diff.'.format(
-                error.decode('utf-8'),
-                ' '.join(command)
-            ))
+            raise tornado.web.HTTPError(
+                log_message="Error [{}] occurred while executing [{}] command to retrieve plaintext diff.".format(
+                    error, " ".join(command)
+                )
+            )
 
     def get_content(self, filename, top_repo_path):
         """
@@ -932,20 +944,24 @@ class Git:
         """
         relative_repo = os.path.relpath(top_repo_path, self.root_dir)
         model = self.contents_manager.get(path=os.path.join(relative_repo, filename))
-        return model['content']
+        return model["content"]
 
-    def diff_content(self, filename, prev_ref, curr_ref, top_repo_path):
+    async def diff_content(self, filename, prev_ref, curr_ref, top_repo_path):
         """
         Collect get content of prev and curr and return.
         """
-        prev_content = self.show(filename, prev_ref["git"], top_repo_path)
+        prev_content = await self.show(filename, prev_ref["git"], top_repo_path)
         if "special" in curr_ref:
             if curr_ref["special"] == "WORKING":
                 curr_content = self.get_content(filename, top_repo_path)
             elif curr_ref["special"] == "INDEX":
-                curr_content = self.show(filename, "", top_repo_path)
+                curr_content = await self.show(filename, "", top_repo_path)
             else:
-                raise HTTPError(log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(curr_ref["special"]))
+                raise tornado.web.HTTPError(
+                    log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(
+                        curr_ref["special"]
+                    )
+                )
         else:
-            curr_content = self.show(filename, curr_ref["git"], top_repo_path)
+            curr_content = await self.show(filename, curr_ref["git"], top_repo_path)
         return {"prev_content": prev_content, "curr_content": curr_content}
