@@ -143,7 +143,7 @@ export class ResetRevertCommit extends React.Component<
   };
 
   /**
-   * Callback invoked upon clicking a button to reset or delete a commit.
+   * Callback invoked upon clicking a button to reset or revert a commit.
    *
    * @param event - event object
    */
