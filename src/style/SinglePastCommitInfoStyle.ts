@@ -136,7 +136,7 @@ export const button = style({
 export const resetDeleteButton = style({
   backgroundColor: 'var(--jp-error-color1)',
   $nest: {
-    ':disabled': {
+    '&:disabled': {
       cursor: 'default',
       backgroundColor: 'var(--jp-error-color2)'
     }
@@ -147,7 +147,7 @@ export const cancelButton = style({
   backgroundColor: 'var(--jp-layout-color4)',
   marginRight: '4px',
   $nest: {
-    ':disabled': {
+    '&:disabled': {
       cursor: 'default'
     }
   }
