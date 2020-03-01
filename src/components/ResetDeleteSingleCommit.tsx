@@ -19,7 +19,7 @@ export interface IResetDeleteProps {
   /**
    * Type of action to perform.
    */
-  action: 'reset' | 'delete';
+  action: 'reset' | 'revert';
 
   /**
    * Commit data for a single commit.
@@ -82,11 +82,11 @@ export class ResetDeleteSingleCommit extends React.Component<
     return (
       <div>
         <div className={warningLabel}>
-          {this.props.action === 'delete'
+          {this.props.action === 'revert'
             ? "These changes will be reverted. Only commit if you're sure you're okay losing these changes."
             : 'All changes after this commit will be gone forever (hard reset). Are you sure?'}
         </div>
-        {this.props.action === 'delete' ? (
+        {this.props.action === 'revert' ? (
           <TextareaAutosize
             disabled={this.state.disabled}
             className={classes(commitDescriptionClass, messageInput)}
@@ -110,7 +110,7 @@ export class ResetDeleteSingleCommit extends React.Component<
           title="Submit changes"
           onClick={this._onSubmitClick}
         >
-          {this.props.action === 'delete'
+          {this.props.action === 'revert'
             ? 'Revert this commit'
             : 'Discard changes after this commit'}
         </button>
@@ -163,7 +163,7 @@ export class ResetDeleteSingleCommit extends React.Component<
       }
     } else {
       try {
-        await this.props.model.deleteCommit(
+        await this.props.model.revertCommit(
           this.state.message || this._defaultMessage(),
           this.props.commit.commit
         );

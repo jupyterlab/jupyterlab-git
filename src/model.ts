@@ -533,12 +533,12 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Make request to delete changes from selected commit
+   * Make request to revert changes from selected commit
    *
    * @param message Commit message to use for the new repository state
    * @param commitId Selected commit ID
    */
-  async deleteCommit(message: string, commitId: string): Promise<Response> {
+  async revertCommit(message: string, commitId: string): Promise<Response> {
     await this.ready;
     const path = this.pathRepository;
 

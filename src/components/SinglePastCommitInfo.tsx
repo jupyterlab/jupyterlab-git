@@ -184,7 +184,7 @@ export class SinglePastCommitInfo extends React.Component<
           <div>
             {this.state.displayDelete && (
               <ResetDeleteSingleCommit
-                action="delete"
+                action="revert"
                 commit={this.props.data}
                 model={this.props.model}
                 onClose={this.hideDeleteCommit}
