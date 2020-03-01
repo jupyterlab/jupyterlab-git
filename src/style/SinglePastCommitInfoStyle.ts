@@ -129,16 +129,28 @@ export const messageInput = style({
 export const button = style({
   outline: 'none',
   border: 'none',
-  color: 'var(--jp-layout-color0)'
+  color: 'var(--jp-layout-color0)',
+  cursor: 'pointer'
 });
 
 export const resetDeleteButton = style({
-  backgroundColor: 'var(--jp-error-color1)'
+  backgroundColor: 'var(--jp-error-color1)',
+  $nest: {
+    ':disabled': {
+      cursor: 'default',
+      backgroundColor: 'var(--jp-error-color2)'
+    }
+  }
 });
 
 export const cancelButton = style({
   backgroundColor: 'var(--jp-layout-color4)',
-  marginRight: '4px'
+  marginRight: '4px',
+  $nest: {
+    ':disabled': {
+      cursor: 'default'
+    }
+  }
 });
 
 export const fileList = style({
