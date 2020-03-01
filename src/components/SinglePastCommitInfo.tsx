@@ -27,7 +27,7 @@ import { Git } from '../tokens';
 import { parseFileExtension } from '../utils';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
-import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
+import { ResetRevertCommit } from './ResetRevertCommit';
 
 export interface ISinglePastCommitInfoProps {
   data: Git.ISingleCommitInfo;
@@ -183,7 +183,7 @@ export class SinglePastCommitInfo extends React.Component<
           </div>
           <div>
             {this.state.displayDelete && (
-              <ResetDeleteSingleCommit
+              <ResetRevertCommit
                 action="revert"
                 commit={this.props.data}
                 model={this.props.model}
@@ -191,7 +191,7 @@ export class SinglePastCommitInfo extends React.Component<
               />
             )}
             {this.state.displayReset && (
-              <ResetDeleteSingleCommit
+              <ResetRevertCommit
                 action="reset"
                 commit={this.props.data}
                 model={this.props.model}

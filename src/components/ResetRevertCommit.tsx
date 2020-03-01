@@ -15,7 +15,7 @@ import { Git, IGitExtension } from '../tokens';
 /**
  * Interface describing component properties.
  */
-export interface IResetDeleteProps {
+export interface IResetRevertCommitProps {
   /**
    * Type of action to perform.
    */
@@ -40,7 +40,7 @@ export interface IResetDeleteProps {
 /**
  * Interface describing component state.
  */
-export interface IResetDeleteState {
+export interface IResetRevertCommitState {
   /**
    * Commit message.
    */
@@ -55,9 +55,9 @@ export interface IResetDeleteState {
 /**
  * React component for reseting or deleting a single commit.
  */
-export class ResetDeleteSingleCommit extends React.Component<
-  IResetDeleteProps,
-  IResetDeleteState
+export class ResetRevertCommit extends React.Component<
+  IResetRevertCommitProps,
+  IResetRevertCommitState
 > {
   /**
    * Returns a React component for reseting or deleting a single commit.
@@ -65,7 +65,7 @@ export class ResetDeleteSingleCommit extends React.Component<
    * @param props - component properties
    * @returns React component
    */
-  constructor(props: IResetDeleteProps) {
+  constructor(props: IResetRevertCommitProps) {
     super(props);
     this.state = {
       message: '',
