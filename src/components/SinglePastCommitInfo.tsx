@@ -187,7 +187,7 @@ export class SinglePastCommitInfo extends React.Component<
                 action="delete"
                 commit={this.props.data}
                 model={this.props.model}
-                onCancel={this.hideDeleteCommit}
+                onClose={this.hideDeleteCommit}
               />
             )}
             {this.state.displayReset && (
@@ -195,7 +195,7 @@ export class SinglePastCommitInfo extends React.Component<
                 action="reset"
                 commit={this.props.data}
                 model={this.props.model}
-                onCancel={this.hideResetToCommit}
+                onClose={this.hideResetToCommit}
               />
             )}
           </div>
