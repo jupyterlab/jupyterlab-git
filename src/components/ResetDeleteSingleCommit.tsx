@@ -80,7 +80,7 @@ export class ResetDeleteSingleCommit extends React.Component<
         <div className={warningLabel}>
           {this.props.action === 'delete'
             ? "These changes will be reverted. Only commit if you're sure you're okay losing these changes."
-            : 'All changes after this will be gone forever (hard reset). Are you sure?'}
+            : 'All changes after this commit will be gone forever (hard reset). Are you sure?'}
         </div>
         {this.props.action === 'delete' ? (
           <TextareaAutosize
