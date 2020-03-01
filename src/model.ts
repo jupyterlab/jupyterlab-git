@@ -760,7 +760,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * General git refresh
+   * General Git refresh
    */
   async refresh(): Promise<void> {
     await this.refreshBranch();
@@ -768,7 +768,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Make request for a list of all git branches
+   * Make request for a list of all Git branches
    */
   async refreshBranch(): Promise<void> {
     const response = await this._branch();
@@ -788,7 +788,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Request git status refresh
+   * Request Git status refresh
    */
   async refreshStatus(): Promise<void> {
     await this.ready;
@@ -891,7 +891,7 @@ export class GitExtension implements IGitExtension {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
-      await this.refreshBranch();
+      await this.refresh();
       this._headChanged.emit();
       return response;
     } catch (err) {
