@@ -91,7 +91,7 @@ export class ResetDeleteSingleCommit extends React.Component<
             disabled={this.state.disabled}
             className={classes(commitDescriptionClass, messageInput)}
             minRows={3}
-            title={'Enter commit message'}
+            title="Enter a commit message"
             onChange={this._onMessageChange}
             placeholder={this._defaultMessage()}
           />
@@ -99,6 +99,7 @@ export class ResetDeleteSingleCommit extends React.Component<
         <button
           disabled={this.state.disabled}
           className={classes(button, cancelButton)}
+          title="Cancel changes"
           onClick={this._onCancelClick}
         >
           Cancel
@@ -106,6 +107,7 @@ export class ResetDeleteSingleCommit extends React.Component<
         <button
           disabled={this.state.disabled}
           className={classes(button, resetDeleteButton)}
+          title="Submit changes"
           onClick={this._onSubmitClick}
         >
           {this.props.action === 'delete'
