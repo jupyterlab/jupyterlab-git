@@ -489,6 +489,8 @@ export class GitExtension implements IGitExtension {
       }
 
       this.refreshStatus();
+      this._headChanged.emit();
+
       return response;
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
@@ -891,7 +893,7 @@ export class GitExtension implements IGitExtension {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
-      await this.refresh();
+      await this.refreshBranch();
       this._headChanged.emit();
       return response;
     } catch (err) {
