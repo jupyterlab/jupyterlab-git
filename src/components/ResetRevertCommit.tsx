@@ -53,14 +53,14 @@ export interface IResetRevertCommitState {
 }
 
 /**
- * React component for reseting or deleting a single commit.
+ * React component for reseting or reverting a single commit.
  */
 export class ResetRevertCommit extends React.Component<
   IResetRevertCommitProps,
   IResetRevertCommitState
 > {
   /**
-   * Returns a React component for reseting or deleting a single commit.
+   * Returns a React component for reseting or reverting a single commit.
    *
    * @param props - component properties
    * @returns React component
