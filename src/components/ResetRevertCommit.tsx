@@ -6,7 +6,7 @@ import {
   button,
   cancelButton,
   messageInput,
-  resetDeleteButton,
+  resetRevertButton,
   warningLabel
 } from '../style/SinglePastCommitInfoStyle';
 import { commitDescriptionClass } from '../style/CommitBox';
@@ -106,7 +106,7 @@ export class ResetRevertCommit extends React.Component<
         </button>
         <button
           disabled={this.state.disabled}
-          className={classes(button, resetDeleteButton)}
+          className={classes(button, resetRevertButton)}
           title="Submit changes"
           onClick={this._onSubmitClick}
         >

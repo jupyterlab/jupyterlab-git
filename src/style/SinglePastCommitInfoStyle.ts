@@ -133,7 +133,7 @@ export const button = style({
   cursor: 'pointer'
 });
 
-export const resetDeleteButton = style({
+export const resetRevertButton = style({
   backgroundColor: 'var(--jp-error-color1)',
   $nest: {
     '&:disabled': {
