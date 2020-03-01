@@ -117,6 +117,17 @@ export class ResetDeleteSingleCommit extends React.Component<
   }
 
   /**
+   * Callback invoked upon updating a commit message.
+   *
+   * @param event - event object
+   */
+  private _onMessageChange = (event: any): void => {
+    this.setState({
+      message: event.target.value
+    });
+  };
+
+  /**
    * Callback invoked upon clicking a "cancel" button.
    *
    * @param event - event object
@@ -127,17 +138,6 @@ export class ResetDeleteSingleCommit extends React.Component<
       disabled: true
     });
     this.props.onClose();
-  };
-
-  /**
-   * Callback invoked upon updating a commit message.
-   *
-   * @param event - event object
-   */
-  private _onMessageChange = (event: any): void => {
-    this.setState({
-      message: event.target.value
-    });
   };
 
   /**
