@@ -104,6 +104,7 @@ node_modules/
 
 #editors
 .vscode/
+.idea/
 
 package-lock.json
 MANIFEST

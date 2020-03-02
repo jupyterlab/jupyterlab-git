@@ -168,14 +168,14 @@ class Git:
             }
         """
         if single_commit:
-            cmd = ["git", "diff", "{}^!".format(single_commit), "--name-only"]
+            cmd = ["git", "diff", "-z", "{}^!".format(single_commit), "--name-only"]
         elif base and remote:
             if base == "WORKING":
-                cmd = ["git", "diff", remote, "--name-only"]
+                cmd = ["git", "diff", "-z", remote, "--name-only"]
             elif base == "INDEX":
-                cmd = ["git", "diff", "--staged", remote, "--name-only"]
+                cmd = ["git", "diff", "-z", "--staged", remote, "--name-only"]
             else:
-                cmd = ["git", "diff", base, remote, "--name-only"]
+                cmd = ["git", "diff", "-z", base, remote, "--name-only"]
         else:
             raise tornado.web.HTTPError(
                 400, "Either single_commit or (base and remote) must be provided"
@@ -236,7 +236,7 @@ class Git:
         """
         Execute git status command & return the result.
         """
-        cmd = ["git", "status", "--porcelain", "-u"]
+        cmd = ["git", "status", "-z", "--porcelain", "-u"]
         code, my_output, my_error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path),
         )
@@ -272,6 +272,7 @@ class Git:
         cmd = [
             "git",
             "log",
+            "-z",
             "--pretty=format:%H%n%an%n%ar%n%s",
             ("-%d" % history_count),
         ]
@@ -314,7 +315,7 @@ class Git:
         Execute git log -1 --stat --numstat --oneline command (used to get
         insertions & deletions per file) & return the result.
         """
-        cmd = ["git", "log", "-1", "--stat", "--numstat", "--oneline", selected_hash]
+        cmd = ["git", "log", "-z", "-1", "--stat", "--numstat", "--oneline", selected_hash]
         code, my_output, my_error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path),
         )
@@ -370,7 +371,7 @@ class Git:
         """
         Execute git diff command & return the result.
         """
-        cmd = ["git", "diff", "--numstat"]
+        cmd = ["git", "diff", "-z", "--numstat"]
         code, my_output, my_error = await execute(cmd, cwd=top_repo_path)
 
         if code != 0:
@@ -732,7 +733,7 @@ class Git:
         """
         Execute git commit <filename> command & return the result.
         """
-        cmd = ["git", "commit", "-m", commit_msg]
+        cmd = ["git", "commit", "-z", "-m", commit_msg]
         code, _, error = await execute(cmd, cwd=top_repo_path)
 
         if code != 0:
@@ -911,7 +912,7 @@ class Git:
         """
         Execute git show <ref:filename> command & return the result.
         """
-        command = ["git", "show", "{}:{}".format(ref, filename)]
+        command = ["git", "show", "-z", "{}:{}".format(ref, filename)]
 
         code, output, error = await execute(command, cwd=top_repo_path)
 
