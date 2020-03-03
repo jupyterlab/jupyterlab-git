@@ -1,5 +1,5 @@
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { JLIcon } from '@jupyterlab/ui-components';
+import { fileIcon } from '@jupyterlab/ui-components';
 import { insertionsMadeIcon, deletionsMadeIcon } from '../style/icons';
 import * as React from 'react';
 import { classes } from 'typestyle/';
@@ -132,8 +132,7 @@ export class SinglePastCommitInfo extends React.Component<
         <div className={commitStyle}>
           <div className={commitOverviewNumbers}>
             <span>
-              <JLIcon.getReact
-                name="file"
+              <fileIcon.react
                 className={iconStyle}
                 tag="span"
                 title="# Files Changed"
