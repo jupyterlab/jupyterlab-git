@@ -14,11 +14,13 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Menu } from '@lumino/widgets';
 import { addCommands, CommandIDs } from './gitMenuCommands';
+import { gitIcon } from './icons';
 import { GitExtension } from './model';
 import { IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 
+export * from './icons';
 export { Git, IGitExtension } from './tokens';
 
 const RESOURCES = [
@@ -98,7 +100,7 @@ async function activate(
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(gitExtension, settings, renderMime);
     gitPlugin.id = 'jp-git-sessions';
-    gitPlugin.title.iconClass = 'jp-SideBar-tabIcon jp-GitIcon';
+    gitPlugin.title.icon = gitIcon;
     gitPlugin.title.caption = 'Git';
 
     // Let the application restorer track the running panel for restoration of

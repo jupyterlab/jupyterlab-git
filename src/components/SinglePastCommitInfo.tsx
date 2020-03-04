@@ -1,6 +1,6 @@
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { fileIcon } from '@jupyterlab/ui-components';
-import { deletionsIcon, insertionsIcon } from '../style/icons';
+import { deletionsIcon, insertionsIcon } from '../icons';
 import * as React from 'react';
 import { classes } from 'typestyle/';
 import { GitExtension } from '../model';
