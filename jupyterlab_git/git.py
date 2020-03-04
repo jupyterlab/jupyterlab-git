@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 from urllib.parse import unquote
+from codecs import decode, escape_decode
 
 import pexpect
 import tornado
@@ -262,6 +263,8 @@ class Git:
                 to1 = to1[1:]
             if to1.endswith('"'):
                 to1 = to1[:-1]
+            to1 = decode(escape_decode(to1)[0],'utf-8')
+            from_path = decode(escape_decode(from_path)[0],'utf-8')
             result.append({"x": line[0], "y": line[1], "to": to1, "from": from_path})
         return {"code": code, "files": result}
 
