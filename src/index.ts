@@ -1,10 +1,14 @@
+// exports
+export * from './icons';
+export { Git, IGitExtension } from './tokens';
+
+// external imports
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   FileBrowser,
   FileBrowserModel,
@@ -12,16 +16,16 @@ import {
 } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Menu } from '@lumino/widgets';
+
+// local imports
 import { addCommands, CommandIDs } from './gitMenuCommands';
 import { gitIcon } from './icons';
 import { GitExtension } from './model';
 import { IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
-
-export * from './icons';
-export { Git, IGitExtension } from './tokens';
 
 const RESOURCES = [
   {

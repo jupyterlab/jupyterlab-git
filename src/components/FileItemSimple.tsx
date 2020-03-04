@@ -1,12 +1,16 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { LabIcon, fileIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle';
+
+import { isDiffSupported } from './diff/Diff';
+import { openDiffView } from './diff/DiffWidget';
+import { ISpecialRef } from './diff/model';
 import { GitExtension } from '../model';
 import {
   fileButtonStyle,
   fileGitButtonStyle,
-  fileIconStyle,
   fileLabelStyle,
   fileStyle
 } from '../style/FileItemStyle';
@@ -17,10 +21,7 @@ import {
   discardFileButtonStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
-import { openListedFile, parseFileExtension } from '../utils';
-import { isDiffSupported } from './diff/Diff';
-import { openDiffView } from './diff/DiffWidget';
-import { ISpecialRef } from './diff/model';
+import { openListedFile } from '../utils';
 
 export interface IGitMarkBoxProps {
   fname: string;
@@ -97,9 +98,7 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
   async discardSelectedFileChanges() {
     const result = await showDialog({
       title: 'Discard changes',
-      body: `Are you sure you want to permanently discard changes to ${
-        this.props.file.from
-      }? This action cannot be undone.`,
+      body: `Are you sure you want to permanently discard changes to ${this.props.file.from}? This action cannot be undone.`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
     });
     if (result.button.accept) {
@@ -108,6 +107,8 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
   }
 
   render() {
+    const ft = this.props.file.ft;
+
     return (
       <li className={fileStyle}>
         <GitMarkBox
@@ -115,11 +116,11 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
           stage={this.props.stage}
           model={this.props.model}
         />
-        <span
-          className={classes(
-            fileIconStyle,
-            parseFileExtension(this.props.file.to)
-          )}
+        <LabIcon.resolveReact
+          icon={ft?.icon || (ft?.iconClass ? undefined : fileIcon)}
+          iconClass={classes(ft?.iconClass, 'jp-Icon')}
+          stylesheet="listing"
+          tag="span"
         />
         <span
           className={fileLabelStyle}

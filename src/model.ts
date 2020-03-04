@@ -589,11 +589,21 @@ export class GitExtension implements IGitExtension {
         selected_hash: hash,
         current_path: path
       });
+      const data = await response.json();
       if (response.status !== 200) {
-        const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
-      return response.json();
+
+      // lookup filetypes
+      data.modifiedFiles = data.modifiedFiles?.map(
+        (f: Git.ICommitModifiedFile) => {
+          f.ft = this._app.docRegistry.getFileTypesForPath(
+            f.modified_file_path
+          )[0];
+          return f;
+        }
+      );
+      return data;
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     }
@@ -807,7 +817,13 @@ export class GitExtension implements IGitExtension {
         this._setStatus([]);
       }
 
-      this._setStatus((data as Git.IStatusResult).files);
+      // lookup filetypes then set status
+      this._setStatus(
+        data.files.map((f: Git.IStatusFileResult) => {
+          f.ft = this._app.docRegistry.getFileTypesForPath(f.to)[0];
+          return f;
+        })
+      );
     } catch (err) {
       console.error(err);
       // TODO should we notify the user

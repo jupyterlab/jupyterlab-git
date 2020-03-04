@@ -1,7 +1,12 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { LabIcon, fileIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle';
+
+import { isDiffSupported } from './diff/Diff';
+import { openDiffView } from './diff/DiffWidget';
+import { ISpecialRef } from './diff/model';
 import { GitExtension } from '../model';
 import {
   disabledFileStyle,
@@ -12,7 +17,6 @@ import {
   fileChangedLabelInfoStyle,
   fileChangedLabelStyle,
   fileGitButtonStyle,
-  fileIconStyle,
   fileLabelStyle,
   fileStyle,
   selectedFileChangedLabelStyle,
@@ -26,15 +30,7 @@ import {
   discardFileButtonStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
-import {
-  extractFilename,
-  openListedFile,
-  parseFileExtension,
-  parseSelectedFileExtension
-} from '../utils';
-import { isDiffSupported } from './diff/Diff';
-import { openDiffView } from './diff/DiffWidget';
-import { ISpecialRef } from './diff/model';
+import { extractFilename, openListedFile } from '../utils';
 
 export interface IFileItemProps {
   file: Git.IStatusFileResult;
@@ -120,16 +116,6 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
             )
           : classes(fileChangedLabelStyle, fileChangedLabelInfoStyle);
       }
-    }
-  }
-
-  getFileLabelIconClass() {
-    if (this.showDiscardWarning()) {
-      return classes(fileIconStyle, parseFileExtension(this.props.file.to));
-    } else {
-      return this.checkSelected()
-        ? classes(fileIconStyle, parseSelectedFileExtension(this.props.file.to))
-        : classes(fileIconStyle, parseFileExtension(this.props.file.to));
     }
   }
 
@@ -221,9 +207,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
     this.props.updateSelectedDiscardFile(this.props.fileIndex);
     const result = await showDialog({
       title: 'Discard changes',
-      body: `Are you sure you want to permanently discard changes to ${
-        this.props.file.from
-      }? This action cannot be undone.`,
+      body: `Are you sure you want to permanently discard changes to ${this.props.file.from}? This action cannot be undone.`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
     });
     if (result.button.accept) {
@@ -234,6 +218,8 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
   }
 
   render() {
+    const ft = this.props.file.ft;
+
     return (
       <li
         className={this.getFileClass()}
@@ -248,7 +234,12 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
             this.props.moveFile(this.props.file.to);
           }}
         />
-        <span className={this.getFileLabelIconClass()} />
+        <LabIcon.resolveReact
+          icon={ft?.icon || (ft?.iconClass ? undefined : fileIcon)}
+          iconClass={classes(ft?.iconClass, 'jp-Icon')}
+          stylesheet="listing"
+          tag="span"
+        />
         <span
           className={this.getFileLabelClass()}
           onContextMenu={e => {

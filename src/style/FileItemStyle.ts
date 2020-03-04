@@ -38,16 +38,6 @@ export const disabledFileStyle = style({
   opacity: 0.5
 });
 
-export const fileIconStyle = style({
-  flex: '0 0 auto',
-  padding: '0px 8px',
-  marginRight: '4px',
-  verticalAlign: 'baseline',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});
-
 export const fileLabelStyle = style({
   fontSize: 'var(--jp-ui-font-size1)',
   flex: '1 1 auto',

@@ -1,4 +1,5 @@
 import { IChangedArgs } from '@jupyterlab/coreutils';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Token, JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
@@ -366,6 +367,9 @@ export namespace Git {
     y: string;
     to: string;
     from: string;
+
+    // filetype as determined by app.docRegistry
+    ft?: DocumentRegistry.IFileType;
   }
 
   /** Interface for GitStatus request result,
@@ -395,6 +399,9 @@ export namespace Git {
     modified_file_name: string;
     insertion: string;
     deletion: string;
+
+    // filetype as determined by app.docRegistry
+    ft?: DocumentRegistry.IFileType;
   }
 
   /** Interface for GitDetailedLog request result,

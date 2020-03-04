@@ -1,10 +1,13 @@
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { fileIcon } from '@jupyterlab/ui-components';
-import { deletionsIcon, insertionsIcon } from '../icons';
+import { LabIcon, fileIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle/';
+
+import { isDiffSupported } from './diff/Diff';
+import { openDiffView } from './diff/DiffWidget';
+import { deletionsIcon, insertionsIcon } from '../icons';
 import { GitExtension } from '../model';
-import { fileIconStyle } from '../style/FileItemStyle';
+import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
 import {
   changeStageButtonStyle,
   discardFileButtonStyle
@@ -25,10 +28,6 @@ import {
   revertButtonStyle
 } from '../style/SinglePastCommitInfoStyle';
 import { Git } from '../tokens';
-import { parseFileExtension } from '../utils';
-import { isDiffSupported } from './diff/Diff';
-import { openDiffView } from './diff/DiffWidget';
-import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
 
 export interface ISinglePastCommitInfoProps {
   data: Git.ISingleCommitInfo;
@@ -74,9 +73,7 @@ export class SinglePastCommitInfo extends React.Component<
       );
     } catch (err) {
       console.error(
-        `Error while gettting detailed log for commit ${
-          this.props.data.commit
-        } and path ${this.props.model.pathRepository}`,
+        `Error while gettting detailed log for commit ${this.props.data.commit} and path ${this.props.model.pathRepository}`,
         err
       );
       this.setState(() => ({ loadingState: 'error' }));
@@ -201,15 +198,17 @@ export class SinglePastCommitInfo extends React.Component<
             {this.state.modifiedFiles.length > 0 &&
               this.state.modifiedFiles.map(
                 (modifiedFile, modifiedFileIndex) => {
+                  const {
+                    ft,
+                    modified_file_name,
+                    modified_file_path
+                  } = modifiedFile;
                   return (
                     <li
                       className={commitDetailFileStyle}
                       key={modifiedFileIndex}
                     >
                       <span
-                        className={`${fileIconStyle} ${parseFileExtension(
-                          modifiedFile.modified_file_path
-                        )}`}
                         onDoubleClick={() => {
                           window.open(
                             'https://github.com/search?q=' +
@@ -217,17 +216,26 @@ export class SinglePastCommitInfo extends React.Component<
                               '&type=Commits&utf8=%E2%9C%93'
                           );
                         }}
-                      />
-                      <span className={commitDetailFilePathStyle}>
-                        {modifiedFile.modified_file_name}
+                      >
+                        <LabIcon.resolveReact
+                          icon={
+                            ft?.icon || (ft?.iconClass ? undefined : fileIcon)
+                          }
+                          iconClass={classes(ft?.iconClass, 'jp-Icon')}
+                          stylesheet="listing"
+                          tag="span"
+                        />
+                        <span className={commitDetailFilePathStyle}>
+                          {modified_file_name}
+                        </span>
                       </span>
-                      {isDiffSupported(modifiedFile.modified_file_path) && (
+                      {isDiffSupported(modified_file_path) && (
                         <button
                           className={`${diffIconStyle}`}
                           title={'View file changes'}
                           onClick={async () => {
                             await openDiffView(
-                              modifiedFile.modified_file_path,
+                              modified_file_path,
                               this.props.model,
                               {
                                 previousRef: {
