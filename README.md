@@ -40,7 +40,7 @@ jupyter labextension list
 
   - Be sure to be in a Git repository in the filebrowser tab
 
-  - Check the server log. If you see a warning with a 404 code similar to:  
+  - Check the server log. If you see a warning with a 404 code similar to:
     `[W 00:27:41.800 LabApp] 404 GET /git/server_root?1576081660665`
 
     Explicitly enable the server extension by running:
@@ -106,7 +106,6 @@ cd jupyterlab-git
 
 # Install the server extension in development mode and enable it
 pip install -e .[test]
-jupyter serverextension enable --py jupyterlab_git
 
 # Build the labextension and dev-mode link it to jlab
 jlpm build
