@@ -15,6 +15,7 @@ import {
 import {
   commitDetailFilePathStyle,
   commitDetailFileStyle,
+  commitDetailFileInnerStyle,
   commitDetailHeader,
   commitDetailStyle,
   commitOverviewNumbers,
@@ -209,6 +210,7 @@ export class SinglePastCommitInfo extends React.Component<
                       key={modifiedFileIndex}
                     >
                       <span
+                        className={commitDetailFileInnerStyle}
                         onDoubleClick={() => {
                           window.open(
                             'https://github.com/search?q=' +
@@ -218,11 +220,9 @@ export class SinglePastCommitInfo extends React.Component<
                         }}
                       >
                         <LabIcon.resolveReact
-                          icon={
-                            ft?.icon || (ft?.iconClass ? undefined : fileIcon)
-                          }
+                          icon={ft?.icon}
                           iconClass={classes(ft?.iconClass, 'jp-Icon')}
-                          stylesheet="listing"
+                          elementPosition="center"
                           tag="span"
                         />
                         <span className={commitDetailFilePathStyle}>

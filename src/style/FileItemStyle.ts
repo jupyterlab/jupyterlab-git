@@ -26,6 +26,12 @@ export const selectedFileStyle = style({
     '&:hover': {
       color: 'white',
       background: 'var(--jp-brand-color1) !important'
+    },
+    '& .jp-icon-selectable[fill]': {
+      fill: '#fff'
+    },
+    '& .jp-icon-selectable-inverse[fill]': {
+      fill: 'var(--jp-brand-color1)'
     }
   }
 });

@@ -22,8 +22,7 @@
     "strict": true,
     "strictNullChecks": false,
     "target": "es2017",
-    "types": ["jest"],
-    "plugins": [{ "name": "typescript-tslint-plugin" }]
+    "types": ["jest"]
   },
   "include": ["src/**/*"]
 }

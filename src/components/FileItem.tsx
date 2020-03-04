@@ -1,6 +1,6 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { LabIcon, fileIcon } from '@jupyterlab/ui-components';
+import { LabIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle';
 
@@ -235,7 +235,7 @@ export class FileItem extends React.Component<IFileItemProps, {}> {
           }}
         />
         <LabIcon.resolveReact
-          icon={ft?.icon || (ft?.iconClass ? undefined : fileIcon)}
+          icon={ft?.icon}
           iconClass={classes(ft?.iconClass, 'jp-Icon')}
           stylesheet="listing"
           tag="span"

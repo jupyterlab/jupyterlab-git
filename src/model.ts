@@ -1,11 +1,13 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
+
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
 
@@ -597,9 +599,7 @@ export class GitExtension implements IGitExtension {
       // lookup filetypes
       data.modifiedFiles = data.modifiedFiles?.map(
         (f: Git.ICommitModifiedFile) => {
-          f.ft = this._app.docRegistry.getFileTypesForPath(
-            f.modified_file_path
-          )[0];
+          f.ft = this._resolveFileType(f.modified_file_path);
           return f;
         }
       );
@@ -820,7 +820,7 @@ export class GitExtension implements IGitExtension {
       // lookup filetypes then set status
       this._setStatus(
         data.files.map((f: Git.IStatusFileResult) => {
-          f.ft = this._app.docRegistry.getFileTypesForPath(f.to)[0];
+          f.ft = this._resolveFileType(f.to);
           return f;
         })
       );
@@ -974,6 +974,21 @@ export class GitExtension implements IGitExtension {
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     }
+  }
+
+  /**
+   * Resolve path to filetype
+   */
+  protected _resolveFileType(path: string): DocumentRegistry.IFileType {
+    // test if directory
+    if (path.endsWith('/')) {
+      return DocumentRegistry.defaultDirectoryFileType;
+    }
+
+    return (
+      this._app.docRegistry.getFileTypesForPath(path)[0] ||
+      DocumentRegistry.defaultTextFileType
+    );
   }
 
   /**

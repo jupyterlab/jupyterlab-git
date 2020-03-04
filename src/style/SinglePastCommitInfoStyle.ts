@@ -54,6 +54,11 @@ export const commitDetailFileStyle = style({
   whiteSpace: 'nowrap'
 });
 
+export const commitDetailFileInnerStyle = style({
+  display: 'flex',
+  flexDirection: 'row'
+});
+
 export const commitDetailFilePathStyle = style({
   fontSize: 'var(--jp-ui-font-size1)',
   marginRight: '4px',
