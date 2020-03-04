@@ -77,22 +77,6 @@ export const iconStyle = style({
   right: '10px'
 });
 
-export const insertionsIconStyle = style({
-  $nest: {
-    '.jp-icon3': {
-      fill: '#00dc00'
-    }
-  }
-});
-
-export const deletionsIconStyle = style({
-  $nest: {
-    '.jp-icon3': {
-      fill: '#ff0000'
-    }
-  }
-});
-
 export const diffIconStyle = style({
   backgroundColor: 'transparent',
   backgroundPosition: 'center',

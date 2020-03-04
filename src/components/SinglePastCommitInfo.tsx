@@ -24,8 +24,6 @@ import {
   fileList,
   floatRightStyle,
   iconStyle,
-  insertionsIconStyle,
-  deletionsIconStyle,
   revertButtonStyle
 } from '../style/SinglePastCommitInfoStyle';
 import { Git } from '../tokens';
@@ -139,7 +137,7 @@ export class SinglePastCommitInfo extends React.Component<
             </span>
             <span>
               <insertionsIcon.react
-                className={classes(iconStyle, insertionsIconStyle)}
+                className={iconStyle}
                 tag="span"
                 title="# Insertions"
               />
@@ -147,7 +145,7 @@ export class SinglePastCommitInfo extends React.Component<
             </span>
             <span>
               <deletionsIcon.react
-                className={classes(iconStyle, deletionsIconStyle)}
+                className={iconStyle}
                 tag="span"
                 title="# Deletions"
               />

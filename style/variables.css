@@ -14,6 +14,14 @@
   --jp-icon-git-clone: url('./icons/git-clone.svg');
   --jp-icon-move-file-down-hover: url('./icons/move-file-down-hover.svg');
   --jp-icon-move-file-up-hover: url('./icons/move-file-up-hover.svg');
+
+  /* TODO: remove when these get pulled into core */
+  /* colors that work well with light or dark backgrounds */
+  --jp-contrast-blue: var(--md-blue-600);
+  --jp-contrast-green: var(--md-green-600);
+  --jp-contrast-pink: var(--md-pink-600);
+  --jp-contrast-purple: var(--md-purple-600);
+  --jp-contrast-red: var(--md-red-600);
 }
 
 [data-jp-theme-light='true'] {

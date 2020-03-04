@@ -1,0 +1,40 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/* TODO: remove this file when the high contrast icon styles
+get pulled into core */
+
+/* icon colors that contrast well with each other and most backgrounds */
+.jp-icon-contrast-blue[fill] {
+  fill: var(--jp-contrast-blue);
+}
+.jp-icon-contrast-green[fill] {
+  fill: var(--jp-contrast-green);
+}
+.jp-icon-contrast-pink[fill] {
+  fill: var(--jp-contrast-pink);
+}
+.jp-icon-contrast-purple[fill] {
+  fill: var(--jp-contrast-purple);
+}
+.jp-icon-contrast-red[fill] {
+  fill: var(--jp-contrast-red);
+}
+
+.jp-icon-contrast-blue[stroke] {
+  stroke: var(--jp-contrast-blue);
+}
+.jp-icon-contrast-green[stroke] {
+  stroke: var(--jp-contrast-green);
+}
+.jp-icon-contrast-pink[stroke] {
+  stroke: var(--jp-contrast-pink);
+}
+.jp-icon-contrast-purple[stroke] {
+  stroke: var(--jp-contrast-purple);
+}
+.jp-icon-contrast-red[stroke] {
+  stroke: var(--jp-contrast-red);
+}
