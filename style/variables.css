@@ -4,42 +4,42 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-checkmark: url('./images/checkmark.svg');
+  --jp-checkmark: url('./icons/checkmark.svg');
   --jp-git-diff-added-color: rgba(155, 185, 85, 0.2);
   --jp-git-diff-deleted-color: rgba(255, 0, 0, 0.2);
   --jp-git-diff-output-border-color: rgba(0, 141, 255, 0.7);
   --jp-git-diff-output-color: rgba(0, 141, 255, 0.3);
-  --jp-icon-clear-white: url('./images/clear-white.svg');
-  --jp-icon-discard-file-selected: url('./images/discard-selected.svg');
-  --jp-icon-git-clone: url('./images/git-clone.svg');
-  --jp-icon-move-file-down-hover: url('./images/move-file-down-hover.svg');
-  --jp-icon-move-file-up-hover: url('./images/move-file-up-hover.svg');
+  --jp-icon-clear-white: url('./icons/clear-white.svg');
+  --jp-icon-discard-file-selected: url('./icons/discard-selected.svg');
+  --jp-icon-git-clone: url('./icons/git-clone.svg');
+  --jp-icon-move-file-down-hover: url('./icons/move-file-down-hover.svg');
+  --jp-icon-move-file-up-hover: url('./icons/move-file-up-hover.svg');
 }
 
 [data-jp-theme-light='true'] {
-  --jp-icon-arrow-down: url('./images/arrow-down.svg');
-  --jp-icon-diff: url('./images/diff-hover.svg');
-  --jp-icon-discard-file: url('./images/discard.svg');
-  --jp-icon-git-branch: url('./images/git-branch.svg');
-  --jp-icon-git-pull: url('./images/git-pull.svg');
-  --jp-icon-git-push: url('./images/git-push.svg');
-  --jp-icon-git-repo: url('./images/desktop.svg');
-  --jp-icon-move-file-down: url('./images/move-file-down.svg');
-  --jp-icon-move-file-up: url('./images/move-file-up.svg');
-  --jp-icon-plus: url('./images/plus.svg');
-  --jp-icon-rewind: url('./images/rewind.svg');
+  --jp-icon-arrow-down: url('./icons/arrow-down.svg');
+  --jp-icon-diff: url('./icons/diff-hover.svg');
+  --jp-icon-discard-file: url('./icons/discard.svg');
+  --jp-icon-git-branch: url('./icons/git-branch.svg');
+  --jp-icon-git-pull: url('./icons/git-pull.svg');
+  --jp-icon-git-push: url('./icons/git-push.svg');
+  --jp-icon-git-repo: url('./icons/desktop.svg');
+  --jp-icon-move-file-down: url('./icons/move-file-down.svg');
+  --jp-icon-move-file-up: url('./icons/move-file-up.svg');
+  --jp-icon-plus: url('./icons/plus.svg');
+  --jp-icon-rewind: url('./icons/rewind.svg');
 }
 
 [data-jp-theme-light='false'] {
-  --jp-icon-arrow-down: url('./images/arrow-down-white.svg');
-  --jp-icon-diff: url('./images/diff-hover-dk.svg');
-  --jp-icon-discard-file: url('./images/discard-selected.svg');
-  --jp-icon-git-branch: url('./images/git-branch-white.svg');
-  --jp-icon-git-pull: url('./images/git-pull-white.svg');
-  --jp-icon-git-push: url('./images/git-push-white.svg');
-  --jp-icon-git-repo: url('./images/desktop-white.svg');
-  --jp-icon-move-file-down: url('./images/move-file-down-hover.svg');
-  --jp-icon-move-file-up: url('./images/move-file-up-hover.svg');
-  --jp-icon-plus: url('./images/plus-white.svg');
-  --jp-icon-rewind: url('./images/rewind-white.svg');
+  --jp-icon-arrow-down: url('./icons/arrow-down-white.svg');
+  --jp-icon-diff: url('./icons/diff-hover-dk.svg');
+  --jp-icon-discard-file: url('./icons/discard-selected.svg');
+  --jp-icon-git-branch: url('./icons/git-branch-white.svg');
+  --jp-icon-git-pull: url('./icons/git-pull-white.svg');
+  --jp-icon-git-push: url('./icons/git-push-white.svg');
+  --jp-icon-git-repo: url('./icons/desktop-white.svg');
+  --jp-icon-move-file-down: url('./icons/move-file-down-hover.svg');
+  --jp-icon-move-file-up: url('./icons/move-file-up-hover.svg');
+  --jp-icon-plus: url('./icons/plus-white.svg');
+  --jp-icon-rewind: url('./icons/rewind-white.svg');
 }
