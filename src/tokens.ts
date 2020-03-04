@@ -413,7 +413,7 @@ export namespace Git {
     modified_files_count?: string;
     number_of_insertions?: string;
     number_of_deletions?: string;
-    modified_files?: [ICommitModifiedFile];
+    modified_files?: ICommitModifiedFile[];
   }
 
   /** Interface for GitLog request result,

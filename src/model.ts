@@ -591,18 +591,18 @@ export class GitExtension implements IGitExtension {
         selected_hash: hash,
         current_path: path
       });
-      const data = await response.json();
+
       if (response.status !== 200) {
+        const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
 
       // lookup filetypes
-      data.modifiedFiles = data.modifiedFiles?.map(
-        (f: Git.ICommitModifiedFile) => {
-          f.ft = this._resolveFileType(f.modified_file_path);
-          return f;
-        }
-      );
+      let data: Git.ISingleCommitFilePathInfo = await response.json();
+      data.modified_files = data.modified_files?.map(f => {
+        f.ft = this._resolveFileType(f.modified_file_path);
+        return f;
+      });
       return data;
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
@@ -810,16 +810,17 @@ export class GitExtension implements IGitExtension {
       let response = await httpGitRequest('/git/status', 'POST', {
         current_path: path
       });
-      const data = await response.json();
       if (response.status !== 200) {
+        const data = await response.json();
         console.error(data.message);
         // TODO should we notify the user
         this._setStatus([]);
       }
 
       // lookup filetypes then set status
+      let data: Git.IStatusResult = await response.json();
       this._setStatus(
-        data.files.map((f: Git.IStatusFileResult) => {
+        data.files.map(f => {
           f.ft = this._resolveFileType(f.to);
           return f;
         })
