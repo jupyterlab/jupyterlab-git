@@ -84,5 +84,17 @@
       "ban-keywords",
       "allow-pascal-case"
     ]
+  },
+  "linterOptions": {
+    "exclude": [
+      "**/*.d.ts",
+      "src/style/icons.ts",
+      "node_modules/**/*.ts",
+      "node_modules/**/*.tsx",
+
+      ".idea/",
+      ".history/",
+      ".vscode/"
+    ]
   }
 }
