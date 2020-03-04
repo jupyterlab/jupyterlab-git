@@ -24,7 +24,6 @@
 }
 
 [data-jp-theme-light='true'] {
-  --jp-icon-diff: url('./icons/diff-hover.svg');
   --jp-icon-discard-file: url('./icons/discard.svg');
   --jp-icon-git-branch: url('./icons/git-branch.svg');
   --jp-icon-git-pull: url('./icons/git-pull.svg');
@@ -37,7 +36,6 @@
 }
 
 [data-jp-theme-light='false'] {
-  --jp-icon-diff: url('./icons/diff-hover-dk.svg');
   --jp-icon-discard-file: url('./icons/discard-selected.svg');
   --jp-icon-git-branch: url('./icons/git-branch-white.svg');
   --jp-icon-git-pull: url('./icons/git-pull-white.svg');

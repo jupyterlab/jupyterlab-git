@@ -7,6 +7,7 @@ import { classes } from 'typestyle';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
+import { diffIcon } from '../icons';
 import { GitExtension } from '../model';
 import {
   fileButtonStyle,
@@ -17,7 +18,6 @@ import {
 import { gitMarkBoxStyle } from '../style/FileItemSimpleStyle';
 import {
   changeStageButtonStyle,
-  diffFileButtonStyle,
   discardFileButtonStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
@@ -73,12 +73,7 @@ export interface IFileItemSimpleProps {
 
 export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
   getDiffFileIconClass() {
-    return classes(
-      fileButtonStyle,
-      changeStageButtonStyle,
-      fileGitButtonStyle,
-      diffFileButtonStyle
-    );
+    return classes(fileButtonStyle, changeStageButtonStyle, fileGitButtonStyle);
   }
 
   getDiscardFileIconClass() {
@@ -178,7 +173,9 @@ export class FileItemSimple extends React.Component<IFileItemSimpleProps> {
             this.props.renderMime
           );
         }}
-      />
+      >
+        <diffIcon.react elementPosition="center" paddingLeft="0px" />
+      </button>
     );
   }
 }

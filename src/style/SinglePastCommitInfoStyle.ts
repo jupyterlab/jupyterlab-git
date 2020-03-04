@@ -77,11 +77,8 @@ export const iconStyle = style({
   right: '10px'
 });
 
-export const diffIconStyle = style({
+export const diffButtonStyle = style({
   backgroundColor: 'transparent',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  backgroundImage: 'var(--jp-icon-diff)',
   border: 'none',
   outline: 'none'
 });

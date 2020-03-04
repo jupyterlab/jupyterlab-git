@@ -5,7 +5,7 @@ import { classes } from 'typestyle/';
 
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
-import { deletionsIcon, insertionsIcon } from '../icons';
+import { deletionsIcon, diffIcon, insertionsIcon } from '../icons';
 import { GitExtension } from '../model';
 import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
 import {
@@ -20,7 +20,7 @@ import {
   commitDetailStyle,
   commitOverviewNumbers,
   commitStyle,
-  diffIconStyle,
+  diffButtonStyle,
   fileList,
   floatRightStyle,
   iconStyle,
@@ -202,6 +202,21 @@ export class SinglePastCommitInfo extends React.Component<
                     modified_file_name,
                     modified_file_path
                   } = modifiedFile;
+
+                  const onClickDiff = async () => {
+                    await openDiffView(
+                      modified_file_path,
+                      this.props.model,
+                      {
+                        previousRef: {
+                          gitRef: this.props.data.pre_commit
+                        },
+                        currentRef: { gitRef: this.props.data.commit }
+                      },
+                      this.props.renderMime
+                    );
+                  };
+
                   return (
                     <li
                       className={commitDetailFileStyle}
@@ -229,22 +244,12 @@ export class SinglePastCommitInfo extends React.Component<
                       </span>
                       {isDiffSupported(modified_file_path) && (
                         <button
-                          className={`${diffIconStyle}`}
+                          className={diffButtonStyle}
                           title={'View file changes'}
-                          onClick={async () => {
-                            await openDiffView(
-                              modified_file_path,
-                              this.props.model,
-                              {
-                                previousRef: {
-                                  gitRef: this.props.data.pre_commit
-                                },
-                                currentRef: { gitRef: this.props.data.commit }
-                              },
-                              this.props.renderMime
-                            );
-                          }}
-                        />
+                          onClick={onClickDiff}
+                        >
+                          <diffIcon.react elementPosition="center" />
+                        </button>
                       )}
                     </li>
                   );
