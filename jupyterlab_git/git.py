@@ -596,14 +596,18 @@ class Git:
 
     async def add_all_untracked(self, top_repo_path):
         """
-        Execute git add all untracked command & return the result.
+        Find all untracked files, execute git add & return the result.
         """
-        cmd = ["echo", "a\n*\nq\n", "|", "git", "add", "-i"]
-        code, _, error = await execute(cmd, cwd=top_repo_path)
+        status = await self.status(top_repo_path)
+        if status["code"] != 0:
+            return status
 
-        if code != 0:
-            return {"code": code, "command": " ".join(cmd), "message": error}
-        return {"code": code}
+        unstaged = []
+        for f in status["files"]:
+            if f["x"]=="?" and f["y"]=="?":
+                unstaged.append(f["from"].strip('"'))
+
+        return await self.add(unstaged, top_repo_path)
 
     async def reset(self, filename, top_repo_path):
         """
