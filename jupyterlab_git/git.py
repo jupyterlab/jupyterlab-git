@@ -315,7 +315,7 @@ class Git:
 
     async def detailed_log(self, selected_hash, current_path):
         """
-        Execute git log -1 --stat --numstat --oneline command (used to get
+        Execute git log -1 --stat --numstat --oneline -z command (used to get
         insertions & deletions per file) & return the result.
         """
         cmd = ["git", "log", "-1", "--stat", "--numstat", "--oneline", "-z", selected_hash]
