@@ -24,7 +24,7 @@ async def test_changed_files_single_commit():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.return_value = tornado.gen.maybe_future(
-            (0, "file1.ipynb\nfile2.py", "")
+            (0, "file1.ipynb\x00file2.py", "")
         )
 
         # When
@@ -39,6 +39,7 @@ async def test_changed_files_single_commit():
                 "diff",
                 "64950a634cd11d1a01ddfedaeffed67b531cb11e^!",
                 "--name-only",
+                "-z",
             ],
             cwd="/bin",
         )
@@ -50,7 +51,7 @@ async def test_changed_files_working_tree():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.return_value = tornado.gen.maybe_future(
-            (0, "file1.ipynb\nfile2.py", "")
+            (0, "file1.ipynb\x00file2.py", "")
         )
 
         # When
@@ -60,7 +61,7 @@ async def test_changed_files_working_tree():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "--name-only"], cwd="/bin"
+            ["git", "diff", "HEAD", "--name-only", "-z"], cwd="/bin"
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -70,7 +71,7 @@ async def test_changed_files_index():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.return_value = tornado.gen.maybe_future(
-            (0, "file1.ipynb\nfile2.py", "")
+            (0, "file1.ipynb\x00file2.py", "")
         )
 
         # When
@@ -80,7 +81,7 @@ async def test_changed_files_index():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "--staged", "HEAD", "--name-only"], cwd="/bin"
+            ["git", "diff", "--staged", "HEAD", "--name-only", "-z"], cwd="/bin"
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -90,7 +91,7 @@ async def test_changed_files_two_commits():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.return_value = tornado.gen.maybe_future(
-            (0, "file1.ipynb\nfile2.py", "")
+            (0, "file1.ipynb\x00file2.py", "")
         )
 
         # When
@@ -100,7 +101,7 @@ async def test_changed_files_two_commits():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "origin/HEAD", "--name-only"], cwd="/bin"
+            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"], cwd="/bin"
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -118,6 +119,6 @@ async def test_changed_files_git_diff_error():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "origin/HEAD", "--name-only"], cwd="/bin"
+            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"], cwd="/bin"
         )
         assert {"code": 128, "message": "error message"} == actual_response

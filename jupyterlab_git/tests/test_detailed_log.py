@@ -17,10 +17,10 @@ async def test_detailed_log():
         # Given
         process_output = [
             "f29660a (HEAD, origin/feature) Commit message",
-            "10      3       notebook_without_spaces.ipynb",
-            "11      4       Notebook with spaces.ipynb",
-            "12      5       path/notebook_without_spaces.ipynb",
-            "13      6       path/Notebook with spaces.ipynb",
+            "10\t3\tnotebook_without_spaces.ipynb",
+            "11\t4\tNotebook with spaces.ipynb",
+            "12\t5\tpath/notebook_without_spaces.ipynb",
+            "13\t6\tpath/Notebook with spaces.ipynb",
             " notebook_without_spaces.ipynb      | 13 ++++++++---",
             " Notebook with spaces.ipynb         | 15 +++++++++----",
             " path/notebook_without_spaces.ipynb | 17 ++++++++++-----",
@@ -28,7 +28,7 @@ async def test_detailed_log():
             " 4 files changed, 46 insertions(+), 18 deletions(-)",
         ]
         mock_execute.return_value = tornado.gen.maybe_future(
-            (0, "\n".join(process_output), "")
+            (0, "\x00".join(process_output), "")
         )
 
         expected_response = {
@@ -83,6 +83,7 @@ async def test_detailed_log():
                 "--stat",
                 "--numstat",
                 "--oneline",
+                "-z",
                 "f29660a2472e24164906af8653babeb48e4bf2ab",
             ],
             cwd=os.path.join("/bin", "test_curr_path"),
