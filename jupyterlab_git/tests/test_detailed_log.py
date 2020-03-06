@@ -28,7 +28,7 @@ async def test_detailed_log():
             " Notebook with spaces.ipynb         | 15 +++++++++----",
             " path/notebook_without_spaces.ipynb | 17 ++++++++++-----",
             " path/Notebook with spaces.ipynb    | 19 +++++++++++------",
-            " path/Notebook with λ.ipynb         | 15 +++++++++++-",
+            " path/Notebook with \\316\\273.ipynb         | 15 +++++++++++-",
             " 5 files changed, 50 insertions(+), 19 deletions(-)",
         ]
         process_output_first_half = "\x00".join(process_output_first_half)
