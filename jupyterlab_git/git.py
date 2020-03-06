@@ -592,7 +592,7 @@ class Git:
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
-        return {"result": code}
+        return {"code": code}
 
     async def add_all_untracked(self, top_repo_path):
         """
