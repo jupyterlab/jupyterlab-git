@@ -105,6 +105,10 @@ node_modules/
 #editors
 .vscode/
 
+# PyCharm
+.idea/
+*.iml
+
 package-lock.json
 MANIFEST
 jupyterlab_git/labextension/*.tgz
