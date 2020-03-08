@@ -170,6 +170,13 @@ class Git:
         :param auth: OPTIONAL dictionary with 'username' and 'password' fields
         :return: response with status code and error message.
         """
+
+        # Validate folder don't already exists
+        dir_name = self._get_git_dir_name(unquote(repo_url))
+        full_dir_name = os.path.join(self.root_dir, current_path, dir_name)
+        if os.path.exists(full_dir_name):
+            raise HTTPError(500, 'Directory {} already exists.'.format(dir_name))
+
         env = os.environ.copy()
         if (auth):
             env["GIT_TERMINAL_PROMPT"] = "1"
@@ -949,3 +956,10 @@ class Git:
         else:
             curr_content = self.show(filename, curr_ref["git"], top_repo_path)
         return {"prev_content": prev_content, "curr_content": curr_content}
+
+    def _get_git_dir_name(self, repo_url):
+        # Get the folder name from the repo_url
+        dir_with_extension = repo_url.split('/')[-1]
+        # remove possible `.git` extension from repo_url
+        dir_name = dir_with_extension.split('.')[0]
+        return dir_name
