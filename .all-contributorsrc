@@ -91,6 +91,16 @@
         "code",
         "review"
       ]
+    },
+    {
+      "login": "hzarea",
+      "name": "Hana Zarea",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/27518229?v=4",
+      "profile": "https://github.com/hzarea",
+      "contributions": [
+        "code",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7
