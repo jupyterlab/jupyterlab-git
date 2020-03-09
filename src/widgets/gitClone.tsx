@@ -79,11 +79,10 @@ async function makeApiCall(
           // try to clone again
           response = await model.clone(path, cloneUrl, result.value);
         } else {
-          showErrorMessage('Clone failed', response.message, [
-            Dialog.warnButton({ label: 'DISMISS' })
-          ]);
-          break;
+            throw new Error(response.message);
         }
+      } else if (response.code === 128) {
+          throw new Error(response.message);
       }
     }
   } catch (error) {

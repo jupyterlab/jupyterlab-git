@@ -48,7 +48,6 @@ async function showGitOperationDialog(
   });
   let retry = false;
   while (!result.button.accept) {
-    retry = true;
     const credentials = await showDialog({
       title: 'Git credentials required',
       body: new GitCredentialsForm(
