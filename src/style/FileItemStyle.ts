@@ -1,22 +1,24 @@
 import { style } from 'typestyle';
+import { showButtonOnHover } from './ActionButtonStyle';
 
-export const fileStyle = style({
-  display: 'flex',
-  flexDirection: 'row',
-  color: 'var(--jp-ui-font-color1)',
-  lineHeight: 'var(--jp-private-running-item-height)',
-  paddingLeft: '4px',
-  listStyleType: 'none',
+export const fileStyle = style(
+  {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    color: 'var(--jp-ui-font-color1)',
+    lineHeight: 'var(--jp-private-running-item-height)',
+    padding: '0px 4px',
+    listStyleType: 'none',
 
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'rgba(153,153,153,.1)'
-    },
-    '&:hover .jp-Git-button': {
-      visibility: 'visible'
+    $nest: {
+      '&:hover': {
+        backgroundColor: 'var(--jp-layout-color2)'
+      }
     }
-  }
-});
+  },
+  showButtonOnHover
+);
 
 export const selectedFileStyle = style({
   color: 'white',
@@ -26,40 +28,12 @@ export const selectedFileStyle = style({
     '&:hover': {
       color: 'white',
       background: 'var(--jp-brand-color1) !important'
-    }
-  }
-});
-
-export const expandedFileStyle = style({
-  height: '75px'
-});
-
-export const disabledFileStyle = style({
-  opacity: 0.5
-});
-
-export const fileIconStyle = style({
-  flex: '0 0 auto',
-  padding: '0px 8px',
-  marginRight: '4px',
-  verticalAlign: 'baseline',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});
-
-export const fileLabelStyle = style({
-  fontSize: 'var(--jp-ui-font-size1)',
-  flex: '1 1 auto',
-  textOverflow: 'ellipsis',
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  borderRadius: '2px',
-  transition: 'background-color 0.1s ease',
-
-  $nest: {
-    '&:focus': {
-      backgroundColor: 'var(--jp-layout-color3)'
+    },
+    '&:hover .jp-icon-selectable[fill]': {
+      fill: 'var(--jp-layout-color2)'
+    },
+    '&:hover .jp-icon-selectable[stroke]': {
+      stroke: 'var(--jp-layout-color2)'
     }
   }
 });
@@ -82,23 +56,9 @@ export const fileChangedLabelInfoStyle = style({
 });
 
 export const fileGitButtonStyle = style({
-  visibility: 'hidden',
-  display: 'inline'
+  display: 'none'
 });
 
 export const fileButtonStyle = style({
   marginTop: '5px'
-});
-
-export const discardButtonStyle = style({
-  color: 'white'
-});
-
-export const discardFileButtonSelectedStyle = style({
-  backgroundImage: 'var(--jp-icon-discard-file-selected)',
-  marginLeft: '6px'
-});
-
-export const sideBarExpandedFileLabelStyle = style({
-  maxWidth: '75%'
 });

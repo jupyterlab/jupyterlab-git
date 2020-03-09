@@ -10,32 +10,8 @@ export const fileListWrapperClass = style({
   overflowY: 'scroll'
 });
 
-export const moveFileUpButtonStyle = style({
-  backgroundImage: 'var(--jp-icon-move-file-up)'
-});
-
-export const moveFileDownButtonStyle = style({
-  backgroundImage: 'var(--jp-icon-move-file-down)'
-});
-
-export const moveFileUpButtonSelectedStyle = style({
-  backgroundImage: 'var(--jp-icon-move-file-up-hover)'
-});
-
-export const moveFileDownButtonSelectedStyle = style({
-  backgroundImage: 'var(--jp-icon-move-file-down-hover)'
-});
-
 export const notebookFileIconStyle = style({
-  backgroundImage: 'var(--jp-icon-book)'
-});
-
-export const consoleFileIconStyle = style({
-  backgroundImage: 'var(--jp-icon-terminal)'
-});
-
-export const terminalFileIconStyle = style({
-  backgroundImage: 'var(--jp-icon-terminal)'
+  backgroundImage: 'var(--jp-icon-notebook)'
 });
 
 export const folderFileIconStyle = style({
@@ -75,15 +51,7 @@ export const kernelFileIconStyle = style({
 });
 
 export const notebookFileIconSelectedStyle = style({
-  backgroundImage: 'var(--jp-icon-book-selected)'
-});
-
-export const consoleFileIconSelectedStyle = style({
-  backgroundImage: 'var(--jp-icon-terminal-selected)'
-});
-
-export const terminalFileIconSelectedStyle = style({
-  backgroundImage: 'var(--jp-icon-terminal-selected)'
+  backgroundImage: 'var(--jp-icon-notebook-selected)'
 });
 
 export const folderFileIconSelectedStyle = style({

@@ -4,30 +4,22 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
-import { fileIconStyle } from '../style/FileItemStyle';
 import {
-  changeStageButtonStyle,
-  discardFileButtonStyle
-} from '../style/GitStageStyle';
-import {
-  commitDetailFilePathStyle,
   commitDetailFileStyle,
   commitDetailHeader,
   commitDetailStyle,
   commitOverviewNumbers,
   commitStyle,
   deletionsIconStyle,
-  diffIconStyle,
   fileList,
-  floatRightStyle,
   iconStyle,
-  insertionsIconStyle,
-  revertButtonStyle
+  insertionsIconStyle
 } from '../style/SinglePastCommitInfoStyle';
 import { Git } from '../tokens';
-import { parseFileExtension } from '../utils';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
+import { FilePath } from './FilePath';
+import { ActionButton } from './ActionButton';
 
 export interface ISinglePastCommitInfoProps {
   data: Git.ISingleCommitInfo;
@@ -159,29 +151,17 @@ export class SinglePastCommitInfo extends React.Component<
         <div className={commitDetailStyle}>
           <div className={commitDetailHeader}>
             Changed
-            <button
-              className={classes(
-                changeStageButtonStyle,
-                floatRightStyle,
-                discardFileButtonStyle
-              )}
-              onClick={(
-                event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-              ) => {
+            <ActionButton
+              iconName={'git-rewind'}
+              onClick={event => {
                 event.stopPropagation();
                 this.deleteCommit(this.props.data.commit);
               }}
               title="Discard changes introduced by this commit"
             />
-            <button
-              className={classes(
-                changeStageButtonStyle,
-                floatRightStyle,
-                revertButtonStyle
-              )}
-              onClick={(
-                event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-              ) => {
+            <ActionButton
+              iconName={'git-discard'}
+              onClick={event => {
                 event.stopPropagation();
                 this.resetToCommit(this.props.data.commit);
               }}
@@ -205,32 +185,33 @@ export class SinglePastCommitInfo extends React.Component<
                       // Avoid commit node to be collapsed
                       event.stopPropagation();
                       if (diffSupported) {
-                        await openDiffView(
-                          modifiedFile.modified_file_path,
-                          this.props.model,
-                          {
-                            previousRef: {
-                              gitRef: this.props.data.pre_commit
+                        try {
+                          await openDiffView(
+                            modifiedFile.modified_file_path,
+                            this.props.model,
+                            {
+                              previousRef: {
+                                gitRef: this.props.data.pre_commit
+                              },
+                              currentRef: { gitRef: this.props.data.commit }
                             },
-                            currentRef: { gitRef: this.props.data.commit }
-                          },
-                          this.props.renderMime
-                        );
+                            this.props.renderMime
+                          );
+                        } catch (reason) {
+                          console.error(
+                            `Fail to open diff view for ${
+                              modifiedFile.modified_file_path
+                            }.\n${reason}`
+                          );
+                        }
                       }
                     }}
                     title={modifiedFile.modified_file_path}
                   >
-                    <span
-                      className={`${fileIconStyle} ${parseFileExtension(
-                        modifiedFile.modified_file_path
-                      )}`}
-                    />
-                    <span className={commitDetailFilePathStyle}>
-                      {modifiedFile.modified_file_name}
-                    </span>
+                    <FilePath filepath={modifiedFile.modified_file_path} />
                     {diffSupported && (
-                      <button
-                        className={diffIconStyle}
+                      <ActionButton
+                        iconName={'git-diff'}
                         title={'View file changes'}
                       />
                     )}

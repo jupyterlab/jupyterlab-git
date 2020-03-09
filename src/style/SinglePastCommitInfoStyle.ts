@@ -8,18 +8,6 @@ export const commitStyle = style({
   marginTop: '5px'
 });
 
-export const headerStyle = style({
-  backgroundColor: 'var(--md-green-500)',
-  color: 'white',
-  display: 'inline-block',
-  width: '100%',
-  height: '30px'
-});
-
-export const floatRightStyle = style({
-  float: 'right'
-});
-
 export const commitOverviewNumbers = style({
   fontSize: '13px',
   fontWeight: 'bold',
@@ -61,17 +49,6 @@ export const commitDetailFileStyle = style({
       backgroundColor: 'var(--jp-layout-color3)'
     }
   }
-});
-
-export const commitDetailFilePathStyle = style({
-  fontSize: 'var(--jp-ui-font-size1)',
-  marginRight: '4px',
-  paddingLeft: '4px',
-  textOverflow: 'ellipsis',
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  borderRadius: '2px',
-  flex: '1 1 auto'
 });
 
 export const iconStyle = style({
