@@ -11,6 +11,7 @@ import { JSONObject } from '@phosphor/coreutils';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
+import { decodeStage } from './utils';
 
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
@@ -187,14 +188,14 @@ export class GitExtension implements IGitExtension {
   /**
    * Files list resulting of a git status call.
    */
-  get status(): Git.IStatusFileResult[] {
+  get status(): Git.IStatusFile[] {
     return this._status;
   }
 
   /**
    * A signal emitted when the current status of the git repository changes.
    */
-  get statusChanged(): ISignal<IGitExtension, Git.IStatusFileResult[]> {
+  get statusChanged(): ISignal<IGitExtension, Git.IStatusFile[]> {
     return this._statusChanged;
   }
 
@@ -325,6 +326,35 @@ export class GitExtension implements IGitExtension {
    */
   toggleMark(fname: string) {
     this._currentMarker.toggle(fname);
+  }
+
+  /**
+   * Add a remote Git repository to the current repository
+   *
+   * @param url Remote repository URL
+   * @param name Remote name
+   */
+  async addRemote(url: string, name?: string): Promise<void> {
+    await this.ready;
+    const path = this.pathRepository;
+
+    if (path === null) {
+      return Promise.resolve();
+    }
+
+    try {
+      let response = await httpGitRequest('/git/remote/add', 'POST', {
+        top_repo_path: path,
+        url,
+        name
+      });
+      if (response.status !== 200) {
+        const data = await response.text();
+        throw new ServerConnection.ResponseError(response, data);
+      }
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    }
   }
 
   /**
@@ -810,7 +840,11 @@ export class GitExtension implements IGitExtension {
         this._setStatus([]);
       }
 
-      this._setStatus((data as Git.IStatusResult).files);
+      this._setStatus(
+        (data as Git.IStatusResult).files.map(file => {
+          return { ...file, status: decodeStage(file.x, file.y) };
+        })
+      );
     } catch (err) {
       console.error(err);
       // TODO should we notify the user
@@ -968,7 +1002,7 @@ export class GitExtension implements IGitExtension {
    *
    * @param v Repository status
    */
-  protected _setStatus(v: Git.IStatusFileResult[]) {
+  protected _setStatus(v: Git.IStatusFile[]) {
     this._status = v;
     this._statusChanged.emit(this._status);
   }
@@ -991,7 +1025,7 @@ export class GitExtension implements IGitExtension {
     return this._currentMarker;
   }
 
-  private _status: Git.IStatusFileResult[] = [];
+  private _status: Git.IStatusFile[] = [];
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[];
   private _currentBranch: Git.IBranch;
@@ -1010,9 +1044,7 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     IChangedArgs<string | null>
   >(this);
-  private _statusChanged = new Signal<IGitExtension, Git.IStatusFileResult[]>(
-    this
-  );
+  private _statusChanged = new Signal<IGitExtension, Git.IStatusFile[]>(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {

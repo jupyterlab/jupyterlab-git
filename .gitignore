@@ -1,13 +1,24 @@
+# os junk
 .DS_Store
+
+# yarn/typescript build junk
+package-lock.json
+*.tsbuildinfo
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
 
 # C extensions
 *.so
 
 # Distribution / packaging
+*.egg
+*.egg-info/
+.eggs/
+.installed.cfg
 .Python
 env/
 build/
@@ -15,16 +26,14 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-.eggs/
+jupyterlab_git/labextension/*.tgz
 lib/
 lib64/
+MANIFEST
 parts/
 sdist/
 var/
 wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -102,12 +111,11 @@ ENV/
 .mypy_cache/
 node_modules/
 
-#editors
-.vscode/
+# jetbrains ide stuff
+*.iml
+.idea/
 
-package-lock.json
-MANIFEST
-jupyterlab_git/labextension/*.tgz
-.pytest_cache/
-*.tsbuildinfo
-.pytest_cache/
+# vscode ide stuff
+*.code-workspace
+.history
+.vscode

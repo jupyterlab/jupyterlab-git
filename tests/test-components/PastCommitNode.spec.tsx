@@ -57,6 +57,7 @@ describe('PastCommitNode', () => {
       pre_commit: 'pre_commit'
     },
     branches: branches,
+    refreshHistory: () => Promise.resolve(),
     renderMime: null
   };
 

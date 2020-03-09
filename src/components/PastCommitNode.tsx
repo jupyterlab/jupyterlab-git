@@ -22,6 +22,7 @@ export interface IPastCommitNodeProps {
   pastCommit: Git.ISingleCommitInfo;
   branches: Git.IBranch[];
   model: GitExtension;
+  refreshHistory: () => Promise<void>;
   renderMime: IRenderMimeRegistry;
 }
 
@@ -39,6 +40,7 @@ export class PastCommitNode extends React.Component<
       expanded: false
     };
   }
+
   getBranchesForCommit() {
     const currentCommit = this.props.pastCommit.commit;
     const branches = [];
@@ -51,26 +53,18 @@ export class PastCommitNode extends React.Component<
     return branches;
   }
 
-  expand() {
-    this.setState(() => ({ expanded: true }));
-  }
-
-  collapse() {
-    this.setState(() => ({ expanded: false }));
-  }
-
   getNodeClass() {
     if (this.state.expanded) {
       return classes(pastCommitNodeStyle, pastCommitExpandedStyle);
     }
     return pastCommitNodeStyle;
   }
+
   render() {
     return (
       <li
         onClick={() => {
-          // tslint:disable-next-line: no-unused-expression
-          !this.state.expanded && this.expand();
+          this.setState({ expanded: !this.state.expanded });
         }}
         className={this.getNodeClass()}
       >
@@ -86,8 +80,8 @@ export class PastCommitNode extends React.Component<
           </div>
         </div>
         <div className={branchesStyle}>
-          {this.getBranchesForCommit().map((branch, id) => (
-            <React.Fragment key={id}>
+          {this.getBranchesForCommit().map(branch => (
+            <React.Fragment key={branch.name}>
               {branch.is_current_branch && (
                 <span className={classes(branchStyle, workingBranchStyle)}>
                   working
@@ -111,9 +105,15 @@ export class PastCommitNode extends React.Component<
               <SinglePastCommitInfo
                 data={this.props.pastCommit}
                 model={this.props.model}
+                refreshHistory={this.props.refreshHistory}
                 renderMime={this.props.renderMime}
               />
-              <div className={collapseStyle} onClick={() => this.collapse()}>
+              <div
+                className={collapseStyle}
+                onClick={() => {
+                  this.setState({ expanded: false });
+                }}
+              >
                 Collapse
               </div>
             </React.Fragment>

@@ -103,6 +103,14 @@ export interface IGitExtension extends IDisposable {
   toggleMark(fname: string): void;
 
   /**
+   * Add a remote Git repository to the current repository
+   *
+   * @param url Remote repository URL
+   * @param name Remote name
+   */
+  addRemote(url: string, name?: string): Promise<void>;
+
+  /**
    * Make request for all git info of the repository
    * (This API is also implicitly used to check if the current repo is a Git repo)
    *
@@ -368,6 +376,13 @@ export namespace Git {
     from: string;
   }
 
+  /**
+   * Changed file attributes
+   */
+  export interface IStatusFile extends IStatusFileResult {
+    status: Status;
+  }
+
   /** Interface for GitStatus request result,
    * has the status of the entire repo
    */
@@ -475,4 +490,6 @@ export namespace Git {
 
     toggle(fname: string): void;
   }
+
+  export type Status = 'untracked' | 'staged' | 'unstaged' | null;
 }
