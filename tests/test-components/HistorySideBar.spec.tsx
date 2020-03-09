@@ -20,18 +20,12 @@ describe('HistorySideBar', () => {
       }
     ],
     branches: [],
-    isExpanded: true,
     model: null,
+    refreshHistory: () => Promise.resolve(),
     renderMime: null
   };
-  test('renders commit nodes when expanded', () => {
+  test('renders commit nodes', () => {
     const historySideBar = shallow(<HistorySideBar {...props} />);
     expect(historySideBar.find(PastCommitNode)).toHaveLength(1);
-  });
-  test('does not render commit nodes when not expanded', () => {
-    const historySideBar = shallow(
-      <HistorySideBar {...props} isExpanded={false} />
-    );
-    expect(historySideBar.find(PastCommitNode)).toHaveLength(0);
   });
 });

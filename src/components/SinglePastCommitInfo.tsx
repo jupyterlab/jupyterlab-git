@@ -1,7 +1,8 @@
+import * as React from 'react';
+import { Dialog, InputDialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { DefaultIconReact } from '@jupyterlab/ui-components';
-import * as React from 'react';
-import { classes } from 'typestyle/';
+import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import { fileIconStyle } from '../style/FileItemStyle';
 import {
@@ -15,29 +16,27 @@ import {
   commitDetailStyle,
   commitOverviewNumbers,
   commitStyle,
+  deletionsIconStyle,
   diffIconStyle,
   fileList,
   floatRightStyle,
   iconStyle,
   insertionsIconStyle,
-  deletionsIconStyle,
   revertButtonStyle
 } from '../style/SinglePastCommitInfoStyle';
 import { Git } from '../tokens';
 import { parseFileExtension } from '../utils';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
-import { ResetDeleteSingleCommit } from './ResetDeleteSingleCommit';
 
 export interface ISinglePastCommitInfoProps {
   data: Git.ISingleCommitInfo;
   model: GitExtension;
+  refreshHistory: () => Promise<void>;
   renderMime: IRenderMimeRegistry;
 }
 
 export interface ISinglePastCommitInfoState {
-  displayDelete: boolean;
-  displayReset: boolean;
   info: string;
   filesChanged: string;
   insertionCount: string;
@@ -53,8 +52,6 @@ export class SinglePastCommitInfo extends React.Component<
   constructor(props: ISinglePastCommitInfoProps) {
     super(props);
     this.state = {
-      displayDelete: false,
-      displayReset: false,
       info: '',
       filesChanged: '',
       insertionCount: '',
@@ -73,7 +70,7 @@ export class SinglePastCommitInfo extends React.Component<
       );
     } catch (err) {
       console.error(
-        `Error while gettting detailed log for commit ${
+        `Error while getting detailed log for commit ${
           this.props.data.commit
         } and path ${this.props.model.pathRepository}`,
         err
@@ -93,30 +90,37 @@ export class SinglePastCommitInfo extends React.Component<
     }
   };
 
-  showDeleteCommit = () => {
-    this.setState({
-      displayDelete: true,
-      displayReset: false
+  deleteCommit = async (commitId: string) => {
+    const result = await InputDialog.getText({
+      title: 'Delete Commit',
+      placeholder: 'Deletion Commit Message',
+      okLabel: 'Delete'
     });
+    if (result.button.accept) {
+      const msg = result.value;
+      await this.props.model.deleteCommit(msg, commitId);
+      await this.props.refreshHistory();
+    }
   };
 
-  hideDeleteCommit = () => {
-    this.setState({
-      displayDelete: false
+  resetToCommit = async (commitId: string) => {
+    const shortCommit = commitId.slice(0, 7);
+    const result = await showDialog({
+      title: 'Reset to Commit',
+      body: `All changes after commit ${shortCommit} will be gone forever. Confirm you want to reset to it?`,
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({
+          accept: true,
+          label: 'Reset'
+        })
+      ]
     });
-  };
 
-  showResetToCommit = () => {
-    this.setState({
-      displayReset: true,
-      displayDelete: false
-    });
-  };
-
-  hideResetToCommit = () => {
-    this.setState({
-      displayReset: false
-    });
+    if (result.button.accept) {
+      await this.props.model.resetToCommit(commitId);
+      await this.props.refreshHistory();
+    }
   };
 
   render() {
@@ -130,30 +134,23 @@ export class SinglePastCommitInfo extends React.Component<
       <div>
         <div className={commitStyle}>
           <div className={commitOverviewNumbers}>
-            <span>
-              <DefaultIconReact
-                name="file"
-                className={iconStyle}
-                tag="span"
-                title="# Files Changed"
-              />
+            <span title="# Files Changed">
+              <DefaultIconReact name="file" className={iconStyle} tag="span" />
               {this.state.filesChanged}
             </span>
-            <span>
+            <span title="# Insertions">
               <DefaultIconReact
                 name="git-insertionsMade"
                 className={classes(iconStyle, insertionsIconStyle)}
                 tag="span"
-                title="# Insertions"
               />
               {this.state.insertionCount}
             </span>
-            <span>
+            <span title="# Deletions">
               <DefaultIconReact
                 name="git-deletionsMade"
                 className={classes(iconStyle, deletionsIconStyle)}
                 tag="span"
-                title="# Deletions"
               />
               {this.state.deletionCount}
             </span>
@@ -168,7 +165,12 @@ export class SinglePastCommitInfo extends React.Component<
                 floatRightStyle,
                 discardFileButtonStyle
               )}
-              onClick={this.showDeleteCommit}
+              onClick={(
+                event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+              ) => {
+                event.stopPropagation();
+                this.deleteCommit(this.props.data.commit);
+              }}
               title="Discard changes introduced by this commit"
             />
             <button
@@ -177,75 +179,64 @@ export class SinglePastCommitInfo extends React.Component<
                 floatRightStyle,
                 revertButtonStyle
               )}
-              onClick={this.showResetToCommit}
+              onClick={(
+                event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+              ) => {
+                event.stopPropagation();
+                this.resetToCommit(this.props.data.commit);
+              }}
               title="Discard changes introduced *after* this commit"
             />
           </div>
-          <div>
-            {this.state.displayDelete && (
-              <ResetDeleteSingleCommit
-                action="delete"
-                commitId={this.props.data.commit}
-                model={this.props.model}
-                onCancel={this.hideDeleteCommit}
-              />
-            )}
-            {this.state.displayReset && (
-              <ResetDeleteSingleCommit
-                action="reset"
-                commitId={this.props.data.commit}
-                model={this.props.model}
-                onCancel={this.hideResetToCommit}
-              />
-            )}
-          </div>
           <ul className={fileList}>
             {this.state.modifiedFiles.length > 0 &&
-              this.state.modifiedFiles.map(
-                (modifiedFile, modifiedFileIndex) => {
-                  return (
-                    <li
-                      className={commitDetailFileStyle}
-                      key={modifiedFileIndex}
-                    >
-                      <span
-                        className={`${fileIconStyle} ${parseFileExtension(
-                          modifiedFile.modified_file_path
-                        )}`}
-                        onDoubleClick={() => {
-                          window.open(
-                            'https://github.com/search?q=' +
-                              this.props.data.commit +
-                              '&type=Commits&utf8=%E2%9C%93'
-                          );
-                        }}
+              this.state.modifiedFiles.map(modifiedFile => {
+                const diffSupported = isDiffSupported(
+                  modifiedFile.modified_file_path
+                );
+
+                return (
+                  <li
+                    className={commitDetailFileStyle}
+                    key={modifiedFile.modified_file_path}
+                    onClick={async (
+                      event: React.MouseEvent<HTMLLIElement, MouseEvent>
+                    ) => {
+                      // Avoid commit node to be collapsed
+                      event.stopPropagation();
+                      if (diffSupported) {
+                        await openDiffView(
+                          modifiedFile.modified_file_path,
+                          this.props.model,
+                          {
+                            previousRef: {
+                              gitRef: this.props.data.pre_commit
+                            },
+                            currentRef: { gitRef: this.props.data.commit }
+                          },
+                          this.props.renderMime
+                        );
+                      }
+                    }}
+                    title={modifiedFile.modified_file_path}
+                  >
+                    <span
+                      className={`${fileIconStyle} ${parseFileExtension(
+                        modifiedFile.modified_file_path
+                      )}`}
+                    />
+                    <span className={commitDetailFilePathStyle}>
+                      {modifiedFile.modified_file_name}
+                    </span>
+                    {diffSupported && (
+                      <button
+                        className={diffIconStyle}
+                        title={'View file changes'}
                       />
-                      <span className={commitDetailFilePathStyle}>
-                        {modifiedFile.modified_file_name}
-                      </span>
-                      {isDiffSupported(modifiedFile.modified_file_path) && (
-                        <button
-                          className={`${diffIconStyle}`}
-                          title={'View file changes'}
-                          onClick={async () => {
-                            await openDiffView(
-                              modifiedFile.modified_file_path,
-                              this.props.model,
-                              {
-                                previousRef: {
-                                  gitRef: this.props.data.pre_commit
-                                },
-                                currentRef: { gitRef: this.props.data.commit }
-                              },
-                              this.props.renderMime
-                            );
-                          }}
-                        />
-                      )}
-                    </li>
-                  );
-                }
-              )}
+                    )}
+                  </li>
+                );
+              })}
           </ul>
         </div>
       </div>

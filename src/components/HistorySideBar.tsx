@@ -9,30 +9,24 @@ import { PastCommitNode } from './PastCommitNode';
 export interface IHistorySideBarProps {
   pastCommits: Git.ISingleCommitInfo[];
   branches: Git.IBranch[];
-  isExpanded: boolean;
   model: GitExtension;
+  refreshHistory: () => Promise<void>;
   renderMime: IRenderMimeRegistry;
 }
 
-export class HistorySideBar extends React.Component<IHistorySideBarProps, {}> {
-  render() {
-    if (!this.props.isExpanded) {
-      return null;
-    }
-    return (
-      <ol className={historySideBarStyle}>
-        {this.props.pastCommits.map(
-          (pastCommit: Git.ISingleCommitInfo, pastCommitIndex: number) => (
-            <PastCommitNode
-              key={pastCommitIndex}
-              pastCommit={pastCommit}
-              branches={this.props.branches}
-              model={this.props.model}
-              renderMime={this.props.renderMime}
-            />
-          )
-        )}
-      </ol>
-    );
-  }
-}
+export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
+  props: IHistorySideBarProps
+) => (
+  <ol className={historySideBarStyle}>
+    {props.pastCommits.map((pastCommit: Git.ISingleCommitInfo) => (
+      <PastCommitNode
+        key={pastCommit.commit}
+        pastCommit={pastCommit}
+        branches={props.branches}
+        model={props.model}
+        refreshHistory={props.refreshHistory}
+        renderMime={props.renderMime}
+      />
+    ))}
+  </ol>
+);

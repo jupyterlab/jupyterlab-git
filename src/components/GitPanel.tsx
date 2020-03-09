@@ -321,10 +321,10 @@ export class GitPanel extends React.Component<
   private _renderHistory(): React.ReactElement {
     return (
       <HistorySideBar
-        isExpanded={this.state.tab === 1}
         branches={this.state.branches}
         pastCommits={this.state.pastCommits}
         model={this.props.model}
+        refreshHistory={this.refreshHistory}
         renderMime={this.props.renderMime}
       />
     );
