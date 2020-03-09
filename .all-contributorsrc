@@ -33,6 +33,18 @@
         "review",
         "infra"
       ]
+    },
+    {
+      "login": "jaipreet-s",
+      "name": "Jaipreet Singh",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/43826141?v=4",
+      "profile": "https://github.com/jaipreet-s",
+      "contributions": [
+        "projectManagement",
+        "review",
+        "code",
+        "design"
+      ]
     }
   ],
   "contributorsPerLine": 7
