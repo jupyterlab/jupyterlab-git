@@ -6,11 +6,9 @@ import os
 from pathlib import Path
 
 from notebook.base.handlers import APIHandler
-from notebook.utils import url2path
-from notebook.utils import url_path_join as ujoin
+from notebook.utils import url_path_join as ujoin, url2path
 
-import tornado
-
+from .git import DEFAULT_REMOTE_NAME
 
 class GitHandler(APIHandler):
     """
@@ -247,6 +245,23 @@ class GitAddAllUntrackedHandler(GitHandler):
         if body["code"] != 0:
             self.set_status(500)
         self.finish(json.dumps(body))
+
+
+class GitRemoteAddHandler(GitHandler):
+    """Handler for 'git remote add <name> <url>'."""
+
+    def post(self):
+        """POST request handler to add a remote."""
+        data = self.get_json_body()
+        top_repo_path = data["top_repo_path"]
+        name = data.get("name", DEFAULT_REMOTE_NAME)
+        url = data["url"]
+        output = self.git.remote_add(top_repo_path, url, name)
+        if(output["code"] == 0):
+            self.set_status(201)
+        else:
+            self.set_status(500)
+        self.finish(json.dumps(output))
 
 
 class GitResetHandler(GitHandler):
@@ -527,6 +542,7 @@ def setup_handlers(web_app):
         ("/git/log", GitLogHandler),
         ("/git/pull", GitPullHandler),
         ("/git/push", GitPushHandler),
+        ("/git/remote/add", GitRemoteAddHandler),
         ("/git/reset", GitResetHandler),
         ("/git/reset_to_commit", GitResetToCommitHandler),
         ("/git/server_root", GitServerRootHandler),

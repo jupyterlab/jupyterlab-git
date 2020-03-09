@@ -15,6 +15,7 @@ ALLOWED_OPTIONS = ['user.name', 'user.email']
 # Regex pattern to capture (key, value) of Git configuration options.
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
 CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
+DEFAULT_REMOTE_NAME = "origin"
 
 
 async def execute(
@@ -25,7 +26,7 @@ async def execute(
     password: "Optional[str]" = None,
 ) -> "Tuple[int, str, str]":
     """Asynchronously execute a command.
-    
+
     Args:
         cmdline (List[str]): Command line to be executed
         cwd (Optional[str]): Current working directory
@@ -965,3 +966,28 @@ class Git:
         else:
             curr_content = await self.show(filename, curr_ref["git"], top_repo_path)
         return {"prev_content": prev_content, "curr_content": curr_content}
+
+    def remote_add(self, top_repo_path, url, name=DEFAULT_REMOTE_NAME):
+        """Handle call to `git remote add` command.
+
+        top_repo_path: str
+            Top Git repository path
+        url: str
+            Git remote url
+        name: str
+            Remote name; default "origin"
+        """
+        cmd = ["git", "remote", "add", name, url]
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=top_repo_path)
+        _, my_error = p.communicate()
+        if p.returncode == 0:
+            return {
+                "code": p.returncode,
+                "command": " ".join(cmd)
+            }
+        else:
+            return {
+                "code": p.returncode,
+                "command": " ".join(cmd),
+                "message": my_error.decode("utf-8").strip()
+            }

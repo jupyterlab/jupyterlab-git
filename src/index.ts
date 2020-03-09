@@ -140,11 +140,14 @@ function createGitMenu(
 
   let menu = new Menu({ commands });
   menu.title.label = 'Git';
-  [CommandIDs.gitUI, CommandIDs.gitTerminalCommand, CommandIDs.gitInit].forEach(
-    command => {
-      menu.addItem({ command });
-    }
-  );
+  [
+    CommandIDs.gitUI,
+    CommandIDs.gitTerminalCommand,
+    CommandIDs.gitInit,
+    CommandIDs.gitAddRemote
+  ].forEach(command => {
+    menu.addItem({ command });
+  });
 
   let tutorial = new Menu({ commands });
   tutorial.title.label = ' Tutorial ';
