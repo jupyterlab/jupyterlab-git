@@ -72,6 +72,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "deshaw",
+      "name": "The D. E. Shaw Group",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/2298205?v=4",
+      "profile": "https://www.deshaw.com/",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7
