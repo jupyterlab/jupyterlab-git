@@ -121,6 +121,16 @@
         "code",
         "review"
       ]
+    },
+    {
+      "login": "neelamgehlot",
+      "name": "Neelam Gehlot",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/15882916?v=4",
+      "profile": "https://github.com/neelamgehlot",
+      "contributions": [
+        "code",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7
