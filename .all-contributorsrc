@@ -54,7 +54,8 @@
       "contributions": [
         "projectManagement",
         "review",
-        "code"
+        "code",
+        "maintenance"
       ]
     }
   ],
