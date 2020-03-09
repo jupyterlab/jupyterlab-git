@@ -138,8 +138,7 @@ jlpm run test
 
 ## Contributors ✨
 
-The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors
-([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. To see who has been active recently, please look at the ["Contributors"](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors) tab. Below we list the different people and entities who contributed in different ways to the project ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
