@@ -460,6 +460,7 @@ export namespace Git {
   export interface IPushPull {
     current_path: string;
     auth?: IAuth;
+    cancel_on_conflict?: boolean;
   }
 
   /**

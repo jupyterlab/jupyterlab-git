@@ -5,6 +5,12 @@
   "description": "jupyterlab-git settings.",
   "type": "object",
   "properties": {
+    "cancelPullMergeConflict": {
+      "type": "boolean",
+      "title": "Cancel pull merge conflict",
+      "description": "If true, when fetching and integrating changes from a remote repository, a conflicting merge is canceled and the working tree left untouched.",
+      "default": false
+    },
     "disableBranchWithChanges": {
       "type": "boolean",
       "title": "Disable branch with changes",

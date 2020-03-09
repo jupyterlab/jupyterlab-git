@@ -67,7 +67,6 @@ async def execute(
 
             returncode = p.wait()
             p.close()
-
             return returncode, "", response
         except pexpect.exceptions.EOF:  # In case of pexpect failure
             response = p.before
@@ -740,7 +739,7 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
-    async def pull(self, curr_fb_path, auth=None):
+    async def pull(self, curr_fb_path, auth=None, cancel_on_conflict=False):
         """
         Execute git pull --no-commit.  Disables prompts for the password to avoid the terminal hanging while waiting
         for auth.
@@ -748,7 +747,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 ["git", "pull", "--no-commit"],
                 username=auth["username"],
                 password=auth["password"],
@@ -757,7 +756,7 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 ["git", "pull", "--no-commit"],
                 env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
@@ -766,7 +765,21 @@ class Git:
         response = {"code": code}
 
         if code != 0:
-            response["message"] = error.strip()
+            output = output.strip()
+            has_conflict = "automatic merge failed; fix conflicts and then commit the result." in output.lower()
+            if cancel_on_conflict and has_conflict:
+                code, _, error = await execute(
+                    ["git", "merge", "--abort"],
+                    cwd=os.path.join(self.root_dir, curr_fb_path)
+                )
+                if code == 0:
+                    response["message"] = "Unable to pull latest changes as doing so would result in a merge conflict. In order to push your local changes, you may want to consider creating a new branch based on your current work and pushing the new branch. Provided your repository is hosted (e.g., on GitHub), once pushed, you can create a pull request against the original branch on the remote repository and manually resolve the conflicts during pull request review."
+                else:
+                    response["message"] = error.strip()
+            elif has_conflict:
+                response["message"] = output
+            else:
+                response["message"] = error.strip()
 
         return response
 

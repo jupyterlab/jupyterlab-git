@@ -416,7 +416,7 @@ class GitPullHandler(GitHandler):
         POST request handler, pulls files from a remote branch to your current branch.
         """
         data = self.get_json_body()
-        response = await self.git.pull(data["current_path"], data.get("auth", None))
+        response = await self.git.pull(data["current_path"], data.get("auth", None), data.get("cancel_on_conflict", False))
 
         self.finish(json.dumps(response))
 

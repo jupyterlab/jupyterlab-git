@@ -24,6 +24,7 @@ export class GitExtension implements IGitExtension {
   ) {
     const model = this;
     this._app = app;
+    this._settings = settings || null;
 
     // Load the server root path
     this._getServerRoot()
@@ -742,7 +743,10 @@ export class GitExtension implements IGitExtension {
     try {
       let obj: Git.IPushPull = {
         current_path: path,
-        auth
+        auth,
+        cancel_on_conflict: this._settings
+          ? (this._settings.composite['cancelPullMergeConflict'] as boolean)
+          : false
       };
 
       let response = await httpGitRequest('/git/pull', 'POST', obj);
@@ -1038,6 +1042,7 @@ export class GitExtension implements IGitExtension {
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
+  private _settings: ISettingRegistry.ISettings | null;
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _repositoryChanged = new Signal<
