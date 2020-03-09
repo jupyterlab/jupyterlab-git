@@ -81,6 +81,16 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "zzhangjii",
+      "name": "Ji Zhang",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/11495372?v=4",
+      "profile": "https://github.com/zzhangjii",
+      "contributions": [
+        "code",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7
