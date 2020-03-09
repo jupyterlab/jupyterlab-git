@@ -21,6 +21,18 @@
         "ideas",
         "fundingFinding"
       ]
+    },
+    {
+      "login": "saulshanabrook",
+      "name": "Saul Shanabrook",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/1186124?v=4",
+      "profile": "https://www.saulshanabrook.com/",
+      "contributions": [
+        "code",
+        "projectManagement",
+        "review",
+        "infra"
+      ]
     }
   ],
   "contributorsPerLine": 7
