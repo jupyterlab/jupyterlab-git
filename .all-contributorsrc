@@ -45,6 +45,17 @@
         "code",
         "design"
       ]
+    },
+    {
+      "login": "fcollonval",
+      "name": "Frédéric Collonval",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/8435071?v=4",
+      "profile": "https://github.com/fcollonval",
+      "contributions": [
+        "projectManagement",
+        "review",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
