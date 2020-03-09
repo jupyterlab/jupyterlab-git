@@ -141,6 +141,18 @@
         "code",
         "review"
       ]
+    },
+    {
+      "login": "telamonian",
+      "name": "Max Klein",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/2263641?v=4",
+      "profile": "https://www.linkedin.com/in/max-klein-b514419",
+      "contributions": [
+        "code",
+        "review",
+        "projectManagement",
+        "design"
+      ]
     }
   ],
   "contributorsPerLine": 7
