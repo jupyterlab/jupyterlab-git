@@ -175,13 +175,3 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 To add yourself, or someone else, to this list you can either [use the bot](https://allcontributors.org/docs/en/bot/usage) (`@all-contributors please add <username> for <contributions>`) or [the CLI](https://allcontributors.org/docs/en/cli/usage) (`jlpm all-contributors add <username> <contributions>`).
-
-## Attributions
-
-Extension development has been sponsored at various times by the following organizations:
-
-- **[Jupyter Cal Poly](https://github.com/jupytercalpoly)**: [Brian Granger](https://github.com/ellisonbg), [Ji Zhang](https://github.com/zzhangjii), [Hana Zarea](https://github.com/hzarea), [Noah Stapp](https://github.com/NoahStapp), and [Ashutosh Bondre](https://github.com/ashutoshbondre).
-- **[Amazon Web Services](https://github.com/aws)**: [Jaipreet Singh](https://github.com/jaipreet-s), [Neelam Gehlot](https://github.com/neelamgehlot), and [Saul Shanabrook](https://github.com/saulshanabrook).
-- **[LabShare](https://github.com/LabShare)**: [Konstantin Taletskiy](https://github.com/ktaletsk).
-- **[Safran Group](https://www.safran-group.com/)**: [Frédéric Collonval](https://github.com/fcollonval).
-- **D. E. Shaw group**: [Max Klein](https://github.com/telamonian) and [Athan](https://github.com/kgryte).
