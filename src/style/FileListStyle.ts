@@ -1,5 +1,15 @@
 import { style } from 'typestyle';
 
+export const fileListWrapperClass = style({
+  height: 'auto',
+  minHeight: '150px',
+  maxHeight: '400px',
+  paddingBottom: '40px',
+
+  overflow: 'hidden',
+  overflowY: 'scroll'
+});
+
 export const notebookFileIconStyle = style({
   backgroundImage: 'var(--jp-icon-notebook)'
 });

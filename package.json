@@ -58,6 +58,8 @@
     "@jupyterlab/services": "^4.1.0",
     "@jupyterlab/terminal": "^1.1.0",
     "@jupyterlab/ui-components": "^1.1.0",
+    "@material-ui/core": "^4.8.2",
+    "@material-ui/icons": "^4.5.1",
     "@phosphor/widgets": "^1.8.0",
     "diff-match-patch": "^1.0.4",
     "nbdime": "~5.0.1",

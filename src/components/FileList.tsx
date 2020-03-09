@@ -5,6 +5,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Menu } from '@phosphor/widgets';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
+import { fileListWrapperClass } from '../style/FileListStyle';
 import { Git } from '../tokens';
 import { openListedFile } from '../utils';
 import { ActionButton } from './ActionButton';
@@ -267,7 +268,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   render() {
     if (this.props.settings.composite['simpleStaging']) {
-      return <div>{this._renderSimpleStage(this.props.files)}</div>;
+      return (
+        <div className={fileListWrapperClass}>
+          {this._renderSimpleStage(this.props.files)}
+        </div>
+      );
     } else {
       const stagedFiles: Git.IStatusFile[] = [];
       const unstagedFiles: Git.IStatusFile[] = [];
@@ -291,7 +296,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       });
 
       return (
-        <div onContextMenu={event => event.preventDefault()}>
+        <div
+          className={fileListWrapperClass}
+          onContextMenu={event => event.preventDefault()}
+        >
           {this._renderStaged(stagedFiles)}
           {this._renderChanged(unstagedFiles)}
           {this._renderUntracked(untrackedFiles)}
