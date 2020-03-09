@@ -101,6 +101,16 @@
         "code",
         "review"
       ]
+    },
+    {
+      "login": "NoahStapp",
+      "name": "Noah Stapp",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/30483654?v=4",
+      "profile": "http://noahstapp.com/",
+      "contributions": [
+        "code",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7
