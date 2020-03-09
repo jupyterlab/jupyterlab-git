@@ -1,7 +1,9 @@
 # jupyterlab-git
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab/tree/examples/demo.ipynb) [![Build Status](https://travis-ci.org/jupyterlab/jupyterlab-git.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab-git) [![Version](https://img.shields.io/npm/v/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/pypi/v/jupyterlab-git.svg)](https://pypi.org/project/jupyterlab-git/) [![Downloads](https://img.shields.io/npm/dm/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git) [![Downloads](https://img.shields.io/conda/dn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git)
@@ -89,23 +91,6 @@ If you would like to contribute to the project, please read our [contributor doc
 
 JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
-### Team
-
-
-JupyterLab Git's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
-
-- Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
-  architecture).
-- Saul Shanabrook, Quansight (software engineering)
-- Jaipreet Singh, AWS (software engineering, UI/UX design, management)
-- Frederic Collonval, Safran Group (software engineering)
-
-A lot of awesome people have contributed to this repo - See the contributors tab for more details!
-
-This list is provided to help provide context about who we are and how our team functions.
-
-If you would like to be listed, please submit a pull request with your information.
-
 ### Install
 
 Requires node 4+ and npm 4+
@@ -174,6 +159,7 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
