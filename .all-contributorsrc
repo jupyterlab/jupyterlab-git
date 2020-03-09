@@ -9,6 +9,7 @@
   "imageSize": 100,
   "commit": true,
   "commitConvention": "none",
+  "contributorsSortAlphabetically": true,
   "contributors": [
     {
       "login": "ellisonbg",
