@@ -26,7 +26,7 @@ export interface IActionButtonProps {
   /**
    * On-click event handler
    */
-  onClick: (event?: React.MouseEvent) => void;
+  onClick?: (event?: React.MouseEvent) => void;
 }
 
 /**

@@ -153,9 +153,7 @@ export class SinglePastCommitInfo extends React.Component<
             Changed
             <ActionButton
               iconName={'git-rewind'}
-              onClick={(
-                event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-              ) => {
+              onClick={event => {
                 event.stopPropagation();
                 this.deleteCommit(this.props.data.commit);
               }}
@@ -163,9 +161,7 @@ export class SinglePastCommitInfo extends React.Component<
             />
             <ActionButton
               iconName={'git-discard'}
-              onClick={(
-                event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-              ) => {
+              onClick={event => {
                 event.stopPropagation();
                 this.resetToCommit(this.props.data.commit);
               }}
