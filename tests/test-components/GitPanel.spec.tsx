@@ -11,8 +11,29 @@ function MockRequest(url: string, method: string, request: any) {
   let response: Response;
   let obj: any;
   switch (url) {
+    case '/git/branch':
+      obj = {
+        code: 0,
+        branches: [],
+        current_branch: null
+      };
+      response = new Response(JSON.stringify(obj));
+      break;
     case '/git/commit':
       response = new Response();
+      break;
+    case '/git/log':
+      obj = {
+        code: 0,
+        commits: []
+      };
+      response = new Response(JSON.stringify(obj));
+      break;
+    case '/git/server_root':
+      obj = {
+        server_root: '/foo'
+      };
+      response = new Response(JSON.stringify(obj));
       break;
     case '/git/show_top_level':
       obj = {
@@ -21,9 +42,10 @@ function MockRequest(url: string, method: string, request: any) {
       };
       response = new Response(JSON.stringify(obj));
       break;
-    case '/git/server_root':
+    case '/git/status':
       obj = {
-        server_root: '/foo'
+        code: 0,
+        files: []
       };
       response = new Response(JSON.stringify(obj));
       break;

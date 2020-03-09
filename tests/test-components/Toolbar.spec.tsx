@@ -33,6 +33,22 @@ async function createModel() {
 function request(url: string, method: string, request: Object | null) {
   let response: Response;
   switch (url) {
+    case '/git/branch':
+      response = new Response(
+        JSON.stringify({
+          code: 0,
+          branches: [],
+          current_branch: null
+        })
+      );
+      break;
+    case '/git/server_root':
+      response = new Response(
+        JSON.stringify({
+          server_root: '/foo'
+        })
+      );
+      break;
     case '/git/show_top_level':
       response = new Response(
         JSON.stringify({
@@ -41,10 +57,11 @@ function request(url: string, method: string, request: Object | null) {
         })
       );
       break;
-    case '/git/server_root':
+    case '/git/status':
       response = new Response(
         JSON.stringify({
-          server_root: '/foo'
+          code: 0,
+          files: []
         })
       );
       break;
