@@ -63,6 +63,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "aws",
+      "name": "Amazon Web Services",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2232217?v=4",
+      "profile": "https://amazon.com/aws",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7
