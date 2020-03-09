@@ -1,6 +1,7 @@
 # jupyterlab-git
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-0-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab/tree/examples/demo.ipynb) [![Build Status](https://travis-ci.org/jupyterlab/jupyterlab-git.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab-git) [![Version](https://img.shields.io/npm/v/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/pypi/v/jupyterlab-git.svg)](https://pypi.org/project/jupyterlab-git/) [![Downloads](https://img.shields.io/npm/dm/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git) [![Downloads](https://img.shields.io/conda/dn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git)
@@ -90,7 +91,6 @@ JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jup
 
 ### Team
 
-The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our maintainer team is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
 
 JupyterLab Git's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
@@ -155,26 +155,34 @@ pytest jupyterlab_git
 jlpm run test
 ```
 
-## Attributions
-
-Extension development has been sponsored at various times by the following organizations:
-
--  **[Jupyter Cal Poly](https://github.com/jupytercalpoly)**: [Brian Granger](https://github.com/ellisonbg), [Ji Zhang](https://github.com/zzhangjii), [Hana Zarea](https://github.com/hzarea), [Noah Stapp](https://github.com/NoahStapp), and [Ashutosh Bondre](https://github.com/ashutoshbondre).
-- **[Amazon Web Services](https://github.com/aws)**: [Jaipreet Singh](https://github.com/jaipreet-s), [Neelam Gehlot](https://github.com/neelamgehlot), and [Saul Shanabrook](https://github.com/saulshanabrook).
--  **[LabShare](https://github.com/LabShare)**: [Konstantin Taletskiy](https://github.com/ktaletsk).
--  **[Safran Group](https://www.safran-group.com/)**: [Frédéric Collonval](https://github.com/fcollonval).
--  **D. E. Shaw group**: [Max Klein](https://github.com/telamonian) and [Athan](https://github.com/kgryte).
-
-
 ## Contributors ✨
+
+The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. Our maintainer team is accompanied by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/ellisonbg"><img src="https://avatars3.githubusercontent.com/u/27600?v=4" width="100px;" alt=""/><br /><sub><b>Brian E. Granger</b></sub></a><br /><a href="#projectManagement-ellisonbg" title="Project Management">📆</a></td>
+  </tr>
+</table>
+
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+## Attributions
+
+Extension development has been sponsored at various times by the following organizations:
+
+- **[Jupyter Cal Poly](https://github.com/jupytercalpoly)**: [Brian Granger](https://github.com/ellisonbg), [Ji Zhang](https://github.com/zzhangjii), [Hana Zarea](https://github.com/hzarea), [Noah Stapp](https://github.com/NoahStapp), and [Ashutosh Bondre](https://github.com/ashutoshbondre).
+- **[Amazon Web Services](https://github.com/aws)**: [Jaipreet Singh](https://github.com/jaipreet-s), [Neelam Gehlot](https://github.com/neelamgehlot), and [Saul Shanabrook](https://github.com/saulshanabrook).
+- **[LabShare](https://github.com/LabShare)**: [Konstantin Taletskiy](https://github.com/ktaletsk).
+- **[Safran Group](https://www.safran-group.com/)**: [Frédéric Collonval](https://github.com/fcollonval).
+- **D. E. Shaw group**: [Max Klein](https://github.com/telamonian) and [Athan](https://github.com/kgryte).
