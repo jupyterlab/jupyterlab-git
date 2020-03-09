@@ -951,21 +951,58 @@ class Git:
         """
         Collect get content of prev and curr and return.
         """
+        is_binary = await self._is_binary(filename, prev_ref["git"], top_repo_path)
+        if is_binary:
+            raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+
         prev_content = await self.show(filename, prev_ref["git"], top_repo_path)
         if "special" in curr_ref:
             if curr_ref["special"] == "WORKING":
                 curr_content = self.get_content(filename, top_repo_path)
             elif curr_ref["special"] == "INDEX":
+                is_binary = await self._is_binary(filename, "", top_repo_path)
+                if is_binary:
+                    raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+                    
                 curr_content = await self.show(filename, "", top_repo_path)
             else:
                 raise tornado.web.HTTPError(
-                    log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(
-                        curr_ref["special"]
-                    )
+                    log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(curr_ref["special"])
                 )
         else:
+            is_binary = await self._is_binary(filename, curr_ref["git"], top_repo_path)
+            if is_binary:
+                raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+
             curr_content = await self.show(filename, curr_ref["git"], top_repo_path)
+
         return {"prev_content": prev_content, "curr_content": curr_content}
+
+    async def _is_binary(self, filename, ref, top_repo_path):
+        """
+        Determine whether Git handles a file as binary or text.
+
+        ## References
+
+        -   <https://stackoverflow.com/questions/6119956/how-to-determine-if-git-handles-a-file-as-binary-or-as-text/6134127#6134127>
+        -   <https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---numstat>
+        -   <https://git-scm.com/docs/git-diff#_other_diff_formats>
+        """
+        command = ["git", "diff", "--numstat", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", ref, "--", filename]  # where 4b825... is a magic SHA which represents the empty tree
+        code, output, error = await execute(command, cwd=top_repo_path)
+
+        if code != 0:
+            err_msg = "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename).lower()
+            if err_msg in error.lower():
+                return False
+
+            raise tornado.web.HTTPError(log_message="Error while determining if file is binary or text '{}'.".format(error))
+
+        # For binary files, `--numstat` outputs two `-` characters separated by TABs:
+        if output.startswith('-\t-\t'):
+            return True
+
+        return False
 
     def remote_add(self, top_repo_path, url, name=DEFAULT_REMOTE_NAME):
         """Handle call to `git remote add` command.
