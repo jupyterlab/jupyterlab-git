@@ -1,0 +1,27 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "saulshanabrook",
+      "name": "Saul Shanabrook",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/1186124?v=4",
+      "profile": "https://www.saulshanabrook.com/",
+      "contributions": [
+        "test",
+        "code",
+        "review",
+        "projectManagement"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "jupyterlab-git",
+  "projectOwner": "jupyterlab",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
