@@ -5,8 +5,9 @@ about: Create a report to help us improve
 
 <!--
 Welcome! Before creating a new issue:
+* Look at the README *Troubleshooting* section
 * Search for relevant issues
-* Check that you have updated both the jupyterlab extension and the python package
+* Check that you have updated both the jupyterlab extension and the python package to the same version
 -->
 
 ## Description

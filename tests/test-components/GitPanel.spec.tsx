@@ -1,78 +1,91 @@
 import * as apputils from '@jupyterlab/apputils';
 import 'jest';
-import { FileList, IFileListProps } from '../../src/components/FileList';
-import { GitExtension } from '../../src/model';
+import { GitExtension as GitModel } from '../../src/model';
 import * as git from '../../src/git';
+import { GitPanel, IGitSessionNodeProps } from '../../src/components/GitPanel';
 
 jest.mock('../../src/git');
-
-// Mock jupyterlab package
 jest.mock('@jupyterlab/apputils');
 
-describe('FileList', () => {
-  const props: IFileListProps = {
-    model: null,
-    renderMime: null,
-    stagedFiles: [],
-    unstagedFiles: [],
-    untrackedFiles: [],
-    settings: null
-  };
+function MockRequest(url: string, method: string, request: any) {
+  let response: Response;
+  let obj: any;
+  switch (url) {
+    case '/git/commit':
+      response = new Response();
+      break;
+    case '/git/show_top_level':
+      obj = {
+        code: 0,
+        top_repo_path: (request as any)['current_path']
+      };
+      response = new Response(JSON.stringify(obj));
+      break;
+    case '/git/server_root':
+      obj = {
+        server_root: '/foo'
+      };
+      response = new Response(JSON.stringify(obj));
+      break;
+    default:
+      obj = {
+        message: `No mock implementation for ${url}.`
+      };
+      response = new Response(JSON.stringify(obj), { status: 404 });
+  }
+  return Promise.resolve(response);
+}
 
-  describe('#commitAllStagedFiles()', () => {
-    let fileList: FileList = null;
+/**
+ * Returns a bare minimum "settings" object for use within the Git panel.
+ *
+ * @private
+ * @returns mock settings
+ */
+function MockSettings() {
+  return {
+    changed: {
+      connect: () => true,
+      disconnect: () => true
+    },
+    composite: {}
+  };
+}
+
+describe('GitPanel', () => {
+  describe('#commitStagedFiles()', () => {
+    const props: IGitSessionNodeProps = {
+      model: null,
+      renderMime: null,
+      settings: null
+    };
 
     beforeEach(async () => {
       jest.restoreAllMocks();
 
-      const fakePath = '/path/to/repo';
-      const fakeRoot = '/foo';
-      const mockGit = git as jest.Mocked<typeof git>;
-      mockGit.httpGitRequest.mockImplementation((url, method, request) => {
-        let response: Response;
-        switch (url) {
-          case '/git/commit':
-            response = new Response();
-            break;
-          case '/git/show_top_level':
-            response = new Response(
-              JSON.stringify({
-                code: 0,
-                top_repo_path: (request as any)['current_path']
-              })
-            );
-            break;
-          case '/git/server_root':
-            response = new Response(
-              JSON.stringify({
-                server_root: fakeRoot
-              })
-            );
-            break;
-          default:
-            response = new Response(
-              `{"message": "No mock implementation for ${url}."}`,
-              { status: 404 }
-            );
-        }
-        return Promise.resolve(response);
-      });
+      const mock = git as jest.Mocked<typeof git>;
+      mock.httpGitRequest.mockImplementation(MockRequest);
+
       const app = {
         commands: {
           hasCommand: jest.fn().mockReturnValue(true)
         }
       };
-      props.model = new GitExtension(app as any);
-      props.model.pathRepository = fakePath;
+      props.model = new GitModel(app as any);
+      props.model.pathRepository = '/path/to/repo';
+
+      // @ts-ignore
+      props.settings = MockSettings();
+
       await props.model.ready;
-      fileList = new FileList(props);
     });
 
     it('should commit when commit message is provided', async () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'commit');
+      const spy = jest.spyOn(GitModel.prototype, 'commit');
+
       // Mock identity look up
       const identity = jest
-        .spyOn(GitExtension.prototype, 'config')
+        .spyOn(GitModel.prototype, 'config')
         .mockResolvedValue(
           new Response(
             JSON.stringify({
@@ -84,24 +97,28 @@ describe('FileList', () => {
             { status: 201 }
           )
         );
-      await fileList.commitAllStagedFiles('Initial commit');
+
+      const panel = new GitPanel(props);
+      await panel.commitStagedFiles('Initial commit');
       expect(identity).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith('Initial commit');
     });
 
-    it('should NOT commit when commit message is empty', async () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'commit');
-      await fileList.commitAllStagedFiles('');
+    it('should not commit without a commit message', async () => {
+      const spy = jest.spyOn(GitModel.prototype, 'commit');
+      const panel = new GitPanel(props);
+      await panel.commitStagedFiles('');
       expect(spy).not.toHaveBeenCalled();
       spy.mockRestore();
     });
 
-    it('should prompt for user identity if user.name is unset', async () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'commit');
+    it('should prompt for user identity if user.name is not set', async () => {
+      const spy = jest.spyOn(GitModel.prototype, 'commit');
+
       // Mock identity look up
       const identity = jest
-        .spyOn(GitExtension.prototype, 'config')
+        .spyOn(GitModel.prototype, 'config')
         .mockImplementation(options => {
           let response: Response = null;
           if (options === undefined) {
@@ -118,8 +135,8 @@ describe('FileList', () => {
           }
           return Promise.resolve(response);
         });
-      const mockApputils = apputils as jest.Mocked<typeof apputils>;
-      mockApputils.showDialog.mockResolvedValue({
+      const mock = apputils as jest.Mocked<typeof apputils>;
+      mock.showDialog.mockResolvedValue({
         button: {
           accept: true,
           caption: '',
@@ -135,7 +152,8 @@ describe('FileList', () => {
         }
       });
 
-      await fileList.commitAllStagedFiles('Initial commit');
+      const panel = new GitPanel(props);
+      await panel.commitStagedFiles('Initial commit');
       expect(identity).toHaveBeenCalledTimes(2);
       expect(identity.mock.calls[0]).toHaveLength(0);
       expect(identity.mock.calls[1]).toEqual([
@@ -148,11 +166,12 @@ describe('FileList', () => {
       expect(spy).toHaveBeenCalledWith('Initial commit');
     });
 
-    it('should prompt for user identity if user.email is unset', async () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'commit');
+    it('should prompt for user identity if user.email is not set', async () => {
+      const spy = jest.spyOn(GitModel.prototype, 'commit');
+
       // Mock identity look up
       const identity = jest
-        .spyOn(GitExtension.prototype, 'config')
+        .spyOn(GitModel.prototype, 'config')
         .mockImplementation(options => {
           let response: Response = null;
           if (options === undefined) {
@@ -169,8 +188,8 @@ describe('FileList', () => {
           }
           return Promise.resolve(response);
         });
-      const mockApputils = apputils as jest.Mocked<typeof apputils>;
-      mockApputils.showDialog.mockResolvedValue({
+      const mock = apputils as jest.Mocked<typeof apputils>;
+      mock.showDialog.mockResolvedValue({
         button: {
           accept: true,
           caption: '',
@@ -186,7 +205,8 @@ describe('FileList', () => {
         }
       });
 
-      await fileList.commitAllStagedFiles('Initial commit');
+      const panel = new GitPanel(props);
+      await panel.commitStagedFiles('Initial commit');
       expect(identity).toHaveBeenCalledTimes(2);
       expect(identity.mock.calls[0]).toHaveLength(0);
       expect(identity.mock.calls[1]).toEqual([
@@ -199,11 +219,12 @@ describe('FileList', () => {
       expect(spy).toHaveBeenCalledWith('Initial commit');
     });
 
-    it('should NOT commit if no user identity is set and the user reject the dialog', async () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'commit');
+    it('should not commit if no user identity is set and the user rejects the dialog', async () => {
+      const spy = jest.spyOn(GitModel.prototype, 'commit');
+
       // Mock identity look up
       const identity = jest
-        .spyOn(GitExtension.prototype, 'config')
+        .spyOn(GitModel.prototype, 'config')
         .mockImplementation(options => {
           let response: Response = null;
           if (options === undefined) {
@@ -218,8 +239,8 @@ describe('FileList', () => {
           }
           return Promise.resolve(response);
         });
-      const mockApputils = apputils as jest.Mocked<typeof apputils>;
-      mockApputils.showDialog.mockResolvedValue({
+      const mock = apputils as jest.Mocked<typeof apputils>;
+      mock.showDialog.mockResolvedValue({
         button: {
           accept: false,
           caption: '',
@@ -232,7 +253,8 @@ describe('FileList', () => {
         value: null
       });
 
-      await fileList.commitAllStagedFiles('Initial commit');
+      const panel = new GitPanel(props);
+      await panel.commitStagedFiles('Initial commit');
       expect(identity).toHaveBeenCalledTimes(1);
       expect(identity).toHaveBeenCalledWith();
       expect(spy).not.toHaveBeenCalled();

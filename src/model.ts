@@ -41,7 +41,7 @@ export class GitExtension implements IGitExtension {
       interval = DEFAULT_REFRESH_INTERVAL;
     }
     const poll = new Poll({
-      factory: () => model._refreshStatus(),
+      factory: () => model.refresh(),
       frequency: {
         interval: interval,
         backoff: true,
@@ -387,6 +387,7 @@ export class GitExtension implements IGitExtension {
       checkout_branch: false,
       new_check: false,
       branchname: '',
+      startpoint: '',
       checkout_all: true,
       filename: '',
       top_repo_path: path
@@ -397,6 +398,9 @@ export class GitExtension implements IGitExtension {
         body.branchname = options.branchname;
         body.checkout_branch = true;
         body.new_check = options.newBranch === true;
+        if (options.newBranch) {
+          body.startpoint = options.startpoint || this._currentBranch.name;
+        }
       } else if (options.filename) {
         body.filename = options.filename;
         body.checkout_all = false;
@@ -787,8 +791,31 @@ export class GitExtension implements IGitExtension {
    * Request git status refresh
    */
   async refreshStatus(): Promise<void> {
-    await this._poll.refresh();
-    await this._poll.tick;
+    await this.ready;
+    const path = this.pathRepository;
+
+    if (path === null) {
+      this._setStatus([]);
+      return Promise.resolve();
+    }
+
+    try {
+      let response = await httpGitRequest('/git/status', 'POST', {
+        current_path: path
+      });
+      const data = await response.json();
+      if (response.status !== 200) {
+        console.error(data.message);
+        // TODO should we notify the user
+        this._setStatus([]);
+      }
+
+      this._setStatus((data as Git.IStatusResult).files);
+    } catch (err) {
+      console.error(err);
+      // TODO should we notify the user
+      this._setStatus([]);
+    }
   }
 
   /**
@@ -933,35 +960,6 @@ export class GitExtension implements IGitExtension {
       return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
-    }
-  }
-
-  /** Refresh the git repository status */
-  protected async _refreshStatus(): Promise<void> {
-    await this.ready;
-    const path = this.pathRepository;
-
-    if (path === null) {
-      this._setStatus([]);
-      return Promise.resolve();
-    }
-
-    try {
-      let response = await httpGitRequest('/git/status', 'POST', {
-        current_path: path
-      });
-      const data = await response.json();
-      if (response.status !== 200) {
-        console.error(data.message);
-        // TODO should we notify the user
-        this._setStatus([]);
-      }
-
-      this._setStatus((data as Git.IStatusResult).files);
-    } catch (err) {
-      console.error(err);
-      // TODO should we notify the user
-      this._setStatus([]);
     }
   }
 

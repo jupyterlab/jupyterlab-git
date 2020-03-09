@@ -1,57 +1,132 @@
+import * as React from 'react';
 import 'jest';
+import { shallow } from 'enzyme';
 import { CommitBox } from '../../src/components/CommitBox';
-import { classes } from 'typestyle';
-import {
-  stagedCommitButtonStyle,
-  stagedCommitButtonReadyStyle,
-  stagedCommitButtonDisabledStyle
-} from '../../src/style/BranchHeaderStyle';
+import { commitButtonDisabledClass } from '../../src/style/CommitBox';
 
 describe('CommitBox', () => {
-  describe('#checkReadyForSubmit()', () => {
-    it('should update commit box state to be ready when changes are staged', () => {
+  describe('#constructor()', () => {
+    it('should return a new instance', () => {
       const box = new CommitBox({
-        commitFunc: async () => {},
-        hasFiles: true,
-        settings: { composite: {} } as any
+        onCommit: async () => {},
+        hasFiles: false
       });
-
-      let actual = box.commitButtonStyle(true);
-
-      let expected = classes(
-        stagedCommitButtonStyle,
-        stagedCommitButtonReadyStyle
-      );
-      expect(actual).toEqual(expected);
+      expect(box).toBeInstanceOf(CommitBox);
     });
 
-    it('should update commit box state to be disabled when no changes are staged', () => {
+    it('should set the default commit message summary to an empty string', () => {
       const box = new CommitBox({
-        commitFunc: async () => {},
-        hasFiles: true,
-        settings: { composite: {} } as any
+        onCommit: async () => {},
+        hasFiles: false
       });
-
-      let actual = box.commitButtonStyle(false);
-      let expected = classes(
-        stagedCommitButtonStyle,
-        stagedCommitButtonDisabledStyle
-      );
-      expect(actual).toEqual(expected);
+      expect(box.state.summary).toEqual('');
     });
 
-    it('should be ready to commit with a message set.', () => {
+    it('should set the default commit message description to an empty string', () => {
       const box = new CommitBox({
-        commitFunc: async () => {},
-        hasFiles: true,
-        settings: { composite: {} } as any
+        onCommit: async () => {},
+        hasFiles: false
       });
-      // can't use setState here, since the box hasn't actually mounted
-      box.state = { value: 'message' };
+      expect(box.state.description).toEqual('');
+    });
+  });
 
-      let actual = box.commitButtonStyle(true);
-      let expected = stagedCommitButtonStyle;
-      expect(actual).toEqual(expected);
+  describe('#render()', () => {
+    it('should display placeholder text for the commit message summary', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="text"]').first();
+      expect(node.prop('placeholder')).toEqual('Summary (required)');
+    });
+
+    it('should set a `title` attribute on the input element to provide a commit message summary', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="text"]').first();
+      expect(node.prop('title').length > 0).toEqual(true);
+    });
+
+    it('should display placeholder text for the commit message description', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('TextareaAutosize').first();
+      expect(node.prop('placeholder')).toEqual('Description');
+    });
+
+    it('should set a `title` attribute on the input element to provide a commit message description', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('TextareaAutosize').first();
+      expect(node.prop('title').length > 0).toEqual(true);
+    });
+
+    it('should display a button to commit changes', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="button"]').first();
+      expect(node.prop('value')).toEqual('Commit');
+    });
+
+    it('should set a `title` attribute on the button to commit changes', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="button"]').first();
+      expect(node.prop('title').length > 0).toEqual(true);
+    });
+
+    it('should apply a class to disable the commit button when no files have changes to commit', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: false
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="button"]').first();
+      const idx = node.prop('className').indexOf(commitButtonDisabledClass);
+      expect(idx >= 0).toEqual(true);
+    });
+
+    it('should apply a class to disable the commit button when files have changes to commit, but the user has not entered a commit message summary', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: true
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="button"]').first();
+      const idx = node.prop('className').indexOf(commitButtonDisabledClass);
+      expect(idx >= 0).toEqual(true);
+    });
+
+    it('should not apply a class to disable the commit button when files have changes to commit and the user has entered a commit message summary', () => {
+      const props = {
+        onCommit: async () => {},
+        hasFiles: true
+      };
+      const component = shallow(<CommitBox {...props} />);
+      component.setState({
+        summary: 'beep boop'
+      });
+
+      const node = component.find('input[type="button"]').first();
+      const idx = node.prop('className').indexOf(commitButtonDisabledClass);
+      expect(idx >= 0).toEqual(false);
     });
   });
 });
