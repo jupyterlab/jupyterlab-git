@@ -5,7 +5,6 @@ import os
 import re
 import subprocess
 from urllib.parse import unquote
-from codecs import decode, escape_decode
 
 import pexpect
 import tornado
@@ -169,14 +168,14 @@ class Git:
             }
         """
         if single_commit:
-            cmd = ["git", "diff", "{}^!".format(single_commit), "--name-only"]
+            cmd = ["git", "diff", "{}^!".format(single_commit), "--name-only", "-z"]
         elif base and remote:
             if base == "WORKING":
-                cmd = ["git", "diff", remote, "--name-only"]
+                cmd = ["git", "diff", remote, "--name-only", "-z"]
             elif base == "INDEX":
-                cmd = ["git", "diff", "--staged", remote, "--name-only"]
+                cmd = ["git", "diff", "--staged", remote, "--name-only", "-z"]
             else:
-                cmd = ["git", "diff", base, remote, "--name-only"]
+                cmd = ["git", "diff", base, remote, "--name-only", "-z"]
         else:
             raise tornado.web.HTTPError(
                 400, "Either single_commit or (base and remote) must be provided"
@@ -194,7 +193,7 @@ class Git:
                 response["command"] = " ".join(cmd)
                 response["message"] = error
             else:
-                response["files"] = output.strip().split("\n")
+                response["files"] = output.strip("\x00").split("\x00")
 
         return response
 
@@ -237,7 +236,7 @@ class Git:
         """
         Execute git status command & return the result.
         """
-        cmd = ["git", "status", "--porcelain", "-u"]
+        cmd = ["git", "status", "--porcelain", "-u", "-z"]
         code, my_output, my_error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path),
         )
@@ -250,22 +249,24 @@ class Git:
             }
 
         result = []
-        line_array = my_output.splitlines()
-        for line in line_array:
-            to1 = None
-            from_path = line[3:]
-            if line[0] == "R":
-                to0 = line[3:].split(" -> ")
-                to1 = to0[len(to0) - 1]
+        line_iterable = iter(my_output.strip("\x00").split('\x00'))
+        result = []
+        for line in line_iterable:
+            x = line[0]
+            y = line[1]
+            if line[0]=='R':
+                #If file was renamed then we need both this line
+                #and the next line, then we want to move onto the subsequent
+                #line. We can accomplish this by calling next on the iterable
+                to = line[3:]
+                from_path = next(line_iterable)
             else:
-                to1 = line[3:]
-            if to1.startswith('"'):
-                to1 = to1[1:]
-            if to1.endswith('"'):
-                to1 = to1[:-1]
-            to1 = decode(escape_decode(to1)[0],'utf-8')
-            from_path = decode(escape_decode(from_path)[0],'utf-8')
-            result.append({"x": line[0], "y": line[1], "to": to1, "from": from_path})
+                #to and from_path are the same
+                from_path = line[3:]
+                to = line[3:]
+            result.append({"x": x, "y": y, "to": to, "from": from_path})
+
+
         return {"code": code, "files": result}
 
     async def log(self, current_path, history_count=10):
@@ -314,10 +315,10 @@ class Git:
 
     async def detailed_log(self, selected_hash, current_path):
         """
-        Execute git log -1 --stat --numstat --oneline command (used to get
+        Execute git log -1 --stat --numstat --oneline -z command (used to get
         insertions & deletions per file) & return the result.
         """
-        cmd = ["git", "log", "-1", "--stat", "--numstat", "--oneline", selected_hash]
+        cmd = ["git", "log", "-1", "--stat", "--numstat", "--oneline", "-z", selected_hash]
         code, my_output, my_error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path),
         )
@@ -329,7 +330,7 @@ class Git:
         note = [0] * 3
         count = 0
         temp = ""
-        line_array = my_output.splitlines()
+        line_array = re.split("\x00|\n|\r\n|\r", my_output)
         length = len(line_array)
         INSERTION_INDEX = 0
         DELETION_INDEX = 1
@@ -342,7 +343,7 @@ class Git:
                     note[count] = words[i]
                     count += 1
             for num in range(1, int(length / 2)):
-                line_info = line_array[num].split(maxsplit=2)
+                line_info = line_array[num].split('\t', maxsplit=2)
                 words = line_info[2].split("/")
                 length = len(words)
                 result.append(
@@ -373,14 +374,14 @@ class Git:
         """
         Execute git diff command & return the result.
         """
-        cmd = ["git", "diff", "--numstat"]
+        cmd = ["git", "diff", "--numstat", "-z"]
         code, my_output, my_error = await execute(cmd, cwd=top_repo_path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
-        line_array = my_output.splitlines()
+        line_array = my_output.strip('\x00').split('\x00')
         for line in line_array:
             linesplit = line.split()
             result.append(
