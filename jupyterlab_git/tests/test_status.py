@@ -11,7 +11,7 @@ from jupyterlab_git.git import Git
 from .testutils import FakeContentManager
 
 @pytest.mark.asyncio
-async def test_changed_files_index():
+async def test_status():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         process_output = (
