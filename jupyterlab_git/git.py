@@ -110,6 +110,13 @@ class Git:
     def __init__(self, contents_manager):
         self.contents_manager = contents_manager
         self.root_dir = os.path.expanduser(contents_manager.root_dir)
+        
+    def strip_and_split(self, s):
+        """strip trailing \x00 and split on \x00
+
+        Useful for parsing output of git commands with -z flag.
+        """
+        return s.strip("\x00").split("\x00")
 
     async def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
