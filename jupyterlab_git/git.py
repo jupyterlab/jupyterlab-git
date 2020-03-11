@@ -200,7 +200,7 @@ class Git:
                 response["command"] = " ".join(cmd)
                 response["message"] = error
             else:
-                response["files"] = output.strip("\x00").split("\x00")
+                response["files"] = self.strip_and_split(output)
 
         return response
 
@@ -256,7 +256,7 @@ class Git:
             }
 
         result = []
-        line_iterable = iter(my_output.strip("\x00").split('\x00'))
+        line_iterable = iter(self.strip_and_split(my_output))
         result = []
         for line in line_iterable:
             x = line[0]
@@ -388,7 +388,7 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
-        line_array = my_output.strip('\x00').split('\x00')
+        line_array = strip_and_split(my_output)
         for line in line_array:
             linesplit = line.split()
             result.append(
