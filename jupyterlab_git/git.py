@@ -322,10 +322,10 @@ class Git:
 
     async def detailed_log(self, selected_hash, current_path):
         """
-        Execute git log -1 --stat --numstat --oneline -z command (used to get
+        Execute git log -1 --numstat --oneline -z command (used to get
         insertions & deletions per file) & return the result.
         """
-        cmd = ["git", "log", "-1", "--stat", "--numstat", "--oneline", "-z", selected_hash]
+        cmd = ["git", "log", "-1", "--numstat", "--oneline", "-z", selected_hash]
         code, my_output, my_error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path),
         )
@@ -333,47 +333,44 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
+        total_insertions = 0
+        total_deletions = 0
         result = []
-        note = [0] * 3
-        count = 0
-        temp = ""
-        line_array = re.split("\x00|\n|\r\n|\r", my_output)
-        length = len(line_array)
-        INSERTION_INDEX = 0
-        DELETION_INDEX = 1
-        MODIFIED_FILE_PATH_INDEX = 2
-        if length > 1:
-            temp = line_array[length - 1]
-            words = temp.split()
-            for i in range(0, len(words)):
-                if words[i].isdigit():
-                    note[count] = words[i]
-                    count += 1
-            for num in range(1, int(length / 2)):
-                line_info = line_array[num].split('\t', maxsplit=2)
-                words = line_info[2].split("/")
-                length = len(words)
-                result.append(
-                    {
-                        "modified_file_path": line_info[MODIFIED_FILE_PATH_INDEX],
-                        "modified_file_name": words[length - 1],
-                        "insertion": line_info[INSERTION_INDEX],
-                        "deletion": line_info[DELETION_INDEX],
-                    }
-                )
+        line_iterable = iter(self.strip_and_split(my_output)[1:])
+        for line in line_iterable:
+            insertions, deletions, file = line.split('\t')
 
-        if note[2] == 0 and length > 1:
-            if "-" in temp:
-                exchange = note[1]
-                note[1] = note[2]
-                note[2] = exchange
+            if file == '':
+                # file was renamed or moved
+                # we need next two lines of output
+                from_path = next(line_iterable)
+                to_path = next(line_iterable)
+                modified_file_name = from_path + " ⮕ " + to_path
+                modified_file_path = to_path
+            else:
+                modified_file_name = file.split("/")[-1]
+                modified_file_path = file
+
+            result.append({
+                        "modified_file_path": modified_file_path,
+                        "modified_file_name": modified_file_name,
+                        "insertion": insertions,
+                        "deletion": deletions,
+            })
+            total_insertions += int(insertions)
+            total_deletions += int(deletions)
+
+        modified_file_note = "{num_files} files changed, {insertions} insertions(+), {deletions} deletions(-)".format(
+            num_files=len(result),
+            insertions=total_insertions,
+            deletions=total_deletions)
 
         return {
             "code": code,
-            "modified_file_note": temp,
-            "modified_files_count": note[0],
-            "number_of_insertions": note[1],
-            "number_of_deletions": note[2],
+            "modified_file_note": modified_file_note,
+            "modified_files_count": str(len(result)),
+            "number_of_insertions": str(total_insertions),
+            "number_of_deletions": str(total_deletions),
             "modified_files": result,
         }
 

@@ -15,34 +15,28 @@ from .testutils import FakeContentManager
 async def test_detailed_log():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        process_output_first_half = [
+        process_output = [
             "f29660a (HEAD, origin/feature) Commit message",
             "10\t3\tnotebook_without_spaces.ipynb",
             "11\t4\tNotebook with spaces.ipynb",
             "12\t5\tpath/notebook_without_spaces.ipynb",
             "13\t6\tpath/Notebook with spaces.ipynb",
             "14\t1\tpath/Notebook with λ.ipynb",
+            "0\t0\t",
+            "folder1/file with spaces and λ.py",
+            "folder2/file with spaces.py"
         ]
-        process_output_second_half = [
-            " notebook_without_spaces.ipynb      | 13 ++++++++---",
-            " Notebook with spaces.ipynb         | 15 +++++++++----",
-            " path/notebook_without_spaces.ipynb | 17 ++++++++++-----",
-            " path/Notebook with spaces.ipynb    | 19 +++++++++++------",
-            " path/Notebook with \\316\\273.ipynb         | 15 +++++++++++-",
-            " 5 files changed, 50 insertions(+), 19 deletions(-)",
-        ]
-        process_output_first_half = "\x00".join(process_output_first_half)
-        process_output_second_half = "\n".join(process_output_second_half)
-        process_output = process_output_first_half + "\x00" + process_output_second_half
+
+
         mock_execute._mock_return_value = tornado.gen.maybe_future(
-            (0, process_output, "")
+            (0, "\x00".join(process_output), "")
         )
 
         expected_response = {
             "code": 0,
-            "modified_file_note": " 5 files changed, 50 insertions(+), 19 deletions(-)",
-            "modified_files_count": "5",
-            "number_of_insertions": "50",
+            "modified_file_note": "6 files changed, 60 insertions(+), 19 deletions(-)",
+            "modified_files_count": "6",
+            "number_of_insertions": "60",
             "number_of_deletions": "19",
             "modified_files": [
                 {
@@ -75,11 +69,17 @@ async def test_detailed_log():
                     "insertion": "14",
                     "deletion": "1",
                 },
+                {
+                    "modified_file_path": "folder2/file with spaces.py",
+                    "modified_file_name": "folder1/file with spaces and λ.py ⮕ folder2/file with spaces.py",
+                    "insertion": "0",
+                    "deletion": "0",
+                },
             ],
         }
 
         # When
-        actual_response = (await 
+        actual_response = (await
             Git(FakeContentManager("/bin"))
             .detailed_log(
                 selected_hash="f29660a2472e24164906af8653babeb48e4bf2ab",
@@ -93,7 +93,6 @@ async def test_detailed_log():
                 "git",
                 "log",
                 "-1",
-                "--stat",
                 "--numstat",
                 "--oneline",
                 "-z",
