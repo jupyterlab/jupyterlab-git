@@ -25,7 +25,7 @@ async def execute(
     password: "Optional[str]" = None,
 ) -> "Tuple[int, str, str]":
     """Asynchronously execute a command.
-    
+
     Args:
         cmdline (List[str]): Command line to be executed
         cwd (Optional[str]): Current working directory
@@ -113,7 +113,7 @@ class Git:
 
     async def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
-        
+
         If no kwargs, all options are returned. Otherwise kwargs are set.
         """
         response = {"code": 1}
@@ -154,12 +154,12 @@ class Git:
         There are two reserved "refs" for the base
             1. WORKING : Represents the Git working tree
             2. INDEX: Represents the Git staging area / index
-        
+
         Keyword Arguments:
             single_commit {string} -- The single commit ref
             base {string} -- the base Git ref
             remote {string} -- the remote Git ref
-        
+
         Returns:
             dict -- the response of format {
                 "code": int, # Command status code
@@ -602,12 +602,12 @@ class Git:
         if status["code"] != 0:
             return status
 
-        unstaged = []
+        untracked = []
         for f in status["files"]:
             if f["x"]=="?" and f["y"]=="?":
-                unstaged.append(f["from"].strip('"'))
+                untracked.append(f["from"].strip('"'))
 
-        return await self.add(unstaged, top_repo_path)
+        return await self.add(untracked, top_repo_path)
 
     async def reset(self, filename, top_repo_path):
         """
