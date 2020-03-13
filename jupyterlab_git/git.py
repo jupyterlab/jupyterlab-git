@@ -25,7 +25,7 @@ async def execute(
     password: "Optional[str]" = None,
 ) -> "Tuple[int, str, str]":
     """Asynchronously execute a command.
-    
+
     Args:
         cmdline (List[str]): Command line to be executed
         cwd (Optional[str]): Current working directory
@@ -101,6 +101,12 @@ async def execute(
 
     return code, output, error
 
+def strip_and_split(s):
+    """strip trailing \x00 and split on \x00
+
+    Useful for parsing output of git commands with -z flag.
+    """
+    return s.strip("\x00").split("\x00")
 
 class Git:
     """
@@ -110,17 +116,10 @@ class Git:
     def __init__(self, contents_manager):
         self.contents_manager = contents_manager
         self.root_dir = os.path.expanduser(contents_manager.root_dir)
-        
-    def strip_and_split(self, s):
-        """strip trailing \x00 and split on \x00
-
-        Useful for parsing output of git commands with -z flag.
-        """
-        return s.strip("\x00").split("\x00")
 
     async def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
-        
+
         If no kwargs, all options are returned. Otherwise kwargs are set.
         """
         response = {"code": 1}
@@ -161,12 +160,12 @@ class Git:
         There are two reserved "refs" for the base
             1. WORKING : Represents the Git working tree
             2. INDEX: Represents the Git staging area / index
-        
+
         Keyword Arguments:
             single_commit {string} -- The single commit ref
             base {string} -- the base Git ref
             remote {string} -- the remote Git ref
-        
+
         Returns:
             dict -- the response of format {
                 "code": int, # Command status code
@@ -200,7 +199,7 @@ class Git:
                 response["command"] = " ".join(cmd)
                 response["message"] = error
             else:
-                response["files"] = self.strip_and_split(output)
+                response["files"] = strip_and_split(output)
 
         return response
 
@@ -256,23 +255,15 @@ class Git:
             }
 
         result = []
-        line_iterable = iter(self.strip_and_split(my_output))
-        result = []
+        line_iterable = iter(strip_and_split(my_output))
         for line in line_iterable:
-            x = line[0]
-            y = line[1]
+            from_path = line[3:]
             if line[0]=='R':
                 #If file was renamed then we need both this line
                 #and the next line, then we want to move onto the subsequent
                 #line. We can accomplish this by calling next on the iterable
-                to = line[3:]
                 from_path = next(line_iterable)
-            else:
-                #to and from_path are the same
-                from_path = line[3:]
-                to = line[3:]
-            result.append({"x": x, "y": y, "to": to, "from": from_path})
-
+            result.append({"x": line[0], "y": line[1], "to": line[3:], "from": from_path})
 
         return {"code": code, "files": result}
 
@@ -336,7 +327,7 @@ class Git:
         total_insertions = 0
         total_deletions = 0
         result = []
-        line_iterable = iter(self.strip_and_split(my_output)[1:])
+        line_iterable = iter(strip_and_split(my_output)[1:])
         for line in line_iterable:
             insertions, deletions, file = line.split('\t')
 
