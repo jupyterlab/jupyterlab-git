@@ -8,6 +8,8 @@ from urllib.parse import unquote
 
 import pexpect
 import tornado
+import tornado.locks
+import datetime
 
 
 # Git configuration options exposed through the REST API
@@ -16,7 +18,14 @@ ALLOWED_OPTIONS = ['user.name', 'user.email']
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
 CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
 DEFAULT_REMOTE_NAME = "origin"
+# Ensure on NFS or similar, that we give the .git/index.lock time to be removed
+MAX_WAIT_FOR_LOCK_S = 5
+# How often should we check for the lock above to be free?
+CHECK_LOCK_INTERVAL_S = 0.1
+# How long to wait to be executed or finished your execution before timing out
+MAX_WAIT_FOR_EXECUTE_S = 20
 
+execution_lock = tornado.locks.Lock()
 
 async def execute(
     cmdline: "List[str]",
@@ -85,19 +94,32 @@ async def execute(
         output, error = process.communicate()
         return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
 
-    if username is not None and password is not None:
-        code, output, error = await call_subprocess_with_authentication(
-            cmdline,
-            username,
-            password,
-            cwd,
-            env,
-        )
-    else:
-        current_loop = tornado.ioloop.IOLoop.current()
-        code, output, error = await current_loop.run_in_executor(
-            None, call_subprocess, cmdline, cwd, env
-        )
+    await execution_lock.acquire(timeout=datetime.timedelta(seconds=MAX_WAIT_FOR_EXECUTE_S))
+    try:
+        # Ensure our execution operation will succeed by first checking and waiting for the lock to be removed
+        time_slept = 0
+        lockfile = os.path.join(cwd, '.git', 'index.lock')
+        while os.path.exists(lockfile) and time_slept < CHECK_LOCK_INTERVAL_S:
+            await tornado.gen.sleep(CHECK_LOCK_INTERVAL_S)
+            time_slept += CHECK_LOCK_INTERVAL_S
+
+        # If the lock still exists at this point, we will likely fail anyway, but let's try anyway
+
+        if username is not None and password is not None:
+            code, output, error = await call_subprocess_with_authentication(
+                cmdline,
+                username,
+                password,
+                cwd,
+                env,
+            )
+        else:
+            current_loop = tornado.ioloop.IOLoop.current()
+            code, output, error = await current_loop.run_in_executor(
+                None, call_subprocess, cmdline, cwd, env
+            )
+    finally:
+        execution_lock.release()
 
     return code, output, error
 
@@ -978,7 +1000,7 @@ class Git:
                 is_binary = await self._is_binary(filename, "", top_repo_path)
                 if is_binary:
                     raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
-                    
+
                 curr_content = await self.show(filename, "", top_repo_path)
             else:
                 raise tornado.web.HTTPError(
