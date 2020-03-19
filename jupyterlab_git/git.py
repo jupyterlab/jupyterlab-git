@@ -257,7 +257,6 @@ class Git:
         result = []
         line_iterable = iter(strip_and_split(my_output))
         for line in line_iterable:
-            from_path = line[3:]
             result.append({
                 "x": line[0],
                 "y": line[1],
