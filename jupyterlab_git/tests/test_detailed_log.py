@@ -17,26 +17,27 @@ async def test_detailed_log():
         # Given
         process_output = [
             "f29660a (HEAD, origin/feature) Commit message",
-            "10      3       notebook_without_spaces.ipynb",
-            "11      4       Notebook with spaces.ipynb",
-            "12      5       path/notebook_without_spaces.ipynb",
-            "13      6       path/Notebook with spaces.ipynb",
-            " notebook_without_spaces.ipynb      | 13 ++++++++---",
-            " Notebook with spaces.ipynb         | 15 +++++++++----",
-            " path/notebook_without_spaces.ipynb | 17 ++++++++++-----",
-            " path/Notebook with spaces.ipynb    | 19 +++++++++++------",
-            " 4 files changed, 46 insertions(+), 18 deletions(-)",
+            "10\t3\tnotebook_without_spaces.ipynb",
+            "11\t4\tNotebook with spaces.ipynb",
+            "12\t5\tpath/notebook_without_spaces.ipynb",
+            "13\t6\tpath/Notebook with spaces.ipynb",
+            "14\t1\tpath/Notebook with λ.ipynb",
+            "0\t0\t",
+            "folder1/file with spaces and λ.py",
+            "folder2/file with spaces.py"
         ]
-        mock_execute.return_value = tornado.gen.maybe_future(
-            (0, "\n".join(process_output), "")
+
+
+        mock_execute._mock_return_value = tornado.gen.maybe_future(
+            (0, "\x00".join(process_output), "")
         )
 
         expected_response = {
             "code": 0,
-            "modified_file_note": " 4 files changed, 46 insertions(+), 18 deletions(-)",
-            "modified_files_count": "4",
-            "number_of_insertions": "46",
-            "number_of_deletions": "18",
+            "modified_file_note": "6 files changed, 60 insertions(+), 19 deletions(-)",
+            "modified_files_count": "6",
+            "number_of_insertions": "60",
+            "number_of_deletions": "19",
             "modified_files": [
                 {
                     "modified_file_path": "notebook_without_spaces.ipynb",
@@ -62,11 +63,23 @@ async def test_detailed_log():
                     "insertion": "13",
                     "deletion": "6",
                 },
+                {
+                    "modified_file_path": "path/Notebook with λ.ipynb",
+                    "modified_file_name": "Notebook with λ.ipynb",
+                    "insertion": "14",
+                    "deletion": "1",
+                },
+                {
+                    "modified_file_path": "folder2/file with spaces.py",
+                    "modified_file_name": "folder1/file with spaces and λ.py => folder2/file with spaces.py",
+                    "insertion": "0",
+                    "deletion": "0",
+                },
             ],
         }
 
         # When
-        actual_response = (await 
+        actual_response = (await
             Git(FakeContentManager("/bin"))
             .detailed_log(
                 selected_hash="f29660a2472e24164906af8653babeb48e4bf2ab",
@@ -80,9 +93,9 @@ async def test_detailed_log():
                 "git",
                 "log",
                 "-1",
-                "--stat",
                 "--numstat",
                 "--oneline",
+                "-z",
                 "f29660a2472e24164906af8653babeb48e4bf2ab",
             ],
             cwd=os.path.join("/bin", "test_curr_path"),

@@ -101,6 +101,12 @@ async def execute(
 
     return code, output, error
 
+def strip_and_split(s):
+    """strip trailing \x00 and split on \x00
+
+    Useful for parsing output of git commands with -z flag.
+    """
+    return s.strip("\x00").split("\x00")
 
 class Git:
     """
@@ -113,7 +119,7 @@ class Git:
 
     async def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
-        
+
         If no kwargs, all options are returned. Otherwise kwargs are set.
         """
         response = {"code": 1}
@@ -154,12 +160,12 @@ class Git:
         There are two reserved "refs" for the base
             1. WORKING : Represents the Git working tree
             2. INDEX: Represents the Git staging area / index
-        
+
         Keyword Arguments:
             single_commit {string} -- The single commit ref
             base {string} -- the base Git ref
             remote {string} -- the remote Git ref
-        
+
         Returns:
             dict -- the response of format {
                 "code": int, # Command status code
@@ -168,14 +174,14 @@ class Git:
             }
         """
         if single_commit:
-            cmd = ["git", "diff", "{}^!".format(single_commit), "--name-only"]
+            cmd = ["git", "diff", "{}^!".format(single_commit), "--name-only", "-z"]
         elif base and remote:
             if base == "WORKING":
-                cmd = ["git", "diff", remote, "--name-only"]
+                cmd = ["git", "diff", remote, "--name-only", "-z"]
             elif base == "INDEX":
-                cmd = ["git", "diff", "--staged", remote, "--name-only"]
+                cmd = ["git", "diff", "--staged", remote, "--name-only", "-z"]
             else:
-                cmd = ["git", "diff", base, remote, "--name-only"]
+                cmd = ["git", "diff", base, remote, "--name-only", "-z"]
         else:
             raise tornado.web.HTTPError(
                 400, "Either single_commit or (base and remote) must be provided"
@@ -193,7 +199,7 @@ class Git:
                 response["command"] = " ".join(cmd)
                 response["message"] = error
             else:
-                response["files"] = output.strip().split("\n")
+                response["files"] = strip_and_split(output)
 
         return response
 
@@ -236,7 +242,7 @@ class Git:
         """
         Execute git status command & return the result.
         """
-        cmd = ["git", "status", "--porcelain", "-u"]
+        cmd = ["git", "status", "--porcelain", "-u", "-z"]
         code, my_output, my_error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path),
         )
@@ -249,20 +255,15 @@ class Git:
             }
 
         result = []
-        line_array = my_output.splitlines()
-        for line in line_array:
-            to1 = None
-            from_path = line[3:]
-            if line[0] == "R":
-                to0 = line[3:].split(" -> ")
-                to1 = to0[len(to0) - 1]
-            else:
-                to1 = line[3:]
-            if to1.startswith('"'):
-                to1 = to1[1:]
-            if to1.endswith('"'):
-                to1 = to1[:-1]
-            result.append({"x": line[0], "y": line[1], "to": to1, "from": from_path})
+        line_iterable = iter(strip_and_split(my_output))
+        for line in line_iterable:
+            result.append({
+                "x": line[0],
+                "y": line[1],
+                "to": line[3:],
+                # if file was renamed, next line contains original path
+                "from": next(line_iterable) if line[0]=='R' else line[3:]
+            })       
         return {"code": code, "files": result}
 
     async def log(self, current_path, history_count=10):
@@ -311,10 +312,10 @@ class Git:
 
     async def detailed_log(self, selected_hash, current_path):
         """
-        Execute git log -1 --stat --numstat --oneline command (used to get
+        Execute git log -1 --numstat --oneline -z command (used to get
         insertions & deletions per file) & return the result.
         """
-        cmd = ["git", "log", "-1", "--stat", "--numstat", "--oneline", selected_hash]
+        cmd = ["git", "log", "-1", "--numstat", "--oneline", "-z", selected_hash]
         code, my_output, my_error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path),
         )
@@ -322,47 +323,43 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
+        total_insertions = 0
+        total_deletions = 0
         result = []
-        note = [0] * 3
-        count = 0
-        temp = ""
-        line_array = my_output.splitlines()
-        length = len(line_array)
-        INSERTION_INDEX = 0
-        DELETION_INDEX = 1
-        MODIFIED_FILE_PATH_INDEX = 2
-        if length > 1:
-            temp = line_array[length - 1]
-            words = temp.split()
-            for i in range(0, len(words)):
-                if words[i].isdigit():
-                    note[count] = words[i]
-                    count += 1
-            for num in range(1, int(length / 2)):
-                line_info = line_array[num].split(maxsplit=2)
-                words = line_info[2].split("/")
-                length = len(words)
-                result.append(
-                    {
-                        "modified_file_path": line_info[MODIFIED_FILE_PATH_INDEX],
-                        "modified_file_name": words[length - 1],
-                        "insertion": line_info[INSERTION_INDEX],
-                        "deletion": line_info[DELETION_INDEX],
-                    }
-                )
+        line_iterable = iter(strip_and_split(my_output)[1:])
+        for line in line_iterable:
+            insertions, deletions, file = line.split('\t')
 
-        if note[2] == 0 and length > 1:
-            if "-" in temp:
-                exchange = note[1]
-                note[1] = note[2]
-                note[2] = exchange
+            if file == '':
+                # file was renamed or moved, we need next two lines of output
+                from_path = next(line_iterable)
+                to_path = next(line_iterable)
+                modified_file_name = from_path + " => " + to_path
+                modified_file_path = to_path
+            else:
+                modified_file_name = file.split("/")[-1]
+                modified_file_path = file
+
+            result.append({
+                        "modified_file_path": modified_file_path,
+                        "modified_file_name": modified_file_name,
+                        "insertion": insertions,
+                        "deletion": deletions,
+            })
+            total_insertions += int(insertions)
+            total_deletions += int(deletions)
+
+        modified_file_note = "{num_files} files changed, {insertions} insertions(+), {deletions} deletions(-)".format(
+            num_files=len(result),
+            insertions=total_insertions,
+            deletions=total_deletions)
 
         return {
             "code": code,
-            "modified_file_note": temp,
-            "modified_files_count": note[0],
-            "number_of_insertions": note[1],
-            "number_of_deletions": note[2],
+            "modified_file_note": modified_file_note,
+            "modified_files_count": str(len(result)),
+            "number_of_insertions": str(total_insertions),
+            "number_of_deletions": str(total_deletions),
             "modified_files": result,
         }
 
@@ -370,14 +367,14 @@ class Git:
         """
         Execute git diff command & return the result.
         """
-        cmd = ["git", "diff", "--numstat"]
+        cmd = ["git", "diff", "--numstat", "-z"]
         code, my_output, my_error = await execute(cmd, cwd=top_repo_path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
-        line_array = my_output.splitlines()
+        line_array = strip_and_split(my_output)
         for line in line_array:
             linesplit = line.split()
             result.append(
