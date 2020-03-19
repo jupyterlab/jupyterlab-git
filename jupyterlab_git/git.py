@@ -336,7 +336,7 @@ class Git:
                 # we need next two lines of output
                 from_path = next(line_iterable)
                 to_path = next(line_iterable)
-                modified_file_name = from_path + " ⮕ " + to_path
+                modified_file_name = from_path + " => " + to_path
                 modified_file_path = to_path
             else:
                 modified_file_name = file.split("/")[-1]
