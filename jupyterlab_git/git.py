@@ -264,7 +264,6 @@ class Git:
                 # if file was renamed, next line contains original path
                 "from": next(line_iterable) if line[0]=='R' else line[3:]
             })       
-
         return {"code": code, "files": result}
 
     async def log(self, current_path, history_count=10):
