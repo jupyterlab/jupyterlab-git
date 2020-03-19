@@ -332,8 +332,7 @@ class Git:
             insertions, deletions, file = line.split('\t')
 
             if file == '':
-                # file was renamed or moved
-                # we need next two lines of output
+                # file was renamed or moved, we need next two lines of output
                 from_path = next(line_iterable)
                 to_path = next(line_iterable)
                 modified_file_name = from_path + " => " + to_path
