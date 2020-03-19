@@ -258,12 +258,13 @@ class Git:
         line_iterable = iter(strip_and_split(my_output))
         for line in line_iterable:
             from_path = line[3:]
-            if line[0]=='R':
-                #If file was renamed then we need both this line
-                #and the next line, then we want to move onto the subsequent
-                #line. We can accomplish this by calling next on the iterable
-                from_path = next(line_iterable)
-            result.append({"x": line[0], "y": line[1], "to": line[3:], "from": from_path})
+            result.append({
+                "x": line[0],
+                "y": line[1],
+                "to": line[3:],
+                # if file was renamed, next line contains original path
+                "from": next(line_iterable) if line[0]=='R' else line[3:]
+            })       
 
         return {"code": code, "files": result}
 
