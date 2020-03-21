@@ -203,7 +203,7 @@ export class ResetRevertDialog extends React.Component<
     this.setState({
       summary: '',
       description: '',
-      disabled: true
+      disabled: false
     });
     this.props.onClose();
   };
