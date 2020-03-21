@@ -4,16 +4,16 @@ import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import {
-  commitDetailFileStyle,
-  commitDetailHeader,
-  commitDetailStyle,
-  commitOverviewNumbers,
-  commitStyle,
-  deletionsIconStyle,
-  fileList,
-  iconStyle,
-  insertionsIconStyle
-} from '../style/SinglePastCommitInfoStyle';
+  commitDetailFileClass,
+  commitDetailHeaderClass,
+  commitDetailClass,
+  commitOverviewNumbersClass,
+  commitClass,
+  deletionsIconClass,
+  fileListClass,
+  iconClass,
+  insertionsIconClass
+} from '../style/SinglePastCommitInfo';
 import { Git } from '../tokens';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
@@ -156,16 +156,16 @@ export class SinglePastCommitInfo extends React.Component<
     }
     return (
       <div>
-        <div className={commitStyle}>
-          <div className={commitOverviewNumbers}>
+        <div className={commitClass}>
+          <div className={commitOverviewNumbersClass}>
             <span title="# Files Changed">
-              <DefaultIconReact name="file" className={iconStyle} tag="span" />
+              <DefaultIconReact name="file" className={iconClass} tag="span" />
               {this.state.numFiles}
             </span>
             <span title="# Insertions">
               <DefaultIconReact
                 name="git-insertionsMade"
-                className={classes(iconStyle, insertionsIconStyle)}
+                className={classes(iconClass, insertionsIconClass)}
                 tag="span"
               />
               {this.state.insertions}
@@ -173,15 +173,15 @@ export class SinglePastCommitInfo extends React.Component<
             <span title="# Deletions">
               <DefaultIconReact
                 name="git-deletionsMade"
-                className={classes(iconStyle, deletionsIconStyle)}
+                className={classes(iconClass, deletionsIconClass)}
                 tag="span"
               />
               {this.state.deletions}
             </span>
           </div>
         </div>
-        <div className={commitDetailStyle}>
-          <div className={commitDetailHeader}>
+        <div className={commitDetailClass}>
+          <div className={commitDetailHeaderClass}>
             Changed
             <ActionButton
               iconName="git-rewind"
@@ -201,7 +201,7 @@ export class SinglePastCommitInfo extends React.Component<
               onClose={this._onResetRevertDialogClose}
             />
           </div>
-          <ul className={fileList}>
+          <ul className={fileListClass}>
             {this.state.modifiedFiles.length > 0
               ? this._renderFileList()
               : null}
@@ -232,7 +232,7 @@ export class SinglePastCommitInfo extends React.Component<
     const flg = isDiffSupported(path);
     return (
       <li
-        className={commitDetailFileStyle}
+        className={commitDetailFileClass}
         key={path}
         onClick={this._onDiffClickFactory(path, flg)}
         title={path}
