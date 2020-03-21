@@ -17,10 +17,10 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
   props: IHistorySideBarProps
 ) => (
   <ol className={historySideBarStyle}>
-    {props.pastCommits.map((pastCommit: Git.ISingleCommitInfo) => (
+    {props.pastCommits.map((commit: Git.ISingleCommitInfo) => (
       <PastCommitNode
-        key={pastCommit.commit}
-        pastCommit={pastCommit}
+        key={commit.commit}
+        commit={commit}
         branches={props.branches}
         model={props.model}
         renderMime={props.renderMime}

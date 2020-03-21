@@ -29,7 +29,7 @@ export interface ISinglePastCommitInfoProps {
   /**
    * Commit data.
    */
-  data: Git.ISingleCommitInfo;
+  commit: Git.ISingleCommitInfo;
 
   /**
    * Extension data model.
@@ -120,11 +120,11 @@ export class SinglePastCommitInfo extends React.Component<
   async componentDidMount(): Promise<void> {
     let log: Git.ISingleCommitFilePathInfo;
     try {
-      log = await this.props.model.detailedLog(this.props.data.commit);
+      log = await this.props.model.detailedLog(this.props.commit.commit);
     } catch (err) {
       console.error(
         `Error while getting detailed log for commit ${
-          this.props.data.commit
+          this.props.commit.commit
         } and path ${this.props.model.pathRepository}`,
         err
       );
@@ -200,7 +200,7 @@ export class SinglePastCommitInfo extends React.Component<
               open={this.state.resetRevertDialog}
               action={this.state.resetRevertAction}
               model={this.props.model}
-              commit={this.props.data}
+              commit={this.props.commit}
               onClose={this._onResetRevertDialogClose}
             />
           </div>
@@ -326,10 +326,10 @@ export class SinglePastCommitInfo extends React.Component<
           self.props.model,
           {
             previousRef: {
-              gitRef: self.props.data.pre_commit
+              gitRef: self.props.commit.pre_commit
             },
             currentRef: {
-              gitRef: self.props.data.commit
+              gitRef: self.props.commit.commit
             }
           },
           self.props.renderMime
