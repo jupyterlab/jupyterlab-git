@@ -93,3 +93,7 @@ export const revertButtonClass = style({
 export const fileListClass = style({
   paddingLeft: 0
 });
+
+export const actionButtonClass = style({
+  float: 'right'
+});

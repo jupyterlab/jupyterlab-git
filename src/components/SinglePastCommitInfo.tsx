@@ -4,11 +4,12 @@ import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import {
+  actionButtonClass,
+  commitClass,
   commitDetailFileClass,
   commitDetailHeaderClass,
   commitDetailClass,
   commitOverviewNumbersClass,
-  commitClass,
   deletionsIconClass,
   fileListClass,
   iconClass,
@@ -184,11 +185,13 @@ export class SinglePastCommitInfo extends React.Component<
           <div className={commitDetailHeaderClass}>
             Changed
             <ActionButton
+              className={actionButtonClass}
               iconName="git-rewind"
               title="Revert changes introduced by this commit"
               onClick={this._onRevertClick}
             />
             <ActionButton
+              className={actionButtonClass}
               iconName="git-discard"
               title="Discard changes introduced *after* this commit (hard reset)"
               onClick={this._onResetClick}
