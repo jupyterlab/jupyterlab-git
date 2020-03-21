@@ -6,7 +6,6 @@ import {
   IPastCommitNodeProps
 } from '../../src/components/PastCommitNode';
 import { Git } from '../../src/tokens';
-import { collapseStyle } from '../../src/style/PastCommitNodeStyle';
 import 'jest';
 
 describe('PastCommitNode', () => {
@@ -91,7 +90,6 @@ describe('PastCommitNode', () => {
   test('hides details after collapse', () => {
     const pastCommitNode = shallow(<PastCommitNode {...props} />);
     pastCommitNode.simulate('click');
-    pastCommitNode.find(`.${collapseStyle}`).simulate('click');
     expect(pastCommitNode.find(SinglePastCommitInfo)).toHaveLength(0);
   });
 });

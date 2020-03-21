@@ -17,7 +17,7 @@ import {
   localBranchClass,
   remoteBranchClass,
   workingBranchClass
-} from '../style/PastCommitNodeStyle';
+} from '../style/PastCommitNode';
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 
 /**
