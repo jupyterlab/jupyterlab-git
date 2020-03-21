@@ -151,6 +151,7 @@ export class ResetRevertDialog extends React.Component<
         </div>
         <DialogActions className={actionsWrapperClass}>
           <input
+            disabled={this.state.disabled}
             className={classes(buttonClass, cancelButtonClass)}
             type="button"
             title="Cancel changes"
