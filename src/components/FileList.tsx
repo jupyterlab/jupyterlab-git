@@ -1,59 +1,37 @@
-import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
+import * as React from 'react';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Menu } from '@phosphor/widgets';
-import * as React from 'react';
 import { GitExtension } from '../model';
-import {
-  fileListWrapperClass,
-  moveFileDownButtonSelectedStyle,
-  moveFileDownButtonStyle,
-  moveFileUpButtonSelectedStyle,
-  moveFileUpButtonStyle
-} from '../style/FileListStyle';
+import { hiddenButtonStyle } from '../style/ActionButtonStyle';
+import { fileListWrapperClass } from '../style/FileListStyle';
 import { Git } from '../tokens';
 import { openListedFile } from '../utils';
+import { ActionButton } from './ActionButton';
+import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
-import { GitStage, IGitStageProps } from './GitStage';
-import { GitStageSimple } from './GitStageSimple';
+import { ISpecialRef } from './diff/model';
+import { FileItem } from './FileItem';
+import { FileItemSimple } from './FileItemSimple';
+import { GitStage } from './GitStage';
 
 export namespace CommandIDs {
-  export const gitFileOpen = 'gf:Open';
-  export const gitFileUnstage = 'gf:Unstage';
-  export const gitFileStage = 'gf:Stage';
-  export const gitFileTrack = 'gf:Track';
-  export const gitFileDiscard = 'gf:Discard';
-  export const gitFileDiffWorking = 'gf:DiffWorking';
-  export const gitFileDiffIndex = 'gf:DiffIndex';
+  export const gitFileOpen = 'git:context-open';
+  export const gitFileUnstage = 'git:context-unstage';
+  export const gitFileStage = 'git:context-stage';
+  export const gitFileTrack = 'git:context-track';
+  export const gitFileDiscard = 'git:context-discard';
+  export const gitFileDiffWorking = 'git:context-diffWorking';
+  export const gitFileDiffIndex = 'git:context-diffIndex';
 }
 
 export interface IFileListState {
-  commitMessage: string;
-  disableCommit: boolean;
-  showStaged: boolean;
-  showUnstaged: boolean;
-  showUntracked: boolean;
-  contextMenuStaged: Menu;
-  contextMenuUnstaged: Menu;
-  contextMenuUntracked: Menu;
-  contextMenuTypeX: string;
-  contextMenuTypeY: string;
-  contextMenuFile: string;
-  contextMenuIndex: number;
-  contextMenuStage: string;
-  selectedFile: number;
-  selectedStage: string;
-  selectedDiscardFile: number;
-  disableStaged: boolean;
-  disableUnstaged: boolean;
-  disableUntracked: boolean;
-  disableFiles: boolean;
+  selectedFile: Git.IStatusFile | null;
 }
 
 export interface IFileListProps {
-  stagedFiles: Git.IStatusFileResult[];
-  unstagedFiles: Git.IStatusFileResult[];
-  untrackedFiles: Git.IStatusFileResult[];
+  files: Git.IStatusFile[];
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
   settings: ISettingRegistry.ISettings;
@@ -64,28 +42,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     super(props);
 
     const commands = this.props.model.commands;
+    this._contextMenuStaged = new Menu({ commands });
+    this._contextMenuUnstaged = new Menu({ commands });
+    this._contextMenuUntracked = new Menu({ commands });
 
     this.state = {
-      commitMessage: '',
-      disableCommit: true,
-      showStaged: true,
-      showUnstaged: true,
-      showUntracked: true,
-      contextMenuStaged: new Menu({ commands }),
-      contextMenuUnstaged: new Menu({ commands }),
-      contextMenuUntracked: new Menu({ commands }),
-      contextMenuTypeX: '',
-      contextMenuTypeY: '',
-      contextMenuFile: '',
-      contextMenuIndex: -1,
-      contextMenuStage: '',
-      selectedFile: -1,
-      selectedStage: '',
-      selectedDiscardFile: -1,
-      disableStaged: false,
-      disableUnstaged: false,
-      disableUntracked: false,
-      disableFiles: false
+      selectedFile: null
     };
 
     if (!commands.hasCommand(CommandIDs.gitFileOpen)) {
@@ -93,12 +55,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Open',
         caption: 'Open selected file',
         execute: async () => {
-          await openListedFile(
-            this.state.contextMenuTypeX,
-            this.state.contextMenuTypeY,
-            this.state.contextMenuFile,
-            this.props.model
-          );
+          await openListedFile(this.state.selectedFile, this.props.model);
         }
       });
     }
@@ -109,7 +66,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         caption: 'Diff selected file',
         execute: async () => {
           await openDiffView(
-            this.state.contextMenuFile,
+            this.state.selectedFile.to,
             this.props.model,
             {
               currentRef: { specialRef: 'WORKING' },
@@ -127,7 +84,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         caption: 'Diff selected file',
         execute: async () => {
           await openDiffView(
-            this.state.contextMenuFile,
+            this.state.selectedFile.to,
             this.props.model,
             {
               currentRef: { specialRef: 'INDEX' },
@@ -144,7 +101,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Stage',
         caption: 'Stage the changes of selected file',
         execute: () => {
-          this.addFile(this.state.contextMenuFile);
+          this.addFile(this.state.selectedFile.to);
         }
       });
     }
@@ -154,7 +111,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Track',
         caption: 'Start tracking selected file',
         execute: () => {
-          this.addFile(this.state.contextMenuFile);
+          this.addFile(this.state.selectedFile.to);
         }
       });
     }
@@ -164,8 +121,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Unstage',
         caption: 'Unstage the changes of selected file',
         execute: () => {
-          if (this.state.contextMenuTypeX !== 'D') {
-            this.resetStagedFile(this.state.contextMenuFile);
+          if (this.state.selectedFile.x !== 'D') {
+            this.resetStagedFile(this.state.selectedFile.to);
           }
         }
       });
@@ -176,129 +133,49 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Discard',
         caption: 'Discard recent changes of selected file',
         execute: () => {
-          this.updateSelectedFile(
-            this.state.contextMenuIndex,
-            this.state.contextMenuStage
-          );
-          this.updateSelectedDiscardFile(this.state.contextMenuIndex);
-          this.toggleDisableFiles();
+          this.discardChanges(this.state.selectedFile.to);
         }
       });
     }
 
-    this.state.contextMenuStaged.addItem({ command: CommandIDs.gitFileOpen });
-    this.state.contextMenuStaged.addItem({
-      command: CommandIDs.gitFileUnstage
-    });
-    this.state.contextMenuStaged.addItem({
-      command: CommandIDs.gitFileDiffIndex
-    });
-
-    this.state.contextMenuUnstaged.addItem({ command: CommandIDs.gitFileOpen });
-    this.state.contextMenuUnstaged.addItem({
-      command: CommandIDs.gitFileStage
-    });
-    this.state.contextMenuUnstaged.addItem({
-      command: CommandIDs.gitFileDiscard
-    });
-    this.state.contextMenuUnstaged.addItem({
-      command: CommandIDs.gitFileDiffWorking
+    [
+      CommandIDs.gitFileOpen,
+      CommandIDs.gitFileUnstage,
+      CommandIDs.gitFileDiffIndex
+    ].forEach(command => {
+      this._contextMenuStaged.addItem({ command });
     });
 
-    this.state.contextMenuUntracked.addItem({
-      command: CommandIDs.gitFileOpen
+    [
+      CommandIDs.gitFileOpen,
+      CommandIDs.gitFileStage,
+      CommandIDs.gitFileDiscard,
+      CommandIDs.gitFileDiffWorking
+    ].forEach(command => {
+      this._contextMenuUnstaged.addItem({ command });
     });
-    this.state.contextMenuUntracked.addItem({
-      command: CommandIDs.gitFileTrack
+
+    [CommandIDs.gitFileOpen, CommandIDs.gitFileTrack].forEach(command => {
+      this._contextMenuUntracked.addItem({ command });
     });
   }
 
   /** Handle right-click on a staged file */
-  contextMenuStaged = (
-    event: any,
-    typeX: string,
-    typeY: string,
-    file: string,
-    index: number,
-    stage: string
-  ) => {
-    event.persist();
+  contextMenuStaged = (event: React.MouseEvent) => {
     event.preventDefault();
-    this.setState(
-      {
-        contextMenuTypeX: typeX,
-        contextMenuTypeY: typeY,
-        contextMenuFile: file,
-        contextMenuIndex: index,
-        contextMenuStage: stage
-      },
-      () => this.state.contextMenuStaged.open(event.clientX, event.clientY)
-    );
+    this._contextMenuStaged.open(event.clientX, event.clientY);
   };
 
   /** Handle right-click on an unstaged file */
-  contextMenuUnstaged = (
-    event: any,
-    typeX: string,
-    typeY: string,
-    file: string,
-    index: number,
-    stage: string
-  ) => {
-    event.persist();
+  contextMenuUnstaged = (event: React.MouseEvent) => {
     event.preventDefault();
-    this.setState(
-      {
-        contextMenuTypeX: typeX,
-        contextMenuTypeY: typeY,
-        contextMenuFile: file,
-        contextMenuIndex: index,
-        contextMenuStage: stage
-      },
-      () => this.state.contextMenuUnstaged.open(event.clientX, event.clientY)
-    );
+    this._contextMenuUnstaged.open(event.clientX, event.clientY);
   };
 
   /** Handle right-click on an untracked file */
-  contextMenuUntracked = (
-    event: any,
-    typeX: string,
-    typeY: string,
-    file: string,
-    index: number,
-    stage: string
-  ) => {
-    event.persist();
+  contextMenuUntracked = (event: React.MouseEvent) => {
     event.preventDefault();
-    this.setState(
-      {
-        contextMenuTypeX: typeX,
-        contextMenuTypeY: typeY,
-        contextMenuFile: file,
-        contextMenuIndex: index,
-        contextMenuStage: stage
-      },
-      () => this.state.contextMenuUntracked.open(event.clientX, event.clientY)
-    );
-  };
-
-  /** Toggle display of staged files */
-  displayStaged = (): void => {
-    this.setState({ showStaged: !this.state.showStaged });
-  };
-
-  /** Toggle display of unstaged files */
-  displayUnstaged = (): void => {
-    this.setState({ showUnstaged: !this.state.showUnstaged });
-  };
-
-  /** Toggle display of untracked files */
-  displayUntracked = (): void => {
-    this.setState({ showUntracked: !this.state.showUntracked });
-  };
-
-  updateSelectedStage = (stage: string): void => {
-    this.setState({ selectedStage: stage });
+    this._contextMenuUntracked.open(event.clientX, event.clientY);
   };
 
   /** Reset all staged files */
@@ -318,23 +195,33 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Discard changes in all unstaged files */
   discardAllUnstagedFiles = async () => {
-    try {
-      await this.props.model.checkout();
-    } catch (reason) {
-      showErrorMessage('Discard all unstaged changes failed.', reason, [
-        Dialog.warnButton({ label: 'DISMISS' })
-      ]);
+    const result = await showDialog({
+      title: 'Discard all changes',
+      body: `Are you sure you want to permanently discard changes to all files? This action cannot be undone.`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+    });
+    if (result.button.accept) {
+      try {
+        await this.props.model.checkout();
+      } catch (reason) {
+        showErrorMessage('Discard all unstaged changes failed.', reason);
+      }
     }
   };
 
   /** Discard changes in all unstaged and staged files */
   discardAllChanges = async () => {
-    try {
-      await this.props.model.resetToCommit();
-    } catch (reason) {
-      showErrorMessage('Discard all changes failed.', reason, [
-        Dialog.warnButton({ label: 'DISMISS' })
-      ]);
+    const result = await showDialog({
+      title: 'Discard all changes',
+      body: `Are you sure you want to permanently discard changes to all files? This action cannot be undone.`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+    });
+    if (result.button.accept) {
+      try {
+        await this.props.model.resetToCommit();
+      } catch (reason) {
+        showErrorMessage('Discard all changes failed.', reason);
+      }
     }
   };
 
@@ -345,13 +232,20 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Discard changes in a specific unstaged or staged file */
   discardChanges = async (file: string) => {
-    try {
-      await this.props.model.reset(file);
-      await this.props.model.checkout({ filename: file });
-    } catch (reason) {
-      showErrorMessage(`Discard changes for ${file} failed.`, reason, [
-        Dialog.warnButton({ label: 'DISMISS' })
-      ]);
+    const result = await showDialog({
+      title: 'Discard changes',
+      body: `Are you sure you want to permanently discard changes to ${file}? This action cannot be undone.`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
+    });
+    if (result.button.accept) {
+      try {
+        await this.props.model.reset(file);
+        await this.props.model.checkout({ filename: file });
+      } catch (reason) {
+        showErrorMessage(`Discard changes for ${file} failed.`, reason, [
+          Dialog.warnButton({ label: 'DISMISS' })
+        ]);
+      }
     }
   };
 
@@ -364,150 +258,304 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
-  disableStagesForDiscardAll = () => {
-    this.setState({
-      disableStaged: !this.state.disableStaged,
-      disableUntracked: !this.state.disableUntracked
-    });
-  };
-
-  updateSelectedDiscardFile = (index: number): void => {
-    this.setState({ selectedDiscardFile: index });
-  };
-
-  toggleDisableFiles = (): void => {
-    this.setState({ disableFiles: !this.state.disableFiles });
-  };
-
-  updateSelectedFile = (file: number, stage: string) => {
-    this.setState({ selectedFile: file }, () =>
-      this.updateSelectedStage(stage)
-    );
+  updateSelectedFile = (file: Git.IStatusFile | null) => {
+    this.setState({ selectedFile: file });
   };
 
   get markedFiles() {
-    return this.allFilesExcludingUnmodified.filter(file =>
-      this.props.model.getMark(file.to)
-    );
-  }
-
-  get allFilesExcludingUnmodified() {
-    let files = this.props.untrackedFiles.concat(
-      this.props.unstagedFiles,
-      this.props.stagedFiles
-    );
-
-    files.sort((a, b) => a.to.localeCompare(b.to));
-    return files;
+    return this.props.files.filter(file => this.props.model.getMark(file.to));
   }
 
   render() {
-    const sharedProps = {
-      model: this.props.model,
-      selectedFile: this.state.selectedFile,
-      updateSelectedFile: this.updateSelectedFile,
-      selectedStage: this.state.selectedStage,
-      updateSelectedStage: this.updateSelectedStage,
-      selectedDiscardFile: this.state.selectedDiscardFile,
-      updateSelectedDiscardFile: this.updateSelectedDiscardFile,
-      disableFiles: this.state.disableFiles,
-      toggleDisableFiles: this.toggleDisableFiles,
-      renderMime: this.props.renderMime
-    };
-
-    const Staged = (props: Partial<IGitStageProps> = {}) => (
-      <GitStage
-        heading={'Staged'}
-        files={this.props.stagedFiles}
-        showFiles={this.state.showStaged}
-        displayFiles={this.displayStaged}
-        moveAllFiles={this.resetAllStagedFiles}
-        discardAllFiles={null}
-        discardFile={null}
-        moveFile={this.resetStagedFile}
-        moveFileIconClass={moveFileDownButtonStyle}
-        moveFileIconSelectedClass={moveFileDownButtonSelectedStyle}
-        moveAllFilesTitle={'Unstage all changes'}
-        moveFileTitle={'Unstage this change'}
-        contextMenu={this.contextMenuStaged}
-        disableOthers={null}
-        isDisabled={this.state.disableStaged}
-        {...sharedProps}
-        {...props}
-      />
-    );
-
-    const Changed = (props: Partial<IGitStageProps> = {}) => (
-      <GitStage
-        heading={'Changed'}
-        files={this.props.unstagedFiles}
-        showFiles={this.state.showUnstaged}
-        displayFiles={this.displayUnstaged}
-        moveAllFiles={this.addAllUnstagedFiles}
-        discardAllFiles={this.discardAllUnstagedFiles}
-        discardFile={this.discardChanges}
-        moveFile={this.addFile}
-        moveFileIconClass={moveFileUpButtonStyle}
-        moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
-        moveAllFilesTitle={'Stage all changes'}
-        moveFileTitle={'Stage this change'}
-        contextMenu={this.contextMenuUnstaged}
-        disableOthers={this.disableStagesForDiscardAll}
-        isDisabled={this.state.disableUnstaged}
-        {...sharedProps}
-        {...props}
-      />
-    );
-
-    const Untracked = (props: Partial<IGitStageProps> = {}) => (
-      <GitStage
-        heading={'Untracked'}
-        files={this.props.untrackedFiles}
-        showFiles={this.state.showUntracked}
-        displayFiles={this.displayUntracked}
-        moveAllFiles={this.addAllUntrackedFiles}
-        discardAllFiles={null}
-        discardFile={null}
-        moveFile={this.addFile}
-        moveFileIconClass={moveFileUpButtonStyle}
-        moveFileIconSelectedClass={moveFileUpButtonSelectedStyle}
-        moveAllFilesTitle={'Track all untracked files'}
-        moveFileTitle={'Track this file'}
-        contextMenu={this.contextMenuUntracked}
-        disableOthers={null}
-        isDisabled={this.state.disableUntracked}
-        {...sharedProps}
-        {...props}
-      />
-    );
-
     if (this.props.settings.composite['simpleStaging']) {
       return (
         <div className={fileListWrapperClass}>
-          <div>
-            <GitStageSimple
-              heading={'Changed'}
-              files={this.allFilesExcludingUnmodified}
-              model={this.props.model}
-              discardAllFiles={this.discardAllChanges}
-              discardFile={this.discardChanges}
-              renderMime={this.props.renderMime}
-            />
-          </div>
+          {this._renderSimpleStage(this.props.files)}
+        </div>
+      );
+    } else {
+      const stagedFiles: Git.IStatusFile[] = [];
+      const unstagedFiles: Git.IStatusFile[] = [];
+      const untrackedFiles: Git.IStatusFile[] = [];
+
+      this.props.files.forEach(file => {
+        switch (file.status) {
+          case 'staged':
+            stagedFiles.push(file);
+            break;
+          case 'unstaged':
+            unstagedFiles.push(file);
+            break;
+          case 'untracked':
+            untrackedFiles.push(file);
+            break;
+
+          default:
+            break;
+        }
+      });
+
+      return (
+        <div
+          className={fileListWrapperClass}
+          onContextMenu={event => event.preventDefault()}
+        >
+          {this._renderStaged(stagedFiles)}
+          {this._renderChanged(unstagedFiles)}
+          {this._renderUntracked(untrackedFiles)}
         </div>
       );
     }
+  }
+
+  private _isSelectedFile(candidate: Git.IStatusFile): boolean {
+    if (this.state.selectedFile === null) {
+      return false;
+    }
+
     return (
-      <div
-        className={fileListWrapperClass}
-        onContextMenu={event => event.preventDefault()}
-      >
-        <div>
-          <Staged />
-          <Changed />
-          <Untracked />
-        </div>
-      </div>
+      this.state.selectedFile.x === candidate.x &&
+      this.state.selectedFile.y === candidate.y &&
+      this.state.selectedFile.from === candidate.from &&
+      this.state.selectedFile.to === candidate.to
     );
   }
+
+  private _renderStaged(files: Git.IStatusFile[]) {
+    return (
+      <GitStage
+        actions={
+          <ActionButton
+            className={hiddenButtonStyle}
+            disabled={files.length === 0}
+            iconName={'git-remove'}
+            title={'Unstage all changes'}
+            onClick={this.resetAllStagedFiles}
+          />
+        }
+        collapsible
+        heading={'Staged'}
+        nFiles={files.length}
+      >
+        {files.map((file: Git.IStatusFile) => {
+          return (
+            <FileItem
+              key={file.to}
+              actions={
+                <React.Fragment>
+                  {this._createDiffButton(file.to, 'INDEX')}
+                  <ActionButton
+                    className={hiddenButtonStyle}
+                    iconName={'git-remove'}
+                    title={'Unstage this change'}
+                    onClick={() => {
+                      this.resetStagedFile(file.to);
+                    }}
+                  />
+                </React.Fragment>
+              }
+              file={file}
+              contextMenu={this.contextMenuStaged}
+              model={this.props.model}
+              selected={this._isSelectedFile(file)}
+              selectFile={this.updateSelectedFile}
+            />
+          );
+        })}
+      </GitStage>
+    );
+  }
+
+  private _renderChanged(files: Git.IStatusFile[]) {
+    const disabled = files.length === 0;
+    return (
+      <GitStage
+        actions={
+          <React.Fragment>
+            <ActionButton
+              className={hiddenButtonStyle}
+              disabled={disabled}
+              iconName={'git-discard'}
+              title={'Discard All Changes'}
+              onClick={this.discardAllUnstagedFiles}
+            />
+            <ActionButton
+              className={hiddenButtonStyle}
+              disabled={disabled}
+              iconName={'git-add'}
+              title={'Stage all changes'}
+              onClick={this.addAllUnstagedFiles}
+            />
+          </React.Fragment>
+        }
+        collapsible
+        heading={'Changed'}
+        nFiles={files.length}
+      >
+        {files.map((file: Git.IStatusFile) => {
+          return (
+            <FileItem
+              key={file.to}
+              actions={
+                <React.Fragment>
+                  <ActionButton
+                    className={hiddenButtonStyle}
+                    iconName={'git-discard'}
+                    title={'Discard changes'}
+                    onClick={() => {
+                      this.discardChanges(file.to);
+                    }}
+                  />
+                  {this._createDiffButton(file.to, 'WORKING')}
+                  <ActionButton
+                    className={hiddenButtonStyle}
+                    iconName={'git-add'}
+                    title={'Stage this change'}
+                    onClick={() => {
+                      this.addFile(file.to);
+                    }}
+                  />
+                </React.Fragment>
+              }
+              file={file}
+              contextMenu={this.contextMenuUnstaged}
+              model={this.props.model}
+              selected={this._isSelectedFile(file)}
+              selectFile={this.updateSelectedFile}
+            />
+          );
+        })}
+      </GitStage>
+    );
+  }
+
+  private _renderUntracked(files: Git.IStatusFile[]) {
+    return (
+      <GitStage
+        actions={
+          <ActionButton
+            className={hiddenButtonStyle}
+            disabled={files.length === 0}
+            iconName={'git-add'}
+            title={'Track all untracked files'}
+            onClick={this.addAllUntrackedFiles}
+          />
+        }
+        collapsible
+        heading={'Untracked'}
+        nFiles={files.length}
+      >
+        {files.map((file: Git.IStatusFile) => {
+          return (
+            <FileItem
+              key={file.to}
+              actions={
+                <ActionButton
+                  className={hiddenButtonStyle}
+                  iconName={'git-add'}
+                  title={'Track this file'}
+                  onClick={() => {
+                    this.addFile(file.to);
+                  }}
+                />
+              }
+              file={file}
+              contextMenu={this.contextMenuUntracked}
+              model={this.props.model}
+              selected={this._isSelectedFile(file)}
+              selectFile={this.updateSelectedFile}
+            />
+          );
+        })}
+      </GitStage>
+    );
+  }
+
+  private _renderSimpleStage(files: Git.IStatusFile[]) {
+    return (
+      <GitStage
+        actions={
+          <ActionButton
+            className={hiddenButtonStyle}
+            disabled={files.length === 0}
+            iconName={'git-discard'}
+            title={'Discard All Changes'}
+            onClick={this.discardAllChanges}
+          />
+        }
+        heading={'Changed'}
+        nFiles={files.length}
+      >
+        {files.map((file: Git.IStatusFile) => {
+          let actions = null;
+          if (file.status === 'unstaged') {
+            actions = (
+              <React.Fragment>
+                <ActionButton
+                  className={hiddenButtonStyle}
+                  iconName={'git-discard'}
+                  title={'Discard changes'}
+                  onClick={() => {
+                    this.discardChanges(file.to);
+                  }}
+                />
+                {this._createDiffButton(file.to, 'WORKING')}
+              </React.Fragment>
+            );
+          } else if (file.status === 'staged') {
+            actions = this._createDiffButton(file.to, 'INDEX');
+          }
+
+          return (
+            <FileItemSimple
+              key={file.to}
+              actions={actions}
+              file={file}
+              model={this.props.model}
+            />
+          );
+        })}
+      </GitStage>
+    );
+  }
+
+  /**
+   * Creates a button element which is used to request diff of a file.
+   *
+   * @param path File path of interest
+   * @param currentRef the ref to diff against the git 'HEAD' ref
+   */
+  private _createDiffButton(
+    path: string,
+    currentRef: ISpecialRef['specialRef']
+  ): JSX.Element {
+    return (
+      isDiffSupported(path) && (
+        <ActionButton
+          className={hiddenButtonStyle}
+          iconName={'git-diff'}
+          title={'Diff this file'}
+          onClick={async () => {
+            try {
+              await openDiffView(
+                path,
+                this.props.model,
+                {
+                  previousRef: { gitRef: 'HEAD' },
+                  currentRef: { specialRef: currentRef }
+                },
+                this.props.renderMime
+              );
+            } catch (reason) {
+              console.error(`Fail to open diff view for ${path}.\n${reason}`);
+            }
+          }}
+        />
+      )
+    );
+  }
+
+  private _contextMenuStaged: Menu;
+  private _contextMenuUnstaged: Menu;
+  private _contextMenuUntracked: Menu;
 }

@@ -15,6 +15,7 @@ ALLOWED_OPTIONS = ['user.name', 'user.email']
 # Regex pattern to capture (key, value) of Git configuration options.
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
 CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
+DEFAULT_REMOTE_NAME = "origin"
 
 
 async def execute(
@@ -25,7 +26,7 @@ async def execute(
     password: "Optional[str]" = None,
 ) -> "Tuple[int, str, str]":
     """Asynchronously execute a command.
-    
+
     Args:
         cmdline (List[str]): Command line to be executed
         cwd (Optional[str]): Current working directory
@@ -66,7 +67,6 @@ async def execute(
 
             returncode = p.wait()
             p.close()
-
             return returncode, "", response
         except pexpect.exceptions.EOF:  # In case of pexpect failure
             response = p.before
@@ -739,7 +739,7 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
-    async def pull(self, curr_fb_path, auth=None):
+    async def pull(self, curr_fb_path, auth=None, cancel_on_conflict=False):
         """
         Execute git pull --no-commit.  Disables prompts for the password to avoid the terminal hanging while waiting
         for auth.
@@ -747,7 +747,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 ["git", "pull", "--no-commit"],
                 username=auth["username"],
                 password=auth["password"],
@@ -756,7 +756,7 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 ["git", "pull", "--no-commit"],
                 env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
@@ -765,7 +765,21 @@ class Git:
         response = {"code": code}
 
         if code != 0:
-            response["message"] = error.strip()
+            output = output.strip()
+            has_conflict = "automatic merge failed; fix conflicts and then commit the result." in output.lower()
+            if cancel_on_conflict and has_conflict:
+                code, _, error = await execute(
+                    ["git", "merge", "--abort"],
+                    cwd=os.path.join(self.root_dir, curr_fb_path)
+                )
+                if code == 0:
+                    response["message"] = "Unable to pull latest changes as doing so would result in a merge conflict. In order to push your local changes, you may want to consider creating a new branch based on your current work and pushing the new branch. Provided your repository is hosted (e.g., on GitHub), once pushed, you can create a pull request against the original branch on the remote repository and manually resolve the conflicts during pull request review."
+                else:
+                    response["message"] = error.strip()
+            elif has_conflict:
+                response["message"] = output
+            else:
+                response["message"] = error.strip()
 
         return response
 
@@ -950,18 +964,80 @@ class Git:
         """
         Collect get content of prev and curr and return.
         """
+        is_binary = await self._is_binary(filename, prev_ref["git"], top_repo_path)
+        if is_binary:
+            raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+
         prev_content = await self.show(filename, prev_ref["git"], top_repo_path)
         if "special" in curr_ref:
             if curr_ref["special"] == "WORKING":
                 curr_content = self.get_content(filename, top_repo_path)
             elif curr_ref["special"] == "INDEX":
+                is_binary = await self._is_binary(filename, "", top_repo_path)
+                if is_binary:
+                    raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+                    
                 curr_content = await self.show(filename, "", top_repo_path)
             else:
                 raise tornado.web.HTTPError(
-                    log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(
-                        curr_ref["special"]
-                    )
+                    log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(curr_ref["special"])
                 )
         else:
+            is_binary = await self._is_binary(filename, curr_ref["git"], top_repo_path)
+            if is_binary:
+                raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
+
             curr_content = await self.show(filename, curr_ref["git"], top_repo_path)
+
         return {"prev_content": prev_content, "curr_content": curr_content}
+
+    async def _is_binary(self, filename, ref, top_repo_path):
+        """
+        Determine whether Git handles a file as binary or text.
+
+        ## References
+
+        -   <https://stackoverflow.com/questions/6119956/how-to-determine-if-git-handles-a-file-as-binary-or-as-text/6134127#6134127>
+        -   <https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---numstat>
+        -   <https://git-scm.com/docs/git-diff#_other_diff_formats>
+        """
+        command = ["git", "diff", "--numstat", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", ref, "--", filename]  # where 4b825... is a magic SHA which represents the empty tree
+        code, output, error = await execute(command, cwd=top_repo_path)
+
+        if code != 0:
+            err_msg = "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename).lower()
+            if err_msg in error.lower():
+                return False
+
+            raise tornado.web.HTTPError(log_message="Error while determining if file is binary or text '{}'.".format(error))
+
+        # For binary files, `--numstat` outputs two `-` characters separated by TABs:
+        if output.startswith('-\t-\t'):
+            return True
+
+        return False
+
+    def remote_add(self, top_repo_path, url, name=DEFAULT_REMOTE_NAME):
+        """Handle call to `git remote add` command.
+
+        top_repo_path: str
+            Top Git repository path
+        url: str
+            Git remote url
+        name: str
+            Remote name; default "origin"
+        """
+        cmd = ["git", "remote", "add", name, url]
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=top_repo_path)
+        _, my_error = p.communicate()
+        if p.returncode == 0:
+            return {
+                "code": p.returncode,
+                "command": " ".join(cmd)
+            }
+        else:
+            return {
+                "code": p.returncode,
+                "command": " ".join(cmd),
+                "message": my_error.decode("utf-8").strip()
+            }

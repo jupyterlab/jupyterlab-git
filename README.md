@@ -2,7 +2,7 @@
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab/tree/examples/demo.ipynb) [![Build Status](https://travis-ci.org/jupyterlab/jupyterlab-git.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab-git) [![Version](https://img.shields.io/npm/v/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/pypi/v/jupyterlab-git.svg)](https://pypi.org/project/jupyterlab-git/) [![Downloads](https://img.shields.io/npm/dm/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git) [![Downloads](https://img.shields.io/conda/dn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git)
 
-A JupyterLab extension for version control using git
+A JupyterLab extension for version control using Git
 
 ![](http://g.recordit.co/N9Ikzbyk8P.gif)
 
@@ -11,10 +11,11 @@ To see the extension in action, open the example notebook included in the Binder
 ## Prerequisites
 
 - JupyterLab
+- Git (version `>=1.7.4`)
 
 ## Usage
 
-- Open the git extension from the _Git_ tab on the left panel
+- Open the Git extension from the _Git_ tab on the left panel
 
 ## Install
 
@@ -24,6 +25,15 @@ To install perform the following steps:
 pip install --upgrade jupyterlab-git
 jupyter lab build
 ```
+
+## Settings
+
+Once installed, extension behavior can be modified via the following settings which can be set in JupyterLab's advanced settings editor:
+
+-   **disableBranchWithChanges**: disable all branch operations, such as creating a new branch or switching to a different branch, when there are changed/staged files. When set to `true`, this setting guards against overwriting and/or losing uncommitted changes.
+-   **historyCount**: number of commits shown in the history log, beginning with the most recent. Displaying a larger number of commits can lead to performance degradation, so use caution when modifying this setting.
+-   **refreshInterval**: number of milliseconds between polling the file system for changes. In order to ensure that the UI correctly displays the current repository status, the extension must poll the file system for changes. Longer polling times increase the likelihood that the UI does not reflect the current status; however, longer polling times also incur less performance overhead.
+-   **simpleStaging**: enable a simplified concept of staging. When this setting is `true`, all files with changes are automatically staged. When we develop in JupyterLab, we often only care about what files have changed (in the broadest sense) and don't need to distinguish between "tracked" and "untracked" files. Accordingly, this setting allows us to simplify the visual presentation of changes, which is especially useful for those less acquainted with Git.
 
 ### Troubleshooting
 
@@ -83,13 +93,14 @@ JupyterLab Git's current maintainers are listed in alphabetical order, with affi
 
 - Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
   architecture).
-- Saul Shanabrook, Quansight(software engineering)
+- Saul Shanabrook, Quansight (software engineering)
 - Jaipreet Singh, AWS (software engineering, UI/UX design, management)
 - Frederic Collonval, Safran Group (software engineering)
 
 A lot of awesome people have contributed to this repo - See the contributors tab for more details!
 
 This list is provided to help provide context about who we are and how our team functions.
+
 If you would like to be listed, please submit a pull request with your information.
 
 ### Install
@@ -120,15 +131,19 @@ jlpm run build
 jupyter lab build
 ```
 
-Or start jupyter in watch mode:
+To continuously monitor the project for changes and automatically trigger a rebuild, start Jupyter in watch mode:
+
 ```bash
 jupyter lab --watch
 ```
-And in a separate session, start this project in watch mode:
+
+And in a separate session, begin watching the source directory for changes:
+
 ```bash
 jlpm run watch
 ```
-Now every change will be built locally then bundled into Jupyter Lab. Refresh the page after any save to see your change (note: you'll need to wait for webpack to finish, which can take 10s+ at times).
+
+Now every change will be built locally and bundled into JupyterLab. Be sure to refresh your browser page after saving file changes to reload the extension (note: you'll need to wait for webpack to finish, which can take 10s+ at times).
 
 To execute the tests
 
