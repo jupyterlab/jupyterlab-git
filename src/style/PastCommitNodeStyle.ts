@@ -50,11 +50,28 @@ export const pastCommitExpandedStyle = style({
 
 export const pastCommitHeaderItemStyle = style({});
 
-export const collapseStyle = style({
-  color: '#1a76d2',
-  float: 'right'
-});
-
 export const pastCommitBodyStyle = style({
   flex: 'auto'
+});
+
+export const expandButtonIconClass = style({
+  width: '16px',
+  height: '16px',
+
+  /* top | right | bottom | left */
+  margin: 'auto 8px auto 0'
+});
+
+export const expandIconClass = style({
+  backgroundImage: 'var(--jp-icon-caretdown)',
+  backgroundSize: '20px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
+});
+
+export const collapseIconClass = style({
+  backgroundImage: 'var(--jp-icon-caretup)',
+  backgroundSize: '20px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
 });

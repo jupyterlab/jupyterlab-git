@@ -5,7 +5,9 @@ import { GitExtension } from '../model';
 import {
   branchesStyle,
   branchStyle,
-  collapseStyle,
+  collapseIconClass,
+  expandButtonIconClass,
+  expandIconClass,
   localBranchStyle,
   pastCommitBodyStyle,
   pastCommitExpandedStyle,
@@ -77,6 +79,13 @@ export class PastCommitNode extends React.Component<
           <div className={pastCommitHeaderItemStyle}>
             {this.props.pastCommit.date}
           </div>
+          <span
+            className={classes(
+              expandButtonIconClass,
+              this.state.expanded ? collapseIconClass : expandIconClass,
+              'jp-Icon-16'
+            )}
+          />
         </div>
         <div className={branchesStyle}>
           {this.getBranchesForCommit().map(branch => (
@@ -106,14 +115,6 @@ export class PastCommitNode extends React.Component<
                 model={this.props.model}
                 renderMime={this.props.renderMime}
               />
-              <div
-                className={collapseStyle}
-                onClick={() => {
-                  this.setState({ expanded: false });
-                }}
-              >
-                Collapse
-              </div>
             </React.Fragment>
           )}
         </div>
