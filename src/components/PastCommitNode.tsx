@@ -2,22 +2,22 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
+import { Git } from '../tokens';
 import {
-  branchesStyle,
-  branchStyle,
+  branchesClass,
+  branchClass,
   collapseIconClass,
   expandButtonIconClass,
   expandIconClass,
-  localBranchStyle,
-  pastCommitBodyStyle,
-  pastCommitExpandedStyle,
-  pastCommitHeaderItemStyle,
-  pastCommitHeaderStyle,
-  pastCommitNodeStyle,
-  remoteBranchStyle,
-  workingBranchStyle
+  localBranchClass,
+  pastCommitBodyClass,
+  pastCommitExpandedClass,
+  pastCommitHeaderItemClass,
+  pastCommitHeaderClass,
+  pastCommitNodeClass,
+  remoteBranchClass,
+  workingBranchClass
 } from '../style/PastCommitNodeStyle';
-import { Git } from '../tokens';
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 
 export interface IPastCommitNodeProps {
@@ -56,9 +56,9 @@ export class PastCommitNode extends React.Component<
 
   getNodeClass() {
     if (this.state.expanded) {
-      return classes(pastCommitNodeStyle, pastCommitExpandedStyle);
+      return classes(pastCommitNodeClass, pastCommitExpandedClass);
     }
-    return pastCommitNodeStyle;
+    return pastCommitNodeClass;
   }
 
   render() {
@@ -69,14 +69,14 @@ export class PastCommitNode extends React.Component<
         }}
         className={this.getNodeClass()}
       >
-        <div className={pastCommitHeaderStyle}>
-          <span className={pastCommitHeaderItemStyle}>
+        <div className={pastCommitHeaderClass}>
+          <span className={pastCommitHeaderItemClass}>
             {this.props.pastCommit.author}
           </span>
-          <span className={pastCommitHeaderItemStyle}>
+          <span className={pastCommitHeaderItemClass}>
             {this.props.pastCommit.commit.slice(0, 7)}
           </span>
-          <span className={pastCommitHeaderItemStyle}>
+          <span className={pastCommitHeaderItemClass}>
             {this.props.pastCommit.date}
           </span>
           <span
@@ -87,18 +87,18 @@ export class PastCommitNode extends React.Component<
             )}
           />
         </div>
-        <div className={branchesStyle}>
+        <div className={branchesClass}>
           {this.getBranchesForCommit().map(branch => (
             <React.Fragment key={branch.name}>
               {branch.is_current_branch && (
-                <span className={classes(branchStyle, workingBranchStyle)}>
+                <span className={classes(branchClass, workingBranchClass)}>
                   working
                 </span>
               )}
               <span
                 className={classes(
-                  branchStyle,
-                  branch.is_remote_branch ? remoteBranchStyle : localBranchStyle
+                  branchClass,
+                  branch.is_remote_branch ? remoteBranchClass : localBranchClass
                 )}
               >
                 {branch.name}
@@ -106,7 +106,7 @@ export class PastCommitNode extends React.Component<
             </React.Fragment>
           ))}
         </div>
-        <div className={pastCommitBodyStyle}>
+        <div className={pastCommitBodyClass}>
           {this.props.pastCommit.commit_msg}
           {this.state.expanded && (
             <React.Fragment>

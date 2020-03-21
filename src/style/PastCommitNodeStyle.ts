@@ -1,6 +1,6 @@
 import { style } from 'typestyle';
 
-export const pastCommitNodeStyle = style({
+export const pastCommitNodeClass = style({
   flexGrow: 0,
   display: 'flex',
   flexShrink: 0,
@@ -9,13 +9,13 @@ export const pastCommitNodeStyle = style({
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
-export const pastCommitHeaderStyle = style({
+export const pastCommitHeaderClass = style({
   display: 'flex',
   color: 'var(--jp-ui-font-color2)',
   paddingBottom: '5px'
 });
 
-export const pastCommitHeaderItemStyle = style({
+export const pastCommitHeaderItemClass = style({
   width: '30%',
 
   paddingLeft: '0.5em',
@@ -32,13 +32,13 @@ export const pastCommitHeaderItemStyle = style({
   }
 });
 
-export const branchesStyle = style({
+export const branchesClass = style({
   display: 'flex',
   fontSize: '0.8em',
   marginLeft: '-5px'
 });
 
-export const branchStyle = style({
+export const branchClass = style({
   padding: '2px',
   // Special case as black, regardless of theme, because
   // backgrounds of colors are not based on theme either
@@ -48,23 +48,23 @@ export const branchStyle = style({
   margin: '3px'
 });
 
-export const remoteBranchStyle = style({
+export const remoteBranchClass = style({
   backgroundColor: '#ffcdd3'
 });
 
-export const localBranchStyle = style({
+export const localBranchClass = style({
   backgroundColor: '#b2ebf3'
 });
 
-export const workingBranchStyle = style({
+export const workingBranchClass = style({
   backgroundColor: '#ffce83'
 });
 
-export const pastCommitExpandedStyle = style({
+export const pastCommitExpandedClass = style({
   backgroundColor: 'var(--jp-layout-color1)'
 });
 
-export const pastCommitBodyStyle = style({
+export const pastCommitBodyClass = style({
   flex: 'auto'
 });
 
