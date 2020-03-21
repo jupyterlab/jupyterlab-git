@@ -21,27 +21,84 @@ import { ResetRevertDialog } from './ResetRevertDialog';
 import { FilePath } from './FilePath';
 import { ActionButton } from './ActionButton';
 
+/**
+ * Interface describing component properties.
+ */
 export interface ISinglePastCommitInfoProps {
+  /**
+   * Commit data.
+   */
   data: Git.ISingleCommitInfo;
+
+  /**
+   * Extension data model.
+   */
   model: GitExtension;
+
+  /**
+   * Render MIME type registry.
+   */
   renderMime: IRenderMimeRegistry;
 }
 
+/**
+ * Interface describing component state.
+ */
 export interface ISinglePastCommitInfoState {
+  /**
+   * Commit information.
+   */
   info: string;
+
+  /**
+   * Number of modified files.
+   */
   numFiles: string;
+
+  /**
+   * Number of insertions.
+   */
   insertions: string;
+
+  /**
+   * Number of deletions.
+   */
   deletions: string;
+
+  /**
+   * A list of modified files.
+   */
   modifiedFiles: Git.ICommitModifiedFile[];
+
+  /**
+   * Current loading state for loading individual commit information.
+   */
   loadingState: 'loading' | 'error' | 'success';
+
+  /**
+   * Boolean indicating whether to display a dialog for reseting or reverting a commit.
+   */
   resetRevertDialog: boolean;
+
+  /**
+   * Reset/revert dialog mode (i.e., whether the dialog should be for reseting to or reverting an individual commit).
+   */
   resetRevertAction: 'reset' | 'revert';
 }
 
+/**
+ * React component for rendering information about an individual commit.
+ */
 export class SinglePastCommitInfo extends React.Component<
   ISinglePastCommitInfoProps,
   ISinglePastCommitInfoState
 > {
+  /**
+   * Returns a React component for information about an individual commit.
+   *
+   * @param props - component properties
+   * @returns React component
+   */
   constructor(props: ISinglePastCommitInfoProps) {
     super(props);
     this.state = {
