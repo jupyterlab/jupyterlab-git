@@ -276,8 +276,6 @@ export class SinglePastCommitInfo extends React.Component<
 
   /**
    * Callback invoked upon closing a dialog to reset or revert changes.
-   *
-   * @param event - event object
    */
   private _onResetRevertDialogClose = (): void => {
     this.setState({

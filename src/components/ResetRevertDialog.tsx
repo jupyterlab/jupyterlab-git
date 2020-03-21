@@ -197,7 +197,8 @@ export class ResetRevertDialog extends React.Component<
    *
    * @param event - event object
    */
-  private _onClose = (): void => {
+  private _onClose = (event: any): void => {
+    event.stopPropagation();
     this.setState({
       summary: '',
       description: '',
