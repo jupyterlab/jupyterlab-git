@@ -70,15 +70,15 @@ export class PastCommitNode extends React.Component<
         className={this.getNodeClass()}
       >
         <div className={pastCommitHeaderStyle}>
-          <div className={pastCommitHeaderItemStyle}>
+          <span className={pastCommitHeaderItemStyle}>
             {this.props.pastCommit.author}
-          </div>
-          <div className={pastCommitHeaderItemStyle}>
+          </span>
+          <span className={pastCommitHeaderItemStyle}>
             {this.props.pastCommit.commit.slice(0, 7)}
-          </div>
-          <div className={pastCommitHeaderItemStyle}>
+          </span>
+          <span className={pastCommitHeaderItemStyle}>
             {this.props.pastCommit.date}
-          </div>
+          </span>
           <span
             className={classes(
               expandButtonIconClass,
