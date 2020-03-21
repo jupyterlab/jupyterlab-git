@@ -211,11 +211,7 @@ export class ResetRevertDialog extends React.Component<
   private _onClose = (event: any): void => {
     event.stopPropagation();
     this.props.onClose();
-    this.setState({
-      summary: '',
-      description: '',
-      disabled: false
-    });
+    this._reset();
   };
 
   /**
@@ -250,6 +246,7 @@ export class ResetRevertDialog extends React.Component<
         );
       }
     }
+    this._reset();
     this.props.onClose();
   };
 
@@ -281,5 +278,16 @@ export class ResetRevertDialog extends React.Component<
     const summary = this.state.summary || this._defaultSummary();
     const desc = this.state.description || this._defaultDescription();
     return summary + '\n\n' + desc + '\n';
+  }
+
+  /**
+   * Resets component state.
+   */
+  private _reset(): void {
+    this.setState({
+      summary: '',
+      description: '',
+      disabled: false
+    });
   }
 }
