@@ -202,58 +202,46 @@ export class SinglePastCommitInfo extends React.Component<
             />
           </div>
           <ul className={fileList}>
-            {this.state.modifiedFiles.length > 0 &&
-              this.state.modifiedFiles.map(modifiedFile => {
-                const diffSupported = isDiffSupported(
-                  modifiedFile.modified_file_path
-                );
-
-                return (
-                  <li
-                    className={commitDetailFileStyle}
-                    key={modifiedFile.modified_file_path}
-                    onClick={async (
-                      event: React.MouseEvent<HTMLLIElement, MouseEvent>
-                    ) => {
-                      // Avoid commit node to be collapsed
-                      event.stopPropagation();
-                      if (diffSupported) {
-                        try {
-                          await openDiffView(
-                            modifiedFile.modified_file_path,
-                            this.props.model,
-                            {
-                              previousRef: {
-                                gitRef: this.props.data.pre_commit
-                              },
-                              currentRef: { gitRef: this.props.data.commit }
-                            },
-                            this.props.renderMime
-                          );
-                        } catch (reason) {
-                          console.error(
-                            `Fail to open diff view for ${
-                              modifiedFile.modified_file_path
-                            }.\n${reason}`
-                          );
-                        }
-                      }
-                    }}
-                    title={modifiedFile.modified_file_path}
-                  >
-                    <FilePath filepath={modifiedFile.modified_file_path} />
-                    {diffSupported && (
-                      <ActionButton
-                        iconName={'git-diff'}
-                        title={'View file changes'}
-                      />
-                    )}
-                  </li>
-                );
-              })}
+            {this.state.modifiedFiles.length > 0
+              ? this._renderFileList()
+              : null}
           </ul>
         </div>
       </div>
+    );
+  }
+
+  /**
+   * Renders a list of modified files.
+   *
+   * @returns array of React elements
+   */
+  private _renderFileList(): React.ReactElement[] {
+    return this.state.modifiedFiles.map(this._renderFile, this);
+  }
+
+  /**
+   * Renders a modified file.
+   *
+   * @param file - modified file
+   * @param idx - file index
+   * @returns React element
+   */
+  private _renderFile(file: Git.ICommitModifiedFile): React.ReactElement {
+    const path = file.modified_file_path;
+    const flg = isDiffSupported(path);
+    return (
+      <li
+        className={commitDetailFileStyle}
+        key={path}
+        onClick={this._onDiffClickFactory(path, flg)}
+        title={path}
+      >
+        <FilePath filepath={path} />
+        {flg ? (
+          <ActionButton iconName="git-diff" title="View file changes" />
+        ) : null}
+      </li>
     );
   }
 
@@ -293,4 +281,61 @@ export class SinglePastCommitInfo extends React.Component<
       resetRevertDialog: false
     });
   };
+
+  /**
+   * Returns a callback to be invoked clicking a button to display a file diff.
+   *
+   * @param fpath - modified file path
+   * @param bool - boolean indicating whether a displaying a diff is supported for this file path
+   * @returns callback
+   */
+  private _onDiffClickFactory(fpath: string, bool: boolean) {
+    const self = this;
+    if (bool) {
+      return onShowDiff;
+    }
+    return onClick;
+
+    /**
+     * Callback invoked upon clicking a button to display a file diff.
+     *
+     * @private
+     * @param event - event object
+     */
+    function onClick(event: React.MouseEvent<HTMLLIElement, MouseEvent>) {
+      // Prevent the commit component from being collapsed:
+      event.stopPropagation();
+    }
+
+    /**
+     * Callback invoked upon clicking a button to display a file diff.
+     *
+     * @private
+     * @param event - event object
+     */
+    async function onShowDiff(
+      event: React.MouseEvent<HTMLLIElement, MouseEvent>
+    ) {
+      // Prevent the commit component from being collapsed:
+      event.stopPropagation();
+
+      try {
+        await openDiffView(
+          fpath,
+          self.props.model,
+          {
+            previousRef: {
+              gitRef: self.props.data.pre_commit
+            },
+            currentRef: {
+              gitRef: self.props.data.commit
+            }
+          },
+          self.props.renderMime
+        );
+      } catch (err) {
+        console.error(`Failed to open diff view for ${fpath}.\n${err}`);
+      }
+    }
+  }
 }
