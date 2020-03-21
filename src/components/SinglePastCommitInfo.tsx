@@ -3,6 +3,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
+import { Git } from '../tokens';
 import {
   actionButtonClass,
   commitClass,
@@ -15,7 +16,6 @@ import {
   iconClass,
   insertionsIconClass
 } from '../style/SinglePastCommitInfo';
-import { Git } from '../tokens';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ResetRevertDialog } from './ResetRevertDialog';

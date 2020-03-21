@@ -5,19 +5,42 @@ import { historySideBarStyle } from '../style/HistorySideBarStyle';
 import { Git } from '../tokens';
 import { PastCommitNode } from './PastCommitNode';
 
-/** Interface for WorkingFolder component props */
+/**
+ * Interface describing component properties.
+ */
 export interface IHistorySideBarProps {
-  pastCommits: Git.ISingleCommitInfo[];
+  /**
+   * List of commits.
+   */
+  commits: Git.ISingleCommitInfo[];
+
+  /**
+   * List of branches.
+   */
   branches: Git.IBranch[];
+
+  /**
+   * Git extension data model.
+   */
   model: GitExtension;
+
+  /**
+   * Render MIME type registry.
+   */
   renderMime: IRenderMimeRegistry;
 }
 
+/**
+ * Returns a React component for displaying commit history.
+ *
+ * @param props - component properties
+ * @returns React element
+ */
 export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
   props: IHistorySideBarProps
-) => (
+): React.ReactElement => (
   <ol className={historySideBarStyle}>
-    {props.pastCommits.map((commit: Git.ISingleCommitInfo) => (
+    {props.commits.map((commit: Git.ISingleCommitInfo) => (
       <PastCommitNode
         key={commit.commit}
         commit={commit}
