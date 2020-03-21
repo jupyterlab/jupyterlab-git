@@ -77,8 +77,16 @@ export const buttonClass = style({
   color: 'white',
   fontSize: 'var(--jp-ui-font-size1)',
 
+  cursor: 'pointer',
+
   border: '0',
-  borderRadius: '3px'
+  borderRadius: '3px',
+
+  $nest: {
+    '&:disabled': {
+      cursor: 'default'
+    }
+  }
 });
 
 export const cancelButtonClass = style({
