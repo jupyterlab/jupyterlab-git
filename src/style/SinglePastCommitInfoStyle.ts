@@ -29,6 +29,7 @@ export const commitDetailStyle = style({
 });
 
 export const commitDetailHeader = style({
+  paddingBottom: '0.5em',
   fontSize: '13px',
   fontWeight: 'bold'
 });
