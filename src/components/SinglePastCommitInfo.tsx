@@ -29,9 +29,9 @@ export interface ISinglePastCommitInfoProps {
 
 export interface ISinglePastCommitInfoState {
   info: string;
-  filesChanged: string;
-  insertionCount: string;
-  deletionCount: string;
+  numFiles: string;
+  insertions: string;
+  deletions: string;
   modifiedFiles: Git.ICommitModifiedFile[];
   loadingState: 'loading' | 'error' | 'success';
   resetRevertDialog: boolean;
@@ -46,9 +46,9 @@ export class SinglePastCommitInfo extends React.Component<
     super(props);
     this.state = {
       info: '',
-      filesChanged: '',
-      insertionCount: '',
-      deletionCount: '',
+      numFiles: '',
+      insertions: '',
+      deletions: '',
       modifiedFiles: [],
       loadingState: 'loading',
       resetRevertDialog: false,
@@ -76,9 +76,9 @@ export class SinglePastCommitInfo extends React.Component<
     if (log.code === 0) {
       this.setState({
         info: log.modified_file_note,
-        filesChanged: log.modified_files_count,
-        insertionCount: log.number_of_insertions,
-        deletionCount: log.number_of_deletions,
+        numFiles: log.modified_files_count,
+        insertions: log.number_of_insertions,
+        deletions: log.number_of_deletions,
         modifiedFiles: log.modified_files,
         loadingState: 'success'
       });
@@ -103,7 +103,7 @@ export class SinglePastCommitInfo extends React.Component<
           <div className={commitOverviewNumbers}>
             <span title="# Files Changed">
               <DefaultIconReact name="file" className={iconStyle} tag="span" />
-              {this.state.filesChanged}
+              {this.state.numFiles}
             </span>
             <span title="# Insertions">
               <DefaultIconReact
@@ -111,7 +111,7 @@ export class SinglePastCommitInfo extends React.Component<
                 className={classes(iconStyle, insertionsIconStyle)}
                 tag="span"
               />
-              {this.state.insertionCount}
+              {this.state.insertions}
             </span>
             <span title="# Deletions">
               <DefaultIconReact
@@ -119,7 +119,7 @@ export class SinglePastCommitInfo extends React.Component<
                 className={classes(iconStyle, deletionsIconStyle)}
                 tag="span"
               />
-              {this.state.deletionCount}
+              {this.state.deletions}
             </span>
           </div>
         </div>
