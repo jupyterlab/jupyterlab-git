@@ -89,6 +89,8 @@ describe('PastCommitNode', () => {
   test('hides details after collapse', () => {
     const node = shallow(<PastCommitNode {...props} />);
     node.simulate('click');
+    expect(node.find(SinglePastCommitInfo)).toHaveLength(1);
+    node.simulate('click');
     expect(node.find(SinglePastCommitInfo)).toHaveLength(0);
   });
 });
