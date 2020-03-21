@@ -106,6 +106,7 @@ export class ResetRevertDialog extends React.Component<
           paper: resetRevertDialogClass
         }}
         open={this.props.open}
+        onClick={this._onClick}
         onClose={this._onClose}
       >
         <div className={titleWrapperClass}>
@@ -194,18 +195,27 @@ export class ResetRevertDialog extends React.Component<
   };
 
   /**
+   * Callback invoked upon clicking on a dialog.
+   *
+   * @param event - event object
+   */
+  private _onClick = (event: any): void => {
+    event.stopPropagation();
+  };
+
+  /**
    * Callback invoked upon closing the dialog.
    *
    * @param event - event object
    */
   private _onClose = (event: any): void => {
     event.stopPropagation();
+    this.props.onClose();
     this.setState({
       summary: '',
       description: '',
       disabled: false
     });
-    this.props.onClose();
   };
 
   /**
