@@ -54,15 +54,15 @@ export class SinglePastCommitInfo extends React.Component<
       resetRevertDialog: false,
       resetRevertAction: 'reset'
     };
-    this.showPastCommitWork();
   }
 
-  showPastCommitWork = async () => {
-    let detailedLogData: Git.ISingleCommitFilePathInfo;
+  /**
+   * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
+   */
+  async componentDidMount(): Promise<void> {
+    let log: Git.ISingleCommitFilePathInfo;
     try {
-      detailedLogData = await this.props.model.detailedLog(
-        this.props.data.commit
-      );
+      log = await this.props.model.detailedLog(this.props.data.commit);
     } catch (err) {
       console.error(
         `Error while getting detailed log for commit ${
@@ -70,22 +70,27 @@ export class SinglePastCommitInfo extends React.Component<
         } and path ${this.props.model.pathRepository}`,
         err
       );
-      this.setState(() => ({ loadingState: 'error' }));
+      this.setState({ loadingState: 'error' });
       return;
     }
-    if (detailedLogData.code === 0) {
+    if (log.code === 0) {
       this.setState({
-        info: detailedLogData.modified_file_note,
-        filesChanged: detailedLogData.modified_files_count,
-        insertionCount: detailedLogData.number_of_insertions,
-        deletionCount: detailedLogData.number_of_deletions,
-        modifiedFiles: detailedLogData.modified_files,
+        info: log.modified_file_note,
+        filesChanged: log.modified_files_count,
+        insertionCount: log.number_of_insertions,
+        deletionCount: log.number_of_deletions,
+        modifiedFiles: log.modified_files,
         loadingState: 'success'
       });
     }
-  };
+  }
 
-  render() {
+  /**
+   * Renders the component.
+   *
+   * @returns React element
+   */
+  render(): React.ReactElement {
     if (this.state.loadingState === 'loading') {
       return <div>...</div>;
     }
