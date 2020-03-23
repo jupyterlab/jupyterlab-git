@@ -1023,7 +1023,9 @@ export class GitExtension implements IGitExtension {
       if (response.status === 404) {
         throw new ServerConnection.ResponseError(
           response,
-          'Required Git serverextension not available.'
+          'Git server extension is unavailable. Please ensure you have installed the ' +
+            'JupyterLab Git server extension by running: pip install --upgrade jupyterlab-git. ' +
+            'To confirm that the server extension is installed, run: jupyter serverextension list.'
         );
       }
       const data = await response.json();
