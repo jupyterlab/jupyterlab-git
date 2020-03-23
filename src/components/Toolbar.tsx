@@ -56,14 +56,17 @@ async function showGitOperationDialog(
       ),
       buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
     });
+
     if (!credentials.button.accept) {
       break;
     }
+
     result = await showDialog({
       title: title,
       body: new GitPullPushDialog(model, operation, credentials.value),
       buttons: [Dialog.okButton({ label: 'DISMISS' })]
     });
+    retry = true;
   }
 }
 
