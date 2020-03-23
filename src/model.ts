@@ -12,6 +12,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
 import { decodeStage } from './utils';
+import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
@@ -33,6 +34,11 @@ export class GitExtension implements IGitExtension {
       })
       .catch(reason => {
         console.error(`Fail to get the server root path.\n${reason}`);
+        showErrorMessage(
+          'Internal Error:',
+          `Fail to get the server root path.\n\n${reason}`,
+          [Dialog.warnButton({ label: 'DISMISS' })]
+        );
       });
 
     let interval: number;
@@ -1014,10 +1020,20 @@ export class GitExtension implements IGitExtension {
   private async _getServerRoot(): Promise<string> {
     try {
       const response = await httpGitRequest('/git/server_root', 'GET', null);
+      if (response.status === 404) {
+        throw new ServerConnection.ResponseError(
+          response,
+          'Required Git serverextension not available.'
+        );
+      }
       const data = await response.json();
       return data['server_root'];
-    } catch (reason) {
-      throw new Error(reason);
+    } catch (error) {
+      if (error instanceof ServerConnection.ResponseError) {
+        throw error;
+      } else {
+        throw new Error(error);
+      }
     }
   }
 
