@@ -134,6 +134,10 @@ export class GitMarkBox extends React.Component<IGitMarkBoxProps> {
     this.forceUpdate();
   };
 
+  protected _onDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
+    event.stopPropagation();
+  };
+
   render() {
     // idempotent, will only run once per file
     this.props.model.addMark(
@@ -148,6 +152,7 @@ export class GitMarkBox extends React.Component<IGitMarkBoxProps> {
         type="checkbox"
         checked={this.props.model.getMark(this.props.fname)}
         onChange={this._onClick}
+        onDoubleClick={this._onDoubleClick}
       />
     );
   }
