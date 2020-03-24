@@ -84,6 +84,11 @@ async function makeApiCall(
           ]);
           break;
         }
+      } else {
+        showErrorMessage('Clone failed', response.message, [
+          Dialog.warnButton({ label: 'DISMISS' })
+        ]);
+        break;
       }
     }
   } catch (error) {

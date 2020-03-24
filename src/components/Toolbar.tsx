@@ -48,7 +48,6 @@ async function showGitOperationDialog(
   });
   let retry = false;
   while (!result.button.accept) {
-    retry = true;
     const credentials = await showDialog({
       title: 'Git credentials required',
       body: new GitCredentialsForm(
@@ -57,14 +56,17 @@ async function showGitOperationDialog(
       ),
       buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
     });
+
     if (!credentials.button.accept) {
       break;
     }
+
     result = await showDialog({
       title: title,
       body: new GitPullPushDialog(model, operation, credentials.value),
       buttons: [Dialog.okButton({ label: 'DISMISS' })]
     });
+    retry = true;
   }
 }
 
