@@ -6,6 +6,7 @@ import {
   fileChangedLabelInfoStyle,
   fileChangedLabelStyle,
   fileStyle,
+  gitMarkBoxStyle,
   selectedFileChangedLabelStyle,
   selectedFileStyle
 } from '../style/FileItemStyle';
@@ -27,11 +28,18 @@ export const STATUS_CODES = {
 
 export interface IFileItemProps {
   actions?: React.ReactElement;
-  contextMenu: (event: React.MouseEvent) => void;
+  contextMenu?: (event: React.MouseEvent) => void;
   file: Git.IStatusFile;
+  markBox?: boolean;
   model: GitExtension;
-  selected: boolean;
-  selectFile: (file: Git.IStatusFile | null) => void;
+  selected?: boolean;
+  selectFile?: (file: Git.IStatusFile | null) => void;
+}
+
+export interface IGitMarkBoxProps {
+  fname: string;
+  model: GitExtension;
+  stage: string;
 }
 
 export class FileItem extends React.Component<IFileItemProps> {
@@ -73,16 +81,31 @@ export class FileItem extends React.Component<IFileItemProps> {
     return (
       <li
         className={this.getFileClass()}
-        onClick={() => this.props.selectFile(this.props.file)}
-        onContextMenu={event => {
-          this.props.selectFile(this.props.file);
-          this.props.contextMenu(event);
-        }}
+        onClick={
+          this.props.selectFile &&
+          (() => this.props.selectFile(this.props.file))
+        }
+        onContextMenu={
+          this.props.contextMenu &&
+          (event => {
+            if (this.props.selectFile) {
+              this.props.selectFile(this.props.file);
+            }
+            this.props.contextMenu(event);
+          })
+        }
         onDoubleClick={() => {
           openListedFile(this.props.file, this.props.model);
         }}
         title={`${this.props.file.to} ● ${status}`}
       >
+        {this.props.markBox && (
+          <GitMarkBox
+            fname={this.props.file.to}
+            stage={this.props.file.status}
+            model={this.props.model}
+          />
+        )}
         <FilePath
           filepath={this.props.file.to}
           selected={this.props.selected}
@@ -94,6 +117,38 @@ export class FileItem extends React.Component<IFileItemProps> {
             : this.props.file.y.trim() || this.props.file.x}
         </span>
       </li>
+    );
+  }
+}
+
+export class GitMarkBox extends React.Component<IGitMarkBoxProps> {
+  constructor(props: IGitMarkBoxProps) {
+    super(props);
+  }
+
+  protected _onClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // toggle will emit a markChanged signal
+    this.props.model.toggleMark(this.props.fname);
+
+    // needed if markChanged doesn't force an update of a parent
+    this.forceUpdate();
+  };
+
+  render() {
+    // idempotent, will only run once per file
+    this.props.model.addMark(
+      this.props.fname,
+      this.props.stage !== 'untracked'
+    );
+
+    return (
+      <input
+        name="gitMark"
+        className={gitMarkBoxStyle}
+        type="checkbox"
+        checked={this.props.model.getMark(this.props.fname)}
+        onChange={this._onClick}
+      />
     );
   }
 }
