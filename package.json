@@ -19,10 +19,11 @@
     "clean:more": "jlpm clean && rimraf build dist MANIFEST",
     "clean:labextension": "rimraf jupyterlab_git/labextension",
     "clean:slate": "jlpm clean:more && jlpm clean:labextension && rimraf node_modules",
-    "watch": "tsc -w",
-    "test": "jest",
+    "contributors:generate": "jlpm run all-contributors generate",
     "lint": "tslint --project .",
-    "tslint-check": "tslint-config-prettier-check ./tslint.json"
+    "test": "jest",
+    "tslint-check": "tslint-config-prettier-check ./tslint.json",
+    "watch": "tsc -w"
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
