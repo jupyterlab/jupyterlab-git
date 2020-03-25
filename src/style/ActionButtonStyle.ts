@@ -12,6 +12,11 @@ export const actionButtonStyle = style({
   cursor: 'pointer',
 
   $nest: {
+    '&:active': {
+      transform: 'scale(1.272019649)',
+      overflow: 'hidden'
+    },
+
     '&:disabled': {
       cursor: 'default'
     }
