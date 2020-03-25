@@ -160,14 +160,13 @@ export class SinglePastCommitInfo extends React.Component<
         <div className={commitClass}>
           <div className={commitOverviewNumbersClass}>
             <span title="# Files Changed">
-              <DefaultIconReact name="file" className={iconClass} tag="span" />
+              <DefaultIconReact name="file" className={iconClass} />
               {this.state.numFiles}
             </span>
             <span title="# Insertions">
               <DefaultIconReact
                 name="git-insertionsMade"
                 className={classes(iconClass, insertionsIconClass)}
-                tag="span"
               />
               {this.state.insertions}
             </span>
@@ -175,7 +174,6 @@ export class SinglePastCommitInfo extends React.Component<
               <DefaultIconReact
                 name="git-deletionsMade"
                 className={classes(iconClass, deletionsIconClass)}
-                tag="span"
               />
               {this.state.deletions}
             </span>

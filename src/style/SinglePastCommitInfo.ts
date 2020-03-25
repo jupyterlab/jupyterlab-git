@@ -14,6 +14,8 @@ export const commitOverviewNumbersClass = style({
   paddingTop: '5px',
   $nest: {
     '& span': {
+      alignItems: 'center',
+      display: 'inline-flex',
       marginLeft: '5px'
     },
     '& span:nth-of-type(1)': {
