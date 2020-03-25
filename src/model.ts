@@ -258,6 +258,8 @@ export class GitExtension implements IGitExtension {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
+
+      this.refreshStatus();
       return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
@@ -291,6 +293,7 @@ export class GitExtension implements IGitExtension {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
+
       this.refreshStatus();
       return response.json();
     } catch (err) {
