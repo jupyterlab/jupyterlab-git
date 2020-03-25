@@ -26,8 +26,7 @@ export const commitOverviewNumbersClass = style({
 
 export const commitDetailClass = style({
   flex: '1 1 auto',
-  margin: '0',
-  overflow: 'auto'
+  margin: '0'
 });
 
 export const commitDetailHeaderClass = style({
