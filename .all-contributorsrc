@@ -1,0 +1,173 @@
+{
+  "projectName": "jupyterlab-git",
+  "projectOwner": "jupyterlab",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "none",
+  "contributorsSortAlphabetically": true,
+  "contributors": [
+    {
+      "login": "ellisonbg",
+      "name": "Brian E. Granger",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/27600?v=4",
+      "profile": "https://github.com/ellisonbg",
+      "contributions": [
+        "projectManagement",
+        "design",
+        "ideas",
+        "fundingFinding"
+      ]
+    },
+    {
+      "login": "saulshanabrook",
+      "name": "Saul Shanabrook",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/1186124?v=4",
+      "profile": "https://www.saulshanabrook.com/",
+      "contributions": [
+        "code",
+        "projectManagement",
+        "review",
+        "infra"
+      ]
+    },
+    {
+      "login": "jaipreet-s",
+      "name": "Jaipreet Singh",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/43826141?v=4",
+      "profile": "https://github.com/jaipreet-s",
+      "contributions": [
+        "projectManagement",
+        "review",
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "fcollonval",
+      "name": "Frédéric Collonval",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/8435071?v=4",
+      "profile": "https://github.com/fcollonval",
+      "contributions": [
+        "maintenance"
+      ]
+    },
+    {
+      "login": "jupytercalpoly",
+      "name": "jupytercalpoly",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/19445175?v=4",
+      "profile": "https://github.com/jupytercalpoly",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "aws",
+      "name": "Amazon Web Services",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2232217?v=4",
+      "profile": "https://amazon.com/aws",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "deshaw",
+      "name": "The D. E. Shaw Group",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/2298205?v=4",
+      "profile": "https://www.deshaw.com/",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "zzhangjii",
+      "name": "Ji Zhang",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/11495372?v=4",
+      "profile": "https://github.com/zzhangjii",
+      "contributions": [
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "hzarea",
+      "name": "Hana Zarea",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/27518229?v=4",
+      "profile": "https://github.com/hzarea",
+      "contributions": [
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "NoahStapp",
+      "name": "Noah Stapp",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/30483654?v=4",
+      "profile": "http://noahstapp.com/",
+      "contributions": [
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "ashutoshbondre",
+      "name": "Ashutosh Bondre",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/13174154?v=4",
+      "profile": "https://github.com/ashutoshbondre",
+      "contributions": [
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "neelamgehlot",
+      "name": "Neelam Gehlot",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/15882916?v=4",
+      "profile": "https://github.com/neelamgehlot",
+      "contributions": [
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "ktaletsk",
+      "name": "Konstantin Taletskiy",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/8834829?v=4",
+      "profile": "http://taletskiy.com",
+      "contributions": [
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "telamonian",
+      "name": "Max Klein",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/2263641?v=4",
+      "profile": "https://www.linkedin.com/in/max-klein-b514419",
+      "contributions": [
+        "code",
+        "review",
+        "projectManagement",
+        "design",
+        "infra"
+      ]
+    },
+    {
+      "login": "kgryte",
+      "name": "Athan",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/2643044?v=4",
+      "profile": "https://github.com/stdlib-js/stdlib",
+      "contributions": [
+        "code",
+        "review",
+        "projectManagement",
+        "design"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
