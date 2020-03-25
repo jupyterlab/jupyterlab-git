@@ -100,12 +100,12 @@
     line-height: 1;
 }
 
-.jp-git-diff-root .CodeMirror-merge-r-inserted, 
+.jp-git-diff-root .CodeMirror-merge-r-inserted,
 .jp-git-diff-root .CodeMirror-merge-l-inserted {
     background-color: var(--jp-diff-added-color1);
 }
 
-.jp-git-diff-root .CodeMirror-merge-r-deleted, 
+.jp-git-diff-root .CodeMirror-merge-r-deleted,
 .jp-git-diff-root .CodeMirror-merge-l-deleted {
     background-color: var(--jp-diff-deleted-color1);
 }
@@ -130,10 +130,10 @@
 
 .jp-git-diff-root .CodeMirror-merge-spacer {
     background-image: repeating-linear-gradient(
-        -45deg, 
-        transparent, 
-        transparent 1em, 
-        var(--jp-border-color0) 1em, 
+        -45deg,
+        transparent,
+        transparent 1em,
+        var(--jp-border-color0) 1em,
         var(--jp-border-color0) 1.3em
     )
 }

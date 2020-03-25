@@ -10,7 +10,7 @@ import { PastCommitNode } from '../../src/components/PastCommitNode';
 
 describe('HistorySideBar', () => {
   const props: IHistorySideBarProps = {
-    pastCommits: [
+    commits: [
       {
         commit: null,
         author: null,
@@ -21,7 +21,6 @@ describe('HistorySideBar', () => {
     ],
     branches: [],
     model: null,
-    refreshHistory: () => Promise.resolve(),
     renderMime: null
   };
   test('renders commit nodes', () => {

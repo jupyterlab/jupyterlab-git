@@ -529,6 +529,8 @@ export class GitExtension implements IGitExtension {
       }
 
       this.refreshStatus();
+      this._headChanged.emit();
+
       return response;
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
@@ -573,12 +575,12 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Make request to delete changes from selected commit
+   * Make request to revert changes from selected commit
    *
    * @param message Commit message to use for the new repository state
    * @param commitId Selected commit ID
    */
-  async deleteCommit(message: string, commitId: string): Promise<Response> {
+  async revertCommit(message: string, commitId: string): Promise<Response> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -803,7 +805,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * General git refresh
+   * General Git refresh
    */
   async refresh(): Promise<void> {
     await this.refreshBranch();
@@ -811,7 +813,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Make request for a list of all git branches
+   * Make request for a list of all Git branches
    */
   async refreshBranch(): Promise<void> {
     const response = await this._branch();
@@ -831,7 +833,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Request git status refresh
+   * Request Git status refresh
    */
   async refreshStatus(): Promise<void> {
     await this.ready;

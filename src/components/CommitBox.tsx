@@ -1,12 +1,10 @@
 import * as React from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
-import { classes } from 'typestyle';
 import {
   commitFormClass,
   commitSummaryClass,
   commitDescriptionClass,
-  commitButtonClass,
-  commitButtonDisabledClass
+  commitButtonClass
 } from '../style/CommitBox';
 
 /**
@@ -90,10 +88,7 @@ export class CommitBox extends React.Component<
           onChange={this._onDescriptionChange}
         />
         <input
-          className={classes(
-            commitButtonClass,
-            disabled ? commitButtonDisabledClass : null
-          )}
+          className={commitButtonClass}
           type="button"
           title="Commit"
           value="Commit"
@@ -110,7 +105,7 @@ export class CommitBox extends React.Component<
    * @param event - event object
    */
   private _onCommitClick = (): void => {
-    const msg = this.state.summary + '\n' + this.state.description + '\n';
+    const msg = this.state.summary + '\n\n' + this.state.description + '\n';
     this.props.onCommit(msg);
 
     // NOTE: we assume here that committing changes always works and we can safely clear component state

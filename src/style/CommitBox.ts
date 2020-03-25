@@ -93,12 +93,17 @@ export const commitButtonClass = style({
   color: 'white',
   fontSize: 'var(--jp-ui-font-size1)',
 
+  cursor: 'pointer',
+
   backgroundColor: 'var(--jp-brand-color1)',
   border: '0',
-  borderRadius: '3px'
-});
+  borderRadius: '3px',
 
-export const commitButtonDisabledClass = style({
-  color: 'var(--jp-ui-inverse-font-color0)',
-  backgroundColor: 'var(--jp-layout-color3)'
+  $nest: {
+    '&:disabled': {
+      cursor: 'default',
+      color: 'var(--jp-ui-inverse-font-color0)',
+      backgroundColor: 'var(--jp-layout-color3)'
+    }
+  }
 });

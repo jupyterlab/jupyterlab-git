@@ -1,121 +1,154 @@
 import * as React from 'react';
-import { Dialog, InputDialog, showDialog } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
-import {
-  commitDetailFileStyle,
-  commitDetailHeader,
-  commitDetailStyle,
-  commitOverviewNumbers,
-  commitStyle,
-  deletionsIconStyle,
-  fileList,
-  iconStyle,
-  insertionsIconStyle
-} from '../style/SinglePastCommitInfoStyle';
 import { Git } from '../tokens';
+import {
+  actionButtonClass,
+  commitClass,
+  commitDetailFileClass,
+  commitDetailHeaderClass,
+  commitDetailClass,
+  commitOverviewNumbersClass,
+  deletionsIconClass,
+  fileListClass,
+  iconClass,
+  insertionsIconClass
+} from '../style/SinglePastCommitInfo';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
+import { ResetRevertDialog } from './ResetRevertDialog';
 import { FilePath } from './FilePath';
 import { ActionButton } from './ActionButton';
 
+/**
+ * Interface describing component properties.
+ */
 export interface ISinglePastCommitInfoProps {
-  data: Git.ISingleCommitInfo;
+  /**
+   * Commit data.
+   */
+  commit: Git.ISingleCommitInfo;
+
+  /**
+   * Extension data model.
+   */
   model: GitExtension;
-  refreshHistory: () => Promise<void>;
+
+  /**
+   * Render MIME type registry.
+   */
   renderMime: IRenderMimeRegistry;
 }
 
+/**
+ * Interface describing component state.
+ */
 export interface ISinglePastCommitInfoState {
+  /**
+   * Commit information.
+   */
   info: string;
-  filesChanged: string;
-  insertionCount: string;
-  deletionCount: string;
+
+  /**
+   * Number of modified files.
+   */
+  numFiles: string;
+
+  /**
+   * Number of insertions.
+   */
+  insertions: string;
+
+  /**
+   * Number of deletions.
+   */
+  deletions: string;
+
+  /**
+   * A list of modified files.
+   */
   modifiedFiles: Git.ICommitModifiedFile[];
+
+  /**
+   * Current loading state for loading individual commit information.
+   */
   loadingState: 'loading' | 'error' | 'success';
+
+  /**
+   * Boolean indicating whether to display a dialog for reseting or reverting a commit.
+   */
+  resetRevertDialog: boolean;
+
+  /**
+   * Reset/revert dialog mode (i.e., whether the dialog should be for reseting to or reverting an individual commit).
+   */
+  resetRevertAction: 'reset' | 'revert';
 }
 
+/**
+ * React component for rendering information about an individual commit.
+ */
 export class SinglePastCommitInfo extends React.Component<
   ISinglePastCommitInfoProps,
   ISinglePastCommitInfoState
 > {
+  /**
+   * Returns a React component for information about an individual commit.
+   *
+   * @param props - component properties
+   * @returns React component
+   */
   constructor(props: ISinglePastCommitInfoProps) {
     super(props);
     this.state = {
       info: '',
-      filesChanged: '',
-      insertionCount: '',
-      deletionCount: '',
+      numFiles: '',
+      insertions: '',
+      deletions: '',
       modifiedFiles: [],
-      loadingState: 'loading'
+      loadingState: 'loading',
+      resetRevertDialog: false,
+      resetRevertAction: 'reset'
     };
-    this.showPastCommitWork();
   }
 
-  showPastCommitWork = async () => {
-    let detailedLogData: Git.ISingleCommitFilePathInfo;
+  /**
+   * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
+   */
+  async componentDidMount(): Promise<void> {
+    let log: Git.ISingleCommitFilePathInfo;
     try {
-      detailedLogData = await this.props.model.detailedLog(
-        this.props.data.commit
-      );
+      log = await this.props.model.detailedLog(this.props.commit.commit);
     } catch (err) {
       console.error(
         `Error while getting detailed log for commit ${
-          this.props.data.commit
+          this.props.commit.commit
         } and path ${this.props.model.pathRepository}`,
         err
       );
-      this.setState(() => ({ loadingState: 'error' }));
+      this.setState({ loadingState: 'error' });
       return;
     }
-    if (detailedLogData.code === 0) {
+    if (log.code === 0) {
       this.setState({
-        info: detailedLogData.modified_file_note,
-        filesChanged: detailedLogData.modified_files_count,
-        insertionCount: detailedLogData.number_of_insertions,
-        deletionCount: detailedLogData.number_of_deletions,
-        modifiedFiles: detailedLogData.modified_files,
+        info: log.modified_file_note,
+        numFiles: log.modified_files_count,
+        insertions: log.number_of_insertions,
+        deletions: log.number_of_deletions,
+        modifiedFiles: log.modified_files,
         loadingState: 'success'
       });
     }
-  };
+  }
 
-  deleteCommit = async (commitId: string) => {
-    const result = await InputDialog.getText({
-      title: 'Delete Commit',
-      placeholder: 'Deletion Commit Message',
-      okLabel: 'Delete'
-    });
-    if (result.button.accept) {
-      const msg = result.value;
-      await this.props.model.deleteCommit(msg, commitId);
-      await this.props.refreshHistory();
-    }
-  };
-
-  resetToCommit = async (commitId: string) => {
-    const shortCommit = commitId.slice(0, 7);
-    const result = await showDialog({
-      title: 'Reset to Commit',
-      body: `All changes after commit ${shortCommit} will be gone forever. Confirm you want to reset to it?`,
-      buttons: [
-        Dialog.cancelButton(),
-        Dialog.warnButton({
-          accept: true,
-          label: 'Reset'
-        })
-      ]
-    });
-
-    if (result.button.accept) {
-      await this.props.model.resetToCommit(commitId);
-      await this.props.refreshHistory();
-    }
-  };
-
-  render() {
+  /**
+   * Renders the component.
+   *
+   * @returns React element
+   */
+  render(): React.ReactElement {
     if (this.state.loadingState === 'loading') {
       return <div>...</div>;
     }
@@ -124,103 +157,184 @@ export class SinglePastCommitInfo extends React.Component<
     }
     return (
       <div>
-        <div className={commitStyle}>
-          <div className={commitOverviewNumbers}>
+        <div className={commitClass}>
+          <div className={commitOverviewNumbersClass}>
             <span title="# Files Changed">
-              <DefaultIconReact name="file" className={iconStyle} tag="span" />
-              {this.state.filesChanged}
+              <DefaultIconReact name="file" className={iconClass} />
+              {this.state.numFiles}
             </span>
             <span title="# Insertions">
               <DefaultIconReact
                 name="git-insertionsMade"
-                className={classes(iconStyle, insertionsIconStyle)}
-                tag="span"
+                className={classes(iconClass, insertionsIconClass)}
               />
-              {this.state.insertionCount}
+              {this.state.insertions}
             </span>
             <span title="# Deletions">
               <DefaultIconReact
                 name="git-deletionsMade"
-                className={classes(iconStyle, deletionsIconStyle)}
-                tag="span"
+                className={classes(iconClass, deletionsIconClass)}
               />
-              {this.state.deletionCount}
+              {this.state.deletions}
             </span>
           </div>
         </div>
-        <div className={commitDetailStyle}>
-          <div className={commitDetailHeader}>
+        <div className={commitDetailClass}>
+          <div className={commitDetailHeaderClass}>
             Changed
             <ActionButton
-              iconName={'git-rewind'}
-              onClick={event => {
-                event.stopPropagation();
-                this.deleteCommit(this.props.data.commit);
-              }}
-              title="Discard changes introduced by this commit"
+              className={actionButtonClass}
+              iconName="git-rewind"
+              title="Revert changes introduced by this commit"
+              onClick={this._onRevertClick}
             />
             <ActionButton
-              iconName={'git-discard'}
-              onClick={event => {
-                event.stopPropagation();
-                this.resetToCommit(this.props.data.commit);
-              }}
-              title="Discard changes introduced *after* this commit"
+              className={actionButtonClass}
+              iconName="git-discard"
+              title="Discard changes introduced *after* this commit (hard reset)"
+              onClick={this._onResetClick}
+            />
+            <ResetRevertDialog
+              open={this.state.resetRevertDialog}
+              action={this.state.resetRevertAction}
+              model={this.props.model}
+              commit={this.props.commit}
+              onClose={this._onResetRevertDialogClose}
             />
           </div>
-          <ul className={fileList}>
-            {this.state.modifiedFiles.length > 0 &&
-              this.state.modifiedFiles.map(modifiedFile => {
-                const diffSupported = isDiffSupported(
-                  modifiedFile.modified_file_path
-                );
-
-                return (
-                  <li
-                    className={commitDetailFileStyle}
-                    key={modifiedFile.modified_file_path}
-                    onClick={async (
-                      event: React.MouseEvent<HTMLLIElement, MouseEvent>
-                    ) => {
-                      // Avoid commit node to be collapsed
-                      event.stopPropagation();
-                      if (diffSupported) {
-                        try {
-                          await openDiffView(
-                            modifiedFile.modified_file_path,
-                            this.props.model,
-                            {
-                              previousRef: {
-                                gitRef: this.props.data.pre_commit
-                              },
-                              currentRef: { gitRef: this.props.data.commit }
-                            },
-                            this.props.renderMime
-                          );
-                        } catch (reason) {
-                          console.error(
-                            `Fail to open diff view for ${
-                              modifiedFile.modified_file_path
-                            }.\n${reason}`
-                          );
-                        }
-                      }
-                    }}
-                    title={modifiedFile.modified_file_path}
-                  >
-                    <FilePath filepath={modifiedFile.modified_file_path} />
-                    {diffSupported && (
-                      <ActionButton
-                        iconName={'git-diff'}
-                        title={'View file changes'}
-                      />
-                    )}
-                  </li>
-                );
-              })}
+          <ul className={fileListClass}>
+            {this.state.modifiedFiles.length > 0
+              ? this._renderFileList()
+              : null}
           </ul>
         </div>
       </div>
     );
+  }
+
+  /**
+   * Renders a list of modified files.
+   *
+   * @returns array of React elements
+   */
+  private _renderFileList(): React.ReactElement[] {
+    return this.state.modifiedFiles.map(this._renderFile, this);
+  }
+
+  /**
+   * Renders a modified file.
+   *
+   * @param file - modified file
+   * @param idx - file index
+   * @returns React element
+   */
+  private _renderFile(file: Git.ICommitModifiedFile): React.ReactElement {
+    const path = file.modified_file_path;
+    const flg = isDiffSupported(path);
+    return (
+      <li
+        className={commitDetailFileClass}
+        key={path}
+        onClick={this._onDiffClickFactory(path, flg)}
+        title={path}
+      >
+        <FilePath filepath={path} />
+        {flg ? (
+          <ActionButton iconName="git-diff" title="View file changes" />
+        ) : null}
+      </li>
+    );
+  }
+
+  /**
+   * Callback invoked upon a clicking a button to revert changes.
+   *
+   * @param event - event object
+   */
+  private _onRevertClick = (event: any): void => {
+    event.stopPropagation();
+    this.setState({
+      resetRevertDialog: true,
+      resetRevertAction: 'revert'
+    });
+  };
+
+  /**
+   * Callback invoked upon a clicking a button to reset changes.
+   *
+   * @param event - event object
+   */
+  private _onResetClick = (event: any): void => {
+    event.stopPropagation();
+    this.setState({
+      resetRevertDialog: true,
+      resetRevertAction: 'reset'
+    });
+  };
+
+  /**
+   * Callback invoked upon closing a dialog to reset or revert changes.
+   */
+  private _onResetRevertDialogClose = (): void => {
+    this.setState({
+      resetRevertDialog: false
+    });
+  };
+
+  /**
+   * Returns a callback to be invoked clicking a button to display a file diff.
+   *
+   * @param fpath - modified file path
+   * @param bool - boolean indicating whether a displaying a diff is supported for this file path
+   * @returns callback
+   */
+  private _onDiffClickFactory(fpath: string, bool: boolean) {
+    const self = this;
+    if (bool) {
+      return onShowDiff;
+    }
+    return onClick;
+
+    /**
+     * Callback invoked upon clicking a button to display a file diff.
+     *
+     * @private
+     * @param event - event object
+     */
+    function onClick(event: React.MouseEvent<HTMLLIElement, MouseEvent>) {
+      // Prevent the commit component from being collapsed:
+      event.stopPropagation();
+    }
+
+    /**
+     * Callback invoked upon clicking a button to display a file diff.
+     *
+     * @private
+     * @param event - event object
+     */
+    async function onShowDiff(
+      event: React.MouseEvent<HTMLLIElement, MouseEvent>
+    ) {
+      // Prevent the commit component from being collapsed:
+      event.stopPropagation();
+
+      try {
+        await openDiffView(
+          fpath,
+          self.props.model,
+          {
+            previousRef: {
+              gitRef: self.props.commit.pre_commit
+            },
+            currentRef: {
+              gitRef: self.props.commit.commit
+            }
+          },
+          self.props.renderMime
+        );
+      } catch (err) {
+        console.error(`Failed to open diff view for ${fpath}.\n${err}`);
+      }
+    }
   }
 }

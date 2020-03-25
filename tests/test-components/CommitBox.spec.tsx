@@ -2,7 +2,6 @@ import * as React from 'react';
 import 'jest';
 import { shallow } from 'enzyme';
 import { CommitBox } from '../../src/components/CommitBox';
-import { commitButtonDisabledClass } from '../../src/style/CommitBox';
 
 describe('CommitBox', () => {
   describe('#constructor()', () => {
@@ -99,8 +98,8 @@ describe('CommitBox', () => {
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
-      const idx = node.prop('className').indexOf(commitButtonDisabledClass);
-      expect(idx >= 0).toEqual(true);
+      const prop = node.prop('disabled');
+      expect(prop).toEqual(true);
     });
 
     it('should apply a class to disable the commit button when files have changes to commit, but the user has not entered a commit message summary', () => {
@@ -110,8 +109,8 @@ describe('CommitBox', () => {
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
-      const idx = node.prop('className').indexOf(commitButtonDisabledClass);
-      expect(idx >= 0).toEqual(true);
+      const prop = node.prop('disabled');
+      expect(prop).toEqual(true);
     });
 
     it('should not apply a class to disable the commit button when files have changes to commit and the user has entered a commit message summary', () => {
@@ -125,8 +124,8 @@ describe('CommitBox', () => {
       });
 
       const node = component.find('input[type="button"]').first();
-      const idx = node.prop('className').indexOf(commitButtonDisabledClass);
-      expect(idx >= 0).toEqual(false);
+      const prop = node.prop('disabled');
+      expect(prop).toEqual(false);
     });
   });
 });

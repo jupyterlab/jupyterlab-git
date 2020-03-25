@@ -1,6 +1,6 @@
 import { style } from 'typestyle';
 
-export const commitStyle = style({
+export const commitClass = style({
   flex: '0 0 auto',
   width: '100%',
   fontSize: '12px',
@@ -8,12 +8,14 @@ export const commitStyle = style({
   marginTop: '5px'
 });
 
-export const commitOverviewNumbers = style({
+export const commitOverviewNumbersClass = style({
   fontSize: '13px',
   fontWeight: 'bold',
   paddingTop: '5px',
   $nest: {
     '& span': {
+      alignItems: 'center',
+      display: 'inline-flex',
       marginLeft: '5px'
     },
     '& span:nth-of-type(1)': {
@@ -22,18 +24,19 @@ export const commitOverviewNumbers = style({
   }
 });
 
-export const commitDetailStyle = style({
+export const commitDetailClass = style({
   flex: '1 1 auto',
   margin: '0',
   overflow: 'auto'
 });
 
-export const commitDetailHeader = style({
+export const commitDetailHeaderClass = style({
+  paddingBottom: '0.5em',
   fontSize: '13px',
   fontWeight: 'bold'
 });
 
-export const commitDetailFileStyle = style({
+export const commitDetailFileClass = style({
   display: 'flex',
   flexDirection: 'row',
   color: 'var(--jp-ui-font-color1)',
@@ -51,14 +54,14 @@ export const commitDetailFileStyle = style({
   }
 });
 
-export const iconStyle = style({
+export const iconClass = style({
   display: 'inline-block',
   width: '13px',
   height: '13px',
   right: '10px'
 });
 
-export const insertionsIconStyle = style({
+export const insertionsIconClass = style({
   $nest: {
     '.jp-icon3': {
       fill: '#00dc00'
@@ -66,7 +69,7 @@ export const insertionsIconStyle = style({
   }
 });
 
-export const deletionsIconStyle = style({
+export const deletionsIconClass = style({
   $nest: {
     '.jp-icon3': {
       fill: '#ff0000'
@@ -74,7 +77,7 @@ export const deletionsIconStyle = style({
   }
 });
 
-export const diffIconStyle = style({
+export const diffIconClass = style({
   backgroundColor: 'transparent',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
@@ -84,11 +87,15 @@ export const diffIconStyle = style({
   width: '2px'
 });
 
-export const revertButtonStyle = style({
+export const revertButtonClass = style({
   backgroundImage: 'var(--jp-icon-rewind)',
   marginLeft: '6px'
 });
 
-export const fileList = style({
+export const fileListClass = style({
   paddingLeft: 0
+});
+
+export const actionButtonClass = style({
+  float: 'right'
 });

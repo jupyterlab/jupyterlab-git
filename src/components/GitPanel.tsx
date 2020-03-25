@@ -282,9 +282,8 @@ export class GitPanel extends React.Component<
     return (
       <HistorySideBar
         branches={this.state.branches}
-        pastCommits={this.state.pastCommits}
+        commits={this.state.pastCommits}
         model={this.props.model}
-        refreshHistory={this.refreshHistory}
         renderMime={this.props.renderMime}
       />
     );

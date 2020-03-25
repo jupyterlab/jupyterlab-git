@@ -158,12 +158,12 @@ export interface IGitExtension extends IDisposable {
   config(options?: JSONObject): Promise<Response>;
 
   /**
-   * Make request to delete changes from selected commit
+   * Make request to revert changes from selected commit
    *
    * @param message Commit message to use for the new repository state
    * @param commitId Selected commit ID
    */
-  deleteCommit(message: string, commitId: string): Promise<Response>;
+  revertCommit(message: string, commitId: string): Promise<Response>;
 
   /**
    * Make request for detailed git commit info of
