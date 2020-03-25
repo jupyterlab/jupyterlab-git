@@ -256,7 +256,7 @@ class Git:
             }
 
         result = []
-        line_iterable = line_iterable = (line for line in strip_and_split(my_output)) if line)
+        line_iterable = line_iterable = (line for line in strip_and_split(my_output) if line)
         for line in line_iterable:
             result.append({
                 "x": line[0],
