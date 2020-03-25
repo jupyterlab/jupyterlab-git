@@ -101,12 +101,13 @@ async def execute(
 
     return code, output, error
 
+
 def strip_and_split(s):
     """strip trailing \x00 and split on \x00
-
     Useful for parsing output of git commands with -z flag.
     """
     return s.strip("\x00").split("\x00")
+
 
 class Git:
     """
@@ -255,7 +256,7 @@ class Git:
             }
 
         result = []
-        line_iterable = iter(strip_and_split(my_output))
+        line_iterable = line_iterable = (line for line in strip_and_split(my_output) if line)
         for line in line_iterable:
             result.append({
                 "x": line[0],
@@ -263,7 +264,7 @@ class Git:
                 "to": line[3:],
                 # if file was renamed, next line contains original path
                 "from": next(line_iterable) if line[0]=='R' else line[3:]
-            })       
+            })
         return {"code": code, "files": result}
 
     async def log(self, current_path, history_count=10):
