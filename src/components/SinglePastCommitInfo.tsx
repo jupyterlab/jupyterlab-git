@@ -184,13 +184,13 @@ export class SinglePastCommitInfo extends React.Component<
             Changed
             <ActionButton
               className={actionButtonClass}
-              iconName="git-rewind"
+              iconName="git-discard"
               title="Revert changes introduced by this commit"
               onClick={this._onRevertClick}
             />
             <ActionButton
               className={actionButtonClass}
-              iconName="git-discard"
+              iconName="git-rewind"
               title="Discard changes introduced *after* this commit (hard reset)"
               onClick={this._onResetClick}
             />
