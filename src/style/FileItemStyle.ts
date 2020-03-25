@@ -62,3 +62,8 @@ export const fileGitButtonStyle = style({
 export const fileButtonStyle = style({
   marginTop: '5px'
 });
+
+export const gitMarkBoxStyle = style({
+  flex: '0 0 auto',
+  margin: 'auto 8px auto 4px'
+});

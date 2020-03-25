@@ -13,7 +13,6 @@ import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
 import { FileItem } from './FileItem';
-import { FileItemSimple } from './FileItemSimple';
 import { GitStage } from './GitStage';
 
 export namespace CommandIDs {
@@ -507,10 +506,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           }
 
           return (
-            <FileItemSimple
+            <FileItem
               key={file.to}
               actions={actions}
               file={file}
+              markBox={true}
               model={this.props.model}
             />
           );
