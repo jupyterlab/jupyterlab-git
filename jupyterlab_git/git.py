@@ -101,16 +101,12 @@ async def execute(
 
     return code, output, error
 
-def strip_and_split(s: "str") -> "List[str]":
-    """Strip trailing \x00 and split on \x00 a string.
 
+def strip_and_split(s):
+    """strip trailing \x00 and split on \x00
     Useful for parsing output of git commands with -z flag.
     """
-    s = s.strip("\x00")
-    if len(s) > 0:
-        return s.split("\x00")
-    else:
-        return list()
+    return s.strip("\x00").split("\x00")
 
 
 class Git:
@@ -260,7 +256,7 @@ class Git:
             }
 
         result = []
-        line_iterable = iter(strip_and_split(my_output))
+        line_iterable = line_iterable = (line for line in strip_and_split(my_output)) if line)
         for line in line_iterable:
             result.append({
                 "x": line[0],
