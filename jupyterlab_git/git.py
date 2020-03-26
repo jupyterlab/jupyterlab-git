@@ -18,18 +18,18 @@ ALLOWED_OPTIONS = ['user.name', 'user.email']
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
 CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
 DEFAULT_REMOTE_NAME = "origin"
-# Ensure on NFS or similar, that we give the .git/index.lock time to be removed
-MAX_WAIT_FOR_LOCK_S = 5
-# How often should we check for the lock above to be free?
-CHECK_LOCK_INTERVAL_S = 0.1
 # How long to wait to be executed or finished your execution before timing out
 MAX_WAIT_FOR_EXECUTE_S = 20
+# Ensure on NFS or similar, that we give the .git/index.lock time to be removed
+MAX_WAIT_FOR_LOCK_S = 5
+# How often should we check for the lock above to be free? This comes up more on things like NFS
+CHECK_LOCK_INTERVAL_S = 0.1
 
 execution_lock = tornado.locks.Lock()
 
 async def execute(
     cmdline: "List[str]",
-    cwd: "Optional[str]" = None,
+    cwd: "str",
     env: "Optional[Dict[str, str]]" = None,
     username: "Optional[str]" = None,
     password: "Optional[str]" = None,
@@ -94,12 +94,16 @@ async def execute(
         output, error = process.communicate()
         return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
 
-    await execution_lock.acquire(timeout=datetime.timedelta(seconds=MAX_WAIT_FOR_EXECUTE_S))
+    try:
+        await execution_lock.acquire(timeout=datetime.timedelta(seconds=MAX_WAIT_FOR_EXECUTE_S))
+    except  tornado.util.TimeoutError:
+        return (1, "", "Unable to get the lock on the directory")
+
     try:
         # Ensure our execution operation will succeed by first checking and waiting for the lock to be removed
         time_slept = 0
         lockfile = os.path.join(cwd, '.git', 'index.lock')
-        while os.path.exists(lockfile) and time_slept < CHECK_LOCK_INTERVAL_S:
+        while os.path.exists(lockfile) and time_slept < MAX_WAIT_FOR_LOCK_S:
             await tornado.gen.sleep(CHECK_LOCK_INTERVAL_S)
             time_slept += CHECK_LOCK_INTERVAL_S
 
