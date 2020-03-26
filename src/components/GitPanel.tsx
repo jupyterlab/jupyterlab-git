@@ -93,7 +93,7 @@ export class GitPanel extends React.Component<
   refreshHistory = async () => {
     if (this.props.model.pathRepository !== null) {
       // Get git log for current branch
-      let logData = await this.props.model.log(this.props.settings.composite[
+      const logData = await this.props.model.log(this.props.settings.composite[
         'historyCount'
       ] as number);
       let pastCommits = new Array<Git.ISingleCommitInfo>();
@@ -402,7 +402,7 @@ export class GitPanel extends React.Component<
    * List of sorted modified files.
    */
   private get _sortedFiles(): Git.IStatusFile[] {
-    let { files } = this.state;
+    const { files } = this.state;
 
     files.sort((a, b) => a.to.localeCompare(b.to));
     return files;

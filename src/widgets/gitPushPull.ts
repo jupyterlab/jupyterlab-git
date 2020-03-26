@@ -86,7 +86,7 @@ export class GitPullPushDialog extends Widget {
   }
 
   private handleError(
-    message: string = 'Unexpected failure. Please check your Jupyter server logs for more details.'
+    message = 'Unexpected failure. Please check your Jupyter server logs for more details.'
   ): void {
     const label = document.createElement('label');
     const text = document.createElement('span');

@@ -74,7 +74,9 @@ export async function openListedFile(
     } else {
       console.log('Cannot open a folder here');
     }
-  } catch (err) {}
+  } catch (err) {
+    console.error(`Fail to open ${to}.`);
+  }
 }
 
 /**
@@ -83,14 +85,11 @@ export async function openListedFile(
  * @param path File path for which the icon should be found
  * @param selected Is the file selected? Optional: default is false
  */
-export function getFileIconClassName(
-  path: string,
-  selected: boolean = false
-): string {
+export function getFileIconClassName(path: string, selected = false): string {
   if (path[path.length - 1] === '/') {
     return selected ? folderFileIconSelectedStyle : folderFileIconStyle;
   }
-  let fileExtension = PathExt.extname(path).toLocaleLowerCase();
+  const fileExtension = PathExt.extname(path).toLocaleLowerCase();
   switch (fileExtension) {
     case '.md':
       return selected ? markdownFileIconSelectedStyle : markdownFileIconStyle;

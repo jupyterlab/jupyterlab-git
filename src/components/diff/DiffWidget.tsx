@@ -26,7 +26,7 @@ export async function openDiffView(
 ) {
   if (isDiffSupported(filePath) || isText) {
     const id = `nbdiff-${filePath}-${getRefValue(diffContext.currentRef)}`;
-    let mainAreaItems = model.shell.widgets('main');
+    const mainAreaItems = model.shell.widgets('main');
     let mainAreaItem = mainAreaItems.next();
     while (mainAreaItem) {
       if (mainAreaItem.id === id) {
