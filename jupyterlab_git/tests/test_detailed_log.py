@@ -30,7 +30,7 @@ async def test_detailed_log():
 
 
         mock_execute._mock_return_value = tornado.gen.maybe_future(
-            (0, "\x00".join(process_output), "")
+            (0, "\x00".join(process_output)+"\x00", "")
         )
 
         expected_response = {
