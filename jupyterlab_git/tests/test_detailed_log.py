@@ -24,18 +24,19 @@ async def test_detailed_log():
             "14\t1\tpath/Notebook with λ.ipynb",
             "0\t0\t",
             "folder1/file with spaces and λ.py",
-            "folder2/file with spaces.py"
+            "folder2/file with spaces.py",
+            "-\t-\tbinary_file.png",
         ]
 
 
         mock_execute._mock_return_value = tornado.gen.maybe_future(
-            (0, "\x00".join(process_output), "")
+            (0, "\x00".join(process_output)+"\x00", "")
         )
 
         expected_response = {
             "code": 0,
-            "modified_file_note": "6 files changed, 60 insertions(+), 19 deletions(-)",
-            "modified_files_count": "6",
+            "modified_file_note": "7 files changed, 60 insertions(+), 19 deletions(-)",
+            "modified_files_count": "7",
             "number_of_insertions": "60",
             "number_of_deletions": "19",
             "modified_files": [
@@ -72,6 +73,12 @@ async def test_detailed_log():
                 {
                     "modified_file_path": "folder2/file with spaces.py",
                     "modified_file_name": "folder1/file with spaces and λ.py => folder2/file with spaces.py",
+                    "insertion": "0",
+                    "deletion": "0",
+                },
+                {
+                    "modified_file_path": "binary_file.png",
+                    "modified_file_name": "binary_file.png",
                     "insertion": "0",
                     "deletion": "0",
                 },
