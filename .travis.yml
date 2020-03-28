@@ -18,8 +18,8 @@ script:
   # Log the current state of jupyterlab's extensions
   - jupyter labextension list
 
-  # Do a tslint check
-  - jlpm run lint
+  # Do a eslint check
+  - jlpm run lint-check
 
   # Rebuild jupyterlab to include our extension
   - jupyter lab build

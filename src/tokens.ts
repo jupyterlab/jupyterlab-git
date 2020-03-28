@@ -5,7 +5,6 @@ import { ISignal } from '@lumino/signaling';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
-// tslint:disable-next-line: variable-name
 export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
 
 /** Interface for extension class */
