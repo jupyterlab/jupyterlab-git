@@ -4,8 +4,9 @@
 
 // The linter must be relaxed on this imported file.
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-/* eslint-disable prefer-arrow-callback */
+/* eslint-disable eqeqeq */
 /* eslint-disable no-inner-declarations */
+/* eslint-disable prefer-arrow-callback */
 
 import CodeMirror from 'codemirror';
 
