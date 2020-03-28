@@ -24,7 +24,7 @@ async def test_changed_files_single_commit():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.return_value = tornado.gen.maybe_future(
-            (0, "file1.ipynb\x00file2.py", "")
+            (0, "file1.ipynb\x00file2.py\x00", "")
         )
 
         # When

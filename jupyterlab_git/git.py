@@ -256,7 +256,7 @@ class Git:
             }
 
         result = []
-        line_iterable = line_iterable = (line for line in strip_and_split(my_output) if line)
+        line_iterable = (line for line in strip_and_split(my_output) if line)
         for line in line_iterable:
             result.append({
                 "x": line[0],
@@ -330,6 +330,8 @@ class Git:
         line_iterable = iter(strip_and_split(my_output)[1:])
         for line in line_iterable:
             insertions, deletions, file = line.split('\t')
+            insertions = insertions.replace('-', '0')
+            deletions = deletions.replace('-', '0')
 
             if file == '':
                 # file was renamed or moved, we need next two lines of output
