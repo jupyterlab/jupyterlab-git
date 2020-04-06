@@ -271,7 +271,7 @@ class Git:
         are_binary = dict()
         if text_code == 0:
             for line in filter(lambda l: len(l) > 0, strip_and_split(text_output)):
-                diff, name = line.rsplit(maxsplit=1)
+                diff, name = line.rsplit("\t", maxsplit=1)
                 are_binary[name] = diff.startswith("-\t-")
         
         result = []
@@ -345,23 +345,12 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
-        # Test for binary file
-        command = ["git", "diff", "--numstat", "-z", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", selected_hash]
-        text_code, text_output, _ = await execute(
-            command, 
-            cwd=os.path.join(self.root_dir, current_path),
-        )
-        are_binary = dict()
-        if text_code == 0:
-            for line in filter(lambda l: len(l) > 0, strip_and_split(text_output)):
-                diff, name = line.rsplit(maxsplit=1)
-                are_binary[name] = diff.startswith("-\t-")
-
         total_insertions = 0
         total_deletions = 0
         result = []
         line_iterable = iter(strip_and_split(my_output)[1:])
         for line in line_iterable:
+            is_binary = line.startswith("-\t-\t")
             insertions, deletions, file = line.split('\t')
             insertions = insertions.replace('-', '0')
             deletions = deletions.replace('-', '0')
@@ -372,11 +361,9 @@ class Git:
                 to_path = next(line_iterable)
                 modified_file_name = from_path + " => " + to_path
                 modified_file_path = to_path
-                is_binary = are_binary.get(to_path, None)
             else:
                 modified_file_name = file.split("/")[-1]
                 modified_file_path = file
-                is_binary = are_binary.get(file, None)
 
             result.append({
                 "modified_file_path": modified_file_path,
@@ -1057,9 +1044,7 @@ class Git:
         else:
             command = ["git", "diff", "--numstat", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", ref, "--", filename]  # where 4b825... is a magic SHA which represents the empty tree
         # code, output, error = await execute(command, cwd=top_repo_path)
-        r = await execute(command, cwd=top_repo_path)
-        print(r)
-        code, output, error = r
+        code, output, error = await execute(command, cwd=top_repo_path)
 
         if code != 0:
             err_msg = "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename).lower()

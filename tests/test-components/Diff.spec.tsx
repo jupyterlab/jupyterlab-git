@@ -40,6 +40,6 @@ describe('Diff', () => {
   );
 
   it('should support diffing all files', function() {
-    expect(isDiffSupported('/path/to/script.unk')).toBeTruthy();
+    expect(isDiffSupported('/path/to/script.unk')).toBeFalsy();
   });
 });

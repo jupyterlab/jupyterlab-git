@@ -29,7 +29,7 @@ async def test_detailed_log():
         ]
 
 
-        mock_execute._mock_return_value = maybe_future(
+        mock_execute.return_value = maybe_future(
             (0, "\x00".join(process_output)+"\x00", "")
         )
 
@@ -45,42 +45,49 @@ async def test_detailed_log():
                     "modified_file_name": "notebook_without_spaces.ipynb",
                     "insertion": "10",
                     "deletion": "3",
+                    "is_binary": False,
                 },
                 {
                     "modified_file_path": "Notebook with spaces.ipynb",
                     "modified_file_name": "Notebook with spaces.ipynb",
                     "insertion": "11",
                     "deletion": "4",
+                    "is_binary": False,
                 },
                 {
                     "modified_file_path": "path/notebook_without_spaces.ipynb",
                     "modified_file_name": "notebook_without_spaces.ipynb",
                     "insertion": "12",
                     "deletion": "5",
+                    "is_binary": False,
                 },
                 {
                     "modified_file_path": "path/Notebook with spaces.ipynb",
                     "modified_file_name": "Notebook with spaces.ipynb",
                     "insertion": "13",
                     "deletion": "6",
+                    "is_binary": False,
                 },
                 {
                     "modified_file_path": "path/Notebook with λ.ipynb",
                     "modified_file_name": "Notebook with λ.ipynb",
                     "insertion": "14",
                     "deletion": "1",
+                    "is_binary": False,
                 },
                 {
                     "modified_file_path": "folder2/file with spaces.py",
                     "modified_file_name": "folder1/file with spaces and λ.py => folder2/file with spaces.py",
                     "insertion": "0",
                     "deletion": "0",
+                    "is_binary": False,
                 },
                 {
                     "modified_file_path": "binary_file.png",
                     "modified_file_name": "binary_file.png",
                     "insertion": "0",
                     "deletion": "0",
+                    "is_binary": True,
                 },
             ],
         }

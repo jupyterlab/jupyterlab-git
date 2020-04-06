@@ -122,7 +122,8 @@ export class PlainTextDiff extends React.Component<
    * @param currContent the raw value of the current content
    */
   private _addDiffViewer(prevContent: string, currContent: string) {
-    const mode = Mode.findBest(this.props.path);
+    const mode =
+      Mode.findByFileName(this.props.path) || Mode.findBest(this.props.path);
 
     mergeView(this._mergeViewRef.current, {
       value: currContent,
