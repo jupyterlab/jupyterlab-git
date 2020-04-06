@@ -977,7 +977,7 @@ class Git:
             if curr_ref["special"] == "WORKING":
                 curr_content = self.get_content(filename, top_repo_path)
             elif curr_ref["special"] == "INDEX":
-                is_binary = await self._is_binary(filename, "", top_repo_path)
+                is_binary = await self._is_binary(filename, "INDEX", top_repo_path)
                 if is_binary:
                     raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
                     
@@ -1005,7 +1005,10 @@ class Git:
         -   <https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---numstat>
         -   <https://git-scm.com/docs/git-diff#_other_diff_formats>
         """
-        command = ["git", "diff", "--numstat", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", ref, "--", filename]  # where 4b825... is a magic SHA which represents the empty tree
+        if ref == "INDEX":
+            command = ["git", "diff", "--numstat", "--cached", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", "--", filename]
+        else:
+            command = ["git", "diff", "--numstat", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", ref, "--", filename]  # where 4b825... is a magic SHA which represents the empty tree
         code, output, error = await execute(command, cwd=top_repo_path)
 
         if code != 0:
@@ -1016,10 +1019,7 @@ class Git:
             raise tornado.web.HTTPError(log_message="Error while determining if file is binary or text '{}'.".format(error))
 
         # For binary files, `--numstat` outputs two `-` characters separated by TABs:
-        if output.startswith('-\t-\t'):
-            return True
-
-        return False
+        return output.startswith('-\t-\t')
 
     def remote_add(self, top_repo_path, url, name=DEFAULT_REMOTE_NAME):
         """Handle call to `git remote add` command.
