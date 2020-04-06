@@ -4,7 +4,13 @@ import json
 from typing import List
 from unittest.mock import patch
 
+try:
+    from unittest.mock import AsyncMock  # New in Python 3.8 and used by unittest.mock
+except ImportError:
+    AsyncMock = None
+
 import requests
+import tornado
 from traitlets.config import Config
 
 # Shim for notebook server or jupyter_server
@@ -83,3 +89,10 @@ class FakeContentManager:
     
     def get(self, path=None):
         return {"content": ""}
+
+
+def maybe_future(args):
+    if AsyncMock is None:
+        return tornado.gen.maybe_future(args)
+    else:
+        return args

@@ -1004,12 +1004,26 @@ class Git:
         -   <https://stackoverflow.com/questions/6119956/how-to-determine-if-git-handles-a-file-as-binary-or-as-text/6134127#6134127>
         -   <https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---numstat>
         -   <https://git-scm.com/docs/git-diff#_other_diff_formats>
+
+        Args:
+            filename (str): Filename (relative to the git repository)
+            ref (str): Commit reference or "INDEX" if file is staged
+            top_repo_path (str): Git repository filepath
+
+        Returns:
+            bool: Is file binary?
+        
+        Raises:
+            HTTPError: if git command failed
         """
         if ref == "INDEX":
             command = ["git", "diff", "--numstat", "--cached", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", "--", filename]
         else:
             command = ["git", "diff", "--numstat", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", ref, "--", filename]  # where 4b825... is a magic SHA which represents the empty tree
-        code, output, error = await execute(command, cwd=top_repo_path)
+        # code, output, error = await execute(command, cwd=top_repo_path)
+        r = await execute(command, cwd=top_repo_path)
+        print(r)
+        code, output, error = r
 
         if code != 0:
             err_msg = "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(filename).lower()

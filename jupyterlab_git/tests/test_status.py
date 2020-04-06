@@ -8,7 +8,7 @@ import tornado
 # local lib
 from jupyterlab_git.git import Git
 
-from .testutils import FakeContentManager
+from .testutils import FakeContentManager, maybe_future
 
 
 @pytest.mark.asyncio
@@ -58,7 +58,7 @@ async def test_status(output, expected):
         # Given
         root = "/bin"
         repository = "test_curr_path"
-        mock_execute.return_value = tornado.gen.maybe_future(
+        mock_execute.return_value = maybe_future(
             (0, "\x00".join(output)+"\x00", "")
         )
 
