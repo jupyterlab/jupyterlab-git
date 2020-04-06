@@ -255,15 +255,36 @@ class Git:
                 "message": my_error,
             }
 
+        # Add attribute `is_binary`
+        command = [  # Compare stage to an empty tree see `_is_binary`
+            "git",
+            "diff",
+            "--numstat",
+            "-z",
+            "--cached",
+            "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+        ]
+        text_code, text_output, _ = await execute(
+            command, cwd=os.path.join(self.root_dir, current_path),
+        )
+
+        are_binary = dict()
+        if text_code == 0:
+            for line in filter(lambda l: len(l) > 0, strip_and_split(text_output)):
+                diff, name = line.rsplit(maxsplit=1)
+                are_binary[name] = diff.startswith("-\t-")
+        
         result = []
         line_iterable = (line for line in strip_and_split(my_output) if line)
         for line in line_iterable:
+            name = line[3:]
             result.append({
                 "x": line[0],
                 "y": line[1],
-                "to": line[3:],
+                "to": name,
                 # if file was renamed, next line contains original path
-                "from": next(line_iterable) if line[0]=='R' else line[3:]
+                "from": next(line_iterable) if line[0]=='R' else name,
+                "is_binary": are_binary.get(name, None)
             })
         return {"code": code, "files": result}
 
@@ -324,6 +345,18 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
+        # Test for binary file
+        command = ["git", "diff", "--numstat", "-z", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", selected_hash]
+        text_code, text_output, _ = await execute(
+            command, 
+            cwd=os.path.join(self.root_dir, current_path),
+        )
+        are_binary = dict()
+        if text_code == 0:
+            for line in filter(lambda l: len(l) > 0, strip_and_split(text_output)):
+                diff, name = line.rsplit(maxsplit=1)
+                are_binary[name] = diff.startswith("-\t-")
+
         total_insertions = 0
         total_deletions = 0
         result = []
@@ -339,15 +372,18 @@ class Git:
                 to_path = next(line_iterable)
                 modified_file_name = from_path + " => " + to_path
                 modified_file_path = to_path
+                is_binary = are_binary.get(to_path, None)
             else:
                 modified_file_name = file.split("/")[-1]
                 modified_file_path = file
+                is_binary = are_binary.get(file, None)
 
             result.append({
-                        "modified_file_path": modified_file_path,
-                        "modified_file_name": modified_file_name,
-                        "insertion": insertions,
-                        "deletion": deletions,
+                "modified_file_path": modified_file_path,
+                "modified_file_name": modified_file_name,
+                "insertion": insertions,
+                "deletion": deletions,
+                "is_binary": is_binary
             })
             total_insertions += int(insertions)
             total_deletions += int(deletions)

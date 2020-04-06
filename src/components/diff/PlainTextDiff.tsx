@@ -138,12 +138,3 @@ export class PlainTextDiff extends React.Component<
 
   private _mergeViewRef: React.RefObject<HTMLDivElement>;
 }
-
-/**
- * Checks if a given path is supported language
- *
- * @param path the path of the file
- */
-export function isText(path: string): boolean {
-  return Mode.findBest(path) !== undefined;
-}

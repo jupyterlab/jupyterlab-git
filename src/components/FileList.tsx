@@ -71,7 +71,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               currentRef: { specialRef: 'WORKING' },
               previousRef: { gitRef: 'HEAD' }
             },
-            this.props.renderMime
+            this.props.renderMime,
+            !this.state.selectedFile.is_binary
           );
         }
       });
@@ -89,7 +90,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               currentRef: { specialRef: 'INDEX' },
               previousRef: { gitRef: 'HEAD' }
             },
-            this.props.renderMime
+            this.props.renderMime,
+            !this.state.selectedFile.is_binary
           );
         }
       });
@@ -342,7 +344,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               key={file.to}
               actions={
                 <React.Fragment>
-                  {this._createDiffButton(file.to, 'INDEX')}
+                  {this._createDiffButton(file, 'INDEX')}
                   <ActionButton
                     className={hiddenButtonStyle}
                     iconName={'git-remove'}
@@ -405,7 +407,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                       this.discardChanges(file.to);
                     }}
                   />
-                  {this._createDiffButton(file.to, 'WORKING')}
+                  {this._createDiffButton(file, 'WORKING')}
                   <ActionButton
                     className={hiddenButtonStyle}
                     iconName={'git-add'}
@@ -498,11 +500,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                     this.discardChanges(file.to);
                   }}
                 />
-                {this._createDiffButton(file.to, 'WORKING')}
+                {this._createDiffButton(file, 'WORKING')}
               </React.Fragment>
             );
           } else if (file.status === 'staged') {
-            actions = this._createDiffButton(file.to, 'INDEX');
+            actions = this._createDiffButton(file, 'INDEX');
           }
 
           return (
@@ -526,11 +528,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
   private _createDiffButton(
-    path: string,
+    file: Git.IStatusFile,
     currentRef: ISpecialRef['specialRef']
   ): JSX.Element {
     return (
-      isDiffSupported(path) && (
+      (isDiffSupported(file.to) || !file.is_binary) && (
         <ActionButton
           className={hiddenButtonStyle}
           iconName={'git-diff'}
@@ -538,16 +540,19 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           onClick={async () => {
             try {
               await openDiffView(
-                path,
+                file.to,
                 this.props.model,
                 {
                   previousRef: { gitRef: 'HEAD' },
                   currentRef: { specialRef: currentRef }
                 },
-                this.props.renderMime
+                this.props.renderMime,
+                !file.is_binary
               );
             } catch (reason) {
-              console.error(`Fail to open diff view for ${path}.\n${reason}`);
+              console.error(
+                `Fail to open diff view for ${file.to}.\n${reason}`
+              );
             }
           }}
         />
