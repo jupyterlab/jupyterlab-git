@@ -1043,7 +1043,6 @@ class Git:
             command = ["git", "diff", "--numstat", "--cached", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", "--", filename]
         else:
             command = ["git", "diff", "--numstat", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", ref, "--", filename]  # where 4b825... is a magic SHA which represents the empty tree
-        # code, output, error = await execute(command, cwd=top_repo_path)
         code, output, error = await execute(command, cwd=top_repo_path)
 
         if code != 0:
