@@ -3,6 +3,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { showErrorMessage, showDialog } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { PathExt } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { JSONObject } from '@lumino/coreutils';
 import { GitExtension } from '../model';
@@ -21,6 +22,7 @@ import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
 import { CommitBox } from './CommitBox';
+import { FileBrowser } from '@jupyterlab/filebrowser';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -37,6 +39,7 @@ export interface IGitSessionNodeProps {
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
   settings: ISettingRegistry.ISettings;
+  filebrowser: FileBrowser;
 }
 
 /** A React component for the git extension's main display */
@@ -163,8 +166,14 @@ export class GitPanel extends React.Component<
   render(): React.ReactElement {
     return (
       <div className={panelWrapperClass}>
-        {this._renderToolbar()}
-        {this._renderMain()}
+        {this.state.inGitRepository ? (
+          <React.Fragment>
+            {this._renderToolbar()}
+            {this._renderMain()}
+          </React.Fragment>
+        ) : (
+          this._renderWarning()
+        )}
       </div>
     );
   }
@@ -194,15 +203,12 @@ export class GitPanel extends React.Component<
    * @returns React element
    */
   private _renderMain(): React.ReactElement {
-    if (this.state.inGitRepository) {
-      return (
-        <React.Fragment>
-          {this._renderTabs()}
-          {this.state.tab === 1 ? this._renderHistory() : this._renderChanges()}
-        </React.Fragment>
-      );
-    }
-    return this._renderWarning();
+    return (
+      <React.Fragment>
+        {this._renderTabs()}
+        {this.state.tab === 1 ? this._renderHistory() : this._renderChanges()}
+      </React.Fragment>
+    );
   }
 
   /**
@@ -295,16 +301,42 @@ export class GitPanel extends React.Component<
    * @returns React element
    */
   private _renderWarning(): React.ReactElement {
+    let path = this.props.filebrowser.model.path;
+
     return (
       <div className={warningWrapperClass}>
-        <div>Unable to detect a Git repository.</div>
+        <div>
+          {!!path ? (
+            <span>
+              <b title={path}>{PathExt.basename(path)}</b> is not
+            </span>
+          ) : (
+            'You are not currently in'
+          )}{' '}
+          a git repository. To use git navigate to a local repository, intialize
+          a repository here, or clone an existing repository.
+        </div>
         <button
           className={repoButtonClass}
           onClick={() =>
             this.props.model.commands.execute('filebrowser:toggle-main')
           }
         >
-          Find a repository
+          Open the FileBrowser
+        </button>
+        <br />
+        <button
+          className={repoButtonClass}
+          onClick={() => this.props.model.commands.execute('git:init')}
+        >
+          Initialize a Repository
+        </button>
+        <br />
+        <button
+          className={repoButtonClass}
+          onClick={() => this.props.model.commands.execute('git:clone')}
+        >
+          Clone a Repository
         </button>
       </div>
     );

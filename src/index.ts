@@ -97,7 +97,12 @@ async function activate(
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Create the Git widget sidebar
-    const gitPlugin = new GitWidget(gitExtension, settings, renderMime);
+    const gitPlugin = new GitWidget(
+      gitExtension,
+      settings,
+      renderMime,
+      factory.defaultBrowser
+    );
     gitPlugin.id = 'jp-git-sessions';
     gitPlugin.title.icon = gitIcon;
     gitPlugin.title.caption = 'Git';
