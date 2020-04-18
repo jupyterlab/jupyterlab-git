@@ -147,7 +147,7 @@ export function addCommands(
       }
     }
   });
-  
+
   /** Add git clone command */
   commands.addCommand(CommandIDs.gitClone, {
     label: 'Clone',
