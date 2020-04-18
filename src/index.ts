@@ -18,6 +18,7 @@ import { GitExtension } from './model';
 import { IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
+import { gitIcon } from './style/icons';
 
 export { Git, IGitExtension } from './tokens';
 
@@ -98,7 +99,7 @@ async function activate(
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(gitExtension, settings, renderMime);
     gitPlugin.id = 'jp-git-sessions';
-    gitPlugin.title.iconClass = 'jp-SideBar-tabIcon jp-GitIcon';
+    gitPlugin.title.icon = gitIcon;
     gitPlugin.title.caption = 'Git';
 
     // Let the application restorer track the running panel for restoration of
