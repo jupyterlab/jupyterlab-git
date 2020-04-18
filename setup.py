@@ -78,7 +78,7 @@ setup_args = dict(
         'test': [
             'pytest',
             'pytest-asyncio',
-            'jupyterlab~=1.1',
+            'jupyterlab>=2.0',
         ],
     },
 )
