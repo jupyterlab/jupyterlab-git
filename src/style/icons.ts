@@ -19,24 +19,24 @@ export const insertionsMadeIcon = new LabIcon({
   name: 'git-insertionsMade',
   svgstr: insertionsMadeSvg
 });
-export const addIcon = new JLIcon({
+export const addIcon = new LabIcon({
   name: 'git-add',
   svgstr: addSvg
 });
 
-export const diffIcon = new JLIcon({
+export const diffIcon = new LabIcon({
   name: 'git-diff',
   svgstr: diffSvg
 });
-export const discardIcon = new JLIcon({
+export const discardIcon = new LabIcon({
   name: 'git-discard',
   svgstr: discardSvg
 });
-export const removeIcon = new JLIcon({
+export const removeIcon = new LabIcon({
   name: 'git-remove',
   svgstr: removeSvg
 });
-export const rewindIcon = new JLIcon({
+export const rewindIcon = new LabIcon({
   name: 'git-rewind',
   svgstr: rewindSvg
 });
