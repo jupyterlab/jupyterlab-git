@@ -12,7 +12,7 @@ import {
 } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 import { addCommands, CommandIDs } from './gitMenuCommands';
 import { GitExtension } from './model';
 import { IGitExtension } from './tokens';

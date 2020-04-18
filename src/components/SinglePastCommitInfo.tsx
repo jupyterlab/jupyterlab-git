@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { JLIcon } from '@jupyterlab/ui-components';
+import { fileIcon } from '@jupyterlab/ui-components';
 import { insertionsMadeIcon, deletionsMadeIcon } from '../style/icons';
 import { classes } from 'typestyle/';
 import { GitExtension } from '../model';
@@ -161,8 +161,7 @@ export class SinglePastCommitInfo extends React.Component<
         <div className={commitClass}>
           <div className={commitOverviewNumbersClass}>
             <span>
-              <JLIcon.getReact
-                name="file"
+              <fileIcon.react
                 className={iconClass}
                 tag="span"
                 title="# Files Changed"
