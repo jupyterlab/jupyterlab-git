@@ -962,11 +962,22 @@ class Git:
         Execute git checkout command & return the result.
         """
         cmd = ["git", "checkout", "--", "."]
+        code, output, error = await execute(cmd, cwd=path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code, "message": output.strip()}
+
+    async def merge(self, merge_from, path):
+        """
+        Execute git merge command & return the result.
+        """
+        cmd = ["git", "merge", merge_from]
         code, _, error = await execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
-        return {"code": code}
+        return {"code": 0}
 
     async def commit(self, commit_msg, amend, path):
         """

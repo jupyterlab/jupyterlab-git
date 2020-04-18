@@ -138,6 +138,9 @@ namespace Private {
         case 'git:init':
           status = 'initializing repository...';
           break;
+        case 'git:merge':
+          status = 'merging...';
+          break;
         case 'git:pull':
           status = 'pulling changes...';
           break;

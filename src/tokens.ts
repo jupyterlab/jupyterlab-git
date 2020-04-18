@@ -336,6 +336,18 @@ export interface IGitExtension extends IDisposable {
   log(historyCount?: number): Promise<Git.ILogResult>;
 
   /**
+   * Merge the given branch with the current one.
+   *
+   * @param branch to merge into the current branch
+   * @returns promise which resolves upon merge action
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  merge(branch: string): Promise<Git.IResultWithMessage>;
+
+  /**
    * Fetch changes from a remote repository.
    *
    * @param auth - remote authentication information
