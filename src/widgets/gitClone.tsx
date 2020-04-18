@@ -103,7 +103,7 @@ async function makeApiCall(
  * 1. Invokes a new dialog box with form fields.
  * 2. Invokes the server API with the form input.
  */
-async function doGitClone(model: IGitExtension, path: string): Promise<void> {
+export async function doGitClone(model: IGitExtension, path: string): Promise<void> {
   const result = await showDialog({
     title: 'Clone a repo',
     body: new GitCloneForm(),
