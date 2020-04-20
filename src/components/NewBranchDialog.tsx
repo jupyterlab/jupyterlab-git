@@ -234,6 +234,11 @@ export class NewBranchDialog extends React.Component<
       if (a.name === current) {
         return -1;
       }
+      if (a.name === 'master') {
+        return -1;
+      } else if (b.name === 'master') {
+        return 1;
+      }
       return 0;
     }
   }
