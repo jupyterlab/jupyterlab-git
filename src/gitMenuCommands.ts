@@ -152,6 +152,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitClone, {
     label: 'Clone',
     caption: 'Clone a repository from a URL',
+    isEnabled: () => model.pathRepository === null,
     execute: async () => {
       await doGitClone(model, fileBrowser.model.path);
       fileBrowser.model.refresh();
