@@ -101,7 +101,7 @@ export const listWrapperClass = style({
   maxHeight: '400px',
 
   overflow: 'hidden',
-  overflowY: 'scroll'
+  overflowY: 'auto'
 });
 
 export const listItemClass = style({
