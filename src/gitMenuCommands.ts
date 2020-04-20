@@ -10,6 +10,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
 import { ITerminal } from '@jupyterlab/terminal';
 import { IGitExtension } from './tokens';
+import { doGitClone } from './widgets/gitClone';
 
 /**
  * The command IDs used by the git plugin.
@@ -21,6 +22,7 @@ export namespace CommandIDs {
   export const gitOpenUrl = 'git:open-url';
   export const gitToggleSimpleStaging = 'git:toggle-simple-staging';
   export const gitAddRemote = 'git:add-remote';
+  export const gitClone = 'git:clone';
 }
 
 /**
@@ -143,6 +145,17 @@ export function addCommands(
           showErrorMessage('Error when adding remote repository', error);
         }
       }
+    }
+  });
+
+  /** Add git clone command */
+  commands.addCommand(CommandIDs.gitClone, {
+    label: 'Clone',
+    caption: 'Clone a repository from a URL',
+    isEnabled: () => model.pathRepository === null,
+    execute: async () => {
+      await doGitClone(model, fileBrowser.model.path);
+      fileBrowser.model.refresh();
     }
   });
 }
