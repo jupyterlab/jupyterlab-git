@@ -153,14 +153,14 @@ export const branchIconClass = style({
 });
 
 export const openMenuIconClass = style({
-  backgroundImage: 'var(--jp-icon-caretdown)',
+  backgroundImage: 'var(--jp-icon-caret-down)',
   backgroundSize: '20px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
 });
 
 export const closeMenuIconClass = style({
-  backgroundImage: 'var(--jp-icon-caretup)',
+  backgroundImage: 'var(--jp-icon-caret-up)',
   backgroundSize: '20px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'

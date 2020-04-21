@@ -171,7 +171,7 @@ export class SinglePastCommitInfo extends React.Component<
             <span>
               <insertionsMadeIcon.react
                 className={classes(iconClass, insertionsIconClass)}
-                tag="span"
+                tag="div"
                 title="# Insertions"
               />
               {this.state.insertions}
@@ -179,7 +179,7 @@ export class SinglePastCommitInfo extends React.Component<
             <span>
               <deletionsMadeIcon.react
                 className={classes(iconClass, deletionsIconClass)}
-                tag="span"
+                tag="div"
                 title="# Deletions"
               />
               {this.state.deletions}

@@ -54,7 +54,7 @@ export const changeStageButtonStyle = style({
   backgroundColor: 'transparent',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
-  backgroundSize: '14px',
+  backgroundSize: '20px',
   transition: 'background-color 0.1s ease',
   height: '13px',
   width: '12px',
@@ -63,9 +63,9 @@ export const changeStageButtonStyle = style({
 });
 
 export const caretdownImageStyle = style({
-  backgroundImage: 'var(--jp-image-caretdown)'
+  backgroundImage: 'var(--jp-icon-caret-down)'
 });
 
 export const caretrightImageStyle = style({
-  backgroundImage: 'var(--jp-image-caretright)'
+  backgroundImage: 'var(--jp-icon-caret-right)'
 });
