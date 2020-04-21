@@ -4900,7 +4900,7 @@ natural-compare@^1.4.0:
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha1-Sr6/7tdUHywnrPspvbvRXI1bpPc=
 
-nbdime@~6.0.0:
+nbdime@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/nbdime/-/nbdime-6.0.0.tgz#722f18e06a072a457f831888e7758b0eec54ddd1"
   integrity sha512-N3Ch/5VxnKNYhSh9+dlkM/LRhGMBKUQUhH1BH/nyJoQdmoQyM93fwYbWDuf6ehdk7F3BkoRPHWiw7HrWJJAecA==
