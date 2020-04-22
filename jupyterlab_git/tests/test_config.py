@@ -7,14 +7,14 @@ import tornado
 from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import GitConfigHandler
 
-from .testutils import FakeContentManager, ServerTest
+from .testutils import FakeContentManager, ServerTest, maybe_future
 
 
 class TestConfig(ServerTest):
     @patch("jupyterlab_git.git.execute")
     def test_git_get_config_success(self, mock_execute):
         # Given
-        mock_execute.return_value = tornado.gen.maybe_future(
+        mock_execute.return_value = maybe_future(
             (0, "user.name=John Snow\nuser.email=john.snow@iscoming.com", "")
         )
 
@@ -52,7 +52,7 @@ class TestConfig(ServerTest):
             '";   };f\n'
             'alias.topic-start=!f(){     topic_branch="$1";     git topic-create "$topic_branch";     git topic-push;   };f'
         )
-        mock_execute.return_value = tornado.gen.maybe_future((0, output, ""))
+        mock_execute.return_value = maybe_future((0, output, ""))
 
         # When
         body = {"path": "test_path"}
@@ -92,7 +92,7 @@ class TestConfig(ServerTest):
             '";   };f\n'
             'alias.topic-start=!f(){     topic_branch="$1";     git topic-create "$topic_branch";     git topic-push;   };f'
         )
-        mock_execute.return_value = tornado.gen.maybe_future((0, output, ""))
+        mock_execute.return_value = maybe_future((0, output, ""))
 
         # When
         body = {"path": "test_path"}
@@ -120,7 +120,7 @@ class TestConfig(ServerTest):
     @patch("jupyterlab_git.git.execute")
     def test_git_set_config_success(self, mock_execute):
         # Given
-        mock_execute.return_value = tornado.gen.maybe_future((0, "", ""))
+        mock_execute.return_value = maybe_future((0, "", ""))
 
         # When
         body = {

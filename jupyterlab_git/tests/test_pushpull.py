@@ -6,7 +6,7 @@ import tornado
 
 from jupyterlab_git.git import Git
 
-from .testutils import FakeContentManager
+from .testutils import FakeContentManager, maybe_future
 
 
 @pytest.mark.asyncio
@@ -14,7 +14,7 @@ async def test_git_pull_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = tornado.gen.maybe_future(
+            mock_execute.return_value = maybe_future(
                 (1, "output", "Authentication failed")
             )
 
@@ -37,7 +37,7 @@ async def test_git_pull_with_conflict_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = tornado.gen.maybe_future((1, "", "Automatic merge failed; fix conflicts and then commit the result."))
+            mock_execute.return_value = maybe_future((1, "", "Automatic merge failed; fix conflicts and then commit the result."))
 
             # When
             actual_response = await Git(FakeContentManager("/bin")).pull("test_curr_path")
@@ -58,7 +58,7 @@ async def test_git_pull_with_auth_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
-            mock_execute_with_authentication.return_value = tornado.gen.maybe_future(
+            mock_execute_with_authentication.return_value = maybe_future(
                 (
                     1,
                     "",
@@ -92,7 +92,7 @@ async def test_git_pull_success():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = tornado.gen.maybe_future((0, "output", ""))
+            mock_execute.return_value = maybe_future((0, "output", ""))
 
             # When
             actual_response = await Git(FakeContentManager("/bin")).pull(
@@ -114,7 +114,7 @@ async def test_git_pull_with_auth_success():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
-            mock_execute_with_authentication.return_value = tornado.gen.maybe_future(
+            mock_execute_with_authentication.return_value = maybe_future(
                 (0, "", "output")
             )
 
@@ -140,7 +140,7 @@ async def test_git_pull_with_auth_success_and_conflict_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
-            mock_execute_with_authentication.return_value = tornado.gen.maybe_future((1, "output", "Automatic merge failed; fix conflicts and then commit the result."))
+            mock_execute_with_authentication.return_value = maybe_future((1, "output", "Automatic merge failed; fix conflicts and then commit the result."))
 
             # When
             auth = {
@@ -167,7 +167,7 @@ async def test_git_push_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = tornado.gen.maybe_future(
+            mock_execute.return_value = maybe_future(
                 (1, "output", "Authentication failed")
             )
 
@@ -191,7 +191,7 @@ async def test_git_push_with_auth_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
-            mock_execute_with_authentication.return_value = tornado.gen.maybe_future(
+            mock_execute_with_authentication.return_value = maybe_future(
                 (
                     1,
                     "",
@@ -225,7 +225,7 @@ async def test_git_push_success():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = tornado.gen.maybe_future(
+            mock_execute.return_value = maybe_future(
                 (0, "output", "does not matter")
             )
 
@@ -249,7 +249,7 @@ async def test_git_push_with_auth_success():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
-            mock_execute_with_authentication.return_value = tornado.gen.maybe_future(
+            mock_execute_with_authentication.return_value = maybe_future(
                 (0, "", "does not matter")
             )
 

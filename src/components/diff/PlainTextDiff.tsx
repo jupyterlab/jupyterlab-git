@@ -122,7 +122,8 @@ export class PlainTextDiff extends React.Component<
    * @param currContent the raw value of the current content
    */
   private _addDiffViewer(prevContent: string, currContent: string) {
-    const mode = Mode.findBest(this.props.path);
+    const mode =
+      Mode.findByFileName(this.props.path) || Mode.findBest(this.props.path);
 
     mergeView(this._mergeViewRef.current, {
       value: currContent,
@@ -137,13 +138,4 @@ export class PlainTextDiff extends React.Component<
   }
 
   private _mergeViewRef: React.RefObject<HTMLDivElement>;
-}
-
-/**
- * Checks if a given path is supported language
- *
- * @param path the path of the file
- */
-export function isText(path: string): boolean {
-  return Mode.findBest(path) !== undefined;
 }

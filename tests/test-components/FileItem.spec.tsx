@@ -11,6 +11,7 @@ describe('FileItem', () => {
       y: 'M',
       to: 'some/file/path/file-name',
       from: '',
+      is_binary: null,
       status: null
     },
     model: null,

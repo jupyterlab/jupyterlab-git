@@ -255,15 +255,36 @@ class Git:
                 "message": my_error,
             }
 
+        # Add attribute `is_binary`
+        command = [  # Compare stage to an empty tree see `_is_binary`
+            "git",
+            "diff",
+            "--numstat",
+            "-z",
+            "--cached",
+            "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+        ]
+        text_code, text_output, _ = await execute(
+            command, cwd=os.path.join(self.root_dir, current_path),
+        )
+
+        are_binary = dict()
+        if text_code == 0:
+            for line in filter(lambda l: len(l) > 0, strip_and_split(text_output)):
+                diff, name = line.rsplit("\t", maxsplit=1)
+                are_binary[name] = diff.startswith("-\t-")
+        
         result = []
         line_iterable = (line for line in strip_and_split(my_output) if line)
         for line in line_iterable:
+            name = line[3:]
             result.append({
                 "x": line[0],
                 "y": line[1],
-                "to": line[3:],
+                "to": name,
                 # if file was renamed, next line contains original path
-                "from": next(line_iterable) if line[0]=='R' else line[3:]
+                "from": next(line_iterable) if line[0]=='R' else name,
+                "is_binary": are_binary.get(name, None)
             })
         return {"code": code, "files": result}
 
@@ -329,6 +350,7 @@ class Git:
         result = []
         line_iterable = iter(strip_and_split(my_output)[1:])
         for line in line_iterable:
+            is_binary = line.startswith("-\t-\t")
             insertions, deletions, file = line.split('\t')
             insertions = insertions.replace('-', '0')
             deletions = deletions.replace('-', '0')
@@ -344,10 +366,11 @@ class Git:
                 modified_file_path = file
 
             result.append({
-                        "modified_file_path": modified_file_path,
-                        "modified_file_name": modified_file_name,
-                        "insertion": insertions,
-                        "deletion": deletions,
+                "modified_file_path": modified_file_path,
+                "modified_file_name": modified_file_name,
+                "insertion": insertions,
+                "deletion": deletions,
+                "is_binary": is_binary
             })
             total_insertions += int(insertions)
             total_deletions += int(deletions)
@@ -977,7 +1000,7 @@ class Git:
             if curr_ref["special"] == "WORKING":
                 curr_content = self.get_content(filename, top_repo_path)
             elif curr_ref["special"] == "INDEX":
-                is_binary = await self._is_binary(filename, "", top_repo_path)
+                is_binary = await self._is_binary(filename, "INDEX", top_repo_path)
                 if is_binary:
                     raise tornado.web.HTTPError(log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8.")
                     
@@ -1004,8 +1027,22 @@ class Git:
         -   <https://stackoverflow.com/questions/6119956/how-to-determine-if-git-handles-a-file-as-binary-or-as-text/6134127#6134127>
         -   <https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---numstat>
         -   <https://git-scm.com/docs/git-diff#_other_diff_formats>
+
+        Args:
+            filename (str): Filename (relative to the git repository)
+            ref (str): Commit reference or "INDEX" if file is staged
+            top_repo_path (str): Git repository filepath
+
+        Returns:
+            bool: Is file binary?
+        
+        Raises:
+            HTTPError: if git command failed
         """
-        command = ["git", "diff", "--numstat", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", ref, "--", filename]  # where 4b825... is a magic SHA which represents the empty tree
+        if ref == "INDEX":
+            command = ["git", "diff", "--numstat", "--cached", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", "--", filename]
+        else:
+            command = ["git", "diff", "--numstat", "4b825dc642cb6eb9a060e54bf8d69288fbee4904", ref, "--", filename]  # where 4b825... is a magic SHA which represents the empty tree
         code, output, error = await execute(command, cwd=top_repo_path)
 
         if code != 0:
@@ -1016,10 +1053,7 @@ class Git:
             raise tornado.web.HTTPError(log_message="Error while determining if file is binary or text '{}'.".format(error))
 
         # For binary files, `--numstat` outputs two `-` characters separated by TABs:
-        if output.startswith('-\t-\t'):
-            return True
-
-        return False
+        return output.startswith('-\t-\t')
 
     def remote_add(self, top_repo_path, url, name=DEFAULT_REMOTE_NAME):
         """Handle call to `git remote add` command.
