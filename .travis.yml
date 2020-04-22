@@ -11,15 +11,15 @@ install: pip install --upgrade --upgrade-strategy=eager pytest pytest-asyncio "j
 script:
   # Build the sdist (identical to what will be uploaded to eg pypi on release)
   - python setup.py sdist
+  # Linter checks
+  - jlpm run eslint-check
+
   # Install the extension from the sdist ensuring the cache is unused
   - pip install jupyterlab_git[test] --pre --no-index --find-links=dist --no-deps --no-cache-dir -v
   # Install the extension dependencies based on the current setup.py
   - pip install jupyterlab_git[test]
   # Log the current state of jupyterlab's extensions
   - jupyter labextension list
-
-  # Do a tslint check
-  - jlpm run lint
 
   # Rebuild jupyterlab to include our extension
   - jupyter lab build

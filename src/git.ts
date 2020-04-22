@@ -14,7 +14,7 @@ export const AUTH_ERROR_MESSAGES = [
 export function httpGitRequest(
   url: string,
   method: string,
-  request: Object | null
+  request: Record<string, any> | null
 ): Promise<Response> {
   let fullRequest: RequestInit;
   if (request === null) {
@@ -28,7 +28,7 @@ export function httpGitRequest(
     };
   }
 
-  let setting = ServerConnection.makeSettings();
-  let fullUrl = URLExt.join(setting.baseUrl, url);
+  const setting = ServerConnection.makeSettings();
+  const fullUrl = URLExt.join(setting.baseUrl, url);
   return ServerConnection.makeRequest(fullUrl, fullRequest, setting);
 }

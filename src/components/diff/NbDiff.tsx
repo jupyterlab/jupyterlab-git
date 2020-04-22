@@ -196,9 +196,9 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
               });
             } else {
               // Handle response
-              let base = data.base;
-              let diff = data.diff;
-              let nbdModel = new NotebookDiffModel(base, diff);
+              const base = data.base;
+              const diff = data.diff;
+              const nbdModel = new NotebookDiffModel(base, diff);
               this.setState({
                 nbdModel: nbdModel
               });
