@@ -14,6 +14,7 @@ module.exports = {
     plugins: ['@typescript-eslint'],
     rules: {
       '@typescript-eslint/camelcase': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/interface-name-prefix': [
         'error',
         { prefixWithI: 'always' }

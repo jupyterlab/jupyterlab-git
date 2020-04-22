@@ -76,7 +76,7 @@ export class GitPullPushDialog extends Widget {
         ).indexOf(true) > -1
       ) {
         this.handleError(response.message);
-        this.parent!.parent!.close();
+        this.parent!.parent!.close(); // eslint-disable-line @typescript-eslint/no-non-null-assertion
       } else {
         this.handleError(response.message);
       }
