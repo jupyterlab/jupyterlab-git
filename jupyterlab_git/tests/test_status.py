@@ -59,7 +59,7 @@ async def test_status(output, expected):
         root = "/bin"
         repository = "test_curr_path"
         mock_execute.return_value = tornado.gen.maybe_future(
-            (0, "\x00".join(output), "")
+            (0, "\x00".join(output)+"\x00", "")
         )
 
         # When
