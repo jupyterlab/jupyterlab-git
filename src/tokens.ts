@@ -374,6 +374,7 @@ export namespace Git {
     y: string;
     to: string;
     from: string;
+    is_binary: boolean | null;
   }
 
   /**
@@ -410,6 +411,7 @@ export namespace Git {
     modified_file_name: string;
     insertion: string;
     deletion: string;
+    is_binary: boolean | null;
   }
 
   /** Interface for GitDetailedLog request result,

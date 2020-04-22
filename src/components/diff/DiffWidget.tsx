@@ -15,15 +15,16 @@ import { GitExtension } from '../../model';
  * @param shell The JupyterLab shell instance
  * @param diffContext the context in which the diff is being requested
  * @param renderMime the renderMime registry instance from the
- * @param topRepoPath the Git repo root path.
+ * @param isText Is the file of textual type?
  */
 export async function openDiffView(
   filePath: string,
   model: GitExtension,
   diffContext: IDiffContext,
-  renderMime: IRenderMimeRegistry
+  renderMime: IRenderMimeRegistry,
+  isText = false
 ) {
-  if (isDiffSupported(filePath)) {
+  if (isDiffSupported(filePath) || isText) {
     const id = `nbdiff-${filePath}-${getRefValue(diffContext.currentRef)}`;
     let mainAreaItems = model.shell.widgets('main');
     let mainAreaItem = mainAreaItems.next();
