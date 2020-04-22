@@ -302,12 +302,12 @@ export class GitPanel extends React.Component<
    * @returns React element
    */
   private _renderWarning(): React.ReactElement {
-    let path = this.props.filebrowser.model.path;
+    const path = this.props.filebrowser.model.path;
 
     return (
       <div className={warningWrapperClass}>
         <div className={warningTextClass}>
-          {!!path ? (
+          {path ? (
             <React.Fragment>
               <b title={path}>{PathExt.basename(path)}</b> is not
             </React.Fragment>
