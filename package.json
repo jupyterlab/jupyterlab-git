@@ -20,9 +20,9 @@
     "clean:labextension": "rimraf jupyterlab_git/labextension",
     "clean:slate": "jlpm clean:more && jlpm clean:labextension && rimraf node_modules",
     "contributors:generate": "jlpm run all-contributors generate",
-    "lint": "tslint --project .",
+    "lint": "eslint . --ext .ts,.tsx --fix",
     "test": "jest",
-    "tslint-check": "tslint-config-prettier-check ./tslint.json",
+    "eslint-check": "eslint . --ext .ts,.tsx",
     "watch": "tsc -w"
   },
   "files": [
@@ -80,9 +80,15 @@
     "@types/react": "~16.8.13",
     "@types/react-dom": "~16.0.5",
     "@types/react-textarea-autosize": "^4.3.5",
+    "@typescript-eslint/eslint-plugin": "^2.25.0",
+    "@typescript-eslint/parser": "^2.25.0",
     "all-contributors-cli": "6.14.0",
     "enzyme": "3.7.0",
     "enzyme-adapter-react-16": "1.7.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.19.0",
     "husky": "1.3.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24",
@@ -93,11 +99,7 @@
     "puppeteer": "^1.10.0",
     "rimraf": "^2.6.1",
     "ts-jest": "^24",
-    "tslint": "^5.11.0",
-    "tslint-config-prettier": "1.18.0",
-    "tslint-plugin-prettier": "^2.0.0",
-    "typescript": "~3.5.1",
-    "typescript-tslint-plugin": "^0.5.4"
+    "typescript": "~3.5.1"
   },
   "peerDependencies": {
     "codemirror": "^5.0.0"
@@ -112,7 +114,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "tslint --fix",
+      "eslint . --ext .ts,.tsx --fix",
       "git add"
     ]
   },

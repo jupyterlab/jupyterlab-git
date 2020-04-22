@@ -72,7 +72,9 @@ export function addCommands(
     execute: () => {
       try {
         shell.activateById('jp-git-sessions');
-      } catch (err) {}
+      } catch (err) {
+        console.error('Fail to open Git tab.');
+      }
     }
   });
 
@@ -124,7 +126,7 @@ export function addCommands(
         return;
       }
       let url = args['url'] as string;
-      let name = args['name'] as string;
+      const name = args['name'] as string;
 
       if (!url) {
         const result = await InputDialog.getText({

@@ -138,7 +138,7 @@ function createGitMenu(
   const { commands } = app;
   addCommands(app, gitExtension, fileBrowser, settings);
 
-  let menu = new Menu({ commands });
+  const menu = new Menu({ commands });
   menu.title.label = 'Git';
   [
     CommandIDs.gitUI,
@@ -150,7 +150,7 @@ function createGitMenu(
     menu.addItem({ command });
   });
 
-  let tutorial = new Menu({ commands });
+  const tutorial = new Menu({ commands });
   tutorial.title.label = ' Tutorial ';
   RESOURCES.map(args => {
     tutorial.addItem({
