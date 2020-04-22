@@ -23,7 +23,7 @@ export class GitExtension implements IGitExtension {
     app: JupyterFrontEnd = null,
     settings?: ISettingRegistry.ISettings
   ) {
-    const model = this;
+    const self = this;
     this._app = app;
     this._settings = settings || null;
 
@@ -49,7 +49,7 @@ export class GitExtension implements IGitExtension {
       interval = DEFAULT_REFRESH_INTERVAL;
     }
     const poll = new Poll({
-      factory: () => model.refresh(),
+      factory: () => self.refresh(),
       frequency: {
         interval: interval,
         backoff: true,
@@ -259,7 +259,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/add_all_unstaged', 'POST', {
+      const response = await httpGitRequest('/git/add_all_unstaged', 'POST', {
         top_repo_path: path
       });
       if (response.status !== 200) {
@@ -294,7 +294,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/add_all_untracked', 'POST', {
+      const response = await httpGitRequest('/git/add_all_untracked', 'POST', {
         top_repo_path: path
       });
       if (response.status !== 200) {
@@ -353,7 +353,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/remote/add', 'POST', {
+      const response = await httpGitRequest('/git/remote/add', 'POST', {
         top_repo_path: path,
         url,
         name
@@ -374,7 +374,7 @@ export class GitExtension implements IGitExtension {
    * @param historyCount: Optional number of commits to get from git log
    * @returns Repository history
    */
-  async allHistory(historyCount: number = 25): Promise<Git.IAllHistory> {
+  async allHistory(historyCount = 25): Promise<Git.IAllHistory> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -386,7 +386,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/all_history', 'POST', {
+      const response = await httpGitRequest('/git/all_history', 'POST', {
         current_path: path,
         history_count: historyCount
       });
@@ -448,7 +448,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/checkout', 'POST', body);
+      const response = await httpGitRequest('/git/checkout', 'POST', body);
       if (response.status !== 200) {
         return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
@@ -480,13 +480,13 @@ export class GitExtension implements IGitExtension {
     auth?: Git.IAuth
   ): Promise<Git.ICloneResult> {
     try {
-      let obj: Git.IGitClone = {
+      const obj: Git.IGitClone = {
         current_path: path,
         clone_url: url,
         auth
       };
 
-      let response = await httpGitRequest('/git/clone', 'POST', obj);
+      const response = await httpGitRequest('/git/clone', 'POST', obj);
       if (response.status !== 200) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
@@ -518,7 +518,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/commit', 'POST', {
+      const response = await httpGitRequest('/git/commit', 'POST', {
         commit_msg: message,
         top_repo_path: path
       });
@@ -558,10 +558,10 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let method = 'POST';
-      let body = { path, options };
+      const method = 'POST';
+      const body = { path, options };
 
-      let response = await httpGitRequest('/git/config', method, body);
+      const response = await httpGitRequest('/git/config', method, body);
 
       if (!response.ok) {
         const jsonData = await response.json();
@@ -596,7 +596,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/delete_commit', 'POST', {
+      const response = await httpGitRequest('/git/delete_commit', 'POST', {
         commit_id: commitId,
         top_repo_path: path
       });
@@ -630,7 +630,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/detailed_log', 'POST', {
+      const response = await httpGitRequest('/git/detailed_log', 'POST', {
         selected_hash: hash,
         current_path: path
       });
@@ -682,7 +682,7 @@ export class GitExtension implements IGitExtension {
    */
   async init(path: string): Promise<Response> {
     try {
-      let response = await httpGitRequest('/git/init', 'POST', {
+      const response = await httpGitRequest('/git/init', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
@@ -701,7 +701,7 @@ export class GitExtension implements IGitExtension {
    *
    * @param historyCount: Optional number of commits to get from git log
    */
-  async log(historyCount: number = 25): Promise<Git.ILogResult> {
+  async log(historyCount = 25): Promise<Git.ILogResult> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -713,7 +713,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/log', 'POST', {
+      const response = await httpGitRequest('/git/log', 'POST', {
         current_path: path,
         history_count: historyCount
       });
@@ -752,7 +752,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let obj: Git.IPushPull = {
+      const obj: Git.IPushPull = {
         current_path: path,
         auth,
         cancel_on_conflict: this._settings
@@ -760,7 +760,7 @@ export class GitExtension implements IGitExtension {
           : false
       };
 
-      let response = await httpGitRequest('/git/pull', 'POST', obj);
+      const response = await httpGitRequest('/git/pull', 'POST', obj);
       if (response.status !== 200) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
@@ -787,12 +787,12 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let obj: Git.IPushPull = {
+      const obj: Git.IPushPull = {
         current_path: path,
         auth
       };
 
-      let response = await httpGitRequest('/git/push', 'POST', obj);
+      const response = await httpGitRequest('/git/push', 'POST', obj);
       if (response.status !== 200) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
@@ -845,7 +845,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/status', 'POST', {
+      const response = await httpGitRequest('/git/status', 'POST', {
         current_path: path
       });
       const data = await response.json();
@@ -890,7 +890,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/reset', 'POST', {
+      const response = await httpGitRequest('/git/reset', 'POST', {
         reset_all: filename === undefined,
         filename: filename === undefined ? null : filename,
         top_repo_path: path
@@ -915,7 +915,7 @@ export class GitExtension implements IGitExtension {
    *
    * @returns a promise that resolves when the request is complete.
    */
-  async resetToCommit(commitId: string = ''): Promise<Response> {
+  async resetToCommit(commitId = ''): Promise<Response> {
     await this.ready;
     const path = this.pathRepository;
 
@@ -931,7 +931,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/reset_to_commit', 'POST', {
+      const response = await httpGitRequest('/git/reset_to_commit', 'POST', {
         commit_id: commitId,
         top_repo_path: path
       });
@@ -953,7 +953,7 @@ export class GitExtension implements IGitExtension {
    */
   async showPrefix(path: string): Promise<Git.IShowPrefixResult> {
     try {
-      let response = await httpGitRequest('/git/show_prefix', 'POST', {
+      const response = await httpGitRequest('/git/show_prefix', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
@@ -969,7 +969,7 @@ export class GitExtension implements IGitExtension {
   /** Make request for top level path of repository 'path' */
   async showTopLevel(path: string): Promise<Git.IShowTopLevelResult> {
     try {
-      let response = await httpGitRequest('/git/show_top_level', 'POST', {
+      const response = await httpGitRequest('/git/show_top_level', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
@@ -999,7 +999,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      let response = await httpGitRequest('/git/branch', 'POST', {
+      const response = await httpGitRequest('/git/branch', 'POST', {
         current_path: path
       });
       if (response.status !== 200) {
@@ -1078,7 +1078,7 @@ export class GitExtension implements IGitExtension {
 export class BranchMarker implements Git.IBranchMarker {
   constructor(private _refresh: () => void) {}
 
-  add(fname: string, mark: boolean = true) {
+  add(fname: string, mark = true) {
     if (!(fname in this._marks)) {
       this.set(fname, mark);
     }
@@ -1109,7 +1109,7 @@ export class Markers {
       return this._branchMarkers[key];
     }
 
-    let marker = new BranchMarker(this._refresh);
+    const marker = new BranchMarker(this._refresh);
     this._branchMarkers[key] = marker;
     return marker;
   }

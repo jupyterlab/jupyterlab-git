@@ -198,7 +198,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   discardAllUnstagedFiles = async () => {
     const result = await showDialog({
       title: 'Discard all changes',
-      body: `Are you sure you want to permanently discard changes to all files? This action cannot be undone.`,
+      body:
+        'Are you sure you want to permanently discard changes to all files? This action cannot be undone.',
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
     });
     if (result.button.accept) {
@@ -214,7 +215,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   discardAllChanges = async () => {
     const result = await showDialog({
       title: 'Discard all changes',
-      body: `Are you sure you want to permanently discard changes to all files? This action cannot be undone.`,
+      body:
+        'Are you sure you want to permanently discard changes to all files? This action cannot be undone.',
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
     });
     if (result.button.accept) {

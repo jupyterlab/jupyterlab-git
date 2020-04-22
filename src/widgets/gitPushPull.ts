@@ -76,7 +76,7 @@ export class GitPullPushDialog extends Widget {
         ).indexOf(true) > -1
       ) {
         this.handleError(response.message);
-        this.parent!.parent!.close();
+        this.parent!.parent!.close(); // eslint-disable-line @typescript-eslint/no-non-null-assertion
       } else {
         this.handleError(response.message);
       }
@@ -86,7 +86,7 @@ export class GitPullPushDialog extends Widget {
   }
 
   private handleError(
-    message: string = 'Unexpected failure. Please check your Jupyter server logs for more details.'
+    message = 'Unexpected failure. Please check your Jupyter server logs for more details.'
   ): void {
     const label = document.createElement('label');
     const text = document.createElement('span');

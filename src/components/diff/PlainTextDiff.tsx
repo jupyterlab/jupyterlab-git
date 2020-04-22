@@ -17,8 +17,6 @@ export interface IPlainTextDiffState {
   errorMessage: string;
 }
 
-export interface IPlainTextDiffProps extends IDiffProps {}
-
 /**
  * A React component to render the diff of a plain text file
  *
@@ -26,10 +24,10 @@ export interface IPlainTextDiffProps extends IDiffProps {}
  * 2. Renders the content using CodeMirror merge addon
  */
 export class PlainTextDiff extends React.Component<
-  IPlainTextDiffProps,
+  IDiffProps,
   IPlainTextDiffState
 > {
-  constructor(props: IPlainTextDiffProps) {
+  constructor(props: IDiffProps) {
     super(props);
     this.state = { errorMessage: null };
     this._mergeViewRef = React.createRef<HTMLDivElement>();
