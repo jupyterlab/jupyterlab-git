@@ -337,11 +337,11 @@
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel-header-icon-opened {
-    background-image: var(--jp-icon-caretup);
+    background-image: var(--jp-icon-caret-up);
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel-header-icon-closed {
-    background-image: var(--jp-icon-caretdown);
+    background-image: var(--jp-icon-caret-down);
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel-header {

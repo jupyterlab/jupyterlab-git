@@ -1,7 +1,7 @@
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { Token, JSONObject } from '@phosphor/coreutils';
-import { IDisposable } from '@phosphor/disposable';
-import { ISignal } from '@phosphor/signaling';
+import { Token, JSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal } from '@lumino/signaling';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 

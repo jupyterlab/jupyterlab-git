@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { DefaultIconReact } from '@jupyterlab/ui-components';
-import { classes } from 'typestyle';
+import { fileIcon } from '@jupyterlab/ui-components';
+import { insertionsMadeIcon, deletionsMadeIcon } from '../style/icons';
+import { classes } from 'typestyle/';
 import { GitExtension } from '../model';
 import { Git } from '../tokens';
 import {
@@ -159,21 +160,27 @@ export class SinglePastCommitInfo extends React.Component<
       <div>
         <div className={commitClass}>
           <div className={commitOverviewNumbersClass}>
-            <span title="# Files Changed">
-              <DefaultIconReact name="file" className={iconClass} />
+            <span>
+              <fileIcon.react
+                className={iconClass}
+                tag="span"
+                title="# Files Changed"
+              />
               {this.state.numFiles}
             </span>
-            <span title="# Insertions">
-              <DefaultIconReact
-                name="git-insertionsMade"
+            <span>
+              <insertionsMadeIcon.react
                 className={classes(iconClass, insertionsIconClass)}
+                tag="div"
+                title="# Insertions"
               />
               {this.state.insertions}
             </span>
-            <span title="# Deletions">
-              <DefaultIconReact
-                name="git-deletionsMade"
+            <span>
+              <deletionsMadeIcon.react
                 className={classes(iconClass, deletionsIconClass)}
+                tag="div"
+                title="# Deletions"
               />
               {this.state.deletions}
             </span>

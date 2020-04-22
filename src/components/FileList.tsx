@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Menu } from '@phosphor/widgets';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { Menu } from '@lumino/widgets';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { fileListWrapperClass } from '../style/FileListStyle';

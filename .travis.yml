@@ -7,7 +7,7 @@ cache:
     - /home/travis/.yarn-cache/
 before_install:
   - nvm install 10
-install: pip install pytest pytest-asyncio "jupyterlab~=1.1"
+install: pip install --upgrade --upgrade-strategy=eager pytest pytest-asyncio "jupyterlab~=2.0"
 script:
   # Build the sdist (identical to what will be uploaded to eg pypi on release)
   - python setup.py sdist

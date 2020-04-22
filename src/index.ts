@@ -3,7 +3,8 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IChangedArgs, ISettingRegistry } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   FileBrowser,
   FileBrowserModel,
@@ -11,14 +12,13 @@ import {
 } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 import { addCommands, CommandIDs } from './gitMenuCommands';
 import { GitExtension } from './model';
-import { registerGitIcons } from './style/icons';
 import { IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
+import { gitIcon } from './style/icons';
 
 export { Git, IGitExtension } from './tokens';
 
@@ -68,9 +68,6 @@ async function activate(
 ): Promise<IGitExtension> {
   let settings: ISettingRegistry.ISettings;
 
-  // Register Git icons with the icon registry
-  registerGitIcons(defaultIconRegistry);
-
   // Get a reference to the default file browser extension
   const filebrowser = factory.defaultBrowser;
 
@@ -102,7 +99,7 @@ async function activate(
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(gitExtension, settings, renderMime);
     gitPlugin.id = 'jp-git-sessions';
-    gitPlugin.title.iconClass = 'jp-SideBar-tabIcon jp-GitIcon';
+    gitPlugin.title.icon = gitIcon;
     gitPlugin.title.caption = 'Git';
 
     // Let the application restorer track the running panel for restoration of

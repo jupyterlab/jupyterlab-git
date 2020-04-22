@@ -77,14 +77,14 @@ export const iconButtonClass = style({
 });
 
 export const expandIconButtonClass = style({
-  backgroundImage: 'var(--jp-icon-caretdown)',
+  backgroundImage: 'var(--jp-icon-caret-down)',
   backgroundSize: '20px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
 });
 
 export const collapseIconButtonClass = style({
-  backgroundImage: 'var(--jp-icon-caretup)',
+  backgroundImage: 'var(--jp-icon-caret-up)',
   backgroundSize: '20px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'

@@ -71,14 +71,14 @@ setup_args = dict(
     ],
     install_requires = [
         'notebook',
-        'nbdime >= 1.1.0, < 2.0.0',
+        'nbdime ~=2.0',
         'pexpect'
     ],
     extras_require = {
         'test': [
             'pytest',
             'pytest-asyncio',
-            'jupyterlab~=1.1',
+            'jupyterlab~=2.0',
         ],
     },
 )

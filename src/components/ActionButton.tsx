@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { classes } from 'typestyle';
+import { LabIcon } from '@jupyterlab/ui-components';
 import { actionButtonStyle } from '../style/ActionButtonStyle';
 
 /**
@@ -44,7 +44,7 @@ export const ActionButton: React.FunctionComponent<IActionButtonProps> = (
       title={props.title}
       onClick={props.onClick}
     >
-      <DefaultIconReact tag="span" name={props.iconName} />
+      <LabIcon.resolveReact icon={props.iconName} />
     </button>
   );
 };

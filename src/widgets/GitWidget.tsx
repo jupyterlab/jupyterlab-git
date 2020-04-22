@@ -1,11 +1,11 @@
 import { ReactWidget } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { GitPanel } from '../components/GitPanel';
 import { GitExtension } from '../model';
 import { gitWidgetStyle } from '../style/GitWidgetStyle';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * A class that exposes the git plugin Widget.

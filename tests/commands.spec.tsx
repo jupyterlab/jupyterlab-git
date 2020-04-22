@@ -4,7 +4,7 @@ import { GitExtension } from '../src/model';
 import { IGitExtension } from '../src/tokens';
 
 import { CommandIDs, addCommands } from '../src/gitMenuCommands';
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
 jest.mock('../src/git');

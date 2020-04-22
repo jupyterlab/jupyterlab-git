@@ -1,4 +1,4 @@
-import { IIconRegistry } from '@jupyterlab/ui-components';
+import { LabIcon } from '@jupyterlab/ui-components';
 
 // icon svg import statements
 import gitSvg from '../../style/images/git-icon.svg';
@@ -10,39 +10,33 @@ import addSvg from '../../style/images/move-file-up.svg';
 import removeSvg from '../../style/images/move-file-down.svg';
 import rewindSvg from '../../style/images/rewind.svg';
 
-export function registerGitIcons(iconRegistry: IIconRegistry) {
-  iconRegistry.addIcon(
-    {
-      name: 'git',
-      svg: gitSvg
-    },
-    {
-      name: 'git-add',
-      svg: addSvg
-    },
-    {
-      name: 'git-deletionsMade',
-      svg: deletionsMadeSvg
-    },
-    {
-      name: 'git-diff',
-      svg: diffSvg
-    },
-    {
-      name: 'git-discard',
-      svg: discardSvg
-    },
-    {
-      name: 'git-insertionsMade',
-      svg: insertionsMadeSvg
-    },
-    {
-      name: 'git-remove',
-      svg: removeSvg
-    },
-    {
-      name: 'git-rewind',
-      svg: rewindSvg
-    }
-  );
-}
+export const gitIcon = new LabIcon({ name: 'git', svgstr: gitSvg });
+export const deletionsMadeIcon = new LabIcon({
+  name: 'git-deletionsMade',
+  svgstr: deletionsMadeSvg
+});
+export const insertionsMadeIcon = new LabIcon({
+  name: 'git-insertionsMade',
+  svgstr: insertionsMadeSvg
+});
+export const addIcon = new LabIcon({
+  name: 'git-add',
+  svgstr: addSvg
+});
+
+export const diffIcon = new LabIcon({
+  name: 'git-diff',
+  svgstr: diffSvg
+});
+export const discardIcon = new LabIcon({
+  name: 'git-discard',
+  svgstr: discardSvg
+});
+export const removeIcon = new LabIcon({
+  name: 'git-remove',
+  svgstr: removeSvg
+});
+export const rewindIcon = new LabIcon({
+  name: 'git-rewind',
+  svgstr: rewindSvg
+});
