@@ -18,6 +18,10 @@ export const warningWrapperClass = style({
   lineHeight: '1.5em'
 });
 
+export const warningTextClass = style({
+  textAlign: 'left'
+});
+
 export const repoButtonClass = style({
   boxSizing: 'border-box',
 

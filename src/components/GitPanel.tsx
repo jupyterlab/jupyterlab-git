@@ -14,6 +14,7 @@ import {
   tabClass,
   tabsClass,
   tabIndicatorClass,
+  warningTextClass,
   warningWrapperClass
 } from '../style/GitPanel';
 import { Git } from '../tokens';
@@ -305,11 +306,11 @@ export class GitPanel extends React.Component<
 
     return (
       <div className={warningWrapperClass}>
-        <div>
+        <div className={warningTextClass}>
           {!!path ? (
-            <span>
+            <React.Fragment>
               <b title={path}>{PathExt.basename(path)}</b> is not
-            </span>
+            </React.Fragment>
           ) : (
             'You are not currently in'
           )}{' '}
