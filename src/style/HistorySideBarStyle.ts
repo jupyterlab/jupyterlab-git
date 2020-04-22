@@ -10,5 +10,5 @@ export const historySideBarStyle = style({
   marginBlockEnd: 0,
   paddingLeft: 0,
 
-  overflowY: 'scroll'
+  overflowY: 'auto'
 });
