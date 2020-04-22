@@ -3,7 +3,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
 import { IDiffContext } from './model';
 import { NBDiff } from './NbDiff';
-import { isText, PlainTextDiff } from './PlainTextDiff';
+import { PlainTextDiff } from './PlainTextDiff';
 
 /**
  * A registry which maintains mappings of file extension to diff provider components.
@@ -18,10 +18,7 @@ const DIFF_PROVIDER_REGISTRY: { [key: string]: typeof React.Component } = {
  * @param path the file path
  */
 export function isDiffSupported(path: string): boolean {
-  return (
-    PathExt.extname(path).toLocaleLowerCase() in DIFF_PROVIDER_REGISTRY ||
-    isText(path)
-  );
+  return PathExt.extname(path).toLocaleLowerCase() in DIFF_PROVIDER_REGISTRY;
 }
 
 /** Diff component properties */
@@ -51,11 +48,14 @@ export function Diff(props: IDiffProps) {
   if (fileExtension in DIFF_PROVIDER_REGISTRY) {
     const DiffProvider = DIFF_PROVIDER_REGISTRY[fileExtension];
     return <DiffProvider {...props} />;
-  } else if (isText(props.path)) {
-    return <PlainTextDiff {...props} />;
   } else {
-    console.log(`Diff is not supported for ${fileExtension} files`);
-    return null;
+    // Fallback to plain text diff
+    try {
+      return <PlainTextDiff {...props} />;
+    } catch (error) {
+      console.log(`Unable to render diff view for ${props.path}:\n${error}`);
+      return null;
+    }
   }
 }
 

@@ -230,7 +230,7 @@ export class SinglePastCommitInfo extends React.Component<
    */
   private _renderFile(file: Git.ICommitModifiedFile): React.ReactElement {
     const path = file.modified_file_path;
-    const flg = isDiffSupported(path);
+    const flg = isDiffSupported(path) || !file.is_binary;
     return (
       <li
         className={commitDetailFileClass}
@@ -330,7 +330,8 @@ export class SinglePastCommitInfo extends React.Component<
               gitRef: self.props.commit.commit
             }
           },
-          self.props.renderMime
+          self.props.renderMime,
+          bool
         );
       } catch (err) {
         console.error(`Failed to open diff view for ${fpath}.\n${err}`);

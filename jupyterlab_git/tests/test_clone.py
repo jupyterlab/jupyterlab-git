@@ -6,7 +6,7 @@ import tornado
 
 from jupyterlab_git.git import Git
 
-from .testutils import FakeContentManager
+from .testutils import FakeContentManager, maybe_future
 
 
 @pytest.mark.asyncio
@@ -14,7 +14,7 @@ async def test_git_clone_success():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = tornado.gen.maybe_future((0, "output", "error"))
+            mock_execute.return_value = maybe_future((0, "output", "error"))
 
             # When
             actual_response = await Git(FakeContentManager("/bin")).clone(
@@ -40,7 +40,7 @@ async def test_git_clone_failure_from_git():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = tornado.gen.maybe_future(
+            mock_execute.return_value = maybe_future(
                 (128, "test_output", "fatal: Not a git repository")
             )
 
@@ -66,7 +66,7 @@ async def test_git_clone_with_auth_success():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_authentication:
             # Given
-            mock_authentication.return_value = tornado.gen.maybe_future((0, "", ""))
+            mock_authentication.return_value = maybe_future((0, "", ""))
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
@@ -95,7 +95,7 @@ async def test_git_clone_with_auth_wrong_repo_url_failure_from_git():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_authentication:
             # Given
-            mock_authentication.return_value = tornado.gen.maybe_future(
+            mock_authentication.return_value = maybe_future(
                 (128, "", "fatal: repository 'ghjkhjkl' does not exist")
             )
 
@@ -129,7 +129,7 @@ async def test_git_clone_with_auth_auth_failure_from_git():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_authentication:
             # Given
-            mock_authentication.return_value = tornado.gen.maybe_future(
+            mock_authentication.return_value = maybe_future(
                 (
                     128,
                     "",

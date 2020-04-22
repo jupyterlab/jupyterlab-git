@@ -190,7 +190,7 @@ describe('IGitExtension', () => {
 
       model.pathRepository = '/path/to/server/repo';
       await model.ready;
-      status = [{ x: '', y: '', from: '', to: '' }];
+      status = [{ x: '', y: '', from: '', to: '', is_binary: null }];
       await model.refreshStatus();
       expect(model.status).toHaveLength(1);
 
@@ -220,7 +220,7 @@ describe('IGitExtension', () => {
 
       model.pathRepository = '/path/to/server/repo';
       await model.ready;
-      status = [{ x: '', y: '', from: '', to: '' }];
+      status = [{ x: '', y: '', from: '', to: '', is_binary: null }];
       await model.refreshStatus();
       await testSignal;
     });
