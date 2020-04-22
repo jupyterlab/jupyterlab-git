@@ -233,6 +233,8 @@ export class NewBranchDialog extends React.Component<
     function comparator(a: Git.IBranch, b: Git.IBranch): number {
       if (a.name === current) {
         return -1;
+      } else if (b.name === current) {
+        return 1;
       }
       return 0;
     }
