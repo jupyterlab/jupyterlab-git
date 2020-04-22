@@ -38,8 +38,8 @@ export function addCommands(
    * Add open terminal in the Git repository
    */
   commands.addCommand(CommandIDs.gitTerminalCommand, {
-    label: 'Open Terminal in Git Repository',
-    caption: 'Open a New Terminal in the Git Repository',
+    label: 'Open Git Repository in Terminal',
+    caption: 'Open a New Terminal to the Git Repository',
     execute: async args => {
       const main = (await commands.execute(
         'terminal:create-new',
