@@ -314,8 +314,8 @@ export class GitPanel extends React.Component<
           ) : (
             'You are not currently in'
           )}{' '}
-          a git repository. To use git navigate to a local repository, intialize
-          a repository here, or clone an existing repository.
+          a Git repository. To use Git, navigate to a local repository,
+          initialize a repository here, or clone an existing repository.
         </div>
         <button
           className={repoButtonClass}
