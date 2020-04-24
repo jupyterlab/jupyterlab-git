@@ -21,6 +21,7 @@ export namespace CommandIDs {
   export const gitInit = 'git:init';
   export const gitOpenUrl = 'git:open-url';
   export const gitToggleSimpleStaging = 'git:toggle-simple-staging';
+  export const gitToggleDoubleClickDiff = 'git:toggle-double-click-diff';
   export const gitAddRemote = 'git:add-remote';
   export const gitClone = 'git:clone';
 }
@@ -112,6 +113,15 @@ export function addCommands(
     isToggled: () => !!settings.composite['simpleStaging'],
     execute: args => {
       settings.set('simpleStaging', !settings.composite['simpleStaging']);
+    }
+  });
+
+  /** add toggle for double click opens diffs */
+  commands.addCommand(CommandIDs.gitToggleDoubleClickDiff, {
+    label: 'Double click opens diff',
+    isToggled: () => !!settings.composite['doubleClickDiff'],
+    execute: args => {
+      settings.set('doubleClickDiff', !settings.composite['doubleClickDiff']);
     }
   });
 
