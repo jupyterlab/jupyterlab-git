@@ -362,6 +362,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               model={this.props.model}
               selected={this._isSelectedFile(file)}
               selectFile={this.updateSelectedFile}
+              onDoubleClick={this._onDoubleClickFactory(file, 'WORKING')}
             />
           );
         })}
@@ -425,6 +426,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               model={this.props.model}
               selected={this._isSelectedFile(file)}
               selectFile={this.updateSelectedFile}
+              onDoubleClick={this._onDoubleClickFactory(file, 'WORKING')}
             />
           );
         })}
@@ -491,6 +493,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       >
         {files.map((file: Git.IStatusFile) => {
           let actions = null;
+          let onDoubleClick = null;
           if (file.status === 'unstaged') {
             actions = (
               <React.Fragment>
@@ -505,8 +508,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 {this._createDiffButton(file, 'WORKING')}
               </React.Fragment>
             );
+            onDoubleClick = this._onDoubleClickFactory(file, 'WORKING');
           } else if (file.status === 'staged') {
             actions = this._createDiffButton(file, 'INDEX');
+            onDoubleClick = this._onDoubleClickFactory(file, 'INDEX');
           }
 
           return (
@@ -516,6 +521,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               file={file}
               markBox={true}
               model={this.props.model}
+              onDoubleClick={onDoubleClick}
             />
           );
         })}
@@ -539,27 +545,47 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           className={hiddenButtonStyle}
           iconName={'git-diff'}
           title={'Diff this file'}
-          onClick={async () => {
-            try {
-              await openDiffView(
-                file.to,
-                this.props.model,
-                {
-                  previousRef: { gitRef: 'HEAD' },
-                  currentRef: { specialRef: currentRef }
-                },
-                this.props.renderMime,
-                !file.is_binary
-              );
-            } catch (reason) {
-              console.error(
-                `Fail to open diff view for ${file.to}.\n${reason}`
-              );
-            }
-          }}
+          onClick={this._openDiffViewFactory(file, currentRef)}
         />
       )
     );
+  }
+
+  private _openDiffViewFactory(
+    file: Git.IStatusFile,
+    currentRef: ISpecialRef['specialRef']
+  ) {
+    const self = this;
+    return genDiff;
+
+    async function genDiff() {
+      try {
+        await openDiffView(
+          file.to,
+          self.props.model,
+          {
+            previousRef: { gitRef: 'HEAD' },
+            currentRef: { specialRef: currentRef }
+          },
+          self.props.renderMime,
+          !file.is_binary
+        );
+      } catch (reason) {
+        console.error(`Fail to open diff view for ${file.to}.\n${reason}`);
+      }
+    }
+  }
+
+  private _onDoubleClickFactory(
+    file: Git.IStatusFile,
+    currentRef: ISpecialRef['specialRef']
+  ) {
+    if (
+      this.props.settings.composite['doubleClickDiff'] &&
+      (isDiffSupported(file.to) || !file.is_binary)
+    ) {
+      return this._openDiffViewFactory(file, currentRef);
+    }
   }
 
   private _contextMenuStaged: Menu;
