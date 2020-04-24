@@ -346,7 +346,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               key={file.to}
               actions={
                 <React.Fragment>
-                  {this._createDiffButton(file, 'INDEX')}
+                  {this._maybeCreateDiffButton(file, 'INDEX')}
                   <ActionButton
                     className={hiddenButtonStyle}
                     iconName={'git-remove'}
@@ -410,7 +410,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                       this.discardChanges(file.to);
                     }}
                   />
-                  {this._createDiffButton(file, 'WORKING')}
+                  {this._maybeCreateDiffButton(file, 'WORKING')}
                   <ActionButton
                     className={hiddenButtonStyle}
                     iconName={'git-add'}
@@ -505,12 +505,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                     this.discardChanges(file.to);
                   }}
                 />
-                {this._createDiffButton(file, 'WORKING')}
+                {this._maybeCreateDiffButton(file, 'WORKING')}
               </React.Fragment>
             );
             onDoubleClick = this._onDoubleClickFactory(file, 'WORKING');
           } else if (file.status === 'staged') {
-            actions = this._createDiffButton(file, 'INDEX');
+            actions = this._maybeCreateDiffButton(file, 'INDEX');
             onDoubleClick = this._onDoubleClickFactory(file, 'INDEX');
           }
 
@@ -530,27 +530,47 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   /**
-   * Creates a button element which is used to request diff of a file.
+   * Creates a button element which, depending on the settings, is used
+   * to either request a diff of the file, or open the file
    *
    * @param path File path of interest
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
-  private _createDiffButton(
+  private _maybeCreateDiffButton(
     file: Git.IStatusFile,
     currentRef: ISpecialRef['specialRef']
   ): JSX.Element {
-    return (
-      (isDiffSupported(file.to) || !file.is_binary) && (
+    if (this.props.settings.composite['doubleClickDiff']) {
+      return (
         <ActionButton
           className={hiddenButtonStyle}
-          iconName={'git-diff'}
-          title={'Diff this file'}
-          onClick={this._openDiffViewFactory(file, currentRef)}
+          iconName={'open-file'}
+          title={'Open this file'}
+          onClick={async () => {
+            openListedFile(file, this.props.model);
+          }}
         />
-      )
-    );
+      );
+    } else {
+      return (
+        (isDiffSupported(file.to) || !file.is_binary) && (
+          <ActionButton
+            className={hiddenButtonStyle}
+            iconName={'git-diff'}
+            title={'Diff this file'}
+            onClick={this._openDiffViewFactory(file, currentRef)}
+          />
+        )
+      );
+    }
   }
 
+  /**
+   * Returns a callback which opens a diff of the file
+   *
+   * @param file
+   * @param currentRef the ref to diff against the git 'HEAD' ref
+   */
   private _openDiffViewFactory(
     file: Git.IStatusFile,
     currentRef: ISpecialRef['specialRef']
@@ -576,6 +596,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   }
 
+  /**
+   * Returns a callback which is invoked upon double clicking a file
+   *
+   * @param file
+   * @param currentRef the ref to diff against the current git 'HEAD' ref
+   */
   private _onDoubleClickFactory(
     file: Git.IStatusFile,
     currentRef: ISpecialRef['specialRef']
