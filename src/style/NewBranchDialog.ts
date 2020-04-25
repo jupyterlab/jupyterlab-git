@@ -257,5 +257,10 @@ export const cancelButtonClass = style({
 });
 
 export const createButtonClass = style({
-  backgroundColor: 'var(--jp-brand-color1)'
+  backgroundColor: 'var(--jp-brand-color1)',
+  $nest: {
+    '&:disabled': {
+      opacity: '0.3'
+    }
+  }
 });

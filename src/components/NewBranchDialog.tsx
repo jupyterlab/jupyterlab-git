@@ -204,6 +204,7 @@ export class NewBranchDialog extends React.Component<
             title="Create a new branch"
             value="Create Branch"
             onClick={this._onCreate}
+            disabled={this.state.name === ''}
           />
         </DialogActions>
       </Dialog>
@@ -397,19 +398,8 @@ export class NewBranchDialog extends React.Component<
    * @param event - event object
    */
   private _onCreate = (): void => {
-    const branch = this.state.name;
-
-    // Close the branch dialog:
-    this.props.onClose();
-
-    // Reset the branch name and filter:
-    this.setState({
-      name: '',
-      filter: ''
-    });
-
     // Create the branch:
-    this._createBranch(branch);
+    this._createBranch(this.state.name);
   };
 
   /**
@@ -418,6 +408,7 @@ export class NewBranchDialog extends React.Component<
    * @param branch - branch name
    */
   private _createBranch(branch: string): void {
+    const self = this;
     const opts = {
       newBranch: true,
       branchname: branch
@@ -436,6 +427,15 @@ export class NewBranchDialog extends React.Component<
     function onResolve(result: any): void {
       if (result.code !== 0) {
         showErrorMessage('Error creating branch', result.message);
+      } else {
+        // Close the branch dialog:
+        self.props.onClose();
+
+        // Reset the branch name and filter:
+        self.setState({
+          name: '',
+          filter: ''
+        });
       }
     }
 
@@ -446,7 +446,10 @@ export class NewBranchDialog extends React.Component<
      * @param err - error
      */
     function onError(err: any): void {
-      showErrorMessage('Error creating branch', err.message);
+      showErrorMessage(
+        'Error creating branch',
+        err.message.replace(/^fatal:/, '')
+      );
     }
   }
 }
