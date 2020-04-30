@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { classes } from 'typestyle';
+import Modal from '@material-ui/core/Modal';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-
 import {
   // NOTE: keep in alphabetical order
   branchIconClass,
@@ -23,6 +24,7 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
+import { fullscreenProgressClass } from '../style/progress';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 import { IGitExtension } from '../tokens';
@@ -115,6 +117,11 @@ export interface IToolbarState {
    * Current branch name.
    */
   branch: string;
+
+  /**
+   * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
+   */
+  suspend: boolean;
 }
 
 /**
@@ -136,7 +143,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       branchMenu: false,
       repoMenu: false,
       repository: repo || '',
-      branch: repo ? this.props.model.currentBranch.name : ''
+      branch: repo ? this.props.model.currentBranch.name : '',
+      suspend: false
     };
   }
 
@@ -165,6 +173,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         {this._renderTopNav()}
         {this._renderRepoMenu()}
         {this._renderBranchMenu()}
+        {this._renderFeedback()}
       </div>
     );
   }
@@ -291,6 +300,22 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   /**
+   * Renders a component to provide UI feedback.
+   *
+   * @returns React element
+   */
+  private _renderFeedback(): React.ReactElement | null {
+    if (this.state.suspend === false) {
+      return null;
+    }
+    return (
+      <Modal open={this.state.suspend}>
+        <CircularProgress className={fullscreenProgressClass} color="inherit" />
+      </Modal>
+    );
+  }
+
+  /**
    * Adds model listeners.
    */
   private _addListeners(): void {
@@ -324,12 +349,21 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Callback invoked upon clicking a button to pull the latest changes.
    *
    * @param event - event object
+   * @returns a promise which resolves upon pulling the latest changes
    */
-  private _onPullClick = (): void => {
-    showGitOperationDialog(this.props.model, Operation.Pull).catch(reason => {
+  private _onPullClick = async (): Promise<void> => {
+    this.setState({
+      suspend: true
+    });
+    try {
+      await showGitOperationDialog(this.props.model, Operation.Pull);
+    } catch (error) {
       console.error(
-        `Encountered an error when pulling changes. Error: ${reason}`
+        `Encountered an error when pulling changes. Error: ${error}`
       );
+    }
+    this.setState({
+      suspend: false
     });
   };
 
@@ -337,12 +371,21 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Callback invoked upon clicking a button to push the latest changes.
    *
    * @param event - event object
+   * @returns a promise which resolves upon pushing the latest changes
    */
-  private _onPushClick = (): void => {
-    showGitOperationDialog(this.props.model, Operation.Push).catch(reason => {
+  private _onPushClick = async (): Promise<void> => {
+    this.setState({
+      suspend: true
+    });
+    try {
+      await showGitOperationDialog(this.props.model, Operation.Push);
+    } catch (error) {
       console.error(
-        `Encountered an error when pushing changes. Error: ${reason}`
+        `Encountered an error when pushing changes. Error: ${error}`
       );
+    }
+    this.setState({
+      suspend: false
     });
   };
 
@@ -374,8 +417,15 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Callback invoked upon clicking a button to refresh a repository.
    *
    * @param event - event object
+   * @returns a promise which resolves upon refreshing a repository
    */
-  private _onRefreshClick = (): void => {
-    this.props.refresh();
+  private _onRefreshClick = async (): Promise<void> => {
+    this.setState({
+      suspend: true
+    });
+    await this.props.refresh();
+    this.setState({
+      suspend: false
+    });
   };
 }
