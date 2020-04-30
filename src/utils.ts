@@ -41,7 +41,11 @@ export function decodeStage(x: string, y: string): Git.Status {
   } else {
     // If file is staged
     if (x !== ' ' && y !== 'D') {
-      return 'staged';
+      if (y !== ' ') {
+        return 'staged-and-unstaged';
+      } else {
+        return 'staged';
+      }
     }
     // If file is unstaged but tracked
     if (y !== ' ') {

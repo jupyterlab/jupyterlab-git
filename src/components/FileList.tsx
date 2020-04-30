@@ -297,6 +297,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           case 'untracked':
             untrackedFiles.push(file);
             break;
+          case 'staged-and-unstaged':
+            stagedFiles.push(file);
+            unstagedFiles.push(file);
+            break;
 
           default:
             break;
@@ -557,14 +561,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           };
 
           // Default value for actions and double click
-          let actions: JSX.Element = (
-            <ActionButton
-              className={hiddenButtonStyle}
-              iconName={'open-file'}
-              title={'Open this file'}
-              onClick={openFile}
-            />
-          );
+          // let actions: JSX.Element = ( <ActionButton
+          //     className={hiddenButtonStyle}
+          //     iconName={'open-file'}
+          //     title={'Open this file'}
+          //     onClick={openFile}
+          //   />
+          // );
           let onDoubleClick = doubleClickDiff
             ? (): void => undefined
             : openFile;
@@ -572,6 +575,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           let diffButton: JSX.Element;
           if (file.status === 'unstaged') {
             diffButton = this._createDiffButton(file, 'WORKING');
+          }
+          let actions = null;
+          if (
+            file.status === 'unstaged' ||
+            file.status === 'staged-and-unstaged'
+          ) {
             actions = (
               <React.Fragment>
                 <ActionButton
