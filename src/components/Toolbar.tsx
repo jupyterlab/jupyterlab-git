@@ -25,6 +25,7 @@ import {
   toolbarNavClass
 } from '../style/Toolbar';
 import { fullscreenProgressClass } from '../style/progress';
+import { sleep } from '../utils';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 import { IGitExtension } from '../tokens';
@@ -423,7 +424,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     this.setState({
       suspend: true
     });
-    await this.props.refresh();
+    await Promise.all([sleep(1000), this.props.refresh()]);
     this.setState({
       suspend: false
     });
