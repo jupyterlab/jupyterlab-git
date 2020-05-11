@@ -32,6 +32,7 @@ jupyter lab build
 
 Once installed, extension behavior can be modified via the following settings which can be set in JupyterLab's advanced settings editor:
 
+-   **cancelPullMergeConflict**: cancel pulling changes from a remote repository if there exists a merge conflict. If set to `true`, when fetching and integrating changes from a remote repository, a conflicting merge is canceled and the working tree left untouched.
 -   **disableBranchWithChanges**: disable all branch operations, such as creating a new branch or switching to a different branch, when there are changed/staged files. When set to `true`, this setting guards against overwriting and/or losing uncommitted changes.
 -   **historyCount**: number of commits shown in the history log, beginning with the most recent. Displaying a larger number of commits can lead to performance degradation, so use caution when modifying this setting.
 -   **refreshInterval**: number of milliseconds between polling the file system for changes. In order to ensure that the UI correctly displays the current repository status, the extension must poll the file system for changes. Longer polling times increase the likelihood that the UI does not reflect the current status; however, longer polling times also incur less performance overhead.
