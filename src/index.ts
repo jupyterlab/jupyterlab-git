@@ -128,9 +128,20 @@ async function activate(
     align: 'left',
     item: statusWidget
   });
-  statusWidget.node.textContent = 'beep boop';
+  gitExtension.eventLogger.connect(onEvent);
 
   return gitExtension;
+
+  /**
+   * Callback invoked upon a model event.
+   *
+   * @private
+   * @param model - extension model
+   * @param event - event data
+   */
+  function onEvent(model: IGitExtension, event: any) {
+    statusWidget.node.textContent = event.data;
+  }
 }
 
 /**

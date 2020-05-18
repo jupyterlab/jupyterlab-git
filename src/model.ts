@@ -73,6 +73,14 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * A signal emitted whenever a model event occurs.
+   */
+  get eventLogger(): ISignal<IGitExtension, any> {
+    // FIXME: more precise typing
+    return this._eventLogger;
+  }
+
+  /**
    * The list of branch in the current repo
    */
   get branches() {
@@ -1070,6 +1078,7 @@ export class GitExtension implements IGitExtension {
     IChangedArgs<string | null>
   >(this);
   private _statusChanged = new Signal<IGitExtension, Git.IStatusFile[]>(this);
+  private _eventLogger = new Signal<IGitExtension, any>(this); // FIXME: more precise typing
 }
 
 export class BranchMarker implements Git.IBranchMarker {
