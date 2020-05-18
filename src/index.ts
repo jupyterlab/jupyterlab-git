@@ -5,6 +5,7 @@ import {
 } from '@jupyterlab/application';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IStatusBar } from '@jupyterlab/statusbar';
 import {
   FileBrowser,
   FileBrowserModel,
@@ -12,7 +13,7 @@ import {
 } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Menu } from '@lumino/widgets';
+import { Menu, Widget } from '@lumino/widgets';
 import { addCommands, CommandIDs } from './gitMenuCommands';
 import { GitExtension } from './model';
 import { IGitExtension } from './tokens';
@@ -43,7 +44,8 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     ILayoutRestorer,
     IFileBrowserFactory,
     IRenderMimeRegistry,
-    ISettingRegistry
+    ISettingRegistry,
+    IStatusBar
   ],
   provides: IGitExtension,
   activate,
@@ -64,7 +66,8 @@ async function activate(
   restorer: ILayoutRestorer,
   factory: IFileBrowserFactory,
   renderMime: IRenderMimeRegistry,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  statusBar: IStatusBar
 ): Promise<IGitExtension> {
   let settings: ISettingRegistry.ISettings;
 
@@ -119,6 +122,13 @@ async function activate(
   }
   // Add a clone button to the file browser extension toolbar
   addCloneButton(gitExtension, factory.defaultBrowser);
+
+  const statusWidget = new Widget();
+  statusBar.registerStatusItem('git-status', {
+    align: 'left',
+    item: statusWidget
+  });
+  statusWidget.node.textContent = 'beep boop';
 
   return gitExtension;
 }

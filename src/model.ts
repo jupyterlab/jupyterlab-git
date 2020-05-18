@@ -169,7 +169,7 @@ export class GitExtension implements IGitExtension {
           }
         })
         .catch(reason => {
-          console.error(`Fail to find git top level for path ${v}.\n${reason}`);
+          console.error(`Fail to find Git top level for path ${v}.\n${reason}`);
         });
 
       void this._readyPromise.then(() => {
@@ -220,7 +220,7 @@ export class GitExtension implements IGitExtension {
         new Response(
           JSON.stringify({
             code: -1,
-            message: 'Not in a git repository.'
+            message: 'Not in a Git repository.'
           })
         )
       );
