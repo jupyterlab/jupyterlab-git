@@ -1,5 +1,5 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-GitIcon",
+  "jupyter.lab.setting-icon": "git",
   "jupyter.lab.setting-icon-label": "Git",
   "title": "Git",
   "description": "jupyterlab-git settings.",
