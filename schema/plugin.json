@@ -7,8 +7,8 @@
   "properties": {
     "blockWhileCommandExecutes": {
       "type": "boolean",
-      "title": "Suspend interaction until commands finish",
-      "description": "Suspend JupyterLab interaction until Git commands (e.g., commit, pull, reset, revert) finish executing. Setting this to true helps mitigate potential race conditions leading to data loss, conflicts, and a broken Git history. Unless running a slow network, UI suspension should not interfere with standard workflows. Setting this to false allows for actions to trigger multiple concurrent Git actions.",
+      "title": "Suspend user interaction until commands finish",
+      "description": "Suspend JupyterLab user interaction until Git commands (e.g., commit, pull, reset, revert) finish executing. Setting this to true helps mitigate potential race conditions leading to data loss, conflicts, and a broken Git history. Unless running a slow network, UI suspension should not interfere with standard workflows. Setting this to false allows for actions to trigger multiple concurrent Git actions.",
       "default": true
     },
     "cancelPullMergeConflict": {
