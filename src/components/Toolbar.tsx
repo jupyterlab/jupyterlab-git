@@ -12,6 +12,7 @@ import {
   pushButtonClass,
   refreshButtonClass,
   repoIconClass,
+  tagIconClass,
   toolbarButtonClass,
   toolbarClass,
   toolbarMenuButtonClass,
@@ -27,6 +28,8 @@ import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 import { IGitExtension } from '../tokens';
 import { BranchMenu } from './BranchMenu';
+import { GitTagDialog } from '../widgets/TagList';
+import { GitTagCheckoutDialog } from '../widgets/TagCheckout';
 
 /**
  * Displays an error dialog when a Git operation fails.
@@ -67,6 +70,32 @@ async function showGitOperationDialog(
       buttons: [Dialog.okButton({ label: 'DISMISS' })]
     });
     retry = true;
+  }
+}
+
+async function showTagListDialog(
+  model: IGitExtension,
+  repo: IToolbarState['repository']
+): Promise<void> {
+  const title = `Tags`;
+  let tagsValue = await showDialog({
+    title: title,
+    body: new GitTagDialog(model, repo),
+    buttons: [Dialog.okButton({ label: 'OK' })]
+  });
+  while (!tagsValue.button.accept) {
+    tagsValue = await showDialog({
+      title: title,
+      body: new GitTagDialog(model, repo),
+      buttons: [Dialog.okButton({ label: 'DISMISS' })]
+    });
+  }
+  if (tagsValue.button.accept) {
+    tagsValue = await showDialog({
+      title: title,
+      body: new GitTagCheckoutDialog(model, repo, tagsValue.value),
+      buttons: [Dialog.okButton({ label: 'OK' })]
+    });
   }
 }
 
@@ -195,6 +224,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           )}
           title={'Refresh the repository to detect local and remote changes'}
           onClick={this._onRefreshClick}
+        />
+        <button
+          className={classes(toolbarButtonClass, tagIconClass, 'jp-Icon-16')}
+          title={'Tags'}
+          onClick={this._onTagClick}
         />
       </div>
     );
@@ -377,5 +411,20 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    */
   private _onRefreshClick = (): void => {
     this.props.refresh();
+  };
+
+  /**
+   * Callback invoked upon clicking a button to view tags.
+   *
+   * @param event - event object
+   */
+  private _onTagClick = (): void => {
+    showTagListDialog(this.props.model, this.props.model.pathRepository).catch(
+      reason => {
+        console.error(
+          `Encountered an error when pulling changes. Error: ${reason}`
+        );
+      }
+    );
   };
 }

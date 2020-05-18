@@ -165,3 +165,10 @@ export const closeMenuIconClass = style({
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
 });
+
+export const tagIconClass = style({
+  backgroundImage: 'var(--jp-icon-git-tag)',
+  backgroundSize: '16px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
+});

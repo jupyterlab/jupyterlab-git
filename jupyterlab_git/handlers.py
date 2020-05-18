@@ -542,6 +542,34 @@ class GitServerRootHandler(GitHandler):
         server_root = None if root_dir is None else Path(root_dir).as_posix()
         self.finish(json.dumps({"server_root": server_root}))
 
+class GitTagHandler(GitHandler):
+    """
+        Handler for 'git tag '. Fetches list of all tags in current repository
+    """
+
+    @web.authenticated
+    async def post(self):
+        """
+        POST request handler, fetches all tags in current repository.
+        """
+        current_path = self.get_json_body()["current_path"]
+        result = await self.git.tags(current_path)
+        self.finish(json.dumps(result))
+
+class GitTagCheckoutHandler(GitHandler):
+    """
+        Handler for 'git tag checkout '. Checkout the tag version of repo
+    """
+
+    @web.authenticated
+    async def post(self):
+        """
+        POST request handler, checkout the tag version to a branch.
+        """
+        current_path = self.get_json_body()["current_path"]
+        tag = self.get_json_body()["tag_id"]
+        result = await self.git.tag_checkout(current_path, tag)
+        self.finish(json.dumps(result))
 
 def setup_handlers(web_app):
     """
@@ -576,6 +604,8 @@ def setup_handlers(web_app):
         ("/git/show_top_level", GitShowTopLevelHandler),
         ("/git/status", GitStatusHandler),
         ("/git/upstream", GitUpstreamHandler),
+        ("/git/tags", GitTagHandler),
+        ("/git/tag_checkout", GitTagCheckoutHandler)
     ]
 
     # add the baseurl to our paths

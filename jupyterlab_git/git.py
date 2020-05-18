@@ -1105,3 +1105,41 @@ class Git:
                 "command": " ".join(cmd),
                 "message": my_error.decode("utf-8").strip()
             }
+
+    async def tags(self, current_path):
+        command = ["git", "tag"]
+        params = {"current_path": current_path}
+        code, error = await self.error_messages(params)
+        if code == 128:
+            return {"code": 128, "message": error}
+        code, output, error = await execute(command, cwd=os.path.join(self.root_dir, current_path))
+        output_list = output.split("\n")
+        if code != 0:
+            return {"code": code, "command": " ".join(command), "message": error}
+        return {"code": code, "message": output_list}
+
+    async def tag_checkout(self, current_path, tag):
+        command = ["git", "checkout", "tags/" + tag, "-b", tag + "_branch"]
+        params = {"current_path": current_path, "tag": tag}
+        code, error = await self.error_messages(params)
+        if code == 128:
+            return {"code": 128, "message": error}
+        code, output, error = await execute(command, cwd=os.path.join(self.root_dir, current_path))
+        if code == 0:
+            return {"code": code, "message": "Tag " + tag + " checked out"}
+        else:
+            return {
+                "code": code,
+                "command": " ".join(command),
+                "message": error,
+            }
+
+    async def error_messages(self, parameters):
+        code = 0
+        message = ""
+        for key in parameters:
+            value = parameters[key]
+            if not value:
+                code = 128
+                message = "No ({}) specified".format(key)
+        return code, message

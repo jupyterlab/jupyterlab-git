@@ -18,6 +18,7 @@
   --jp-icon-git-pull: url('./images/git-pull.svg');
   --jp-icon-git-push: url('./images/git-push.svg');
   --jp-icon-git-repo: url('./images/desktop.svg');
+  --jp-icon-git-tag: url('./images/git-tag.svg');
 }
 
 [data-jp-theme-light='false'] {

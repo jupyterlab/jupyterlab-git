@@ -1,10 +1,11 @@
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { Token, JSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
+import { Token, JSONObject } from '@phosphor/coreutils';
+import { IDisposable } from '@phosphor/disposable';
+import { ISignal } from '@phosphor/signaling';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
+// tslint:disable-next-line: variable-name
 export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
 
 /** Interface for extension class */
@@ -18,6 +19,8 @@ export interface IGitExtension extends IDisposable {
    * The current branch
    */
   currentBranch: Git.IBranch;
+
+  taglist: Git.ITag[];
 
   /**
    * A signal emitted when the HEAD of the git repository changes.
@@ -269,6 +272,9 @@ export interface IGitExtension extends IDisposable {
    * @param path Path from which the top Git repository needs to be found
    */
   showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
+
+  tags(path: string): Promise<Git.ITagResult>;
+  tag_checkout(path: string, tag: string): Promise<Git.ICheckoutResult>;
 }
 
 export namespace Git {
@@ -292,7 +298,6 @@ export namespace Git {
       status?: IStatusResult;
     };
   }
-
   /** Interface for GitShowTopLevel request result,
    * has the git root directory inside a repository
    */
@@ -365,6 +370,10 @@ export namespace Git {
     current_branch?: IBranch;
   }
 
+  export interface ITag {
+    name: string;
+  }
+
   /** Interface for GitStatus request result,
    * has the status of each changed file
    */
@@ -373,7 +382,6 @@ export namespace Git {
     y: string;
     to: string;
     from: string;
-    is_binary: boolean | null;
   }
 
   /**
@@ -410,7 +418,6 @@ export namespace Git {
     modified_file_name: string;
     insertion: string;
     deletion: string;
-    is_binary: boolean | null;
   }
 
   /** Interface for GitDetailedLog request result,
@@ -478,6 +485,12 @@ export namespace Git {
   export interface IPushPullResult {
     code: number;
     message?: string;
+  }
+
+  export interface ITagResult {
+    code: number;
+    message?: string;
+    tags?: ITag[];
   }
 
   /**
