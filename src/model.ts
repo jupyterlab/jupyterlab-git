@@ -91,7 +91,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * A signal emitted when the HEAD of the git repository changes.
+   * A signal emitted when the HEAD of the Git repository changes.
    */
   get headChanged(): ISignal<IGitExtension, void> {
     return this._headChanged;
@@ -119,7 +119,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * A signal emitted when the current marking of the git repository changes.
+   * A signal emitted when the current marking of the Git repository changes.
    */
   get markChanged(): ISignal<IGitExtension, void> {
     return this._markChanged;
@@ -179,7 +179,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * A signal emitted when the current git repository changes.
+   * A signal emitted when the current Git repository changes.
    */
   get repositoryChanged(): ISignal<IGitExtension, IChangedArgs<string | null>> {
     return this._repositoryChanged;
@@ -249,7 +249,7 @@ export class GitExtension implements IGitExtension {
         new Response(
           JSON.stringify({
             code: -1,
-            message: 'Not in a git repository.'
+            message: 'Not in a Git repository.'
           })
         )
       );
@@ -284,7 +284,7 @@ export class GitExtension implements IGitExtension {
         new Response(
           JSON.stringify({
             code: -1,
-            message: 'Not in a git repository.'
+            message: 'Not in a Git repository.'
           })
         )
       );
@@ -378,7 +378,7 @@ export class GitExtension implements IGitExtension {
     if (path === null) {
       return Promise.resolve({
         code: -1,
-        message: 'Not in a git repository.'
+        message: 'Not in a Git repository.'
       });
     }
 
@@ -416,7 +416,7 @@ export class GitExtension implements IGitExtension {
     if (path === null) {
       return Promise.resolve({
         code: -1,
-        message: 'Not in a git repository.'
+        message: 'Not in a Git repository.'
       });
     }
 
@@ -508,7 +508,7 @@ export class GitExtension implements IGitExtension {
         new Response(
           JSON.stringify({
             code: -1,
-            message: 'Not in a git repository.'
+            message: 'Not in a Git repository.'
           })
         )
       );
@@ -548,7 +548,7 @@ export class GitExtension implements IGitExtension {
         new Response(
           JSON.stringify({
             code: -1,
-            message: 'Not in a git repository.'
+            message: 'Not in a Git repository.'
           })
         )
       );
@@ -586,7 +586,7 @@ export class GitExtension implements IGitExtension {
         new Response(
           JSON.stringify({
             code: -1,
-            message: 'Not in a git repository.'
+            message: 'Not in a Git repository.'
           })
         )
       );
@@ -622,7 +622,7 @@ export class GitExtension implements IGitExtension {
     if (path === null) {
       return Promise.resolve({
         code: -1,
-        message: 'Not in a git repository.'
+        message: 'Not in a Git repository.'
       });
     }
 
@@ -744,7 +744,7 @@ export class GitExtension implements IGitExtension {
     if (path === null) {
       return Promise.resolve({
         code: -1,
-        message: 'Not in a git repository.'
+        message: 'Not in a Git repository.'
       });
     }
 
@@ -779,7 +779,7 @@ export class GitExtension implements IGitExtension {
     if (path === null) {
       return Promise.resolve({
         code: -1,
-        message: 'Not in a git repository.'
+        message: 'Not in a Git repository.'
       });
     }
 
@@ -880,7 +880,7 @@ export class GitExtension implements IGitExtension {
         new Response(
           JSON.stringify({
             code: -1,
-            message: 'Not in a git repository.'
+            message: 'Not in a Git repository.'
           })
         )
       );
@@ -921,7 +921,7 @@ export class GitExtension implements IGitExtension {
         new Response(
           JSON.stringify({
             code: -1,
-            message: 'Not in a git repository.'
+            message: 'Not in a Git repository.'
           })
         )
       );
@@ -991,7 +991,7 @@ export class GitExtension implements IGitExtension {
     if (path === null) {
       return Promise.resolve({
         code: -1,
-        message: 'Not in a git repository.'
+        message: 'Not in a Git repository.'
       });
     }
 
