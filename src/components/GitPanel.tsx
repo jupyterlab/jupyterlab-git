@@ -184,6 +184,9 @@ export class GitPanel extends React.Component<
         model={this.props.model}
         branching={!disableBranching}
         refresh={this._onRefresh}
+        suspend={
+          this.props.settings.composite['blockWhileCommandExecutes'] as boolean
+        }
       />
     );
   }

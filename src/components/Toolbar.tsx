@@ -88,6 +88,11 @@ export interface IToolbarProps {
   branching: boolean;
 
   /**
+   * Boolean indicating whether to enable UI suspension.
+   */
+  suspend: boolean;
+
+  /**
    * Callback to invoke in order to refresh a repository.
    *
    * @returns promise which refreshes a repository
@@ -306,7 +311,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderFeedback(): React.ReactElement | null {
-    if (this.state.suspend === false) {
+    if (this.props.suspend === false || this.state.suspend === false) {
       return null;
     }
     return (
@@ -347,15 +352,26 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   /**
+   * Sets the suspension state.
+   *
+   * @param bool - boolean indicating whether to suspend UI interaction
+   */
+  private _suspend(bool: boolean): void {
+    if (this.props.suspend) {
+      this.setState({
+        suspend: bool
+      });
+    }
+  }
+
+  /**
    * Callback invoked upon clicking a button to pull the latest changes.
    *
    * @param event - event object
    * @returns a promise which resolves upon pulling the latest changes
    */
   private _onPullClick = async (): Promise<void> => {
-    this.setState({
-      suspend: true
-    });
+    this._suspend(true);
     try {
       await showGitOperationDialog(this.props.model, Operation.Pull);
     } catch (error) {
@@ -363,9 +379,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         `Encountered an error when pulling changes. Error: ${error}`
       );
     }
-    this.setState({
-      suspend: false
-    });
+    this._suspend(false);
   };
 
   /**
@@ -375,9 +389,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns a promise which resolves upon pushing the latest changes
    */
   private _onPushClick = async (): Promise<void> => {
-    this.setState({
-      suspend: true
-    });
+    this._suspend(true);
     try {
       await showGitOperationDialog(this.props.model, Operation.Push);
     } catch (error) {
@@ -385,9 +397,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         `Encountered an error when pushing changes. Error: ${error}`
       );
     }
-    this.setState({
-      suspend: false
-    });
+    this._suspend(false);
   };
 
   /**
@@ -421,12 +431,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns a promise which resolves upon refreshing a repository
    */
   private _onRefreshClick = async (): Promise<void> => {
-    this.setState({
-      suspend: true
-    });
+    this._suspend(true);
     await Promise.all([sleep(1000), this.props.refresh()]);
-    this.setState({
-      suspend: false
-    });
+    this._suspend(false);
   };
 }
