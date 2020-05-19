@@ -141,12 +141,47 @@ async function activate(
    */
   function onEvent(model: IGitExtension, event: string) {
     let status;
-    if (event === 'git:idle') {
-      status = 'idle';
-    } else if (event === 'git:refresh') {
-      status = 'refreshing...';
-    } else {
-      status = 'working...';
+    switch (event) {
+      case 'git:checkout':
+        status = 'checking out...';
+        break;
+      case 'git:clone':
+        status = 'cloning repository...';
+        break;
+      case 'git:commit:create':
+        status = 'committing changes...';
+        break;
+      case 'git:commit:revert':
+        status = 'reverting changes...';
+        break;
+      case 'git:idle':
+        status = 'idle';
+        break;
+      case 'git:init':
+        status = 'initializing repository...';
+        break;
+      case 'git:pull':
+        status = 'pulling changes...';
+        break;
+      case 'git:pushing':
+        status = 'pushing changes...';
+        break;
+      case 'git:refresh':
+        status = 'refreshing...';
+        break;
+      case 'git:reset:changes':
+        status = 'resetting changes...';
+        break;
+      case 'git:reset:hard':
+        status = 'discarding changes...';
+        break;
+      default:
+        if (/git:add:files/.test(event)) {
+          status = 'adding files...';
+        } else {
+          status = 'working...';
+        }
+        break;
     }
     statusWidget.status = status;
   }

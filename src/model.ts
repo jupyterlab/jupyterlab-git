@@ -142,7 +142,7 @@ export class GitExtension implements IGitExtension {
       };
       return Promise.resolve(new Response(JSON.stringify(response)));
     }
-    const tid = this._addTask('git:add:all_unstaged');
+    const tid = this._addTask('git:add:files:all_unstaged');
     try {
       response = await httpGitRequest('/git/add_all_unstaged', 'POST', {
         top_repo_path: path
@@ -178,7 +178,7 @@ export class GitExtension implements IGitExtension {
       };
       return Promise.resolve(new Response(JSON.stringify(response)));
     }
-    const tid = this._addTask('git:add:all_untracked');
+    const tid = this._addTask('git:add:files:all_untracked');
     try {
       response = await httpGitRequest('/git/add_all_untracked', 'POST', {
         top_repo_path: path
@@ -769,7 +769,7 @@ export class GitExtension implements IGitExtension {
       };
       return Promise.resolve(new Response(JSON.stringify(response)));
     }
-    const tid = this._addTask('git:reset:files');
+    const tid = this._addTask('git:reset:changes');
     try {
       response = await httpGitRequest('/git/reset', 'POST', {
         reset_all: filename === undefined,
@@ -812,7 +812,7 @@ export class GitExtension implements IGitExtension {
       };
       return Promise.resolve(new Response(JSON.stringify(response)));
     }
-    const tid = this._addTask('git:reset:to_commit');
+    const tid = this._addTask('git:reset:hard');
     try {
       response = await httpGitRequest('/git/reset_to_commit', 'POST', {
         commit_id: hash,
