@@ -128,7 +128,7 @@ async function activate(
     align: 'left',
     item: statusWidget
   });
-  gitExtension.eventLogger.connect(onEvent);
+  gitExtension.logger.connect(onEvent);
 
   return gitExtension;
 
@@ -140,9 +140,15 @@ async function activate(
    * @param event - event name
    */
   function onEvent(model: IGitExtension, event: string) {
-    if (event === 'refresh') {
-      statusWidget.status = 'refreshing...';
+    let status;
+    if (event === 'git:idle') {
+      status = 'idle';
+    } else if (event === 'git:refresh') {
+      status = 'refreshing...';
+    } else {
+      status = 'working...';
     }
+    statusWidget.status = status;
   }
 }
 
@@ -163,30 +169,8 @@ class StatusWidget extends Widget {
    * Sets the current status.
    */
   set status(text: string) {
-    if (!this._lock) {
-      this.node.textContent = 'Git: ' + text;
-      this.lock();
-    }
+    this.node.textContent = 'Git: ' + text;
   }
-
-  /**
-   * Locks the status widget.
-   */
-  lock(): void {
-    this._lock = new Promise(resolve => this.release());
-  }
-
-  /**
-   * Releases the status widget "lock".
-   */
-  release(): void {
-    this._lock = null;
-  }
-
-  /**
-   * Promise for "locking" the widget (i.e., blocking the widget from displaying new status changes).
-   */
-  private _lock: Promise<void> | null = null;
 }
 
 /**

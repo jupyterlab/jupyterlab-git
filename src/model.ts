@@ -93,27 +93,34 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon adding files to the repository staging area
    */
   async add(...filename: string[]): Promise<Response> {
-    await this.ready;
     const path = this.pathRepository;
+    let response;
 
+    await this.ready;
     if (path === null) {
-      return Promise.resolve(
-        new Response(
-          JSON.stringify({
-            code: -1,
-            message: 'Not in a Git repository.'
-          })
-        )
-      );
+      response = {
+        code: -1,
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(new Response(JSON.stringify(response)));
     }
     const tid = this._addTask('git:add:files');
-    const response = await httpGitRequest('/git/add', 'POST', {
-      add_all: !filename,
-      filename: filename || '',
-      top_repo_path: path
-    });
+    try {
+      response = await httpGitRequest('/git/add', 'POST', {
+        add_all: !filename,
+        filename: filename || '',
+        top_repo_path: path
+      });
+    } catch (err) {
+      this._removeTask(tid);
+      throw new ServerConnection.NetworkError(err);
+    }
     this._removeTask(tid);
 
+    if (response.status !== 200) {
+      const data = await response.json();
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
     this.refreshStatus();
     return Promise.resolve(response);
   }
@@ -124,10 +131,10 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon adding files to the repository staging area
    */
   async addAllUnstaged(): Promise<Response> {
-    await this.ready;
     const path = this.pathRepository;
     let response;
 
+    await this.ready;
     if (path === null) {
       response = {
         code: -1,
@@ -160,9 +167,10 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon adding files to the repository staging area
    */
   async addAllUntracked(): Promise<Response> {
-    await this.ready;
     const path = this.pathRepository;
     let response;
+
+    await this.ready;
     if (path === null) {
       response = {
         code: -1,
@@ -716,10 +724,10 @@ export class GitExtension implements IGitExtension {
       });
     } catch (err) {
       this._removeTask(tid);
-      console.error(err);
 
       // TODO we should notify the user
       this._setStatus([]);
+      console.error(err);
       return;
     }
     this._removeTask(tid);
@@ -1099,8 +1107,8 @@ export class GitExtension implements IGitExtension {
   /**
    * A signal emitted whenever a model event occurs.
    */
-  get eventLogger(): ISignal<IGitExtension, string> {
-    return this._eventLogger;
+  get logger(): ISignal<IGitExtension, string> {
+    return this._logger;
   }
 
   /**
@@ -1197,6 +1205,11 @@ export class GitExtension implements IGitExtension {
       task: task
     });
 
+    // If this task is the only task, broadcast the task...
+    if (this._taskList.length === 1) {
+      this._logger.emit(task);
+    }
+    // Return the task identifier to allow consumers to remove the task once completed:
     return id;
   }
 
@@ -1206,20 +1219,26 @@ export class GitExtension implements IGitExtension {
    * @param id - task identifier
    */
   private _removeTask(task: number): void {
-    let node = this._taskList.first();
+    let node = this._taskList.firstNode;
 
     // Check the first node...
-    if (node.value && node.value.id === task) {
+    if (node && node.value.id === task) {
       this._taskList.removeNode(node);
-      return;
-    }
-    // Walk the task list looking for a task with the provided identifier...
-    while (node.next) {
-      node = node.next;
-      if (node.value && node.value.id === task) {
-        this._taskList.removeNode(node);
-        return;
+    } else {
+      // Walk the task list looking for a task with the provided identifier...
+      while (node.next) {
+        node = node.next;
+        if (node.value && node.value.id === task) {
+          this._taskList.removeNode(node);
+          break;
+        }
       }
+    }
+    // Check for pending tasks and broadcast the oldest pending task...
+    if (this._taskList.length === 0) {
+      this._logger.emit('git:idle');
+    } else {
+      this._logger.emit(this._taskList.first.task);
     }
   }
 
@@ -1256,7 +1275,7 @@ export class GitExtension implements IGitExtension {
     IChangedArgs<string | null>
   >(this);
   private _statusChanged = new Signal<IGitExtension, Git.IStatusFile[]>(this);
-  private _eventLogger = new Signal<IGitExtension, string>(this);
+  private _logger = new Signal<IGitExtension, string>(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {
