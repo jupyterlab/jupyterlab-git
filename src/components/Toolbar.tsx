@@ -315,7 +315,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       return null;
     }
     return (
-      <Modal open={this.state.suspend}>
+      <Modal open={this.state.suspend} onClick={this._onFeedbackModalClick}>
         <CircularProgress className={fullscreenProgressClass} color="inherit" />
       </Modal>
     );
@@ -433,6 +433,15 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   private _onRefreshClick = async (): Promise<void> => {
     this._suspend(true);
     await Promise.all([sleep(1000), this.props.refresh()]);
+    this._suspend(false);
+  };
+
+  /**
+   * Callback invoked upon clicking on the feedback modal.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackModalClick = (): void => {
     this._suspend(false);
   };
 }
