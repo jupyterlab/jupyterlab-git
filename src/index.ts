@@ -13,14 +13,14 @@ import {
 } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Menu, Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 import { addCommands, CommandIDs } from './gitMenuCommands';
 import { GitExtension } from './model';
 import { IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
+import { StatusWidget } from './widgets/StatusWidget';
 import { gitIcon } from './style/icons';
-import { sleep } from './utils';
 export { Git, IGitExtension } from './tokens';
 
 const RESOURCES = [
@@ -123,6 +123,7 @@ async function activate(
   // Add a clone button to the file browser extension toolbar
   addCloneButton(gitExtension, factory.defaultBrowser);
 
+  // Add a status bar widget to provide Git status updates:
   const statusWidget = new StatusWidget();
   statusBar.registerStatusItem('git-status', {
     align: 'left',
@@ -185,62 +186,6 @@ async function activate(
     }
     statusWidget.status = status;
   }
-}
-
-/**
- * Class for creating a status bar widget.
- */
-class StatusWidget extends Widget {
-  /**
-   * Returns a status bar widget.
-   *
-   * @returns widget
-   */
-  constructor() {
-    super();
-  }
-
-  /**
-   * Sets the current status.
-   */
-  set status(text: string) {
-    this._status = text;
-    if (!this._locked) {
-      this._lock();
-      this.refresh();
-    }
-  }
-
-  /**
-   * Refreshes the status widget.
-   */
-  refresh(): void {
-    this.node.textContent = 'Git: ' + this._status;
-  }
-
-  /**
-   * Locks the status widget to prevent updates.
-   *
-   * ## Notes
-   *
-   * -   This is used to throttle updates in order to prevent "flashing" messages.
-   */
-  async _lock(): Promise<void> {
-    this._locked = true;
-    await sleep(500);
-    this._locked = false;
-    this.refresh();
-  }
-
-  /**
-   * Boolean indicating whether the status widget is accepting updates.
-   */
-  private _locked = false;
-
-  /**
-   * Status string.
-   */
-  private _status = '';
 }
 
 /**
