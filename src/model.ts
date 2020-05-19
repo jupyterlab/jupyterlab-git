@@ -738,7 +738,6 @@ export class GitExtension implements IGitExtension {
 
       // TODO we should notify the user
       this._setStatus([]);
-      return;
     }
     this._setStatus(
       (data as Git.IStatusResult).files.map(file => {
