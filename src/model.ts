@@ -93,10 +93,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon adding files to the repository staging area
    */
   async add(...filename: string[]): Promise<Response> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       response = {
         code: -1,
@@ -131,10 +132,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon adding files to the repository staging area
    */
   async addAllUnstaged(): Promise<Response> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       response = {
         code: -1,
@@ -167,10 +169,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon adding files to the repository staging area
    */
   async addAllUntracked(): Promise<Response> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       response = {
         code: -1,
@@ -205,10 +208,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon adding a remote
    */
   async addRemote(url: string, name?: string): Promise<void> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve();
     }
@@ -242,10 +246,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon retrieving the repository commit log
    */
   async allHistory(count = 25): Promise<Git.IAllHistory> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
@@ -286,10 +291,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon performing a checkout
    */
   async checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
@@ -383,10 +389,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon committing file changes
    */
   async commit(message: string): Promise<Response> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       response = {
         code: -1,
@@ -422,10 +429,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon either getting or setting configuration options
    */
   async config(options?: JSONObject): Promise<Response> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       response = {
         code: -1,
@@ -460,10 +468,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon reverting changes
    */
   async revertCommit(message: string, hash: string): Promise<Response> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       response = {
         code: -1,
@@ -498,10 +507,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon retrieving commit information
    */
   async detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
@@ -561,10 +571,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon retrieving commit logs
    */
   async log(count = 25): Promise<Git.ILogResult> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
@@ -597,10 +608,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon fetching changes
    */
   async pull(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
@@ -638,10 +650,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon pushing changes
    */
   async push(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
@@ -709,10 +722,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon refreshing the repository status
    */
   async refreshStatus(): Promise<void> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       this._setStatus([]);
       return Promise.resolve();
@@ -738,6 +752,7 @@ export class GitExtension implements IGitExtension {
 
       // TODO we should notify the user
       this._setStatus([]);
+      return;
     }
     this._setStatus(
       (data as Git.IStatusResult).files.map(file => {
@@ -757,10 +772,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon moving files
    */
   async reset(filename?: string): Promise<Response> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       response = {
         code: -1,
@@ -800,10 +816,11 @@ export class GitExtension implements IGitExtension {
    * @returns promises which resolves upon resetting the repository
    */
   async resetToCommit(hash = ''): Promise<Response> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       response = {
         code: -1,
@@ -1116,10 +1133,11 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon fetching repository branches
    */
   protected async _branch(): Promise<Git.IBranchResult> {
-    const path = this.pathRepository;
     let response;
 
     await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
