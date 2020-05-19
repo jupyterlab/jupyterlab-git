@@ -123,7 +123,7 @@ async function activate(
   // Add a clone button to the file browser extension toolbar
   addCloneButton(gitExtension, factory.defaultBrowser);
 
-  const statusWidget = new Widget();
+  const statusWidget = new StatusWidget();
   statusBar.registerStatusItem('git-status', {
     align: 'left',
     item: statusWidget
@@ -137,11 +137,56 @@ async function activate(
    *
    * @private
    * @param model - extension model
-   * @param event - event data
+   * @param event - event name
    */
-  function onEvent(model: IGitExtension, event: any) {
-    statusWidget.node.textContent = event.data;
+  function onEvent(model: IGitExtension, event: string) {
+    if (event === 'refresh') {
+      statusWidget.status = 'refreshing...';
+    }
   }
+}
+
+/**
+ * Class for creating a status bar widget.
+ */
+class StatusWidget extends Widget {
+  /**
+   * Returns a status bar widget.
+   *
+   * @returns widget
+   */
+  constructor() {
+    super();
+  }
+
+  /**
+   * Sets the current status.
+   */
+  set status(text: string) {
+    if (!this._lock) {
+      this.node.textContent = 'Git: ' + text;
+      this.lock();
+    }
+  }
+
+  /**
+   * Locks the status widget.
+   */
+  lock(): void {
+    this._lock = new Promise(resolve => this.release());
+  }
+
+  /**
+   * Releases the status widget "lock".
+   */
+  release(): void {
+    this._lock = null;
+  }
+
+  /**
+   * Promise for "locking" the widget (i.e., blocking the widget from displaying new status changes).
+   */
+  private _lock: Promise<void> | null = null;
 }
 
 /**
