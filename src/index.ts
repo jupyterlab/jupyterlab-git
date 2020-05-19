@@ -20,7 +20,7 @@ import { IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 import { gitIcon } from './style/icons';
-
+import { sleep } from './utils';
 export { Git, IGitExtension } from './tokens';
 
 const RESOURCES = [
@@ -204,8 +204,43 @@ class StatusWidget extends Widget {
    * Sets the current status.
    */
   set status(text: string) {
-    this.node.textContent = 'Git: ' + text;
+    this._status = text;
+    if (!this._locked) {
+      this._lock();
+      this.refresh();
+    }
   }
+
+  /**
+   * Refreshes the status widget.
+   */
+  refresh(): void {
+    this.node.textContent = 'Git: ' + this._status;
+  }
+
+  /**
+   * Locks the status widget to prevent updates.
+   *
+   * ## Notes
+   *
+   * -   This is used to throttle updates in order to prevent "flashing" messages.
+   */
+  async _lock(): Promise<void> {
+    this._locked = true;
+    await sleep(500);
+    this._locked = false;
+    this.refresh();
+  }
+
+  /**
+   * Boolean indicating whether the status widget is accepting updates.
+   */
+  private _locked = false;
+
+  /**
+   * Status string.
+   */
+  private _status = '';
 }
 
 /**
