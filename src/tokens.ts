@@ -502,7 +502,7 @@ export namespace Git {
   export interface ITag {
     name: string;
   }
-  
+
   export interface ITagResult {
     code: number;
     message?: string;

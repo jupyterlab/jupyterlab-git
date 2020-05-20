@@ -60,6 +60,6 @@ async def test_git_tag_error_messages():
             # Then
             mock_execute.assert_called_once_with(parameters)
 
-            assert "'code': 128" in str(actual_response)
+            assert "128" in actual_response
 
 
