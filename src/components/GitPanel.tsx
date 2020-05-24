@@ -1,5 +1,5 @@
 import { showDialog, showErrorMessage } from '@jupyterlab/apputils';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry, PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import Tab from '@material-ui/core/Tab';
