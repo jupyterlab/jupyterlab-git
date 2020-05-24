@@ -7,29 +7,22 @@ export const panelWrapperClass = style({
   overflowY: 'auto'
 });
 
-export const warningWrapperClass = style({
-  marginTop: '9px',
-  textAlign: 'center',
-
-  /* top | right | bottom | left */
-  padding: '4px 11px 4px 11px!important',
-
-  fontSize: 'var(--jp-ui-font-size1)',
-  lineHeight: '1.5em'
-});
-
 export const warningTextClass = style({
+  fontSize: 'var(--jp-ui-font-size1)',
+  lineHeight: 'var(--jp-content-line-height)',
+  margin: '13px 11px 4px 11px',
   textAlign: 'left'
 });
 
 export const repoButtonClass = style({
+  alignSelf: 'center',
   boxSizing: 'border-box',
 
   height: '2em',
   width: '12em',
   marginTop: '5px',
 
-  color: 'white',
+  color: 'var(--jp-ui-inverse-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
 
   backgroundColor: 'var(--jp-brand-color1)',

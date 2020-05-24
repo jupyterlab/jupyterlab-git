@@ -101,7 +101,7 @@ async function activate(
       gitExtension,
       settings,
       renderMime,
-      factory.defaultBrowser
+      factory.defaultBrowser.model
     );
     gitPlugin.id = 'jp-git-sessions';
     gitPlugin.title.icon = gitIcon;
