@@ -237,7 +237,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   discardChanges = async (file: string) => {
     const result = await showDialog({
       title: 'Discard changes',
-      body: `Are you sure you want to permanently discard changes to ${file}? This action cannot be undone.`,
+      body: (
+        <span>
+          Are you sure you want to permanently discard changes to <b>{file}</b>?
+          This action cannot be undone.
+        </span>
+      ),
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
     });
     if (result.button.accept) {
