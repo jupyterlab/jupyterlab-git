@@ -47,7 +47,7 @@ export function registerGitIcons(iconRegistry: IIconRegistry) {
     },
     {
       name: 'open-file',
-      svgstr: openSvg
+      svg: openSvg
     }
   );
 }
