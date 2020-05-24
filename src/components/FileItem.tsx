@@ -11,7 +11,6 @@ import {
   selectedFileStyle
 } from '../style/FileItemStyle';
 import { Git } from '../tokens';
-import { openListedFile } from '../utils';
 import { FilePath } from './FilePath';
 
 // Git status codes https://git-scm.com/docs/git-status
@@ -32,6 +31,7 @@ export interface IFileItemProps {
   file: Git.IStatusFile;
   markBox?: boolean;
   model: GitExtension;
+  onDoubleClick: () => void;
   selected?: boolean;
   selectFile?: (file: Git.IStatusFile | null) => void;
 }
@@ -94,9 +94,7 @@ export class FileItem extends React.Component<IFileItemProps> {
             this.props.contextMenu(event);
           })
         }
-        onDoubleClick={() => {
-          openListedFile(this.props.file, this.props.model);
-        }}
+        onDoubleClick={this.props.onDoubleClick}
         title={`${this.props.file.to} ● ${status}`}
       >
         {this.props.markBox && (
