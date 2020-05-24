@@ -17,6 +17,12 @@
       "description": "Disable all branch operations (new, switch) when there are changed/staged files",
       "default": false
     },
+    "doubleClickDiff": {
+      "type": "boolean",
+      "title": "Show diff on double click",
+      "description": "If true, doubling clicking a file in the list of changed files will open a diff",
+      "default": false
+    },
     "historyCount": {
       "type": "integer",
       "title": "History count",

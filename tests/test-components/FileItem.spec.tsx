@@ -15,6 +15,7 @@ describe('FileItem', () => {
       status: null
     },
     model: null,
+    onDoubleClick: () => {},
     selected: false,
     selectFile: () => {}
   };

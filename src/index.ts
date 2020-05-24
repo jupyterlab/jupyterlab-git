@@ -166,5 +166,7 @@ function createGitMenu(
 
   menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
 
+  menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
+
   return menu;
 }
