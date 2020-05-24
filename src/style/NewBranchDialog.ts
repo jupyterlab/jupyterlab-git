@@ -257,5 +257,12 @@ export const cancelButtonClass = style({
 });
 
 export const createButtonClass = style({
-  backgroundColor: 'var(--jp-brand-color1)'
+  backgroundColor: 'var(--jp-brand-color1)',
+  $nest: {
+    '&:disabled': {
+      cursor: 'default',
+      color: 'var(--jp-ui-inverse-font-color0)',
+      backgroundColor: 'var(--jp-layout-color3)'
+    }
+  }
 });
