@@ -1,26 +1,29 @@
-import * as React from 'react';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import { showErrorMessage, showDialog } from '@jupyterlab/apputils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import { PathExt } from '@jupyterlab/coreutils';
+import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { JSONObject } from '@lumino/coreutils';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import * as React from 'react';
 import { GitExtension } from '../model';
 import {
   panelWrapperClass,
   repoButtonClass,
   selectedTabClass,
   tabClass,
-  tabsClass,
   tabIndicatorClass,
-  warningWrapperClass
+  tabsClass,
+  warningTextClass
 } from '../style/GitPanel';
 import { Git } from '../tokens';
 import { GitAuthorForm } from '../widgets/AuthorBox';
+import { CommitBox } from './CommitBox';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
-import { CommitBox } from './CommitBox';
+import { CommandIDs } from '../gitMenuCommands';
 
 /** Interface for GitPanel component state */
 export interface IGitSessionNodeState {
@@ -37,6 +40,7 @@ export interface IGitSessionNodeProps {
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
   settings: ISettingRegistry.ISettings;
+  filebrowser: FileBrowserModel;
 }
 
 /** A React component for the git extension's main display */
@@ -163,8 +167,14 @@ export class GitPanel extends React.Component<
   render(): React.ReactElement {
     return (
       <div className={panelWrapperClass}>
-        {this._renderToolbar()}
-        {this._renderMain()}
+        {this.state.inGitRepository ? (
+          <React.Fragment>
+            {this._renderToolbar()}
+            {this._renderMain()}
+          </React.Fragment>
+        ) : (
+          this._renderWarning()
+        )}
       </div>
     );
   }
@@ -194,15 +204,12 @@ export class GitPanel extends React.Component<
    * @returns React element
    */
   private _renderMain(): React.ReactElement {
-    if (this.state.inGitRepository) {
-      return (
-        <React.Fragment>
-          {this._renderTabs()}
-          {this.state.tab === 1 ? this._renderHistory() : this._renderChanges()}
-        </React.Fragment>
-      );
-    }
-    return this._renderWarning();
+    return (
+      <React.Fragment>
+        {this._renderTabs()}
+        {this.state.tab === 1 ? this._renderHistory() : this._renderChanges()}
+      </React.Fragment>
+    );
   }
 
   /**
@@ -295,18 +302,45 @@ export class GitPanel extends React.Component<
    * @returns React element
    */
   private _renderWarning(): React.ReactElement {
+    const path = this.props.filebrowser.path;
+    const { commands } = this.props.model;
+
     return (
-      <div className={warningWrapperClass}>
-        <div>Unable to detect a Git repository.</div>
+      <React.Fragment>
+        <div className={warningTextClass}>
+          {path ? (
+            <React.Fragment>
+              <b title={path}>{PathExt.basename(path)}</b> is not
+            </React.Fragment>
+          ) : (
+            'You are not currently in'
+          )}
+          {
+            ' a Git repository. To use Git, navigate to a local repository, initialize a repository here, or clone an existing repository.'
+          }
+        </div>
         <button
           className={repoButtonClass}
-          onClick={() =>
-            this.props.model.commands.execute('filebrowser:toggle-main')
-          }
+          onClick={() => commands.execute('filebrowser:toggle-main')}
         >
-          Find a repository
+          Open the FileBrowser
         </button>
-      </div>
+        <button
+          className={repoButtonClass}
+          onClick={() => commands.execute(CommandIDs.gitInit)}
+        >
+          Initialize a Repository
+        </button>
+        <button
+          className={repoButtonClass}
+          onClick={async () => {
+            await commands.execute(CommandIDs.gitClone);
+            await commands.execute('filebrowser:toggle-main');
+          }}
+        >
+          Clone a Repository
+        </button>
+      </React.Fragment>
     );
   }
 

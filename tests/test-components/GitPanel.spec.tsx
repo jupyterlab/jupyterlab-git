@@ -79,7 +79,8 @@ describe('GitPanel', () => {
     const props: IGitSessionNodeProps = {
       model: null,
       renderMime: null,
-      settings: null
+      settings: null,
+      filebrowser: null
     };
 
     beforeEach(async () => {
