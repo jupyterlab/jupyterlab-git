@@ -13,7 +13,7 @@ To see the extension in action, open the example notebook included in the Binder
 ## Prerequisites
 
 - JupyterLab
-- Git (version `>=1.7.4`)
+- Git (version `>=2.x`)
 
 ## Usage
 
@@ -89,7 +89,7 @@ JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jup
 
 ### Install
 
-Requires node 4+ and npm 4+
+Requires NodeJS
 
 ```bash
 # Install new-ish JupyterLab
