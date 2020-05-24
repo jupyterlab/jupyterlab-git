@@ -119,3 +119,6 @@ node_modules/
 *.code-workspace
 .history
 .vscode
+
+# vim stuff
+*.swp
