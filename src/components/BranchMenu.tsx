@@ -320,7 +320,7 @@ export class BranchMenu extends React.Component<
           body: (
             <React.Fragment>
               <p>
-                Your changes to the follow files would be overwritten by
+                Your changes to the following files would be overwritten by
                 switching:
               </p>
               <List>
