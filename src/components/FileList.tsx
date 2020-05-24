@@ -671,7 +671,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         !file.is_binary
       );
     } catch (reason) {
-      console.error(`Fail to open diff view for ${file.to}.\n${reason}`);
+      console.error(`Failed to open diff view for ${file.to}.\n${reason}`);
     }
   }
 
