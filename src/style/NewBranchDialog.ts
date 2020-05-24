@@ -260,7 +260,9 @@ export const createButtonClass = style({
   backgroundColor: 'var(--jp-brand-color1)',
   $nest: {
     '&:disabled': {
-      opacity: '0.3'
+      cursor: 'default',
+      color: 'var(--jp-ui-inverse-font-color0)',
+      backgroundColor: 'var(--jp-layout-color3)'
     }
   }
 });
