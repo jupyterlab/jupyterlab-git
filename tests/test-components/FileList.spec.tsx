@@ -4,7 +4,7 @@ import 'jest';
 import { GitExtension } from '../../src/model';
 import { FileList } from '../../src/components/FileList';
 
-import * as git from '../../src/git';
+import { httpGitRequest } from '../../src/git';
 
 jest.mock('../../src/git');
 jest.mock('@jupyterlab/apputils');
@@ -74,8 +74,10 @@ describe('FileList', () => {
         };
       });
 
-      const mock = git as jest.Mocked<typeof git>;
-      mock.httpGitRequest.mockImplementation(request);
+      const mockRequest = httpGitRequest as jest.MockedFunction<
+        typeof httpGitRequest
+      >;
+      mockRequest.mockImplementation(request);
 
       model = await createModel();
     });
