@@ -21,7 +21,7 @@ paths:
           Request with a current_path. If the current_path is a git repo, 
           return all the git repo information with a code of zero. If the current_path is not a git repo, 
           return error message with a non-zero code. 
-          This request contains 4 seperate requests on server side (showtoplevel, branch, log, status) 
+          This request contains 4 separate requests on server side (showtoplevel, branch, log, status) 
           and may fail individually, so each request has its own code to indicate execution status
           (zero for success, none-zero for failure)
         parameters:

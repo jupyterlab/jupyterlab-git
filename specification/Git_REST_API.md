@@ -10,7 +10,7 @@ Contents for each call include:
 
 ### /all_history - Get all git information of current repository
 
-Request with a current_path. If the current_path is a git repository, return all the git repository information. This request contains 4 seperate requests on server side (show_top_level, branch, log, status)
+Request with a current_path. If the current_path is a git repository, return all the git repository information. This request contains 4 separate requests on server side (show_top_level, branch, log, status)
 and may fail individually, so each request has its own code to indicate execution status (zero for success, non-zero for failure)
 URL:
 
