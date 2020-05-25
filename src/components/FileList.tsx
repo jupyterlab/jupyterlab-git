@@ -134,7 +134,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Discard',
         caption: 'Discard recent changes of selected file',
         execute: () => {
-          this.discardChanges(this.state.selectedFile.to);
+          this.discardChanges(this.state.selectedFile);
         }
       });
     }
@@ -234,23 +234,26 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Discard changes in a specific unstaged or staged file */
-  discardChanges = async (file: string) => {
+  discardChanges = async (file: Git.IStatusFile) => {
     const result = await showDialog({
       title: 'Discard changes',
       body: (
         <span>
-          Are you sure you want to permanently discard changes to <b>{file}</b>?
-          This action cannot be undone.
+          Are you sure you want to permanently discard changes to{' '}
+          <b>{file.to}</b>? This action cannot be undone.
         </span>
       ),
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
     });
     if (result.button.accept) {
       try {
-        await this.props.model.reset(file);
-        await this.props.model.checkout({ filename: file });
+        await this.props.model.reset(file.to);
+        if (file.x !== 'A') {
+          // resetting an added file moves it to untracked category => checkout will fail
+          await this.props.model.checkout({ filename: file.to });
+        }
       } catch (reason) {
-        showErrorMessage(`Discard changes for ${file} failed.`, reason, [
+        showErrorMessage(`Discard changes for ${file.to} failed.`, reason, [
           Dialog.warnButton({ label: 'DISMISS' })
         ]);
       }
@@ -454,7 +457,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                     iconName={'git-discard'}
                     title={'Discard changes'}
                     onClick={() => {
-                      this.discardChanges(file.to);
+                      this.discardChanges(file);
                     }}
                   />
                   <ActionButton
@@ -568,26 +571,23 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           };
 
           // Default value for actions and double click
-          // let actions: JSX.Element = ( <ActionButton
-          //     className={hiddenButtonStyle}
-          //     iconName={'open-file'}
-          //     title={'Open this file'}
-          //     onClick={openFile}
-          //   />
-          // );
+          let actions: JSX.Element = (
+            <ActionButton
+              className={hiddenButtonStyle}
+              iconName={'open-file'}
+              title={'Open this file'}
+              onClick={openFile}
+            />
+          );
           let onDoubleClick = doubleClickDiff
             ? (): void => undefined
             : openFile;
 
-          let diffButton: JSX.Element;
-          if (file.status === 'unstaged') {
-            diffButton = this._createDiffButton(file, 'WORKING');
-          }
-          let actions = null;
           if (
             file.status === 'unstaged' ||
             file.status === 'partially-staged'
           ) {
+            const diffButton = this._createDiffButton(file, 'WORKING');
             actions = (
               <React.Fragment>
                 <ActionButton
@@ -602,7 +602,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                   iconName={'git-discard'}
                   title={'Discard changes'}
                   onClick={() => {
-                    this.discardChanges(file.to);
+                    this.discardChanges(file);
                   }}
                 />
               </React.Fragment>
@@ -613,7 +613,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 : () => undefined
               : openFile;
           } else if (file.status === 'staged') {
-            diffButton = this._createDiffButton(file, 'INDEX');
+            const diffButton = this._createDiffButton(file, 'INDEX');
             actions = (
               <React.Fragment>
                 <ActionButton
