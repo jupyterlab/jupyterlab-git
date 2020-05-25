@@ -11,7 +11,7 @@
   "commitConvention": "none",
   "types": {
     "financial": {
-      "symbol": "<img style='height: 1em;' src='./docs/sponsorship.svg' />"
+      "symbol": "🤝"
     }
   },
   "contributorsSortAlphabetically": true,
