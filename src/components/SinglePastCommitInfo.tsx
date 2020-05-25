@@ -245,7 +245,7 @@ export class SinglePastCommitInfo extends React.Component<
         onClick={this._onDiffClickFactory(path, flg)}
         title={path}
       >
-        <FilePath filepath={path} />
+        <FilePath filepath={path} filetype={file.type} />
         {flg ? (
           <ActionButton iconName="git-diff" title="View file changes" />
         ) : null}

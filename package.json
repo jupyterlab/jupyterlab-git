@@ -54,6 +54,7 @@
     "@jupyterlab/codemirror": "^2.0.0",
     "@jupyterlab/console": "^2.0.0",
     "@jupyterlab/coreutils": "^4.0.0",
+    "@jupyterlab/docregistry": "^2.0.0",
     "@jupyterlab/filebrowser": "^2.0.0",
     "@jupyterlab/mainmenu": "^2.0.0",
     "@jupyterlab/nbformat": "^2.0.0",

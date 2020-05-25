@@ -1,4 +1,5 @@
 import { IChangedArgs } from '@jupyterlab/coreutils';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Token, JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
@@ -374,6 +375,8 @@ export namespace Git {
     to: string;
     from: string;
     is_binary: boolean | null;
+    // filetype as determined by app.docRegistry
+    type?: DocumentRegistry.IFileType;
   }
 
   /**
@@ -411,6 +414,8 @@ export namespace Git {
     insertion: string;
     deletion: string;
     is_binary: boolean | null;
+    // filetype as determined by app.docRegistry
+    type?: DocumentRegistry.IFileType;
   }
 
   /** Interface for GitDetailedLog request result,
@@ -422,7 +427,7 @@ export namespace Git {
     modified_files_count?: string;
     number_of_insertions?: string;
     number_of_deletions?: string;
-    modified_files?: [ICommitModifiedFile];
+    modified_files?: ICommitModifiedFile[];
   }
 
   /** Interface for GitLog request result,
@@ -430,7 +435,7 @@ export namespace Git {
    */
   export interface ILogResult {
     code: number;
-    commits?: [ISingleCommitInfo];
+    commits?: ISingleCommitInfo[];
   }
 
   export interface IIdentity {

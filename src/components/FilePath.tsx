@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { classes } from 'typestyle';
 import {
-  fileIconStyle,
+  // fileIconStyle,
   fileLabelStyle,
   folderLabelStyle
 } from '../style/FilePathStyle';
-import { extractFilename, getFileIconClassName } from '../utils';
+import { extractFilename } from '../utils';
+import { LabIcon } from '@jupyterlab/ui-components';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 /**
  * FilePath component properties
@@ -16,16 +18,13 @@ export interface IFilePathProps {
    */
   filepath: string;
   /**
+   * File type
+   */
+  filetype: DocumentRegistry.IFileType;
+  /**
    * Is file selected? - impact style of the icon
    */
   selected?: boolean;
-}
-
-function getFileIconClass(props: IFilePathProps) {
-  return classes(
-    fileIconStyle,
-    getFileIconClassName(props.filepath, props.selected)
-  );
 }
 
 export const FilePath: React.FunctionComponent<IFilePathProps> = (
@@ -38,7 +37,12 @@ export const FilePath: React.FunctionComponent<IFilePathProps> = (
 
   return (
     <React.Fragment>
-      <span className={getFileIconClass(props)} />
+      <LabIcon.resolveReact
+        icon={props.filetype.icon}
+        iconClass={classes(props.filetype.iconClass, 'jp-Icon')}
+        elementPosition="center"
+        tag="span"
+      />
       <span className={fileLabelStyle}>
         {filename}
         <span className={folderLabelStyle}>{folder}</span>
