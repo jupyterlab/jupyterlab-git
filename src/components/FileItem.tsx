@@ -34,7 +34,6 @@ export interface IFileItemProps {
   onDoubleClick: () => void;
   selected?: boolean;
   selectFile?: (file: Git.IStatusFile | null) => void;
-  staged?: boolean;
 }
 
 export interface IGitMarkBoxProps {
@@ -75,9 +74,8 @@ export class FileItem extends React.Component<IFileItemProps> {
   }
 
   render() {
-    const status_code = this.props.staged
-      ? this.props.file.x
-      : this.props.file.y;
+    const { file } = this.props;
+    const status_code = file.status === 'staged' ? file.x : file.y;
     const status = this.getFileChangedLabel(status_code as any);
 
     return (

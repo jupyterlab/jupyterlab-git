@@ -297,9 +297,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           case 'untracked':
             untrackedFiles.push(file);
             break;
-          case 'staged-and-unstaged':
-            stagedFiles.push(file);
-            unstagedFiles.push(file);
+          case 'partially-staged':
+            stagedFiles.push({
+              ...file,
+              status: 'staged'
+            });
+            unstagedFiles.push({
+              ...file,
+              status: 'unstaged'
+            });
             break;
 
           default:
@@ -329,7 +335,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       this.state.selectedFile.x === candidate.x &&
       this.state.selectedFile.y === candidate.y &&
       this.state.selectedFile.from === candidate.from &&
-      this.state.selectedFile.to === candidate.to
+      this.state.selectedFile.to === candidate.to &&
+      this.state.selectedFile.status === candidate.status
     );
   }
 
@@ -579,7 +586,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           let actions = null;
           if (
             file.status === 'unstaged' ||
-            file.status === 'staged-and-unstaged'
+            file.status === 'partially-staged'
           ) {
             actions = (
               <React.Fragment>

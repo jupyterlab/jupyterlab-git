@@ -497,6 +497,6 @@ export namespace Git {
     | 'untracked'
     | 'staged'
     | 'unstaged'
-    | 'staged-and-unstaged'
+    | 'partially-staged'
     | null;
 }
