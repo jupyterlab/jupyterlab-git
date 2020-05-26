@@ -268,13 +268,13 @@ class GitAddAllUntrackedHandler(GitHandler):
 class GitRemoteAddHandler(GitHandler):
     """Handler for 'git remote add <name> <url>'."""
 
-    def post(self):
+    async def post(self):
         """POST request handler to add a remote."""
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         name = data.get("name", DEFAULT_REMOTE_NAME)
         url = data["url"]
-        output = self.git.remote_add(top_repo_path, url, name)
+        output = await self.git.remote_add(top_repo_path, url, name)
         if(output["code"] == 0):
             self.set_status(201)
         else:
@@ -437,16 +437,33 @@ class GitPushHandler(GitHandler):
         """
         POST request handler,
         pushes committed files from your current branch to a remote branch
+
+        Request body: 
+        {
+            current_path: string, # Git repository path
+            remote?: string # Remote to push to; i.e. <remote_name> or <remote_name>/<branch>
+        }
         """
         data = self.get_json_body()
         current_path = data["current_path"]
+        known_remote = data.get("remote")
 
         current_local_branch = await self.git.get_current_branch(current_path)
+
+        set_upstream = False
         current_upstream_branch = await self.git.get_upstream_branch(
             current_path, current_local_branch
         )
+        has_upstream = current_upstream_branch and current_upstream_branch.strip()
+        if known_remote is not None:
+            if "/" in known_remote:
+                current_upstream_branch = known_remote  
+            else:
+                current_upstream_branch = "{}/{}".format(known_remote, current_local_branch)
+            set_upstream = not has_upstream
+            has_upstream = True
 
-        if current_upstream_branch and current_upstream_branch.strip():
+        if has_upstream:
             upstream = current_upstream_branch.split("/")
             if len(upstream) == 1:
                 # If upstream is a local branch
@@ -458,25 +475,45 @@ class GitPushHandler(GitHandler):
                 branch = ":".join(["HEAD", upstream[1]])
 
             response = await self.git.push(
-                remote, branch, current_path, data.get("auth", None)
+                remote, branch, current_path, data.get("auth", None), set_upstream
             )
 
         else:
             # Allow users to specify upstream through their configuration
             # https://git-scm.com/docs/git-config#Documentation/git-config.txt-pushdefault
-            config_options = self.git.config(current_path)["options"]
-            default_remote = config_options.get('remote.pushdefault')
-            default_remote_branch = config_options.get('push.default') == 'current'
+            # Or use the remote defined if only one remote exists
+            config = await self.git.config(current_path)
+            config_options = config["options"]
+            list_remotes = await self.git.remote_show(current_path)
+            remotes = list_remotes.get("remotes", list())
+            push_default = config_options.get('remote.pushdefault')
 
-            if default_remote_branch and default_remote:
-                response = self.git.push(default_remote, current_local_branch, current_path)
+            default_remote = None
+            if push_default is not None and push_default in remotes:
+                default_remote = push_default
+            elif len(remotes) == 1:
+                default_remote = remotes[0]
+
+            if default_remote is not None:
+                response = await self.git.push(
+                    default_remote, 
+                    current_local_branch, 
+                    current_path, 
+                    data.get("auth", None), 
+                    set_upstream=True,
+                )
             else:
                 response = {
                     "code": 128,
                     "message": "fatal: The current branch {} has no upstream branch.".format(
                         current_local_branch
                     ),
+                    "remotes": remotes  # Returns the list of known remotes
                 }
+
+        if response["code"] != 0:
+            self.set_status(500)
+
         self.finish(json.dumps(response))
 
 
@@ -520,9 +557,9 @@ class GitConfigHandler(GitHandler):
         top_repo_path = data["path"]
         options = data.get("options", {})
         filtered_options = {k: v for k, v in options.items() if k in ALLOWED_OPTIONS}
-        response = await self.git.config(top_repo_path, **options)
+        response = await self.git.config(top_repo_path, **filtered_options)
         if "options" in response:
-            response["options"] = {k:v for k, v in response["options"] if k in ALLOWED_OPTIONS}
+            response["options"] = {k:v for k, v in response["options"].items() if k in ALLOWED_OPTIONS}
 
         if response["code"] != 0:
             self.set_status(500)

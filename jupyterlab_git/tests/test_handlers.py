@@ -12,6 +12,7 @@ from jupyterlab_git.handlers import (
     GitUpstreamHandler,
     setup_handlers,
 )
+from jupyterlab_git.git import Git
 
 from .testutils import ServerTest, assert_http_error, maybe_future
 
@@ -25,7 +26,7 @@ def test_mapping_added():
 
 
 class TestAllHistory(ServerTest):
-    @patch("jupyterlab_git.handlers.GitAllHistoryHandler.git")
+    @patch("jupyterlab_git.handlers.GitAllHistoryHandler.git", spec=Git)
     def test_all_history_handler_localbranch(self, mock_git):
         # Given
         show_top_level = {"code": 0, "foo": "top_level"}
@@ -62,7 +63,7 @@ class TestAllHistory(ServerTest):
 
 
 class TestBranch(ServerTest):
-    @patch("jupyterlab_git.handlers.GitBranchHandler.git")
+    @patch("jupyterlab_git.handlers.GitBranchHandler.git", spec=Git)
     def test_branch_handler_localbranch(self, mock_git):
         # Given
         branch = {
@@ -126,7 +127,7 @@ class TestBranch(ServerTest):
 
 
 class TestLog(ServerTest):
-    @patch("jupyterlab_git.handlers.GitLogHandler.git")
+    @patch("jupyterlab_git.handlers.GitLogHandler.git", spec=Git)
     def test_log_handler(self, mock_git):
         # Given
         log = {"code": 0, "commits": []}
@@ -143,7 +144,7 @@ class TestLog(ServerTest):
         payload = response.json()
         assert payload == log
 
-    @patch("jupyterlab_git.handlers.GitLogHandler.git")
+    @patch("jupyterlab_git.handlers.GitLogHandler.git", spec=Git)
     def test_log_handler_no_history_count(self, mock_git):
         # Given
         log = {"code": 0, "commits": []}
@@ -162,7 +163,7 @@ class TestLog(ServerTest):
 
 
 class TestPush(ServerTest):
-    @patch("jupyterlab_git.handlers.GitPushHandler.git")
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
     def test_push_handler_localbranch(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo")
@@ -178,13 +179,13 @@ class TestPush(ServerTest):
         # Then
         mock_git.get_current_branch.assert_called_with("test_path")
         mock_git.get_upstream_branch.assert_called_with("test_path", "foo")
-        mock_git.push.assert_called_with(".", "HEAD:localbranch", "test_path", None)
+        mock_git.push.assert_called_with(".", "HEAD:localbranch", "test_path", None, False)
 
         assert response.status_code == 200
         payload = response.json()
         assert payload == {"code": 0}
 
-    @patch("jupyterlab_git.handlers.GitPushHandler.git")
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
     def test_push_handler_remotebranch(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo")
@@ -201,39 +202,150 @@ class TestPush(ServerTest):
         mock_git.get_current_branch.assert_called_with("test_path")
         mock_git.get_upstream_branch.assert_called_with("test_path", "foo")
         mock_git.push.assert_called_with(
-            "origin", "HEAD:remotebranch", "test_path", None
+            "origin", "HEAD:remotebranch", "test_path", None, False
         )
 
         assert response.status_code == 200
         payload = response.json()
         assert payload == {"code": 0}
 
-    @patch("jupyterlab_git.handlers.GitPushHandler.git")
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
     def test_push_handler_noupstream(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo")
         mock_git.get_upstream_branch.return_value = maybe_future("")
+        mock_git.config.return_value = maybe_future({"options": dict()})
+        mock_git.remote_show.return_value = maybe_future({})
         mock_git.push.return_value = maybe_future({"code": 0})
 
+        path = "test_path"
+
         # When
-        body = {"current_path": "test_path"}
+        body = {"current_path": path}
+        with assert_http_error(500, msg="fatal: The current branch foo has no upstream branch."):
+            self.tester.post(["push"], body=body)
+
+        # Then
+        mock_git.get_current_branch.assert_called_with(path)
+        mock_git.get_upstream_branch.assert_called_with(path, "foo")
+        mock_git.config.assert_called_with(path)
+        mock_git.remote_show.assert_called_with(path)
+        mock_git.push.assert_not_called()
+
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
+    def test_push_handler_noupstream_unique_remote(self, mock_git):
+        # Given
+        remote = "origin"
+        mock_git.get_current_branch.return_value = maybe_future("foo")
+        mock_git.get_upstream_branch.return_value = maybe_future("")
+        mock_git.config.return_value = maybe_future({"options": dict()})
+        mock_git.remote_show.return_value = maybe_future({"remotes": [remote]})
+        mock_git.push.return_value = maybe_future({"code": 0})
+
+        path = "test_path"
+
+        # When
+        body = {"current_path": path}
         response = self.tester.post(["push"], body=body)
 
         # Then
-        mock_git.get_current_branch.assert_called_with("test_path")
-        mock_git.get_upstream_branch.assert_called_with("test_path", "foo")
-        mock_git.push.assert_not_called()
+        mock_git.get_current_branch.assert_called_with(path)
+        mock_git.get_upstream_branch.assert_called_with(path, "foo")
+        mock_git.config.assert_called_with(path)
+        mock_git.remote_show.assert_called_with(path)
+        mock_git.push.assert_called_with(remote, "foo", "test_path", None, set_upstream=True)
 
         assert response.status_code == 200
         payload = response.json()
-        assert payload == {
-            "code": 128,
-            "message": "fatal: The current branch foo has no upstream branch.",
-        }
+        assert payload == {"code": 0}
+
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
+    def test_push_handler_noupstream_pushdefault(self, mock_git):
+        # Given
+        remote = "rorigin"
+        mock_git.get_current_branch.return_value = maybe_future("foo")
+        mock_git.get_upstream_branch.return_value = maybe_future("")
+        mock_git.config.return_value = maybe_future({"options": {"remote.pushdefault": remote}})
+        mock_git.remote_show.return_value = maybe_future({"remotes": [remote, "upstream"]})
+        mock_git.push.return_value = maybe_future({"code": 0})
+
+        path = "test_path"
+
+        # When
+        body = {"current_path": path}
+        response = self.tester.post(["push"], body=body)
+
+        # Then
+        mock_git.get_current_branch.assert_called_with(path)
+        mock_git.get_upstream_branch.assert_called_with(path, "foo")
+        mock_git.config.assert_called_with(path)
+        mock_git.remote_show.assert_called_with(path)
+        mock_git.push.assert_called_with(remote, "foo", "test_path", None, set_upstream=True)
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload == {"code": 0}
+
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
+    def test_push_handler_noupstream_pass_remote_nobranch(self, mock_git):
+        # Given
+        mock_git.get_current_branch.return_value = maybe_future("foo")
+        mock_git.get_upstream_branch.return_value = maybe_future("")
+        mock_git.config.return_value = maybe_future({"options": dict()})
+        mock_git.remote_show.return_value = maybe_future({})
+        mock_git.push.return_value = maybe_future({"code": 0})
+
+        path = "test_path"
+        remote = "online"
+
+        # When
+        body = {"current_path": path, "remote": remote}
+        response = self.tester.post(["push"], body=body)
+
+        # Then
+        mock_git.get_current_branch.assert_called_with(path)
+        mock_git.get_upstream_branch.assert_called_with(path, "foo")
+        mock_git.config.assert_not_called()
+        mock_git.remote_show.assert_not_called()
+        mock_git.push.assert_called_with(remote, "HEAD:foo", "test_path", None, True)
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload == {"code": 0}
+
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
+    def test_push_handler_noupstream_pass_remote_branch(self, mock_git):
+        # Given
+        mock_git.get_current_branch.return_value = maybe_future("foo")
+        mock_git.get_upstream_branch.return_value = maybe_future("")
+        mock_git.config.return_value = maybe_future({"options": dict()})
+        mock_git.remote_show.return_value = maybe_future({})
+        mock_git.push.return_value = maybe_future({"code": 0})
+
+        path = "test_path"
+        remote = "online"
+        remote_branch = "onfoo"
+
+        # When
+        body = {"current_path": path, "remote": "/".join((remote, remote_branch))}
+        response = self.tester.post(["push"], body=body)
+
+        # Then
+        mock_git.get_current_branch.assert_called_with(path)
+        mock_git.get_upstream_branch.assert_called_with(path, "foo")
+        mock_git.config.assert_not_called()
+        mock_git.remote_show.assert_not_called()
+        mock_git.push.assert_called_with(
+            remote, "HEAD:" + remote_branch, "test_path", None, True
+        )
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload == {"code": 0}
 
 
 class TestUpstream(ServerTest):
-    @patch("jupyterlab_git.handlers.GitUpstreamHandler.git")
+    @patch("jupyterlab_git.handlers.GitUpstreamHandler.git", spec=Git)
     def test_upstream_handler_localbranch(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo")
