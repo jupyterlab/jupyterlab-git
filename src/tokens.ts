@@ -20,7 +20,7 @@ export interface IGitExtension extends IDisposable {
   currentBranch: Git.IBranch;
 
   /**
-   * A signal emitted when the HEAD of the Git repository changes.
+   * A signal emitted when the `HEAD` of the Git repository changes.
    */
   readonly headChanged: ISignal<IGitExtension, void>;
 
@@ -133,7 +133,7 @@ export interface IGitExtension extends IDisposable {
   checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult>;
 
   /**
-   * Make request for the Git Clone API.
+   * Make request for the Git clone API.
    *
    * @param path Local path in which the repository will be cloned
    * @param url Distant Git repository URL
