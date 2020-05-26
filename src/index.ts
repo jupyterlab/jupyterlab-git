@@ -269,7 +269,6 @@ function isStatusWidgetActive(settings?: ISettingRegistry.ISettings) {
    * @returns boolean indicating whether the extension should display status updates
    */
   function isActive(): boolean {
-    console.log(settings.composite.displayStatus);
     return settings.composite.displayStatus as boolean;
   }
 }
