@@ -119,19 +119,19 @@ async function activate(
       createGitMenu(app, gitExtension, factory.defaultBrowser, settings),
       { rank: 60 }
     );
-
-    // Add a status bar widget to provide Git status updates:
-    if (settings.composite.displayStatus) {
-      const statusWidget = new StatusWidget();
-      statusBar.registerStatusItem('git-status', {
-        align: 'left',
-        item: statusWidget
-      });
-      gitExtension.logger.connect(createEventCallback(statusWidget));
-    }
   }
   // Add a clone button to the file browser extension toolbar
   addCloneButton(gitExtension, factory.defaultBrowser);
+
+  // Add a status bar widget to provide Git status updates:
+  const statusWidget = new StatusWidget();
+  statusBar.registerStatusItem('git-status', {
+    align: 'left',
+    item: statusWidget,
+    isActive: isStatusWidgetActive(settings),
+    activeStateChanged: settings && settings.changed
+  });
+  gitExtension.logger.connect(createEventCallback(statusWidget));
 
   return gitExtension;
 }
@@ -239,5 +239,37 @@ function createEventCallback(widget: StatusWidget) {
         break;
     }
     widget.status = status;
+  }
+}
+
+/**
+ * Returns a callback which returns a boolean indicating whether the extension should display status updates.
+ *
+ * @private
+ * @param settings - extension settings
+ * @returns callback
+ */
+function isStatusWidgetActive(settings?: ISettingRegistry.ISettings) {
+  return settings ? isActive : inactive;
+
+  /**
+   * Returns a boolean indicating that the extension should not display status updates.
+   *
+   * @private
+   * @returns boolean indicating that the extension should not display status updates
+   */
+  function inactive(): boolean {
+    return false;
+  }
+
+  /**
+   * Returns a boolean indicating whether the extension should display status updates.
+   *
+   * @private
+   * @returns boolean indicating whether the extension should display status updates
+   */
+  function isActive(): boolean {
+    console.log(settings.composite.displayStatus);
+    return settings.composite.displayStatus as boolean;
   }
 }
