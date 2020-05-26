@@ -9,6 +9,7 @@ import insertionsMadeSvg from '../../style/images/insertions-made-icon.svg';
 import addSvg from '../../style/images/move-file-up.svg';
 import removeSvg from '../../style/images/move-file-down.svg';
 import rewindSvg from '../../style/images/rewind.svg';
+import openSvg from '../../style/images/open-file.svg';
 
 export const gitIcon = new LabIcon({ name: 'git', svgstr: gitSvg });
 export const deletionsMadeIcon = new LabIcon({
@@ -39,4 +40,8 @@ export const removeIcon = new LabIcon({
 export const rewindIcon = new LabIcon({
   name: 'git-rewind',
   svgstr: rewindSvg
+});
+export const openIcon = new LabIcon({
+  name: 'open-file',
+  svgstr: openSvg
 });

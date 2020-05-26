@@ -237,7 +237,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   discardChanges = async (file: string) => {
     const result = await showDialog({
       title: 'Discard changes',
-      body: `Are you sure you want to permanently discard changes to ${file}? This action cannot be undone.`,
+      body: (
+        <span>
+          Are you sure you want to permanently discard changes to <b>{file}</b>?
+          This action cannot be undone.
+        </span>
+      ),
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
     });
     if (result.button.accept) {
@@ -325,6 +330,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   private _renderStaged(files: Git.IStatusFile[]) {
+    const doubleClickDiff = this.props.settings.get('doubleClickDiff')
+      .composite as boolean;
     return (
       <GitStage
         actions={
@@ -341,12 +348,22 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         nFiles={files.length}
       >
         {files.map((file: Git.IStatusFile) => {
+          const openFile = () => {
+            openListedFile(file, this.props.model);
+          };
+          const diffButton = this._createDiffButton(file, 'INDEX');
           return (
             <FileItem
               key={file.to}
               actions={
                 <React.Fragment>
-                  {this._createDiffButton(file, 'INDEX')}
+                  <ActionButton
+                    className={hiddenButtonStyle}
+                    iconName={'open-file'}
+                    title={'Open this file'}
+                    onClick={openFile}
+                  />
+                  {diffButton}
                   <ActionButton
                     className={hiddenButtonStyle}
                     iconName={'git-remove'}
@@ -362,6 +379,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               model={this.props.model}
               selected={this._isSelectedFile(file)}
               selectFile={this.updateSelectedFile}
+              onDoubleClick={
+                doubleClickDiff
+                  ? diffButton
+                    ? () => this._openDiffView(file, 'INDEX')
+                    : () => undefined
+                  : openFile
+              }
             />
           );
         })}
@@ -370,6 +394,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   private _renderChanged(files: Git.IStatusFile[]) {
+    const doubleClickDiff = this.props.settings.get('doubleClickDiff')
+      .composite as boolean;
     const disabled = files.length === 0;
     return (
       <GitStage
@@ -396,11 +422,22 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         nFiles={files.length}
       >
         {files.map((file: Git.IStatusFile) => {
+          const openFile = () => {
+            openListedFile(file, this.props.model);
+          };
+          const diffButton = this._createDiffButton(file, 'WORKING');
           return (
             <FileItem
               key={file.to}
               actions={
                 <React.Fragment>
+                  <ActionButton
+                    className={hiddenButtonStyle}
+                    iconName={'open-file'}
+                    title={'Open this file'}
+                    onClick={openFile}
+                  />
+                  {diffButton}
                   <ActionButton
                     className={hiddenButtonStyle}
                     iconName={'git-discard'}
@@ -409,7 +446,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                       this.discardChanges(file.to);
                     }}
                   />
-                  {this._createDiffButton(file, 'WORKING')}
                   <ActionButton
                     className={hiddenButtonStyle}
                     iconName={'git-add'}
@@ -425,6 +461,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               model={this.props.model}
               selected={this._isSelectedFile(file)}
               selectFile={this.updateSelectedFile}
+              onDoubleClick={
+                doubleClickDiff
+                  ? diffButton
+                    ? () => this._openDiffView(file, 'WORKING')
+                    : () => undefined
+                  : openFile
+              }
             />
           );
         })}
@@ -433,6 +476,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   private _renderUntracked(files: Git.IStatusFile[]) {
+    const doubleClickDiff = this.props.settings.get('doubleClickDiff')
+      .composite as boolean;
     return (
       <GitStage
         actions={
@@ -453,18 +498,33 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             <FileItem
               key={file.to}
               actions={
-                <ActionButton
-                  className={hiddenButtonStyle}
-                  iconName={'git-add'}
-                  title={'Track this file'}
-                  onClick={() => {
-                    this.addFile(file.to);
-                  }}
-                />
+                <React.Fragment>
+                  <ActionButton
+                    className={hiddenButtonStyle}
+                    iconName={'open-file'}
+                    title={'Open this file'}
+                    onClick={async () => {
+                      openListedFile(file, this.props.model);
+                    }}
+                  />
+                  <ActionButton
+                    className={hiddenButtonStyle}
+                    iconName={'git-add'}
+                    title={'Track this file'}
+                    onClick={() => {
+                      this.addFile(file.to);
+                    }}
+                  />
+                </React.Fragment>
               }
               file={file}
               contextMenu={this.contextMenuUntracked}
               model={this.props.model}
+              onDoubleClick={() => {
+                if (!doubleClickDiff) {
+                  openListedFile(file, this.props.model);
+                }
+              }}
               selected={this._isSelectedFile(file)}
               selectFile={this.updateSelectedFile}
             />
@@ -475,6 +535,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   private _renderSimpleStage(files: Git.IStatusFile[]) {
+    const doubleClickDiff = this.props.settings.get('doubleClickDiff')
+      .composite as boolean;
     return (
       <GitStage
         actions={
@@ -490,10 +552,35 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         nFiles={files.length}
       >
         {files.map((file: Git.IStatusFile) => {
-          let actions = null;
+          const openFile = () => {
+            openListedFile(file, this.props.model);
+          };
+
+          // Default value for actions and double click
+          let actions: JSX.Element = (
+            <ActionButton
+              className={hiddenButtonStyle}
+              iconName={'open-file'}
+              title={'Open this file'}
+              onClick={openFile}
+            />
+          );
+          let onDoubleClick = doubleClickDiff
+            ? (): void => undefined
+            : openFile;
+
+          let diffButton: JSX.Element;
           if (file.status === 'unstaged') {
+            diffButton = this._createDiffButton(file, 'WORKING');
             actions = (
               <React.Fragment>
+                <ActionButton
+                  className={hiddenButtonStyle}
+                  iconName={'open-file'}
+                  title={'Open this file'}
+                  onClick={openFile}
+                />
+                {diffButton}
                 <ActionButton
                   className={hiddenButtonStyle}
                   iconName={'git-discard'}
@@ -502,11 +589,31 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                     this.discardChanges(file.to);
                   }}
                 />
-                {this._createDiffButton(file, 'WORKING')}
               </React.Fragment>
             );
+            onDoubleClick = doubleClickDiff
+              ? diffButton
+                ? () => this._openDiffView(file, 'WORKING')
+                : () => undefined
+              : openFile;
           } else if (file.status === 'staged') {
-            actions = this._createDiffButton(file, 'INDEX');
+            diffButton = this._createDiffButton(file, 'INDEX');
+            actions = (
+              <React.Fragment>
+                <ActionButton
+                  className={hiddenButtonStyle}
+                  iconName={'open-file'}
+                  title={'Open this file'}
+                  onClick={openFile}
+                />
+                {diffButton}
+              </React.Fragment>
+            );
+            onDoubleClick = doubleClickDiff
+              ? diffButton
+                ? () => this._openDiffView(file, 'INDEX')
+                : () => undefined
+              : openFile;
           }
 
           return (
@@ -516,6 +623,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               file={file}
               markBox={true}
               model={this.props.model}
+              onDoubleClick={onDoubleClick}
             />
           );
         })}
@@ -524,7 +632,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   /**
-   * Creates a button element which is used to request diff of a file.
+   * Creates a button element which, depending on the settings, is used
+   * to either request a diff of the file, or open the file
    *
    * @param path File path of interest
    * @param currentRef the ref to diff against the git 'HEAD' ref
@@ -539,27 +648,36 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           className={hiddenButtonStyle}
           iconName={'git-diff'}
           title={'Diff this file'}
-          onClick={async () => {
-            try {
-              await openDiffView(
-                file.to,
-                this.props.model,
-                {
-                  previousRef: { gitRef: 'HEAD' },
-                  currentRef: { specialRef: currentRef }
-                },
-                this.props.renderMime,
-                !file.is_binary
-              );
-            } catch (reason) {
-              console.error(
-                `Fail to open diff view for ${file.to}.\n${reason}`
-              );
-            }
-          }}
+          onClick={() => this._openDiffView(file, currentRef)}
         />
       )
     );
+  }
+
+  /**
+   * Returns a callback which opens a diff of the file
+   *
+   * @param file File to open diff for
+   * @param currentRef the ref to diff against the git 'HEAD' ref
+   */
+  private async _openDiffView(
+    file: Git.IStatusFile,
+    currentRef: ISpecialRef['specialRef']
+  ): Promise<void> {
+    try {
+      await openDiffView(
+        file.to,
+        this.props.model,
+        {
+          previousRef: { gitRef: 'HEAD' },
+          currentRef: { specialRef: currentRef }
+        },
+        this.props.renderMime,
+        !file.is_binary
+      );
+    } catch (reason) {
+      console.error(`Failed to open diff view for ${file.to}.\n${reason}`);
+    }
   }
 
   private _contextMenuStaged: Menu;
