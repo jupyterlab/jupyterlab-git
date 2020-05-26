@@ -119,19 +119,73 @@ async function activate(
       createGitMenu(app, gitExtension, factory.defaultBrowser, settings),
       { rank: 60 }
     );
+
+    // Add a status bar widget to provide Git status updates:
+    if (settings.composite.displayStatus) {
+      const statusWidget = new StatusWidget();
+      statusBar.registerStatusItem('git-status', {
+        align: 'left',
+        item: statusWidget
+      });
+      gitExtension.logger.connect(createEventCallback(statusWidget));
+    }
   }
   // Add a clone button to the file browser extension toolbar
   addCloneButton(gitExtension, factory.defaultBrowser);
 
-  // Add a status bar widget to provide Git status updates:
-  const statusWidget = new StatusWidget();
-  statusBar.registerStatusItem('git-status', {
-    align: 'left',
-    item: statusWidget
-  });
-  gitExtension.logger.connect(onEvent);
-
   return gitExtension;
+}
+
+/**
+ * Add commands and menu items
+ */
+function createGitMenu(
+  app: JupyterFrontEnd,
+  gitExtension: IGitExtension,
+  fileBrowser: FileBrowser,
+  settings: ISettingRegistry.ISettings
+): Menu {
+  const { commands } = app;
+  addCommands(app, gitExtension, fileBrowser, settings);
+
+  const menu = new Menu({ commands });
+  menu.title.label = 'Git';
+  [
+    CommandIDs.gitUI,
+    CommandIDs.gitTerminalCommand,
+    CommandIDs.gitInit,
+    CommandIDs.gitClone,
+    CommandIDs.gitAddRemote
+  ].forEach(command => {
+    menu.addItem({ command });
+  });
+
+  const tutorial = new Menu({ commands });
+  tutorial.title.label = ' Tutorial ';
+  RESOURCES.map(args => {
+    tutorial.addItem({
+      args,
+      command: CommandIDs.gitOpenUrl
+    });
+  });
+  menu.addItem({ type: 'submenu', submenu: tutorial });
+
+  menu.addItem({ type: 'separator' });
+
+  menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
+
+  return menu;
+}
+
+/**
+ * Returns a callback for updating a status widget upon receiving model events.
+ *
+ * @private
+ * @param widget - status widget
+ * @returns callback
+ */
+function createEventCallback(widget: StatusWidget) {
+  return onEvent;
 
   /**
    * Callback invoked upon a model event.
@@ -184,47 +238,6 @@ async function activate(
         }
         break;
     }
-    statusWidget.status = status;
+    widget.status = status;
   }
-}
-
-/**
- * Add commands and menu items
- */
-function createGitMenu(
-  app: JupyterFrontEnd,
-  gitExtension: IGitExtension,
-  fileBrowser: FileBrowser,
-  settings: ISettingRegistry.ISettings
-): Menu {
-  const { commands } = app;
-  addCommands(app, gitExtension, fileBrowser, settings);
-
-  const menu = new Menu({ commands });
-  menu.title.label = 'Git';
-  [
-    CommandIDs.gitUI,
-    CommandIDs.gitTerminalCommand,
-    CommandIDs.gitInit,
-    CommandIDs.gitClone,
-    CommandIDs.gitAddRemote
-  ].forEach(command => {
-    menu.addItem({ command });
-  });
-
-  const tutorial = new Menu({ commands });
-  tutorial.title.label = ' Tutorial ';
-  RESOURCES.map(args => {
-    tutorial.addItem({
-      args,
-      command: CommandIDs.gitOpenUrl
-    });
-  });
-  menu.addItem({ type: 'submenu', submenu: tutorial });
-
-  menu.addItem({ type: 'separator' });
-
-  menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
-
-  return menu;
 }

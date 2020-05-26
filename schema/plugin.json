@@ -23,6 +23,12 @@
       "description": "Disable all branch operations (new, switch) when there are changed/staged files",
       "default": false
     },
+    "displayStatus": {
+      "type": "boolean",
+      "title": "Display Git status updates",
+      "description": "Display Git extension status updates in the JupyterLab status bar. If true, the extension displays status updates in the JupyterLab status bar, such as when pulling and pushing changes, switching branches, and polling for changes. Depending on the level of extension activity, some users may find the status updates distracting. In which case, setting this to false should reduce visual noise.",
+      "default": true
+    },
     "historyCount": {
       "type": "integer",
       "title": "History count",
