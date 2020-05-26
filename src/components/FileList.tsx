@@ -359,7 +359,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 <React.Fragment>
                   <ActionButton
                     className={hiddenButtonStyle}
-                    iconName={'open-file'}
+                    iconName={'git-open-file'}
                     title={'Open this file'}
                     onClick={openFile}
                   />
@@ -433,7 +433,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 <React.Fragment>
                   <ActionButton
                     className={hiddenButtonStyle}
-                    iconName={'open-file'}
+                    iconName={'git-open-file'}
                     title={'Open this file'}
                     onClick={openFile}
                   />
@@ -501,7 +501,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 <React.Fragment>
                   <ActionButton
                     className={hiddenButtonStyle}
-                    iconName={'open-file'}
+                    iconName={'git-open-file'}
                     title={'Open this file'}
                     onClick={async () => {
                       openListedFile(file, this.props.model);
@@ -560,7 +560,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           let actions: JSX.Element = (
             <ActionButton
               className={hiddenButtonStyle}
-              iconName={'open-file'}
+              iconName={'git-open-file'}
               title={'Open this file'}
               onClick={openFile}
             />
@@ -576,7 +576,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               <React.Fragment>
                 <ActionButton
                   className={hiddenButtonStyle}
-                  iconName={'open-file'}
+                  iconName={'git-open-file'}
                   title={'Open this file'}
                   onClick={openFile}
                 />
@@ -602,7 +602,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               <React.Fragment>
                 <ActionButton
                   className={hiddenButtonStyle}
-                  iconName={'open-file'}
+                  iconName={'git-open-file'}
                   title={'Open this file'}
                   onClick={openFile}
                 />

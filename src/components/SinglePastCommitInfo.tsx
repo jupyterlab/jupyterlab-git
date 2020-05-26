@@ -160,27 +160,21 @@ export class SinglePastCommitInfo extends React.Component<
       <div>
         <div className={commitClass}>
           <div className={commitOverviewNumbersClass}>
-            <span>
-              <fileIcon.react
-                className={iconClass}
-                tag="span"
-                title="# Files Changed"
-              />
+            <span title="# Files Changed">
+              <fileIcon.react className={iconClass} tag="span" />
               {this.state.numFiles}
             </span>
-            <span>
+            <span title="# Insertions">
               <insertionsMadeIcon.react
                 className={classes(iconClass, insertionsIconClass)}
-                tag="div"
-                title="# Insertions"
+                tag="span"
               />
               {this.state.insertions}
             </span>
-            <span>
+            <span title="# Deletions">
               <deletionsMadeIcon.react
                 className={classes(iconClass, deletionsIconClass)}
-                tag="div"
-                title="# Deletions"
+                tag="span"
               />
               {this.state.deletions}
             </span>

@@ -18,6 +18,7 @@ import {
   wrapperClass
 } from '../style/BranchMenu';
 import { NewBranchDialog } from './NewBranchDialog';
+import { branchIcon } from '../style/icons';
 
 const CHANGES_ERR_MSG =
   'The current branch contains files with uncommitted changes. Please commit or discard these changes before switching to or creating another branch.';
@@ -185,7 +186,7 @@ export class BranchMenu extends React.Component<
         key={branch.name}
         onClick={this._onBranchClickFactory(branch.name)}
       >
-        <span className={listItemIconClass} />
+        <branchIcon.react className={listItemIconClass} tag="span" />
         {branch.name}
       </ListItem>
     );

@@ -31,6 +31,7 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
+import { branchIcon } from '../style/icons';
 
 const BRANCH_DESC = {
   current:
@@ -278,7 +279,7 @@ export class NewBranchDialog extends React.Component<
         key={branch.name}
         onClick={this._onBranchClickFactory(branch.name)}
       >
-        <span className={classes(listItemIconClass, 'jp-Icon-16')} />
+        <branchIcon.react className={listItemIconClass} tag="span" />
         <div className={listItemContentClass}>
           <p
             className={classes(

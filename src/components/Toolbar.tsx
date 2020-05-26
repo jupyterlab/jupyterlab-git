@@ -1,17 +1,15 @@
-import * as React from 'react';
-import { classes } from 'typestyle';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-
 import {
-  // NOTE: keep in alphabetical order
-  branchIconClass,
-  closeMenuIconClass,
-  openMenuIconClass,
-  pullButtonClass,
-  pushButtonClass,
-  refreshButtonClass,
-  repoIconClass,
+  caretDownIcon,
+  caretUpIcon,
+  refreshIcon
+} from '@jupyterlab/ui-components';
+import * as React from 'react';
+import { classes } from 'typestyle';
+import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
+import {
+  spacer,
   toolbarButtonClass,
   toolbarClass,
   toolbarMenuButtonClass,
@@ -23,9 +21,10 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
+import { IGitExtension } from '../tokens';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
-import { IGitExtension } from '../tokens';
+import { ActionButton } from './ActionButton';
 import { BranchMenu } from './BranchMenu';
 
 /**
@@ -177,24 +176,24 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   private _renderTopNav(): React.ReactElement {
     return (
       <div className={toolbarNavClass}>
-        <button
-          className={classes(toolbarButtonClass, pullButtonClass, 'jp-Icon-16')}
-          title={'Pull latest changes'}
+        <span className={spacer} />
+        <ActionButton
+          className={toolbarButtonClass}
+          iconName={pullIcon.name}
           onClick={this._onPullClick}
+          title={'Pull latest changes'}
         />
-        <button
-          className={classes(toolbarButtonClass, pushButtonClass, 'jp-Icon-16')}
-          title={'Push committed changes'}
+        <ActionButton
+          className={toolbarButtonClass}
+          iconName={pushIcon.name}
           onClick={this._onPushClick}
+          title={'Push committed changes'}
         />
-        <button
-          className={classes(
-            toolbarButtonClass,
-            refreshButtonClass,
-            'jp-Icon-16'
-          )}
-          title={'Refresh the repository to detect local and remote changes'}
+        <ActionButton
+          className={toolbarButtonClass}
+          iconName={refreshIcon.name}
           onClick={this._onRefreshClick}
+          title={'Refresh the repository to detect local and remote changes'}
         />
       </div>
     );
@@ -214,26 +213,13 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           title={`Current repository: ${this.state.repository}`}
           onClick={this._onRepositoryClick}
         >
-          <span
-            className={classes(
-              toolbarMenuButtonIconClass,
-              repoIconClass,
-              'jp-Icon-16'
-            )}
-          />
+          <desktopIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
             <p className={toolbarMenuButtonSubtitleClass}>
               {PathExt.basename(this.state.repository)}
             </p>
           </div>
-          {/*<span
-            className={classes(
-              toolbarMenuButtonIconClass,
-              this.state.repoMenu ? closeMenuIconClass : openMenuIconClass,
-              'jp-Icon-16'
-            )}
-          />*/}
         </button>
         {this.state.repoMenu ? null : null}
       </div>
@@ -259,26 +245,18 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           title={`Change the current branch: ${this.state.branch}`}
           onClick={this._onBranchClick}
         >
-          <span
-            className={classes(
-              toolbarMenuButtonIconClass,
-              branchIconClass,
-              'jp-Icon-16'
-            )}
-          />
+          <branchIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
             <p className={toolbarMenuButtonSubtitleClass}>
               {this.state.branch}
             </p>
           </div>
-          <span
-            className={classes(
-              toolbarMenuButtonIconClass,
-              this.state.branchMenu ? closeMenuIconClass : openMenuIconClass,
-              'jp-Icon-16'
-            )}
-          />
+          {this.state.branchMenu ? (
+            <caretUpIcon.react className={toolbarMenuButtonIconClass} />
+          ) : (
+            <caretDownIcon.react className={toolbarMenuButtonIconClass} />
+          )}
         </button>
         {this.state.branchMenu ? (
           <BranchMenu

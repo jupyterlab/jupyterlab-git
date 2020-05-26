@@ -76,21 +76,6 @@ export const deletionsIconClass = style({
   }
 });
 
-export const diffIconClass = style({
-  backgroundColor: 'transparent',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  backgroundImage: 'var(--jp-icon-diff)',
-  border: 'none',
-  outline: 'none',
-  width: '2px'
-});
-
-export const revertButtonClass = style({
-  backgroundImage: 'var(--jp-icon-rewind)',
-  marginLeft: '6px'
-});
-
 export const fileListClass = style({
   paddingLeft: 0
 });
