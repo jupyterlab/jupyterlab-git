@@ -162,7 +162,7 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
   }
 
   /**
-   * Based on the Diff Context , calls the server API with the revant paremeters
+   * Based on the Diff Context , calls the server API with the revant parameters
    * to
    * @param diffContext the context in which to perform the diff
    */
