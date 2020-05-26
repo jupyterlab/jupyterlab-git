@@ -55,5 +55,6 @@ export const changeStageButtonStyle = style({
   height: '13px',
   width: '12px',
   border: 'none',
-  outline: 'none'
+  outline: 'none',
+  paddingLeft: '0px'
 });

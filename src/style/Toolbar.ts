@@ -106,6 +106,12 @@ export const toolbarButtonClass = style({
     },
     '&:active': {
       backgroundColor: 'var(--jp-layout-color3)'
+    },
+
+    '& span': {
+      // Set icon width and centers it
+      margin: 'auto',
+      width: '16px'
     }
   }
 });

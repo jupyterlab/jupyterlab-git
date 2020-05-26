@@ -39,7 +39,7 @@ export const FilePath: React.FunctionComponent<IFilePathProps> = (
     <React.Fragment>
       <LabIcon.resolveReact
         icon={props.filetype.icon}
-        iconClass={classes(props.filetype.iconClass, fileIconStyle)}
+        className={classes(props.filetype.iconClass, fileIconStyle)}
         elementPosition="center"
         tag="span"
       />

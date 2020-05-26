@@ -3,8 +3,7 @@ import { style } from 'typestyle';
 export const fileIconStyle = style({
   flex: '0 0 auto',
   marginRight: '4px',
-  minHeight: '16px',
-  padding: '0px 8px'
+  minHeight: '16px'
 });
 
 export const fileLabelStyle = style({
