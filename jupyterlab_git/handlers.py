@@ -11,6 +11,11 @@ from notebook.utils import url_path_join as ujoin, url2path
 
 from .git import DEFAULT_REMOTE_NAME
 
+
+# Git configuration options exposed through the REST API
+ALLOWED_OPTIONS = ['user.name', 'user.email']
+
+
 class GitHandler(APIHandler):
     """
     Top-level parent class.
@@ -514,7 +519,10 @@ class GitConfigHandler(GitHandler):
         data = self.get_json_body()
         top_repo_path = data["path"]
         options = data.get("options", {})
+        filtered_options = {k: v for k, v in options.items() if k in ALLOWED_OPTIONS}
         response = await self.git.config(top_repo_path, **options)
+        if "options" in response:
+            response["options"] = {k:v for k, v in response["options"] if k in ALLOWED_OPTIONS}
 
         if response["code"] != 0:
             self.set_status(500)

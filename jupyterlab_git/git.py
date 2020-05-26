@@ -12,8 +12,6 @@ import tornado.locks
 import datetime
 
 
-# Git configuration options exposed through the REST API
-ALLOWED_OPTIONS = ['user.name', 'user.email', 'push.default', 'remote.pushdefault']
 # Regex pattern to capture (key, value) of Git configuration options.
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
 CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
@@ -153,9 +151,7 @@ class Git:
 
         if len(kwargs):
             output = []
-            for k, v in filter(
-                lambda t: True if t[0] in ALLOWED_OPTIONS else False, kwargs.items()
-            ):
+            for k, v in kwargs.items():
                 cmd = ["git", "config", "--add", k, v]
                 code, out, err = await execute(cmd, cwd=top_repo_path)
                 output.append(out.strip())
@@ -177,7 +173,7 @@ class Git:
             else:
                 raw = output.strip()
                 s = CONFIG_PATTERN.split(raw)
-                response["options"] = {k:v for k, v in zip(s[1::2], s[2::2]) if k in ALLOWED_OPTIONS}
+                response["options"] = {k:v for k, v in zip(s[1::2], s[2::2])}
 
         return response
 
