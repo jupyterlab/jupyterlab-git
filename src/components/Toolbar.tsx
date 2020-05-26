@@ -179,19 +179,19 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <span className={spacer} />
         <ActionButton
           className={toolbarButtonClass}
-          iconName={pullIcon.name}
+          icon={pullIcon}
           onClick={this._onPullClick}
           title={'Pull latest changes'}
         />
         <ActionButton
           className={toolbarButtonClass}
-          iconName={pushIcon.name}
+          icon={pushIcon}
           onClick={this._onPushClick}
           title={'Push committed changes'}
         />
         <ActionButton
           className={toolbarButtonClass}
-          iconName={refreshIcon.name}
+          icon={refreshIcon}
           onClick={this._onRefreshClick}
           title={'Refresh the repository to detect local and remote changes'}
         />

@@ -16,9 +16,9 @@ export interface IActionButtonProps {
    */
   disabled?: boolean;
   /**
-   * Icon name
+   * Icon
    */
-  iconName: string;
+  icon: LabIcon.IMaybeResolvable;
   /**
    * Button title
    */
@@ -37,14 +37,15 @@ export interface IActionButtonProps {
 export const ActionButton: React.FunctionComponent<IActionButtonProps> = (
   props: IActionButtonProps
 ) => {
+  const { disabled, className, title, onClick, icon } = props;
   return (
     <button
-      disabled={props.disabled}
-      className={classes(actionButtonStyle, props.className)}
-      title={props.title}
-      onClick={props.onClick}
+      disabled={disabled}
+      className={classes(actionButtonStyle, className)}
+      title={title}
+      onClick={onClick}
     >
-      <LabIcon.resolveReact icon={props.iconName} />
+      {LabIcon.resolveReact({ icon })}
     </button>
   );
 };

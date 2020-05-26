@@ -1,70 +1,71 @@
 import { LabIcon } from '@jupyterlab/ui-components';
+
 // icon svg import statements
-import deletionsMadeSvg from '../../style/images/deletions-made-icon.svg';
-import desktopSvg from '../../style/images/desktop.svg';
-import diffSvg from '../../style/images/diff-hover.svg';
-import discardSvg from '../../style/images/discard.svg';
-import branchSvg from '../../style/images/git-branch.svg';
-import gitSvg from '../../style/images/git-icon.svg';
-import pullSvg from '../../style/images/git-pull.svg';
-import pushSvg from '../../style/images/git-push.svg';
-import insertionsMadeSvg from '../../style/images/insertions-made-icon.svg';
-import removeSvg from '../../style/images/move-file-down.svg';
-import addSvg from '../../style/images/move-file-up.svg';
-import openSvg from '../../style/images/open-file.svg';
-import rewindSvg from '../../style/images/rewind.svg';
-import cloneSvg from '../../style/images/git-clone-icon.svg';
+import addSvg from '../../style/icons/add.svg';
+import branchSvg from '../../style/icons/branch.svg';
+import cloneSvg from '../../style/icons/clone.svg';
+import deletionsMadeSvg from '../../style/icons/deletions.svg';
+import desktopSvg from '../../style/icons/desktop.svg';
+import diffSvg from '../../style/icons/diff.svg';
+import discardSvg from '../../style/icons/discard.svg';
+import gitSvg from '../../style/icons/git.svg';
+import insertionsMadeSvg from '../../style/icons/insertions.svg';
+import openSvg from '../../style/icons/open-file.svg';
+import pullSvg from '../../style/icons/pull.svg';
+import pushSvg from '../../style/icons/push.svg';
+import removeSvg from '../../style/icons/remove.svg';
+import rewindSvg from '../../style/icons/rewind.svg';
 
 export const gitIcon = new LabIcon({ name: 'git', svgstr: gitSvg });
 export const deletionsMadeIcon = new LabIcon({
-  name: 'git-deletionsMade',
+  name: 'git:deletions',
   svgstr: deletionsMadeSvg
 });
 export const insertionsMadeIcon = new LabIcon({
-  name: 'git-insertionsMade',
+  name: 'git:insertions',
   svgstr: insertionsMadeSvg
 });
 export const addIcon = new LabIcon({
-  name: 'git-add',
+  name: 'git:add',
   svgstr: addSvg
 });
 export const branchIcon = new LabIcon({
-  name: 'git-branch',
+  name: 'git:branch',
   svgstr: branchSvg
 });
 export const cloneIcon = new LabIcon({
-  name: 'git-clone',
+  name: 'git:clone',
   svgstr: cloneSvg
 });
 export const desktopIcon = new LabIcon({
-  name: 'git-desktop',
+  name: 'git:desktop',
   svgstr: desktopSvg
 });
 export const diffIcon = new LabIcon({
-  name: 'git-diff',
+  name: 'git:diff',
   svgstr: diffSvg
 });
 export const discardIcon = new LabIcon({
-  name: 'git-discard',
+  name: 'git:discard',
   svgstr: discardSvg
 });
 export const openIcon = new LabIcon({
-  name: 'git-open-file',
+  name: 'git:open-file',
   svgstr: openSvg
 });
 export const pullIcon = new LabIcon({
-  name: 'git-pull',
+  name: 'git:pull',
   svgstr: pullSvg
 });
 export const pushIcon = new LabIcon({
-  name: 'git-push',
+  name: 'git:push',
   svgstr: pushSvg
 });
 export const removeIcon = new LabIcon({
-  name: 'git-remove',
+  name: 'git:remove',
   svgstr: removeSvg
 });
 export const rewindIcon = new LabIcon({
-  name: 'git-rewind',
+  name: 'git:rewind',
   svgstr: rewindSvg
 });

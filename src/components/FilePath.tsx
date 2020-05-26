@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { classes } from 'typestyle';
 import {
-  // fileIconStyle,
+  fileIconStyle,
   fileLabelStyle,
   folderLabelStyle
 } from '../style/FilePathStyle';
@@ -39,7 +39,7 @@ export const FilePath: React.FunctionComponent<IFilePathProps> = (
     <React.Fragment>
       <LabIcon.resolveReact
         icon={props.filetype.icon}
-        iconClass={classes(props.filetype.iconClass, 'jp-Icon')}
+        iconClass={classes(props.filetype.iconClass, fileIconStyle)}
         elementPosition="center"
         tag="span"
       />

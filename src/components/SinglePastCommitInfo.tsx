@@ -1,7 +1,13 @@
 import * as React from 'react';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { fileIcon } from '@jupyterlab/ui-components';
-import { insertionsMadeIcon, deletionsMadeIcon } from '../style/icons';
+import {
+  insertionsMadeIcon,
+  deletionsMadeIcon,
+  discardIcon,
+  rewindIcon,
+  diffIcon
+} from '../style/icons';
 import { classes } from 'typestyle/';
 import { GitExtension } from '../model';
 import { Git } from '../tokens';
@@ -185,13 +191,13 @@ export class SinglePastCommitInfo extends React.Component<
             Changed
             <ActionButton
               className={actionButtonClass}
-              iconName="git-discard"
+              icon={discardIcon}
               title="Revert changes introduced by this commit"
               onClick={this._onRevertClick}
             />
             <ActionButton
               className={actionButtonClass}
-              iconName="git-rewind"
+              icon={rewindIcon}
               title="Discard changes introduced *after* this commit (hard reset)"
               onClick={this._onResetClick}
             />
@@ -241,7 +247,7 @@ export class SinglePastCommitInfo extends React.Component<
       >
         <FilePath filepath={path} filetype={file.type} />
         {flg ? (
-          <ActionButton iconName="git-diff" title="View file changes" />
+          <ActionButton icon={diffIcon} title="View file changes" />
         ) : null}
       </li>
     );
