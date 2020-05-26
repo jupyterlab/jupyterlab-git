@@ -137,7 +137,14 @@ async function activate(
 }
 
 /**
- * Add commands and menu items
+ * Adds commands and menu items.
+ *
+ * @private
+ * @param app - Jupyter front end
+ * @param gitExtension - Git extension instance
+ * @param fileBrowser - file browser instance
+ * @param settings - extension settings
+ * @returns menu
  */
 function createGitMenu(
   app: JupyterFrontEnd,
