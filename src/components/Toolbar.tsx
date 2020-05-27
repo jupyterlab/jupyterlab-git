@@ -299,6 +299,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           <BranchMenu
             model={this.props.model}
             branching={this.props.branching}
+            suspend={this.props.suspend}
           />
         ) : null}
       </div>
