@@ -129,8 +129,8 @@ async def execute(
             )
         logger.debug({
             "code": code,
-            "error": error[:MAX_LOG_MESSAGE],
-            "output": output[:MAX_LOG_MESSAGE]
+            "error": error if len(error) < MAX_LOG_MESSAGE else error[:MAX_LOG_MESSAGE] + "...",
+            "output": output if len(output) < MAX_LOG_MESSAGE else output[:MAX_LOG_MESSAGE] + "...",
         })
     finally:
         execution_lock.release()
