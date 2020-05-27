@@ -511,8 +511,10 @@ class GitPushHandler(GitHandler):
                     "remotes": remotes  # Returns the list of known remotes
                 }
 
-        if response["code"] != 0:
-            self.set_status(500)
+        # TODO: once https://github.com/jupyterlab/jupyterlab-git/pull/630 is merged
+        #   because this has implication on credentials request in the frontend
+        # if response["code"] != 0:
+        #     self.set_status(500)
 
         self.finish(json.dumps(response))
 
