@@ -119,7 +119,8 @@ describe('BranchMenu', () => {
     it('should return a new instance', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const menu = new BranchMenu(props);
       expect(menu).toBeInstanceOf(BranchMenu);
@@ -128,7 +129,8 @@ describe('BranchMenu', () => {
     it('should set the default menu filter to an empty string', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const menu = new BranchMenu(props);
       expect(menu.state.filter).toEqual('');
@@ -137,7 +139,8 @@ describe('BranchMenu', () => {
     it('should set the default flag indicating whether to show a dialog to create a new branch to `false`', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const menu = new BranchMenu(props);
       expect(menu.state.branchDialog).toEqual(false);
@@ -157,7 +160,8 @@ describe('BranchMenu', () => {
     it('should display placeholder text for the menu filter', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       const node = component.find('input[type="text"]').first();
@@ -167,7 +171,8 @@ describe('BranchMenu', () => {
     it('should set a `title` attribute on the input element to filter a branch menu', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       const node = component.find('input[type="text"]').first();
@@ -177,7 +182,8 @@ describe('BranchMenu', () => {
     it('should display a button to clear the menu filter once a filter is provided', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       component.setState({
@@ -190,7 +196,8 @@ describe('BranchMenu', () => {
     it('should set a `title` on the button to clear the menu filter', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       component.setState({
@@ -206,7 +213,8 @@ describe('BranchMenu', () => {
     it('should display a button to create a new branch', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -216,7 +224,8 @@ describe('BranchMenu', () => {
     it('should set a `title` attribute on the button to create a new branch', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -226,7 +235,8 @@ describe('BranchMenu', () => {
     it('should display a list of branches', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       const nodes = component.find(`.${listItemClass}`);
@@ -248,7 +258,8 @@ describe('BranchMenu', () => {
     it('should set a `title` attribute for each displayed branch', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       const nodes = component.find(`.${listItemClass}`);
@@ -264,7 +275,8 @@ describe('BranchMenu', () => {
     it('should not, by default, show a dialog to create a new branch', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       const node = component.find('NewBranchDialog').first();
@@ -274,7 +286,8 @@ describe('BranchMenu', () => {
     it('should show a dialog to create a new branch when the flag indicating whether to show the dialog is `true`', () => {
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       component.setState({
@@ -300,7 +313,8 @@ describe('BranchMenu', () => {
 
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       const nodes = component.find(`.${listItemClass}`);
@@ -317,7 +331,8 @@ describe('BranchMenu', () => {
 
       const props = {
         model: model,
-        branching: true
+        branching: true,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
       const nodes = component.find(`.${listItemClass}`);
@@ -349,7 +364,8 @@ describe('BranchMenu', () => {
 
       const props = {
         model: model,
-        branching: false
+        branching: false,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
 
@@ -366,7 +382,8 @@ describe('BranchMenu', () => {
 
       const props = {
         model: model,
-        branching: true
+        branching: true,
+        suspend: false
       };
       const component = shallow(<BranchMenu {...props} />);
 
