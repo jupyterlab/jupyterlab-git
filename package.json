@@ -13,7 +13,7 @@
     "jupyterlab-extension"
   ],
   "scripts": {
-    "build": "jlpm install && tsc",
+    "build": "tsc",
     "build:labextension": "jlpm build && jlpm clean:labextension && mkdirp jupyterlab_git/labextension && cd jupyterlab_git/labextension && npm pack ../..",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "clean:more": "jlpm clean && rimraf build dist MANIFEST",
@@ -23,6 +23,7 @@
     "lint": "eslint . --ext .ts,.tsx --fix",
     "test": "jest",
     "eslint-check": "eslint . --ext .ts,.tsx",
+    "prepare": "jlpm run build",
     "watch": "tsc -w"
   },
   "files": [
