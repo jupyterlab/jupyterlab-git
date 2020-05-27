@@ -233,6 +233,10 @@ export const listItemBoldTitleClass = style({
   fontWeight: 700
 });
 
+export const errorMessageClass = style({
+  color: '#ff0000'
+});
+
 export const actionsWrapperClass = style({
   padding: '15px!important',
 

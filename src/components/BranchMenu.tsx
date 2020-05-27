@@ -280,6 +280,7 @@ export class BranchMenu extends React.Component<
     return (
       <NewBranchDialog
         open={this.state.branchDialog}
+        suspend={this.props.suspend}
         model={this.props.model}
         onClose={this._onNewBranchDialogClose}
       />
@@ -407,7 +408,6 @@ export class BranchMenu extends React.Component<
      * @returns promise which resolves upon attempting to switch branches
      */
     async function onClick(): Promise<void> {
-      let result: Array<any>;
       if (!self.props.branching) {
         showErrorMessage('Switching branches is disabled', CHANGES_ERR_MSG);
         return;
@@ -415,6 +415,8 @@ export class BranchMenu extends React.Component<
       const opts = {
         branchname: branch
       };
+
+      let result: Array<any>;
       self._suspend(true);
       try {
         result = await Promise.all([
