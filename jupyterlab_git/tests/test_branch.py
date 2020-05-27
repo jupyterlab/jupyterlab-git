@@ -1,4 +1,5 @@
 # python lib
+import logging
 import os
 from unittest.mock import Mock, call, patch
 
@@ -6,7 +7,7 @@ import pytest
 import tornado
 
 # local lib
-from jupyterlab_git.git import Git
+from jupyterlab_git.git import Git, __name__ as git_name
 
 from .testutils import FakeContentManager, maybe_future
 
@@ -44,7 +45,9 @@ async def test_get_current_branch_success():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "symbolic-ref", "HEAD"], cwd=os.path.join("/bin", "test_curr_path")
+            ["git", "symbolic-ref", "HEAD"],
+            cwd=os.path.join("/bin", "test_curr_path"),
+            logger=logging.getLogger(git_name)
         )
         assert "feature-foo" == actual_response
 
@@ -76,7 +79,7 @@ async def test_checkout_branch_noref_success():
 
             cmd = ["git", "checkout", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=os.path.join("/bin", "test_curr_path")
+                cmd, cwd=os.path.join("/bin", "test_curr_path"), logger=logging.getLogger(git_name)
             )
 
             assert {"code": rc, "message": stdout_message} == actual_response
@@ -110,7 +113,7 @@ async def test_checkout_branch_noref_failure():
 
             cmd = ["git", "checkout", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=os.path.join("/bin", "test_curr_path")
+                cmd, cwd=os.path.join("/bin", "test_curr_path"), logger=logging.getLogger(git_name)
             )
 
             assert {
@@ -149,7 +152,7 @@ async def test_checkout_branch_remoteref_success():
 
             cmd = ["git", "checkout", "--track", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=os.path.join("/bin", "test_curr_path")
+                cmd, cwd=os.path.join("/bin", "test_curr_path"), logger=logging.getLogger(git_name)
             )
 
             assert {"code": rc, "message": stdout_message} == actual_response
@@ -186,7 +189,7 @@ async def test_checkout_branch_headsref_failure():
 
             cmd = ["git", "checkout", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=os.path.join("/bin", "test_curr_path")
+                cmd, cwd=os.path.join("/bin", "test_curr_path"), logger=logging.getLogger(git_name)
             )
             assert {
                 "code": rc,
@@ -221,7 +224,7 @@ async def test_checkout_branch_headsref_success():
             # Then
             cmd = ["git", "checkout", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=os.path.join("/bin", "test_curr_path")
+                cmd, cwd=os.path.join("/bin", "test_curr_path"), logger=logging.getLogger(git_name)
             )
             assert {"code": rc, "message": stdout_message} == actual_response
 
@@ -254,7 +257,7 @@ async def test_checkout_branch_remoteref_failure():
             # Then
             cmd = ["git", "checkout", "--track", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=os.path.join("/bin", "test_curr_path")
+                cmd, cwd=os.path.join("/bin", "test_curr_path"), logger=logging.getLogger(git_name)
             )
             assert {
                 "code": rc,
@@ -283,6 +286,7 @@ async def test_get_branch_reference_success():
         mock_execute.assert_called_once_with(
             ["git", "rev-parse", "--symbolic-full-name", branch],
             cwd=os.path.join("/bin", "test_curr_path"),
+            logger=logging.getLogger(git_name),
         )
         assert actual_response == reference
 
@@ -313,6 +317,7 @@ async def test_get_branch_reference_failure():
         mock_execute.assert_called_once_with(
             ["git", "rev-parse", "--symbolic-full-name", branch],
             cwd=os.path.join("/bin", "test_curr_path"),
+            logger=logging.getLogger(git_name),
         )
         assert actual_response is None
 
@@ -337,7 +342,7 @@ async def test_get_current_branch_failure():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "symbolic-ref", "HEAD"], cwd=os.path.join("/bin", "test_curr_path")
+            ["git", "symbolic-ref", "HEAD"], cwd=os.path.join("/bin", "test_curr_path"), logger=logging.getLogger(git_name)
         )
         assert (
             "Error [fatal: Not a git repository (or any of the parent directories): .git] "
@@ -367,7 +372,7 @@ async def test_get_current_branch_detached_success():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "branch", "-a"], cwd=os.path.join("/bin", "test_curr_path")
+            ["git", "branch", "-a"], cwd=os.path.join("/bin", "test_curr_path"), logger=logging.getLogger(git_name)
         )
         assert "(HEAD detached at origin/feature-foo)" == actual_response
 
@@ -392,7 +397,7 @@ async def test_get_current_branch_detached_failure():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "branch", "-a"], cwd=os.path.join("/bin", "test_curr_path")
+            ["git", "branch", "-a"], cwd=os.path.join("/bin", "test_curr_path"), logger=logging.getLogger(git_name)
         )
         assert (
             "Error [fatal: Not a git repository (or any of the parent directories): .git] "
@@ -424,6 +429,7 @@ async def test_get_upstream_branch_success(branch, upstream):
         mock_execute.assert_called_once_with(
             ["git", "rev-parse", "--abbrev-ref", "{}@{{upstream}}".format(branch)],
             cwd=os.path.join("/bin", "test_curr_path"),
+            logger=logging.getLogger(git_name),
         )
         assert upstream == actual_response
 
@@ -472,6 +478,7 @@ async def test_get_upstream_branch_failure(outputs, message):
                 call(
                     ["git", "rev-parse", "--abbrev-ref", "blah@{upstream}"],
                     cwd=os.path.join("/bin", "test_curr_path"),
+                    logger=logging.getLogger(git_name),
                 )
             ],
             any_order=False,
@@ -494,6 +501,7 @@ async def test_get_tag_success():
         mock_execute.assert_called_once_with(
             ["git", "describe", "--tags", "abcdefghijklmnopqrstuvwxyz01234567890123"],
             cwd=os.path.join("/bin", "test_curr_path"),
+            logger=logging.getLogger(git_name),
         )
         assert "v0.3.0" == actual_response
 
@@ -538,6 +546,7 @@ async def test_get_tag_failure():
                 call(
                     ["git", "describe", "--tags", "blah"],
                     cwd=os.path.join("/bin", "test_curr_path"),
+                    logger=logging.getLogger(git_name),
                 ),
                 call(
                     [
@@ -547,6 +556,7 @@ async def test_get_tag_failure():
                         "01234567899999abcdefghijklmnopqrstuvwxyz",
                     ],
                     cwd=os.path.join("/bin", "test_curr_path"),
+                    logger=logging.getLogger(git_name),
                 ),
             ],
             any_order=False,
@@ -570,6 +580,7 @@ async def test_no_tags():
         mock_execute.assert_called_once_with(
             ["git", "describe", "--tags", "768c79ad661598889f29bdf8916f4cc488f5062a"],
             cwd="/path/foo",
+            logger=logging.getLogger(git_name),
         )
         assert actual_response is None
 
@@ -666,6 +677,7 @@ async def test_branch_success():
                         "refs/heads/",
                     ],
                     cwd=os.path.join("/bin", "test_curr_path"),
+                    logger=logging.getLogger(git_name),
                 ),
                 # call to get refs/remotes
                 call(
@@ -676,6 +688,7 @@ async def test_branch_success():
                         "refs/remotes/",
                     ],
                     cwd=os.path.join("/bin", "test_curr_path"),
+                    logger=logging.getLogger(git_name),
                 ),
             ],
             any_order=False,
@@ -714,7 +727,7 @@ async def test_branch_failure():
 
         # Then
         mock_execute.assert_called_once_with(
-            expected_cmd, cwd=os.path.join("/bin", "test_curr_path")
+            expected_cmd, cwd=os.path.join("/bin", "test_curr_path"), logger=logging.getLogger(git_name)
         )
 
         assert expected_response == actual_response
@@ -793,6 +806,7 @@ async def test_branch_success_detached_head():
         )
 
         # Then
+        git_logger = logging.getLogger(git_name)
         mock_execute.assert_has_calls(
             [
                 # call to get refs/heads
@@ -804,15 +818,17 @@ async def test_branch_success_detached_head():
                         "refs/heads/",
                     ],
                     cwd=os.path.join("/bin", "test_curr_path"),
+                    logger=git_logger,
                 ),
                 # call to get current branch
                 call(
                     ["git", "symbolic-ref", "HEAD"],
                     cwd=os.path.join("/bin", "test_curr_path"),
+                    logger=git_logger,
                 ),
                 # call to get current branch name given a detached head
                 call(
-                    ["git", "branch", "-a"], cwd=os.path.join("/bin", "test_curr_path")
+                    ["git", "branch", "-a"], cwd=os.path.join("/bin", "test_curr_path"), logger=git_logger
                 ),
                 # call to get refs/remotes
                 call(
@@ -823,6 +839,7 @@ async def test_branch_success_detached_head():
                         "refs/remotes/",
                     ],
                     cwd=os.path.join("/bin", "test_curr_path"),
+                    logger=git_logger,
                 ),
             ],
             any_order=False,

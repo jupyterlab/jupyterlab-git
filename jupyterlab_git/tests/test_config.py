@@ -24,7 +24,7 @@ class TestConfig(ServerTest):
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "config", "--list"], cwd="test_path"
+            ["git", "config", "--list"], cwd="test_path", logger=self.notebook.log
         )
 
         assert response.status_code == 201
@@ -60,7 +60,7 @@ class TestConfig(ServerTest):
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "config", "--list"], cwd="test_path"
+            ["git", "config", "--list"], cwd="test_path", logger=self.notebook.log
         )
 
         assert response.status_code == 201
@@ -100,7 +100,7 @@ class TestConfig(ServerTest):
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "config", "--list"], cwd="test_path"
+            ["git", "config", "--list"], cwd="test_path", logger=self.notebook.log
         )
 
         assert response.status_code == 201
@@ -139,10 +139,12 @@ class TestConfig(ServerTest):
                 call(
                     ["git", "config", "--add", "user.email", "john.snow@iscoming.com"],
                     cwd="test_path",
+                    logger=self.notebook.log,
                 ),
                 call(
                     ["git", "config", "--add", "user.name", "John Snow"],
                     cwd="test_path",
+                    logger=self.notebook.log,
                 ),
             ],
             any_order=True,

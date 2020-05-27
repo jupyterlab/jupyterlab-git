@@ -1,4 +1,5 @@
 # python lib
+import logging
 import os
 from unittest.mock import Mock, call, patch
 
@@ -6,7 +7,7 @@ import pytest
 import tornado
 
 # local lib
-from jupyterlab_git.git import Git
+from jupyterlab_git.git import Git, __name__ as git_name
 
 from .testutils import FakeContentManager, maybe_future
 
@@ -113,6 +114,7 @@ async def test_detailed_log():
                 "f29660a2472e24164906af8653babeb48e4bf2ab",
             ],
             cwd=os.path.join("/bin", "test_curr_path"),
+            logger=logging.getLogger(git_name),
         )
 
         assert expected_response == actual_response

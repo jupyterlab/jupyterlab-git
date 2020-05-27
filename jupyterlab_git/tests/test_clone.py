@@ -1,10 +1,11 @@
+import logging
 import os
 from unittest.mock import Mock, call, patch
 
 import pytest
 import tornado
 
-from jupyterlab_git.git import Git
+from jupyterlab_git.git import Git, __name__ as git_name
 
 from .testutils import FakeContentManager, maybe_future
 
@@ -26,6 +27,7 @@ async def test_git_clone_success():
                 ["git", "clone", "ghjkhjkl"],
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+                logger=logging.getLogger(git_name),
             )
             assert {"code": 0} == actual_response
 
@@ -54,6 +56,7 @@ async def test_git_clone_failure_from_git():
                 ["git", "clone", "ghjkhjkl"],
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+                logger=logging.getLogger(git_name),
             )
             assert {
                 "code": 128,
@@ -81,6 +84,7 @@ async def test_git_clone_with_auth_success():
                 password="qwerty",
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
+                logger=logging.getLogger(git_name),
             )
             assert {"code": 0} == actual_response
 
@@ -112,6 +116,7 @@ async def test_git_clone_with_auth_wrong_repo_url_failure_from_git():
                 password="qwerty",
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
+                logger=logging.getLogger(git_name),
             )
             assert {
                 "code": 128,
@@ -150,6 +155,7 @@ async def test_git_clone_with_auth_auth_failure_from_git():
                 password="qwerty",
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
+                logger=logging.getLogger(git_name),
             )
             assert {
                 "code": 128,

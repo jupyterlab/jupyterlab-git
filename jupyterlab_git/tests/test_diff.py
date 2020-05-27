@@ -1,3 +1,4 @@
+import logging
 import os
 from subprocess import CalledProcessError
 from unittest.mock import Mock, call, patch
@@ -5,7 +6,7 @@ from unittest.mock import Mock, call, patch
 import pytest
 import tornado
 
-from jupyterlab_git.git import Git
+from jupyterlab_git.git import Git, __name__ as git_name
 
 from .testutils import FakeContentManager, maybe_future
 
@@ -42,6 +43,7 @@ async def test_changed_files_single_commit():
                 "-z",
             ],
             cwd="/bin",
+            logger=logging.getLogger(git_name),
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -61,7 +63,7 @@ async def test_changed_files_working_tree():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "--name-only", "-z"], cwd="/bin"
+            ["git", "diff", "HEAD", "--name-only", "-z"], cwd="/bin", logger=logging.getLogger(git_name)
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -81,7 +83,7 @@ async def test_changed_files_index():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "--staged", "HEAD", "--name-only", "-z"], cwd="/bin"
+            ["git", "diff", "--staged", "HEAD", "--name-only", "-z"], cwd="/bin", logger=logging.getLogger(git_name)
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -101,7 +103,7 @@ async def test_changed_files_two_commits():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"], cwd="/bin"
+            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"], cwd="/bin", logger=logging.getLogger(git_name)
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -119,7 +121,7 @@ async def test_changed_files_git_diff_error():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"], cwd="/bin"
+            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"], cwd="/bin", logger=logging.getLogger(git_name)
         )
         assert {"code": 128, "message": "error message"} == actual_response
 
@@ -176,6 +178,6 @@ async def test_is_binary_file(args, cli_result, cmd, expected):
             actual_response = await Git(FakeContentManager("/bin"))._is_binary(*args)
 
             # Then
-            mock_execute.assert_called_once_with(cmd, cwd="/bin")
+            mock_execute.assert_called_once_with(cmd, cwd="/bin", logger=logging.getLogger(git_name))
 
             assert actual_response == expected

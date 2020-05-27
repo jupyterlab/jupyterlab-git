@@ -23,7 +23,7 @@ class TestAddRemote(ServerTest):
 
         # Then
         command = ["git", "remote", "add", "origin", url]
-        mock_execute.assert_called_once_with(command, cwd=path)
+        mock_execute.assert_called_once_with(command, cwd=path, logger=self.notebook.log)
 
         assert response.status_code == 201
         payload = response.json()
@@ -46,7 +46,7 @@ class TestAddRemote(ServerTest):
 
         # Then
         command = ["git", "remote", "add", name, url]
-        mock_execute.assert_called_once_with(command, cwd=path)
+        mock_execute.assert_called_once_with(command, cwd=path, logger=self.notebook.log)
 
         assert response.status_code == 201
         payload = response.json()
@@ -74,5 +74,5 @@ class TestAddRemote(ServerTest):
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "remote", "add", "origin", url], cwd=path,
+            ["git", "remote", "add", "origin", url], cwd=path, logger=self.notebook.log,
         )

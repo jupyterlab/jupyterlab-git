@@ -222,8 +222,7 @@ class TestPush(ServerTest):
 
         # When
         body = {"current_path": path}
-        with assert_http_error(500, msg="fatal: The current branch foo has no upstream branch."):
-            self.tester.post(["push"], body=body)
+        response = self.tester.post(["push"], body=body)
 
         # Then
         mock_git.get_current_branch.assert_called_with(path)
@@ -231,6 +230,45 @@ class TestPush(ServerTest):
         mock_git.config.assert_called_with(path)
         mock_git.remote_show.assert_called_with(path)
         mock_git.push.assert_not_called()
+        
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload == {
+            "code": 128,
+            "message": "fatal: The current branch foo has no upstream branch.",
+            "remotes": list()
+        }
+
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
+    def test_push_handler_multipleupstream(self, mock_git):
+        # Given
+        remotes = ["origin", "upstream"]
+        mock_git.get_current_branch.return_value = maybe_future("foo")
+        mock_git.get_upstream_branch.return_value = maybe_future("")
+        mock_git.config.return_value = maybe_future({"options": dict()})
+        mock_git.remote_show.return_value = maybe_future({"remotes": remotes})
+        mock_git.push.return_value = maybe_future({"code": 0})
+
+        path = "test_path"
+
+        # When
+        body = {"current_path": path}
+        response = self.tester.post(["push"], body=body)
+
+        # Then
+        mock_git.get_current_branch.assert_called_with(path)
+        mock_git.get_upstream_branch.assert_called_with(path, "foo")
+        mock_git.config.assert_called_with(path)
+        mock_git.remote_show.assert_called_with(path)
+        mock_git.push.assert_not_called()
+        
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload == {
+            "code": 128,
+            "message": "fatal: The current branch foo has no upstream branch.",
+            "remotes": remotes
+        }
 
     @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
     def test_push_handler_noupstream_unique_remote(self, mock_git):
@@ -398,10 +436,12 @@ class TestDiffContent(ServerTest):
                 call(
                     ["git", "show", "{}:{}".format("previous", filename)],
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
+                    logger=self.notebook.log,
                 ),
                 call(
                     ["git", "show", "{}:{}".format("current", filename)],
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
+                    logger=self.notebook.log,
                 )
             ],
             any_order=True
@@ -444,6 +484,7 @@ class TestDiffContent(ServerTest):
                 call(
                     ["git", "show", "{}:{}".format("previous", filename)],
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
+                    logger=self.notebook.log,
                 )
             ]
         )
@@ -481,10 +522,12 @@ class TestDiffContent(ServerTest):
                 call(
                     ["git", "show", "{}:{}".format("previous", filename)],
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
+                    logger=self.notebook.log,
                 ),
                 call(
                     ["git", "show", "{}:{}".format("", filename)],
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
+                    logger=self.notebook.log,
                 )
             ],
             any_order=True

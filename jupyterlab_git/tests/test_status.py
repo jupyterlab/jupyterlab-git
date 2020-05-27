@@ -1,4 +1,5 @@
 # python lib
+import logging
 import os
 from unittest.mock import Mock, call, patch
 
@@ -6,7 +7,7 @@ import pytest
 import tornado
 
 # local lib
-from jupyterlab_git.git import Git
+from jupyterlab_git.git import Git, __name__ as git_name
 
 from .testutils import FakeContentManager, maybe_future
 
@@ -91,6 +92,7 @@ async def test_status(output, diff_output, expected):
                 call(
                     ["git", "status", "--porcelain", "-u", "-z"],
                     cwd=os.path.join(root, repository),
+                    logger=logging.getLogger(git_name),
                 ),
                 call(
                     [
@@ -102,6 +104,7 @@ async def test_status(output, diff_output, expected):
                         "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
                     ],
                     cwd=os.path.join(root, repository),
+                    logger=logging.getLogger(git_name),
                 ),
             ]
         )

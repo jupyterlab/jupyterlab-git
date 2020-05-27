@@ -1,10 +1,11 @@
+import logging
 import os
 from unittest.mock import Mock, call, patch
 
 import pytest
 import tornado
 
-from jupyterlab_git.git import Git
+from jupyterlab_git.git import Git, __name__ as git_name
 
 from .testutils import FakeContentManager, maybe_future
 
@@ -28,6 +29,7 @@ async def test_git_pull_fail():
                 ["git", "pull", "--no-commit"],
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+                logger=logging.getLogger(git_name),
             )
             assert {"code": 1, "message": "Authentication failed"} == actual_response
 
@@ -48,6 +50,7 @@ async def test_git_pull_with_conflict_fail():
                     ["git", "pull", "--no-commit"],
                     cwd="/bin/test_curr_path",
                     env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+                    logger=logging.getLogger(git_name),
                 )
             ])
             assert {"code": 1, "message": "Automatic merge failed; fix conflicts and then commit the result."} == actual_response
@@ -79,6 +82,7 @@ async def test_git_pull_with_auth_fail():
                 password="qwerty",
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
+                logger=logging.getLogger(git_name),
             )
             assert {
                 "code": 1,
@@ -104,6 +108,7 @@ async def test_git_pull_success():
                 ["git", "pull", "--no-commit"],
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+                logger=logging.getLogger(git_name),
             )
             assert {"code": 0} == actual_response
 
@@ -131,6 +136,7 @@ async def test_git_pull_with_auth_success():
                 password="qwerty",
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
+                logger=logging.getLogger(git_name),
             )
             assert {"code": 0} == actual_response
 
@@ -156,7 +162,8 @@ async def test_git_pull_with_auth_success_and_conflict_fail():
                     cwd="/bin/test_curr_path",
                     env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
                     username="asdf",
-                    password="qwerty"
+                    password="qwerty",
+                    logger=logging.getLogger(git_name),
                 )
             ])
             assert {"code": 1, "message": "Automatic merge failed; fix conflicts and then commit the result."} == actual_response
@@ -181,6 +188,7 @@ async def test_git_push_fail():
                 ["git", "push", "test_origin", "HEAD:test_master"],
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+                logger=logging.getLogger(git_name),
             )
             assert {"code": 1, "message": "Authentication failed"} == actual_response
 
@@ -212,6 +220,7 @@ async def test_git_push_with_auth_fail():
                 password="qwerty",
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
+                logger=logging.getLogger(git_name),
             )
             assert {
                 "code": 1,
@@ -239,6 +248,7 @@ async def test_git_push_success():
                 ["git", "push", ".", "HEAD:test_master"],
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+                logger=logging.getLogger(git_name),
             )
             assert {"code": 0} == actual_response
 
@@ -266,5 +276,6 @@ async def test_git_push_with_auth_success():
                 password="qwerty",
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
+                logger=logging.getLogger(git_name),
             )
             assert {"code": 0} == actual_response
