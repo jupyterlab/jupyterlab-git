@@ -861,11 +861,12 @@ class Git:
         if set_upstream:
             command.append("--set-upstream")
         command.extend([remote, branch])
+
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, _, error = await execute(
-                ["git", "push", remote, branch],
+                command,
                 username=auth["username"],
                 password=auth["password"],
                 cwd=os.path.join(self.root_dir, curr_fb_path),
@@ -875,7 +876,7 @@ class Git:
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             code, _, error = await execute(
-                ["git", "push", remote, branch],
+                command,
                 env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
                 logger=self.logger
