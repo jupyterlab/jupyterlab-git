@@ -2,6 +2,10 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import Modal from '@material-ui/core/Modal';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Portal from '@material-ui/core/Portal';
+import Snackbar from '@material-ui/core/Snackbar';
+import Slide from '@material-ui/core/Slide';
+import Alert from '@material-ui/lab/Alert';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import {
@@ -73,6 +77,30 @@ async function showGitOperationDialog(
   }
 }
 
+function SlideTransition(props: any): React.ReactElement {
+  return <Slide {...props} direction="up" />;
+}
+
+/**
+ * Log message severity.
+ */
+type Severity = 'error' | 'warning' | 'info' | 'success';
+
+/**
+ * Interface describing a log message.
+ */
+interface ILogMessage {
+  /**
+   * Message severity.
+   */
+  severity: Severity;
+
+  /**
+   * Message text.
+   */
+  message: string;
+}
+
 /**
  * Interface describing component properties.
  */
@@ -128,6 +156,16 @@ export interface IToolbarState {
    * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
    */
   suspend: boolean;
+
+  /**
+   * Boolean indicating whether to show an alert.
+   */
+  alert: boolean;
+
+  /**
+   * Log message.
+   */
+  log: ILogMessage;
 }
 
 /**
@@ -150,7 +188,12 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       repoMenu: false,
       repository: repo || '',
       branch: repo ? this.props.model.currentBranch.name : '',
-      suspend: false
+      suspend: false,
+      alert: false,
+      log: {
+        severity: 'info',
+        message: ''
+      }
     };
   }
 
@@ -311,14 +354,42 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    *
    * @returns React element
    */
-  private _renderFeedback(): React.ReactElement | null {
-    if (this.props.suspend === false || this.state.suspend === false) {
-      return null;
+  private _renderFeedback(): React.ReactElement {
+    let duration: number | null = null;
+
+    const severity = this.state.log.severity;
+    if (severity === 'success') {
+      duration = 5000; // milliseconds
     }
     return (
-      <Modal open={this.state.suspend} onClick={this._onFeedbackModalClick}>
-        <CircularProgress className={fullscreenProgressClass} color="inherit" />
-      </Modal>
+      <React.Fragment>
+        <Modal
+          open={this.props.suspend && this.state.suspend}
+          onClick={this._onFeedbackModalClick}
+        >
+          <div className={fullscreenProgressClass}>
+            <CircularProgress color="inherit" />
+          </div>
+        </Modal>
+        <Portal>
+          <Snackbar
+            key="git:toolbar"
+            open={this.state.alert}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            autoHideDuration={duration}
+            TransitionComponent={SlideTransition}
+            onClick={this._onFeedbackAlertClick}
+            onClose={this._onFeedbackAlertClose}
+          >
+            <Alert variant="filled" severity={severity}>
+              {this.state.log.message}
+            </Alert>
+          </Snackbar>
+        </Portal>
+      </React.Fragment>
     );
   }
 
@@ -363,6 +434,18 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         suspend: bool
       });
     }
+  }
+
+  /**
+   * Sets the current component log message.
+   *
+   * @param msg - log message
+   */
+  private _log(msg: ILogMessage): void {
+    this.setState({
+      alert: true,
+      log: msg
+    });
   }
 
   /**
@@ -433,8 +516,16 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    */
   private _onRefreshClick = async (): Promise<void> => {
     this._suspend(true);
+    this._log({
+      severity: 'info',
+      message: 'Refreshing...'
+    });
     await Promise.all([sleep(1000), this.props.refresh()]);
     this._suspend(false);
+    this._log({
+      severity: 'success',
+      message: 'Successfully refreshed.'
+    });
   };
 
   /**
@@ -444,5 +535,31 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    */
   private _onFeedbackModalClick = (): void => {
     this._suspend(false);
+  };
+
+  /**
+   * Callback invoked upon clicking on a feedback alert.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackAlertClick = (): void => {
+    this.setState({
+      alert: false
+    });
+  };
+
+  /**
+   * Callback invoked upon closing a feedback alert.
+   *
+   * @param event - event object
+   * @param reason - reason why the callback was invoked
+   */
+  private _onFeedbackAlertClose = (event: any, reason: string): void => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    this.setState({
+      alert: false
+    });
   };
 }
