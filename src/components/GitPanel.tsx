@@ -25,30 +25,77 @@ import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
 import { CommandIDs } from '../gitMenuCommands';
 
-/** Interface for GitPanel component state */
-export interface IGitSessionNodeState {
-  branches: Git.IBranch[];
-  currentBranch: string;
-  files: Git.IStatusFile[];
-  inGitRepository: boolean;
-  pastCommits: Git.ISingleCommitInfo[];
-  tab: number;
-}
-
-/** Interface for GitPanel component props */
-export interface IGitSessionNodeProps {
+/**
+ * Interface describing component properties.
+ */
+export interface IGitPanelProps {
+  /**
+   * Git extension data model.
+   */
   model: GitExtension;
+
+  /**
+   * MIME type registry.
+   */
   renderMime: IRenderMimeRegistry;
+
+  /**
+   * Git extension settings.
+   */
   settings: ISettingRegistry.ISettings;
+
+  /**
+   * File browser model.
+   */
   filebrowser: FileBrowserModel;
 }
 
-/** A React component for the git extension's main display */
-export class GitPanel extends React.Component<
-  IGitSessionNodeProps,
-  IGitSessionNodeState
-> {
-  constructor(props: IGitSessionNodeProps) {
+/**
+ * Interface describing component state.
+ */
+export interface IGitPanelState {
+  /**
+   * Boolean indicating whether the user is currently in a Git repository.
+   */
+  inGitRepository: boolean;
+
+  /**
+   * List of branches.
+   */
+  branches: Git.IBranch[];
+
+  /**
+   * Current branch.
+   */
+  currentBranch: string;
+
+  /**
+   * List of changed files.
+   */
+  files: Git.IStatusFile[];
+
+  /**
+   * List of prior commits.
+   */
+  pastCommits: Git.ISingleCommitInfo[];
+
+  /**
+   * Panel tab identifier.
+   */
+  tab: number;
+}
+
+/**
+ * React component for rendering a panel for performing Git operations.
+ */
+export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
+  /**
+   * Returns a React component for rendering a panel for performing Git operations.
+   *
+   * @param props - component properties
+   * @returns React component
+   */
+  constructor(props: IGitPanelProps) {
     super(props);
     this.state = {
       branches: [],
@@ -60,6 +107,9 @@ export class GitPanel extends React.Component<
     };
   }
 
+  /**
+   * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
+   */
   componentDidMount() {
     const { model, settings } = this.props;
 
