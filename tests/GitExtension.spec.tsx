@@ -36,12 +36,6 @@ describe('IGitExtension', () => {
             top_repo_path: (request as any)['current_path']
           })
       },
-      '/git/server_root': {
-        body: () =>
-          JSON.stringify({
-            server_root: fakeRoot
-          })
-      },
       '/git/status': {
         body: () =>
           JSON.stringify({
@@ -79,17 +73,7 @@ describe('IGitExtension', () => {
         getFileTypesForPath: jest.fn().mockReturnValue([])
       }
     };
-    model = new GitExtension(app as any);
-  });
-
-  describe('#constructor', () => {
-    it('should have requested the server root folder', () => {
-      expect(mockGit.httpGitRequest).toBeCalledWith(
-        '/git/server_root',
-        'GET',
-        null
-      );
-    });
+    model = new GitExtension(fakeRoot, app as any);
   });
 
   describe('#pathRepository', () => {

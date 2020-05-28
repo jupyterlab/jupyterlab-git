@@ -13,7 +13,7 @@
     "jupyterlab-extension"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "genversion --es6 --semi src/version.ts && tsc",
     "build:labextension": "jlpm && jlpm clean:labextension && mkdirp jupyterlab_git/labextension && cd jupyterlab_git/labextension && npm pack ../..",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "clean:more": "jlpm clean && rimraf build dist MANIFEST",
@@ -69,6 +69,7 @@
     "@material-ui/icons": "^4.5.1",
     "@material-ui/lab": "^4.0.0-alpha.54",
     "diff-match-patch": "^1.0.4",
+    "genversion": "^2.2.1",
     "nbdime": "^6.0.0",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
