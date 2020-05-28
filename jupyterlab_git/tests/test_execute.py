@@ -24,4 +24,4 @@ async def test_execute_waits_on_index_lock(tmp_path):
         assert "unlock" in repr(execution_lock)
         
         assert not lock_file.exists()
-        sleep.assert_called_once()
+        assert sleep.call_count == 1
