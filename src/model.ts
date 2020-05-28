@@ -262,7 +262,7 @@ export class GitExtension implements IGitExtension {
       const response = await httpGitRequest('/git/add_all_unstaged', 'POST', {
         top_repo_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
@@ -297,7 +297,7 @@ export class GitExtension implements IGitExtension {
       const response = await httpGitRequest('/git/add_all_untracked', 'POST', {
         top_repo_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
@@ -358,9 +358,9 @@ export class GitExtension implements IGitExtension {
         url,
         name
       });
-      if (response.status !== 200) {
-        const data = await response.text();
-        throw new ServerConnection.ResponseError(response, data);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
       }
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
@@ -390,9 +390,9 @@ export class GitExtension implements IGitExtension {
         current_path: path,
         history_count: historyCount
       });
-      if (response.status !== 200) {
-        const data = await response.text();
-        throw new ServerConnection.ResponseError(response, data);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
       }
       return response.json();
     } catch (err) {
@@ -449,7 +449,7 @@ export class GitExtension implements IGitExtension {
 
     try {
       const response = await httpGitRequest('/git/checkout', 'POST', body);
-      if (response.status !== 200) {
+      if (!response.ok) {
         return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
@@ -487,7 +487,7 @@ export class GitExtension implements IGitExtension {
       };
 
       const response = await httpGitRequest('/git/clone', 'POST', obj);
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
@@ -522,7 +522,7 @@ export class GitExtension implements IGitExtension {
         commit_msg: message,
         top_repo_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
@@ -600,7 +600,7 @@ export class GitExtension implements IGitExtension {
         commit_id: commitId,
         top_repo_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
@@ -634,7 +634,7 @@ export class GitExtension implements IGitExtension {
         selected_hash: hash,
         current_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
@@ -685,7 +685,7 @@ export class GitExtension implements IGitExtension {
       const response = await httpGitRequest('/git/init', 'POST', {
         current_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
@@ -717,7 +717,7 @@ export class GitExtension implements IGitExtension {
         current_path: path,
         history_count: historyCount
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
@@ -761,7 +761,7 @@ export class GitExtension implements IGitExtension {
       };
 
       const response = await httpGitRequest('/git/pull', 'POST', obj);
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
@@ -793,7 +793,7 @@ export class GitExtension implements IGitExtension {
       };
 
       const response = await httpGitRequest('/git/push', 'POST', obj);
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
@@ -849,7 +849,7 @@ export class GitExtension implements IGitExtension {
         current_path: path
       });
       const data = await response.json();
-      if (response.status !== 200) {
+      if (!response.ok) {
         console.error(data.message);
         // TODO should we notify the user
         this._setStatus([]);
@@ -895,7 +895,7 @@ export class GitExtension implements IGitExtension {
         filename: filename === undefined ? null : filename,
         top_repo_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
@@ -935,7 +935,7 @@ export class GitExtension implements IGitExtension {
         commit_id: commitId,
         top_repo_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
@@ -956,7 +956,7 @@ export class GitExtension implements IGitExtension {
       const response = await httpGitRequest('/git/show_prefix', 'POST', {
         current_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
@@ -972,7 +972,7 @@ export class GitExtension implements IGitExtension {
       const response = await httpGitRequest('/git/show_top_level', 'POST', {
         current_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
@@ -1002,7 +1002,7 @@ export class GitExtension implements IGitExtension {
       const response = await httpGitRequest('/git/branch', 'POST', {
         current_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
