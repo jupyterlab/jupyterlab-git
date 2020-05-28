@@ -1,5 +1,4 @@
 import os
-from subprocess import CalledProcessError
 from unittest.mock import Mock, patch
 
 from packaging.version import parse
@@ -39,7 +38,7 @@ class TestSettings(ServerTest):
     def test_git_get_settings_no_git(self, mock_execute):
         # Given
         jlab_version = "2.1.42-alpha.24"
-        mock_execute.side_effect = CalledProcessError(128, b"cmd", b"error message")
+        mock_execute.side_effect = FileNotFoundError("[Errno 2] No such file or directory: 'git'")
 
         # When
         response = self.tester.get(["settings"], params={"version": jlab_version})

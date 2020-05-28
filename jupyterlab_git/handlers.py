@@ -542,7 +542,11 @@ class GitSettingsHandler(GitHandler):
         jlab_version = self.get_query_argument("version", None)
         if jlab_version is not None:
             jlab_version = str(parse(jlab_version))
-        git_version = await self.git.version()
+        git_version = None
+        try:
+            git_version = await self.git.version()
+        except Exception as error:
+            self.log.debug("[jupyterlab_git] Fail to execute 'git' command: {!s}".format(error))
         server_version = str(parse(__version__))
         # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
         root_dir = getattr(self.contents_manager, "root_dir", None)
