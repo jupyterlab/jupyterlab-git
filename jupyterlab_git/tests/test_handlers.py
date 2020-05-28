@@ -4,6 +4,7 @@ from unittest.mock import ANY, Mock, call, patch
 
 import tornado
 
+from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import (
     GitAllHistoryHandler,
     GitBranchHandler,
@@ -25,7 +26,7 @@ def test_mapping_added():
 
 
 class TestAllHistory(ServerTest):
-    @patch("jupyterlab_git.handlers.GitAllHistoryHandler.git")
+    @patch("jupyterlab_git.handlers.GitAllHistoryHandler.git", spec=Git)
     def test_all_history_handler_localbranch(self, mock_git):
         # Given
         show_top_level = {"code": 0, "foo": "top_level"}
@@ -62,7 +63,7 @@ class TestAllHistory(ServerTest):
 
 
 class TestBranch(ServerTest):
-    @patch("jupyterlab_git.handlers.GitBranchHandler.git")
+    @patch("jupyterlab_git.handlers.GitBranchHandler.git", spec=Git)
     def test_branch_handler_localbranch(self, mock_git):
         # Given
         branch = {
@@ -126,7 +127,7 @@ class TestBranch(ServerTest):
 
 
 class TestLog(ServerTest):
-    @patch("jupyterlab_git.handlers.GitLogHandler.git")
+    @patch("jupyterlab_git.handlers.GitLogHandler.git", spec=Git)
     def test_log_handler(self, mock_git):
         # Given
         log = {"code": 0, "commits": []}
@@ -143,7 +144,7 @@ class TestLog(ServerTest):
         payload = response.json()
         assert payload == log
 
-    @patch("jupyterlab_git.handlers.GitLogHandler.git")
+    @patch("jupyterlab_git.handlers.GitLogHandler.git", spec=Git)
     def test_log_handler_no_history_count(self, mock_git):
         # Given
         log = {"code": 0, "commits": []}
@@ -162,7 +163,7 @@ class TestLog(ServerTest):
 
 
 class TestPush(ServerTest):
-    @patch("jupyterlab_git.handlers.GitPushHandler.git")
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
     def test_push_handler_localbranch(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo")
@@ -184,7 +185,7 @@ class TestPush(ServerTest):
         payload = response.json()
         assert payload == {"code": 0}
 
-    @patch("jupyterlab_git.handlers.GitPushHandler.git")
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
     def test_push_handler_remotebranch(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo")
@@ -208,7 +209,7 @@ class TestPush(ServerTest):
         payload = response.json()
         assert payload == {"code": 0}
 
-    @patch("jupyterlab_git.handlers.GitPushHandler.git")
+    @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
     def test_push_handler_noupstream(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo")
@@ -233,7 +234,7 @@ class TestPush(ServerTest):
 
 
 class TestUpstream(ServerTest):
-    @patch("jupyterlab_git.handlers.GitUpstreamHandler.git")
+    @patch("jupyterlab_git.handlers.GitUpstreamHandler.git", spec=Git)
     def test_upstream_handler_localbranch(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo")
