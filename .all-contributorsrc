@@ -9,6 +9,11 @@
   "imageSize": 100,
   "commit": true,
   "commitConvention": "none",
+  "types": {
+    "financial": {
+      "symbol": "🤝"
+    }
+  },
   "contributorsSortAlphabetically": true,
   "contributors": [
     {
