@@ -1,8 +1,6 @@
 import * as React from 'react';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
-import Modal from '@material-ui/core/Modal';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
@@ -10,6 +8,8 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { JSONObject } from '@lumino/coreutils';
 import { GitExtension } from '../model';
+import { Git, ILogMessage } from '../tokens';
+import { GitAuthorForm } from '../widgets/AuthorBox';
 import {
   panelWrapperClass,
   repoButtonClass,
@@ -19,13 +19,12 @@ import {
   tabsClass,
   warningTextClass
 } from '../style/GitPanel';
-import { fullscreenProgressClass } from '../style/SuspendModal';
-import { Git } from '../tokens';
-import { GitAuthorForm } from '../widgets/AuthorBox';
 import { CommitBox } from './CommitBox';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
+import { SuspendModal } from './SuspendModal';
+import { Alert } from './Alert';
 import { CommandIDs } from '../gitMenuCommands';
 
 /**
@@ -91,6 +90,16 @@ export interface IGitPanelState {
    * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
    */
   suspend: boolean;
+
+  /**
+   * Boolean indicating whether to show an alert.
+   */
+  alert: boolean;
+
+  /**
+   * Log message.
+   */
+  log: ILogMessage;
 }
 
 /**
@@ -112,7 +121,12 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       inGitRepository: false,
       pastCommits: [],
       tab: 0,
-      suspend: false
+      suspend: false,
+      alert: false,
+      log: {
+        severity: 'info',
+        message: ''
+      }
     };
   }
 
@@ -193,8 +207,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   commitMarkedFiles = async (message: string): Promise<void> => {
     this._suspend(true);
+
+    this._log({
+      severity: 'info',
+      message: 'Staging files...'
+    });
     await this.props.model.reset();
     await this.props.model.add(...this._markedFiles.map(file => file.to));
+
     await this.commitStagedFiles(message);
     this._suspend(false);
   };
@@ -212,20 +232,36 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     try {
       await this._hasIdentity(this.props.model.pathRepository);
     } catch (err) {
+      this._log({
+        severity: 'error',
+        message: 'Failed to commit changes.'
+      });
       console.error(err);
       showErrorMessage('Fail to commit', err);
       return;
     }
+    this._log({
+      severity: 'info',
+      message: 'Committing changes...'
+    });
     this._suspend(true);
     try {
       await this.props.model.commit(message);
     } catch (err) {
       this._suspend(false);
+      this._log({
+        severity: 'error',
+        message: 'Failed to commit changes.'
+      });
       console.error(err);
       showErrorMessage('Fail to commit', err);
       return;
     }
     this._suspend(false);
+    this._log({
+      severity: 'success',
+      message: 'Committed changes.'
+    });
   };
 
   /**
@@ -374,14 +410,23 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    *
    * @returns React element
    */
-  private _renderFeedback(): React.ReactElement | null {
-    if (!this.props.settings.composite['blockWhileCommandExecutes']) {
-      return null;
-    }
+  private _renderFeedback(): React.ReactElement {
     return (
-      <Modal open={this.state.suspend} onClick={this._onFeedbackModalClick}>
-        <CircularProgress className={fullscreenProgressClass} color="inherit" />
-      </Modal>
+      <React.Fragment>
+        <SuspendModal
+          open={
+            this.props.settings.composite['blockWhileCommandExecutes'] &&
+            this.state.suspend
+          }
+          onClick={this._onFeedbackModalClick}
+        />
+        <Alert
+          open={this.state.alert}
+          message={this.state.log.message}
+          severity={this.state.log.severity}
+          onClose={this._onFeedbackAlertClose}
+        />
+      </React.Fragment>
     );
   }
 
@@ -434,6 +479,31 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   }
 
   /**
+   * Sets the suspension state.
+   *
+   * @param bool - boolean indicating whether to suspend UI interaction
+   */
+  private _suspend(bool: boolean): void {
+    if (this.props.settings.composite['blockWhileCommandExecutes']) {
+      this.setState({
+        suspend: bool
+      });
+    }
+  }
+
+  /**
+   * Sets the current component log message.
+   *
+   * @param msg - log message
+   */
+  private _log(msg: ILogMessage): void {
+    this.setState({
+      alert: true,
+      log: msg
+    });
+  }
+
+  /**
    * Callback invoked upon changing the active panel tab.
    *
    * @param event - event object
@@ -472,17 +542,15 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   };
 
   /**
-   * Sets the suspension state.
+   * Callback invoked upon closing a feedback alert.
    *
-   * @param bool - boolean indicating whether to suspend UI interaction
+   * @param event - event object
    */
-  private _suspend(bool: boolean): void {
-    if (this.props.settings.composite['blockWhileCommandExecutes']) {
-      this.setState({
-        suspend: bool
-      });
-    }
-  }
+  private _onFeedbackAlertClose = (): void => {
+    this.setState({
+      alert: false
+    });
+  };
 
   /**
    * Determines whether a user has a known Git identity.
