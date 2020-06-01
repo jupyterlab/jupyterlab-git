@@ -226,11 +226,12 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns a promise which commits the files
    */
   commitStagedFiles = async (message: string): Promise<void> => {
+    let res: boolean;
     if (!message) {
       return;
     }
     try {
-      await this._hasIdentity(this.props.model.pathRepository);
+      res = await this._hasIdentity(this.props.model.pathRepository);
     } catch (err) {
       this._log({
         severity: 'error',
@@ -238,6 +239,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       });
       console.error(err);
       showErrorMessage('Fail to commit', err);
+      return;
+    }
+    if (!res) {
+      this._log({
+        severity: 'error',
+        message: 'Failed to commit changes.'
+      });
       return;
     }
     this._log({

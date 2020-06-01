@@ -118,7 +118,7 @@ export class GitExtension implements IGitExtension {
     }
     this._removeTask(tid);
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
     }
