@@ -8,6 +8,7 @@ import { Severity } from '../tokens';
 /**
  * Returns a React component for "sliding-in" an alert.
  *
+ * @private
  * @param props - component properties
  * @returns React element
  */
