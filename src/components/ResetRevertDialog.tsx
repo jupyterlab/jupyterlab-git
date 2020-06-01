@@ -238,31 +238,6 @@ export class ResetRevertDialog extends React.Component<
   }
 
   /**
-   * Sets the suspension state.
-   *
-   * @param bool - boolean indicating whether to suspend UI interaction
-   */
-  private _suspend(bool: boolean): void {
-    if (this.props.suspend) {
-      this.setState({
-        suspend: bool
-      });
-    }
-  }
-
-  /**
-   * Sets the current component log message.
-   *
-   * @param msg - log message
-   */
-  private _log(msg: ILogMessage): void {
-    this.setState({
-      alert: true,
-      log: msg
-    });
-  }
-
-  /**
    * Callback invoked upon updating a commit message summary.
    *
    * @param event - event object
@@ -403,6 +378,31 @@ export class ResetRevertDialog extends React.Component<
       alert: false
     });
   };
+
+  /**
+   * Sets the suspension state.
+   *
+   * @param bool - boolean indicating whether to suspend UI interaction
+   */
+  private _suspend(bool: boolean): void {
+    if (this.props.suspend) {
+      this.setState({
+        suspend: bool
+      });
+    }
+  }
+
+  /**
+   * Sets the current component log message.
+   *
+   * @param msg - log message
+   */
+  private _log(msg: ILogMessage): void {
+    this.setState({
+      alert: true,
+      log: msg
+    });
+  }
 
   /**
    * Returns a default commit summary for reverting a commit.
