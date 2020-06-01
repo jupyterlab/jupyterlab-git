@@ -2,13 +2,11 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import Modal from '@material-ui/core/Modal';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import ClearIcon from '@material-ui/icons/Clear';
 import { sleep } from '../utils';
-import { Git, IGitExtension } from '../tokens';
+import { Git, IGitExtension, ILogMessage } from '../tokens';
 import {
   actionsWrapperClass,
   activeListItemClass,
@@ -34,7 +32,8 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
-import { fullscreenProgressClass } from '../style/SuspendModal';
+import { SuspendModal } from './SuspendModal';
+import { Alert } from './Alert';
 
 const BRANCH_DESC = {
   current:
@@ -98,14 +97,24 @@ export interface INewBranchDialogState {
   branches: Git.IBranch[];
 
   /**
+   * Error message.
+   */
+  error: string;
+
+  /**
    * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
    */
   suspend: boolean;
 
   /**
-   * Error message.
+   * Boolean indicating whether to show an alert.
    */
-  error: string;
+  alert: boolean;
+
+  /**
+   * Log message.
+   */
+  log: ILogMessage;
 }
 
 /**
@@ -132,8 +141,13 @@ export class NewBranchDialog extends React.Component<
       filter: '',
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : [],
+      error: '',
       suspend: false,
-      error: ''
+      alert: false,
+      log: {
+        severity: 'info',
+        message: ''
+      }
     };
   }
 
@@ -337,14 +351,20 @@ export class NewBranchDialog extends React.Component<
    *
    * @returns React element
    */
-  private _renderFeedback(): React.ReactElement | null {
-    if (this.props.suspend === false || this.state.suspend === false) {
-      return null;
-    }
+  private _renderFeedback(): React.ReactElement {
     return (
-      <Modal open={this.state.suspend} onClick={this._onFeedbackModalClick}>
-        <CircularProgress className={fullscreenProgressClass} color="inherit" />
-      </Modal>
+      <React.Fragment>
+        <SuspendModal
+          open={this.props.suspend && this.state.suspend}
+          onClick={this._onFeedbackModalClick}
+        />
+        <Alert
+          open={this.state.alert}
+          message={this.state.log.message}
+          severity={this.state.log.severity}
+          onClose={this._onFeedbackAlertClose}
+        />
+      </React.Fragment>
     );
   }
 
@@ -390,6 +410,18 @@ export class NewBranchDialog extends React.Component<
         suspend: bool
       });
     }
+  }
+
+  /**
+   * Sets the current component log message.
+   *
+   * @param msg - log message
+   */
+  private _log(msg: ILogMessage): void {
+    this.setState({
+      alert: true,
+      log: msg
+    });
   }
 
   /**
@@ -484,6 +516,10 @@ export class NewBranchDialog extends React.Component<
       newBranch: true,
       branchname: branch
     };
+    this._log({
+      severity: 'info',
+      message: 'Creating branch...'
+    });
     this._suspend(true);
     try {
       result = await Promise.all([
@@ -495,6 +531,10 @@ export class NewBranchDialog extends React.Component<
       this.setState({
         error: err.message.replace(/^fatal:/, '')
       });
+      this._log({
+        severity: 'error',
+        message: 'Failed to create branch.'
+      });
       return;
     }
     this._suspend(false);
@@ -503,8 +543,16 @@ export class NewBranchDialog extends React.Component<
       this.setState({
         error: res.message
       });
+      this._log({
+        severity: 'error',
+        message: 'Failed to create branch.'
+      });
       return;
     }
+    this._log({
+      severity: 'success',
+      message: 'Branch created.'
+    });
     // Close the branch dialog:
     this.props.onClose();
 
@@ -522,5 +570,16 @@ export class NewBranchDialog extends React.Component<
    */
   private _onFeedbackModalClick = (): void => {
     this._suspend(false);
+  };
+
+  /**
+   * Callback invoked upon closing a feedback alert.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackAlertClose = (): void => {
+    this.setState({
+      alert: false
+    });
   };
 }

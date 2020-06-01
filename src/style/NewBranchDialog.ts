@@ -1,7 +1,7 @@
 import { style } from 'typestyle';
 
 export const branchDialogClass = style({
-  height: '460px',
+  minHeight: '460px',
   width: '400px',
 
   color: 'var(--jp-ui-font-color1)!important',
