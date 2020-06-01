@@ -2,6 +2,10 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+import { sleep } from '../utils';
+import { IGitExtension, ILogMessage } from '../tokens';
+import { GitCredentialsForm } from '../widgets/CredentialsBox';
+import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 import {
   // NOTE: keep in alphabetical order
   branchIconClass,
@@ -22,10 +26,6 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { sleep } from '../utils';
-import { GitCredentialsForm } from '../widgets/CredentialsBox';
-import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
-import { IGitExtension, ILogMessage } from '../tokens';
 import { BranchMenu } from './BranchMenu';
 import { SuspendModal } from './SuspendModal';
 import { Alert } from './Alert';

@@ -3,11 +3,9 @@ import { classes } from 'typestyle';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
-import Modal from '@material-ui/core/Modal';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { sleep } from '../utils';
-import { Git, IGitExtension } from '../tokens';
+import { Git, IGitExtension, ILogMessage } from '../tokens';
 import {
   activeListItemClass,
   filterClass,
@@ -20,8 +18,9 @@ import {
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
-import { fullscreenProgressClass } from '../style/SuspendModal';
 import { NewBranchDialog } from './NewBranchDialog';
+import { SuspendModal } from './SuspendModal';
+import { Alert } from './Alert';
 
 const CHANGES_ERR_MSG =
   'The current branch contains files with uncommitted changes. Please commit or discard these changes before switching to or creating another branch.';
@@ -120,6 +119,16 @@ export interface IBranchMenuState {
    * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
    */
   suspend: boolean;
+
+  /**
+   * Boolean indicating whether to show an alert.
+   */
+  alert: boolean;
+
+  /**
+   * Log message.
+   */
+  log: ILogMessage;
 }
 
 /**
@@ -145,7 +154,12 @@ export class BranchMenu extends React.Component<
       branchDialog: false,
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : [],
-      suspend: false
+      suspend: false,
+      alert: false,
+      log: {
+        severity: 'info',
+        message: ''
+      }
     };
   }
 
@@ -292,14 +306,20 @@ export class BranchMenu extends React.Component<
    *
    * @returns React element
    */
-  private _renderFeedback(): React.ReactElement | null {
-    if (this.props.suspend === false || this.state.suspend === false) {
-      return null;
-    }
+  private _renderFeedback(): React.ReactElement {
     return (
-      <Modal open={this.state.suspend} onClick={this._onFeedbackModalClick}>
-        <CircularProgress className={fullscreenProgressClass} color="inherit" />
-      </Modal>
+      <React.Fragment>
+        <SuspendModal
+          open={this.props.suspend && this.state.suspend}
+          onClick={this._onFeedbackModalClick}
+        />
+        <Alert
+          open={this.state.alert}
+          message={this.state.log.message}
+          severity={this.state.log.severity}
+          onClose={this._onFeedbackAlertClose}
+        />
+      </React.Fragment>
     );
   }
 
@@ -344,6 +364,18 @@ export class BranchMenu extends React.Component<
         suspend: bool
       });
     }
+  }
+
+  /**
+   * Sets the current component log message.
+   *
+   * @param msg - log message
+   */
+  private _log(msg: ILogMessage): void {
+    this.setState({
+      alert: true,
+      log: msg
+    });
   }
 
   /**
@@ -416,8 +448,13 @@ export class BranchMenu extends React.Component<
         branchname: branch
       };
 
-      let result: Array<any>;
+      self._log({
+        severity: 'info',
+        message: 'Switching branch...'
+      });
       self._suspend(true);
+
+      let result: Array<any>;
       try {
         result = await Promise.all([
           sleep(1000),
@@ -425,13 +462,26 @@ export class BranchMenu extends React.Component<
         ]);
       } catch (err) {
         self._suspend(false);
+        self._log({
+          severity: 'error',
+          message: 'Failed to switch branch.'
+        });
         return onBranchError(err);
       }
       self._suspend(false);
       const res = result[1] as Git.ICheckoutResult;
       if (res.code !== 0) {
+        self._log({
+          severity: 'error',
+          message: 'Failed to switch branch.'
+        });
         showErrorMessage('Error switching branch', res.message);
+        return;
       }
+      self._log({
+        severity: 'success',
+        message: 'Switched branch.'
+      });
     }
   }
 
@@ -442,5 +492,16 @@ export class BranchMenu extends React.Component<
    */
   private _onFeedbackModalClick = (): void => {
     this._suspend(false);
+  };
+
+  /**
+   * Callback invoked upon closing a feedback alert.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackAlertClose = (): void => {
+    this.setState({
+      alert: false
+    });
   };
 }
