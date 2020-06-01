@@ -19,9 +19,9 @@ async def test_execute_waits_on_index_lock(tmp_path):
         
         assert "unlock" in repr(execution_lock)
         cmd = ["git", "dummy"]
-        kwargs = {"cwd": f"{tmp_path!s}"}
+        kwargs = {"cwd": "{!s}".format(tmp_path)}
         await execute(cmd, **kwargs)
         assert "unlock" in repr(execution_lock)
         
         assert not lock_file.exists()
-        sleep.assert_called_once()
+        assert sleep.call_count == 1

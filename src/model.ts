@@ -156,7 +156,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     this.refreshStatus();
@@ -193,7 +193,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     this.refreshStatus();
@@ -229,7 +229,7 @@ export class GitExtension implements IGitExtension {
     }
     this._removeTask(tid);
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       const data = await response.text();
       throw new ServerConnection.ResponseError(response, data);
     }
@@ -269,7 +269,7 @@ export class GitExtension implements IGitExtension {
     }
     this._removeTask(tid);
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       const data = await response.text();
       throw new ServerConnection.ResponseError(response, data);
     }
@@ -334,7 +334,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     if (body.checkout_branch) {
@@ -376,7 +376,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     return data;
@@ -413,7 +413,7 @@ export class GitExtension implements IGitExtension {
     }
     this._removeTask(tid);
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
     }
@@ -492,7 +492,7 @@ export class GitExtension implements IGitExtension {
     }
     this._removeTask(tid);
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
     }
@@ -531,7 +531,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     return data;
@@ -557,7 +557,7 @@ export class GitExtension implements IGitExtension {
     }
     this._removeTask(tid);
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
     }
@@ -595,7 +595,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     return data;
@@ -636,7 +636,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     this._headChanged.emit();
@@ -675,7 +675,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     this._headChanged.emit();
@@ -747,7 +747,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       console.error(data.message);
 
       // TODO we should notify the user
@@ -797,7 +797,7 @@ export class GitExtension implements IGitExtension {
     }
     this._removeTask(tid);
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
     }
@@ -840,7 +840,7 @@ export class GitExtension implements IGitExtension {
     }
     this._removeTask(tid);
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
     }
@@ -870,7 +870,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     return data;
@@ -897,7 +897,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     return data;
@@ -1156,7 +1156,7 @@ export class GitExtension implements IGitExtension {
     this._removeTask(tid);
 
     const data = await response.json();
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
     return data;
