@@ -8,6 +8,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { JSONObject } from '@lumino/coreutils';
 import { GitExtension } from '../model';
+import { sleep } from '../utils';
 import { Git, ILogMessage } from '../tokens';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import {
@@ -254,7 +255,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     });
     this._suspend(true);
     try {
-      await this.props.model.commit(message);
+      await Promise.all([sleep(1000), this.props.model.commit(message)]);
     } catch (err) {
       this._suspend(false);
       this._log({
@@ -409,6 +410,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         commits={this.state.pastCommits}
         model={this.props.model}
         renderMime={this.props.renderMime}
+        suspend={
+          this.props.settings.composite['blockWhileCommandExecutes'] as boolean
+        }
       />
     );
   }

@@ -41,6 +41,11 @@ export interface ISinglePastCommitInfoProps {
    * Render MIME type registry.
    */
   renderMime: IRenderMimeRegistry;
+
+  /**
+   * Boolean indicating whether to enable UI suspension.
+   */
+  suspend: boolean;
 }
 
 /**
@@ -206,6 +211,7 @@ export class SinglePastCommitInfo extends React.Component<
               action={this.state.resetRevertAction}
               model={this.props.model}
               commit={this.props.commit}
+              suspend={this.props.suspend}
               onClose={this._onResetRevertDialogClose}
             />
           </div>
