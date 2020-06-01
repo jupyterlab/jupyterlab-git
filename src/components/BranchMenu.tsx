@@ -20,7 +20,7 @@ import {
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
-import { fullscreenProgressClass } from '../style/progress';
+import { fullscreenProgressClass } from '../style/SuspendModal';
 import { NewBranchDialog } from './NewBranchDialog';
 
 const CHANGES_ERR_MSG =

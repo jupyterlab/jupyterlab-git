@@ -1,11 +1,5 @@
 import * as React from 'react';
 import { classes } from 'typestyle';
-import Modal from '@material-ui/core/Modal';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Portal from '@material-ui/core/Portal';
-import Snackbar from '@material-ui/core/Snackbar';
-import Slide from '@material-ui/core/Slide';
-import Alert from '@material-ui/lab/Alert';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import {
@@ -28,12 +22,13 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { fullscreenProgressClass } from '../style/progress';
 import { sleep } from '../utils';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
-import { IGitExtension } from '../tokens';
+import { IGitExtension, ILogMessage } from '../tokens';
 import { BranchMenu } from './BranchMenu';
+import { SuspendModal } from './SuspendModal';
+import { Alert } from './Alert';
 
 /**
  * Displays an error dialog when a Git operation fails.
@@ -75,30 +70,6 @@ async function showGitOperationDialog(
     });
     retry = true;
   }
-}
-
-function SlideTransition(props: any): React.ReactElement {
-  return <Slide {...props} direction="up" />;
-}
-
-/**
- * Log message severity.
- */
-type Severity = 'error' | 'warning' | 'info' | 'success';
-
-/**
- * Interface describing a log message.
- */
-interface ILogMessage {
-  /**
-   * Message severity.
-   */
-  severity: Severity;
-
-  /**
-   * Message text.
-   */
-  message: string;
 }
 
 /**
@@ -355,40 +326,18 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderFeedback(): React.ReactElement {
-    let duration: number | null = null;
-
-    const severity = this.state.log.severity;
-    if (severity === 'success') {
-      duration = 5000; // milliseconds
-    }
     return (
       <React.Fragment>
-        <Modal
+        <SuspendModal
           open={this.props.suspend && this.state.suspend}
           onClick={this._onFeedbackModalClick}
-        >
-          <div className={fullscreenProgressClass}>
-            <CircularProgress color="inherit" />
-          </div>
-        </Modal>
-        <Portal>
-          <Snackbar
-            key="git:toolbar"
-            open={this.state.alert}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right'
-            }}
-            autoHideDuration={duration}
-            TransitionComponent={SlideTransition}
-            onClick={this._onFeedbackAlertClick}
-            onClose={this._onFeedbackAlertClose}
-          >
-            <Alert variant="filled" severity={severity}>
-              {this.state.log.message}
-            </Alert>
-          </Snackbar>
-        </Portal>
+        />
+        <Alert
+          open={this.state.alert}
+          message={this.state.log.message}
+          severity={this.state.log.severity}
+          onClose={this._onFeedbackAlertClose}
+        />
       </React.Fragment>
     );
   }
@@ -515,11 +464,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns a promise which resolves upon refreshing a repository
    */
   private _onRefreshClick = async (): Promise<void> => {
-    this._suspend(true);
     this._log({
       severity: 'info',
       message: 'Refreshing...'
     });
+    this._suspend(true);
     await Promise.all([sleep(1000), this.props.refresh()]);
     this._suspend(false);
     this._log({
@@ -538,26 +487,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   };
 
   /**
-   * Callback invoked upon clicking on a feedback alert.
-   *
-   * @param event - event object
-   */
-  private _onFeedbackAlertClick = (): void => {
-    this.setState({
-      alert: false
-    });
-  };
-
-  /**
    * Callback invoked upon closing a feedback alert.
    *
    * @param event - event object
-   * @param reason - reason why the callback was invoked
    */
-  private _onFeedbackAlertClose = (event: any, reason: string): void => {
-    if (reason === 'clickaway') {
-      return;
-    }
+  private _onFeedbackAlertClose = (): void => {
     this.setState({
       alert: false
     });

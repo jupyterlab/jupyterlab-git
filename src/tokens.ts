@@ -495,3 +495,23 @@ export namespace Git {
 
   export type Status = 'untracked' | 'staged' | 'unstaged' | null;
 }
+
+/**
+ * Log message severity.
+ */
+export type Severity = 'error' | 'warning' | 'info' | 'success';
+
+/**
+ * Interface describing a component log message.
+ */
+export interface ILogMessage {
+  /**
+   * Message severity.
+   */
+  severity: Severity;
+
+  /**
+   * Message text.
+   */
+  message: string;
+}

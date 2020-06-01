@@ -19,7 +19,7 @@ import {
   tabsClass,
   warningTextClass
 } from '../style/GitPanel';
-import { fullscreenProgressClass } from '../style/progress';
+import { fullscreenProgressClass } from '../style/SuspendModal';
 import { Git } from '../tokens';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import { CommitBox } from './CommitBox';

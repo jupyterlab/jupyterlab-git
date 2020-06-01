@@ -34,7 +34,7 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
-import { fullscreenProgressClass } from '../style/progress';
+import { fullscreenProgressClass } from '../style/SuspendModal';
 
 const BRANCH_DESC = {
   current:
