@@ -87,10 +87,16 @@ async function activate(
       serverSettings.frontendVersion &&
       serverSettings.frontendVersion !== serverSettings.serverVersion
     ) {
-      throw new Error(
-        'JupyterLab Git server extension and frontend extension are not matching. ' +
-          'Please install identical version of jupyterlab-git Python package and @jupyterlab/git extension.'
-      );
+    throw new Error(
+      'The versions of the JupyterLab Git server frontend and backend do not match. ' +
+        `The @jupyterlab/git frontend extension has version: ${
+          serverSettings.frontendVersion
+        } ` +
+        `while the python package has version ${
+          serverSettings.serverVersion
+        } ` +
+        'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git'
+    );
     }
   } catch (error) {
     // If we fall here, nothing will be loaded in the frontend.
