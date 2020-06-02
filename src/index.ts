@@ -73,7 +73,7 @@ async function activate(
 
     // Version validation
     if (!serverSettings.gitVersion) {
-      throw new Error('git command not found');
+      throw new Error('git command not found - please ensure you have Git > 2 installed');
     } else {
       const gitVersion = serverSettings.gitVersion.split('.');
       if (Number.parseInt(gitVersion[0]) < 2) {
