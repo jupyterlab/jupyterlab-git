@@ -100,8 +100,8 @@ async function activate(
     }
   } catch (error) {
     // If we fall here, nothing will be loaded in the frontend.
-    console.error('Fail to load the server git extension settings', error);
-    showErrorMessage('Fail to load the server git extension', error.message, [
+    console.error('Failed to load the jupyterlab-git server extension settings', error);
+    showErrorMessage('Failed to load the jupyterlab-git server extension', error.message, [
       Dialog.warnButton({ label: 'DISMISS' })
     ]);
     return null;

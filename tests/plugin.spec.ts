@@ -1,6 +1,5 @@
 import 'jest';
 import * as git from '../src/git';
-// import { Git } from '../src/tokens';
 import plugin from '../src/index';
 import { version } from '../src/version';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
@@ -129,7 +128,7 @@ describe('plugin', () => {
         [undefined] // The warning button is undefined as the module @jupyterlab/apputils is mocked
       );
     });
-    it('should fail if server and extension version are not matching', async () => {
+    it('should fail if server and extension version do not match', async () => {
       // Given
       const endpoint =
         '/git/settings' + URLExt.objectToQueryString({ version });
@@ -160,9 +159,13 @@ describe('plugin', () => {
       // Then
       expect(extension).toBeNull(); // Token is null
       expect(mockedErrorMessage).toHaveBeenCalledWith(
-        'Fail to load the server git extension',
-        'JupyterLab Git server extension and frontend extension are not matching. ' +
-          'Please install identical version of jupyterlab-git Python package and @jupyterlab/git extension.',
+        'Failed to load the jupyterlab-git server extension',
+      'The versions of the JupyterLab Git server frontend and backend do not match. ' +
+        `The @jupyterlab/git frontend extension has version: ${
+          version
+        } ` +
+        'while the python package has version 0.1.0' +
+        'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git',
         [undefined] // The warning button is undefined as the module @jupyterlab/apputils is mocked
       );
     });
@@ -190,7 +193,7 @@ describe('plugin', () => {
       // Then
       expect(extension).toBeNull(); // Token is null
       expect(mockedErrorMessage).toHaveBeenCalledWith(
-        'Fail to load the server git extension',
+        'Failed to load the jupyterlab-git server extension',
         'Git server extension is unavailable. Please ensure you have installed the ' +
           'JupyterLab Git server extension by running: pip install --upgrade jupyterlab-git. ' +
           'To confirm that the server extension is installed, run: jupyter serverextension list.',

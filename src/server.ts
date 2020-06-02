@@ -21,7 +21,7 @@ export async function getServerSettings(): Promise<Git.IServerSettings> {
     }
     if (!response.ok) {
       const message = content.message || content;
-      console.error('Fail to get the server extension settings', message);
+      console.error('Failed to get the server extension settings', message);
       throw new ServerConnection.ResponseError(response, message);
     }
     return content as Git.IServerSettings;
