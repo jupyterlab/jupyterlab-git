@@ -74,6 +74,9 @@ describe('IGitExtension', () => {
     const app = {
       commands: {
         hasCommand: jest.fn().mockReturnValue(true)
+      },
+      docRegistry: {
+        getFileTypesForPath: jest.fn().mockReturnValue([])
       }
     };
     model = new GitExtension(app as any);

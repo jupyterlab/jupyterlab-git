@@ -278,7 +278,14 @@ export class NewBranchDialog extends React.Component<
         key={branch.name}
         onClick={this._onBranchClickFactory(branch.name)}
       >
-        <span className={classes(listItemIconClass, 'jp-Icon-16')} />
+        <span
+          className={classes(
+            'jp-git-icon',
+            listItemIconClass,
+            'jp-Icon-16',
+            isBold && 'jp-git-selected'
+          )}
+        />
         <div className={listItemContentClass}>
           <p
             className={classes(

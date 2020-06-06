@@ -1,7 +1,13 @@
 import * as React from 'react';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { fileIcon } from '@jupyterlab/ui-components';
-import { insertionsMadeIcon, deletionsMadeIcon } from '../style/icons';
+import {
+  insertionsMadeIcon,
+  deletionsMadeIcon,
+  discardIcon,
+  rewindIcon,
+  diffIcon
+} from '../style/icons';
 import { classes } from 'typestyle/';
 import { GitExtension } from '../model';
 import { Git } from '../tokens';
@@ -160,27 +166,21 @@ export class SinglePastCommitInfo extends React.Component<
       <div>
         <div className={commitClass}>
           <div className={commitOverviewNumbersClass}>
-            <span>
-              <fileIcon.react
-                className={iconClass}
-                tag="span"
-                title="# Files Changed"
-              />
+            <span title="# Files Changed">
+              <fileIcon.react className={iconClass} tag="span" />
               {this.state.numFiles}
             </span>
-            <span>
+            <span title="# Insertions">
               <insertionsMadeIcon.react
                 className={classes(iconClass, insertionsIconClass)}
-                tag="div"
-                title="# Insertions"
+                tag="span"
               />
               {this.state.insertions}
             </span>
-            <span>
+            <span title="# Deletions">
               <deletionsMadeIcon.react
                 className={classes(iconClass, deletionsIconClass)}
-                tag="div"
-                title="# Deletions"
+                tag="span"
               />
               {this.state.deletions}
             </span>
@@ -191,13 +191,13 @@ export class SinglePastCommitInfo extends React.Component<
             Changed
             <ActionButton
               className={actionButtonClass}
-              iconName="git-discard"
+              icon={discardIcon}
               title="Revert changes introduced by this commit"
               onClick={this._onRevertClick}
             />
             <ActionButton
               className={actionButtonClass}
-              iconName="git-rewind"
+              icon={rewindIcon}
               title="Discard changes introduced *after* this commit (hard reset)"
               onClick={this._onResetClick}
             />
@@ -247,7 +247,7 @@ export class SinglePastCommitInfo extends React.Component<
       >
         <FilePath filepath={path} />
         {flg ? (
-          <ActionButton iconName="git-diff" title="View file changes" />
+          <ActionButton icon={diffIcon} title="View file changes" />
         ) : null}
       </li>
     );

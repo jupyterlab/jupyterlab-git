@@ -9,21 +9,17 @@
   --jp-git-diff-output-border-color: rgba(0, 141, 255, 0.7);
   --jp-git-diff-output-color: rgba(0, 141, 255, 0.3);
 
-  --jp-icon-git-clone: url('./images/git-clone-icon.svg');
+  --jp-icon-git-branch: url('./icons/branch.svg');
 }
 
-[data-jp-theme-light='true'] {
-  --jp-icon-diff: url('./images/diff-hover.svg');
-  --jp-icon-git-branch: url('./images/git-branch.svg');
-  --jp-icon-git-pull: url('./images/git-pull.svg');
-  --jp-icon-git-push: url('./images/git-push.svg');
-  --jp-icon-git-repo: url('./images/desktop.svg');
+[data-jp-theme-light='true'] .jp-git-icon.jp-git-selected {
+  filter: brightness(3);
 }
 
-[data-jp-theme-light='false'] {
-  --jp-icon-diff: url('./images/diff-hover-dk.svg');
-  --jp-icon-git-branch: url('./images/git-branch-white.svg');
-  --jp-icon-git-pull: url('./images/git-pull-white.svg');
-  --jp-icon-git-push: url('./images/git-push-white.svg');
-  --jp-icon-git-repo: url('./images/desktop-white.svg');
+[data-jp-theme-light='false'] .jp-git-icon {
+  filter: brightness(1.75);
+}
+
+[data-jp-theme-light='false'] .jp-git-icon.jp-git-selected {
+  filter: brightness(0.5);
 }

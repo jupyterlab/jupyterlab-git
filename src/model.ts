@@ -1,4 +1,5 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -7,9 +8,8 @@ import { JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import { httpGitRequest } from './git';
-import { IGitExtension, Git } from './tokens';
+import { Git, IGitExtension } from './tokens';
 import { decodeStage } from './utils';
-import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms

@@ -2,10 +2,10 @@ import { ReactWidget, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
-import { style } from 'typestyle';
+import { GitExtension } from '../../model';
+import { diffIcon } from '../../style/icons';
 import { Diff, isDiffSupported, RenderMimeProvider } from './Diff';
 import { getRefValue, IDiffContext } from './model';
-import { GitExtension } from '../../model';
 
 /**
  * Method to open a main menu panel to show the diff of a given Notebook file.
@@ -48,9 +48,7 @@ export async function openDiffView(
       );
       nbDiffWidget.id = id;
       nbDiffWidget.title.label = PathExt.basename(filePath);
-      nbDiffWidget.title.iconClass = style({
-        backgroundImage: 'var(--jp-icon-diff)'
-      });
+      nbDiffWidget.title.icon = diffIcon;
       nbDiffWidget.title.closable = true;
       nbDiffWidget.addClass('jp-git-diff-parent-diff-widget');
 
