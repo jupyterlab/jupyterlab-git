@@ -18,7 +18,7 @@ export interface IActionButtonProps {
   /**
    * Icon
    */
-  icon: LabIcon.IMaybeResolvable;
+  icon: LabIcon;
   /**
    * Button title
    */
@@ -45,7 +45,7 @@ export const ActionButton: React.FunctionComponent<IActionButtonProps> = (
       title={title}
       onClick={onClick}
     >
-      <LabIcon.resolveReact icon={icon} elementPosition="center" tag="span" />
+      <icon.react elementPosition="center" tag="span" />
     </button>
   );
 };

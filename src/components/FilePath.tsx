@@ -5,9 +5,7 @@ import {
   fileLabelStyle,
   folderLabelStyle
 } from '../style/FilePathStyle';
-import { extractFilename } from '../utils';
-import { LabIcon } from '@jupyterlab/ui-components';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { extractFilename, getFileIconClassName } from '../utils';
 
 /**
  * FilePath component properties
@@ -18,13 +16,13 @@ export interface IFilePathProps {
    */
   filepath: string;
   /**
-   * File type
-   */
-  filetype: DocumentRegistry.IFileType;
-  /**
    * Is file selected? - impact style of the icon
    */
   selected?: boolean;
+}
+
+function getFileIconClass(path: string): string {
+  return getFileIconClassName(path);
 }
 
 export const FilePath: React.FunctionComponent<IFilePathProps> = (
@@ -37,11 +35,13 @@ export const FilePath: React.FunctionComponent<IFilePathProps> = (
 
   return (
     <React.Fragment>
-      <LabIcon.resolveReact
-        icon={props.filetype.icon}
-        className={classes(props.filetype.iconClass, fileIconStyle)}
-        elementPosition="center"
-        tag="span"
+      <span
+        className={classes(
+          fileIconStyle,
+          'jp-git-icon',
+          getFileIconClass(props.filepath),
+          props.selected && 'jp-git-selected'
+        )}
       />
       <span className={fileLabelStyle}>
         {filename}

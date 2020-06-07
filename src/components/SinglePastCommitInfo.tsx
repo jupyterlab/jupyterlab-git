@@ -1,33 +1,33 @@
-import * as React from 'react';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { fileIcon } from '@jupyterlab/ui-components';
-import {
-  insertionsMadeIcon,
-  deletionsMadeIcon,
-  discardIcon,
-  rewindIcon,
-  diffIcon
-} from '../style/icons';
+import * as React from 'react';
 import { classes } from 'typestyle/';
 import { GitExtension } from '../model';
-import { Git } from '../tokens';
+import {
+  deletionsMadeIcon,
+  diffIcon,
+  discardIcon,
+  insertionsMadeIcon,
+  rewindIcon
+} from '../style/icons';
 import {
   actionButtonClass,
   commitClass,
+  commitDetailClass,
   commitDetailFileClass,
   commitDetailHeaderClass,
-  commitDetailClass,
   commitOverviewNumbersClass,
   deletionsIconClass,
   fileListClass,
   iconClass,
   insertionsIconClass
 } from '../style/SinglePastCommitInfo';
+import { Git } from '../tokens';
+import { ActionButton } from './ActionButton';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
-import { ResetRevertDialog } from './ResetRevertDialog';
 import { FilePath } from './FilePath';
-import { ActionButton } from './ActionButton';
+import { ResetRevertDialog } from './ResetRevertDialog';
 
 /**
  * Interface describing component properties.
@@ -245,7 +245,7 @@ export class SinglePastCommitInfo extends React.Component<
         onClick={this._onDiffClickFactory(path, flg)}
         title={path}
       >
-        <FilePath filepath={path} filetype={file.type} />
+        <FilePath filepath={path} />
         {flg ? (
           <ActionButton icon={diffIcon} title="View file changes" />
         ) : null}

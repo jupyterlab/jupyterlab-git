@@ -219,7 +219,12 @@ export const listItemIconClass = style({
   height: '16px',
 
   /* top | right | bottom | left */
-  margin: 'auto 8px auto 0'
+  margin: 'auto 8px auto 0',
+
+  backgroundImage: 'var(--jp-icon-git-branch)',
+  backgroundSize: '16px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
 });
 
 export const listItemTitleClass = style({});

@@ -1,4 +1,5 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -7,10 +8,8 @@ import { JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import { httpGitRequest } from './git';
-import { IGitExtension, Git } from './tokens';
+import { Git, IGitExtension } from './tokens';
 import { decodeStage } from './utils';
-import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
@@ -637,13 +636,7 @@ export class GitExtension implements IGitExtension {
         throw new ServerConnection.ResponseError(response, data.message);
       }
 
-      // lookup filetypes
-      const data: Git.ISingleCommitFilePathInfo = await response.json();
-      data.modified_files = data.modified_files.map(f => {
-        f.type = this._resolveFileType(f.modified_file_path);
-        return f;
-      });
-      return data;
+      return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     }
@@ -864,7 +857,6 @@ export class GitExtension implements IGitExtension {
         (data as Git.IStatusResult).files.map(file => {
           return {
             ...file,
-            type: this._resolveFileType(file.to),
             status: decodeStage(file.x, file.y)
           };
         })
@@ -1019,21 +1011,6 @@ export class GitExtension implements IGitExtension {
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     }
-  }
-
-  /**
-   * Resolve path to filetype
-   */
-  protected _resolveFileType(path: string): DocumentRegistry.IFileType {
-    // test if directory
-    if (path.endsWith('/')) {
-      return DocumentRegistry.defaultDirectoryFileType;
-    }
-
-    return (
-      this._app.docRegistry.getFileTypesForPath(path)[0] ||
-      DocumentRegistry.defaultTextFileType
-    );
   }
 
   /**

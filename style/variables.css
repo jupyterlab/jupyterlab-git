@@ -8,4 +8,6 @@
   --jp-git-diff-deleted-color: rgba(255, 0, 0, 0.2);
   --jp-git-diff-output-border-color: rgba(0, 141, 255, 0.7);
   --jp-git-diff-output-color: rgba(0, 141, 255, 0.3);
+
+  --jp-icon-git-branch: url('./icons/branch.svg');
 }

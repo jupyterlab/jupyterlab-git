@@ -106,7 +106,6 @@ export class FileItem extends React.Component<IFileItemProps> {
         )}
         <FilePath
           filepath={this.props.file.to}
-          filetype={this.props.file.type}
           selected={this.props.selected}
         />
         {this.props.actions}
