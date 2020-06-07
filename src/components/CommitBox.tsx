@@ -68,6 +68,11 @@ export class CommitBox extends React.Component<
    */
   render(): React.ReactElement {
     const disabled = !(this.props.hasFiles && this.state.summary);
+    const title = !this.props.hasFiles
+      ? 'Disabled: No files are staged for commit'
+      : !this.state.summary
+      ? 'Disabled: No commit message summary'
+      : 'Commit';
     return (
       <form className={commitFormClass}>
         <input
@@ -90,7 +95,7 @@ export class CommitBox extends React.Component<
         <input
           className={commitButtonClass}
           type="button"
-          title="Commit"
+          title={title}
           value="Commit"
           disabled={disabled}
           onClick={this._onCommitClick}
