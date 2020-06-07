@@ -5,6 +5,7 @@ import { GitExtension } from '../../src/model';
 import { FileList } from '../../src/components/FileList';
 
 import { httpGitRequest } from '../../src/git';
+import { Git } from '../../src/tokens';
 
 jest.mock('../../src/git');
 jest.mock('@jupyterlab/apputils');
@@ -82,51 +83,63 @@ describe('FileList', () => {
       model = await createModel();
     });
 
-    [' ', 'M', 'A'].forEach(x => {
-      it(`should reset${x !== 'A' ? ' and checkout' : ''}`, async () => {
-        const mockDialog = showDialog as jest.MockedFunction<typeof showDialog>;
-        mockDialog.mockResolvedValue({
-          button: {
-            accept: true,
-            caption: '',
-            className: '',
-            displayType: 'default',
-            iconClass: '',
-            iconLabel: '',
-            label: ''
-          },
-          value: undefined
-        });
-        const spyReset = jest.spyOn(model, 'reset');
-        spyReset.mockResolvedValueOnce(undefined);
-        const spyCheckout = jest.spyOn(model, 'checkout');
-        spyReset.mockResolvedValueOnce(undefined);
+    ['staged', 'partially-staged', 'unstaged', 'untracked'].forEach(status => {
+      [' ', 'M', 'A'].forEach(x => {
+        it(`status:${status} - x:${x} may reset and/or checkout`, async () => {
+          const mockDialog = showDialog as jest.MockedFunction<
+            typeof showDialog
+          >;
+          mockDialog.mockResolvedValue({
+            button: {
+              accept: true,
+              caption: '',
+              className: '',
+              displayType: 'default',
+              iconClass: '',
+              iconLabel: '',
+              label: ''
+            },
+            value: undefined
+          });
+          const spyReset = jest.spyOn(model, 'reset');
+          spyReset.mockResolvedValueOnce(undefined);
+          const spyCheckout = jest.spyOn(model, 'checkout');
+          spyCheckout.mockResolvedValueOnce(undefined);
 
-        const path = 'file/path.ext';
+          const path = 'file/path.ext';
 
-        const component = new FileList({
-          model,
-          files: [],
-          renderMime: null,
-          settings: null
-        });
-        await component.discardChanges({
-          x,
-          y: ' ',
-          from: 'from',
-          to: path,
-          status: 'staged',
-          is_binary: false
-        });
-        expect(spyReset).toHaveBeenCalledWith(path);
-        if (x !== 'A') {
-          expect(spyCheckout).toHaveBeenCalledWith({ filename: path });
-        } else {
-          expect(spyCheckout).not.toHaveBeenCalled();
-        }
+          const component = new FileList({
+            model,
+            files: [],
+            renderMime: null,
+            settings: null
+          });
+          await component.discardChanges({
+            x,
+            y: ' ',
+            from: 'from',
+            to: path,
+            status: status as Git.Status,
+            is_binary: false
+          });
 
-        spyReset.mockRestore();
-        spyCheckout.mockRestore();
+          if (status === 'staged' || status === 'partially-staged') {
+            expect(spyReset).toHaveBeenCalledWith(path);
+          } else if (status === 'unstaged') {
+            expect(spyReset).not.toHaveBeenCalled();
+            expect(spyCheckout).toHaveBeenCalledWith({ filename: path });
+          } else if (status === 'partially-staged') {
+            expect(spyReset).toHaveBeenCalledWith(path);
+            if (x !== 'A') {
+              expect(spyCheckout).toHaveBeenCalledWith({ filename: path });
+            } else {
+              expect(spyCheckout).not.toHaveBeenCalled();
+            }
+          }
+
+          spyReset.mockRestore();
+          spyCheckout.mockRestore();
+        });
       });
     });
   });
