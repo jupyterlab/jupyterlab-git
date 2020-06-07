@@ -70,40 +70,39 @@ async function activate(
   }
   try {
     serverSettings = await getServerSettings();
+    const { frontendVersion, gitVersion, serverVersion } = serverSettings;
 
     // Version validation
-    if (!serverSettings.gitVersion) {
-      throw new Error('git command not found - please ensure you have Git > 2 installed');
+    if (!gitVersion) {
+      throw new Error(
+        'git command not found - please ensure you have Git > 2 installed'
+      );
     } else {
-      const gitVersion = serverSettings.gitVersion.split('.');
-      if (Number.parseInt(gitVersion[0]) < 2) {
-        throw new Error(
-          `git command version must be > 2; got ${serverSettings.gitVersion}.`
-        );
+      const gitVersion_ = gitVersion.split('.');
+      if (Number.parseInt(gitVersion_[0]) < 2) {
+        throw new Error(`git command version must be > 2; got ${gitVersion}.`);
       }
     }
 
-    if (
-      serverSettings.frontendVersion &&
-      serverSettings.frontendVersion !== serverSettings.serverVersion
-    ) {
-    throw new Error(
-      'The versions of the JupyterLab Git server frontend and backend do not match. ' +
-        `The @jupyterlab/git frontend extension has version: ${
-          serverSettings.frontendVersion
-        } ` +
-        `while the python package has version ${
-          serverSettings.serverVersion
-        } ` +
-        'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git'
-    );
+    if (frontendVersion && frontendVersion !== serverVersion) {
+      throw new Error(
+        'The versions of the JupyterLab Git server frontend and backend do not match. ' +
+          `The @jupyterlab/git frontend extension has version: ${frontendVersion} ` +
+          `while the python package has version ${serverVersion} ` +
+          'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git'
+      );
     }
   } catch (error) {
     // If we fall here, nothing will be loaded in the frontend.
-    console.error('Failed to load the jupyterlab-git server extension settings', error);
-    showErrorMessage('Failed to load the jupyterlab-git server extension', error.message, [
-      Dialog.warnButton({ label: 'DISMISS' })
-    ]);
+    console.error(
+      'Failed to load the jupyterlab-git server extension settings',
+      error
+    );
+    showErrorMessage(
+      'Failed to load the jupyterlab-git server extension',
+      error.message,
+      [Dialog.warnButton({ label: 'DISMISS' })]
+    );
     return null;
   }
   // Create the Git model
