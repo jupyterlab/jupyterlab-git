@@ -1,4 +1,4 @@
-import { ReactWidget, showDialog } from '@jupyterlab/apputils';
+import { ReactWidget, showDialog, UseSignal } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import * as React from 'react';
@@ -6,6 +6,7 @@ import { style } from 'typestyle';
 import { Diff, isDiffSupported, RenderMimeProvider } from './Diff';
 import { getRefValue, IDiffContext } from './model';
 import { GitExtension } from '../../model';
+import { FileBrowserModel } from '@jupyterlab/filebrowser';
 
 /**
  * Method to open a main menu panel to show the diff of a given Notebook file.
@@ -22,7 +23,8 @@ export async function openDiffView(
   model: GitExtension,
   diffContext: IDiffContext,
   renderMime: IRenderMimeRegistry,
-  isText = false
+  isText = false,
+  filebrowser?: FileBrowserModel
 ) {
   if (isDiffSupported(filePath) || isText) {
     const id = `nbdiff-${filePath}-${getRefValue(diffContext.currentRef)}`;
@@ -38,13 +40,22 @@ export async function openDiffView(
     if (!mainAreaItem) {
       const serverRepoPath = model.getRelativeFilePath();
       const nbDiffWidget = ReactWidget.create(
-        <RenderMimeProvider value={renderMime}>
-          <Diff
-            path={filePath}
-            diffContext={diffContext}
-            topRepoPath={serverRepoPath}
-          />
-        </RenderMimeProvider>
+        <UseSignal
+          signal={filebrowser.fileChanged}
+          shouldUpdate={(sender, change) => {
+            return change.newValue.path === serverRepoPath + '/' + filePath;
+          }}
+        >
+          {(_, change) => (
+            <RenderMimeProvider value={renderMime}>
+              <Diff
+                path={filePath}
+                diffContext={diffContext}
+                topRepoPath={serverRepoPath}
+              />
+            </RenderMimeProvider>
+          )}
+        </UseSignal>
       );
       nbDiffWidget.id = id;
       nbDiffWidget.title.label = PathExt.basename(filePath);

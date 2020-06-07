@@ -14,6 +14,7 @@ import { openDiffView } from './diff/DiffWidget';
 import { ISpecialRef } from './diff/model';
 import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
+import { FileBrowserModel } from '@jupyterlab/filebrowser';
 
 export namespace CommandIDs {
   export const gitFileOpen = 'git:context-open';
@@ -34,6 +35,7 @@ export interface IFileListProps {
   model: GitExtension;
   renderMime: IRenderMimeRegistry;
   settings: ISettingRegistry.ISettings;
+  filebrowser: FileBrowserModel;
 }
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
@@ -72,7 +74,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               previousRef: { gitRef: 'HEAD' }
             },
             this.props.renderMime,
-            !this.state.selectedFile.is_binary
+            !this.state.selectedFile.is_binary,
+            this.props.filebrowser
           );
         }
       });
@@ -91,7 +94,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               previousRef: { gitRef: 'HEAD' }
             },
             this.props.renderMime,
-            !this.state.selectedFile.is_binary
+            !this.state.selectedFile.is_binary,
+            this.props.filebrowser
           );
         }
       });
@@ -673,7 +677,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           currentRef: { specialRef: currentRef }
         },
         this.props.renderMime,
-        !file.is_binary
+        !file.is_binary,
+        this.props.filebrowser
       );
     } catch (reason) {
       console.error(`Failed to open diff view for ${file.to}.\n${reason}`);

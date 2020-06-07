@@ -264,6 +264,7 @@ export class GitPanel extends React.Component<
           model={this.props.model}
           renderMime={this.props.renderMime}
           settings={this.props.settings}
+          filebrowser={this.props.filebrowser}
         />
         {this.props.settings.composite['simpleStaging'] ? (
           <CommitBox
