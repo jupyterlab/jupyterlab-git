@@ -88,7 +88,7 @@ async function activate(
       throw new Error(
         'The versions of the JupyterLab Git server frontend and backend do not match. ' +
           `The @jupyterlab/git frontend extension has version: ${frontendVersion} ` +
-          `while the python package has version ${serverVersion} ` +
+          `while the python package has version ${serverVersion}. ` +
           'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git'
       );
     }

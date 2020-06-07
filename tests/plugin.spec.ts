@@ -86,8 +86,8 @@ describe('plugin', () => {
       // Then
       expect(extension).toBeNull(); // Token is null
       expect(mockedErrorMessage).toHaveBeenCalledWith(
-        'Fail to load the server git extension',
-        'git command not found',
+        'Failed to load the jupyterlab-git server extension',
+        'git command not found - please ensure you have Git > 2 installed',
         [undefined] // The warning button is undefined as the module @jupyterlab/apputils is mocked
       );
     });
@@ -123,7 +123,7 @@ describe('plugin', () => {
       // Then
       expect(extension).toBeNull(); // Token is null
       expect(mockedErrorMessage).toHaveBeenCalledWith(
-        'Fail to load the server git extension',
+        'Failed to load the jupyterlab-git server extension',
         'git command version must be > 2; got 1.8.7.',
         [undefined] // The warning button is undefined as the module @jupyterlab/apputils is mocked
       );
@@ -164,7 +164,7 @@ describe('plugin', () => {
         `The @jupyterlab/git frontend extension has version: ${
           version
         } ` +
-        'while the python package has version 0.1.0' +
+        'while the python package has version 0.1.0. ' +
         'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git',
         [undefined] // The warning button is undefined as the module @jupyterlab/apputils is mocked
       );
