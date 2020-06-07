@@ -247,8 +247,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
     if (result.button.accept) {
       try {
-        await this.props.model.reset(file.to);
-        if (file.x !== 'A') {
+        if (file.status === 'staged' || file.status === 'partially-staged') {
+          await this.props.model.reset(file.to);
+        }
+        if (
+          file.status === 'unstaged' ||
+          (file.status === 'partially-staged' && file.x !== 'A')
+        ) {
           // resetting an added file moves it to untracked category => checkout will fail
           await this.props.model.checkout({ filename: file.to });
         }
