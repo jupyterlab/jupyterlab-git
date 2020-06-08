@@ -53,7 +53,7 @@ export function Diff(props: IDiffProps) {
     try {
       return <PlainTextDiff {...props} />;
     } catch (error) {
-      console.log(`Unable to render diff view for ${props.path}:\n${error}`);
+      console.error(`Unable to render diff view for ${props.path}:\n${error}`);
       return null;
     }
   }

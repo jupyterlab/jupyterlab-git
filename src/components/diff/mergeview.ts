@@ -141,7 +141,7 @@ export namespace MergeView {
     /**
      * Forces the view to reload.
      */
-    forceUpdate(): (mode: string) => void;
+    forceUpdate(mode?: string): void;
 
     /**
      * Sets whether or not the merge view should show the differences between the editor views.

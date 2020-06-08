@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import { IDiffProps } from './Diff';
 import { httpGitRequest } from '../../git';
-import { mergeView } from './mergeview';
+import { mergeView, MergeView } from './mergeview';
 import { IDiffContext } from './model';
 
 interface ICurrentReference {
@@ -33,11 +33,8 @@ export class PlainTextDiff extends React.Component<
     this._mergeViewRef = React.createRef<HTMLDivElement>();
   }
 
-  componentDidMount() {
-    this._performDiff(this.props.diffContext);
-  }
-
   render() {
+    this._performDiff(this.props.diffContext);
     if (this.state.errorMessage !== null) {
       return (
         <div>
@@ -123,17 +120,23 @@ export class PlainTextDiff extends React.Component<
     const mode =
       Mode.findByFileName(this.props.path) || Mode.findBest(this.props.path);
 
-    mergeView(this._mergeViewRef.current, {
-      value: currContent,
-      orig: prevContent,
-      lineNumbers: true,
-      mode: mode.mime,
-      theme: 'jupyter',
-      connect: 'align',
-      collapseIdentical: true,
-      revertButtons: false
-    });
+    if (this._mergeView) {
+      this._mergeView.editor().setValue(currContent);
+      this._mergeView.left.forceUpdate('full');
+    } else {
+      this._mergeView = mergeView(this._mergeViewRef.current, {
+        value: currContent,
+        orig: prevContent,
+        lineNumbers: true,
+        mode: mode.mime,
+        theme: 'jupyter',
+        connect: 'align',
+        collapseIdentical: true,
+        revertButtons: false
+      });
+    }
   }
 
   private _mergeViewRef: React.RefObject<HTMLDivElement>;
+  private _mergeView: MergeView.IMergeViewEditor;
 }
