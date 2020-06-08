@@ -39,24 +39,29 @@ export async function openDiffView(
     }
     if (!mainAreaItem) {
       const serverRepoPath = model.getRelativeFilePath();
-      const nbDiffWidget = ReactWidget.create(
-        <UseSignal
-          signal={filebrowser.fileChanged}
-          shouldUpdate={(sender, change) => {
-            return change.newValue.path === serverRepoPath + '/' + filePath;
-          }}
-        >
-          {(_, change) => (
-            <RenderMimeProvider value={renderMime}>
-              <Diff
-                path={filePath}
-                diffContext={diffContext}
-                topRepoPath={serverRepoPath}
-              />
-            </RenderMimeProvider>
-          )}
-        </UseSignal>
-      );
+      const innerWidget = function() {
+        return (
+          <RenderMimeProvider value={renderMime}>
+            <Diff
+              path={filePath}
+              diffContext={diffContext}
+              topRepoPath={serverRepoPath}
+            />
+          </RenderMimeProvider>
+        );
+      };
+      const nbDiffWidget = filebrowser
+        ? ReactWidget.create(
+            <UseSignal
+              signal={filebrowser.fileChanged}
+              shouldUpdate={(sender, change) => {
+                return change.newValue.path === serverRepoPath + '/' + filePath;
+              }}
+            >
+              {() => innerWidget()}
+            </UseSignal>
+          )
+        : ReactWidget.create(innerWidget());
       nbDiffWidget.id = id;
       nbDiffWidget.title.label = PathExt.basename(filePath);
       nbDiffWidget.title.iconClass = style({
