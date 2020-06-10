@@ -566,8 +566,9 @@ class GitTagCheckoutHandler(GitHandler):
         """
         POST request handler, checkout the tag version to a branch.
         """
-        current_path = self.get_json_body()["current_path"]
-        tag = self.get_json_body()["tag_id"]
+        data = self.get_json_body()
+        current_path = data["current_path"]
+        tag = data["tag_id"]
         result = await self.git.tag_checkout(current_path, tag)
         self.finish(json.dumps(result))
 

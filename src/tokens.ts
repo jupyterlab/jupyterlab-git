@@ -270,8 +270,20 @@ export interface IGitExtension extends IDisposable {
    */
   showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
 
-  taglist: Git.ITag[];
+  /**
+   * Make request to list all the tags present in the remote repo
+   *
+   * @param path of the repository
+   * @returns list of tags
+   */
   tags(path: string): Promise<Git.ITagResult>;
+
+  /**
+   * Make request to checkout the specified tag version
+   *
+   * @param path of the repository
+   * @param tag of the version to checkout
+   */
   tag_checkout(path: string, tag: string): Promise<Git.ICheckoutResult>;
 }
 

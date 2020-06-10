@@ -1,6 +1,8 @@
 import { Spinner } from '@jupyterlab/apputils';
-import { Widget } from '@phosphor/widgets';
-import { AUTH_ERROR_MESSAGES } from '../git';
+import { Widget } from '@lumino/widgets';
+import {
+
+} from '../git';
 import { Git, IGitExtension } from '../tokens';
 /**
  * The UI for the content shown within the Git push/pull modal.

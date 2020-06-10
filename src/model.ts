@@ -91,13 +91,6 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * The list of tags in repo
-   */
-  get taglist() {
-    return this._tagList;
-  }
-
-  /**
    * A signal emitted when the HEAD of the git repository changes.
    */
   get headChanged(): ISignal<IGitExtension, void> {
@@ -986,37 +979,7 @@ export class GitExtension implements IGitExtension {
     }
   }
 
-  /**
-   * Make request for a list of all git branches in the repository
-   *
-   * @returns The repository branches
-   */
-  protected async _branch(): Promise<Git.IBranchResult> {
-    await this.ready;
-    const path = this.pathRepository;
-
-    if (path === null) {
-      return Promise.resolve({
-        code: -1,
-        message: 'Not in a git repository.'
-      });
-    }
-
-    try {
-      const response = await httpGitRequest('/git/branch', 'POST', {
-        current_path: path
-      });
-      if (response.status !== 200) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      return response.json();
-    } catch (err) {
-      throw new ServerConnection.NetworkError(err);
-    }
-  }
-
-   async tags(path: string): Promise<Git.ITagResult> {
+  async tags(path: string): Promise<Git.ITagResult> {
     await this.ready;
 
     if (path === null) {
@@ -1030,7 +993,7 @@ export class GitExtension implements IGitExtension {
       let response = await httpGitRequest('/git/tags', 'POST', {
         current_path: path
       });
-      if (response.status !== 200) {
+      if (!response.ok) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
       }
@@ -1054,6 +1017,36 @@ export class GitExtension implements IGitExtension {
       let response = await httpGitRequest('/git/tag_checkout', 'POST', {
         current_path: path,
         tag_id: tag
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
+      }
+      return response.json();
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    }
+  }
+
+  /**
+   * Make request for a list of all git branches in the repository
+   *
+   * @returns The repository branches
+   */
+  protected async _branch(): Promise<Git.IBranchResult> {
+    await this.ready;
+    const path = this.pathRepository;
+
+    if (path === null) {
+      return Promise.resolve({
+        code: -1,
+        message: 'Not in a git repository.'
+      });
+    }
+
+    try {
+      const response = await httpGitRequest('/git/branch', 'POST', {
+        current_path: path
       });
       if (response.status !== 200) {
         const data = await response.json();
@@ -1126,7 +1119,6 @@ export class GitExtension implements IGitExtension {
     IChangedArgs<string | null>
   >(this);
   private _statusChanged = new Signal<IGitExtension, Git.IStatusFile[]>(this);
-  private _tagList: Git.ITag[];
 }
 
 export class BranchMarker implements Git.IBranchMarker {

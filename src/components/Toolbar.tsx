@@ -81,20 +81,20 @@ async function showTagListDialog(
   let tagsValue = await showDialog({
     title: title,
     body: new GitTagDialog(model, repo),
-    buttons: [Dialog.okButton({ label: 'OK' })]
+    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
   });
   while (!tagsValue.button.accept) {
     tagsValue = await showDialog({
       title: title,
       body: new GitTagDialog(model, repo),
-      buttons: [Dialog.okButton({ label: 'DISMISS' })]
+      buttons: [Dialog.cancelButton(),Dialog.okButton({ label: 'DISMISS' })]
     });
   }
   if (tagsValue.button.accept) {
     tagsValue = await showDialog({
       title: title,
       body: new GitTagCheckoutDialog(model, repo, tagsValue.value),
-      buttons: [Dialog.okButton({ label: 'OK' })]
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
     });
   }
 }

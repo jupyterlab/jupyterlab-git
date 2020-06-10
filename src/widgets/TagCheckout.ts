@@ -1,5 +1,5 @@
 import { Spinner } from '@jupyterlab/apputils';
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 import { AUTH_ERROR_MESSAGES } from '../git';
 import { Git, IGitExtension } from '../tokens';
 /**
