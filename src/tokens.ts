@@ -451,6 +451,15 @@ export namespace Git {
     files?: IStatusFileResult[];
   }
 
+  /** Interface for changed_files request result
+   * lists the names of files that have differences between two commits
+   * or beween two branches, or that were changed by a single commit
+   */
+  export interface IChangedFilesResult {
+    code: number;
+    files?: string[];
+  }
+
   /** Interface for GitLog request result,
    * has the info of a single past commit
    */

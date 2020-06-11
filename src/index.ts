@@ -5,6 +5,7 @@ import {
 } from '@jupyterlab/application';
 import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -32,6 +33,7 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     IFileBrowserFactory,
     IRenderMimeRegistry,
     ISettingRegistry,
+    IDocumentManager,
     IStatusBar
   ],
   provides: IGitExtension,
@@ -54,6 +56,7 @@ async function activate(
   factory: IFileBrowserFactory,
   renderMime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
+  docmanager: IDocumentManager,
   statusBar: IStatusBar
 ): Promise<IGitExtension> {
   let gitExtension: GitExtension | null = null;
@@ -106,7 +109,12 @@ async function activate(
     return null;
   }
   // Create the Git model
-  gitExtension = new GitExtension(serverSettings.serverRoot, app, settings);
+  gitExtension = new GitExtension(
+    serverSettings.serverRoot,
+    app,
+    docmanager,
+    settings
+  );
 
   // Whenever we restore the application, sync the Git extension path
   Promise.all([app.restored, filebrowser.model.restored]).then(() => {

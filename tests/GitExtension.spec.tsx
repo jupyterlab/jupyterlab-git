@@ -10,6 +10,8 @@ describe('IGitExtension', () => {
   const mockGit = git as jest.Mocked<typeof git>;
   const fakeRoot = '/path/to/server';
   let model: IGitExtension;
+  const docmanager = jest.mock('@jupyterlab/docmanager') as any;
+  docmanager.findWidget = jest.fn();
   let mockResponses: {
     [url: string]: {
       body?: (request: Object) => string;
@@ -73,7 +75,17 @@ describe('IGitExtension', () => {
         getFileTypesForPath: jest.fn().mockReturnValue([])
       }
     };
-    model = new GitExtension(fakeRoot, app as any);
+    model = new GitExtension(fakeRoot, app as any, docmanager as any);
+  });
+
+  describe('#constructor', () => {
+    it('should have requested the server root folder', () => {
+      expect(mockGit.httpGitRequest).toBeCalledWith(
+        '/git/server_root',
+        'GET',
+        null
+      );
+    });
   });
 
   describe('#pathRepository', () => {
@@ -246,6 +258,45 @@ describe('IGitExtension', () => {
         ...mockResponses,
         '/git/checkout': {
           body: () => '{}'
+        },
+        '/git/branch': {
+          body: () =>
+            JSON.stringify({
+              code: 0,
+              branches: [
+                {
+                  is_current_branch: true,
+                  is_remote_branch: false,
+                  name: 'master',
+                  upstream: null,
+                  top_commit: '52263564aac988a0888060becc3c76d1023e680f',
+                  tag: null
+                },
+                {
+                  is_current_branch: false,
+                  is_remote_branch: false,
+                  name: 'test-branch',
+                  upstream: null,
+                  top_commit: '52263564aac988a0888060becc3c76d1023e680f',
+                  tag: null
+                }
+              ],
+              current_branch: {
+                is_current_branch: true,
+                is_remote_branch: false,
+                name: 'master',
+                upstream: null,
+                top_commit: '52263564aac988a0888060becc3c76d1023e680f',
+                tag: null
+              }
+            })
+        },
+        '/git/changed_files': {
+          body: () =>
+            JSON.stringify({
+              code: 0,
+              files: ['']
+            })
         }
       };
 
@@ -258,7 +309,8 @@ describe('IGitExtension', () => {
         }
       });
 
-      await model.checkout({ branchname: 'dummy' });
+      await model.refreshBranch();
+      await model.checkout({ branchname: 'test-branch' });
       await testSignal;
     });
   });
@@ -315,6 +367,13 @@ describe('IGitExtension', () => {
         ...mockResponses,
         '/git/reset_to_commit': {
           body: () => '{}'
+        },
+        '/git/changed_files': {
+          body: () =>
+            JSON.stringify({
+              code: 0,
+              files: ['made-up-file.md']
+            })
         }
       };
 
