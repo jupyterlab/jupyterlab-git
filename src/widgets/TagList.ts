@@ -1,8 +1,5 @@
 import { Spinner } from '@jupyterlab/apputils';
 import { Widget } from '@lumino/widgets';
-import {
-
-} from '../git';
 import { Git, IGitExtension } from '../tokens';
 /**
  * The UI for the content shown within the Git push/pull modal.
@@ -59,17 +56,6 @@ export class GitTagDialog extends Widget {
     this.node.removeChild(this._spinner.node);
     this._spinner.dispose();
     if (response.code !== 0) {
-      if (
-        AUTH_ERROR_MESSAGES.map(
-          message => response.message.indexOf(message) > -1
-        ).indexOf(true) > -1
-      ) {
-        this.handleError(response.message);
-        this.parent!.parent!.close();
-      } else {
-        this.handleError(response.message);
-      }
-    } else {
       this.handleSuccess(response);
     }
   }
@@ -78,16 +64,7 @@ export class GitTagDialog extends Widget {
     this.node.removeChild(this._spinner.node);
     this._spinner.dispose();
     if (response.code !== 0) {
-      if (
-        AUTH_ERROR_MESSAGES.map(
-          message => response.message.indexOf(message) > -1
-        ).indexOf(true) > -1
-      ) {
-        this.handleError(response.message);
-        this.parent!.parent!.close();
-      } else {
-        this.handleError(response.message);
-      }
+      this.handleError(response.message);
     } else {
       const label = document.createElement('label');
       const text = document.createElement('span');
@@ -99,11 +76,11 @@ export class GitTagDialog extends Widget {
   }
 
   private handleError(
-    message: string = 'Unexpected failure. Please check your Jupyter server logs for more details.'
+    message = 'Unexpected failure. Please check your Jupyter server logs for more details.'
   ): void {
     const label = document.createElement('label');
     const text = document.createElement('span');
-    text.textContent = `Tag list fetch failed with error:`;
+    text.textContent = 'Tag list fetch failed with error:';
     const errorMessage = document.createElement('span');
     errorMessage.textContent = message;
     errorMessage.setAttribute(
@@ -120,11 +97,11 @@ export class GitTagDialog extends Widget {
     const label = document.createElement('label');
     const text = document.createElement('span');
     text.textContent = 'Tag versions : ';
-    let taglist = response.message;
-    let dropdown = document.createElement('select');
+    const taglist = response.message;
+    const dropdown = document.createElement('select');
     for (let i = 0; i <= taglist.length; i++) {
-      if (taglist[i] !== '' && taglist[i] != null) {
-        let dropdownvalue = document.createElement('option');
+      if (taglist[i] !== '' && taglist[i] !== null) {
+        const dropdownvalue = document.createElement('option');
         dropdownvalue.textContent = taglist[i];
         dropdown.options.add(dropdownvalue);
       }
