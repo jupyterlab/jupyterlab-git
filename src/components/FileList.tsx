@@ -628,6 +628,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                   onClick={openFile}
                 />
                 {diffButton}
+                <ActionButton
+                  className={hiddenButtonStyle}
+                  iconName={'git-discard'}
+                  title={'Discard changes'}
+                  onClick={() => {
+                    this.discardChanges(file);
+                  }}
+                />
               </React.Fragment>
             );
             onDoubleClick = doubleClickDiff
