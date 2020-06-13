@@ -44,6 +44,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this._contextMenuStaged = new Menu({ commands });
     this._contextMenuUnstaged = new Menu({ commands });
     this._contextMenuUntracked = new Menu({ commands });
+    this._contextMenuSimpleUntracked = new Menu({ commands });
+    this._contextMenuSimpleTracked = new Menu({ commands });
 
     this.state = {
       selectedFile: null
@@ -159,6 +161,18 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     [CommandIDs.gitFileOpen, CommandIDs.gitFileTrack].forEach(command => {
       this._contextMenuUntracked.addItem({ command });
     });
+
+    [
+      CommandIDs.gitFileOpen,
+      CommandIDs.gitFileDiscard,
+      CommandIDs.gitFileDiffWorking
+    ].forEach(command => {
+      this._contextMenuSimpleTracked.addItem({ command });
+    });
+
+    [CommandIDs.gitFileOpen].forEach(command => {
+      this._contextMenuSimpleUntracked.addItem({ command });
+    });
   }
 
   /** Handle right-click on a staged file */
@@ -177,6 +191,18 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   contextMenuUntracked = (event: React.MouseEvent) => {
     event.preventDefault();
     this._contextMenuUntracked.open(event.clientX, event.clientY);
+  };
+
+  /** Handle right-click on an untracked file in Simple mode*/
+  contextMenuSimpleUntracked = (event: React.MouseEvent) => {
+    event.preventDefault();
+    this._contextMenuSimpleUntracked.open(event.clientX, event.clientY);
+  };
+
+  /** Handle right-click on an tracked file in Simple mode*/
+  contextMenuSimpleTracked = (event: React.MouseEvent) => {
+    event.preventDefault();
+    this._contextMenuSimpleTracked.open(event.clientX, event.clientY);
   };
 
   /** Reset all staged files */
@@ -588,6 +614,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             ? (): void => undefined
             : openFile;
 
+          let contextMenu = this.contextMenuSimpleUntracked;
+
           if (
             file.status === 'unstaged' ||
             file.status === 'partially-staged'
@@ -617,6 +645,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 ? () => this._openDiffView(file, 'WORKING')
                 : () => undefined
               : openFile;
+            contextMenu = this.contextMenuSimpleTracked;
           } else if (file.status === 'staged') {
             const diffButton = this._createDiffButton(file, 'INDEX');
             actions = (
@@ -643,6 +672,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 ? () => this._openDiffView(file, 'INDEX')
                 : () => undefined
               : openFile;
+            contextMenu = this.contextMenuSimpleTracked;
           }
 
           return (
@@ -653,6 +683,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               markBox={true}
               model={this.props.model}
               onDoubleClick={onDoubleClick}
+              contextMenu={contextMenu}
+              selectFile={this.updateSelectedFile}
             />
           );
         })}
@@ -712,4 +744,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _contextMenuStaged: Menu;
   private _contextMenuUnstaged: Menu;
   private _contextMenuUntracked: Menu;
+  private _contextMenuSimpleTracked: Menu;
+  private _contextMenuSimpleUntracked: Menu;
 }
