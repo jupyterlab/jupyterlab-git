@@ -9,7 +9,7 @@ import { Git } from '../../src/tokens';
 
 jest.mock('../../src/git');
 jest.mock('@jupyterlab/apputils');
-jest.mock('@lumino/commands');
+jest.mock('@phosphor/commands');
 
 function request(url: string, method: string, request: Object | null) {
   let response: Response;
