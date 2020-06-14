@@ -1,5 +1,5 @@
 import { showDialog } from '@jupyterlab/apputils';
-import { CommandRegistry } from '@lumino/commands';
+import { CommandRegistry } from '@phosphor/commands';
 import 'jest';
 import { GitExtension } from '../../src/model';
 import { FileList } from '../../src/components/FileList';
