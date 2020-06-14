@@ -417,11 +417,15 @@ export class GitPanel extends React.Component<
   }
 
   private _hasStagedFile(): boolean {
-    return this.state.files.some(file => file.status === 'staged');
+    return this.state.files.some(
+      file => file.status === 'staged' || file.status === 'partially-staged'
+    );
   }
 
   private _hasUnStagedFile(): boolean {
-    return this.state.files.some(file => file.status === 'unstaged');
+    return this.state.files.some(
+      file => file.status === 'unstaged' || file.status === 'partially-staged'
+    );
   }
 
   /**
