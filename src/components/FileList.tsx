@@ -44,6 +44,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this._contextMenuStaged = new Menu({ commands });
     this._contextMenuUnstaged = new Menu({ commands });
     this._contextMenuUntracked = new Menu({ commands });
+    this._contextMenuSimpleUntracked = new Menu({ commands });
+    this._contextMenuSimpleTracked = new Menu({ commands });
 
     this.state = {
       selectedFile: null
@@ -134,7 +136,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Discard',
         caption: 'Discard recent changes of selected file',
         execute: () => {
-          this.discardChanges(this.state.selectedFile.to);
+          this.discardChanges(this.state.selectedFile);
         }
       });
     }
@@ -159,6 +161,18 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     [CommandIDs.gitFileOpen, CommandIDs.gitFileTrack].forEach(command => {
       this._contextMenuUntracked.addItem({ command });
     });
+
+    [
+      CommandIDs.gitFileOpen,
+      CommandIDs.gitFileDiscard,
+      CommandIDs.gitFileDiffWorking
+    ].forEach(command => {
+      this._contextMenuSimpleTracked.addItem({ command });
+    });
+
+    [CommandIDs.gitFileOpen].forEach(command => {
+      this._contextMenuSimpleUntracked.addItem({ command });
+    });
   }
 
   /** Handle right-click on a staged file */
@@ -177,6 +191,18 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   contextMenuUntracked = (event: React.MouseEvent) => {
     event.preventDefault();
     this._contextMenuUntracked.open(event.clientX, event.clientY);
+  };
+
+  /** Handle right-click on an untracked file in Simple mode*/
+  contextMenuSimpleUntracked = (event: React.MouseEvent) => {
+    event.preventDefault();
+    this._contextMenuSimpleUntracked.open(event.clientX, event.clientY);
+  };
+
+  /** Handle right-click on an tracked file in Simple mode*/
+  contextMenuSimpleTracked = (event: React.MouseEvent) => {
+    event.preventDefault();
+    this._contextMenuSimpleTracked.open(event.clientX, event.clientY);
   };
 
   /** Reset all staged files */
@@ -234,23 +260,31 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Discard changes in a specific unstaged or staged file */
-  discardChanges = async (file: string) => {
+  discardChanges = async (file: Git.IStatusFile) => {
     const result = await showDialog({
       title: 'Discard changes',
       body: (
         <span>
-          Are you sure you want to permanently discard changes to <b>{file}</b>?
-          This action cannot be undone.
+          Are you sure you want to permanently discard changes to{' '}
+          <b>{file.to}</b>? This action cannot be undone.
         </span>
       ),
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
     });
     if (result.button.accept) {
       try {
-        await this.props.model.reset(file);
-        await this.props.model.checkout({ filename: file });
+        if (file.status === 'staged' || file.status === 'partially-staged') {
+          await this.props.model.reset(file.to);
+        }
+        if (
+          file.status === 'unstaged' ||
+          (file.status === 'partially-staged' && file.x !== 'A')
+        ) {
+          // resetting an added file moves it to untracked category => checkout will fail
+          await this.props.model.checkout({ filename: file.to });
+        }
       } catch (reason) {
-        showErrorMessage(`Discard changes for ${file} failed.`, reason, [
+        showErrorMessage(`Discard changes for ${file.to} failed.`, reason, [
           Dialog.warnButton({ label: 'DISMISS' })
         ]);
       }
@@ -297,6 +331,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           case 'untracked':
             untrackedFiles.push(file);
             break;
+          case 'partially-staged':
+            stagedFiles.push({
+              ...file,
+              status: 'staged'
+            });
+            unstagedFiles.push({
+              ...file,
+              status: 'unstaged'
+            });
+            break;
 
           default:
             break;
@@ -325,7 +369,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       this.state.selectedFile.x === candidate.x &&
       this.state.selectedFile.y === candidate.y &&
       this.state.selectedFile.from === candidate.from &&
-      this.state.selectedFile.to === candidate.to
+      this.state.selectedFile.to === candidate.to &&
+      this.state.selectedFile.status === candidate.status
     );
   }
 
@@ -443,7 +488,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                     iconName={'git-discard'}
                     title={'Discard changes'}
                     onClick={() => {
-                      this.discardChanges(file.to);
+                      this.discardChanges(file);
                     }}
                   />
                   <ActionButton
@@ -569,9 +614,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             ? (): void => undefined
             : openFile;
 
-          let diffButton: JSX.Element;
-          if (file.status === 'unstaged') {
-            diffButton = this._createDiffButton(file, 'WORKING');
+          let contextMenu = this.contextMenuSimpleUntracked;
+
+          if (
+            file.status === 'unstaged' ||
+            file.status === 'partially-staged'
+          ) {
+            const diffButton = this._createDiffButton(file, 'WORKING');
             actions = (
               <React.Fragment>
                 <ActionButton
@@ -586,7 +635,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                   iconName={'git-discard'}
                   title={'Discard changes'}
                   onClick={() => {
-                    this.discardChanges(file.to);
+                    this.discardChanges(file);
                   }}
                 />
               </React.Fragment>
@@ -596,8 +645,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 ? () => this._openDiffView(file, 'WORKING')
                 : () => undefined
               : openFile;
+            contextMenu = this.contextMenuSimpleTracked;
           } else if (file.status === 'staged') {
-            diffButton = this._createDiffButton(file, 'INDEX');
+            const diffButton = this._createDiffButton(file, 'INDEX');
             actions = (
               <React.Fragment>
                 <ActionButton
@@ -607,6 +657,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                   onClick={openFile}
                 />
                 {diffButton}
+                <ActionButton
+                  className={hiddenButtonStyle}
+                  iconName={'git-discard'}
+                  title={'Discard changes'}
+                  onClick={() => {
+                    this.discardChanges(file);
+                  }}
+                />
               </React.Fragment>
             );
             onDoubleClick = doubleClickDiff
@@ -614,6 +672,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 ? () => this._openDiffView(file, 'INDEX')
                 : () => undefined
               : openFile;
+            contextMenu = this.contextMenuSimpleTracked;
           }
 
           return (
@@ -624,6 +683,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               markBox={true}
               model={this.props.model}
               onDoubleClick={onDoubleClick}
+              contextMenu={contextMenu}
+              selectFile={this.updateSelectedFile}
             />
           );
         })}
@@ -683,4 +744,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _contextMenuStaged: Menu;
   private _contextMenuUnstaged: Menu;
   private _contextMenuUntracked: Menu;
+  private _contextMenuSimpleTracked: Menu;
+  private _contextMenuSimpleUntracked: Menu;
 }
