@@ -83,6 +83,156 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Branch list for the current repository.
+   */
+  get branches() {
+    return this._branches;
+  }
+
+  /**
+   * List of available Git commands.
+   */
+  get commands(): CommandRegistry | null {
+    return this._app ? this._app.commands : null;
+  }
+
+  /**
+   * The current repository branch.
+   */
+  get currentBranch() {
+    return this._currentBranch;
+  }
+
+  /**
+   * Boolean indicating whether the model has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Boolean indicating whether the model is ready.
+   */
+  get isReady(): boolean {
+    return this._pendingReadyPromise === 0;
+  }
+
+  /**
+   * Promise which fulfills when the model is ready.
+   */
+  get ready(): Promise<void> {
+    return this._readyPromise;
+  }
+
+  /**
+   * Git repository path.
+   *
+   * ## Notes
+   *
+   * -   This is the full path of the top-level folder.
+   * -   The return value is `null` if a repository path is not defined.
+   */
+  get pathRepository(): string | null {
+    return this._pathRepository;
+  }
+
+  set pathRepository(v: string | null) {
+    const change: IChangedArgs<string> = {
+      name: 'pathRepository',
+      newValue: null,
+      oldValue: this._pathRepository
+    };
+    if (v === null) {
+      this._pendingReadyPromise += 1;
+      this._readyPromise.then(() => {
+        this._pathRepository = null;
+        this._pendingReadyPromise -= 1;
+
+        if (change.newValue !== change.oldValue) {
+          this.refresh().then(() => this._repositoryChanged.emit(change));
+        }
+      });
+    } else {
+      const currentReady = this._readyPromise;
+      this._pendingReadyPromise += 1;
+      this._readyPromise = Promise.all([currentReady, this.showTopLevel(v)])
+        .then(r => {
+          const results = r[1];
+          if (results.code === 0) {
+            this._pathRepository = results.top_repo_path;
+            change.newValue = results.top_repo_path;
+          } else {
+            this._pathRepository = null;
+          }
+
+          if (change.newValue !== change.oldValue) {
+            this.refresh().then(() => this._repositoryChanged.emit(change));
+          }
+        })
+        .catch(reason => {
+          console.error(`Fail to find Git top level for path ${v}.\n${reason}`);
+        });
+
+      void this._readyPromise.then(() => {
+        this._pendingReadyPromise -= 1;
+      });
+    }
+  }
+
+  /**
+   * The Jupyter front-end application shell.
+   */
+  get shell(): JupyterFrontEnd.IShell | null {
+    return this._app ? this._app.shell : null;
+  }
+
+  /**
+   * A list of modified files.
+   *
+   * ## Notes
+   *
+   * -   The file list corresponds to the list of files from `git status`.
+   */
+  get status(): Git.IStatusFile[] {
+    return this._status;
+  }
+
+  /**
+   * A signal emitted when the `HEAD` of the Git repository changes.
+   */
+  get headChanged(): ISignal<IGitExtension, void> {
+    return this._headChanged;
+  }
+
+  /**
+   * A signal emitted when the current marking of the Git repository changes.
+   */
+  get markChanged(): ISignal<IGitExtension, void> {
+    return this._markChanged;
+  }
+
+  /**
+   * A signal emitted when the current Git repository changes.
+   */
+  get repositoryChanged(): ISignal<IGitExtension, IChangedArgs<string | null>> {
+    return this._repositoryChanged;
+  }
+
+  /**
+   * A signal emitted when the current status of the Git repository changes.
+   */
+  get statusChanged(): ISignal<IGitExtension, Git.IStatusFile[]> {
+    return this._statusChanged;
+  }
+
+  /**
+   * A signal emitted whenever a model event occurs.
+   */
+  get logger(): ISignal<IGitExtension, string> {
+    return this._logger;
+  }
+
+  /**
    * Add one or more files to the repository staging area.
    *
    * ## Notes
@@ -975,156 +1125,6 @@ export class GitExtension implements IGitExtension {
     this._isDisposed = true;
     this._poll.dispose();
     Signal.clearData(this);
-  }
-
-  /**
-   * Branch list for the current repository.
-   */
-  get branches() {
-    return this._branches;
-  }
-
-  /**
-   * List of available Git commands.
-   */
-  get commands(): CommandRegistry | null {
-    return this._app ? this._app.commands : null;
-  }
-
-  /**
-   * The current repository branch.
-   */
-  get currentBranch() {
-    return this._currentBranch;
-  }
-
-  /**
-   * Boolean indicating whether the model has been disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
-   * Boolean indicating whether the model is ready.
-   */
-  get isReady(): boolean {
-    return this._pendingReadyPromise === 0;
-  }
-
-  /**
-   * Promise which fulfills when the model is ready.
-   */
-  get ready(): Promise<void> {
-    return this._readyPromise;
-  }
-
-  /**
-   * Git repository path.
-   *
-   * ## Notes
-   *
-   * -   This is the full path of the top-level folder.
-   * -   The return value is `null` if a repository path is not defined.
-   */
-  get pathRepository(): string | null {
-    return this._pathRepository;
-  }
-
-  set pathRepository(v: string | null) {
-    const change: IChangedArgs<string> = {
-      name: 'pathRepository',
-      newValue: null,
-      oldValue: this._pathRepository
-    };
-    if (v === null) {
-      this._pendingReadyPromise += 1;
-      this._readyPromise.then(() => {
-        this._pathRepository = null;
-        this._pendingReadyPromise -= 1;
-
-        if (change.newValue !== change.oldValue) {
-          this.refresh().then(() => this._repositoryChanged.emit(change));
-        }
-      });
-    } else {
-      const currentReady = this._readyPromise;
-      this._pendingReadyPromise += 1;
-      this._readyPromise = Promise.all([currentReady, this.showTopLevel(v)])
-        .then(r => {
-          const results = r[1];
-          if (results.code === 0) {
-            this._pathRepository = results.top_repo_path;
-            change.newValue = results.top_repo_path;
-          } else {
-            this._pathRepository = null;
-          }
-
-          if (change.newValue !== change.oldValue) {
-            this.refresh().then(() => this._repositoryChanged.emit(change));
-          }
-        })
-        .catch(reason => {
-          console.error(`Fail to find Git top level for path ${v}.\n${reason}`);
-        });
-
-      void this._readyPromise.then(() => {
-        this._pendingReadyPromise -= 1;
-      });
-    }
-  }
-
-  /**
-   * The Jupyter front-end application shell.
-   */
-  get shell(): JupyterFrontEnd.IShell | null {
-    return this._app ? this._app.shell : null;
-  }
-
-  /**
-   * A list of modified files.
-   *
-   * ## Notes
-   *
-   * -   The file list corresponds to the list of files from `git status`.
-   */
-  get status(): Git.IStatusFile[] {
-    return this._status;
-  }
-
-  /**
-   * A signal emitted when the `HEAD` of the Git repository changes.
-   */
-  get headChanged(): ISignal<IGitExtension, void> {
-    return this._headChanged;
-  }
-
-  /**
-   * A signal emitted when the current marking of the Git repository changes.
-   */
-  get markChanged(): ISignal<IGitExtension, void> {
-    return this._markChanged;
-  }
-
-  /**
-   * A signal emitted when the current Git repository changes.
-   */
-  get repositoryChanged(): ISignal<IGitExtension, IChangedArgs<string | null>> {
-    return this._repositoryChanged;
-  }
-
-  /**
-   * A signal emitted when the current status of the Git repository changes.
-   */
-  get statusChanged(): ISignal<IGitExtension, Git.IStatusFile[]> {
-    return this._statusChanged;
-  }
-
-  /**
-   * A signal emitted whenever a model event occurs.
-   */
-  get logger(): ISignal<IGitExtension, string> {
-    return this._logger;
   }
 
   /**
