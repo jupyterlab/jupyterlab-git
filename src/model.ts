@@ -263,11 +263,10 @@ export class GitExtension implements IGitExtension {
         top_repo_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
@@ -300,11 +299,10 @@ export class GitExtension implements IGitExtension {
         top_repo_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
@@ -337,11 +335,10 @@ export class GitExtension implements IGitExtension {
         top_repo_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
@@ -374,11 +371,10 @@ export class GitExtension implements IGitExtension {
         name
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     if (!response.ok) {
       const data = await response.text();
       throw new ServerConnection.ResponseError(response, data);
@@ -414,11 +410,10 @@ export class GitExtension implements IGitExtension {
         history_count: count
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     if (!response.ok) {
       const data = await response.text();
       throw new ServerConnection.ResponseError(response, data);
@@ -478,11 +473,10 @@ export class GitExtension implements IGitExtension {
     try {
       response = await httpGitRequest('/git/checkout', 'POST', body);
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
@@ -520,11 +514,10 @@ export class GitExtension implements IGitExtension {
     try {
       response = await httpGitRequest('/git/clone', 'POST', obj);
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
@@ -558,11 +551,10 @@ export class GitExtension implements IGitExtension {
         top_repo_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
@@ -598,11 +590,10 @@ export class GitExtension implements IGitExtension {
         options
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
@@ -637,11 +628,10 @@ export class GitExtension implements IGitExtension {
         top_repo_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
@@ -675,11 +665,10 @@ export class GitExtension implements IGitExtension {
         current_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
@@ -702,11 +691,10 @@ export class GitExtension implements IGitExtension {
         current_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
@@ -739,11 +727,10 @@ export class GitExtension implements IGitExtension {
         history_count: count
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
@@ -780,11 +767,10 @@ export class GitExtension implements IGitExtension {
     try {
       response = await httpGitRequest('/git/pull', 'POST', obj);
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
@@ -819,11 +805,10 @@ export class GitExtension implements IGitExtension {
     try {
       response = await httpGitRequest('/git/push', 'POST', obj);
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
@@ -887,15 +872,13 @@ export class GitExtension implements IGitExtension {
         current_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
-
       // TODO we should notify the user
       this._setStatus([]);
       console.error(err);
       return;
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       console.error(data.message);
@@ -942,11 +925,10 @@ export class GitExtension implements IGitExtension {
         top_repo_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
@@ -985,11 +967,10 @@ export class GitExtension implements IGitExtension {
         top_repo_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
@@ -1014,11 +995,10 @@ export class GitExtension implements IGitExtension {
         current_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
@@ -1041,11 +1021,10 @@ export class GitExtension implements IGitExtension {
         current_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
@@ -1150,11 +1129,10 @@ export class GitExtension implements IGitExtension {
         current_path: path
       });
     } catch (err) {
-      this._removeTask(tid);
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
-
     const data = await response.json();
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
