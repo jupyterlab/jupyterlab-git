@@ -105,9 +105,9 @@ cd jupyterlab-git
 pip install -e .[test]
 jupyter serverextension enable --py jupyterlab_git --sys-prefix
 
-# Build the labextension and dev-mode link it to jlab
+# Build and install your development version of the extension
 jlpm
-jupyter labextension link .
+jupyter labextension install .
 ```
 
 To rebuild the package after a change and the JupyterLab app:
