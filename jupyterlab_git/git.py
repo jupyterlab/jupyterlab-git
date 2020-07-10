@@ -940,7 +940,7 @@ class Git:
             command, cwd=os.path.join(self.root_dir, current_path)
         )
         if code != 0:
-            return {"code": code, "command": " ".join(cmd), "message": error}
+            return {"code": code, "command": " ".join(command), "message": error}
         rev_parse_output = output.strip()
 
         command = ["git", "config", "--local", f"branch.{branch_name}.remote"]
