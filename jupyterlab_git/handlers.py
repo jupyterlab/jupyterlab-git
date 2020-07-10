@@ -404,7 +404,7 @@ class GitUpstreamHandler(GitHandler):
         response = await self.git.get_upstream_branch(current_path, current_branch)
         if response['code'] != 0:
             self.set_status(500)
-        self.finish(json.dumps(upstream))
+        self.finish(json.dumps(response))
 
 
 class GitPullHandler(GitHandler):
