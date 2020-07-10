@@ -1,23 +1,22 @@
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { GitExtension } from '../model';
-import { Git } from '../tokens';
 import {
-  branchWrapperClass,
   branchClass,
-  collapseIconButtonClass,
+  branchWrapperClass,
   commitBodyClass,
   commitExpandedClass,
   commitHeaderClass,
   commitHeaderItemClass,
   commitWrapperClass,
-  expandIconButtonClass,
   iconButtonClass,
   localBranchClass,
   remoteBranchClass,
   workingBranchClass
 } from '../style/PastCommitNode';
+import { Git } from '../tokens';
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 
 /**
@@ -99,15 +98,11 @@ export class PastCommitNode extends React.Component<
           <span className={commitHeaderItemClass}>
             {this.props.commit.date}
           </span>
-          <span
-            className={classes(
-              iconButtonClass,
-              this.state.expanded
-                ? collapseIconButtonClass
-                : expandIconButtonClass,
-              'jp-Icon-16'
-            )}
-          />
+          {this.state.expanded ? (
+            <caretUpIcon.react className={iconButtonClass} tag="span" />
+          ) : (
+            <caretDownIcon.react className={iconButtonClass} tag="span" />
+          )}
         </div>
         <div className={branchWrapperClass}>{this._renderBranches()}</div>
         <div className={commitBodyClass}>

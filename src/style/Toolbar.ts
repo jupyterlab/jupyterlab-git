@@ -106,62 +106,16 @@ export const toolbarButtonClass = style({
     },
     '&:active': {
       backgroundColor: 'var(--jp-layout-color3)'
+    },
+
+    '& span': {
+      // Set icon width and centers it
+      margin: 'auto',
+      width: '16px'
     }
   }
 });
 
-export const pullButtonClass = style({
-  marginLeft: 'auto',
-
-  background: 'var(--jp-layout-color1)',
-  backgroundImage: 'var(--jp-icon-git-pull)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});
-
-export const pushButtonClass = style({
-  background: 'var(--jp-layout-color1)',
-  backgroundImage: 'var(--jp-icon-git-push)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});
-
-export const refreshButtonClass = style({
-  marginRight: '4px',
-
-  background: 'var(--jp-layout-color1)',
-  backgroundImage: 'var(--jp-icon-refresh)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});
-
-export const repoIconClass = style({
-  backgroundImage: 'var(--jp-icon-git-repo)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});
-
-export const branchIconClass = style({
-  backgroundImage: 'var(--jp-icon-git-branch)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});
-
-export const openMenuIconClass = style({
-  backgroundImage: 'var(--jp-icon-caret-down)',
-  backgroundSize: '20px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});
-
-export const closeMenuIconClass = style({
-  backgroundImage: 'var(--jp-icon-caret-up)',
-  backgroundSize: '20px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
+export const spacer = style({
+  flex: '1 1 auto'
 });

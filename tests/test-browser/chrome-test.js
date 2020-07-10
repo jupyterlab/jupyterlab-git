@@ -3,11 +3,10 @@ const puppeteer = require('puppeteer');
 const inspect = require('util').inspect;
 const URL = process.argv[2];
 
-function testGitExtension(html) {
-  // Test git icons are present
-  assert(html.includes('--jp-icon-git-clone'), 'Could not find git clone icon.');
-  assert(html.includes('--jp-icon-git-pull'), 'Could not find git pull icon.');
-  assert(html.includes('--jp-icon-git-push'), 'Could not find git push icon.');
+async function testGitExtension(page) {
+  // Test tabbar entry
+  const gitTabbar = await page.waitForSelector('.lm-TabBar-tab[data-id="jp-git-sessions"]')
+  assert.ok(gitTabbar, 'Could not find Git Tab entry');
 }
 
 async function main() {
@@ -46,7 +45,7 @@ async function main() {
     console.error(`Parsed an error from text content: ${error.message}`, error);
   }
 
-  testGitExtension(html);
+  await testGitExtension(page);
 
   await browser.close();
 

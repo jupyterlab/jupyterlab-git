@@ -1,11 +1,18 @@
-import * as React from 'react';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Menu } from '@lumino/widgets';
+import * as React from 'react';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { fileListWrapperClass } from '../style/FileListStyle';
+import {
+  addIcon,
+  diffIcon,
+  discardIcon,
+  openIcon,
+  removeIcon
+} from '../style/icons';
 import { Git } from '../tokens';
 import { openListedFile } from '../utils';
 import { ActionButton } from './ActionButton';
@@ -383,7 +390,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           <ActionButton
             className={hiddenButtonStyle}
             disabled={files.length === 0}
-            iconName={'git-remove'}
+            icon={removeIcon}
             title={'Unstage all changes'}
             onClick={this.resetAllStagedFiles}
           />
@@ -404,14 +411,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 <React.Fragment>
                   <ActionButton
                     className={hiddenButtonStyle}
-                    iconName={'open-file'}
+                    icon={openIcon}
                     title={'Open this file'}
                     onClick={openFile}
                   />
                   {diffButton}
                   <ActionButton
                     className={hiddenButtonStyle}
-                    iconName={'git-remove'}
+                    icon={removeIcon}
                     title={'Unstage this change'}
                     onClick={() => {
                       this.resetStagedFile(file.to);
@@ -449,14 +456,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             <ActionButton
               className={hiddenButtonStyle}
               disabled={disabled}
-              iconName={'git-discard'}
+              icon={discardIcon}
               title={'Discard All Changes'}
               onClick={this.discardAllUnstagedFiles}
             />
             <ActionButton
               className={hiddenButtonStyle}
               disabled={disabled}
-              iconName={'git-add'}
+              icon={addIcon}
               title={'Stage all changes'}
               onClick={this.addAllUnstagedFiles}
             />
@@ -478,14 +485,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 <React.Fragment>
                   <ActionButton
                     className={hiddenButtonStyle}
-                    iconName={'open-file'}
+                    icon={openIcon}
                     title={'Open this file'}
                     onClick={openFile}
                   />
                   {diffButton}
                   <ActionButton
                     className={hiddenButtonStyle}
-                    iconName={'git-discard'}
+                    icon={discardIcon}
                     title={'Discard changes'}
                     onClick={() => {
                       this.discardChanges(file);
@@ -493,7 +500,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                   />
                   <ActionButton
                     className={hiddenButtonStyle}
-                    iconName={'git-add'}
+                    icon={addIcon}
                     title={'Stage this change'}
                     onClick={() => {
                       this.addFile(file.to);
@@ -529,7 +536,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           <ActionButton
             className={hiddenButtonStyle}
             disabled={files.length === 0}
-            iconName={'git-add'}
+            icon={addIcon}
             title={'Track all untracked files'}
             onClick={this.addAllUntrackedFiles}
           />
@@ -546,15 +553,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 <React.Fragment>
                   <ActionButton
                     className={hiddenButtonStyle}
-                    iconName={'open-file'}
+                    icon={openIcon}
                     title={'Open this file'}
-                    onClick={async () => {
+                    onClick={() => {
                       openListedFile(file, this.props.model);
                     }}
                   />
                   <ActionButton
                     className={hiddenButtonStyle}
-                    iconName={'git-add'}
+                    icon={addIcon}
                     title={'Track this file'}
                     onClick={() => {
                       this.addFile(file.to);
@@ -588,7 +595,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           <ActionButton
             className={hiddenButtonStyle}
             disabled={files.length === 0}
-            iconName={'git-discard'}
+            icon={discardIcon}
             title={'Discard All Changes'}
             onClick={this.discardAllChanges}
           />
@@ -605,7 +612,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           let actions: JSX.Element = (
             <ActionButton
               className={hiddenButtonStyle}
-              iconName={'open-file'}
+              icon={openIcon}
               title={'Open this file'}
               onClick={openFile}
             />
@@ -625,14 +632,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               <React.Fragment>
                 <ActionButton
                   className={hiddenButtonStyle}
-                  iconName={'open-file'}
+                  icon={openIcon}
                   title={'Open this file'}
                   onClick={openFile}
                 />
                 {diffButton}
                 <ActionButton
                   className={hiddenButtonStyle}
-                  iconName={'git-discard'}
+                  icon={discardIcon}
                   title={'Discard changes'}
                   onClick={() => {
                     this.discardChanges(file);
@@ -652,7 +659,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               <React.Fragment>
                 <ActionButton
                   className={hiddenButtonStyle}
-                  iconName={'open-file'}
+                  icon={openIcon}
                   title={'Open this file'}
                   onClick={openFile}
                 />
@@ -707,7 +714,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       (isDiffSupported(file.to) || !file.is_binary) && (
         <ActionButton
           className={hiddenButtonStyle}
-          iconName={'git-diff'}
+          icon={diffIcon}
           title={'Diff this file'}
           onClick={() => this._openDiffView(file, currentRef)}
         />

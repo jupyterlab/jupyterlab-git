@@ -11,7 +11,7 @@ import { FileBrowser } from '@jupyterlab/filebrowser';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { AUTH_ERROR_MESSAGES } from '../git';
-import { cloneButtonStyle } from '../style/CloneButton';
+import { cloneIcon } from '../style/icons';
 import { IGitExtension } from '../tokens';
 import { GitCredentialsForm } from './CredentialsBox';
 
@@ -30,7 +30,7 @@ export function addCloneButton(model: IGitExtension, filebrowser: FileBrowser) {
         {(_, change: IChangedArgs<string | null>) => (
           <ToolbarButtonComponent
             enabled={change.newValue === null}
-            iconClass={`${cloneButtonStyle} jp-Icon jp-Icon-16`}
+            icon={cloneIcon}
             onClick={async () => {
               await doGitClone(model, filebrowser.model.path);
               filebrowser.model.refresh();

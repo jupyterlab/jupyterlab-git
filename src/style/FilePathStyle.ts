@@ -1,13 +1,14 @@
 import { style } from 'typestyle';
 
 export const fileIconStyle = style({
+  alignSelf: 'center',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
   backgroundSize: '16px',
   flex: '0 0 auto',
-  marginRight: '4px',
-  minHeight: '16px',
-  padding: '0px 8px'
+  height: '16px',
+  width: '16px',
+  marginRight: '4px'
 });
 
 export const fileLabelStyle = style({

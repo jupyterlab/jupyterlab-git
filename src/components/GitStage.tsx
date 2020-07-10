@@ -1,13 +1,11 @@
+import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
-import { classes } from 'typestyle';
 import {
-  caretdownImageStyle,
-  caretrightImageStyle,
   changeStageButtonStyle,
-  sectionHeaderSizeStyle,
   sectionAreaStyle,
   sectionFileContainerStyle,
-  sectionHeaderLabelStyle
+  sectionHeaderLabelStyle,
+  sectionHeaderSizeStyle
 } from '../style/GitStageStyle';
 
 /**
@@ -49,18 +47,19 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
       <div className={sectionAreaStyle}>
         {props.collapsible && (
           <button
-            className={classes(
-              changeStageButtonStyle,
-              showFiles && props.nFiles > 0
-                ? caretdownImageStyle
-                : caretrightImageStyle
-            )}
+            className={changeStageButtonStyle}
             onClick={() => {
               if (props.nFiles > 0) {
                 setShowFiles(!showFiles);
               }
             }}
-          />
+          >
+            {showFiles && props.nFiles > 0 ? (
+              <caretDownIcon.react />
+            ) : (
+              <caretRightIcon.react />
+            )}
+          </button>
         )}
         <span className={sectionHeaderLabelStyle}>{props.heading}</span>
         {props.actions}

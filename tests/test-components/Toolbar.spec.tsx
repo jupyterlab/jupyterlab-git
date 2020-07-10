@@ -1,13 +1,14 @@
-import * as React from 'react';
-import 'jest';
+import { refreshIcon } from '@jupyterlab/ui-components';
 import { shallow } from 'enzyme';
-import { GitExtension } from '../../src/model';
-import * as git from '../../src/git';
+import 'jest';
+import * as React from 'react';
+import { ActionButton } from '../../src/components/ActionButton';
 import { Toolbar } from '../../src/components/Toolbar';
+import * as git from '../../src/git';
+import { GitExtension } from '../../src/model';
+import { pullIcon, pushIcon } from '../../src/style/icons';
 import {
-  pullButtonClass,
-  pushButtonClass,
-  refreshButtonClass,
+  toolbarButtonClass,
   toolbarMenuButtonClass
 } from '../../src/style/Toolbar';
 
@@ -133,8 +134,9 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const nodes = node.find(`.${pullButtonClass}`);
-
+      const nodes = node
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === pullIcon);
       expect(nodes.length).toEqual(1);
     });
 
@@ -145,7 +147,10 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${pullButtonClass}`).first();
+      const button = node
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === pullIcon)
+        .first();
 
       expect(button.prop('title')).toEqual('Pull latest changes');
     });
@@ -157,8 +162,9 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const nodes = node.find(`.${pushButtonClass}`);
-
+      const nodes = node
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === pushIcon);
       expect(nodes.length).toEqual(1);
     });
 
@@ -169,7 +175,10 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${pushButtonClass}`).first();
+      const button = node
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === pushIcon)
+        .first();
 
       expect(button.prop('title')).toEqual('Push committed changes');
     });
@@ -181,7 +190,9 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const nodes = node.find(`.${refreshButtonClass}`);
+      const nodes = node
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === refreshIcon);
 
       expect(nodes.length).toEqual(1);
     });
@@ -193,7 +204,7 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${refreshButtonClass}`).first();
+      const button = node.find(ActionButton).last();
 
       expect(button.prop('title')).toEqual(
         'Refresh the repository to detect local and remote changes'
@@ -309,7 +320,7 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${pullButtonClass}`);
+      const button = node.find(`.${toolbarButtonClass}`).first();
 
       button.simulate('click');
       expect(spy).toHaveBeenCalledTimes(1);
@@ -338,7 +349,7 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${pushButtonClass}`);
+      const button = node.find(`.${toolbarButtonClass}`).at(1);
 
       button.simulate('click');
       expect(spy).toHaveBeenCalledTimes(1);
@@ -367,7 +378,7 @@ describe('Toolbar', () => {
         refresh: spy
       };
       const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${refreshButtonClass}`);
+      const button = node.find(`.${toolbarButtonClass}`).last();
 
       button.simulate('click');
       expect(spy).toHaveBeenCalledTimes(1);

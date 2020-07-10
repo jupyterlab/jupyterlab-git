@@ -21,11 +21,8 @@ export interface IFilePathProps {
   selected?: boolean;
 }
 
-function getFileIconClass(props: IFilePathProps) {
-  return classes(
-    fileIconStyle,
-    getFileIconClassName(props.filepath, props.selected)
-  );
+function getFileIconClass(path: string): string {
+  return getFileIconClassName(path);
 }
 
 export const FilePath: React.FunctionComponent<IFilePathProps> = (
@@ -38,7 +35,14 @@ export const FilePath: React.FunctionComponent<IFilePathProps> = (
 
   return (
     <React.Fragment>
-      <span className={getFileIconClass(props)} />
+      <span
+        className={classes(
+          fileIconStyle,
+          'jp-git-icon',
+          getFileIconClass(props.filepath),
+          props.selected && 'jp-git-selected'
+        )}
+      />
       <span className={fileLabelStyle}>
         {filename}
         <span className={folderLabelStyle}>{folder}</span>
