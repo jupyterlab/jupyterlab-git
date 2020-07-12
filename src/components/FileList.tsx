@@ -666,7 +666,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 {diffButton}
                 <ActionButton
                   className={hiddenButtonStyle}
-                  iconName={'git-discard'}
+                  icon={discardIcon}
                   title={'Discard changes'}
                   onClick={() => {
                     this.discardChanges(file);
