@@ -8,6 +8,7 @@ Welcome! Before creating a new issue:
 * Look at the README *Troubleshooting* section
 * Search for relevant issues
 * Check that you have updated both the jupyterlab extension and the python package to the same version
+Check that you have installed Git version 2 or higher
 -->
 
 ## Description
@@ -35,6 +36,9 @@ Welcome! Before creating a new issue:
 <!-- Results of `conda list jupyterlab-git` or `pip show jupyterlab-git` -->
 - Extension version:
 <!-- Results of `jupyter labextension list` -->
+- Git version:
+<!-- Results of `git --version` -->
+- Operating System and its version:
 
 <details><summary>Command Line Output</summary>
 <pre>
