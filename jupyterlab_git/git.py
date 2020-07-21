@@ -142,9 +142,10 @@ class Git:
     A single parent class containing all of the individual git methods in it.
     """
 
-    def __init__(self, contents_manager):
+    def __init__(self, contents_manager, user_custom_actions):
         self.contents_manager = contents_manager
         self.root_dir = os.path.expanduser(contents_manager.root_dir)
+        self.user_custom_actions = user_custom_actions
 
     async def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
@@ -301,7 +302,7 @@ class Git:
             for line in filter(lambda l: len(l) > 0, strip_and_split(text_output)):
                 diff, name = line.rsplit("\t", maxsplit=1)
                 are_binary[name] = diff.startswith("-\t-")
-        
+
         result = []
         line_iterable = (line for line in strip_and_split(my_output) if line)
         for line in line_iterable:
@@ -872,9 +873,11 @@ class Git:
         Execute git init command & return the result.
         """
         cmd = ["git", "init"]
+        cwd = os.path.join(self.root_dir, current_path)
         code, _, error = await execute(
-            cmd, cwd=os.path.join(self.root_dir, current_path)
+            cmd, cwd=cwd
         )
+        await self.user_custom_actions.post_init(cwd)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -1065,7 +1068,7 @@ class Git:
 
         Returns:
             bool: Is file binary?
-        
+
         Raises:
             HTTPError: if git command failed
         """
