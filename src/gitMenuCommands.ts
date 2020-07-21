@@ -63,7 +63,8 @@ export function addCommands(
         console.error(e);
         main.dispose();
       }
-    }
+    },
+    isVisible: () => model.pathRepository !== null
   });
 
   /** Add open/go to git interface command */
@@ -95,7 +96,8 @@ export function addCommands(
         await model.init(currentPath);
         model.pathRepository = currentPath;
       }
-    }
+    },
+    isVisible: () => model.pathRepository === null
   });
 
   /** Open URL externally */
@@ -129,7 +131,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitAddRemote, {
     label: 'Add remote repository',
     caption: 'Add a Git remote repository',
-    isEnabled: () => model.pathRepository !== null,
+    isVisible: () => model.pathRepository !== null,
     execute: async args => {
       if (model.pathRepository === null) {
         console.warn('Not in a Git repository. Unable to add a remote.');
@@ -168,6 +170,7 @@ export function addCommands(
     execute: async () => {
       await doGitClone(model, fileBrowser.model.path);
       fileBrowser.model.refresh();
-    }
+    },
+    isVisible: () => model.pathRepository === null
   });
 }
