@@ -68,7 +68,7 @@ export function addCommands(
         main.dispose();
       }
     },
-    isVisible: () => model.pathRepository !== null
+    isEnabled: () => model.pathRepository !== null
   });
 
   /** Add open/go to git interface command */
@@ -101,7 +101,7 @@ export function addCommands(
         model.pathRepository = currentPath;
       }
     },
-    isVisible: () => model.pathRepository === null
+    isEnabled: () => model.pathRepository === null
   });
 
   /** Open URL externally */
@@ -135,7 +135,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitAddRemote, {
     label: 'Add remote repository',
     caption: 'Add a Git remote repository',
-    isVisible: () => model.pathRepository !== null,
+    isEnabled: () => model.pathRepository !== null,
     execute: async args => {
       if (model.pathRepository === null) {
         console.warn('Not in a Git repository. Unable to add a remote.');
@@ -174,8 +174,7 @@ export function addCommands(
     execute: async () => {
       await doGitClone(model, fileBrowser.model.path);
       fileBrowser.model.refresh();
-    },
-    isVisible: () => model.pathRepository === null
+    }
   });
 
   /**
@@ -224,7 +223,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitPush, {
     label: 'Push to Remote',
     caption: 'Push code to remote repository',
-    isVisible: () => model.pathRepository !== null,
+    isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       await showGitOperationDialog(model, Operation.Push).catch(reason => {
         console.error(
@@ -238,7 +237,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitPull, {
     label: 'Pull from Remote',
     caption: 'Pull latest code from remote repository',
-    isVisible: () => model.pathRepository !== null,
+    isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       await showGitOperationDialog(model, Operation.Pull).catch(reason => {
         console.error(
