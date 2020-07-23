@@ -11,6 +11,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { IGitExtension } from './tokens';
 import { doGitClone } from './widgets/gitClone';
+import { GitPullPushDialog, Operation } from './widgets/gitPushPull';
+import { GitCredentialsForm } from './widgets/CredentialsBox';
 
 /**
  * The command IDs used by the git plugin.
@@ -24,6 +26,8 @@ export namespace CommandIDs {
   export const gitToggleDoubleClickDiff = 'git:toggle-double-click-diff';
   export const gitAddRemote = 'git:add-remote';
   export const gitClone = 'git:clone';
+  export const gitPush = 'git:push';
+  export const gitPull = 'git:pull';
 }
 
 /**
@@ -82,8 +86,8 @@ export function addCommands(
 
   /** Add git init command */
   commands.addCommand(CommandIDs.gitInit, {
-    label: 'Init',
-    caption: ' Create an empty Git repository or reinitialize an existing one',
+    label: 'Initialize a Repository',
+    caption: 'Create an empty Git repository or reinitialize an existing one',
     execute: async () => {
       const currentPath = fileBrowser.model.path;
       const result = await showDialog({
@@ -164,7 +168,7 @@ export function addCommands(
 
   /** Add git clone command */
   commands.addCommand(CommandIDs.gitClone, {
-    label: 'Clone',
+    label: 'Clone a Repository',
     caption: 'Clone a repository from a URL',
     isEnabled: () => model.pathRepository === null,
     execute: async () => {
@@ -172,5 +176,75 @@ export function addCommands(
       fileBrowser.model.refresh();
     },
     isVisible: () => model.pathRepository === null
+  });
+
+  /**
+   * Displays an error dialog when a Git operation fails.
+   *
+   * @private
+   * @param model - Git extension model
+   * @param operation - Git operation name
+   * @returns Promise for displaying a dialog
+   */
+  async function showGitOperationDialog(
+    model: IGitExtension,
+    operation: Operation
+  ): Promise<void> {
+    const title = `Git ${operation}`;
+    let result = await showDialog({
+      title: title,
+      body: new GitPullPushDialog(model, operation),
+      buttons: [Dialog.okButton({ label: 'DISMISS' })]
+    });
+    let retry = false;
+    while (!result.button.accept) {
+      const credentials = await showDialog({
+        title: 'Git credentials required',
+        body: new GitCredentialsForm(
+          'Enter credentials for remote repository',
+          retry ? 'Incorrect username or password.' : ''
+        ),
+        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
+      });
+
+      if (!credentials.button.accept) {
+        break;
+      }
+
+      result = await showDialog({
+        title: title,
+        body: new GitPullPushDialog(model, operation, credentials.value),
+        buttons: [Dialog.okButton({ label: 'DISMISS' })]
+      });
+      retry = true;
+    }
+  }
+
+  /** Add git push command */
+  commands.addCommand(CommandIDs.gitPush, {
+    label: 'Push to Remote',
+    caption: 'Push code to remote repository',
+    isVisible: () => model.pathRepository !== null,
+    execute: async () => {
+      await showGitOperationDialog(model, Operation.Push).catch(reason => {
+        console.error(
+          `Encountered an error when pushing changes. Error: ${reason}`
+        );
+      });
+    }
+  });
+
+  /** Add git pull command */
+  commands.addCommand(CommandIDs.gitPull, {
+    label: 'Pull from Remote',
+    caption: 'Pull latest code from remote repository',
+    isVisible: () => model.pathRepository !== null,
+    execute: async () => {
+      await showGitOperationDialog(model, Operation.Pull).catch(reason => {
+        console.error(
+          `Encountered an error when pulling changes. Error: ${reason}`
+        );
+      });
+    }
   });
 }
