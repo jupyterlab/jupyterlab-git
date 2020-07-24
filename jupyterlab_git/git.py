@@ -243,7 +243,7 @@ class Git:
         """
         Execute git status command & return the result.
         """
-        cmd = ["git", "status", "--porcelain", "-u", "-z"]
+        cmd = ["git", "status", "--porcelain", "-z"]
         code, my_output, my_error = await execute(
             cmd, cwd=os.path.join(self.root_dir, current_path),
         )
