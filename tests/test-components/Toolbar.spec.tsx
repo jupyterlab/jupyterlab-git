@@ -1,10 +1,12 @@
 import { refreshIcon } from '@jupyterlab/ui-components';
+import * as commands from '@lumino/commands';
 import { shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
 import { ActionButton } from '../../src/components/ActionButton';
 import { Toolbar } from '../../src/components/Toolbar';
 import * as git from '../../src/git';
+import { CommandIDs } from '../../src/gitMenuCommands';
 import { GitExtension } from '../../src/model';
 import { pullIcon, pushIcon } from '../../src/style/icons';
 import {
@@ -12,10 +14,15 @@ import {
   toolbarMenuButtonClass
 } from '../../src/style/Toolbar';
 
+jest.mock('@lumino/commands');
 jest.mock('../../src/git');
 
-async function createModel() {
-  const model = new GitExtension();
+async function createModel(commands?: commands.CommandRegistry) {
+  const app = {
+    commands,
+    shell: null as any
+  };
+  const model = new GitExtension(app as any);
 
   jest.spyOn(model, 'currentBranch', 'get').mockReturnValue({
     is_current_branch: true,
@@ -303,17 +310,25 @@ describe('Toolbar', () => {
 
   describe('pull changes', () => {
     let model: GitExtension;
+    let mockedExecute: any;
 
     beforeEach(async () => {
+      const mockedCommands = commands as jest.Mocked<typeof commands>;
+      mockedExecute = jest.fn();
+      mockedCommands.CommandRegistry.mockImplementation(() => {
+        return {
+          execute: mockedExecute
+        } as any;
+      });
+      const registry = new commands.CommandRegistry();
+
       const mock = git as jest.Mocked<typeof git>;
       mock.httpGitRequest.mockImplementation(request);
 
-      model = await createModel();
+      model = await createModel(registry);
     });
 
     it('should pull changes when the button to pull the latest changes is clicked', () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'pull');
-
       const props = {
         model: model,
         branching: false,
@@ -323,26 +338,32 @@ describe('Toolbar', () => {
       const button = node.find(`.${toolbarButtonClass}`).first();
 
       button.simulate('click');
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(undefined);
-
-      spy.mockRestore();
+      expect(mockedExecute).toHaveBeenCalledTimes(1);
+      expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPull);
     });
   });
 
   describe('push changes', () => {
     let model: GitExtension;
+    let mockedExecute: any;
 
     beforeEach(async () => {
+      const mockedCommands = commands as jest.Mocked<typeof commands>;
+      mockedExecute = jest.fn();
+      mockedCommands.CommandRegistry.mockImplementation(() => {
+        return {
+          execute: mockedExecute
+        } as any;
+      });
+      const registry = new commands.CommandRegistry();
+
       const mock = git as jest.Mocked<typeof git>;
       mock.httpGitRequest.mockImplementation(request);
 
-      model = await createModel();
+      model = await createModel(registry);
     });
 
     it('should push changes when the button to push the latest changes is clicked', () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'push');
-
       const props = {
         model: model,
         branching: false,
@@ -352,10 +373,8 @@ describe('Toolbar', () => {
       const button = node.find(`.${toolbarButtonClass}`).at(1);
 
       button.simulate('click');
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(undefined);
-
-      spy.mockRestore();
+      expect(mockedExecute).toHaveBeenCalledTimes(1);
+      expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPush);
     });
   });
 

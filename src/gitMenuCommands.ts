@@ -177,6 +177,41 @@ export function addCommands(
     }
   });
 
+  /** Add git push command */
+  commands.addCommand(CommandIDs.gitPush, {
+    label: 'Push to Remote',
+    caption: 'Push code to remote repository',
+    isEnabled: () => model.pathRepository !== null,
+    execute: async () => {
+      await Private.showGitOperationDialog(model, Operation.Push).catch(
+        reason => {
+          console.error(
+            `Encountered an error when pushing changes. Error: ${reason}`
+          );
+        }
+      );
+    }
+  });
+
+  /** Add git pull command */
+  commands.addCommand(CommandIDs.gitPull, {
+    label: 'Pull from Remote',
+    caption: 'Pull latest code from remote repository',
+    isEnabled: () => model.pathRepository !== null,
+    execute: async () => {
+      await Private.showGitOperationDialog(model, Operation.Pull).catch(
+        reason => {
+          console.error(
+            `Encountered an error when pulling changes. Error: ${reason}`
+          );
+        }
+      );
+    }
+  });
+}
+
+/* eslint-disable no-inner-declarations */
+namespace Private {
   /**
    * Displays an error dialog when a Git operation fails.
    *
@@ -185,7 +220,7 @@ export function addCommands(
    * @param operation - Git operation name
    * @returns Promise for displaying a dialog
    */
-  async function showGitOperationDialog(
+  export async function showGitOperationDialog(
     model: IGitExtension,
     operation: Operation
   ): Promise<void> {
@@ -218,32 +253,5 @@ export function addCommands(
       retry = true;
     }
   }
-
-  /** Add git push command */
-  commands.addCommand(CommandIDs.gitPush, {
-    label: 'Push to Remote',
-    caption: 'Push code to remote repository',
-    isEnabled: () => model.pathRepository !== null,
-    execute: async () => {
-      await showGitOperationDialog(model, Operation.Push).catch(reason => {
-        console.error(
-          `Encountered an error when pushing changes. Error: ${reason}`
-        );
-      });
-    }
-  });
-
-  /** Add git pull command */
-  commands.addCommand(CommandIDs.gitPull, {
-    label: 'Pull from Remote',
-    caption: 'Pull latest code from remote repository',
-    isEnabled: () => model.pathRepository !== null,
-    execute: async () => {
-      await showGitOperationDialog(model, Operation.Pull).catch(reason => {
-        console.error(
-          `Encountered an error when pulling changes. Error: ${reason}`
-        );
-      });
-    }
-  });
 }
+/* eslint-enable no-inner-declarations */
