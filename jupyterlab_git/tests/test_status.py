@@ -89,7 +89,7 @@ async def test_status(output, diff_output, expected):
         mock_execute.assert_has_calls(
             [
                 call(
-                    ["git", "status", "--porcelain", "-u", "-z"],
+                    ["git", "status", "--porcelain", "-z"],
                     cwd=os.path.join(root, repository),
                 ),
                 call(
