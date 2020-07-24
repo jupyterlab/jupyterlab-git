@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { CommandIDs } from '../gitMenuCommands';
+import { CommandIDs } from '../commandsAndMenu';
 import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import {
   spacer,

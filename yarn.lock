@@ -1410,6 +1410,11 @@
   resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-1.3.0.tgz#1b8b07b537c1660b9e94cb1607d2e74cbf8aa15e"
   integrity sha512-j0OFVm3/SpvKnKxHiUt8sgct25x+G97ohdrPRzDS9rHX0SLnx4GEVp5qE8OmzfGoAcY9V6C89F6Gh+PnN4LtiA==
 
+"@lumino/algorithm@^1.3.3":
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-1.3.3.tgz#fdf4daa407a1ce6f233e173add6a2dda0c99eef4"
+  integrity sha512-I2BkssbOSLq3rDjgAC3fzf/zAIwkRUnAh60MO0lYcaFdSGyI15w4K3gwZHGIO0p9cKEiNHLXKEODGmOjMLOQ3g==
+
 "@lumino/application@^1.8.4":
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/@lumino/application/-/application-1.10.0.tgz#91b7bee4794614ee9bdcf07fe21961953317dba7"
@@ -1418,6 +1423,13 @@
     "@lumino/commands" "^1.11.0"
     "@lumino/coreutils" "^1.5.0"
     "@lumino/widgets" "^1.13.0"
+
+"@lumino/collections@^1.2.3":
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/@lumino/collections/-/collections-1.3.3.tgz#fa95c826b93ee6e24b3c4b07c8f595312525f8cc"
+  integrity sha512-vN3GSV5INkgM6tMLd+WqTgaPnQNTY7L/aFUtTOC8TJQm+vg1eSmR4fNXsoGHM3uA85ctSJThvdZr5triu1Iajg==
+  dependencies:
+    "@lumino/algorithm" "^1.3.3"
 
 "@lumino/collections@^1.3.0":
   version "1.3.0"
@@ -1559,20 +1571,10 @@
     prop-types "^15.7.2"
     react-is "^16.8.0"
 
-"@material-ui/react-transition-group@^4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@material-ui/react-transition-group/-/react-transition-group-4.2.0.tgz#afec833bbcc79f05a9b4d4828b3e07965cc7e321"
-  integrity sha512-4zapZ0gW1ZTws5aH9OGy3IMvtTV/olc7YrVSkM1WFu1FsrEhL+qarEniRjx7LjHt0gukFqoINfElI8v2boVMQA==
-  dependencies:
-    "@babel/runtime" "^7.4.5"
-    dom-helpers "^3.4.0"
-    loose-envify "^1.4.0"
-    prop-types "^15.6.2"
-
-"@material-ui/styles@^4.9.10":
-  version "4.9.10"
-  resolved "https://registry.yarnpkg.com/@material-ui/styles/-/styles-4.9.10.tgz#182ccdd0bc8525a459486499bbaebcd92b0db3ab"
-  integrity sha512-EXIXlqVyFDnjXF6tj72y6ZxiSy+mHtrsCo3Srkm3XUeu3Z01aftDBy7ZSr3TQ02gXHTvDSBvegp3Le6p/tl7eA==
+"@material-ui/styles@^4.10.0":
+  version "4.10.0"
+  resolved "https://registry.yarnpkg.com/@material-ui/styles/-/styles-4.10.0.tgz#2406dc23aa358217aa8cc772e6237bd7f0544071"
+  integrity sha512-XPwiVTpd3rlnbfrgtEJ1eJJdFCXZkHxy8TrdieaTvwxNYj42VnnCyFzxYeNW9Lhj4V1oD8YtQ6S5Gie7bZDf7Q==
   dependencies:
     "@babel/runtime" "^7.4.4"
     "@emotion/hash" "^0.8.0"
@@ -3288,11 +3290,6 @@ extsprintf@^1.2.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
   integrity sha1-4mifjzVvrWLMplo6kcXfX5VRaS8=
-
-fast-deep-equal@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz#7b05218ddf9667bf7f370bf7fdb2cb15fdd0aa49"
-  integrity sha1-ewUhjd+WZ79/Nwv3/bLLFf3Qqkk=
 
 fast-deep-equal@^3.1.1:
   version "3.1.1"

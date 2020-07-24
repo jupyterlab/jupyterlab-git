@@ -4,35 +4,20 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { IStatusBar } from '@jupyterlab/statusbar';
-import {
-  FileBrowser,
-  FileBrowserModel,
-  IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
+import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Menu } from '@lumino/widgets';
-import { addCommands, CommandIDs } from './gitMenuCommands';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IStatusBar } from '@jupyterlab/statusbar';
+import { addCommands, createGitMenu } from './commandsAndMenu';
 import { GitExtension } from './model';
+import { gitIcon } from './style/icons';
 import { IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
-import { StatusWidget } from './widgets/StatusWidget';
-import { gitIcon } from './style/icons';
-export { Git, IGitExtension } from './tokens';
+import { addStatusBarWidget } from './widgets/StatusWidget';
 
-const RESOURCES = [
-  {
-    text: 'Set Up Remotes',
-    url: 'https://www.atlassian.com/git/tutorials/setting-up-a-repository'
-  },
-  {
-    text: 'Git Documentation',
-    url: 'https://git-scm.com/doc'
-  }
-];
+export { Git, IGitExtension } from './tokens';
 
 /**
  * The default running sessions extension.
@@ -99,6 +84,9 @@ async function activate(
 
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
+    // Add JupyterLab commands
+    addCommands(app, gitExtension, factory.defaultBrowser, settings);
+
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
       gitExtension,
@@ -120,173 +108,14 @@ async function activate(
     app.shell.add(gitPlugin, 'left', { rank: 200 });
 
     // Add a menu for the plugin
-    mainMenu.addMenu(
-      createGitMenu(app, gitExtension, factory.defaultBrowser, settings),
-      { rank: 60 }
-    );
-  }
-  // Add a clone button to the file browser extension toolbar
-  addCloneButton(gitExtension, factory.defaultBrowser);
+    mainMenu.addMenu(createGitMenu(app.commands), { rank: 60 });
 
-  // Add a status bar widget to provide Git status updates:
-  const statusWidget = new StatusWidget();
-  statusBar.registerStatusItem('git-status', {
-    align: 'left',
-    item: statusWidget,
-    isActive: isStatusWidgetActive(settings),
-    activeStateChanged: settings && settings.changed
-  });
-  gitExtension.logger.connect(createEventCallback(statusWidget));
+    // Add a clone button to the file browser extension toolbar
+    addCloneButton(gitExtension, factory.defaultBrowser);
+
+    // Add the status bar widget
+    addStatusBarWidget(statusBar, gitExtension, settings);
+  }
 
   return gitExtension;
-}
-
-/**
- * Adds commands and menu items.
- *
- * @private
- * @param app - Jupyter front end
- * @param gitExtension - Git extension instance
- * @param fileBrowser - file browser instance
- * @param settings - extension settings
- * @returns menu
- */
-function createGitMenu(
-  app: JupyterFrontEnd,
-  gitExtension: IGitExtension,
-  fileBrowser: FileBrowser,
-  settings: ISettingRegistry.ISettings
-): Menu {
-  const { commands } = app;
-  addCommands(app, gitExtension, fileBrowser, settings);
-
-  const menu = new Menu({ commands });
-  menu.title.label = 'Git';
-  [
-    CommandIDs.gitInit,
-    CommandIDs.gitClone,
-    CommandIDs.gitPush,
-    CommandIDs.gitPull,
-    CommandIDs.gitAddRemote,
-    CommandIDs.gitTerminalCommand
-  ].forEach(command => {
-    menu.addItem({ command });
-  });
-
-  menu.addItem({ type: 'separator' });
-
-  menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
-
-  menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
-
-  menu.addItem({ type: 'separator' });
-
-  const tutorial = new Menu({ commands });
-  tutorial.title.label = ' Help ';
-  RESOURCES.map(args => {
-    tutorial.addItem({
-      args,
-      command: CommandIDs.gitOpenUrl
-    });
-  });
-
-  menu.addItem({ type: 'submenu', submenu: tutorial });
-
-  return menu;
-}
-
-/**
- * Returns a callback for updating a status widget upon receiving model events.
- *
- * @private
- * @param widget - status widget
- * @returns callback
- */
-function createEventCallback(widget: StatusWidget) {
-  return onEvent;
-
-  /**
-   * Callback invoked upon a model event.
-   *
-   * @private
-   * @param model - extension model
-   * @param event - event name
-   */
-  function onEvent(model: IGitExtension, event: string) {
-    let status;
-    switch (event) {
-      case 'git:checkout':
-        status = 'checking out...';
-        break;
-      case 'git:clone':
-        status = 'cloning repository...';
-        break;
-      case 'git:commit:create':
-        status = 'committing changes...';
-        break;
-      case 'git:commit:revert':
-        status = 'reverting changes...';
-        break;
-      case 'git:idle':
-        status = 'idle';
-        break;
-      case 'git:init':
-        status = 'initializing repository...';
-        break;
-      case 'git:pull':
-        status = 'pulling changes...';
-        break;
-      case 'git:pushing':
-        status = 'pushing changes...';
-        break;
-      case 'git:refresh':
-        status = 'refreshing...';
-        break;
-      case 'git:reset:changes':
-        status = 'resetting changes...';
-        break;
-      case 'git:reset:hard':
-        status = 'discarding changes...';
-        break;
-      default:
-        if (/git:add:files/.test(event)) {
-          status = 'adding files...';
-        } else {
-          status = 'working...';
-        }
-        break;
-    }
-    widget.status = status;
-  }
-}
-
-/**
- * Returns a callback which returns a boolean indicating whether the extension should display status updates.
- *
- * @private
- * @param settings - extension settings
- * @returns callback
- */
-function isStatusWidgetActive(settings?: ISettingRegistry.ISettings) {
-  return settings ? isActive : inactive;
-
-  /**
-   * Returns a boolean indicating that the extension should not display status updates.
-   *
-   * @private
-   * @returns boolean indicating that the extension should not display status updates
-   */
-  function inactive(): boolean {
-    return false;
-  }
-
-  /**
-   * Returns a boolean indicating whether the extension should display status updates.
-   *
-   * @private
-   * @returns boolean indicating whether the extension should display status updates
-   */
-  function isActive(): boolean {
-    return settings.composite.displayStatus as boolean;
-  }
 }

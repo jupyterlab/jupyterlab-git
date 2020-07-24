@@ -26,7 +26,7 @@ import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
 import { SuspendModal } from './SuspendModal';
 import { Alert } from './Alert';
-import { CommandIDs } from '../gitMenuCommands';
+import { CommandIDs } from '../commandsAndMenu';
 
 /**
  * Interface describing component properties.

@@ -27,6 +27,11 @@ export interface IGitExtension extends IDisposable {
   readonly headChanged: ISignal<IGitExtension, void>;
 
   /**
+   * A signal emitted whenever a model event occurs.
+   */
+  readonly logger: ISignal<IGitExtension, string>;
+
+  /**
    * Top level path of the current Git repository
    */
   pathRepository: string | null;
