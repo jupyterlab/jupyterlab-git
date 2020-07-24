@@ -75,17 +75,3 @@ export const iconButtonClass = style({
   /* top | right | bottom | left */
   margin: 'auto 8px auto auto'
 });
-
-export const expandIconButtonClass = style({
-  backgroundImage: 'var(--jp-icon-caret-down)',
-  backgroundSize: '20px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});
-
-export const collapseIconButtonClass = style({
-  backgroundImage: 'var(--jp-icon-caret-up)',
-  backgroundSize: '20px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
-});

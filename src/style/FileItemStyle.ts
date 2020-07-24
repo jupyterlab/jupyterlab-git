@@ -34,6 +34,12 @@ export const selectedFileStyle = style({
     },
     '&:hover .jp-icon-selectable[stroke]': {
       stroke: 'var(--jp-layout-color2)'
+    },
+    '& .jp-icon-selectable[fill]': {
+      fill: '#fff'
+    },
+    '& .jp-icon-selectable-inverse[fill]': {
+      fill: 'var(--jp-brand-color1)'
     }
   }
 });
@@ -64,6 +70,5 @@ export const fileButtonStyle = style({
 });
 
 export const gitMarkBoxStyle = style({
-  flex: '0 0 auto',
-  margin: 'auto 8px auto 4px'
+  flex: '0 0 auto'
 });

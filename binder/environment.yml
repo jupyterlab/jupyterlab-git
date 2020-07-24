@@ -3,4 +3,5 @@ channels:
 dependencies:
 # Jupyter
 - jupyterlab~=2.0
-- nodejs>=11
+- nodejs>=12
+- nbgitpuller

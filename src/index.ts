@@ -163,30 +163,34 @@ function createGitMenu(
   const menu = new Menu({ commands });
   menu.title.label = 'Git';
   [
-    CommandIDs.gitUI,
-    CommandIDs.gitTerminalCommand,
     CommandIDs.gitInit,
     CommandIDs.gitClone,
-    CommandIDs.gitAddRemote
+    CommandIDs.gitPush,
+    CommandIDs.gitPull,
+    CommandIDs.gitAddRemote,
+    CommandIDs.gitTerminalCommand
   ].forEach(command => {
     menu.addItem({ command });
   });
-
-  const tutorial = new Menu({ commands });
-  tutorial.title.label = ' Tutorial ';
-  RESOURCES.map(args => {
-    tutorial.addItem({
-      args,
-      command: CommandIDs.gitOpenUrl
-    });
-  });
-  menu.addItem({ type: 'submenu', submenu: tutorial });
 
   menu.addItem({ type: 'separator' });
 
   menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
 
   menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
+
+  menu.addItem({ type: 'separator' });
+
+  const tutorial = new Menu({ commands });
+  tutorial.title.label = ' Help ';
+  RESOURCES.map(args => {
+    tutorial.addItem({
+      args,
+      command: CommandIDs.gitOpenUrl
+    });
+  });
+
+  menu.addItem({ type: 'submenu', submenu: tutorial });
 
   return menu;
 }

@@ -52,20 +52,9 @@ export const sectionHeaderSizeStyle = style({
 export const changeStageButtonStyle = style({
   flex: '0 0 auto',
   backgroundColor: 'transparent',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: '20px',
-  transition: 'background-color 0.1s ease',
   height: '13px',
   width: '12px',
   border: 'none',
-  outline: 'none'
-});
-
-export const caretdownImageStyle = style({
-  backgroundImage: 'var(--jp-icon-caret-down)'
-});
-
-export const caretrightImageStyle = style({
-  backgroundImage: 'var(--jp-icon-caret-right)'
+  outline: 'none',
+  paddingLeft: '0px'
 });

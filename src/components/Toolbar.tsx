@@ -1,20 +1,15 @@
+import { PathExt } from '@jupyterlab/coreutils';
+import {
+  caretDownIcon,
+  caretUpIcon,
+  refreshIcon
+} from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { PathExt } from '@jupyterlab/coreutils';
-import { sleep } from '../utils';
-import { IGitExtension, ILogMessage } from '../tokens';
-import { GitCredentialsForm } from '../widgets/CredentialsBox';
-import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
+import { CommandIDs } from '../gitMenuCommands';
+import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import {
-  // NOTE: keep in alphabetical order
-  branchIconClass,
-  closeMenuIconClass,
-  openMenuIconClass,
-  pullButtonClass,
-  pushButtonClass,
-  refreshButtonClass,
-  repoIconClass,
+  spacer,
   toolbarButtonClass,
   toolbarClass,
   toolbarMenuButtonClass,
@@ -26,51 +21,12 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
+import { IGitExtension, ILogMessage } from '../tokens';
+import { sleep } from '../utils';
+import { ActionButton } from './ActionButton';
+import { Alert } from './Alert';
 import { BranchMenu } from './BranchMenu';
 import { SuspendModal } from './SuspendModal';
-import { Alert } from './Alert';
-
-/**
- * Displays an error dialog when a Git operation fails.
- *
- * @private
- * @param model - Git extension model
- * @param operation - Git operation name
- * @returns Promise for displaying a dialog
- */
-async function showGitOperationDialog(
-  model: IGitExtension,
-  operation: Operation
-): Promise<void> {
-  const title = `Git ${operation}`;
-  let result = await showDialog({
-    title: title,
-    body: new GitPullPushDialog(model, operation),
-    buttons: [Dialog.okButton({ label: 'DISMISS' })]
-  });
-  let retry = false;
-  while (!result.button.accept) {
-    const credentials = await showDialog({
-      title: 'Git credentials required',
-      body: new GitCredentialsForm(
-        'Enter credentials for remote repository',
-        retry ? 'Incorrect username or password.' : ''
-      ),
-      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
-    });
-
-    if (!credentials.button.accept) {
-      break;
-    }
-
-    result = await showDialog({
-      title: title,
-      body: new GitPullPushDialog(model, operation, credentials.value),
-      buttons: [Dialog.okButton({ label: 'DISMISS' })]
-    });
-    retry = true;
-  }
-}
 
 /**
  * Interface describing component properties.
@@ -206,24 +162,24 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   private _renderTopNav(): React.ReactElement {
     return (
       <div className={toolbarNavClass}>
-        <button
-          className={classes(toolbarButtonClass, pullButtonClass, 'jp-Icon-16')}
-          title={'Pull latest changes'}
+        <span className={spacer} />
+        <ActionButton
+          className={toolbarButtonClass}
+          icon={pullIcon}
           onClick={this._onPullClick}
+          title={'Pull latest changes'}
         />
-        <button
-          className={classes(toolbarButtonClass, pushButtonClass, 'jp-Icon-16')}
-          title={'Push committed changes'}
+        <ActionButton
+          className={toolbarButtonClass}
+          icon={pushIcon}
           onClick={this._onPushClick}
+          title={'Push committed changes'}
         />
-        <button
-          className={classes(
-            toolbarButtonClass,
-            refreshButtonClass,
-            'jp-Icon-16'
-          )}
-          title={'Refresh the repository to detect local and remote changes'}
+        <ActionButton
+          className={toolbarButtonClass}
+          icon={refreshIcon}
           onClick={this._onRefreshClick}
+          title={'Refresh the repository to detect local and remote changes'}
         />
       </div>
     );
@@ -243,26 +199,13 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           title={`Current repository: ${this.state.repository}`}
           onClick={this._onRepositoryClick}
         >
-          <span
-            className={classes(
-              toolbarMenuButtonIconClass,
-              repoIconClass,
-              'jp-Icon-16'
-            )}
-          />
+          <desktopIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
             <p className={toolbarMenuButtonSubtitleClass}>
               {PathExt.basename(this.state.repository)}
             </p>
           </div>
-          {/*<span
-            className={classes(
-              toolbarMenuButtonIconClass,
-              this.state.repoMenu ? closeMenuIconClass : openMenuIconClass,
-              'jp-Icon-16'
-            )}
-          />*/}
         </button>
         {this.state.repoMenu ? null : null}
       </div>
@@ -288,26 +231,18 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           title={`Change the current branch: ${this.state.branch}`}
           onClick={this._onBranchClick}
         >
-          <span
-            className={classes(
-              toolbarMenuButtonIconClass,
-              branchIconClass,
-              'jp-Icon-16'
-            )}
-          />
+          <branchIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
             <p className={toolbarMenuButtonSubtitleClass}>
               {this.state.branch}
             </p>
           </div>
-          <span
-            className={classes(
-              toolbarMenuButtonIconClass,
-              this.state.branchMenu ? closeMenuIconClass : openMenuIconClass,
-              'jp-Icon-16'
-            )}
-          />
+          {this.state.branchMenu ? (
+            <caretUpIcon.react className={toolbarMenuButtonIconClass} />
+          ) : (
+            <caretDownIcon.react className={toolbarMenuButtonIconClass} />
+          )}
         </button>
         {this.state.branchMenu ? (
           <BranchMenu
@@ -403,14 +338,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param event - event object
    * @returns a promise which resolves upon pulling the latest changes
    */
-  private _onPullClick = async (): Promise<void> => {
+  private _onPullClick = (): void => {
     this._suspend(true);
-    try {
-      await showGitOperationDialog(this.props.model, Operation.Pull);
-    } catch (error) {
-      console.error(
-        `Encountered an error when pulling changes. Error: ${error}`
-      );
+    const commands = this.props.model.commands;
+    if (commands) {
+      commands.execute(CommandIDs.gitPull);
     }
     this._suspend(false);
   };
@@ -421,14 +353,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param event - event object
    * @returns a promise which resolves upon pushing the latest changes
    */
-  private _onPushClick = async (): Promise<void> => {
+  private _onPushClick = (): void => {
     this._suspend(true);
-    try {
-      await showGitOperationDialog(this.props.model, Operation.Push);
-    } catch (error) {
-      console.error(
-        `Encountered an error when pushing changes. Error: ${error}`
-      );
+    const commands = this.props.model.commands;
+    if (commands) {
+      commands.execute(CommandIDs.gitPush);
     }
     this._suspend(false);
   };

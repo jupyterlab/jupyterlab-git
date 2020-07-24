@@ -2,26 +2,16 @@ import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { GitExtension } from './model';
 import {
-  folderFileIconSelectedStyle,
   folderFileIconStyle,
-  genericFileIconSelectedStyle,
   genericFileIconStyle,
-  imageFileIconSelectedStyle,
   imageFileIconStyle,
-  jsonFileIconSelectedStyle,
   jsonFileIconStyle,
-  kernelFileIconSelectedStyle,
   kernelFileIconStyle,
-  markdownFileIconSelectedStyle,
   markdownFileIconStyle,
-  pythonFileIconSelectedStyle,
+  notebookFileIconStyle,
   pythonFileIconStyle,
-  spreadsheetFileIconSelectedStyle,
   spreadsheetFileIconStyle,
-  yamlFileIconSelectedStyle,
-  yamlFileIconStyle,
-  notebookFileIconSelectedStyle,
-  notebookFileIconStyle
+  yamlFileIconStyle
 } from './style/FileListStyle';
 import { Git } from './tokens';
 
@@ -40,8 +30,8 @@ export function decodeStage(x: string, y: string): Git.Status {
     return 'untracked';
   } else {
     // If file is staged
-    if (x !== ' ' && y !== 'D') {
-      return 'staged';
+    if (x !== ' ') {
+      return y !== ' ' ? 'partially-staged' : 'staged';
     }
     // If file is unstaged but tracked
     if (y !== ' ') {
@@ -83,33 +73,30 @@ export async function openListedFile(
  * Get the extension of a given file
  *
  * @param path File path for which the icon should be found
- * @param selected Is the file selected? Optional: default is false
  */
-export function getFileIconClassName(path: string, selected = false): string {
+export function getFileIconClassName(path: string): string {
   if (path[path.length - 1] === '/') {
-    return selected ? folderFileIconSelectedStyle : folderFileIconStyle;
+    return folderFileIconStyle;
   }
   const fileExtension = PathExt.extname(path).toLocaleLowerCase();
   switch (fileExtension) {
     case '.md':
-      return selected ? markdownFileIconSelectedStyle : markdownFileIconStyle;
+      return markdownFileIconStyle;
     case '.py':
-      return selected ? pythonFileIconSelectedStyle : pythonFileIconStyle;
+      return pythonFileIconStyle;
     case '.ipynb':
-      return selected ? notebookFileIconSelectedStyle : notebookFileIconStyle;
+      return notebookFileIconStyle;
     case '.json':
-      return selected ? jsonFileIconSelectedStyle : jsonFileIconStyle;
+      return jsonFileIconStyle;
     case '.csv':
     case '.xls':
     case '.xlsx':
-      return selected
-        ? spreadsheetFileIconSelectedStyle
-        : spreadsheetFileIconStyle;
+      return spreadsheetFileIconStyle;
     case '.r':
-      return selected ? kernelFileIconSelectedStyle : kernelFileIconStyle;
+      return kernelFileIconStyle;
     case '.yml':
     case '.yaml':
-      return selected ? yamlFileIconSelectedStyle : yamlFileIconStyle;
+      return yamlFileIconStyle;
     case '.svg':
     case '.tiff':
     case '.jpeg':
@@ -117,9 +104,9 @@ export function getFileIconClassName(path: string, selected = false): string {
     case '.gif':
     case '.png':
     case '.raw':
-      return selected ? imageFileIconSelectedStyle : imageFileIconStyle;
+      return imageFileIconStyle;
     default:
-      return selected ? genericFileIconSelectedStyle : genericFileIconStyle;
+      return genericFileIconStyle;
   }
 }
 
