@@ -2,6 +2,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import { Token, JSONObject } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 import { ISignal } from '@phosphor/signaling';
+import { CommandRegistry } from '@phosphor/commands';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
@@ -55,6 +56,8 @@ export interface IGitExtension extends IDisposable {
    * A signal emitted when the current status of the git repository changes.
    */
   readonly statusChanged: ISignal<IGitExtension, Git.IStatusFileResult[]>;
+
+  readonly commands: CommandRegistry | null;
 
   /**
    * Make request to add one or all files into
