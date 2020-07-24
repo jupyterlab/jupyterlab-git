@@ -13,7 +13,7 @@ import {
   toolbarMenuButtonClass
 } from '../../src/style/Toolbar';
 
-jest.mock('@phoshpor/commands');
+jest.mock('@phosphor/commands');
 jest.mock('../../src/git');
 
 async function createModel(commands?: commands.CommandRegistry) {
