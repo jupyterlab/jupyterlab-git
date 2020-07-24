@@ -1,4 +1,3 @@
-import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import {
   caretDownIcon,
@@ -22,52 +21,9 @@ import {
   toolbarNavClass
 } from '../style/Toolbar';
 import { IGitExtension } from '../tokens';
-import { GitCredentialsForm } from '../widgets/CredentialsBox';
-import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 import { ActionButton } from './ActionButton';
 import { BranchMenu } from './BranchMenu';
-
-/**
- * Displays an error dialog when a Git operation fails.
- *
- * @private
- * @param model - Git extension model
- * @param operation - Git operation name
- * @returns Promise for displaying a dialog
- */
-async function showGitOperationDialog(
-  model: IGitExtension,
-  operation: Operation
-): Promise<void> {
-  const title = `Git ${operation}`;
-  let result = await showDialog({
-    title: title,
-    body: new GitPullPushDialog(model, operation),
-    buttons: [Dialog.okButton({ label: 'DISMISS' })]
-  });
-  let retry = false;
-  while (!result.button.accept) {
-    const credentials = await showDialog({
-      title: 'Git credentials required',
-      body: new GitCredentialsForm(
-        'Enter credentials for remote repository',
-        retry ? 'Incorrect username or password.' : ''
-      ),
-      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
-    });
-
-    if (!credentials.button.accept) {
-      break;
-    }
-
-    result = await showDialog({
-      title: title,
-      body: new GitPullPushDialog(model, operation, credentials.value),
-      buttons: [Dialog.okButton({ label: 'DISMISS' })]
-    });
-    retry = true;
-  }
-}
+import { CommandIDs } from '../gitMenuCommands';
 
 /**
  * Interface describing component properties.
@@ -304,11 +260,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param event - event object
    */
   private _onPullClick = (): void => {
-    showGitOperationDialog(this.props.model, Operation.Pull).catch(reason => {
-      console.error(
-        `Encountered an error when pulling changes. Error: ${reason}`
-      );
-    });
+    const commands = this.props.model.commands;
+    if (commands) {
+      commands.execute(CommandIDs.gitPull);
+    }
   };
 
   /**
@@ -317,11 +272,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param event - event object
    */
   private _onPushClick = (): void => {
-    showGitOperationDialog(this.props.model, Operation.Push).catch(reason => {
-      console.error(
-        `Encountered an error when pushing changes. Error: ${reason}`
-      );
-    });
+    const commands = this.props.model.commands;
+    if (commands) {
+      commands.execute(CommandIDs.gitPush);
+    }
   };
 
   /**
