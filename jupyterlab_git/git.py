@@ -3,6 +3,7 @@ Module for executing git commands, sending results back to the handlers
 """
 import os
 import re
+import shlex
 import subprocess
 from urllib.parse import unquote
 
@@ -877,11 +878,28 @@ class Git:
         code, _, error = await execute(
             cmd, cwd=cwd
         )
-        await self.user_custom_actions.post_init(cwd)
+        if code == 0:
+            code, _, error = await self._maybe_run_actions('post_init', cwd)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
+
+    async def _maybe_run_actions(self, name, cwd):
+        code = 0
+        stdout = None
+        stderr = None
+        if name in self.user_custom_actions:
+            actions_list = self.user_custom_actions[name]
+            for action in actions_list:
+                # We trust the actions as they were passed via a config and not the UI
+                code, stdout, stderr = await execute(
+                    shlex.split(action), cwd=cwd
+                )
+                # After any failure, stop
+                if code != 0:
+                    break
+        return code, stdout, stderr
 
     def _is_remote_branch(self, branch_reference):
         """Check if given branch is remote branch by comparing with 'remotes/',
