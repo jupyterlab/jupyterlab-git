@@ -18,6 +18,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * The current branch
    */
+
   currentBranch: Git.IBranch;
 
   /**
@@ -270,6 +271,13 @@ export interface IGitExtension extends IDisposable {
    * @param path Path from which the top Git repository needs to be found
    */
   showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
+
+  /**
+   * Add an entry in .gitignore file
+   *
+   * @param filename The name of the entry to ignore
+   */
+  ignore(filename: string): Promise<Response>;
 }
 
 export namespace Git {

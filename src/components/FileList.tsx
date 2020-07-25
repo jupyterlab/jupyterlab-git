@@ -30,6 +30,7 @@ export namespace CommandIDs {
   export const gitFileDiscard = 'git:context-discard';
   export const gitFileDiffWorking = 'git:context-diffWorking';
   export const gitFileDiffIndex = 'git:context-diffIndex';
+  export const gitIgnore = 'git:context-ignore';
 }
 
 export interface IFileListState {
@@ -148,6 +149,21 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       });
     }
 
+    if (!commands.hasCommand(CommandIDs.gitIgnore)) {
+      commands.addCommand(CommandIDs.gitIgnore, {
+        label: 'Ignore',
+        caption: 'Ignore selected item',
+        execute: async () => {
+          await this.props.model.ignore(this.state.selectedFile.to);
+          const gitignore = this.props.model.getRelativeFilePath('.gitignore');
+          await this.props.model.commands.execute('docmanager:reload');
+          await this.props.model.commands.execute('docmanager:open', {
+            path: gitignore
+          });
+        }
+      });
+    }
+
     [
       CommandIDs.gitFileOpen,
       CommandIDs.gitFileUnstage,
@@ -165,7 +181,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       this._contextMenuUnstaged.addItem({ command });
     });
 
-    [CommandIDs.gitFileOpen, CommandIDs.gitFileTrack].forEach(command => {
+    [
+      CommandIDs.gitFileOpen,
+      CommandIDs.gitFileTrack,
+      CommandIDs.gitIgnore
+    ].forEach(command => {
       this._contextMenuUntracked.addItem({ command });
     });
 

@@ -1105,3 +1105,24 @@ class Git:
                 "command": " ".join(cmd),
                 "message": my_error.decode("utf-8").strip()
             }
+
+    async def ignore(self, top_repo_path, file_path):
+        """Handle call to add an entry in .gitignore.
+
+        top_repo_path: str
+            Top Git repository path
+        file_path: str
+            The path of the file in .gitignore 
+        """
+        try:
+            gitignore = os.path.join(top_repo_path, '.gitignore')
+            if os.path.exists(gitignore):
+                aw = 'a' # Append if already exists.
+            else:
+                aw = 'w' # Make a new file if not.
+            f = open(gitignore, aw)
+            f.write("\n" + file_path + "\n")
+            f.close()
+            return {"code": 0}
+        except:
+            return {"code": -1}

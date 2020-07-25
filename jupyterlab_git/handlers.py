@@ -534,6 +534,23 @@ class GitDiffContentHandler(GitHandler):
         self.finish(json.dumps(response))
 
 
+class GitIgnoreHandler(GitHandler):
+    """
+    Handler to add an entry in .gitignore
+    """
+
+    @web.authenticated
+    async def post(self):
+        data = self.get_json_body()
+        top_repo_path = data["top_repo_path"]
+        file_path = data["file_path"]
+        body = await self.git.ignore(top_repo_path, file_path)
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
+
+
 class GitServerRootHandler(GitHandler):
     @web.authenticated
     async def get(self):
@@ -576,6 +593,7 @@ def setup_handlers(web_app):
         ("/git/show_top_level", GitShowTopLevelHandler),
         ("/git/status", GitStatusHandler),
         ("/git/upstream", GitUpstreamHandler),
+        ("/git/ignore", GitIgnoreHandler),
     ]
 
     # add the baseurl to our paths
