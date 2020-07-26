@@ -3,7 +3,7 @@ import * as git from '../src/git';
 import { GitExtension } from '../src/model';
 import { IGitExtension } from '../src/tokens';
 
-import { CommandIDs, addCommands } from '../src/gitMenuCommands';
+import { CommandIDs, addCommands } from '../src/commandsAndMenu';
 import { CommandRegistry } from '@phosphor/commands';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 

@@ -4,7 +4,7 @@ import 'jest';
 import * as React from 'react';
 import { Toolbar } from '../../src/components/Toolbar';
 import * as git from '../../src/git';
-import { CommandIDs } from '../../src/gitMenuCommands';
+import { CommandIDs } from '../../src/commandsAndMenu';
 import { GitExtension } from '../../src/model';
 import {
   pullButtonClass,
@@ -96,6 +96,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const el = new Toolbar(props);
@@ -106,6 +107,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const el = new Toolbar(props);
@@ -116,6 +118,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const el = new Toolbar(props);
@@ -137,6 +140,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -149,6 +153,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -161,6 +166,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -173,6 +179,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -185,6 +192,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -197,6 +205,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -211,6 +220,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -224,6 +234,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -237,6 +248,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -250,6 +262,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -275,6 +288,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -287,6 +301,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -321,6 +336,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -356,6 +372,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
@@ -383,6 +400,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
+        suspend: false,
         refresh: spy
       };
       const node = shallow(<Toolbar {...props} />);

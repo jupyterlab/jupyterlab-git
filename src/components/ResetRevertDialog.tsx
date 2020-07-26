@@ -5,7 +5,8 @@ import { showErrorMessage } from '@jupyterlab/apputils';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import ClearIcon from '@material-ui/icons/Clear';
-import { Git, IGitExtension } from '../tokens';
+import { sleep } from '../utils';
+import { Git, IGitExtension, ILogMessage } from '../tokens';
 import {
   actionsWrapperClass,
   commitFormClass,
@@ -20,6 +21,8 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/ResetRevertDialog';
+import { SuspendModal } from './SuspendModal';
+import { Alert } from './Alert';
 
 /**
  * Interface describing component properties.
@@ -46,6 +49,11 @@ export interface IResetRevertDialogProps {
   open: boolean;
 
   /**
+   * Boolean indicating whether to enable UI suspension.
+   */
+  suspend: boolean;
+
+  /**
    * Callback invoked upon closing the dialog.
    */
   onClose: () => void;
@@ -69,6 +77,21 @@ export interface IResetRevertDialogState {
    * Boolean indicating whether component buttons should be disabled.
    */
   disabled: boolean;
+
+  /**
+   * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
+   */
+  suspend: boolean;
+
+  /**
+   * Boolean indicating whether to show an alert.
+   */
+  alert: boolean;
+
+  /**
+   * Log message.
+   */
+  log: ILogMessage;
 }
 
 /**
@@ -89,7 +112,13 @@ export class ResetRevertDialog extends React.Component<
     this.state = {
       summary: '',
       description: '',
-      disabled: false
+      disabled: false,
+      suspend: false,
+      alert: false,
+      log: {
+        severity: 'info',
+        message: ''
+      }
     };
   }
 
@@ -99,6 +128,20 @@ export class ResetRevertDialog extends React.Component<
    * @returns React element
    */
   render(): React.ReactElement {
+    return (
+      <React.Fragment>
+        {this._renderDialog()}
+        {this._renderFeedback()}
+      </React.Fragment>
+    );
+  }
+
+  /**
+   * Renders a dialog.
+   *
+   * @returns React element
+   */
+  private _renderDialog(): React.ReactElement {
     const shortCommit = this.props.commit.commit.slice(0, 7);
     return (
       <Dialog
@@ -173,6 +216,28 @@ export class ResetRevertDialog extends React.Component<
   }
 
   /**
+   * Renders a component to provide UI feedback.
+   *
+   * @returns React element
+   */
+  private _renderFeedback(): React.ReactElement {
+    return (
+      <React.Fragment>
+        <SuspendModal
+          open={this.props.suspend && this.state.suspend}
+          onClick={this._onFeedbackModalClick}
+        />
+        <Alert
+          open={this.state.alert}
+          message={this.state.log.message}
+          severity={this.state.log.severity}
+          onClose={this._onFeedbackAlertClose}
+        />
+      </React.Fragment>
+    );
+  }
+
+  /**
    * Callback invoked upon updating a commit message summary.
    *
    * @param event - event object
@@ -221,34 +286,123 @@ export class ResetRevertDialog extends React.Component<
    */
   private _onSubmit = async (): Promise<void> => {
     const shortCommit = this.props.commit.commit.slice(0, 7);
+    let err: Error;
+
     this.setState({
       disabled: true
     });
     if (this.props.action === 'reset') {
+      this._log({
+        severity: 'info',
+        message: 'Discarding changes...'
+      });
+      this._suspend(true);
       try {
-        await this.props.model.resetToCommit(this.props.commit.commit);
-      } catch (err) {
+        await Promise.all([
+          sleep(1000),
+          this.props.model.resetToCommit(this.props.commit.commit)
+        ]);
+      } catch (error) {
+        err = error;
+      }
+      this._suspend(false);
+      if (err) {
+        this._log({
+          severity: 'error',
+          message: 'Failed to discard changes.'
+        });
         showErrorMessage(
-          'Error Removing Changes',
+          'Error Discarding Changes',
           `Failed to discard changes after ${shortCommit}: ${err}`
         );
+      } else {
+        this._log({
+          severity: 'success',
+          message: 'Successfully discarded changes.'
+        });
       }
     } else {
+      this._log({
+        severity: 'info',
+        message: 'Reverting changes...'
+      });
+      this._suspend(true);
       try {
-        await this.props.model.revertCommit(
-          this._commitMessage(),
-          this.props.commit.commit
-        );
-      } catch (err) {
+        await Promise.all([
+          sleep(1000),
+          this.props.model.revertCommit(
+            this._commitMessage(),
+            this.props.commit.commit
+          )
+        ]);
+      } catch (error) {
+        err = error;
+      }
+      this._suspend(false);
+      if (err) {
+        this._log({
+          severity: 'error',
+          message: 'Failed to revert changes.'
+        });
         showErrorMessage(
           'Error Reverting Changes',
           `Failed to revert ${shortCommit}: ${err}`
         );
+      } else {
+        this._log({
+          severity: 'success',
+          message: 'Successfully reverted changes.'
+        });
       }
     }
     this._reset();
     this.props.onClose();
   };
+
+  /**
+   * Callback invoked upon clicking on the feedback modal.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackModalClick = (): void => {
+    this._suspend(false);
+  };
+
+  /**
+   * Callback invoked upon closing a feedback alert.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackAlertClose = (): void => {
+    this.setState({
+      alert: false
+    });
+  };
+
+  /**
+   * Sets the suspension state.
+   *
+   * @param bool - boolean indicating whether to suspend UI interaction
+   */
+  private _suspend(bool: boolean): void {
+    if (this.props.suspend) {
+      this.setState({
+        suspend: bool
+      });
+    }
+  }
+
+  /**
+   * Sets the current component log message.
+   *
+   * @param msg - log message
+   */
+  private _log(msg: ILogMessage): void {
+    this.setState({
+      alert: true,
+      log: msg
+    });
+  }
 
   /**
    * Returns a default commit summary for reverting a commit.

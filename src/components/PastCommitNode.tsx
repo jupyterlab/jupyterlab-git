@@ -43,6 +43,11 @@ export interface IPastCommitNodeProps {
    * Render MIME type registry.
    */
   renderMime: IRenderMimeRegistry;
+
+  /**
+   * Boolean indicating whether to enable UI suspension.
+   */
+  suspend: boolean;
 }
 
 /**
@@ -117,6 +122,7 @@ export class PastCommitNode extends React.Component<
               commit={this.props.commit}
               model={this.props.model}
               renderMime={this.props.renderMime}
+              suspend={this.props.suspend}
             />
           )}
         </div>
