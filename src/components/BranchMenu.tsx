@@ -16,11 +16,60 @@ import {
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
-import { Git, IGitExtension } from '../tokens';
+import { Git, IGitExtension, ILogMessage } from '../tokens';
+import { sleep } from '../utils';
+import { Alert } from './Alert';
 import { NewBranchDialog } from './NewBranchDialog';
+import { SuspendModal } from './SuspendModal';
 
 const CHANGES_ERR_MSG =
   'The current branch contains files with uncommitted changes. Please commit or discard these changes before switching to or creating another branch.';
+
+/**
+ * Callback invoked upon encountering an error when switching branches.
+ *
+ * @private
+ * @param err - error
+ */
+function onBranchError(err: any): void {
+  if (err.message.includes('following files would be overwritten')) {
+    showDialog({
+      title: 'Unable to switch branch',
+      body: (
+        <React.Fragment>
+          <p>
+            Your changes to the following files would be overwritten by
+            switching:
+          </p>
+          <List>
+            {err.message
+              .split('\n')
+              .slice(1, -3)
+              .map(renderFileName)}
+          </List>
+          <span>
+            Please commit, stash, or discard your changes before you switch
+            branches.
+          </span>
+        </React.Fragment>
+      ),
+      buttons: [Dialog.okButton({ label: 'Dismiss' })]
+    });
+  } else {
+    showErrorMessage('Error switching branch', err.message);
+  }
+}
+
+/**
+ * Renders a file name.
+ *
+ * @private
+ * @param filename - file name
+ * @returns React element
+ */
+function renderFileName(filename: string): React.ReactElement {
+  return <ListItem key={filename}>{filename}</ListItem>;
+}
 
 /**
  * Interface describing component properties.
@@ -35,6 +84,11 @@ export interface IBranchMenuProps {
    * Boolean indicating whether branching is disabled.
    */
   branching: boolean;
+
+  /**
+   * Boolean indicating whether to enable UI suspension.
+   */
+  suspend: boolean;
 }
 
 /**
@@ -60,6 +114,21 @@ export interface IBranchMenuState {
    * Current list of branches.
    */
   branches: Git.IBranch[];
+
+  /**
+   * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
+   */
+  suspend: boolean;
+
+  /**
+   * Boolean indicating whether to show an alert.
+   */
+  alert: boolean;
+
+  /**
+   * Log message.
+   */
+  log: ILogMessage;
 }
 
 /**
@@ -84,7 +153,13 @@ export class BranchMenu extends React.Component<
       filter: '',
       branchDialog: false,
       current: repo ? this.props.model.currentBranch.name : '',
-      branches: repo ? this.props.model.branches : []
+      branches: repo ? this.props.model.branches : [],
+      suspend: false,
+      alert: false,
+      log: {
+        severity: 'info',
+        message: ''
+      }
     };
   }
 
@@ -110,42 +185,61 @@ export class BranchMenu extends React.Component<
   render(): React.ReactElement {
     return (
       <div className={wrapperClass}>
-        <div className={filterWrapperClass}>
-          <div className={filterClass}>
-            <input
-              className={filterInputClass}
-              type="text"
-              onChange={this._onFilterChange}
-              value={this.state.filter}
-              placeholder="Filter"
-              title="Filter branch menu"
-            />
-            {this.state.filter ? (
-              <button className={filterClearClass}>
-                <ClearIcon
-                  titleAccess="Clear the current filter"
-                  fontSize="small"
-                  onClick={this._resetFilter}
-                />
-              </button>
-            ) : null}
-          </div>
+        {this._renderFilter()}
+        {this._renderBranchList()}
+        {this._renderNewBranchDialog()}
+        {this._renderFeedback()}
+      </div>
+    );
+  }
+
+  /**
+   * Renders a branch input filter.
+   *
+   * @returns React element
+   */
+  private _renderFilter(): React.ReactElement {
+    return (
+      <div className={filterWrapperClass}>
+        <div className={filterClass}>
           <input
-            className={newBranchButtonClass}
-            type="button"
-            title="Create a new branch"
-            value="New Branch"
-            onClick={this._onNewBranchClick}
+            className={filterInputClass}
+            type="text"
+            onChange={this._onFilterChange}
+            value={this.state.filter}
+            placeholder="Filter"
+            title="Filter branch menu"
           />
+          {this.state.filter ? (
+            <button className={filterClearClass}>
+              <ClearIcon
+                titleAccess="Clear the current filter"
+                fontSize="small"
+                onClick={this._resetFilter}
+              />
+            </button>
+          ) : null}
         </div>
-        <div className={listWrapperClass}>
-          <List disablePadding>{this._renderItems()}</List>
-        </div>
-        <NewBranchDialog
-          open={this.state.branchDialog}
-          model={this.props.model}
-          onClose={this._onNewBranchDialogClose}
+        <input
+          className={newBranchButtonClass}
+          type="button"
+          title="Create a new branch"
+          value="New Branch"
+          onClick={this._onNewBranchClick}
         />
+      </div>
+    );
+  }
+
+  /**
+   * Renders a
+   *
+   * @returns React element
+   */
+  private _renderBranchList(): React.ReactElement {
+    return (
+      <div className={listWrapperClass}>
+        <List disablePadding>{this._renderItems()}</List>
       </div>
     );
   }
@@ -199,6 +293,44 @@ export class BranchMenu extends React.Component<
   }
 
   /**
+   * Renders a dialog for creating a new branch.
+   *
+   * @returns React element
+   */
+  private _renderNewBranchDialog(): React.ReactElement {
+    return (
+      <NewBranchDialog
+        open={this.state.branchDialog}
+        suspend={this.props.suspend}
+        model={this.props.model}
+        onClose={this._onNewBranchDialogClose}
+      />
+    );
+  }
+
+  /**
+   * Renders a component to provide UI feedback.
+   *
+   * @returns React element
+   */
+  private _renderFeedback(): React.ReactElement {
+    return (
+      <React.Fragment>
+        <SuspendModal
+          open={this.props.suspend && this.state.suspend}
+          onClick={this._onFeedbackModalClick}
+        />
+        <Alert
+          open={this.state.alert}
+          message={this.state.log.message}
+          severity={this.state.log.severity}
+          onClose={this._onFeedbackAlertClose}
+        />
+      </React.Fragment>
+    );
+  }
+
+  /**
    * Adds model listeners.
    */
   private _addListeners(): void {
@@ -225,6 +357,31 @@ export class BranchMenu extends React.Component<
     this.setState({
       current: repo ? this.props.model.currentBranch.name : '',
       branches: repo ? this.props.model.branches : []
+    });
+  }
+
+  /**
+   * Sets the suspension state.
+   *
+   * @param bool - boolean indicating whether to suspend UI interaction
+   */
+  private _suspend(bool: boolean): void {
+    if (this.props.suspend) {
+      this.setState({
+        suspend: bool
+      });
+    }
+  }
+
+  /**
+   * Sets the current component log message.
+   *
+   * @param msg - log message
+   */
+  private _log(msg: ILogMessage): void {
+    this.setState({
+      alert: true,
+      log: msg
     });
   }
 
@@ -287,8 +444,9 @@ export class BranchMenu extends React.Component<
      *
      * @private
      * @param event - event object
+     * @returns promise which resolves upon attempting to switch branches
      */
-    function onClick(): void {
+    async function onClick(): Promise<void> {
       if (!self.props.branching) {
         showErrorMessage('Switching branches is disabled', CHANGES_ERR_MSG);
         return;
@@ -296,66 +454,61 @@ export class BranchMenu extends React.Component<
       const opts = {
         branchname: branch
       };
-      self.props.model
-        .checkout(opts)
-        .then(onResolve)
-        .catch(onError);
-    }
 
-    /**
-     * Callback invoked upon promise resolution.
-     *
-     * @private
-     * @param result - result
-     */
-    function onResolve(result: any): void {
-      if (result.code !== 0) {
-        showErrorMessage('Error switching branch', result.message);
-      }
-    }
+      self._log({
+        severity: 'info',
+        message: 'Switching branch...'
+      });
+      self._suspend(true);
 
-    /**
-     * Callback invoked upon encountering an error.
-     *
-     * @private
-     * @param err - error
-     */
-    function onError(err: any): void {
-      if (err.message.includes('following files would be overwritten')) {
-        showDialog({
-          title: 'Unable to switch branch',
-          body: (
-            <React.Fragment>
-              <p>
-                Your changes to the following files would be overwritten by
-                switching:
-              </p>
-              <List>
-                {err.message
-                  .split('\n')
-                  .slice(1, -3)
-                  .map(renderFileName)}
-              </List>
-              <span>
-                Please commit, stash, or discard your changes before you switch
-                branches.
-              </span>
-            </React.Fragment>
-          ),
-          buttons: [Dialog.okButton({ label: 'Dismiss' })]
+      let result: Array<any>;
+      try {
+        result = await Promise.all([
+          sleep(1000),
+          self.props.model.checkout(opts)
+        ]);
+      } catch (err) {
+        self._suspend(false);
+        self._log({
+          severity: 'error',
+          message: 'Failed to switch branch.'
         });
-      } else {
-        showErrorMessage('Error switching branch', err.message);
+        return onBranchError(err);
       }
-    }
-
-    /**
-     * Render a filename into a list
-     * @param filename
-     * @returns ReactElement
-     */
-    function renderFileName(filename: string): React.ReactElement {
-      return <ListItem key={filename}>{filename}</ListItem>;
+      self._suspend(false);
+      const res = result[1] as Git.ICheckoutResult;
+      if (res.code !== 0) {
+        self._log({
+          severity: 'error',
+          message: 'Failed to switch branch.'
+        });
+        showErrorMessage('Error switching branch', res.message);
+        return;
+      }
+      self._log({
+        severity: 'success',
+        message: 'Switched branch.'
+      });
     }
   }
+
+  /**
+   * Callback invoked upon clicking on the feedback modal.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackModalClick = (): void => {
+    this._suspend(false);
+  };
+
+  /**
+   * Callback invoked upon closing a feedback alert.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackAlertClose = (): void => {
+    this.setState({
+      alert: false
+    });
+  };
 }

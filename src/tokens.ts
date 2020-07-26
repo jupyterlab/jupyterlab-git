@@ -22,17 +22,22 @@ export interface IGitExtension extends IDisposable {
   currentBranch: Git.IBranch;
 
   /**
-   * A signal emitted when the HEAD of the git repository changes.
+   * A signal emitted when the `HEAD` of the Git repository changes.
    */
   readonly headChanged: ISignal<IGitExtension, void>;
 
   /**
-   * Top level path of the current git repository
+   * A signal emitted whenever a model event occurs.
+   */
+  readonly logger: ISignal<IGitExtension, string>;
+
+  /**
+   * Top level path of the current Git repository
    */
   pathRepository: string | null;
 
   /**
-   * A signal emitted when the current git repository changes.
+   * A signal emitted when the current Git repository changes.
    */
   readonly repositoryChanged: ISignal<IGitExtension, IChangedArgs<string>>;
 
@@ -49,12 +54,12 @@ export interface IGitExtension extends IDisposable {
   ready: Promise<void>;
 
   /**
-   * Files list resulting of a git status call.
+   * Files list resulting of a Git status call.
    */
   readonly status: Git.IStatusFileResult[];
 
   /**
-   * A signal emitted when the current status of the git repository changes.
+   * A signal emitted when the current status of the Git repository changes.
    */
   readonly statusChanged: ISignal<IGitExtension, Git.IStatusFileResult[]>;
 
@@ -114,10 +119,10 @@ export interface IGitExtension extends IDisposable {
   addRemote(url: string, name?: string): Promise<void>;
 
   /**
-   * Make request for all git info of the repository
+   * Make request for all Git info of the repository
    * (This API is also implicitly used to check if the current repo is a Git repo)
    *
-   * @param historyCount: Optional number of commits to get from git log
+   * @param historyCount: Optional number of commits to get from Git log
    * @returns Repository history
    */
   allHistory(historyCount?: number): Promise<Git.IAllHistory>;
@@ -137,7 +142,7 @@ export interface IGitExtension extends IDisposable {
   checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult>;
 
   /**
-   * Make request for the Git Clone API.
+   * Make request for the Git clone API.
    *
    * @param path Local path in which the repository will be cloned
    * @param url Distant Git repository URL
@@ -169,7 +174,7 @@ export interface IGitExtension extends IDisposable {
   revertCommit(message: string, commitId: string): Promise<Response>;
 
   /**
-   * Make request for detailed git commit info of
+   * Make request for detailed Git commit info of
    * commit 'hash'
    *
    * @param hash Commit hash
@@ -189,16 +194,16 @@ export interface IGitExtension extends IDisposable {
   getRelativeFilePath(path?: string): string | null;
 
   /**
-   * Make request to initialize a  new git repository at path 'path'
+   * Make request to initialize a  new Git repository at path 'path'
    *
-   * @param path Folder path to initialize as a git repository.
+   * @param path Folder path to initialize as a Git repository.
    */
   init(path: string): Promise<Response>;
 
   /**
-   * Make request for git commit logs
+   * Make request for Git commit logs
    *
-   * @param historyCount: Optional number of commits to get from git log
+   * @param historyCount: Optional number of commits to get from Git log
    * @returns Repository logs
    */
   log(historyCount?: number): Promise<Git.ILogResult>;
@@ -220,17 +225,17 @@ export interface IGitExtension extends IDisposable {
   push(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
 
   /**
-   * General git refresh
+   * General Git refresh
    */
   refresh(): Promise<void>;
 
   /**
-   * Make request for a list of all git branches
+   * Make request for a list of all Git branches
    */
   refreshBranch(): Promise<void>;
 
   /**
-   * Request git status refresh
+   * Request Git status refresh
    */
   refreshStatus(): Promise<void>;
 
@@ -298,7 +303,7 @@ export namespace Git {
   }
 
   /** Interface for GitShowTopLevel request result,
-   * has the git root directory inside a repository
+   * has the Git root directory inside a repository
    */
   export interface IShowTopLevelResult {
     code: number;
@@ -507,4 +512,24 @@ export namespace Git {
     | 'unstaged'
     | 'partially-staged'
     | null;
+}
+
+/**
+ * Log message severity.
+ */
+export type Severity = 'error' | 'warning' | 'info' | 'success';
+
+/**
+ * Interface describing a component log message.
+ */
+export interface ILogMessage {
+  /**
+   * Message severity.
+   */
+  severity: Severity;
+
+  /**
+   * Message text.
+   */
+  message: string;
 }

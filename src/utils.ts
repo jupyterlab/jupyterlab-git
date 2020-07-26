@@ -109,3 +109,13 @@ export function getFileIconClassName(path: string): string {
       return genericFileIconStyle;
   }
 }
+
+/**
+ * Returns a promise which resolves after a specified duration.
+ *
+ * @param ms - duration (in milliseconds)
+ * @returns a promise
+ */
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

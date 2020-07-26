@@ -28,6 +28,11 @@ export interface IHistorySideBarProps {
    * Render MIME type registry.
    */
   renderMime: IRenderMimeRegistry;
+
+  /**
+   * Boolean indicating whether to enable UI suspension.
+   */
+  suspend: boolean;
 }
 
 /**
@@ -47,6 +52,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
         branches={props.branches}
         model={props.model}
         renderMime={props.renderMime}
+        suspend={props.suspend}
       />
     ))}
   </ol>

@@ -4,34 +4,20 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  FileBrowser,
-  FileBrowserModel,
-  IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
+import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Menu } from '@lumino/widgets';
-import { addCommands, CommandIDs } from './gitMenuCommands';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IStatusBar } from '@jupyterlab/statusbar';
+import { addCommands, createGitMenu } from './commandsAndMenu';
 import { GitExtension } from './model';
+import { gitIcon } from './style/icons';
 import { IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
-import { gitIcon } from './style/icons';
+import { addStatusBarWidget } from './widgets/StatusWidget';
 
 export { Git, IGitExtension } from './tokens';
-
-const RESOURCES = [
-  {
-    text: 'Set Up Remotes',
-    url: 'https://www.atlassian.com/git/tutorials/setting-up-a-repository'
-  },
-  {
-    text: 'Git Documentation',
-    url: 'https://git-scm.com/doc'
-  }
-];
 
 /**
  * The default running sessions extension.
@@ -43,7 +29,8 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     ILayoutRestorer,
     IFileBrowserFactory,
     IRenderMimeRegistry,
-    ISettingRegistry
+    ISettingRegistry,
+    IStatusBar
   ],
   provides: IGitExtension,
   activate,
@@ -64,7 +51,8 @@ async function activate(
   restorer: ILayoutRestorer,
   factory: IFileBrowserFactory,
   renderMime: IRenderMimeRegistry,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  statusBar: IStatusBar
 ): Promise<IGitExtension> {
   let settings: ISettingRegistry.ISettings;
 
@@ -96,6 +84,9 @@ async function activate(
 
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
+    // Add JupyterLab commands
+    addCommands(app, gitExtension, factory.defaultBrowser, settings);
+
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
       gitExtension,
@@ -117,60 +108,14 @@ async function activate(
     app.shell.add(gitPlugin, 'left', { rank: 200 });
 
     // Add a menu for the plugin
-    mainMenu.addMenu(
-      createGitMenu(app, gitExtension, factory.defaultBrowser, settings),
-      { rank: 60 }
-    );
+    mainMenu.addMenu(createGitMenu(app.commands), { rank: 60 });
+
+    // Add a clone button to the file browser extension toolbar
+    addCloneButton(gitExtension, factory.defaultBrowser);
+
+    // Add the status bar widget
+    addStatusBarWidget(statusBar, gitExtension, settings);
   }
-  // Add a clone button to the file browser extension toolbar
-  addCloneButton(gitExtension, factory.defaultBrowser);
 
   return gitExtension;
-}
-
-/**
- * Add commands and menu items
- */
-function createGitMenu(
-  app: JupyterFrontEnd,
-  gitExtension: IGitExtension,
-  fileBrowser: FileBrowser,
-  settings: ISettingRegistry.ISettings
-): Menu {
-  const { commands } = app;
-  addCommands(app, gitExtension, fileBrowser, settings);
-
-  const menu = new Menu({ commands });
-  menu.title.label = 'Git';
-  [
-    CommandIDs.gitInit,
-    CommandIDs.gitClone,
-    CommandIDs.gitPush,
-    CommandIDs.gitPull,
-    CommandIDs.gitAddRemote,
-    CommandIDs.gitTerminalCommand
-  ].forEach(command => {
-    menu.addItem({ command });
-  });
-
-  menu.addItem({ type: 'separator' });
-
-  menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
-
-  menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
-
-  menu.addItem({ type: 'separator' });
-
-  const tutorial = new Menu({ commands });
-  tutorial.title.label = ' Help ';
-  RESOURCES.map(args => {
-    tutorial.addItem({
-      args,
-      command: CommandIDs.gitOpenUrl
-    });
-  });
-
-  menu.addItem({ type: 'submenu', submenu: tutorial });
-
-  return menu;
 }

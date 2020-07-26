@@ -5,6 +5,12 @@
   "description": "jupyterlab-git settings.",
   "type": "object",
   "properties": {
+    "blockWhileCommandExecutes": {
+      "type": "boolean",
+      "title": "Suspend user interaction until commands finish",
+      "description": "Suspend JupyterLab user interaction until Git commands (e.g., commit, pull, reset, revert) finish executing. Setting this to true helps mitigate potential race conditions leading to data loss, conflicts, and a broken Git history. Unless running a slow network, UI suspension should not interfere with standard workflows. Setting this to false allows for actions to trigger multiple concurrent Git actions.",
+      "default": true
+    },
     "cancelPullMergeConflict": {
       "type": "boolean",
       "title": "Cancel pull merge conflict",
@@ -17,10 +23,16 @@
       "description": "Disable all branch operations (new, switch) when there are changed/staged files",
       "default": false
     },
+    "displayStatus": {
+      "type": "boolean",
+      "title": "Display Git status updates",
+      "description": "Display Git extension status updates in the JupyterLab status bar. If true, the extension displays status updates in the JupyterLab status bar, such as when pulling and pushing changes, switching branches, and polling for changes. Depending on the level of extension activity, some users may find the status updates distracting. In which case, setting this to false should reduce visual noise.",
+      "default": true
+    },
     "doubleClickDiff": {
       "type": "boolean",
       "title": "Show diff on double click",
-      "description": "If true, doubling clicking a file in the list of changed files will open a diff",
+      "description": "If true, doubling clicking a file in the list of changed files will open a diff.",
       "default": false
     },
     "historyCount": {
