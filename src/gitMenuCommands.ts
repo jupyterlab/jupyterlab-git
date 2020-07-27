@@ -10,6 +10,7 @@ import { FileBrowser } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { IGitExtension } from './tokens';
+import { GitExtension } from './model';
 import { doGitClone } from './widgets/gitClone';
 
 /**
@@ -24,6 +25,7 @@ export namespace CommandIDs {
   export const gitToggleDoubleClickDiff = 'git:toggle-double-click-diff';
   export const gitAddRemote = 'git:add-remote';
   export const gitClone = 'git:clone';
+  export const gitOpenGitignore = 'git:open-gitignore';
 }
 
 /**
@@ -168,6 +170,21 @@ export function addCommands(
     execute: async () => {
       await doGitClone(model, fileBrowser.model.path);
       fileBrowser.model.refresh();
+    }
+  });
+
+  /** Add git open gitignore command */
+  commands.addCommand(CommandIDs.gitOpenGitignore, {
+    label: 'Open .gitignore',
+    caption: 'Open .gitignore',
+    isEnabled: () => model.pathRepository !== null,
+    execute: async () => {
+      model.ensureGitignore();
+      const gitModel = model as GitExtension;
+      await gitModel.commands.execute('docmanager:reload');
+      await gitModel.commands.execute('docmanager:open', {
+        path: model.getRelativeFilePath('.gitignore')
+      });
     }
   });
 }

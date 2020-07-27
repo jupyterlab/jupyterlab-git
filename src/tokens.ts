@@ -273,11 +273,17 @@ export interface IGitExtension extends IDisposable {
   showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
 
   /**
+   * Ensure a.gitignore file
+   *
+   */
+  ensureGitignore(): Promise<Response>;
+
+  /**
    * Add an entry in .gitignore file
    *
    * @param filename The name of the entry to ignore
    */
-  ignore(filename: string): Promise<Response>;
+  ignore(filename: string, useExtension: boolean): Promise<Response>;
 }
 
 export namespace Git {

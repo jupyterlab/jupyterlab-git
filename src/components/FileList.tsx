@@ -31,6 +31,7 @@ export namespace CommandIDs {
   export const gitFileDiffWorking = 'git:context-diffWorking';
   export const gitFileDiffIndex = 'git:context-diffIndex';
   export const gitIgnore = 'git:context-ignore';
+  export const gitIgnoreExtension = 'git:context-ignoreExtension';
 }
 
 export interface IFileListState {
@@ -152,13 +153,26 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     if (!commands.hasCommand(CommandIDs.gitIgnore)) {
       commands.addCommand(CommandIDs.gitIgnore, {
         label: 'Ignore',
-        caption: 'Ignore selected item',
+        caption: 'Ignore',
         execute: async () => {
-          await this.props.model.ignore(this.state.selectedFile.to);
-          const gitignore = this.props.model.getRelativeFilePath('.gitignore');
+          await this.props.model.ignore(this.state.selectedFile.to, false);
           await this.props.model.commands.execute('docmanager:reload');
           await this.props.model.commands.execute('docmanager:open', {
-            path: gitignore
+            path: this.props.model.getRelativeFilePath('.gitignore')
+          });
+        }
+      });
+    }
+
+    if (!commands.hasCommand(CommandIDs.gitIgnoreExtension)) {
+      commands.addCommand(CommandIDs.gitIgnoreExtension, {
+        label: 'Ignore extension',
+        caption: 'Ignore extension',
+        execute: async () => {
+          await this.props.model.ignore(this.state.selectedFile.to, true);
+          await this.props.model.commands.execute('docmanager:reload');
+          await this.props.model.commands.execute('docmanager:open', {
+            path: this.props.model.getRelativeFilePath('.gitignore')
           });
         }
       });
@@ -184,7 +198,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     [
       CommandIDs.gitFileOpen,
       CommandIDs.gitFileTrack,
-      CommandIDs.gitIgnore
+      CommandIDs.gitIgnore,
+      CommandIDs.gitIgnoreExtension
     ].forEach(command => {
       this._contextMenuUntracked.addItem({ command });
     });

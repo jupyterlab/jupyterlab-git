@@ -168,5 +168,11 @@ function createGitMenu(
 
   menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
 
+  menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
+
+  menu.addItem({ type: 'separator' });
+
+  menu.addItem({ command: CommandIDs.gitOpenGitignore });
+
   return menu;
 }

@@ -1106,6 +1106,26 @@ class Git:
                 "message": my_error.decode("utf-8").strip()
             }
 
+    async def ensure_gitignore(self, top_repo_path):
+        """Handle call to ensure .gitignore file exists.
+
+        top_repo_path: str
+            Top Git repository path
+        """
+        try:            
+            gitignore = os.path.join(top_repo_path, ".gitignore")
+            if not os.path.exists(gitignore):
+                open(gitignore, "w").close()
+            elif os.path.getsize(gitignore) != 0:
+                f = open(gitignore, "r")
+                if (f.read()[-1] != "\n"):
+                    f = open(gitignore, "r")
+                    f.write('\n')
+                f.close()
+            return {"code": 0}
+        except:
+            return {"code": -1}
+
     async def ignore(self, top_repo_path, file_path):
         """Handle call to add an entry in .gitignore.
 
@@ -1115,13 +1135,12 @@ class Git:
             The path of the file in .gitignore 
         """
         try:
+            res = await self.ensure_gitignore(top_repo_path)
+            if res["code"] != 0:
+                return res
             gitignore = os.path.join(top_repo_path, '.gitignore')
-            if os.path.exists(gitignore):
-                aw = 'a' # Append if already exists.
-            else:
-                aw = 'w' # Make a new file if not.
-            f = open(gitignore, aw)
-            f.write("\n" + file_path + "\n")
+            f = open(gitignore, "a")
+            f.write(file_path + "\n")
             f.close()
             return {"code": 0}
         except:
