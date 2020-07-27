@@ -1107,7 +1107,9 @@ class Git:
             }
 
     async def ensure_gitignore(self, top_repo_path):
-        """Handle call to ensure .gitignore file exists.
+        """Handle call to ensure .gitignore file exists and the 
+        next append will be on a new line (this means an empty file
+        or a file ending with \n).
 
         top_repo_path: str
             Top Git repository path
@@ -1119,7 +1121,7 @@ class Git:
             elif os.path.getsize(gitignore) != 0:
                 f = open(gitignore, "r")
                 if (f.read()[-1] != "\n"):
-                    f = open(gitignore, "r")
+                    f = open(gitignore, "a")
                     f.write('\n')
                 f.close()
             return {"code": 0}
