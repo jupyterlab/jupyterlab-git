@@ -1,4 +1,3 @@
-import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import {
   caretDownIcon,
@@ -7,6 +6,7 @@ import {
 } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { classes } from 'typestyle';
+import { CommandIDs } from '../commandsAndMenu';
 import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import {
   spacer,
@@ -21,53 +21,12 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { IGitExtension } from '../tokens';
-import { GitCredentialsForm } from '../widgets/CredentialsBox';
-import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
+import { IGitExtension, ILogMessage } from '../tokens';
+import { sleep } from '../utils';
 import { ActionButton } from './ActionButton';
+import { Alert } from './Alert';
 import { BranchMenu } from './BranchMenu';
-
-/**
- * Displays an error dialog when a Git operation fails.
- *
- * @private
- * @param model - Git extension model
- * @param operation - Git operation name
- * @returns Promise for displaying a dialog
- */
-async function showGitOperationDialog(
-  model: IGitExtension,
-  operation: Operation
-): Promise<void> {
-  const title = `Git ${operation}`;
-  let result = await showDialog({
-    title: title,
-    body: new GitPullPushDialog(model, operation),
-    buttons: [Dialog.okButton({ label: 'DISMISS' })]
-  });
-  let retry = false;
-  while (!result.button.accept) {
-    const credentials = await showDialog({
-      title: 'Git credentials required',
-      body: new GitCredentialsForm(
-        'Enter credentials for remote repository',
-        retry ? 'Incorrect username or password.' : ''
-      ),
-      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
-    });
-
-    if (!credentials.button.accept) {
-      break;
-    }
-
-    result = await showDialog({
-      title: title,
-      body: new GitPullPushDialog(model, operation, credentials.value),
-      buttons: [Dialog.okButton({ label: 'DISMISS' })]
-    });
-    retry = true;
-  }
-}
+import { SuspendModal } from './SuspendModal';
 
 /**
  * Interface describing component properties.
@@ -82,6 +41,11 @@ export interface IToolbarProps {
    * Boolean indicating whether branching is disabled.
    */
   branching: boolean;
+
+  /**
+   * Boolean indicating whether to enable UI suspension.
+   */
+  suspend: boolean;
 
   /**
    * Callback to invoke in order to refresh a repository.
@@ -114,6 +78,21 @@ export interface IToolbarState {
    * Current branch name.
    */
   branch: string;
+
+  /**
+   * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
+   */
+  suspend: boolean;
+
+  /**
+   * Boolean indicating whether to show an alert.
+   */
+  alert: boolean;
+
+  /**
+   * Log message.
+   */
+  log: ILogMessage;
 }
 
 /**
@@ -135,7 +114,13 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       branchMenu: false,
       repoMenu: false,
       repository: repo || '',
-      branch: repo ? this.props.model.currentBranch.name : ''
+      branch: repo ? this.props.model.currentBranch.name : '',
+      suspend: false,
+      alert: false,
+      log: {
+        severity: 'info',
+        message: ''
+      }
     };
   }
 
@@ -164,6 +149,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         {this._renderTopNav()}
         {this._renderRepoMenu()}
         {this._renderBranchMenu()}
+        {this._renderFeedback()}
       </div>
     );
   }
@@ -232,7 +218,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderBranchMenu(): React.ReactElement | null {
-    if (!this.state.repository) {
+    if (!this.props.model.pathRepository) {
       return null;
     }
     return (
@@ -262,9 +248,32 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           <BranchMenu
             model={this.props.model}
             branching={this.props.branching}
+            suspend={this.props.suspend}
           />
         ) : null}
       </div>
+    );
+  }
+
+  /**
+   * Renders a component to provide UI feedback.
+   *
+   * @returns React element
+   */
+  private _renderFeedback(): React.ReactElement {
+    return (
+      <React.Fragment>
+        <SuspendModal
+          open={this.props.suspend && this.state.suspend}
+          onClick={this._onFeedbackModalClick}
+        />
+        <Alert
+          open={this.state.alert}
+          message={this.state.log.message}
+          severity={this.state.log.severity}
+          onClose={this._onFeedbackAlertClose}
+        />
+      </React.Fragment>
     );
   }
 
@@ -299,29 +308,58 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   /**
+   * Sets the suspension state.
+   *
+   * @param bool - boolean indicating whether to suspend UI interaction
+   */
+  private _suspend(bool: boolean): void {
+    if (this.props.suspend) {
+      this.setState({
+        suspend: bool
+      });
+    }
+  }
+
+  /**
+   * Sets the current component log message.
+   *
+   * @param msg - log message
+   */
+  private _log(msg: ILogMessage): void {
+    this.setState({
+      alert: true,
+      log: msg
+    });
+  }
+
+  /**
    * Callback invoked upon clicking a button to pull the latest changes.
    *
    * @param event - event object
+   * @returns a promise which resolves upon pulling the latest changes
    */
   private _onPullClick = (): void => {
-    showGitOperationDialog(this.props.model, Operation.Pull).catch(reason => {
-      console.error(
-        `Encountered an error when pulling changes. Error: ${reason}`
-      );
-    });
+    this._suspend(true);
+    const commands = this.props.model.commands;
+    if (commands) {
+      commands.execute(CommandIDs.gitPull);
+    }
+    this._suspend(false);
   };
 
   /**
    * Callback invoked upon clicking a button to push the latest changes.
    *
    * @param event - event object
+   * @returns a promise which resolves upon pushing the latest changes
    */
   private _onPushClick = (): void => {
-    showGitOperationDialog(this.props.model, Operation.Push).catch(reason => {
-      console.error(
-        `Encountered an error when pushing changes. Error: ${reason}`
-      );
-    });
+    this._suspend(true);
+    const commands = this.props.model.commands;
+    if (commands) {
+      commands.execute(CommandIDs.gitPush);
+    }
+    this._suspend(false);
   };
 
   /**
@@ -352,8 +390,39 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Callback invoked upon clicking a button to refresh a repository.
    *
    * @param event - event object
+   * @returns a promise which resolves upon refreshing a repository
    */
-  private _onRefreshClick = (): void => {
-    this.props.refresh();
+  private _onRefreshClick = async (): Promise<void> => {
+    this._log({
+      severity: 'info',
+      message: 'Refreshing...'
+    });
+    this._suspend(true);
+    await Promise.all([sleep(1000), this.props.refresh()]);
+    this._suspend(false);
+    this._log({
+      severity: 'success',
+      message: 'Successfully refreshed.'
+    });
+  };
+
+  /**
+   * Callback invoked upon clicking on the feedback modal.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackModalClick = (): void => {
+    this._suspend(false);
+  };
+
+  /**
+   * Callback invoked upon closing a feedback alert.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackAlertClose = (): void => {
+    this.setState({
+      alert: false
+    });
   };
 }
