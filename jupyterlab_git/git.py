@@ -943,7 +943,7 @@ class Git:
             return {"code": code, "command": " ".join(command), "message": error}
         rev_parse_output = output.strip()
 
-        command = ["git", "config", "--local", f"branch.{branch_name}.remote"]
+        command = ["git", "config", "--local", "branch.{}.remote".format(branch_name)]
         code, output, error = await execute(
             command, cwd=os.path.join(self.root_dir, current_path)
         )

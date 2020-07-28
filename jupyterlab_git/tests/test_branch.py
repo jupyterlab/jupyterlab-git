@@ -431,7 +431,7 @@ async def test_get_upstream_branch_success(branch, upstream, remotename):
                     cwd=os.path.join("/bin", "test_curr_path"),
                 ),
                 call(
-                    ['git', 'config', '--local', f'branch.{branch}.remote'],
+                    ['git', 'config', '--local', 'branch.{}.remote'.format(branch)],
                      cwd='/bin/test_curr_path',
                 ),
 
