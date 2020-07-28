@@ -1,5 +1,4 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
