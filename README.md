@@ -57,7 +57,7 @@ jupyter labextension list
   - Be sure to be in a Git repository in the filebrowser tab
 
   - Check the server log. If you see a warning with a 404 code similar to:
-    `[W 00:27:41.800 LabApp] 404 GET /git/server_root?1576081660665`
+    `[W 00:27:41.800 LabApp] 404 GET /git/settings?version=0.20.0`
 
     Explicitly enable the server extension by running:
 

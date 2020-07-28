@@ -29,12 +29,6 @@ function MockRequest(url: string, method: string, request: any) {
       };
       response = new Response(JSON.stringify(obj));
       break;
-    case '/git/server_root':
-      obj = {
-        server_root: '/foo'
-      };
-      response = new Response(JSON.stringify(obj));
-      break;
     case '/git/show_top_level':
       obj = {
         code: 0,
