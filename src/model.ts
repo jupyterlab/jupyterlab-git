@@ -9,6 +9,7 @@ import { ServerConnection } from '@jupyterlab/services';
 import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
 import { ISignal, Signal } from '@phosphor/signaling';
+import { LinkedList } from '@phosphor/collections';
 import { httpGitRequest } from './git';
 import { IGitExtension, Git } from './tokens';
 import { decodeStage } from './utils';
@@ -17,8 +18,17 @@ import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
 
-/** Main extension class */
+/**
+ * Class for creating a model for retrieving info from, and interacting with, a remote Git repository.
+ */
 export class GitExtension implements IGitExtension {
+  /**
+   * Returns an extension model.
+   *
+   * @param app - frontend application
+   * @param settings - plugin settings
+   * @returns extension model
+   */
   constructor(
     app: JupyterFrontEnd = null,
     settings?: ISettingRegistry.ISettings
@@ -76,63 +86,54 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * The list of branch in the current repo
+   * Branch list for the current repository.
    */
   get branches() {
     return this._branches;
   }
 
+  /**
+   * List of available Git commands.
+   */
   get commands(): CommandRegistry | null {
     return this._app ? this._app.commands : null;
   }
 
   /**
-   * The current branch
+   * The current repository branch.
    */
   get currentBranch() {
     return this._currentBranch;
   }
 
   /**
-   * A signal emitted when the HEAD of the git repository changes.
-   */
-  get headChanged(): ISignal<IGitExtension, void> {
-    return this._headChanged;
-  }
-
-  /**
-   * Get whether the model is disposed.
+   * Boolean indicating whether the model has been disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
 
   /**
-   * Test whether the model is ready.
+   * Boolean indicating whether the model is ready.
    */
   get isReady(): boolean {
     return this._pendingReadyPromise === 0;
   }
 
   /**
-   * A promise that fulfills when the model is ready.
+   * Promise which fulfills when the model is ready.
    */
   get ready(): Promise<void> {
     return this._readyPromise;
   }
 
   /**
-   * A signal emitted when the current marking of the git repository changes.
-   */
-  get markChanged(): ISignal<IGitExtension, void> {
-    return this._markChanged;
-  }
-
-  /**
-   * Git Repository path
+   * Git repository path.
    *
-   * This is the top-level folder fullpath.
-   * null if not defined.
+   * ## Notes
+   *
+   * -   This is the full path of the top-level folder.
+   * -   The return value is `null` if a repository path is not defined.
    */
   get pathRepository(): string | null {
     return this._pathRepository;
@@ -172,7 +173,7 @@ export class GitExtension implements IGitExtension {
           }
         })
         .catch(reason => {
-          console.error(`Fail to find git top level for path ${v}.\n${reason}`);
+          console.error(`Fail to find Git top level for path ${v}.\n${reason}`);
         });
 
       void this._readyPromise.then(() => {
@@ -182,247 +183,273 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * A signal emitted when the current git repository changes.
+   * The Jupyter front-end application shell.
    */
-  get repositoryChanged(): ISignal<IGitExtension, IChangedArgs<string | null>> {
-    return this._repositoryChanged;
-  }
-
   get shell(): JupyterFrontEnd.IShell | null {
     return this._app ? this._app.shell : null;
   }
 
   /**
-   * Files list resulting of a git status call.
+   * A list of modified files.
+   *
+   * ## Notes
+   *
+   * -   The file list corresponds to the list of files from `git status`.
    */
   get status(): Git.IStatusFile[] {
     return this._status;
   }
 
   /**
-   * A signal emitted when the current status of the git repository changes.
+   * A signal emitted when the `HEAD` of the Git repository changes.
+   */
+  get headChanged(): ISignal<IGitExtension, void> {
+    return this._headChanged;
+  }
+
+  /**
+   * A signal emitted when the current marking of the Git repository changes.
+   */
+  get markChanged(): ISignal<IGitExtension, void> {
+    return this._markChanged;
+  }
+
+  /**
+   * A signal emitted when the current Git repository changes.
+   */
+  get repositoryChanged(): ISignal<IGitExtension, IChangedArgs<string | null>> {
+    return this._repositoryChanged;
+  }
+
+  /**
+   * A signal emitted when the current status of the Git repository changes.
    */
   get statusChanged(): ISignal<IGitExtension, Git.IStatusFile[]> {
     return this._statusChanged;
   }
 
   /**
-   * Make request to add one or all files into
-   * the staging area in repository
+   * A signal emitted whenever a model event occurs.
+   */
+  get logger(): ISignal<IGitExtension, string> {
+    return this._logger;
+  }
+
+  /**
+   * Add one or more files to the repository staging area.
    *
-   * If filename is not provided, all files will be added.
+   * ## Notes
    *
-   * @param filename Optional name of the files to add
+   * -   If no filename is provided, all files are added.
+   *
+   * @param filename - files to add
+   * @returns promise which resolves upon adding files to the repository staging area
    */
   async add(...filename: string[]): Promise<Response> {
+    let response;
+
     await this.ready;
+
     const path = this.pathRepository;
-
     if (path === null) {
-      return Promise.resolve(
-        new Response(
-          JSON.stringify({
-            code: -1,
-            message: 'Not in a git repository.'
-          })
-        )
-      );
+      response = {
+        code: -1,
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(new Response(JSON.stringify(response)));
     }
-
-    const response = await httpGitRequest('/git/add', 'POST', {
-      add_all: !filename,
-      filename: filename || '',
-      top_repo_path: path
-    });
-
+    const tid = this._addTask('git:add:files');
+    try {
+      response = await httpGitRequest('/git/add', 'POST', {
+        add_all: !filename,
+        filename: filename || '',
+        top_repo_path: path
+      });
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
+    }
+    if (!response.ok) {
+      const data = await response.json();
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
     this.refreshStatus();
     return Promise.resolve(response);
   }
 
   /**
-   * Make request to add all unstaged files into
-   * the staging area in repository 'path'
+   * Add all "unstaged" files to the repository staging area.
+   *
+   * @returns promise which resolves upon adding files to the repository staging area
    */
   async addAllUnstaged(): Promise<Response> {
+    let response;
+
     await this.ready;
+
     const path = this.pathRepository;
-
     if (path === null) {
-      return Promise.resolve(
-        new Response(
-          JSON.stringify({
-            code: -1,
-            message: 'Not in a git repository.'
-          })
-        )
-      );
+      response = {
+        code: -1,
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(new Response(JSON.stringify(response)));
     }
-
+    const tid = this._addTask('git:add:files:all_unstaged');
     try {
-      const response = await httpGitRequest('/git/add_all_unstaged', 'POST', {
+      response = await httpGitRequest('/git/add_all_unstaged', 'POST', {
         top_repo_path: path
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-
-      this.refreshStatus();
-      return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    this.refreshStatus();
+    return data;
   }
 
   /**
-   * Make request to add all untracked files into
-   * the staging area in the repository
+   * Add all untracked files to the repository staging area.
+   *
+   * @returns promise which resolves upon adding files to the repository staging area
    */
   async addAllUntracked(): Promise<Response> {
+    let response;
+
     await this.ready;
+
     const path = this.pathRepository;
-
     if (path === null) {
-      return Promise.resolve(
-        new Response(
-          JSON.stringify({
-            code: -1,
-            message: 'Not in a git repository.'
-          })
-        )
-      );
+      response = {
+        code: -1,
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(new Response(JSON.stringify(response)));
     }
-
+    const tid = this._addTask('git:add:files:all_untracked');
     try {
-      const response = await httpGitRequest('/git/add_all_untracked', 'POST', {
+      response = await httpGitRequest('/git/add_all_untracked', 'POST', {
         top_repo_path: path
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-
-      this.refreshStatus();
-      return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    this.refreshStatus();
+    return data;
   }
 
   /**
-   * Add file named fname to current marker obj
+   * Add a remote Git repository to the current repository.
    *
-   * @param fname Filename
-   * @param mark Mark to set
-   */
-  addMark(fname: string, mark: boolean) {
-    this._currentMarker.add(fname, mark);
-  }
-
-  /**
-   * get current mark of fname
-   *
-   * @param fname Filename
-   * @returns Mark of the file
-   */
-  getMark(fname: string): boolean {
-    return this._currentMarker.get(fname);
-  }
-
-  /**
-   * Toggle mark for file named fname in current marker obj
-   *
-   * @param fname Filename
-   */
-  toggleMark(fname: string) {
-    this._currentMarker.toggle(fname);
-  }
-
-  /**
-   * Add a remote Git repository to the current repository
-   *
-   * @param url Remote repository URL
-   * @param name Remote name
+   * @param url - remote repository URL
+   * @param name - remote name
+   * @returns promise which resolves upon adding a remote
    */
   async addRemote(url: string, name?: string): Promise<void> {
-    await this.ready;
-    const path = this.pathRepository;
+    let response;
 
+    await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve();
     }
-
+    const tid = this._addTask('git:add:remote');
     try {
-      const response = await httpGitRequest('/git/remote/add', 'POST', {
+      response = await httpGitRequest('/git/remote/add', 'POST', {
         top_repo_path: path,
         url,
         name
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
+    }
+    if (!response.ok) {
+      const data = await response.text();
+      throw new ServerConnection.ResponseError(response, data);
     }
   }
 
   /**
-   * Make request for all git info of the repository
-   * (This API is also implicitly used to check if the current repo is a Git repo)
+   * Retrieve the repository commit log.
    *
-   * @param historyCount: Optional number of commits to get from git log
-   * @returns Repository history
+   * ## Notes
+   *
+   * -  This API can be used to implicitly check if the current folder is a Git repository.
+   *
+   * @param count - number of commits to retrieve
+   * @returns promise which resolves upon retrieving the repository commit log
    */
-  async allHistory(historyCount = 25): Promise<Git.IAllHistory> {
-    await this.ready;
-    const path = this.pathRepository;
+  async allHistory(count = 25): Promise<Git.IAllHistory> {
+    let response;
 
+    await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
-        message: 'Not in a git repository.'
+        message: 'Not in a Git repository.'
       });
     }
-
+    const tid = this._addTask('git:fetch:history');
     try {
-      const response = await httpGitRequest('/git/all_history', 'POST', {
+      response = await httpGitRequest('/git/all_history', 'POST', {
         current_path: path,
-        history_count: historyCount
+        history_count: count
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    if (!response.ok) {
+      const data = await response.text();
+      throw new ServerConnection.ResponseError(response, data);
+    }
+    return response.json();
   }
 
   /**
-   * Make request to switch current working branch,
-   * create new branch if needed,
-   * or discard a specific file change or all changes
-   * TODO: Refactor into seperate endpoints for each kind of checkout request
+   * Checkout a branch.
    *
-   * If a branch name is provided, check it out (with or without creating it)
-   * If a filename is provided, check the file out
-   * If nothing is provided, check all files out
+   * ## Notes
    *
-   * @param options Checkout options
+   * -   If a branch name is provided, checkout the provided branch (with or without creating it)
+   * -   If a filename is provided, checkout the file, discarding all changes.
+   * -   If nothing is provided, checkout all files, discarding all changes.
+   *
+   * TODO: Refactor into separate endpoints for each kind of checkout request
+   *
+   * @param options - checkout options
+   * @returns promise which resolves upon performing a checkout
    */
   async checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult> {
-    await this.ready;
-    const path = this.pathRepository;
+    let response;
 
+    await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
-        message: 'Not in a git repository.'
+        message: 'Not in a Git repository.'
       });
     }
-
     const body = {
       checkout_branch: false,
       new_check: false,
@@ -432,7 +459,6 @@ export class GitExtension implements IGitExtension {
       filename: '',
       top_repo_path: path
     };
-
     if (options !== undefined) {
       if (options.branchname) {
         body.branchname = options.branchname;
@@ -446,285 +472,596 @@ export class GitExtension implements IGitExtension {
         body.checkout_all = false;
       }
     }
-
+    const tid = this._addTask('git:checkout');
     try {
-      const response = await httpGitRequest('/git/checkout', 'POST', body);
-      if (!response.ok) {
-        return response.json().then((data: any) => {
-          throw new ServerConnection.ResponseError(response, data.message);
-        });
-      }
-
-      if (body.checkout_branch) {
-        await this.refreshBranch();
-        this._headChanged.emit();
-      } else {
-        this.refreshStatus();
-      }
-      return response.json();
+      response = await httpGitRequest('/git/checkout', 'POST', body);
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    if (body.checkout_branch) {
+      await this.refreshBranch();
+      this._headChanged.emit();
+    } else {
+      this.refreshStatus();
+    }
+    return data;
   }
 
   /**
-   * Make request for the Git Clone API.
+   * Clone a repository.
    *
-   * @param path Local path in which the repository will be cloned
-   * @param url Distant Git repository URL
-   * @param auth Optional authentication information for the remote repository
+   * @param path - local path into which the repository will be cloned
+   * @param url - Git repository URL
+   * @param auth - remote repository authentication information
+   * @returns promise which resolves upon cloning a repository
    */
   async clone(
     path: string,
     url: string,
     auth?: Git.IAuth
   ): Promise<Git.ICloneResult> {
-    try {
-      const obj: Git.IGitClone = {
-        current_path: path,
-        clone_url: url,
-        auth
-      };
+    let response;
 
-      const response = await httpGitRequest('/git/clone', 'POST', obj);
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      return response.json();
+    const obj: Git.IGitClone = {
+      current_path: path,
+      clone_url: url,
+      auth
+    };
+    const tid = this._addTask('git:clone');
+    try {
+      response = await httpGitRequest('/git/clone', 'POST', obj);
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return data;
   }
 
   /**
-   * Make request to commit all staged files in repository
+   * Commit all staged file changes.
    *
-   * @param message Commit message
+   * @param message - commit message
+   * @returns promise which resolves upon committing file changes
    */
   async commit(message: string): Promise<Response> {
+    let response;
+
     await this.ready;
+
     const path = this.pathRepository;
-
     if (path === null) {
-      return Promise.resolve(
-        new Response(
-          JSON.stringify({
-            code: -1,
-            message: 'Not in a git repository.'
-          })
-        )
-      );
+      response = {
+        code: -1,
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(new Response(JSON.stringify(response)));
     }
-
+    const tid = this._addTask('git:commit:create');
     try {
-      const response = await httpGitRequest('/git/commit', 'POST', {
+      response = await httpGitRequest('/git/commit', 'POST', {
         commit_msg: message,
         top_repo_path: path
       });
-      if (!response.ok) {
-        return response.json().then((data: any) => {
-          throw new ServerConnection.ResponseError(response, data.message);
-        });
-      }
-
-      this.refreshStatus();
-      this._headChanged.emit();
-
-      return response;
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    if (!response.ok) {
+      const data = await response.json();
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    this.refreshStatus();
+    this._headChanged.emit();
+    return response;
   }
 
   /**
-   * Get or set Git configuration options
+   * Get (or set) Git configuration options.
    *
-   * @param options Configuration options to set (undefined to get)
+   * @param options - configuration options to set
+   * @returns promise which resolves upon either getting or setting configuration options
    */
   async config(options?: JSONObject): Promise<Response> {
+    let response;
+
     await this.ready;
+
     const path = this.pathRepository;
-
     if (path === null) {
-      return Promise.resolve(
-        new Response(
-          JSON.stringify({
-            code: -1,
-            message: 'Not in a git repository.'
-          })
-        )
-      );
+      response = {
+        code: -1,
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(new Response(JSON.stringify(response)));
     }
-
+    const tid = this._addTask('git:config:' + (options ? 'set' : 'get'));
     try {
-      const method = 'POST';
-      const body = { path, options };
-
-      const response = await httpGitRequest('/git/config', method, body);
-
-      if (!response.ok) {
-        const jsonData = await response.json();
-        throw new ServerConnection.ResponseError(response, jsonData.message);
-      }
-
-      return response;
+      response = await httpGitRequest('/git/config', 'POST', {
+        path,
+        options
+      });
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    if (!response.ok) {
+      const data = await response.json();
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return response;
   }
 
   /**
-   * Make request to revert changes from selected commit
+   * Revert changes made after a specified commit.
    *
-   * @param message Commit message to use for the new repository state
-   * @param commitId Selected commit ID
+   * @param message - commit message
+   * @param hash - commit identifier (hash)
+   * @returns promise which resolves upon reverting changes
    */
-  async revertCommit(message: string, commitId: string): Promise<Response> {
+  async revertCommit(message: string, hash: string): Promise<Response> {
+    let response;
+
     await this.ready;
+
     const path = this.pathRepository;
-
     if (path === null) {
-      return Promise.resolve(
-        new Response(
-          JSON.stringify({
-            code: -1,
-            message: 'Not in a git repository.'
-          })
-        )
-      );
+      response = {
+        code: -1,
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(new Response(JSON.stringify(response)));
     }
-
+    const tid = this._addTask('git:commit:revert');
     try {
-      const response = await httpGitRequest('/git/delete_commit', 'POST', {
-        commit_id: commitId,
+      response = await httpGitRequest('/git/delete_commit', 'POST', {
+        commit_id: hash,
         top_repo_path: path
       });
-      if (!response.ok) {
-        return response.json().then((data: any) => {
-          throw new ServerConnection.ResponseError(response, data.message);
-        });
-      }
-      await this.commit(message);
-      return response;
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    if (!response.ok) {
+      const data = await response.json();
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    await this.commit(message);
+    return response;
   }
 
   /**
-   * Make request for detailed git commit info of
-   * commit 'hash'
+   * Fetch commit information.
    *
-   * @param hash Commit hash
+   * @param hash - commit hash
+   * @returns promise which resolves upon retrieving commit information
    */
   async detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo> {
-    await this.ready;
-    const path = this.pathRepository;
+    let response;
 
+    await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
-        message: 'Not in a git repository.'
+        message: 'Not in a Git repository.'
       });
     }
-
+    const tid = this._addTask('git:fetch:commit_log');
     try {
-      const response = await httpGitRequest('/git/detailed_log', 'POST', {
+      response = await httpGitRequest('/git/detailed_log', 'POST', {
         selected_hash: hash,
         current_path: path
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return data;
   }
 
   /**
-   * Dispose of the resources held by the model.
+   * Initialize a new Git repository at a specified path.
+   *
+   * @param path - path at which initialize a Git repository
+   * @returns promise which resolves upon initializing a Git repository
    */
-  dispose(): void {
-    if (this.isDisposed) {
+  async init(path: string): Promise<Response> {
+    let response;
+
+    const tid = this._addTask('git:init');
+    try {
+      response = await httpGitRequest('/git/init', 'POST', {
+        current_path: path
+      });
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
+    }
+    if (!response.ok) {
+      const data = await response.json();
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return response;
+  }
+
+  /**
+   * Retrieve commit logs.
+   *
+   * @param count - number of commits
+   * @returns promise which resolves upon retrieving commit logs
+   */
+  async log(count = 25): Promise<Git.ILogResult> {
+    let response;
+
+    await this.ready;
+
+    const path = this.pathRepository;
+    if (path === null) {
+      return Promise.resolve({
+        code: -1,
+        message: 'Not in a Git repository.'
+      });
+    }
+    const tid = this._addTask('git:fetch:log');
+    try {
+      response = await httpGitRequest('/git/log', 'POST', {
+        current_path: path,
+        history_count: count
+      });
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
+    }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return data;
+  }
+
+  /**
+   * Fetch changes from a remote repository.
+   *
+   * @param auth - remote authentication information
+   * @returns promise which resolves upon fetching changes
+   */
+  async pull(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
+    let response;
+
+    await this.ready;
+
+    const path = this.pathRepository;
+    if (path === null) {
+      return Promise.resolve({
+        code: -1,
+        message: 'Not in a Git repository.'
+      });
+    }
+    const obj: Git.IPushPull = {
+      current_path: path,
+      auth,
+      cancel_on_conflict: this._settings
+        ? (this._settings.composite['cancelPullMergeConflict'] as boolean)
+        : false
+    };
+    const tid = this._addTask('git:pull');
+    try {
+      response = await httpGitRequest('/git/pull', 'POST', obj);
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
+    }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    this._headChanged.emit();
+    return data;
+  }
+
+  /**
+   * Push local changes to a remote repository.
+   *
+   * @param auth - remote authentication information
+   * @returns promise which resolves upon pushing changes
+   */
+  async push(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
+    let response;
+
+    await this.ready;
+
+    const path = this.pathRepository;
+    if (path === null) {
+      return Promise.resolve({
+        code: -1,
+        message: 'Not in a Git repository.'
+      });
+    }
+    const obj: Git.IPushPull = {
+      current_path: path,
+      auth
+    };
+    const tid = this._addTask('git:push');
+    try {
+      response = await httpGitRequest('/git/push', 'POST', obj);
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
+    }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    this._headChanged.emit();
+    return data;
+  }
+
+  /**
+   * Refresh the repository.
+   *
+   * @returns promise which resolves upon refreshing the repository
+   */
+  async refresh(): Promise<void> {
+    const tid = this._addTask('git:refresh');
+    await this.refreshBranch();
+    await this.refreshStatus();
+    this._removeTask(tid);
+  }
+
+  /**
+   * Refresh the list of repository branches.
+   *
+   * @returns promise which resolves upon refreshing repository branches
+   */
+  async refreshBranch(): Promise<void> {
+    const tid = this._addTask('git:refresh:branches');
+    const response = await this._branch();
+    if (response.code === 0) {
+      this._branches = response.branches;
+      this._currentBranch = response.current_branch;
+      if (this._currentBranch) {
+        // Set up the marker obj for the current (valid) repo/branch combination
+        this._setMarker(this.pathRepository, this._currentBranch.name);
+      }
+    } else {
+      this._branches = [];
+      this._currentBranch = null;
+    }
+    this._removeTask(tid);
+  }
+
+  /**
+   * Refresh the repository status.
+   *
+   * @returns promise which resolves upon refreshing the repository status
+   */
+  async refreshStatus(): Promise<void> {
+    let response;
+
+    await this.ready;
+
+    const path = this.pathRepository;
+    if (path === null) {
+      this._setStatus([]);
+      return Promise.resolve();
+    }
+    const tid = this._addTask('git:refresh:status');
+    try {
+      response = await httpGitRequest('/git/status', 'POST', {
+        current_path: path
+      });
+    } catch (err) {
+      // TODO we should notify the user
+      this._setStatus([]);
+      console.error(err);
+      return;
+    } finally {
+      this._removeTask(tid);
+    }
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.message);
+
+      // TODO we should notify the user
+      this._setStatus([]);
       return;
     }
-    this._isDisposed = true;
-    this._poll.dispose();
-    Signal.clearData(this);
-  }
-
-  /**
-   * Gets the path of the file relative to the Jupyter server root.
-   *
-   * If no path is provided, returns the Git repository top folder relative path.
-   * If no Git repository selected, return null
-   *
-   * @param path the file path relative to Git repository top folder
-   */
-  getRelativeFilePath(path?: string): string | null {
-    if (this.pathRepository === null || this._serverRoot === undefined) {
-      return null;
-    }
-
-    return PathExt.join(
-      PathExt.relative(this._serverRoot, this.pathRepository),
-      path || ''
+    this._setStatus(
+      (data as Git.IStatusResult).files.map(file => {
+        return { ...file, status: decodeStage(file.x, file.y) };
+      })
     );
   }
 
   /**
-   * Make request to initialize a  new git repository at path 'path'
+   * Move files from the "staged" to the "unstaged" area.
    *
-   * @param path Folder path to initialize as a git repository.
+   * ## Notes
+   *
+   * -  If no filename is provided, moves all files from the "staged" to the "unstaged" area.
+   *
+   * @param filename - file path to be reset
+   * @returns promise which resolves upon moving files
    */
-  async init(path: string): Promise<Response> {
+  async reset(filename?: string): Promise<Response> {
+    let response;
+
+    await this.ready;
+
+    const path = this.pathRepository;
+    if (path === null) {
+      response = {
+        code: -1,
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(new Response(JSON.stringify(response)));
+    }
+    const tid = this._addTask('git:reset:changes');
     try {
-      const response = await httpGitRequest('/git/init', 'POST', {
-        current_path: path
+      response = await httpGitRequest('/git/reset', 'POST', {
+        reset_all: filename === undefined,
+        filename: filename === undefined ? null : filename,
+        top_repo_path: path
       });
-      if (!response.ok) {
-        return response.json().then((data: any) => {
-          throw new ServerConnection.ResponseError(response, data.message);
-        });
-      }
-      return response;
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    if (!response.ok) {
+      const data = await response.json();
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    this.refreshStatus();
+    return response;
   }
 
   /**
-   * Make request for git commit logs
+   * Reset the repository to a specified commit.
    *
-   * @param historyCount: Optional number of commits to get from git log
+   * ## Notes
+   *
+   * -   If a commit hash is not provided, resets the repository to `HEAD`.
+   *
+   * @param hash - commit identifier (hash)
+   * @returns promises which resolves upon resetting the repository
    */
-  async log(historyCount = 25): Promise<Git.ILogResult> {
+  async resetToCommit(hash = ''): Promise<Response> {
+    let response;
+
     await this.ready;
+
     const path = this.pathRepository;
-
     if (path === null) {
-      return Promise.resolve({
+      response = {
         code: -1,
-        message: 'Not in a git repository.'
-      });
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(new Response(JSON.stringify(response)));
     }
-
+    const tid = this._addTask('git:reset:hard');
     try {
-      const response = await httpGitRequest('/git/log', 'POST', {
-        current_path: path,
-        history_count: historyCount
+      response = await httpGitRequest('/git/reset_to_commit', 'POST', {
+        commit_id: hash,
+        top_repo_path: path
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    if (!response.ok) {
+      const data = await response.json();
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    await this.refreshBranch();
+    this._headChanged.emit();
+    return response;
+  }
+
+  /**
+   * Retrieve the prefix path of a directory `path` with respect to the root repository directory.
+   *
+   * @param path - directory path
+   * @returns promise which resolves upon retrieving the prefix path
+   */
+  async showPrefix(path: string): Promise<Git.IShowPrefixResult> {
+    let response;
+
+    const tid = this._addTask('git:fetch:prefix_path');
+    try {
+      response = await httpGitRequest('/git/show_prefix', 'POST', {
+        current_path: path
+      });
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
+    }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return data;
+  }
+
+  /**
+   * Retrieve the top level repository path.
+   *
+   * @param path - current path
+   * @returns promise which resolves upon retrieving the top level repository path
+   */
+  async showTopLevel(path: string): Promise<Git.IShowTopLevelResult> {
+    let response;
+
+    const tid = this._addTask('git:fetch:top_level_path');
+    try {
+      response = await httpGitRequest('/git/show_top_level', 'POST', {
+        current_path: path
+      });
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
+    }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return data;
+  }
+
+  /**
+   * Add a file to the current marker object.
+   *
+   * @param fname - filename
+   * @param mark - mark to set
+   */
+  addMark(fname: string, mark: boolean) {
+    this._currentMarker.add(fname, mark);
+  }
+
+  /**
+   * Return the current mark associated with a specified filename.
+   *
+   * @param fname - filename
+   * @returns mark
+   */
+  getMark(fname: string): boolean {
+    return this._currentMarker.get(fname);
+  }
+
+  /**
+   * Toggle the mark for a file in the current marker object
+   *
+   * @param fname - filename
+   */
+  toggleMark(fname: string) {
+    this._currentMarker.toggle(fname);
   }
 
   /**
@@ -739,317 +1076,178 @@ export class GitExtension implements IGitExtension {
     });
   }
 
-  /** Make request for the Git Pull API. */
-  async pull(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
-    await this.ready;
-    const path = this.pathRepository;
-
-    if (path === null) {
-      return Promise.resolve({
-        code: -1,
-        message: 'Not in a git repository.'
-      });
-    }
-
-    try {
-      const obj: Git.IPushPull = {
-        current_path: path,
-        auth,
-        cancel_on_conflict: this._settings
-          ? (this._settings.composite['cancelPullMergeConflict'] as boolean)
-          : false
-      };
-
-      const response = await httpGitRequest('/git/pull', 'POST', obj);
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-
-      this._headChanged.emit();
-
-      return response.json();
-    } catch (err) {
-      throw new ServerConnection.NetworkError(err);
-    }
-  }
-
-  /** Make request for the Git Push API. */
-  async push(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
-    await this.ready;
-    const path = this.pathRepository;
-
-    if (path === null) {
-      return Promise.resolve({
-        code: -1,
-        message: 'Not in a git repository.'
-      });
-    }
-
-    try {
-      const obj: Git.IPushPull = {
-        current_path: path,
-        auth
-      };
-
-      const response = await httpGitRequest('/git/push', 'POST', obj);
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      this._headChanged.emit();
-      return response.json();
-    } catch (err) {
-      throw new ServerConnection.NetworkError(err);
-    }
-  }
-
   /**
-   * General Git refresh
-   */
-  async refresh(): Promise<void> {
-    await this.refreshBranch();
-    await this.refreshStatus();
-  }
-
-  /**
-   * Make request for a list of all Git branches
-   */
-  async refreshBranch(): Promise<void> {
-    const response = await this._branch();
-
-    if (response.code === 0) {
-      this._branches = response.branches;
-      this._currentBranch = response.current_branch;
-
-      if (this._currentBranch) {
-        // set up the marker obj for the current (valid) repo/branch combination
-        this._setMarker(this.pathRepository, this._currentBranch.name);
-      }
-    } else {
-      this._branches = [];
-      this._currentBranch = null;
-    }
-  }
-
-  /**
-   * Request Git status refresh
-   */
-  async refreshStatus(): Promise<void> {
-    await this.ready;
-    const path = this.pathRepository;
-
-    if (path === null) {
-      this._setStatus([]);
-      return Promise.resolve();
-    }
-
-    try {
-      const response = await httpGitRequest('/git/status', 'POST', {
-        current_path: path
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        console.error(data.message);
-        // TODO should we notify the user
-        this._setStatus([]);
-      }
-
-      this._setStatus(
-        (data as Git.IStatusResult).files.map(file => {
-          return { ...file, status: decodeStage(file.x, file.y) };
-        })
-      );
-    } catch (err) {
-      console.error(err);
-      // TODO should we notify the user
-      this._setStatus([]);
-    }
-  }
-
-  /**
-   * Make request to move one or all files from the staged to the unstaged area
+   * Return the path of a file relative to the Jupyter server root.
    *
-   * @param filename - Path to a file to be reset. Leave blank to reset all
+   * ## Notes
    *
-   * @returns a promise that resolves when the request is complete.
+   * -   If no path is provided, returns the Git repository top folder relative path.
+   * -   If no Git repository selected, returns `null`
+   *
+   * @param path - file path relative to the top folder of the Git repository
+   * @returns relative path
    */
-  async reset(filename?: string): Promise<Response> {
-    await this.ready;
-    const path = this.pathRepository;
-
-    if (path === null) {
-      return Promise.resolve(
-        new Response(
-          JSON.stringify({
-            code: -1,
-            message: 'Not in a git repository.'
-          })
-        )
-      );
+  getRelativeFilePath(path?: string): string | null {
+    if (this.pathRepository === null || this._serverRoot === void 0) {
+      return null;
     }
-
-    try {
-      const response = await httpGitRequest('/git/reset', 'POST', {
-        reset_all: filename === undefined,
-        filename: filename === undefined ? null : filename,
-        top_repo_path: path
-      });
-      if (!response.ok) {
-        return response.json().then((data: any) => {
-          throw new ServerConnection.ResponseError(response, data.message);
-        });
-      }
-
-      this.refreshStatus();
-      return response;
-    } catch (err) {
-      throw new ServerConnection.NetworkError(err);
-    }
+    return PathExt.join(
+      PathExt.relative(this._serverRoot, this.pathRepository),
+      path || ''
+    );
   }
 
   /**
-   * Make request to reset to selected commit
-   *
-   * @param commitId - Git commit specification. Leave blank to reset to HEAD
-   *
-   * @returns a promise that resolves when the request is complete.
+   * Dispose of model resources.
    */
-  async resetToCommit(commitId = ''): Promise<Response> {
-    await this.ready;
-    const path = this.pathRepository;
-
-    if (path === null) {
-      return Promise.resolve(
-        new Response(
-          JSON.stringify({
-            code: -1,
-            message: 'Not in a git repository.'
-          })
-        )
-      );
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
     }
-
-    try {
-      const response = await httpGitRequest('/git/reset_to_commit', 'POST', {
-        commit_id: commitId,
-        top_repo_path: path
-      });
-      if (!response.ok) {
-        return response.json().then((data: any) => {
-          throw new ServerConnection.ResponseError(response, data.message);
-        });
-      }
-      await this.refreshBranch();
-      this._headChanged.emit();
-      return response;
-    } catch (err) {
-      throw new ServerConnection.NetworkError(err);
-    }
-  }
-
-  /** Make request for the prefix path of a directory 'path',
-   * with respect to the root directory of repository
-   */
-  async showPrefix(path: string): Promise<Git.IShowPrefixResult> {
-    try {
-      const response = await httpGitRequest('/git/show_prefix', 'POST', {
-        current_path: path
-      });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      return response.json();
-    } catch (err) {
-      throw new ServerConnection.NetworkError(err);
-    }
-  }
-
-  /** Make request for top level path of repository 'path' */
-  async showTopLevel(path: string): Promise<Git.IShowTopLevelResult> {
-    try {
-      const response = await httpGitRequest('/git/show_top_level', 'POST', {
-        current_path: path
-      });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      return response.json();
-    } catch (err) {
-      throw new ServerConnection.NetworkError(err);
-    }
+    this._isDisposed = true;
+    this._poll.dispose();
+    Signal.clearData(this);
   }
 
   /**
-   * Make request for a list of all git branches in the repository
+   * Retrieve a list of repository branches.
    *
-   * @returns The repository branches
+   * @returns promise which resolves upon fetching repository branches
    */
   protected async _branch(): Promise<Git.IBranchResult> {
-    await this.ready;
-    const path = this.pathRepository;
+    let response;
 
+    await this.ready;
+
+    const path = this.pathRepository;
     if (path === null) {
       return Promise.resolve({
         code: -1,
-        message: 'Not in a git repository.'
+        message: 'Not in a Git repository.'
       });
     }
-
+    const tid = this._addTask('git:fetch:branches');
     try {
-      const response = await httpGitRequest('/git/branch', 'POST', {
+      response = await httpGitRequest('/git/branch', 'POST', {
         current_path: path
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return data;
   }
 
   /**
-   * Set repository status
+   * Set the repository status.
    *
-   * @param v Repository status
+   * @param v - repository status
    */
   protected _setStatus(v: Git.IStatusFile[]) {
     this._status = v;
     this._statusChanged.emit(this._status);
   }
 
+  /**
+   * Retrieve the path of the root server directory.
+   *
+   * @returns promise which resolves upon retrieving the root server path
+   */
   private async _getServerRoot(): Promise<string> {
+    let response;
     try {
-      const response = await httpGitRequest('/git/server_root', 'GET', null);
-      if (response.status === 404) {
-        throw new ServerConnection.ResponseError(
-          response,
-          'Git server extension is unavailable. Please ensure you have installed the ' +
-            'JupyterLab Git server extension by running: pip install --upgrade jupyterlab-git. ' +
-            'To confirm that the server extension is installed, run: jupyter serverextension list.'
-        );
-      }
-      const data = await response.json();
-      return data['server_root'];
-    } catch (error) {
-      if (error instanceof ServerConnection.ResponseError) {
-        throw error;
-      } else {
-        throw new Error(error);
-      }
+      response = await httpGitRequest('/git/server_root', 'GET', null);
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
     }
+    if (response.status === 404) {
+      throw new ServerConnection.ResponseError(
+        response,
+        'Git server extension is unavailable. Please ensure you have installed the ' +
+          'JupyterLab Git server extension by running: pip install --upgrade jupyterlab-git. ' +
+          'To confirm that the server extension is installed, run: jupyter serverextension list.'
+      );
+    }
+    const data = await response.json();
+    return data['server_root'];
   }
 
   /**
-   * set marker obj for repo path/branch combination
+   * Set the marker object for a repository path and branch.
+   *
+   * @returns branch marker
    */
   private _setMarker(path: string, branch: string): BranchMarker {
     this._currentMarker = this._markerCache.get(path, branch);
     return this._currentMarker;
+  }
+
+  /**
+   * Adds a task to the list of pending model tasks.
+   *
+   * @param task - task name
+   * @returns task identifier
+   */
+  private _addTask(task: string): number {
+    // Generate a unique task identifier:
+    const id = this._generateTaskID();
+
+    // Add the task to our list of pending tasks:
+    this._taskList.addLast({
+      id: id,
+      task: task
+    });
+
+    // If this task is the only task, broadcast the task...
+    if (this._taskList.length === 1) {
+      this._logger.emit(task);
+    }
+    // Return the task identifier to allow consumers to remove the task once completed:
+    return id;
+  }
+
+  /**
+   * Removes a task from the list of pending model tasks.
+   *
+   * @param id - task identifier
+   */
+  private _removeTask(task: number): void {
+    let node = this._taskList.firstNode;
+
+    // Check the first node...
+    if (node && node.value.id === task) {
+      this._taskList.removeNode(node);
+    } else {
+      // Walk the task list looking for a task with the provided identifier...
+      while (node.next) {
+        node = node.next;
+        if (node.value && node.value.id === task) {
+          this._taskList.removeNode(node);
+          break;
+        }
+      }
+    }
+    // Check for pending tasks and broadcast the oldest pending task...
+    if (this._taskList.length === 0) {
+      this._logger.emit('git:idle');
+    } else {
+      this._logger.emit(this._taskList.first.task);
+    }
+  }
+
+  /**
+   * Generates a unique task identifier.
+   *
+   * @returns task identifier
+   */
+  private _generateTaskID(): number {
+    this._taskID += 1;
+    return this._taskID;
   }
 
   private _status: Git.IStatusFile[] = [];
@@ -1065,6 +1263,8 @@ export class GitExtension implements IGitExtension {
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
+  private _taskList: LinkedList<any> = new LinkedList();
+  private _taskID = 0;
   private _settings: ISettingRegistry.ISettings | null;
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
@@ -1073,6 +1273,7 @@ export class GitExtension implements IGitExtension {
     IChangedArgs<string | null>
   >(this);
   private _statusChanged = new Signal<IGitExtension, Git.IStatusFile[]>(this);
+  private _logger = new Signal<IGitExtension, string>(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {

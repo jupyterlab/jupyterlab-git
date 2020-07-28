@@ -2,7 +2,7 @@ import * as apputils from '@jupyterlab/apputils';
 import 'jest';
 import { GitExtension as GitModel } from '../../src/model';
 import * as git from '../../src/git';
-import { GitPanel, IGitSessionNodeProps } from '../../src/components/GitPanel';
+import { GitPanel, IGitPanelProps } from '../../src/components/GitPanel';
 
 jest.mock('../../src/git');
 jest.mock('@jupyterlab/apputils');
@@ -76,7 +76,7 @@ function MockSettings() {
 
 describe('GitPanel', () => {
   describe('#commitStagedFiles()', () => {
-    const props: IGitSessionNodeProps = {
+    const props: IGitPanelProps = {
       model: null,
       renderMime: null,
       settings: null,

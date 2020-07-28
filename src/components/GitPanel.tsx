@@ -6,7 +6,7 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import { JSONObject } from '@phosphor/coreutils';
 import * as React from 'react';
-import { CommandIDs } from '../gitMenuCommands';
+import { CommandIDs } from '../commandsAndMenu';
 import { GitExtension } from '../model';
 import {
   panelWrapperClass,
@@ -17,37 +17,102 @@ import {
   tabsClass,
   warningTextClass
 } from '../style/GitPanel';
-import { Git } from '../tokens';
+import { Git, ILogMessage } from '../tokens';
+import { sleep } from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
+import { Alert } from './Alert';
 import { CommitBox } from './CommitBox';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
+import { SuspendModal } from './SuspendModal';
 import { Toolbar } from './Toolbar';
 
-/** Interface for GitPanel component state */
-export interface IGitSessionNodeState {
-  branches: Git.IBranch[];
-  currentBranch: string;
-  files: Git.IStatusFile[];
-  inGitRepository: boolean;
-  pastCommits: Git.ISingleCommitInfo[];
-  tab: number;
-}
-
-/** Interface for GitPanel component props */
-export interface IGitSessionNodeProps {
+/**
+ * Interface describing component properties.
+ */
+export interface IGitPanelProps {
+  /**
+   * Git extension data model.
+   */
   model: GitExtension;
+
+  /**
+   * MIME type registry.
+   */
   renderMime: IRenderMimeRegistry;
+
+  /**
+   * Git extension settings.
+   */
   settings: ISettingRegistry.ISettings;
+
+  /**
+   * File browser model.
+   */
   filebrowser: FileBrowserModel;
 }
 
-/** A React component for the git extension's main display */
-export class GitPanel extends React.Component<
-  IGitSessionNodeProps,
-  IGitSessionNodeState
-> {
-  constructor(props: IGitSessionNodeProps) {
+/**
+ * Interface describing component state.
+ */
+export interface IGitPanelState {
+  /**
+   * Boolean indicating whether the user is currently in a Git repository.
+   */
+  inGitRepository: boolean;
+
+  /**
+   * List of branches.
+   */
+  branches: Git.IBranch[];
+
+  /**
+   * Current branch.
+   */
+  currentBranch: string;
+
+  /**
+   * List of changed files.
+   */
+  files: Git.IStatusFile[];
+
+  /**
+   * List of prior commits.
+   */
+  pastCommits: Git.ISingleCommitInfo[];
+
+  /**
+   * Panel tab identifier.
+   */
+  tab: number;
+
+  /**
+   * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
+   */
+  suspend: boolean;
+
+  /**
+   * Boolean indicating whether to show an alert.
+   */
+  alert: boolean;
+
+  /**
+   * Log message.
+   */
+  log: ILogMessage;
+}
+
+/**
+ * React component for rendering a panel for performing Git operations.
+ */
+export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
+  /**
+   * Returns a React component for rendering a panel for performing Git operations.
+   *
+   * @param props - component properties
+   * @returns React component
+   */
+  constructor(props: IGitPanelProps) {
     super(props);
     this.state = {
       branches: [],
@@ -55,10 +120,19 @@ export class GitPanel extends React.Component<
       files: [],
       inGitRepository: false,
       pastCommits: [],
-      tab: 0
+      tab: 0,
+      suspend: false,
+      alert: false,
+      log: {
+        severity: 'info',
+        message: ''
+      }
     };
   }
 
+  /**
+   * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
+   */
   componentDidMount() {
     const { model, settings } = this.props;
 
@@ -132,9 +206,17 @@ export class GitPanel extends React.Component<
    * @returns a promise which commits the files
    */
   commitMarkedFiles = async (message: string): Promise<void> => {
+    this._suspend(true);
+
+    this._log({
+      severity: 'info',
+      message: 'Staging files...'
+    });
     await this.props.model.reset();
     await this.props.model.add(...this._markedFiles.map(file => file.to));
+
     await this.commitStagedFiles(message);
+    this._suspend(false);
   };
 
   /**
@@ -144,18 +226,50 @@ export class GitPanel extends React.Component<
    * @returns a promise which commits the files
    */
   commitStagedFiles = async (message: string): Promise<void> => {
-    try {
-      if (
-        message &&
-        message !== '' &&
-        (await this._hasIdentity(this.props.model.pathRepository))
-      ) {
-        await this.props.model.commit(message);
-      }
-    } catch (error) {
-      console.error(error);
-      showErrorMessage('Fail to commit', error);
+    let res: boolean;
+    if (!message) {
+      return;
     }
+    try {
+      res = await this._hasIdentity(this.props.model.pathRepository);
+    } catch (err) {
+      this._log({
+        severity: 'error',
+        message: 'Failed to commit changes.'
+      });
+      console.error(err);
+      showErrorMessage('Fail to commit', err);
+      return;
+    }
+    if (!res) {
+      this._log({
+        severity: 'error',
+        message: 'Failed to commit changes.'
+      });
+      return;
+    }
+    this._log({
+      severity: 'info',
+      message: 'Committing changes...'
+    });
+    this._suspend(true);
+    try {
+      await Promise.all([sleep(1000), this.props.model.commit(message)]);
+    } catch (err) {
+      this._suspend(false);
+      this._log({
+        severity: 'error',
+        message: 'Failed to commit changes.'
+      });
+      console.error(err);
+      showErrorMessage('Fail to commit', err);
+      return;
+    }
+    this._suspend(false);
+    this._log({
+      severity: 'success',
+      message: 'Committed changes.'
+    });
   };
 
   /**
@@ -170,6 +284,7 @@ export class GitPanel extends React.Component<
           <React.Fragment>
             {this._renderToolbar()}
             {this._renderMain()}
+            {this._renderFeedback()}
           </React.Fragment>
         ) : (
           this._renderWarning()
@@ -193,6 +308,9 @@ export class GitPanel extends React.Component<
         model={this.props.model}
         branching={!disableBranching}
         refresh={this._onRefresh}
+        suspend={
+          this.props.settings.composite['blockWhileCommandExecutes'] as boolean
+        }
       />
     );
   }
@@ -291,7 +409,35 @@ export class GitPanel extends React.Component<
         commits={this.state.pastCommits}
         model={this.props.model}
         renderMime={this.props.renderMime}
+        suspend={
+          this.props.settings.composite['blockWhileCommandExecutes'] as boolean
+        }
       />
+    );
+  }
+
+  /**
+   * Renders a component to provide UI feedback.
+   *
+   * @returns React element
+   */
+  private _renderFeedback(): React.ReactElement {
+    return (
+      <React.Fragment>
+        <SuspendModal
+          open={
+            this.props.settings.composite['blockWhileCommandExecutes'] &&
+            this.state.suspend
+          }
+          onClick={this._onFeedbackModalClick}
+        />
+        <Alert
+          open={this.state.alert}
+          message={this.state.log.message}
+          severity={this.state.log.severity}
+          onClose={this._onFeedbackAlertClose}
+        />
+      </React.Fragment>
     );
   }
 
@@ -344,6 +490,31 @@ export class GitPanel extends React.Component<
   }
 
   /**
+   * Sets the suspension state.
+   *
+   * @param bool - boolean indicating whether to suspend UI interaction
+   */
+  private _suspend(bool: boolean): void {
+    if (this.props.settings.composite['blockWhileCommandExecutes']) {
+      this.setState({
+        suspend: bool
+      });
+    }
+  }
+
+  /**
+   * Sets the current component log message.
+   *
+   * @param msg - log message
+   */
+  private _log(msg: ILogMessage): void {
+    this.setState({
+      alert: true,
+      log: msg
+    });
+  }
+
+  /**
    * Callback invoked upon changing the active panel tab.
    *
    * @param event - event object
@@ -370,6 +541,26 @@ export class GitPanel extends React.Component<
     } else {
       this.refreshStatus();
     }
+  };
+
+  /**
+   * Callback invoked upon clicking on the feedback modal.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackModalClick = (): void => {
+    this._suspend(false);
+  };
+
+  /**
+   * Callback invoked upon closing a feedback alert.
+   *
+   * @param event - event object
+   */
+  private _onFeedbackAlertClose = (): void => {
+    this.setState({
+      alert: false
+    });
   };
 
   /**

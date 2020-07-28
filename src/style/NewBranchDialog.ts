@@ -1,7 +1,7 @@
 import { style } from 'typestyle';
 
 export const branchDialogClass = style({
-  height: '460px',
+  minHeight: '460px',
   width: '400px',
 
   color: 'var(--jp-ui-font-color1)!important',
@@ -231,6 +231,10 @@ export const listItemTitleClass = style({});
 
 export const listItemBoldTitleClass = style({
   fontWeight: 700
+});
+
+export const errorMessageClass = style({
+  color: '#ff0000'
 });
 
 export const actionsWrapperClass = style({

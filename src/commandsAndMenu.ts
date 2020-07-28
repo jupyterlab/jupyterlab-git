@@ -9,10 +9,23 @@ import {
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
 import { ITerminal } from '@jupyterlab/terminal';
+import { CommandRegistry } from '@phosphor/commands';
+import { Menu } from '@phosphor/widgets';
 import { IGitExtension } from './tokens';
+import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { doGitClone } from './widgets/gitClone';
 import { GitPullPushDialog, Operation } from './widgets/gitPushPull';
-import { GitCredentialsForm } from './widgets/CredentialsBox';
+
+const RESOURCES = [
+  {
+    text: 'Set Up Remotes',
+    url: 'https://www.atlassian.com/git/tutorials/setting-up-a-repository'
+  },
+  {
+    text: 'Git Documentation',
+    url: 'https://git-scm.com/doc'
+  }
+];
 
 /**
  * The command IDs used by the git plugin.
@@ -208,6 +221,52 @@ export function addCommands(
       );
     }
   });
+}
+
+/**
+ * Adds commands and menu items.
+ *
+ * @private
+ * @param app - Jupyter front end
+ * @param gitExtension - Git extension instance
+ * @param fileBrowser - file browser instance
+ * @param settings - extension settings
+ * @returns menu
+ */
+export function createGitMenu(commands: CommandRegistry): Menu {
+  const menu = new Menu({ commands });
+  menu.title.label = 'Git';
+  [
+    CommandIDs.gitInit,
+    CommandIDs.gitClone,
+    CommandIDs.gitPush,
+    CommandIDs.gitPull,
+    CommandIDs.gitAddRemote,
+    CommandIDs.gitTerminalCommand
+  ].forEach(command => {
+    menu.addItem({ command });
+  });
+
+  menu.addItem({ type: 'separator' });
+
+  menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
+
+  menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
+
+  menu.addItem({ type: 'separator' });
+
+  const tutorial = new Menu({ commands });
+  tutorial.title.label = ' Help ';
+  RESOURCES.map(args => {
+    tutorial.addItem({
+      args,
+      command: CommandIDs.gitOpenUrl
+    });
+  });
+
+  menu.addItem({ type: 'submenu', submenu: tutorial });
+
+  return menu;
 }
 
 /* eslint-disable no-inner-declarations */
