@@ -56,7 +56,7 @@ function request(url: string, method: string, request: Object | null) {
 }
 
 async function createModel() {
-  const model = new GitExtension();
+  const model = new GitExtension('/path/to/server');
   model.pathRepository = '/path/to/repo';
   const mockedCommands = jest.spyOn(model, 'commands', 'get');
   mockedCommands.mockImplementation(() => new CommandRegistry());
