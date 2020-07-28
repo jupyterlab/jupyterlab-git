@@ -168,7 +168,7 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/stdlib-js/stdlib"><img src="https://avatars0.githubusercontent.com/u/2643044?v=4" width="100px;" alt=""/><br /><sub><b>Athan</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=kgryte" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Akgryte" title="Reviewed Pull Requests">👀</a> <a href="#projectManagement-kgryte" title="Project Management">📆</a> <a href="#design-kgryte" title="Design">🎨</a></td>
-    <td align="center"><a href="http://ianhi.github.io"><img src="https://avatars0.githubusercontent.com/u/10111092?v=4" width="100px;" alt=""/><br /><sub><b>Ian Hunt-Isaak</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=ianhi" title="Code">💻</a></td>
+    <td align="center"><a href="http://ianhi.github.io"><img src="https://avatars0.githubusercontent.com/u/10111092?v=4" width="100px;" alt=""/><br /><sub><b>Ian Hunt-Isaak</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=ianhi" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Aianhi" title="Reviewed Pull Requests">👀</a></td>
   </tr>
 </table>
 
