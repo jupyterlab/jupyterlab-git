@@ -3,6 +3,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -11,8 +12,9 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { addCommands, createGitMenu } from './commandsAndMenu';
 import { GitExtension } from './model';
+import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
-import { IGitExtension } from './tokens';
+import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 import { addStatusBarWidget } from './widgets/StatusWidget';
@@ -54,8 +56,9 @@ async function activate(
   settingRegistry: ISettingRegistry,
   statusBar: IStatusBar
 ): Promise<IGitExtension> {
+  let gitExtension: GitExtension | null = null;
   let settings: ISettingRegistry.ISettings;
-
+  let serverSettings: Git.IServerSettings;
   // Get a reference to the default file browser extension
   const filebrowser = factory.defaultBrowser;
 
@@ -65,8 +68,45 @@ async function activate(
   } catch (error) {
     console.error(`Failed to load settings for the Git Extension.\n${error}`);
   }
+  try {
+    serverSettings = await getServerSettings();
+    const { frontendVersion, gitVersion, serverVersion } = serverSettings;
+
+    // Version validation
+    if (!gitVersion) {
+      throw new Error(
+        'git command not found - please ensure you have Git > 2 installed'
+      );
+    } else {
+      const gitVersion_ = gitVersion.split('.');
+      if (Number.parseInt(gitVersion_[0]) < 2) {
+        throw new Error(`git command version must be > 2; got ${gitVersion}.`);
+      }
+    }
+
+    if (frontendVersion && frontendVersion !== serverVersion) {
+      throw new Error(
+        'The versions of the JupyterLab Git server frontend and backend do not match. ' +
+          `The @jupyterlab/git frontend extension has version: ${frontendVersion} ` +
+          `while the python package has version ${serverVersion}. ` +
+          'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git'
+      );
+    }
+  } catch (error) {
+    // If we fall here, nothing will be loaded in the frontend.
+    console.error(
+      'Failed to load the jupyterlab-git server extension settings',
+      error
+    );
+    showErrorMessage(
+      'Failed to load the jupyterlab-git server extension',
+      error.message,
+      [Dialog.warnButton({ label: 'DISMISS' })]
+    );
+    return null;
+  }
   // Create the Git model
-  const gitExtension = new GitExtension(app, settings);
+  gitExtension = new GitExtension(serverSettings.serverRoot, app, settings);
 
   // Whenever we restore the application, sync the Git extension path
   Promise.all([app.restored, filebrowser.model.restored]).then(() => {

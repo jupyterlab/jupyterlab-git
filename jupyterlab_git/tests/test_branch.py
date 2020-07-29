@@ -44,7 +44,7 @@ async def test_get_current_branch_success():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "symbolic-ref", "HEAD"], cwd=os.path.join("/bin", "test_curr_path")
+            ["git", "symbolic-ref", "--short", "HEAD"], cwd=os.path.join("/bin", "test_curr_path")
         )
         assert "feature-foo" == actual_response
 
@@ -337,11 +337,11 @@ async def test_get_current_branch_failure():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "symbolic-ref", "HEAD"], cwd=os.path.join("/bin", "test_curr_path")
+            ["git", "symbolic-ref", "--short", "HEAD"], cwd=os.path.join("/bin", "test_curr_path")
         )
         assert (
             "Error [fatal: Not a git repository (or any of the parent directories): .git] "
-            "occurred while executing [git symbolic-ref HEAD] command to get current branch."
+            "occurred while executing [git symbolic-ref --short HEAD] command to get current branch."
             == str(error.value)
         )
 
@@ -403,17 +403,20 @@ async def test_get_current_branch_detached_failure():
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "branch,upstream",
+    "branch,upstream,remotename",
     [
-        ("feature-foo", "origin/master"),
-        ("master", "origin/master"),
-        ("feature-bar", "feature-foo"),
+        ("feature-foo", "master", "origin/withslash"),
+        ("master", "master", "origin"),
+        ("feature/bar", "feature-foo", ""),
     ],
 )
-async def test_get_upstream_branch_success(branch, upstream):
+async def test_get_upstream_branch_success(branch, upstream, remotename):
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((0, upstream, ""))
+        mock_execute.side_effect = [
+            maybe_future((0, remotename + '/' + upstream, '')), 
+            maybe_future((0, remotename, ''))
+            ]
 
         # When
         actual_response = await Git(FakeContentManager("/bin")).get_upstream_branch(
@@ -421,11 +424,21 @@ async def test_get_upstream_branch_success(branch, upstream):
         )
 
         # Then
-        mock_execute.assert_called_once_with(
-            ["git", "rev-parse", "--abbrev-ref", "{}@{{upstream}}".format(branch)],
-            cwd=os.path.join("/bin", "test_curr_path"),
+        mock_execute.assert_has_calls(
+            [
+                call(
+                    ["git", "rev-parse", "--abbrev-ref", "{}@{{upstream}}".format(branch)],
+                    cwd=os.path.join("/bin", "test_curr_path"),
+                ),
+                call(
+                    ['git', 'config', '--local', 'branch.{}.remote'.format(branch)],
+                     cwd='/bin/test_curr_path',
+                ),
+
+            ],
+            any_order=False,
         )
-        assert upstream == actual_response
+        assert {'code': 0, 'remote_branch': upstream, 'remote_short_name': remotename} == actual_response
 
 
 @pytest.mark.asyncio
@@ -454,17 +467,12 @@ async def test_get_upstream_branch_failure(outputs, message):
         mock_execute.return_value = maybe_future(outputs)
 
         # When
-        if message:
-            with pytest.raises(Exception) as error:
-                await Git(FakeContentManager("/bin")).get_upstream_branch(
-                    current_path="test_curr_path", branch_name="blah"
-                )
-            assert message == str(error.value)
-        else:
-            response = await Git(FakeContentManager("/bin")).get_upstream_branch(
-                current_path="test_curr_path", branch_name="blah"
-            )
-            assert response is None
+        response = await Git(FakeContentManager("/bin")).get_upstream_branch(
+            current_path="test_curr_path", branch_name="blah"
+        )
+        expected = {'code': 128, 'command': 'git rev-parse --abbrev-ref blah@{upstream}', 'message': outputs[2]}
+
+        assert response == expected
 
         # Then
         mock_execute.assert_has_calls(
@@ -807,7 +815,7 @@ async def test_branch_success_detached_head():
                 ),
                 # call to get current branch
                 call(
-                    ["git", "symbolic-ref", "HEAD"],
+                    ["git", "symbolic-ref", "--short", "HEAD"],
                     cwd=os.path.join("/bin", "test_curr_path"),
                 ),
                 # call to get current branch name given a detached head

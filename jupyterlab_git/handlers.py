@@ -8,7 +8,9 @@ from tornado import web
 
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join as ujoin, url2path
+from packaging.version import parse
 
+from ._version import __version__
 from .git import DEFAULT_REMOTE_NAME
 
 class GitHandler(APIHandler):
@@ -401,8 +403,10 @@ class GitUpstreamHandler(GitHandler):
         """
         current_path = self.get_json_body()["current_path"]
         current_branch = await self.git.get_current_branch(current_path)
-        upstream = await self.git.get_upstream_branch(current_path, current_branch)
-        self.finish(json.dumps({"upstream": upstream}))
+        response = await self.git.get_upstream_branch(current_path, current_branch)
+        if response['code'] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(response))
 
 
 class GitPullHandler(GitHandler):
@@ -437,32 +441,28 @@ class GitPushHandler(GitHandler):
         current_path = data["current_path"]
 
         current_local_branch = await self.git.get_current_branch(current_path)
-        current_upstream_branch = await self.git.get_upstream_branch(
+        upstream = await self.git.get_upstream_branch(
             current_path, current_local_branch
         )
 
-        if current_upstream_branch and current_upstream_branch.strip():
-            upstream = current_upstream_branch.split("/")
-            if len(upstream) == 1:
-                # If upstream is a local branch
-                remote = "."
-                branch = ":".join(["HEAD", upstream[0]])
-            else:
-                # If upstream is a remote branch
-                remote = upstream[0]
-                branch = ":".join(["HEAD", upstream[1]])
-
+        if upstream['code'] == 0:
+            branch = ":".join(["HEAD", upstream['remote_branch']])
             response = await self.git.push(
-                remote, branch, current_path, data.get("auth", None)
+                upstream['remote_short_name'], branch, current_path, data.get("auth", None)
             )
 
         else:
-            response = {
-                "code": 128,
-                "message": "fatal: The current branch {} has no upstream branch.".format(
-                    current_local_branch
-                ),
-            }
+            if ("no upstream configured for branch" in upstream['message'].lower()
+                 or 'unknown revision or path' in upstream['message'].lower()):
+                response = {
+                    "code": 128,
+                    "message": "fatal: The current branch {} has no upstream branch.".format(
+                        current_local_branch
+                    ),
+                }
+            else:
+                self.set_status(500)
+
         self.finish(json.dumps(response))
 
 
@@ -562,13 +562,31 @@ class GitIgnoreHandler(GitHandler):
         self.finish(json.dumps(body))
 
 
-class GitServerRootHandler(GitHandler):
+class GitSettingsHandler(GitHandler):
     @web.authenticated
     async def get(self):
+        jlab_version = self.get_query_argument("version", None)
+        if jlab_version is not None:
+            jlab_version = str(parse(jlab_version))
+        git_version = None
+        try:
+            git_version = await self.git.version()
+        except Exception as error:
+            self.log.debug("[jupyterlab_git] Failed to execute 'git' command: {!s}".format(error))
+        server_version = str(parse(__version__))
         # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
         root_dir = getattr(self.contents_manager, "root_dir", None)
         server_root = None if root_dir is None else Path(root_dir).as_posix()
-        self.finish(json.dumps({"server_root": server_root}))
+        self.finish(
+            json.dumps(
+                {
+                    "frontendVersion": jlab_version,
+                    "gitVersion": git_version,
+                    "serverRoot": server_root,
+                    "serverVersion": server_version,
+                }
+            )
+        )
 
 
 def setup_handlers(web_app):
@@ -599,7 +617,7 @@ def setup_handlers(web_app):
         ("/git/remote/add", GitRemoteAddHandler),
         ("/git/reset", GitResetHandler),
         ("/git/reset_to_commit", GitResetToCommitHandler),
-        ("/git/server_root", GitServerRootHandler),
+        ("/git/settings", GitSettingsHandler),
         ("/git/show_prefix", GitShowPrefixHandler),
         ("/git/show_top_level", GitShowTopLevelHandler),
         ("/git/status", GitStatusHandler),

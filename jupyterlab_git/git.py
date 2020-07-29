@@ -24,6 +24,8 @@ MAX_WAIT_FOR_EXECUTE_S = 20
 MAX_WAIT_FOR_LOCK_S = 5
 # How often should we check for the lock above to be free? This comes up more on things like NFS
 CHECK_LOCK_INTERVAL_S = 0.1
+# Parse Git version output
+GIT_VERSION_REGEX = re.compile(r"^git\sversion\s(?P<version>\d+(.\d+)*)")
 
 execution_lock = tornado.locks.Lock()
 
@@ -890,12 +892,12 @@ class Git:
         to the `branch` command to get the name.
         See https://git-blame.blogspot.com/2013/06/checking-current-branch-programatically.html
         """
-        command = ["git", "symbolic-ref", "HEAD"]
+        command = ["git", "symbolic-ref", "--short", "HEAD"]
         code, output, error = await execute(
             command, cwd=os.path.join(self.root_dir, current_path)
         )
         if code == 0:
-            return output.split("/")[-1].strip()
+            return output.strip()
         elif "not a symbolic ref" in error.lower():
             current_branch = await self._get_current_branch_detached(current_path)
             return current_branch
@@ -939,18 +941,22 @@ class Git:
         code, output, error = await execute(
             command, cwd=os.path.join(self.root_dir, current_path)
         )
-        if code == 0:
-            return output.strip()
-        elif "fatal: no upstream configured for branch" in error.lower():
-            return None
-        elif "unknown revision or path not in the working tree" in error.lower():
-            return None
-        else:
-            raise Exception(
-                "Error [{}] occurred while executing [{}] command to get upstream branch.".format(
-                    error, " ".join(command)
-                )
-            )
+        if code != 0:
+            return {"code": code, "command": " ".join(command), "message": error}
+        rev_parse_output = output.strip()
+
+        command = ["git", "config", "--local", "branch.{}.remote".format(branch_name)]
+        code, output, error = await execute(
+            command, cwd=os.path.join(self.root_dir, current_path)
+        )
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        remote_name = output.strip()
+        remote_branch = rev_parse_output.strip().lstrip(remote_name+"/")
+        return {"code": code, "remote_short_name": remote_name, "remote_branch": remote_branch}
+
+        
 
     async def _get_tag(self, current_path, commit_sha):
         """Execute 'git describe commit_sha' to get
@@ -1147,3 +1153,17 @@ class Git:
             return {"code": 0}
         except:
             return {"code": -1}
+
+    async def version(self):
+        """Return the Git command version.
+        
+        If an error occurs, return None.
+        """
+        command = ["git", "--version"]
+        code, output, _ = await execute(command, cwd=os.curdir)
+        if code == 0:
+            version = GIT_VERSION_REGEX.match(output)
+            if version is not None:
+                return version.group('version')
+        
+        return None

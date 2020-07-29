@@ -1,5 +1,4 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -27,26 +26,14 @@ export class GitExtension implements IGitExtension {
    * @returns extension model
    */
   constructor(
+    serverRoot: string,
     app: JupyterFrontEnd = null,
     settings?: ISettingRegistry.ISettings
   ) {
     const self = this;
+    this._serverRoot = serverRoot;
     this._app = app;
     this._settings = settings || null;
-
-    // Load the server root path
-    this._getServerRoot()
-      .then(root => {
-        this._serverRoot = root;
-      })
-      .catch(reason => {
-        console.error(`Fail to get the server root path.\n${reason}`);
-        showErrorMessage(
-          'Internal Error:',
-          `Fail to get the server root path.\n\n${reason}`,
-          [Dialog.warnButton({ label: 'DISMISS' })]
-        );
-      });
 
     let interval: number;
     if (settings) {
@@ -1207,30 +1194,6 @@ export class GitExtension implements IGitExtension {
   protected _setStatus(v: Git.IStatusFile[]) {
     this._status = v;
     this._statusChanged.emit(this._status);
-  }
-
-  /**
-   * Retrieve the path of the root server directory.
-   *
-   * @returns promise which resolves upon retrieving the root server path
-   */
-  private async _getServerRoot(): Promise<string> {
-    let response;
-    try {
-      response = await httpGitRequest('/git/server_root', 'GET', null);
-    } catch (err) {
-      throw new ServerConnection.NetworkError(err);
-    }
-    if (response.status === 404) {
-      throw new ServerConnection.ResponseError(
-        response,
-        'Git server extension is unavailable. Please ensure you have installed the ' +
-          'JupyterLab Git server extension by running: pip install --upgrade jupyterlab-git. ' +
-          'To confirm that the server extension is installed, run: jupyter serverextension list.'
-      );
-    }
-    const data = await response.json();
-    return data['server_root'];
   }
 
   /**

@@ -316,6 +316,28 @@ export namespace Git {
     };
   }
 
+  /**
+   * Interface for server settings
+   */
+  export interface IServerSettings {
+    /**
+     * Frontend version formatted as Python package version
+     */
+    frontendVersion?: string;
+    /**
+     * Git version (X.Y.Z)
+     */
+    gitVersion?: string;
+    /**
+     * Server absolute root path (as posix)
+     */
+    serverRoot: string;
+    /**
+     * Server extension version formatted as Python package version
+     */
+    serverVersion: string;
+  }
+
   /** Interface for GitShowTopLevel request result,
    * has the Git root directory inside a repository
    */
