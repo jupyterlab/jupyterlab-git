@@ -21,7 +21,7 @@ async function createModel(commands?: commands.CommandRegistry) {
     commands,
     shell: null as any
   };
-  const model = new GitExtension(app as any);
+  const model = new GitExtension('/server/root', app as any);
 
   jest.spyOn(model, 'currentBranch', 'get').mockReturnValue({
     is_current_branch: true,
@@ -46,13 +46,6 @@ function request(url: string, method: string, request: Object | null) {
           code: 0,
           branches: [],
           current_branch: null
-        })
-      );
-      break;
-    case '/git/server_root':
-      response = new Response(
-        JSON.stringify({
-          server_root: '/foo'
         })
       );
       break;

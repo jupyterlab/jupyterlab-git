@@ -11,7 +11,6 @@ jest.mock('../src/git');
 
 describe('git-commands', () => {
   const mockGit = git as jest.Mocked<typeof git>;
-  const fakeRoot = '/path/to/server';
   let commands: CommandRegistry;
   let model: IGitExtension;
   let mockResponses: {
@@ -38,12 +37,6 @@ describe('git-commands', () => {
           JSON.stringify({
             code: 0,
             top_repo_path: (request as any)['current_path']
-          })
-      },
-      '/git/server_root': {
-        body: () =>
-          JSON.stringify({
-            server_root: fakeRoot
           })
       },
       '/git/status': {

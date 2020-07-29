@@ -62,13 +62,6 @@ function request(url: string, method: string, request: Object | null) {
         })
       );
       break;
-    case '/git/server_root':
-      response = new Response(
-        JSON.stringify({
-          server_root: '/foo'
-        })
-      );
-      break;
     case '/git/show_top_level':
       response = new Response(
         JSON.stringify({
@@ -95,7 +88,7 @@ function request(url: string, method: string, request: Object | null) {
 }
 
 async function createModel() {
-  const model = new GitExtension();
+  const model = new GitExtension('/server/root');
 
   jest.spyOn(model, 'branches', 'get').mockReturnValue(BRANCHES);
   jest.spyOn(model, 'currentBranch', 'get').mockReturnValue(BRANCHES[0]);

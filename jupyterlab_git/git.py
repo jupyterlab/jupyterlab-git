@@ -24,6 +24,8 @@ MAX_WAIT_FOR_EXECUTE_S = 20
 MAX_WAIT_FOR_LOCK_S = 5
 # How often should we check for the lock above to be free? This comes up more on things like NFS
 CHECK_LOCK_INTERVAL_S = 0.1
+# Parse Git version output
+GIT_VERSION_REGEX = re.compile(r"^git\sversion\s(?P<version>\d+(.\d+)*)")
 
 execution_lock = tornado.locks.Lock()
 
@@ -1109,3 +1111,17 @@ class Git:
                 "command": " ".join(cmd),
                 "message": my_error.decode("utf-8").strip()
             }
+
+    async def version(self):
+        """Return the Git command version.
+        
+        If an error occurs, return None.
+        """
+        command = ["git", "--version"]
+        code, output, _ = await execute(command, cwd=os.curdir)
+        if code == 0:
+            version = GIT_VERSION_REGEX.match(output)
+            if version is not None:
+                return version.group('version')
+        
+        return None
