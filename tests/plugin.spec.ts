@@ -2,15 +2,13 @@ import 'jest';
 import * as git from '../src/git';
 import plugin from '../src/index';
 import { version } from '../src/version';
-import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { JupyterLab } from '@jupyterlab/application';
 import { showErrorMessage } from '@jupyterlab/apputils';
-import { URLExt } from '@jupyterlab/coreutils';
+import { ISettingRegistry, SettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
 jest.mock('../src/git');
 jest.mock('@jupyterlab/application');
 jest.mock('@jupyterlab/apputils');
-jest.mock('@jupyterlab/settingregistry');
 
 describe('plugin', () => {
   const mockGit = git as jest.Mocked<typeof git>;
