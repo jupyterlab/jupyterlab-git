@@ -1,4 +1,5 @@
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import { PathExt } from '@jupyterlab/coreutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Menu } from '@lumino/widgets';
@@ -53,6 +54,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this._contextMenuStaged = new Menu({ commands });
     this._contextMenuUnstaged = new Menu({ commands });
     this._contextMenuUntracked = new Menu({ commands });
+    this._contextMenuUntrackedMin = new Menu({ commands });
     this._contextMenuSimpleUntracked = new Menu({ commands });
     this._contextMenuSimpleTracked = new Menu({ commands });
 
@@ -152,8 +154,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
     if (!commands.hasCommand(CommandIDs.gitIgnore)) {
       commands.addCommand(CommandIDs.gitIgnore, {
-        label: 'Ignore',
-        caption: 'Ignore',
+        label: () => 'Ignore this file (add to .gitignore)',
+        caption: () => 'Ignore this file (add to .gitignore)',
         execute: async () => {
           await this.props.model.ignore(this.state.selectedFile.to, false);
           await this.props.model.commands.execute('docmanager:reload');
@@ -166,8 +168,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
     if (!commands.hasCommand(CommandIDs.gitIgnoreExtension)) {
       commands.addCommand(CommandIDs.gitIgnoreExtension, {
-        label: 'Ignore extension',
-        caption: 'Ignore extension',
+        label: 'Ignore this file extension (add to .gitignore)',
+        caption: 'Ignore this file extension (add to .gitignore)',
         execute: async () => {
           await this.props.model.ignore(this.state.selectedFile.to, true);
           await this.props.model.commands.execute('docmanager:reload');
@@ -206,6 +208,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
     [
       CommandIDs.gitFileOpen,
+      CommandIDs.gitFileTrack,
+      CommandIDs.gitIgnore
+    ].forEach(command => {
+      this._contextMenuUntrackedMin.addItem({ command });
+    });
+
+    [
+      CommandIDs.gitFileOpen,
       CommandIDs.gitFileDiscard,
       CommandIDs.gitFileDiffWorking
     ].forEach(command => {
@@ -232,7 +242,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   /** Handle right-click on an untracked file */
   contextMenuUntracked = (event: React.MouseEvent) => {
     event.preventDefault();
-    this._contextMenuUntracked.open(event.clientX, event.clientY);
+    const extension = PathExt.extname(this.state.selectedFile.to);
+    if (extension.length > 0 && extension !== 'ipynb' && extension !== 'py') {
+      this._contextMenuUntracked.open(event.clientX, event.clientY);
+    } else {
+      this._contextMenuUntrackedMin.open(event.clientX, event.clientY);
+    }
   };
 
   /** Handle right-click on an untracked file in Simple mode*/
@@ -786,6 +801,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _contextMenuStaged: Menu;
   private _contextMenuUnstaged: Menu;
   private _contextMenuUntracked: Menu;
+  private _contextMenuUntrackedMin: Menu;
   private _contextMenuSimpleTracked: Menu;
   private _contextMenuSimpleUntracked: Menu;
 }
