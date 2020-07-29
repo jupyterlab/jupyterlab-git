@@ -18,21 +18,22 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v1
       with:
-        python-version: '3.x'     
+        python-version: '3.x'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install jupyterlab packaging setuptools twine wheel
     - name: Test version are matching
-      run: python -c "from release import assertEqualVersion; assertEqualVersion()" 
-    - name: Publish the NPM package
-      run: npm publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - name: Build and publish the Python package
+      run: python -c "from release import assertEqualVersion; assertEqualVersion()"
+    - name: Publish the Python package
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: |
         python setup.py sdist bdist_wheel
-        twine upload dist/jupyterlab_git-*
+        twine upload dist/*
+    - name: Publish the NPM package
+      run: |
+        npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
