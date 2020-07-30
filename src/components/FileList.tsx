@@ -243,7 +243,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   contextMenuUntracked = (event: React.MouseEvent) => {
     event.preventDefault();
     const extension = PathExt.extname(this.state.selectedFile.to);
-    if (extension.length > 0 && extension !== 'ipynb' && extension !== 'py') {
+    if (extension.length > 0 && extension !== 'ipynb') {
       this._contextMenuUntracked.open(event.clientX, event.clientY);
     } else {
       this._contextMenuUntrackedMin.open(event.clientX, event.clientY);
