@@ -1,4 +1,5 @@
 import { PathExt } from '@jupyterlab/coreutils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
   caretDownIcon,
   caretUpIcon,
@@ -101,7 +102,7 @@ async function showTagListDialog(
   model: IGitExtension,
   repo: IToolbarState['repository']
 ): Promise<void> {
-  const title = `Tags`;
+  const title = 'Tags';
   let tagsValue = await showDialog({
     title: title,
     body: new GitTagDialog(model, repo),
@@ -111,7 +112,7 @@ async function showTagListDialog(
     tagsValue = await showDialog({
       title: title,
       body: new GitTagDialog(model, repo),
-      buttons: [Dialog.cancelButton(),Dialog.okButton({ label: 'DISMISS' })]
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'DISMISS' })]
     });
   }
   if (tagsValue.button.accept) {
@@ -122,7 +123,6 @@ async function showTagListDialog(
     });
   }
 }
-
 
 /**
  * React component for rendering a panel toolbar.
@@ -210,7 +210,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           onClick={this._onRefreshClick}
           title={'Refresh the repository to detect local and remote changes'}
         />
-        <ActionButton
+        <button
           className={classes(toolbarButtonClass, tagIconClass, 'jp-Icon-16')}
           title={'Tags'}
           onClick={this._onTagClick}
