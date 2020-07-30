@@ -278,6 +278,22 @@ export interface IGitExtension extends IDisposable {
    * @param path Path from which the top Git repository needs to be found
    */
   showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
+
+  /**
+   * Make request to list all the tags present in the remote repo
+   *
+   * @param path of the repository
+   * @returns list of tags
+   */
+  tags(path: string): Promise<Git.ITagResult>;
+
+  /**
+   * Make request to checkout the specified tag version
+   *
+   * @param path of the repository
+   * @param tag of the version to checkout
+   */
+  tag_checkout(path: string, tag: string): Promise<Git.ICheckoutResult>;
 }
 
 export namespace Git {
@@ -534,6 +550,16 @@ export namespace Git {
     | 'unstaged'
     | 'partially-staged'
     | null;
+
+  export interface ITag {
+    name: string;
+  }
+
+  export interface ITagResult {
+    code: number;
+    message?: string;
+    tags?: ITag[];
+  }
 }
 
 /**

@@ -10,4 +10,5 @@
   --jp-git-diff-output-color: rgba(0, 141, 255, 0.3);
 
   --jp-icon-git-branch: url('./icons/branch.svg');
+  --jp-icon-git-tag: url('./icons/git-tag.svg');
 }

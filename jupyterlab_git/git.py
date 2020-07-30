@@ -1125,3 +1125,23 @@ class Git:
                 return version.group('version')
         
         return None
+
+    async def tags(self, current_path):
+        command = ["git", "tag"]
+        code, output, error = await execute(command, cwd=os.path.join(self.root_dir, current_path))
+        output_list = output.split("\n")
+        if code != 0:
+            return {"code": code, "command": " ".join(command), "message": error}
+        return {"code": code, "message": output_list}
+
+    async def tag_checkout(self, current_path, tag):
+        command = ["git", "checkout", "tags/" + tag]
+        code, output, error = await execute(command, cwd=os.path.join(self.root_dir, current_path))
+        if code == 0:
+            return {"code": code, "message": "Tag " + tag + " checked out"}
+        else:
+            return {
+                "code": code,
+                "command": " ".join(command),
+                "message": error,
+            }

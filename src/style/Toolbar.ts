@@ -119,3 +119,10 @@ export const toolbarButtonClass = style({
 export const spacer = style({
   flex: '1 1 auto'
 });
+
+export const tagIconClass = style({
+  backgroundImage: 'var(--jp-icon-git-tag)',
+  backgroundSize: '16px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
+});

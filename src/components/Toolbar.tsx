@@ -10,6 +10,7 @@ import { CommandIDs } from '../commandsAndMenu';
 import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import {
   spacer,
+  tagIconClass,
   toolbarButtonClass,
   toolbarClass,
   toolbarMenuButtonClass,
@@ -27,7 +28,8 @@ import { ActionButton } from './ActionButton';
 import { Alert } from './Alert';
 import { BranchMenu } from './BranchMenu';
 import { SuspendModal } from './SuspendModal';
-
+import { GitTagDialog } from '../widgets/TagList';
+import { GitTagCheckoutDialog } from '../widgets/TagCheckout';
 /**
  * Interface describing component properties.
  */
@@ -94,6 +96,33 @@ export interface IToolbarState {
    */
   log: ILogMessage;
 }
+
+async function showTagListDialog(
+  model: IGitExtension,
+  repo: IToolbarState['repository']
+): Promise<void> {
+  const title = `Tags`;
+  let tagsValue = await showDialog({
+    title: title,
+    body: new GitTagDialog(model, repo),
+    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
+  });
+  while (!tagsValue.button.accept) {
+    tagsValue = await showDialog({
+      title: title,
+      body: new GitTagDialog(model, repo),
+      buttons: [Dialog.cancelButton(),Dialog.okButton({ label: 'DISMISS' })]
+    });
+  }
+  if (tagsValue.button.accept) {
+    tagsValue = await showDialog({
+      title: title,
+      body: new GitTagCheckoutDialog(model, repo, tagsValue.value),
+      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
+    });
+  }
+}
+
 
 /**
  * React component for rendering a panel toolbar.
@@ -180,6 +209,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           icon={refreshIcon}
           onClick={this._onRefreshClick}
           title={'Refresh the repository to detect local and remote changes'}
+        />
+        <ActionButton
+          className={classes(toolbarButtonClass, tagIconClass, 'jp-Icon-16')}
+          title={'Tags'}
+          onClick={this._onTagClick}
         />
       </div>
     );
@@ -424,5 +458,20 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     this.setState({
       alert: false
     });
+  };
+
+  /**
+   * Callback invoked upon clicking a button to view tags.
+   *
+   * @param event - event object
+   */
+  private _onTagClick = (): void => {
+    showTagListDialog(this.props.model, this.props.model.pathRepository).catch(
+      reason => {
+        console.error(
+          `Encountered an error when pulling changes. Error: ${reason}`
+        );
+      }
+    );
   };
 }
