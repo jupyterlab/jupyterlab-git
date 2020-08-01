@@ -1,5 +1,5 @@
 import { Spinner } from '@jupyterlab/apputils';
-import { Widget } from '@lumino/widgets';
+import { Widget } from '@phosphor/widgets';
 import { Git, IGitExtension } from '../tokens';
 /**
  * The UI for the content shown within the Git push/pull modal.
