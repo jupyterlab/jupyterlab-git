@@ -78,7 +78,7 @@ setup_args = dict(
     ],
     extras_require = {
         'test': [
-            'notebook[test]',
+            'notebook!=6.1.0',
             'pytest',
             'pytest-asyncio',
             'jupyterlab~=2.0',
