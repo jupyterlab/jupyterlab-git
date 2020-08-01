@@ -950,17 +950,15 @@ class Git:
             command, cwd=os.path.join(self.root_dir, current_path)
         )
         if code != 0:
-            return {"code": code, "command": " ".join(cmd), "message": error}
+            return {"code": code, "command": " ".join(command), "message": error}
 
         remote_name = output.strip()
         remote_branch = rev_parse_output.strip().lstrip(remote_name+"/")
         return {"code": code, "remote_short_name": remote_name, "remote_branch": remote_branch}
 
-        
-
     async def _get_tag(self, current_path, commit_sha):
         """Execute 'git describe commit_sha' to get
-        nearest tag associated with lastest commit in branch.
+        nearest tag associated with latest commit in branch.
         Reference : https://git-scm.com/docs/git-describe#git-describe-ltcommit-ishgt82308203
         """
         command = ["git", "describe", "--tags", commit_sha]
@@ -1127,18 +1125,30 @@ class Git:
         return None
 
     async def tags(self, current_path):
-        command = ["git", "tag"]
+        """List all tags of the git repository.
+        
+        current_path: str
+            Git path repository
+        """
+        command = ["git", "tag", "--list"]
         code, output, error = await execute(command, cwd=os.path.join(self.root_dir, current_path))
-        output_list = output.split("\n")
         if code != 0:
             return {"code": code, "command": " ".join(command), "message": error}
-        return {"code": code, "message": output_list}
+        tags = [tag for tag in output.split("\n") if len(tag) > 0]
+        return {"code": code, "tags": tags}
 
     async def tag_checkout(self, current_path, tag):
+        """Checkout the git repository at a given tag.
+        
+        current_path: str
+            Git path repository
+        tag : str
+            Tag to checkout
+        """
         command = ["git", "checkout", "tags/" + tag]
-        code, output, error = await execute(command, cwd=os.path.join(self.root_dir, current_path))
+        code, _, error = await execute(command, cwd=os.path.join(self.root_dir, current_path))
         if code == 0:
-            return {"code": code, "message": "Tag " + tag + " checked out"}
+            return {"code": code, "message": "Tag {} checked out".format(tag)}
         else:
             return {
                 "code": code,

@@ -1022,63 +1022,76 @@ export class GitExtension implements IGitExtension {
   /**
    * Retrieve the list of tags in the repository.
    *
-   * @param path - current path
    * @returns promise which resolves upon retrieving the tag list
    */
-  async tags(path: string): Promise<Git.ITagResult> {
+  async tags(): Promise<Git.ITagResult> {
+    let response;
+
     await this.ready;
 
+    const path = this.pathRepository;
     if (path === null) {
-      return Promise.resolve({
+      response = {
         code: -1,
-        message: 'Not in a git repository.'
-      });
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(response);
     }
 
+    const tid = this._addTask('git:tag:list');
     try {
-      let response = await httpGitRequest('/git/tags', 'POST', {
+      response = await httpGitRequest('/git/tags', 'POST', {
         current_path: path
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return data;
   }
 
   /**
    * Checkout the specified tag version
    *
-   * @param path - current path
    * @param tag - selected tag version
    * @returns promise which resolves upon checking out the tag version of the repository
    */
-  async tag_checkout(path: string, tag: string): Promise<Git.ICheckoutResult> {
+  async checkoutTag(tag: string): Promise<Git.ICheckoutResult> {
+    let response;
+
     await this.ready;
 
+    const path = this.pathRepository;
     if (path === null) {
-      return Promise.resolve({
+      response = {
         code: -1,
-        message: 'Not in a git repository.'
-      });
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(response);
     }
 
+    const tid = this._addTask('git:tag:checkout');
     try {
-      let response = await httpGitRequest('/git/tag_checkout', 'POST', {
+      response = await httpGitRequest('/git/tag_checkout', 'POST', {
         current_path: path,
         tag_id: tag
       });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new ServerConnection.ResponseError(response, data.message);
-      }
-      return response.json();
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
     }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return data;
   }
 
   /**

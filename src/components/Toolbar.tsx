@@ -1,5 +1,5 @@
+import { showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
   caretDownIcon,
   caretUpIcon,
@@ -8,10 +8,15 @@ import {
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { CommandIDs } from '../commandsAndMenu';
-import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
+import {
+  branchIcon,
+  desktopIcon,
+  pullIcon,
+  pushIcon,
+  tagIcon
+} from '../style/icons';
 import {
   spacer,
-  tagIconClass,
   toolbarButtonClass,
   toolbarClass,
   toolbarMenuButtonClass,
@@ -23,14 +28,14 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { IGitExtension, ILogMessage } from '../tokens';
+import { IGitExtension, ILogMessage, Git } from '../tokens';
 import { sleep } from '../utils';
+import { GitTagDialog } from '../widgets/TagList';
 import { ActionButton } from './ActionButton';
 import { Alert } from './Alert';
 import { BranchMenu } from './BranchMenu';
 import { SuspendModal } from './SuspendModal';
-import { GitTagDialog } from '../widgets/TagList';
-import { GitTagCheckoutDialog } from '../widgets/TagCheckout';
+
 /**
  * Interface describing component properties.
  */
@@ -96,32 +101,6 @@ export interface IToolbarState {
    * Log message.
    */
   log: ILogMessage;
-}
-
-async function showTagListDialog(
-  model: IGitExtension,
-  repo: IToolbarState['repository']
-): Promise<void> {
-  const title = 'Tags';
-  let tagsValue = await showDialog({
-    title: title,
-    body: new GitTagDialog(model, repo),
-    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
-  });
-  while (!tagsValue.button.accept) {
-    tagsValue = await showDialog({
-      title: title,
-      body: new GitTagDialog(model, repo),
-      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'DISMISS' })]
-    });
-  }
-  if (tagsValue.button.accept) {
-    tagsValue = await showDialog({
-      title: title,
-      body: new GitTagCheckoutDialog(model, repo, tagsValue.value),
-      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
-    });
-  }
 }
 
 /**
@@ -210,10 +189,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           onClick={this._onRefreshClick}
           title={'Refresh the repository to detect local and remote changes'}
         />
-        <button
-          className={classes(toolbarButtonClass, tagIconClass, 'jp-Icon-16')}
-          title={'Tags'}
+        <ActionButton
+          className={toolbarButtonClass}
+          icon={tagIcon}
           onClick={this._onTagClick}
+          title={'Checkout a tag'}
         />
       </div>
     );
@@ -465,13 +445,42 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    *
    * @param event - event object
    */
-  private _onTagClick = (): void => {
-    showTagListDialog(this.props.model, this.props.model.pathRepository).catch(
-      reason => {
-        console.error(
-          `Encountered an error when pulling changes. Error: ${reason}`
-        );
+  private _onTagClick = async (): Promise<void> => {
+    const result = await showDialog({
+      title: 'Checkout tag',
+      body: new GitTagDialog(this.props.model)
+    });
+    if (result.button.accept) {
+      this._log({
+        severity: 'info',
+        message: `Switching to ${result.value}...`
+      });
+      this._suspend(true);
+
+      let response: Git.ICheckoutResult;
+      try {
+        response = await this.props.model.checkoutTag(result.value);
+      } catch (error) {
+        response = {
+          code: -1,
+          message: error.message || error
+        };
+      } finally {
+        this._suspend(false);
       }
-    );
+
+      if (response.code !== 0) {
+        console.error(response.message);
+        this._log({
+          severity: 'error',
+          message: `Fail to checkout tag ${result.value}`
+        });
+      } else {
+        this._log({
+          severity: 'success',
+          message: `Switched to ${result.value}`
+        });
+      }
+    }
   };
 }
