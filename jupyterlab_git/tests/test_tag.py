@@ -24,7 +24,7 @@ async def test_git_tag_success():
             cwd=os.path.join("/bin", "test_curr_path"),
         )
 
-        assert {"code": 0, "message": [tag]} == actual_response
+        assert {"code": 0, "tags": [tag]} == actual_response
 
 @pytest.mark.asyncio
 async def test_git_tag_checkout_success():
