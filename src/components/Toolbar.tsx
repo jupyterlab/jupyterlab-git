@@ -185,15 +185,15 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         />
         <ActionButton
           className={toolbarButtonClass}
-          icon={refreshIcon}
-          onClick={this._onRefreshClick}
-          title={'Refresh the repository to detect local and remote changes'}
-        />
-        <ActionButton
-          className={toolbarButtonClass}
           icon={tagIcon}
           onClick={this._onTagClick}
           title={'Checkout a tag'}
+        />
+        <ActionButton
+          className={toolbarButtonClass}
+          icon={refreshIcon}
+          onClick={this._onRefreshClick}
+          title={'Refresh the repository to detect local and remote changes'}
         />
       </div>
     );
