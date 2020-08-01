@@ -1,9 +1,8 @@
+import { showDialog } from '@jupyterlab/apputils';
+import { PathExt } from '@jupyterlab/coreutils';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { PathExt } from '@jupyterlab/coreutils';
-
 import { CommandIDs } from '../commandsAndMenu';
-
 import {
   // NOTE: keep in alphabetical order
   branchIconClass,
@@ -13,6 +12,7 @@ import {
   pushButtonClass,
   refreshButtonClass,
   repoIconClass,
+  tagButtonClass,
   toolbarButtonClass,
   toolbarClass,
   toolbarMenuButtonClass,
@@ -24,8 +24,9 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { IGitExtension, ILogMessage } from '../tokens';
+import { Git, IGitExtension, ILogMessage } from '../tokens';
 import { sleep } from '../utils';
+import { GitTagDialog } from '../widgets/TagList';
 import { Alert } from './Alert';
 import { BranchMenu } from './BranchMenu';
 import { SuspendModal } from './SuspendModal';
@@ -173,6 +174,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           className={classes(toolbarButtonClass, pushButtonClass, 'jp-Icon-16')}
           title={'Push committed changes'}
           onClick={this._onPushClick}
+        />
+        <button
+          className={classes(toolbarButtonClass, tagButtonClass, 'jp-Icon-16')}
+          onClick={this._onTagClick}
+          title={'Checkout a tag'}
         />
         <button
           className={classes(
@@ -447,5 +453,49 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     this.setState({
       alert: false
     });
+  };
+
+  /**
+   * Callback invoked upon clicking a button to view tags.
+   *
+   * @param event - event object
+   */
+  private _onTagClick = async (): Promise<void> => {
+    const result = await showDialog({
+      title: 'Checkout tag',
+      body: new GitTagDialog(this.props.model)
+    });
+    if (result.button.accept) {
+      this._log({
+        severity: 'info',
+        message: `Switching to ${result.value}...`
+      });
+      this._suspend(true);
+
+      let response: Git.ICheckoutResult;
+      try {
+        response = await this.props.model.checkoutTag(result.value);
+      } catch (error) {
+        response = {
+          code: -1,
+          message: error.message || error
+        };
+      } finally {
+        this._suspend(false);
+      }
+
+      if (response.code !== 0) {
+        console.error(response.message);
+        this._log({
+          severity: 'error',
+          message: `Fail to checkout tag ${result.value}`
+        });
+      } else {
+        this._log({
+          severity: 'success',
+          message: `Switched to ${result.value}`
+        });
+      }
+    }
   };
 }
