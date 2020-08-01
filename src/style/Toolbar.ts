@@ -128,6 +128,14 @@ export const pushButtonClass = style({
   backgroundPosition: 'center'
 });
 
+export const tagButtonClass = style({
+  background: 'var(--jp-layout-color1)',
+  backgroundImage: 'var(--jp-icon-git-tag)',
+  backgroundSize: '16px',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center'
+});
+
 export const refreshButtonClass = style({
   marginRight: '4px',
 

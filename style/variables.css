@@ -10,6 +10,7 @@
   --jp-git-diff-output-color: rgba(0, 141, 255, 0.3);
 
   --jp-icon-git-clone: url('./images/git-clone-icon.svg');
+  --jp-icon-git-tag: url('./images/tag.svg');
 }
 
 [data-jp-theme-light='true'] {

@@ -1023,6 +1023,81 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Retrieve the list of tags in the repository.
+   *
+   * @returns promise which resolves upon retrieving the tag list
+   */
+  async tags(): Promise<Git.ITagResult> {
+    let response;
+
+    await this.ready;
+
+    const path = this.pathRepository;
+    if (path === null) {
+      response = {
+        code: -1,
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(response);
+    }
+
+    const tid = this._addTask('git:tag:list');
+    try {
+      response = await httpGitRequest('/git/tags', 'POST', {
+        current_path: path
+      });
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
+    }
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return data;
+  }
+
+  /**
+   * Checkout the specified tag version
+   *
+   * @param tag - selected tag version
+   * @returns promise which resolves upon checking out the tag version of the repository
+   */
+  async checkoutTag(tag: string): Promise<Git.ICheckoutResult> {
+    let response;
+
+    await this.ready;
+
+    const path = this.pathRepository;
+    if (path === null) {
+      response = {
+        code: -1,
+        message: 'Not in a Git repository.'
+      };
+      return Promise.resolve(response);
+    }
+
+    const tid = this._addTask('git:tag:checkout');
+    try {
+      response = await httpGitRequest('/git/tag_checkout', 'POST', {
+        current_path: path,
+        tag_id: tag
+      });
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    } finally {
+      this._removeTask(tid);
+    }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ServerConnection.ResponseError(response, data.message);
+    }
+    return data;
+  }
+
+  /**
    * Add a file to the current marker object.
    *
    * @param fname - filename
