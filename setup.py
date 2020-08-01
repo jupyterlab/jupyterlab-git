@@ -78,6 +78,7 @@ setup_args = dict(
     ],
     extras_require = {
         'test': [
+            'requests_unixsocket',
             'pytest',
             'pytest-asyncio',
             'jupyterlab~=2.0',

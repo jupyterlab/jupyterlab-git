@@ -9,10 +9,7 @@ import * as git from '../../src/git';
 import { CommandIDs } from '../../src/commandsAndMenu';
 import { GitExtension } from '../../src/model';
 import { pullIcon, pushIcon } from '../../src/style/icons';
-import {
-  toolbarButtonClass,
-  toolbarMenuButtonClass
-} from '../../src/style/Toolbar';
+import { toolbarMenuButtonClass } from '../../src/style/Toolbar';
 
 jest.mock('@lumino/commands');
 jest.mock('../../src/git');
@@ -213,7 +210,10 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const button = node.find(ActionButton).last();
+      const button = node
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === refreshIcon)
+        .first();
 
       expect(button.prop('title')).toEqual(
         'Refresh the repository to detect local and remote changes'
@@ -344,7 +344,10 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${toolbarButtonClass}`).first();
+      const button = node
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === pullIcon)
+        .first();
 
       button.simulate('click');
       expect(mockedExecute).toHaveBeenCalledTimes(1);
@@ -380,7 +383,10 @@ describe('Toolbar', () => {
         refresh: async () => {}
       };
       const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${toolbarButtonClass}`).at(1);
+      const button = node
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === pushIcon)
+        .first();
 
       button.simulate('click');
       expect(mockedExecute).toHaveBeenCalledTimes(1);
@@ -408,7 +414,10 @@ describe('Toolbar', () => {
         refresh: spy
       };
       const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${toolbarButtonClass}`).last();
+      const button = node
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === refreshIcon)
+        .first();
 
       button.simulate('click');
       expect(spy).toHaveBeenCalledTimes(1);

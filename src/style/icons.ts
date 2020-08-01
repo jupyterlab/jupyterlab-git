@@ -15,16 +15,9 @@ import pullSvg from '../../style/icons/pull.svg';
 import pushSvg from '../../style/icons/push.svg';
 import removeSvg from '../../style/icons/remove.svg';
 import rewindSvg from '../../style/icons/rewind.svg';
+import tagSvg from '../../style/icons/tag.svg';
 
 export const gitIcon = new LabIcon({ name: 'git', svgstr: gitSvg });
-export const deletionsMadeIcon = new LabIcon({
-  name: 'git:deletions',
-  svgstr: deletionsMadeSvg
-});
-export const insertionsMadeIcon = new LabIcon({
-  name: 'git:insertions',
-  svgstr: insertionsMadeSvg
-});
 export const addIcon = new LabIcon({
   name: 'git:add',
   svgstr: addSvg
@@ -37,6 +30,10 @@ export const cloneIcon = new LabIcon({
   name: 'git:clone',
   svgstr: cloneSvg
 });
+export const deletionsMadeIcon = new LabIcon({
+  name: 'git:deletions',
+  svgstr: deletionsMadeSvg
+});
 export const desktopIcon = new LabIcon({
   name: 'git:desktop',
   svgstr: desktopSvg
@@ -48,6 +45,10 @@ export const diffIcon = new LabIcon({
 export const discardIcon = new LabIcon({
   name: 'git:discard',
   svgstr: discardSvg
+});
+export const insertionsMadeIcon = new LabIcon({
+  name: 'git:insertions',
+  svgstr: insertionsMadeSvg
 });
 export const openIcon = new LabIcon({
   name: 'git:open-file',
@@ -68,4 +69,8 @@ export const removeIcon = new LabIcon({
 export const rewindIcon = new LabIcon({
   name: 'git:rewind',
   svgstr: rewindSvg
+});
+export const tagIcon = new LabIcon({
+  name: 'git:tag',
+  svgstr: tagSvg
 });
