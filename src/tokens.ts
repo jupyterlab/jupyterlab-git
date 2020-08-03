@@ -19,7 +19,6 @@ export interface IGitExtension extends IDisposable {
   /**
    * The current branch
    */
-
   currentBranch: Git.IBranch;
 
   /**
