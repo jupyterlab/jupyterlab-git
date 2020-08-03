@@ -589,6 +589,38 @@ class GitSettingsHandler(GitHandler):
         )
 
 
+class GitTagHandler(GitHandler):
+    """
+        Handler for 'git tag '. Fetches list of all tags in current repository
+    """
+
+    @web.authenticated
+    async def post(self):
+        """
+        POST request handler, fetches all tags in current repository.
+        """
+        current_path = self.get_json_body()["current_path"]
+        result = await self.git.tags(current_path)
+        self.finish(json.dumps(result))
+
+
+class GitTagCheckoutHandler(GitHandler):
+    """
+        Handler for 'git tag checkout '. Checkout the tag version of repo
+    """
+
+    @web.authenticated
+    async def post(self):
+        """
+        POST request handler, checkout the tag version to a branch.
+        """
+        data = self.get_json_body()
+        current_path = data["current_path"]
+        tag = data["tag_id"]
+        result = await self.git.tag_checkout(current_path, tag)
+        self.finish(json.dumps(result))
+
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -623,6 +655,8 @@ def setup_handlers(web_app):
         ("/git/status", GitStatusHandler),
         ("/git/upstream", GitUpstreamHandler),
         ("/git/ignore", GitIgnoreHandler),
+        ("/git/tags", GitTagHandler),
+        ("/git/tag_checkout", GitTagCheckoutHandler)
     ]
 
     # add the baseurl to our paths
