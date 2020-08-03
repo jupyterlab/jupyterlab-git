@@ -288,7 +288,7 @@ export interface IGitExtension extends IDisposable {
    * Add an entry in .gitignore file
    *
    * @param filename The name of the entry to ignore
-   * @param useExtension Ignore all file with the same extension than filename
+   * @param useExtension Ignore all files having the same extension as filename
    */
   ignore(filename: string, useExtension: boolean): Promise<Response>;
 
