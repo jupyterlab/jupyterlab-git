@@ -198,7 +198,7 @@ export function addCommands(
     caption: 'Open .gitignore',
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
-      model.ensureGitignore();
+      await model.ensureGitignore();
       const gitModel = model as GitExtension;
       await gitModel.commands.execute('docmanager:reload');
       await gitModel.commands.execute('docmanager:open', {

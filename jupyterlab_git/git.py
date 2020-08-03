@@ -6,6 +6,7 @@ import re
 import subprocess
 from urllib.parse import unquote
 
+import pathlib
 import pexpect
 import tornado
 import tornado.locks
@@ -1121,18 +1122,17 @@ class Git:
             Top Git repository path
         """
         try:            
-            gitignore = os.path.join(top_repo_path, ".gitignore")
-            if not os.path.exists(gitignore):
-                open(gitignore, "w").close()
-            elif os.path.getsize(gitignore) != 0:
-                f = open(gitignore, "r")
-                if (f.read()[-1] != "\n"):
-                    f = open(gitignore, "a")
-                    f.write('\n')
-                f.close()
-            return {"code": 0}
-        except:
-            return {"code": -1}
+            gitignore = pathlib.Path(top_repo_path) / ".gitignore"
+            if not gitignore.exists():
+                gitignore.touch()
+            elif gitignore.stat().st_size > 0:
+                content = gitignore.read_text()
+                if (content[-1] != "\n"):
+                    with gitignore.open("a") as f:
+                        f.write('\n')
+        except BaseException as error:
+            return {"code": -1, "message": str(error)}
+        return {"code": 0}
 
     async def ignore(self, top_repo_path, file_path):
         """Handle call to add an entry in .gitignore.
@@ -1146,13 +1146,12 @@ class Git:
             res = await self.ensure_gitignore(top_repo_path)
             if res["code"] != 0:
                 return res
-            gitignore = os.path.join(top_repo_path, '.gitignore')
-            f = open(gitignore, "a")
-            f.write(file_path + "\n")
-            f.close()
-            return {"code": 0}
-        except:
-            return {"code": -1}
+            gitignore = pathlib.Path(top_repo_path) / ".gitignore"
+            with gitignore.open("a") as f:
+                f.write(file_path + "\n")
+        except BaseException as error:
+            return {"code": -1, "message": str(error)}
+        return {"code": 0}
 
     async def version(self):
         """Return the Git command version.

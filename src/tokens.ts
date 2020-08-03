@@ -281,7 +281,7 @@ export interface IGitExtension extends IDisposable {
   showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
 
   /**
-   * Ensure a.gitignore file
+   * Ensure a .gitignore file exists
    *
    */
   ensureGitignore(): Promise<Response>;
@@ -290,6 +290,7 @@ export interface IGitExtension extends IDisposable {
    * Add an entry in .gitignore file
    *
    * @param filename The name of the entry to ignore
+   * @param useExtension Ignore all file with the same extension than filename
    */
   ignore(filename: string, useExtension: boolean): Promise<Response>;
 }

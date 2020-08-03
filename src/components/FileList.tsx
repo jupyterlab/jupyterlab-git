@@ -157,11 +157,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: () => 'Ignore this file (add to .gitignore)',
         caption: () => 'Ignore this file (add to .gitignore)',
         execute: async () => {
-          await this.props.model.ignore(this.state.selectedFile.to, false);
-          await this.props.model.commands.execute('docmanager:reload');
-          await this.props.model.commands.execute('docmanager:open', {
-            path: this.props.model.getRelativeFilePath('.gitignore')
-          });
+          if (this.state.selectedFile) {
+            await this.props.model.ignore(this.state.selectedFile.to, false);
+            await this.props.model.commands.execute('docmanager:reload');
+            await this.props.model.commands.execute('docmanager:open', {
+              path: this.props.model.getRelativeFilePath('.gitignore')
+            });
+          }
         }
       });
     }
@@ -171,11 +173,26 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         label: 'Ignore this file extension (add to .gitignore)',
         caption: 'Ignore this file extension (add to .gitignore)',
         execute: async () => {
-          await this.props.model.ignore(this.state.selectedFile.to, true);
-          await this.props.model.commands.execute('docmanager:reload');
-          await this.props.model.commands.execute('docmanager:open', {
-            path: this.props.model.getRelativeFilePath('.gitignore')
-          });
+          if (this.state.selectedFile) {
+            const extension = PathExt.extname(this.state.selectedFile.to);
+            if (extension.length > 0) {
+              const result = await showDialog({
+                title: 'Ignore file extension',
+                body: `Are you sure you want to ignore all ${extension} files within this git repository?`,
+                buttons: [
+                  Dialog.cancelButton(),
+                  Dialog.okButton({ label: 'Ignore' })
+                ]
+              });
+              if (result.button.label === 'Ignore') {
+                await this.props.model.ignore(this.state.selectedFile.to, true);
+                await this.props.model.commands.execute('docmanager:reload');
+                await this.props.model.commands.execute('docmanager:open', {
+                  path: this.props.model.getRelativeFilePath('.gitignore')
+                });
+              }
+            }
+          }
         }
       });
     }
@@ -243,7 +260,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   contextMenuUntracked = (event: React.MouseEvent) => {
     event.preventDefault();
     const extension = PathExt.extname(this.state.selectedFile.to);
-    if (extension.length > 0 && extension !== 'ipynb') {
+    if (extension.length > 0) {
       this._contextMenuUntracked.open(event.clientX, event.clientY);
     } else {
       this._contextMenuUntrackedMin.open(event.clientX, event.clientY);

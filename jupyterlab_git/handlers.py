@@ -550,9 +550,9 @@ class GitIgnoreHandler(GitHandler):
         use_extension = data.get("use_extension", False)
         if file_path:
             if use_extension:
-                parts = os.path.splitext(file_path)
-                if len(parts) == 2:
-                    file_path = "**/*" + parts[1]
+                suffixes = Path(file_path).suffixes
+                if len(suffixes) > 0:
+                    file_path = "**/*" + ".".join(suffixes)
             body = await self.git.ignore(top_repo_path, file_path)
         else:
             body = await self.git.ensure_gitignore(top_repo_path)
