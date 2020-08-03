@@ -143,10 +143,10 @@ class Git:
     A single parent class containing all of the individual git methods in it.
     """
 
-    def __init__(self, contents_manager, user_custom_actions):
+    def __init__(self, contents_manager, config=None):
         self.contents_manager = contents_manager
         self.root_dir = os.path.expanduser(contents_manager.root_dir)
-        self.user_custom_actions = user_custom_actions
+        self._config = config
 
     async def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
@@ -878,28 +878,46 @@ class Git:
         code, _, error = await execute(
             cmd, cwd=cwd
         )
+
+        actions = None
         if code == 0:
-            code, _, error = await self._maybe_run_actions('post_init', cwd)
+            code, actions = await self._maybe_run_actions('post_init', cwd)
 
         if code != 0:
-            return {"code": code, "command": " ".join(cmd), "message": error}
-        return {"code": code}
+            return {"code": code, "command": " ".join(cmd), "message": error, "actions": actions}
+        return {"code": code, "actions": actions}
 
     async def _maybe_run_actions(self, name, cwd):
         code = 0
-        stdout = None
-        stderr = None
-        if name in self.user_custom_actions:
-            actions_list = self.user_custom_actions[name]
+        actions = None
+        if self._config and name in self._config.actions:
+            actions = []
+            actions_list = self._config.actions[name]
             for action in actions_list:
-                # We trust the actions as they were passed via a config and not the UI
-                code, stdout, stderr = await execute(
-                    shlex.split(action), cwd=cwd
-                )
-                # After any failure, stop
+                try:
+                    # We trust the actions as they were passed via a config and not the UI
+                    code, stdout, stderr = await execute(
+                        shlex.split(action), cwd=cwd
+                    )
+                    actions.append({
+                        'cmd': action,
+                        'code': code,
+                        'stdout': stdout,
+                        'stderr': stderr
+                    })
+                    # After any failure, stop
+                except Exception as e:
+                    code = 1
+                    action.append({
+                        'cmd': action,
+                        'code': 1,
+                        'stdout': None,
+                        'stderr': 'Exception: {}'.format(e)
+                    })
                 if code != 0:
                     break
-        return code, stdout, stderr
+
+        return code, actions
 
     def _is_remote_branch(self, branch_reference):
         """Check if given branch is remote branch by comparing with 'remotes/',
@@ -1133,7 +1151,7 @@ class Git:
 
     async def version(self):
         """Return the Git command version.
-        
+
         If an error occurs, return None.
         """
         command = ["git", "--version"]
@@ -1142,12 +1160,12 @@ class Git:
             version = GIT_VERSION_REGEX.match(output)
             if version is not None:
                 return version.group('version')
-        
+
         return None
 
     async def tags(self, current_path):
         """List all tags of the git repository.
-        
+
         current_path: str
             Git path repository
         """
@@ -1160,7 +1178,7 @@ class Git:
 
     async def tag_checkout(self, current_path, tag):
         """Checkout the git repository at a given tag.
-        
+
         current_path: str
             Git path repository
         tag : str

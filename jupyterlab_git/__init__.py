@@ -19,7 +19,7 @@ class JupyterLabGit(Configurable):
         help='Actions to be taken after a git command. Each action takes a list of commands to execute (strings). Supported actions: post_init',
         config=True,
         trait=List(
-            trait=Unicode,
+            trait=Unicode(),
             help='List of commands to run. E.g. ["touch baz.py"]'
         )
         # TODO Validate
@@ -35,7 +35,7 @@ def load_jupyter_server_extension(nbapp):
     """Load the Jupyter server extension.
     """
 
-    user_custom_actions = JupyterLabGit(config=nbapp.config).actions
-    git = Git(nbapp.web_app.settings['contents_manager'], user_custom_actions)
+    config = JupyterLabGit(config=nbapp.config)
+    git = Git(nbapp.web_app.settings['contents_manager'], config)
     nbapp.web_app.settings["git"] = git
     setup_handlers(nbapp.web_app)
