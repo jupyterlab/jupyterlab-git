@@ -1171,7 +1171,6 @@ export class GitExtension implements IGitExtension {
   /**
    * Make request to ensure gitignore.
    *
-   * @param filename Optional name of the files to add
    */
   async ensureGitignore(): Promise<Response> {
     await this.ready;
