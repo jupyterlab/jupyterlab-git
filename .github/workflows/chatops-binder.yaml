@@ -25,10 +25,11 @@ jobs:
 
             // use the branch name to make a comment  on the PR with a Binder badge
             var BRANCH_NAME = pr.data.head.ref
+            var REPO_NAME = pr.data.head.repo.full_name  
             github.issues.createComment({
               issue_number: context.payload.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/${context.repo.owner}/${context.repo.repo}/${BRANCH_NAME}?urlpath=lab/tree/examples/demo.ipynb) :point_left: Launch a binder JupyterLab on this branch`
+              body: `[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/${REPO_NAME}/${BRANCH_NAME}?urlpath=lab/tree/examples/demo.ipynb) :point_left: Launch a binder JupyterLab on this branch`
             })
           })
