@@ -2,10 +2,18 @@
 import argparse as argpar
 import json
 import subprocess
+from packaging.version import parse
 
 from setupbase import get_version
 
 VERSION_PY = 'jupyterlab_git/_version.py'
+
+def assertEqualVersion():
+    serverVersion = parse(serverExtensionVersion())
+    frontendVersion = parse(labExtensionVersion())
+
+    error_msg = "Frontend ({}) and server ({}) version do not match".format(frontendVersion, serverVersion)
+    assert serverVersion == frontendVersion, error_msg
 
 def prepLabextensionBundle():
     subprocess.run(['jlpm', 'clean:slate'])
