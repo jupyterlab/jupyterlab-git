@@ -1172,6 +1172,64 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Make request to ensure gitignore.
+   *
+   */
+  async ensureGitignore(): Promise<Response> {
+    await this.ready;
+    const repositoryPath = this.pathRepository;
+
+    if (repositoryPath === null) {
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            code: -1,
+            message: 'Not in a git repository.'
+          })
+        )
+      );
+    }
+
+    const response = await httpGitRequest('/git/ignore', 'POST', {
+      top_repo_path: repositoryPath
+    });
+
+    this.refreshStatus();
+    return Promise.resolve(response);
+  }
+
+  /**
+   * Make request to ignore one file.
+   *
+   * @param filename Optional name of the files to add
+   */
+  async ignore(filePath: string, useExtension: boolean): Promise<Response> {
+    await this.ready;
+    const repositoryPath = this.pathRepository;
+
+    if (repositoryPath === null) {
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            code: -1,
+            message: 'Not in a git repository.'
+          })
+        )
+      );
+    }
+
+    const response = await httpGitRequest('/git/ignore', 'POST', {
+      top_repo_path: repositoryPath,
+      file_path: filePath,
+      use_extension: useExtension
+    });
+
+    this.refreshStatus();
+    return Promise.resolve(response);
+  }
+
+  /**
+   * Make request for a list of all git branches in the repository
    * Retrieve a list of repository branches.
    *
    * @returns promise which resolves upon fetching repository branches

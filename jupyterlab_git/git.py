@@ -6,6 +6,7 @@ import re
 import subprocess
 from urllib.parse import unquote
 
+import pathlib
 import pexpect
 import tornado
 import tornado.locks
@@ -1109,6 +1110,46 @@ class Git:
                 "command": " ".join(cmd),
                 "message": my_error.decode("utf-8").strip()
             }
+
+    async def ensure_gitignore(self, top_repo_path):
+        """Handle call to ensure .gitignore file exists and the 
+        next append will be on a new line (this means an empty file
+        or a file ending with \n).
+
+        top_repo_path: str
+            Top Git repository path
+        """
+        try:            
+            gitignore = pathlib.Path(top_repo_path) / ".gitignore"
+            if not gitignore.exists():
+                gitignore.touch()
+            elif gitignore.stat().st_size > 0:
+                content = gitignore.read_text()
+                if (content[-1] != "\n"):
+                    with gitignore.open("a") as f:
+                        f.write('\n')
+        except BaseException as error:
+            return {"code": -1, "message": str(error)}
+        return {"code": 0}
+
+    async def ignore(self, top_repo_path, file_path):
+        """Handle call to add an entry in .gitignore.
+
+        top_repo_path: str
+            Top Git repository path
+        file_path: str
+            The path of the file in .gitignore 
+        """
+        try:
+            res = await self.ensure_gitignore(top_repo_path)
+            if res["code"] != 0:
+                return res
+            gitignore = pathlib.Path(top_repo_path) / ".gitignore"
+            with gitignore.open("a") as f:
+                f.write(file_path + "\n")
+        except BaseException as error:
+            return {"code": -1, "message": str(error)}
+        return {"code": 0}
 
     async def version(self):
         """Return the Git command version.
