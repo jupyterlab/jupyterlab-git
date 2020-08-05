@@ -12,6 +12,7 @@ import { ITerminal } from '@jupyterlab/terminal';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
 import { IGitExtension } from './tokens';
+import { GitExtension } from './model';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { doGitClone } from './widgets/gitClone';
 import { GitPullPushDialog, Operation } from './widgets/gitPushPull';
@@ -39,6 +40,7 @@ export namespace CommandIDs {
   export const gitToggleDoubleClickDiff = 'git:toggle-double-click-diff';
   export const gitAddRemote = 'git:add-remote';
   export const gitClone = 'git:clone';
+  export const gitOpenGitignore = 'git:open-gitignore';
   export const gitPush = 'git:push';
   export const gitPull = 'git:pull';
 }
@@ -190,6 +192,21 @@ export function addCommands(
     }
   });
 
+  /** Add git open gitignore command */
+  commands.addCommand(CommandIDs.gitOpenGitignore, {
+    label: 'Open .gitignore',
+    caption: 'Open .gitignore',
+    isEnabled: () => model.pathRepository !== null,
+    execute: async () => {
+      await model.ensureGitignore();
+      const gitModel = model as GitExtension;
+      await gitModel.commands.execute('docmanager:reload');
+      await gitModel.commands.execute('docmanager:open', {
+        path: model.getRelativeFilePath('.gitignore')
+      });
+    }
+  });
+
   /** Add git push command */
   commands.addCommand(CommandIDs.gitPush, {
     label: 'Push to Remote',
@@ -252,6 +269,10 @@ export function createGitMenu(commands: CommandRegistry): Menu {
   menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
 
   menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
+
+  menu.addItem({ type: 'separator' });
+
+  menu.addItem({ command: CommandIDs.gitOpenGitignore });
 
   menu.addItem({ type: 'separator' });
 

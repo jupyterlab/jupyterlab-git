@@ -280,6 +280,19 @@ export interface IGitExtension extends IDisposable {
   showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
 
   /**
+   * Ensure a .gitignore file exists
+   */
+  ensureGitignore(): Promise<Response>;
+
+  /**
+   * Add an entry in .gitignore file
+   *
+   * @param filename The name of the entry to ignore
+   * @param useExtension Ignore all files having the same extension as filename
+   */
+  ignore(filename: string, useExtension: boolean): Promise<Response>;
+
+  /*
    * Make request to list all the tags present in the remote repo
    *
    * @returns list of tags
