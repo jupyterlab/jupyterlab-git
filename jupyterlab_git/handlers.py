@@ -534,6 +534,34 @@ class GitDiffContentHandler(GitHandler):
         self.finish(json.dumps(response))
 
 
+class GitIgnoreHandler(GitHandler):
+    """
+    Handler to manage .gitignore
+    """
+
+    @web.authenticated
+    async def post(self):
+        """
+        POST add entry in .gitignore
+        """
+        data = self.get_json_body()
+        top_repo_path = data["top_repo_path"]
+        file_path = data.get("file_path", None)
+        use_extension = data.get("use_extension", False)
+        if file_path:
+            if use_extension:
+                suffixes = Path(file_path).suffixes
+                if len(suffixes) > 0:
+                    file_path = "**/*" + ".".join(suffixes)
+            body = await self.git.ignore(top_repo_path, file_path)
+        else:
+            body = await self.git.ensure_gitignore(top_repo_path)
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
+
+
 class GitSettingsHandler(GitHandler):
     @web.authenticated
     async def get(self):
@@ -626,6 +654,7 @@ def setup_handlers(web_app):
         ("/git/show_top_level", GitShowTopLevelHandler),
         ("/git/status", GitStatusHandler),
         ("/git/upstream", GitUpstreamHandler),
+        ("/git/ignore", GitIgnoreHandler),
         ("/git/tags", GitTagHandler),
         ("/git/tag_checkout", GitTagCheckoutHandler)
     ]
