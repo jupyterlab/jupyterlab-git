@@ -192,7 +192,7 @@ class Git:
 
         return response
 
-    async def changed_files(self, base=None, remote=None, single_commit=None):
+    async def changed_files(self, current_path, base=None, remote=None, single_commit=None):
         """Gets the list of changed files between two Git refs, or the files changed in a single commit
 
         There are two reserved "refs" for the base
@@ -212,7 +212,7 @@ class Git:
             }
         """
         if single_commit:
-            cmd = ["git", "diff", "{}^!".format(single_commit), "--name-only", "-z"]
+            cmd = ["git", "diff", single_commit, "--name-only", "-z"]
         elif base and remote:
             if base == "WORKING":
                 cmd = ["git", "diff", remote, "--name-only", "-z"]
@@ -227,7 +227,7 @@ class Git:
 
         response = {}
         try:
-            code, output, error = await execute(cmd, cwd=self.root_dir)
+            code, output, error = await execute(cmd, cwd=os.path.join(self.root_dir, current_path))
         except subprocess.CalledProcessError as e:
             response["code"] = e.returncode
             response["message"] = e.output.decode("utf-8")

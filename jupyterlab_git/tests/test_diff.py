@@ -14,7 +14,7 @@ from .testutils import FakeContentManager, maybe_future
 async def test_changed_files_invalid_input():
     with pytest.raises(tornado.web.HTTPError):
         await Git(FakeContentManager("/bin")).changed_files(
-            base="64950a634cd11d1a01ddfedaeffed67b531cb11e"
+            current_path="test-path", base="64950a634cd11d1a01ddfedaeffed67b531cb11e"
         )
 
 
@@ -29,7 +29,7 @@ async def test_changed_files_single_commit():
 
         # When
         actual_response = await Git(FakeContentManager("/bin")).changed_files(
-            single_commit="64950a634cd11d1a01ddfedaeffed67b531cb11e"
+            current_path="test-path", single_commit="64950a634cd11d1a01ddfedaeffed67b531cb11e^!"
         )
 
         # Then
@@ -41,7 +41,7 @@ async def test_changed_files_single_commit():
                 "--name-only",
                 "-z",
             ],
-            cwd="/bin",
+            cwd="/bin/test-path",
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -56,12 +56,12 @@ async def test_changed_files_working_tree():
 
         # When
         actual_response = await Git(FakeContentManager("/bin")).changed_files(
-            base="WORKING", remote="HEAD"
+            current_path="test-path", base="WORKING", remote="HEAD"
         )
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "--name-only", "-z"], cwd="/bin"
+            ["git", "diff", "HEAD", "--name-only", "-z"], cwd="/bin/test-path"
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -76,12 +76,12 @@ async def test_changed_files_index():
 
         # When
         actual_response = await Git(FakeContentManager("/bin")).changed_files(
-            base="INDEX", remote="HEAD"
+            current_path="test-path", base="INDEX", remote="HEAD"
         )
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "--staged", "HEAD", "--name-only", "-z"], cwd="/bin"
+            ["git", "diff", "--staged", "HEAD", "--name-only", "-z"], cwd="/bin/test-path"
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -96,12 +96,12 @@ async def test_changed_files_two_commits():
 
         # When
         actual_response = await Git(FakeContentManager("/bin")).changed_files(
-            base="HEAD", remote="origin/HEAD"
+            current_path = "test-path", base="HEAD", remote="origin/HEAD"
         )
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"], cwd="/bin"
+            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"], cwd="/bin/test-path"
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -114,12 +114,12 @@ async def test_changed_files_git_diff_error():
 
         # When
         actual_response = await Git(FakeContentManager("/bin")).changed_files(
-            base="HEAD", remote="origin/HEAD"
+            current_path="test-path", base="HEAD", remote="origin/HEAD"
         )
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"], cwd="/bin"
+            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"], cwd="/bin/test-path"
         )
         assert {"code": 128, "message": "error message"} == actual_response
 

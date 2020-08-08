@@ -5,6 +5,7 @@ import {
   Poll,
   ISettingRegistry
 } from '@jupyterlab/coreutils';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ServerConnection } from '@jupyterlab/services';
 import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
@@ -31,11 +32,13 @@ export class GitExtension implements IGitExtension {
   constructor(
     serverRoot: string,
     app: JupyterFrontEnd = null,
+    docmanager: IDocumentManager = null,
     settings?: ISettingRegistry.ISettings
   ) {
     const self = this;
     this._serverRoot = serverRoot;
     this._app = app;
+    this._docmanager = docmanager;
     this._settings = settings || null;
 
     let interval: number;
@@ -462,6 +465,19 @@ export class GitExtension implements IGitExtension {
     const tid = this._addTask('git:checkout');
     try {
       response = await httpGitRequest('/git/checkout', 'POST', body);
+
+      if (response.ok) {
+        if (body.checkout_branch) {
+          const files = (
+            await this.changedFiles(this._currentBranch.name, body.branchname)
+          )['files'];
+          if (files) {
+            files.forEach(file => this._revertFile(file));
+          }
+        } else {
+          this._revertFile(options.filename);
+        }
+      }
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     } finally {
@@ -471,6 +487,7 @@ export class GitExtension implements IGitExtension {
     if (!response.ok) {
       throw new ServerConnection.ResponseError(response, data.message);
     }
+
     if (body.checkout_branch) {
       await this.refreshBranch();
       this._headChanged.emit();
@@ -612,11 +629,17 @@ export class GitExtension implements IGitExtension {
       return Promise.resolve(new Response(JSON.stringify(response)));
     }
     const tid = this._addTask('git:commit:revert');
+    const files = (await this.changedFiles(null, null, hash + '^!'))['files'];
     try {
       response = await httpGitRequest('/git/delete_commit', 'POST', {
         commit_id: hash,
         top_repo_path: path
       });
+      if (response.ok && files) {
+        files.forEach(file => {
+          this._revertFile(file);
+        });
+      }
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     } finally {
@@ -908,12 +931,29 @@ export class GitExtension implements IGitExtension {
       return Promise.resolve(new Response(JSON.stringify(response)));
     }
     const tid = this._addTask('git:reset:changes');
+    const reset_all = filename === undefined;
+    let files;
+    if (reset_all) {
+      files = (await this.changedFiles('INDEX', 'HEAD'))['files'];
+    }
     try {
       response = await httpGitRequest('/git/reset', 'POST', {
         reset_all: filename === undefined,
         filename: filename === undefined ? null : filename,
         top_repo_path: path
       });
+
+      if (response.ok) {
+        if (reset_all) {
+          if (files) {
+            files.forEach(file => {
+              this._revertFile(file);
+            });
+          }
+        } else {
+          this._revertFile(filename);
+        }
+      }
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     } finally {
@@ -950,12 +990,20 @@ export class GitExtension implements IGitExtension {
       };
       return Promise.resolve(new Response(JSON.stringify(response)));
     }
+    const files = (await this.changedFiles(null, null, hash))['files'];
     const tid = this._addTask('git:reset:hard');
     try {
       response = await httpGitRequest('/git/reset_to_commit', 'POST', {
         commit_id: hash,
         top_repo_path: path
       });
+      if (response.ok) {
+        if (files) {
+          files.forEach(file => {
+            this._revertFile(file);
+          });
+        }
+      }
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
     } finally {
@@ -1230,6 +1278,37 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Get list of files changed between two commits or two branches
+   * @param base id of base commit or base branch for comparison
+   * @param remote id of remote commit or remote branch for comparison
+   * @param singleCommit id of a single commit
+   *
+   * @returns the names of the changed files
+   */
+  async changedFiles(
+    base?: string,
+    remote?: string,
+    singleCommit?: string
+  ): Promise<Git.IChangedFilesResult> {
+    try {
+      const response = await httpGitRequest('/git/changed_files', 'POST', {
+        current_path: this.pathRepository,
+        base: base,
+        remote: remote,
+        single_commit: singleCommit
+      });
+      if (!response.ok) {
+        return response.json().then((data: any) => {
+          throw new ServerConnection.ResponseError(response, data.message);
+        });
+      }
+      return response.json();
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    }
+  }
+
+  /**
    * Make request for a list of all git branches in the repository
    * Retrieve a list of repository branches.
    *
@@ -1347,12 +1426,26 @@ export class GitExtension implements IGitExtension {
     return this._taskID;
   }
 
+  /**
+   * if file is open in JupyterLab find the widget and ensure the JupyterLab
+   * version matches the version on disk. Do nothing if the file has unsaved changes
+   *
+   * @param path path to the file to be reverted
+   */
+  private _revertFile(path: string): void {
+    const widget = this._docmanager.findWidget(this.getRelativeFilePath(path));
+    if (widget && !widget.context.model.dirty) {
+      widget.context.revert();
+    }
+  }
+
   private _status: Git.IStatusFile[] = [];
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[];
   private _currentBranch: Git.IBranch;
   private _serverRoot: string;
   private _app: JupyterFrontEnd | null;
+  private _docmanager: IDocumentManager | null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
   private _isDisposed = false;
   private _markerCache: Markers = new Markers(() => this._markChanged.emit());
