@@ -78,16 +78,6 @@ describe('IGitExtension', () => {
     model = new GitExtension(fakeRoot, app as any, docmanager as any);
   });
 
-  describe('#constructor', () => {
-    it('should have requested the server root folder', () => {
-      expect(mockGit.httpGitRequest).toBeCalledWith(
-        '/git/server_root',
-        'GET',
-        null
-      );
-    });
-  });
-
   describe('#pathRepository', () => {
     it('should be null if not in a git repository', async () => {
       const path = '/path/to/server/repo';
