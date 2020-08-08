@@ -1198,7 +1198,8 @@ export class GitExtension implements IGitExtension {
   /**
    * Make request to ignore one file.
    *
-   * @param filename Optional name of the files to add
+   * @param filePath File to ignore
+   * @param useExtension Whether to ignore the file or its extension
    */
   async ignore(filePath: string, useExtension: boolean): Promise<Response> {
     await this.ready;
