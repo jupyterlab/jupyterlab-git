@@ -30,7 +30,7 @@ export class GitTagDialog extends Widget {
       .then(response => {
         this._handleResponse(response);
       })
-      .catch(() => this._handleError());
+      .catch(error => this._handleError(error.message));
   }
 
   /**
@@ -40,8 +40,6 @@ export class GitTagDialog extends Widget {
    * @param response the response from the server API call
    */
   private async _handleResponse(response: Git.ITagResult) {
-    this.node.removeChild(this._spinner.node);
-    this._spinner.dispose();
     if (response.code === 0) {
       this._handleSuccess(response);
     } else {
@@ -57,6 +55,9 @@ export class GitTagDialog extends Widget {
   private _handleError(
     message = 'Unexpected failure. Please check your Jupyter server logs for more details.'
   ): void {
+    this.node.removeChild(this._spinner.node);
+    this._spinner.dispose();
+
     const label = document.createElement('label');
     const text = document.createElement('span');
     text.textContent = 'Tag list fetch failed with error:';
@@ -78,6 +79,9 @@ export class GitTagDialog extends Widget {
    * @param response Git REST API response
    */
   private _handleSuccess(response: Git.ITagResult): void {
+    this.node.removeChild(this._spinner.node);
+    this._spinner.dispose();
+
     const label = document.createElement('label');
     const text = document.createElement('span');
     text.textContent = 'Select the tag to checkout : ';

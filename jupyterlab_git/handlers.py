@@ -428,6 +428,9 @@ class GitPullHandler(GitHandler):
         data = self.get_json_body()
         response = await self.git.pull(data["current_path"], data.get("auth", None), data.get("cancel_on_conflict", False))
 
+        if response["code"] != 0:
+            self.set_status(500)
+
         self.finish(json.dumps(response))
 
 
@@ -655,6 +658,9 @@ class GitTagHandler(GitHandler):
         """
         current_path = self.get_json_body()["current_path"]
         result = await self.git.tags(current_path)
+
+        if result["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(result))
 
 
@@ -672,6 +678,9 @@ class GitTagCheckoutHandler(GitHandler):
         current_path = data["current_path"]
         tag = data["tag_id"]
         result = await self.git.tag_checkout(current_path, tag)
+
+        if result["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(result))
 
 
