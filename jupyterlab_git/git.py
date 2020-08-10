@@ -12,11 +12,15 @@ import tornado
 import tornado.locks
 import datetime
 
+from .log import get_logger
+
 
 # Regex pattern to capture (key, value) of Git configuration options.
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
 CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
 DEFAULT_REMOTE_NAME = "origin"
+# Maximum number of character of command output to print in debug log
+MAX_LOG_OUTPUT = 500  # type: int
 # How long to wait to be executed or finished your execution before timing out
 MAX_WAIT_FOR_EXECUTE_S = 20
 # Ensure on NFS or similar, that we give the .git/index.lock time to be removed
@@ -97,7 +101,7 @@ async def execute(
 
     try:
         await execution_lock.acquire(timeout=datetime.timedelta(seconds=MAX_WAIT_FOR_EXECUTE_S))
-    except  tornado.util.TimeoutError:
+    except tornado.util.TimeoutError:
         return (1, "", "Unable to get the lock on the directory")
 
     try:
@@ -110,6 +114,7 @@ async def execute(
 
         # If the lock still exists at this point, we will likely fail anyway, but let's try anyway
 
+        get_logger().debug("Execute {!s} in {!s}.".format(cmdline, cwd))
         if username is not None and password is not None:
             code, output, error = await call_subprocess_with_authentication(
                 cmdline,
@@ -123,6 +128,11 @@ async def execute(
             code, output, error = await current_loop.run_in_executor(
                 None, call_subprocess, cmdline, cwd, env
             )
+        log_output = output[:MAX_LOG_OUTPUT] + "..." if len(output) > MAX_LOG_OUTPUT else output
+        log_error = error[:MAX_LOG_OUTPUT] + "..." if len(error) > MAX_LOG_OUTPUT else error
+        get_logger().debug("Code: {}\nOutput: {}\nError: {}".format(code, log_output, log_error))
+    except BaseException:
+        get_logger().warning("Fail to execute {!s}".format(cmdline), exc_info=True)
     finally:
         execution_lock.release()
 
