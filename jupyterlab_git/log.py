@@ -1,11 +1,10 @@
 import logging
-from typing import Optional
 
 from traitlets.config import Application
 
 
 class _ExtensionLogger:
-    _LOGGER: Optional[logging.Logger] = None
+    _LOGGER = None  # type: Optional[logging.Logger]
 
     @classmethod
     def get_logger(cls) -> logging.Logger:
