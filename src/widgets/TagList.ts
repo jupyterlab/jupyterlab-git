@@ -85,7 +85,8 @@ export class GitTagDialog extends Widget {
     const label = document.createElement('label');
     const text = document.createElement('span');
     text.textContent = 'Select the tag to checkout : ';
-    const tags = response.tags;
+    // Reverse the tag list to get the more recent on top
+    const tags = response.tags.reverse();
     this._list = document.createElement('select');
     tags.forEach(tag => {
       if (tag) {
