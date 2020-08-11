@@ -908,7 +908,7 @@ class Git:
                     # After any failure, stop
                 except Exception as e:
                     code = 1
-                    action.append({
+                    actions.append({
                         'cmd': action,
                         'code': 1,
                         'stdout': None,

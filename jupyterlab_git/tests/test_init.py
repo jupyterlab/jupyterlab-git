@@ -86,3 +86,37 @@ async def test_init_and_post_init_fail():
                 }
             ],
         } == actual_response
+
+
+@pytest.mark.asyncio
+async def test_init_and_post_init_fail_to_run():
+    with patch("jupyterlab_git.git.execute") as mock_execute:
+        # Given
+        mock_execute.side_effect = [
+            maybe_future((0, "", "")),
+            Exception("Not a command!"),
+        ]
+
+        # When
+        actual_response = await Git(
+            FakeContentManager("/bin"),
+            JupyterLabGit(actions={"post_init": ["not_there arg"]}),
+        ).init("test_curr_path")
+
+        mock_execute.assert_called_with(
+            ["not_there", "arg"], cwd=os.path.join("/bin", "test_curr_path")
+        )
+
+        assert {
+            "code": 1,
+            "message": "",
+            "command": "git init",
+            "actions": [
+                {
+                    "stderr": "Exception: Not a command!",
+                    "stdout": None,
+                    "code": 1,
+                    "cmd": "not_there arg",
+                }
+            ],
+        } == actual_response
