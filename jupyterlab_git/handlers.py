@@ -621,6 +621,18 @@ class GitTagCheckoutHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+# FIXME remove for 0.22 release - this avoid error when upgrading from 0.20 to 0.21 if the frontend
+# has not been rebuilt yet.
+class GitServerRootHandler(GitHandler):
+
+    @web.authenticated
+    async def get(self):
+        # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
+        root_dir = getattr(self.contents_manager, "root_dir", None)
+        server_root = None if root_dir is None else Path(root_dir).as_posix()
+        self.finish(json.dumps({"server_root": server_root}))
+
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -649,6 +661,7 @@ def setup_handlers(web_app):
         ("/git/remote/add", GitRemoteAddHandler),
         ("/git/reset", GitResetHandler),
         ("/git/reset_to_commit", GitResetToCommitHandler),
+        ("/git/server_root", GitServerRootHandler),
         ("/git/settings", GitSettingsHandler),
         ("/git/show_prefix", GitShowPrefixHandler),
         ("/git/show_top_level", GitShowTopLevelHandler),
