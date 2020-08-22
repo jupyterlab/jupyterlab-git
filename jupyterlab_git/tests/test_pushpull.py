@@ -49,7 +49,7 @@ async def test_git_pull_with_conflict_fail():
                     cwd="/bin/test_curr_path",
                     env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                 )
-            ]);
+            ])
             assert {"code": 1, "message": "Automatic merge failed; fix conflicts and then commit the result."} == actual_response
 
 

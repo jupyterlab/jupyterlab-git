@@ -46,7 +46,7 @@ export class GitPullPushDialog extends Widget {
           .then(response => {
             this.handleResponse(response);
           })
-          .catch(() => this.handleError());
+          .catch(error => this.handleError(error.message));
         break;
       case Operation.Push:
         this._model
@@ -54,7 +54,7 @@ export class GitPullPushDialog extends Widget {
           .then(response => {
             this.handleResponse(response);
           })
-          .catch(() => this.handleError());
+          .catch(error => this.handleError(error.message));
         break;
       default:
         throw new Error(`Invalid _operation type: ${this._operation}`);
@@ -67,19 +67,8 @@ export class GitPullPushDialog extends Widget {
    * @param response the response from the server API call
    */
   private async handleResponse(response: Git.IPushPullResult) {
-    this.node.removeChild(this._spinner.node);
-    this._spinner.dispose();
     if (response.code !== 0) {
-      if (
-        AUTH_ERROR_MESSAGES.map(
-          message => response.message.indexOf(message) > -1
-        ).indexOf(true) > -1
-      ) {
-        this.handleError(response.message);
-        this.parent!.parent!.close(); // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      } else {
-        this.handleError(response.message);
-      }
+      this.handleError(response.message);
     } else {
       this.handleSuccess();
     }
@@ -88,6 +77,16 @@ export class GitPullPushDialog extends Widget {
   private handleError(
     message = 'Unexpected failure. Please check your Jupyter server logs for more details.'
   ): void {
+    if (
+      AUTH_ERROR_MESSAGES.map(
+        errorMessage => message.indexOf(errorMessage) > -1
+      ).indexOf(true) > -1
+    ) {
+      this.parent!.parent!.close(); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    }
+
+    this.node.removeChild(this._spinner.node);
+    this._spinner.dispose();
     const label = document.createElement('label');
     const text = document.createElement('span');
     text.textContent = `Git ${this._operation} failed with error:`;
@@ -104,6 +103,8 @@ export class GitPullPushDialog extends Widget {
   }
 
   private handleSuccess(): void {
+    this.node.removeChild(this._spinner.node);
+    this._spinner.dispose();
     const label = document.createElement('label');
     const text = document.createElement('span');
     text.textContent = `Git ${this._operation} completed successfully`;

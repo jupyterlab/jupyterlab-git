@@ -3,22 +3,16 @@ from unittest.mock import Mock, patch
 
 from jupyterlab_git.handlers import GitRemoteAddHandler
 
-from .testutils import assert_http_error, ServerTest
+from .testutils import assert_http_error, ServerTest, maybe_future
 
 
 class TestAddRemote(ServerTest):
-    @patch("subprocess.Popen")
-    def test_git_add_remote_success_no_name(self, popen):
+    @patch("jupyterlab_git.git.execute")
+    def test_git_add_remote_success_no_name(self, mock_execute):
         # Given
         path = "test_path"
         url = "http://github.com/myid/myrepository.git"
-        process_mock = Mock()
-        attrs = {
-            "communicate": Mock(return_value=(b"", b"",)),
-            "returncode": 0,
-        }
-        process_mock.configure_mock(**attrs)
-        popen.return_value = process_mock
+        mock_execute.return_value = maybe_future((0, "", ""))
 
         # When
         body = {
@@ -28,69 +22,47 @@ class TestAddRemote(ServerTest):
         response = self.tester.post(["remote", "add"], body=body)
 
         # Then
-        popen.assert_called_once_with(
-            ["git", "remote", "add", "origin", url],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=path,
-        )
-        process_mock.communicate.assert_called_once_with()
+        command = ["git", "remote", "add", "origin", url]
+        mock_execute.assert_called_once_with(command, cwd=path)
 
         assert response.status_code == 201
         payload = response.json()
         assert payload == {
             "code": 0,
-            "command": " ".join(["git", "remote", "add", "origin", url]),
+            "command": " ".join(command),
         }
 
-    @patch("subprocess.Popen")
-    def test_git_add_remote_success(self, popen):
+    @patch("jupyterlab_git.git.execute")
+    def test_git_add_remote_success(self, mock_execute):
         # Given
         path = "test_path"
         url = "http://github.com/myid/myrepository.git"
         name = "distant"
-        process_mock = Mock()
-        attrs = {
-            "communicate": Mock(return_value=(b"", b"",)),
-            "returncode": 0,
-        }
-        process_mock.configure_mock(**attrs)
-        popen.return_value = process_mock
+        mock_execute.return_value = maybe_future((0, "", ""))
 
         # When
         body = {"top_repo_path": path, "url": url, "name": name}
         response = self.tester.post(["remote", "add"], body=body)
 
         # Then
-        popen.assert_called_once_with(
-            ["git", "remote", "add", name, url],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=path,
-        )
-        process_mock.communicate.assert_called_once_with()
+        command = ["git", "remote", "add", name, url]
+        mock_execute.assert_called_once_with(command, cwd=path)
 
         assert response.status_code == 201
         payload = response.json()
         assert payload == {
             "code": 0,
-            "command": " ".join(["git", "remote", "add", name, url]),
+            "command": " ".join(command),
         }
 
-    @patch("subprocess.Popen")
-    def test_git_add_remote_failure(self, popen):
+    @patch("jupyterlab_git.git.execute")
+    def test_git_add_remote_failure(self, mock_execute):
         # Given
         path = "test_path"
         url = "http://github.com/myid/myrepository.git"
-        process_mock = Mock()
         error_msg = "Fake failure"
         error_code = 128
-        attrs = {
-            "communicate": Mock(return_value=(b"", bytes(error_msg, encoding="utf-8"))),
-            "returncode": error_code,
-        }
-        process_mock.configure_mock(**attrs)
-        popen.return_value = process_mock
+        mock_execute.return_value = maybe_future((error_code, "", error_msg))
 
         # When
         body = {
@@ -101,10 +73,6 @@ class TestAddRemote(ServerTest):
             self.tester.post(["remote", "add"], body=body)
 
         # Then
-        popen.assert_called_once_with(
-            ["git", "remote", "add", "origin", url],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=path,
+        mock_execute.assert_called_once_with(
+            ["git", "remote", "add", "origin", url], cwd=path
         )
-        process_mock.communicate.assert_called_once_with()

@@ -13,6 +13,11 @@ from packaging.version import parse
 from ._version import __version__
 from .git import DEFAULT_REMOTE_NAME
 
+
+# Git configuration options exposed through the REST API
+ALLOWED_OPTIONS = ['user.name', 'user.email']
+
+
 class GitHandler(APIHandler):
     """
     Top-level parent class.
@@ -265,13 +270,14 @@ class GitAddAllUntrackedHandler(GitHandler):
 class GitRemoteAddHandler(GitHandler):
     """Handler for 'git remote add <name> <url>'."""
 
-    def post(self):
+    @web.authenticated
+    async def post(self):
         """POST request handler to add a remote."""
         data = self.get_json_body()
         top_repo_path = data["top_repo_path"]
         name = data.get("name", DEFAULT_REMOTE_NAME)
         url = data["url"]
-        output = self.git.remote_add(top_repo_path, url, name)
+        output = await self.git.remote_add(top_repo_path, url, name)
         if(output["code"] == 0):
             self.set_status(201)
         else:
@@ -422,6 +428,9 @@ class GitPullHandler(GitHandler):
         data = self.get_json_body()
         response = await self.git.pull(data["current_path"], data.get("auth", None), data.get("cancel_on_conflict", False))
 
+        if response["code"] != 0:
+            self.set_status(500)
+
         self.finish(json.dumps(response))
 
 
@@ -436,32 +445,76 @@ class GitPushHandler(GitHandler):
         """
         POST request handler,
         pushes committed files from your current branch to a remote branch
+        
+        Request body: 
+        {
+            current_path: string, # Git repository path
+            remote?: string # Remote to push to; i.e. <remote_name> or <remote_name>/<branch>
+        }
         """
         data = self.get_json_body()
         current_path = data["current_path"]
+        known_remote = data.get("remote")
 
         current_local_branch = await self.git.get_current_branch(current_path)
-        upstream = await self.git.get_upstream_branch(
+        
+        set_upstream = False
+        current_upstream_branch = await self.git.get_upstream_branch(
             current_path, current_local_branch
         )
 
-        if upstream['code'] == 0:
-            branch = ":".join(["HEAD", upstream['remote_branch']])
+        if known_remote is not None:
+            set_upstream = current_upstream_branch['code'] != 0
+
+            remote_name, _, remote_branch = known_remote.partition("/")
+            
+            current_upstream_branch = {
+                "code": 0,
+                "remote_branch": remote_branch or current_local_branch,
+                "remote_short_name": remote_name
+            }
+
+        if current_upstream_branch['code'] == 0:
+            branch = ":".join(["HEAD", current_upstream_branch['remote_branch']])
             response = await self.git.push(
-                upstream['remote_short_name'], branch, current_path, data.get("auth", None)
+                current_upstream_branch['remote_short_name'], branch, current_path, data.get("auth", None), set_upstream
             )
 
         else:
-            if ("no upstream configured for branch" in upstream['message'].lower()
-                 or 'unknown revision or path' in upstream['message'].lower()):
+            # Allow users to specify upstream through their configuration
+            # https://git-scm.com/docs/git-config#Documentation/git-config.txt-pushdefault
+            # Or use the remote defined if only one remote exists
+            config = await self.git.config(current_path)
+            config_options = config["options"]
+            list_remotes = await self.git.remote_show(current_path)
+            remotes = list_remotes.get("remotes", list())
+            push_default = config_options.get('remote.pushdefault')
+
+            default_remote = None
+            if push_default is not None and push_default in remotes:
+                default_remote = push_default
+            elif len(remotes) == 1:
+                default_remote = remotes[0]
+
+            if default_remote is not None:
+                response = await self.git.push(
+                    default_remote, 
+                    current_local_branch, 
+                    current_path, 
+                    data.get("auth", None), 
+                    set_upstream=True,
+                )
+            else:
                 response = {
                     "code": 128,
                     "message": "fatal: The current branch {} has no upstream branch.".format(
                         current_local_branch
                     ),
+                    "remotes": remotes  # Returns the list of known remotes
                 }
-            else:
-                self.set_status(500)
+
+        if response["code"] != 0:
+            self.set_status(500)
 
         self.finish(json.dumps(response))
 
@@ -504,8 +557,12 @@ class GitConfigHandler(GitHandler):
         """
         data = self.get_json_body()
         top_repo_path = data["path"]
-        options = data.get("options", {})
-        response = await self.git.config(top_repo_path, **options)
+        options = data.get("options", {})        
+        
+        filtered_options = {k: v for k, v in options.items() if k in ALLOWED_OPTIONS}
+        response = await self.git.config(top_repo_path, **filtered_options)
+        if "options" in response:
+            response["options"] = {k:v for k, v in response["options"].items() if k in ALLOWED_OPTIONS}
 
         if response["code"] != 0:
             self.set_status(500)
@@ -601,6 +658,9 @@ class GitTagHandler(GitHandler):
         """
         current_path = self.get_json_body()["current_path"]
         result = await self.git.tags(current_path)
+
+        if result["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(result))
 
 
@@ -618,6 +678,9 @@ class GitTagCheckoutHandler(GitHandler):
         current_path = data["current_path"]
         tag = data["tag_id"]
         result = await self.git.tag_checkout(current_path, tag)
+
+        if result["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(result))
 
 
