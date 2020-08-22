@@ -13,13 +13,15 @@ import tornado
 import tornado.locks
 import datetime
 
+from .log import get_logger
 
-# Git configuration options exposed through the REST API
-ALLOWED_OPTIONS = ['user.name', 'user.email']
+
 # Regex pattern to capture (key, value) of Git configuration options.
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
 CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
 DEFAULT_REMOTE_NAME = "origin"
+# Maximum number of character of command output to print in debug log
+MAX_LOG_OUTPUT = 500  # type: int
 # How long to wait to be executed or finished your execution before timing out
 MAX_WAIT_FOR_EXECUTE_S = 20
 # Ensure on NFS or similar, that we give the .git/index.lock time to be removed
@@ -100,7 +102,7 @@ async def execute(
 
     try:
         await execution_lock.acquire(timeout=datetime.timedelta(seconds=MAX_WAIT_FOR_EXECUTE_S))
-    except  tornado.util.TimeoutError:
+    except tornado.util.TimeoutError:
         return (1, "", "Unable to get the lock on the directory")
 
     try:
@@ -113,6 +115,7 @@ async def execute(
 
         # If the lock still exists at this point, we will likely fail anyway, but let's try anyway
 
+        get_logger().debug("Execute {!s} in {!s}.".format(cmdline, cwd))
         if username is not None and password is not None:
             code, output, error = await call_subprocess_with_authentication(
                 cmdline,
@@ -126,6 +129,11 @@ async def execute(
             code, output, error = await current_loop.run_in_executor(
                 None, call_subprocess, cmdline, cwd, env
             )
+        log_output = output[:MAX_LOG_OUTPUT] + "..." if len(output) > MAX_LOG_OUTPUT else output
+        log_error = error[:MAX_LOG_OUTPUT] + "..." if len(error) > MAX_LOG_OUTPUT else error
+        get_logger().debug("Code: {}\nOutput: {}\nError: {}".format(code, log_output, log_error))
+    except BaseException:
+        get_logger().warning("Fail to execute {!s}".format(cmdline), exc_info=True)
     finally:
         execution_lock.release()
 
@@ -158,9 +166,7 @@ class Git:
 
         if len(kwargs):
             output = []
-            for k, v in filter(
-                lambda t: True if t[0] in ALLOWED_OPTIONS else False, kwargs.items()
-            ):
+            for k, v in kwargs.items():
                 cmd = ["git", "config", "--add", k, v]
                 code, out, err = await execute(cmd, cwd=top_repo_path)
                 output.append(out.strip())
@@ -182,7 +188,7 @@ class Git:
             else:
                 raw = output.strip()
                 s = CONFIG_PATTERN.split(raw)
-                response["options"] = {k:v for k, v in zip(s[1::2], s[2::2]) if k in ALLOWED_OPTIONS}
+                response["options"] = {k:v for k, v in zip(s[1::2], s[2::2])}
 
         return response
 
@@ -841,15 +847,20 @@ class Git:
 
         return response
 
-    async def push(self, remote, branch, curr_fb_path, auth=None):
+    async def push(self, remote, branch, curr_fb_path, auth=None, set_upstream=False):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
-        """
+        """        
+        command = ["git", "push"]
+        if set_upstream:
+            command.append("--set-upstream")
+        command.extend([remote, branch])
+
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, _, error = await execute(
-                ["git", "push", remote, branch],
+                command,
                 username=auth["username"],
                 password=auth["password"],
                 cwd=os.path.join(self.root_dir, curr_fb_path),
@@ -858,7 +869,7 @@ class Git:
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             code, _, error = await execute(
-                ["git", "push", remote, branch],
+                command,
                 env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
             )
@@ -1125,7 +1136,7 @@ class Git:
         # For binary files, `--numstat` outputs two `-` characters separated by TABs:
         return output.startswith('-\t-\t')
 
-    def remote_add(self, top_repo_path, url, name=DEFAULT_REMOTE_NAME):
+    async def remote_add(self, top_repo_path, url, name=DEFAULT_REMOTE_NAME):
         """Handle call to `git remote add` command.
 
         top_repo_path: str
@@ -1136,19 +1147,37 @@ class Git:
             Remote name; default "origin"
         """
         cmd = ["git", "remote", "add", name, url]
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=top_repo_path)
-        _, my_error = p.communicate()
-        if p.returncode == 0:
-            return {
-                "code": p.returncode,
+        code, _, error = await execute(cmd, cwd=top_repo_path)
+        response = {
+                "code": code,
                 "command": " ".join(cmd)
             }
-        else:
-            return {
-                "code": p.returncode,
-                "command": " ".join(cmd),
-                "message": my_error.decode("utf-8").strip()
+        
+        if code != 0:
+            response["message"] = error
+
+        return response
+
+    async def remote_show(self, path):
+        """Handle call to `git remote show` command.
+        Args:
+            path (str): Git repository path
+        
+        Returns:
+            List[str]: Known remotes
+        """
+        command = ["git", "remote", "show"]
+        code, output, error = await execute(command, cwd=path)
+        response = {
+                "code": code,
+                "command": " ".join(command)
             }
+        if code == 0:
+            response["remotes"] = [r.strip() for r in output.splitlines()]
+        else:
+            response["message"] = error
+
+        return response
 
     async def ensure_gitignore(self, top_repo_path):
         """Handle call to ensure .gitignore file exists and the 
