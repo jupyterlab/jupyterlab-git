@@ -122,3 +122,4 @@ node_modules/
 
 # vim stuff
 *.swp
+.devcontainer/
