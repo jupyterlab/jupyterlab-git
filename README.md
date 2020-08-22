@@ -30,8 +30,6 @@ jupyter lab build
 
 ## Settings
 
-### UI Settings
-
 Once installed, extension behavior can be modified via the following settings which can be set in JupyterLab's advanced settings editor:
 
 - **blockWhileCommandExecutes**: suspend JupyterLab user interaction until Git commands (e.g., `commit`, `pull`, `reset`, `revert`) finish executing. Setting this to `true` helps mitigate potential race conditions leading to data loss, conflicts, and a broken Git history. Unless running a slow network, UI suspension should not interfere with standard workflows. Setting this to `false` allows for actions to trigger multiple concurrent Git actions.
@@ -43,23 +41,7 @@ Once installed, extension behavior can be modified via the following settings wh
 - **refreshInterval**: number of milliseconds between polling the file system for changes. In order to ensure that the UI correctly displays the current repository status, the extension must poll the file system for changes. Longer polling times increase the likelihood that the UI does not reflect the current status; however, longer polling times also incur less performance overhead.
 - **simpleStaging**: enable a simplified concept of staging. When this setting is `true`, all files with changes are automatically staged. When we develop in JupyterLab, we often only care about what files have changed (in the broadest sense) and don't need to distinguish between "tracked" and "untracked" files. Accordingly, this setting allows us to simplify the visual presentation of changes, which is especially useful for those less acquainted with Git.
 
-### Server Settings
-
-- Post *git init* actions: It is possible to provide a list of commands to be executed in a folder after it is initialized as Git repository.
-
-```json
-{
-  "JupyterLabGit": {
-    "actions": {
-      "post_init": [
-        "touch dummy_init.dat"
-      ]
-    }
-  }
-}
-```
-
-## Troubleshooting
+### Troubleshooting
 
 Before consulting the following list, be sure the server extension and the frontend extension have the same version by executing the following commands:
 
