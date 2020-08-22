@@ -75,7 +75,7 @@ class TestConfig(ServerTest):
 
     @patch("jupyterlab_git.git.execute")
     @patch(
-        "jupyterlab_git.git.ALLOWED_OPTIONS",
+        "jupyterlab_git.handlers.ALLOWED_OPTIONS",
         ["alias.summary", "alias.topic-base-branch-name"],
     )
     def test_git_get_config_accepted_multiline(self, mock_execute):
