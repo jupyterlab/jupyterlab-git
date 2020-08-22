@@ -17,6 +17,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: 'x64'
+
       - name: Get pip cache dir
         id: pip-cache
         run: |
@@ -47,12 +53,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-${{ env.CACHE_NUMBER }}
             ${{ runner.os }}-yarn-
-
-      - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: 'x64'
 
       - name: Install dependencies
         run: |
