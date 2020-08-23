@@ -135,9 +135,7 @@ export class SinglePastCommitInfo extends React.Component<
       log = await this.props.model.detailedLog(this.props.commit.commit);
     } catch (err) {
       console.error(
-        `Error while getting detailed log for commit ${
-          this.props.commit.commit
-        } and path ${this.props.model.pathRepository}`,
+        `Error while getting detailed log for commit ${this.props.commit.commit} and path ${this.props.model.pathRepository}`,
         err
       );
       this.setState({ loadingState: 'error' });

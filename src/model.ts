@@ -465,10 +465,9 @@ export class GitExtension implements IGitExtension {
 
       if (response.ok) {
         if (body.checkout_branch) {
-          const files = (await this.changedFiles(
-            this._currentBranch.name,
-            body.branchname
-          ))['files'];
+          const files = (
+            await this.changedFiles(this._currentBranch.name, body.branchname)
+          )['files'];
           if (files) {
             files.forEach(file => this._revertFile(file));
           }
