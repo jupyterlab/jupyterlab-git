@@ -123,3 +123,4 @@ node_modules/
 # vim stuff
 *.swp
 .devcontainer/
+src/version.ts
