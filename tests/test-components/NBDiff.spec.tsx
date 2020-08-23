@@ -22,8 +22,9 @@ describe('NBDiff', () => {
       }
     };
 
-    const jsonResult: Promise<any> = Promise.resolve({
-      message: 'TEST_ERROR_MESSAGE'
+    let resolveJson: (value?: any) => void;
+    const jsonResult = new Promise<any>(resolve => {
+      resolveJson = resolve;
     });
 
     (httpGitRequest as jest.Mock).mockReturnValue(
@@ -32,20 +33,29 @@ describe('NBDiff', () => {
 
     // When
     const node = shallow<NBDiff>(<NBDiff {...props} />);
+    resolveJson({
+      message: 'TEST_ERROR_MESSAGE'
+    });
 
     // Then
-    await jsonResult;
-    node.update();
-
-    expect(httpGitRequest).toHaveBeenCalled();
-    expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
-      file_path: 'top/repo/path/path/to/File.ipynb',
-      ref_remote: { special: 'WORKING' },
-      ref_local: { git: '83baee' }
+    let resolveTest: () => void;
+    const terminateTest = new Promise(resolve => {resolveTest = resolve});
+    setImmediate(() => {
+      expect(httpGitRequest).toHaveBeenCalled();
+      expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
+        file_path: 'top/repo/path/path/to/File.ipynb',
+        ref_remote: { special: 'WORKING' },
+        ref_local: { git: '83baee' }
+      });
+      expect(
+        node
+          .update()
+          .find('.jp-git-diff-error')
+          .text()
+      ).toContain('TEST_ERROR_MESSAGE');
+      resolveTest();
     });
-    expect(node.find('.jp-git-diff-error').text()).toContain(
-      'TEST_ERROR_MESSAGE'
-    );
+    await terminateTest;
   });
 
   it('should render header and cell diff components in success case', async () => {
@@ -59,7 +69,10 @@ describe('NBDiff', () => {
       }
     };
 
-    const jsonResult: Promise<any> = Promise.resolve(diffResponse);
+    let resolveJson: (value?: any) => void;
+    const jsonResult: Promise<any> = new Promise<any>(resolve => {
+      resolveJson = resolve;
+    });
 
     (httpGitRequest as jest.Mock).mockReturnValue(
       createTestResponse(200, jsonResult)
@@ -67,19 +80,24 @@ describe('NBDiff', () => {
 
     // When
     const node = shallow<NBDiff>(<NBDiff {...props} />);
+    resolveJson(diffResponse);
 
     // Then
-    await jsonResult;
-    node.update();
-
-    expect(httpGitRequest).toHaveBeenCalled();
-    expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
-      file_path: 'top/repo/path/path/to/File.ipynb',
-      ref_remote: { special: 'WORKING' },
-      ref_local: { git: '83baee' }
+    let resolveTest: () => void;
+    const terminateTest = new Promise(resolve => {resolveTest = resolve});
+    setImmediate(() => {
+      expect(httpGitRequest).toHaveBeenCalled();
+      expect(httpGitRequest).toBeCalledWith('/nbdime/api/gitdiff', 'POST', {
+        file_path: 'top/repo/path/path/to/File.ipynb',
+        ref_remote: { special: 'WORKING' },
+        ref_local: { git: '83baee' }
+      });
+      node.update();
+      expect(node.find('.jp-git-diff-error')).toHaveLength(0);
+      expect(node.find(NBDiffHeader)).toHaveLength(1);
+      expect(node.find(CellDiff)).toHaveLength(3);
+      resolveTest();
     });
-    expect(node.find('.jp-git-diff-error')).toHaveLength(0);
-    expect(node.find(NBDiffHeader)).toHaveLength(1);
-    expect(node.find(CellDiff)).toHaveLength(3);
+    await terminateTest;
   });
 });

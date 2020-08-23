@@ -170,9 +170,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   refreshHistory = async () => {
     if (this.props.model.pathRepository !== null) {
       // Get git log for current branch
-      const logData = await this.props.model.log(this.props.settings.composite[
-        'historyCount'
-      ] as number);
+      const logData = await this.props.model.log(
+        this.props.settings.composite['historyCount'] as number
+      );
       let pastCommits = new Array<Git.ISingleCommitInfo>();
       if (logData.code === 0) {
         pastCommits = logData.commits;

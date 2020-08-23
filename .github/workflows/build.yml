@@ -1,0 +1,91 @@
+name: Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: "*"
+
+jobs:
+  test-3x:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.5', '3.6', '3.7', '3.8']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: 'x64'
+
+      - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+      
+      - name: pip cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+            ${{ runner.os }}-pip-
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Setup yarn cache
+        uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        env:
+          # Increase this value to reset cache
+          CACHE_NUMBER: 0
+        with:
+          path: |
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_NUMBER }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.CACHE_NUMBER }}
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: |
+          pip install wheel
+          pip install --upgrade --upgrade-strategy=eager pytest pytest-asyncio "jupyterlab~=2.0"
+
+      - name: Test the extension
+        run: |
+          # Build the sdist (identical to what will be uploaded to eg pypi on release)
+          python setup.py sdist
+          # Linter checks
+          jlpm run eslint-check
+        
+          # Install the extension from the sdist ensuring the cache is unused
+          pip install jupyterlab_git[test] --pre --no-index --find-links=dist --no-deps --no-cache-dir -v
+          # Install the extension dependencies based on the current setup.py
+          pip install jupyterlab_git[test]
+        
+          # Run the Python tests
+          pytest jupyterlab_git -r ap
+          # Run the TS/JS tests
+          jlpm run test
+        
+          # Log the current state of jupyterlab's extensions
+          jupyter labextension list
+          # Rebuild jupyterlab to include our extension
+          jupyter lab build
+          # Run the standard jupyterlab browser integration test
+          jupyter serverextension list 1>serverextensions 2>&1
+          cat serverextensions | grep "jupyterlab_git.*OK"
+          jupyter labextension list 1>labextensions 2>&1
+          cat labextensions | grep "@jupyterlab/git.*OK"
+          python -m jupyterlab.browser_check
+          # Run our extension-specific browser integration test
+          python tests/test-browser/run_browser_test.py
