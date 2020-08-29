@@ -335,7 +335,7 @@ export class NewBranchDialog extends React.Component<
             'jp-git-icon',
             listItemIconClass,
             'jp-Icon-16',
-            isBold && 'jp-git-selected'
+            isBase && 'jp-git-selected'
           )}
         />
         <div className={listItemContentClass}>
