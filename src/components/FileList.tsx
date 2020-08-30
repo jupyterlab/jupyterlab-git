@@ -48,6 +48,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this._contextMenuUntracked = new Menu({ commands });
     this._contextMenuUntrackedMin = new Menu({ commands });
     this._contextMenuSimpleUntracked = new Menu({ commands });
+    this._contextMenuSimpleUntrackedMin = new Menu({ commands });
     this._contextMenuSimpleTracked = new Menu({ commands });
 
     this.state = {
@@ -231,8 +232,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       this._contextMenuSimpleTracked.addItem({ command });
     });
 
-    [CommandIDs.gitFileOpen].forEach(command => {
+    [
+      CommandIDs.gitFileOpen,
+      CommandIDs.gitIgnore,
+      CommandIDs.gitIgnoreExtension
+    ].forEach(command => {
       this._contextMenuSimpleUntracked.addItem({ command });
+    });
+
+    [CommandIDs.gitFileOpen, CommandIDs.gitIgnore].forEach(command => {
+      this._contextMenuSimpleUntrackedMin.addItem({ command });
     });
   }
 
@@ -262,7 +271,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   /** Handle right-click on an untracked file in Simple mode*/
   contextMenuSimpleUntracked = (event: React.MouseEvent) => {
     event.preventDefault();
-    this._contextMenuSimpleUntracked.open(event.clientX, event.clientY);
+    const extension = PathExt.extname(this.state.selectedFile.to);
+    if (extension.length > 0) {
+      this._contextMenuSimpleUntracked.open(event.clientX, event.clientY);
+    } else {
+      this._contextMenuSimpleUntrackedMin.open(event.clientX, event.clientY);
+    }
   };
 
   /** Handle right-click on an tracked file in Simple mode*/
@@ -813,4 +827,5 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _contextMenuUntrackedMin: Menu;
   private _contextMenuSimpleTracked: Menu;
   private _contextMenuSimpleUntracked: Menu;
+  private _contextMenuSimpleUntrackedMin: Menu;
 }
