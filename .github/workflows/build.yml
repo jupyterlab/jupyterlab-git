@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install wheel
-          pip install --upgrade --upgrade-strategy=eager pytest pytest-asyncio "jupyterlab~=2.0"
+          pip install --upgrade --upgrade-strategy=eager pytest pytest-asyncio "jupyterlab~=1.2"
 
       - name: Test the extension
         run: |
