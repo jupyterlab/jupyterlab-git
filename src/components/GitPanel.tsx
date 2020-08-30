@@ -6,7 +6,6 @@ import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { JSONObject } from '@lumino/coreutils';
 import { GitExtension } from '../model';
 import { sleep } from '../utils';
 import { Git, ILogMessage } from '../tokens';
@@ -27,6 +26,9 @@ import { Toolbar } from './Toolbar';
 import { SuspendModal } from './SuspendModal';
 import { Alert } from './Alert';
 import { CommandIDs } from '../commandsAndMenu';
+
+const MISSING_IDENTITY =
+  'Your name and email address were configured automatically';
 
 /**
  * Interface describing component properties.
@@ -227,26 +229,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns a promise which commits the files
    */
   commitStagedFiles = async (message: string): Promise<void> => {
-    let res: boolean;
+    let res: Response;
     if (!message) {
-      return;
-    }
-    try {
-      res = await this._hasIdentity(this.props.model.pathRepository);
-    } catch (err) {
-      this._log({
-        severity: 'error',
-        message: 'Failed to commit changes.'
-      });
-      console.error(err);
-      showErrorMessage('Fail to commit', err);
-      return;
-    }
-    if (!res) {
-      this._log({
-        severity: 'error',
-        message: 'Failed to commit changes.'
-      });
       return;
     }
     this._log({
@@ -255,7 +239,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     });
     this._suspend(true);
     try {
-      await Promise.all([sleep(1000), this.props.model.commit(message)]);
+      [, res] = await Promise.all<any, Response>([
+        sleep(1000),
+        this.props.model.commit(message)
+      ]);
     } catch (err) {
       this._suspend(false);
       this._log({
@@ -271,6 +258,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       severity: 'success',
       message: 'Committed changes.'
     });
+    const { output } = await res.json();
+    if (output.indexOf(MISSING_IDENTITY) !== -1) {
+      await this._setIdentity(this.props.model.pathRepository);
+    }
   };
 
   /**
@@ -570,37 +561,36 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @param path - repository path
    * @returns a promise which returns a success status
    */
-  private async _hasIdentity(path: string): Promise<boolean> {
+  private async _setIdentity(path: string): Promise<boolean> {
     // If the repository path changes, check the user identity
     if (path !== this._previousRepoPath) {
       try {
-        let res = await this.props.model.config();
-        if (res.ok) {
-          const options: JSONObject = (await res.json()).options;
-          const keys = Object.keys(options);
-
-          // If the user name or e-mail is unknown, ask the user to set it
-          if (keys.indexOf('user.name') < 0 || keys.indexOf('user.email') < 0) {
-            const result = await showDialog({
-              title: 'Who is committing?',
-              body: new GitAuthorForm()
-            });
-            if (!result.button.accept) {
-              console.log('User refuses to set identity.');
-              return false;
-            }
-            const identity = result.value;
-            res = await this.props.model.config({
-              'user.name': identity.name,
-              'user.email': identity.email
-            });
-            if (!res.ok) {
-              console.log(await res.text());
-              return false;
-            }
-          }
-          this._previousRepoPath = path;
+        const result = await showDialog({
+          title: 'Who is committing?',
+          body: new GitAuthorForm()
+        });
+        if (!result.button.accept) {
+          console.log('User refuses to set identity.');
+          return false;
         }
+        const identity = result.value;
+        let res = await this.props.model.config({
+          'user.name': identity.name,
+          'user.email': identity.email
+        });
+        if (!res.ok) {
+          console.log(await res.text());
+          return false;
+        }
+        this._suspend(true);
+        res = await this.props.model.resetAuthor();
+        if (!res.ok) {
+          this._suspend(false);
+          console.log(await res.text());
+          return false;
+        }
+        this._suspend(false);
+        this._previousRepoPath = path;
       } catch (error) {
         throw new Error('Failed to set your identity. ' + error.message);
       }

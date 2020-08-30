@@ -375,6 +375,22 @@ class GitCheckoutHandler(GitHandler):
         self.finish(json.dumps(body))
 
 
+class GitResetAuthorHandler(GitHandler):
+    """
+    Handler for 'git commit --amend --reset-author --no-edit'.
+    """
+
+    @web.authenticated
+    async def post(self):
+        data = self.get_json_body()
+        top_repo_path = data["top_repo_path"]
+        body = await self.git.reset_author(top_repo_path)
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
+
+
 class GitCommitHandler(GitHandler):
     """
     Handler for 'git commit -m <message>'. Commits files.
@@ -711,6 +727,7 @@ def setup_handlers(web_app):
         ("/git/changed_files", GitChangedFilesHandler),
         ("/git/checkout", GitCheckoutHandler),
         ("/git/clone", GitCloneHandler),
+        ("/git/reset_author", GitResetAuthorHandler),
         ("/git/commit", GitCommitHandler),
         ("/git/config", GitConfigHandler),
         ("/git/delete_commit", GitDeleteCommitHandler),
