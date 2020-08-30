@@ -6,6 +6,8 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { JupyterLab } from '@jupyterlab/application';
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { mockedRequestAPI } from './utils';
 
 jest.mock('../src/git');
 jest.mock('@jupyterlab/application');
@@ -18,7 +20,7 @@ describe('plugin', () => {
   let app: jest.Mocked<JupyterLab>;
   let mockResponses: {
     [url: string]: {
-      body?: (request: Object) => string;
+      body?: (request: Object) => ReadonlyJSONObject;
       status?: number;
     };
   } = {};
@@ -33,41 +35,22 @@ describe('plugin', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    mockGit.httpGitRequest.mockImplementation((url, method, request) => {
-      let response: Response;
-      if (url in mockResponses) {
-        response = new Response(
-          mockResponses[url].body
-            ? mockResponses[url].body(request)
-            : undefined,
-          {
-            status: mockResponses[url].status
-          }
-        );
-      } else {
-        response = new Response(
-          `{"message": "No mock implementation for ${url}."}`,
-          { status: 404 }
-        );
-      }
-      return Promise.resolve(response);
-    });
+    mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
   });
 
   describe('#activate', () => {
     it('should fail if no git is installed', async () => {
       // Given
-      const endpoint =
-        '/git/settings' + URLExt.objectToQueryString({ version });
+      const endpoint = 'settings' + URLExt.objectToQueryString({ version });
       mockResponses[endpoint] = {
-        body: request =>
-          JSON.stringify({
+        body: request => {
+          return {
             gitVersion: null,
             frontendVersion: version,
             serverRoot: fakeRoot,
             serverVersion: version
-          }),
-        status: 200
+          };
+        }
       };
       const mockedErrorMessage = showErrorMessage as jest.MockedFunction<
         typeof showErrorMessage
@@ -94,17 +77,16 @@ describe('plugin', () => {
 
     it('should fail if git version is < 2', async () => {
       // Given
-      const endpoint =
-        '/git/settings' + URLExt.objectToQueryString({ version });
+      const endpoint = 'settings' + URLExt.objectToQueryString({ version });
       mockResponses[endpoint] = {
-        body: request =>
-          JSON.stringify({
+        body: request => {
+          return {
             gitVersion: '1.8.7',
             frontendVersion: version,
             serverRoot: fakeRoot,
             serverVersion: version
-          }),
-        status: 200
+          };
+        }
       };
       const mockedErrorMessage = showErrorMessage as jest.MockedFunction<
         typeof showErrorMessage
@@ -130,17 +112,16 @@ describe('plugin', () => {
     });
     it('should fail if server and extension version do not match', async () => {
       // Given
-      const endpoint =
-        '/git/settings' + URLExt.objectToQueryString({ version });
+      const endpoint = 'settings' + URLExt.objectToQueryString({ version });
       mockResponses[endpoint] = {
-        body: request =>
-          JSON.stringify({
+        body: request => {
+          return {
             gitVersion: '2.22.0',
             frontendVersion: version,
             serverRoot: fakeRoot,
             serverVersion: '0.1.0'
-          }),
-        status: 200
+          };
+        }
       };
       const mockedErrorMessage = showErrorMessage as jest.MockedFunction<
         typeof showErrorMessage
@@ -160,19 +141,16 @@ describe('plugin', () => {
       expect(extension).toBeNull(); // Token is null
       expect(mockedErrorMessage).toHaveBeenCalledWith(
         'Failed to load the jupyterlab-git server extension',
-      'The versions of the JupyterLab Git server frontend and backend do not match. ' +
-        `The @jupyterlab/git frontend extension has version: ${
-          version
-        } ` +
-        'while the python package has version 0.1.0. ' +
-        'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git',
+        'The versions of the JupyterLab Git server frontend and backend do not match. ' +
+          `The @jupyterlab/git frontend extension has version: ${version} ` +
+          'while the python package has version 0.1.0. ' +
+          'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git',
         [undefined] // The warning button is undefined as the module @jupyterlab/apputils is mocked
       );
     });
     it('should fail if the server extension is not installed', async () => {
       // Given
-      const endpoint =
-        '/git/settings' + URLExt.objectToQueryString({ version });
+      const endpoint = 'settings' + URLExt.objectToQueryString({ version });
       mockResponses[endpoint] = {
         status: 404
       };

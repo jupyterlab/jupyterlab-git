@@ -4,9 +4,9 @@ import * as React from 'react';
 import { IDiffProps } from '../../src/components/diff/Diff';
 import { mergeView } from '../../src/components/diff/mergeview';
 import { PlainTextDiff } from '../../src/components/diff/PlainTextDiff';
-import { httpGitRequest } from '../../src/git';
+import { requestAPI } from '../../src/git';
+import { Git } from '../../src/tokens';
 import * as diffResponse from '../test-components/data/textDiffResponse.json';
-import { createTestResponse } from './testutils';
 
 jest.mock('../../src/git');
 jest.mock('../../src/components/diff/mergeview');
@@ -23,27 +23,24 @@ describe('PlainTextDiff', () => {
       }
     };
 
-    let resolveJson: (value?: any) => void;
-    const jsonResult: Promise<any> = new Promise<any>(resolve => {
-      resolveJson = resolve;
-    });
-
-    (httpGitRequest as jest.Mock).mockReturnValueOnce(
-      createTestResponse(401, jsonResult)
+    (requestAPI as jest.Mock).mockRejectedValueOnce(
+      new Git.GitResponseError(
+        new Response('', { status: 401 }),
+        'TEST_ERROR_MESSAGE'
+      )
     );
 
     // When
     const node = shallow<PlainTextDiff>(<PlainTextDiff {...props} />);
-    resolveJson({
-      message: 'TEST_ERROR_MESSAGE'
-    });
 
     // Then
     let resolveTest: () => void;
-    const terminateTest = new Promise(resolve => {resolveTest = resolve});
+    const terminateTest = new Promise(resolve => {
+      resolveTest = resolve;
+    });
     setImmediate(() => {
-      expect(httpGitRequest).toHaveBeenCalled();
-      expect(httpGitRequest).toBeCalledWith('/git/diffcontent', 'POST', {
+      expect(requestAPI).toHaveBeenCalled();
+      expect(requestAPI).toBeCalledWith('diffcontent', 'POST', {
         curr_ref: {
           special: 'WORKING'
         },
@@ -75,27 +72,21 @@ describe('PlainTextDiff', () => {
       }
     };
 
-    let resolveJson: (value?: any) => void;
-    const jsonResult: Promise<any> = new Promise<any>(resolve => {
-      resolveJson = resolve;
-    });
-
-    (httpGitRequest as jest.Mock).mockReturnValueOnce(
-      createTestResponse(200, jsonResult)
-    );
+    (requestAPI as jest.Mock).mockResolvedValueOnce(diffResponse);
 
     const mockMergeView = mergeView as jest.Mocked<typeof mergeView>;
 
     // When
     const node = shallow<PlainTextDiff>(<PlainTextDiff {...props} />);
-    resolveJson(diffResponse);
 
     // Then
     let resolveTest: () => void;
-    const terminateTest = new Promise(resolve => {resolveTest = resolve});
+    const terminateTest = new Promise(resolve => {
+      resolveTest = resolve;
+    });
     setImmediate(() => {
-      expect(httpGitRequest).toHaveBeenCalled();
-      expect(httpGitRequest).toBeCalledWith('/git/diffcontent', 'POST', {
+      expect(requestAPI).toHaveBeenCalled();
+      expect(requestAPI).toBeCalledWith('diffcontent', 'POST', {
         curr_ref: {
           special: 'WORKING'
         },
