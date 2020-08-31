@@ -285,6 +285,13 @@ export interface IGitExtension extends IDisposable {
   ensureGitignore(): Promise<Response>;
 
   /**
+   * open new editor or show an existing editor of the
+   * .gitignore file. If the editor does not have unsaved changes
+   * then ensure the editor's content matches the file on disk
+   */
+  openGitignore(): void;
+
+  /**
    * Add an entry in .gitignore file
    *
    * @param filename The name of the entry to ignore

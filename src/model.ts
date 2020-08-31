@@ -1275,6 +1275,20 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * open new editor or show an existing editor of the
+   * .gitignore file. If the editor does not have unsaved changes
+   * then ensure the editor's content matches the file on disk
+   */
+  openGitignore() {
+    const widget = this._docmanager.openOrReveal(
+      this.getRelativeFilePath('.gitignore')
+    );
+    if (widget && !widget.context.model.dirty) {
+      widget.context.revert();
+    }
+  }
+
+  /**
    * Get list of files changed between two commits or two branches
    * @param base id of base commit or base branch for comparison
    * @param remote id of remote commit or remote branch for comparison

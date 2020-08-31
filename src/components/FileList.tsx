@@ -160,10 +160,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         execute: async () => {
           if (this.state.selectedFile) {
             await this.props.model.ignore(this.state.selectedFile.to, false);
-            await this.props.model.commands.execute('docmanager:reload');
-            await this.props.model.commands.execute('docmanager:open', {
-              path: this.props.model.getRelativeFilePath('.gitignore')
-            });
+            this.props.model.openGitignore();
           }
         }
       });
@@ -187,10 +184,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               });
               if (result.button.label === 'Ignore') {
                 await this.props.model.ignore(this.state.selectedFile.to, true);
-                await this.props.model.commands.execute('docmanager:reload');
-                await this.props.model.commands.execute('docmanager:open', {
-                  path: this.props.model.getRelativeFilePath('.gitignore')
-                });
+                this.props.model.openGitignore();
               }
             }
           }
