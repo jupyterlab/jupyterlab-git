@@ -199,8 +199,6 @@ export function addCommands(
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       await model.ensureGitignore();
-      const gitModel = model as GitExtension;
-      gitModel.openGitignore();
     }
   });
 
