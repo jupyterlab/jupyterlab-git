@@ -1240,6 +1240,7 @@ export class GitExtension implements IGitExtension {
     });
 
     this.refreshStatus();
+    this._openGitignore();
     return Promise.resolve(response);
   }
 
@@ -1271,6 +1272,7 @@ export class GitExtension implements IGitExtension {
     });
 
     this.refreshStatus();
+    this._openGitignore();
     return Promise.resolve(response);
   }
 
@@ -1421,6 +1423,22 @@ export class GitExtension implements IGitExtension {
   private _generateTaskID(): number {
     this._taskID += 1;
     return this._taskID;
+  }
+
+  /**
+   * open new editor or show an existing editor of the
+   * .gitignore file. If the editor does not have unsaved changes
+   * then ensure the editor's content matches the file on disk
+   */
+  private _openGitignore() {
+    if (this._docmanager) {
+      const widget = this._docmanager.openOrReveal(
+        this.getRelativeFilePath('.gitignore')
+      );
+      if (widget && !widget.context.model.dirty) {
+        widget.context.revert();
+      }
+    }
   }
 
   /**

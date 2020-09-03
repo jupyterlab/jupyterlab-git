@@ -12,7 +12,6 @@ import { ITerminal } from '@jupyterlab/terminal';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
 import { IGitExtension } from './tokens';
-import { GitExtension } from './model';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { doGitClone } from './widgets/gitClone';
 import { GitPullPushDialog, Operation } from './widgets/gitPushPull';
@@ -199,11 +198,6 @@ export function addCommands(
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       await model.ensureGitignore();
-      const gitModel = model as GitExtension;
-      await gitModel.commands.execute('docmanager:reload');
-      await gitModel.commands.execute('docmanager:open', {
-        path: model.getRelativeFilePath('.gitignore')
-      });
     }
   });
 

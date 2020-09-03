@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 pip install .
 jupyter serverextension enable --sys-prefix --py nbgitpuller
-jupyter lab build
+jupyter lab build --dev-build=False --minimize=False --debug
