@@ -169,11 +169,7 @@ class TestPush(ServerTest):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("localbranch")
         mock_git.get_upstream_branch.return_value = maybe_future(
-            {
-                "code": 0,
-                "remote_short_name": ".",
-                "remote_branch": "localbranch"
-            }
+            {"code": 0, "remote_short_name": ".", "remote_branch": "localbranch"}
         )
         mock_git.push.return_value = maybe_future({"code": 0})
 
@@ -184,7 +180,9 @@ class TestPush(ServerTest):
         # Then
         mock_git.get_current_branch.assert_called_with("test_path")
         mock_git.get_upstream_branch.assert_called_with("test_path", "localbranch")
-        mock_git.push.assert_called_with(".", "HEAD:localbranch", "test_path", None, False)
+        mock_git.push.assert_called_with(
+            ".", "HEAD:localbranch", "test_path", None, False
+        )
 
         assert response.status_code == 200
         payload = response.json()
@@ -194,9 +192,11 @@ class TestPush(ServerTest):
     def test_push_handler_remotebranch(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo/bar")
-        upstream = {"code": 0,
-                    "remote_short_name": "origin/something",
-                    "remote_branch": "remote-branch-name"}
+        upstream = {
+            "code": 0,
+            "remote_short_name": "origin/something",
+            "remote_branch": "remote-branch-name",
+        }
         mock_git.get_upstream_branch.return_value = maybe_future(upstream)
         mock_git.push.return_value = maybe_future({"code": 0})
 
@@ -222,7 +222,7 @@ class TestPush(ServerTest):
         upstream = {
             "code": 128,
             "command": "",
-            "message": "fatal: no upstream configured for branch 'foo'"
+            "message": "fatal: no upstream configured for branch 'foo'",
         }
         mock_git.get_upstream_branch.return_value = maybe_future(upstream)
         mock_git.config.return_value = maybe_future({"options": dict()})
@@ -250,7 +250,7 @@ class TestPush(ServerTest):
         assert payload == {
             "code": 128,
             "message": "fatal: The current branch foo has no upstream branch.",
-            "remotes": list()
+            "remotes": list(),
         }
 
     @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
@@ -285,7 +285,7 @@ class TestPush(ServerTest):
         assert payload == {
             "code": 128,
             "message": "fatal: The current branch foo has no upstream branch.",
-            "remotes": remotes
+            "remotes": remotes,
         }
 
     @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
@@ -310,7 +310,9 @@ class TestPush(ServerTest):
         mock_git.get_upstream_branch.assert_called_with(path, "foo")
         mock_git.config.assert_called_with(path)
         mock_git.remote_show.assert_called_with(path)
-        mock_git.push.assert_called_with(remote, "foo", "test_path", None, set_upstream=True)
+        mock_git.push.assert_called_with(
+            remote, "foo", "test_path", None, set_upstream=True
+        )
 
         assert response.status_code == 200
         payload = response.json()
@@ -323,8 +325,12 @@ class TestPush(ServerTest):
         mock_git.get_current_branch.return_value = maybe_future("foo")
         upstream = {"code": -1, "message": "oups"}
         mock_git.get_upstream_branch.return_value = maybe_future(upstream)
-        mock_git.config.return_value = maybe_future({"options": {"remote.pushdefault": remote}})
-        mock_git.remote_show.return_value = maybe_future({"remotes": [remote, "upstream"]})
+        mock_git.config.return_value = maybe_future(
+            {"options": {"remote.pushdefault": remote}}
+        )
+        mock_git.remote_show.return_value = maybe_future(
+            {"remotes": [remote, "upstream"]}
+        )
         mock_git.push.return_value = maybe_future({"code": 0})
 
         path = "test_path"
@@ -338,7 +344,9 @@ class TestPush(ServerTest):
         mock_git.get_upstream_branch.assert_called_with(path, "foo")
         mock_git.config.assert_called_with(path)
         mock_git.remote_show.assert_called_with(path)
-        mock_git.push.assert_called_with(remote, "foo", "test_path", None, set_upstream=True)
+        mock_git.push.assert_called_with(
+            remote, "foo", "test_path", None, set_upstream=True
+        )
 
         assert response.status_code == 200
         payload = response.json()
@@ -409,9 +417,11 @@ class TestUpstream(ServerTest):
     def test_upstream_handler_forward_slashes(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo/bar")
-        upstream = {"code": 0,
-                    "remote_short_name": "origin/something",
-                    "remote_branch": "foo/bar"}
+        upstream = {
+            "code": 0,
+            "remote_short_name": "origin/something",
+            "remote_branch": "foo/bar",
+        }
         mock_git.get_upstream_branch.return_value = maybe_future(upstream)
 
         # When
@@ -424,15 +434,13 @@ class TestUpstream(ServerTest):
 
         assert response.status_code == 200
         payload = response.json()
-        assert payload == upstream 
+        assert payload == upstream
 
     @patch("jupyterlab_git.handlers.GitUpstreamHandler.git", spec=Git)
     def test_upstream_handler_localbranch(self, mock_git):
         # Given
         mock_git.get_current_branch.return_value = maybe_future("foo/bar")
-        upstream = {"code": 0,
-                    "remote_short_name": ".",
-                    "remote_branch": "foo/bar"}
+        upstream = {"code": 0, "remote_short_name": ".", "remote_branch": "foo/bar"}
         mock_git.get_upstream_branch.return_value = maybe_future(upstream)
 
         # When
@@ -445,7 +453,7 @@ class TestUpstream(ServerTest):
 
         assert response.status_code == 200
         payload = response.json()
-        assert payload == upstream 
+        assert payload == upstream
 
 
 class TestDiffContent(ServerTest):
@@ -460,7 +468,7 @@ class TestDiffContent(ServerTest):
             maybe_future((0, "1\t1\t{}".format(filename), "")),
             maybe_future((0, content, "")),
             maybe_future((0, "1\t1\t{}".format(filename), "")),
-            maybe_future((0, content, ""))
+            maybe_future((0, content, "")),
         ]
 
         # When
@@ -486,9 +494,9 @@ class TestDiffContent(ServerTest):
                 call(
                     ["git", "show", "{}:{}".format("current", filename)],
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
-                )
+                ),
             ],
-            any_order=True
+            any_order=True,
         )
 
     @patch("jupyterlab_git.git.execute")
@@ -501,7 +509,7 @@ class TestDiffContent(ServerTest):
         mock_execute.side_effect = [
             maybe_future((0, "1\t1\t{}".format(filename), "")),
             maybe_future((0, content, "")),
-            maybe_future((0, content, ""))
+            maybe_future((0, content, "")),
         ]
 
         dummy_file = os.path.join(self.notebook_dir, top_repo_path, filename)
@@ -543,7 +551,7 @@ class TestDiffContent(ServerTest):
             maybe_future((0, "1\t1\t{}".format(filename), "")),
             maybe_future((0, content, "")),
             maybe_future((0, "1\t1\t{}".format(filename), "")),
-            maybe_future((0, content, ""))
+            maybe_future((0, content, "")),
         ]
 
         # When
@@ -569,9 +577,9 @@ class TestDiffContent(ServerTest):
                 call(
                     ["git", "show", "{}:{}".format("", filename)],
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
-                )
+                ),
             ],
-            any_order=True
+            any_order=True,
         )
 
     @patch("jupyterlab_git.git.execute")
@@ -585,7 +593,7 @@ class TestDiffContent(ServerTest):
             maybe_future((0, "1\t1\t{}".format(filename), "")),
             maybe_future((0, content, "")),
             maybe_future((0, "1\t1\t{}".format(filename), "")),
-            maybe_future((0, content, ""))
+            maybe_future((0, content, "")),
         ]
 
         # When
@@ -645,7 +653,7 @@ class TestDiffContent(ServerTest):
             "curr_ref": {"git": "current"},
             "top_repo_path": top_repo_path,
         }
-        
+
         # Then
         with assert_http_error(500, msg="file is not UTF-8"):
             self.tester.post(["diffcontent"], body=body)
@@ -680,7 +688,7 @@ class TestDiffContent(ServerTest):
         mock_execute.side_effect = [
             maybe_future((0, "1\t1\t{}".format(filename), "")),
             maybe_future((0, content, "")),
-            maybe_future((0, content, ""))
+            maybe_future((0, content, "")),
         ]
 
         # When

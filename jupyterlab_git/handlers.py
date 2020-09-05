@@ -15,7 +15,7 @@ from .git import DEFAULT_REMOTE_NAME
 
 
 # Git configuration options exposed through the REST API
-ALLOWED_OPTIONS = ['user.name', 'user.email']
+ALLOWED_OPTIONS = ["user.name", "user.email"]
 
 
 class GitHandler(APIHandler):
@@ -278,7 +278,7 @@ class GitRemoteAddHandler(GitHandler):
         name = data.get("name", DEFAULT_REMOTE_NAME)
         url = data["url"]
         output = await self.git.remote_add(top_repo_path, url, name)
-        if(output["code"] == 0):
+        if output["code"] == 0:
             self.set_status(201)
         else:
             self.set_status(500)
@@ -410,7 +410,7 @@ class GitUpstreamHandler(GitHandler):
         current_path = self.get_json_body()["current_path"]
         current_branch = await self.git.get_current_branch(current_path)
         response = await self.git.get_upstream_branch(current_path, current_branch)
-        if response['code'] != 0:
+        if response["code"] != 0:
             self.set_status(500)
         self.finish(json.dumps(response))
 
@@ -426,7 +426,11 @@ class GitPullHandler(GitHandler):
         POST request handler, pulls files from a remote branch to your current branch.
         """
         data = self.get_json_body()
-        response = await self.git.pull(data["current_path"], data.get("auth", None), data.get("cancel_on_conflict", False))
+        response = await self.git.pull(
+            data["current_path"],
+            data.get("auth", None),
+            data.get("cancel_on_conflict", False),
+        )
 
         if response["code"] != 0:
             self.set_status(500)
@@ -445,8 +449,8 @@ class GitPushHandler(GitHandler):
         """
         POST request handler,
         pushes committed files from your current branch to a remote branch
-        
-        Request body: 
+
+        Request body:
         {
             current_path: string, # Git repository path
             remote?: string # Remote to push to; i.e. <remote_name> or <remote_name>/<branch>
@@ -457,27 +461,31 @@ class GitPushHandler(GitHandler):
         known_remote = data.get("remote")
 
         current_local_branch = await self.git.get_current_branch(current_path)
-        
+
         set_upstream = False
         current_upstream_branch = await self.git.get_upstream_branch(
             current_path, current_local_branch
         )
 
         if known_remote is not None:
-            set_upstream = current_upstream_branch['code'] != 0
+            set_upstream = current_upstream_branch["code"] != 0
 
             remote_name, _, remote_branch = known_remote.partition("/")
-            
+
             current_upstream_branch = {
                 "code": 0,
                 "remote_branch": remote_branch or current_local_branch,
-                "remote_short_name": remote_name
+                "remote_short_name": remote_name,
             }
 
-        if current_upstream_branch['code'] == 0:
-            branch = ":".join(["HEAD", current_upstream_branch['remote_branch']])
+        if current_upstream_branch["code"] == 0:
+            branch = ":".join(["HEAD", current_upstream_branch["remote_branch"]])
             response = await self.git.push(
-                current_upstream_branch['remote_short_name'], branch, current_path, data.get("auth", None), set_upstream
+                current_upstream_branch["remote_short_name"],
+                branch,
+                current_path,
+                data.get("auth", None),
+                set_upstream,
             )
 
         else:
@@ -488,7 +496,7 @@ class GitPushHandler(GitHandler):
             config_options = config["options"]
             list_remotes = await self.git.remote_show(current_path)
             remotes = list_remotes.get("remotes", list())
-            push_default = config_options.get('remote.pushdefault')
+            push_default = config_options.get("remote.pushdefault")
 
             default_remote = None
             if push_default is not None and push_default in remotes:
@@ -498,10 +506,10 @@ class GitPushHandler(GitHandler):
 
             if default_remote is not None:
                 response = await self.git.push(
-                    default_remote, 
-                    current_local_branch, 
-                    current_path, 
-                    data.get("auth", None), 
+                    default_remote,
+                    current_local_branch,
+                    current_path,
+                    data.get("auth", None),
                     set_upstream=True,
                 )
             else:
@@ -510,7 +518,7 @@ class GitPushHandler(GitHandler):
                     "message": "fatal: The current branch {} has no upstream branch.".format(
                         current_local_branch
                     ),
-                    "remotes": remotes  # Returns the list of known remotes
+                    "remotes": remotes,  # Returns the list of known remotes
                 }
 
         if response["code"] != 0:
@@ -557,12 +565,14 @@ class GitConfigHandler(GitHandler):
         """
         data = self.get_json_body()
         top_repo_path = data["path"]
-        options = data.get("options", {})        
-        
+        options = data.get("options", {})
+
         filtered_options = {k: v for k, v in options.items() if k in ALLOWED_OPTIONS}
         response = await self.git.config(top_repo_path, **filtered_options)
         if "options" in response:
-            response["options"] = {k:v for k, v in response["options"].items() if k in ALLOWED_OPTIONS}
+            response["options"] = {
+                k: v for k, v in response["options"].items() if k in ALLOWED_OPTIONS
+            }
 
         if response["code"] != 0:
             self.set_status(500)
@@ -629,7 +639,9 @@ class GitSettingsHandler(GitHandler):
         try:
             git_version = await self.git.version()
         except Exception as error:
-            self.log.debug("[jupyterlab_git] Failed to execute 'git' command: {!s}".format(error))
+            self.log.debug(
+                "[jupyterlab_git] Failed to execute 'git' command: {!s}".format(error)
+            )
         server_version = str(parse(__version__))
         # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
         root_dir = getattr(self.contents_manager, "root_dir", None)
@@ -648,7 +660,7 @@ class GitSettingsHandler(GitHandler):
 
 class GitTagHandler(GitHandler):
     """
-        Handler for 'git tag '. Fetches list of all tags in current repository
+    Handler for 'git tag '. Fetches list of all tags in current repository
     """
 
     @web.authenticated
@@ -666,7 +678,7 @@ class GitTagHandler(GitHandler):
 
 class GitTagCheckoutHandler(GitHandler):
     """
-        Handler for 'git tag checkout '. Checkout the tag version of repo
+    Handler for 'git tag checkout '. Checkout the tag version of repo
     """
 
     @web.authenticated
@@ -687,7 +699,6 @@ class GitTagCheckoutHandler(GitHandler):
 # FIXME remove for 0.22 release - this avoid error when upgrading from 0.20 to 0.21 if the frontend
 # has not been rebuilt yet.
 class GitServerRootHandler(GitHandler):
-
     @web.authenticated
     async def get(self):
         # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
@@ -732,7 +743,7 @@ def setup_handlers(web_app):
         ("/git/upstream", GitUpstreamHandler),
         ("/git/ignore", GitIgnoreHandler),
         ("/git/tags", GitTagHandler),
-        ("/git/tag_checkout", GitTagCheckoutHandler)
+        ("/git/tag_checkout", GitTagCheckoutHandler),
     ]
 
     # add the baseurl to our paths

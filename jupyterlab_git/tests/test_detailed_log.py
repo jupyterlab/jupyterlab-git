@@ -28,9 +28,8 @@ async def test_detailed_log():
             "-\t-\tbinary_file.png",
         ]
 
-
         mock_execute.return_value = maybe_future(
-            (0, "\x00".join(process_output)+"\x00", "")
+            (0, "\x00".join(process_output) + "\x00", "")
         )
 
         expected_response = {
@@ -93,12 +92,9 @@ async def test_detailed_log():
         }
 
         # When
-        actual_response = (await
-            Git(FakeContentManager("/bin"))
-            .detailed_log(
-                selected_hash="f29660a2472e24164906af8653babeb48e4bf2ab",
-                current_path="test_curr_path",
-            )
+        actual_response = await Git(FakeContentManager("/bin")).detailed_log(
+            selected_hash="f29660a2472e24164906af8653babeb48e4bf2ab",
+            current_path="test_curr_path",
         )
 
         # Then
