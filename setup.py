@@ -88,6 +88,7 @@ setup_args = dict(
             "pytest-asyncio",
             "jupyterlab~=2.0",
             "black",
+            "pre-commit",
         ],
     },
 )
