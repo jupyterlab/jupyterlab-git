@@ -21,7 +21,7 @@ import setuptools
 name = "jupyterlab_git"
 
 # Ensure a valid python version
-ensure_python(">=3.5")
+ensure_python(">=3.6")
 
 # Get our version
 version = get_version(str(Path(name) / "_version.py"))
@@ -74,10 +74,10 @@ setup_args = dict(
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Framework :: Jupyter",
     ],
     install_requires=["notebook", "nbdime ~=2.0", "packaging", "pexpect"],
@@ -91,6 +91,7 @@ setup_args = dict(
             "pre-commit",
         ],
     },
+    python_requires=">=3.6,<4",
 )
 
 setuptools.setup(**setup_args)

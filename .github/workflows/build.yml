@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.5', '3.6', '3.7', '3.8']
+        python-version: ['3.6', '3.7', '3.8', '3.9.0-rc.1']
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install wheel
-          pip install --upgrade --upgrade-strategy=eager pytest pytest-asyncio "jupyterlab~=2.0" black
+          pip install --upgrade --upgrade-strategy=eager "jupyterlab~=2.0"
 
       - name: Test the extension
         run: |
@@ -66,14 +66,14 @@ jobs:
           python setup.py sdist
           # Linter checks
           jlpm run eslint-check
-
-          # Python formatting checks
-          black . --check
         
           # Install the extension from the sdist ensuring the cache is unused
           pip install jupyterlab_git[test] --pre --no-index --find-links=dist --no-deps --no-cache-dir -v
           # Install the extension dependencies based on the current setup.py
           pip install jupyterlab_git[test]
+
+          # Python formatting checks
+          black . --check
         
           # Run the Python tests
           pytest jupyterlab_git -r ap
