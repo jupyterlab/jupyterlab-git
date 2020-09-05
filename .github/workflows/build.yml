@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install wheel
-          pip install --upgrade --upgrade-strategy=eager pytest pytest-asyncio "jupyterlab~=2.0"
+          pip install --upgrade --upgrade-strategy=eager pytest pytest-asyncio "jupyterlab~=2.0" black
 
       - name: Test the extension
         run: |
@@ -66,6 +66,9 @@ jobs:
           python setup.py sdist
           # Linter checks
           jlpm run eslint-check
+
+          # Python formatting checks
+          black . --check
         
           # Install the extension from the sdist ensuring the cache is unused
           pip install jupyterlab_git[test] --pre --no-index --find-links=dist --no-deps --no-cache-dir -v
