@@ -44,7 +44,8 @@ async def test_get_current_branch_success():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "symbolic-ref", "--short", "HEAD"], cwd=os.path.join("/bin", "test_curr_path")
+            ["git", "symbolic-ref", "--short", "HEAD"],
+            cwd=os.path.join("/bin", "test_curr_path"),
         )
         assert "feature-foo" == actual_response
 
@@ -87,8 +88,8 @@ async def test_checkout_branch_noref_failure():
     branch = "test-branch"
     curr_path = "test_curr_path"
     stdout_message = ""
-    stderr_message = "error: pathspec '{}' did not match any file(s) known to git".format(
-        branch
+    stderr_message = (
+        "error: pathspec '{}' did not match any file(s) known to git".format(branch)
     )
     rc = 1
     with patch("jupyterlab_git.git.execute") as mock_execute:
@@ -160,8 +161,8 @@ async def test_checkout_branch_headsref_failure():
     branch = "test-branch"
     curr_path = "test_curr_path"
     stdout_message = ""
-    stderr_message = "error: pathspec '{}' did not match any file(s) known to git".format(
-        branch
+    stderr_message = (
+        "error: pathspec '{}' did not match any file(s) known to git".format(branch)
     )
     rc = 1
 
@@ -230,8 +231,8 @@ async def test_checkout_branch_headsref_success():
 async def test_checkout_branch_remoteref_failure():
     branch = "test-branch"
     stdout_message = ""
-    stderr_message = "error: pathspec '{}' did not match any file(s) known to git".format(
-        branch
+    stderr_message = (
+        "error: pathspec '{}' did not match any file(s) known to git".format(branch)
     )
     rc = 1
 
@@ -337,7 +338,8 @@ async def test_get_current_branch_failure():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "symbolic-ref", "--short", "HEAD"], cwd=os.path.join("/bin", "test_curr_path")
+            ["git", "symbolic-ref", "--short", "HEAD"],
+            cwd=os.path.join("/bin", "test_curr_path"),
         )
         assert (
             "Error [fatal: Not a git repository (or any of the parent directories): .git] "
@@ -356,9 +358,7 @@ async def test_get_current_branch_detached_success():
             "  remotes/origin/feature-foo",
             "  remotes/origin/HEAD",
         ]
-        mock_execute.return_value = maybe_future(
-            (0, "\n".join(process_output), "")
-        )
+        mock_execute.return_value = maybe_future((0, "\n".join(process_output), ""))
 
         # When
         actual_response = await Git(
@@ -414,9 +414,9 @@ async def test_get_upstream_branch_success(branch, upstream, remotename):
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.side_effect = [
-            maybe_future((0, remotename + '/' + upstream, '')), 
-            maybe_future((0, remotename, ''))
-            ]
+            maybe_future((0, remotename + "/" + upstream, "")),
+            maybe_future((0, remotename, "")),
+        ]
 
         # When
         actual_response = await Git(FakeContentManager("/bin")).get_upstream_branch(
@@ -427,18 +427,26 @@ async def test_get_upstream_branch_success(branch, upstream, remotename):
         mock_execute.assert_has_calls(
             [
                 call(
-                    ["git", "rev-parse", "--abbrev-ref", "{}@{{upstream}}".format(branch)],
+                    [
+                        "git",
+                        "rev-parse",
+                        "--abbrev-ref",
+                        "{}@{{upstream}}".format(branch),
+                    ],
                     cwd=os.path.join("/bin", "test_curr_path"),
                 ),
                 call(
-                    ['git', 'config', '--local', 'branch.{}.remote'.format(branch)],
-                     cwd='/bin/test_curr_path',
+                    ["git", "config", "--local", "branch.{}.remote".format(branch)],
+                    cwd="/bin/test_curr_path",
                 ),
-
             ],
             any_order=False,
         )
-        assert {'code': 0, 'remote_branch': upstream, 'remote_short_name': remotename} == actual_response
+        assert {
+            "code": 0,
+            "remote_branch": upstream,
+            "remote_short_name": remotename,
+        } == actual_response
 
 
 @pytest.mark.asyncio
@@ -470,7 +478,11 @@ async def test_get_upstream_branch_failure(outputs, message):
         response = await Git(FakeContentManager("/bin")).get_upstream_branch(
             current_path="test_curr_path", branch_name="blah"
         )
-        expected = {'code': 128, 'command': 'git rev-parse --abbrev-ref blah@{upstream}', 'message': outputs[2]}
+        expected = {
+            "code": 128,
+            "command": "git rev-parse --abbrev-ref blah@{upstream}",
+            "message": outputs[2],
+        }
 
         assert response == expected
 
@@ -748,9 +760,7 @@ async def test_branch_success_detached_head():
             # Response for get all refs/heads
             maybe_future((0, "\n".join(process_output_heads), "")),
             # Response for get current branch
-            maybe_future(
-                (128, "", "fatal: ref HEAD is not a symbolic ref")
-            ),
+            maybe_future((128, "", "fatal: ref HEAD is not a symbolic ref")),
             # Response for get current branch detached
             maybe_future((0, "\n".join(detached_head_output), "")),
             # Response for get all refs/remotes

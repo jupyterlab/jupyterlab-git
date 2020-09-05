@@ -123,6 +123,7 @@ cd jupyterlab-git
 
 # Install the server extension in development mode and enable it
 pip install -e .[test]
+pre-commit install
 jupyter serverextension enable --py jupyterlab_git --sys-prefix
 
 # Build and install your development version of the extension

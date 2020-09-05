@@ -8,6 +8,7 @@ from jupyterlab_git.git import Git
 
 from .testutils import FakeContentManager, ServerTest, maybe_future
 
+
 @pytest.mark.asyncio
 async def test_git_tag_success():
     with patch("jupyterlab_git.git.execute") as mock_execute:
@@ -26,6 +27,7 @@ async def test_git_tag_success():
 
         assert {"code": 0, "tags": [tag]} == actual_response
 
+
 @pytest.mark.asyncio
 async def test_git_tag_checkout_success():
     with patch("os.environ", {"TEST": "test"}):
@@ -35,7 +37,9 @@ async def test_git_tag_checkout_success():
             mock_execute.return_value = maybe_future((0, "", ""))
 
             # When
-            actual_response = await Git(FakeContentManager("/bin")).tag_checkout("test_curr_path", "mock_tag")
+            actual_response = await Git(FakeContentManager("/bin")).tag_checkout(
+                "test_curr_path", "mock_tag"
+            )
 
             # Then
             mock_execute.assert_called_once_with(
@@ -43,4 +47,7 @@ async def test_git_tag_checkout_success():
                 cwd=os.path.join("/bin", "test_curr_path"),
             )
 
-            assert {"code": 0, "message": "Tag {} checked out".format(tag)} == actual_response
+            assert {
+                "code": 0,
+                "message": "Tag {} checked out".format(tag),
+            } == actual_response

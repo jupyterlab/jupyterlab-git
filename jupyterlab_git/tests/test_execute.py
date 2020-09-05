@@ -13,15 +13,15 @@ async def test_execute_waits_on_index_lock(tmp_path):
     async def remove_lock_file(*args):
         assert "unlocked" not in repr(execution_lock)  # Check that the lock is working
         lock_file.unlink()  # Raise an error for missing file
-        
+
     with patch("tornado.gen.sleep") as sleep:
-        sleep.side_effect = remove_lock_file   # Remove the lock file instead of sleeping
-        
+        sleep.side_effect = remove_lock_file  # Remove the lock file instead of sleeping
+
         assert "unlock" in repr(execution_lock)
         cmd = ["git", "dummy"]
         kwargs = {"cwd": "{!s}".format(tmp_path)}
         await execute(cmd, **kwargs)
         assert "unlock" in repr(execution_lock)
-        
+
         assert not lock_file.exists()
         assert sleep.call_count == 1

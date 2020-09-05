@@ -33,12 +33,14 @@ class TestSettings(ServerTest):
             "serverRoot": self.notebook.notebook_dir,
             "serverVersion": str(parse(__version__)),
         }
-        
+
     @patch("jupyterlab_git.git.execute")
     def test_git_get_settings_no_git(self, mock_execute):
         # Given
         jlab_version = "2.1.42-alpha.24"
-        mock_execute.side_effect = FileNotFoundError("[Errno 2] No such file or directory: 'git'")
+        mock_execute.side_effect = FileNotFoundError(
+            "[Errno 2] No such file or directory: 'git'"
+        )
 
         # When
         response = self.tester.get(["settings"], params={"version": jlab_version})
