@@ -9,6 +9,6 @@ from jupyterlab.browser_check import BrowserApp
 here = os.path.abspath(os.path.dirname(__file__))
 
 
-if __name__ == '__main__':
-    with patch('jupyterlab.browser_check.here', here):
+if __name__ == "__main__":
+    with patch("jupyterlab.browser_check.here", here):
         BrowserApp.launch_instance()

@@ -83,10 +83,9 @@ class ServerTest(ServerTestBase):
 
 
 class FakeContentManager:
-
     def __init__(self, root_dir):
         self.root_dir = root_dir
-    
+
     def get(self, path=None):
         return {"content": ""}
 
