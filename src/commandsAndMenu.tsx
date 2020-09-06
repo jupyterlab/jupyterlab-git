@@ -6,20 +6,20 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
+import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
+import * as React from 'react';
+import { openDiffView } from './components/diff/DiffWidget';
+import { GitExtension } from './model';
 import { Git } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { doGitClone } from './widgets/gitClone';
 import { GitPullPushDialog, Operation } from './widgets/gitPushPull';
-import { openListedFile, discardChanges } from './utils';
-import { GitExtension } from './model';
-import { openDiffView } from './components/diff/DiffWidget';
-import { PathExt } from '@jupyterlab/coreutils';
 
 const RESOURCES = [
   {
@@ -254,10 +254,28 @@ export function addCommands(
     label: 'Open',
     caption: 'Open selected file',
     execute: async args => {
-      const selectedFile: Git.IStatusFileResult = args as any;
-      await openListedFile(selectedFile, model);
-    },
-    isEnabled: args => args && args.to !== undefined
+      const file: Git.IStatusFileResult = args as any;
+
+      const { x, y, to } = file;
+      if (x === 'D' || y === 'D') {
+        await showErrorMessage(
+          'Open File Failed',
+          'This file has been deleted!'
+        );
+        return;
+      }
+      try {
+        if (to[to.length - 1] !== '/') {
+          commands.execute('docmanager:open', {
+            path: model.getRelativeFilePath(to)
+          });
+        } else {
+          console.log('Cannot open a folder here');
+        }
+      } catch (err) {
+        console.error(`Fail to open ${to}.`);
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.gitFileDiffWorking, {
@@ -275,8 +293,7 @@ export function addCommands(
         renderMime,
         !selectedFile.is_binary
       );
-    },
-    isEnabled: args => args && args.to !== undefined
+    }
   });
 
   commands.addCommand(CommandIDs.gitFileDiffIndex, {
@@ -294,8 +311,7 @@ export function addCommands(
         renderMime,
         !selectedFile.is_binary
       );
-    },
-    isEnabled: args => args && args.to !== undefined
+    }
   });
 
   commands.addCommand(CommandIDs.gitFileStage, {
@@ -304,8 +320,7 @@ export function addCommands(
     execute: async args => {
       const selectedFile: Git.IStatusFile = args as any;
       await model.add(selectedFile.to);
-    },
-    isEnabled: args => args && args.to !== undefined
+    }
   });
 
   commands.addCommand(CommandIDs.gitFileTrack, {
@@ -314,8 +329,7 @@ export function addCommands(
     execute: async args => {
       const selectedFile: Git.IStatusFile = args as any;
       await model.add(selectedFile.to);
-    },
-    isEnabled: args => args && args.to !== undefined
+    }
   });
 
   commands.addCommand(CommandIDs.gitFileUnstage, {
@@ -326,18 +340,47 @@ export function addCommands(
       if (selectedFile.x !== 'D') {
         await model.reset(selectedFile.to);
       }
-    },
-    isEnabled: args => args && args.to !== undefined
+    }
   });
 
   commands.addCommand(CommandIDs.gitFileDiscard, {
     label: 'Discard',
     caption: 'Discard recent changes of selected file',
     execute: async args => {
-      const selectedFile: Git.IStatusFile = args as any;
-      await discardChanges(selectedFile, model);
-    },
-    isEnabled: args => args && args.to !== undefined
+      const file: Git.IStatusFile = args as any;
+
+      const result = await showDialog({
+        title: 'Discard changes',
+        body: (
+          <span>
+            Are you sure you want to permanently discard changes to{' '}
+            <b>{file.to}</b>? This action cannot be undone.
+          </span>
+        ),
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.warnButton({ label: 'Discard' })
+        ]
+      });
+      if (result.button.accept) {
+        try {
+          if (file.status === 'staged' || file.status === 'partially-staged') {
+            await model.reset(file.to);
+          }
+          if (
+            file.status === 'unstaged' ||
+            (file.status === 'partially-staged' && file.x !== 'A')
+          ) {
+            // resetting an added file moves it to untracked category => checkout will fail
+            await model.checkout({ filename: file.to });
+          }
+        } catch (reason) {
+          showErrorMessage(`Discard changes for ${file.to} failed.`, reason, [
+            Dialog.warnButton({ label: 'DISMISS' })
+          ]);
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.gitIgnore, {
@@ -348,8 +391,7 @@ export function addCommands(
       if (selectedFile) {
         await model.ignore(selectedFile.to, false);
       }
-    },
-    isEnabled: args => args && args.to !== undefined
+    }
   });
 
   commands.addCommand(CommandIDs.gitIgnoreExtension, {
@@ -379,7 +421,6 @@ export function addCommands(
         }
       }
     },
-    isEnabled: args => args && args.to !== undefined,
     isVisible: args => {
       const selectedFile: Git.IStatusFile = args as any;
       const extension = PathExt.extname(selectedFile.to);

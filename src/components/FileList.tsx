@@ -16,7 +16,6 @@ import {
   removeIcon
 } from '../style/icons';
 import { Git } from '../tokens';
-import { discardChanges, openListedFile } from '../utils';
 import { ActionButton } from './ActionButton';
 import { isDiffSupported } from './diff/Diff';
 import { openDiffView } from './diff/DiffWidget';
@@ -175,7 +174,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Discard changes in a specific unstaged or staged file */
   discardChanges = async (file: Git.IStatusFile) => {
-    await discardChanges(file, this.props.model);
+    await this._commands.execute(CommandIDs.gitFileDiscard, file as any);
   };
 
   /** Add all untracked files */
@@ -281,7 +280,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       >
         {files.map((file: Git.IStatusFile) => {
           const openFile = () => {
-            openListedFile(file, this.props.model);
+            this._commands.execute(CommandIDs.gitFileOpen, file as any);
           };
           const diffButton = this._createDiffButton(file, 'INDEX');
           return (
@@ -355,7 +354,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       >
         {files.map((file: Git.IStatusFile) => {
           const openFile = () => {
-            openListedFile(file, this.props.model);
+            this._commands.execute(CommandIDs.gitFileOpen, file as any);
           };
           const diffButton = this._createDiffButton(file, 'WORKING');
           return (
@@ -436,7 +435,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                     icon={openIcon}
                     title={'Open this file'}
                     onClick={() => {
-                      openListedFile(file, this.props.model);
+                      this._commands.execute(
+                        CommandIDs.gitFileOpen,
+                        file as any
+                      );
                     }}
                   />
                   <ActionButton
@@ -454,7 +456,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               model={this.props.model}
               onDoubleClick={() => {
                 if (!doubleClickDiff) {
-                  openListedFile(file, this.props.model);
+                  this._commands.execute(CommandIDs.gitFileOpen, file as any);
                 }
               }}
               selected={this._isSelectedFile(file)}
@@ -485,7 +487,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       >
         {files.map((file: Git.IStatusFile) => {
           const openFile = () => {
-            openListedFile(file, this.props.model);
+            this._commands.execute(CommandIDs.gitFileOpen, file as any);
           };
 
           // Default value for actions and double click

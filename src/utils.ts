@@ -1,7 +1,4 @@
-import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import * as React from 'react';
-import { GitExtension } from './model';
 import {
   folderFileIconStyle,
   genericFileIconStyle,
@@ -41,63 +38,6 @@ export function decodeStage(x: string, y: string): Git.Status {
   }
 
   return null;
-}
-
-export async function discardChanges(
-  file: Git.IStatusFile,
-  model: GitExtension
-) {
-  const result = await showDialog({
-    title: 'Discard changes',
-    body: (
-      <span>
-        Are you sure you want to permanently discard changes to <b>{file.to}</b>
-        ? This action cannot be undone.
-      </span>
-    ),
-    buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Discard' })]
-  });
-  if (result.button.accept) {
-    try {
-      if (file.status === 'staged' || file.status === 'partially-staged') {
-        await model.reset(file.to);
-      }
-      if (
-        file.status === 'unstaged' ||
-        (file.status === 'partially-staged' && file.x !== 'A')
-      ) {
-        // resetting an added file moves it to untracked category => checkout will fail
-        await model.checkout({ filename: file.to });
-      }
-    } catch (reason) {
-      showErrorMessage(`Discard changes for ${file.to} failed.`, reason, [
-        Dialog.warnButton({ label: 'DISMISS' })
-      ]);
-    }
-  }
-}
-
-/** Open a file in the git listing */
-export async function openListedFile(
-  file: Git.IStatusFileResult,
-  model: GitExtension
-) {
-  const { x, y, to } = file;
-  if (x === 'D' || y === 'D') {
-    await showErrorMessage('Open File Failed', 'This file has been deleted!');
-    return;
-  }
-  try {
-    if (to[to.length - 1] !== '/') {
-      model.commands.execute('docmanager:open', {
-        path: model.getRelativeFilePath(to)
-      });
-    } else {
-      console.log('Cannot open a folder here');
-    }
-  } catch (err) {
-    console.error(`Fail to open ${to}.`);
-  }
 }
 
 /**
