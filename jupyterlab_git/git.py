@@ -1085,6 +1085,7 @@ class Git:
                 "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(
                     filename
                 ),
+                "fatal: Path '{}' does not exist in '{}'".format(filename, ref),
             ],
         )
         lower_error = error.lower()
@@ -1111,13 +1112,17 @@ class Git:
         """
         Collect get content of prev and curr and return.
         """
-        is_binary = await self._is_binary(filename, prev_ref["git"], top_repo_path)
-        if is_binary:
-            raise tornado.web.HTTPError(
-                log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8."
-            )
+        if prev_ref["git"]:
+            is_binary = await self._is_binary(filename, prev_ref["git"], top_repo_path)
+            if is_binary:
+                raise tornado.web.HTTPError(
+                    log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8."
+                )
 
-        prev_content = await self.show(filename, prev_ref["git"], top_repo_path)
+            prev_content = await self.show(filename, prev_ref["git"], top_repo_path)
+        else:
+            prev_content = ""
+
         if "special" in curr_ref:
             if curr_ref["special"] == "WORKING":
                 curr_content = self.get_content(filename, top_repo_path)
