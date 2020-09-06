@@ -91,7 +91,18 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
 
     commands.forEach(command => {
-      contextMenu.addItem({ command, args: selectedFile as any });
+      if (command === CommandIDs.gitFileDiff) {
+        contextMenu.addItem({
+          command,
+          args: {
+            filePath: selectedFile.to,
+            isText: !selectedFile.is_binary,
+            status: selectedFile.status
+          }
+        });
+      } else {
+        contextMenu.addItem({ command, args: selectedFile as any });
+      }
     });
     contextMenu.open(event.clientX, event.clientY);
   };
