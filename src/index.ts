@@ -111,7 +111,6 @@ async function activate(
   // Create the Git model
   gitExtension = new GitExtension(
     serverSettings.serverRoot,
-    app,
     docmanager,
     settings
   );
@@ -145,7 +144,7 @@ async function activate(
     const gitPlugin = new GitWidget(
       gitExtension,
       settings,
-      renderMime,
+      app.commands,
       factory.defaultBrowser.model
     );
     gitPlugin.id = 'jp-git-sessions';

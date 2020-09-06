@@ -3,6 +3,7 @@ import {
   Dialog,
   InputDialog,
   MainAreaWidget,
+  ReactWidget,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
@@ -14,8 +15,14 @@ import { ITerminal } from '@jupyterlab/terminal';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
 import * as React from 'react';
-import { openDiffView } from './components/diff/DiffWidget';
+import {
+  Diff,
+  isDiffSupported,
+  RenderMimeProvider
+} from './components/diff/Diff';
+import { getRefValue, IDiffContext } from './components/diff/model';
 import { GitExtension } from './model';
+import { diffIcon } from './style/icons';
 import { Git } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { doGitClone } from './widgets/gitClone';
@@ -48,8 +55,7 @@ export namespace CommandIDs {
   export const gitPush = 'git:push';
   export const gitPull = 'git:pull';
   // Context menu commands
-  export const gitFileDiffIndex = 'git:context-diffIndex';
-  export const gitFileDiffWorking = 'git:context-diffWorking';
+  export const gitFileDiff = 'git:context-diff';
   export const gitFileDiscard = 'git:context-discard';
   export const gitFileOpen = 'git:context-open';
   export const gitFileUnstage = 'git:context-unstage';
@@ -278,39 +284,66 @@ export function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.gitFileDiffWorking, {
+  commands.addCommand(CommandIDs.gitFileDiff, {
     label: 'Diff',
     caption: 'Diff selected file',
-    execute: async args => {
-      const selectedFile: Git.IStatusFileResult = args as any;
-      await openDiffView(
-        selectedFile.to,
-        model,
-        {
-          currentRef: { specialRef: 'WORKING' },
-          previousRef: { gitRef: 'HEAD' }
-        },
-        renderMime,
-        !selectedFile.is_binary
-      );
-    }
-  });
+    execute: args => {
+      const { context, filePath, isText, status } = (args as any) as {
+        context?: IDiffContext;
+        filePath: string;
+        isText: boolean;
+        status?: Git.Status;
+      };
 
-  commands.addCommand(CommandIDs.gitFileDiffIndex, {
-    label: 'Diff',
-    caption: 'Diff selected file',
-    execute: async args => {
-      const selectedFile: Git.IStatusFileResult = args as any;
-      await openDiffView(
-        selectedFile.to,
-        model,
-        {
-          currentRef: { specialRef: 'INDEX' },
+      let diffContext = context;
+      if (!diffContext) {
+        const specialRef = status === 'staged' ? 'INDEX' : 'WORKING';
+        diffContext = {
+          currentRef: { specialRef },
           previousRef: { gitRef: 'HEAD' }
-        },
-        renderMime,
-        !selectedFile.is_binary
-      );
+        };
+      }
+
+      if (isDiffSupported(filePath) || isText) {
+        const id = `nbdiff-${filePath}-${getRefValue(diffContext.currentRef)}`;
+        const mainAreaItems = shell.widgets('main');
+        let mainAreaItem = mainAreaItems.next();
+        while (mainAreaItem) {
+          if (mainAreaItem.id === id) {
+            shell.activateById(id);
+            break;
+          }
+          mainAreaItem = mainAreaItems.next();
+        }
+
+        if (!mainAreaItem) {
+          const serverRepoPath = model.getRelativeFilePath();
+          const nbDiffWidget = ReactWidget.create(
+            <RenderMimeProvider value={renderMime}>
+              <Diff
+                path={filePath}
+                diffContext={diffContext}
+                topRepoPath={serverRepoPath}
+              />
+            </RenderMimeProvider>
+          );
+          nbDiffWidget.id = id;
+          nbDiffWidget.title.label = PathExt.basename(filePath);
+          nbDiffWidget.title.icon = diffIcon;
+          nbDiffWidget.title.closable = true;
+          nbDiffWidget.addClass('jp-git-diff-parent-diff-widget');
+
+          shell.add(nbDiffWidget, 'main');
+          shell.activateById(nbDiffWidget.id);
+        }
+      } else {
+        showErrorMessage(
+          'Diff Not Supported',
+          `Diff is not supported for ${PathExt.extname(
+            filePath
+          ).toLocaleLowerCase()} files.`
+        );
+      }
     }
   });
 

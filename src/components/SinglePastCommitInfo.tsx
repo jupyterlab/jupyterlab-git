@@ -1,7 +1,8 @@
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { fileIcon } from '@jupyterlab/ui-components';
+import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { classes } from 'typestyle/';
+import { CommandIDs } from '../commandsAndMenu';
 import { GitExtension } from '../model';
 import {
   deletionsMadeIcon,
@@ -25,7 +26,6 @@ import {
 import { Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { isDiffSupported } from './diff/Diff';
-import { openDiffView } from './diff/DiffWidget';
 import { FilePath } from './FilePath';
 import { ResetRevertDialog } from './ResetRevertDialog';
 
@@ -44,9 +44,9 @@ export interface ISinglePastCommitInfoProps {
   model: GitExtension;
 
   /**
-   * Render MIME type registry.
+   * Jupyter App commands registry
    */
-  renderMime: IRenderMimeRegistry;
+  commands: CommandRegistry;
 
   /**
    * Boolean indicating whether to enable UI suspension.
@@ -330,20 +330,18 @@ export class SinglePastCommitInfo extends React.Component<
       event.stopPropagation();
 
       try {
-        await openDiffView(
-          fpath,
-          self.props.model,
-          {
+        self.props.commands.execute(CommandIDs.gitFileDiff, {
+          filePath: fpath,
+          isText: bool,
+          context: {
             previousRef: {
               gitRef: self.props.commit.pre_commit
             },
             currentRef: {
               gitRef: self.props.commit.commit
             }
-          },
-          self.props.renderMime,
-          bool
-        );
+          }
+        });
       } catch (err) {
         console.error(`Failed to open diff view for ${fpath}.\n${err}`);
       }

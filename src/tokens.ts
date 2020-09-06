@@ -3,7 +3,6 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Token, JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
-import { CommandRegistry } from '@lumino/commands';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
@@ -62,8 +61,6 @@ export interface IGitExtension extends IDisposable {
    * A signal emitted when the current status of the Git repository changes.
    */
   readonly statusChanged: ISignal<IGitExtension, Git.IStatusFileResult[]>;
-
-  readonly commands: CommandRegistry | null;
 
   /**
    * Make request to add one or all files into

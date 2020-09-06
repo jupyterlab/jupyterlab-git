@@ -1,4 +1,4 @@
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { GitExtension } from '../model';
 import { historySideBarStyle } from '../style/HistorySideBarStyle';
@@ -25,9 +25,9 @@ export interface IHistorySideBarProps {
   model: GitExtension;
 
   /**
-   * Render MIME type registry.
+   * Jupyter App commands registry
    */
-  renderMime: IRenderMimeRegistry;
+  commands: CommandRegistry;
 
   /**
    * Boolean indicating whether to enable UI suspension.
@@ -51,7 +51,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
         commit={commit}
         branches={props.branches}
         model={props.model}
-        renderMime={props.renderMime}
+        commands={props.commands}
         suspend={props.suspend}
       />
     ))}

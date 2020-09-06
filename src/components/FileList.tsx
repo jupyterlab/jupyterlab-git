@@ -1,5 +1,4 @@
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
@@ -18,8 +17,6 @@ import {
 import { Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { isDiffSupported } from './diff/Diff';
-import { openDiffView } from './diff/DiffWidget';
-import { ISpecialRef } from './diff/model';
 import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
 
@@ -28,17 +25,27 @@ export interface IFileListState {
 }
 
 export interface IFileListProps {
+  /**
+   * Modified files
+   */
   files: Git.IStatusFile[];
+  /**
+   * Git extension model
+   */
   model: GitExtension;
-  renderMime: IRenderMimeRegistry;
+  /**
+   * Jupyter App commands registry
+   */
+  commands: CommandRegistry;
+  /**
+   * Extension settings
+   */
   settings: ISettingRegistry.ISettings;
 }
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
   constructor(props: IFileListProps) {
     super(props);
-
-    this._commands = this.props.model.commands;
 
     this.state = {
       selectedFile: null
@@ -61,14 +68,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       selectedFile
     });
 
-    const contextMenu = new Menu({ commands: this._commands });
+    const contextMenu = new Menu({ commands: this.props.commands });
     const commands = [CommandIDs.gitFileOpen];
     switch (selectedFile.status) {
       case 'unstaged':
         commands.push(
           CommandIDs.gitFileStage,
           CommandIDs.gitFileDiscard,
-          CommandIDs.gitFileDiffWorking
+          CommandIDs.gitFileDiff
         );
         break;
       case 'untracked':
@@ -79,7 +86,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         );
         break;
       case 'staged':
-        commands.push(CommandIDs.gitFileUnstage, CommandIDs.gitFileDiffIndex);
+        commands.push(CommandIDs.gitFileUnstage, CommandIDs.gitFileDiff);
         break;
     }
 
@@ -101,19 +108,30 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   ) => {
     event.preventDefault();
 
-    const contextMenu = new Menu({ commands: this._commands });
+    const contextMenu = new Menu({ commands: this.props.commands });
     const commands = [CommandIDs.gitFileOpen];
     switch (selectedFile.status) {
       case 'untracked':
         commands.push(CommandIDs.gitIgnore, CommandIDs.gitIgnoreExtension);
         break;
       default:
-        commands.push(CommandIDs.gitFileDiscard, CommandIDs.gitFileDiffWorking);
+        commands.push(CommandIDs.gitFileDiscard, CommandIDs.gitFileDiff);
         break;
     }
 
     commands.forEach(command => {
-      contextMenu.addItem({ command, args: selectedFile as any });
+      if (command === CommandIDs.gitFileDiff) {
+        contextMenu.addItem({
+          command,
+          args: {
+            filePath: selectedFile.to,
+            isText: !selectedFile.is_binary,
+            status: selectedFile.status
+          }
+        });
+      } else {
+        contextMenu.addItem({ command, args: selectedFile as any });
+      }
     });
     contextMenu.open(event.clientX, event.clientY);
   };
@@ -174,7 +192,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Discard changes in a specific unstaged or staged file */
   discardChanges = async (file: Git.IStatusFile) => {
-    await this._commands.execute(CommandIDs.gitFileDiscard, file as any);
+    await this.props.commands.execute(CommandIDs.gitFileDiscard, file as any);
   };
 
   /** Add all untracked files */
@@ -280,9 +298,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       >
         {files.map((file: Git.IStatusFile) => {
           const openFile = () => {
-            this._commands.execute(CommandIDs.gitFileOpen, file as any);
+            this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
           };
-          const diffButton = this._createDiffButton(file, 'INDEX');
+          const diffButton = this._createDiffButton(file);
           return (
             <FileItem
               key={file.to}
@@ -313,7 +331,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               onDoubleClick={
                 doubleClickDiff
                   ? diffButton
-                    ? () => this._openDiffView(file, 'INDEX')
+                    ? () => this._openDiffView(file)
                     : () => undefined
                   : openFile
               }
@@ -354,9 +372,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       >
         {files.map((file: Git.IStatusFile) => {
           const openFile = () => {
-            this._commands.execute(CommandIDs.gitFileOpen, file as any);
+            this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
           };
-          const diffButton = this._createDiffButton(file, 'WORKING');
+          const diffButton = this._createDiffButton(file);
           return (
             <FileItem
               key={file.to}
@@ -395,7 +413,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               onDoubleClick={
                 doubleClickDiff
                   ? diffButton
-                    ? () => this._openDiffView(file, 'WORKING')
+                    ? () => this._openDiffView(file)
                     : () => undefined
                   : openFile
               }
@@ -435,7 +453,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                     icon={openIcon}
                     title={'Open this file'}
                     onClick={() => {
-                      this._commands.execute(
+                      this.props.commands.execute(
                         CommandIDs.gitFileOpen,
                         file as any
                       );
@@ -456,7 +474,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               model={this.props.model}
               onDoubleClick={() => {
                 if (!doubleClickDiff) {
-                  this._commands.execute(CommandIDs.gitFileOpen, file as any);
+                  this.props.commands.execute(
+                    CommandIDs.gitFileOpen,
+                    file as any
+                  );
                 }
               }}
               selected={this._isSelectedFile(file)}
@@ -487,7 +508,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       >
         {files.map((file: Git.IStatusFile) => {
           const openFile = () => {
-            this._commands.execute(CommandIDs.gitFileOpen, file as any);
+            this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
           };
 
           // Default value for actions and double click
@@ -507,7 +528,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             file.status === 'unstaged' ||
             file.status === 'partially-staged'
           ) {
-            const diffButton = this._createDiffButton(file, 'WORKING');
+            const diffButton = this._createDiffButton(file);
             actions = (
               <React.Fragment>
                 <ActionButton
@@ -529,11 +550,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             );
             onDoubleClick = doubleClickDiff
               ? diffButton
-                ? () => this._openDiffView(file, 'WORKING')
+                ? () => this._openDiffView(file)
                 : () => undefined
               : openFile;
           } else if (file.status === 'staged') {
-            const diffButton = this._createDiffButton(file, 'INDEX');
+            const diffButton = this._createDiffButton(file);
             actions = (
               <React.Fragment>
                 <ActionButton
@@ -555,7 +576,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             );
             onDoubleClick = doubleClickDiff
               ? diffButton
-                ? () => this._openDiffView(file, 'INDEX')
+                ? () => this._openDiffView(file)
                 : () => undefined
               : openFile;
           }
@@ -584,17 +605,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param path File path of interest
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
-  private _createDiffButton(
-    file: Git.IStatusFile,
-    currentRef: ISpecialRef['specialRef']
-  ): JSX.Element {
+  private _createDiffButton(file: Git.IStatusFile): JSX.Element {
     return (
       (isDiffSupported(file.to) || !file.is_binary) && (
         <ActionButton
           className={hiddenButtonStyle}
           icon={diffIcon}
           title={'Diff this file'}
-          onClick={() => this._openDiffView(file, currentRef)}
+          onClick={() => this._openDiffView(file)}
         />
       )
     );
@@ -606,25 +624,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param file File to open diff for
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
-  private async _openDiffView(
-    file: Git.IStatusFile,
-    currentRef: ISpecialRef['specialRef']
-  ): Promise<void> {
+  private async _openDiffView(file: Git.IStatusFile): Promise<void> {
     try {
-      await openDiffView(
-        file.to,
-        this.props.model,
-        {
-          previousRef: { gitRef: 'HEAD' },
-          currentRef: { specialRef: currentRef }
-        },
-        this.props.renderMime,
-        !file.is_binary
-      );
+      await this.props.commands.execute(CommandIDs.gitFileDiff, {
+        filePath: file.to,
+        isText: !file.is_binary,
+        status: file.status
+      });
     } catch (reason) {
       console.error(`Failed to open diff view for ${file.to}.\n${reason}`);
     }
   }
-
-  private _commands: CommandRegistry;
 }

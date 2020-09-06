@@ -1,5 +1,5 @@
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
+import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
@@ -39,9 +39,9 @@ export interface IPastCommitNodeProps {
   model: GitExtension;
 
   /**
-   * Render MIME type registry.
+   * Jupyter App commands registry
    */
-  renderMime: IRenderMimeRegistry;
+  commands: CommandRegistry;
 
   /**
    * Boolean indicating whether to enable UI suspension.
@@ -116,7 +116,7 @@ export class PastCommitNode extends React.Component<
             <SinglePastCommitInfo
               commit={this.props.commit}
               model={this.props.model}
-              renderMime={this.props.renderMime}
+              commands={this.props.commands}
               suspend={this.props.suspend}
             />
           )}

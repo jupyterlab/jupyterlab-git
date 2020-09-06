@@ -1,12 +1,12 @@
 import { ReactWidget } from '@jupyterlab/apputils';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { FileBrowserModel } from '@jupyterlab/filebrowser';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { GitPanel } from '../components/GitPanel';
 import { GitExtension } from '../model';
 import { gitWidgetStyle } from '../style/GitWidgetStyle';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { FileBrowserModel } from '@jupyterlab/filebrowser';
 
 /**
  * A class that exposes the git plugin Widget.
@@ -15,7 +15,7 @@ export class GitWidget extends ReactWidget {
   constructor(
     model: GitExtension,
     settings: ISettingRegistry.ISettings,
-    renderMime: IRenderMimeRegistry,
+    commands: CommandRegistry,
     filebrowser: FileBrowserModel,
     options?: Widget.IOptions
   ) {
@@ -24,7 +24,7 @@ export class GitWidget extends ReactWidget {
     this.addClass(gitWidgetStyle);
 
     this._model = model;
-    this._renderMime = renderMime;
+    this._commands = commands;
     this._settings = settings;
     this._filebrowser = filebrowser;
   }
@@ -33,7 +33,7 @@ export class GitWidget extends ReactWidget {
     return (
       <GitPanel
         model={this._model}
-        renderMime={this._renderMime}
+        commands={this._commands}
         settings={this._settings}
         filebrowser={this._filebrowser}
       />
@@ -41,7 +41,7 @@ export class GitWidget extends ReactWidget {
   }
 
   private _model: GitExtension;
-  private _renderMime: IRenderMimeRegistry;
+  private _commands: CommandRegistry;
   private _settings: ISettingRegistry.ISettings;
   private _filebrowser: FileBrowserModel;
 }

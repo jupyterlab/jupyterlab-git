@@ -1,16 +1,14 @@
-import * as React from 'react';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import { showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import * as React from 'react';
+import { CommandIDs } from '../commandsAndMenu';
 import { GitExtension } from '../model';
-import { sleep } from '../utils';
-import { Git, ILogMessage } from '../tokens';
-import { GitAuthorForm } from '../widgets/AuthorBox';
 import {
   panelWrapperClass,
   repoButtonClass,
@@ -20,13 +18,15 @@ import {
   tabsClass,
   warningTextClass
 } from '../style/GitPanel';
+import { Git, ILogMessage } from '../tokens';
+import { sleep } from '../utils';
+import { GitAuthorForm } from '../widgets/AuthorBox';
+import { Alert } from './Alert';
 import { CommitBox } from './CommitBox';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
-import { Toolbar } from './Toolbar';
 import { SuspendModal } from './SuspendModal';
-import { Alert } from './Alert';
-import { CommandIDs } from '../commandsAndMenu';
+import { Toolbar } from './Toolbar';
 
 /**
  * Interface describing component properties.
@@ -38,9 +38,9 @@ export interface IGitPanelProps {
   model: GitExtension;
 
   /**
-   * MIME type registry.
+   * Jupyter App commands registry
    */
-  renderMime: IRenderMimeRegistry;
+  commands: CommandRegistry;
 
   /**
    * Git extension settings.
@@ -306,6 +306,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     );
     return (
       <Toolbar
+        commands={this.props.commands}
         model={this.props.model}
         branching={!disableBranching}
         refresh={this._onRefresh}
@@ -380,7 +381,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         <FileList
           files={this._sortedFiles}
           model={this.props.model}
-          renderMime={this.props.renderMime}
+          commands={this.props.commands}
           settings={this.props.settings}
         />
         {this.props.settings.composite['simpleStaging'] ? (
@@ -409,7 +410,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         branches={this.state.branches}
         commits={this.state.pastCommits}
         model={this.props.model}
-        renderMime={this.props.renderMime}
+        commands={this.props.commands}
         suspend={
           this.props.settings.composite['blockWhileCommandExecutes'] as boolean
         }
@@ -449,7 +450,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   private _renderWarning(): React.ReactElement {
     const path = this.props.filebrowser.path;
-    const { commands } = this.props.model;
+    const { commands } = this.props;
 
     return (
       <React.Fragment>
