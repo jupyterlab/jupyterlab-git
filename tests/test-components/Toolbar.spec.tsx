@@ -1,5 +1,4 @@
 import { refreshIcon } from '@jupyterlab/ui-components';
-import * as commands from '@lumino/commands';
 import { shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
@@ -11,15 +10,10 @@ import { GitExtension } from '../../src/model';
 import { pullIcon, pushIcon } from '../../src/style/icons';
 import { toolbarMenuButtonClass } from '../../src/style/Toolbar';
 
-jest.mock('@lumino/commands');
 jest.mock('../../src/git');
 
-async function createModel(commands?: commands.CommandRegistry) {
-  const app = {
-    commands,
-    shell: null as any
-  };
-  const model = new GitExtension('/server/root', app as any);
+async function createModel() {
+  const model = new GitExtension('/server/root');
 
   jest.spyOn(model, 'currentBranch', 'get').mockReturnValue({
     is_current_branch: true,
@@ -88,7 +82,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const el = new Toolbar(props);
       expect(el).toBeInstanceOf(Toolbar);
@@ -99,7 +96,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const el = new Toolbar(props);
       expect(el.state.branchMenu).toEqual(false);
@@ -110,7 +110,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const el = new Toolbar(props);
       expect(el.state.repoMenu).toEqual(false);
@@ -132,7 +135,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const nodes = node
@@ -146,7 +152,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node
@@ -162,7 +171,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const nodes = node
@@ -176,7 +188,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node
@@ -192,7 +207,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const nodes = node
@@ -207,7 +225,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node
@@ -225,7 +246,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node.find(`.${toolbarMenuButtonClass}`).first();
@@ -239,7 +263,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node.find(`.${toolbarMenuButtonClass}`).first();
@@ -253,7 +280,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
@@ -267,7 +297,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
@@ -293,7 +326,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const nodes = node.find('BranchMenu');
@@ -306,7 +342,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
@@ -318,30 +357,24 @@ describe('Toolbar', () => {
 
   describe('pull changes', () => {
     let model: GitExtension;
-    let mockedExecute: any;
 
     beforeEach(async () => {
-      const mockedCommands = commands as jest.Mocked<typeof commands>;
-      mockedExecute = jest.fn();
-      mockedCommands.CommandRegistry.mockImplementation(() => {
-        return {
-          execute: mockedExecute
-        } as any;
-      });
-      const registry = new commands.CommandRegistry();
-
       const mock = git as jest.Mocked<typeof git>;
       mock.httpGitRequest.mockImplementation(request);
 
-      model = await createModel(registry);
+      model = await createModel();
     });
 
     it('should pull changes when the button to pull the latest changes is clicked', () => {
+      const mockedExecute = jest.fn();
       const props = {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: mockedExecute
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node
@@ -357,30 +390,24 @@ describe('Toolbar', () => {
 
   describe('push changes', () => {
     let model: GitExtension;
-    let mockedExecute: any;
 
     beforeEach(async () => {
-      const mockedCommands = commands as jest.Mocked<typeof commands>;
-      mockedExecute = jest.fn();
-      mockedCommands.CommandRegistry.mockImplementation(() => {
-        return {
-          execute: mockedExecute
-        } as any;
-      });
-      const registry = new commands.CommandRegistry();
-
       const mock = git as jest.Mocked<typeof git>;
       mock.httpGitRequest.mockImplementation(request);
 
-      model = await createModel(registry);
+      model = await createModel();
     });
 
     it('should push changes when the button to push the latest changes is clicked', () => {
+      const mockedExecute = jest.fn();
       const props = {
         model: model,
         branching: false,
         suspend: false,
-        refresh: async () => {}
+        refresh: async () => {},
+        commands: {
+          execute: mockedExecute
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node
@@ -411,7 +438,10 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         suspend: false,
-        refresh: spy
+        refresh: spy,
+        commands: {
+          execute: jest.fn()
+        } as any
       };
       const node = shallow(<Toolbar {...props} />);
       const button = node
