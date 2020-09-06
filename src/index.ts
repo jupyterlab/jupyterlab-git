@@ -133,7 +133,13 @@ async function activate(
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Add JupyterLab commands
-    addCommands(app, gitExtension, factory.defaultBrowser, settings);
+    addCommands(
+      app,
+      gitExtension,
+      factory.defaultBrowser,
+      settings,
+      renderMime
+    );
 
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(

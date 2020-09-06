@@ -7,14 +7,19 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
-import { IGitExtension } from './tokens';
+import { Git } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { doGitClone } from './widgets/gitClone';
 import { GitPullPushDialog, Operation } from './widgets/gitPushPull';
+import { openListedFile, discardChanges } from './utils';
+import { GitExtension } from './model';
+import { openDiffView } from './components/diff/DiffWidget';
+import { PathExt } from '@jupyterlab/coreutils';
 
 const RESOURCES = [
   {
@@ -42,6 +47,16 @@ export namespace CommandIDs {
   export const gitOpenGitignore = 'git:open-gitignore';
   export const gitPush = 'git:push';
   export const gitPull = 'git:pull';
+  // Context menu commands
+  export const gitFileDiffIndex = 'git:context-diffIndex';
+  export const gitFileDiffWorking = 'git:context-diffWorking';
+  export const gitFileDiscard = 'git:context-discard';
+  export const gitFileOpen = 'git:context-open';
+  export const gitFileUnstage = 'git:context-unstage';
+  export const gitFileStage = 'git:context-stage';
+  export const gitFileTrack = 'git:context-track';
+  export const gitIgnore = 'git:context-ignore';
+  export const gitIgnoreExtension = 'git:context-ignoreExtension';
 }
 
 /**
@@ -49,9 +64,10 @@ export namespace CommandIDs {
  */
 export function addCommands(
   app: JupyterFrontEnd,
-  model: IGitExtension,
+  model: GitExtension,
   fileBrowser: FileBrowser,
-  settings: ISettingRegistry.ISettings
+  settings: ISettingRegistry.ISettings,
+  renderMime: IRenderMimeRegistry
 ) {
   const { commands, shell } = app;
 
@@ -232,6 +248,144 @@ export function addCommands(
       );
     }
   });
+
+  /* Context menu commands */
+  commands.addCommand(CommandIDs.gitFileOpen, {
+    label: 'Open',
+    caption: 'Open selected file',
+    execute: async args => {
+      const selectedFile: Git.IStatusFileResult = args as any;
+      await openListedFile(selectedFile, model);
+    },
+    isEnabled: args => args && args.to !== undefined
+  });
+
+  commands.addCommand(CommandIDs.gitFileDiffWorking, {
+    label: 'Diff',
+    caption: 'Diff selected file',
+    execute: async args => {
+      const selectedFile: Git.IStatusFileResult = args as any;
+      await openDiffView(
+        selectedFile.to,
+        model,
+        {
+          currentRef: { specialRef: 'WORKING' },
+          previousRef: { gitRef: 'HEAD' }
+        },
+        renderMime,
+        !selectedFile.is_binary
+      );
+    },
+    isEnabled: args => args && args.to !== undefined
+  });
+
+  commands.addCommand(CommandIDs.gitFileDiffIndex, {
+    label: 'Diff',
+    caption: 'Diff selected file',
+    execute: async args => {
+      const selectedFile: Git.IStatusFileResult = args as any;
+      await openDiffView(
+        selectedFile.to,
+        model,
+        {
+          currentRef: { specialRef: 'INDEX' },
+          previousRef: { gitRef: 'HEAD' }
+        },
+        renderMime,
+        !selectedFile.is_binary
+      );
+    },
+    isEnabled: args => args && args.to !== undefined
+  });
+
+  commands.addCommand(CommandIDs.gitFileStage, {
+    label: 'Stage',
+    caption: 'Stage the changes of selected file',
+    execute: async args => {
+      const selectedFile: Git.IStatusFile = args as any;
+      await model.add(selectedFile.to);
+    },
+    isEnabled: args => args && args.to !== undefined
+  });
+
+  commands.addCommand(CommandIDs.gitFileTrack, {
+    label: 'Track',
+    caption: 'Start tracking selected file',
+    execute: async args => {
+      const selectedFile: Git.IStatusFile = args as any;
+      await model.add(selectedFile.to);
+    },
+    isEnabled: args => args && args.to !== undefined
+  });
+
+  commands.addCommand(CommandIDs.gitFileUnstage, {
+    label: 'Unstage',
+    caption: 'Unstage the changes of selected file',
+    execute: async args => {
+      const selectedFile: Git.IStatusFile = args as any;
+      if (selectedFile.x !== 'D') {
+        await model.reset(selectedFile.to);
+      }
+    },
+    isEnabled: args => args && args.to !== undefined
+  });
+
+  commands.addCommand(CommandIDs.gitFileDiscard, {
+    label: 'Discard',
+    caption: 'Discard recent changes of selected file',
+    execute: async args => {
+      const selectedFile: Git.IStatusFile = args as any;
+      await discardChanges(selectedFile, model);
+    },
+    isEnabled: args => args && args.to !== undefined
+  });
+
+  commands.addCommand(CommandIDs.gitIgnore, {
+    label: () => 'Ignore this file (add to .gitignore)',
+    caption: () => 'Ignore this file (add to .gitignore)',
+    execute: async args => {
+      const selectedFile: Git.IStatusFile = args as any;
+      if (selectedFile) {
+        await model.ignore(selectedFile.to, false);
+      }
+    },
+    isEnabled: args => args && args.to !== undefined
+  });
+
+  commands.addCommand(CommandIDs.gitIgnoreExtension, {
+    label: args => {
+      const selectedFile: Git.IStatusFile = args as any;
+      return `Ignore ${PathExt.extname(
+        selectedFile.to
+      )} extension (add to .gitignore)`;
+    },
+    caption: 'Ignore this file extension (add to .gitignore)',
+    execute: async args => {
+      const selectedFile: Git.IStatusFile = args as any;
+      if (selectedFile) {
+        const extension = PathExt.extname(selectedFile.to);
+        if (extension.length > 0) {
+          const result = await showDialog({
+            title: 'Ignore file extension',
+            body: `Are you sure you want to ignore all ${extension} files within this git repository?`,
+            buttons: [
+              Dialog.cancelButton(),
+              Dialog.okButton({ label: 'Ignore' })
+            ]
+          });
+          if (result.button.label === 'Ignore') {
+            await model.ignore(selectedFile.to, true);
+          }
+        }
+      }
+    },
+    isEnabled: args => args && args.to !== undefined,
+    isVisible: args => {
+      const selectedFile: Git.IStatusFile = args as any;
+      const extension = PathExt.extname(selectedFile.to);
+      return extension.length > 0;
+    }
+  });
 }
 
 /**
@@ -295,7 +449,7 @@ namespace Private {
    * @returns Promise for displaying a dialog
    */
   export async function showGitOperationDialog(
-    model: IGitExtension,
+    model: GitExtension,
     operation: Operation
   ): Promise<void> {
     const title = `Git ${operation}`;
