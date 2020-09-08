@@ -679,7 +679,7 @@ class TestDiffContent(ServerTest):
             self.tester.post(["diffcontent"], body=body)
 
     @patch("jupyterlab_git.git.execute")
-    def test_diffcontent_getcontent_error(self, mock_execute):
+    def test_diffcontent_getcontent_deleted_file(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/absent_file"
@@ -687,7 +687,6 @@ class TestDiffContent(ServerTest):
 
         mock_execute.side_effect = [
             maybe_future((0, "1\t1\t{}".format(filename), "")),
-            maybe_future((0, content, "")),
             maybe_future((0, content, "")),
         ]
 
@@ -699,5 +698,18 @@ class TestDiffContent(ServerTest):
             "top_repo_path": top_repo_path,
         }
         # Then
-        with assert_http_error(404, msg="No such file or directory"):
-            self.tester.post(["diffcontent"], body=body)
+        response = self.tester.post(["diffcontent"], body=body)
+
+        # Then
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["prev_content"] == content
+        assert payload["curr_content"] == ""
+        mock_execute.assert_has_calls(
+            [
+                call(
+                    ["git", "show", "{}:{}".format("previous", filename)],
+                    cwd=os.path.join(self.notebook_dir, top_repo_path),
+                )
+            ]
+        )
