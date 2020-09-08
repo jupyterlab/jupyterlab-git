@@ -1105,7 +1105,17 @@ class Git:
         Get the file content of filename.
         """
         relative_repo = os.path.relpath(top_repo_path, self.root_dir)
-        model = self.contents_manager.get(path=os.path.join(relative_repo, filename))
+        try:
+            model = self.contents_manager.get(
+                path=os.path.join(relative_repo, filename)
+            )
+        except tornado.web.HTTPError as error:
+            # Handle versioned file being deleted case
+            if error.status_code == 404 and error.log_message.startswith(
+                "No such file or directory: "
+            ):
+                return ""
+            raise error
         return model["content"]
 
     async def diff_content(self, filename, prev_ref, curr_ref, top_repo_path):
