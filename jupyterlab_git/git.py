@@ -818,16 +818,27 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
-    async def commit(self, commit_msg, top_repo_path):
+    async def reset_author(self, top_repo_path):
         """
-        Execute git commit <filename> command & return the result.
+        Reset committer identity in previous commit
         """
-        cmd = ["git", "commit", "-m", commit_msg]
+        cmd = ["git", "commit", "--amend", "--reset-author", "--no-edit"]
         code, _, error = await execute(cmd, cwd=top_repo_path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
+
+    async def commit(self, commit_msg, top_repo_path):
+        """
+        Execute git commit <filename> command & return the result.
+        """
+        cmd = ["git", "commit", "-m", commit_msg]
+        code, output, error = await execute(cmd, cwd=top_repo_path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code, "output": output}
 
     async def pull(self, curr_fb_path, auth=None, cancel_on_conflict=False):
         """

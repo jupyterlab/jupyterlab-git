@@ -529,6 +529,40 @@ export class GitExtension implements IGitExtension {
     return data;
   }
 
+  async resetAuthor(): Promise<Response> {
+    await this.ready;
+    const path = this.pathRepository;
+
+    if (path === null) {
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            code: -1,
+            message: 'Not in a git repository.'
+          })
+        )
+      );
+    }
+
+    try {
+      const response = await httpGitRequest('/git/reset_author', 'POST', {
+        top_repo_path: path
+      });
+      if (!response.ok) {
+        return response.json().then((data: any) => {
+          throw new ServerConnection.ResponseError(response, data.message);
+        });
+      }
+
+      this.refreshStatus();
+      this._headChanged.emit();
+
+      return response;
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    }
+  }
+
   /**
    * Commit all staged file changes.
    *

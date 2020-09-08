@@ -43,6 +43,9 @@ function MockRequest(url: string, method: string, request: any) {
       };
       response = new Response(JSON.stringify(obj));
       break;
+    case '/git/reset_author':
+      response = new Response();
+      break;
     default:
       obj = {
         message: `No mock implementation for ${url}.`
@@ -98,26 +101,13 @@ describe('GitPanel', () => {
     });
 
     it('should commit when commit message is provided', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
-
-      // Mock identity look up
-      const identity = jest
-        .spyOn(GitModel.prototype, 'config')
+      const spy = jest.spyOn(GitModel.prototype, 'commit')
         .mockResolvedValue(
-          new Response(
-            JSON.stringify({
-              options: {
-                'user.name': 'John Snow',
-                'user.email': 'john.snow@winteris.com'
-              }
-            }),
-            { status: 201 }
-          )
-        );
+          new Response(JSON.stringify({code: 200, output: ""})
+        ));
 
       const panel = new GitPanel(props);
       await panel.commitStagedFiles('Initial commit');
-      expect(identity).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith('Initial commit');
     });
@@ -130,61 +120,23 @@ describe('GitPanel', () => {
       spy.mockRestore();
     });
 
-    it('should prompt for user identity if user.name is not set', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
+    it('should prompt for user identity when git advices to set committer identity', async () => {
+      const spy = jest.spyOn(GitModel.prototype, 'commit')
+        .mockResolvedValue(
+          new Response(
+            JSON.stringify(
+              {
+                code: 200,
+                output: `Your name and email address were configured automatically based
+                  on your username and hostname. Please check that they are accurate.
+                  You can suppress this message by setting them explicitly:
 
-      // Mock identity look up
-      const identity = jest
-        .spyOn(GitModel.prototype, 'config')
-        .mockImplementation(options => {
-          let response: Response = null;
-          if (options === undefined) {
-            response = new Response(
-              JSON.stringify({
-                options: {
-                  'user.email': 'john.snow@winteris.com'
-                }
-              }),
-              { status: 201 }
-            );
-          } else {
-            response = new Response('', { status: 201 });
-          }
-          return Promise.resolve(response);
-        });
-      const mock = apputils as jest.Mocked<typeof apputils>;
-      mock.showDialog.mockResolvedValue({
-        button: {
-          accept: true,
-          caption: '',
-          className: '',
-          displayType: 'default',
-          iconClass: '',
-          iconLabel: '',
-          label: ''
-        },
-        value: {
-          name: 'John Snow',
-          email: 'john.snow@winteris.com'
-        }
-      });
-
-      const panel = new GitPanel(props);
-      await panel.commitStagedFiles('Initial commit');
-      expect(identity).toHaveBeenCalledTimes(2);
-      expect(identity.mock.calls[0]).toHaveLength(0);
-      expect(identity.mock.calls[1]).toEqual([
-        {
-          'user.name': 'John Snow',
-          'user.email': 'john.snow@winteris.com'
-        }
-      ]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith('Initial commit');
-    });
-
-    it('should prompt for user identity if user.email is not set', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
+                      git config --global user.name "Your Name"
+                      git config --global user.email you@example.com`
+              }
+            )
+          )
+        );
 
       // Mock identity look up
       const identity = jest
@@ -222,11 +174,12 @@ describe('GitPanel', () => {
         }
       });
 
+      const resetAuthorMock = jest.spyOn(GitModel.prototype, 'resetAuthor');
+
       const panel = new GitPanel(props);
       await panel.commitStagedFiles('Initial commit');
-      expect(identity).toHaveBeenCalledTimes(2);
-      expect(identity.mock.calls[0]).toHaveLength(0);
-      expect(identity.mock.calls[1]).toEqual([
+      expect(identity).toHaveBeenCalledTimes(1);
+      expect(identity.mock.calls[0]).toEqual([
         {
           'user.name': 'John Snow',
           'user.email': 'john.snow@winteris.com'
@@ -234,28 +187,31 @@ describe('GitPanel', () => {
       ]);
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith('Initial commit');
+      expect(resetAuthorMock).toHaveBeenCalledTimes(1);
     });
 
-    it('should not commit if no user identity is set and the user rejects the dialog', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
+    it('should not reset author if no user identity is set and the user rejects the dialog', async () => {
+      const spy = jest.spyOn(GitModel.prototype, 'commit')
+        .mockResolvedValue(
+          new Response(
+            JSON.stringify(
+              {
+                code: 200,
+                output: `Your name and email address were configured automatically based
+                  on your username and hostname. Please check that they are accurate.
+                  You can suppress this message by setting them explicitly:
+
+                      git config --global user.name "Your Name"
+                      git config --global user.email you@example.com`
+              }
+            )
+          )
+        );
 
       // Mock identity look up
-      const identity = jest
-        .spyOn(GitModel.prototype, 'config')
-        .mockImplementation(options => {
-          let response: Response = null;
-          if (options === undefined) {
-            response = new Response(
-              JSON.stringify({
-                options: {}
-              }),
-              { status: 201 }
-            );
-          } else {
-            response = new Response('', { status: 201 });
-          }
-          return Promise.resolve(response);
-        });
+      const identity = jest.spyOn(GitModel.prototype, 'config')
+      const resetAuthorMock = jest.spyOn(GitModel.prototype, 'resetAuthor');
+
       const mock = apputils as jest.Mocked<typeof apputils>;
       mock.showDialog.mockResolvedValue({
         button: {
@@ -272,9 +228,9 @@ describe('GitPanel', () => {
 
       const panel = new GitPanel(props);
       await panel.commitStagedFiles('Initial commit');
-      expect(identity).toHaveBeenCalledTimes(1);
-      expect(identity).toHaveBeenCalledWith();
-      expect(spy).not.toHaveBeenCalled();
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(identity).toHaveBeenCalledTimes(0);
+      expect(resetAuthorMock).toHaveBeenCalledTimes(0);
     });
   });
 });
