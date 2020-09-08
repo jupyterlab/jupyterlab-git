@@ -1,5 +1,6 @@
 import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
+import { FixedSizeList } from 'react-window';
 import {
   changeStageButtonStyle,
   sectionAreaStyle,
@@ -7,6 +8,10 @@ import {
   sectionHeaderLabelStyle,
   sectionHeaderSizeStyle
 } from '../style/GitStageStyle';
+import { Git } from '../tokens';
+
+const HEADER_HEIGHT = 34;
+const ITEM_HEIGHT = 25;
 
 /**
  * Git stage component properties
@@ -21,13 +26,21 @@ export interface IGitStageProps {
    */
   collapsible?: boolean;
   /**
+   * Files in the group
+   */
+  files: Git.IStatusFile[];
+  /**
    * Group title
    */
   heading: string;
+  height: number;
   /**
-   * Number of files in the group
+   * Row renderer
    */
-  nFiles: number;
+  rowRenderer: (
+    file: Git.IStatusFile,
+    style: React.CSSProperties
+  ) => JSX.Element;
 }
 
 /**
@@ -38,9 +51,21 @@ export interface IGitStageState {
 }
 
 export const GitStage: React.FunctionComponent<IGitStageProps> = (
-  props: React.PropsWithChildren<IGitStageProps>
+  props: IGitStageProps
 ) => {
   const [showFiles, setShowFiles] = React.useState(true);
+  const nFiles = props.files.length;
+
+  const _renderList = ({
+    index,
+    style
+  }: {
+    index: number;
+    style: React.CSSProperties;
+  }) => {
+    const file = props.files[index];
+    return props.rowRenderer(file, style);
+  };
 
   return (
     <div className={sectionFileContainerStyle}>
@@ -49,12 +74,12 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
           <button
             className={changeStageButtonStyle}
             onClick={() => {
-              if (props.nFiles > 0) {
+              if (nFiles > 0) {
                 setShowFiles(!showFiles);
               }
             }}
           >
-            {showFiles && props.nFiles > 0 ? (
+            {showFiles && nFiles > 0 ? (
               <caretDownIcon.react />
             ) : (
               <caretRightIcon.react />
@@ -63,10 +88,23 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
         )}
         <span className={sectionHeaderLabelStyle}>{props.heading}</span>
         {props.actions}
-        <span className={sectionHeaderSizeStyle}>({props.nFiles})</span>
+        <span className={sectionHeaderSizeStyle}>({nFiles})</span>
       </div>
-      {showFiles && (
-        <ul className={sectionFileContainerStyle}>{props.children}</ul>
+      {showFiles && nFiles > 0 && (
+        <FixedSizeList
+          height={Math.max(
+            Math.min(props.height, nFiles * ITEM_HEIGHT) - HEADER_HEIGHT,
+            ITEM_HEIGHT
+          )}
+          itemCount={nFiles}
+          itemData={props.files}
+          itemKey={(index, data) => data[index].to}
+          itemSize={ITEM_HEIGHT}
+          width={'100%'}
+          style={{ overflowX: 'visible' }}
+        >
+          {_renderList}
+        </FixedSizeList>
       )}
     </div>
   );

@@ -34,6 +34,7 @@ export interface IFileItemProps {
   onDoubleClick: () => void;
   selected?: boolean;
   selectFile?: (file: Git.IStatusFile | null) => void;
+  style: React.CSSProperties;
 }
 
 export interface IGitMarkBoxProps {
@@ -92,6 +93,7 @@ export class FileItem extends React.Component<IFileItemProps> {
           })
         }
         onDoubleClick={this.props.onDoubleClick}
+        style={this.props.style}
         title={`${this.props.file.to} ● ${status}`}
       >
         {this.props.markBox && (

@@ -73,6 +73,8 @@
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
     "react-textarea-autosize": "^7.1.2",
+    "react-virtualized-auto-sizer": "^1.0.2",
+    "react-window": "^1.8.5",
     "typestyle": "^2.0.1"
   },
   "devDependencies": {
@@ -86,6 +88,8 @@
     "@types/react": "~16.8.13",
     "@types/react-dom": "~16.0.5",
     "@types/react-textarea-autosize": "^4.3.5",
+    "@types/react-virtualized-auto-sizer": "^1.0.0",
+    "@types/react-window": "^1.8.2",
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",
     "all-contributors-cli": "^6.14.0",
