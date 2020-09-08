@@ -21,7 +21,7 @@ describe('HistorySideBar', () => {
     ],
     branches: [],
     model: null,
-    renderMime: null,
+    commands: null,
     suspend: false
   };
   test('renders commit nodes', () => {

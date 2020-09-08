@@ -56,7 +56,7 @@ describe('PastCommitNode', () => {
       pre_commit: 'pre_commit'
     },
     branches: branches,
-    renderMime: null,
+    commands: null,
     suspend: false
   };
 
