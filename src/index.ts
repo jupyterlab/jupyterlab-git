@@ -164,7 +164,7 @@ async function activate(
     mainMenu.addMenu(createGitMenu(app.commands), { rank: 60 });
 
     // Add a clone button to the file browser extension toolbar
-    addCloneButton(gitExtension, factory.defaultBrowser);
+    addCloneButton(gitExtension, factory.defaultBrowser, app.commands);
 
     // Add the status bar widget
     addStatusBarWidget(statusBar, gitExtension, settings);

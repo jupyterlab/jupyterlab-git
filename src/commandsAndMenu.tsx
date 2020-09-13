@@ -21,12 +21,13 @@ import {
   RenderMimeProvider
 } from './components/diff/Diff';
 import { getRefValue, IDiffContext } from './components/diff/model';
+import { AUTH_ERROR_MESSAGES } from './git';
+import { logger } from './logger';
 import { GitExtension } from './model';
 import { diffIcon } from './style/icons';
-import { Git } from './tokens';
+import { Git, Level } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
-import { doGitClone } from './widgets/gitClone';
-import { GitPullPushDialog, Operation } from './widgets/gitPushPull';
+import { GitCloneForm } from './widgets/GitCloneForm';
 
 const RESOURCES = [
   {
@@ -38,6 +39,26 @@ const RESOURCES = [
     url: 'https://git-scm.com/doc'
   }
 ];
+
+interface IGitCloneArgs {
+  /**
+   * Path in which to clone the Git repository
+   */
+  path: string;
+  /**
+   * Git repository url
+   */
+  url: string;
+}
+
+/**
+ * Git operations requiring authentication
+ */
+enum Operation {
+  Clone = 'Clone',
+  Pull = 'Pull',
+  Push = 'Push'
+}
 
 /**
  * The command IDs used by the git plugin.
@@ -133,8 +154,28 @@ export function addCommands(
       });
 
       if (result.button.accept) {
-        await model.init(currentPath);
-        model.pathRepository = currentPath;
+        logger.log({
+          message: 'Initializing...',
+          level: Level.RUNNING
+        });
+        try {
+          await model.init(currentPath);
+          model.pathRepository = currentPath;
+          logger.log({
+            message: 'Git repository initialized.',
+            level: Level.SUCCESS
+          });
+        } catch (error) {
+          console.error(
+            'Encountered an error when initializing the repository. Error: ',
+            error
+          );
+          logger.log({
+            message: 'Failed to initialize the Git repository',
+            level: Level.ERROR,
+            error
+          });
+        }
       }
     },
     isEnabled: () => model.pathRepository === null
@@ -208,8 +249,41 @@ export function addCommands(
     caption: 'Clone a repository from a URL',
     isEnabled: () => model.pathRepository === null,
     execute: async () => {
-      await doGitClone(model, fileBrowser.model.path);
-      fileBrowser.model.refresh();
+      const result = await showDialog({
+        title: 'Clone a repo',
+        body: new GitCloneForm(),
+        focusNodeSelector: 'input',
+        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'CLONE' })]
+      });
+
+      if (result.button.accept && result.value) {
+        logger.log({
+          level: Level.RUNNING,
+          message: 'Cloning...'
+        });
+        try {
+          await Private.showGitOperationDialog<IGitCloneArgs>(
+            model,
+            Operation.Clone,
+            { path: fileBrowser.model.path, url: result.value }
+          );
+          logger.log({
+            message: 'Successfully cloned',
+            level: Level.SUCCESS
+          });
+          await fileBrowser.model.refresh();
+        } catch (error) {
+          console.error(
+            'Encountered an error when cloning the repository. Error: ',
+            error
+          );
+          logger.log({
+            message: 'Failed to clone',
+            level: Level.ERROR,
+            error
+          });
+        }
+      }
     }
   });
 
@@ -229,13 +303,27 @@ export function addCommands(
     caption: 'Push code to remote repository',
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
-      await Private.showGitOperationDialog(model, Operation.Push).catch(
-        reason => {
-          console.error(
-            `Encountered an error when pushing changes. Error: ${reason}`
-          );
-        }
-      );
+      logger.log({
+        level: Level.RUNNING,
+        message: 'Pushing...'
+      });
+      try {
+        await Private.showGitOperationDialog(model, Operation.Push);
+        logger.log({
+          message: 'Successfully pushed',
+          level: Level.SUCCESS
+        });
+      } catch (error) {
+        console.error(
+          'Encountered an error when pushing changes. Error: ',
+          error
+        );
+        logger.log({
+          message: 'Failed to push',
+          level: Level.ERROR,
+          error
+        });
+      }
     }
   });
 
@@ -245,13 +333,27 @@ export function addCommands(
     caption: 'Pull latest code from remote repository',
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
-      await Private.showGitOperationDialog(model, Operation.Pull).catch(
-        reason => {
-          console.error(
-            `Encountered an error when pulling changes. Error: ${reason}`
-          );
-        }
-      );
+      logger.log({
+        level: Level.RUNNING,
+        message: 'Pulling...'
+      });
+      try {
+        await Private.showGitOperationDialog(model, Operation.Pull);
+        logger.log({
+          message: 'Successfully pulled',
+          level: Level.SUCCESS
+        });
+      } catch (error) {
+        console.error(
+          'Encountered an error when pulling changes. Error: ',
+          error
+        );
+        logger.log({
+          message: 'Failed to pull',
+          level: Level.ERROR,
+          error
+        });
+      }
     }
   });
 
@@ -515,44 +617,66 @@ export function createGitMenu(commands: CommandRegistry): Menu {
 /* eslint-disable no-inner-declarations */
 namespace Private {
   /**
-   * Displays an error dialog when a Git operation fails.
+   * Handle Git operation that may require authentication.
    *
    * @private
    * @param model - Git extension model
    * @param operation - Git operation name
+   * @param args - Git operation arguments
+   * @param authentication - Git authentication information
+   * @param retry - Is this operation retried?
    * @returns Promise for displaying a dialog
    */
-  export async function showGitOperationDialog(
+  export async function showGitOperationDialog<T>(
     model: GitExtension,
-    operation: Operation
+    operation: Operation,
+    args?: T,
+    authentication?: Git.IAuth,
+    retry = false
   ): Promise<void> {
-    const title = `Git ${operation}`;
-    let result = await showDialog({
-      title: title,
-      body: new GitPullPushDialog(model, operation),
-      buttons: [Dialog.okButton({ label: 'DISMISS' })]
-    });
-    let retry = false;
-    while (!result.button.accept) {
-      const credentials = await showDialog({
-        title: 'Git credentials required',
-        body: new GitCredentialsForm(
-          'Enter credentials for remote repository',
-          retry ? 'Incorrect username or password.' : ''
-        ),
-        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
-      });
-
-      if (!credentials.button.accept) {
-        break;
+    try {
+      // the Git action
+      switch (operation) {
+        case Operation.Clone:
+          // eslint-disable-next-line no-case-declarations
+          const { path, url } = (args as any) as IGitCloneArgs;
+          await model.clone(path, url, authentication);
+          break;
+        case Operation.Pull:
+          await model.pull(authentication);
+          break;
+        case Operation.Push:
+          await model.push(authentication);
+          break;
+        default:
+          return;
       }
+    } catch (error) {
+      if (
+        AUTH_ERROR_MESSAGES.some(
+          errorMessage => error.message.indexOf(errorMessage) > -1
+        )
+      ) {
+        // If the error is an authentication error, ask the user credentials
+        const credentials = await showDialog({
+          title: 'Git credentials required',
+          body: new GitCredentialsForm(
+            'Enter credentials for remote repository',
+            retry ? 'Incorrect username or password.' : ''
+          )
+        });
 
-      result = await showDialog({
-        title: title,
-        body: new GitPullPushDialog(model, operation, credentials.value),
-        buttons: [Dialog.okButton({ label: 'DISMISS' })]
-      });
-      retry = true;
+        if (credentials.button.accept) {
+          // Retry the operation if the user provides its credentials
+          await showGitOperationDialog<T>(
+            model,
+            operation,
+            args,
+            credentials.value,
+            true
+          );
+        }
+      }
     }
   }
 }
