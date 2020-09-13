@@ -1,6 +1,6 @@
+import { CommandRegistry } from '@phosphor/commands';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { GitExtension } from '../model';
 import { Git } from '../tokens';
 import {
@@ -40,9 +40,9 @@ export interface IPastCommitNodeProps {
   model: GitExtension;
 
   /**
-   * Render MIME type registry.
+   * Jupyter App commands registry
    */
-  renderMime: IRenderMimeRegistry;
+  commands: CommandRegistry;
 
   /**
    * Boolean indicating whether to enable UI suspension.
@@ -121,7 +121,7 @@ export class PastCommitNode extends React.Component<
             <SinglePastCommitInfo
               commit={this.props.commit}
               model={this.props.model}
-              renderMime={this.props.renderMime}
+              commands={this.props.commands}
               suspend={this.props.suspend}
             />
           )}

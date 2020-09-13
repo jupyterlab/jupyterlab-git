@@ -72,7 +72,7 @@ describe('GitPanel', () => {
   describe('#commitStagedFiles()', () => {
     const props: IGitPanelProps = {
       model: null,
-      renderMime: null,
+      commands: null,
       settings: null,
       filebrowser: null
     };
@@ -83,12 +83,7 @@ describe('GitPanel', () => {
       const mock = git as jest.Mocked<typeof git>;
       mock.httpGitRequest.mockImplementation(MockRequest);
 
-      const app = {
-        commands: {
-          hasCommand: jest.fn().mockReturnValue(true)
-        }
-      };
-      props.model = new GitModel(app as any);
+      props.model = new GitModel('/server/root');
       props.model.pathRepository = '/path/to/repo';
 
       // @ts-ignore

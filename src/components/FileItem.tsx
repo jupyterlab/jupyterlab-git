@@ -27,7 +27,7 @@ export const STATUS_CODES = {
 
 export interface IFileItemProps {
   actions?: React.ReactElement;
-  contextMenu?: (event: React.MouseEvent) => void;
+  contextMenu?: (file: Git.IStatusFile, event: React.MouseEvent) => void;
   file: Git.IStatusFile;
   markBox?: boolean;
   model: GitExtension;
@@ -88,10 +88,7 @@ export class FileItem extends React.Component<IFileItemProps> {
         onContextMenu={
           this.props.contextMenu &&
           (event => {
-            if (this.props.selectFile) {
-              this.props.selectFile(this.props.file);
-            }
-            this.props.contextMenu(event);
+            this.props.contextMenu(this.props.file, event);
           })
         }
         onDoubleClick={this.props.onDoubleClick}

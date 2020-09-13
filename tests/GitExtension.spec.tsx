@@ -67,12 +67,7 @@ describe('IGitExtension', () => {
       return Promise.resolve(response);
     });
 
-    const app = {
-      commands: {
-        hasCommand: jest.fn().mockReturnValue(true)
-      }
-    };
-    model = new GitExtension(fakeRoot, app as any, docmanager as any);
+    model = new GitExtension(fakeRoot, docmanager as any);
   });
 
   describe('#pathRepository', () => {

@@ -1,9 +1,9 @@
 import { showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ISettingRegistry, PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
+import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
 import * as React from 'react';
 import { CommandIDs } from '../commandsAndMenu';
@@ -37,9 +37,9 @@ export interface IGitPanelProps {
   model: GitExtension;
 
   /**
-   * MIME type registry.
+   * Jupyter App commands registry
    */
-  renderMime: IRenderMimeRegistry;
+  commands: CommandRegistry;
 
   /**
    * Git extension settings.
@@ -305,6 +305,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     );
     return (
       <Toolbar
+        commands={this.props.commands}
         model={this.props.model}
         branching={!disableBranching}
         refresh={this._onRefresh}
@@ -379,7 +380,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         <FileList
           files={this._sortedFiles}
           model={this.props.model}
-          renderMime={this.props.renderMime}
+          commands={this.props.commands}
           settings={this.props.settings}
         />
         {this.props.settings.composite['simpleStaging'] ? (
@@ -408,7 +409,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         branches={this.state.branches}
         commits={this.state.pastCommits}
         model={this.props.model}
-        renderMime={this.props.renderMime}
+        commands={this.props.commands}
         suspend={
           this.props.settings.composite['blockWhileCommandExecutes'] as boolean
         }
@@ -448,7 +449,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   private _renderWarning(): React.ReactElement {
     const path = this.props.filebrowser.path;
-    const { commands } = this.props.model;
+    const { commands } = this.props;
 
     return (
       <React.Fragment>
