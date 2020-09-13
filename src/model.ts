@@ -1,10 +1,8 @@
-import { JupyterFrontEnd } from '@jupyterlab/application';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { LinkedList } from '@lumino/collections';
-import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -28,13 +26,11 @@ export class GitExtension implements IGitExtension {
    */
   constructor(
     serverRoot: string,
-    app: JupyterFrontEnd = null,
     docmanager: IDocumentManager = null,
     settings?: ISettingRegistry.ISettings
   ) {
     const self = this;
     this._serverRoot = serverRoot;
-    this._app = app;
     this._docmanager = docmanager;
     this._settings = settings || null;
 
@@ -77,13 +73,6 @@ export class GitExtension implements IGitExtension {
    */
   get branches() {
     return this._branches;
-  }
-
-  /**
-   * List of available Git commands.
-   */
-  get commands(): CommandRegistry | null {
-    return this._app ? this._app.commands : null;
   }
 
   /**
@@ -167,13 +156,6 @@ export class GitExtension implements IGitExtension {
         this._pendingReadyPromise -= 1;
       });
     }
-  }
-
-  /**
-   * The Jupyter front-end application shell.
-   */
-  get shell(): JupyterFrontEnd.IShell | null {
-    return this._app ? this._app.shell : null;
   }
 
   /**
@@ -1459,7 +1441,6 @@ export class GitExtension implements IGitExtension {
   private _branches: Git.IBranch[];
   private _currentBranch: Git.IBranch;
   private _serverRoot: string;
-  private _app: JupyterFrontEnd | null;
   private _docmanager: IDocumentManager | null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
   private _isDisposed = false;

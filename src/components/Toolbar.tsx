@@ -5,6 +5,7 @@ import {
   caretUpIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
+import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { CommandIDs } from '../commandsAndMenu';
@@ -28,7 +29,7 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { IGitExtension, ILogMessage, Git } from '../tokens';
+import { Git, IGitExtension, ILogMessage } from '../tokens';
 import { sleep } from '../utils';
 import { GitTagDialog } from '../widgets/TagList';
 import { ActionButton } from './ActionButton';
@@ -61,6 +62,11 @@ export interface IToolbarProps {
    * @returns promise which refreshes a repository
    */
   refresh: () => Promise<void>;
+
+  /**
+   * Jupyter App commands registry
+   */
+  commands: CommandRegistry;
 }
 
 /**
@@ -352,12 +358,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param event - event object
    * @returns a promise which resolves upon pulling the latest changes
    */
-  private _onPullClick = (): void => {
+  private _onPullClick = async (): Promise<void> => {
     this._suspend(true);
-    const commands = this.props.model.commands;
-    if (commands) {
-      commands.execute(CommandIDs.gitPull);
-    }
+    await this.props.commands.execute(CommandIDs.gitPull);
     this._suspend(false);
   };
 
@@ -367,12 +370,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param event - event object
    * @returns a promise which resolves upon pushing the latest changes
    */
-  private _onPushClick = (): void => {
+  private _onPushClick = async (): Promise<void> => {
     this._suspend(true);
-    const commands = this.props.model.commands;
-    if (commands) {
-      commands.execute(CommandIDs.gitPush);
-    }
+    await this.props.commands.execute(CommandIDs.gitPush);
     this._suspend(false);
   };
 

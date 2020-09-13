@@ -111,7 +111,6 @@ async function activate(
   // Create the Git model
   gitExtension = new GitExtension(
     serverSettings.serverRoot,
-    app,
     docmanager,
     settings
   );
@@ -133,13 +132,19 @@ async function activate(
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Add JupyterLab commands
-    addCommands(app, gitExtension, factory.defaultBrowser, settings);
+    addCommands(
+      app,
+      gitExtension,
+      factory.defaultBrowser,
+      settings,
+      renderMime
+    );
 
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
       gitExtension,
       settings,
-      renderMime,
+      app.commands,
       factory.defaultBrowser.model
     );
     gitPlugin.id = 'jp-git-sessions';
