@@ -1,16 +1,15 @@
 import { PathExt } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ServerConnection } from '@jupyterlab/services/lib/serverconnection';
 import { IDiffEntry } from 'nbdime/lib/diff/diffentries';
 import { CellDiffModel, NotebookDiffModel } from 'nbdime/lib/diff/model';
 import { CellDiffWidget } from 'nbdime/lib/diff/widget';
 import * as React from 'react';
 import { RefObject } from 'react';
-import { httpGitRequest } from '../../git';
+import { requestAPI } from '../../git';
+import { IDiffProps, RenderMimeConsumer } from './Diff';
 import { IDiffContext } from './model';
 import { NBDiffHeader } from './NBDiffHeader';
-import { IDiffProps, RenderMimeConsumer } from './Diff';
 
 export interface ICellDiffProps {
   cellChunk: CellDiffModel[];
@@ -167,53 +166,42 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
    * @param diffContext the context in which to perform the diff
    */
   private performDiff(diffContext: IDiffContext): void {
-    try {
-      // Resolve what API parameter to call.
-      let currentRefValue: any;
-      if ('specialRef' in diffContext.currentRef) {
-        currentRefValue = {
-          special: diffContext.currentRef.specialRef
-        };
-      } else {
-        currentRefValue = {
-          git: diffContext.currentRef.gitRef
-        };
-      }
+    // Resolve what API parameter to call.
+    let currentRefValue: any;
+    if ('specialRef' in diffContext.currentRef) {
+      currentRefValue = {
+        special: diffContext.currentRef.specialRef
+      };
+    } else {
+      currentRefValue = {
+        git: diffContext.currentRef.gitRef
+      };
+    }
 
-      httpGitRequest('/nbdime/api/gitdiff', 'POST', {
+    requestAPI<INbdimeDiff>(
+      'gitdiff',
+      'POST',
+      {
         file_path: PathExt.join(this.props.topRepoPath, this.props.path),
         ref_local: { git: diffContext.previousRef.gitRef },
         ref_remote: currentRefValue
-      }).then((response: Response) => {
-        response
-          .json()
-          .then((data: INbdimeDiff) => {
-            if (response.status !== 200) {
-              // Handle error
-              this.setState({
-                errorMessage:
-                  data.message || 'Unknown error. Please check the server log.'
-              });
-            } else {
-              // Handle response
-              const base = data.base;
-              const diff = data.diff;
-              const nbdModel = new NotebookDiffModel(base, diff);
-              this.setState({
-                nbdModel: nbdModel
-              });
-            }
-          })
-          .catch(reason => {
-            // Handle error
-            this.setState({
-              errorMessage:
-                reason.message || 'Unknown error. Please check the server log.'
-            });
-          });
+      },
+      'nbdime/api'
+    )
+      .then((data: INbdimeDiff) => {
+        const base = data.base;
+        const diff = data.diff;
+        const nbdModel = new NotebookDiffModel(base, diff);
+        this.setState({
+          nbdModel: nbdModel
+        });
+      })
+      .catch(reason => {
+        // Handle error
+        this.setState({
+          errorMessage:
+            reason.message || 'Unknown error. Please check the server log.'
+        });
       });
-    } catch (err) {
-      throw ServerConnection.NetworkError;
-    }
   }
 }

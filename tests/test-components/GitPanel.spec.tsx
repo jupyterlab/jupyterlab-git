@@ -1,56 +1,30 @@
 import * as apputils from '@jupyterlab/apputils';
+import { JSONObject } from '@lumino/coreutils';
 import 'jest';
-import { GitExtension as GitModel } from '../../src/model';
-import * as git from '../../src/git';
 import { GitPanel, IGitPanelProps } from '../../src/components/GitPanel';
+import * as git from '../../src/git';
+import { GitExtension as GitModel } from '../../src/model';
+import {
+  defaultMockedResponses,
+  IMockedResponses,
+  mockedRequestAPI
+} from '../utils';
 
 jest.mock('../../src/git');
 jest.mock('@jupyterlab/apputils');
 
-function MockRequest(url: string, method: string, request: any) {
-  let response: Response;
-  let obj: any;
-  switch (url) {
-    case '/git/branch':
-      obj = {
-        code: 0,
-        branches: [],
-        current_branch: null
-      };
-      response = new Response(JSON.stringify(obj));
-      break;
-    case '/git/commit':
-      response = new Response();
-      break;
-    case '/git/log':
-      obj = {
+const mockedResponses: IMockedResponses = {
+  ...defaultMockedResponses,
+  commit: { body: () => null },
+  log: {
+    body: () => {
+      return {
         code: 0,
         commits: []
       };
-      response = new Response(JSON.stringify(obj));
-      break;
-    case '/git/show_top_level':
-      obj = {
-        code: 0,
-        top_repo_path: (request as any)['current_path']
-      };
-      response = new Response(JSON.stringify(obj));
-      break;
-    case '/git/status':
-      obj = {
-        code: 0,
-        files: []
-      };
-      response = new Response(JSON.stringify(obj));
-      break;
-    default:
-      obj = {
-        message: `No mock implementation for ${url}.`
-      };
-      response = new Response(JSON.stringify(obj), { status: 404 });
+    }
   }
-  return Promise.resolve(response);
-}
+};
 
 /**
  * Returns a bare minimum "settings" object for use within the Git panel.
@@ -69,46 +43,41 @@ function MockSettings() {
 }
 
 describe('GitPanel', () => {
+  const props: IGitPanelProps = {
+    model: null,
+    commands: null,
+    settings: null,
+    filebrowser: null
+  };
+
+  beforeEach(async () => {
+    jest.restoreAllMocks();
+
+    const mock = git as jest.Mocked<typeof git>;
+    mock.requestAPI.mockImplementation(mockedRequestAPI(mockedResponses));
+
+    props.model = new GitModel('/server/root');
+    props.model.pathRepository = '/path/to/repo';
+
+    // @ts-ignore
+    props.settings = MockSettings();
+
+    await props.model.ready;
+  });
+
   describe('#commitStagedFiles()', () => {
-    const props: IGitPanelProps = {
-      model: null,
-      commands: null,
-      settings: null,
-      filebrowser: null
-    };
-
-    beforeEach(async () => {
-      jest.restoreAllMocks();
-
-      const mock = git as jest.Mocked<typeof git>;
-      mock.httpGitRequest.mockImplementation(MockRequest);
-
-      props.model = new GitModel('/server/root');
-      props.model.pathRepository = '/path/to/repo';
-
-      // @ts-ignore
-      props.settings = MockSettings();
-
-      await props.model.ready;
-    });
-
     it('should commit when commit message is provided', async () => {
       const spy = jest.spyOn(GitModel.prototype, 'commit');
 
       // Mock identity look up
       const identity = jest
         .spyOn(GitModel.prototype, 'config')
-        .mockResolvedValue(
-          new Response(
-            JSON.stringify({
-              options: {
-                'user.name': 'John Snow',
-                'user.email': 'john.snow@winteris.com'
-              }
-            }),
-            { status: 201 }
-          )
-        );
+        .mockResolvedValue({
+          options: {
+            'user.name': 'John Snow',
+            'user.email': 'john.snow@winteris.com'
+          }
+        });
 
       const panel = new GitPanel(props);
       await panel.commitStagedFiles('Initial commit');
@@ -132,18 +101,13 @@ describe('GitPanel', () => {
       const identity = jest
         .spyOn(GitModel.prototype, 'config')
         .mockImplementation(options => {
-          let response: Response = null;
+          let response: JSONObject = null;
           if (options === undefined) {
-            response = new Response(
-              JSON.stringify({
-                options: {
-                  'user.email': 'john.snow@winteris.com'
-                }
-              }),
-              { status: 201 }
-            );
-          } else {
-            response = new Response('', { status: 201 });
+            response = {
+              options: {
+                'user.email': 'john.snow@winteris.com'
+              }
+            };
           }
           return Promise.resolve(response);
         });
@@ -185,18 +149,13 @@ describe('GitPanel', () => {
       const identity = jest
         .spyOn(GitModel.prototype, 'config')
         .mockImplementation(options => {
-          let response: Response = null;
+          let response: JSONObject = null;
           if (options === undefined) {
-            response = new Response(
-              JSON.stringify({
-                options: {
-                  'user.name': 'John Snow'
-                }
-              }),
-              { status: 201 }
-            );
-          } else {
-            response = new Response('', { status: 201 });
+            response = {
+              options: {
+                'user.name': 'John Snow'
+              }
+            };
           }
           return Promise.resolve(response);
         });
@@ -238,16 +197,11 @@ describe('GitPanel', () => {
       const identity = jest
         .spyOn(GitModel.prototype, 'config')
         .mockImplementation(options => {
-          let response: Response = null;
+          let response: JSONObject = null;
           if (options === undefined) {
-            response = new Response(
-              JSON.stringify({
-                options: {}
-              }),
-              { status: 201 }
-            );
-          } else {
-            response = new Response('', { status: 201 });
+            response = {
+              options: {}
+            };
           }
           return Promise.resolve(response);
         });
