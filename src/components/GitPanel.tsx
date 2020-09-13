@@ -574,33 +574,35 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     // If the repository path changes, check the user identity
     if (path !== this._previousRepoPath) {
       try {
-        let res = await this.props.model.config();
-        if (res.ok) {
-          const options: JSONObject = (await res.json()).options;
-          const keys = Object.keys(options);
+        const data: JSONObject = (await this.props.model.config()) as any;
+        const options: JSONObject = data['options'] as JSONObject;
+        const keys = Object.keys(options);
 
-          // If the user name or e-mail is unknown, ask the user to set it
-          if (keys.indexOf('user.name') < 0 || keys.indexOf('user.email') < 0) {
-            const result = await showDialog({
-              title: 'Who is committing?',
-              body: new GitAuthorForm()
-            });
-            if (!result.button.accept) {
-              console.log('User refuses to set identity.');
-              return false;
-            }
-            const identity = result.value;
-            res = await this.props.model.config({
+        // If the user name or e-mail is unknown, ask the user to set it
+        if (keys.indexOf('user.name') < 0 || keys.indexOf('user.email') < 0) {
+          const result = await showDialog({
+            title: 'Who is committing?',
+            body: new GitAuthorForm()
+          });
+          if (!result.button.accept) {
+            console.log('User refuses to set identity.');
+            return false;
+          }
+          const identity = result.value;
+          try {
+            await this.props.model.config({
               'user.name': identity.name,
               'user.email': identity.email
             });
-            if (!res.ok) {
-              console.log(await res.text());
+          } catch (error) {
+            if (error instanceof Git.GitResponseError) {
+              console.log(error);
               return false;
             }
+            throw error;
           }
-          this._previousRepoPath = path;
         }
+        this._previousRepoPath = path;
       } catch (error) {
         throw new Error('Failed to set your identity. ' + error.message);
       }

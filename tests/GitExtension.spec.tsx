@@ -2,7 +2,12 @@ import { testEmission } from '@jupyterlab/testutils';
 import 'jest';
 import * as git from '../src/git';
 import { GitExtension } from '../src/model';
-import { IGitExtension, Git } from '../src/tokens';
+import { Git, IGitExtension } from '../src/tokens';
+import {
+  defaultMockedResponses,
+  IMockedResponses,
+  mockedRequestAPI
+} from './utils';
 
 jest.mock('../src/git');
 
@@ -12,60 +17,16 @@ describe('IGitExtension', () => {
   let model: IGitExtension;
   const docmanager = jest.mock('@jupyterlab/docmanager') as any;
   docmanager.findWidget = jest.fn();
-  let mockResponses: {
-    [url: string]: {
-      body?: (request: Object) => string;
-      status?: number;
-    };
-  };
+  let mockResponses: IMockedResponses;
 
   beforeEach(async () => {
     jest.restoreAllMocks();
 
     mockResponses = {
-      '/git/branch': {
-        body: request =>
-          JSON.stringify({
-            code: 0,
-            branches: [],
-            current_branch: null
-          })
-      },
-      '/git/show_top_level': {
-        body: request =>
-          JSON.stringify({
-            code: 0,
-            top_repo_path: (request as any)['current_path']
-          })
-      },
-      '/git/status': {
-        body: () =>
-          JSON.stringify({
-            code: 0,
-            files: []
-          })
-      }
+      ...defaultMockedResponses
     };
 
-    mockGit.httpGitRequest.mockImplementation((url, method, request) => {
-      let response: Response;
-      if (url in mockResponses) {
-        response = new Response(
-          mockResponses[url].body
-            ? mockResponses[url].body(request)
-            : undefined,
-          {
-            status: mockResponses[url].status
-          }
-        );
-      } else {
-        response = new Response(
-          `{"message": "No mock implementation for ${url}."}`,
-          { status: 404 }
-        );
-      }
-      return Promise.resolve(response);
-    });
+    mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
 
     model = new GitExtension(fakeRoot, docmanager as any);
   });
@@ -87,14 +48,12 @@ describe('IGitExtension', () => {
     it('should be equal to the top repository folder', async () => {
       const path = '/path/to/server/repo';
 
-      mockResponses = {
-        ...mockResponses,
-        '/git/show_top_level': {
-          body: request =>
-            JSON.stringify({
-              code: 0,
-              top_repo_path: path
-            })
+      mockResponses['show_top_level'] = {
+        body: () => {
+          return {
+            code: 0,
+            top_repo_path: path
+          };
         }
       };
 
@@ -160,10 +119,9 @@ describe('IGitExtension', () => {
   describe('#status', () => {
     it('should be an empty list if not in a git repository', async () => {
       let status: Git.IStatusFileResult[] = [];
-      mockResponses = {
-        ...mockResponses,
-        '/git/status': {
-          body: () => JSON.stringify({ files: status })
+      mockResponses['status'] = {
+        body: () => {
+          return { files: status as any };
         }
       };
       expect(model.pathRepository).toBeNull();
@@ -183,10 +141,9 @@ describe('IGitExtension', () => {
 
     it('should emit a signal if when set', async () => {
       let status: Git.IStatusFileResult[] = [];
-      mockResponses = {
-        ...mockResponses,
-        '/git/status': {
-          body: () => JSON.stringify({ files: status })
+      mockResponses['status'] = {
+        body: () => {
+          return { files: status as any };
         }
       };
 
@@ -236,49 +193,50 @@ describe('IGitExtension', () => {
 
   describe('#checkout', () => {
     it('should emit headChanged signal if checkout branch', async () => {
-      mockResponses = {
-        ...mockResponses,
-        '/git/checkout': {
-          body: () => '{}'
-        },
-        '/git/branch': {
-          body: () =>
-            JSON.stringify({
-              code: 0,
-              branches: [
-                {
-                  is_current_branch: true,
-                  is_remote_branch: false,
-                  name: 'master',
-                  upstream: null,
-                  top_commit: '52263564aac988a0888060becc3c76d1023e680f',
-                  tag: null
-                },
-                {
-                  is_current_branch: false,
-                  is_remote_branch: false,
-                  name: 'test-branch',
-                  upstream: null,
-                  top_commit: '52263564aac988a0888060becc3c76d1023e680f',
-                  tag: null
-                }
-              ],
-              current_branch: {
+      mockResponses['checkout'] = {
+        body: () => {
+          return {};
+        }
+      };
+      mockResponses['branch'] = {
+        body: () => {
+          return {
+            code: 0,
+            branches: [
+              {
                 is_current_branch: true,
                 is_remote_branch: false,
                 name: 'master',
                 upstream: null,
                 top_commit: '52263564aac988a0888060becc3c76d1023e680f',
                 tag: null
+              },
+              {
+                is_current_branch: false,
+                is_remote_branch: false,
+                name: 'test-branch',
+                upstream: null,
+                top_commit: '52263564aac988a0888060becc3c76d1023e680f',
+                tag: null
               }
-            })
-        },
-        '/git/changed_files': {
-          body: () =>
-            JSON.stringify({
-              code: 0,
-              files: ['']
-            })
+            ],
+            current_branch: {
+              is_current_branch: true,
+              is_remote_branch: false,
+              name: 'master',
+              upstream: null,
+              top_commit: '52263564aac988a0888060becc3c76d1023e680f',
+              tag: null
+            }
+          };
+        }
+      };
+      mockResponses['changed_files'] = {
+        body: () => {
+          return {
+            code: 0,
+            files: ['']
+          };
         }
       };
 
@@ -299,11 +257,8 @@ describe('IGitExtension', () => {
 
   describe('#pull', () => {
     it('should emit headChanged signal if successful', async () => {
-      mockResponses = {
-        ...mockResponses,
-        '/git/pull': {
-          body: () => '{}'
-        }
+      mockResponses['pull'] = {
+        body: () => null
       };
 
       model.pathRepository = '/path/to/server/repo';
@@ -322,11 +277,8 @@ describe('IGitExtension', () => {
 
   describe('#push', () => {
     it('should emit headChanged signal if successful', async () => {
-      mockResponses = {
-        ...mockResponses,
-        '/git/push': {
-          body: () => '{}'
-        }
+      mockResponses['push'] = {
+        body: () => null
       };
 
       model.pathRepository = '/path/to/server/repo';
@@ -345,17 +297,15 @@ describe('IGitExtension', () => {
 
   describe('#resetToCommit', () => {
     it('should emit headChanged signal if successfully reset to commit', async () => {
-      mockResponses = {
-        ...mockResponses,
-        '/git/reset_to_commit': {
-          body: () => '{}'
-        },
-        '/git/changed_files': {
-          body: () =>
-            JSON.stringify({
-              code: 0,
-              files: ['made-up-file.md']
-            })
+      mockResponses['reset_to_commit'] = {
+        body: () => null
+      };
+      mockResponses['changed_files'] = {
+        body: () => {
+          return {
+            code: 0,
+            files: ['made-up-file.md']
+          };
         }
       };
 

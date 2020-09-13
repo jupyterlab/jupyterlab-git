@@ -1,5 +1,6 @@
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { Token, JSONObject } from '@phosphor/coreutils';
+import { ServerConnection } from '@jupyterlab/services';
+import { JSONObject, ReadonlyJSONObject, Token } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 import { ISignal } from '@phosphor/signaling';
 
@@ -62,26 +63,42 @@ export interface IGitExtension extends IDisposable {
   readonly statusChanged: ISignal<IGitExtension, Git.IStatusFileResult[]>;
 
   /**
-   * Make request to add one or all files into
-   * the staging area in repository
+   * Add one or more files to the repository staging area.
    *
-   * If filename is not provided, all files will be added.
+   * ## Notes
    *
-   * @param filename Optional name of the files to add
+   * -   If no filename is provided, all files are added.
+   *
+   * @param filename - files to add
+   * @returns promise which resolves upon adding files to the repository staging area
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  add(...filename: string[]): Promise<Response>;
+  add(...filename: string[]): Promise<void>;
 
   /**
-   * Make request to add all unstaged files into
-   * the staging area in repository 'path'
+   * Add all "unstaged" files to the repository staging area.
+   *
+   * @returns promise which resolves upon adding files to the repository staging area
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  addAllUnstaged(): Promise<Response>;
+  addAllUnstaged(): Promise<void>;
 
   /**
-   * Make request to add all untracked files into
-   * the staging area in repository
+   * Add all untracked files to the repository staging area.
+   *
+   * @returns promise which resolves upon adding files to the repository staging area
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  addAllUntracked(): Promise<Response>;
+  addAllUntracked(): Promise<void>;
 
   /**
    * Add the file named fname to the current marker with given mark
@@ -92,91 +109,130 @@ export interface IGitExtension extends IDisposable {
   addMark(fname: string, mark: boolean): void;
 
   /**
+   * Add a remote Git repository to the current repository.
+   *
+   * @param url - remote repository URL
+   * @param name - remote name
+   * @returns promise which resolves upon adding a remote
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  addRemote(url: string, name?: string): Promise<void>;
+
+  /**
+   * Retrieve the repository commit log.
+   *
+   * ## Notes
+   *
+   * -  This API can be used to implicitly check if the current folder is a Git repository.
+   *
+   * @param count - number of commits to retrieve
+   * @returns promise which resolves upon retrieving the repository commit log
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  allHistory(historyCount?: number): Promise<Git.IAllHistory>;
+
+  /**
+   * Checkout a branch.
+   *
+   * ## Notes
+   *
+   * -   If a branch name is provided, checkout the provided branch (with or without creating it)
+   * -   If a filename is provided, checkout the file, discarding all changes.
+   * -   If nothing is provided, checkout all files, discarding all changes.
+   *
+   * TODO: Refactor into separate endpoints for each kind of checkout request
+   *
+   * @param options - checkout options
+   * @returns promise which resolves upon performing a checkout
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult>;
+
+  /**
+   * Make request to checkout the specified tag version
+   *
+   * @param tag of the version to checkout
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  checkoutTag(tag: string): Promise<Git.ICheckoutResult>;
+
+  /**
+   * Clone a repository.
+   *
+   * @param path - local path into which the repository will be cloned
+   * @param url - Git repository URL
+   * @param auth - remote repository authentication information
+   * @returns promise which resolves upon cloning a repository
+   *
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  clone(path: string, url: string, auth?: Git.IAuth): Promise<Git.ICloneResult>;
+
+  /**
+   * Commit all staged file changes.
+   *
+   * @param message - commit message
+   * @returns promise which resolves upon committing file changes
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  commit(message: string): Promise<void>;
+
+  /**
+   * Get (or set) Git configuration options.
+   *
+   * @param options - configuration options to set
+   * @returns promise which resolves upon either getting or setting configuration options
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  config(options?: JSONObject): Promise<JSONObject | void>;
+
+  /**
+   * Fetch commit information.
+   *
+   * @param hash - commit hash
+   * @returns promise which resolves upon retrieving commit information
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo>;
+
+  /**
+   * Ensure a .gitignore file exists
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  ensureGitignore(): Promise<void>;
+
+  /**
    * Get current mark of file named fname
    *
    * @param fname Filename
    * @returns Mark of the file
    */
   getMark(fname: string): boolean;
-
-  /**
-   * Toggle the mark for the file named fname
-   *
-   * @param fname Filename
-   */
-  toggleMark(fname: string): void;
-
-  /**
-   * Add a remote Git repository to the current repository
-   *
-   * @param url Remote repository URL
-   * @param name Remote name
-   */
-  addRemote(url: string, name?: string): Promise<void>;
-
-  /**
-   * Make request for all Git info of the repository
-   * (This API is also implicitly used to check if the current repo is a Git repo)
-   *
-   * @param historyCount: Optional number of commits to get from Git log
-   * @returns Repository history
-   */
-  allHistory(historyCount?: number): Promise<Git.IAllHistory>;
-
-  /** Make request to switch current working branch,
-   * create new branch if needed,
-   * or discard a specific file change or all changes
-   * TODO: Refactor into seperate endpoints for each kind of checkout request
-   *
-   * If a branch name is provided, check it out (with or without creating it)
-   * If a filename is provided, check the file out
-   * If nothing is provided, check all files out
-   *
-   * @param options Checkout options
-   * @returns Command execution status
-   */
-  checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult>;
-
-  /**
-   * Make request for the Git clone API.
-   *
-   * @param path Local path in which the repository will be cloned
-   * @param url Distant Git repository URL
-   * @param auth Optional authentication information for the remote repository
-   * @returns Command execution status
-   */
-  clone(path: string, url: string, auth?: Git.IAuth): Promise<Git.ICloneResult>;
-
-  /**
-   * Make request to commit all staged files in repository
-   *
-   * @param message Commit message
-   */
-  commit(message: string): Promise<Response>;
-
-  /**
-   * Get or set Git configuration options
-   *
-   * @param options Configuration options to set (undefined to get)
-   */
-  config(options?: JSONObject): Promise<Response>;
-
-  /**
-   * Make request to revert changes from selected commit
-   *
-   * @param message Commit message to use for the new repository state
-   * @param commitId Selected commit ID
-   */
-  revertCommit(message: string, commitId: string): Promise<Response>;
-
-  /**
-   * Make request for detailed Git commit info of
-   * commit 'hash'
-   *
-   * @param hash Commit hash
-   * @returns Detailed log of the commit
-   */
-  detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo>;
 
   /**
    * Gets the path of the file relative to the Jupyter server root.
@@ -190,33 +246,61 @@ export interface IGitExtension extends IDisposable {
   getRelativeFilePath(path?: string): string | null;
 
   /**
-   * Make request to initialize a  new Git repository at path 'path'
+   * Add an entry in .gitignore file
    *
-   * @param path Folder path to initialize as a Git repository.
+   * @param filename The name of the entry to ignore
+   * @param useExtension Ignore all files having the same extension as filename
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  init(path: string): Promise<Response>;
+  ignore(filename: string, useExtension: boolean): Promise<void>;
 
   /**
-   * Make request for Git commit logs
+   * Initialize a new Git repository at a specified path.
    *
-   * @param historyCount: Optional number of commits to get from Git log
-   * @returns Repository logs
+   * @param path - path at which initialize a Git repository
+   * @returns promise which resolves upon initializing a Git repository
+   *
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  init(path: string): Promise<void>;
+
+  /**
+   * Retrieve commit logs.
+   *
+   * @param count - number of commits
+   * @returns promise which resolves upon retrieving commit logs
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   log(historyCount?: number): Promise<Git.ILogResult>;
 
   /**
-   * Make request for the Git Pull API.
+   * Fetch changes from a remote repository.
    *
-   * @param auth Optional authentication information for the remote repository
-   * @returns Command execution status
+   * @param auth - remote authentication information
+   * @returns promise which resolves upon fetching changes
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   pull(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
 
   /**
-   * Make request for the Git Push API.
+   * Push local changes to a remote repository.
    *
-   * @param auth Optional authentication information for the remote repository
-   * @returns Command execution status
+   * @param auth - remote authentication information
+   * @returns promise which resolves upon pushing changes
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   push(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
 
@@ -244,20 +328,49 @@ export interface IGitExtension extends IDisposable {
   registerDiffProvider(filetypes: string[], callback: Git.IDiffCallback): void;
 
   /**
-   * Make request to move one or all files from the staged to the unstaged area
+   * Move files from the "staged" to the "unstaged" area.
    *
-   * If filename is not provided, all files will be reset.
+   * ## Notes
    *
-   * @param filename Optional name of the file to add
+   * -  If no filename is provided, moves all files from the "staged" to the "unstaged" area.
+   *
+   * @param filename - file path to be reset
+   * @returns promise which resolves upon moving files
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  reset(filename?: string): Promise<Response>;
+  reset(filename?: string): Promise<void>;
 
   /**
-   * Make request to reset to selected commit
+   * Reset the repository to a specified commit.
    *
-   * @param commitId Selected commit ID
+   * ## Notes
+   *
+   * -   If a commit hash is not provided, resets the repository to `HEAD`.
+   *
+   * @param hash - commit identifier (hash)
+   * @returns promises which resolves upon resetting the repository
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  resetToCommit(commitId: string): Promise<Response>;
+  resetToCommit(hash: string): Promise<void>;
+
+  /**
+   * Revert changes made after a specified commit.
+   *
+   * @param message - commit message
+   * @param hash - commit identifier (hash)
+   * @returns promise which resolves upon reverting changes
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  revertCommit(message: string, hash: string): Promise<void>;
 
   /**
    * Make request for the prefix path of a directory 'path',
@@ -265,6 +378,9 @@ export interface IGitExtension extends IDisposable {
    *
    * @param path Path for which the prefix is searched for
    * @returns Path prefix
+   *
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   showPrefix(path: string): Promise<Git.IShowPrefixResult>;
 
@@ -272,35 +388,29 @@ export interface IGitExtension extends IDisposable {
    * Make request for top level path of repository 'path'
    *
    * @param path Path from which the top Git repository needs to be found
+   *
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
 
   /**
-   * Ensure a .gitignore file exists
-   */
-  ensureGitignore(): Promise<Response>;
-
-  /**
-   * Add an entry in .gitignore file
-   *
-   * @param filename The name of the entry to ignore
-   * @param useExtension Ignore all files having the same extension as filename
-   */
-  ignore(filename: string, useExtension: boolean): Promise<Response>;
-
-  /*
    * Make request to list all the tags present in the remote repo
    *
    * @returns list of tags
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   tags(): Promise<Git.ITagResult>;
 
   /**
-   * Make request to checkout the specified tag version
+   * Toggle the mark for the file named fname
    *
-   * @param tag of the version to checkout
+   * @param fname Filename
    */
-  checkoutTag(tag: string): Promise<Git.ICheckoutResult>;
+  toggleMark(fname: string): void;
 }
 
 export namespace Git {
@@ -417,6 +527,20 @@ export namespace Git {
     code: number;
     branches?: IBranch[];
     current_branch?: IBranch;
+  }
+
+  /**
+   * Data interface of diffcontent request
+   */
+  export interface IDiffContent {
+    /**
+     * Current file content
+     */
+    curr_content: string;
+    /**
+     * Previous file content
+     */
+    prev_content: string;
   }
 
   /** Interface for GitStatus request result,
@@ -567,6 +691,44 @@ export namespace Git {
     code: number;
     message?: string;
     tags?: string[];
+  }
+
+  /**
+   * A wrapped error for a fetch response.
+   */
+  export class GitResponseError extends ServerConnection.ResponseError {
+    /**
+     * Create a new response error.
+     */
+    constructor(
+      response: Response,
+      message = `Invalid response: ${response.status} ${response.statusText}`,
+      traceback = '',
+      json: ReadonlyJSONObject = {}
+    ) {
+      super(response, message);
+      this.traceback = traceback; // traceback added in mother class in 2.2.x
+      this._json = json;
+    }
+
+    /**
+     * The error response JSON body
+     */
+    get json(): ReadonlyJSONObject {
+      return this._json;
+    }
+
+    /**
+     * The traceback associated with the error.
+     */
+    traceback: string;
+
+    protected _json: ReadonlyJSONObject;
+  }
+  export class NotInRepository extends Error {
+    constructor() {
+      super('Not in a Git Repository');
+    }
   }
 }
 

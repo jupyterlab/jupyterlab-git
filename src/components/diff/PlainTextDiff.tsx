@@ -1,10 +1,8 @@
 import { Mode } from '@jupyterlab/codemirror';
-import { ServerConnection } from '@jupyterlab/services';
-
 import * as React from 'react';
-
+import { requestAPI } from '../../git';
+import { Git } from '../../tokens';
 import { IDiffProps } from './Diff';
-import { httpGitRequest } from '../../git';
 import { mergeView } from './mergeview';
 import { IDiffContext } from './model';
 
@@ -20,7 +18,7 @@ export interface IPlainTextDiffState {
 /**
  * A React component to render the diff of a plain text file
  *
- * 1. It calls the `/git/diffcontent` API on the server to get the previous and current content
+ * 1. It calls the `diffcontent` API on the server to get the previous and current content
  * 2. Renders the content using CodeMirror merge addon
  */
 export class PlainTextDiff extends React.Component<
@@ -66,51 +64,35 @@ export class PlainTextDiff extends React.Component<
    * @param diffContext the context in which to perform the diff
    */
   private _performDiff(diffContext: IDiffContext): void {
-    try {
-      // Resolve what API parameter to call.
-      let currentRefValue: ICurrentReference;
-      if ('specialRef' in diffContext.currentRef) {
-        currentRefValue = {
-          special: diffContext.currentRef.specialRef
-        };
-      } else {
-        currentRefValue = {
-          git: diffContext.currentRef.gitRef
-        };
-      }
-
-      httpGitRequest('/git/diffcontent', 'POST', {
-        filename: this.props.path,
-        prev_ref: { git: diffContext.previousRef.gitRef },
-        curr_ref: currentRefValue,
-        top_repo_path: this.props.topRepoPath
-      }).then(response => {
-        response
-          .json()
-          .then(data => {
-            if (response.status !== 200) {
-              // Handle error
-              this.setState({
-                errorMessage:
-                  data.message || 'Unknown error. Please check the server log.'
-              });
-            } else {
-              this._addDiffViewer(data['prev_content'], data['curr_content']);
-            }
-          })
-          .catch(reason => {
-            console.error(reason);
-            // Handle error
-            this.setState({
-              errorMessage:
-                reason.message || 'Unknown error. Please check the server log.'
-            });
-          });
-      });
-    } catch (err) {
-      console.error(err);
-      throw ServerConnection.NetworkError;
+    // Resolve what API parameter to call.
+    let currentRefValue: ICurrentReference;
+    if ('specialRef' in diffContext.currentRef) {
+      currentRefValue = {
+        special: diffContext.currentRef.specialRef
+      };
+    } else {
+      currentRefValue = {
+        git: diffContext.currentRef.gitRef
+      };
     }
+
+    requestAPI<Git.IDiffContent>('diffcontent', 'POST', {
+      filename: this.props.path,
+      prev_ref: { git: diffContext.previousRef.gitRef },
+      curr_ref: currentRefValue as any,
+      top_repo_path: this.props.topRepoPath
+    })
+      .then(data => {
+        this._addDiffViewer(data['prev_content'], data['curr_content']);
+      })
+      .catch(reason => {
+        console.error(reason);
+        // Handle error
+        this.setState({
+          errorMessage:
+            reason.message || 'Unknown error. Please check the server log.'
+        });
+      });
   }
 
   /**

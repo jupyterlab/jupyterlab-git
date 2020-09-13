@@ -6,6 +6,11 @@ import { addCommands, CommandIDs } from '../src/commandsAndMenu';
 import * as git from '../src/git';
 import { GitExtension } from '../src/model';
 import { Git } from '../src/tokens';
+import {
+  defaultMockedResponses,
+  IMockedResponses,
+  mockedRequestAPI
+} from './utils';
 
 jest.mock('../src/git');
 jest.mock('@jupyterlab/apputils');
@@ -14,60 +19,16 @@ describe('git-commands', () => {
   const mockGit = git as jest.Mocked<typeof git>;
   let commands: CommandRegistry;
   let model: GitExtension;
-  let mockResponses: {
-    [url: string]: {
-      body?: (request: Object) => string;
-      status?: number;
-    };
-  };
+  let mockResponses: IMockedResponses;
 
   beforeEach(async () => {
     jest.restoreAllMocks();
 
     mockResponses = {
-      '/git/branch': {
-        body: request =>
-          JSON.stringify({
-            code: 0,
-            branches: [],
-            current_branch: null
-          })
-      },
-      '/git/show_top_level': {
-        body: request =>
-          JSON.stringify({
-            code: 0,
-            top_repo_path: (request as any)['current_path']
-          })
-      },
-      '/git/status': {
-        body: () =>
-          JSON.stringify({
-            code: 0,
-            files: []
-          })
-      }
+      ...defaultMockedResponses
     };
 
-    mockGit.httpGitRequest.mockImplementation((url, method, request) => {
-      let response: Response;
-      if (url in mockResponses) {
-        response = new Response(
-          mockResponses[url].body
-            ? mockResponses[url].body(request)
-            : undefined,
-          {
-            status: mockResponses[url].status
-          }
-        );
-      } else {
-        response = new Response(
-          `{"message": "No mock implementation for ${url}."}`,
-          { status: 404 }
-        );
-      }
-      return Promise.resolve(response);
-    });
+    mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
 
     commands = new CommandRegistry();
     const app = {
@@ -84,19 +45,23 @@ describe('git-commands', () => {
       const url = 'https://www.mygitserver.com/me/myrepo.git';
       const path = '/path/to/repo';
 
-      mockResponses = {
-        ...mockResponses,
-        '/git/remote/add': {
-          body: () => `{"code": 0, "command": "git remote add ${name} ${url}"}`
-        }
-      };
+      mockGit.requestAPI.mockImplementation(
+        mockedRequestAPI({
+          ...mockResponses,
+          'remote/add': {
+            body: () => {
+              return { code: 0, command: `git remote add ${name} ${url}` };
+            }
+          }
+        })
+      );
 
       model.pathRepository = path;
       await model.ready;
 
       await commands.execute(CommandIDs.gitAddRemote, { url, name });
 
-      expect(mockGit.httpGitRequest).toBeCalledWith('/git/remote/add', 'POST', {
+      expect(mockGit.requestAPI).toBeCalledWith('remote/add', 'POST', {
         top_repo_path: path,
         url,
         name
@@ -108,19 +73,23 @@ describe('git-commands', () => {
       const url = 'https://www.mygitserver.com/me/myrepo.git';
       const path = '/path/to/repo';
 
-      mockResponses = {
-        ...mockResponses,
-        '/git/remote/add': {
-          body: () => `{"code": 0, "command": "git remote add ${name} ${url}"}`
-        }
-      };
+      mockGit.requestAPI.mockImplementation(
+        mockedRequestAPI({
+          ...mockResponses,
+          'remote/add': {
+            body: () => {
+              return { code: 0, command: `git remote add ${name} ${url}` };
+            }
+          }
+        })
+      );
 
       model.pathRepository = path;
       await model.ready;
 
       await commands.execute(CommandIDs.gitAddRemote, { url });
 
-      expect(mockGit.httpGitRequest).toBeCalledWith('/git/remote/add', 'POST', {
+      expect(mockGit.requestAPI).toBeCalledWith('remote/add', 'POST', {
         top_repo_path: path,
         url
       });

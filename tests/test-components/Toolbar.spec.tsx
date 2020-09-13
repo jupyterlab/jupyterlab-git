@@ -6,6 +6,7 @@ import { Toolbar } from '../../src/components/Toolbar';
 import * as git from '../../src/git';
 import { GitExtension } from '../../src/model';
 import { toolbarMenuButtonClass } from '../../src/style/Toolbar';
+import { mockedRequestAPI } from '../utils';
 
 jest.mock('../../src/git');
 
@@ -26,54 +27,19 @@ async function createModel() {
   return model;
 }
 
-function request(url: string, method: string, request: Object | null) {
-  let response: Response;
-  switch (url) {
-    case '/git/branch':
-      response = new Response(
-        JSON.stringify({
-          code: 0,
-          branches: [],
-          current_branch: null
-        })
-      );
-      break;
-    case '/git/show_top_level':
-      response = new Response(
-        JSON.stringify({
-          code: 0,
-          top_repo_path: (request as any)['current_path']
-        })
-      );
-      break;
-    case '/git/status':
-      response = new Response(
-        JSON.stringify({
-          code: 0,
-          files: []
-        })
-      );
-      break;
-    default:
-      response = new Response(
-        `{"message": "No mock implementation for ${url}."}`,
-        { status: 404 }
-      );
-  }
-  return Promise.resolve(response);
-}
-
 describe('Toolbar', () => {
+  let model: GitExtension;
+
+  beforeEach(async () => {
+    jest.restoreAllMocks();
+
+    const mock = git as jest.Mocked<typeof git>;
+    mock.requestAPI.mockImplementation(mockedRequestAPI());
+
+    model = await createModel();
+  });
+
   describe('constructor', () => {
-    let model: GitExtension;
-
-    beforeEach(async () => {
-      const mock = git as jest.Mocked<typeof git>;
-      mock.httpGitRequest.mockImplementation(request);
-
-      model = await createModel();
-    });
-
     it('should return a new instance', () => {
       const props = {
         model: model,
@@ -118,15 +84,6 @@ describe('Toolbar', () => {
   });
 
   describe('render', () => {
-    let model: GitExtension;
-
-    beforeEach(async () => {
-      const mock = git as jest.Mocked<typeof git>;
-      mock.httpGitRequest.mockImplementation(request);
-
-      model = await createModel();
-    });
-
     it('should display a button to pull the latest changes', () => {
       const props = {
         model: model,
@@ -296,15 +253,6 @@ describe('Toolbar', () => {
   });
 
   describe('branch menu', () => {
-    let model: GitExtension;
-
-    beforeEach(async () => {
-      const mock = git as jest.Mocked<typeof git>;
-      mock.httpGitRequest.mockImplementation(request);
-
-      model = await createModel();
-    });
-
     it('should not, by default, display a branch menu', () => {
       const props = {
         model: model,
@@ -340,14 +288,6 @@ describe('Toolbar', () => {
   });
 
   describe('pull changes', () => {
-    let model: GitExtension;
-
-    beforeEach(async () => {
-      const mock = git as jest.Mocked<typeof git>;
-      mock.httpGitRequest.mockImplementation(request);
-
-      model = await createModel();
-    });
 
     it('should pull changes when the button to pull the latest changes is clicked', () => {
       const mockedExecute = jest.fn();
@@ -370,14 +310,6 @@ describe('Toolbar', () => {
   });
 
   describe('push changes', () => {
-    let model: GitExtension;
-
-    beforeEach(async () => {
-      const mock = git as jest.Mocked<typeof git>;
-      mock.httpGitRequest.mockImplementation(request);
-
-      model = await createModel();
-    });
 
     it('should push changes when the button to push the latest changes is clicked', () => {
       const mockedExecute = jest.fn();
@@ -400,15 +332,6 @@ describe('Toolbar', () => {
   });
 
   describe('refresh repository', () => {
-    let model: GitExtension;
-
-    beforeEach(async () => {
-      const mock = git as jest.Mocked<typeof git>;
-      mock.httpGitRequest.mockImplementation(request);
-
-      model = await createModel();
-    });
-
     it('should refresh the repository when the button to refresh the repository is clicked', () => {
       const spy = jest.fn(async () => {});
 
