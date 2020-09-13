@@ -712,7 +712,7 @@ export namespace Git {
       json: ReadonlyJSONObject = {}
     ) {
       super(response, message);
-      this._traceback = traceback;
+      this.traceback = traceback; // traceback added in mother class in 2.2.x
       this._json = json;
     }
 
@@ -726,12 +726,9 @@ export namespace Git {
     /**
      * The traceback associated with the error.
      */
-    get traceback(): string {
-      return this._traceback;
-    }
+    traceback: string;
 
     protected _json: ReadonlyJSONObject;
-    protected _traceback: string;
   }
   export class NotInRepository extends Error {
     constructor() {

@@ -702,9 +702,12 @@ export class GitExtension implements IGitExtension {
    */
   async refresh(): Promise<void> {
     const tid = this._addTask('git:refresh');
-    await this.refreshBranch();
-    await this.refreshStatus();
-    this._removeTask(tid);
+    try {
+      await this.refreshBranch();
+      await this.refreshStatus();
+    } finally {
+      this._removeTask(tid);
+    }
   }
 
   /**
@@ -714,19 +717,22 @@ export class GitExtension implements IGitExtension {
    */
   async refreshBranch(): Promise<void> {
     const tid = this._addTask('git:refresh:branches');
-    const response = await this._branch();
-    if (response.code === 0) {
-      this._branches = response.branches;
-      this._currentBranch = response.current_branch;
-      if (this._currentBranch) {
-        // Set up the marker obj for the current (valid) repo/branch combination
-        this._setMarker(this.pathRepository, this._currentBranch.name);
+    try {
+      const response = await this._branch();
+      if (response.code === 0) {
+        this._branches = response.branches;
+        this._currentBranch = response.current_branch;
+        if (this._currentBranch) {
+          // Set up the marker obj for the current (valid) repo/branch combination
+          this._setMarker(this.pathRepository, this._currentBranch.name);
+        }
+      } else {
+        this._branches = [];
+        this._currentBranch = null;
       }
-    } else {
-      this._branches = [];
-      this._currentBranch = null;
+    } finally {
+      this._removeTask(tid);
     }
-    this._removeTask(tid);
   }
 
   /**
