@@ -8,18 +8,17 @@ import {
   imageFileIconStyle,
   jsonFileIconSelectedStyle,
   jsonFileIconStyle,
-  kernelFileIconSelectedStyle,
-  kernelFileIconStyle,
   markdownFileIconSelectedStyle,
   markdownFileIconStyle,
+  notebookFileIconSelectedStyle,
+  notebookFileIconStyle,
   pythonFileIconSelectedStyle,
   pythonFileIconStyle,
+  rKernelFileIconStyle,
   spreadsheetFileIconSelectedStyle,
   spreadsheetFileIconStyle,
   yamlFileIconSelectedStyle,
-  yamlFileIconStyle,
-  notebookFileIconSelectedStyle,
-  notebookFileIconStyle
+  yamlFileIconStyle
 } from './style/FileListStyle';
 import { Git } from './tokens';
 
@@ -77,7 +76,7 @@ export function getFileIconClassName(path: string, selected = false): string {
         ? spreadsheetFileIconSelectedStyle
         : spreadsheetFileIconStyle;
     case '.r':
-      return selected ? kernelFileIconSelectedStyle : kernelFileIconStyle;
+      return rKernelFileIconStyle;
     case '.yml':
     case '.yaml':
       return selected ? yamlFileIconSelectedStyle : yamlFileIconStyle;
