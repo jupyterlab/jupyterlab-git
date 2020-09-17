@@ -44,6 +44,6 @@ export const pythonFileIconStyle = style({
   backgroundImage: 'var(--jp-icon-python)'
 });
 
-export const kernelFileIconStyle = style({
-  backgroundImage: 'var(--jp-icon-r)'
+export const rKernelFileIconStyle = style({
+  backgroundImage: 'var(--jp-icon-r-kernel)'
 });

@@ -4,7 +4,7 @@ import {
   genericFileIconStyle,
   imageFileIconStyle,
   jsonFileIconStyle,
-  kernelFileIconStyle,
+  rKernelFileIconStyle,
   markdownFileIconStyle,
   notebookFileIconStyle,
   pythonFileIconStyle,
@@ -64,7 +64,7 @@ export function getFileIconClassName(path: string): string {
     case '.xlsx':
       return spreadsheetFileIconStyle;
     case '.r':
-      return kernelFileIconStyle;
+      return rKernelFileIconStyle;
     case '.yml':
     case '.yaml':
       return yamlFileIconStyle;
