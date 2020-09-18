@@ -206,6 +206,9 @@ class GitBranchHandler(GitHandler):
         """
         current_path = self.get_json_body()["current_path"]
         result = await self.git.branch(current_path)
+
+        if result["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(result))
 
 
