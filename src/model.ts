@@ -722,16 +722,17 @@ export class GitExtension implements IGitExtension {
     const tid = this._addTask('git:refresh:branches');
     try {
       const response = await this._branch();
-      if (response.code === 0) {
-        this._branches = response.branches;
-        this._currentBranch = response.current_branch;
-        if (this._currentBranch) {
-          // Set up the marker obj for the current (valid) repo/branch combination
-          this._setMarker(this.pathRepository, this._currentBranch.name);
-        }
-      } else {
-        this._branches = [];
-        this._currentBranch = null;
+      this._branches = response.branches;
+      this._currentBranch = response.current_branch;
+      if (this._currentBranch) {
+        // Set up the marker obj for the current (valid) repo/branch combination
+        this._setMarker(this.pathRepository, this._currentBranch.name);
+      }
+    } catch (error) {
+      this._branches = [];
+      this._currentBranch = null;
+      if (!(error instanceof Git.NotInRepository)) {
+        throw error;
       }
     } finally {
       this._removeTask(tid);
@@ -746,13 +747,17 @@ export class GitExtension implements IGitExtension {
   async refreshStatus(): Promise<void> {
     let data: Git.IStatusResult;
 
-    await this.ready;
-
-    const path = this.pathRepository;
-    if (path === null) {
+    let path: string;
+    try {
+      path = await this._getPathRespository();
+    } catch (error) {
       this._setStatus([]);
-      return Promise.resolve();
+      if (!(error instanceof Git.NotInRepository)) {
+        throw error;
+      }
+      return;
     }
+
     const tid = this._addTask('git:refresh:status');
     try {
       data = await requestAPI<Git.IStatusResult>('status', 'POST', {
