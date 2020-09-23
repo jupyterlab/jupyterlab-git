@@ -65,8 +65,6 @@ Or equivalently in `jupyter_notebook_config.json`:
 }
 ```
 
-
-
 ## Troubleshooting
 
 Before consulting the following list, be sure the server extension and the frontend extension have the same version by executing the following commands:
