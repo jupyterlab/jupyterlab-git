@@ -47,6 +47,12 @@ Once installed, extension behavior can be modified via the following settings wh
 
 - Post *git init* actions: It is possible to provide a list of commands to be executed in a folder after it is initialized as Git repository.
 
+In `~/.jupyter/jupyter_notebook_config.py`:
+```python
+c.JupyterLabGit.actions = {"post_init": ["touch dummy_init.dat"]}
+```
+
+Or equivalently in `jupyter_notebook_config.json`:
 ```json
 {
   "JupyterLabGit": {
@@ -58,6 +64,8 @@ Once installed, extension behavior can be modified via the following settings wh
   }
 }
 ```
+
+
 
 ## Troubleshooting
 
