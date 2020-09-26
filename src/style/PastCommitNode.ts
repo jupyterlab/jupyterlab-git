@@ -5,7 +5,7 @@ export const commitWrapperClass = style({
   display: 'flex',
   flexShrink: 0,
   flexDirection: 'column',
-  padding: '10px',
+  padding: '5px 0px 5px 10px',
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
