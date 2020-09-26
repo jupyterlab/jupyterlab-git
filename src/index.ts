@@ -112,6 +112,7 @@ async function activate(
   gitExtension = new GitExtension(
     serverSettings.serverRoot,
     docmanager,
+    app.docRegistry,
     settings
   );
 

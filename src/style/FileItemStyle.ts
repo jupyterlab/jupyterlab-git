@@ -37,7 +37,7 @@ export const selectedFileStyle = style({
       stroke: 'var(--jp-layout-color2)'
     },
     '& .jp-icon-selectable[fill]': {
-      fill: '#fff'
+      fill: 'var(--jp-layout-color1)'
     },
     '& .jp-icon-selectable-inverse[fill]': {
       fill: 'var(--jp-brand-color1)'

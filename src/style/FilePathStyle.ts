@@ -1,10 +1,6 @@
 import { style } from 'typestyle';
 
 export const fileIconStyle = style({
-  alignSelf: 'center',
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: '16px',
   flex: '0 0 auto',
   height: '16px',
   width: '16px',
