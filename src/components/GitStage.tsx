@@ -1,6 +1,6 @@
 import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
-import { FixedSizeList } from 'react-window';
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import {
   changeStageButtonStyle,
   sectionAreaStyle,
@@ -33,14 +33,14 @@ export interface IGitStageProps {
    * Group title
    */
   heading: string;
+  /**
+   * HTML element height
+   */
   height: number;
   /**
    * Row renderer
    */
-  rowRenderer: (
-    file: Git.IStatusFile,
-    style: React.CSSProperties
-  ) => JSX.Element;
+  rowRenderer: (props: ListChildComponentProps) => JSX.Element;
 }
 
 /**
@@ -56,29 +56,18 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
   const [showFiles, setShowFiles] = React.useState(true);
   const nFiles = props.files.length;
 
-  const _renderList = ({
-    index,
-    style
-  }: {
-    index: number;
-    style: React.CSSProperties;
-  }) => {
-    const file = props.files[index];
-    return props.rowRenderer(file, style);
-  };
-
   return (
     <div className={sectionFileContainerStyle}>
-      <div className={sectionAreaStyle}>
+      <div
+        className={sectionAreaStyle}
+        onClick={() => {
+          if (props.collapsible && nFiles > 0) {
+            setShowFiles(!showFiles);
+          }
+        }}
+      >
         {props.collapsible && (
-          <button
-            className={changeStageButtonStyle}
-            onClick={() => {
-              if (nFiles > 0) {
-                setShowFiles(!showFiles);
-              }
-            }}
-          >
+          <button className={changeStageButtonStyle}>
             {showFiles && nFiles > 0 ? (
               <caretDownIcon.react />
             ) : (
@@ -100,10 +89,11 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
           itemData={props.files}
           itemKey={(index, data) => data[index].to}
           itemSize={ITEM_HEIGHT}
-          width={'100%'}
+          innerElementType="ul"
           style={{ overflowX: 'visible' }}
+          width={'100%'}
         >
-          {_renderList}
+          {props.rowRenderer}
         </FixedSizeList>
       )}
     </div>

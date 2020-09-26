@@ -4,6 +4,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
 import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import { ListChildComponentProps } from 'react-window';
 import { CommandIDs } from '../commandsAndMenu';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
@@ -224,6 +225,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     return this.props.files.filter(file => this.props.model.getMark(file.to));
   }
 
+  /**
+   * Render the modified files
+   */
   render() {
     if (this.props.settings.composite['simpleStaging']) {
       return (
@@ -284,6 +288,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   }
 
+  /**
+   * Test if a file is selected
+   * @param candidate file to test
+   */
   private _isSelectedFile(candidate: Git.IStatusFile): boolean {
     if (this.state.selectedFile === null) {
       return false;
@@ -298,57 +306,71 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   }
 
-  private _renderStaged(files: Git.IStatusFile[], height: number) {
+  /**
+   * Render a staged file
+   *
+   * Note: This is actually a React.FunctionComponent but defined as
+   * a private method as it needs access to FileList properties.
+   *
+   * @param rowProps Row properties
+   */
+  private _renderStagedRow = (
+    rowProps: ListChildComponentProps
+  ): JSX.Element => {
     const doubleClickDiff = this.props.settings.get('doubleClickDiff')
       .composite as boolean;
-
-    const renderStagedRow = (
-      file: Git.IStatusFile,
-      style: React.CSSProperties
-    ) => {
-      const openFile = () => {
-        this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
-      };
-      const diffButton = this._createDiffButton(file);
-      return (
-        <FileItem
-          // key={file.to}
-          actions={
-            <React.Fragment>
-              <ActionButton
-                className={hiddenButtonStyle}
-                icon={openIcon}
-                title={'Open this file'}
-                onClick={openFile}
-              />
-              {diffButton}
-              <ActionButton
-                className={hiddenButtonStyle}
-                icon={removeIcon}
-                title={'Unstage this change'}
-                onClick={() => {
-                  this.resetStagedFile(file.to);
-                }}
-              />
-            </React.Fragment>
-          }
-          file={file}
-          contextMenu={this.openContextMenu}
-          model={this.props.model}
-          selected={this._isSelectedFile(file)}
-          selectFile={this.updateSelectedFile}
-          onDoubleClick={
-            doubleClickDiff
-              ? diffButton
-                ? () => this._openDiffView(file)
-                : () => undefined
-              : openFile
-          }
-          style={style}
-        />
-      );
+    const { data, index, style } = rowProps;
+    const file = data[index] as Git.IStatusFile;
+    const openFile = () => {
+      this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
     };
+    const diffButton = this._createDiffButton(file);
+    return (
+      <FileItem
+        // key={file.to}
+        actions={
+          <React.Fragment>
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={openIcon}
+              title={'Open this file'}
+              onClick={openFile}
+            />
+            {diffButton}
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={removeIcon}
+              title={'Unstage this change'}
+              onClick={() => {
+                this.resetStagedFile(file.to);
+              }}
+            />
+          </React.Fragment>
+        }
+        file={file}
+        contextMenu={this.openContextMenu}
+        model={this.props.model}
+        selected={this._isSelectedFile(file)}
+        selectFile={this.updateSelectedFile}
+        onDoubleClick={
+          doubleClickDiff
+            ? diffButton
+              ? () => this._openDiffView(file)
+              : () => undefined
+            : openFile
+        }
+        style={style}
+      />
+    );
+  };
 
+  /**
+   * Render the staged files list.
+   *
+   * @param files The staged files
+   * @param height The height of the HTML element
+   */
+  private _renderStaged(files: Git.IStatusFile[], height: number) {
     return (
       <GitStage
         actions={
@@ -364,70 +386,85 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         files={files}
         heading={'Staged'}
         height={height}
-        rowRenderer={renderStagedRow}
+        rowRenderer={this._renderStagedRow}
       />
     );
   }
 
-  private _renderChanged(files: Git.IStatusFile[], height: number) {
+  /**
+   * Render a changed file
+   *
+   * Note: This is actually a React.FunctionComponent but defined as
+   * a private method as it needs access to FileList properties.
+   *
+   * @param rowProps Row properties
+   */
+  private _renderChangedRow = (
+    rowProps: ListChildComponentProps
+  ): JSX.Element => {
     const doubleClickDiff = this.props.settings.get('doubleClickDiff')
       .composite as boolean;
-    const disabled = files.length === 0;
-
-    const renderChangedRow = (
-      file: Git.IStatusFile,
-      style: React.CSSProperties
-    ) => {
-      const openFile = () => {
-        this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
-      };
-      const diffButton = this._createDiffButton(file);
-      return (
-        <FileItem
-          // key={file.to}
-          actions={
-            <React.Fragment>
-              <ActionButton
-                className={hiddenButtonStyle}
-                icon={openIcon}
-                title={'Open this file'}
-                onClick={openFile}
-              />
-              {diffButton}
-              <ActionButton
-                className={hiddenButtonStyle}
-                icon={discardIcon}
-                title={'Discard changes'}
-                onClick={() => {
-                  this.discardChanges(file);
-                }}
-              />
-              <ActionButton
-                className={hiddenButtonStyle}
-                icon={addIcon}
-                title={'Stage this change'}
-                onClick={() => {
-                  this.addFile(file.to);
-                }}
-              />
-            </React.Fragment>
-          }
-          file={file}
-          contextMenu={this.openContextMenu}
-          model={this.props.model}
-          selected={this._isSelectedFile(file)}
-          selectFile={this.updateSelectedFile}
-          onDoubleClick={
-            doubleClickDiff
-              ? diffButton
-                ? () => this._openDiffView(file)
-                : () => undefined
-              : openFile
-          }
-          style={style}
-        />
-      );
+    const { data, index, style } = rowProps;
+    const file = data[index] as Git.IStatusFile;
+    const openFile = () => {
+      this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
     };
+    const diffButton = this._createDiffButton(file);
+    return (
+      <FileItem
+        // key={file.to}
+        actions={
+          <React.Fragment>
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={openIcon}
+              title={'Open this file'}
+              onClick={openFile}
+            />
+            {diffButton}
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={discardIcon}
+              title={'Discard changes'}
+              onClick={() => {
+                this.discardChanges(file);
+              }}
+            />
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={addIcon}
+              title={'Stage this change'}
+              onClick={() => {
+                this.addFile(file.to);
+              }}
+            />
+          </React.Fragment>
+        }
+        file={file}
+        contextMenu={this.openContextMenu}
+        model={this.props.model}
+        selected={this._isSelectedFile(file)}
+        selectFile={this.updateSelectedFile}
+        onDoubleClick={
+          doubleClickDiff
+            ? diffButton
+              ? () => this._openDiffView(file)
+              : () => undefined
+            : openFile
+        }
+        style={style}
+      />
+    );
+  };
+
+  /**
+   * Render the changed files list
+   *
+   * @param files Changed files
+   * @param height Height of the HTML element
+   */
+  private _renderChanged(files: Git.IStatusFile[], height: number) {
+    const disabled = files.length === 0;
     return (
       <GitStage
         actions={
@@ -452,60 +489,74 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         heading={'Changed'}
         height={height}
         files={files}
-        rowRenderer={renderChangedRow}
+        rowRenderer={this._renderChangedRow}
       />
     );
   }
 
-  private _renderUntracked(files: Git.IStatusFile[], height: number) {
+  /**
+   * Render a untracked file.
+   *
+   * Note: This is actually a React.FunctionComponent but defined as
+   * a private method as it needs access to FileList properties.
+   *
+   * @param rowProps Row properties
+   */
+  private _renderUntrackedRow = (
+    rowProps: ListChildComponentProps
+  ): JSX.Element => {
     const doubleClickDiff = this.props.settings.get('doubleClickDiff')
       .composite as boolean;
-
-    const renderUntrackedRow = (
-      file: Git.IStatusFile,
-      style: React.CSSProperties
-    ) => {
-      return (
-        <FileItem
-          // key={file.to}
-          actions={
-            <React.Fragment>
-              <ActionButton
-                className={hiddenButtonStyle}
-                icon={openIcon}
-                title={'Open this file'}
-                onClick={() => {
-                  this.props.commands.execute(
-                    CommandIDs.gitFileOpen,
-                    file as any
-                  );
-                }}
-              />
-              <ActionButton
-                className={hiddenButtonStyle}
-                icon={addIcon}
-                title={'Track this file'}
-                onClick={() => {
-                  this.addFile(file.to);
-                }}
-              />
-            </React.Fragment>
+    const { data, index, style } = rowProps;
+    const file = data[index] as Git.IStatusFile;
+    return (
+      <FileItem
+        // key={file.to}
+        actions={
+          <React.Fragment>
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={openIcon}
+              title={'Open this file'}
+              onClick={() => {
+                this.props.commands.execute(
+                  CommandIDs.gitFileOpen,
+                  file as any
+                );
+              }}
+            />
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={addIcon}
+              title={'Track this file'}
+              onClick={() => {
+                this.addFile(file.to);
+              }}
+            />
+          </React.Fragment>
+        }
+        file={file}
+        contextMenu={this.openContextMenu}
+        model={this.props.model}
+        onDoubleClick={() => {
+          if (!doubleClickDiff) {
+            this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
           }
-          file={file}
-          contextMenu={this.openContextMenu}
-          model={this.props.model}
-          onDoubleClick={() => {
-            if (!doubleClickDiff) {
-              this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
-            }
-          }}
-          selected={this._isSelectedFile(file)}
-          selectFile={this.updateSelectedFile}
-          style={style}
-        />
-      );
-    };
+        }}
+        selected={this._isSelectedFile(file)}
+        selectFile={this.updateSelectedFile}
+        style={style}
+      />
+    );
+  };
 
+  /**
+   * Render the untracked files list.
+   *
+   * @param files Untracked files
+   * @param height Height of the HTML element
+   */
+  private _renderUntracked(files: Git.IStatusFile[], height: number) {
     return (
       <GitStage
         actions={
@@ -521,103 +572,116 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         heading={'Untracked'}
         height={height}
         files={files}
-        rowRenderer={renderUntrackedRow}
+        rowRenderer={this._renderUntrackedRow}
       />
     );
   }
 
-  private _renderSimpleStage(files: Git.IStatusFile[], height: number) {
+  /**
+   * Render a modified file in simple mode.
+   *
+   * Note: This is actually a React.FunctionComponent but defined as
+   * a private method as it needs access to FileList properties.
+   *
+   * @param rowProps Row properties
+   */
+  private _renderSimpleStageRow = (rowProps: ListChildComponentProps) => {
+    const { data, index, style } = rowProps;
+    const file = data[index] as Git.IStatusFile;
     const doubleClickDiff = this.props.settings.get('doubleClickDiff')
       .composite as boolean;
 
-    const renderSimpleStageRow = (
-      file: Git.IStatusFile,
-      style: React.CSSProperties
-    ) => {
-      const openFile = () => {
-        this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
-      };
-
-      // Default value for actions and double click
-      let actions: JSX.Element = (
-        <ActionButton
-          className={hiddenButtonStyle}
-          icon={openIcon}
-          title={'Open this file'}
-          onClick={openFile}
-        />
-      );
-      let onDoubleClick = doubleClickDiff ? (): void => undefined : openFile;
-
-      if (file.status === 'unstaged' || file.status === 'partially-staged') {
-        const diffButton = this._createDiffButton(file);
-        actions = (
-          <React.Fragment>
-            <ActionButton
-              className={hiddenButtonStyle}
-              icon={openIcon}
-              title={'Open this file'}
-              onClick={openFile}
-            />
-            {diffButton}
-            <ActionButton
-              className={hiddenButtonStyle}
-              icon={discardIcon}
-              title={'Discard changes'}
-              onClick={() => {
-                this.discardChanges(file);
-              }}
-            />
-          </React.Fragment>
-        );
-        onDoubleClick = doubleClickDiff
-          ? diffButton
-            ? () => this._openDiffView(file)
-            : () => undefined
-          : openFile;
-      } else if (file.status === 'staged') {
-        const diffButton = this._createDiffButton(file);
-        actions = (
-          <React.Fragment>
-            <ActionButton
-              className={hiddenButtonStyle}
-              icon={openIcon}
-              title={'Open this file'}
-              onClick={openFile}
-            />
-            {diffButton}
-            <ActionButton
-              className={hiddenButtonStyle}
-              icon={discardIcon}
-              title={'Discard changes'}
-              onClick={() => {
-                this.discardChanges(file);
-              }}
-            />
-          </React.Fragment>
-        );
-        onDoubleClick = doubleClickDiff
-          ? diffButton
-            ? () => this._openDiffView(file)
-            : () => undefined
-          : openFile;
-      }
-
-      return (
-        <FileItem
-          // key={file.to}
-          actions={actions}
-          file={file}
-          markBox={true}
-          model={this.props.model}
-          onDoubleClick={onDoubleClick}
-          contextMenu={this.openSimpleContextMenu}
-          selectFile={this.updateSelectedFile}
-          style={style}
-        />
-      );
+    const openFile = () => {
+      this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
     };
 
+    // Default value for actions and double click
+    let actions: JSX.Element = (
+      <ActionButton
+        className={hiddenButtonStyle}
+        icon={openIcon}
+        title={'Open this file'}
+        onClick={openFile}
+      />
+    );
+    let onDoubleClick = doubleClickDiff ? (): void => undefined : openFile;
+
+    if (file.status === 'unstaged' || file.status === 'partially-staged') {
+      const diffButton = this._createDiffButton(file);
+      actions = (
+        <React.Fragment>
+          <ActionButton
+            className={hiddenButtonStyle}
+            icon={openIcon}
+            title={'Open this file'}
+            onClick={openFile}
+          />
+          {diffButton}
+          <ActionButton
+            className={hiddenButtonStyle}
+            icon={discardIcon}
+            title={'Discard changes'}
+            onClick={() => {
+              this.discardChanges(file);
+            }}
+          />
+        </React.Fragment>
+      );
+      onDoubleClick = doubleClickDiff
+        ? diffButton
+          ? () => this._openDiffView(file)
+          : () => undefined
+        : openFile;
+    } else if (file.status === 'staged') {
+      const diffButton = this._createDiffButton(file);
+      actions = (
+        <React.Fragment>
+          <ActionButton
+            className={hiddenButtonStyle}
+            icon={openIcon}
+            title={'Open this file'}
+            onClick={openFile}
+          />
+          {diffButton}
+          <ActionButton
+            className={hiddenButtonStyle}
+            icon={discardIcon}
+            title={'Discard changes'}
+            onClick={() => {
+              this.discardChanges(file);
+            }}
+          />
+        </React.Fragment>
+      );
+      onDoubleClick = doubleClickDiff
+        ? diffButton
+          ? () => this._openDiffView(file)
+          : () => undefined
+        : openFile;
+    }
+
+    return (
+      <FileItem
+        // key={file.to}
+        actions={actions}
+        file={file}
+        markBox={true}
+        model={this.props.model}
+        onDoubleClick={onDoubleClick}
+        contextMenu={this.openSimpleContextMenu}
+        selectFile={this.updateSelectedFile}
+        style={style}
+      />
+    );
+  };
+
+  /**
+   * Render the modified files in simple mode.
+   *
+   * @param files Modified files
+   * @param height Height of the HTML element
+   */
+  private _renderSimpleStage(files: Git.IStatusFile[], height: number) {
     return (
       <GitStage
         actions={
@@ -632,7 +696,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         heading={'Changed'}
         height={height}
         files={files}
-        rowRenderer={renderSimpleStageRow}
+        rowRenderer={this._renderSimpleStageRow}
       />
     );
   }
