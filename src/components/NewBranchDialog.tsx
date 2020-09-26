@@ -6,6 +6,7 @@ import * as React from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { classes } from 'typestyle';
 import { Logger } from '../logger';
+import { branchIcon } from '../style/icons';
 import {
   actionsWrapperClass,
   activeListItemClass,
@@ -313,14 +314,7 @@ export class NewBranchDialog extends React.Component<
         onClick={this._onBranchClickFactory(branch.name)}
         style={style}
       >
-        <span
-          className={classes(
-            'jp-git-icon',
-            listItemIconClass,
-            'jp-Icon-16',
-            isBase && 'jp-git-selected'
-          )}
-        />
+        <branchIcon.react className={listItemIconClass} tag="span" />
         <div className={listItemContentClass}>
           <p
             className={classes(

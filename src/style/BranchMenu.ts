@@ -103,17 +103,18 @@ export const listItemClass = style({
 export const activeListItemClass = style({
   color: 'white!important',
 
-  backgroundColor: 'var(--jp-brand-color1)!important'
+  backgroundColor: 'var(--jp-brand-color1)!important',
+
+  $nest: {
+    '& .jp-icon-selectable[fill]': {
+      fill: 'var(--jp-layout-color1)'
+    }
+  }
 });
 
 export const listItemIconClass = style({
   width: '16px',
   height: '16px',
 
-  marginRight: '4px',
-
-  backgroundImage: 'var(--jp-icon-git-branch)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
+  marginRight: '4px'
 });
