@@ -327,7 +327,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const diffButton = this._createDiffButton(file);
     return (
       <FileItem
-        // key={file.to}
         actions={
           <React.Fragment>
             <ActionButton
@@ -412,7 +411,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const diffButton = this._createDiffButton(file);
     return (
       <FileItem
-        // key={file.to}
         actions={
           <React.Fragment>
             <ActionButton
@@ -511,7 +509,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const file = data[index] as Git.IStatusFile;
     return (
       <FileItem
-        // key={file.to}
         actions={
           <React.Fragment>
             <ActionButton
@@ -662,7 +659,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
     return (
       <FileItem
-        // key={file.to}
         actions={actions}
         file={file}
         markBox={true}

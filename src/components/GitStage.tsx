@@ -85,13 +85,13 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
             Math.min(props.height, nFiles * ITEM_HEIGHT) - HEADER_HEIGHT,
             ITEM_HEIGHT
           )}
+          innerElementType="ul"
           itemCount={nFiles}
           itemData={props.files}
           itemKey={(index, data) => data[index].to}
           itemSize={ITEM_HEIGHT}
-          innerElementType="ul"
-          style={{ overflowX: 'visible' }}
-          width={'100%'}
+          style={{ overflowX: 'hidden' }}
+          width={'auto'}
         >
           {props.rowRenderer}
         </FixedSizeList>
