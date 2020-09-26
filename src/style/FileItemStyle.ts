@@ -6,6 +6,7 @@ export const fileStyle = style(
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+    boxSizing: 'border-box',
     color: 'var(--jp-ui-font-color1)',
     lineHeight: 'var(--jp-private-running-item-height)',
     padding: '0px 4px',

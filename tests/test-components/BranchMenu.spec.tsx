@@ -1,4 +1,4 @@
-import { shallow } from 'enzyme';
+import { mount, render, shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
 import { BranchMenu } from '../../src/components/BranchMenu';
@@ -192,7 +192,7 @@ describe('BranchMenu', () => {
         branching: false,
         suspend: false
       };
-      const component = shallow(<BranchMenu {...props} />);
+      const component = render(<BranchMenu {...props} />);
       const nodes = component.find(`.${listItemClass}`);
 
       const branches = model.branches;
@@ -201,11 +201,8 @@ describe('BranchMenu', () => {
       // Should contain the branch names...
       for (let i = 0; i < branches.length; i++) {
         expect(
-          nodes
-            .at(i)
-            .text()
-            .includes(branches[i].name)
-        ).toEqual(true);
+          nodes[i].lastChild.data
+        ).toEqual(branches[i].name);
       }
     });
 
@@ -215,14 +212,14 @@ describe('BranchMenu', () => {
         branching: false,
         suspend: false
       };
-      const component = shallow(<BranchMenu {...props} />);
+      const component = render(<BranchMenu {...props} />);
       const nodes = component.find(`.${listItemClass}`);
 
       const branches = model.branches;
       expect(nodes.length).toEqual(branches.length);
 
       for (let i = 0; i < branches.length; i++) {
-        expect(nodes.at(i).prop('title').length > 0).toEqual(true);
+        expect(nodes[i].attribs['title'].length).toBeGreaterThan(0);
       }
     });
 
@@ -261,17 +258,15 @@ describe('BranchMenu', () => {
         branching: false,
         suspend: false
       };
-      const component = shallow(<BranchMenu {...props} />);
-      const nodes = component.find(`.${listItemClass}`);
-
-      const node = nodes.at(1);
-      node.simulate('click');
+      const component = mount(<BranchMenu {...props} />);
+      const nodes = component.find(`.${listItemClass}[title*="${BRANCHES[1].name}"]`);
+      nodes.at(0).simulate('click');
 
       expect(spy).toHaveBeenCalledTimes(0);
       spy.mockRestore();
     });
 
-    it('should not switch to a specified branch upon clicking its corresponding element when branching is enabled', () => {
+    it('should switch to a specified branch upon clicking its corresponding element when branching is enabled', () => {
       const spy = jest.spyOn(GitExtension.prototype, 'checkout');
 
       const props = {
@@ -279,11 +274,9 @@ describe('BranchMenu', () => {
         branching: true,
         suspend: false
       };
-      const component = shallow(<BranchMenu {...props} />);
-      const nodes = component.find(`.${listItemClass}`);
-
-      const node = nodes.at(1);
-      node.simulate('click');
+      const component = mount(<BranchMenu {...props} />);
+      const nodes = component.find(`.${listItemClass}[title*="${BRANCHES[1].name}"]`);
+      nodes.at(0).simulate('click');
 
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith({

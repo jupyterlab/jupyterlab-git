@@ -171,15 +171,10 @@ export const filterClearClass = style({
 export const listWrapperClass = style({
   boxSizing: 'border-box',
   display: 'block',
-
-  width: '100%',
-  height: '200px',
-
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   borderRadius: '3px',
-
-  overflow: 'hidden',
-  overflowY: 'scroll'
+  paddingTop: 0,
+  paddingBottom: 0
 });
 
 export const listItemClass = style({
