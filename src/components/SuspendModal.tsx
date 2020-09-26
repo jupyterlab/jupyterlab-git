@@ -39,7 +39,12 @@ export class SuspendModal extends React.Component<ISuspendModalProps> {
    */
   render(): React.ReactElement {
     return (
-      <Modal open={this.props.open} onClick={this._onClick}>
+      <Modal
+        disableAutoFocus={true}
+        disableEnforceFocus={true}
+        open={this.props.open}
+        onClick={this._onClick}
+      >
         <div className={fullscreenProgressClass}>
           <CircularProgress color="inherit" />
         </div>
