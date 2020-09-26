@@ -668,7 +668,7 @@ namespace Private {
 
         if (credentials.button.accept) {
           // Retry the operation if the user provides its credentials
-          await showGitOperationDialog<T>(
+          return await showGitOperationDialog<T>(
             model,
             operation,
             args,
@@ -677,6 +677,9 @@ namespace Private {
           );
         }
       }
+      // Throw the error if it cannot be handled or
+      // if the user did not accept to provide its credentials
+      throw error;
     }
   }
 }
