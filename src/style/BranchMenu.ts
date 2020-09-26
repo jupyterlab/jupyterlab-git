@@ -94,16 +94,6 @@ export const newBranchButtonClass = style({
   borderRadius: '3px'
 });
 
-export const listWrapperClass = style({
-  display: 'block',
-  width: '100%',
-  minHeight: '150px',
-  maxHeight: '400px',
-
-  overflow: 'hidden',
-  overflowY: 'auto'
-});
-
 export const listItemClass = style({
   paddingTop: '4px!important',
   paddingBottom: '4px!important',

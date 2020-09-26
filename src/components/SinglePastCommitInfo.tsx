@@ -1,6 +1,7 @@
 import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@phosphor/commands';
 import * as React from 'react';
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
 import { CommandIDs } from '../commandsAndMenu';
 import { GitExtension } from '../model';
@@ -21,6 +22,9 @@ import { ActionButton } from './ActionButton';
 import { isDiffSupported } from './diff/Diff';
 import { FilePath } from './FilePath';
 import { ResetRevertDialog } from './ResetRevertDialog';
+
+const ITEM_HEIGHT = 24; // File list item height
+const MAX_VISIBLE_FILES = 20; // Maximal number of file display at once
 
 /**
  * Interface describing component properties.
@@ -123,18 +127,9 @@ export class SinglePastCommitInfo extends React.Component<
    * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
    */
   async componentDidMount(): Promise<void> {
-    let log: Git.ISingleCommitFilePathInfo;
     try {
-      log = await this.props.model.detailedLog(this.props.commit.commit);
-    } catch (err) {
-      console.error(
-        `Error while getting detailed log for commit ${this.props.commit.commit} and path ${this.props.model.pathRepository}`,
-        err
-      );
-      this.setState({ loadingState: 'error' });
-      return;
-    }
-    if (log.code === 0) {
+      const log = await this.props.model.detailedLog(this.props.commit.commit);
+
       this.setState({
         info: log.modified_file_note,
         numFiles: log.modified_files_count,
@@ -143,6 +138,13 @@ export class SinglePastCommitInfo extends React.Component<
         modifiedFiles: log.modified_files,
         loadingState: 'success'
       });
+    } catch (err) {
+      console.error(
+        `Error while getting detailed log for commit ${this.props.commit.commit} and path ${this.props.model.pathRepository}`,
+        err
+      );
+      this.setState({ loadingState: 'error' });
+      return;
     }
   }
 
@@ -206,40 +208,45 @@ export class SinglePastCommitInfo extends React.Component<
               onClose={this._onResetRevertDialogClose}
             />
           </div>
-          <ul className={fileListClass}>
-            {this.state.modifiedFiles.length > 0
-              ? this._renderFileList()
-              : null}
-          </ul>
+          {this.state.modifiedFiles.length > 0 && (
+            <FixedSizeList
+              className={fileListClass}
+              height={
+                Math.min(MAX_VISIBLE_FILES, this.state.modifiedFiles.length) *
+                ITEM_HEIGHT
+              }
+              innerElementType="ul"
+              itemCount={this.state.modifiedFiles.length}
+              itemData={this.state.modifiedFiles}
+              itemKey={(index, data) => data[index].modified_file_path}
+              itemSize={ITEM_HEIGHT}
+              style={{ overflowX: 'hidden' }}
+              width={'auto'}
+            >
+              {this._renderFile}
+            </FixedSizeList>
+          )}
         </div>
       </div>
     );
   }
 
   /**
-   * Renders a list of modified files.
-   *
-   * @returns array of React elements
-   */
-  private _renderFileList(): React.ReactElement[] {
-    return this.state.modifiedFiles.map(this._renderFile, this);
-  }
-
-  /**
    * Renders a modified file.
    *
-   * @param file - modified file
-   * @param idx - file index
+   * @param props Row properties
    * @returns React element
    */
-  private _renderFile(file: Git.ICommitModifiedFile): React.ReactElement {
+  private _renderFile = (props: ListChildComponentProps): JSX.Element => {
+    const { data, index, style } = props;
+    const file = data[index];
     const path = file.modified_file_path;
     const flg = isDiffSupported(path) || !file.is_binary;
     return (
       <li
         className={commitDetailFileClass}
-        key={path}
         onClick={this._onDiffClickFactory(path, flg)}
+        style={style}
         title={path}
       >
         <FilePath filepath={path} />
@@ -248,7 +255,7 @@ export class SinglePastCommitInfo extends React.Component<
         ) : null}
       </li>
     );
-  }
+  };
 
   /**
    * Callback invoked upon a clicking a button to revert changes.

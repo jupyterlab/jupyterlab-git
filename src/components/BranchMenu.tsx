@@ -1,10 +1,10 @@
-import * as React from 'react';
-import { classes } from 'typestyle';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
-import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-import { Git, IGitExtension, ILogMessage } from '../tokens';
+import * as React from 'react';
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import { classes } from 'typestyle';
 import {
   activeListItemClass,
   filterClass,
@@ -13,10 +13,10 @@ import {
   filterWrapperClass,
   listItemClass,
   listItemIconClass,
-  listWrapperClass,
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
+import { Git, IGitExtension, ILogMessage } from '../tokens';
 import { sleep } from '../utils';
 import { Alert } from './Alert';
 import { NewBranchDialog } from './NewBranchDialog';
@@ -24,6 +24,9 @@ import { SuspendModal } from './SuspendModal';
 
 const CHANGES_ERR_MSG =
   'The current branch contains files with uncommitted changes. Please commit or discard these changes before switching to or creating another branch.';
+const ITEM_HEIGHT = 24.8; // HTML element height for a single branch
+const MIN_HEIGHT = 150; // Minimal HTML element height for the branches list
+const MAX_HEIGHT = 400; // Maximal HTML element height for the branches list
 
 /**
  * Callback invoked upon encountering an error when switching branches.
@@ -237,53 +240,55 @@ export class BranchMenu extends React.Component<
    * @returns React element
    */
   private _renderBranchList(): React.ReactElement {
-    return (
-      <div className={listWrapperClass}>
-        <List disablePadding>{this._renderItems()}</List>
-      </div>
+    // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
+    const filter = this.state.filter;
+    const branches = this.state.branches.filter(
+      branch => !filter || branch.name.includes(filter)
     );
-  }
-
-  /**
-   * Renders menu items.
-   *
-   * @returns array of React elements
-   */
-  private _renderItems(): React.ReactElement[] {
-    return this.state.branches.map(this._renderItem, this);
+    return (
+      <FixedSizeList
+        height={Math.min(
+          Math.max(MIN_HEIGHT, branches.length * ITEM_HEIGHT),
+          MAX_HEIGHT
+        )}
+        itemCount={branches.length}
+        itemData={branches}
+        itemKey={(index, data) => data[index].name}
+        itemSize={ITEM_HEIGHT}
+        style={{ overflowX: 'hidden', paddingTop: 0, paddingBottom: 0 }}
+        width={'auto'}
+      >
+        {this._renderItem}
+      </FixedSizeList>
+    );
   }
 
   /**
    * Renders a menu item.
    *
-   * @param branch - branch
-   * @param idx - item index
+   * @param props Row properties
    * @returns React element
    */
-  private _renderItem(
-    branch: Git.IBranch,
-    idx: number
-  ): React.ReactElement | null {
-    // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
-    if (this.state.filter && !branch.name.includes(this.state.filter)) {
-      return null;
-    }
+  private _renderItem = (props: ListChildComponentProps): JSX.Element => {
+    const { data, index, style } = props;
+    const branch = data[index] as Git.IBranch;
+    const isActive = branch.name === this.state.current;
     return (
       <ListItem
         button
         title={`Switch to branch: ${branch.name}`}
         className={classes(
           listItemClass,
-          branch.name === this.state.current ? activeListItemClass : null
+          isActive ? activeListItemClass : null
         )}
-        key={branch.name}
         onClick={this._onBranchClickFactory(branch.name)}
+        style={style}
       >
         <span className={listItemIconClass} />
         {branch.name}
       </ListItem>
     );
-  }
+  };
 
   /**
    * Renders a dialog for creating a new branch.

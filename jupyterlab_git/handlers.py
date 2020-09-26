@@ -175,6 +175,9 @@ class GitDetailedLogHandler(GitHandler):
         selected_hash = data["selected_hash"]
         current_path = data["current_path"]
         result = await self.git.detailed_log(selected_hash, current_path)
+
+        if result["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(result))
 
 
