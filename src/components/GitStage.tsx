@@ -82,7 +82,7 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
       {showFiles && nFiles > 0 && (
         <FixedSizeList
           height={Math.max(
-            Math.min(props.height, nFiles * ITEM_HEIGHT) - HEADER_HEIGHT,
+            Math.min(props.height - HEADER_HEIGHT, nFiles * ITEM_HEIGHT),
             ITEM_HEIGHT
           )}
           innerElementType="ul"

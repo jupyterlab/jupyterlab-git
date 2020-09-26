@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { classes } from 'typestyle';
-import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -34,6 +33,7 @@ import {
 } from '../style/NewBranchDialog';
 import { SuspendModal } from './SuspendModal';
 import { Alert } from './Alert';
+import { VariableSizeList, ListChildComponentProps } from 'react-window';
 
 const BRANCH_DESC = {
   current:
@@ -41,6 +41,10 @@ const BRANCH_DESC = {
   default:
     'The default branch. Pick this if you want to start fresh from the default branch.'
 };
+
+const ITEM_HEIGHT = 27.5; // HTML element height for a single branch
+const CURRENT_BRANCH_HEIGHT = 66.5; // HTML element height for the current branch with description
+const HEIGHT = 200; // HTML element height for the branches list
 
 /**
  * Interface describing component properties.
@@ -238,9 +242,7 @@ export class NewBranchDialog extends React.Component<
               ) : null}
             </div>
           </div>
-          <div className={listWrapperClass}>
-            <List disablePadding>{this._renderItems()}</List>
-          </div>
+          {this._renderItems()}
         </div>
         <DialogActions className={actionsWrapperClass}>
           <input
@@ -268,12 +270,28 @@ export class NewBranchDialog extends React.Component<
    *
    * @returns array of React elements
    */
-  private _renderItems(): React.ReactElement[] {
+  private _renderItems(): JSX.Element {
     const current = this.props.model.currentBranch.name;
-    return this.state.branches
-      .slice()
-      .sort(comparator)
-      .map(this._renderItem, this);
+    const branches = this.state.branches.slice().sort(comparator);
+    return (
+      <VariableSizeList
+        className={listWrapperClass}
+        height={HEIGHT}
+        itemCount={branches.length}
+        itemData={branches}
+        itemKey={(index, data) => data[index].name}
+        itemSize={index => {
+          const branch = branches[index];
+          return branch.name === this.state.current
+            ? CURRENT_BRANCH_HEIGHT
+            : ITEM_HEIGHT;
+        }}
+        style={{ overflowX: 'hidden' }}
+        width={'auto'}
+      >
+        {this._renderItem}
+      </VariableSizeList>
+    );
 
     /**
      * Comparator function for sorting branches.
@@ -305,10 +323,9 @@ export class NewBranchDialog extends React.Component<
    * @param idx - item index
    * @returns React element
    */
-  private _renderItem(
-    branch: Git.IBranch,
-    idx: number
-  ): React.ReactElement | null {
+  private _renderItem = (props: ListChildComponentProps): JSX.Element => {
+    const { data, index, style } = props;
+    const branch = data[index] as Git.IBranch;
     // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     if (this.state.filter && !branch.name.includes(this.state.filter)) {
       return null;
@@ -327,8 +344,8 @@ export class NewBranchDialog extends React.Component<
         button
         title={`Create a new branch based on: ${branch.name}`}
         className={classes(listItemClass, isBase ? activeListItemClass : null)}
-        key={branch.name}
         onClick={this._onBranchClickFactory(branch.name)}
+        style={style}
       >
         <span
           className={classes(
@@ -351,7 +368,7 @@ export class NewBranchDialog extends React.Component<
         </div>
       </ListItem>
     );
-  }
+  };
 
   /**
    * Renders a component to provide UI feedback.
