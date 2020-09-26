@@ -138,6 +138,7 @@ export class NewBranchDialog extends React.Component<
     super(props);
 
     const repo = this.props.model.pathRepository;
+    this._branchList = React.createRef<VariableSizeList>();
 
     this.state = {
       name: '',
@@ -272,11 +273,17 @@ export class NewBranchDialog extends React.Component<
    */
   private _renderItems(): JSX.Element {
     const current = this.props.model.currentBranch.name;
-    const branches = this.state.branches.slice().sort(comparator);
+    // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
+    const filter = this.state.filter;
+    const branches = this.state.branches
+      .filter(branch => !filter || branch.name.includes(filter))
+      .slice()
+      .sort(comparator);
     return (
       <VariableSizeList
         className={listWrapperClass}
         height={HEIGHT}
+        estimatedItemSize={ITEM_HEIGHT}
         itemCount={branches.length}
         itemData={branches}
         itemKey={(index, data) => data[index].name}
@@ -286,6 +293,7 @@ export class NewBranchDialog extends React.Component<
             ? CURRENT_BRANCH_HEIGHT
             : ITEM_HEIGHT;
         }}
+        ref={this._branchList}
         style={{ overflowX: 'hidden' }}
         width={'auto'}
       >
@@ -319,17 +327,13 @@ export class NewBranchDialog extends React.Component<
   /**
    * Renders a branch menu item.
    *
-   * @param branch - branch
-   * @param idx - item index
+   * @param props Row properties
    * @returns React element
    */
   private _renderItem = (props: ListChildComponentProps): JSX.Element => {
     const { data, index, style } = props;
     const branch = data[index] as Git.IBranch;
-    // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
-    if (this.state.filter && !branch.name.includes(this.state.filter)) {
-      return null;
-    }
+
     const isBase = branch.name === this.state.base;
     const isCurr = branch.name === this.state.current;
 
@@ -468,6 +472,7 @@ export class NewBranchDialog extends React.Component<
    * @param event - event object
    */
   private _onFilterChange = (event: any): void => {
+    this._branchList.current.resetAfterIndex(0);
     this.setState({
       filter: event.target.value
     });
@@ -477,6 +482,7 @@ export class NewBranchDialog extends React.Component<
    * Callback invoked to reset the menu filter.
    */
   private _resetFilter = (): void => {
+    this._branchList.current.resetAfterIndex(0);
     this.setState({
       filter: ''
     });
@@ -581,6 +587,7 @@ export class NewBranchDialog extends React.Component<
     this.props.onClose();
 
     // Reset the branch name and filter:
+    this._branchList.current.resetAfterIndex(0);
     this.setState({
       name: '',
       filter: ''
@@ -606,4 +613,6 @@ export class NewBranchDialog extends React.Component<
       alert: false
     });
   };
+
+  private _branchList: React.RefObject<VariableSizeList>;
 }

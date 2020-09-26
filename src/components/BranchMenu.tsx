@@ -240,14 +240,19 @@ export class BranchMenu extends React.Component<
    * @returns React element
    */
   private _renderBranchList(): React.ReactElement {
+    // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
+    const filter = this.state.filter;
+    const branches = this.state.branches.filter(
+      branch => !filter || branch.name.includes(filter)
+    );
     return (
       <FixedSizeList
         height={Math.min(
-          Math.max(MIN_HEIGHT, this.state.branches.length * ITEM_HEIGHT),
+          Math.max(MIN_HEIGHT, branches.length * ITEM_HEIGHT),
           MAX_HEIGHT
         )}
-        itemCount={this.state.branches.length}
-        itemData={this.state.branches}
+        itemCount={branches.length}
+        itemData={branches}
         itemKey={(index, data) => data[index].name}
         itemSize={ITEM_HEIGHT}
         style={{ overflowX: 'hidden', paddingTop: 0, paddingBottom: 0 }}
@@ -261,17 +266,12 @@ export class BranchMenu extends React.Component<
   /**
    * Renders a menu item.
    *
-   * @param branch - branch
-   * @param idx - item index
+   * @param props Row properties
    * @returns React element
    */
   private _renderItem = (props: ListChildComponentProps): JSX.Element => {
     const { data, index, style } = props;
     const branch = data[index] as Git.IBranch;
-    // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
-    if (this.state.filter && !branch.name.includes(this.state.filter)) {
-      return null;
-    }
     const isActive = branch.name === this.state.current;
     return (
       <ListItem
