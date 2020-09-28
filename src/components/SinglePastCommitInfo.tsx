@@ -256,7 +256,7 @@ export class SinglePastCommitInfo extends React.Component<
         style={style}
         title={path}
       >
-        <FilePath filepath={path} />
+        <FilePath filepath={path} filetype={file.type} />
         {flg ? (
           <ActionButton icon={diffIcon} title="View file changes" />
         ) : null}

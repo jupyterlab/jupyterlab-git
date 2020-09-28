@@ -16,11 +16,14 @@ describe('IGitExtension', () => {
   const fakeRoot = '/path/to/server';
   let model: IGitExtension;
   const docmanager = jest.mock('@jupyterlab/docmanager') as any;
-  docmanager.findWidget = jest.fn();
   let mockResponses: IMockedResponses;
 
   beforeEach(async () => {
     jest.restoreAllMocks();
+    docmanager.findWidget = jest.fn();
+    const docregistry = {
+      getFileTypesForPath: jest.fn().mockReturnValue([])
+    };
 
     mockResponses = {
       ...defaultMockedResponses
@@ -28,7 +31,7 @@ describe('IGitExtension', () => {
 
     mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
 
-    model = new GitExtension(fakeRoot, docmanager as any);
+    model = new GitExtension(fakeRoot, docmanager as any, docregistry as any);
   });
 
   describe('#pathRepository', () => {

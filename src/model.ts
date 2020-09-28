@@ -1,5 +1,6 @@
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
@@ -26,10 +27,12 @@ export class GitExtension implements IGitExtension {
   constructor(
     serverRoot: string,
     docmanager: IDocumentManager = null,
+    docRegistry: DocumentRegistry = null,
     settings?: ISettingRegistry.ISettings
   ) {
     this._serverRoot = serverRoot;
     this._docmanager = docmanager;
+    this._docRegistry = docRegistry;
     this._settings = settings || null;
     this._taskHandler = new TaskHandler(this);
 
@@ -519,6 +522,11 @@ export class GitExtension implements IGitExtension {
         return d;
       }
     );
+
+    data.modified_files = data.modified_files.map(f => {
+      f.type = this._resolveFileType(f.modified_file_path);
+      return f;
+    });
     return data;
   }
 
@@ -751,7 +759,11 @@ export class GitExtension implements IGitExtension {
 
       this._setStatus(
         data.files.map(file => {
-          return { ...file, status: decodeStage(file.x, file.y) };
+          return {
+            ...file,
+            status: decodeStage(file.x, file.y),
+            type: this._resolveFileType(file.to)
+          };
         })
       );
     } catch (err) {
@@ -1077,6 +1089,21 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Resolve path to filetype
+   */
+  protected _resolveFileType(path: string): DocumentRegistry.IFileType {
+    // test if directory
+    if (path.endsWith('/')) {
+      return DocumentRegistry.defaultDirectoryFileType;
+    }
+
+    return (
+      this._docRegistry.getFileTypesForPath(path)[0] ||
+      DocumentRegistry.defaultTextFileType
+    );
+  }
+
+  /**
    * Set the repository status.
    *
    * @param v - repository status
@@ -1131,6 +1158,7 @@ export class GitExtension implements IGitExtension {
   private _currentBranch: Git.IBranch;
   private _serverRoot: string;
   private _docmanager: IDocumentManager | null;
+  private _docRegistry: DocumentRegistry | null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
   private _isDisposed = false;
   private _markerCache: Markers = new Markers(() => this._markChanged.emit());

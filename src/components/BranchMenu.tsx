@@ -17,6 +17,7 @@ import {
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
+import { branchIcon } from '../style/icons';
 import { Git, IGitExtension, Level } from '../tokens';
 import { NewBranchDialog } from './NewBranchDialog';
 
@@ -270,13 +271,7 @@ export class BranchMenu extends React.Component<
         onClick={this._onBranchClickFactory(branch.name)}
         style={style}
       >
-        <span
-          className={classes(
-            'jp-git-icon',
-            listItemIconClass,
-            isActive && 'jp-git-selected'
-          )}
-        />
+        <branchIcon.react className={listItemIconClass} tag="span" />
         {branch.name}
       </ListItem>
     );

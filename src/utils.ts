@@ -1,16 +1,4 @@
 import { PathExt } from '@jupyterlab/coreutils';
-import {
-  folderFileIconStyle,
-  genericFileIconStyle,
-  imageFileIconStyle,
-  jsonFileIconStyle,
-  rKernelFileIconStyle,
-  markdownFileIconStyle,
-  notebookFileIconStyle,
-  pythonFileIconStyle,
-  spreadsheetFileIconStyle,
-  yamlFileIconStyle
-} from './style/FileListStyle';
 import { Git } from './tokens';
 
 /** Get the filename from a path */
@@ -38,47 +26,6 @@ export function decodeStage(x: string, y: string): Git.Status {
   }
 
   return null;
-}
-
-/**
- * Get the extension of a given file
- *
- * @param path File path for which the icon should be found
- */
-export function getFileIconClassName(path: string): string {
-  if (path[path.length - 1] === '/') {
-    return folderFileIconStyle;
-  }
-  const fileExtension = PathExt.extname(path).toLocaleLowerCase();
-  switch (fileExtension) {
-    case '.md':
-      return markdownFileIconStyle;
-    case '.py':
-      return pythonFileIconStyle;
-    case '.ipynb':
-      return notebookFileIconStyle;
-    case '.json':
-      return jsonFileIconStyle;
-    case '.csv':
-    case '.xls':
-    case '.xlsx':
-      return spreadsheetFileIconStyle;
-    case '.r':
-      return rKernelFileIconStyle;
-    case '.yml':
-    case '.yaml':
-      return yamlFileIconStyle;
-    case '.svg':
-    case '.tiff':
-    case '.jpeg':
-    case '.jpg':
-    case '.gif':
-    case '.png':
-    case '.raw':
-      return imageFileIconStyle;
-    default:
-      return genericFileIconStyle;
-  }
 }
 
 /**

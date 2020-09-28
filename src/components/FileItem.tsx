@@ -185,7 +185,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         )}
         <FilePath
           filepath={this.props.file.to}
-          selected={this.props.selected}
+          filetype={this.props.file.type}
         />
         {this.props.actions}
         <span className={this._getFileChangedLabelClass(this.props.file.y)}>

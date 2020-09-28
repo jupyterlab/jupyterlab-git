@@ -30,7 +30,7 @@ export const filterInputClass = style({
   /* top | right | bottom | left */
   padding: '1px 18px 2px 7px',
 
-  color: 'var(--jp-ui-font-color0)',
+  color: 'var(--jp-ui-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 
@@ -86,7 +86,7 @@ export const newBranchButtonClass = style({
   width: '7.7em',
   height: '2em',
 
-  color: 'white',
+  color: 'var(--jp-ui-inverse-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
 
   backgroundColor: 'var(--jp-brand-color1)',
@@ -101,19 +101,20 @@ export const listItemClass = style({
 });
 
 export const activeListItemClass = style({
-  color: 'white!important',
+  color: 'var(--jp-ui-inverse-font-color1)!important',
 
-  backgroundColor: 'var(--jp-brand-color1)!important'
+  backgroundColor: 'var(--jp-brand-color1)!important',
+
+  $nest: {
+    '& .jp-icon-selectable[fill]': {
+      fill: 'var(--jp-layout-color1)'
+    }
+  }
 });
 
 export const listItemIconClass = style({
   width: '16px',
   height: '16px',
 
-  marginRight: '4px',
-
-  backgroundImage: 'var(--jp-icon-git-branch)',
-  backgroundSize: '16px',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center'
+  marginRight: '4px'
 });

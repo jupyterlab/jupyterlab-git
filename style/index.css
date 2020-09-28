@@ -7,15 +7,3 @@
 @import 'diff-nb.css';
 @import 'diff-text.css';
 @import 'variables.css';
-
-[data-jp-theme-light='true'] .jp-git-icon.jp-git-selected {
-  filter: grayscale(1) brightness(3);
-}
-
-[data-jp-theme-light='false'] .jp-git-icon {
-  filter: brightness(1.25);
-}
-
-[data-jp-theme-light='false'] .jp-git-icon.jp-git-selected {
-  filter: grayscale(1) brightness(3);
-}
