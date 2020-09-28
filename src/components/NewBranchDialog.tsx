@@ -218,7 +218,7 @@ export class NewBranchDialog extends React.Component<
    * @returns array of React elements
    */
   private _renderItems(): JSX.Element {
-    const current = this.props.model.currentBranch.name;
+    const current = this.props.currentBranch;
     // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     const filter = this.state.filter;
     const branches = this.props.branches
