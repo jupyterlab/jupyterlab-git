@@ -9,6 +9,7 @@ import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { CommandIDs } from '../commandsAndMenu';
+import { Logger } from '../logger';
 import {
   branchIcon,
   desktopIcon,
@@ -29,22 +30,19 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { Git, IGitExtension, ILogMessage } from '../tokens';
-import { sleep } from '../utils';
+import { IGitExtension, Level } from '../tokens';
 import { GitTagDialog } from '../widgets/TagList';
 import { ActionButton } from './ActionButton';
-import { Alert } from './Alert';
 import { BranchMenu } from './BranchMenu';
-import { SuspendModal } from './SuspendModal';
 
 /**
  * Interface describing component properties.
  */
 export interface IToolbarProps {
   /**
-   * Git extension data model.
+   * Jupyter App commands registry
    */
-  model: IGitExtension;
+  commands: CommandRegistry;
 
   /**
    * Boolean indicating whether branching is disabled.
@@ -52,9 +50,14 @@ export interface IToolbarProps {
   branching: boolean;
 
   /**
-   * Boolean indicating whether to enable UI suspension.
+   * Extension logger
    */
-  suspend: boolean;
+  logger: Logger;
+
+  /**
+   * Git extension data model.
+   */
+  model: IGitExtension;
 
   /**
    * Callback to invoke in order to refresh a repository.
@@ -62,11 +65,6 @@ export interface IToolbarProps {
    * @returns promise which refreshes a repository
    */
   refresh: () => Promise<void>;
-
-  /**
-   * Jupyter App commands registry
-   */
-  commands: CommandRegistry;
 }
 
 /**
@@ -92,21 +90,6 @@ export interface IToolbarState {
    * Current branch name.
    */
   branch: string;
-
-  /**
-   * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
-   */
-  suspend: boolean;
-
-  /**
-   * Boolean indicating whether to show an alert.
-   */
-  alert: boolean;
-
-  /**
-   * Log message.
-   */
-  log: ILogMessage;
 }
 
 /**
@@ -128,13 +111,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       branchMenu: false,
       repoMenu: false,
       repository: repo || '',
-      branch: repo ? this.props.model.currentBranch.name : '',
-      suspend: false,
-      alert: false,
-      log: {
-        severity: 'info',
-        message: ''
-      }
+      branch: repo ? this.props.model.currentBranch.name : ''
     };
   }
 
@@ -163,7 +140,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         {this._renderTopNav()}
         {this._renderRepoMenu()}
         {this._renderBranchMenu()}
-        {this._renderFeedback()}
       </div>
     );
   }
@@ -266,34 +242,12 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         </button>
         {this.state.branchMenu ? (
           <BranchMenu
+            logger={this.props.logger}
             model={this.props.model}
             branching={this.props.branching}
-            suspend={this.props.suspend}
           />
         ) : null}
       </div>
-    );
-  }
-
-  /**
-   * Renders a component to provide UI feedback.
-   *
-   * @returns React element
-   */
-  private _renderFeedback(): React.ReactElement {
-    return (
-      <React.Fragment>
-        <SuspendModal
-          open={this.props.suspend && this.state.suspend}
-          onClick={this._onFeedbackModalClick}
-        />
-        <Alert
-          open={this.state.alert}
-          message={this.state.log.message}
-          severity={this.state.log.severity}
-          onClose={this._onFeedbackAlertClose}
-        />
-      </React.Fragment>
     );
   }
 
@@ -328,40 +282,13 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   /**
-   * Sets the suspension state.
-   *
-   * @param bool - boolean indicating whether to suspend UI interaction
-   */
-  private _suspend(bool: boolean): void {
-    if (this.props.suspend) {
-      this.setState({
-        suspend: bool
-      });
-    }
-  }
-
-  /**
-   * Sets the current component log message.
-   *
-   * @param msg - log message
-   */
-  private _log(msg: ILogMessage): void {
-    this.setState({
-      alert: true,
-      log: msg
-    });
-  }
-
-  /**
    * Callback invoked upon clicking a button to pull the latest changes.
    *
    * @param event - event object
    * @returns a promise which resolves upon pulling the latest changes
    */
   private _onPullClick = async (): Promise<void> => {
-    this._suspend(true);
     await this.props.commands.execute(CommandIDs.gitPull);
-    this._suspend(false);
   };
 
   /**
@@ -371,9 +298,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns a promise which resolves upon pushing the latest changes
    */
   private _onPushClick = async (): Promise<void> => {
-    this._suspend(true);
     await this.props.commands.execute(CommandIDs.gitPush);
-    this._suspend(false);
   };
 
   /**
@@ -407,37 +332,25 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns a promise which resolves upon refreshing a repository
    */
   private _onRefreshClick = async (): Promise<void> => {
-    this._log({
-      severity: 'info',
+    this.props.logger.log({
+      level: Level.RUNNING,
       message: 'Refreshing...'
     });
-    this._suspend(true);
-    await Promise.all([sleep(1000), this.props.refresh()]);
-    this._suspend(false);
-    this._log({
-      severity: 'success',
-      message: 'Successfully refreshed.'
-    });
-  };
+    try {
+      await this.props.refresh();
 
-  /**
-   * Callback invoked upon clicking on the feedback modal.
-   *
-   * @param event - event object
-   */
-  private _onFeedbackModalClick = (): void => {
-    this._suspend(false);
-  };
-
-  /**
-   * Callback invoked upon closing a feedback alert.
-   *
-   * @param event - event object
-   */
-  private _onFeedbackAlertClose = (): void => {
-    this.setState({
-      alert: false
-    });
+      this.props.logger.log({
+        level: Level.SUCCESS,
+        message: 'Successfully refreshed.'
+      });
+    } catch (error) {
+      console.error(error);
+      this.props.logger.log({
+        level: Level.ERROR,
+        message: 'Failed to refresh.',
+        error
+      });
+    }
   };
 
   /**
@@ -451,34 +364,24 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       body: new GitTagDialog(this.props.model)
     });
     if (result.button.accept) {
-      this._log({
-        severity: 'info',
+      this.props.logger.log({
+        level: Level.RUNNING,
         message: `Switching to ${result.value}...`
       });
-      this._suspend(true);
 
-      let response: Git.ICheckoutResult;
       try {
-        response = await this.props.model.checkoutTag(result.value);
-      } catch (error) {
-        response = {
-          code: -1,
-          message: error.message || error
-        };
-      } finally {
-        this._suspend(false);
-      }
+        await this.props.model.checkoutTag(result.value);
 
-      if (response.code !== 0) {
-        console.error(response.message);
-        this._log({
-          severity: 'error',
-          message: `Fail to checkout tag ${result.value}`
-        });
-      } else {
-        this._log({
-          severity: 'success',
+        this.props.logger.log({
+          level: Level.SUCCESS,
           message: `Switched to ${result.value}`
+        });
+      } catch (error) {
+        console.error(error);
+        this.props.logger.log({
+          level: Level.ERROR,
+          message: `Fail to checkout tag ${result.value}`,
+          error
         });
       }
     }

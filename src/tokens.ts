@@ -27,11 +27,6 @@ export interface IGitExtension extends IDisposable {
   readonly headChanged: ISignal<IGitExtension, void>;
 
   /**
-   * A signal emitted whenever a model event occurs.
-   */
-  readonly logger: ISignal<IGitExtension, string>;
-
-  /**
    * Top level path of the current Git repository
    */
   pathRepository: string | null;
@@ -62,6 +57,11 @@ export interface IGitExtension extends IDisposable {
    * A signal emitted when the current status of the Git repository changes.
    */
   readonly statusChanged: ISignal<IGitExtension, Git.IStatusFileResult[]>;
+
+  /**
+   * A signal emitted whenever a model task event occurs.
+   */
+  readonly taskChanged: ISignal<IGitExtension, string>;
 
   /**
    * Add one or more files to the repository staging area.
@@ -740,16 +740,27 @@ export namespace Git {
 /**
  * Log message severity.
  */
-export type Severity = 'error' | 'warning' | 'info' | 'success';
+export enum Level {
+  SUCCESS = 10,
+  INFO = 20,
+  RUNNING = 30,
+  WARNING = 40,
+  ERROR = 50
+}
 
 /**
  * Interface describing a component log message.
  */
 export interface ILogMessage {
   /**
-   * Message severity.
+   * Error object.
    */
-  severity: Severity;
+  error?: Error;
+
+  /**
+   * Message level.
+   */
+  level: Level;
 
   /**
    * Message text.
