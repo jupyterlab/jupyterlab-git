@@ -88,6 +88,16 @@ function renderFileName(filename: string): React.ReactElement {
  */
 export interface IBranchMenuProps {
   /**
+   * Current branch name.
+   */
+  currentBranch: string;
+
+  /**
+   * Current list of branches.
+   */
+  branches: Git.IBranch[];
+
+  /**
    * Boolean indicating whether branching is disabled.
    */
   branching: boolean;
@@ -108,19 +118,9 @@ export interface IBranchMenuProps {
  */
 export interface IBranchMenuState {
   /**
-   * Current branch name.
-   */
-  current: string;
-
-  /**
    * Boolean indicating whether to show a dialog to create a new branch.
    */
   branchDialog: boolean;
-
-  /**
-   * Current list of branches.
-   */
-  branches: Git.IBranch[];
 
   /**
    * Menu filter.
@@ -144,28 +144,10 @@ export class BranchMenu extends React.Component<
   constructor(props: IBranchMenuProps) {
     super(props);
 
-    const repo = this.props.model.pathRepository;
-
     this.state = {
       filter: '',
-      branchDialog: false,
-      current: repo ? this.props.model.currentBranch.name : '',
-      branches: repo ? this.props.model.branches : []
+      branchDialog: false
     };
-  }
-
-  /**
-   * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
-   */
-  componentDidMount(): void {
-    this._addListeners();
-  }
-
-  /**
-   * Callback invoked when a component will no longer be mounted.
-   */
-  componentWillUnmount(): void {
-    this._removeListeners();
   }
 
   /**
@@ -229,7 +211,7 @@ export class BranchMenu extends React.Component<
   private _renderBranchList(): React.ReactElement {
     // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     const filter = this.state.filter;
-    const branches = this.state.branches.filter(
+    const branches = this.props.branches.filter(
       branch => !filter || branch.name.includes(filter)
     );
     return (
@@ -259,7 +241,7 @@ export class BranchMenu extends React.Component<
   private _renderItem = (props: ListChildComponentProps): JSX.Element => {
     const { data, index, style } = props;
     const branch = data[index] as Git.IBranch;
-    const isActive = branch.name === this.state.current;
+    const isActive = branch.name === this.props.currentBranch;
     return (
       <ListItem
         button
@@ -285,42 +267,14 @@ export class BranchMenu extends React.Component<
   private _renderNewBranchDialog(): React.ReactElement {
     return (
       <NewBranchDialog
+        currentBranch={this.props.currentBranch}
+        branches={this.props.branches}
         logger={this.props.logger}
         open={this.state.branchDialog}
         model={this.props.model}
         onClose={this._onNewBranchDialogClose}
       />
     );
-  }
-
-  /**
-   * Adds model listeners.
-   */
-  private _addListeners(): void {
-    // When the HEAD changes, decent probability that we've switched branches:
-    this.props.model.headChanged.connect(this._syncState, this);
-
-    // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension) or changed repositories:
-    this.props.model.statusChanged.connect(this._syncState, this);
-  }
-
-  /**
-   * Removes model listeners.
-   */
-  private _removeListeners(): void {
-    this.props.model.headChanged.disconnect(this._syncState, this);
-    this.props.model.statusChanged.disconnect(this._syncState, this);
-  }
-
-  /**
-   * Syncs the component state with the underlying model.
-   */
-  private _syncState(): void {
-    const repo = this.props.model.pathRepository;
-    this.setState({
-      current: repo ? this.props.model.currentBranch.name : '',
-      branches: repo ? this.props.model.branches : []
-    });
   }
 
   /**

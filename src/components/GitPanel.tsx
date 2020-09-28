@@ -61,9 +61,9 @@ export interface IGitPanelProps {
  */
 export interface IGitPanelState {
   /**
-   * Boolean indicating whether the user is currently in a Git repository.
+   * Git path repository
    */
-  inGitRepository: boolean;
+  repository: string | null;
 
   /**
    * List of branches.
@@ -108,7 +108,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       branches: [],
       currentBranch: '',
       files: [],
-      inGitRepository: false,
+      repository: null,
       pastCommits: [],
       tab: 0
     };
@@ -122,7 +122,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
     model.repositoryChanged.connect((_, args) => {
       this.setState({
-        inGitRepository: args.newValue !== null
+        repository: args.newValue
       });
       this.refresh();
     }, this);
@@ -249,7 +249,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   render(): React.ReactElement {
     return (
       <div className={panelWrapperClass}>
-        {this.state.inGitRepository ? (
+        {this.state.repository ? (
           <React.Fragment>
             {this._renderToolbar()}
             {this._renderMain()}
@@ -273,11 +273,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     );
     return (
       <Toolbar
+        currentBranch={this.state.currentBranch}
+        branches={this.state.branches}
         branching={!disableBranching}
         commands={this.props.commands}
         logger={this.props.logger}
         model={this.props.model}
         refresh={this._onRefresh}
+        repository={this.state.repository || ''}
       />
     );
   }

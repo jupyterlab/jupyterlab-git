@@ -30,7 +30,7 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { IGitExtension, Level } from '../tokens';
+import { Git, IGitExtension, Level } from '../tokens';
 import { GitTagDialog } from '../widgets/TagList';
 import { ActionButton } from './ActionButton';
 import { BranchMenu } from './BranchMenu';
@@ -40,14 +40,24 @@ import { BranchMenu } from './BranchMenu';
  */
 export interface IToolbarProps {
   /**
-   * Jupyter App commands registry
+   * Current list of branches.
    */
-  commands: CommandRegistry;
+  branches: Git.IBranch[];
 
   /**
    * Boolean indicating whether branching is disabled.
    */
   branching: boolean;
+
+  /**
+   * Jupyter App commands registry
+   */
+  commands: CommandRegistry;
+
+  /**
+   * Current branch name.
+   */
+  currentBranch: string;
 
   /**
    * Extension logger
@@ -58,6 +68,11 @@ export interface IToolbarProps {
    * Git extension data model.
    */
   model: IGitExtension;
+
+  /**
+   * Current repository.
+   */
+  repository: string;
 
   /**
    * Callback to invoke in order to refresh a repository.
@@ -75,21 +90,6 @@ export interface IToolbarState {
    * Boolean indicating whether a branch menu is shown.
    */
   branchMenu: boolean;
-
-  /**
-   * Boolean indicating whether a repository menu is shown.
-   */
-  repoMenu: boolean;
-
-  /**
-   * Current repository.
-   */
-  repository: string;
-
-  /**
-   * Current branch name.
-   */
-  branch: string;
 }
 
 /**
@@ -105,28 +105,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   constructor(props: IToolbarProps) {
     super(props);
 
-    const repo = this.props.model.pathRepository;
-
     this.state = {
-      branchMenu: false,
-      repoMenu: false,
-      repository: repo || '',
-      branch: repo ? this.props.model.currentBranch.name : ''
+      branchMenu: false
     };
-  }
-
-  /**
-   * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
-   */
-  componentDidMount(): void {
-    this._addListeners();
-  }
-
-  /**
-   * Callback invoked when a component will no longer be mounted.
-   */
-  componentWillUnmount(): void {
-    this._removeListeners();
   }
 
   /**
@@ -192,18 +173,16 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <button
           disabled
           className={toolbarMenuButtonClass}
-          title={`Current repository: ${this.state.repository}`}
-          onClick={this._onRepositoryClick}
+          title={`Current repository: ${this.props.repository}`}
         >
           <desktopIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
             <p className={toolbarMenuButtonSubtitleClass}>
-              {PathExt.basename(this.state.repository)}
+              {PathExt.basename(this.props.repository)}
             </p>
           </div>
         </button>
-        {this.state.repoMenu ? null : null}
       </div>
     );
   }
@@ -224,14 +203,14 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             toolbarMenuButtonClass,
             toolbarMenuButtonEnabledClass
           )}
-          title={`Change the current branch: ${this.state.branch}`}
+          title={`Change the current branch: ${this.props.currentBranch}`}
           onClick={this._onBranchClick}
         >
           <branchIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
             <p className={toolbarMenuButtonSubtitleClass}>
-              {this.state.branch}
+              {this.props.currentBranch || ''}
             </p>
           </div>
           {this.state.branchMenu ? (
@@ -242,43 +221,15 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         </button>
         {this.state.branchMenu ? (
           <BranchMenu
+            currentBranch={this.props.currentBranch || ''}
+            branches={this.props.branches}
+            branching={this.props.branching}
             logger={this.props.logger}
             model={this.props.model}
-            branching={this.props.branching}
           />
         ) : null}
       </div>
     );
-  }
-
-  /**
-   * Adds model listeners.
-   */
-  private _addListeners(): void {
-    // When the HEAD changes, decent probability that we've switched branches:
-    this.props.model.headChanged.connect(this._syncState, this);
-
-    // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension) or changed repositories:
-    this.props.model.statusChanged.connect(this._syncState, this);
-  }
-
-  /**
-   * Removes model listeners.
-   */
-  private _removeListeners(): void {
-    this.props.model.headChanged.disconnect(this._syncState, this);
-    this.props.model.statusChanged.disconnect(this._syncState, this);
-  }
-
-  /**
-   * Syncs the component state with the underlying model.
-   */
-  private _syncState(): void {
-    const repo = this.props.model.pathRepository;
-    this.setState({
-      repository: repo || '',
-      branch: repo ? this.props.model.currentBranch.name : ''
-    });
   }
 
   /**
@@ -299,18 +250,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    */
   private _onPushClick = async (): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitPush);
-  };
-
-  /**
-   * Callback invoked upon clicking a button to change the current repository.
-   *
-   * @param event - event object
-   */
-  private _onRepositoryClick = (): void => {
-    // Toggle the repository menu:
-    this.setState({
-      repoMenu: !this.state.repoMenu
-    });
   };
 
   /**
