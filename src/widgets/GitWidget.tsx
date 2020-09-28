@@ -1,12 +1,15 @@
-import { ReactWidget } from '@jupyterlab/apputils';
+import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { CommandRegistry } from '@phosphor/commands';
 import { Widget } from '@phosphor/widgets';
 import * as React from 'react';
+import { Feedback } from '../components/Feedback';
 import { GitPanel } from '../components/GitPanel';
+import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
 import { gitWidgetStyle } from '../style/GitWidgetStyle';
+import { ILogMessage, Level } from '../tokens';
 
 /**
  * A class that exposes the git plugin Widget.
@@ -23,25 +26,42 @@ export class GitWidget extends ReactWidget {
     this.node.id = 'GitSession-root';
     this.addClass(gitWidgetStyle);
 
-    this._model = model;
     this._commands = commands;
-    this._settings = settings;
     this._filebrowser = filebrowser;
+    this._model = model;
+    this._settings = settings;
   }
 
   render() {
     return (
-      <GitPanel
-        model={this._model}
-        commands={this._commands}
-        settings={this._settings}
-        filebrowser={this._filebrowser}
-      />
+      <LoggerContext.Consumer>
+        {logger => (
+          <React.Fragment>
+            <GitPanel
+              commands={this._commands}
+              filebrowser={this._filebrowser}
+              logger={logger}
+              model={this._model}
+              settings={this._settings}
+            />
+            <UseSignal
+              signal={logger.signal}
+              initialArgs={{ message: '', level: Level.INFO } as ILogMessage}
+            >
+              {(sender, log) =>
+                log && log.message ? (
+                  <Feedback log={log} settings={this._settings} />
+                ) : null
+              }
+            </UseSignal>
+          </React.Fragment>
+        )}
+      </LoggerContext.Consumer>
     );
   }
 
-  private _model: GitExtension;
   private _commands: CommandRegistry;
-  private _settings: ISettingRegistry.ISettings;
   private _filebrowser: FileBrowserModel;
+  private _model: GitExtension;
+  private _settings: ISettingRegistry.ISettings;
 }

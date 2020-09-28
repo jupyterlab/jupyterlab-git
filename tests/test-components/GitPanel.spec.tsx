@@ -3,6 +3,7 @@ import { JSONObject } from '@phosphor/coreutils';
 import 'jest';
 import { GitPanel, IGitPanelProps } from '../../src/components/GitPanel';
 import * as git from '../../src/git';
+import { Logger } from '../../src/logger';
 import { GitExtension as GitModel } from '../../src/model';
 import {
   defaultMockedResponses,
@@ -46,6 +47,7 @@ describe('GitPanel', () => {
   const props: IGitPanelProps = {
     model: null,
     commands: null,
+    logger: new Logger(),
     settings: null,
     filebrowser: null
   };

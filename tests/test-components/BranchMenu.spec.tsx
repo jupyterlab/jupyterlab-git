@@ -3,6 +3,7 @@ import 'jest';
 import * as React from 'react';
 import { BranchMenu } from '../../src/components/BranchMenu';
 import * as git from '../../src/git';
+import { Logger } from '../../src/logger';
 import { GitExtension } from '../../src/model';
 import { listItemClass } from '../../src/style/BranchMenu';
 import { mockedRequestAPI, defaultMockedResponses } from '../utils';
@@ -83,7 +84,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const menu = new BranchMenu(props);
       expect(menu).toBeInstanceOf(BranchMenu);
@@ -93,7 +94,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const menu = new BranchMenu(props);
       expect(menu.state.filter).toEqual('');
@@ -103,7 +104,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const menu = new BranchMenu(props);
       expect(menu.state.branchDialog).toEqual(false);
@@ -115,7 +116,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = shallow(<BranchMenu {...props} />);
       const node = component.find('input[type="text"]').first();
@@ -126,7 +127,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = shallow(<BranchMenu {...props} />);
       const node = component.find('input[type="text"]').first();
@@ -137,7 +138,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = shallow(<BranchMenu {...props} />);
       component.setState({
@@ -151,7 +152,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = shallow(<BranchMenu {...props} />);
       component.setState({
@@ -168,7 +169,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = shallow(<BranchMenu {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -179,7 +180,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = shallow(<BranchMenu {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -190,7 +191,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = render(<BranchMenu {...props} />);
       const nodes = component.find(`.${listItemClass}`);
@@ -210,7 +211,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = render(<BranchMenu {...props} />);
       const nodes = component.find(`.${listItemClass}`);
@@ -227,7 +228,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = shallow(<BranchMenu {...props} />);
       const node = component.find('NewBranchDialog').first();
@@ -238,7 +239,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = shallow(<BranchMenu {...props} />);
       component.setState({
@@ -256,7 +257,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = mount(<BranchMenu {...props} />);
       const nodes = component.find(`.${listItemClass}[title*="${BRANCHES[1].name}"]`);
@@ -272,7 +273,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: true,
-        suspend: false
+        logger: new Logger(),
       };
       const component = mount(<BranchMenu {...props} />);
       const nodes = component.find(`.${listItemClass}[title*="${BRANCHES[1].name}"]`);
@@ -294,7 +295,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false
+        logger: new Logger(),
       };
       const component = shallow(<BranchMenu {...props} />);
 
@@ -312,7 +313,7 @@ describe('BranchMenu', () => {
       const props = {
         model: model,
         branching: true,
-        suspend: false
+        logger: new Logger(),
       };
       const component = shallow(<BranchMenu {...props} />);
 

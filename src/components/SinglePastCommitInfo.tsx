@@ -4,6 +4,7 @@ import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
 import { CommandIDs } from '../commandsAndMenu';
+import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
 import {
   actionButtonClass,
@@ -44,11 +45,6 @@ export interface ISinglePastCommitInfoProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
-
-  /**
-   * Boolean indicating whether to enable UI suspension.
-   */
-  suspend: boolean;
 }
 
 /**
@@ -199,14 +195,18 @@ export class SinglePastCommitInfo extends React.Component<
               title="Discard changes introduced *after* this commit (hard reset)"
               onClick={this._onResetClick}
             />
-            <ResetRevertDialog
-              open={this.state.resetRevertDialog}
-              action={this.state.resetRevertAction}
-              model={this.props.model}
-              commit={this.props.commit}
-              suspend={this.props.suspend}
-              onClose={this._onResetRevertDialogClose}
-            />
+            <LoggerContext.Consumer>
+              {logger => (
+                <ResetRevertDialog
+                  open={this.state.resetRevertDialog}
+                  action={this.state.resetRevertAction}
+                  model={this.props.model}
+                  logger={logger}
+                  commit={this.props.commit}
+                  onClose={this._onResetRevertDialogClose}
+                />
+              )}
+            </LoggerContext.Consumer>
           </div>
           {this.state.modifiedFiles.length > 0 && (
             <FixedSizeList

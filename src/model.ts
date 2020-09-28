@@ -5,11 +5,10 @@ import {
   Poll
 } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { ServerConnection } from '@jupyterlab/services';
-import { LinkedList } from '@phosphor/collections';
 import { JSONObject } from '@phosphor/coreutils';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { requestAPI } from './git';
+import { TaskHandler } from './taskhandler';
 import { Git, IGitExtension } from './tokens';
 import { decodeStage } from './utils';
 
@@ -32,10 +31,10 @@ export class GitExtension implements IGitExtension {
     docmanager: IDocumentManager = null,
     settings?: ISettingRegistry.ISettings
   ) {
-    const self = this;
     this._serverRoot = serverRoot;
     this._docmanager = docmanager;
     this._settings = settings || null;
+    this._taskHandler = new TaskHandler(this);
 
     let interval: number;
     if (settings) {
@@ -45,7 +44,7 @@ export class GitExtension implements IGitExtension {
       interval = DEFAULT_REFRESH_INTERVAL;
     }
     const poll = new Poll({
-      factory: () => self.refresh(),
+      factory: () => this.refresh(),
       frequency: {
         interval: interval,
         backoff: true,
@@ -203,8 +202,8 @@ export class GitExtension implements IGitExtension {
   /**
    * A signal emitted whenever a model event occurs.
    */
-  get logger(): ISignal<IGitExtension, string> {
-    return this._logger;
+  get taskChanged(): ISignal<IGitExtension, string> {
+    return this._taskHandler.taskChanged;
   }
 
   /**
@@ -223,18 +222,13 @@ export class GitExtension implements IGitExtension {
    */
   async add(...filename: string[]): Promise<void> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:add:files');
-    try {
+    await this._taskHandler.execute<void>('git:add:files', async () => {
       await requestAPI<void>('add', 'POST', {
         add_all: !filename,
         filename: filename || '',
         top_repo_path: path
       });
-    } catch (err) {
-      throw new ServerConnection.NetworkError(err);
-    } finally {
-      this._removeTask(tid);
-    }
+    });
     await this.refreshStatus();
   }
 
@@ -249,14 +243,14 @@ export class GitExtension implements IGitExtension {
    */
   async addAllUnstaged(): Promise<void> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:add:files:all_unstaged');
-    try {
-      await requestAPI<void>('add_all_unstaged', 'POST', {
-        top_repo_path: path
-      });
-    } finally {
-      this._removeTask(tid);
-    }
+    await this._taskHandler.execute<void>(
+      'git:add:files:all_unstaged',
+      async () => {
+        await requestAPI<void>('add_all_unstaged', 'POST', {
+          top_repo_path: path
+        });
+      }
+    );
     await this.refreshStatus();
   }
 
@@ -271,14 +265,14 @@ export class GitExtension implements IGitExtension {
    */
   async addAllUntracked(): Promise<void> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:add:files:all_untracked');
-    try {
-      await requestAPI<void>('add_all_untracked', 'POST', {
-        top_repo_path: path
-      });
-    } finally {
-      this._removeTask(tid);
-    }
+    await this._taskHandler.execute<void>(
+      'git:add:files:all_untracked',
+      async () => {
+        await requestAPI<void>('add_all_untracked', 'POST', {
+          top_repo_path: path
+        });
+      }
+    );
     await this.refreshStatus();
   }
 
@@ -295,16 +289,13 @@ export class GitExtension implements IGitExtension {
    */
   async addRemote(url: string, name?: string): Promise<void> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:add:remote');
-    try {
+    await this._taskHandler.execute<void>('git:add:remote', async () => {
       await requestAPI<void>('remote/add', 'POST', {
         top_repo_path: path,
         url,
         name
       });
-    } finally {
-      this._removeTask(tid);
-    }
+    });
   }
 
   /**
@@ -323,16 +314,17 @@ export class GitExtension implements IGitExtension {
    */
   async allHistory(count = 25): Promise<Git.IAllHistory> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:fetch:history');
-    try {
-      const data = await requestAPI<Git.IAllHistory>('all_history', 'POST', {
-        current_path: path,
-        history_count: count
-      });
-      return data;
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = await this._taskHandler.execute<Git.IAllHistory>(
+      'git:fetch:history',
+      async () => {
+        const d = await requestAPI<Git.IAllHistory>('all_history', 'POST', {
+          current_path: path,
+          history_count: count
+        });
+        return d;
+      }
+    );
+    return data;
   }
 
   /**
@@ -354,7 +346,6 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult> {
-    let data: Git.ICheckoutResult;
     const path = await this._getPathRespository();
 
     const body = {
@@ -381,24 +372,29 @@ export class GitExtension implements IGitExtension {
       }
     }
 
-    const tid = this._addTask('git:checkout');
-    try {
-      data = await requestAPI<Git.ICheckoutResult>('checkout', 'POST', body);
-
-      if (body.checkout_branch) {
-        const changes = await this._changedFiles(
-          this._currentBranch.name,
-          body.branchname
+    const data = await this._taskHandler.execute<Git.ICheckoutResult>(
+      'git:checkout',
+      async () => {
+        const d = await requestAPI<Git.ICheckoutResult>(
+          'checkout',
+          'POST',
+          body
         );
-        if (changes.files) {
-          changes.files.forEach(file => this._revertFile(file));
+
+        if (body.checkout_branch) {
+          const changes = await this._changedFiles(
+            this._currentBranch.name,
+            body.branchname
+          );
+          if (changes.files) {
+            changes.files.forEach(file => this._revertFile(file));
+          }
+        } else {
+          this._revertFile(options.filename);
         }
-      } else {
-        this._revertFile(options.filename);
+        return d;
       }
-    } finally {
-      this._removeTask(tid);
-    }
+    );
 
     if (body.checkout_branch) {
       await this.refreshBranch();
@@ -425,22 +421,18 @@ export class GitExtension implements IGitExtension {
     url: string,
     auth?: Git.IAuth
   ): Promise<Git.ICloneResult> {
-    const obj: Git.IGitClone = {
-      current_path: path,
-      clone_url: url,
-      auth
-    };
-    const tid = this._addTask('git:clone');
-    try {
-      const data = await requestAPI<Git.ICloneResult>(
-        'clone',
-        'POST',
-        obj as any
-      );
-      return data;
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = this._taskHandler.execute<Git.ICloneResult>(
+      'git:clone',
+      async () => {
+        const d = await requestAPI<Git.ICloneResult>('clone', 'POST', {
+          current_path: path,
+          clone_url: url,
+          auth: auth as any
+        });
+        return d;
+      }
+    );
+    return data;
   }
 
   /**
@@ -455,15 +447,12 @@ export class GitExtension implements IGitExtension {
    */
   async commit(message: string): Promise<void> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:commit:create');
-    try {
+    await this._taskHandler.execute('git:commit:create', async () => {
       await requestAPI('commit', 'POST', {
         commit_msg: message,
         top_repo_path: path
       });
-    } finally {
-      this._removeTask(tid);
-    }
+    });
     await this.refreshStatus();
     this._headChanged.emit();
   }
@@ -480,20 +469,21 @@ export class GitExtension implements IGitExtension {
    */
   async config(options?: JSONObject): Promise<JSONObject | void> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:config:' + (options ? 'set' : 'get'));
-    try {
-      if (options) {
-        await requestAPI('config', 'POST', {
-          path,
-          options
-        });
-      } else {
-        const data = await requestAPI<JSONObject>('config', 'POST', { path });
-        return data;
+    const data = await this._taskHandler.execute<JSONObject | void>(
+      'git:config:' + (options ? 'set' : 'get'),
+      async () => {
+        if (options) {
+          await requestAPI('config', 'POST', {
+            path,
+            options
+          });
+        } else {
+          const d = await requestAPI<JSONObject>('config', 'POST', { path });
+          return d;
+        }
       }
-    } finally {
-      this._removeTask(tid);
-    }
+    );
+    return data;
   }
 
   /**
@@ -520,20 +510,21 @@ export class GitExtension implements IGitExtension {
    */
   async detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:fetch:commit_log');
-    try {
-      const data = await requestAPI<Git.ISingleCommitFilePathInfo>(
-        'detailed_log',
-        'POST',
-        {
-          selected_hash: hash,
-          current_path: path
-        }
-      );
-      return data;
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = await this._taskHandler.execute<Git.ISingleCommitFilePathInfo>(
+      'git:fetch:commit_log',
+      async () => {
+        const d = await requestAPI<Git.ISingleCommitFilePathInfo>(
+          'detailed_log',
+          'POST',
+          {
+            selected_hash: hash,
+            current_path: path
+          }
+        );
+        return d;
+      }
+    );
+    return data;
   }
 
   /**
@@ -607,14 +598,11 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async init(path: string): Promise<void> {
-    const tid = this._addTask('git:init');
-    try {
+    await this._taskHandler.execute<void>('git:init', async () => {
       await requestAPI('init', 'POST', {
         current_path: path
       });
-    } finally {
-      this._removeTask(tid);
-    }
+    });
   }
 
   /**
@@ -629,16 +617,17 @@ export class GitExtension implements IGitExtension {
    */
   async log(count = 25): Promise<Git.ILogResult> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:fetch:log');
-    try {
-      const data = await requestAPI<Git.ILogResult>('log', 'POST', {
-        current_path: path,
-        history_count: count
-      });
-      return data;
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = this._taskHandler.execute<Git.ILogResult>(
+      'git:fetch:log',
+      async () => {
+        const d = await requestAPI<Git.ILogResult>('log', 'POST', {
+          current_path: path,
+          history_count: count
+        });
+        return d;
+      }
+    );
+    return data;
   }
 
   /**
@@ -652,21 +641,23 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async pull(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
-    let data: Git.IPushPullResult;
     const path = await this._getPathRespository();
-    const obj: Git.IPushPull = {
-      current_path: path,
-      auth,
-      cancel_on_conflict: this._settings
-        ? (this._settings.composite['cancelPullMergeConflict'] as boolean)
-        : false
-    };
-    const tid = this._addTask('git:pull');
-    try {
-      data = await requestAPI<Git.IPushPullResult>('pull', 'POST', obj as any);
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = this._taskHandler.execute<Git.IPushPullResult>(
+      'git:pull',
+      async () => {
+        const d = await requestAPI<Git.IPushPullResult>('pull', 'POST', {
+          current_path: path,
+          auth: auth as any,
+          cancel_on_conflict:
+            (this._settings &&
+              (this._settings.composite[
+                'cancelPullMergeConflict'
+              ] as boolean)) ||
+            false
+        });
+        return d;
+      }
+    );
     this._headChanged.emit();
     return data;
   }
@@ -682,18 +673,17 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async push(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
-    let data: Git.IPushPullResult;
     const path = await this._getPathRespository();
-    const obj: Git.IPushPull = {
-      current_path: path,
-      auth
-    };
-    const tid = this._addTask('git:push');
-    try {
-      data = await requestAPI<Git.IPushPullResult>('push', 'POST', obj as any);
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = this._taskHandler.execute<Git.IPushPullResult>(
+      'git:push',
+      async () => {
+        const d = await requestAPI<Git.IPushPullResult>('push', 'POST', {
+          current_path: path,
+          auth: auth as any
+        });
+        return d;
+      }
+    );
     this._headChanged.emit();
     return data;
   }
@@ -704,13 +694,10 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon refreshing the repository
    */
   async refresh(): Promise<void> {
-    const tid = this._addTask('git:refresh');
-    try {
+    await this._taskHandler.execute<void>('git:refresh', async () => {
       await this.refreshBranch();
       await this.refreshStatus();
-    } finally {
-      this._removeTask(tid);
-    }
+    });
   }
 
   /**
@@ -719,11 +706,16 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon refreshing repository branches
    */
   async refreshBranch(): Promise<void> {
-    const tid = this._addTask('git:refresh:branches');
     try {
-      const response = await this._branch();
-      this._branches = response.branches;
-      this._currentBranch = response.current_branch;
+      const data = await this._taskHandler.execute<Git.IBranchResult>(
+        'git:refresh:branches',
+        async () => {
+          const response = await this._branch();
+          return response;
+        }
+      );
+      this._branches = data.branches;
+      this._currentBranch = data.current_branch;
       if (this._currentBranch) {
         // Set up the marker obj for the current (valid) repo/branch combination
         this._setMarker(this.pathRepository, this._currentBranch.name);
@@ -734,8 +726,6 @@ export class GitExtension implements IGitExtension {
       if (!(error instanceof Git.NotInRepository)) {
         throw error;
       }
-    } finally {
-      this._removeTask(tid);
     }
   }
 
@@ -745,8 +735,6 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon refreshing the repository status
    */
   async refreshStatus(): Promise<void> {
-    let data: Git.IStatusResult;
-
     let path: string;
     try {
       path = await this._getPathRespository();
@@ -758,24 +746,28 @@ export class GitExtension implements IGitExtension {
       return;
     }
 
-    const tid = this._addTask('git:refresh:status');
     try {
-      data = await requestAPI<Git.IStatusResult>('status', 'POST', {
-        current_path: path
-      });
+      const data = await this._taskHandler.execute<Git.IStatusResult>(
+        'git:refresh:status',
+        async () => {
+          const d = await requestAPI<Git.IStatusResult>('status', 'POST', {
+            current_path: path
+          });
+          return d;
+        }
+      );
+
+      this._setStatus(
+        data.files.map(file => {
+          return { ...file, status: decodeStage(file.x, file.y) };
+        })
+      );
     } catch (err) {
       // TODO we should notify the user
       this._setStatus([]);
       console.error(err);
       return;
-    } finally {
-      this._removeTask(tid);
     }
-    this._setStatus(
-      data.files.map(file => {
-        return { ...file, status: decodeStage(file.x, file.y) };
-      })
-    );
   }
 
   /**
@@ -794,31 +786,24 @@ export class GitExtension implements IGitExtension {
    */
   async reset(filename?: string): Promise<void> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:reset:changes');
-    const reset_all = filename === undefined;
-    let files;
-    if (reset_all) {
-      files = (await this._changedFiles('INDEX', 'HEAD'))['files'];
-    }
-    try {
+    await this._taskHandler.execute<void>('git:reset:changes', async () => {
+      const reset_all = filename === undefined;
+      let files: string[];
+      if (reset_all) {
+        files = (await this._changedFiles('INDEX', 'HEAD')).files;
+      } else {
+        files = [filename];
+      }
       await requestAPI('reset', 'POST', {
         reset_all: filename === undefined,
         filename: filename === undefined ? null : filename,
         top_repo_path: path
       });
 
-      if (reset_all) {
-        if (files) {
-          files.forEach(file => {
-            this._revertFile(file);
-          });
-        }
-      } else {
-        this._revertFile(filename);
-      }
-    } finally {
-      this._removeTask(tid);
-    }
+      files.forEach(file => {
+        this._revertFile(file);
+      });
+    });
     await this.refreshStatus();
   }
 
@@ -838,21 +823,20 @@ export class GitExtension implements IGitExtension {
    */
   async resetToCommit(hash = ''): Promise<void> {
     const path = await this._getPathRespository();
-    const files = (await this._changedFiles(null, null, hash))['files'];
-    const tid = this._addTask('git:reset:hard');
-    try {
+    await this._taskHandler.execute<void>('git:reset:hard', async () => {
+      const files = (await this._changedFiles(null, null, hash)).files;
+
       await requestAPI('reset_to_commit', 'POST', {
         commit_id: hash,
         top_repo_path: path
       });
+
       if (files) {
         files.forEach(file => {
           this._revertFile(file);
         });
       }
-    } finally {
-      this._removeTask(tid);
-    }
+    });
     await this.refreshBranch();
     this._headChanged.emit();
   }
@@ -867,19 +851,20 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async showPrefix(path: string): Promise<Git.IShowPrefixResult> {
-    const tid = this._addTask('git:fetch:prefix_path');
-    try {
-      const data = await requestAPI<Git.IShowPrefixResult>(
-        'show_prefix',
-        'POST',
-        {
-          current_path: path
-        }
-      );
-      return data;
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = await this._taskHandler.execute<Git.IShowPrefixResult>(
+      'git:fetch:prefix_path',
+      async () => {
+        const d = await requestAPI<Git.IShowPrefixResult>(
+          'show_prefix',
+          'POST',
+          {
+            current_path: path
+          }
+        );
+        return d;
+      }
+    );
+    return data;
   }
 
   /**
@@ -892,19 +877,20 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async showTopLevel(path: string): Promise<Git.IShowTopLevelResult> {
-    const tid = this._addTask('git:fetch:top_level_path');
-    try {
-      const data = await requestAPI<Git.IShowTopLevelResult>(
-        'show_top_level',
-        'POST',
-        {
-          current_path: path
-        }
-      );
-      return data;
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = this._taskHandler.execute<Git.IShowTopLevelResult>(
+      'git:fetch:top_level_path',
+      async () => {
+        const d = await requestAPI<Git.IShowTopLevelResult>(
+          'show_top_level',
+          'POST',
+          {
+            current_path: path
+          }
+        );
+        return d;
+      }
+    );
+    return data;
   }
 
   /**
@@ -918,15 +904,16 @@ export class GitExtension implements IGitExtension {
    */
   async tags(): Promise<Git.ITagResult> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:tag:list');
-    try {
-      const data = await requestAPI<Git.ITagResult>('tags', 'POST', {
-        current_path: path
-      });
-      return data;
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = await this._taskHandler.execute<Git.ITagResult>(
+      'git:tag:list',
+      async () => {
+        const d = await requestAPI<Git.ITagResult>('tags', 'POST', {
+          current_path: path
+        });
+        return d;
+      }
+    );
+    return data;
   }
 
   /**
@@ -941,20 +928,21 @@ export class GitExtension implements IGitExtension {
    */
   async checkoutTag(tag: string): Promise<Git.ICheckoutResult> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:tag:checkout');
-    try {
-      const data = await requestAPI<Git.ICheckoutResult>(
-        'tag_checkout',
-        'POST',
-        {
-          current_path: path,
-          tag_id: tag
-        }
-      );
-      return data;
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = await this._taskHandler.execute<Git.ICheckoutResult>(
+      'git:tag:checkout',
+      async () => {
+        const d = await requestAPI<Git.ICheckoutResult>(
+          'tag_checkout',
+          'POST',
+          {
+            current_path: path,
+            tag_id: tag
+          }
+        );
+        return d;
+      }
+    );
+    return data;
   }
 
   /**
@@ -1011,21 +999,20 @@ export class GitExtension implements IGitExtension {
    */
   async revertCommit(message: string, hash: string): Promise<void> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:commit:revert');
-    const files = (await this._changedFiles(null, null, hash + '^!'))['files'];
-    try {
+    await this._taskHandler.execute<void>('git:commit:revert', async () => {
+      const files = (await this._changedFiles(null, null, hash + '^!')).files;
+
       await requestAPI('delete_commit', 'POST', {
         commit_id: hash,
         top_repo_path: path
       });
+
       if (files) {
         files.forEach(file => {
           this._revertFile(file);
         });
       }
-    } finally {
-      this._removeTask(tid);
-    }
+    });
     await this.commit(message);
   }
 
@@ -1041,15 +1028,16 @@ export class GitExtension implements IGitExtension {
    */
   protected async _branch(): Promise<Git.IBranchResult> {
     const path = await this._getPathRespository();
-    const tid = this._addTask('git:fetch:branches');
-    try {
-      const data = await requestAPI<Git.IBranchResult>('branch', 'POST', {
-        current_path: path
-      });
-      return data;
-    } finally {
-      this._removeTask(tid);
-    }
+    const data = await this._taskHandler.execute<Git.IBranchResult>(
+      'git:fetch:branches',
+      async () => {
+        const d = await requestAPI<Git.IBranchResult>('branch', 'POST', {
+          current_path: path
+        });
+        return d;
+      }
+    );
+    return data;
   }
 
   /**
@@ -1111,40 +1099,6 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Adds a task to the list of pending model tasks.
-   *
-   * @param task - task name
-   * @returns task identifier
-   */
-  private _addTask(task: string): number {
-    // Generate a unique task identifier:
-    const id = this._generateTaskID();
-
-    // Add the task to our list of pending tasks:
-    this._taskList.addLast({
-      id: id,
-      task: task
-    });
-
-    // If this task is the only task, broadcast the task...
-    if (this._taskList.length === 1) {
-      this._logger.emit(task);
-    }
-    // Return the task identifier to allow consumers to remove the task once completed:
-    return id;
-  }
-
-  /**
-   * Generates a unique task identifier.
-   *
-   * @returns task identifier
-   */
-  private _generateTaskID(): number {
-    this._taskID += 1;
-    return this._taskID;
-  }
-
-  /**
    * open new editor or show an existing editor of the
    * .gitignore file. If the editor does not have unsaved changes
    * then ensure the editor's content matches the file on disk
@@ -1157,35 +1111,6 @@ export class GitExtension implements IGitExtension {
       if (widget && !widget.context.model.dirty) {
         widget.context.revert();
       }
-    }
-  }
-
-  /**
-   * Removes a task from the list of pending model tasks.
-   *
-   * @param id - task identifier
-   */
-  private _removeTask(task: number): void {
-    let node = this._taskList.firstNode;
-
-    // Check the first node...
-    if (node && node.value.id === task) {
-      this._taskList.removeNode(node);
-    } else {
-      // Walk the task list looking for a task with the provided identifier...
-      while (node.next) {
-        node = node.next;
-        if (node.value && node.value.id === task) {
-          this._taskList.removeNode(node);
-          break;
-        }
-      }
-    }
-    // Check for pending tasks and broadcast the oldest pending task...
-    if (this._taskList.length === 0) {
-      this._logger.emit('git:idle');
-    } else {
-      this._logger.emit(this._taskList.first.task);
     }
   }
 
@@ -1225,9 +1150,9 @@ export class GitExtension implements IGitExtension {
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
-  private _taskList: LinkedList<any> = new LinkedList();
-  private _taskID = 0;
   private _settings: ISettingRegistry.ISettings | null;
+  private _taskHandler: TaskHandler<IGitExtension>;
+
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _repositoryChanged = new Signal<
@@ -1235,7 +1160,6 @@ export class GitExtension implements IGitExtension {
     IChangedArgs<string | null>
   >(this);
   private _statusChanged = new Signal<IGitExtension, Git.IStatusFile[]>(this);
-  private _logger = new Signal<IGitExtension, string>(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {

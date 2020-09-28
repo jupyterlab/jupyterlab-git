@@ -4,6 +4,7 @@ import * as React from 'react';
 import { CommandIDs } from '../../src/commandsAndMenu';
 import { Toolbar } from '../../src/components/Toolbar';
 import * as git from '../../src/git';
+import { Logger } from '../../src/logger';
 import { GitExtension } from '../../src/model';
 import {
   pullButtonClass,
@@ -49,7 +50,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -63,7 +64,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -77,7 +78,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -93,7 +94,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -109,7 +110,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -125,7 +126,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -141,7 +142,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -157,7 +158,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -173,7 +174,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -191,7 +192,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -208,7 +209,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -225,7 +226,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -242,7 +243,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -262,7 +263,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -278,7 +279,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: jest.fn()
@@ -298,7 +299,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: mockedExecute
@@ -319,7 +320,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: async () => {},
         commands: {
           execute: mockedExecute
@@ -341,7 +342,7 @@ describe('Toolbar', () => {
       const props = {
         model: model,
         branching: false,
-        suspend: false,
+        logger: new Logger(),
         refresh: spy,
         commands: {
           execute: jest.fn()

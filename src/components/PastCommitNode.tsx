@@ -43,11 +43,6 @@ export interface IPastCommitNodeProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
-
-  /**
-   * Boolean indicating whether to enable UI suspension.
-   */
-  suspend: boolean;
 }
 
 /**
@@ -122,7 +117,6 @@ export class PastCommitNode extends React.Component<
               commit={this.props.commit}
               model={this.props.model}
               commands={this.props.commands}
-              suspend={this.props.suspend}
             />
           )}
         </div>

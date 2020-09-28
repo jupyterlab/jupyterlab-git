@@ -28,11 +28,6 @@ export interface IHistorySideBarProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
-
-  /**
-   * Boolean indicating whether to enable UI suspension.
-   */
-  suspend: boolean;
 }
 
 /**
@@ -52,7 +47,6 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
         branches={props.branches}
         model={props.model}
         commands={props.commands}
-        suspend={props.suspend}
       />
     ))}
   </ol>

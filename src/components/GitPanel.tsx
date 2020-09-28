@@ -1,4 +1,4 @@
-import { showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import { showDialog } from '@jupyterlab/apputils';
 import { ISettingRegistry, PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import Tab from '@material-ui/core/Tab';
@@ -7,6 +7,7 @@ import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
 import * as React from 'react';
 import { CommandIDs } from '../commandsAndMenu';
+import { Logger } from '../logger';
 import { GitExtension } from '../model';
 import {
   panelWrapperClass,
@@ -17,14 +18,11 @@ import {
   tabsClass,
   warningTextClass
 } from '../style/GitPanel';
-import { Git, ILogMessage } from '../tokens';
-import { sleep } from '../utils';
+import { Git, ILogMessage, Level } from '../tokens';
 import { GitAuthorForm } from '../widgets/AuthorBox';
-import { Alert } from './Alert';
 import { CommitBox } from './CommitBox';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
-import { SuspendModal } from './SuspendModal';
 import { Toolbar } from './Toolbar';
 
 /**
@@ -32,24 +30,29 @@ import { Toolbar } from './Toolbar';
  */
 export interface IGitPanelProps {
   /**
-   * Git extension data model.
-   */
-  model: GitExtension;
-
-  /**
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
 
   /**
-   * Git extension settings.
-   */
-  settings: ISettingRegistry.ISettings;
-
-  /**
    * File browser model.
    */
   filebrowser: FileBrowserModel;
+
+  /**
+   * Extension logger
+   */
+  logger: Logger;
+
+  /**
+   * Git extension data model.
+   */
+  model: GitExtension;
+
+  /**
+   * Git extension settings.
+   */
+  settings: ISettingRegistry.ISettings;
 }
 
 /**
@@ -85,21 +88,6 @@ export interface IGitPanelState {
    * Panel tab identifier.
    */
   tab: number;
-
-  /**
-   * Boolean indicating whether UI interaction should be suspended (e.g., due to pending command).
-   */
-  suspend: boolean;
-
-  /**
-   * Boolean indicating whether to show an alert.
-   */
-  alert: boolean;
-
-  /**
-   * Log message.
-   */
-  log: ILogMessage;
 }
 
 /**
@@ -114,19 +102,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   constructor(props: IGitPanelProps) {
     super(props);
+
     this.state = {
       branches: [],
       currentBranch: '',
       files: [],
       inGitRepository: false,
       pastCommits: [],
-      tab: 0,
-      suspend: false,
-      alert: false,
-      log: {
-        severity: 'info',
-        message: ''
-      }
+      tab: 0
     };
   }
 
@@ -206,17 +189,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns a promise which commits the files
    */
   commitMarkedFiles = async (message: string): Promise<void> => {
-    this._suspend(true);
-
-    this._log({
-      severity: 'info',
+    this.props.logger.log({
+      level: Level.RUNNING,
       message: 'Staging files...'
     });
     await this.props.model.reset();
     await this.props.model.add(...this._markedFiles.map(file => file.to));
 
     await this.commitStagedFiles(message);
-    this._suspend(false);
   };
 
   /**
@@ -226,50 +206,38 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns a promise which commits the files
    */
   commitStagedFiles = async (message: string): Promise<void> => {
-    let res: boolean;
     if (!message) {
       return;
     }
+
+    const errorLog: ILogMessage = {
+      level: Level.ERROR,
+      message: 'Failed to commit changes.'
+    };
+
     try {
-      res = await this._hasIdentity(this.props.model.pathRepository);
-    } catch (err) {
-      this._log({
-        severity: 'error',
-        message: 'Failed to commit changes.'
+      const res = await this._hasIdentity(this.props.model.pathRepository);
+
+      if (!res) {
+        this.props.logger.log(errorLog);
+        return;
+      }
+
+      this.props.logger.log({
+        level: Level.RUNNING,
+        message: 'Committing changes...'
       });
-      console.error(err);
-      showErrorMessage('Fail to commit', err);
-      return;
-    }
-    if (!res) {
-      this._log({
-        severity: 'error',
-        message: 'Failed to commit changes.'
+
+      await this.props.model.commit(message);
+
+      this.props.logger.log({
+        level: Level.SUCCESS,
+        message: 'Committed changes.'
       });
-      return;
+    } catch (error) {
+      console.error(error);
+      this.props.logger.log({ ...errorLog, error });
     }
-    this._log({
-      severity: 'info',
-      message: 'Committing changes...'
-    });
-    this._suspend(true);
-    try {
-      await Promise.all([sleep(1000), this.props.model.commit(message)]);
-    } catch (err) {
-      this._suspend(false);
-      this._log({
-        severity: 'error',
-        message: 'Failed to commit changes.'
-      });
-      console.error(err);
-      showErrorMessage('Fail to commit', err);
-      return;
-    }
-    this._suspend(false);
-    this._log({
-      severity: 'success',
-      message: 'Committed changes.'
-    });
   };
 
   /**
@@ -284,7 +252,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           <React.Fragment>
             {this._renderToolbar()}
             {this._renderMain()}
-            {this._renderFeedback()}
           </React.Fragment>
         ) : (
           this._renderWarning()
@@ -305,13 +272,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     );
     return (
       <Toolbar
-        commands={this.props.commands}
-        model={this.props.model}
         branching={!disableBranching}
+        commands={this.props.commands}
+        logger={this.props.logger}
+        model={this.props.model}
         refresh={this._onRefresh}
-        suspend={
-          this.props.settings.composite['blockWhileCommandExecutes'] as boolean
-        }
       />
     );
   }
@@ -410,35 +375,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         commits={this.state.pastCommits}
         model={this.props.model}
         commands={this.props.commands}
-        suspend={
-          this.props.settings.composite['blockWhileCommandExecutes'] as boolean
-        }
       />
-    );
-  }
-
-  /**
-   * Renders a component to provide UI feedback.
-   *
-   * @returns React element
-   */
-  private _renderFeedback(): React.ReactElement {
-    return (
-      <React.Fragment>
-        <SuspendModal
-          open={
-            this.props.settings.composite['blockWhileCommandExecutes'] &&
-            this.state.suspend
-          }
-          onClick={this._onFeedbackModalClick}
-        />
-        <Alert
-          open={this.state.alert}
-          message={this.state.log.message}
-          severity={this.state.log.severity}
-          onClose={this._onFeedbackAlertClose}
-        />
-      </React.Fragment>
     );
   }
 
@@ -491,31 +428,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   }
 
   /**
-   * Sets the suspension state.
-   *
-   * @param bool - boolean indicating whether to suspend UI interaction
-   */
-  private _suspend(bool: boolean): void {
-    if (this.props.settings.composite['blockWhileCommandExecutes']) {
-      this.setState({
-        suspend: bool
-      });
-    }
-  }
-
-  /**
-   * Sets the current component log message.
-   *
-   * @param msg - log message
-   */
-  private _log(msg: ILogMessage): void {
-    this.setState({
-      alert: true,
-      log: msg
-    });
-  }
-
-  /**
    * Callback invoked upon changing the active panel tab.
    *
    * @param event - event object
@@ -542,26 +454,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     } else {
       this.refreshStatus();
     }
-  };
-
-  /**
-   * Callback invoked upon clicking on the feedback modal.
-   *
-   * @param event - event object
-   */
-  private _onFeedbackModalClick = (): void => {
-    this._suspend(false);
-  };
-
-  /**
-   * Callback invoked upon closing a feedback alert.
-   *
-   * @param event - event object
-   */
-  private _onFeedbackAlertClose = (): void => {
-    this.setState({
-      alert: false
-    });
   };
 
   /**

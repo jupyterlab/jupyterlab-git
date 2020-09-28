@@ -75,7 +75,7 @@ export function addStatusBarWidget(
     isActive: Private.isStatusWidgetActive(settings),
     activeStateChanged: settings && settings.changed
   });
-  model.logger.connect(Private.createEventCallback(statusWidget));
+  model.taskChanged.connect(Private.createEventCallback(statusWidget));
 }
 /* eslint-disable no-inner-declarations */
 namespace Private {
@@ -99,6 +99,9 @@ namespace Private {
     function onEvent(model: IGitExtension, event: string) {
       let status;
       switch (event) {
+        case 'empty':
+          status = 'idle';
+          break;
         case 'git:checkout':
           status = 'checking out...';
           break;
@@ -110,9 +113,6 @@ namespace Private {
           break;
         case 'git:commit:revert':
           status = 'reverting changes...';
-          break;
-        case 'git:idle':
-          status = 'idle';
           break;
         case 'git:init':
           status = 'initializing repository...';

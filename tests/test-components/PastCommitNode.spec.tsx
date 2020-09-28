@@ -56,8 +56,7 @@ describe('PastCommitNode', () => {
       pre_commit: 'pre_commit'
     },
     branches: branches,
-    commands: null,
-    suspend: false
+    commands: null
   };
 
   test('Includes commit info', () => {

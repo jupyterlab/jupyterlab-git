@@ -1,9 +1,10 @@
-import * as React from 'react';
+import { showErrorMessage } from '@jupyterlab/apputils';
+import { Button } from '@material-ui/core';
 import Portal from '@material-ui/core/Portal';
-import Snackbar from '@material-ui/core/Snackbar';
 import Slide from '@material-ui/core/Slide';
-import { default as MuiAlert } from '@material-ui/lab/Alert';
-import { Severity } from '../tokens';
+import Snackbar from '@material-ui/core/Snackbar';
+import { Color, default as MuiAlert } from '@material-ui/lab/Alert';
+import * as React from 'react';
 
 /**
  * Returns a React component for "sliding-in" an alert.
@@ -31,9 +32,14 @@ export interface IAlertProps {
   message: string;
 
   /**
+   * Error object
+   */
+  error?: Error;
+
+  /**
    * Alert severity.
    */
-  severity?: Severity;
+  severity?: Color;
 
   /**
    * Alert duration (in milliseconds).
@@ -91,7 +97,23 @@ export class Alert extends React.Component<IAlertProps> {
           onClick={this._onClick}
           onClose={this._onClose}
         >
-          <MuiAlert variant="filled" severity={severity}>
+          <MuiAlert
+            action={
+              this.props.error && (
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    showErrorMessage('Error', this.props.error);
+                  }}
+                >
+                  SHOW
+                </Button>
+              )
+            }
+            variant="filled"
+            severity={severity}
+          >
             {this.props.message || '(missing message)'}
           </MuiAlert>
         </Snackbar>
