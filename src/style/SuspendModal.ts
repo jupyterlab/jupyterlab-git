@@ -4,6 +4,6 @@ export const fullscreenProgressClass = style({
   position: 'absolute',
   top: '50%',
   left: '50%',
-  color: '#ffffff',
+  color: 'var(--jp-ui-inverse-font-color0)',
   textAlign: 'center'
 });

@@ -73,7 +73,7 @@ export const nameInputClass = style({
   /* top | right | bottom | left */
   padding: '1px 18px 2px 7px',
 
-  color: 'var(--jp-ui-font-color0)',
+  color: 'var(--jp-ui-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 
@@ -118,7 +118,7 @@ export const filterInputClass = style({
   /* top | right | bottom | left */
   padding: '1px 18px 2px 7px',
 
-  color: 'var(--jp-ui-font-color0)',
+  color: 'var(--jp-ui-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 
@@ -191,7 +191,7 @@ export const listItemClass = style({
 });
 
 export const activeListItemClass = style({
-  color: 'white!important',
+  color: 'var(--jp-ui-inverse-font-color1)!important',
 
   backgroundColor: 'var(--jp-brand-color1)!important',
 
@@ -245,7 +245,7 @@ export const buttonClass = style({
   width: '9em',
   height: '2em',
 
-  color: 'white',
+  color: 'var(--jp-ui-inverse-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
 
   border: '0',
@@ -253,7 +253,16 @@ export const buttonClass = style({
 });
 
 export const cancelButtonClass = style({
-  backgroundColor: '#757575'
+  backgroundColor: 'var(--md-grey-500)',
+
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--md-grey-600)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--md-grey-700)'
+    }
+  }
 });
 
 export const createButtonClass = style({

@@ -24,7 +24,7 @@ export const commitSummaryClass = style({
   outline: 'none',
   overflowX: 'auto',
 
-  color: 'var(--jp-ui-font-color0)',
+  color: 'var(--jp-ui-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 
@@ -52,7 +52,7 @@ export const commitDescriptionClass = style({
   overflowX: 'auto',
   resize: 'none',
 
-  color: 'var(--jp-ui-font-color0)',
+  color: 'var(--jp-ui-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 
@@ -90,7 +90,7 @@ export const commitButtonClass = style({
 
   marginBottom: '0.5em',
 
-  color: 'white',
+  color: 'var(--jp-ui-inverse-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
 
   cursor: 'pointer',

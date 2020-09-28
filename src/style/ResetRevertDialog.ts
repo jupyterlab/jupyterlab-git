@@ -74,7 +74,7 @@ export const buttonClass = style({
   width: '9em',
   height: '2em',
 
-  color: 'white',
+  color: 'var(--jp-ui-inverse-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
 
   cursor: 'pointer',
@@ -90,7 +90,16 @@ export const buttonClass = style({
 });
 
 export const cancelButtonClass = style({
-  backgroundColor: '#757575'
+  backgroundColor: 'var(--md-grey-500)',
+
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--md-grey-600)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--md-grey-700)'
+    }
+  }
 });
 
 export const submitButtonClass = style({
@@ -126,7 +135,7 @@ export const commitSummaryClass = style({
   outline: 'none',
   overflowX: 'auto',
 
-  color: 'var(--jp-ui-font-color0)',
+  color: 'var(--jp-ui-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 
@@ -154,7 +163,7 @@ export const commitDescriptionClass = style({
   overflowX: 'auto',
   resize: 'none',
 
-  color: 'var(--jp-ui-font-color0)',
+  color: 'var(--jp-ui-font-color1)',
   fontSize: 'var(--jp-ui-font-size1)',
   fontWeight: 300,
 

@@ -63,7 +63,7 @@ export const iconClass = style({
 export const insertionsIconClass = style({
   $nest: {
     '.jp-icon3': {
-      fill: '#00dc00'
+      fill: 'var(--md-green-500)'
     }
   }
 });
@@ -71,7 +71,7 @@ export const insertionsIconClass = style({
 export const deletionsIconClass = style({
   $nest: {
     '.jp-icon3': {
-      fill: '#ff0000'
+      fill: '--var(--md-red-500)'
     }
   }
 });
