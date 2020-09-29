@@ -22,22 +22,22 @@ export const fileStyle = style(
 );
 
 export const selectedFileStyle = style({
-  color: 'var(--jp-ui-inverse-font-color1)',
+  color: 'white',
   background: 'var(--jp-brand-color1)',
 
   $nest: {
     '&:hover': {
-      color: 'var(--jp-ui-inverse-font-color1)',
+      color: 'white',
       background: 'var(--jp-brand-color1) !important'
     },
     '&:hover .jp-icon-selectable[fill]': {
-      fill: 'var(--jp-layout-color2)'
+      fill: 'white'
     },
     '&:hover .jp-icon-selectable[stroke]': {
-      stroke: 'var(--jp-layout-color2)'
+      stroke: 'white'
     },
     '& .jp-icon-selectable[fill]': {
-      fill: 'var(--jp-layout-color1)'
+      fill: 'white'
     },
     '& .jp-icon-selectable-inverse[fill]': {
       fill: 'var(--jp-brand-color1)'
@@ -51,7 +51,7 @@ export const fileChangedLabelStyle = style({
 });
 
 export const selectedFileChangedLabelStyle = style({
-  color: 'var(--jp-ui-inverse-font-color1) !important'
+  color: 'white !important'
 });
 
 export const fileChangedLabelBrandStyle = style({

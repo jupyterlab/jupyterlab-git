@@ -86,12 +86,21 @@ export const newBranchButtonClass = style({
   width: '7.7em',
   height: '2em',
 
-  color: 'var(--jp-ui-inverse-font-color1)',
+  color: 'white',
   fontSize: 'var(--jp-ui-font-size1)',
 
-  backgroundColor: 'var(--jp-brand-color1)',
+  backgroundColor: 'var(--md-blue-500)',
   border: '0',
-  borderRadius: '3px'
+  borderRadius: '3px',
+
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--md-blue-600)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--md-blue-700)'
+    }
+  }
 });
 
 export const listItemClass = style({
@@ -101,13 +110,13 @@ export const listItemClass = style({
 });
 
 export const activeListItemClass = style({
-  color: 'var(--jp-ui-inverse-font-color1)!important',
+  color: 'white!important',
 
   backgroundColor: 'var(--jp-brand-color1)!important',
 
   $nest: {
     '& .jp-icon-selectable[fill]': {
-      fill: 'var(--jp-layout-color1)'
+      fill: 'white'
     }
   }
 });
