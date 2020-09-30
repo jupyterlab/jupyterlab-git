@@ -12,7 +12,7 @@ To see the extension in action, open the example notebook included in the Binder
 
 ## Prerequisites
 
-- JupyterLab
+- JupyterLab (version 1.x or 2.x)
 - Git (version `>=2.x`)
 
 ## Usage
@@ -21,10 +21,17 @@ To see the extension in action, open the example notebook included in the Binder
 
 ## Install
 
-To install perform the following steps:
+To install perform the following steps, with *pip*:
 
 ```bash
-pip install --upgrade jupyterlab-git
+pip install --upgrade jupyterlab jupyterlab-git
+jupyter lab build
+```
+
+or with *conda*:
+
+```bash
+conda install -c conda-forge jupyterlab jupyterlab-git
 jupyter lab build
 ```
 
@@ -201,8 +208,8 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcomed!
 
 To add yourself, or someone else, to this list you can either [use the bot](https://allcontributors.org/docs/en/bot/usage) (`@all-contributors please add <username> for <contributions>`) or [the CLI](https://allcontributors.org/docs/en/cli/usage) (`jlpm all-contributors add <username> <contributions>`).
 
-If you manually edit the `.all-contributorsrc` config file, run `yarn run contributors:generate`
+If you manually edit the `.all-contributorsrc` config file, run `yarn run contributors:generate`.
