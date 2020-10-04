@@ -2,6 +2,6 @@
 # Distributed under the terms of the Modified BSD License.
 
 version_info = (0, 22, 0)
-flag = "a0"
+flag = ""
 
 __version__ = ".".join(map(str, version_info)) + flag
