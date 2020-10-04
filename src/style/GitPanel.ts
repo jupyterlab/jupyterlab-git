@@ -21,13 +21,21 @@ export const repoButtonClass = style({
   height: '2em',
   width: '12em',
   marginTop: '5px',
+  border: '0',
+  borderRadius: '3px',
 
-  color: 'var(--jp-ui-inverse-font-color1)',
+  color: 'white',
   fontSize: 'var(--jp-ui-font-size1)',
 
-  backgroundColor: 'var(--jp-brand-color1)',
-  border: '0',
-  borderRadius: '3px'
+  backgroundColor: 'var(--md-blue-500)',
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--md-blue-600)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--md-blue-700)'
+    }
+  }
 });
 
 export const tabsClass = style({

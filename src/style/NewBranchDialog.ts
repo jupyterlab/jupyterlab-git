@@ -191,13 +191,13 @@ export const listItemClass = style({
 });
 
 export const activeListItemClass = style({
-  color: 'var(--jp-ui-inverse-font-color1)!important',
+  color: 'white!important',
 
   backgroundColor: 'var(--jp-brand-color1)!important',
 
   $nest: {
     '& .jp-icon-selectable[fill]': {
-      fill: 'var(--jp-layout-color1)'
+      fill: 'white'
     }
   }
 });
@@ -245,7 +245,7 @@ export const buttonClass = style({
   width: '9em',
   height: '2em',
 
-  color: 'var(--jp-ui-inverse-font-color1)',
+  color: 'white',
   fontSize: 'var(--jp-ui-font-size1)',
 
   border: '0',
@@ -266,11 +266,24 @@ export const cancelButtonClass = style({
 });
 
 export const createButtonClass = style({
-  backgroundColor: 'var(--jp-brand-color1)',
+  backgroundColor: 'var(--md-blue-500)',
+
   $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--md-blue-600)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--md-blue-700)'
+    },
     '&:disabled': {
       cursor: 'default',
       color: 'var(--jp-ui-inverse-font-color0)',
+      backgroundColor: 'var(--jp-layout-color3)'
+    },
+    '&:disabled:hover': {
+      backgroundColor: 'var(--jp-layout-color3)'
+    },
+    '&:disabled:active': {
       backgroundColor: 'var(--jp-layout-color3)'
     }
   }
