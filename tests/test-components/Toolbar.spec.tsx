@@ -12,21 +12,13 @@ import {
   refreshButtonClass,
   toolbarMenuButtonClass
 } from '../../src/style/Toolbar';
+import { Git } from '../../src/tokens';
 import { mockedRequestAPI } from '../utils';
 
 jest.mock('../../src/git');
 
 async function createModel() {
   const model = new GitExtension('/server/root');
-
-  jest.spyOn(model, 'currentBranch', 'get').mockReturnValue({
-    is_current_branch: true,
-    is_remote_branch: false,
-    name: 'master',
-    upstream: '',
-    top_commit: '',
-    tag: ''
-  });
   model.pathRepository = '/path/to/repo';
 
   await model.ready;
@@ -48,6 +40,9 @@ describe('Toolbar', () => {
   describe('constructor', () => {
     it('should return a new instance', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -62,6 +57,9 @@ describe('Toolbar', () => {
 
     it('should set the default flag indicating whether to show a branch menu to `false`', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -73,25 +71,14 @@ describe('Toolbar', () => {
       const el = new Toolbar(props);
       expect(el.state.branchMenu).toEqual(false);
     });
-
-    it('should set the default flag indicating whether to show a repository menu to `false`', () => {
-      const props = {
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        refresh: async () => {},
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const el = new Toolbar(props);
-      expect(el.state.repoMenu).toEqual(false);
-    });
   });
 
   describe('render', () => {
     it('should display a button to pull the latest changes', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -108,6 +95,9 @@ describe('Toolbar', () => {
 
     it('should set the `title` attribute on the button to pull the latest changes', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -124,6 +114,9 @@ describe('Toolbar', () => {
 
     it('should display a button to push the latest changes', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -140,6 +133,9 @@ describe('Toolbar', () => {
 
     it('should set the `title` attribute on the button to push the latest changes', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -156,6 +152,9 @@ describe('Toolbar', () => {
 
     it('should display a button to refresh the current repository', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -172,6 +171,9 @@ describe('Toolbar', () => {
 
     it('should set the `title` attribute on the button to refresh the current repository', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -190,6 +192,9 @@ describe('Toolbar', () => {
 
     it('should display a button to toggle a repository menu', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -207,6 +212,9 @@ describe('Toolbar', () => {
 
     it('should set the `title` attribute on the button to toggle a repository menu', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -224,6 +232,9 @@ describe('Toolbar', () => {
 
     it('should display a button to toggle a branch menu', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -240,7 +251,11 @@ describe('Toolbar', () => {
     });
 
     it('should set the `title` attribute on the button to toggle a branch menu', () => {
+      const currentBranch = 'master';
       const props = {
+        currentBranch,
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -253,7 +268,7 @@ describe('Toolbar', () => {
       const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
 
       expect(button.prop('title')).toEqual(
-        `Change the current branch: ${model.currentBranch.name}`
+        `Change the current branch: ${currentBranch}`
       );
     });
   });
@@ -261,6 +276,9 @@ describe('Toolbar', () => {
   describe('branch menu', () => {
     it('should not, by default, display a branch menu', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -277,6 +295,9 @@ describe('Toolbar', () => {
 
     it('should display a branch menu when the button to display a branch menu is clicked', () => {
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -297,6 +318,9 @@ describe('Toolbar', () => {
     it('should pull changes when the button to pull the latest changes is clicked', () => {
       const mockedExecute = jest.fn();
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -318,6 +342,9 @@ describe('Toolbar', () => {
     it('should push changes when the button to push the latest changes is clicked', () => {
       const mockedExecute = jest.fn();
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
@@ -340,6 +367,9 @@ describe('Toolbar', () => {
       const spy = jest.fn(async () => {});
 
       const props = {
+        currentBranch: 'master',
+        branches: new Array<Git.IBranch>(),
+        repository: model.pathRepository,
         model: model,
         branching: false,
         logger: new Logger(),
