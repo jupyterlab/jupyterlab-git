@@ -5,7 +5,12 @@ import { CommandIDs } from '../../src/commandsAndMenu';
 import { Toolbar } from '../../src/components/Toolbar';
 import * as git from '../../src/git';
 import { GitExtension } from '../../src/model';
-import { toolbarMenuButtonClass } from '../../src/style/Toolbar';
+import {
+  pullButtonClass,
+  pushButtonClass,
+  refreshButtonClass,
+  toolbarMenuButtonClass
+} from '../../src/style/Toolbar';
 import { mockedRequestAPI } from '../utils';
 
 jest.mock('../../src/git');
@@ -288,7 +293,6 @@ describe('Toolbar', () => {
   });
 
   describe('pull changes', () => {
-
     it('should pull changes when the button to pull the latest changes is clicked', () => {
       const mockedExecute = jest.fn();
       const props = {
@@ -310,7 +314,6 @@ describe('Toolbar', () => {
   });
 
   describe('push changes', () => {
-
     it('should push changes when the button to push the latest changes is clicked', () => {
       const mockedExecute = jest.fn();
       const props = {
