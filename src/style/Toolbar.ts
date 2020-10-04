@@ -17,17 +17,11 @@ export const toolbarNavClass = style({
 
   backgroundColor: 'var(--jp-layout-color1)',
 
-  borderBottomStyle: 'solid',
-  borderBottomWidth: 'var(--jp-border-width)',
-  borderBottomColor: 'var(--jp-border-color2)'
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
 export const toolbarMenuWrapperClass = style({
-  background: 'var(--jp-layout-color1)',
-
-  borderBottomStyle: 'solid',
-  borderBottomWidth: 'var(--jp-border-width)',
-  borderBottomColor: 'var(--jp-border-color2)'
+  background: 'var(--jp-layout-color1)'
 });
 
 export const toolbarMenuButtonClass = style({
@@ -47,7 +41,8 @@ export const toolbarMenuButtonClass = style({
   color: 'var(--jp-ui-font-color1)',
   textAlign: 'left',
 
-  border: 'none',
+  border: 'none',  
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   borderRadius: 0,
 
   background: 'var(--jp-layout-color1)'
