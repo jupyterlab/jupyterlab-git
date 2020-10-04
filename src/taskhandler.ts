@@ -60,8 +60,7 @@ export class TaskHandler<T> {
   async execute<R>(name: string, callable: () => Promise<R>): Promise<R> {
     const taskID = this.add(name);
     try {
-      const result = await callable();
-      return result;
+      return await callable();
     } finally {
       this.remove(taskID);
     }

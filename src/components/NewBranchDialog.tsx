@@ -50,6 +50,16 @@ const HEIGHT = 200; // HTML element height for the branches list
  */
 export interface INewBranchDialogProps {
   /**
+   * Current branch name.
+   */
+  currentBranch: string;
+
+  /**
+   * Current list of branches.
+   */
+  branches: Git.IBranch[];
+
+  /**
    * Extension logger
    */
   logger: Logger;
@@ -90,16 +100,6 @@ export interface INewBranchDialogState {
   filter: string;
 
   /**
-   * Current branch name.
-   */
-  current: string;
-
-  /**
-   * Current list of branches.
-   */
-  branches: Git.IBranch[];
-
-  /**
    * Error message.
    */
   error: string;
@@ -120,33 +120,16 @@ export class NewBranchDialog extends React.Component<
    */
   constructor(props: INewBranchDialogProps) {
     super(props);
-
-    const repo = this.props.model.pathRepository;
     this._branchList = React.createRef<VariableSizeList>();
 
     this.state = {
       name: '',
-      base: repo ? this.props.model.currentBranch.name : '',
+      base: props.currentBranch || '',
       filter: '',
-      current: repo ? this.props.model.currentBranch.name : '',
-      branches: repo ? this.props.model.branches : [],
       error: ''
     };
   }
 
-  /**
-   * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
-   */
-  componentDidMount(): void {
-    this._addListeners();
-  }
-
-  /**
-   * Callback invoked when a component will no longer be mounted.
-   */
-  componentWillUnmount(): void {
-    this._removeListeners();
-  }
   /**
    * Renders a dialog for creating a new branch.
    *
@@ -235,10 +218,10 @@ export class NewBranchDialog extends React.Component<
    * @returns array of React elements
    */
   private _renderItems(): JSX.Element {
-    const current = this.props.model.currentBranch.name;
+    const current = this.props.currentBranch;
     // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     const filter = this.state.filter;
-    const branches = this.state.branches
+    const branches = this.props.branches
       .filter(branch => !filter || branch.name.includes(filter))
       .slice()
       .sort(comparator);
@@ -252,7 +235,7 @@ export class NewBranchDialog extends React.Component<
         itemKey={(index, data) => data[index].name}
         itemSize={index => {
           const branch = branches[index];
-          return branch.name === this.state.current
+          return branch.name === this.props.currentBranch
             ? CURRENT_BRANCH_HEIGHT
             : ITEM_HEIGHT;
         }}
@@ -302,12 +285,11 @@ export class NewBranchDialog extends React.Component<
     const { data, index, style } = props;
     const branch = data[index] as Git.IBranch;
 
-    const isBase = branch.name === this.state.base;
-    const isCurr = branch.name === this.state.current;
+    const isCurrent = branch.name === this.props.currentBranch;
 
     let isBold;
     let desc;
-    if (isCurr) {
+    if (isCurrent) {
       isBold = true;
       desc = BRANCH_DESC['current'];
     }
@@ -315,7 +297,10 @@ export class NewBranchDialog extends React.Component<
       <ListItem
         button
         title={`Create a new branch based on: ${branch.name}`}
-        className={classes(listItemClass, isBase ? activeListItemClass : null)}
+        className={classes(
+          listItemClass,
+          isCurrent ? activeListItemClass : null
+        )}
         onClick={this._onBranchClickFactory(branch.name)}
         style={style}
       >
@@ -334,37 +319,6 @@ export class NewBranchDialog extends React.Component<
       </ListItem>
     );
   };
-
-  /**
-   * Adds model listeners.
-   */
-  private _addListeners(): void {
-    // When the HEAD changes, decent probability that we've switched branches:
-    this.props.model.headChanged.connect(this._syncState, this);
-
-    // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension) or changed repositories:
-    this.props.model.statusChanged.connect(this._syncState, this);
-  }
-
-  /**
-   * Removes model listeners.
-   */
-  private _removeListeners(): void {
-    this.props.model.headChanged.disconnect(this._syncState, this);
-    this.props.model.statusChanged.disconnect(this._syncState, this);
-  }
-
-  /**
-   * Syncs the component state with the underlying model.
-   */
-  private _syncState(): void {
-    const repo = this.props.model.pathRepository;
-    this.setState({
-      base: repo ? this.state.base : '',
-      current: repo ? this.props.model.currentBranch.name : '',
-      branches: repo ? this.props.model.branches : []
-    });
-  }
 
   /**
    * Callback invoked upon closing the dialog.
