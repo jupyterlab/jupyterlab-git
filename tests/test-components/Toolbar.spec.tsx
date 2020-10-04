@@ -267,9 +267,7 @@ describe('Toolbar', () => {
       const node = shallow(<Toolbar {...props} />);
       const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
 
-      expect(button.prop('title')).toEqual(
-        `Change the current branch: ${currentBranch}`
-      );
+      expect(button.prop('title')).toEqual('Manage branches and tags');
     });
   });
 

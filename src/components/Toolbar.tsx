@@ -1,10 +1,16 @@
-import { showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+import { Tab, Tabs } from '@material-ui/core';
 import { CommandRegistry } from '@phosphor/commands';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { CommandIDs } from '../commandsAndMenu';
 import { Logger } from '../logger';
+import {
+  selectedTabClass,
+  tabClass,
+  tabIndicatorClass,
+  tabsClass
+} from '../style/GitPanel';
 import {
   // NOTE: keep in alphabetical order
   branchIconClass,
@@ -14,7 +20,6 @@ import {
   pushButtonClass,
   refreshButtonClass,
   repoIconClass,
-  tagButtonClass,
   toolbarButtonClass,
   toolbarClass,
   toolbarMenuButtonClass,
@@ -27,8 +32,8 @@ import {
   toolbarNavClass
 } from '../style/Toolbar';
 import { Git, IGitExtension, Level } from '../tokens';
-import { GitTagDialog } from '../widgets/TagList';
 import { BranchMenu } from './BranchMenu';
+import { TagMenu } from './TagMenu';
 
 /**
  * Interface describing component properties.
@@ -85,6 +90,11 @@ export interface IToolbarState {
    * Boolean indicating whether a branch menu is shown.
    */
   branchMenu: boolean;
+
+  /**
+   * Panel tab identifier.
+   */
+  tab: number;
 }
 
 /**
@@ -101,7 +111,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     super(props);
 
     this.state = {
-      branchMenu: false
+      branchMenu: false,
+      tab: 0
     };
   }
 
@@ -137,11 +148,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           className={classes(toolbarButtonClass, pushButtonClass, 'jp-Icon-16')}
           title={'Push committed changes'}
           onClick={this._onPushClick}
-        />
-        <button
-          className={classes(toolbarButtonClass, tagButtonClass, 'jp-Icon-16')}
-          onClick={this._onTagClick}
-          title={'Checkout a tag'}
         />
         <button
           className={classes(
@@ -210,7 +216,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             toolbarMenuButtonClass,
             toolbarMenuButtonEnabledClass
           )}
-          title={`Change the current branch: ${this.props.currentBranch}`}
+          title={'Manage branches and tags'}
           onClick={this._onBranchClick}
         >
           <span
@@ -234,16 +240,71 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             )}
           />
         </button>
-        {this.state.branchMenu ? (
-          <BranchMenu
-            currentBranch={this.props.currentBranch || ''}
-            branches={this.props.branches}
-            branching={this.props.branching}
-            logger={this.props.logger}
-            model={this.props.model}
-          />
-        ) : null}
+        {this.state.branchMenu ? this._renderTabs() : null}
       </div>
+    );
+  }
+
+  private _renderTabs(): JSX.Element {
+    return (
+      <React.Fragment>
+        <Tabs
+          classes={{
+            root: tabsClass,
+            indicator: tabIndicatorClass
+          }}
+          value={this.state.tab}
+          onChange={(event: any, tab: number): void => {
+            this.setState({
+              tab: tab
+            });
+          }}
+        >
+          <Tab
+            classes={{
+              root: tabClass,
+              selected: selectedTabClass
+            }}
+            title="View branches"
+            label="Branches"
+            disableFocusRipple={true}
+            disableRipple={true}
+          ></Tab>
+          <Tab
+            classes={{
+              root: tabClass,
+              selected: selectedTabClass
+            }}
+            title="View tags"
+            label="Tags"
+            disableFocusRipple={true}
+            disableRipple={true}
+          ></Tab>
+        </Tabs>
+        {this.state.tab === 0 ? this._renderBranches() : this._renderTags()}
+      </React.Fragment>
+    );
+  }
+
+  private _renderBranches(): JSX.Element {
+    return (
+      <BranchMenu
+        currentBranch={this.props.currentBranch || ''}
+        branches={this.props.branches}
+        branching={this.props.branching}
+        logger={this.props.logger}
+        model={this.props.model}
+      />
+    );
+  }
+
+  private _renderTags(): JSX.Element {
+    return (
+      <TagMenu
+        logger={this.props.logger}
+        model={this.props.model}
+        branching={this.props.branching}
+      ></TagMenu>
     );
   }
 
@@ -304,40 +365,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         message: 'Failed to refresh.',
         error
       });
-    }
-  };
-
-  /**
-   * Callback invoked upon clicking a button to view tags.
-   *
-   * @param event - event object
-   */
-  private _onTagClick = async (): Promise<void> => {
-    const result = await showDialog({
-      title: 'Checkout tag',
-      body: new GitTagDialog(this.props.model)
-    });
-    if (result.button.accept) {
-      this.props.logger.log({
-        level: Level.RUNNING,
-        message: `Switching to ${result.value}...`
-      });
-
-      try {
-        await this.props.model.checkoutTag(result.value);
-
-        this.props.logger.log({
-          level: Level.SUCCESS,
-          message: `Switched to ${result.value}`
-        });
-      } catch (error) {
-        console.error(error);
-        this.props.logger.log({
-          level: Level.ERROR,
-          message: `Fail to checkout tag ${result.value}`,
-          error
-        });
-      }
     }
   };
 }
