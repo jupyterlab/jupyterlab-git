@@ -89,9 +89,18 @@ export const newBranchButtonClass = style({
   color: 'white',
   fontSize: 'var(--jp-ui-font-size1)',
 
-  backgroundColor: 'var(--jp-brand-color1)',
+  backgroundColor: 'var(--md-blue-500)',
   border: '0',
-  borderRadius: '3px'
+  borderRadius: '3px',
+
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--md-blue-600)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--md-blue-700)'
+    }
+  }
 });
 
 export const listItemClass = style({

@@ -94,11 +94,23 @@ export const cancelButtonClass = style({
 });
 
 export const submitButtonClass = style({
-  backgroundColor: 'var(--jp-brand-color1)',
+  backgroundColor: 'var(--md-blue-500)',
 
   $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--md-blue-600)'
+    },
+    '&:active': {
+      backgroundColor: 'var(--md-blue-700)'
+    },
     '&:disabled': {
       color: 'var(--jp-ui-inverse-font-color0)',
+      backgroundColor: 'var(--jp-layout-color3)'
+    },
+    '&:disabled:hover': {
+      backgroundColor: 'var(--jp-layout-color3)'
+    },
+    '&:disabled:active': {
       backgroundColor: 'var(--jp-layout-color3)'
     }
   }

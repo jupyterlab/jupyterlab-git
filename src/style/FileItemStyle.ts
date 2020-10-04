@@ -31,7 +31,7 @@ export const selectedFileStyle = style({
       background: 'var(--jp-brand-color1) !important'
     },
     '&:hover .jp-icon-selectable[fill]': {
-      fill: 'var(--jp-layout-color2)'
+      fill: 'white'
     },
     '&:hover .jp-icon-selectable[stroke]': {
       stroke: 'var(--jp-layout-color2)'
