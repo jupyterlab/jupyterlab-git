@@ -2,7 +2,7 @@ import { fileIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import { classes } from 'typestyle/';
+import { classes } from 'typestyle';
 import { CommandIDs } from '../commandsAndMenu';
 import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
