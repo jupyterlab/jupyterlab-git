@@ -43,6 +43,8 @@ export const commitDetailFileClass = style({
   lineHeight: 'var(--jp-private-running-item-height)',
   whiteSpace: 'nowrap',
 
+  overflow: 'hidden',
+
   $nest: {
     '&:hover': {
       backgroundColor: 'var(--jp-layout-color2)'
