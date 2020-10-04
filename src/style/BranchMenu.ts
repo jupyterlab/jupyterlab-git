@@ -2,22 +2,21 @@ import { style } from 'typestyle';
 
 export const wrapperClass = style({
   marginTop: '6px',
-  marginBottom: '0'
+  marginBottom: '0',
+
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
 export const filterWrapperClass = style({
-  padding: '4px 11px 4px'
+  padding: '4px 11px 4px',
+  display: 'flex'
 });
 
 export const filterClass = style({
+  flex: '1 1 auto',
   boxSizing: 'border-box',
   display: 'inline-block',
   position: 'relative',
-
-  width: 'calc(100% - 7.7em - 11px)', // full_width - button_width - right_margin
-
-  marginRight: '11px',
-
   fontSize: 'var(--jp-ui-font-size1)'
 });
 
@@ -85,6 +84,9 @@ export const newBranchButtonClass = style({
 
   width: '7.7em',
   height: '2em',
+  flex: '0 0 auto',
+
+  marginLeft: '5px',
 
   color: 'white',
   fontSize: 'var(--jp-ui-font-size1)',
