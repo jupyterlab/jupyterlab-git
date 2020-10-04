@@ -41,7 +41,7 @@ export const toolbarMenuButtonClass = style({
   color: 'var(--jp-ui-font-color1)',
   textAlign: 'left',
 
-  border: 'none',  
+  border: 'none',
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
   borderRadius: 0,
 

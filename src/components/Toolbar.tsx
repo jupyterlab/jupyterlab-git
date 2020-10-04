@@ -30,7 +30,7 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { IGitExtension, Level } from '../tokens';
+import { Git, IGitExtension, Level } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { BranchMenu } from './BranchMenu';
 import { TagMenu } from './TagMenu';
@@ -86,11 +86,6 @@ export interface IToolbarProps {
  * Interface describing component state.
  */
 export interface IToolbarState {
-  /**
-   * Current branch name.
-   */
-  branch: string;
-
   /**
    * Boolean indicating whether a branch menu is shown.
    */
