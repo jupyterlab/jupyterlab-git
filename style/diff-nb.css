@@ -4,379 +4,397 @@
 |----------------------------------------------------------------------------*/
 
 .jp-git-Notebook-diff .CodeMirror-gutter.CodeMirror-linenumbers[style] {
-    width: 29px !important;
+  width: 29px !important;
 }
 
 .jp-git-Notebook-diff .CodeMirror-sizer[style] {
-    margin-left: 47px !important;
+  margin-left: 47px !important;
 }
 
 .jp-git-diff-header-path {
-    background: rgba(204, 204, 204, .25);
-    border: 1px solid rgba(173, 173, 173, 0.5);
-    box-sizing: border-box;
-    margin-bottom: 5px;
-    font-size: var(--jp-ui-font-size0);
-    padding: 5px;
+  background: rgba(204, 204, 204, 0.25);
+  border: 1px solid rgba(173, 173, 173, 0.5);
+  box-sizing: border-box;
+  margin-bottom: 5px;
+  font-size: var(--jp-ui-font-size0);
+  padding: 5px;
 }
 
 .jp-git-diff-header {
-    font-family: var(--jp-ui-font-color2);
-    font-size: var(--jp-ui-font-size0);
-    margin-bottom: 10px;
+  font-family: var(--jp-ui-font-color2);
+  font-size: var(--jp-ui-font-size0);
+  margin-bottom: 10px;
 }
 
 .jp-git-diff-header > .jp-Diff-addedchunk {
-    background: var(--jp-git-diff-added-color);
-    box-sizing: border-box;
-    padding: 5px;
+  background: var(--jp-git-diff-added-color);
+  box-sizing: border-box;
+  padding: 5px;
 }
 
 .jp-git-diff-header > .jp-Diff-removedchunk {
-    background: var(--jp-git-diff-deleted-color);
-    box-sizing: border-box;
-    padding: 5px
+  background: var(--jp-git-diff-deleted-color);
+  box-sizing: border-box;
+  padding: 5px;
 }
 
 .jp-git-Notebook-diff .CodeMirror pre {
-    font-size: var(--jp-ui-font-size0);
+  font-size: var(--jp-ui-font-size0);
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel {
-    font-size: var(--jp-ui-font-size0);
+  font-size: var(--jp-ui-font-size0);
 }
 
 .jp-git-Notebook-diff pre {
-    font-size: var(--jp-ui-font-size0);
+  font-size: var(--jp-ui-font-size0);
 }
 
 .jp-git-Notebook-diff .jp-Diff-outputMenu {
-    font-size: var(--jp-ui-font-size0);
+  font-size: var(--jp-ui-font-size0);
 }
-
 
 /* Begin styles imported from NBDime */
 
 .jp-git-Notebook-diff button.jp-CollapsiblePanel-header-icon {
-    background-size: 20px;
-    background-position: center;
-    background-repeat: no-repeat;
-    height: 2px;
-    width: 4px;
-    font-size: var(--jp-ui-font-size1);
-    line-height: var(--jp-private-toolbar-height);
-    margin-top: .1em;
-    font-weight: 500;
-    color: var(--jp-ui-font-color1);
-    background-color: transparent;
-    text-decoration: none;
-    transition: background-color 0.1s ease;
-    margin-left: 5px;
-    border: transparent;
-    float: none;
+  background-size: 20px;
+  height: 2px;
+  width: 4px;
+  font-size: var(--jp-ui-font-size1);
+  line-height: var(--jp-private-toolbar-height);
+  margin-top: 0.1em;
+  color: var(--jp-ui-font-color1);
+  background: none;
+  text-decoration: none;
+  margin-left: 5px;
+  border: transparent;
+  float: none;
+}
+
+.jp-git-Notebook-diff button.jp-CollapsiblePanel-header-icon:active,
+.jp-git-Notebook-diff button.jp-CollapsiblePanel-header-icon:focus,
+.jp-git-Notebook-diff button.jp-CollapsiblePanel-header-icon:hover {
+  border: none;
 }
 
 .jp-git-diff-Widget {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .jp-git-diff-root .p-Widget.CodeMirror-merge-gap {
-    z-index: 2;
-    display: inline-block;
-    height: 100%;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    overflow: hidden;
-    border-left: var(--codemirror-border);
-    border-right: var(--codemirror-border);
-    position: absolute;
-    color: var(--jp-ui-font-color2);
-    background: var(--jp-layout-color2);
+  z-index: 2;
+  display: inline-block;
+  height: 100%;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-left: var(--codemirror-border);
+  border-right: var(--codemirror-border);
+  position: absolute;
+  color: var(--jp-ui-font-color2);
+  background: var(--jp-layout-color2);
 }
 
-
 .jp-git-Notebook-diff .jp-Diff-unchanged .jp-Output *:first-child {
-    margin-left: auto;
+  margin-left: auto;
 }
 
 .jp-git-Notebook-diff .jp-Diff-unchanged .jp-Output *:last-child {
-    margin-right: auto;
+  margin-right: auto;
 }
 
 .jp-git-Notebook-diff .jp-Diff-unchanged {
-    margin-left: 10%;
-    width: 80%;
+  margin-left: 10%;
+  width: 80%;
 }
 
 .jp-git-Notebook-diff .jp-Diff-unchanged .jp-Diff-unchanged {
-    margin-left: 0;
-    width: 100%;
+  margin-left: 0;
+  width: 100%;
 }
 
 .jp-git-Notebook-diff .jp-Diff-unchanged .CodeMirror-merge-pane-unchanged {
-    border: var(--jp-border-width) solid var(--jp-private-notebook-cell-editor-border);
+  border: var(--jp-border-width) solid
+    var(--jp-private-notebook-cell-editor-border);
 }
 
-.jp-git-Notebook-diff .jp-Diff-unchanged + .jp-Diff-unchanged > div:first-of-type {
-    border: none;
+.jp-git-Notebook-diff
+  .jp-Diff-unchanged
+  + .jp-Diff-unchanged
+  > div:first-of-type {
+  border: none;
 }
 
 .jp-git-Notebook-diff .jp-Diff-unchanged .jp-Cellrow-executionCount {
-    float: left;
+  float: left;
 }
 
 .jp-git-Notebook-diff .jp-Metadata-diff {
-    margin-bottom: 20px;
-    border: solid black thin;
+  margin-bottom: 20px;
+  border: solid black thin;
 }
 
 .jp-git-Notebook-diff .jp-Cell-diff {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 /* Border on top of cell */
 .jp-git-Notebook-diff .jp-Cell-diff > div:first-of-type {
-    border-top: solid #ccc 1px;
+  border-top: solid #ccc 1px;
 }
-
 
 .jp-git-Notebook-diff .jp-Diff-added .jp-Cellrow-source,
 .jp-git-Notebook-diff .jp-Diff-added .jp-Cellrow-outputs {
-    border-left: var(--codemirror-border);
+  border-left: var(--codemirror-border);
 }
 
 .jp-git-Notebook-diff .jp-Diff-deleted .jp-Cellrow-source,
 .jp-git-Notebook-diff .jp-Diff-deleted .jp-Cellrow-outputs {
-    border-right: var(--codemirror-border);
+  border-right: var(--codemirror-border);
 }
 
 /* Add/delete chunks for small width devices (added before delete) */
 .jp-git-Notebook-diff .jp-Diff-addremchunk {
-    display: flex;
-    flex-direction: column-reverse;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: space-between;
 }
 
 .jp-git-Notebook-diff .jp-Diff-addremchunk .jp-Diff-addedchunk,
 .jp-git-Notebook-diff .jp-Diff-addremchunk .jp-Diff-removedchunk {
-    width: 100%;
+  width: 100%;
 }
 
 /* Add/delete chunks should show side-by-side for larger screens */
 @media (min-width: 1000px) {
-    .jp-git-Notebook-diff .jp-Diff-addremchunk {
-        flex-direction: row-reverse;
-    }
+  .jp-git-Notebook-diff .jp-Diff-addremchunk {
+    flex-direction: row-reverse;
+  }
 
-    .jp-git-Notebook-diff .jp-Diff-addremchunk .jp-Diff-addedchunk,
-    .jp-git-Notebook-diff .jp-Diff-addremchunk .jp-Diff-removedchunk {
-        width: 49%;
-    }
+  .jp-git-Notebook-diff .jp-Diff-addremchunk .jp-Diff-addedchunk,
+  .jp-git-Notebook-diff .jp-Diff-addremchunk .jp-Diff-removedchunk {
+    width: 49%;
+  }
 }
 
 /* Hide metadata changes by default */
 .jp-git-Notebook-diff .jp-Diff-added .jp-Cellrow-metadata,
 .jp-git-Notebook-diff .jp-Diff-deleted .jp-Cellrow-metadata,
 .jp-git-Notebook-diff .jp-Diff-unchanged .jp-Cellrow-outputs {
-    display: none;
+  display: none;
 }
 
 .jp-git-Notebook-diff .jp-Diff-added .jp-Diff-unchanged {
-    margin-left: 25%;
-    width: 75%;
+  margin-left: 25%;
+  width: 75%;
 }
 
 .jp-git-Notebook-diff .jp-Diff-deleted .jp-Diff-unchanged {
-    margin-left: 0;
-    width: 75%;
+  margin-left: 0;
+  width: 75%;
 }
 
 .jp-git-Notebook-diff .jp-Diff-unchanged .jp-Output-result > * {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .jp-git-Notebook-diff .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-base {
-    float: left;
-    width: 47%;
+  float: left;
+  width: 47%;
 }
 
 .jp-git-Notebook-diff .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-remote {
-    float: right;
-    width: 47%;
+  float: right;
+  width: 47%;
 }
 
 .jp-git-Notebook-diff .jp-Output-result img {
-    max-width: 100%;
+  max-width: 100%;
 }
 
 .jp-git-Notebook-diff .CodeMirror-merge-pane-remote {
-    position: relative;
-    left: 6%;
+  position: relative;
+  left: 6%;
 }
 
 .jp-git-Notebook-diff .jp-Cellrow-source .CodeMirror-merge-pane-deleted,
 .jp-git-Notebook-diff .jp-Cellrow-source .CodeMirror-merge-pane-added {
-    width: 75%;
+  width: 75%;
 }
 
-.jp-git-Notebook-diff .jp-Diff-twoway .jp-Cellrow-outputs .jp-Diff-unchanged .jp-CodeMirrorWidget {
-    width: initial;
-    max-width: 100%;
+.jp-git-Notebook-diff
+  .jp-Diff-twoway
+  .jp-Cellrow-outputs
+  .jp-Diff-unchanged
+  .jp-CodeMirrorWidget {
+  width: initial;
+  max-width: 100%;
 }
 
-.jp-git-Notebook-diff .jp-Diff-twoway .jp-Cellrow-outputs .jp-Diff-unchanged .jp-RenderedImage {
-    text-align: center;
+.jp-git-Notebook-diff
+  .jp-Diff-twoway
+  .jp-Cellrow-outputs
+  .jp-Diff-unchanged
+  .jp-RenderedImage {
+  text-align: center;
 }
 
 .jp-git-Notebook-diff .CodeMirror-merge-r-chunk {
-    background-color: var(--jp-git-diff-deleted-color);
+  background-color: var(--jp-git-diff-deleted-color);
 }
 
 .jp-git-Notebook-diff .CodeMirror-merge-r-connect {
-    fill: var(--jp-git-diff-deleted-color);
-    stroke: var(--jp-diff-deleted-color0);
-    stroke-width: 1px;
+  fill: var(--jp-git-diff-deleted-color);
+  stroke: var(--jp-diff-deleted-color0);
+  stroke-width: 1px;
 }
 
 .jp-git-Notebook-diff .CodeMirror-merge-spacer {
-    background-color: var(--jp-git-diff-deleted-color);
+  background-color: var(--jp-git-diff-deleted-color);
 }
 
 .jp-git-Notebook-diff .CodeMirror-merge-pane-remote .CodeMirror-merge-r-chunk {
-    background-color: var(--jp-git-diff-added-color);
+  background-color: var(--jp-git-diff-added-color);
 }
 
-.jp-git-Notebook-diff .CodeMirror-merge-pane-remote .CodeMirror-merge-r-connect {
-    fill: var(--jp-git-diff-added-color);
-    stroke: var(--jp-diff-added-color0);
-    stroke-width: 1px;
+.jp-git-Notebook-diff
+  .CodeMirror-merge-pane-remote
+  .CodeMirror-merge-r-connect {
+  fill: var(--jp-git-diff-added-color);
+  stroke: var(--jp-diff-added-color0);
+  stroke-width: 1px;
 }
 
 .jp-git-Notebook-diff .CodeMirror-merge-pane-remote .CodeMirror-merge-spacer {
-    background-color: var(--jp-git-diff-added-color);
+  background-color: var(--jp-git-diff-added-color);
 }
-
 
 .jp-git-Notebook-diff .jp-Diff-deleted .CodeMirror,
 .jp-git-Notebook-diff .jp-Diff-deleted .jp-Diff-renderedOutput,
 .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-base {
-    background-color: var(--jp-git-diff-deleted-color);
+  background-color: var(--jp-git-diff-deleted-color);
 }
 
 .jp-git-Notebook-diff .jp-Diff-added .CodeMirror,
 .jp-git-Notebook-diff .jp-Diff-added .jp-Diff-renderedOutput,
 .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-remote {
-    background-color: var(--jp-git-diff-added-color);
+  background-color: var(--jp-git-diff-added-color);
 }
 
 .jp-git-Notebook-diff .jp-Diff-added .CodeMirror-merge-pane-added,
 .jp-git-Notebook-diff .jp-Diff-deleted .CodeMirror-merge-pane-deleted {
-    width: 100%;
+  width: 100%;
 }
 
 .jp-git-Notebook-diff .jp-Cellrow-source .jp-InputPrompt {
-    text-align: left;
+  text-align: left;
 }
 
 .jp-CollapsiblePanel-container {
-    background-color: var(--jp-layout-color1);
-    color: var(--jp-ui-font-color1);
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-git-Notebook-diff .jp-Diff-outputPanel .jp-Diff-outputMenu {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translate(-50%, 0);
-    background-color: var(--jp-layout-color1);
-    color: var(--jp-ui-font-color1);
-    padding: 3px 5px;
-    border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
-    z-index: 10;
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  padding: 3px 5px;
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  z-index: 10;
 }
 
 .jp-git-Notebook-diff .jp-Diff-outputPanel:hover .jp-Diff-outputMenu {
-    display: initial;
+  display: initial;
 }
 
 .jp-git-Notebook-diff .jp-Diff-trustOutputButton {
-    display: none;
+  display: none;
 }
 
 .jp-git-Notebook-diff .jp-Diff-trustCandidate .jp-Diff-trustOutputButton {
-    display: initial;
+  display: initial;
 }
 
-.jp-git-Notebook-diff .jp-Diff-outputPanel:not(.jp-Diff-trustCandidate) .jp-diff-base64Output + .jp-Diff-outputMenu {
-    display: none;
+.jp-git-Notebook-diff
+  .jp-Diff-outputPanel:not(.jp-Diff-trustCandidate)
+  .jp-diff-base64Output
+  + .jp-Diff-outputMenu {
+  display: none;
 }
 
-.jp-git-Notebook-diff .jp-Diff-outputPanel .jp-Diff-outputMenu > :not(:first-child) {
-    margin-left: 5px;
+.jp-git-Notebook-diff
+  .jp-Diff-outputPanel
+  .jp-Diff-outputMenu
+  > :not(:first-child) {
+  margin-left: 5px;
 }
 
 .jp-Diff-outputsContainer > .p-Widget:not(:last-child) {
-    padding-bottom: 6px;
-    min-height: 2em;
+  padding-bottom: 6px;
+  min-height: 2em;
 }
 
 .jp-git-Notebook-diff .jp-Diff-renderedOutput {
-    min-height: 2em;
+  min-height: 2em;
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel {
-    border: var(--jp-git-diff-output-border-color) solid 1pt;
+  border: var(--jp-git-diff-output-border-color) solid 1pt;
 }
 
 .jp-git-Notebook-diff button.jp-CollapsiblePanel-header-icon::-moz-focus-inner {
-    border: none;
+  border: none;
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel-header-icon-opened {
-    background-image: var(--jp-icon-caret-up);
+  background-image: var(--jp-icon-caret-up);
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel-header-icon-closed {
-    background-image: var(--jp-icon-caret-down);
+  background-image: var(--jp-icon-caret-down);
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel-header {
-    padding-top: .2em;
-    padding-bottom: .2em;
-    background-color: var(--jp-git-diff-output-color);
-    padding-left: 2em;
-    padding-right: 2em;
-    color: var(--jp-ui-font-color1);
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  background-color: var(--jp-git-diff-output-color);
+  padding-left: 2em;
+  padding-right: 2em;
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel-container {
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel-slider {
-    height:100%;
-    -webkit-transition: -webkit-transform .3s ease, height 0.3s;
-    -moz-transition:    -moz-transform .3s ease, height 0.3s;
-    -ms-transition:     -ms-transform .3s ease, height 0.3s;
-    transition:         transform .3s ease, height 0.3s;
+  height: 100%;
+  -webkit-transition: -webkit-transform 0.3s ease, height 0.3s;
+  -moz-transition: -moz-transform 0.3s ease, height 0.3s;
+  -ms-transition: -ms-transform 0.3s ease, height 0.3s;
+  transition: transform 0.3s ease, height 0.3s;
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel-opened {
-    -webkit-transform: translate(0, 0%);
-    -moz-transform: translate(0, 0%);
-    -ms-transform: translate(0, 0%);
-    transform: translate(0, 0%);
-    height: 100%;
+  -webkit-transform: translate(0, 0%);
+  -moz-transform: translate(0, 0%);
+  -ms-transform: translate(0, 0%);
+  transform: translate(0, 0%);
+  height: 100%;
 }
 
 .jp-git-Notebook-diff .jp-CollapsiblePanel-closed {
-    -webkit-transform: translate(0, -100%);
-    -moz-transform: translate(0, -100%);
-    -ms-transform: translate(0, -100%);
-    transform: translate(0, -100%);
-    height: 0;
+  -webkit-transform: translate(0, -100%);
+  -moz-transform: translate(0, -100%);
+  -ms-transform: translate(0, -100%);
+  transform: translate(0, -100%);
+  height: 0;
 }

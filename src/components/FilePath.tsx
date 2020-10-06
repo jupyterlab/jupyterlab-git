@@ -1,7 +1,11 @@
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { fileIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
-import { fileLabelStyle, folderLabelStyle } from '../style/FilePathStyle';
+import {
+  fileIconStyle,
+  fileLabelStyle,
+  folderLabelStyle
+} from '../style/FilePathStyle';
 import { extractFilename } from '../utils';
 
 /**
@@ -30,7 +34,11 @@ export const FilePath: React.FunctionComponent<IFilePathProps> = (
 
   return (
     <React.Fragment>
-      <icon.react elementPosition="center" tag="span" />
+      <icon.react
+        className={fileIconStyle}
+        elementPosition="center"
+        tag="span"
+      />
       <span className={fileLabelStyle}>
         {filename}
         <span className={folderLabelStyle}>{folder}</span>

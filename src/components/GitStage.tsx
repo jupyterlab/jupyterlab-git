@@ -85,7 +85,6 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
             Math.min(props.height - HEADER_HEIGHT, nFiles * ITEM_HEIGHT),
             ITEM_HEIGHT
           )}
-          innerElementType="ul"
           itemCount={nFiles}
           itemData={props.files}
           itemKey={(index, data) => data[index].to}
