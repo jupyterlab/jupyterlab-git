@@ -38,6 +38,7 @@ export const commitDetailHeaderClass = style({
 export const commitDetailFileClass = style({
   display: 'flex',
   flexDirection: 'row',
+  alignItems: 'center',
   color: 'var(--jp-ui-font-color1)',
   height: 'var(--jp-private-running-item-height)',
   lineHeight: 'var(--jp-private-running-item-height)',

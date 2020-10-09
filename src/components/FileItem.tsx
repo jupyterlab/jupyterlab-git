@@ -160,7 +160,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
     const status = this._getFileChangedLabel(status_code as any);
 
     return (
-      <li
+      <div
         className={this._getFileClass()}
         onClick={
           this.props.selectFile &&
@@ -191,7 +191,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         <span className={this._getFileChangedLabelClass(this.props.file.y)}>
           {this.props.file.y === '?' ? 'U' : status_code}
         </span>
-      </li>
+      </div>
     );
   }
 }
