@@ -43,13 +43,6 @@ export interface IGitStageProps {
   rowRenderer: (props: ListChildComponentProps) => JSX.Element;
 }
 
-/**
- * Git stage component state
- */
-export interface IGitStageState {
-  showFiles: boolean;
-}
-
 export const GitStage: React.FunctionComponent<IGitStageProps> = (
   props: IGitStageProps
 ) => {

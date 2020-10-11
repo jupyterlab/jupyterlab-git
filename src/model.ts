@@ -207,6 +207,21 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Get the current markers
+   *
+   * Note: This makes sure it always returns non null value
+   */
+  protected get _currentMarker(): BranchMarker {
+    if (!this.__currentMarker) {
+      this._setMarker(
+        this.pathRepository,
+        this._currentBranch ? this._currentBranch.name : ''
+      );
+    }
+    return this.__currentMarker;
+  }
+
+  /**
    * Add one or more files to the repository staging area.
    *
    * ## Notes
@@ -1119,12 +1134,9 @@ export class GitExtension implements IGitExtension {
 
   /**
    * Set the marker object for a repository path and branch.
-   *
-   * @returns branch marker
    */
-  private _setMarker(path: string, branch: string): BranchMarker {
-    this._currentMarker = this._markerCache.get(path, branch);
-    return this._currentMarker;
+  private _setMarker(path: string, branch: string): void {
+    this.__currentMarker = this._markerCache.get(path, branch);
   }
 
   private _status: Git.IStatusFile[] = [];
@@ -1137,7 +1149,7 @@ export class GitExtension implements IGitExtension {
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
   private _isDisposed = false;
   private _markerCache: Markers = new Markers(() => this._markChanged.emit());
-  private _currentMarker: BranchMarker = null;
+  private __currentMarker: BranchMarker = null;
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _poll: Poll;
