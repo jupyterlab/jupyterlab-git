@@ -47,6 +47,9 @@ class GitCloneHandler(GitHandler):
         response = await self.git.clone(
             data["current_path"], data["clone_url"], data.get("auth", None)
         )
+
+        if response["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(response))
 
 
@@ -72,6 +75,7 @@ class GitAllHistoryHandler(GitHandler):
 
         show_top_level = await self.git.show_top_level(current_path)
         if show_top_level["code"] != 0:
+            self.set_status(500)
             self.finish(json.dumps(show_top_level))
         else:
             branch = await self.git.branch(current_path)
@@ -103,6 +107,9 @@ class GitShowTopLevelHandler(GitHandler):
         """
         current_path = self.get_json_body()["current_path"]
         result = await self.git.show_top_level(current_path)
+
+        if result["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(result))
 
 
@@ -121,6 +128,9 @@ class GitShowPrefixHandler(GitHandler):
         """
         current_path = self.get_json_body()["current_path"]
         result = await self.git.show_prefix(current_path)
+
+        if result["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(result))
 
 
@@ -136,6 +146,9 @@ class GitStatusHandler(GitHandler):
         """
         current_path = self.get_json_body()["current_path"]
         result = await self.git.status(current_path)
+
+        if result["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(result))
 
 
@@ -155,6 +168,9 @@ class GitLogHandler(GitHandler):
         current_path = body["current_path"]
         history_count = body.get("history_count", 25)
         result = await self.git.log(current_path, history_count)
+
+        if result["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(result))
 
 
@@ -194,6 +210,9 @@ class GitDiffHandler(GitHandler):
         """
         top_repo_path = self.get_json_body()["top_repo_path"]
         my_output = await self.git.diff(top_repo_path)
+
+        if my_output["code"] != 0:
+            self.set_status(500)
         self.finish(my_output)
 
 
@@ -556,6 +575,9 @@ class GitChangedFilesHandler(GitHandler):
     @web.authenticated
     async def post(self):
         body = await self.git.changed_files(**self.get_json_body())
+
+        if body["code"] != 0:
+            self.set_status(500)
         self.finish(json.dumps(body))
 
 
