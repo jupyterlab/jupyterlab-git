@@ -374,7 +374,7 @@ export interface IGitExtension extends IDisposable {
   revertCommit(message: string, hash: string): Promise<void>;
 
   /**
-   * Make request for the prefix path of a directory 'path',
+   * Get the prefix path of a directory 'path',
    * with respect to the root directory of repository
    *
    * @param path Path for which the prefix is searched for
@@ -386,14 +386,14 @@ export interface IGitExtension extends IDisposable {
   showPrefix(path: string): Promise<Git.IShowPrefixResult>;
 
   /**
-   * Make request for top level path of repository 'path'
+   * Get the top level path of repository 'path'
    *
    * @param path Path from which the top Git repository needs to be found
    *
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  showTopLevel(path: string): Promise<Git.IShowTopLevelResult>;
+  showTopLevel(path: string): Promise<string | null>;
 
   /**
    * Make request to list all the tags present in the remote repo

@@ -6,8 +6,7 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { JupyterLab } from '@jupyterlab/application';
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { mockedRequestAPI } from './utils';
+import { IMockedResponses, mockedRequestAPI } from './utils';
 
 jest.mock('../src/git');
 jest.mock('@jupyterlab/application');
@@ -18,12 +17,7 @@ describe('plugin', () => {
   const mockGit = git as jest.Mocked<typeof git>;
   const fakeRoot = '/path/to/server';
   let app: jest.Mocked<JupyterLab>;
-  let mockResponses: {
-    [url: string]: {
-      body?: (request: Object) => ReadonlyJSONObject;
-      status?: number;
-    };
-  } = {};
+  let mockResponses: IMockedResponses = {};
   let settingRegistry: jest.Mocked<ISettingRegistry>;
 
   beforeAll(() => {

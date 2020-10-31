@@ -137,26 +137,18 @@ export class GitExtension implements IGitExtension {
       const currentReady = this._readyPromise;
       this._pendingReadyPromise += 1;
       this._readyPromise = Promise.all([currentReady, this.showTopLevel(v)])
-        .then(r => {
-          const results = r[1];
-          if (results.code === 0) {
-            this._pathRepository = results.top_repo_path;
-            change.newValue = results.top_repo_path;
-          } else {
-            this._pathRepository = null;
-          }
+        .then(([_, path]) => {
+          change.newValue = this._pathRepository = path;
 
           if (change.newValue !== change.oldValue) {
             this.refresh().then(() => this._repositoryChanged.emit(change));
           }
+          this._pendingReadyPromise -= 1;
         })
         .catch(reason => {
+          this._pendingReadyPromise -= 1;
           console.error(`Fail to find Git top level for path ${v}.\n${reason}`);
         });
-
-      void this._readyPromise.then(() => {
-        this._pendingReadyPromise -= 1;
-      });
     }
   }
 
@@ -885,19 +877,31 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async showTopLevel(path: string): Promise<Git.IShowTopLevelResult> {
-    return await this._taskHandler.execute<Git.IShowTopLevelResult>(
-      'git:fetch:top_level_path',
-      async () => {
-        return await requestAPI<Git.IShowTopLevelResult>(
-          'show_top_level',
-          'POST',
-          {
-            current_path: path
-          }
-        );
+  async showTopLevel(path: string): Promise<string | null> {
+    try {
+      const data = await this._taskHandler.execute<Git.IShowTopLevelResult>(
+        'git:fetch:top_level_path',
+        async () => {
+          return await requestAPI<Git.IShowTopLevelResult>(
+            'show_top_level',
+            'POST',
+            {
+              current_path: path
+            }
+          );
+        }
+      );
+      return data.top_repo_path || null;
+    } catch (error) {
+      if (
+        error instanceof Git.GitResponseError &&
+        error.response.status === 500 &&
+        error.json.code === 128
+      ) {
+        return null;
       }
-    );
+      throw error;
+    }
   }
 
   /**
