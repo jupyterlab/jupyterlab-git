@@ -71,6 +71,10 @@ describe('Toolbar', () => {
         .find(ActionButton)
         .findWhere(n => n.prop('icon') === pullIcon);
       expect(nodes.length).toEqual(1);
+
+      expect(
+        toolbar.find('[data-test-id="pull-badge"]').prop('invisible')
+      ).toEqual(true);
     });
 
     it('should set the `title` attribute on the button to pull the latest changes', () => {
@@ -82,12 +86,26 @@ describe('Toolbar', () => {
       expect(button.prop('title')).toEqual('Pull latest changes');
     });
 
+    it('should display a badge on pull icon if behind', () => {
+      const toolbar = shallow<Toolbar>(
+        <Toolbar {...createProps({ nCommitsBehind: 1 })} />
+      );
+
+      expect(
+        toolbar.find('[data-test-id="pull-badge"]').prop('invisible')
+      ).toEqual(false);
+    });
+
     it('should display a button to push the latest changes', () => {
       const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
       const nodes = toolbar
         .find(ActionButton)
         .findWhere(n => n.prop('icon') === pushIcon);
       expect(nodes.length).toEqual(1);
+
+      expect(
+        toolbar.find('[data-test-id="push-badge"]').prop('invisible')
+      ).toEqual(true);
     });
 
     it('should set the `title` attribute on the button to push the latest changes', () => {
@@ -98,6 +116,16 @@ describe('Toolbar', () => {
         .first();
 
       expect(button.prop('title')).toEqual('Push committed changes');
+    });
+
+    it('should display a badge on pull icon if behind', () => {
+      const toolbar = shallow<Toolbar>(
+        <Toolbar {...createProps({ nCommitsAhead: 1 })} />
+      );
+
+      expect(
+        toolbar.find('[data-test-id="push-badge"]').prop('invisible')
+      ).toEqual(false);
     });
 
     it('should display a button to refresh the current repository', () => {
