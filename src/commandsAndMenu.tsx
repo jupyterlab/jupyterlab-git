@@ -78,6 +78,7 @@ export namespace CommandIDs {
   // Context menu commands
   export const gitFileDiff = 'git:context-diff';
   export const gitFileDiscard = 'git:context-discard';
+  export const gitFileDelete = 'git:context-delete';
   export const gitFileOpen = 'git:context-open';
   export const gitFileUnstage = 'git:context-unstage';
   export const gitFileStage = 'git:context-stage';
@@ -474,6 +475,36 @@ export function addCommands(
       const selectedFile: Git.IStatusFile = args as any;
       if (selectedFile.x !== 'D') {
         await model.reset(selectedFile.to);
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.gitFileDelete, {
+    label: 'Delete',
+    caption: 'Delete this file',
+    execute: async args => {
+      const file: Git.IStatusFile = args as any;
+
+      const result = await showDialog({
+        title: 'Delete File',
+        body: (
+          <span>
+            Are you sure you want to permanently delete
+            <b>{file.to}</b>? This action cannot be undone.
+          </span>
+        ),
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
+      });
+      if (result.button.accept) {
+        try {
+          await app.commands.execute('docmanager:delete-file', {
+            path: model.getRelativeFilePath(file.to)
+          });
+        } catch (reason) {
+          showErrorMessage(`Deleting ${file.to} failed.`, reason, [
+            Dialog.warnButton({ label: 'DISMISS' })
+          ]);
+        }
       }
     }
   });
