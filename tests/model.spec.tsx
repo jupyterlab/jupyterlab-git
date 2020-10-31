@@ -196,48 +196,74 @@ describe('IGitExtension', () => {
   });
 
   describe('#status', () => {
-    it('should be an empty list if not in a git repository', async () => {
-      let status: Git.IStatusFileResult[] = [];
+    it('should be clear if not in a git repository', async () => {
+      let status: Partial<Git.IStatusResult> = {
+        branch: null,
+        remote: null,
+        ahead: 0,
+        behind: 0,
+        files: []
+      };
+
       mockResponses['status'] = {
         body: () => {
-          return { files: status as any };
+          return { code: 0, ...status } as any;
         }
       };
       expect(model.pathRepository).toBeNull();
-      expect(model.status).toHaveLength(0);
+      expect(model.status.branch).toBeNull();
+      expect(model.status.files).toHaveLength(0);
 
       model.pathRepository = '/path/to/server/repo';
+      const branch = 'master';
       await model.ready;
-      status = [{ x: '', y: '', from: '', to: '', is_binary: null }];
+      status = {
+        branch,
+        remote: null,
+        ahead: 0,
+        behind: 0,
+        files: [{ x: '', y: '', from: '', to: '', is_binary: null }]
+      };
       await model.refreshStatus();
-      expect(model.status).toHaveLength(1);
+      expect(model.status.branch).toEqual(branch);
+      expect(model.status.files).toHaveLength(1);
 
       model.pathRepository = null;
       await model.ready;
       await model.refreshStatus();
-      expect(model.status).toHaveLength(0);
+      expect(model.status.branch).toBeNull();
+      expect(model.status.files).toHaveLength(0);
     });
 
     it('should emit a signal if when set', async () => {
-      let status: Git.IStatusFileResult[] = [];
+      const branch = 'master';
+      const status: Partial<Git.IStatusResult> = {
+        branch,
+        remote: null,
+        ahead: 0,
+        behind: 0,
+        files: [{ x: '', y: '', from: '', to: '', is_binary: null }]
+      };
+
       mockResponses['status'] = {
         body: () => {
-          return { files: status as any };
+          return { code: 0, ...status } as any;
         }
       };
 
       const testSignal = testEmission(model.statusChanged, {
-        test: (model, files) => {
-          expect(files).toHaveLength(status.length);
-          expect(files[0]).toMatchObject<Git.IStatusFileResult>({
-            ...status[0]
+        test: (model, receivedStatus) => {
+          expect(receivedStatus.branch).toEqual(branch);
+          expect(receivedStatus.files).toHaveLength(status.files.length);
+          expect(receivedStatus.files[0]).toMatchObject<Git.IStatusFileResult>({
+            ...status.files[0]
           });
         }
       });
 
       model.pathRepository = '/path/to/server/repo';
       await model.ready;
-      status = [{ x: '', y: '', from: '', to: '', is_binary: null }];
+
       await model.refreshStatus();
       await testSignal;
     });

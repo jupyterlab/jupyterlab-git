@@ -4,7 +4,7 @@ import 'jest';
 import * as React from 'react';
 import { CommandIDs } from '../../src/commandsAndMenu';
 import { ActionButton } from '../../src/components/ActionButton';
-import { Toolbar } from '../../src/components/Toolbar';
+import { IToolbarProps, Toolbar } from '../../src/components/Toolbar';
 import * as git from '../../src/git';
 import { Logger } from '../../src/logger';
 import { GitExtension } from '../../src/model';
@@ -26,6 +26,23 @@ async function createModel() {
 describe('Toolbar', () => {
   let model: GitExtension;
 
+  function createProps(props?: Partial<IToolbarProps>): IToolbarProps {
+    return {
+      currentBranch: 'master',
+      branches: new Array<Git.IBranch>(),
+      repository: model.pathRepository,
+      model: model,
+      branching: false,
+      logger: new Logger(),
+      nCommitsAhead: 0,
+      nCommitsBehind: 0,
+      commands: {
+        execute: jest.fn()
+      } as any,
+      ...props
+    };
+  }
+
   beforeEach(async () => {
     jest.restoreAllMocks();
 
@@ -37,118 +54,45 @@ describe('Toolbar', () => {
 
   describe('constructor', () => {
     it('should return a new instance', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const el = new Toolbar(props);
-      expect(el).toBeInstanceOf(Toolbar);
+      const el = shallow(<Toolbar {...createProps()} />);
+      expect(el.instance()).toBeInstanceOf(Toolbar);
     });
 
     it('should set the default flag indicating whether to show a branch menu to `false`', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const el = new Toolbar(props);
-      expect(el.state.branchMenu).toEqual(false);
+      const el = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      expect(el.state().branchMenu).toEqual(false);
     });
   });
 
   describe('render', () => {
     it('should display a button to pull the latest changes', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const nodes = node
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const nodes = toolbar
         .find(ActionButton)
         .findWhere(n => n.prop('icon') === pullIcon);
       expect(nodes.length).toEqual(1);
     });
 
     it('should set the `title` attribute on the button to pull the latest changes', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const button = toolbar
         .find(ActionButton)
-        .findWhere(n => n.prop('icon') === pullIcon)
-        .first();
+        .findWhere(n => n.prop('icon') === pullIcon);
 
       expect(button.prop('title')).toEqual('Pull latest changes');
     });
 
     it('should display a button to push the latest changes', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const nodes = node
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const nodes = toolbar
         .find(ActionButton)
         .findWhere(n => n.prop('icon') === pushIcon);
       expect(nodes.length).toEqual(1);
     });
 
     it('should set the `title` attribute on the button to push the latest changes', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const button = toolbar
         .find(ActionButton)
         .findWhere(n => n.prop('icon') === pushIcon)
         .first();
@@ -157,20 +101,8 @@ describe('Toolbar', () => {
     });
 
     it('should display a button to refresh the current repository', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const nodes = node
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const nodes = toolbar
         .find(ActionButton)
         .findWhere(n => n.prop('icon') === refreshIcon);
 
@@ -178,20 +110,8 @@ describe('Toolbar', () => {
     });
 
     it('should set the `title` attribute on the button to refresh the current repository', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const button = toolbar
         .find(ActionButton)
         .findWhere(n => n.prop('icon') === refreshIcon)
         .first();
@@ -202,60 +122,24 @@ describe('Toolbar', () => {
     });
 
     it('should display a button to toggle a repository menu', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${toolbarMenuButtonClass}`).first();
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const button = toolbar.find(`.${toolbarMenuButtonClass}`).first();
 
       const text = button.text();
       expect(text.includes('Current Repository')).toEqual(true);
     });
 
     it('should set the `title` attribute on the button to toggle a repository menu', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${toolbarMenuButtonClass}`).first();
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const button = toolbar.find(`.${toolbarMenuButtonClass}`).first();
 
       const bool = button.prop('title').includes('Current repository: ');
       expect(bool).toEqual(true);
     });
 
     it('should display a button to toggle a branch menu', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const button = toolbar.find(`.${toolbarMenuButtonClass}`).at(1);
 
       const text = button.text();
       expect(text.includes('Current Branch')).toEqual(true);
@@ -263,20 +147,10 @@ describe('Toolbar', () => {
 
     it('should set the `title` attribute on the button to toggle a branch menu', () => {
       const currentBranch = 'master';
-      const props = {
-        currentBranch,
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
+      const toolbar = shallow<Toolbar>(
+        <Toolbar {...createProps({ currentBranch })} />
+      );
+      const button = toolbar.find(`.${toolbarMenuButtonClass}`).at(1);
 
       expect(button.prop('title')).toEqual('Manage branches and tags');
     });
@@ -284,62 +158,34 @@ describe('Toolbar', () => {
 
   describe('branch menu', () => {
     it('should not, by default, display a branch menu', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const nodes = node.find('BranchMenu');
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const nodes = toolbar.find('BranchMenu');
 
       expect(nodes.length).toEqual(0);
     });
 
     it('should display a branch menu when the button to display a branch menu is clicked', () => {
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node.find(`.${toolbarMenuButtonClass}`).at(1);
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const button = toolbar.find(`.${toolbarMenuButtonClass}`).at(1);
 
       button.simulate('click');
-      expect(node.find('BranchMenu').length).toEqual(1);
+      expect(toolbar.find('BranchMenu').length).toEqual(1);
     });
   });
 
   describe('pull changes', () => {
     it('should pull changes when the button to pull the latest changes is clicked', () => {
       const mockedExecute = jest.fn();
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: mockedExecute
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node
+      const toolbar = shallow<Toolbar>(
+        <Toolbar
+          {...createProps({
+            commands: {
+              execute: mockedExecute
+            } as any
+          })}
+        />
+      );
+      const button = toolbar
         .find(ActionButton)
         .findWhere(n => n.prop('icon') === pullIcon)
         .first();
@@ -353,20 +199,16 @@ describe('Toolbar', () => {
   describe('push changes', () => {
     it('should push changes when the button to push the latest changes is clicked', () => {
       const mockedExecute = jest.fn();
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        
-        commands: {
-          execute: mockedExecute
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node
+      const toolbar = shallow<Toolbar>(
+        <Toolbar
+          {...createProps({
+            commands: {
+              execute: mockedExecute
+            } as any
+          })}
+        />
+      );
+      const button = toolbar
         .find(ActionButton)
         .findWhere(n => n.prop('icon') === pushIcon)
         .first();
@@ -380,19 +222,8 @@ describe('Toolbar', () => {
   describe('refresh repository', () => {
     it('should refresh the repository when the button to refresh the repository is clicked', () => {
       const spy = jest.spyOn(model, 'refresh');
-      const props = {
-        currentBranch: 'master',
-        branches: new Array<Git.IBranch>(),
-        repository: model.pathRepository,
-        model: model,
-        branching: false,
-        logger: new Logger(),
-        commands: {
-          execute: jest.fn()
-        } as any
-      };
-      const node = shallow(<Toolbar {...props} />);
-      const button = node
+      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
+      const button = toolbar
         .find(ActionButton)
         .findWhere(n => n.prop('icon') === refreshIcon)
         .first();
@@ -400,7 +231,7 @@ describe('Toolbar', () => {
       button.simulate('click');
       expect(spy).toHaveBeenCalledTimes(1);
 
-      spy.mockReset()
+      spy.mockReset();
       spy.mockRestore();
     });
   });
