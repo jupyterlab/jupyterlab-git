@@ -32,7 +32,7 @@ CHECK_LOCK_INTERVAL_S = 0.1
 GIT_VERSION_REGEX = re.compile(r"^git\sversion\s(?P<version>\d+(.\d+)*)")
 # Parse Git branch status
 GIT_BRANCH_STATUS = re.compile(
-    r"^## (?P<branch>([\w\-/\.]+|HEAD \(no branch\)|No commits yet on master))(\.\.\.(?P<remote>[\w\-/\.]+)( \[(ahead (?P<ahead>\d+))?(, )?(behind (?P<behind>\d+))?\])?)?$"
+    r"^## (?P<branch>([\w\-/]+|HEAD \(no branch\)|No commits yet on \w+))(\.\.\.(?P<remote>[\w\-/]+)( \[(ahead (?P<ahead>\d+))?(, )?(behind (?P<behind>\d+))?\])?)?$"
 )
 
 execution_lock = tornado.locks.Lock()
@@ -355,7 +355,7 @@ class Git:
                 branch = d.get("branch")
                 if branch == "HEAD (no branch)":
                     branch = "(detached)"
-                elif branch == "No commits yet on master":
+                elif branch.startswith("No commits yet on "):
                     branch = "(initial)"
                 data["branch"] = branch
                 data["remote"] = d.get("remote")
