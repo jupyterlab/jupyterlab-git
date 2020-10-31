@@ -119,6 +119,82 @@ describe('IGitExtension', () => {
     });
   });
 
+  describe('#showPrefix', () => {
+    it('should return a string if the folder is a git repository', async () => {
+      const fakeRepo = '/repo';
+      mockResponses['show_prefix'] = {
+        body: () => {
+          return { code: 0, under_repo_path: fakeRepo };
+        }
+      };
+      const topLevel = await model.showPrefix('/repo/cwd');
+      expect(topLevel).toEqual(fakeRepo);
+    });
+
+    it('should return null if the repository is not a git repository', async () => {
+      mockResponses['show_prefix'] = {
+        body: () => {
+          return { code: 128 };
+        },
+        status: 500
+      };
+      const topLevel = await model.showPrefix('/repo/cwd');
+      expect(topLevel).toBeNull();
+    });
+
+    it('should throw an exception if the server otherwise', async () => {
+      mockResponses['show_prefix'] = {
+        body: () => {
+          return { code: 128 };
+        },
+        status: 401
+      };
+      try {
+        await model.showPrefix('/repo/cwd');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Git.GitResponseError);
+      }
+    });
+  });
+
+  describe('#showTopLevel', () => {
+    it('should return a string if the folder is a git repository', async () => {
+      const fakeRepo = '/path/to/repo';
+      mockResponses['show_top_level'] = {
+        body: () => {
+          return { code: 0, top_repo_path: fakeRepo };
+        }
+      };
+      const topLevel = await model.showTopLevel('/path/to/repo/cwd');
+      expect(topLevel).toEqual(fakeRepo);
+    });
+
+    it('should return null if the repository is not a git repository', async () => {
+      mockResponses['show_top_level'] = {
+        body: () => {
+          return { code: 128 };
+        },
+        status: 500
+      };
+      const topLevel = await model.showTopLevel('/path/to/repo/cwd');
+      expect(topLevel).toBeNull();
+    });
+
+    it('should throw an exception if the server otherwise', async () => {
+      mockResponses['show_top_level'] = {
+        body: () => {
+          return { code: 128 };
+        },
+        status: 401
+      };
+      try {
+        await model.showTopLevel('/path/to/repo/cwd');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Git.GitResponseError);
+      }
+    });
+  });
+
   describe('#status', () => {
     it('should be an empty list if not in a git repository', async () => {
       let status: Git.IStatusFileResult[] = [];
