@@ -16,6 +16,7 @@ import pushSvg from '../../style/icons/push.svg';
 import removeSvg from '../../style/icons/remove.svg';
 import rewindSvg from '../../style/icons/rewind.svg';
 import tagSvg from '../../style/icons/tag.svg';
+import trashSvg from '../../style/icons/trash.svg';
 
 export const gitIcon = new LabIcon({ name: 'git', svgstr: gitSvg });
 export const addIcon = new LabIcon({
@@ -73,4 +74,8 @@ export const rewindIcon = new LabIcon({
 export const tagIcon = new LabIcon({
   name: 'git:tag',
   svgstr: tagSvg
+});
+export const trashIcon = new LabIcon({
+  name: 'git:trash',
+  svgstr: trashSvg
 });
