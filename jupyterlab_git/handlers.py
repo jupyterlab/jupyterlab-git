@@ -234,6 +234,31 @@ class GitBranchHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+class GitBranchDeleteHandler(GitHandler):
+    """
+    Handler for 'git branch -D <branch>'
+    """
+
+    @web.authenticated
+    async def post(self):
+        """
+        POST request handler, delete branch in current repository.
+
+        Body: {
+            "current_path": Git repository path relatively to the server root,
+            "branch": Branch name to be deleted
+        }
+        """
+        data = self.get_json_body()
+        result = await self.git.delete_branch(data["current_path"], data["branch"])
+
+        if result["code"] != 0:
+            self.set_status(500)
+            self.finish(json.dumps(result))
+        else:
+            self.set_status(204)
+
+
 class GitAddHandler(GitHandler):
     """
     Handler for git add <filename>'.
@@ -747,6 +772,7 @@ def setup_handlers(web_app):
         ("/git/add_all_untracked", GitAddAllUntrackedHandler),
         ("/git/all_history", GitAllHistoryHandler),
         ("/git/branch", GitBranchHandler),
+        ("/git/branch_delete", GitBranchDeleteHandler),
         ("/git/changed_files", GitChangedFilesHandler),
         ("/git/checkout", GitCheckoutHandler),
         ("/git/clone", GitCloneHandler),

@@ -497,6 +497,15 @@ class Git:
             "current_branch": heads["current_branch"],
         }
 
+    async def branch_delete(self, current_path, branch):
+        """Execute 'git branch -D <branchname>'"""
+        cmd = ["git", "branch", "-D", branch]
+        code, _, error = await execute(
+            cmd, cwd=os.path.join(self.root_dir, current_path)
+        )
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
     async def branch_heads(self, current_path):
         """
         Execute 'git for-each-ref' command on refs/heads & return the result.
