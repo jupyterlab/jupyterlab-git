@@ -44,7 +44,7 @@
     "refreshIfHidden": {
       "type": "boolean",
       "title": "Refresh if Git tab is hidden",
-      "description": "Whether to refresh even if Git tab is hidden",
+      "description": "Whether to refresh even if the Git tab is hidden",
       "default": false
     },
     "refreshInterval": {
