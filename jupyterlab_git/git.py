@@ -30,6 +30,10 @@ MAX_WAIT_FOR_LOCK_S = 5
 CHECK_LOCK_INTERVAL_S = 0.1
 # Parse Git version output
 GIT_VERSION_REGEX = re.compile(r"^git\sversion\s(?P<version>\d+(.\d+)*)")
+# Parse Git branch status
+GIT_BRANCH_STATUS = re.compile(
+    r"^## (?P<branch>([\w\-/\.]+|HEAD \(no branch\)|No commits yet on master))(\.\.\.(?P<remote>[\w\-/\.]+)( \[(ahead (?P<ahead>\d+))?(, )?(behind (?P<behind>\d+))?\])?)?$"
+)
 
 execution_lock = tornado.locks.Lock()
 
@@ -298,8 +302,8 @@ class Git:
         """
         Execute git status command & return the result.
         """
-        cmd = ["git", "status", "--porcelain", "-u", "-z"]
-        code, my_output, my_error = await execute(
+        cmd = ["git", "status", "--porcelain", "-b", "-u", "-z"]
+        code, status, my_error = await execute(
             cmd,
             cwd=os.path.join(self.root_dir, current_path),
         )
@@ -331,21 +335,52 @@ class Git:
                 diff, name = line.rsplit("\t", maxsplit=1)
                 are_binary[name] = diff.startswith("-\t-")
 
+        data = {
+            "code": code,
+            "branch": None,
+            "remote": None,
+            "ahead": 0,
+            "behind": 0,
+            "files": [],
+        }
         result = []
-        line_iterable = (line for line in strip_and_split(my_output) if line)
-        for line in line_iterable:
-            name = line[3:]
-            result.append(
-                {
-                    "x": line[0],
-                    "y": line[1],
-                    "to": name,
-                    # if file was renamed, next line contains original path
-                    "from": next(line_iterable) if line[0] == "R" else name,
-                    "is_binary": are_binary.get(name, None),
-                }
-            )
-        return {"code": code, "files": result}
+        line_iterable = (line for line in strip_and_split(status) if line)
+
+        try:
+            first_line = next(line_iterable)
+            # Interpret branch line
+            match = GIT_BRANCH_STATUS.match(first_line)
+            if match is not None:
+                d = match.groupdict()
+                branch = d.get("branch")
+                if branch == "HEAD (no branch)":
+                    branch = "(detached)"
+                elif branch == "No commits yet on master":
+                    branch = "(initial)"
+                data["branch"] = branch
+                data["remote"] = d.get("remote")
+                data["ahead"] = int(d.get("ahead") or 0)
+                data["behind"] = int(d.get("behind") or 0)
+
+            # Interpret file lines
+            for line in line_iterable:
+                name = line[3:]
+                result.append(
+                    {
+                        "x": line[0],
+                        "y": line[1],
+                        "to": name,
+                        # if file was renamed, next line contains original path
+                        "from": next(line_iterable) if line[0] == "R" else name,
+                        "is_binary": are_binary.get(name, None),
+                    }
+                )
+
+            data["files"] = result
+        except StopIteration:  # Raised if line_iterable is empty
+            pass
+
+        return data
 
     async def log(self, current_path, history_count=10):
         """

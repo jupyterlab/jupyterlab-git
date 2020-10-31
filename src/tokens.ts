@@ -54,14 +54,14 @@ export interface IGitExtension extends IDisposable {
   refreshStandbyCondition: () => boolean;
 
   /**
-   * Files list resulting of a Git status call.
+   * Git repository status.
    */
-  readonly status: Git.IStatusFileResult[];
+  readonly status: Git.IStatus;
 
   /**
    * A signal emitted when the current status of the Git repository changes.
    */
-  readonly statusChanged: ISignal<IGitExtension, Git.IStatusFileResult[]>;
+  readonly statusChanged: ISignal<IGitExtension, Git.IStatus>;
 
   /**
    * A signal emitted whenever a model task event occurs.
@@ -561,6 +561,32 @@ export namespace Git {
     prev_content: string;
   }
 
+  /**
+   * Git repository status
+   */
+  export interface IStatus {
+    /**
+     * Current branch
+     */
+    branch: string | null;
+    /**
+     * Tracked upstream branch
+     */
+    remote: string | null;
+    /**
+     * Number of commits ahead
+     */
+    ahead: number;
+    /**
+     * Number of commits behind
+     */
+    behind: number;
+    /**
+     * Files status
+     */
+    files: IStatusFile[];
+  }
+
   /** Interface for GitStatus request result,
    * has the status of each changed file
    */
@@ -586,6 +612,10 @@ export namespace Git {
    */
   export interface IStatusResult {
     code: number;
+    branch?: string;
+    remote?: string | null;
+    ahead?: number;
+    behind?: number;
     files?: IStatusFileResult[];
   }
 

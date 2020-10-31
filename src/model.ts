@@ -36,6 +36,9 @@ export class GitExtension implements IGitExtension {
     this._settings = settings || null;
     this._taskHandler = new TaskHandler(this);
 
+    // Initialize repository status
+    this._clearStatus();
+
     let interval: number;
     if (settings) {
       interval = settings.composite.refreshInterval as number;
@@ -147,13 +150,9 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * A list of modified files.
-   *
-   * ## Notes
-   *
-   * -   The file list corresponds to the list of files from `git status`.
+   * Git repository status
    */
-  get status(): Git.IStatusFile[] {
+  get status(): Git.IStatus {
     return this._status;
   }
 
@@ -181,7 +180,7 @@ export class GitExtension implements IGitExtension {
   /**
    * A signal emitted when the current status of the Git repository changes.
    */
-  get statusChanged(): ISignal<IGitExtension, Git.IStatusFile[]> {
+  get statusChanged(): ISignal<IGitExtension, Git.IStatus> {
     return this._statusChanged;
   }
 
@@ -767,7 +766,7 @@ export class GitExtension implements IGitExtension {
     try {
       path = await this._getPathRespository();
     } catch (error) {
-      this._setStatus([]);
+      this._clearStatus();
       if (!(error instanceof Git.NotInRepository)) {
         throw error;
       }
@@ -784,18 +783,22 @@ export class GitExtension implements IGitExtension {
         }
       );
 
-      this._setStatus(
-        data.files.map(file => {
+      this._setStatus({
+        branch: data.branch || null,
+        remote: data.remote || null,
+        ahead: data.ahead || 0,
+        behind: data.behind || 0,
+        files: data.files?.map(file => {
           return {
             ...file,
             status: decodeStage(file.x, file.y),
             type: this._resolveFileType(file.to)
           };
         })
-      );
+      });
     } catch (err) {
       // TODO we should notify the user
-      this._setStatus([]);
+      this._clearStatus();
       console.error(err);
       return;
     }
@@ -1105,6 +1108,19 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Clear repository status
+   */
+  protected _clearStatus() {
+    this._status = {
+      branch: null,
+      remote: null,
+      ahead: 0,
+      behind: 0,
+      files: []
+    };
+  }
+
+  /**
    * Get the current Git repository path
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
@@ -1139,7 +1155,7 @@ export class GitExtension implements IGitExtension {
    *
    * @param v - repository status
    */
-  protected _setStatus(v: Git.IStatusFile[]) {
+  protected _setStatus(v: Git.IStatus) {
     this._status = v;
     this._statusChanged.emit(this._status);
   }
@@ -1225,7 +1241,7 @@ export class GitExtension implements IGitExtension {
     this.__currentMarker = this._markerCache.get(path, branch);
   }
 
-  private _status: Git.IStatusFile[] = [];
+  private _status: Git.IStatus;
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[];
   private _currentBranch: Git.IBranch;
@@ -1249,7 +1265,7 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     IChangedArgs<string | null>
   >(this);
-  private _statusChanged = new Signal<IGitExtension, Git.IStatusFile[]>(this);
+  private _statusChanged = new Signal<IGitExtension, Git.IStatus>(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {

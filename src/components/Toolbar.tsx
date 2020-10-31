@@ -18,6 +18,7 @@ import {
 } from '../style/GitPanel';
 import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import {
+  badgeClass,
   spacer,
   toolbarButtonClass,
   toolbarClass,
@@ -36,7 +37,7 @@ import { BranchMenu } from './BranchMenu';
 import { TagMenu } from './TagMenu';
 
 /**
- * Interface describing component properties.
+ * Interface describing  properties.
  */
 export interface IToolbarProps {
   /**
@@ -68,6 +69,16 @@ export interface IToolbarProps {
    * Git extension data model.
    */
   model: IGitExtension;
+
+  /**
+   * Number of commits ahead
+   */
+  nCommitsAhead: number;
+
+  /**
+   * Number of commits behind
+   */
+  nCommitsBehind: number;
 
   /**
    * Current repository.
@@ -133,20 +144,38 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarNavClass}>
         <span className={spacer} />
-        <Badge>
+        <Badge
+          className={badgeClass}
+          variant="dot"
+          invisible={this.props.nCommitsBehind === 0}
+        >
           <ActionButton
             className={toolbarButtonClass}
             icon={pullIcon}
             onClick={this._onPullClick}
-            title={'Pull latest changes'}
+            title={
+              'Pull latest changes' +
+              (this.props.nCommitsBehind > 0
+                ? ` (behind by ${this.props.nCommitsBehind} commits)`
+                : '')
+            }
           />
         </Badge>
-        <Badge>
+        <Badge
+          className={badgeClass}
+          variant="dot"
+          invisible={this.props.nCommitsAhead === 0}
+        >
           <ActionButton
             className={toolbarButtonClass}
             icon={pushIcon}
             onClick={this._onPushClick}
-            title={'Push committed changes'}
+            title={
+              'Push committed changes' +
+              (this.props.nCommitsAhead > 0
+                ? ` (ahead by ${this.props.nCommitsAhead} commits)`
+                : '')
+            }
           />
         </Badge>
 

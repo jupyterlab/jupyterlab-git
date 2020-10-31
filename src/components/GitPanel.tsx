@@ -81,6 +81,16 @@ export interface IGitPanelState {
   files: Git.IStatusFile[];
 
   /**
+   * Number of commits ahead
+   */
+  nCommitsAhead: number;
+
+  /**
+   * Number of commits behind
+   */
+  nCommitsBehind: number;
+
+  /**
    * List of prior commits.
    */
   pastCommits: Git.ISingleCommitInfo[];
@@ -108,8 +118,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       branches: [],
       currentBranch: '',
       files: [],
-      repository: null,
+      nCommitsAhead: 0,
+      nCommitsBehind: 0,
       pastCommits: [],
+      repository: null,
       tab: 0
     };
   }
@@ -127,7 +139,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.refreshView();
     }, this);
     model.statusChanged.connect(() => {
-      this.setState({ files: model.status });
+      this.setState({
+        files: model.status.files,
+        nCommitsAhead: model.status.ahead,
+        nCommitsBehind: model.status.behind
+      });
     }, this);
     model.headChanged.connect(async () => {
       await this.refreshBranch();
@@ -272,6 +288,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         commands={this.props.commands}
         logger={this.props.logger}
         model={this.props.model}
+        nCommitsAhead={this.state.nCommitsAhead}
+        nCommitsBehind={this.state.nCommitsBehind}
         repository={this.state.repository || ''}
       />
     );
