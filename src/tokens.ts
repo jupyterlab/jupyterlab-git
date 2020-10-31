@@ -49,6 +49,11 @@ export interface IGitExtension extends IDisposable {
   ready: Promise<void>;
 
   /**
+   * Custom model refresh standby condition
+   */
+  refreshStandbyCondition: () => boolean;
+
+  /**
    * Files list resulting of a Git status call.
    */
   readonly status: Git.IStatusFileResult[];

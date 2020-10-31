@@ -36,6 +36,20 @@ export class GitExtension implements IGitExtension {
     this._settings = settings || null;
     this._taskHandler = new TaskHandler(this);
 
+    /**
+     * Standby refresh if
+     * - webpage is hidden
+     * - not in a git repository
+     * - standby condition is true
+     */
+    const refreshStandby = (): boolean | Poll.Standby => {
+      if (this.pathRepository === null || this._standbyCondition()) {
+        return true;
+      }
+
+      return 'when-hidden';
+    };
+
     let interval: number;
     if (settings) {
       interval = settings.composite.refreshInterval as number;
@@ -50,7 +64,7 @@ export class GitExtension implements IGitExtension {
         backoff: true,
         max: 300 * 1000
       },
-      standby: 'when-hidden'
+      standby: refreshStandby
     });
     this._poll = poll;
 
@@ -150,6 +164,16 @@ export class GitExtension implements IGitExtension {
           console.error(`Fail to find Git top level for path ${v}.\n${reason}`);
         });
     }
+  }
+
+  /**
+   * Custom model refresh standby condition
+   */
+  get refreshStandbyCondition(): () => boolean {
+    return this._standbyCondition;
+  }
+  set refreshStandbyCondition(v: () => boolean) {
+    this._standbyCondition = v;
   }
 
   /**
@@ -1174,6 +1198,7 @@ export class GitExtension implements IGitExtension {
   private _pendingReadyPromise = 0;
   private _poll: Poll;
   private _settings: ISettingRegistry.ISettings | null;
+  private _standbyCondition: () => boolean = () => false;
   private _taskHandler: TaskHandler<IGitExtension>;
 
   private _headChanged = new Signal<IGitExtension, void>(this);

@@ -30,6 +30,10 @@ export class GitWidget extends ReactWidget {
     this._filebrowser = filebrowser;
     this._model = model;
     this._settings = settings;
+
+    // Add refresh standby condition if this widget is hidden
+    model.refreshStandbyCondition = () =>
+      !this._settings.composite['refreshIfHidden'] && this.isHidden;
   }
 
   render() {

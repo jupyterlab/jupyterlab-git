@@ -41,6 +41,12 @@
       "description": "Number of (most recent) commits shown in the history log",
       "default": 25
     },
+    "refreshIfHidden": {
+      "type": "boolean",
+      "title": "Refresh if Git tab is hidden",
+      "description": "Whether to refresh even if Git tab is hidden",
+      "default": false
+    },
     "refreshInterval": {
       "type": "integer",
       "title": "Refresh interval",
