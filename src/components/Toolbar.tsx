@@ -5,7 +5,7 @@ import {
   refreshIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import { Tab, Tabs } from '@material-ui/core';
+import { Badge, Tab, Tabs } from '@material-ui/core';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { CommandIDs } from '../commandsAndMenu';
@@ -133,18 +133,23 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarNavClass}>
         <span className={spacer} />
-        <ActionButton
-          className={toolbarButtonClass}
-          icon={pullIcon}
-          onClick={this._onPullClick}
-          title={'Pull latest changes'}
-        />
-        <ActionButton
-          className={toolbarButtonClass}
-          icon={pushIcon}
-          onClick={this._onPushClick}
-          title={'Push committed changes'}
-        />
+        <Badge>
+          <ActionButton
+            className={toolbarButtonClass}
+            icon={pullIcon}
+            onClick={this._onPullClick}
+            title={'Pull latest changes'}
+          />
+        </Badge>
+        <Badge>
+          <ActionButton
+            className={toolbarButtonClass}
+            icon={pushIcon}
+            onClick={this._onPushClick}
+            title={'Push committed changes'}
+          />
+        </Badge>
+
         <ActionButton
           className={toolbarButtonClass}
           icon={refreshIcon}
