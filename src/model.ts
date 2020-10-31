@@ -857,15 +857,31 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async showPrefix(path: string): Promise<Git.IShowPrefixResult> {
-    return await this._taskHandler.execute<Git.IShowPrefixResult>(
-      'git:fetch:prefix_path',
-      async () => {
-        return await requestAPI<Git.IShowPrefixResult>('show_prefix', 'POST', {
-          current_path: path
-        });
+  async showPrefix(path: string): Promise<string | null> {
+    try {
+      const data = await this._taskHandler.execute<Git.IShowPrefixResult>(
+        'git:fetch:prefix_path',
+        async () => {
+          return await requestAPI<Git.IShowPrefixResult>(
+            'show_prefix',
+            'POST',
+            {
+              current_path: path
+            }
+          );
+        }
+      );
+      return data.under_repo_path || null;
+    } catch (error) {
+      if (
+        error instanceof Git.GitResponseError &&
+        error.response.status === 500 &&
+        error.json.code === 128
+      ) {
+        return null;
       }
-    );
+      throw error;
+    }
   }
 
   /**
