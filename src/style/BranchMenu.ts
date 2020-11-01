@@ -1,7 +1,7 @@
 import { style } from 'typestyle';
 import { showButtonOnHover } from './ActionButtonStyle';
 
-export const branchNameClass = style({
+export const nameClass = style({
   flex: '1 1 auto',
   textOverflow: 'ellipsis',
   overflow: 'hidden',

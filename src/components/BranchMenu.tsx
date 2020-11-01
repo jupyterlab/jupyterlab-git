@@ -9,7 +9,7 @@ import { Logger } from '../logger';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
   activeListItemClass,
-  branchNameClass,
+  nameClass,
   filterClass,
   filterClearClass,
   filterInputClass,
@@ -257,7 +257,7 @@ export class BranchMenu extends React.Component<
         style={style}
       >
         <branchIcon.react className={listItemIconClass} tag="span" />
-        <span className={branchNameClass}>{branch.name}</span>
+        <span className={nameClass}>{branch.name}</span>
         {!branch.is_remote_branch && !isActive && (
           <ActionButton
             className={hiddenButtonStyle}
@@ -329,7 +329,11 @@ export class BranchMenu extends React.Component<
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
     });
     if (acknowledgement.button.accept) {
-      await this.props.model.deleteBranch(branchName);
+      try {
+        await this.props.model.deleteBranch(branchName);
+      } catch (error) {
+        console.error(`Failed to delete branch ${branchName}`, error);
+      }
     }
   };
 
