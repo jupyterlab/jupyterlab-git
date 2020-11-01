@@ -36,52 +36,22 @@ export class GitExtension implements IGitExtension {
     this._settings = settings || null;
     this._taskHandler = new TaskHandler(this);
 
-    /**
-     * Standby refresh if
-     * - webpage is hidden
-     * - not in a git repository
-     * - standby condition is true
-     */
-    const refreshStandby = (): boolean | Poll.Standby => {
-      if (this.pathRepository === null || this._standbyCondition()) {
-        return true;
-      }
-
-      return 'when-hidden';
-    };
-
     let interval: number;
     if (settings) {
       interval = settings.composite.refreshInterval as number;
-      settings.changed.connect(onSettingsChange, this);
+      settings.changed.connect(this._onSettingsChange, this);
     } else {
       interval = DEFAULT_REFRESH_INTERVAL;
     }
-    const poll = new Poll({
-      factory: () => this.refresh(),
+    this._poll = new Poll({
+      factory: this._refreshModel,
       frequency: {
         interval: interval,
         backoff: true,
         max: 300 * 1000
       },
-      standby: refreshStandby
+      standby: this._refreshStandby
     });
-    this._poll = poll;
-
-    /**
-     * Callback invoked upon a change to plugin settings.
-     *
-     * @private
-     * @param settings - settings registry
-     */
-    function onSettingsChange(settings: ISettingRegistry.ISettings) {
-      const freq = poll.frequency;
-      poll.frequency = {
-        interval: settings.composite.refreshInterval as number,
-        backoff: freq.backoff,
-        max: freq.max
-      };
-    }
   }
 
   /**
@@ -714,10 +684,8 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon refreshing the repository
    */
   async refresh(): Promise<void> {
-    await this._taskHandler.execute<void>('git:refresh', async () => {
-      await this.refreshBranch();
-      await this.refreshStatus();
-    });
+    await this._poll.refresh();
+    await this._poll.tick;
   }
 
   /**
@@ -1148,11 +1116,24 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Callback invoked upon a change to plugin settings.
+   *
+   * @private
+   * @param settings - plugin settings
+   */
+  private _onSettingsChange(settings: ISettingRegistry.ISettings) {
+    this._poll.frequency = {
+      ...this._poll.frequency,
+      interval: settings.composite.refreshInterval as number
+    };
+  }
+
+  /**
    * open new editor or show an existing editor of the
    * .gitignore file. If the editor does not have unsaved changes
    * then ensure the editor's content matches the file on disk
    */
-  private _openGitignore() {
+  private _openGitignore(): void {
     if (this._docmanager) {
       const widget = this._docmanager.openOrReveal(
         this.getRelativeFilePath('.gitignore')
@@ -1162,6 +1143,34 @@ export class GitExtension implements IGitExtension {
       }
     }
   }
+
+  /**
+   * Refresh model status through a Poll
+   */
+  private _refreshModel = async (): Promise<void> => {
+    await this._taskHandler.execute<void>('git:refresh', async () => {
+      await this.refreshBranch();
+      await this.refreshStatus();
+    });
+  };
+
+  /**
+   * Standby test function for the refresh Poll
+   *
+   * Standby refresh if
+   * - webpage is hidden
+   * - not in a git repository
+   * - standby condition is true
+   *
+   * @returns The test function
+   */
+  private _refreshStandby = (): boolean | Poll.Standby => {
+    if (this.pathRepository === null || this._standbyCondition()) {
+      return true;
+    }
+
+    return 'when-hidden';
+  };
 
   /**
    * if file is open in JupyterLab find the widget and ensure the JupyterLab

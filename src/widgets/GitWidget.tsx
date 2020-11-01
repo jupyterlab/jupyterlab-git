@@ -2,6 +2,7 @@ import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
+import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Feedback } from '../components/Feedback';
@@ -32,11 +33,31 @@ export class GitWidget extends ReactWidget {
     this._settings = settings;
 
     // Add refresh standby condition if this widget is hidden
-    model.refreshStandbyCondition = () =>
+    model.refreshStandbyCondition = (): boolean =>
       !this._settings.composite['refreshIfHidden'] && this.isHidden;
   }
 
-  render() {
+  /**
+   * A message handler invoked on a `'before-show'` message.
+   *
+   * #### Notes
+   * The default implementation of this handler is a no-op.
+   */
+  onBeforeShow(msg: Message): void {
+    // Trigger refresh when the widget is displayed
+    this._model.refresh().catch(error => {
+      console.error('Fail to refresh model when displaying GitWidget.', error);
+    });
+    super.onBeforeShow(msg);
+  }
+
+  /**
+   * Render the content of this widget using the virtual DOM.
+   *
+   * This method will be called anytime the widget needs to be rendered, which
+   * includes layout triggered rendering.
+   */
+  render(): JSX.Element {
     return (
       <LoggerContext.Consumer>
         {logger => (
