@@ -302,11 +302,25 @@ class Git:
         """
         Execute git status command & return the result.
         """
+        cwd = os.path.join(self.root_dir, current_path)
+        # Start by fetching to get accurate ahead/behind status
+        cmd = [
+            "git",
+            "fetch",
+            "--all",
+            "--prune",
+        ]  # Run prune by default to help beginners
+        try:
+            code, _, fetch_error = await execute(cmd, cwd=cwd)
+        except BaseException as error:
+            code = -1
+            fetch_error = str(error)
+
+        if code != 0:
+            get_logger().warning(f"Error when fetching git data: {fetch_error}")
+
         cmd = ["git", "status", "--porcelain", "-b", "-u", "-z"]
-        code, status, my_error = await execute(
-            cmd,
-            cwd=os.path.join(self.root_dir, current_path),
-        )
+        code, status, my_error = await execute(cmd, cwd=cwd)
 
         if code != 0:
             return {
@@ -324,10 +338,7 @@ class Git:
             "--cached",
             "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
         ]
-        text_code, text_output, _ = await execute(
-            command,
-            cwd=os.path.join(self.root_dir, current_path),
-        )
+        text_code, text_output, _ = await execute(command, cwd=cwd)
 
         are_binary = dict()
         if text_code == 0:

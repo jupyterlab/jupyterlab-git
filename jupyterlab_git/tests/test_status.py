@@ -1,5 +1,6 @@
 # python lib
 import os
+from subprocess import CalledProcessError
 from unittest.mock import Mock, call, patch
 
 import pytest
@@ -174,6 +175,7 @@ async def test_status(output, diff_output, expected):
         root = "/bin"
         repository = "test_curr_path"
         mock_execute.side_effect = [
+            maybe_future((0, "", "")),
             maybe_future((0, "\x00".join(output) + "\x00", "")),
             maybe_future((0, "\x00".join(diff_output) + "\x00", "")),
         ]
@@ -186,6 +188,10 @@ async def test_status(output, diff_output, expected):
         # Then
         mock_execute.assert_has_calls(
             [
+                call(
+                    ["git", "fetch", "--all", "--prune"],
+                    cwd=os.path.join(root, repository),
+                ),
                 call(
                     ["git", "status", "--porcelain", "-b", "-u", "-z"],
                     cwd=os.path.join(root, repository),
@@ -205,3 +211,59 @@ async def test_status(output, diff_output, expected):
         )
 
         assert expected == actual_response
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "fetch_error",
+    (maybe_future((128, "", "")), CalledProcessError(returncode=128, cmd="git fetch")),
+)
+async def test_status_with_failing_fetch(fetch_error):
+    with patch("jupyterlab_git.git.execute") as mock_execute:
+        # Given
+        root = "/bin"
+        repository = "test_curr_path"
+        mock_execute.side_effect = [
+            fetch_error,
+            maybe_future((0, "## master\x00", "")),
+            maybe_future((0, "\x00", "")),
+        ]
+
+        # When
+        actual_response = await Git(FakeContentManager(root)).status(
+            current_path=repository
+        )
+
+        # Then
+        mock_execute.assert_has_calls(
+            [
+                call(
+                    ["git", "fetch", "--all", "--prune"],
+                    cwd=os.path.join(root, repository),
+                ),
+                call(
+                    ["git", "status", "--porcelain", "-b", "-u", "-z"],
+                    cwd=os.path.join(root, repository),
+                ),
+                call(
+                    [
+                        "git",
+                        "diff",
+                        "--numstat",
+                        "-z",
+                        "--cached",
+                        "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+                    ],
+                    cwd=os.path.join(root, repository),
+                ),
+            ]
+        )
+
+        assert actual_response == {
+            "code": 0,
+            "branch": "master",
+            "remote": None,
+            "ahead": 0,
+            "behind": 0,
+            "files": [],
+        }
