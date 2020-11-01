@@ -276,7 +276,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 ["git", "clone", unquote(repo_url), "-q"],
                 username=auth["username"],
                 password=auth["password"],
@@ -285,13 +285,13 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 ["git", "clone", unquote(repo_url)],
                 cwd=os.path.join(self.root_dir, current_path),
                 env=env,
             )
 
-        response = {"code": code}
+        response = {"code": code, "message": output.strip()}
 
         if code != 0:
             response["message"] = error.strip()
@@ -909,7 +909,7 @@ class Git:
                 cwd=os.path.join(self.root_dir, curr_fb_path),
             )
 
-        response = {"code": code}
+        response = {"code": code, "message": output.strip()}
 
         if code != 0:
             output = output.strip()
@@ -947,7 +947,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 command,
                 username=auth["username"],
                 password=auth["password"],
@@ -956,13 +956,13 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 command,
                 env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
             )
 
-        response = {"code": code}
+        response = {"code": code, "message": output.strip()}
 
         if code != 0:
             response["message"] = error.strip()

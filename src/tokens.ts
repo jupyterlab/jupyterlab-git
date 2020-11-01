@@ -185,7 +185,11 @@ export interface IGitExtension extends IDisposable {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  clone(path: string, url: string, auth?: Git.IAuth): Promise<Git.ICloneResult>;
+  clone(
+    path: string,
+    url: string,
+    auth?: Git.IAuth
+  ): Promise<Git.IResultWithMessage>;
 
   /**
    * Commit all staged file changes.
@@ -308,7 +312,7 @@ export interface IGitExtension extends IDisposable {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  pull(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
+  pull(auth?: Git.IAuth): Promise<Git.IResultWithMessage>;
 
   /**
    * Push local changes to a remote repository.
@@ -320,7 +324,7 @@ export interface IGitExtension extends IDisposable {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  push(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
+  push(auth?: Git.IAuth): Promise<Git.IResultWithMessage>;
 
   /**
    * General Git refresh
@@ -704,19 +708,17 @@ export namespace Git {
   }
 
   /**
-   * Structure for the result of the Git Clone API.
+   * Structure for commands with informative output
    */
-  export interface ICloneResult {
+  export interface IResultWithMessage {
+    /**
+     * Git process return code
+     */
     code: number;
-    message?: string;
-  }
-
-  /**
-   * Structure for the result of the Git Push & Pull API.
-   */
-  export interface IPushPullResult {
-    code: number;
-    message?: string;
+    /**
+     * Git process result message
+     */
+    message: string;
   }
 
   /**
@@ -799,6 +801,11 @@ export enum Level {
  * Interface describing a component log message.
  */
 export interface ILogMessage {
+  /**
+   * Detailed message
+   */
+  details?: string;
+
   /**
    * Error object.
    */

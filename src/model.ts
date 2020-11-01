@@ -415,11 +415,11 @@ export class GitExtension implements IGitExtension {
     path: string,
     url: string,
     auth?: Git.IAuth
-  ): Promise<Git.ICloneResult> {
-    return await this._taskHandler.execute<Git.ICloneResult>(
+  ): Promise<Git.IResultWithMessage> {
+    return await this._taskHandler.execute<Git.IResultWithMessage>(
       'git:clone',
       async () => {
-        return await requestAPI<Git.ICloneResult>('clone', 'POST', {
+        return await requestAPI<Git.IResultWithMessage>('clone', 'POST', {
           current_path: path,
           clone_url: url,
           auth: auth as any
@@ -652,12 +652,12 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async pull(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
+  async pull(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRespository();
-    const data = this._taskHandler.execute<Git.IPushPullResult>(
+    const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:pull',
       async () => {
-        return await requestAPI<Git.IPushPullResult>('pull', 'POST', {
+        return await requestAPI<Git.IResultWithMessage>('pull', 'POST', {
           current_path: path,
           auth: auth as any,
           cancel_on_conflict:
@@ -680,12 +680,12 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async push(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
+  async push(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRespository();
-    const data = this._taskHandler.execute<Git.IPushPullResult>(
+    const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
       async () => {
-        return await requestAPI<Git.IPushPullResult>('push', 'POST', {
+        return await requestAPI<Git.IResultWithMessage>('push', 'POST', {
           current_path: path,
           auth: auth as any
         });
