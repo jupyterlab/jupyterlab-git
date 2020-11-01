@@ -321,9 +321,9 @@ export class BranchMenu extends React.Component<
       title: 'Delete branch',
       body: (
         <p>
-          {`The branch '${branchName}' will be deleted. This can not be undone.`}
+          Are you sure you want to permanently delete the branch <b>{branchName}</b>?
           <br />
-          Please confirm you want to delete it.
+          This action cannot be undone.
         </p>
       ),
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
