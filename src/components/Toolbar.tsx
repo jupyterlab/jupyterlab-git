@@ -141,6 +141,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderTopNav(): React.ReactElement {
+    const activeBranch = this.props.branches.filter(
+      branch => branch.is_current_branch
+    );
+    const hasUpstream = activeBranch[0]?.upstream.length > 0 || false;
+
     return (
       <div className={toolbarNavClass}>
         <span className={spacer} />
@@ -165,7 +170,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <Badge
           className={badgeClass}
           variant="dot"
-          invisible={this.props.nCommitsAhead === 0}
+          invisible={this.props.nCommitsAhead === 0 && hasUpstream}
           data-test-id="push-badge"
         >
           <ActionButton
@@ -173,10 +178,12 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             icon={pushIcon}
             onClick={this._onPushClick}
             title={
-              'Push committed changes' +
-              (this.props.nCommitsAhead > 0
-                ? ` (ahead by ${this.props.nCommitsAhead} commits)`
-                : '')
+              hasUpstream
+                ? 'Push committed changes' +
+                  (this.props.nCommitsAhead > 0
+                    ? ` (ahead by ${this.props.nCommitsAhead} commits)`
+                    : '')
+                : 'Publish branch'
             }
           />
         </Badge>
