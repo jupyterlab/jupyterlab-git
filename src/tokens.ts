@@ -537,9 +537,9 @@ export namespace Git {
     is_current_branch: boolean;
     is_remote_branch: boolean;
     name: string;
-    upstream: string;
+    upstream: string | null;
     top_commit: string;
-    tag: string;
+    tag: string | null;
   }
 
   /** Interface for GitBranch request result,

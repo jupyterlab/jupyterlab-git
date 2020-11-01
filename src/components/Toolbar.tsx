@@ -144,7 +144,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     const activeBranch = this.props.branches.filter(
       branch => branch.is_current_branch
     );
-    const hasUpstream = activeBranch[0]?.upstream.length > 0 || false;
+    // FIXME whether the repository as a remote or not should be done through a call to `git remote`
+    const hasRemote = this.props.branches.some(
+      branch => branch.is_remote_branch
+    );
+    const hasUpstream = activeBranch[0]?.upstream !== null;
 
     return (
       <div className={toolbarNavClass}>
@@ -152,38 +156,46 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <Badge
           className={badgeClass}
           variant="dot"
-          invisible={this.props.nCommitsBehind === 0}
+          invisible={!hasRemote || this.props.nCommitsBehind === 0}
           data-test-id="pull-badge"
         >
           <ActionButton
             className={toolbarButtonClass}
+            disabled={!hasRemote}
             icon={pullIcon}
-            onClick={this._onPullClick}
+            onClick={hasRemote ? this._onPullClick : undefined}
             title={
-              'Pull latest changes' +
-              (this.props.nCommitsBehind > 0
-                ? ` (behind by ${this.props.nCommitsBehind} commits)`
-                : '')
+              hasRemote
+                ? 'Pull latest changes' +
+                  (this.props.nCommitsBehind > 0
+                    ? ` (behind by ${this.props.nCommitsBehind} commits)`
+                    : '')
+                : 'No remote repository defined'
             }
           />
         </Badge>
         <Badge
           className={badgeClass}
           variant="dot"
-          invisible={this.props.nCommitsAhead === 0 && hasUpstream}
+          invisible={
+            !hasRemote || (this.props.nCommitsAhead === 0 && hasUpstream)
+          }
           data-test-id="push-badge"
         >
           <ActionButton
             className={toolbarButtonClass}
+            disabled={!hasRemote}
             icon={pushIcon}
-            onClick={this._onPushClick}
+            onClick={hasRemote ? this._onPushClick : undefined}
             title={
-              hasUpstream
-                ? 'Push committed changes' +
-                  (this.props.nCommitsAhead > 0
-                    ? ` (ahead by ${this.props.nCommitsAhead} commits)`
-                    : '')
-                : 'Publish branch'
+              hasRemote
+                ? hasUpstream
+                  ? 'Push committed changes' +
+                    (this.props.nCommitsAhead > 0
+                      ? ` (ahead by ${this.props.nCommitsAhead} commits)`
+                      : '')
+                  : 'Publish branch'
+                : 'No remote repository defined'
             }
           />
         </Badge>

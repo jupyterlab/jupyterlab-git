@@ -96,6 +96,12 @@ export const toolbarButtonClass = style({
   outline: 'none',
 
   $nest: {
+    '&:disabled': {
+      opacity: 0.4,
+      background: 'none',
+      cursor: 'not-allowed'
+    },
+
     '&:hover': {
       backgroundColor: 'var(--jp-layout-color2)'
     },
