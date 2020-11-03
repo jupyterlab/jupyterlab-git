@@ -505,6 +505,8 @@ class Git:
         )
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
+        else:
+            return {"code": code}
 
     async def branch_heads(self, current_path):
         """

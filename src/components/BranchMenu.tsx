@@ -262,7 +262,7 @@ export class BranchMenu extends React.Component<
           <ActionButton
             className={hiddenButtonStyle}
             icon={trashIcon}
-            title={'Delete this branch'}
+            title={'Delete this branch locally'}
             onClick={(event: React.MouseEvent) => {
               event.stopPropagation();
               this._onDeleteBranch(branch.name);
@@ -321,7 +321,8 @@ export class BranchMenu extends React.Component<
       title: 'Delete branch',
       body: (
         <p>
-          Are you sure you want to permanently delete the branch <b>{branchName}</b>?
+          Are you sure you want to permanently delete the branch{' '}
+          <b>{branchName}</b>?
           <br />
           This action cannot be undone.
         </p>
@@ -331,6 +332,7 @@ export class BranchMenu extends React.Component<
     if (acknowledgement.button.accept) {
       try {
         await this.props.model.deleteBranch(branchName);
+        await this.props.model.refreshBranch();
       } catch (error) {
         console.error(`Failed to delete branch ${branchName}`, error);
       }

@@ -498,7 +498,7 @@ export class GitExtension implements IGitExtension {
   async deleteBranch(branchName: string): Promise<void> {
     const path = await this._getPathRespository();
     await this._taskHandler.execute<void>('git:branch:delete', async () => {
-      return await requestAPI<void>('branch_delete', 'POST', {
+      return await requestAPI<void>('branch/delete', 'POST', {
         current_path: path,
         branch: branchName
       });

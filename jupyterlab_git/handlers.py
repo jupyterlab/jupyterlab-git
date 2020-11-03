@@ -250,7 +250,7 @@ class GitBranchDeleteHandler(GitHandler):
         }
         """
         data = self.get_json_body()
-        result = await self.git.delete_branch(data["current_path"], data["branch"])
+        result = await self.git.branch_delete(data["current_path"], data["branch"])
 
         if result["code"] != 0:
             self.set_status(500)
@@ -772,7 +772,7 @@ def setup_handlers(web_app):
         ("/git/add_all_untracked", GitAddAllUntrackedHandler),
         ("/git/all_history", GitAllHistoryHandler),
         ("/git/branch", GitBranchHandler),
-        ("/git/branch_delete", GitBranchDeleteHandler),
+        ("/git/branch/delete", GitBranchDeleteHandler),
         ("/git/changed_files", GitChangedFilesHandler),
         ("/git/checkout", GitCheckoutHandler),
         ("/git/clone", GitCloneHandler),

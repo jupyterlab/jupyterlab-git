@@ -66,7 +66,7 @@ describe('BranchMenu', () => {
     mock.requestAPI.mockImplementation(
       mockedRequestAPI({
         ...defaultMockedResponses,
-        branch_delete: {
+        'branch/delete': {
           body: () => {
             return { code: 0 };
           }
