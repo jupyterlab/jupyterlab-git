@@ -124,21 +124,20 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.setState({
         repository: args.newValue
       });
-      this.refresh();
+      this.refreshView();
     }, this);
     model.statusChanged.connect(() => {
       this.setState({ files: model.status });
     }, this);
     model.headChanged.connect(async () => {
+      await this.refreshBranch();
       if (this.state.tab === 1) {
         this.refreshHistory();
-      } else {
-        this.refreshStatus();
       }
     }, this);
     model.markChanged.connect(() => this.forceUpdate());
 
-    settings.changed.connect(this.refresh, this);
+    settings.changed.connect(this.refreshView, this);
   }
 
   refreshBranch = async () => {
@@ -167,18 +166,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     }
   };
 
-  refreshStatus = async () => {
-    await this.props.model.refreshStatus();
-  };
-
   /**
    * Refresh widget, update all content
    */
-  refresh = async () => {
+  refreshView = async () => {
     if (this.props.model.pathRepository !== null) {
       await this.refreshBranch();
       await this.refreshHistory();
-      await this.refreshStatus();
     }
   };
 
@@ -278,7 +272,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         commands={this.props.commands}
         logger={this.props.logger}
         model={this.props.model}
-        refresh={this._onRefresh}
         repository={this.state.repository || ''}
       />
     );
@@ -443,20 +436,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     this.setState({
       tab: tab
     });
-  };
-
-  /**
-   * Callback invoked upon refreshing a repository.
-   *
-   * @returns promise which refreshes a repository
-   */
-  private _onRefresh = async () => {
-    await this.refreshBranch();
-    if (this.state.tab === 1) {
-      this.refreshHistory();
-    } else {
-      this.refreshStatus();
-    }
   };
 
   /**

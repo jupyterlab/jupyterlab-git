@@ -73,13 +73,6 @@ export interface IToolbarProps {
    * Current repository.
    */
   repository: string;
-
-  /**
-   * Callback to invoke in order to refresh a repository.
-   *
-   * @returns promise which refreshes a repository
-   */
-  refresh: () => Promise<void>;
 }
 
 /**
@@ -320,10 +313,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   };
 
   /**
-   * Callback invoked upon clicking a button to refresh a repository.
+   * Callback invoked upon clicking a button to refresh the model.
    *
    * @param event - event object
-   * @returns a promise which resolves upon refreshing a repository
+   * @returns a promise which resolves upon refreshing the model
    */
   private _onRefreshClick = async (): Promise<void> => {
     this.props.logger.log({
@@ -331,7 +324,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       message: 'Refreshing...'
     });
     try {
-      await this.props.refresh();
+      await this.props.model.refresh();
 
       this.props.logger.log({
         level: Level.SUCCESS,
