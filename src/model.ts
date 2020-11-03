@@ -1124,12 +1124,12 @@ export class GitExtension implements IGitExtension {
   protected _resolveFileType(path: string): DocumentRegistry.IFileType {
     // test if directory
     if (path.endsWith('/')) {
-      return DocumentRegistry.defaultDirectoryFileType;
+      return DocumentRegistry.getDefaultDirectoryFileType();
     }
 
     return (
       this._docRegistry.getFileTypesForPath(path)[0] ||
-      DocumentRegistry.defaultTextFileType
+      DocumentRegistry.getDefaultTextFileType()
     );
   }
 

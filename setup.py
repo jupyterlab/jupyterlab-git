@@ -80,13 +80,13 @@ setup_args = dict(
         "Programming Language :: Python :: 3.9",
         "Framework :: Jupyter",
     ],
-    install_requires=["notebook", "nbdime ~=2.0", "packaging", "pexpect"],
+    install_requires=["notebook", "nbdime ~=3.0.0dev0", "packaging", "pexpect"],
     extras_require={
         "test": [
             "requests_unixsocket",
             "pytest",
             "pytest-asyncio",
-            "jupyterlab~=2.0",
+            "jupyterlab~=3.0.0rc6",
             "black",
             "pre-commit",
         ],
