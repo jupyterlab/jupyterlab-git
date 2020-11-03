@@ -84,7 +84,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         commands.push(
           CommandIDs.gitFileTrack,
           CommandIDs.gitIgnore,
-          CommandIDs.gitIgnoreExtension
+          CommandIDs.gitIgnoreExtension,
+          CommandIDs.gitFileDelete
         );
         break;
       case 'staged':
@@ -125,7 +126,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const commands = [CommandIDs.gitFileOpen];
     switch (selectedFile.status) {
       case 'untracked':
-        commands.push(CommandIDs.gitIgnore, CommandIDs.gitIgnoreExtension);
+        commands.push(
+          CommandIDs.gitIgnore,
+          CommandIDs.gitIgnoreExtension,
+          CommandIDs.gitFileDelete
+        );
         break;
       default:
         commands.push(CommandIDs.gitFileDiscard, CommandIDs.gitFileDiff);
