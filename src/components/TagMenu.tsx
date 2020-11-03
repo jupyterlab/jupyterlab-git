@@ -6,6 +6,7 @@ import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { Logger } from '../logger';
 import {
+  nameClass,
   filterClass,
   filterClearClass,
   filterInputClass,
@@ -241,7 +242,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
         style={style}
       >
         <tagIcon.react className={listItemIconClass} tag="span" />
-        {tag}
+        <span className={nameClass}>{tag}</span>
       </ListItem>
     );
   };

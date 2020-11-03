@@ -486,15 +486,23 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Dispose of model resources.
+   * Delete a branch
+   *
+   * @param branchName Branch name
+   * @returns promise which resolves when the branch has been deleted.
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    this._poll.dispose();
-    Signal.clearData(this);
+  async deleteBranch(branchName: string): Promise<void> {
+    const path = await this._getPathRespository();
+    await this._taskHandler.execute<void>('git:branch:delete', async () => {
+      return await requestAPI<void>('branch/delete', 'POST', {
+        current_path: path,
+        branch: branchName
+      });
+    });
   }
 
   /**
@@ -528,6 +536,18 @@ export class GitExtension implements IGitExtension {
       return f;
     });
     return data;
+  }
+
+  /**
+   * Dispose of model resources.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._poll.dispose();
+    Signal.clearData(this);
   }
 
   /**

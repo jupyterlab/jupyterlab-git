@@ -21,7 +21,7 @@
     "clean:slate": "jlpm clean:more && jlpm clean:labextension && rimraf node_modules",
     "contributors:generate": "jlpm run all-contributors generate",
     "lint": "eslint . --ext .ts,.tsx --fix",
-    "test": "jest --no-cache",
+    "test": "jest",
     "eslint-check": "eslint . --ext .ts,.tsx",
     "prepare": "jlpm run build",
     "watch": "tsc -w"

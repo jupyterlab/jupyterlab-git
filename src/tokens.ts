@@ -207,6 +207,18 @@ export interface IGitExtension extends IDisposable {
   config(options?: JSONObject): Promise<JSONObject | void>;
 
   /**
+   * Delete a branch
+   *
+   * @param branchName Branch name
+   * @returns promise which resolves when the branch has been deleted.
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  deleteBranch(branchName: string): Promise<void>;
+
+  /**
    * Fetch commit information.
    *
    * @param hash - commit hash

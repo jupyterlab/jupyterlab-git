@@ -1,4 +1,12 @@
 import { style } from 'typestyle';
+import { showButtonOnHover } from './ActionButtonStyle';
+
+export const nameClass = style({
+  flex: '1 1 auto',
+  textOverflow: 'ellipsis',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap'
+});
 
 export const wrapperClass = style({
   marginTop: '6px',
@@ -105,11 +113,12 @@ export const newBranchButtonClass = style({
   }
 });
 
-export const listItemClass = style({
-  paddingTop: '4px!important',
-  paddingBottom: '4px!important',
-  paddingLeft: '11px!important'
-});
+export const listItemClass = style(
+  {
+    padding: '4px 11px!important'
+  },
+  showButtonOnHover
+);
 
 export const activeListItemClass = style({
   color: 'white!important',

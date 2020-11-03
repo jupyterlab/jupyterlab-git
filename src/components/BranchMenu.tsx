@@ -6,8 +6,10 @@ import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
 import { Logger } from '../logger';
+import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
   activeListItemClass,
+  nameClass,
   filterClass,
   filterClearClass,
   filterInputClass,
@@ -17,8 +19,9 @@ import {
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
-import { branchIcon } from '../style/icons';
+import { branchIcon, trashIcon } from '../style/icons';
 import { Git, IGitExtension, Level } from '../tokens';
+import { ActionButton } from './ActionButton';
 import { NewBranchDialog } from './NewBranchDialog';
 
 const CHANGES_ERR_MSG =
@@ -254,7 +257,18 @@ export class BranchMenu extends React.Component<
         style={style}
       >
         <branchIcon.react className={listItemIconClass} tag="span" />
-        {branch.name}
+        <span className={nameClass}>{branch.name}</span>
+        {!branch.is_remote_branch && !isActive && (
+          <ActionButton
+            className={hiddenButtonStyle}
+            icon={trashIcon}
+            title={'Delete this branch locally'}
+            onClick={(event: React.MouseEvent) => {
+              event.stopPropagation();
+              this._onDeleteBranch(branch.name);
+            }}
+          />
+        )}
       </ListItem>
     );
   };
@@ -295,6 +309,34 @@ export class BranchMenu extends React.Component<
     this.setState({
       filter: ''
     });
+  };
+
+  /**
+   * Callback on delete branch name button
+   *
+   * @param branchName Branch name
+   */
+  private _onDeleteBranch = async (branchName: string): Promise<void> => {
+    const acknowledgement = await showDialog<void>({
+      title: 'Delete branch',
+      body: (
+        <p>
+          Are you sure you want to permanently delete the branch{' '}
+          <b>{branchName}</b>?
+          <br />
+          This action cannot be undone.
+        </p>
+      ),
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
+    });
+    if (acknowledgement.button.accept) {
+      try {
+        await this.props.model.deleteBranch(branchName);
+        await this.props.model.refreshBranch();
+      } catch (error) {
+        console.error(`Failed to delete branch ${branchName}`, error);
+      }
+    }
   };
 
   /**
