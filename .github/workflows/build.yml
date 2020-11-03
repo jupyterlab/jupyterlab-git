@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install wheel
-          pip install --upgrade --upgrade-strategy=eager "jupyterlab~=2.0"
+          pip install --upgrade --upgrade-strategy=eager "jupyterlab~=3.0.0rc6"
 
       - name: Test the extension
         run: |
