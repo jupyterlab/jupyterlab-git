@@ -395,7 +395,6 @@ export class GitExtension implements IGitExtension {
 
     if (body.checkout_branch) {
       await this.refreshBranch();
-      this._headChanged.emit();
     } else {
       await this.refreshStatus();
     }
@@ -448,8 +447,7 @@ export class GitExtension implements IGitExtension {
         top_repo_path: path
       });
     });
-    await this.refreshStatus();
-    this._headChanged.emit();
+    await this.refresh();
   }
 
   /**
@@ -649,7 +647,7 @@ export class GitExtension implements IGitExtension {
         });
       }
     );
-    this._headChanged.emit();
+    this.refreshBranch(); // Will emit headChanged if required
     return data;
   }
 
@@ -674,7 +672,7 @@ export class GitExtension implements IGitExtension {
         });
       }
     );
-    this._headChanged.emit();
+    this.refreshBranch();
     return data;
   }
 
@@ -691,6 +689,8 @@ export class GitExtension implements IGitExtension {
   /**
    * Refresh the list of repository branches.
    *
+   * Emit headChanged if the branch or its top commit changes
+   *
    * @returns promise which resolves upon refreshing repository branches
    */
   async refreshBranch(): Promise<void> {
@@ -702,7 +702,15 @@ export class GitExtension implements IGitExtension {
         }
       );
 
-      const headChanged = this._currentBranch !== data.current_branch;
+      let headChanged = false;
+      if (!this._currentBranch || !data) {
+        headChanged = this._currentBranch !== data.current_branch; // Object comparison is not working
+      } else {
+        headChanged =
+          this._currentBranch.name !== data.current_branch.name ||
+          this._currentBranch.top_commit !== data.current_branch.top_commit;
+      }
+
       this._branches = data.branches;
       this._currentBranch = data.current_branch;
       if (this._currentBranch) {
@@ -729,6 +737,8 @@ export class GitExtension implements IGitExtension {
 
   /**
    * Refresh the repository status.
+   *
+   * Emit statusChanged if required.
    *
    * @returns promise which resolves upon refreshing the repository status
    */
@@ -837,7 +847,6 @@ export class GitExtension implements IGitExtension {
       });
     });
     await this.refreshBranch();
-    this._headChanged.emit();
   }
 
   /**
@@ -1149,8 +1158,12 @@ export class GitExtension implements IGitExtension {
    */
   private _refreshModel = async (): Promise<void> => {
     await this._taskHandler.execute<void>('git:refresh', async () => {
-      await this.refreshBranch();
-      await this.refreshStatus();
+      try {
+        await this.refreshBranch();
+        await this.refreshStatus();
+      } catch (error) {
+        console.error('Failed to refresh git status', error);
+      }
     });
   };
 

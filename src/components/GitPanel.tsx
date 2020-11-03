@@ -130,7 +130,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.setState({ files: model.status });
     }, this);
     model.headChanged.connect(async () => {
-      await this.refreshBranch();
       if (this.state.tab === 1) {
         this.refreshHistory();
       } else {
