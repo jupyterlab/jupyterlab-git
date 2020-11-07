@@ -105,7 +105,8 @@ async def test_git_pull_success():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = maybe_future((0, "output", ""))
+            output = "output"
+            mock_execute.return_value = maybe_future((0, output, ""))
 
             # When
             actual_response = await Git(FakeContentManager("/bin")).pull(
@@ -118,7 +119,7 @@ async def test_git_pull_success():
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
             )
-            assert {"code": 0} == actual_response
+            assert {"code": 0, "message": output} == actual_response
 
 
 @pytest.mark.asyncio
@@ -127,8 +128,9 @@ async def test_git_pull_with_auth_success():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
+            output = "output"
             mock_execute_with_authentication.return_value = maybe_future(
-                (0, "", "output")
+                (0, output, "")
             )
 
             # When
@@ -145,7 +147,7 @@ async def test_git_pull_with_auth_success():
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
             )
-            assert {"code": 0} == actual_response
+            assert {"code": 0, "message": output} == actual_response
 
 
 @pytest.mark.asyncio
@@ -248,7 +250,8 @@ async def test_git_push_success():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = maybe_future((0, "output", "does not matter"))
+            output = "output"
+            mock_execute.return_value = maybe_future((0, output, "does not matter"))
 
             # When
             actual_response = await Git(FakeContentManager("/bin")).push(
@@ -261,7 +264,7 @@ async def test_git_push_success():
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
             )
-            assert {"code": 0} == actual_response
+            assert {"code": 0, "message": output} == actual_response
 
 
 @pytest.mark.asyncio
@@ -270,8 +273,9 @@ async def test_git_push_with_auth_success():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
+            output = "output"
             mock_execute_with_authentication.return_value = maybe_future(
-                (0, "", "does not matter")
+                (0, output, "does not matter")
             )
 
             # When
@@ -288,4 +292,4 @@ async def test_git_push_with_auth_success():
                 cwd=os.path.join("/bin", "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
             )
-            assert {"code": 0} == actual_response
+            assert {"code": 0, "message": output} == actual_response

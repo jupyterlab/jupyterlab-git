@@ -10,7 +10,6 @@ import { Logger } from '../../src/logger';
 import { GitExtension } from '../../src/model';
 import { pullIcon, pushIcon } from '../../src/style/icons';
 import { toolbarMenuButtonClass } from '../../src/style/Toolbar';
-import { Git } from '../../src/tokens';
 import { mockedRequestAPI } from '../utils';
 
 jest.mock('../../src/git');
@@ -29,7 +28,24 @@ describe('Toolbar', () => {
   function createProps(props?: Partial<IToolbarProps>): IToolbarProps {
     return {
       currentBranch: 'master',
-      branches: new Array<Git.IBranch>(),
+      branches: [
+        {
+          is_current_branch: true,
+          is_remote_branch: false,
+          name: 'master',
+          upstream: 'origin/master',
+          top_commit: '',
+          tag: ''
+        },
+        {
+          is_current_branch: false,
+          is_remote_branch: true,
+          name: 'origin/master',
+          upstream: '',
+          top_commit: '',
+          tag: ''
+        }
+      ],
       repository: model.pathRepository,
       model: model,
       branching: false,
@@ -222,6 +238,36 @@ describe('Toolbar', () => {
       expect(mockedExecute).toHaveBeenCalledTimes(1);
       expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPull);
     });
+
+    it('should not pull changes when the pull button is clicked but there is no remote branch', () => {
+      const mockedExecute = jest.fn();
+      const toolbar = shallow<Toolbar>(
+        <Toolbar
+          {...createProps({
+            branches: [
+              {
+                is_current_branch: true,
+                is_remote_branch: false,
+                name: 'master',
+                upstream: '',
+                top_commit: '',
+                tag: ''
+              }
+            ],
+            commands: {
+              execute: mockedExecute
+            } as any
+          })}
+        />
+      );
+      const button = toolbar
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === pullIcon)
+        .first();
+
+      button.simulate('click');
+      expect(mockedExecute).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('push changes', () => {
@@ -244,6 +290,36 @@ describe('Toolbar', () => {
       button.simulate('click');
       expect(mockedExecute).toHaveBeenCalledTimes(1);
       expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPush);
+    });
+
+    it('should not push changes when the push button is clicked but there is no remote branch', () => {
+      const mockedExecute = jest.fn();
+      const toolbar = shallow<Toolbar>(
+        <Toolbar
+          {...createProps({
+            branches: [
+              {
+                is_current_branch: true,
+                is_remote_branch: false,
+                name: 'master',
+                upstream: '',
+                top_commit: '',
+                tag: ''
+              }
+            ],
+            commands: {
+              execute: mockedExecute
+            } as any
+          })}
+        />
+      );
+      const button = toolbar
+        .find(ActionButton)
+        .findWhere(n => n.prop('icon') === pushIcon)
+        .first();
+
+      button.simulate('click');
+      expect(mockedExecute).toHaveBeenCalledTimes(0);
     });
   });
 
