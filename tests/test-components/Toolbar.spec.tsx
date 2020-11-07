@@ -44,7 +44,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -61,7 +61,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -80,7 +80,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -100,7 +100,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -122,7 +122,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -142,7 +142,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -164,7 +164,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -185,7 +185,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -209,7 +209,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -229,7 +229,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -249,7 +249,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -270,7 +270,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -291,7 +291,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -310,7 +310,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: jest.fn()
         } as any
@@ -333,7 +333,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: mockedExecute
         } as any
@@ -360,7 +360,7 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: async () => {},
+        
         commands: {
           execute: mockedExecute
         } as any
@@ -379,8 +379,7 @@ describe('Toolbar', () => {
 
   describe('refresh repository', () => {
     it('should refresh the repository when the button to refresh the repository is clicked', () => {
-      const spy = jest.fn(async () => {});
-
+      const spy = jest.spyOn(model, 'refresh');
       const props = {
         currentBranch: 'master',
         branches: new Array<Git.IBranch>(),
@@ -388,7 +387,6 @@ describe('Toolbar', () => {
         model: model,
         branching: false,
         logger: new Logger(),
-        refresh: spy,
         commands: {
           execute: jest.fn()
         } as any
@@ -402,6 +400,7 @@ describe('Toolbar', () => {
       button.simulate('click');
       expect(spy).toHaveBeenCalledTimes(1);
 
+      spy.mockReset()
       spy.mockRestore();
     });
   });
