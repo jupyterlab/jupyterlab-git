@@ -39,35 +39,19 @@ export class GitExtension implements IGitExtension {
     let interval: number;
     if (settings) {
       interval = settings.composite.refreshInterval as number;
-      settings.changed.connect(onSettingsChange, this);
+      settings.changed.connect(this._onSettingsChange, this);
     } else {
       interval = DEFAULT_REFRESH_INTERVAL;
     }
-    const poll = new Poll({
-      factory: () => this.refresh(),
+    this._poll = new Poll({
+      factory: this._refreshModel,
       frequency: {
         interval: interval,
         backoff: true,
         max: 300 * 1000
       },
-      standby: 'when-hidden'
+      standby: this._refreshStandby
     });
-    this._poll = poll;
-
-    /**
-     * Callback invoked upon a change to plugin settings.
-     *
-     * @private
-     * @param settings - settings registry
-     */
-    function onSettingsChange(settings: ISettingRegistry.ISettings) {
-      const freq = poll.frequency;
-      poll.frequency = {
-        interval: settings.composite.refreshInterval as number,
-        backoff: freq.backoff,
-        max: freq.max
-      };
-    }
   }
 
   /**
@@ -150,6 +134,16 @@ export class GitExtension implements IGitExtension {
           console.error(`Fail to find Git top level for path ${v}.\n${reason}`);
         });
     }
+  }
+
+  /**
+   * Custom model refresh standby condition
+   */
+  get refreshStandbyCondition(): () => boolean {
+    return this._standbyCondition;
+  }
+  set refreshStandbyCondition(v: () => boolean) {
+    this._standbyCondition = v;
   }
 
   /**
@@ -401,7 +395,6 @@ export class GitExtension implements IGitExtension {
 
     if (body.checkout_branch) {
       await this.refreshBranch();
-      this._headChanged.emit();
     } else {
       await this.refreshStatus();
     }
@@ -454,8 +447,7 @@ export class GitExtension implements IGitExtension {
         top_repo_path: path
       });
     });
-    await this.refreshStatus();
-    this._headChanged.emit();
+    await this.refresh();
   }
 
   /**
@@ -675,7 +667,7 @@ export class GitExtension implements IGitExtension {
         });
       }
     );
-    this._headChanged.emit();
+    this.refreshBranch(); // Will emit headChanged if required
     return data;
   }
 
@@ -700,7 +692,7 @@ export class GitExtension implements IGitExtension {
         });
       }
     );
-    this._headChanged.emit();
+    this.refreshBranch();
     return data;
   }
 
@@ -710,14 +702,14 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon refreshing the repository
    */
   async refresh(): Promise<void> {
-    await this._taskHandler.execute<void>('git:refresh', async () => {
-      await this.refreshBranch();
-      await this.refreshStatus();
-    });
+    await this._poll.refresh();
+    await this._poll.tick;
   }
 
   /**
    * Refresh the list of repository branches.
+   *
+   * Emit headChanged if the branch or its top commit changes
    *
    * @returns promise which resolves upon refreshing repository branches
    */
@@ -730,7 +722,15 @@ export class GitExtension implements IGitExtension {
         }
       );
 
-      const headChanged = this._currentBranch !== data.current_branch;
+      let headChanged = false;
+      if (!this._currentBranch || !data) {
+        headChanged = this._currentBranch !== data.current_branch; // Object comparison is not working
+      } else {
+        headChanged =
+          this._currentBranch.name !== data.current_branch.name ||
+          this._currentBranch.top_commit !== data.current_branch.top_commit;
+      }
+
       this._branches = data.branches;
       this._currentBranch = data.current_branch;
       if (this._currentBranch) {
@@ -757,6 +757,8 @@ export class GitExtension implements IGitExtension {
 
   /**
    * Refresh the repository status.
+   *
+   * Emit statusChanged if required.
    *
    * @returns promise which resolves upon refreshing the repository status
    */
@@ -865,7 +867,6 @@ export class GitExtension implements IGitExtension {
       });
     });
     await this.refreshBranch();
-    this._headChanged.emit();
   }
 
   /**
@@ -1144,11 +1145,24 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Callback invoked upon a change to plugin settings.
+   *
+   * @private
+   * @param settings - plugin settings
+   */
+  private _onSettingsChange(settings: ISettingRegistry.ISettings) {
+    this._poll.frequency = {
+      ...this._poll.frequency,
+      interval: settings.composite.refreshInterval as number
+    };
+  }
+
+  /**
    * open new editor or show an existing editor of the
    * .gitignore file. If the editor does not have unsaved changes
    * then ensure the editor's content matches the file on disk
    */
-  private _openGitignore() {
+  private _openGitignore(): void {
     if (this._docmanager) {
       const widget = this._docmanager.openOrReveal(
         this.getRelativeFilePath('.gitignore')
@@ -1158,6 +1172,38 @@ export class GitExtension implements IGitExtension {
       }
     }
   }
+
+  /**
+   * Refresh model status through a Poll
+   */
+  private _refreshModel = async (): Promise<void> => {
+    await this._taskHandler.execute<void>('git:refresh', async () => {
+      try {
+        await this.refreshBranch();
+        await this.refreshStatus();
+      } catch (error) {
+        console.error('Failed to refresh git status', error);
+      }
+    });
+  };
+
+  /**
+   * Standby test function for the refresh Poll
+   *
+   * Standby refresh if
+   * - webpage is hidden
+   * - not in a git repository
+   * - standby condition is true
+   *
+   * @returns The test function
+   */
+  private _refreshStandby = (): boolean | Poll.Standby => {
+    if (this.pathRepository === null || this._standbyCondition()) {
+      return true;
+    }
+
+    return 'when-hidden';
+  };
 
   /**
    * if file is open in JupyterLab find the widget and ensure the JupyterLab
@@ -1194,6 +1240,7 @@ export class GitExtension implements IGitExtension {
   private _pendingReadyPromise = 0;
   private _poll: Poll;
   private _settings: ISettingRegistry.ISettings | null;
+  private _standbyCondition: () => boolean = () => false;
   private _taskHandler: TaskHandler<IGitExtension>;
 
   private _headChanged = new Signal<IGitExtension, void>(this);
