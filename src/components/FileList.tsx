@@ -155,7 +155,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Reset all staged files */
-  resetAllStagedFiles = async () => {
+  resetAllStagedFiles = async (event: React.MouseEvent) => {
+    event.stopPropagation();
     await this.props.model.reset();
   };
 
@@ -165,12 +166,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Add all unstaged files */
-  addAllUnstagedFiles = async () => {
+  addAllUnstagedFiles = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+
     await this.props.model.addAllUnstaged();
   };
 
   /** Discard changes in all unstaged files */
-  discardAllUnstagedFiles = async () => {
+  discardAllUnstagedFiles = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+
     const result = await showDialog({
       title: 'Discard all changes',
       body:
@@ -187,7 +192,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Discard changes in all unstaged and staged files */
-  discardAllChanges = async () => {
+  discardAllChanges = async (event: React.MouseEvent) => {
+    event.stopPropagation();
     const result = await showDialog({
       title: 'Discard all changes',
       body:
@@ -214,7 +220,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Add all untracked files */
-  addAllUntrackedFiles = async () => {
+  addAllUntrackedFiles = async (event: React.MouseEvent) => {
+    event.stopPropagation();
     await this.props.model.addAllUntracked();
   };
 
