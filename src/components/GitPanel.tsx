@@ -4,6 +4,7 @@ import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import * as React from 'react';
@@ -129,7 +130,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   /**
    * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
    */
-  componentDidMount() {
+  componentDidMount(): void {
     const { model, settings } = this.props;
 
     model.repositoryChanged.connect((_, args) => {
@@ -151,9 +152,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         this.refreshHistory();
       }
     }, this);
-    model.markChanged.connect(() => this.forceUpdate());
+    model.markChanged.connect(() => this.forceUpdate(), this);
 
     settings.changed.connect(this.refreshView, this);
+  }
+
+  componentWillUnmount(): void {
+    // Clear all signal connections
+    Signal.clearData(this);
   }
 
   refreshBranch = async () => {
