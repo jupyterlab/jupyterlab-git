@@ -1278,8 +1278,8 @@ export class GitExtension implements IGitExtension {
 
   private _status: Git.IStatus;
   private _pathRepository: string | null = null;
-  private _branches: Git.IBranch[];
-  private _currentBranch: Git.IBranch;
+  private _branches: Git.IBranch[] = [];
+  private _currentBranch: Git.IBranch | null = null;
   private _serverRoot: string;
   private _docmanager: IDocumentManager | null;
   private _docRegistry: DocumentRegistry | null;
