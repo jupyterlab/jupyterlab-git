@@ -5,7 +5,7 @@ import {
   refreshIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import { Tab, Tabs } from '@material-ui/core';
+import { Badge, Tab, Tabs } from '@material-ui/core';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { CommandIDs } from '../commandsAndMenu';
@@ -18,6 +18,7 @@ import {
 } from '../style/GitPanel';
 import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import {
+  badgeClass,
   spacer,
   toolbarButtonClass,
   toolbarClass,
@@ -36,7 +37,7 @@ import { BranchMenu } from './BranchMenu';
 import { TagMenu } from './TagMenu';
 
 /**
- * Interface describing component properties.
+ * Interface describing  properties.
  */
 export interface IToolbarProps {
   /**
@@ -68,6 +69,16 @@ export interface IToolbarProps {
    * Git extension data model.
    */
   model: IGitExtension;
+
+  /**
+   * Number of commits ahead
+   */
+  nCommitsAhead: number;
+
+  /**
+   * Number of commits behind
+   */
+  nCommitsBehind: number;
 
   /**
    * Current repository.
@@ -130,21 +141,65 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderTopNav(): React.ReactElement {
+    const activeBranch = this.props.branches.filter(
+      branch => branch.is_current_branch
+    );
+    // FIXME whether the repository as a remote or not should be done through a call to `git remote`
+    const hasRemote = this.props.branches.some(
+      branch => branch.is_remote_branch
+    );
+    const hasUpstream = activeBranch[0]?.upstream !== null;
+
     return (
       <div className={toolbarNavClass}>
         <span className={spacer} />
-        <ActionButton
-          className={toolbarButtonClass}
-          icon={pullIcon}
-          onClick={this._onPullClick}
-          title={'Pull latest changes'}
-        />
-        <ActionButton
-          className={toolbarButtonClass}
-          icon={pushIcon}
-          onClick={this._onPushClick}
-          title={'Push committed changes'}
-        />
+        <Badge
+          className={badgeClass}
+          variant="dot"
+          invisible={!hasRemote || this.props.nCommitsBehind === 0}
+          data-test-id="pull-badge"
+        >
+          <ActionButton
+            className={toolbarButtonClass}
+            disabled={!hasRemote}
+            icon={pullIcon}
+            onClick={hasRemote ? this._onPullClick : undefined}
+            title={
+              hasRemote
+                ? 'Pull latest changes' +
+                  (this.props.nCommitsBehind > 0
+                    ? ` (behind by ${this.props.nCommitsBehind} commits)`
+                    : '')
+                : 'No remote repository defined'
+            }
+          />
+        </Badge>
+        <Badge
+          className={badgeClass}
+          variant="dot"
+          invisible={
+            !hasRemote || (this.props.nCommitsAhead === 0 && hasUpstream)
+          }
+          data-test-id="push-badge"
+        >
+          <ActionButton
+            className={toolbarButtonClass}
+            disabled={!hasRemote}
+            icon={pushIcon}
+            onClick={hasRemote ? this._onPushClick : undefined}
+            title={
+              hasRemote
+                ? hasUpstream
+                  ? 'Push committed changes' +
+                    (this.props.nCommitsAhead > 0
+                      ? ` (ahead by ${this.props.nCommitsAhead} commits)`
+                      : '')
+                  : 'Publish branch'
+                : 'No remote repository defined'
+            }
+          />
+        </Badge>
+
         <ActionButton
           className={toolbarButtonClass}
           icon={refreshIcon}

@@ -120,6 +120,7 @@ export class Feedback extends React.Component<IFeedbackProps, IFeedbackState> {
           }}
         />
         <Alert
+          details={log?.details}
           error={log?.error}
           open={this.state.showAlert}
           message={log?.message || this.props.log.message}

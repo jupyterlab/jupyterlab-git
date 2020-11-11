@@ -36,6 +36,9 @@ export class GitExtension implements IGitExtension {
     this._settings = settings || null;
     this._taskHandler = new TaskHandler(this);
 
+    // Initialize repository status
+    this._clearStatus();
+
     let interval: number;
     if (settings) {
       interval = settings.composite.refreshInterval as number;
@@ -43,10 +46,20 @@ export class GitExtension implements IGitExtension {
     } else {
       interval = DEFAULT_REFRESH_INTERVAL;
     }
-    this._poll = new Poll({
+    this._statusPoll = new Poll({
       factory: this._refreshModel,
       frequency: {
         interval: interval,
+        backoff: true,
+        max: 300 * 1000
+      },
+      standby: this._refreshStandby
+    });
+    this._fetchPoll = new Poll({
+      auto: false,
+      factory: this._fetchRemotes,
+      frequency: {
+        interval,
         backoff: true,
         max: 300 * 1000
       },
@@ -147,13 +160,9 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * A list of modified files.
-   *
-   * ## Notes
-   *
-   * -   The file list corresponds to the list of files from `git status`.
+   * Git repository status
    */
-  get status(): Git.IStatusFile[] {
+  get status(): Git.IStatus {
     return this._status;
   }
 
@@ -181,7 +190,7 @@ export class GitExtension implements IGitExtension {
   /**
    * A signal emitted when the current status of the Git repository changes.
    */
-  get statusChanged(): ISignal<IGitExtension, Git.IStatusFile[]> {
+  get statusChanged(): ISignal<IGitExtension, Git.IStatus> {
     return this._statusChanged;
   }
 
@@ -416,11 +425,11 @@ export class GitExtension implements IGitExtension {
     path: string,
     url: string,
     auth?: Git.IAuth
-  ): Promise<Git.ICloneResult> {
-    return await this._taskHandler.execute<Git.ICloneResult>(
+  ): Promise<Git.IResultWithMessage> {
+    return await this._taskHandler.execute<Git.IResultWithMessage>(
       'git:clone',
       async () => {
-        return await requestAPI<Git.ICloneResult>('clone', 'POST', {
+        return await requestAPI<Git.IResultWithMessage>('clone', 'POST', {
           current_path: path,
           clone_url: url,
           auth: auth as any
@@ -538,7 +547,8 @@ export class GitExtension implements IGitExtension {
       return;
     }
     this._isDisposed = true;
-    this._poll.dispose();
+    this._fetchPoll.dispose();
+    this._statusPoll.dispose();
     Signal.clearData(this);
   }
 
@@ -653,12 +663,12 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async pull(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
+  async pull(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRespository();
-    const data = this._taskHandler.execute<Git.IPushPullResult>(
+    const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:pull',
       async () => {
-        return await requestAPI<Git.IPushPullResult>('pull', 'POST', {
+        return await requestAPI<Git.IResultWithMessage>('pull', 'POST', {
           current_path: path,
           auth: auth as any,
           cancel_on_conflict:
@@ -681,12 +691,12 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async push(auth?: Git.IAuth): Promise<Git.IPushPullResult> {
+  async push(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRespository();
-    const data = this._taskHandler.execute<Git.IPushPullResult>(
+    const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
       async () => {
-        return await requestAPI<Git.IPushPullResult>('push', 'POST', {
+        return await requestAPI<Git.IResultWithMessage>('push', 'POST', {
           current_path: path,
           auth: auth as any
         });
@@ -702,8 +712,8 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon refreshing the repository
    */
   async refresh(): Promise<void> {
-    await this._poll.refresh();
-    await this._poll.tick;
+    await this._statusPoll.refresh();
+    await this._statusPoll.tick;
   }
 
   /**
@@ -737,14 +747,22 @@ export class GitExtension implements IGitExtension {
         // Set up the marker obj for the current (valid) repo/branch combination
         this._setMarker(this.pathRepository, this._currentBranch.name);
       }
-
       if (headChanged) {
         this._headChanged.emit();
+      }
+
+      // Start fetch remotes if the repository has remote branches
+      const hasRemote = this._branches.some(branch => branch.is_remote_branch);
+      if (hasRemote) {
+        this._fetchPoll.start();
+      } else {
+        this._fetchPoll.stop();
       }
     } catch (error) {
       const headChanged = this._currentBranch !== null;
       this._branches = [];
       this._currentBranch = null;
+      this._fetchPoll.stop();
       if (headChanged) {
         this._headChanged.emit();
       }
@@ -767,7 +785,7 @@ export class GitExtension implements IGitExtension {
     try {
       path = await this._getPathRespository();
     } catch (error) {
-      this._setStatus([]);
+      this._clearStatus();
       if (!(error instanceof Git.NotInRepository)) {
         throw error;
       }
@@ -784,18 +802,22 @@ export class GitExtension implements IGitExtension {
         }
       );
 
-      this._setStatus(
-        data.files.map(file => {
+      this._setStatus({
+        branch: data.branch || null,
+        remote: data.remote || null,
+        ahead: data.ahead || 0,
+        behind: data.behind || 0,
+        files: data.files?.map(file => {
           return {
             ...file,
             status: decodeStage(file.x, file.y),
             type: this._resolveFileType(file.to)
           };
         })
-      );
+      });
     } catch (err) {
       // TODO we should notify the user
-      this._setStatus([]);
+      this._clearStatus();
       console.error(err);
       return;
     }
@@ -1105,6 +1127,19 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Clear repository status
+   */
+  protected _clearStatus() {
+    this._status = {
+      branch: null,
+      remote: null,
+      ahead: 0,
+      behind: 0,
+      files: []
+    };
+  }
+
+  /**
    * Get the current Git repository path
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
@@ -1139,10 +1174,22 @@ export class GitExtension implements IGitExtension {
    *
    * @param v - repository status
    */
-  protected _setStatus(v: Git.IStatusFile[]) {
+  protected _setStatus(v: Git.IStatus) {
     this._status = v;
     this._statusChanged.emit(this._status);
   }
+
+  /**
+   * Fetch poll action.
+   */
+  private _fetchRemotes = async (): Promise<void> => {
+    try {
+      const current_path = await this._getPathRespository();
+      await requestAPI('remote/fetch', 'POST', { current_path });
+    } catch (error) {
+      console.error('Failed to fetch remotes', error);
+    }
+  };
 
   /**
    * Callback invoked upon a change to plugin settings.
@@ -1151,8 +1198,12 @@ export class GitExtension implements IGitExtension {
    * @param settings - plugin settings
    */
   private _onSettingsChange(settings: ISettingRegistry.ISettings) {
-    this._poll.frequency = {
-      ...this._poll.frequency,
+    this._fetchPoll.frequency = {
+      ...this._fetchPoll.frequency,
+      interval: settings.composite.refreshInterval as number
+    };
+    this._statusPoll.frequency = {
+      ...this._statusPoll.frequency,
       interval: settings.composite.refreshInterval as number
     };
   }
@@ -1225,22 +1276,23 @@ export class GitExtension implements IGitExtension {
     this.__currentMarker = this._markerCache.get(path, branch);
   }
 
-  private _status: Git.IStatusFile[] = [];
+  private _status: Git.IStatus;
   private _pathRepository: string | null = null;
-  private _branches: Git.IBranch[];
-  private _currentBranch: Git.IBranch;
+  private _branches: Git.IBranch[] = [];
+  private _currentBranch: Git.IBranch | null = null;
   private _serverRoot: string;
   private _docmanager: IDocumentManager | null;
   private _docRegistry: DocumentRegistry | null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
+  private _fetchPoll: Poll;
   private _isDisposed = false;
   private _markerCache: Markers = new Markers(() => this._markChanged.emit());
   private __currentMarker: BranchMarker = null;
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
-  private _poll: Poll;
   private _settings: ISettingRegistry.ISettings | null;
   private _standbyCondition: () => boolean = () => false;
+  private _statusPoll: Poll;
   private _taskHandler: TaskHandler<IGitExtension>;
 
   private _headChanged = new Signal<IGitExtension, void>(this);
@@ -1249,7 +1301,7 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     IChangedArgs<string | null>
   >(this);
-  private _statusChanged = new Signal<IGitExtension, Git.IStatusFile[]>(this);
+  private _statusChanged = new Signal<IGitExtension, Git.IStatus>(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {

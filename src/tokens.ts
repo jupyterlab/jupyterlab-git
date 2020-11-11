@@ -54,14 +54,14 @@ export interface IGitExtension extends IDisposable {
   refreshStandbyCondition: () => boolean;
 
   /**
-   * Files list resulting of a Git status call.
+   * Git repository status.
    */
-  readonly status: Git.IStatusFileResult[];
+  readonly status: Git.IStatus;
 
   /**
    * A signal emitted when the current status of the Git repository changes.
    */
-  readonly statusChanged: ISignal<IGitExtension, Git.IStatusFileResult[]>;
+  readonly statusChanged: ISignal<IGitExtension, Git.IStatus>;
 
   /**
    * A signal emitted whenever a model task event occurs.
@@ -185,7 +185,11 @@ export interface IGitExtension extends IDisposable {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  clone(path: string, url: string, auth?: Git.IAuth): Promise<Git.ICloneResult>;
+  clone(
+    path: string,
+    url: string,
+    auth?: Git.IAuth
+  ): Promise<Git.IResultWithMessage>;
 
   /**
    * Commit all staged file changes.
@@ -308,7 +312,7 @@ export interface IGitExtension extends IDisposable {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  pull(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
+  pull(auth?: Git.IAuth): Promise<Git.IResultWithMessage>;
 
   /**
    * Push local changes to a remote repository.
@@ -320,7 +324,7 @@ export interface IGitExtension extends IDisposable {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  push(auth?: Git.IAuth): Promise<Git.IPushPullResult>;
+  push(auth?: Git.IAuth): Promise<Git.IResultWithMessage>;
 
   /**
    * General Git refresh
@@ -533,9 +537,9 @@ export namespace Git {
     is_current_branch: boolean;
     is_remote_branch: boolean;
     name: string;
-    upstream: string;
+    upstream: string | null;
     top_commit: string;
-    tag: string;
+    tag: string | null;
   }
 
   /** Interface for GitBranch request result,
@@ -559,6 +563,32 @@ export namespace Git {
      * Previous file content
      */
     prev_content: string;
+  }
+
+  /**
+   * Git repository status
+   */
+  export interface IStatus {
+    /**
+     * Current branch
+     */
+    branch: string | null;
+    /**
+     * Tracked upstream branch
+     */
+    remote: string | null;
+    /**
+     * Number of commits ahead
+     */
+    ahead: number;
+    /**
+     * Number of commits behind
+     */
+    behind: number;
+    /**
+     * Files status
+     */
+    files: IStatusFile[];
   }
 
   /** Interface for GitStatus request result,
@@ -586,6 +616,10 @@ export namespace Git {
    */
   export interface IStatusResult {
     code: number;
+    branch?: string;
+    remote?: string | null;
+    ahead?: number;
+    behind?: number;
     files?: IStatusFileResult[];
   }
 
@@ -674,19 +708,17 @@ export namespace Git {
   }
 
   /**
-   * Structure for the result of the Git Clone API.
+   * Structure for commands with informative output
    */
-  export interface ICloneResult {
+  export interface IResultWithMessage {
+    /**
+     * Git process return code
+     */
     code: number;
-    message?: string;
-  }
-
-  /**
-   * Structure for the result of the Git Push & Pull API.
-   */
-  export interface IPushPullResult {
-    code: number;
-    message?: string;
+    /**
+     * Git process result message
+     */
+    message: string;
   }
 
   /**
@@ -769,6 +801,11 @@ export enum Level {
  * Interface describing a component log message.
  */
 export interface ILogMessage {
+  /**
+   * Detailed message
+   */
+  details?: string;
+
   /**
    * Error object.
    */

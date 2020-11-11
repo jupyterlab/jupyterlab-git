@@ -19,7 +19,7 @@ module.exports = {
   transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
   globals: {
     'ts-jest': {
-      tsConfig: tsOptions
+      tsconfig: tsOptions
     }
   }
 };

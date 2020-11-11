@@ -134,6 +134,24 @@ class GitShowPrefixHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+class GitFetchHandler(GitHandler):
+    """
+    Handler for 'git fetch'
+    """
+
+    @web.authenticated
+    async def post(self):
+        """
+        POST request handler, fetch from remotes.
+        """
+        current_path = self.get_json_body()["current_path"]
+        result = await self.git.fetch(current_path)
+
+        if result["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(result))
+
+
 class GitStatusHandler(GitHandler):
     """
     Handler for 'git status --porcelain', fetches the git status.
@@ -787,6 +805,7 @@ def setup_handlers(web_app):
         ("/git/pull", GitPullHandler),
         ("/git/push", GitPushHandler),
         ("/git/remote/add", GitRemoteAddHandler),
+        ("/git/remote/fetch", GitFetchHandler),
         ("/git/reset", GitResetHandler),
         ("/git/reset_to_commit", GitResetToCommitHandler),
         ("/git/server_root", GitServerRootHandler),

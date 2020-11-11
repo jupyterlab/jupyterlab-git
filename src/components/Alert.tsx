@@ -1,4 +1,4 @@
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { Button } from '@material-ui/core';
 import Portal from '@material-ui/core/Portal';
 import Slide from '@material-ui/core/Slide';
@@ -22,14 +22,14 @@ function SlideTransition(props: any): React.ReactElement {
  */
 export interface IAlertProps {
   /**
-   * Boolean indicating whether to display an alert.
+   * Detailed message
    */
-  open: boolean;
+  details?: string;
 
   /**
-   * Alert message.
+   * Alert duration (in milliseconds).
    */
-  message: string;
+  duration?: number;
 
   /**
    * Error object
@@ -37,14 +37,14 @@ export interface IAlertProps {
   error?: Error;
 
   /**
-   * Alert severity.
+   * Alert message.
    */
-  severity?: Color;
+  message: string;
 
   /**
-   * Alert duration (in milliseconds).
+   * Boolean indicating whether to display an alert.
    */
-  duration?: number;
+  open: boolean;
 
   /**
    * Callback invoked upon clicking on an alert.
@@ -55,6 +55,11 @@ export interface IAlertProps {
    * Callback invoked upon closing an alert.
    */
   onClose: (event?: any) => void;
+
+  /**
+   * Alert severity.
+   */
+  severity?: Color;
 }
 
 /**
@@ -83,6 +88,38 @@ export class Alert extends React.Component<IAlertProps> {
     if (severity === 'success') {
       duration = this.props.duration || 5000; // milliseconds
     }
+
+    let action: React.ReactNode;
+    if (this.props.error) {
+      action = (
+        <Button
+          color="inherit"
+          size="small"
+          onClick={() => {
+            showErrorMessage('Error', this.props.error);
+          }}
+        >
+          SHOW
+        </Button>
+      );
+    } else if (this.props.details) {
+      action = (
+        <Button
+          color="inherit"
+          size="small"
+          onClick={() => {
+            showDialog({
+              title: 'Detailed message',
+              body: this.props.details,
+              buttons: [Dialog.okButton({ label: 'DISMISS' })]
+            });
+          }}
+        >
+          Details
+        </Button>
+      );
+    }
+
     return (
       <Portal>
         <Snackbar
@@ -97,23 +134,7 @@ export class Alert extends React.Component<IAlertProps> {
           onClick={this._onClick}
           onClose={this._onClose}
         >
-          <MuiAlert
-            action={
-              this.props.error && (
-                <Button
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    showErrorMessage('Error', this.props.error);
-                  }}
-                >
-                  SHOW
-                </Button>
-              )
-            }
-            variant="filled"
-            severity={severity}
-          >
+          <MuiAlert action={action} variant="filled" severity={severity}>
             {this.props.message || '(missing message)'}
           </MuiAlert>
         </Snackbar>
