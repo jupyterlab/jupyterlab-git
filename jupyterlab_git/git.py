@@ -298,9 +298,9 @@ class Git:
 
         return response
 
-    async def status(self, current_path):
+    async def fetch(self, current_path):
         """
-        Execute git status command & return the result.
+        Execute git fetch command
         """
         cwd = os.path.join(self.root_dir, current_path)
         # Start by fetching to get accurate ahead/behind status
@@ -310,15 +310,23 @@ class Git:
             "--all",
             "--prune",
         ]  # Run prune by default to help beginners
-        try:
-            code, _, fetch_error = await execute(cmd, cwd=cwd)
-        except BaseException as error:
-            code = -1
-            fetch_error = str(error)
 
+        code, _, fetch_error = await execute(cmd, cwd=cwd)
+
+        result = {
+            "code": code,
+        }
         if code != 0:
-            get_logger().warning(f"Error when fetching git data: {fetch_error}")
+            result["command"] = " ".join(cmd)
+            result["error"] = fetch_error
 
+        return result
+
+    async def status(self, current_path):
+        """
+        Execute git status command & return the result.
+        """
+        cwd = os.path.join(self.root_dir, current_path)
         cmd = ["git", "status", "--porcelain", "-b", "-u", "-z"]
         code, status, my_error = await execute(cmd, cwd=cwd)
 

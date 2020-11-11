@@ -46,10 +46,20 @@ export class GitExtension implements IGitExtension {
     } else {
       interval = DEFAULT_REFRESH_INTERVAL;
     }
-    this._poll = new Poll({
+    this._statusPoll = new Poll({
       factory: this._refreshModel,
       frequency: {
         interval: interval,
+        backoff: true,
+        max: 300 * 1000
+      },
+      standby: this._refreshStandby
+    });
+    this._fetchPoll = new Poll({
+      auto: false,
+      factory: this._fetchRemotes,
+      frequency: {
+        interval,
         backoff: true,
         max: 300 * 1000
       },
@@ -537,7 +547,8 @@ export class GitExtension implements IGitExtension {
       return;
     }
     this._isDisposed = true;
-    this._poll.dispose();
+    this._fetchPoll.dispose();
+    this._statusPoll.dispose();
     Signal.clearData(this);
   }
 
@@ -701,8 +712,8 @@ export class GitExtension implements IGitExtension {
    * @returns promise which resolves upon refreshing the repository
    */
   async refresh(): Promise<void> {
-    await this._poll.refresh();
-    await this._poll.tick;
+    await this._statusPoll.refresh();
+    await this._statusPoll.tick;
   }
 
   /**
@@ -736,14 +747,22 @@ export class GitExtension implements IGitExtension {
         // Set up the marker obj for the current (valid) repo/branch combination
         this._setMarker(this.pathRepository, this._currentBranch.name);
       }
-
       if (headChanged) {
         this._headChanged.emit();
+      }
+
+      // Start fetch remotes if the repository has remote branches
+      const hasRemote = this._branches.some(branch => branch.is_remote_branch);
+      if (hasRemote) {
+        this._fetchPoll.start();
+      } else {
+        this._fetchPoll.stop();
       }
     } catch (error) {
       const headChanged = this._currentBranch !== null;
       this._branches = [];
       this._currentBranch = null;
+      this._fetchPoll.stop();
       if (headChanged) {
         this._headChanged.emit();
       }
@@ -1161,14 +1180,30 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Fetch poll action.
+   */
+  private _fetchRemotes = async (): Promise<void> => {
+    try {
+      const current_path = await this._getPathRespository();
+      await requestAPI('remote/fetch', 'POST', { current_path });
+    } catch (error) {
+      console.error('Failed to fetch remotes', error);
+    }
+  };
+
+  /**
    * Callback invoked upon a change to plugin settings.
    *
    * @private
    * @param settings - plugin settings
    */
   private _onSettingsChange(settings: ISettingRegistry.ISettings) {
-    this._poll.frequency = {
-      ...this._poll.frequency,
+    this._fetchPoll.frequency = {
+      ...this._fetchPoll.frequency,
+      interval: settings.composite.refreshInterval as number
+    };
+    this._statusPoll.frequency = {
+      ...this._statusPoll.frequency,
       interval: settings.composite.refreshInterval as number
     };
   }
@@ -1249,14 +1284,15 @@ export class GitExtension implements IGitExtension {
   private _docmanager: IDocumentManager | null;
   private _docRegistry: DocumentRegistry | null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
+  private _fetchPoll: Poll;
   private _isDisposed = false;
   private _markerCache: Markers = new Markers(() => this._markChanged.emit());
   private __currentMarker: BranchMarker = null;
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
-  private _poll: Poll;
   private _settings: ISettingRegistry.ISettings | null;
   private _standbyCondition: () => boolean = () => false;
+  private _statusPoll: Poll;
   private _taskHandler: TaskHandler<IGitExtension>;
 
   private _headChanged = new Signal<IGitExtension, void>(this);
