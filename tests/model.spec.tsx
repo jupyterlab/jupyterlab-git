@@ -361,7 +361,8 @@ describe('IGitExtension', () => {
   });
 
   describe('#pull', () => {
-    it('should emit headChanged signal if successful', async () => {
+    it('should refresh branches if successful', async () => {
+      const spy = jest.spyOn(GitExtension.prototype, 'refreshBranch');
       mockResponses['pull'] = {
         body: () => null
       };
@@ -369,19 +370,18 @@ describe('IGitExtension', () => {
       model.pathRepository = '/path/to/server/repo';
       await model.ready;
 
-      const testSignal = testEmission(model.headChanged, {
-        test: (model, _) => {
-          expect(_).toBeUndefined();
-        }
-      });
-
       await model.pull();
-      await testSignal;
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith();
+
+      spy.mockReset();
+      spy.mockRestore();
     });
   });
 
   describe('#push', () => {
-    it('should emit headChanged signal if successful', async () => {
+    it('should refresh branches  if successful', async () => {
+      const spy = jest.spyOn(GitExtension.prototype, 'refreshBranch');
       mockResponses['push'] = {
         body: () => null
       };
@@ -389,19 +389,18 @@ describe('IGitExtension', () => {
       model.pathRepository = '/path/to/server/repo';
       await model.ready;
 
-      const testSignal = testEmission(model.headChanged, {
-        test: (model, _) => {
-          expect(_).toBeUndefined();
-        }
-      });
-
       await model.push();
-      await testSignal;
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith();
+
+      spy.mockReset();
+      spy.mockRestore();
     });
   });
 
   describe('#resetToCommit', () => {
-    it('should emit headChanged signal if successfully reset to commit', async () => {
+    it('should refresh branches if successfully reset to commit', async () => {
+      const spy = jest.spyOn(GitExtension.prototype, 'refreshBranch');
       mockResponses['reset_to_commit'] = {
         body: () => null
       };
@@ -417,14 +416,12 @@ describe('IGitExtension', () => {
       model.pathRepository = '/path/to/server/repo';
       await model.ready;
 
-      const testSignal = testEmission(model.headChanged, {
-        test: (model, _) => {
-          expect(_).toBeUndefined();
-        }
-      });
-
       await model.resetToCommit('dummyhash');
-      await testSignal;
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith();
+
+      spy.mockReset();
+      spy.mockRestore();
     });
   });
 });
