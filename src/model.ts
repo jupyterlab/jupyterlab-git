@@ -384,15 +384,17 @@ export class GitExtension implements IGitExtension {
       'git:checkout',
       async () => {
         let changes;
-        if (body.checkout_branch) {
-          changes = await this._changedFiles(
-            this._currentBranch.name,
-            body.branchname
-          );
-        } else if (body.filename) {
-          changes = { files: [body.filename] };
-        } else {
-          changes = await this._changedFiles('WORKING', 'HEAD');
+        if (!body.new_check) {
+          if (body.checkout_branch && !body.new_check) {
+            changes = await this._changedFiles(
+              this._currentBranch.name,
+              body.branchname
+            );
+          } else if (body.filename) {
+            changes = { files: [body.filename] };
+          } else {
+            changes = await this._changedFiles('WORKING', 'HEAD');
+          }
         }
 
         const d = await requestAPI<Git.ICheckoutResult>(
@@ -401,7 +403,7 @@ export class GitExtension implements IGitExtension {
           body
         );
 
-        changes.files?.forEach(file => this._revertFile(file));
+        changes?.files?.forEach(file => this._revertFile(file));
         return d;
       }
     );
