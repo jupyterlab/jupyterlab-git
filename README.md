@@ -75,12 +75,14 @@ Or equivalently in `jupyter_notebook_config.json`:
 
 ## Troubleshooting
 
-Before consulting the following list, be sure the server extension and the frontend extension have the same version by executing the following commands:
+Before consulting the following list, be sure the `jupyterlab_git` server extension and the `@jupyterlab/git` frontend extension have the same version by executing the following commands:
 
 ```bash
 jupyter serverextension list
 jupyter labextension list
 ```
+
+If they do not match or one is missing, please [reinstall the package](README.md#Install).
 
 - **Issue**: the Git panel does not recognize that you are in a Git repository.
 
