@@ -51,8 +51,14 @@ Paste the output from your command line running `jupyter lab` here, use `--debug
 </pre>
 </details>
 
-<details><summary>Browser Output</summary>
+<details><summary>Web Browser Output</summary>
 <pre>
-Paste the output from your browser Javascript console here.
+Paste the output from your browser web console here.
 </pre>
 </details>
+
+<!-- 
+To open the browser, please refer to the documentation:
+Chrome: https://developers.google.com/web/tools/chrome-devtools/open#console
+Firefox: https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Opening_the_Web_Console
+-->
