@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+set -e
+
 pip install .
 jupyter serverextension enable --sys-prefix --py nbgitpuller
 jupyter lab build --dev-build=False --minimize=False --debug
+
+jupyter serverextension list 1>serverextensions 2>&1
+cat serverextensions | grep "jupyterlab_git.*OK"
+jupyter labextension list 1>labextensions 2>&1
+cat labextensions | grep "@jupyterlab/git.*OK"
