@@ -1104,7 +1104,7 @@ class Git:
             return {"code": code, "command": " ".join(command), "message": error}
 
         remote_name = output.strip()
-        remote_branch = rev_parse_output.strip().lstrip(remote_name + "/")
+        remote_branch = rev_parse_output.strip().replace(remote_name + "/", "")
         return {
             "code": code,
             "remote_short_name": remote_name,
