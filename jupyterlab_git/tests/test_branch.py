@@ -409,7 +409,7 @@ async def test_get_current_branch_detached_failure():
         ("master", "master", "origin"),
         ("feature/bar", "feature-foo", ""),
         # Test upstream branch name starts with a letter contained in remote name
-        ("rbranch", "rbranch", "origin")
+        ("rbranch", "rbranch", "origin"),
     ],
 )
 async def test_get_upstream_branch_success(branch, upstream, remotename):
