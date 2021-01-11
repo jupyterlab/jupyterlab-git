@@ -1,14 +1,19 @@
 ---
 name: Bug report
 about: Create a report to help us improve
+title: ''
+labels: type:Bug
+assignees: ''
+
 ---
 
 <!--
 Welcome! Before creating a new issue:
+* This is the GIT EXTENSION for JupyterLab repository. Unrelated issues will be closed.
 * Look at the README *Troubleshooting* section
 * Search for relevant issues
 * Check that you have updated both the jupyterlab extension and the python package to the same version
-Check that you have installed Git version 2 or higher
+* Check that you have installed Git version 2 or higher
 -->
 
 ## Description
@@ -46,8 +51,14 @@ Paste the output from your command line running `jupyter lab` here, use `--debug
 </pre>
 </details>
 
-<details><summary>Browser Output</summary>
+<details><summary>Web Browser Output</summary>
 <pre>
-Paste the output from your browser Javascript console here.
+Paste the output from your browser web console here.
 </pre>
 </details>
+
+<!-- 
+To open the browser, please refer to the documentation:
+Chrome: https://developers.google.com/web/tools/chrome-devtools/open#console
+Firefox: https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Opening_the_Web_Console
+-->

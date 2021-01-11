@@ -31,8 +31,8 @@ lab_path = Path(HERE) / name / "labextension"
 data_files_spec = [
     ("share/jupyter/lab/extensions", str(lab_path), "*.tgz"),
     (
-        "etc/jupyter/jupyter_notebook_config.d",
-        "jupyter-config/jupyter_notebook_config.d",
+        "etc/jupyter/jupyter_server_config.d",
+        "jupyter-config/jupyter_server_config.d",
         "jupyterlab_git.json",
     ),
 ]
@@ -80,13 +80,14 @@ setup_args = dict(
         "Programming Language :: Python :: 3.9",
         "Framework :: Jupyter",
     ],
-    install_requires=["notebook", "nbdime ~=3.0.0dev0", "packaging", "pexpect"],
+    install_requires=["jupyter_server", "nbdime ~=3.0.0dev0", "packaging", "pexpect"],
     extras_require={
         "test": [
             "requests_unixsocket",
             "pytest",
             "pytest-asyncio",
-            "jupyterlab~=3.0.0rc6",
+            "jupyterlab",
+            "notebook",
             "black",
             "pre-commit",
         ],

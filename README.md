@@ -47,6 +47,7 @@ Once installed, extension behavior can be modified via the following settings wh
 - **displayStatus**: display Git extension status updates in the JupyterLab status bar. If `true`, the extension displays status updates in the JupyterLab status bar, such as when pulling and pushing changes, switching branches, and polling for changes. Depending on the level of extension activity, some users may find the status updates distracting. In which case, setting this to `false` should reduce visual noise.
 - **doubleClickDiff**: double click a file in the Git extension panel to open a diff of the file instead of opening the file for editing.
 - **historyCount**: number of commits shown in the history log, beginning with the most recent. Displaying a larger number of commits can lead to performance degradation, so use caution when modifying this setting.
+- **refreshIfHidden**: whether to refresh even if the Git tab is hidden; default to `false` (i.e. refresh is turned off if the Git tab is hidden).
 - **refreshInterval**: number of milliseconds between polling the file system for changes. In order to ensure that the UI correctly displays the current repository status, the extension must poll the file system for changes. Longer polling times increase the likelihood that the UI does not reflect the current status; however, longer polling times also incur less performance overhead.
 - **simpleStaging**: enable a simplified concept of staging. When this setting is `true`, all files with changes are automatically staged. When we develop in JupyterLab, we often only care about what files have changed (in the broadest sense) and don't need to distinguish between "tracked" and "untracked" files. Accordingly, this setting allows us to simplify the visual presentation of changes, which is especially useful for those less acquainted with Git.
 
@@ -74,12 +75,14 @@ Or equivalently in `jupyter_notebook_config.json`:
 
 ## Troubleshooting
 
-Before consulting the following list, be sure the server extension and the frontend extension have the same version by executing the following commands:
+Before consulting the following list, be sure the `jupyterlab_git` server extension and the `@jupyterlab/git` frontend extension have the same version by executing the following commands:
 
 ```bash
-jupyter serverextension list
+jupyter server extension list
 jupyter labextension list
 ```
+
+If they do not match or one is missing, please [reinstall the package](README.md#Install).
 
 - **Issue**: the Git panel does not recognize that you are in a Git repository.
 
@@ -93,7 +96,7 @@ jupyter labextension list
     Explicitly enable the server extension by running:
 
     ```bash
-    jupyter serverextension enable --py jupyterlab_git
+    jupyter server extension enable --py jupyterlab_git
     ```
 
   - If you are using JupyterHub or some other technologies requiring an initialization script which includes the jupyterlab-git extension, be sure to install both the frontend and the server extension **before** launching JupyterLab.
@@ -137,7 +140,7 @@ cd jupyterlab-git
 # Install the server extension in development mode and enable it
 pip install -e .[test]
 pre-commit install
-jupyter serverextension enable --py jupyterlab_git --sys-prefix
+jupyter server extension enable --py jupyterlab_git --sys-prefix
 
 # Build and install your development version of the extension
 jlpm

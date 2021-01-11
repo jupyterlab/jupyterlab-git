@@ -30,6 +30,10 @@ MAX_WAIT_FOR_LOCK_S = 5
 CHECK_LOCK_INTERVAL_S = 0.1
 # Parse Git version output
 GIT_VERSION_REGEX = re.compile(r"^git\sversion\s(?P<version>\d+(.\d+)*)")
+# Parse Git branch status
+GIT_BRANCH_STATUS = re.compile(
+    r"^## (?P<branch>([\w\-/]+|HEAD \(no branch\)|No commits yet on \w+))(\.\.\.(?P<remote>[\w\-/]+)( \[(ahead (?P<ahead>\d+))?(, )?(behind (?P<behind>\d+))?\])?)?$"
+)
 
 execution_lock = tornado.locks.Lock()
 
@@ -272,7 +276,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 ["git", "clone", unquote(repo_url), "-q"],
                 username=auth["username"],
                 password=auth["password"],
@@ -281,28 +285,50 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 ["git", "clone", unquote(repo_url)],
                 cwd=os.path.join(self.root_dir, current_path),
                 env=env,
             )
 
-        response = {"code": code}
+        response = {"code": code, "message": output.strip()}
 
         if code != 0:
             response["message"] = error.strip()
 
         return response
 
+    async def fetch(self, current_path):
+        """
+        Execute git fetch command
+        """
+        cwd = os.path.join(self.root_dir, current_path)
+        # Start by fetching to get accurate ahead/behind status
+        cmd = [
+            "git",
+            "fetch",
+            "--all",
+            "--prune",
+        ]  # Run prune by default to help beginners
+
+        code, _, fetch_error = await execute(cmd, cwd=cwd)
+
+        result = {
+            "code": code,
+        }
+        if code != 0:
+            result["command"] = " ".join(cmd)
+            result["error"] = fetch_error
+
+        return result
+
     async def status(self, current_path):
         """
         Execute git status command & return the result.
         """
-        cmd = ["git", "status", "--porcelain", "-u", "-z"]
-        code, my_output, my_error = await execute(
-            cmd,
-            cwd=os.path.join(self.root_dir, current_path),
-        )
+        cwd = os.path.join(self.root_dir, current_path)
+        cmd = ["git", "status", "--porcelain", "-b", "-u", "-z"]
+        code, status, my_error = await execute(cmd, cwd=cwd)
 
         if code != 0:
             return {
@@ -320,10 +346,7 @@ class Git:
             "--cached",
             "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
         ]
-        text_code, text_output, _ = await execute(
-            command,
-            cwd=os.path.join(self.root_dir, current_path),
-        )
+        text_code, text_output, _ = await execute(command, cwd=cwd)
 
         are_binary = dict()
         if text_code == 0:
@@ -331,21 +354,52 @@ class Git:
                 diff, name = line.rsplit("\t", maxsplit=1)
                 are_binary[name] = diff.startswith("-\t-")
 
+        data = {
+            "code": code,
+            "branch": None,
+            "remote": None,
+            "ahead": 0,
+            "behind": 0,
+            "files": [],
+        }
         result = []
-        line_iterable = (line for line in strip_and_split(my_output) if line)
-        for line in line_iterable:
-            name = line[3:]
-            result.append(
-                {
-                    "x": line[0],
-                    "y": line[1],
-                    "to": name,
-                    # if file was renamed, next line contains original path
-                    "from": next(line_iterable) if line[0] == "R" else name,
-                    "is_binary": are_binary.get(name, None),
-                }
-            )
-        return {"code": code, "files": result}
+        line_iterable = (line for line in strip_and_split(status) if line)
+
+        try:
+            first_line = next(line_iterable)
+            # Interpret branch line
+            match = GIT_BRANCH_STATUS.match(first_line)
+            if match is not None:
+                d = match.groupdict()
+                branch = d.get("branch")
+                if branch == "HEAD (no branch)":
+                    branch = "(detached)"
+                elif branch.startswith("No commits yet on "):
+                    branch = "(initial)"
+                data["branch"] = branch
+                data["remote"] = d.get("remote")
+                data["ahead"] = int(d.get("ahead") or 0)
+                data["behind"] = int(d.get("behind") or 0)
+
+            # Interpret file lines
+            for line in line_iterable:
+                name = line[3:]
+                result.append(
+                    {
+                        "x": line[0],
+                        "y": line[1],
+                        "to": name,
+                        # if file was renamed, next line contains original path
+                        "from": next(line_iterable) if line[0] == "R" else name,
+                        "is_binary": are_binary.get(name, None),
+                    }
+                )
+
+            data["files"] = result
+        except StopIteration:  # Raised if line_iterable is empty
+            pass
+
+        return data
 
     async def log(self, current_path, history_count=10):
         """
@@ -863,7 +917,7 @@ class Git:
                 cwd=os.path.join(self.root_dir, curr_fb_path),
             )
 
-        response = {"code": code}
+        response = {"code": code, "message": output.strip()}
 
         if code != 0:
             output = output.strip()
@@ -901,7 +955,7 @@ class Git:
         env = os.environ.copy()
         if auth:
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 command,
                 username=auth["username"],
                 password=auth["password"],
@@ -910,13 +964,13 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, _, error = await execute(
+            code, output, error = await execute(
                 command,
                 env=env,
                 cwd=os.path.join(self.root_dir, curr_fb_path),
             )
 
-        response = {"code": code}
+        response = {"code": code, "message": output.strip()}
 
         if code != 0:
             response["message"] = error.strip()
@@ -1050,7 +1104,7 @@ class Git:
             return {"code": code, "command": " ".join(command), "message": error}
 
         remote_name = output.strip()
-        remote_branch = rev_parse_output.strip().lstrip(remote_name + "/")
+        remote_branch = rev_parse_output.strip().replace(remote_name + "/", "", 1)
         return {
             "code": code,
             "remote_short_name": remote_name,

@@ -4,6 +4,7 @@ import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import * as React from 'react';
@@ -81,6 +82,16 @@ export interface IGitPanelState {
   files: Git.IStatusFile[];
 
   /**
+   * Number of commits ahead
+   */
+  nCommitsAhead: number;
+
+  /**
+   * Number of commits behind
+   */
+  nCommitsBehind: number;
+
+  /**
    * List of prior commits.
    */
   pastCommits: Git.ISingleCommitInfo[];
@@ -108,8 +119,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       branches: [],
       currentBranch: '',
       files: [],
-      repository: null,
+      nCommitsAhead: 0,
+      nCommitsBehind: 0,
       pastCommits: [],
+      repository: null,
       tab: 0
     };
   }
@@ -117,29 +130,36 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   /**
    * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
    */
-  componentDidMount() {
+  componentDidMount(): void {
     const { model, settings } = this.props;
 
     model.repositoryChanged.connect((_, args) => {
       this.setState({
         repository: args.newValue
       });
-      this.refresh();
+      this.refreshView();
     }, this);
     model.statusChanged.connect(() => {
-      this.setState({ files: model.status });
+      this.setState({
+        files: model.status.files,
+        nCommitsAhead: model.status.ahead,
+        nCommitsBehind: model.status.behind
+      });
     }, this);
     model.headChanged.connect(async () => {
       await this.refreshBranch();
       if (this.state.tab === 1) {
         this.refreshHistory();
-      } else {
-        this.refreshStatus();
       }
     }, this);
-    model.markChanged.connect(() => this.forceUpdate());
+    model.markChanged.connect(() => this.forceUpdate(), this);
 
-    settings.changed.connect(this.refresh, this);
+    settings.changed.connect(this.refreshView, this);
+  }
+
+  componentWillUnmount(): void {
+    // Clear all signal connections
+    Signal.clearData(this);
   }
 
   refreshBranch = async () => {
@@ -168,18 +188,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     }
   };
 
-  refreshStatus = async () => {
-    await this.props.model.refreshStatus();
-  };
-
   /**
    * Refresh widget, update all content
    */
-  refresh = async () => {
+  refreshView = async () => {
     if (this.props.model.pathRepository !== null) {
       await this.refreshBranch();
       await this.refreshHistory();
-      await this.refreshStatus();
     }
   };
 
@@ -279,7 +294,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         commands={this.props.commands}
         logger={this.props.logger}
         model={this.props.model}
-        refresh={this._onRefresh}
+        nCommitsAhead={this.state.nCommitsAhead}
+        nCommitsBehind={this.state.nCommitsBehind}
         repository={this.state.repository || ''}
       />
     );
@@ -444,20 +460,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     this.setState({
       tab: tab
     });
-  };
-
-  /**
-   * Callback invoked upon refreshing a repository.
-   *
-   * @returns promise which refreshes a repository
-   */
-  private _onRefresh = async () => {
-    await this.refreshBranch();
-    if (this.state.tab === 1) {
-      this.refreshHistory();
-    } else {
-      this.refreshStatus();
-    }
   };
 
   /**

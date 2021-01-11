@@ -263,14 +263,15 @@ export function addCommands(
           message: 'Cloning...'
         });
         try {
-          await Private.showGitOperationDialog<IGitCloneArgs>(
+          const details = await Private.showGitOperationDialog<IGitCloneArgs>(
             model,
             Operation.Clone,
             { path: fileBrowser.model.path, url: result.value }
           );
           logger.log({
             message: 'Successfully cloned',
-            level: Level.SUCCESS
+            level: Level.SUCCESS,
+            details
           });
           await fileBrowser.model.refresh();
         } catch (error) {
@@ -309,10 +310,14 @@ export function addCommands(
         message: 'Pushing...'
       });
       try {
-        await Private.showGitOperationDialog(model, Operation.Push);
+        const details = await Private.showGitOperationDialog(
+          model,
+          Operation.Push
+        );
         logger.log({
           message: 'Successfully pushed',
-          level: Level.SUCCESS
+          level: Level.SUCCESS,
+          details
         });
       } catch (error) {
         console.error(
@@ -339,10 +344,14 @@ export function addCommands(
         message: 'Pulling...'
       });
       try {
-        await Private.showGitOperationDialog(model, Operation.Pull);
+        const details = await Private.showGitOperationDialog(
+          model,
+          Operation.Pull
+        );
         logger.log({
           message: 'Successfully pulled',
-          level: Level.SUCCESS
+          level: Level.SUCCESS,
+          details
         });
       } catch (error) {
         console.error(
@@ -664,24 +673,28 @@ namespace Private {
     args?: T,
     authentication?: Git.IAuth,
     retry = false
-  ): Promise<void> {
+  ): Promise<string> {
     try {
+      let result: Git.IResultWithMessage;
       // the Git action
       switch (operation) {
         case Operation.Clone:
           // eslint-disable-next-line no-case-declarations
           const { path, url } = (args as any) as IGitCloneArgs;
-          await model.clone(path, url, authentication);
+          result = await model.clone(path, url, authentication);
           break;
         case Operation.Pull:
-          await model.pull(authentication);
+          result = await model.pull(authentication);
           break;
         case Operation.Push:
-          await model.push(authentication);
+          result = await model.push(authentication);
           break;
         default:
-          return;
+          result = { code: -1, message: 'Unknown git command' };
+          break;
       }
+
+      return result.message;
     } catch (error) {
       if (
         AUTH_ERROR_MESSAGES.some(

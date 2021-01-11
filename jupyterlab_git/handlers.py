@@ -6,8 +6,8 @@ import os
 from pathlib import Path
 from tornado import web
 
-from notebook.base.handlers import APIHandler
-from notebook.utils import url_path_join as ujoin, url2path
+from jupyter_server.base.handlers import APIHandler
+from jupyter_server.utils import url_path_join as ujoin, url2path
 from packaging.version import parse
 
 from ._version import __version__
@@ -128,6 +128,24 @@ class GitShowPrefixHandler(GitHandler):
         """
         current_path = self.get_json_body()["current_path"]
         result = await self.git.show_prefix(current_path)
+
+        if result["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(result))
+
+
+class GitFetchHandler(GitHandler):
+    """
+    Handler for 'git fetch'
+    """
+
+    @web.authenticated
+    async def post(self):
+        """
+        POST request handler, fetch from remotes.
+        """
+        current_path = self.get_json_body()["current_path"]
+        result = await self.git.fetch(current_path)
 
         if result["code"] != 0:
             self.set_status(500)
@@ -787,6 +805,7 @@ def setup_handlers(web_app):
         ("/git/pull", GitPullHandler),
         ("/git/push", GitPushHandler),
         ("/git/remote/add", GitRemoteAddHandler),
+        ("/git/remote/fetch", GitFetchHandler),
         ("/git/reset", GitResetHandler),
         ("/git/reset_to_commit", GitResetToCommitHandler),
         ("/git/server_root", GitServerRootHandler),

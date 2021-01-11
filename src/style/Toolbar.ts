@@ -96,6 +96,12 @@ export const toolbarButtonClass = style({
   outline: 'none',
 
   $nest: {
+    '&:disabled': {
+      opacity: 0.4,
+      background: 'none',
+      cursor: 'not-allowed'
+    },
+
     '&:hover': {
       backgroundColor: 'var(--jp-layout-color2)'
     },
@@ -113,4 +119,14 @@ export const toolbarButtonClass = style({
 
 export const spacer = style({
   flex: '1 1 auto'
+});
+
+export const badgeClass = style({
+  $nest: {
+    '& > .MuiBadge-badge': {
+      top: 12,
+      right: 15,
+      backgroundColor: 'var(--jp-warn-color1)'
+    }
+  }
 });
