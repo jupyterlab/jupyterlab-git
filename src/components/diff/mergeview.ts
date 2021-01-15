@@ -3,7 +3,7 @@
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
 // The linter must be relaxed on this imported file.
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable eqeqeq */
 /* eslint-disable no-inner-declarations */
 /* eslint-disable prefer-arrow-callback */
@@ -345,10 +345,10 @@ class DiffView implements MergeView.IDiffView {
       CodeMirror.on(dv.edit.state.trackAlignable, 'realign', setDealign);
       CodeMirror.on(dv.orig.state.trackAlignable, 'realign', setDealign);
     }
-    dv.edit.on('viewportChange', function() {
+    dv.edit.on('viewportChange', function () {
       set(false);
     });
-    dv.orig.on('viewportChange', function() {
+    dv.orig.on('viewportChange', function () {
       set(false);
     });
     update();
@@ -356,12 +356,12 @@ class DiffView implements MergeView.IDiffView {
   }
 
   private static registerScroll(dv: DiffView, otherDv: DiffView): void {
-    dv.edit.on('scroll', function() {
+    dv.edit.on('scroll', function () {
       if (DiffView.syncScroll(dv, true)) {
         makeConnections(dv);
       }
     });
-    dv.orig.on('scroll', function() {
+    dv.orig.on('scroll', function () {
       if (DiffView.syncScroll(dv, false)) {
         makeConnections(dv);
       }
@@ -556,7 +556,7 @@ function updateMarks(
   classes: MergeView.IClasses
 ): void {
   const vp = editor.getViewport();
-  editor.operation(function() {
+  editor.operation(function () {
     if (
       state.from == state.to ||
       vp.from - state.to > 20 ||
@@ -876,7 +876,7 @@ function alignChunks(dv: DiffView, force?: boolean) {
   }
   // @ts-ignore
   if (!dv.orig.curOp) {
-    return dv.orig.operation(function() {
+    return dv.orig.operation(function () {
       alignChunks(dv, force);
     });
   }
@@ -1188,7 +1188,7 @@ class MergeView implements MergeView.IMergeViewEditor {
       right.init(rightPane, origRight, options);
     }
     if (options.collapseIdentical) {
-      this.editor().operation(function() {
+      this.editor().operation(function () {
         collapseIdenticalStretches(self, options.collapseIdentical);
       });
     }
@@ -1203,7 +1203,7 @@ class MergeView implements MergeView.IMergeViewEditor {
       right.registerEvents(left);
     }
 
-    const onResize = function() {
+    const onResize = function () {
       if (left) {
         makeConnections(left);
       }
@@ -1212,7 +1212,7 @@ class MergeView implements MergeView.IMergeViewEditor {
       }
     };
     CodeMirror.on(window, 'resize', onResize);
-    const resizeInterval = setInterval(function() {
+    const resizeInterval = setInterval(function () {
       let p = null;
       for (
         p = wrapElt.parentNode;
@@ -1280,7 +1280,7 @@ function buildGap(dv: DiffView) {
     [lock],
     'CodeMirror-merge-scrolllock-wrap'
   );
-  CodeMirror.on(lock, 'click', function() {
+  CodeMirror.on(lock, 'click', function () {
     DiffView.setScrollLock(dv, !dv.lockScroll);
   });
   const gapElts: Element[] = [lockWrap];
@@ -1290,7 +1290,7 @@ function buildGap(dv: DiffView) {
       null,
       'CodeMirror-merge-copybuttons-' + dv.type
     );
-    CodeMirror.on(dv.copyButtons, 'click', function(e: MouseEvent) {
+    CodeMirror.on(dv.copyButtons, 'click', function (e: MouseEvent) {
       const node = (e.target || e.srcElement) as any;
       if (!node.chunk) {
         return;
@@ -1631,7 +1631,7 @@ class TrackAlignable {
     this.height = cm.doc.height;
     const self = this;
     // @ts-ignore
-    cm.on('markerAdded', function(_, marker) {
+    cm.on('markerAdded', function (_, marker) {
       if (!marker.collapsed) {
         return;
       }
@@ -1641,14 +1641,14 @@ class TrackAlignable {
       }
     });
     // @ts-ignore
-    cm.on('markerCleared', function(_, marker, _min, max) {
+    cm.on('markerCleared', function (_, marker, _min, max) {
       if (max !== null && marker.collapsed) {
         self.check(max, Alignement.F_MARKER, self.hasMarker);
       }
     });
     cm.on('markerChanged', this.signal.bind(this));
     // @ts-ignore
-    cm.on('lineWidgetAdded', function(_, widget, lineNo) {
+    cm.on('lineWidgetAdded', function (_, widget, lineNo) {
       if (widget.mergeSpacer) {
         return;
       }
@@ -1659,7 +1659,7 @@ class TrackAlignable {
       }
     });
     // @ts-ignore
-    cm.on('lineWidgetCleared', function(_, widget, lineNo) {
+    cm.on('lineWidgetCleared', function (_, widget, lineNo) {
       if (widget.mergeSpacer) {
         return;
       }
@@ -1670,7 +1670,7 @@ class TrackAlignable {
       }
     });
     cm.on('lineWidgetChanged', this.signal.bind(this));
-    cm.on('change', function(_, change) {
+    cm.on('change', function (_, change) {
       const start = change.from.line;
       const nBefore = change.to.line - change.from.line;
       const nAfter = change.text.length - 1;
@@ -1683,7 +1683,7 @@ class TrackAlignable {
         self.check(change.from.line, Alignement.F_MARKER, self.hasMarker);
       }
     });
-    cm.on('viewportChange', function() {
+    cm.on('viewportChange', function () {
       // @ts-ignore
       if (self.cm.doc.height !== self.height) {
         self.signal();
@@ -1822,12 +1822,12 @@ class TrackAlignable {
 }
 
 // @ts-ignore
-CodeMirror.commands.goNextDiff = function(cm: CodeMirror.Editor) {
+CodeMirror.commands.goNextDiff = function (cm: CodeMirror.Editor) {
   return Private.goNearbyDiff(cm, 1);
 };
 
 // @ts-ignore
-CodeMirror.commands.goPrevDiff = function(cm: CodeMirror.Editor) {
+CodeMirror.commands.goPrevDiff = function (cm: CodeMirror.Editor) {
   return Private.goNearbyDiff(cm, -1);
 };
 

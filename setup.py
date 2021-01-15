@@ -72,7 +72,7 @@ setup_args = dict(
     python_requires=">=3.6,<4",
     license="BSD-3-Clause",
     platforms="Linux, Mac OS X, Windows",
-    keywords=["Jupyter", "JupyterLab", "JupyterLab3"],
+    keywords=["Jupyter", "JupyterLab", "JupyterLab3", "Git"],
     classifiers=[
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",

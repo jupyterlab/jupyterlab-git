@@ -5,7 +5,8 @@ import { Git } from '../tokens';
 /**
  * The UI for the commit author form
  */
-export class GitAuthorForm extends Widget
+export class GitAuthorForm
+  extends Widget
   implements Dialog.IBodyWidget<Git.IIdentity> {
   constructor() {
     super();

@@ -26,15 +26,9 @@ export interface ICellDiffProps {
  * is mounted, the PhosporJS widget is created and attached to the Ref.
  */
 export class CellDiff extends React.Component<ICellDiffProps> {
-  private unAddedOrRemovedRef: RefObject<HTMLDivElement> = React.createRef<
-    HTMLDivElement
-  >();
-  private addedRef: RefObject<HTMLDivElement> = React.createRef<
-    HTMLDivElement
-  >();
-  private removedRef: RefObject<HTMLDivElement> = React.createRef<
-    HTMLDivElement
-  >();
+  private unAddedOrRemovedRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
+  private addedRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
+  private removedRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
   private renderMimeRegistry: IRenderMimeRegistry;
 
   constructor(props: ICellDiffProps) {

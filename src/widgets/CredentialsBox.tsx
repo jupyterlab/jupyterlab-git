@@ -5,7 +5,8 @@ import { Git } from '../tokens';
 /**
  * The UI for the credentials form
  */
-export class GitCredentialsForm extends Widget
+export class GitCredentialsForm
+  extends Widget
   implements Dialog.IBodyWidget<Git.IAuth> {
   constructor(
     textContent = 'Enter credentials for remote repository',
