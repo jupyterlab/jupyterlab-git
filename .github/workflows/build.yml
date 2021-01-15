@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install wheel
-          pip install --upgrade --upgrade-strategy=eager "jupyterlab~=3.0.0rc6"
+          pip install --upgrade --upgrade-strategy=eager "jupyterlab~=3.0"
 
       - name: Test the extension
         run: |
@@ -85,8 +85,8 @@ jobs:
           # Rebuild jupyterlab to include our extension
           jupyter lab build
           # Run the standard jupyterlab browser integration test
-          jupyter serverextension list 1>serverextensions 2>&1
-          cat serverextensions | grep "jupyterlab_git.*OK"
+          jupyter server extension list 1>serverextensions 2>&1
+          cat server extensions | grep "jupyterlab_git.*OK"
           jupyter labextension list 1>labextensions 2>&1
           cat labextensions | grep "@jupyterlab/git.*OK"
           python -m jupyterlab.browser_check

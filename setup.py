@@ -80,7 +80,7 @@ setup_args = dict(
         "Programming Language :: Python :: 3.9",
         "Framework :: Jupyter",
     ],
-    install_requires=["jupyter_server", "nbdime ~=3.0.0dev0", "packaging", "pexpect"],
+    install_requires=["jupyter_server", "nbdime ~=3.0.0b1", "packaging", "pexpect"],
     extras_require={
         "test": [
             "requests_unixsocket",
