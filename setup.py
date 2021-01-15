@@ -44,7 +44,8 @@ cmdclass = create_cmdclass(
 )
 
 js_command = combine_commands(
-    install_npm(HERE, build_cmd="build:prod", npm=["jlpm"]), ensure_targets(jstargets),
+    install_npm(HERE, build_cmd="build:prod", npm=["jlpm"]),
+    ensure_targets(jstargets),
 )
 
 is_repo = (HERE / ".git").exists()
