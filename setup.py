@@ -44,8 +44,7 @@ cmdclass = create_cmdclass(
 )
 
 js_command = combine_commands(
-    install_npm(HERE, build_cmd="build:prod", npm=["jlpm"]),
-    ensure_targets(jstargets),
+    install_npm(HERE, build_cmd="build:prod", npm=["jlpm"]), ensure_targets(jstargets),
 )
 
 is_repo = (HERE / ".git").exists()
@@ -87,11 +86,15 @@ setup_args = dict(
     ],
     extras_require={
         "test": [
+            "black",
+            "coverage",
+            "jupyterlab",
+            "pre-commit",
             "pytest",
             "pytest-asyncio",
-            "jupyterlab",
-            "black",
-            "pre-commit",
+            "pytest-cov",
+            "pytest-tornasync",
+            "requests",
         ],
     },
 )
