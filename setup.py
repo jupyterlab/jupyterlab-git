@@ -66,7 +66,7 @@ setup_args = dict(
     long_description_content_type="text/markdown",
     cmdclass=cmdclass,
     packages=setuptools.find_packages(),
-    install_requires=["jupyter_server", "nbdime ~=3.0.0b1", "packaging", "pexpect"],
+    install_requires=["jupyter_server", "nbdime~=3.0.0b1", "jupyter_packaging~=0.7.9", "packaging", "pexpect"],
     zip_safe=False,
     include_package_data=True,
     python_requires=">=3.6,<4",
