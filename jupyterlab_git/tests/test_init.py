@@ -18,7 +18,9 @@ async def test_init():
         mock_execute.return_value = maybe_future((0, "", ""))
 
         # When
-        actual_response = await Git(FakeContentManager(Path("/bin"))).init("test_curr_path")
+        actual_response = await Git(FakeContentManager(Path("/bin"))).init(
+            "test_curr_path"
+        )
 
         mock_execute.assert_called_once_with(
             ["git", "init"], cwd=str(Path("/bin") / "test_curr_path")

@@ -77,7 +77,8 @@ async def test_checkout_branch_noref_success():
 
             cmd = ["git", "checkout", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=str(Path("/bin") / "test_curr_path"),
+                cmd,
+                cwd=str(Path("/bin") / "test_curr_path"),
             )
 
             assert {"code": rc, "message": stdout_message} == actual_response
@@ -88,8 +89,8 @@ async def test_checkout_branch_noref_failure():
     branch = "test-branch"
     curr_path = "test_curr_path"
     stdout_message = ""
-    stderr_message = "error: pathspec '{}' did not match any file(s) known to git".format(
-        branch
+    stderr_message = (
+        "error: pathspec '{}' did not match any file(s) known to git".format(branch)
     )
     rc = 1
     with patch("jupyterlab_git.git.execute") as mock_execute:
@@ -111,7 +112,8 @@ async def test_checkout_branch_noref_failure():
 
             cmd = ["git", "checkout", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=str(Path("/bin") / "test_curr_path"),
+                cmd,
+                cwd=str(Path("/bin") / "test_curr_path"),
             )
 
             assert {
@@ -150,7 +152,8 @@ async def test_checkout_branch_remoteref_success():
 
             cmd = ["git", "checkout", "--track", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=str(Path("/bin") / "test_curr_path"),
+                cmd,
+                cwd=str(Path("/bin") / "test_curr_path"),
             )
 
             assert {"code": rc, "message": stdout_message} == actual_response
@@ -161,8 +164,8 @@ async def test_checkout_branch_headsref_failure():
     branch = "test-branch"
     curr_path = "test_curr_path"
     stdout_message = ""
-    stderr_message = "error: pathspec '{}' did not match any file(s) known to git".format(
-        branch
+    stderr_message = (
+        "error: pathspec '{}' did not match any file(s) known to git".format(branch)
     )
     rc = 1
 
@@ -187,7 +190,8 @@ async def test_checkout_branch_headsref_failure():
 
             cmd = ["git", "checkout", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=str(Path("/bin") / "test_curr_path"),
+                cmd,
+                cwd=str(Path("/bin") / "test_curr_path"),
             )
             assert {
                 "code": rc,
@@ -222,7 +226,8 @@ async def test_checkout_branch_headsref_success():
             # Then
             cmd = ["git", "checkout", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=str(Path("/bin") / "test_curr_path"),
+                cmd,
+                cwd=str(Path("/bin") / "test_curr_path"),
             )
             assert {"code": rc, "message": stdout_message} == actual_response
 
@@ -231,8 +236,8 @@ async def test_checkout_branch_headsref_success():
 async def test_checkout_branch_remoteref_failure():
     branch = "test-branch"
     stdout_message = ""
-    stderr_message = "error: pathspec '{}' did not match any file(s) known to git".format(
-        branch
+    stderr_message = (
+        "error: pathspec '{}' did not match any file(s) known to git".format(branch)
     )
     rc = 1
 
@@ -255,7 +260,8 @@ async def test_checkout_branch_remoteref_failure():
             # Then
             cmd = ["git", "checkout", "--track", branch]
             mock_execute.assert_called_once_with(
-                cmd, cwd=str(Path("/bin") / "test_curr_path"),
+                cmd,
+                cwd=str(Path("/bin") / "test_curr_path"),
             )
             assert {
                 "code": rc,
@@ -367,7 +373,8 @@ async def test_get_current_branch_detached_success():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "branch", "-a"], cwd=str(Path("/bin") / "test_curr_path"),
+            ["git", "branch", "-a"],
+            cwd=str(Path("/bin") / "test_curr_path"),
         )
         assert "(HEAD detached at origin/feature-foo)" == actual_response
 
@@ -392,7 +399,8 @@ async def test_get_current_branch_detached_failure():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "branch", "-a"], cwd=str(Path("/bin") / "test_curr_path"),
+            ["git", "branch", "-a"],
+            cwd=str(Path("/bin") / "test_curr_path"),
         )
         assert (
             "Error [fatal: Not a git repository (or any of the parent directories): .git] "
@@ -736,7 +744,8 @@ async def test_branch_failure():
 
         # Then
         mock_execute.assert_called_once_with(
-            expected_cmd, cwd=str(Path("/bin") / "test_curr_path"),
+            expected_cmd,
+            cwd=str(Path("/bin") / "test_curr_path"),
         )
 
         assert expected_response == actual_response
@@ -832,7 +841,8 @@ async def test_branch_success_detached_head():
                 ),
                 # call to get current branch name given a detached head
                 call(
-                    ["git", "branch", "-a"], cwd=str(Path("/bin") / "test_curr_path"),
+                    ["git", "branch", "-a"],
+                    cwd=str(Path("/bin") / "test_curr_path"),
                 ),
                 # call to get refs/remotes
                 call(

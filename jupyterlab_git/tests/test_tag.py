@@ -17,7 +17,9 @@ async def test_git_tag_success():
         mock_execute.return_value = maybe_future((0, tag, ""))
 
         # When
-        actual_response = await Git(FakeContentManager(Path("/bin"))).tags("test_curr_path")
+        actual_response = await Git(FakeContentManager(Path("/bin"))).tags(
+            "test_curr_path"
+        )
 
         # Then
         mock_execute.assert_called_once_with(

@@ -9,6 +9,7 @@ from jupyterlab_git.handlers import GitConfigHandler
 
 from .testutils import FakeContentManager, NS, maybe_future
 
+
 @patch("jupyterlab_git.git.execute")
 async def test_git_get_config_success(mock_execute, jp_fetch):
     # Given
@@ -21,9 +22,7 @@ async def test_git_get_config_success(mock_execute, jp_fetch):
     response = await jp_fetch(NS, "config", body=json.dumps(body), method="POST")
 
     # Then
-    mock_execute.assert_called_once_with(
-        ["git", "config", "--list"], cwd="test_path"
-    )
+    mock_execute.assert_called_once_with(["git", "config", "--list"], cwd="test_path")
 
     assert response.code == 201
     payload = json.loads(response.body)
@@ -34,6 +33,7 @@ async def test_git_get_config_success(mock_execute, jp_fetch):
             "user.email": "john.snow@iscoming.com",
         },
     }
+
 
 @patch("jupyterlab_git.git.execute")
 async def test_git_get_config_multiline(mock_execute, jp_fetch):
@@ -57,9 +57,7 @@ async def test_git_get_config_multiline(mock_execute, jp_fetch):
     response = await jp_fetch(NS, "config", body=json.dumps(body), method="POST")
 
     # Then
-    mock_execute.assert_called_once_with(
-        ["git", "config", "--list"], cwd="test_path"
-    )
+    mock_execute.assert_called_once_with(["git", "config", "--list"], cwd="test_path")
 
     assert response.code == 201
     payload = json.loads(response.body)
@@ -70,6 +68,7 @@ async def test_git_get_config_multiline(mock_execute, jp_fetch):
             "user.email": "john.snow@iscoming.com",
         },
     }
+
 
 @patch("jupyterlab_git.git.execute")
 @patch(
@@ -97,9 +96,7 @@ async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch):
     response = await jp_fetch(NS, "config", body=json.dumps(body), method="POST")
 
     # Then
-    mock_execute.assert_called_once_with(
-        ["git", "config", "--list"], cwd="test_path"
-    )
+    mock_execute.assert_called_once_with(["git", "config", "--list"], cwd="test_path")
 
     assert response.code == 201
     payload = json.loads(response.body)
@@ -114,6 +111,7 @@ async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch):
             "alias.topic-base-branch-name": '!f(){     printf "master\n";   };f',
         },
     }
+
 
 @patch("jupyterlab_git.git.execute")
 async def test_git_set_config_success(mock_execute, jp_fetch):

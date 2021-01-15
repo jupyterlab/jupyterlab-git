@@ -34,6 +34,7 @@ async def test_git_add_remote_success_no_name(mock_execute, jp_fetch):
         "command": " ".join(command),
     }
 
+
 @patch("jupyterlab_git.git.execute")
 async def test_git_add_remote_success(mock_execute, jp_fetch):
     # Given
@@ -56,6 +57,7 @@ async def test_git_add_remote_success(mock_execute, jp_fetch):
         "code": 0,
         "command": " ".join(command),
     }
+
 
 @patch("jupyterlab_git.git.execute")
 async def test_git_add_remote_failure(mock_execute, jp_fetch):
