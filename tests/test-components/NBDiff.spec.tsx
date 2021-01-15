@@ -33,7 +33,7 @@ describe('NBDiff', () => {
     const node = shallow<NBDiff>(<NBDiff {...props} />);
 
     // Then
-    let resolveTest: () => void;
+    let resolveTest: (value?: any) => void;
     const terminateTest = new Promise(resolve => {
       resolveTest = resolve;
     });
@@ -77,7 +77,7 @@ describe('NBDiff', () => {
     const node = shallow<NBDiff>(<NBDiff {...props} />);
 
     // Then
-    let resolveTest: () => void;
+    let resolveTest: (value?: any) => void;
     const terminateTest = new Promise(resolve => {
       resolveTest = resolve;
     });

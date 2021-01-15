@@ -1,73 +1,78 @@
-"""Setup Module to setup Python serverextension for the jupyterlab git
-extension. For non-dev installs, will also automatically
-build (if package.json is present) and install (if the labextension exists,
-eg the build succeeded) the corresponding labextension.
 """
+jupyterlab_git setup
+"""
+import json
 from pathlib import Path
-from subprocess import CalledProcessError
-
-from setupbase import (
-    command_for_func,
-    create_cmdclass,
-    ensure_python,
-    get_version,
-    HERE,
-    run,
-)
 
 import setuptools
+from jupyter_packaging import (
+    create_cmdclass,
+    install_npm,
+    ensure_targets,
+    combine_commands,
+    skip_if_exists,
+)
+
+HERE = Path(__file__).parent.resolve()
 
 # The name of the project
 name = "jupyterlab_git"
 
-# Ensure a valid python version
-ensure_python(">=3.6")
-
 # Get our version
-version = get_version(str(Path(name) / "_version.py"))
+with (HERE / "package.json").open() as f:
+    version = json.load(f)["version"]
 
-lab_path = Path(HERE) / name / "labextension"
+lab_path = HERE / name / "labextension"
 
-data_files_spec = [
-    ("share/jupyter/lab/extensions", str(lab_path), "*.tgz"),
-    (
-        "etc/jupyter/jupyter_server_config.d",
-        "jupyter-config/jupyter_server_config.d",
-        "jupyterlab_git.json",
-    ),
+# Representative files that should exist after a successful build
+jstargets = [
+    str(lab_path / "package.json"),
 ]
 
+package_data_spec = {name: ["*"]}
 
-def runPackLabextension():
-    if Path("package.json").is_file():
-        try:
-            run(["jlpm", "build:labextension"])
-        except CalledProcessError:
-            pass
+labext_name = "@jupyterlab/git"
 
+data_files_spec = [
+    ("share/jupyter/labextensions/%s" % labext_name, str(lab_path), "**"),
+    ("share/jupyter/labextensions/%s" % labext_name, str(HERE), "install.json"),
+    ("etc/jupyter/jupyter_server_config.d", "jupyter-config", "jupyterlab_git.json"),
+]
 
-pack_labext = command_for_func(runPackLabextension)
+cmdclass = create_cmdclass(
+    "jsdeps", package_data_spec=package_data_spec, data_files_spec=data_files_spec
+)
 
-cmdclass = create_cmdclass("pack_labext", data_files_spec=data_files_spec)
-cmdclass["pack_labext"] = pack_labext
-cmdclass.pop("develop")
+js_command = combine_commands(
+    install_npm(HERE, build_cmd="build:prod", npm=["jlpm"]),
+    ensure_targets(jstargets),
+)
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+is_repo = (HERE / ".git").exists()
+if is_repo:
+    cmdclass["jsdeps"] = js_command
+else:
+    cmdclass["jsdeps"] = skip_if_exists(jstargets, js_command)
+
+long_description = (HERE / "README.md").read_text(errors="ignore")
 
 setup_args = dict(
     name=name,
-    description="A server extension for JupyterLab's git extension",
+    version=version,
+    url="https://github.com/jupyterlab/jupyterlab-git.git",
+    author="Jupyter Development Team",
+    description="A JupyterLab extension for version control using git",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    version=version,
     cmdclass=cmdclass,
     packages=setuptools.find_packages(),
-    author="Jupyter Development Team",
-    url="https://github.com/jupyterlab/jupyterlab-git",
-    license="BSD",
+    install_requires=["jupyter_server", "nbdime ~=3.0.0b1", "packaging", "pexpect"],
+    zip_safe=False,
+    include_package_data=True,
+    python_requires=">=3.6,<4",
+    license="BSD-3-Clause",
     platforms="Linux, Mac OS X, Windows",
-    keywords=["Jupyter", "JupyterLab", "Git"],
+    keywords=["Jupyter", "JupyterLab", "JupyterLab3"],
     classifiers=[
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
@@ -80,19 +85,17 @@ setup_args = dict(
         "Programming Language :: Python :: 3.9",
         "Framework :: Jupyter",
     ],
-    install_requires=["jupyter_server", "nbdime ~=3.0.0b1", "packaging", "pexpect"],
     extras_require={
         "test": [
-            "requests_unixsocket",
             "pytest",
             "pytest-asyncio",
             "jupyterlab",
-            "notebook",
             "black",
             "pre-commit",
         ],
     },
-    python_requires=">=3.6,<4",
 )
 
-setuptools.setup(**setup_args)
+
+if __name__ == "__main__":
+    setuptools.setup(**setup_args)

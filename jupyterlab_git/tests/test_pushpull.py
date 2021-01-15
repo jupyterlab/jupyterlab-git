@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from unittest.mock import Mock, call, patch
 
 import pytest
@@ -19,14 +19,14 @@ async def test_git_pull_fail():
             )
 
             # When
-            actual_response = await Git(FakeContentManager("/bin")).pull(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).pull(
                 "test_curr_path"
             )
 
             # Then
             mock_execute.assert_called_once_with(
                 ["git", "pull", "--no-commit"],
-                cwd=os.path.join("/bin", "test_curr_path"),
+                cwd=str(Path("/bin") / "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
             )
             assert {"code": 1, "message": "Authentication failed"} == actual_response
@@ -46,7 +46,7 @@ async def test_git_pull_with_conflict_fail():
             )
 
             # When
-            actual_response = await Git(FakeContentManager("/bin")).pull(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).pull(
                 "test_curr_path"
             )
 
@@ -55,7 +55,7 @@ async def test_git_pull_with_conflict_fail():
                 [
                     call(
                         ["git", "pull", "--no-commit"],
-                        cwd="/bin/test_curr_path",
+                        cwd=str(Path("/bin") / "test_curr_path"),
                         env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                     )
                 ]
@@ -81,7 +81,7 @@ async def test_git_pull_with_auth_fail():
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
-            actual_response = await Git(FakeContentManager("/bin")).pull(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).pull(
                 "test_curr_path", auth
             )
 
@@ -90,7 +90,7 @@ async def test_git_pull_with_auth_fail():
                 ["git", "pull", "--no-commit"],
                 username="asdf",
                 password="qwerty",
-                cwd=os.path.join("/bin", "test_curr_path"),
+                cwd=str(Path("/bin") / "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
             )
             assert {
@@ -109,14 +109,14 @@ async def test_git_pull_success():
             mock_execute.return_value = maybe_future((0, output, ""))
 
             # When
-            actual_response = await Git(FakeContentManager("/bin")).pull(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).pull(
                 "test_curr_path"
             )
 
             # Then
             mock_execute.assert_called_once_with(
                 ["git", "pull", "--no-commit"],
-                cwd=os.path.join("/bin", "test_curr_path"),
+                cwd=str(Path("/bin") / "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
             )
             assert {"code": 0, "message": output} == actual_response
@@ -135,7 +135,7 @@ async def test_git_pull_with_auth_success():
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
-            actual_response = await Git(FakeContentManager("/bin")).pull(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).pull(
                 "test_curr_path", auth
             )
 
@@ -144,7 +144,7 @@ async def test_git_pull_with_auth_success():
                 ["git", "pull", "--no-commit"],
                 username="asdf",
                 password="qwerty",
-                cwd=os.path.join("/bin", "test_curr_path"),
+                cwd=str(Path("/bin") / "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
             )
             assert {"code": 0, "message": output} == actual_response
@@ -165,7 +165,7 @@ async def test_git_pull_with_auth_success_and_conflict_fail():
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
-            actual_response = await Git(FakeContentManager("/bin")).pull(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).pull(
                 "test_curr_path", auth
             )
 
@@ -174,7 +174,7 @@ async def test_git_pull_with_auth_success_and_conflict_fail():
                 [
                     call(
                         ["git", "pull", "--no-commit"],
-                        cwd="/bin/test_curr_path",
+                        cwd=str(Path("/bin") / "test_curr_path"),
                         env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
                         username="asdf",
                         password="qwerty",
@@ -197,14 +197,14 @@ async def test_git_push_fail():
             )
 
             # When
-            actual_response = await Git(FakeContentManager("/bin")).push(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).push(
                 "test_origin", "HEAD:test_master", "test_curr_path"
             )
 
             # Then
             mock_execute.assert_called_once_with(
                 ["git", "push", "test_origin", "HEAD:test_master"],
-                cwd=os.path.join("/bin", "test_curr_path"),
+                cwd=str(Path("/bin") / "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
             )
             assert {"code": 1, "message": "Authentication failed"} == actual_response
@@ -226,7 +226,7 @@ async def test_git_push_with_auth_fail():
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
-            actual_response = await Git(FakeContentManager("/bin")).push(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).push(
                 "test_origin", "HEAD:test_master", "test_curr_path", auth
             )
 
@@ -235,7 +235,7 @@ async def test_git_push_with_auth_fail():
                 ["git", "push", "test_origin", "HEAD:test_master"],
                 username="asdf",
                 password="qwerty",
-                cwd=os.path.join("/bin", "test_curr_path"),
+                cwd=str(Path("/bin") / "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
             )
             assert {
@@ -254,14 +254,14 @@ async def test_git_push_success():
             mock_execute.return_value = maybe_future((0, output, "does not matter"))
 
             # When
-            actual_response = await Git(FakeContentManager("/bin")).push(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).push(
                 ".", "HEAD:test_master", "test_curr_path"
             )
 
             # Then
             mock_execute.assert_called_once_with(
                 ["git", "push", ".", "HEAD:test_master"],
-                cwd=os.path.join("/bin", "test_curr_path"),
+                cwd=str(Path("/bin") / "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
             )
             assert {"code": 0, "message": output} == actual_response
@@ -280,7 +280,7 @@ async def test_git_push_with_auth_success():
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
-            actual_response = await Git(FakeContentManager("/bin")).push(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).push(
                 ".", "HEAD:test_master", "test_curr_path", auth
             )
 
@@ -289,7 +289,7 @@ async def test_git_push_with_auth_success():
                 ["git", "push", ".", "HEAD:test_master"],
                 username="asdf",
                 password="qwerty",
-                cwd=os.path.join("/bin", "test_curr_path"),
+                cwd=str(Path("/bin") / "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
             )
             assert {"code": 0, "message": output} == actual_response

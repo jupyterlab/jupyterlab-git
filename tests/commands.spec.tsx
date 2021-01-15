@@ -106,6 +106,7 @@ describe('git-commands', () => {
           mockDialog.mockResolvedValue({
             button: {
               accept: true,
+              actions: [],
               caption: '',
               className: '',
               displayType: 'default',

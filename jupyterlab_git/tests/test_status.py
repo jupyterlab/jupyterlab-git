@@ -1,5 +1,4 @@
-# python lib
-import os
+from pathlib import Path
 from subprocess import CalledProcessError
 from unittest.mock import Mock, call, patch
 
@@ -172,7 +171,7 @@ from .testutils import FakeContentManager, maybe_future
 async def test_status(output, diff_output, expected):
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        root = "/bin"
+        root = Path("/bin")
         repository = "test_curr_path"
         mock_execute.side_effect = [
             maybe_future((0, "\x00".join(output) + "\x00", "")),
@@ -189,7 +188,7 @@ async def test_status(output, diff_output, expected):
             [
                 call(
                     ["git", "status", "--porcelain", "-b", "-u", "-z"],
-                    cwd=os.path.join(root, repository),
+                    cwd=str(root / repository),
                 ),
                 call(
                     [
@@ -200,7 +199,7 @@ async def test_status(output, diff_output, expected):
                         "--cached",
                         "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
                     ],
-                    cwd=os.path.join(root, repository),
+                    cwd=str(root / repository),
                 ),
             ]
         )

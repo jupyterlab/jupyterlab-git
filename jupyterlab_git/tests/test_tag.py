@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from unittest.mock import Mock, call, patch
 
 import pytest
@@ -6,7 +6,7 @@ import tornado
 
 from jupyterlab_git.git import Git
 
-from .testutils import FakeContentManager, ServerTest, maybe_future
+from .testutils import FakeContentManager, maybe_future
 
 
 @pytest.mark.asyncio
@@ -17,12 +17,12 @@ async def test_git_tag_success():
         mock_execute.return_value = maybe_future((0, tag, ""))
 
         # When
-        actual_response = await Git(FakeContentManager("/bin")).tags("test_curr_path")
+        actual_response = await Git(FakeContentManager(Path("/bin"))).tags("test_curr_path")
 
         # Then
         mock_execute.assert_called_once_with(
             ["git", "tag", "--list"],
-            cwd=os.path.join("/bin", "test_curr_path"),
+            cwd=str(Path("/bin") / "test_curr_path"),
         )
 
         assert {"code": 0, "tags": [tag]} == actual_response
@@ -37,14 +37,14 @@ async def test_git_tag_checkout_success():
             mock_execute.return_value = maybe_future((0, "", ""))
 
             # When
-            actual_response = await Git(FakeContentManager("/bin")).tag_checkout(
+            actual_response = await Git(FakeContentManager(Path("/bin"))).tag_checkout(
                 "test_curr_path", "mock_tag"
             )
 
             # Then
             mock_execute.assert_called_once_with(
                 ["git", "checkout", "tags/{}".format(tag)],
-                cwd=os.path.join("/bin", "test_curr_path"),
+                cwd=str(Path("/bin") / "test_curr_path"),
             )
 
             assert {

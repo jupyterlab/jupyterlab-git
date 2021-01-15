@@ -2,17 +2,16 @@
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab/tree/examples/demo.ipynb) [![Github Actions Status](https://github.com/jupyterlab/jupyterlab-git/workflows/Test/badge.svg)](https://github.com/jupyterlab/jupyterlab-git/actions?query=workflow%3ATest) [![Version](https://img.shields.io/npm/v/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/pypi/v/jupyterlab-git.svg)](https://pypi.org/project/jupyterlab-git/) [![Downloads](https://img.shields.io/npm/dm/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git) [![Downloads](https://img.shields.io/conda/dn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git)<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 A JupyterLab extension for version control using Git
 
-![ui_glow_up](./docs/figs/preview.gif)
-
 To see the extension in action, open the example notebook included in the Binder [demo](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab/tree/examples/demo.ipynb).
 
-## Prerequisites
+## Requirements
 
-- JupyterLab (version 1.x or 2.x)
+- JupyterLab >= 3.0 (older version available for 2.x)
 - Git (version `>=2.x`)
 
 ## Usage
@@ -21,18 +20,28 @@ To see the extension in action, open the example notebook included in the Binder
 
 ## Install
 
-To install perform the following steps, with *pip*:
+To install perform the following steps, with _pip_:
 
 ```bash
 pip install --upgrade jupyterlab jupyterlab-git
-jupyter lab build
 ```
 
-or with *conda*:
+or with _conda_:
 
 ```bash
 conda install -c conda-forge jupyterlab jupyterlab-git
-jupyter lab build
+```
+
+### Uninstall
+
+```bash
+pip uninstall jupyterlab_git
+```
+
+or with _conda_:
+
+```bash
+conda remove jupyterlab-git
 ```
 
 ## Settings
@@ -53,27 +62,27 @@ Once installed, extension behavior can be modified via the following settings wh
 
 ### Server Settings
 
-- Post *git init* actions: It is possible to provide a list of commands to be executed in a folder after it is initialized as Git repository.
+- Post _git init_ actions: It is possible to provide a list of commands to be executed in a folder after it is initialized as Git repository.
 
 In `~/.jupyter/jupyter_notebook_config.py`:
+
 ```python
 c.JupyterLabGit.actions = {"post_init": ["touch dummy_init.dat"]}
 ```
 
 Or equivalently in `jupyter_notebook_config.json`:
+
 ```json
 {
   "JupyterLabGit": {
     "actions": {
-      "post_init": [
-        "touch dummy_init.dat"
-      ]
+      "post_init": ["touch dummy_init.dat"]
     }
   }
 }
 ```
 
-## Troubleshooting
+## Troubleshoot
 
 Before consulting the following list, be sure the `jupyterlab_git` server extension and the `@jupyterlab/git` frontend extension have the same version by executing the following commands:
 
@@ -117,56 +126,50 @@ If they do not match or one is missing, please [reinstall the package](README.md
     jupyter labextension install @jupyterlab/git
     ```
 
-## Development
-
-### Contributing
+## Contributing
 
 If you would like to contribute to the project, please read our [contributor documentation](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md).
 
 JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
-### Install
+### Development install
 
-Requires NodeJS
+Note: You will need NodeJS to build the extension package.
+
+The `jlpm` command is JupyterLab's pinned version of
+[yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
+`yarn` or `npm` in lieu of `jlpm` below.
 
 ```bash
-# Install new-ish JupyterLab
-pip install -U jupyterlab
-
 # Clone the repo to your local environment
 git clone https://github.com/jupyterlab/jupyterlab-git.git
+# Change directory to the jupyterlab_git directory
 cd jupyterlab-git
-
-# Install the server extension in development mode and enable it
+# Install package in development mode
 pip install -e .[test]
 pre-commit install
-jupyter server extension enable --py jupyterlab_git --sys-prefix
-
-# Build and install your development version of the extension
-jlpm
-jupyter labextension install .
-```
-
-To rebuild the package after a change and the JupyterLab app:
-
-```bash
+# Link your development version of the extension with JupyterLab
+jupyter labextension develop . --overwrite
+# Rebuild extension Typescript source after making changes
 jlpm run build
-jupyter lab build
 ```
 
-To continuously monitor the project for changes and automatically trigger a rebuild, start Jupyter in watch mode:
+You can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the extension.
 
 ```bash
-jupyter lab --watch
-```
-
-And in a separate session, begin watching the source directory for changes:
-
-```bash
+# Watch the source directory in one terminal, automatically rebuilding when needed
 jlpm run watch
+# Run JupyterLab in another terminal
+jupyter lab
 ```
 
-Now every change will be built locally and bundled into JupyterLab. Be sure to refresh your browser page after saving file changes to reload the extension (note: you'll need to wait for webpack to finish, which can take 10s+ at times).
+With the watch command running, every saved change will immediately be built locally and available in your running JupyterLab. Refresh JupyterLab to load the change in your browser (you may need to wait several seconds for the extension to be rebuilt).
+
+By default, the `jlpm run build` command generates the source maps for this extension to make it easier to debug using the browser dev tools. To also generate source maps for the JupyterLab core extensions, you can run the following command:
+
+```bash
+jupyter lab build --minimize=False
+```
 
 To execute the tests
 
@@ -209,6 +212,7 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcomed!

@@ -167,6 +167,7 @@ describe('BranchMenu', () => {
 
       // Should contain the branch names...
       for (let i = 0; i < branches.length; i++) {
+        // @ts-ignore
         expect(nodes[i].lastChild.data).toEqual(branches[i].name);
       }
     });
@@ -227,6 +228,7 @@ describe('BranchMenu', () => {
         return Promise.resolve({
           button: {
             accept: true,
+            actions: [],
             caption: '',
             className: '',
             displayType: 'default',
@@ -280,6 +282,7 @@ describe('BranchMenu', () => {
       expect(nodes.length).toEqual(branches.length);
 
       for (let i = 0; i < branches.length; i++) {
+        // @ts-ignore
         expect(nodes[i].attribs['title'].length).toBeGreaterThan(0);
       }
     });

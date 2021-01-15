@@ -168,7 +168,7 @@ describe('plugin', () => {
         'Failed to load the jupyterlab-git server extension',
         'Git server extension is unavailable. Please ensure you have installed the ' +
           'JupyterLab Git server extension by running: pip install --upgrade jupyterlab-git. ' +
-          'To confirm that the server extension is installed, run: jupyter serverextension list.',
+          'To confirm that the server extension is installed, run: jupyter server extension list.',
         [undefined] // The warning button is undefined as the module @jupyterlab/apputils is mocked
       );
     });

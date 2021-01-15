@@ -117,6 +117,7 @@ describe('GitPanel', () => {
       mock.showDialog.mockResolvedValue({
         button: {
           accept: true,
+          actions: [],
           caption: '',
           className: '',
           displayType: 'default',
@@ -165,6 +166,7 @@ describe('GitPanel', () => {
       mock.showDialog.mockResolvedValue({
         button: {
           accept: true,
+          actions: [],
           caption: '',
           className: '',
           displayType: 'default',
@@ -211,6 +213,7 @@ describe('GitPanel', () => {
       mock.showDialog.mockResolvedValue({
         button: {
           accept: false,
+          actions: [],
           caption: '',
           className: '',
           displayType: 'default',

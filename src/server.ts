@@ -24,7 +24,7 @@ export async function getServerSettings(): Promise<Git.IServerSettings> {
         const message =
           'Git server extension is unavailable. Please ensure you have installed the ' +
           'JupyterLab Git server extension by running: pip install --upgrade jupyterlab-git. ' +
-          'To confirm that the server extension is installed, run: jupyter serverextension list.';
+          'To confirm that the server extension is installed, run: jupyter server extension list.';
         throw new ServerConnection.ResponseError(response, message);
       } else {
         const message = error.message;
