@@ -22,9 +22,9 @@ def assert_http_error(error, expected_code, expected_message=None):
             expected_code == e.status_code
         ), f"Expected status code {expected_code} != {e.status_code}"
         if expected_message is not None:
-            assert expected_message == str(
+            assert expected_message in str(
                 e
-            ), f"Expected error message '{expected_message}' != '{str(e)}'"
+            ), f"Expected error message '{expected_message}' not in '{str(e)}'"
 
     elif any(
         [
@@ -38,8 +38,8 @@ def assert_http_error(error, expected_code, expected_message=None):
         if expected_message:
             message = json.loads(e.response.body.decode())["message"]
             assert (
-                expected_message == message
-            ), f"Expected error message '{expected_message}' != '{message}'"
+                expected_message in message
+            ), f"Expected error message '{expected_message}' not in '{message}'"
 
 
 class FakeContentManager:
