@@ -64,7 +64,7 @@ jobs:
         run: |
           jlpm
           jlpm run eslint:check
-          python -m pip install -e .[test]
+          python -m pip install -e .[dev]
 
           # Python formatting checks
           black . --check

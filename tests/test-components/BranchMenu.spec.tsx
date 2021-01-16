@@ -9,6 +9,7 @@ import { Logger } from '../../src/logger';
 import { GitExtension } from '../../src/model';
 import { listItemClass, nameClass } from '../../src/style/BranchMenu';
 import { mockedRequestAPI, defaultMockedResponses } from '../utils';
+import ClearIcon from '@material-ui/icons/Clear';
 
 jest.mock('../../src/git');
 jest.mock('@jupyterlab/apputils');
@@ -130,7 +131,7 @@ describe('BranchMenu', () => {
       component.setState({
         filter: 'foo'
       });
-      const nodes = component.find('ClearIcon');
+      const nodes = component.find(ClearIcon);
       expect(nodes.length).toEqual(1);
     });
 
@@ -140,7 +141,7 @@ describe('BranchMenu', () => {
         filter: 'foo'
       });
       const html = component
-        .find('ClearIcon')
+        .find(ClearIcon)
         .first()
         .html();
       expect(html.includes('<title>')).toEqual(true);

@@ -12,6 +12,7 @@ from jupyter_packaging import (
     combine_commands,
     skip_if_exists,
 )
+from packaging.version import parse
 
 HERE = Path(__file__).parent.resolve()
 
@@ -20,7 +21,7 @@ name = "jupyterlab_git"
 
 # Get our version
 with (HERE / "package.json").open() as f:
-    version = json.load(f)["version"]
+    version = str(parse(json.load(f)["version"]))
 
 lab_path = HERE / name / "labextension"
 
@@ -66,7 +67,7 @@ setup_args = dict(
     long_description_content_type="text/markdown",
     cmdclass=cmdclass,
     packages=setuptools.find_packages(),
-    install_requires=["jupyter_server", "nbdime~=3.0.0b1", "jupyter_packaging~=0.7.9", "packaging", "pexpect"],
+    install_requires=["jupyter_server", "nbdime~=3.0.0b1", "packaging", "pexpect"],
     zip_safe=False,
     include_package_data=True,
     python_requires=">=3.6,<4",
@@ -86,10 +87,11 @@ setup_args = dict(
         "Framework :: Jupyter",
     ],
     extras_require={
-        "test": [
+        "dev": [
             "black",
             "coverage",
-            "jupyterlab",
+            "jupyter_packaging~=0.7.9",
+            "jupyterlab~=3.0",
             "pre-commit",
             "pytest",
             "pytest-asyncio",
