@@ -83,4 +83,4 @@ jobs:
           jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
           python -m jupyterlab.browser_check
           # Run our extension-specific browser integration test
-          python tests/test-browser/run_browser_test.py
+          # python tests/test-browser/run_browser_test.py
