@@ -1,12 +1,24 @@
 """Initialize the backend server extension
 """
-# need this in order to show version in `jupyter serverextension list`
-from ._version import __version__
+
+import json
+from pathlib import Path
+
 from traitlets import List, Dict, Unicode
 from traitlets.config import Configurable
 
-from jupyterlab_git.handlers import setup_handlers
-from jupyterlab_git.git import Git
+from ._version import __version__
+from .handlers import setup_handlers
+from .git import Git
+
+HERE = Path(__file__).parent.resolve()
+
+with (HERE / "labextension" / "package.json").open() as fid:
+    data = json.load(fid)
+
+
+def _jupyter_labextension_paths():
+    return [{"src": "labextension", "dest": data["name"]}]
 
 
 class JupyterLabGit(Configurable):
@@ -26,15 +38,19 @@ class JupyterLabGit(Configurable):
     )
 
 
-def _jupyter_server_extension_paths():
-    """Declare the Jupyter server extension paths."""
+def _jupyter_server_extension_points():
     return [{"module": "jupyterlab_git"}]
 
 
-def load_jupyter_server_extension(nbapp):
-    """Load the Jupyter server extension."""
+def _load_jupyter_server_extension(server_app):
+    """Registers the API handler to receive HTTP requests from the frontend extension.
 
-    config = JupyterLabGit(config=nbapp.config)
-    git = Git(nbapp.web_app.settings["contents_manager"], config)
-    nbapp.web_app.settings["git"] = git
-    setup_handlers(nbapp.web_app)
+    Parameters
+    ----------
+    server_app: jupyterlab.labapp.LabApp
+        JupyterLab application instance
+    """
+    config = JupyterLabGit(config=server_app.config)
+    git = Git(server_app.web_app.settings["contents_manager"], config)
+    server_app.web_app.settings["git"] = git
+    setup_handlers(server_app.web_app)

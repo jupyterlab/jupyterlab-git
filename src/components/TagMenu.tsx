@@ -47,10 +47,7 @@ function onTagError(error: any, logger: Logger): void {
             switching:
           </p>
           <List>
-            {error.message
-              .split('\n')
-              .slice(1, -3)
-              .map(renderFileName)}
+            {error.message.split('\n').slice(1, -3).map(renderFileName)}
           </List>
           <span>
             Please commit, stash, or discard your changes before you checkout

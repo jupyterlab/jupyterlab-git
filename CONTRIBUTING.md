@@ -1,6 +1,6 @@
 # Contributing
 
-You can contribute in many ways to move this project forwrad.
+You can contribute in many ways to move this project forward.
 
 While anyone can contribute, only [Team Members](https://github.com/jupyterlab/jupyterlab-git#team) can merge in pull requests
 or add labels to issues.

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/git",
-  "version": "0.23.3",
+  "version": "0.30.0-beta.1",
   "description": "A JupyterLab extension for version control using git",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -13,27 +13,38 @@
     "jupyterlab-extension"
   ],
   "scripts": {
-    "build": "genversion --es6 --semi src/version.ts && tsc",
-    "build:labextension": "jlpm && jlpm clean:labextension && mkdirp jupyterlab_git/labextension && cd jupyterlab_git/labextension && npm pack ../..",
-    "clean": "rimraf lib tsconfig.tsbuildinfo",
-    "clean:more": "jlpm clean && rimraf build dist MANIFEST",
+    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
+    "build:labextension": "jupyter labextension build .",
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "build:lib": "genversion --es6 --semi src/version.ts && tsc",
+    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
+    "clean": "jlpm run clean:lib",
+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
     "clean:labextension": "rimraf jupyterlab_git/labextension",
+    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
+    "clean:more": "jlpm clean && rimraf build dist MANIFEST",
     "clean:slate": "jlpm clean:more && jlpm clean:labextension && rimraf node_modules",
     "contributors:generate": "jlpm run all-contributors generate",
-    "lint": "eslint . --ext .ts,.tsx --fix",
+    "eslint": "eslint . --ext .ts,.tsx --fix",
+    "eslint:check": "eslint . --ext .ts,.tsx",
+    "install:extension": "jupyter labextension develop --overwrite .",
+    "prepare": "jlpm run clean && jlpm run build:prod",
     "test": "jest",
-    "eslint-check": "eslint . --ext .ts,.tsx",
-    "prepare": "jlpm run build",
-    "watch": "tsc -w"
+    "watch": "run-p watch:src watch:labextension",
+    "watch:labextension": "jupyter labextension watch .",
+    "watch:src": "tsc -w"
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "schema/**/*.{json,}",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "style/index.js"
   ],
   "sideEffects": [
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
+  "styleModule": "style/index.js",
   "jupyterlab": {
     "discovery": {
       "server": {
@@ -47,34 +58,48 @@
       }
     },
     "extension": true,
-    "schemaDir": "schema"
+    "schemaDir": "schema",
+    "sharedPackages": {
+      "@material-ui/core": {
+        "singleton": true
+      },
+      "@material-ui/icons": {
+        "singleton": true
+      },
+      "@material-ui/lab": {
+        "singleton": true
+      }
+    },
+    "outputDir": "jupyterlab_git/labextension"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.0.0",
-    "@jupyterlab/apputils": "^2.0.0",
-    "@jupyterlab/codemirror": "^2.0.0",
-    "@jupyterlab/console": "^2.0.0",
-    "@jupyterlab/coreutils": "^4.0.0",
-    "@jupyterlab/filebrowser": "^2.0.0",
-    "@jupyterlab/mainmenu": "^2.0.0",
-    "@jupyterlab/nbformat": "^2.0.0",
-    "@jupyterlab/services": "^5.0.0",
-    "@jupyterlab/settingregistry": "^2.0.0",
-    "@jupyterlab/terminal": "^2.0.0",
-    "@jupyterlab/ui-components": "^2.0.0",
+    "@jupyterlab/application": "^3.0.0",
+    "@jupyterlab/apputils": "^3.0.0",
+    "@jupyterlab/codemirror": "^3.0.0",
+    "@jupyterlab/console": "^3.0.0",
+    "@jupyterlab/coreutils": "^5.0.0",
+    "@jupyterlab/docregistry": "^3.0.0",
+    "@jupyterlab/filebrowser": "^3.0.0",
+    "@jupyterlab/mainmenu": "^3.0.0",
+    "@jupyterlab/nbformat": "^3.0.0",
+    "@jupyterlab/rendermime": "^3.0.0",
+    "@jupyterlab/services": "^6.0.0",
+    "@jupyterlab/settingregistry": "^3.0.0",
+    "@jupyterlab/terminal": "^3.0.0",
+    "@jupyterlab/ui-components": "^3.0.0",
     "@lumino/collections": "^1.2.3",
-    "@lumino/commands": "^1.11.0",
-    "@lumino/coreutils": "^1.5.0",
-    "@lumino/polling": "^1.0.4",
-    "@lumino/signaling": "^1.4.0",
-    "@lumino/widgets": "^1.11.1",
+    "@lumino/commands": "^1.12.0",
+    "@lumino/coreutils": "^1.5.3",
+    "@lumino/polling": "^1.3.3",
+    "@lumino/signaling": "^1.4.3",
+    "@lumino/widgets": "^1.17.0",
     "@material-ui/core": "^4.8.2",
     "@material-ui/icons": "^4.5.1",
     "@material-ui/lab": "^4.0.0-alpha.54",
     "diff-match-patch": "^1.0.4",
-    "nbdime": "^6.0.0",
-    "react": "~16.9.0",
-    "react-dom": "~16.9.0",
+    "nbdime": "^6.1.0-beta.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "react-textarea-autosize": "^7.1.2",
     "react-virtualized-auto-sizer": "^1.0.2",
     "react-window": "^1.8.5",
@@ -83,37 +108,39 @@
   "devDependencies": {
     "@babel/core": "^7.5.0",
     "@babel/preset-env": "^7.5.0",
-    "@jupyterlab/testutils": "^2.0.0",
-    "@types/codemirror": "^0.0.79",
+    "@jupyterlab/builder": "^3.0.0-rc.13",
+    "@jupyterlab/testutils": "^3.0.0",
+    "@types/codemirror": "^0.0.97",
     "@types/diff-match-patch": "^1.0.32",
     "@types/enzyme": "^3.1.15",
-    "@types/jest": "^25.0.0",
-    "@types/react": "~16.8.13",
-    "@types/react-dom": "~16.0.5",
+    "@types/jest": "^26.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
     "@types/react-textarea-autosize": "^4.3.5",
     "@types/react-virtualized-auto-sizer": "^1.0.0",
     "@types/react-window": "^1.8.2",
-    "@typescript-eslint/eslint-plugin": "^2.25.0",
-    "@typescript-eslint/parser": "^2.25.0",
+    "@typescript-eslint/eslint-plugin": "^4.13.0",
+    "@typescript-eslint/parser": "^4.13.0",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.4.1",
     "all-contributors-cli": "^6.14.0",
     "enzyme": "^3.7.0",
-    "enzyme-adapter-react-16": "^1.7.0",
-    "eslint": "^6.8.0",
+    "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.19.0",
     "genversion": "^2.2.1",
     "husky": "^1.3.1",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^25.0.0",
+    "jest": "^26.0.0",
     "jest-fetch-mock": "^1.6.6",
     "lint-staged": "^8.1.5",
     "mkdirp": "^1.0.3",
-    "prettier": "^1.16.4",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.2.1",
     "puppeteer": "^1.10.0",
-    "rimraf": "^2.6.1",
-    "ts-jest": "^25.0.0",
-    "typescript": "~3.7.1"
+    "rimraf": "^3.0.2",
+    "ts-jest": "^26.0.0",
+    "typescript": "~4.1.3"
   },
   "peerDependencies": {
     "codemirror": "^5.0.0"
@@ -141,7 +168,6 @@
   },
   "homepage": "https://github.com/jupyterlab/jupyterlab-git",
   "resolutions": {
-    "@types/react": "~16.8.4",
-    "**/extract-zip/mkdirp": "^0.5.3"
+    "@types/react": "^17.0.0"
   }
 }

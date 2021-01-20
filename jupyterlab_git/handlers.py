@@ -6,8 +6,8 @@ import os
 from pathlib import Path
 from tornado import web
 
-from notebook.base.handlers import APIHandler
-from notebook.utils import url_path_join as ujoin, url2path
+from jupyter_server.base.handlers import APIHandler
+from jupyter_server.utils import url_path_join as ujoin, url2path
 from packaging.version import parse
 
 from ._version import __version__
@@ -713,7 +713,7 @@ class GitSettingsHandler(GitHandler):
             self.log.debug(
                 "[jupyterlab_git] Failed to execute 'git' command: {!s}".format(error)
             )
-        server_version = str(parse(__version__))
+        server_version = str(__version__)
         # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
         root_dir = getattr(self.contents_manager, "root_dir", None)
         server_root = None if root_dir is None else Path(root_dir).as_posix()

@@ -34,7 +34,7 @@ describe('PlainTextDiff', () => {
     const node = shallow<PlainTextDiff>(<PlainTextDiff {...props} />);
 
     // Then
-    let resolveTest: () => void;
+    let resolveTest: (value?: any) => void;
     const terminateTest = new Promise(resolve => {
       resolveTest = resolve;
     });
@@ -80,7 +80,7 @@ describe('PlainTextDiff', () => {
     const node = shallow<PlainTextDiff>(<PlainTextDiff {...props} />);
 
     // Then
-    let resolveTest: () => void;
+    let resolveTest: (value?: any) => void;
     const terminateTest = new Promise(resolve => {
       resolveTest = resolve;
     });

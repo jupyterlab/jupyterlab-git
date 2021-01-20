@@ -1,39 +1,42 @@
-# os junk
-.DS_Store
-
-# yarn/typescript build junk
-package-lock.json
+*.bundle.*
+lib/
+node_modules/
+*.egg-info/
+.ipynb_checkpoints
 *.tsbuildinfo
+jupyterlab_git/labextension
 
+# Created by https://www.gitignore.io/api/python
+# Edit at https://www.gitignore.io/?templates=python
+
+### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-.pytest_cache/
 
 # C extensions
 *.so
 
 # Distribution / packaging
-*.egg
-*.egg-info/
-.eggs/
-.installed.cfg
 .Python
-env/
 build/
 develop-eggs/
 dist/
 downloads/
 eggs/
-jupyterlab_git/labextension/*.tgz
+.eggs/
 lib/
 lib64/
-MANIFEST
 parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
+.installed.cfg
+*.egg
+MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -48,6 +51,7 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
+.nox/
 .coverage
 .coverage.*
 .cache
@@ -55,18 +59,11 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+.pytest_cache/
 
 # Translations
 *.mo
 *.pot
-
-# Django stuff:
-*.log
-local_settings.py
-
-# Flask stuff:
-instance/
-.webassets-cache
 
 # Scrapy stuff:
 .scrapy
@@ -104,12 +101,26 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
 # mkdocs documentation
 /site
 
 # mypy
 .mypy_cache/
-node_modules/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# End of https://www.gitignore.io/api/python
+
+# OSX files
+.DS_Store
 
 # jetbrains ide stuff
 *.iml
@@ -122,5 +133,5 @@ node_modules/
 
 # vim stuff
 *.swp
-.devcontainer/
+
 src/version.ts

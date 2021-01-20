@@ -9,6 +9,7 @@ import { Logger } from '../../src/logger';
 import { GitExtension } from '../../src/model';
 import { listItemClass, nameClass } from '../../src/style/BranchMenu';
 import { mockedRequestAPI, defaultMockedResponses } from '../utils';
+import ClearIcon from '@material-ui/icons/Clear';
 
 jest.mock('../../src/git');
 jest.mock('@jupyterlab/apputils');
@@ -130,7 +131,7 @@ describe('BranchMenu', () => {
       component.setState({
         filter: 'foo'
       });
-      const nodes = component.find('ClearIcon');
+      const nodes = component.find(ClearIcon);
       expect(nodes.length).toEqual(1);
     });
 
@@ -140,7 +141,7 @@ describe('BranchMenu', () => {
         filter: 'foo'
       });
       const html = component
-        .find('ClearIcon')
+        .find(ClearIcon)
         .first()
         .html();
       expect(html.includes('<title>')).toEqual(true);
@@ -167,6 +168,7 @@ describe('BranchMenu', () => {
 
       // Should contain the branch names...
       for (let i = 0; i < branches.length; i++) {
+        // @ts-ignore
         expect(nodes[i].lastChild.data).toEqual(branches[i].name);
       }
     });
@@ -227,6 +229,7 @@ describe('BranchMenu', () => {
         return Promise.resolve({
           button: {
             accept: true,
+            actions: [],
             caption: '',
             className: '',
             displayType: 'default',
@@ -280,6 +283,7 @@ describe('BranchMenu', () => {
       expect(nodes.length).toEqual(branches.length);
 
       for (let i = 0; i < branches.length; i++) {
+        // @ts-ignore
         expect(nodes[i].attribs['title'].length).toBeGreaterThan(0);
       }
     });
