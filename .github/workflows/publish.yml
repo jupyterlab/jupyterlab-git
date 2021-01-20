@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install jupyterlab packaging setuptools twine wheel
+        pip install jupyter_packaging~=0.7.9 jupyterlab~=3.0 packaging setuptools twine wheel
     - name: Test version are matching
       run: python -c "from release import assertEqualVersion; assertEqualVersion()"
     - name: Publish the Python package
