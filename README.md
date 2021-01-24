@@ -35,7 +35,7 @@ conda install -c conda-forge jupyterlab jupyterlab-git
 ### Uninstall
 
 ```bash
-pip uninstall jupyterlab_git
+pip uninstall jupyterlab-git
 ```
 
 or with _conda_:
@@ -143,7 +143,7 @@ The `jlpm` command is JupyterLab's pinned version of
 ```bash
 # Clone the repo to your local environment
 git clone https://github.com/jupyterlab/jupyterlab-git.git
-# Change directory to the jupyterlab_git directory
+# Change directory to the jupyterlab-git directory
 cd jupyterlab-git
 # Install package in development mode
 pip install -e .[dev]
