@@ -37,7 +37,16 @@ labext_name = "@jupyterlab/git"
 data_files_spec = [
     ("share/jupyter/labextensions/%s" % labext_name, str(lab_path), "**"),
     ("share/jupyter/labextensions/%s" % labext_name, str(HERE), "install.json"),
-    ("etc/jupyter/jupyter_server_config.d", "jupyter-config", "jupyterlab_git.json"),
+    (
+        "etc/jupyter/jupyter_server_config.d",
+        "jupyter-config/jupyter_server_config.d",
+        "jupyterlab_git.json",
+    ),
+    (
+        "etc/jupyter/jupyter_notebook_config.d",
+        "jupyter-config/jupyter_notebook_config.d",
+        "jupyterlab_git.json",
+    ),
 ]
 
 cmdclass = create_cmdclass(
