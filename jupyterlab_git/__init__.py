@@ -54,3 +54,7 @@ def _load_jupyter_server_extension(server_app):
     git = Git(server_app.web_app.settings["contents_manager"], config)
     server_app.web_app.settings["git"] = git
     setup_handlers(server_app.web_app)
+
+
+# For backward compatibility
+load_jupyter_server_extension = _load_jupyter_server_extension
