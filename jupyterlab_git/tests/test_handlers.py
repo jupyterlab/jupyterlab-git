@@ -83,7 +83,7 @@ async def test_git_show_top_level(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_has_calls(
         [
             call(
-                ["git", "show", "rev-parse", "--show-toplevel"],
+                ["git", "rev-parse", "--show-toplevel"],
                 cwd=str(jp_root_dir / top_repo_path / "subfolder"),
             ),
         ]
@@ -114,7 +114,7 @@ async def test_git_show_top_level_not_a_git_repo(mock_execute, jp_fetch, jp_root
     mock_execute.assert_has_calls(
         [
             call(
-                ["git", "show", "rev-parse", "--show-toplevel"],
+                ["git", "rev-parse", "--show-toplevel"],
                 cwd=str(jp_root_dir / top_repo_path / "subfolder"),
             ),
         ]
