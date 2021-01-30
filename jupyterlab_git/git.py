@@ -684,7 +684,7 @@ class Git:
         else:
             # Handle special case where cwd not inside a git repo
             lower_error = my_error.lower()
-            if "fatal: not a git repository (or any" in lower_error:
+            if "fatal: not a git repository" in lower_error:
                 return {"code": 0, "top_repo_path": None}
 
             return {
