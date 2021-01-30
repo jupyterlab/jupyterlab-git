@@ -28,7 +28,7 @@ def test_mapping_added():
 @patch("jupyterlab_git.handlers.GitAllHistoryHandler.git", spec=Git)
 async def test_all_history_handler_localbranch(mock_git, jp_fetch):
     # Given
-    show_top_level = {"code": 0, "foo": "top_level"}
+    show_top_level = {"code": 0, "top_repo_path": "foo"}
     branch = "branch_foo"
     log = "log_foo"
     status = "status_foo"
@@ -59,6 +59,66 @@ async def test_all_history_handler_localbranch(mock_git, jp_fetch):
             "status": status,
         },
     }
+
+
+@patch("jupyterlab_git.git.execute")
+async def test_git_show_top_level(mock_execute, jp_fetch, jp_root_dir):
+    # Given
+    top_repo_path = "path/to/repo"
+
+    mock_execute.return_value = maybe_future((0, str(top_repo_path), ""))
+
+    # When
+    body = {
+        "current_path": top_repo_path + "/subfolder",
+    }
+    response = await jp_fetch(
+        NS, "show_top_level", body=json.dumps(body), method="POST"
+    )
+
+    # Then
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload["top_repo_path"] == top_repo_path
+    mock_execute.assert_has_calls(
+        [
+            call(
+                ["git", "rev-parse", "--show-toplevel"],
+                cwd=str(jp_root_dir / top_repo_path / "subfolder"),
+            ),
+        ]
+    )
+
+
+@patch("jupyterlab_git.git.execute")
+async def test_git_show_top_level_not_a_git_repo(mock_execute, jp_fetch, jp_root_dir):
+    # Given
+    top_repo_path = "path/to/repo"
+
+    mock_execute.return_value = maybe_future(
+        (128, "", "fatal: not a git repository (or any")
+    )
+
+    # When
+    body = {
+        "current_path": top_repo_path + "/subfolder",
+    }
+    response = await jp_fetch(
+        NS, "show_top_level", body=json.dumps(body), method="POST"
+    )
+
+    # Then
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload["top_repo_path"] is None
+    mock_execute.assert_has_calls(
+        [
+            call(
+                ["git", "rev-parse", "--show-toplevel"],
+                cwd=str(jp_root_dir / top_repo_path / "subfolder"),
+            ),
+        ]
+    )
 
 
 @patch("jupyterlab_git.handlers.GitBranchHandler.git", spec=Git)

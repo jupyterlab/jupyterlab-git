@@ -682,6 +682,11 @@ class Git:
         if code == 0:
             return {"code": code, "top_repo_path": my_output.strip("\n")}
         else:
+            # Handle special case where cwd not inside a git repo
+            lower_error = my_error.lower()
+            if "fatal: not a git repository" in lower_error:
+                return {"code": 0, "top_repo_path": None}
+
             return {
                 "code": code,
                 "command": " ".join(cmd),

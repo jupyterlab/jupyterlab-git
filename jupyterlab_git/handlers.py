@@ -74,7 +74,7 @@ class GitAllHistoryHandler(GitHandler):
         history_count = body["history_count"]
 
         show_top_level = await self.git.show_top_level(current_path)
-        if show_top_level["code"] != 0:
+        if show_top_level.get("top_repo_path") is None:
             self.set_status(500)
             self.finish(json.dumps(show_top_level))
         else:
