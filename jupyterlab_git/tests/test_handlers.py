@@ -28,7 +28,7 @@ def test_mapping_added():
 @patch("jupyterlab_git.handlers.GitAllHistoryHandler.git", spec=Git)
 async def test_all_history_handler_localbranch(mock_git, jp_fetch):
     # Given
-    show_top_level = {"code": 0, "foo": "top_level"}
+    show_top_level = {"code": 0, "top_repo_path": "foo"}
     branch = "branch_foo"
     log = "log_foo"
     status = "status_foo"
