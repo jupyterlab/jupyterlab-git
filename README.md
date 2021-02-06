@@ -50,7 +50,7 @@ or with _conda_:
 conda remove jupyterlab-git
 ```
 
-For JupyterLab < 3, you will need to run the following command after removing the package:
+For JupyterLab < 3, you will also need to run the following command after removing the Python package:
 
 ```bash
 jupyter labextension uninstall @jupyterlab/git
