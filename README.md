@@ -11,7 +11,7 @@ To see the extension in action, open the example notebook included in the Binder
 
 ## Requirements
 
-- JupyterLab >= 3.0 (older version available for 2.x)
+- JupyterLab >= 3.0 ([older version](https://github.com/jupyterlab/jupyterlab-git/tree/jlab-2) available for 2.x)
 - Git (version `>=2.x`)
 
 ## Usage
@@ -32,6 +32,12 @@ or with _conda_:
 conda install -c conda-forge jupyterlab jupyterlab-git
 ```
 
+For JupyterLab < 3, you will need to run the following command after installing the package:
+
+```bash
+jupyter lab build
+```
+
 ### Uninstall
 
 ```bash
@@ -42,6 +48,12 @@ or with _conda_:
 
 ```bash
 conda remove jupyterlab-git
+```
+
+For JupyterLab < 3, you will also need to run the following command after removing the Python package:
+
+```bash
+jupyter labextension uninstall @jupyterlab/git
 ```
 
 ## Settings
