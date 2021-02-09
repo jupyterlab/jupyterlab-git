@@ -28,6 +28,7 @@ import { diffIcon } from './style/icons';
 import { Git, Level } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { GitCloneForm } from './widgets/GitCloneForm';
+import { ITranslator } from '@jupyterlab/translation';
 
 const RESOURCES = [
   {
@@ -95,16 +96,18 @@ export function addCommands(
   model: GitExtension,
   fileBrowser: FileBrowser,
   settings: ISettingRegistry.ISettings,
-  renderMime: IRenderMimeRegistry
+  renderMime: IRenderMimeRegistry,
+  translator: ITranslator
 ) {
   const { commands, shell } = app;
+  const trans = translator.load('jupyterlab');
 
   /**
    * Add open terminal in the Git repository
    */
   commands.addCommand(CommandIDs.gitTerminalCommand, {
-    label: 'Open Git Repository in Terminal',
-    caption: 'Open a New Terminal to the Git Repository',
+    label: trans.__('Open Git Repository in Terminal'),
+    caption: trans.__('Open a New Terminal to the Git Repository'),
     execute: async args => {
       const main = (await commands.execute(
         'terminal:create-new',
@@ -131,8 +134,8 @@ export function addCommands(
 
   /** Add open/go to git interface command */
   commands.addCommand(CommandIDs.gitUI, {
-    label: 'Git Interface',
-    caption: 'Go to Git user interface',
+    label: trans.__('Git Interface'),
+    caption: trans.__('Go to Git user interface'),
     execute: () => {
       try {
         shell.activateById('jp-git-sessions');
@@ -144,8 +147,8 @@ export function addCommands(
 
   /** Add git init command */
   commands.addCommand(CommandIDs.gitInit, {
-    label: 'Initialize a Repository',
-    caption: 'Create an empty Git repository or reinitialize an existing one',
+    label: trans.__('Initialize a Repository'),
+    caption: trans.__('Create an empty Git repository or reinitialize an existing one'),
     execute: async () => {
       const currentPath = fileBrowser.model.path;
       const result = await showDialog({
@@ -301,8 +304,8 @@ export function addCommands(
 
   /** Add git push command */
   commands.addCommand(CommandIDs.gitPush, {
-    label: 'Push to Remote',
-    caption: 'Push code to remote repository',
+    label: trans.__('Push to Remote'),
+    caption: trans.__('Push code to remote repository'),
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       logger.log({

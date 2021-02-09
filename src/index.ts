@@ -19,6 +19,7 @@ import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 import { addStatusBarWidget } from './widgets/StatusWidget';
+import { ITranslator } from '@jupyterlab/translation';
 
 export { Git, IGitExtension } from './tokens';
 
@@ -34,11 +35,12 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     IRenderMimeRegistry,
     ISettingRegistry,
     IDocumentManager,
-    IStatusBar
+    IStatusBar,
+    ITranslator
   ],
   provides: IGitExtension,
-  activate,
-  autoStart: true
+  autoStart: true,
+  activate
 };
 
 /**
@@ -57,7 +59,8 @@ async function activate(
   renderMime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   docmanager: IDocumentManager,
-  statusBar: IStatusBar
+  statusBar: IStatusBar,
+  translator: ITranslator
 ): Promise<IGitExtension> {
   let gitExtension: GitExtension | null = null;
   let settings: ISettingRegistry.ISettings;
@@ -138,7 +141,8 @@ async function activate(
       gitExtension,
       factory.defaultBrowser,
       settings,
-      renderMime
+      renderMime,
+      translator
     );
 
     // Create the Git widget sidebar
