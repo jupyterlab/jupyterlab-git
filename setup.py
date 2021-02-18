@@ -81,6 +81,9 @@ setup_args = dict(
             'jupyterlab~=2.0',
         ],
     },
+    package_data={
+        'jupyterlab_git': ['data/*'],
+    },
 )
 
 setuptools.setup(**setup_args)

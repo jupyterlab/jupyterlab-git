@@ -1,6 +1,8 @@
 """
 Module for executing git commands, sending results back to the handlers
 """
+import configparser
+import datetime
 import os
 import re
 import subprocess
@@ -9,10 +11,10 @@ from urllib.parse import unquote
 import pexpect
 import tornado
 import tornado.locks
-import datetime
-
 
 # Git configuration options exposed through the REST API
+from pkg_resources import resource_filename
+
 ALLOWED_OPTIONS = ['user.name', 'user.email']
 # Regex pattern to capture (key, value) of Git configuration options.
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
@@ -143,6 +145,9 @@ class Git:
     def __init__(self, contents_manager):
         self.contents_manager = contents_manager
         self.root_dir = os.path.expanduser(contents_manager.root_dir)
+        config = configparser.ConfigParser()
+        config.read(resource_filename('jupyterlab_git', 'data/config.ini'))
+        self._file_number_limit = int(config['DEFAULT']['file_number_limit'])
 
     async def config(self, top_repo_path, **kwargs):
         """Get or set Git options.
@@ -312,6 +317,8 @@ class Git:
                 "from": next(line_iterable) if line[0]=='R' else name,
                 "is_binary": are_binary.get(name, None)
             })
+            if len(result) == self._file_number_limit:
+                break
         return {"code": code, "files": result}
 
     async def log(self, current_path, history_count=10):
