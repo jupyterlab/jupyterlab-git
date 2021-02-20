@@ -91,6 +91,7 @@ export class CommitBox extends React.Component<
           title="Enter a commit message description"
           value={this.state.description}
           onChange={this._onDescriptionChange}
+          onKeyPress={this._onDescriptionKeyPress}
         />
         <input
           className={commitButtonClass}
@@ -106,8 +107,6 @@ export class CommitBox extends React.Component<
 
   /**
    * Callback invoked upon clicking a commit message submit button.
-   *
-   * @param event - event object
    */
   private _onCommitClick = (): void => {
     const msg = this.state.summary + '\n\n' + this.state.description + '\n';
@@ -145,14 +144,33 @@ export class CommitBox extends React.Component<
    * ## Notes
    *
    * -   Prevents triggering a `'submit'` action when hitting the `ENTER` key while entering a commit message summary.
+   * -   Triggers the `'submit'` action when hitting `Ctrl` + `ENTER`
    *
    * @param event - event object
    */
-  private _onSummaryKeyPress(event: any): void {
-    if (event.which === 13) {
+  private _onSummaryKeyPress = (event: React.KeyboardEvent): void => {
+    if (event.key === 'Enter') {
       event.preventDefault();
+      if (event.getModifierState('Control')) {
+        this._onCommitClick();
+      }
     }
-  }
+  };
+
+  /**
+   * Callback invoked upon a `'keypress'` event when entering a commit message description.
+   *
+   * ## Notes
+   *
+   * -   Triggers the `'submit'` action when hitting `Ctrl` + `ENTER`
+   *
+   * @param event - event object
+   */
+  private _onDescriptionKeyPress = (event: React.KeyboardEvent): void => {
+    if (event.key === 'Enter' && event.getModifierState('Control')) {
+      this._onCommitClick();
+    }
+  };
 
   /**
    * Resets component state (e.g., in order to re-initialize the commit message input box).
