@@ -44,7 +44,7 @@ import {
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { GitCloneForm } from './widgets/GitCloneForm';
 import { Contents } from '@jupyterlab/services';
-import { ContextMenuSvg } from '@jupyterlab/ui-components';
+import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { CONTEXT_COMMANDS } from './components/FileList';
 
@@ -596,7 +596,7 @@ export function addCommands(
         }
       }
     },
-    icon: removeIcon
+    icon: closeIcon
   });
 
   commands.addCommand(ContextCommandIDs.gitFileDiscard, {
@@ -853,8 +853,13 @@ export function addFileBrowserContextMenu(
         // flatten the list of lists of commands
         []
           .concat(...[...statuses].map(status => CONTEXT_COMMANDS[status]))
-          // filter out the Open command as it is not needed in file browser
-          .filter(command => command !== ContextCommandIDs.gitFileOpen)
+          // filter out the Open and Delete commands as
+          // those are not needed in file browser
+          .filter(
+            command =>
+              command !== ContextCommandIDs.gitFileOpen &&
+              command !== ContextCommandIDs.gitFileDelete
+          )
       );
 
       const commandsChanged =
