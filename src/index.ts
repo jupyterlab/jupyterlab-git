@@ -11,7 +11,11 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { addCommands, addFileBrowserContextMenu, createGitMenu } from './commandsAndMenu';
+import {
+  addCommands,
+  addFileBrowserContextMenu,
+  createGitMenu
+} from './commandsAndMenu';
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
@@ -171,7 +175,12 @@ async function activate(
     addStatusBarWidget(statusBar, gitExtension, settings);
 
     // Add the context menu items for the default file browser
-    addFileBrowserContextMenu(gitExtension, factory.tracker, app.commands, app.contextMenu);
+    addFileBrowserContextMenu(
+      gitExtension,
+      factory.tracker,
+      app.commands,
+      app.contextMenu
+    );
   }
 
   return gitExtension;
