@@ -248,7 +248,7 @@ export class GitExtension implements IGitExtension {
 
   getFile(path: string): Git.IStatusFile {
     const matchingFiles = this._status.files.filter(status => {
-      return status.to === path;
+      return this.getRelativeFilePath(status.to) === path;
     });
     if (matchingFiles.length === 0) {
       return;
