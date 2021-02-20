@@ -249,6 +249,18 @@ export interface IGitExtension extends IDisposable {
   ensureGitignore(): Promise<void>;
 
   /**
+   *
+   * @param path
+   */
+  getFile(path: string): Git.IStatusFile;
+
+  /**
+   *
+   * @param path
+   */
+  getFileStatus(path: string): Git.Status;
+
+  /**
    * Get current mark of file named fname
    *
    * @param fname Filename
@@ -820,4 +832,36 @@ export interface ILogMessage {
    * Message text.
    */
   message: string;
+}
+
+/**
+ * The command IDs used in the git context menus.
+ */
+export enum ContextCommandIDs {
+  gitFileDiff = 'git:context-diff',
+  gitFileDiscard = 'git:context-discard',
+  gitFileDelete = 'git:context-delete',
+  gitFileOpen = 'git:context-open',
+  gitFileUnstage = 'git:context-unstage',
+  gitFileStage = 'git:context-stage',
+  gitFileTrack = 'git:context-track',
+  gitIgnore = 'git:context-ignore',
+  gitIgnoreExtension = 'git:context-ignoreExtension'
+}
+
+/**
+ * The command IDs used by the git plugin.
+ */
+export enum CommandIDs {
+  gitUI = 'git:ui',
+  gitTerminalCommand = 'git:terminal-command',
+  gitInit = 'git:init',
+  gitOpenUrl = 'git:open-url',
+  gitToggleSimpleStaging = 'git:toggle-simple-staging',
+  gitToggleDoubleClickDiff = 'git:toggle-double-click-diff',
+  gitAddRemote = 'git:add-remote',
+  gitClone = 'git:clone',
+  gitOpenGitignore = 'git:open-gitignore',
+  gitPush = 'git:push',
+  gitPull = 'git:pull'
 }

@@ -2,10 +2,10 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { showDialog } from '@jupyterlab/apputils';
 import { CommandRegistry } from '@lumino/commands';
 import 'jest';
-import { addCommands, CommandIDs } from '../src/commandsAndMenu';
+import { addCommands} from '../src/commandsAndMenu';
 import * as git from '../src/git';
 import { GitExtension } from '../src/model';
-import { Git } from '../src/tokens';
+import { CommandIDs, Git } from '../src/tokens';
 import {
   defaultMockedResponses,
   IMockedResponses,

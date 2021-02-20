@@ -231,7 +231,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async add(...filename: string[]): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:add:files', async () => {
       await requestAPI<void>('add', 'POST', {
         add_all: !filename,
@@ -240,6 +240,23 @@ export class GitExtension implements IGitExtension {
       });
     });
     await this.refreshStatus();
+  }
+
+  getFileStatus(path: string): Git.Status {
+    return this.getFile(path)?.status;
+  }
+
+  getFile(path: string): Git.IStatusFile {
+    const matchingFiles = this._status.files.filter(status => {
+      return status.to === path;
+    });
+    if (matchingFiles.length === 0) {
+      return;
+    }
+    if (matchingFiles.length > 1) {
+      console.warn('More than one file matching given path', path);
+    }
+    return matchingFiles[0];
   }
 
   /**
@@ -252,7 +269,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async addAllUnstaged(): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     await this._taskHandler.execute<void>(
       'git:add:files:all_unstaged',
       async () => {
@@ -274,7 +291,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async addAllUntracked(): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     await this._taskHandler.execute<void>(
       'git:add:files:all_untracked',
       async () => {
@@ -298,7 +315,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async addRemote(url: string, name?: string): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:add:remote', async () => {
       await requestAPI<void>('remote/add', 'POST', {
         top_repo_path: path,
@@ -323,7 +340,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async allHistory(count = 25): Promise<Git.IAllHistory> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     return await this._taskHandler.execute<Git.IAllHistory>(
       'git:fetch:history',
       async () => {
@@ -354,7 +371,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async checkout(options?: Git.ICheckoutOptions): Promise<Git.ICheckoutResult> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
 
     const body = {
       checkout_branch: false,
@@ -455,7 +472,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async commit(message: string): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     await this._taskHandler.execute('git:commit:create', async () => {
       await requestAPI('commit', 'POST', {
         commit_msg: message,
@@ -476,7 +493,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async config(options?: JSONObject): Promise<JSONObject | void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     return await this._taskHandler.execute<JSONObject | void>(
       'git:config:' + (options ? 'set' : 'get'),
       async () => {
@@ -503,7 +520,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async deleteBranch(branchName: string): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:branch:delete', async () => {
       return await requestAPI<void>('branch/delete', 'POST', {
         current_path: path,
@@ -523,7 +540,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     const data = await this._taskHandler.execute<Git.ISingleCommitFilePathInfo>(
       'git:fetch:commit_log',
       async () => {
@@ -566,7 +583,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async ensureGitignore(): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
 
     await requestAPI('ignore', 'POST', {
       top_repo_path: path
@@ -607,7 +624,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async ignore(filePath: string, useExtension: boolean): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
 
     await requestAPI('ignore', 'POST', {
       top_repo_path: path,
@@ -647,7 +664,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async log(count = 25): Promise<Git.ILogResult> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     return await this._taskHandler.execute<Git.ILogResult>(
       'git:fetch:log',
       async () => {
@@ -670,7 +687,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async pull(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:pull',
       async () => {
@@ -698,7 +715,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async push(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
       async () => {
@@ -789,7 +806,7 @@ export class GitExtension implements IGitExtension {
   async refreshStatus(): Promise<void> {
     let path: string;
     try {
-      path = await this._getPathRespository();
+      path = await this._getPathRepository();
     } catch (error) {
       this._clearStatus();
       if (!(error instanceof Git.NotInRepository)) {
@@ -844,7 +861,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async reset(filename?: string): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:reset:changes', async () => {
       const reset_all = filename === undefined;
       let files: string[];
@@ -881,7 +898,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async resetToCommit(hash = ''): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:reset:hard', async () => {
       const files = (await this._changedFiles(null, null, hash)).files;
 
@@ -979,7 +996,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async tags(): Promise<Git.ITagResult> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     return await this._taskHandler.execute<Git.ITagResult>(
       'git:tag:list',
       async () => {
@@ -1001,7 +1018,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async checkoutTag(tag: string): Promise<Git.ICheckoutResult> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     return await this._taskHandler.execute<Git.ICheckoutResult>(
       'git:tag:checkout',
       async () => {
@@ -1066,7 +1083,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async revertCommit(message: string, hash: string): Promise<void> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:commit:revert', async () => {
       const files = (await this._changedFiles(null, null, hash + '^!')).files;
 
@@ -1093,7 +1110,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   protected async _branch(): Promise<Git.IBranchResult> {
-    const path = await this._getPathRespository();
+    const path = await this._getPathRepository();
     return await this._taskHandler.execute<Git.IBranchResult>(
       'git:fetch:branches',
       async () => {
@@ -1150,7 +1167,7 @@ export class GitExtension implements IGitExtension {
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    */
-  protected async _getPathRespository(): Promise<string> {
+  protected async _getPathRepository(): Promise<string> {
     await this.ready;
 
     const path = this.pathRepository;
@@ -1190,7 +1207,7 @@ export class GitExtension implements IGitExtension {
    */
   private _fetchRemotes = async (): Promise<void> => {
     try {
-      const current_path = await this._getPathRespository();
+      const current_path = await this._getPathRepository();
       await requestAPI('remote/fetch', 'POST', { current_path });
     } catch (error) {
       console.error('Failed to fetch remotes', error);

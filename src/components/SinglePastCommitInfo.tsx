@@ -3,7 +3,7 @@ import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
-import { CommandIDs } from '../commandsAndMenu';
+import { CommandArguments} from '../commandsAndMenu';
 import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
 import {
@@ -25,7 +25,7 @@ import {
   iconClass,
   insertionsIconClass
 } from '../style/SinglePastCommitInfo';
-import { Git } from '../tokens';
+import { ContextCommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { isDiffSupported } from './diff/Diff';
 import { FilePath } from './FilePath';
@@ -337,18 +337,22 @@ export class SinglePastCommitInfo extends React.Component<
       event.stopPropagation();
 
       try {
-        self.props.commands.execute(CommandIDs.gitFileDiff, {
-          filePath: fpath,
-          isText: bool,
-          context: {
-            previousRef: {
-              gitRef: self.props.commit.pre_commit
-            },
-            currentRef: {
-              gitRef: self.props.commit.commit
+        self.props.commands.execute(ContextCommandIDs.gitFileDiff, ({
+          files: [
+            {
+              filePath: fpath,
+              isText: bool,
+              context: {
+                previousRef: {
+                  gitRef: self.props.commit.pre_commit
+                },
+                currentRef: {
+                  gitRef: self.props.commit.commit
+                }
+              }
             }
-          }
-        });
+          ]
+        } as CommandArguments.IGitFileDiff) as any);
       } catch (err) {
         console.error(`Failed to open diff view for ${fpath}.\n${err}`);
       }
