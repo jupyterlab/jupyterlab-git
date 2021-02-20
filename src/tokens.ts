@@ -846,7 +846,8 @@ export enum ContextCommandIDs {
   gitFileStage = 'git:context-stage',
   gitFileTrack = 'git:context-track',
   gitIgnore = 'git:context-ignore',
-  gitIgnoreExtension = 'git:context-ignoreExtension'
+  gitIgnoreExtension = 'git:context-ignoreExtension',
+  gitNoAction = 'git:no-action'
 }
 
 /**

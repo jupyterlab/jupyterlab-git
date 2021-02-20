@@ -15,7 +15,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
-import { toArray, ArrayExt } from '@lumino/algorithm';
+import { ArrayExt, toArray } from '@lumino/algorithm';
 import * as React from 'react';
 import {
   Diff,
@@ -710,6 +710,12 @@ export function addCommands(
       });
     }
   });
+
+  commands.addCommand(ContextCommandIDs.gitNoAction, {
+    label: 'No actions available',
+    isEnabled: () => false,
+    execute: () => void 0
+  });
 }
 
 /**
@@ -845,7 +851,9 @@ export function addFileBrowserContextMenu(
 
       const items = getSelectedBrowserItems();
       const statuses = new Set<Git.Status>(
-        items.map(item => model.getFileStatus(item.path))
+        items
+          .map(item => model.getFileStatus(item.path))
+          .filter(status => typeof status !== 'undefined')
       );
 
       // get commands and de-duplicate them
@@ -858,9 +866,17 @@ export function addFileBrowserContextMenu(
           .filter(
             command =>
               command !== ContextCommandIDs.gitFileOpen &&
-              command !== ContextCommandIDs.gitFileDelete
+              command !== ContextCommandIDs.gitFileDelete &&
+              typeof command !== 'undefined'
           )
       );
+
+      // if looking at a tracked file with no changes,
+      // it has no status, nor any actions available
+      // (although `git rm` would be a valid action)
+      if (allCommands.size === 0 && statuses.size === 0) {
+        allCommands.add(ContextCommandIDs.gitNoAction);
+      }
 
       const commandsChanged =
         !this._commands ||
