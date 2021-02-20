@@ -249,16 +249,13 @@ export interface IGitExtension extends IDisposable {
   ensureGitignore(): Promise<void>;
 
   /**
+   * Match files status information based on a provided file path.
    *
-   * @param path
+   * If the file is tracked and has no changes, undefined will be returned
+   *
+   * @param path the file path relative to the server root
    */
   getFile(path: string): Git.IStatusFile;
-
-  /**
-   *
-   * @param path
-   */
-  getFileStatus(path: string): Git.Status;
 
   /**
    * Get current mark of file named fname
@@ -637,7 +634,7 @@ export namespace Git {
 
   /** Interface for changed_files request result
    * lists the names of files that have differences between two commits
-   * or beween two branches, or that were changed by a single commit
+   * or between two branches, or that were changed by a single commit
    */
   export interface IChangedFilesResult {
     code: number;

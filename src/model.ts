@@ -242,10 +242,13 @@ export class GitExtension implements IGitExtension {
     await this.refreshStatus();
   }
 
-  getFileStatus(path: string): Git.Status {
-    return this.getFile(path)?.status;
-  }
-
+  /**
+   * Match files status information based on a provided file path.
+   *
+   * If the file is tracked and has no changes, undefined will be returned
+   *
+   * @param path the file path relative to the server root
+   */
   getFile(path: string): Git.IStatusFile {
     const matchingFiles = this._status.files.filter(status => {
       return this.getRelativeFilePath(status.to) === path;
