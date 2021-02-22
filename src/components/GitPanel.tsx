@@ -122,7 +122,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       nCommitsAhead: 0,
       nCommitsBehind: 0,
       pastCommits: [],
-      repository: null,
+      repository: props.model.pathRepository,
       tab: 0
     };
   }
@@ -132,10 +132,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   componentDidMount(): void {
     const { model, settings } = this.props;
-
-    this.setState({
-      repository: model.pathRepository
-    });
 
     model.repositoryChanged.connect((_, args) => {
       this.setState({
