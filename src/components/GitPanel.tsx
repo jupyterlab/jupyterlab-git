@@ -114,15 +114,16 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   constructor(props: IGitPanelProps) {
     super(props);
+    const { branches, currentBranch, pathRepository } = props.model;
 
     this.state = {
-      branches: [],
-      currentBranch: '',
+      branches: branches,
+      currentBranch: currentBranch ? currentBranch.name : 'master',
       files: [],
       nCommitsAhead: 0,
       nCommitsBehind: 0,
       pastCommits: [],
-      repository: null,
+      repository: pathRepository,
       tab: 0
     };
   }
