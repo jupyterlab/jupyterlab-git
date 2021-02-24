@@ -435,7 +435,7 @@ export function addCommands(
         }
       }
     },
-    icon: openIcon
+    icon: openIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
   commands.addCommand(ContextCommandIDs.gitFileDiff, {
@@ -502,7 +502,7 @@ export function addCommands(
         }
       }
     },
-    icon: diffIcon
+    icon: diffIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
   commands.addCommand(ContextCommandIDs.gitFileAdd, {
@@ -517,7 +517,7 @@ export function addCommands(
         await model.add(file.to);
       }
     },
-    icon: addIcon
+    icon: addIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
   commands.addCommand(ContextCommandIDs.gitFileStage, {
@@ -532,7 +532,7 @@ export function addCommands(
         await model.add(file.to);
       }
     },
-    icon: addIcon
+    icon: addIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
   commands.addCommand(ContextCommandIDs.gitFileTrack, {
@@ -547,7 +547,7 @@ export function addCommands(
         await model.add(file.to);
       }
     },
-    icon: addIcon
+    icon: addIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
   commands.addCommand(ContextCommandIDs.gitFileUnstage, {
@@ -564,7 +564,7 @@ export function addCommands(
         }
       }
     },
-    icon: removeIcon
+    icon: removeIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
   function representFiles(files: Git.IStatusFile[]): JSX.Element {
@@ -611,7 +611,7 @@ export function addCommands(
         }
       }
     },
-    icon: closeIcon
+    icon: closeIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
   commands.addCommand(ContextCommandIDs.gitFileDiscard, {
@@ -661,7 +661,7 @@ export function addCommands(
         }
       }
     },
-    icon: discardIcon
+    icon: discardIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
   commands.addCommand(ContextCommandIDs.gitIgnore, {
