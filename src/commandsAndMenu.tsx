@@ -813,7 +813,7 @@ export function addMenuItems(
 }
 
 /**
- *
+ * Add Git context (sub)menu to the file browser context menu.
  */
 export function addFileBrowserContextMenu(
   model: IGitExtension,
