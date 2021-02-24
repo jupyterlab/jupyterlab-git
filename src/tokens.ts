@@ -835,6 +835,7 @@ export interface ILogMessage {
  * The command IDs used in the git context menus.
  */
 export enum ContextCommandIDs {
+  gitFileAdd = 'git:context-add',
   gitFileDiff = 'git:context-diff',
   gitFileDiscard = 'git:context-discard',
   gitFileDelete = 'git:context-delete',

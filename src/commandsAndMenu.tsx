@@ -505,6 +505,21 @@ export function addCommands(
     icon: diffIcon
   });
 
+  commands.addCommand(ContextCommandIDs.gitFileAdd, {
+    label: 'Add',
+    caption: pluralizedContextLabel(
+      'Stage or track the changes to selected file',
+      'Stage or track the changes of selected files'
+    ),
+    execute: async args => {
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      for (const file of files) {
+        await model.add(file.to);
+      }
+    },
+    icon: addIcon
+  });
+
   commands.addCommand(ContextCommandIDs.gitFileStage, {
     label: 'Stage',
     caption: pluralizedContextLabel(
@@ -868,6 +883,13 @@ export function addFileBrowserContextMenu(
               command !== ContextCommandIDs.gitFileOpen &&
               command !== ContextCommandIDs.gitFileDelete &&
               typeof command !== 'undefined'
+          )
+          // replace stage and track with a single "add" operation
+          .map(command =>
+            command === ContextCommandIDs.gitFileStage ||
+            command === ContextCommandIDs.gitFileTrack
+              ? ContextCommandIDs.gitFileAdd
+              : command
           )
       );
 
