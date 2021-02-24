@@ -916,7 +916,11 @@ export function addFileBrowserContextMenu(
         addMenuItems(
           commandsList,
           this,
-          paths.map(path => model.getFile(path))
+          paths
+            .map(path => model.getFile(path))
+            // if file cannot be resolved (has no action available),
+            // omit the undefined result
+            .filter(file => typeof file !== 'undefined')
         );
         if (wasShown) {
           // show he menu again after downtime for refresh
