@@ -736,11 +736,7 @@ export function addCommands(
 /**
  * Adds commands and menu items.
  *
- * @private
- * @param app - Jupyter front end
- * @param gitExtension - Git extension instance
- * @param fileBrowser - file browser instance
- * @param settings - extension settings
+ * @param commands - Jupyter App commands registry
  * @returns menu
  */
 export function createGitMenu(commands: CommandRegistry): Menu {
