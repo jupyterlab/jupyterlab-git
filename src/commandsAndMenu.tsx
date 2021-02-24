@@ -591,8 +591,8 @@ export function addCommands(
         title: 'Delete Files',
         body: (
           <span>
-            Are you sure you want to permanently delete
-            {fileList}? This action cannot be undone.
+            Are you sure you want to permanently delete {fileList}? This action
+            cannot be undone.
           </span>
         ),
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
