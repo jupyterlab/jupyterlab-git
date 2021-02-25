@@ -25,6 +25,7 @@ import { GitWidget } from './widgets/GitWidget';
 import { addStatusBarWidget } from './widgets/StatusWidget';
 
 export { Git, IGitExtension } from './tokens';
+import { substituteListingRenderer } from './browserDecorations';
 
 /**
  * The default running sessions extension.
@@ -181,6 +182,8 @@ async function activate(
       app.commands,
       app.contextMenu
     );
+
+    substituteListingRenderer(gitExtension, factory.defaultBrowser);
   }
 
   return gitExtension;
