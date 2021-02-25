@@ -87,6 +87,8 @@ export namespace CommandIDs {
   export const gitIgnoreExtension = 'git:context-ignoreExtension';
 }
 
+export const SUBMIT_COMMIT_COMMAND = 'git:submit-commit';
+
 /**
  * Add the commands for the git extension.
  */
@@ -98,6 +100,22 @@ export function addCommands(
   renderMime: IRenderMimeRegistry
 ) {
   const { commands, shell } = app;
+
+  /**
+   * Commit using a keystroke combination when in CommitBox.
+   *
+   * This command is not accessible from the user interface (not visible),
+   * as it is handled by a signal listener in the CommitBox component instead.
+   * The label and caption are given to ensure that the command will
+   * show up in the shortcut editor UI with a nice description.
+   */
+  commands.addCommand(SUBMIT_COMMIT_COMMAND, {
+    label: 'Commit from the Commit Box',
+    caption:
+      'Submit the commit using the summary and description from commit box',
+    execute: () => void 0,
+    isVisible: () => false
+  });
 
   /**
    * Add open terminal in the Git repository
