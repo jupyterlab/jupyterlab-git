@@ -373,11 +373,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           <CommitBox
             hasFiles={this._markedFiles.length > 0}
             onCommit={this.commitMarkedFiles}
+            commands={this.props.commands}
           />
         ) : (
           <CommitBox
             hasFiles={this._hasStagedFile()}
             onCommit={this.commitStagedFiles}
+            commands={this.props.commands}
           />
         )}
       </React.Fragment>
