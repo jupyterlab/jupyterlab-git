@@ -862,5 +862,6 @@ export enum CommandIDs {
   gitClone = 'git:clone',
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
-  gitPull = 'git:pull'
+  gitPull = 'git:pull',
+  gitSubmitCommand = 'git:submit-commit'
 }

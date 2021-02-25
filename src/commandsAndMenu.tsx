@@ -106,8 +106,6 @@ function pluralizedContextLabel(singular: string, plural: string) {
   };
 }
 
-export const SUBMIT_COMMIT_COMMAND = 'git:submit-commit';
-
 /**
  * Add the commands for the git extension.
  */
@@ -128,7 +126,7 @@ export function addCommands(
    * The label and caption are given to ensure that the command will
    * show up in the shortcut editor UI with a nice description.
    */
-  commands.addCommand(SUBMIT_COMMIT_COMMAND, {
+  commands.addCommand(CommandIDs.gitSubmitCommand, {
     label: 'Commit from the Commit Box',
     caption:
       'Submit the commit using the summary and description from commit box',
