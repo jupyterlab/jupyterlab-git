@@ -6,11 +6,18 @@ import {
   commitDescriptionClass,
   commitButtonClass
 } from '../style/CommitBox';
+import { CommandRegistry } from '@lumino/commands';
+import { SUBMIT_COMMIT_COMMAND } from '../commandsAndMenu';
 
 /**
  * Interface describing component properties.
  */
 export interface ICommitBoxProps {
+  /**
+   * Jupyter App commands registry
+   */
+  commands: CommandRegistry;
+
   /**
    * Boolean indicating whether files currently exist which have changes to commit.
    */
@@ -61,24 +68,37 @@ export class CommitBox extends React.Component<
     };
   }
 
+  componentDidMount(): void {
+    this.props.commands.commandExecuted.connect(this._handleCommand);
+  }
+
+  componentWillUnmount(): void {
+    this.props.commands.commandExecuted.disconnect(this._handleCommand);
+  }
+
   /**
    * Renders the component.
    *
    * @returns React element
    */
   render(): React.ReactElement {
-    const disabled = !(this.props.hasFiles && this.state.summary);
+    const disabled = !this._canCommit();
     const title = !this.props.hasFiles
       ? 'Disabled: No files are staged for commit'
       : !this.state.summary
       ? 'Disabled: No commit message summary'
       : 'Commit';
+
+    const shortcutHint = CommandRegistry.formatKeystroke(
+      this._getSubmitKeystroke()
+    );
+    const summaryPlaceholder = 'Summary (' + shortcutHint + ' to commit)';
     return (
-      <form className={commitFormClass}>
+      <form className={[commitFormClass, 'jp-git-CommitBox'].join(' ')}>
         <input
           className={commitSummaryClass}
           type="text"
-          placeholder="Summary (required)"
+          placeholder={summaryPlaceholder}
           title="Enter a commit message summary (a single line, preferably less than 50 characters)"
           value={this.state.summary}
           onChange={this._onSummaryChange}
@@ -87,7 +107,7 @@ export class CommitBox extends React.Component<
         <TextareaAutosize
           className={commitDescriptionClass}
           minRows={5}
-          placeholder="Description"
+          placeholder="Description (optional)"
           title="Enter a commit message description"
           value={this.state.description}
           onChange={this._onDescriptionChange}
@@ -98,18 +118,33 @@ export class CommitBox extends React.Component<
           title={title}
           value="Commit"
           disabled={disabled}
-          onClick={this._onCommitClick}
+          onClick={this._onCommitSubmit}
         />
       </form>
     );
   }
 
   /**
-   * Callback invoked upon clicking a commit message submit button.
-   *
-   * @param event - event object
+   * Whether a commit can be performed (files are staged and summary is not empty).
    */
-  private _onCommitClick = (): void => {
+  private _canCommit(): boolean {
+    return !!(this.props.hasFiles && this.state.summary);
+  }
+
+  /**
+   * Get keystroke configured to act as a submit action.
+   */
+  private _getSubmitKeystroke = (): string => {
+    const binding = this.props.commands.keyBindings.find(
+      binding => binding.command === SUBMIT_COMMIT_COMMAND
+    );
+    return binding.keys.join(' ');
+  };
+
+  /**
+   * Callback invoked upon clicking a commit message submit button or otherwise submitting the form.
+   */
+  private _onCommitSubmit = (): void => {
     const msg = this.state.summary + '\n\n' + this.state.description + '\n';
     this.props.onCommit(msg);
 
@@ -148,11 +183,28 @@ export class CommitBox extends React.Component<
    *
    * @param event - event object
    */
-  private _onSummaryKeyPress(event: any): void {
-    if (event.which === 13) {
+  private _onSummaryKeyPress = (event: React.KeyboardEvent): void => {
+    if (event.key === 'Enter') {
       event.preventDefault();
     }
-  }
+  };
+
+  /**
+   * Callback invoked upon command execution activated when entering a commit message description.
+   *
+   * ## Notes
+   *
+   * -   Triggers the `'submit'` action on appropriate command (and if commit is possible)
+   *
+   */
+  private _handleCommand = (
+    _: CommandRegistry,
+    commandArgs: CommandRegistry.ICommandExecutedArgs
+  ): void => {
+    if (commandArgs.id === SUBMIT_COMMIT_COMMAND && this._canCommit()) {
+      this._onCommitSubmit();
+    }
+  };
 
   /**
    * Resets component state (e.g., in order to re-initialize the commit message input box).
