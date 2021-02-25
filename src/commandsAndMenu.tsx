@@ -447,6 +447,11 @@ export function addCommands(
       for (const file of files) {
         const { context, filePath, isText, status } = file;
 
+        // nothing to compare to for untracked files
+        if (status === 'untracked') {
+          continue;
+        }
+
         let diffContext = context;
         if (!diffContext) {
           const specialRef = status === 'staged' ? 'INDEX' : 'WORKING';
