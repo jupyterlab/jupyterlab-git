@@ -380,6 +380,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           <CommitBox
             hasFiles={this._markedFiles.length > 0}
             trans={this.props.trans}
+            useCommitAndPush={this.props.settings.composite['useCommitAndPush'] as boolean}
             onCommit={this.commitMarkedFiles}
             commands={this.props.commands}
           />
@@ -387,6 +388,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           <CommitBox
             hasFiles={this._hasStagedFile()}
             trans={this.props.trans}
+            useCommitAndPush={this.props.settings.composite['useCommitAndPush'] as boolean}
             onCommit={this.commitStagedFiles}
             commands={this.props.commands}
           />

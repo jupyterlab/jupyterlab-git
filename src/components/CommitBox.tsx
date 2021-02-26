@@ -20,6 +20,11 @@ export interface ICommitBoxProps {
   commands: CommandRegistry;
 
   /**
+   * Boolean indicating whether to use simplified commit-and-push instead of commit button
+   */
+  useCommitAndPush: boolean;
+
+  /**
    * Boolean indicating whether files currently exist which have changes to commit.
    */
   hasFiles: boolean;
@@ -91,7 +96,9 @@ export class CommitBox extends React.Component<
       ? this.props.trans.__('Disabled: No files are staged for commit')
       : !this.state.summary
       ? this.props.trans.__('Disabled: No commit message summary')
-      : this.props.trans.__('Commit');
+      : !this.props.useCommitAndPush
+      ? this.props.trans.__('Commit')
+      : this.props.trans.__('Commit and push');
 
     const shortcutHint = CommandRegistry.formatKeystroke(
       this._getSubmitKeystroke()
