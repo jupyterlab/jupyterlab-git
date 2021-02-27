@@ -260,6 +260,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       console.error(error);
       this.props.logger.log({ ...errorLog, error });
     }
+    // If enabled commit and push, push here
+    if (this.props.settings.composite['useCommitAndPush']) {
+      await this.props.commands.execute(CommandIDs.gitPush);
+    }
   };
 
   /**
