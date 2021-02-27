@@ -9,6 +9,7 @@ import {
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { CommandIDs } from '../tokens';
+import { Git } from '../tokens';
 
 /**
  * Interface describing component properties.
@@ -18,6 +19,11 @@ export interface ICommitBoxProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
+
+  /**
+   * Current list of branches.
+   */
+   branches: Git.IBranch[];
 
   /**
    * Boolean indicating whether to use simplified commit-and-push instead of commit button
@@ -98,6 +104,8 @@ export class CommitBox extends React.Component<
       ? this.props.trans.__('Disabled: No commit message summary')
       : !this.props.useCommitAndPush
       ? this.props.trans.__('Commit')
+      : !this.props.branches.some(branch => branch.is_remote_branch) 
+      ? this.props.trans.__('Disabled: No remote repository defined')
       : this.props.trans.__('Commit and push');
 
     const shortcutHint = CommandRegistry.formatKeystroke(
@@ -132,7 +140,9 @@ export class CommitBox extends React.Component<
           className={commitButtonClass}
           type="button"
           title={title}
-          value={this.props.trans.__('Commit')}
+          value={!this.props.useCommitAndPush
+            ? this.props.trans.__('Commit')
+            : this.props.trans.__('Commit and push')}
           disabled={disabled}
           onClick={this._onCommitSubmit}
         />
@@ -144,7 +154,10 @@ export class CommitBox extends React.Component<
    * Whether a commit can be performed (files are staged and summary is not empty).
    */
   private _canCommit(): boolean {
-    return !!(this.props.hasFiles && this.state.summary);
+    const canAlsoPush = this.props.useCommitAndPush 
+                      ? this.props.branches.some(branch => branch.is_remote_branch) 
+                      : true;
+    return !!(this.props.hasFiles && this.state.summary && canAlsoPush);
   }
 
   /**
