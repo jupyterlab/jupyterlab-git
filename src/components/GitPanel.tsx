@@ -126,15 +126,16 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     super(props);
     this.translator = props.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab-git');
+    const { branches, currentBranch, pathRepository } = props.model;
 
     this.state = {
-      branches: [],
-      currentBranch: '',
+      branches: branches,
+      currentBranch: currentBranch ? currentBranch.name : 'master',
       files: [],
       nCommitsAhead: 0,
       nCommitsBehind: 0,
       pastCommits: [],
-      repository: null,
+      repository: pathRepository,
       tab: 0
     };
   }
@@ -387,12 +388,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             hasFiles={this._markedFiles.length > 0}
             translator={this.translator}
             onCommit={this.commitMarkedFiles}
+            commands={this.props.commands}
           />
         ) : (
           <CommitBox
             hasFiles={this._hasStagedFile()}
             translator={this.translator}
             onCommit={this.commitStagedFiles}
+            commands={this.props.commands}
           />
         )}
       </React.Fragment>
