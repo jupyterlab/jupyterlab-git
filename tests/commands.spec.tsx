@@ -36,7 +36,7 @@ describe('git-commands', () => {
       shell: null as any
     };
     model = new GitExtension(app as any);
-    addCommands(app as JupyterFrontEnd, model, null, null, null);
+    addCommands(app as JupyterFrontEnd, model, null, null, null, null);
   });
 
   describe('git:add-remote', () => {

@@ -1,4 +1,5 @@
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import { TranslationBundle } from '@jupyterlab/translation';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
@@ -31,7 +32,7 @@ const MAX_HEIGHT = 400; // Maximal HTML element height for the tags list
  * @param error - error
  * @param logger - the logger
  */
-function onTagError(error: any, logger: Logger): void {
+function onTagError(error: any, logger: Logger, trans: TranslationBundle): void {
   if (error.message.includes('following files would be overwritten')) {
     // Empty log message to hide the executing alert
     logger.log({
@@ -39,28 +40,30 @@ function onTagError(error: any, logger: Logger): void {
       level: Level.INFO
     });
     showDialog({
-      title: 'Unable to checkout tag',
+      title: trans.__('Unable to checkout tag'),
       body: (
         <React.Fragment>
           <p>
-            Your changes to the following files would be overwritten by
-            switching:
+            {trans.__(
+              'Your changes to the following files would be overwritten by switching:'
+            )}
           </p>
           <List>
             {error.message.split('\n').slice(1, -3).map(renderFileName)}
           </List>
           <span>
-            Please commit, stash, or discard your changes before you checkout
-            tags.
+            {trans.__(
+              'Please commit, stash, or discard your changes before you checkout tags.'
+            )}
           </span>
         </React.Fragment>
       ),
-      buttons: [Dialog.okButton({ label: 'Dismiss' })]
+      buttons: [Dialog.okButton({ label: trans.__('Dismiss') })]
     });
   } else {
     logger.log({
       level: Level.ERROR,
-      message: 'Failed to checkout tag.',
+      message: trans.__('Failed to checkout tag.'),
       error
     });
   }
@@ -95,6 +98,11 @@ export interface ITagMenuProps {
    * Git extension data model.
    */
   model: IGitExtension;
+
+  /**
+   * The application language translator.
+   */
+  trans?: TranslationBundle;
 }
 
 /**
@@ -144,7 +152,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
         this.setState({
           tags: []
         });
-        showErrorMessage('Fail to get the tags.', error);
+        showErrorMessage(this.props.trans.__('Fail to get the tags.'), error);
       });
   }
 
@@ -176,13 +184,13 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
             type="text"
             onChange={this._onFilterChange}
             value={this.state.filter}
-            placeholder="Filter"
-            title="Filter branch menu"
+            placeholder={this.props.trans.__("Filter")}
+            title={this.props.trans.__("Filter branch menu")}
           />
           {this.state.filter ? (
             <button className={filterClearClass}>
               <ClearIcon
-                titleAccess="Clear the current filter"
+                titleAccess={this.props.trans.__("Clear the current filter")}
                 fontSize="small"
                 onClick={this._resetFilter}
               />
@@ -233,7 +241,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
     return (
       <ListItem
         button
-        title={`Checkout to tag: ${tag}`}
+        title={this.props.trans.__(`Checkout to tag: %1`, tag)}
         className={listItemClass}
         onClick={this._onTagClickFactory(tag)}
         style={style}
@@ -283,24 +291,24 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
      */
     async function onClick(): Promise<void> {
       if (!self.props.branching) {
-        showErrorMessage('Checkout tags is disabled', CHANGES_ERR_MSG);
+        showErrorMessage(self.props.trans.__('Checkout tags is disabled'), self.props.trans.__(CHANGES_ERR_MSG));
         return;
       }
 
       self.props.logger.log({
         level: Level.RUNNING,
-        message: 'Checking tag out...'
+        message: self.props.trans.__('Checking tag out...')
       });
 
       try {
         await self.props.model.checkoutTag(tag);
       } catch (err) {
-        return onTagError(err, self.props.logger);
+        return onTagError(err, self.props.logger, self.props.trans);
       }
 
       self.props.logger.log({
         level: Level.SUCCESS,
-        message: 'Tag checkout.'
+        message: self.props.trans.__('Tag checkout.')
       });
     }
   }

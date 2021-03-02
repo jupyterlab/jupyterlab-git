@@ -1,3 +1,4 @@
+import { TranslationBundle } from '@jupyterlab/translation';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import ClearIcon from '@material-ui/icons/Clear';
@@ -54,6 +55,11 @@ export interface IResetRevertDialogProps {
    * Callback invoked upon closing the dialog.
    */
   onClose: () => void;
+
+  /**
+   * The application language translator.
+   */
+  trans?: TranslationBundle;
 }
 
 /**
@@ -117,11 +123,11 @@ export class ResetRevertDialog extends React.Component<
       >
         <div className={titleWrapperClass}>
           <p className={titleClass}>
-            {isRevert ? 'Revert Changes' : 'Reset Changes'}
+            {isRevert ? this.props.trans.__('Revert Changes') : this.props.trans.__('Reset Changes')}
           </p>
           <button className={closeButtonClass}>
             <ClearIcon
-              titleAccess="Close this dialog"
+              titleAccess={this.props.trans.__("Close this dialog")}
               fontSize="small"
               onClick={this._onClose}
             />
@@ -130,8 +136,8 @@ export class ResetRevertDialog extends React.Component<
         <div className={contentWrapperClass}>
           <p>
             {isRevert
-              ? "These changes will be reverted. Only commit if you're sure you're okay losing these changes."
-              : `All changes after commit ${shortCommit} will be gone forever (hard reset). Are you sure?`}
+              ? this.props.trans.__("These changes will be reverted. Only commit if you're sure you're okay losing these changes.")
+              : this.props.trans.__(`All changes after commit %1 will be gone forever (hard reset). Are you sure?`, shortCommit)}
           </p>
           {isRevert ? (
             <div className={commitFormClass}>
@@ -139,7 +145,7 @@ export class ResetRevertDialog extends React.Component<
                 className={commitSummaryClass}
                 type="text"
                 placeholder={this._defaultSummary()}
-                title="Enter a commit message summary (a single line, preferably less than 50 characters)"
+                title={this.props.trans.__("Enter a commit message summary (a single line, preferably less than 50 characters)")}
                 value={this.state.summary}
                 onChange={this._onSummaryChange}
               />
@@ -147,7 +153,7 @@ export class ResetRevertDialog extends React.Component<
                 className={commitDescriptionClass}
                 minRows={5}
                 placeholder={this._defaultDescription()}
-                title="Enter a commit message description"
+                title={this.props.trans.__("Enter a commit message description")}
                 value={this.state.description}
                 onChange={this._onDescriptionChange}
               />
@@ -159,7 +165,7 @@ export class ResetRevertDialog extends React.Component<
             disabled={this.state.disabled}
             className={classes(buttonClass, cancelButtonClass)}
             type="button"
-            title="Cancel changes"
+            title={this.props.trans.__("Cancel changes")}
             value="Cancel"
             onClick={this._onClose}
           />
@@ -167,7 +173,7 @@ export class ResetRevertDialog extends React.Component<
             disabled={this.state.disabled}
             className={classes(buttonClass, submitButtonClass)}
             type="button"
-            title="Submit changes"
+            title={this.props.trans.__("Submit changes")}
             value="Submit"
             onClick={this._onSubmit}
           />
@@ -226,18 +232,18 @@ export class ResetRevertDialog extends React.Component<
   private async _resetCommit(hash: string): Promise<void> {
     this.props.logger.log({
       level: Level.RUNNING,
-      message: 'Discarding changes...'
+      message: this.props.trans.__('Discarding changes...')
     });
     try {
       await this.props.model.resetToCommit(hash);
       this.props.logger.log({
         level: Level.SUCCESS,
-        message: 'Successfully discarded changes.'
+        message: this.props.trans.__('Successfully discarded changes.')
       });
     } catch (error) {
       this.props.logger.log({
         level: Level.ERROR,
-        message: 'Failed to discard changes.',
+        message: this.props.trans.__('Failed to discard changes.'),
         error: new Error(
           `Failed to discard changes after ${hash.slice(0, 7)}: ${error}`
         )
@@ -253,18 +259,18 @@ export class ResetRevertDialog extends React.Component<
   private async _revertCommit(hash: string): Promise<void> {
     this.props.logger.log({
       level: Level.RUNNING,
-      message: 'Reverting changes...'
+      message: this.props.trans.__('Reverting changes...')
     });
     try {
       await this.props.model.revertCommit(this._commitMessage(), hash);
       this.props.logger.log({
         level: Level.SUCCESS,
-        message: 'Successfully reverted changes.'
+        message: this.props.trans.__('Successfully reverted changes.')
       });
     } catch (error) {
       this.props.logger.log({
         level: Level.ERROR,
-        message: 'Failed to revert changes.',
+        message: this.props.trans.__('Failed to revert changes.'),
         error: new Error(`Failed to revert ${hash.slice(0, 7)}: ${error}`)
       });
     }
@@ -296,7 +302,7 @@ export class ResetRevertDialog extends React.Component<
    */
   private _defaultSummary(): string {
     const summary = this.props.commit.commit_msg.split('\n')[0];
-    return `Revert "${summary}"`;
+    return this.props.trans.__(`Revert '%1'`, summary);
   }
 
   /**
@@ -305,7 +311,7 @@ export class ResetRevertDialog extends React.Component<
    * @returns default commit description
    */
   private _defaultDescription(): string {
-    return `This reverts commit ${this.props.commit.commit}`;
+    return this.props.trans.__(`This reverts commit %1`, this.props.commit.commit);
   }
 
   /**

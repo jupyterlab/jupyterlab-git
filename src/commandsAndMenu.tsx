@@ -28,17 +28,7 @@ import { diffIcon } from './style/icons';
 import { Git, Level } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { GitCloneForm } from './widgets/GitCloneForm';
-
-const RESOURCES = [
-  {
-    text: 'Set Up Remotes',
-    url: 'https://www.atlassian.com/git/tutorials/setting-up-a-repository'
-  },
-  {
-    text: 'Git Documentation',
-    url: 'https://git-scm.com/doc'
-  }
-];
+import { ITranslator, nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 
 interface IGitCloneArgs {
   /**
@@ -95,7 +85,8 @@ export function addCommands(
   model: GitExtension,
   fileBrowser: FileBrowser,
   settings: ISettingRegistry.ISettings,
-  renderMime: IRenderMimeRegistry
+  renderMime: IRenderMimeRegistry,
+  trans: TranslationBundle
 ) {
   const { commands, shell } = app;
 
@@ -103,8 +94,8 @@ export function addCommands(
    * Add open terminal in the Git repository
    */
   commands.addCommand(CommandIDs.gitTerminalCommand, {
-    label: 'Open Git Repository in Terminal',
-    caption: 'Open a New Terminal to the Git Repository',
+    label: trans.__('Open Git Repository in Terminal'),
+    caption: trans.__('Open a New Terminal to the Git Repository'),
     execute: async args => {
       const main = (await commands.execute(
         'terminal:create-new',
@@ -131,8 +122,8 @@ export function addCommands(
 
   /** Add open/go to git interface command */
   commands.addCommand(CommandIDs.gitUI, {
-    label: 'Git Interface',
-    caption: 'Go to Git user interface',
+    label: trans.__('Git Interface'),
+    caption: trans.__('Go to Git user interface'),
     execute: () => {
       try {
         shell.activateById('jp-git-sessions');
@@ -144,35 +135,35 @@ export function addCommands(
 
   /** Add git init command */
   commands.addCommand(CommandIDs.gitInit, {
-    label: 'Initialize a Repository',
-    caption: 'Create an empty Git repository or reinitialize an existing one',
+    label: trans.__('Initialize a Repository'),
+    caption: trans.__('Create an empty Git repository or reinitialize an existing one'),
     execute: async () => {
       const currentPath = fileBrowser.model.path;
       const result = await showDialog({
-        title: 'Initialize a Repository',
-        body: 'Do you really want to make this directory a Git Repo?',
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Yes' })]
+        title: trans.__('Initialize a Repository'),
+        body: trans.__('Do you really want to make this directory a Git Repo?'),
+        buttons: [Dialog.cancelButton({label: trans.__('Cancel')}), Dialog.warnButton({ label: trans.__('Yes') })]
       });
 
       if (result.button.accept) {
         logger.log({
-          message: 'Initializing...',
+          message: trans.__('Initializing...'),
           level: Level.RUNNING
         });
         try {
           await model.init(currentPath);
           model.pathRepository = currentPath;
           logger.log({
-            message: 'Git repository initialized.',
+            message: trans.__('Git repository initialized.'),
             level: Level.SUCCESS
           });
         } catch (error) {
           console.error(
-            'Encountered an error when initializing the repository. Error: ',
+            trans.__('Encountered an error when initializing the repository. Error: '),
             error
           );
           logger.log({
-            message: 'Failed to initialize the Git repository',
+            message: trans.__('Failed to initialize the Git repository'),
             level: Level.ERROR,
             error
           });
@@ -193,7 +184,7 @@ export function addCommands(
 
   /** add toggle for simple staging */
   commands.addCommand(CommandIDs.gitToggleSimpleStaging, {
-    label: 'Simple staging',
+    label: trans.__('Simple staging'),
     isToggled: () => !!settings.composite['simpleStaging'],
     execute: args => {
       settings.set('simpleStaging', !settings.composite['simpleStaging']);
@@ -202,7 +193,7 @@ export function addCommands(
 
   /** add toggle for double click opens diffs */
   commands.addCommand(CommandIDs.gitToggleDoubleClickDiff, {
-    label: 'Double click opens diff',
+    label: trans.__('Double click opens diff'),
     isToggled: () => !!settings.composite['doubleClickDiff'],
     execute: args => {
       settings.set('doubleClickDiff', !settings.composite['doubleClickDiff']);
@@ -211,12 +202,12 @@ export function addCommands(
 
   /** Command to add a remote Git repository */
   commands.addCommand(CommandIDs.gitAddRemote, {
-    label: 'Add Remote Repository',
-    caption: 'Add a Git remote repository',
+    label: trans.__('Add Remote Repository'),
+    caption: trans.__('Add a Git remote repository'),
     isEnabled: () => model.pathRepository !== null,
     execute: async args => {
       if (model.pathRepository === null) {
-        console.warn('Not in a Git repository. Unable to add a remote.');
+        console.warn(trans.__('Not in a Git repository. Unable to add a remote.'));
         return;
       }
       let url = args['url'] as string;
@@ -224,8 +215,8 @@ export function addCommands(
 
       if (!url) {
         const result = await InputDialog.getText({
-          title: 'Add a remote repository',
-          placeholder: 'Remote Git repository URL'
+          title: trans.__('Add a remote repository'),
+          placeholder: trans.__('Remote Git repository URL')
         });
 
         if (result.button.accept) {
@@ -238,7 +229,7 @@ export function addCommands(
           await model.addRemote(url, name);
         } catch (error) {
           console.error(error);
-          showErrorMessage('Error when adding remote repository', error);
+          showErrorMessage(trans.__('Error when adding remote repository'), error);
         }
       }
     }
@@ -246,30 +237,31 @@ export function addCommands(
 
   /** Add git clone command */
   commands.addCommand(CommandIDs.gitClone, {
-    label: 'Clone a Repository',
-    caption: 'Clone a repository from a URL',
+    label: trans.__('Clone a Repository'),
+    caption: trans.__('Clone a repository from a URL'),
     isEnabled: () => model.pathRepository === null,
     execute: async () => {
       const result = await showDialog({
-        title: 'Clone a repo',
-        body: new GitCloneForm(),
+        title: trans.__('Clone a repo'),
+        body: new GitCloneForm(trans),
         focusNodeSelector: 'input',
-        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'CLONE' })]
+        buttons: [Dialog.cancelButton({label: trans.__('Cancel')}), Dialog.okButton({ label: trans.__('CLONE') })]
       });
 
       if (result.button.accept && result.value) {
         logger.log({
           level: Level.RUNNING,
-          message: 'Cloning...'
+          message: trans.__('Cloning...')
         });
         try {
           const details = await Private.showGitOperationDialog<IGitCloneArgs>(
             model,
             Operation.Clone,
+            trans,
             { path: fileBrowser.model.path, url: result.value }
           );
           logger.log({
-            message: 'Successfully cloned',
+            message: trans.__('Successfully cloned'),
             level: Level.SUCCESS,
             details
           });
@@ -280,7 +272,7 @@ export function addCommands(
             error
           );
           logger.log({
-            message: 'Failed to clone',
+            message: trans.__('Failed to clone'),
             level: Level.ERROR,
             error
           });
@@ -291,8 +283,8 @@ export function addCommands(
 
   /** Add git open gitignore command */
   commands.addCommand(CommandIDs.gitOpenGitignore, {
-    label: 'Open .gitignore',
-    caption: 'Open .gitignore',
+    label: trans.__('Open .gitignore'),
+    caption: trans.__('Open .gitignore'),
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       await model.ensureGitignore();
@@ -301,31 +293,32 @@ export function addCommands(
 
   /** Add git push command */
   commands.addCommand(CommandIDs.gitPush, {
-    label: 'Push to Remote',
-    caption: 'Push code to remote repository',
+    label: trans.__('Push to Remote'),
+    caption: trans.__('Push code to remote repository'),
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       logger.log({
         level: Level.RUNNING,
-        message: 'Pushing...'
+        message: trans.__('Pushing...')
       });
       try {
         const details = await Private.showGitOperationDialog(
           model,
-          Operation.Push
+          Operation.Push,
+          trans
         );
         logger.log({
-          message: 'Successfully pushed',
+          message: trans.__('Successfully pushed'),
           level: Level.SUCCESS,
           details
         });
       } catch (error) {
         console.error(
-          'Encountered an error when pushing changes. Error: ',
+          trans.__('Encountered an error when pushing changes. Error: '),
           error
         );
         logger.log({
-          message: 'Failed to push',
+          message: trans.__('Failed to push'),
           level: Level.ERROR,
           error
         });
@@ -335,21 +328,22 @@ export function addCommands(
 
   /** Add git pull command */
   commands.addCommand(CommandIDs.gitPull, {
-    label: 'Pull from Remote',
-    caption: 'Pull latest code from remote repository',
+    label: trans.__('Pull from Remote'),
+    caption: trans.__('Pull latest code from remote repository'),
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       logger.log({
         level: Level.RUNNING,
-        message: 'Pulling...'
+        message: trans.__('Pulling...')
       });
       try {
         const details = await Private.showGitOperationDialog(
           model,
-          Operation.Pull
+          Operation.Pull,
+          trans
         );
         logger.log({
-          message: 'Successfully pulled',
+          message: trans.__('Successfully pulled'),
           level: Level.SUCCESS,
           details
         });
@@ -359,7 +353,7 @@ export function addCommands(
           error
         );
         logger.log({
-          message: 'Failed to pull',
+          message: trans.__('Failed to pull'),
           level: Level.ERROR,
           error
         });
@@ -369,16 +363,16 @@ export function addCommands(
 
   /* Context menu commands */
   commands.addCommand(CommandIDs.gitFileOpen, {
-    label: 'Open',
-    caption: 'Open selected file',
+    label: trans.__('Open'),
+    caption: trans.__('Open selected file'),
     execute: async args => {
       const file: Git.IStatusFileResult = args as any;
 
       const { x, y, to } = file;
       if (x === 'D' || y === 'D') {
         await showErrorMessage(
-          'Open File Failed',
-          'This file has been deleted!'
+          trans.__('Open File Failed'),
+          trans.__('This file has been deleted!')
         );
         return;
       }
@@ -397,8 +391,8 @@ export function addCommands(
   });
 
   commands.addCommand(CommandIDs.gitFileDiff, {
-    label: 'Diff',
-    caption: 'Diff selected file',
+    label: trans.__('Diff'),
+    caption: trans.__('Diff selected file'),
     execute: args => {
       const { context, filePath, isText, status } = (args as any) as {
         context?: IDiffContext;
@@ -450,18 +444,18 @@ export function addCommands(
         }
       } else {
         showErrorMessage(
-          'Diff Not Supported',
-          `Diff is not supported for ${PathExt.extname(
-            filePath
-          ).toLocaleLowerCase()} files.`
+          trans.__('Diff Not Supported'),
+          trans.__(`Diff is not supported for %1 files.`, 
+            PathExt.extname(filePath).toLocaleLowerCase()
+          )
         );
       }
     }
   });
 
   commands.addCommand(CommandIDs.gitFileStage, {
-    label: 'Stage',
-    caption: 'Stage the changes of selected file',
+    label: trans.__('Stage'),
+    caption: trans.__('Stage the changes of selected file'),
     execute: async args => {
       const selectedFile: Git.IStatusFile = args as any;
       await model.add(selectedFile.to);
@@ -469,8 +463,8 @@ export function addCommands(
   });
 
   commands.addCommand(CommandIDs.gitFileTrack, {
-    label: 'Track',
-    caption: 'Start tracking selected file',
+    label: trans.__('Track'),
+    caption: trans.__('Start tracking selected file'),
     execute: async args => {
       const selectedFile: Git.IStatusFile = args as any;
       await model.add(selectedFile.to);
@@ -478,8 +472,8 @@ export function addCommands(
   });
 
   commands.addCommand(CommandIDs.gitFileUnstage, {
-    label: 'Unstage',
-    caption: 'Unstage the changes of selected file',
+    label: trans.__('Unstage'),
+    caption: trans.__('Unstage the changes of selected file'),
     execute: async args => {
       const selectedFile: Git.IStatusFile = args as any;
       if (selectedFile.x !== 'D') {
@@ -489,20 +483,21 @@ export function addCommands(
   });
 
   commands.addCommand(CommandIDs.gitFileDelete, {
-    label: 'Delete',
-    caption: 'Delete this file',
+    label: trans.__('Delete'),
+    caption: trans.__('Delete this file'),
     execute: async args => {
       const file: Git.IStatusFile = args as any;
-
+      var text1:string = trans.__("Are you sure you want to permanently delete");
+      var text2:string = trans.__("This action cannot be undone.");
+    
       const result = await showDialog({
-        title: 'Delete File',
+        title: trans.__('Delete File'),
         body: (
-          <span>
-            Are you sure you want to permanently delete
-            <b>{file.to}</b>? This action cannot be undone.
+          <span> 
+            {text1} <b>{file.to}</b>? {text2}
           </span>
         ),
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
+        buttons: [Dialog.cancelButton({label: trans.__('Cancel')}), Dialog.warnButton({ label: trans.__('Delete') })]
       });
       if (result.button.accept) {
         try {
@@ -510,8 +505,8 @@ export function addCommands(
             path: model.getRelativeFilePath(file.to)
           });
         } catch (reason) {
-          showErrorMessage(`Deleting ${file.to} failed.`, reason, [
-            Dialog.warnButton({ label: 'DISMISS' })
+          showErrorMessage(trans.__(`Deleting %1 failed.`, file.to), reason, [
+            Dialog.warnButton({ label: trans.__('DISMISS') })
           ]);
         }
       }
@@ -519,22 +514,22 @@ export function addCommands(
   });
 
   commands.addCommand(CommandIDs.gitFileDiscard, {
-    label: 'Discard',
-    caption: 'Discard recent changes of selected file',
+    label: trans.__('Discard'),
+    caption: trans.__('Discard recent changes of selected file'),
     execute: async args => {
       const file: Git.IStatusFile = args as any;
 
       const result = await showDialog({
-        title: 'Discard changes',
+        title: trans.__('Discard changes'),
         body: (
           <span>
-            Are you sure you want to permanently discard changes to{' '}
-            <b>{file.to}</b>? This action cannot be undone.
+            {trans.__('Are you sure you want to permanently discard changes to ')}
+            <b>{file.to}</b>? {trans.__('This action cannot be undone.')}
           </span>
         ),
         buttons: [
-          Dialog.cancelButton(),
-          Dialog.warnButton({ label: 'Discard' })
+          Dialog.cancelButton({label: trans.__('Cancel')}),
+          Dialog.warnButton({ label: trans.__('Discard') })
         ]
       });
       if (result.button.accept) {
@@ -551,7 +546,7 @@ export function addCommands(
           }
         } catch (reason) {
           showErrorMessage(`Discard changes for ${file.to} failed.`, reason, [
-            Dialog.warnButton({ label: 'DISMISS' })
+            Dialog.warnButton({ label: trans.__('DISMISS') })
           ]);
         }
       }
@@ -559,8 +554,8 @@ export function addCommands(
   });
 
   commands.addCommand(CommandIDs.gitIgnore, {
-    label: () => 'Ignore this file (add to .gitignore)',
-    caption: () => 'Ignore this file (add to .gitignore)',
+    label: () => trans.__('Ignore this file (add to .gitignore)'),
+    caption: () => trans.__('Ignore this file (add to .gitignore)'),
     execute: async args => {
       const selectedFile: Git.IStatusFile = args as any;
       if (selectedFile) {
@@ -572,25 +567,24 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitIgnoreExtension, {
     label: args => {
       const selectedFile: Git.IStatusFile = args as any;
-      return `Ignore ${PathExt.extname(
-        selectedFile.to
-      )} extension (add to .gitignore)`;
+      return trans.__(`Ignore %1 extension (add to .gitignore)`,
+        PathExt.extname(selectedFile.to));
     },
-    caption: 'Ignore this file extension (add to .gitignore)',
+    caption: trans.__('Ignore this file extension (add to .gitignore)'),
     execute: async args => {
       const selectedFile: Git.IStatusFile = args as any;
       if (selectedFile) {
         const extension = PathExt.extname(selectedFile.to);
         if (extension.length > 0) {
           const result = await showDialog({
-            title: 'Ignore file extension',
-            body: `Are you sure you want to ignore all ${extension} files within this git repository?`,
+            title: trans.__('Ignore file extension'),
+            body: trans.__(`Are you sure you want to ignore all %1 files within this git repository?`, extension),
             buttons: [
-              Dialog.cancelButton(),
-              Dialog.okButton({ label: 'Ignore' })
+              Dialog.cancelButton({label: trans.__('Cancel')}),
+              Dialog.okButton({ label: trans.__('Ignore') })
             ]
           });
-          if (result.button.label === 'Ignore') {
+          if (result.button.label === trans.__('Ignore')) {
             await model.ignore(selectedFile.to, true);
           }
         }
@@ -612,9 +606,22 @@ export function addCommands(
  * @param gitExtension - Git extension instance
  * @param fileBrowser - file browser instance
  * @param settings - extension settings
+ * @param trans - language translator
  * @returns menu
  */
-export function createGitMenu(commands: CommandRegistry): Menu {
+export function createGitMenu(commands: CommandRegistry, translator?: ITranslator): Menu {
+  const trans = (translator|| nullTranslator).load('jupyterlab-git');  
+  const RESOURCES = [
+    {
+      text: trans.__('Set Up Remotes'),
+      url: 'https://www.atlassian.com/git/tutorials/setting-up-a-repository'
+    },
+    {
+      text: trans.__('Git Documentation'),
+      url: 'https://git-scm.com/doc'
+    }
+  ];
+  
   const menu = new Menu({ commands });
   menu.title.label = 'Git';
   [
@@ -641,7 +648,7 @@ export function createGitMenu(commands: CommandRegistry): Menu {
   menu.addItem({ type: 'separator' });
 
   const tutorial = new Menu({ commands });
-  tutorial.title.label = ' Help ';
+  tutorial.title.label = trans.__(' Help ');
   RESOURCES.map(args => {
     tutorial.addItem({
       args,
@@ -662,6 +669,7 @@ namespace Private {
    * @private
    * @param model - Git extension model
    * @param operation - Git operation name
+   * @param trans - language translator
    * @param args - Git operation arguments
    * @param authentication - Git authentication information
    * @param retry - Is this operation retried?
@@ -670,6 +678,7 @@ namespace Private {
   export async function showGitOperationDialog<T>(
     model: GitExtension,
     operation: Operation,
+    trans?: TranslationBundle,
     args?: T,
     authentication?: Git.IAuth,
     retry = false
@@ -703,10 +712,11 @@ namespace Private {
       ) {
         // If the error is an authentication error, ask the user credentials
         const credentials = await showDialog({
-          title: 'Git credentials required',
+          title: trans.__('Git credentials required'),
           body: new GitCredentialsForm(
-            'Enter credentials for remote repository',
-            retry ? 'Incorrect username or password.' : ''
+            trans,
+            trans.__('Enter credentials for remote repository'),
+            retry ? trans.__('Incorrect username or password.') : ''
           )
         });
 
@@ -715,6 +725,7 @@ namespace Private {
           return await showGitOperationDialog<T>(
             model,
             operation,
+            trans,
             args,
             credentials.value,
             true

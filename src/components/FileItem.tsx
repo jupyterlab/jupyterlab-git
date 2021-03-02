@@ -1,3 +1,8 @@
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
@@ -121,9 +126,18 @@ export interface IFileItemProps {
    * Inline styling for the windowing
    */
   style: React.CSSProperties;
+  /**
+   * The application language translator.
+   */
+  translator?: ITranslator;
 }
 
 export class FileItem extends React.PureComponent<IFileItemProps> {
+  constructor(props: IFileItemProps) {
+    super(props);
+    this.translator = props.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab-git');
+  }
   protected _getFileChangedLabel(change: keyof typeof STATUS_CODES): string {
     return STATUS_CODES[change];
   }
@@ -174,7 +188,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         }
         onDoubleClick={this.props.onDoubleClick}
         style={this.props.style}
-        title={`${this.props.file.to} ● ${status}`}
+        title={`${this.props.file.to} ● ${this._trans.__(status)}`}
       >
         {this.props.markBox && (
           <GitMarkBox
@@ -194,4 +208,6 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
       </div>
     );
   }
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
 }

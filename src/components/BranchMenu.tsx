@@ -1,4 +1,5 @@
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import { TranslationBundle } from '@jupyterlab/translation';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
@@ -37,7 +38,7 @@ const MAX_HEIGHT = 400; // Maximal HTML element height for the branches list
  * @param error - error
  * @param logger - the logger
  */
-function onBranchError(error: any, logger: Logger): void {
+function onBranchError(error: any, logger: Logger, trans?: TranslationBundle): void {
   if (error.message.includes('following files would be overwritten')) {
     // Empty log message to hide the executing alert
     logger.log({
@@ -45,28 +46,26 @@ function onBranchError(error: any, logger: Logger): void {
       level: Level.INFO
     });
     showDialog({
-      title: 'Unable to switch branch',
+      title: trans.__('Unable to switch branch'),
       body: (
         <React.Fragment>
           <p>
-            Your changes to the following files would be overwritten by
-            switching:
+            {trans.__('Your changes to the following files would be overwritten by switching:')}
           </p>
           <List>
             {error.message.split('\n').slice(1, -3).map(renderFileName)}
           </List>
           <span>
-            Please commit, stash, or discard your changes before you switch
-            branches.
+            {trans.__('Please commit, stash, or discard your changes before you switch branches.')}
           </span>
         </React.Fragment>
       ),
-      buttons: [Dialog.okButton({ label: 'Dismiss' })]
+      buttons: [Dialog.okButton({ label: trans.__('Dismiss') })]
     });
   } else {
     logger.log({
       level: Level.ERROR,
-      message: 'Failed to switch branch.',
+      message: trans.__('Failed to switch branch.'),
       error
     });
   }
@@ -111,6 +110,11 @@ export interface IBranchMenuProps {
    * Git extension data model.
    */
   model: IGitExtension;
+
+  /**
+   * The application language translator.
+   */
+  trans?: TranslationBundle;
 }
 
 /**
@@ -179,13 +183,13 @@ export class BranchMenu extends React.Component<
             type="text"
             onChange={this._onFilterChange}
             value={this.state.filter}
-            placeholder="Filter"
-            title="Filter branch menu"
+            placeholder={this.props.trans.__("Filter")}
+            title={this.props.trans.__("Filter branch menu")}
           />
           {this.state.filter ? (
             <button className={filterClearClass}>
               <ClearIcon
-                titleAccess="Clear the current filter"
+                titleAccess={this.props.trans.__("Clear the current filter")}
                 fontSize="small"
                 onClick={this._resetFilter}
               />
@@ -195,8 +199,8 @@ export class BranchMenu extends React.Component<
         <input
           className={newBranchButtonClass}
           type="button"
-          title="Create a new branch"
-          value="New Branch"
+          title={this.props.trans.__("Create a new branch")}
+          value={this.props.trans.__("New Branch")}
           onClick={this._onNewBranchClick}
         />
       </div>
@@ -245,7 +249,7 @@ export class BranchMenu extends React.Component<
     return (
       <ListItem
         button
-        title={`Switch to branch: ${branch.name}`}
+        title={this.props.trans.__(`Switch to branch: %1`, branch.name)}
         className={classes(
           listItemClass,
           isActive ? activeListItemClass : null
@@ -259,7 +263,7 @@ export class BranchMenu extends React.Component<
           <ActionButton
             className={hiddenButtonStyle}
             icon={trashIcon}
-            title={'Delete this branch locally'}
+            title={this.props.trans.__('Delete this branch locally')}
             onClick={(event: React.MouseEvent) => {
               event.stopPropagation();
               this._onDeleteBranch(branch.name);
@@ -284,6 +288,7 @@ export class BranchMenu extends React.Component<
         open={this.state.branchDialog}
         model={this.props.model}
         onClose={this._onNewBranchDialogClose}
+        trans={this.props.trans}
       />
     );
   }
@@ -315,16 +320,17 @@ export class BranchMenu extends React.Component<
    */
   private _onDeleteBranch = async (branchName: string): Promise<void> => {
     const acknowledgement = await showDialog<void>({
-      title: 'Delete branch',
+      title: this.props.trans.__('Delete branch'),
       body: (
         <p>
-          Are you sure you want to permanently delete the branch{' '}
+          {this.props.trans.__('Are you sure you want to permanently delete the branch ')}
           <b>{branchName}</b>?
           <br />
-          This action cannot be undone.
+          {this.props.trans.__('This action cannot be undone.')}
         </p>
       ),
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
+      buttons: [Dialog.cancelButton({label: this.props.trans.__('Cancel')}), 
+                Dialog.warnButton({ label: this.props.trans.__('Delete') })]
     });
     if (acknowledgement.button.accept) {
       try {
@@ -343,7 +349,7 @@ export class BranchMenu extends React.Component<
    */
   private _onNewBranchClick = (): void => {
     if (!this.props.branching) {
-      showErrorMessage('Creating a new branch is disabled', CHANGES_ERR_MSG);
+      showErrorMessage(this.props.trans.__('Creating a new branch is disabled'), this.props.trans.__(CHANGES_ERR_MSG));
       return;
     }
     this.setState({
@@ -378,8 +384,9 @@ export class BranchMenu extends React.Component<
      * @returns promise which resolves upon attempting to switch branches
      */
     async function onClick(): Promise<void> {
+
       if (!self.props.branching) {
-        showErrorMessage('Switching branches is disabled', CHANGES_ERR_MSG);
+        showErrorMessage(self.props.trans.__('Switching branches is disabled'), self.props.trans.__(CHANGES_ERR_MSG));
         return;
       }
       const opts = {
@@ -388,18 +395,18 @@ export class BranchMenu extends React.Component<
 
       self.props.logger.log({
         level: Level.RUNNING,
-        message: 'Switching branch...'
+        message: self.props.trans.__('Switching branch...')
       });
 
       try {
         await self.props.model.checkout(opts);
       } catch (err) {
-        return onBranchError(err, self.props.logger);
+        return onBranchError(err, self.props.logger, self.props.trans);
       }
 
       self.props.logger.log({
         level: Level.SUCCESS,
-        message: 'Switched branch.'
+        message: self.props.trans.__('Switched branch.')
       });
     }
   }

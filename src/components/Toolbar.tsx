@@ -35,6 +35,11 @@ import { Git, IGitExtension, Level } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { BranchMenu } from './BranchMenu';
 import { TagMenu } from './TagMenu';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 /**
  * Interface describing  properties.
@@ -84,6 +89,11 @@ export interface IToolbarProps {
    * Current repository.
    */
   repository: string;
+  
+  /**
+   * The application language translator.
+   */
+  translator?: ITranslator;
 }
 
 /**
@@ -105,6 +115,9 @@ export interface IToolbarState {
  * React component for rendering a panel toolbar.
  */
 export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
+  
+  private translator: ITranslator;
+  private _trans: TranslationBundle;
   /**
    * Returns a React component for rendering a panel toolbar.
    *
@@ -113,6 +126,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    */
   constructor(props: IToolbarProps) {
     super(props);
+    this.translator = props.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab-git');
 
     this.state = {
       branchMenu: false,
@@ -166,11 +181,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             onClick={hasRemote ? this._onPullClick : undefined}
             title={
               hasRemote
-                ? 'Pull latest changes' +
+                ? this._trans.__('Pull latest changes') +
                   (this.props.nCommitsBehind > 0
-                    ? ` (behind by ${this.props.nCommitsBehind} commits)`
+                    ? this._trans.__(` (behind by %1 commits)`, this.props.nCommitsBehind)
                     : '')
-                : 'No remote repository defined'
+                : this._trans.__('No remote repository defined')
             }
           />
         </Badge>
@@ -190,12 +205,12 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             title={
               hasRemote
                 ? hasUpstream
-                  ? 'Push committed changes' +
+                  ? this._trans.__('Push committed changes') +
                     (this.props.nCommitsAhead > 0
-                      ? ` (ahead by ${this.props.nCommitsAhead} commits)`
+                      ? this._trans.__(` (ahead by %1 commits)`, this.props.nCommitsAhead)
                       : '')
-                  : 'Publish branch'
-                : 'No remote repository defined'
+                  : this._trans.__('Publish branch')
+                : this._trans.__('No remote repository defined')
             }
           />
         </Badge>
@@ -204,7 +219,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           className={toolbarButtonClass}
           icon={refreshIcon}
           onClick={this._onRefreshClick}
-          title={'Refresh the repository to detect local and remote changes'}
+          title={this._trans.__('Refresh the repository to detect local and remote changes')}
         />
       </div>
     );
@@ -221,11 +236,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <button
           disabled
           className={toolbarMenuButtonClass}
-          title={`Current repository: ${this.props.repository}`}
+          title={this._trans.__(`Current repository: %1`, this.props.repository)}
         >
           <desktopIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
-            <p className={toolbarMenuButtonTitleClass}>Current Repository</p>
+            <p className={toolbarMenuButtonTitleClass}> {this._trans.__('Current Repository')} </p>
             <p className={toolbarMenuButtonSubtitleClass}>
               {PathExt.basename(this.props.repository)}
             </p>
@@ -251,12 +266,12 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             toolbarMenuButtonClass,
             toolbarMenuButtonEnabledClass
           )}
-          title={'Manage branches and tags'}
+          title={this._trans.__('Manage branches and tags')}
           onClick={this._onBranchClick}
         >
           <branchIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
-            <p className={toolbarMenuButtonTitleClass}>Current Branch</p>
+            <p className={toolbarMenuButtonTitleClass}>{this._trans.__('Current Branch')}</p>
             <p className={toolbarMenuButtonSubtitleClass}>
               {this.props.currentBranch || ''}
             </p>
@@ -292,8 +307,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
               root: tabClass,
               selected: selectedTabClass
             }}
-            title="View branches"
-            label="Branches"
+            title={this._trans.__("View branches")}
+            label={this._trans.__("Branches")}
             disableFocusRipple={true}
             disableRipple={true}
           ></Tab>
@@ -302,8 +317,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
               root: tabClass,
               selected: selectedTabClass
             }}
-            title="View tags"
-            label="Tags"
+            title={this._trans.__("View tags")}
+            label={this._trans.__("Tags")}
             disableFocusRipple={true}
             disableRipple={true}
           ></Tab>
@@ -321,6 +336,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         branching={this.props.branching}
         logger={this.props.logger}
         model={this.props.model}
+        trans={this._trans}
       />
     );
   }
@@ -331,6 +347,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         logger={this.props.logger}
         model={this.props.model}
         branching={this.props.branching}
+        trans={this._trans}
       ></TagMenu>
     );
   }
@@ -376,20 +393,20 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   private _onRefreshClick = async (): Promise<void> => {
     this.props.logger.log({
       level: Level.RUNNING,
-      message: 'Refreshing...'
+      message: this._trans.__('Refreshing...')
     });
     try {
       await this.props.model.refresh();
 
       this.props.logger.log({
         level: Level.SUCCESS,
-        message: 'Successfully refreshed.'
+        message: this._trans.__('Successfully refreshed.')
       });
     } catch (error) {
       console.error(error);
       this.props.logger.log({
         level: Level.ERROR,
-        message: 'Failed to refresh.',
+        message: this._trans.__('Failed to refresh.'),
         error
       });
     }

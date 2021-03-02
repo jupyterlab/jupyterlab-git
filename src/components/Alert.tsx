@@ -1,3 +1,4 @@
+import { nullTranslator, ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { Button } from '@material-ui/core';
 import Portal from '@material-ui/core/Portal';
@@ -60,6 +61,11 @@ export interface IAlertProps {
    * Alert severity.
    */
   severity?: Color;
+
+  /**
+   * The application language translator.
+   */
+  translator?: ITranslator;
 }
 
 /**
@@ -74,6 +80,8 @@ export class Alert extends React.Component<IAlertProps> {
    */
   constructor(props: IAlertProps) {
     super(props);
+    this.translator = props.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab-git');
   }
 
   /**
@@ -96,10 +104,14 @@ export class Alert extends React.Component<IAlertProps> {
           color="inherit"
           size="small"
           onClick={() => {
-            showErrorMessage('Error', this.props.error);
+            showErrorMessage(
+              this._trans.__('Error'),
+              this.props.error,
+              [Dialog.warnButton({ label: this._trans.__('Dismiss') })]           
+            );
           }}
         >
-          SHOW
+          {this._trans.__('SHOW')}
         </Button>
       );
     } else if (this.props.details) {
@@ -109,13 +121,13 @@ export class Alert extends React.Component<IAlertProps> {
           size="small"
           onClick={() => {
             showDialog({
-              title: 'Detailed message',
-              body: this.props.details,
-              buttons: [Dialog.okButton({ label: 'DISMISS' })]
+              title: this._trans.__('Detailed message'),
+              body: this._trans.__(this.props.details),
+              buttons: [Dialog.okButton({ label: this._trans.__('DISMISS') })]
             });
           }}
         >
-          Details
+          {this._trans.__('Details')}
         </Button>
       );
     }
@@ -135,7 +147,7 @@ export class Alert extends React.Component<IAlertProps> {
           onClose={this._onClose}
         >
           <MuiAlert action={action} variant="filled" severity={severity}>
-            {this.props.message || '(missing message)'}
+          {this._trans.__(this.props.message || '(missing message)')}
           </MuiAlert>
         </Snackbar>
       </Portal>
@@ -167,4 +179,7 @@ export class Alert extends React.Component<IAlertProps> {
     }
     this.props.onClose(event);
   };
+
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
 }

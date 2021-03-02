@@ -1,4 +1,5 @@
 import { Dialog } from '@jupyterlab/apputils';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import { Git } from '../tokens';
 
@@ -9,10 +10,12 @@ export class GitCredentialsForm
   extends Widget
   implements Dialog.IBodyWidget<Git.IAuth> {
   constructor(
-    textContent = 'Enter credentials for remote repository',
+    trans: TranslationBundle,
+    textContent = trans.__('Enter credentials for remote repository'),
     warningContent = ''
   ) {
     super();
+    this._trans = trans;
     this.node.appendChild(this.createBody(textContent, warningContent));
   }
 
@@ -30,8 +33,8 @@ export class GitCredentialsForm
     warning.className = 'jp-RedirectForm-warning';
     text.textContent = textContent;
     warning.textContent = warningContent;
-    this._user.placeholder = 'username';
-    this._password.placeholder = 'password / personal access token';
+    this._user.placeholder = this._trans.__('username');
+    this._password.placeholder = this._trans.__('password / personal access token');
 
     label.appendChild(text);
     label.appendChild(this._user);
@@ -50,7 +53,7 @@ export class GitCredentialsForm
       password: this._password.value
     };
   }
-
+  protected _trans: TranslationBundle;
   private _user: HTMLInputElement;
   private _password: HTMLInputElement;
 }

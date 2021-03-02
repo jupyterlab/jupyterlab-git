@@ -6,6 +6,11 @@ import {
   commitDescriptionClass,
   commitButtonClass
 } from '../style/CommitBox';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 /**
  * Interface describing component properties.
@@ -15,7 +20,10 @@ export interface ICommitBoxProps {
    * Boolean indicating whether files currently exist which have changes to commit.
    */
   hasFiles: boolean;
-
+  /**
+   * The application language translator.
+   */
+  translator?: ITranslator;  
   /**
    * Callback to invoke in order to commit changes.
    *
@@ -55,6 +63,8 @@ export class CommitBox extends React.Component<
    */
   constructor(props: ICommitBoxProps) {
     super(props);
+    this.translator = props.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab-git');
     this.state = {
       summary: '',
       description: ''
@@ -69,17 +79,17 @@ export class CommitBox extends React.Component<
   render(): React.ReactElement {
     const disabled = !(this.props.hasFiles && this.state.summary);
     const title = !this.props.hasFiles
-      ? 'Disabled: No files are staged for commit'
+      ? this._trans.__('Disabled: No files are staged for commit')
       : !this.state.summary
-      ? 'Disabled: No commit message summary'
-      : 'Commit';
+      ? this._trans.__('Disabled: No commit message summary')
+      : this._trans.__('Commit');
     return (
       <form className={commitFormClass}>
         <input
           className={commitSummaryClass}
           type="text"
-          placeholder="Summary (required)"
-          title="Enter a commit message summary (a single line, preferably less than 50 characters)"
+          placeholder={this._trans.__("Summary (required)")}
+          title={this._trans.__("Enter a commit message summary (a single line, preferably less than 50 characters)")}
           value={this.state.summary}
           onChange={this._onSummaryChange}
           onKeyPress={this._onSummaryKeyPress}
@@ -87,8 +97,8 @@ export class CommitBox extends React.Component<
         <TextareaAutosize
           className={commitDescriptionClass}
           minRows={5}
-          placeholder="Description"
-          title="Enter a commit message description"
+          placeholder={this._trans.__("Description")}
+          title={this._trans.__("Enter a commit message description")}
           value={this.state.description}
           onChange={this._onDescriptionChange}
         />
@@ -163,4 +173,6 @@ export class CommitBox extends React.Component<
       description: ''
     });
   }
+  private translator: ITranslator;
+  private _trans: TranslationBundle;
 }

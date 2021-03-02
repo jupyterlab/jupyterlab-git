@@ -1,3 +1,4 @@
+import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { GitExtension } from '../model';
@@ -28,6 +29,11 @@ export interface IHistorySideBarProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
+   
+  /**
+   * The application language translator.
+   */
+  trans?: TranslationBundle; 
 }
 
 /**
@@ -47,6 +53,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
         branches={props.branches}
         model={props.model}
         commands={props.commands}
+        trans={props.trans}
       />
     ))}
   </ol>

@@ -1,3 +1,4 @@
+import { TranslationBundle } from '@jupyterlab/translation';
 import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
@@ -42,6 +43,11 @@ export interface IPastCommitNodeProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
+  
+  /**
+   * The application language translator.
+   */
+  trans?: TranslationBundle;
 }
 
 /**
@@ -112,6 +118,7 @@ export class PastCommitNode extends React.Component<
               commit={this.props.commit}
               model={this.props.model}
               commands={this.props.commands}
+              trans={this.props.trans}
             />
           )}
         </div>

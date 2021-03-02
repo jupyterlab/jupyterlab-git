@@ -1,3 +1,4 @@
+import { TranslationBundle } from '@jupyterlab/translation';
 import { fileIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
@@ -52,6 +53,11 @@ export interface ISinglePastCommitInfoProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
+
+  /**
+   * The application language translator.
+   */
+  trans?: TranslationBundle;
 }
 
 /**
@@ -161,24 +167,24 @@ export class SinglePastCommitInfo extends React.Component<
       return <div>...</div>;
     }
     if (this.state.loadingState === 'error') {
-      return <div>Error loading commit data</div>;
+      return <div>{this.props.trans.__('Error loading commit data')}</div>;
     }
     return (
       <div>
         <div className={commitClass}>
           <div className={commitOverviewNumbersClass}>
-            <span title="# Files Changed">
+            <span title={this.props.trans.__("# Files Changed")}>
               <fileIcon.react className={iconClass} tag="span" />
               {this.state.numFiles}
             </span>
-            <span title="# Insertions">
+            <span title={this.props.trans.__("# Insertions")}>
               <insertionsMadeIcon.react
                 className={classes(iconClass, insertionsIconClass)}
                 tag="span"
               />
               {this.state.insertions}
             </span>
-            <span title="# Deletions">
+            <span title={this.props.trans.__("# Deletions")}>
               <deletionsMadeIcon.react
                 className={classes(iconClass, deletionsIconClass)}
                 tag="span"
@@ -189,17 +195,17 @@ export class SinglePastCommitInfo extends React.Component<
         </div>
         <div className={commitDetailClass}>
           <div className={commitDetailHeaderClass}>
-            Changed
+          {this.props.trans.__('Changed')}
             <ActionButton
               className={actionButtonClass}
               icon={discardIcon}
-              title="Revert changes introduced by this commit"
+              title={this.props.trans.__("Revert changes introduced by this commit")}
               onClick={this._onRevertClick}
             />
             <ActionButton
               className={actionButtonClass}
               icon={rewindIcon}
-              title="Discard changes introduced *after* this commit (hard reset)"
+              title={this.props.trans.__("Discard changes introduced *after* this commit (hard reset)")}
               onClick={this._onResetClick}
             />
             <LoggerContext.Consumer>
@@ -211,6 +217,7 @@ export class SinglePastCommitInfo extends React.Component<
                   logger={logger}
                   commit={this.props.commit}
                   onClose={this._onResetRevertDialogClose}
+                  trans={this.props.trans}
                 />
               )}
             </LoggerContext.Consumer>
@@ -258,7 +265,7 @@ export class SinglePastCommitInfo extends React.Component<
       >
         <FilePath filepath={path} filetype={file.type} />
         {flg ? (
-          <ActionButton icon={diffIcon} title="View file changes" />
+          <ActionButton icon={diffIcon} title={this.props.trans.__("View file changes")} />
         ) : null}
       </li>
     );
