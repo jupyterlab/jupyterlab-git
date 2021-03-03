@@ -173,18 +173,18 @@ export class SinglePastCommitInfo extends React.Component<
       <div>
         <div className={commitClass}>
           <div className={commitOverviewNumbersClass}>
-            <span title={this.props.trans.__("# Files Changed")}>
+            <span title={this.props.trans.__('# Files Changed')}>
               <fileIcon.react className={iconClass} tag="span" />
               {this.state.numFiles}
             </span>
-            <span title={this.props.trans.__("# Insertions")}>
+            <span title={this.props.trans.__('# Insertions')}>
               <insertionsMadeIcon.react
                 className={classes(iconClass, insertionsIconClass)}
                 tag="span"
               />
               {this.state.insertions}
             </span>
-            <span title={this.props.trans.__("# Deletions")}>
+            <span title={this.props.trans.__('# Deletions')}>
               <deletionsMadeIcon.react
                 className={classes(iconClass, deletionsIconClass)}
                 tag="span"
@@ -195,17 +195,21 @@ export class SinglePastCommitInfo extends React.Component<
         </div>
         <div className={commitDetailClass}>
           <div className={commitDetailHeaderClass}>
-          {this.props.trans.__('Changed')}
+            {this.props.trans.__('Changed')}
             <ActionButton
               className={actionButtonClass}
               icon={discardIcon}
-              title={this.props.trans.__("Revert changes introduced by this commit")}
+              title={this.props.trans.__(
+                'Revert changes introduced by this commit'
+              )}
               onClick={this._onRevertClick}
             />
             <ActionButton
               className={actionButtonClass}
               icon={rewindIcon}
-              title={this.props.trans.__("Discard changes introduced *after* this commit (hard reset)")}
+              title={this.props.trans.__(
+                'Discard changes introduced *after* this commit (hard reset)'
+              )}
               onClick={this._onResetClick}
             />
             <LoggerContext.Consumer>
@@ -265,7 +269,10 @@ export class SinglePastCommitInfo extends React.Component<
       >
         <FilePath filepath={path} filetype={file.type} />
         {flg ? (
-          <ActionButton icon={diffIcon} title={this.props.trans.__("View file changes")} />
+          <ActionButton
+            icon={diffIcon}
+            title={this.props.trans.__('View file changes')}
+          />
         ) : null}
       </li>
     );

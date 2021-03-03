@@ -28,7 +28,11 @@ import { diffIcon } from './style/icons';
 import { Git, Level } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { GitCloneForm } from './widgets/GitCloneForm';
-import { ITranslator, nullTranslator, TranslationBundle } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 interface IGitCloneArgs {
   /**
@@ -154,13 +158,18 @@ export function addCommands(
   /** Add git init command */
   commands.addCommand(CommandIDs.gitInit, {
     label: trans.__('Initialize a Repository'),
-    caption: trans.__('Create an empty Git repository or reinitialize an existing one'),
+    caption: trans.__(
+      'Create an empty Git repository or reinitialize an existing one'
+    ),
     execute: async () => {
       const currentPath = fileBrowser.model.path;
       const result = await showDialog({
         title: trans.__('Initialize a Repository'),
         body: trans.__('Do you really want to make this directory a Git Repo?'),
-        buttons: [Dialog.cancelButton({label: trans.__('Cancel')}), Dialog.warnButton({ label: trans.__('Yes') })]
+        buttons: [
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
+          Dialog.warnButton({ label: trans.__('Yes') })
+        ]
       });
 
       if (result.button.accept) {
@@ -177,7 +186,9 @@ export function addCommands(
           });
         } catch (error) {
           console.error(
-            trans.__('Encountered an error when initializing the repository. Error: '),
+            trans.__(
+              'Encountered an error when initializing the repository. Error: '
+            ),
             error
           );
           logger.log({
@@ -225,7 +236,9 @@ export function addCommands(
     isEnabled: () => model.pathRepository !== null,
     execute: async args => {
       if (model.pathRepository === null) {
-        console.warn(trans.__('Not in a Git repository. Unable to add a remote.'));
+        console.warn(
+          trans.__('Not in a Git repository. Unable to add a remote.')
+        );
         return;
       }
       let url = args['url'] as string;
@@ -247,7 +260,10 @@ export function addCommands(
           await model.addRemote(url, name);
         } catch (error) {
           console.error(error);
-          showErrorMessage(trans.__('Error when adding remote repository'), error);
+          showErrorMessage(
+            trans.__('Error when adding remote repository'),
+            error
+          );
         }
       }
     }
@@ -263,7 +279,10 @@ export function addCommands(
         title: trans.__('Clone a repo'),
         body: new GitCloneForm(trans),
         focusNodeSelector: 'input',
-        buttons: [Dialog.cancelButton({label: trans.__('Cancel')}), Dialog.okButton({ label: trans.__('CLONE') })]
+        buttons: [
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
+          Dialog.okButton({ label: trans.__('CLONE') })
+        ]
       });
 
       if (result.button.accept && result.value) {
@@ -463,7 +482,8 @@ export function addCommands(
       } else {
         showErrorMessage(
           trans.__('Diff Not Supported'),
-          trans.__(`Diff is not supported for %1 files.`, 
+          trans.__(
+            `Diff is not supported for %1 files.`,
             PathExt.extname(filePath).toLocaleLowerCase()
           )
         );
@@ -505,17 +525,22 @@ export function addCommands(
     caption: trans.__('Delete this file'),
     execute: async args => {
       const file: Git.IStatusFile = args as any;
-      var text1:string = trans.__("Are you sure you want to permanently delete");
-      var text2:string = trans.__("This action cannot be undone.");
-    
+      var text1: string = trans.__(
+        'Are you sure you want to permanently delete'
+      );
+      var text2: string = trans.__('This action cannot be undone.');
+
       const result = await showDialog({
         title: trans.__('Delete File'),
         body: (
-          <span> 
+          <span>
             {text1} <b>{file.to}</b>? {text2}
           </span>
         ),
-        buttons: [Dialog.cancelButton({label: trans.__('Cancel')}), Dialog.warnButton({ label: trans.__('Delete') })]
+        buttons: [
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
+          Dialog.warnButton({ label: trans.__('Delete') })
+        ]
       });
       if (result.button.accept) {
         try {
@@ -541,12 +566,14 @@ export function addCommands(
         title: trans.__('Discard changes'),
         body: (
           <span>
-            {trans.__('Are you sure you want to permanently discard changes to ')}
+            {trans.__(
+              'Are you sure you want to permanently discard changes to '
+            )}
             <b>{file.to}</b>? {trans.__('This action cannot be undone.')}
           </span>
         ),
         buttons: [
-          Dialog.cancelButton({label: trans.__('Cancel')}),
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
           Dialog.warnButton({ label: trans.__('Discard') })
         ]
       });
@@ -585,8 +612,10 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitIgnoreExtension, {
     label: args => {
       const selectedFile: Git.IStatusFile = args as any;
-      return trans.__(`Ignore %1 extension (add to .gitignore)`,
-        PathExt.extname(selectedFile.to));
+      return trans.__(
+        `Ignore %1 extension (add to .gitignore)`,
+        PathExt.extname(selectedFile.to)
+      );
     },
     caption: trans.__('Ignore this file extension (add to .gitignore)'),
     execute: async args => {
@@ -596,9 +625,12 @@ export function addCommands(
         if (extension.length > 0) {
           const result = await showDialog({
             title: trans.__('Ignore file extension'),
-            body: trans.__(`Are you sure you want to ignore all %1 files within this git repository?`, extension),
+            body: trans.__(
+              `Are you sure you want to ignore all %1 files within this git repository?`,
+              extension
+            ),
             buttons: [
-              Dialog.cancelButton({label: trans.__('Cancel')}),
+              Dialog.cancelButton({ label: trans.__('Cancel') }),
               Dialog.okButton({ label: trans.__('Ignore') })
             ]
           });
@@ -627,8 +659,11 @@ export function addCommands(
  * @param trans - language translator
  * @returns menu
  */
-export function createGitMenu(commands: CommandRegistry, translator?: ITranslator): Menu {
-  const trans = (translator|| nullTranslator).load('jupyterlab-git');  
+export function createGitMenu(
+  commands: CommandRegistry,
+  translator?: ITranslator
+): Menu {
+  const trans = (translator || nullTranslator).load('jupyterlab-git');
   const RESOURCES = [
     {
       text: trans.__('Set Up Remotes'),
@@ -639,7 +674,7 @@ export function createGitMenu(commands: CommandRegistry, translator?: ITranslato
       url: 'https://git-scm.com/doc'
     }
   ];
-  
+
   const menu = new Menu({ commands });
   menu.title.label = 'Git';
   [

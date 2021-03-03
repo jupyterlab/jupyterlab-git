@@ -38,7 +38,11 @@ const MAX_HEIGHT = 400; // Maximal HTML element height for the branches list
  * @param error - error
  * @param logger - the logger
  */
-function onBranchError(error: any, logger: Logger, trans?: TranslationBundle): void {
+function onBranchError(
+  error: any,
+  logger: Logger,
+  trans?: TranslationBundle
+): void {
   if (error.message.includes('following files would be overwritten')) {
     // Empty log message to hide the executing alert
     logger.log({
@@ -50,13 +54,17 @@ function onBranchError(error: any, logger: Logger, trans?: TranslationBundle): v
       body: (
         <React.Fragment>
           <p>
-            {trans.__('Your changes to the following files would be overwritten by switching:')}
+            {trans.__(
+              'Your changes to the following files would be overwritten by switching:'
+            )}
           </p>
           <List>
             {error.message.split('\n').slice(1, -3).map(renderFileName)}
           </List>
           <span>
-            {trans.__('Please commit, stash, or discard your changes before you switch branches.')}
+            {trans.__(
+              'Please commit, stash, or discard your changes before you switch branches.'
+            )}
           </span>
         </React.Fragment>
       ),
@@ -183,13 +191,13 @@ export class BranchMenu extends React.Component<
             type="text"
             onChange={this._onFilterChange}
             value={this.state.filter}
-            placeholder={this.props.trans.__("Filter")}
-            title={this.props.trans.__("Filter branch menu")}
+            placeholder={this.props.trans.__('Filter')}
+            title={this.props.trans.__('Filter branch menu')}
           />
           {this.state.filter ? (
             <button className={filterClearClass}>
               <ClearIcon
-                titleAccess={this.props.trans.__("Clear the current filter")}
+                titleAccess={this.props.trans.__('Clear the current filter')}
                 fontSize="small"
                 onClick={this._resetFilter}
               />
@@ -199,8 +207,8 @@ export class BranchMenu extends React.Component<
         <input
           className={newBranchButtonClass}
           type="button"
-          title={this.props.trans.__("Create a new branch")}
-          value={this.props.trans.__("New Branch")}
+          title={this.props.trans.__('Create a new branch')}
+          value={this.props.trans.__('New Branch')}
           onClick={this._onNewBranchClick}
         />
       </div>
@@ -323,14 +331,18 @@ export class BranchMenu extends React.Component<
       title: this.props.trans.__('Delete branch'),
       body: (
         <p>
-          {this.props.trans.__('Are you sure you want to permanently delete the branch ')}
+          {this.props.trans.__(
+            'Are you sure you want to permanently delete the branch '
+          )}
           <b>{branchName}</b>?
           <br />
           {this.props.trans.__('This action cannot be undone.')}
         </p>
       ),
-      buttons: [Dialog.cancelButton({label: this.props.trans.__('Cancel')}), 
-                Dialog.warnButton({ label: this.props.trans.__('Delete') })]
+      buttons: [
+        Dialog.cancelButton({ label: this.props.trans.__('Cancel') }),
+        Dialog.warnButton({ label: this.props.trans.__('Delete') })
+      ]
     });
     if (acknowledgement.button.accept) {
       try {
@@ -349,7 +361,10 @@ export class BranchMenu extends React.Component<
    */
   private _onNewBranchClick = (): void => {
     if (!this.props.branching) {
-      showErrorMessage(this.props.trans.__('Creating a new branch is disabled'), this.props.trans.__(CHANGES_ERR_MSG));
+      showErrorMessage(
+        this.props.trans.__('Creating a new branch is disabled'),
+        this.props.trans.__(CHANGES_ERR_MSG)
+      );
       return;
     }
     this.setState({
@@ -384,9 +399,11 @@ export class BranchMenu extends React.Component<
      * @returns promise which resolves upon attempting to switch branches
      */
     async function onClick(): Promise<void> {
-
       if (!self.props.branching) {
-        showErrorMessage(self.props.trans.__('Switching branches is disabled'), self.props.trans.__(CHANGES_ERR_MSG));
+        showErrorMessage(
+          self.props.trans.__('Switching branches is disabled'),
+          self.props.trans.__(CHANGES_ERR_MSG)
+        );
         return;
       }
       const opts = {

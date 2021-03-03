@@ -138,5 +138,4 @@ export class Feedback extends React.Component<IFeedbackProps, IFeedbackState> {
       </React.Fragment>
     );
   }
-
 }

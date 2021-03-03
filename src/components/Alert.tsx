@@ -1,4 +1,8 @@
-import { nullTranslator, ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { Button } from '@material-ui/core';
 import Portal from '@material-ui/core/Portal';
@@ -104,11 +108,9 @@ export class Alert extends React.Component<IAlertProps> {
           color="inherit"
           size="small"
           onClick={() => {
-            showErrorMessage(
-              this._trans.__('Error'),
-              this.props.error,
-              [Dialog.warnButton({ label: this._trans.__('Dismiss') })]           
-            );
+            showErrorMessage(this._trans.__('Error'), this.props.error, [
+              Dialog.warnButton({ label: this._trans.__('Dismiss') })
+            ]);
           }}
         >
           {this._trans.__('SHOW')}
@@ -147,7 +149,7 @@ export class Alert extends React.Component<IAlertProps> {
           onClose={this._onClose}
         >
           <MuiAlert action={action} variant="filled" severity={severity}>
-          {this._trans.__(this.props.message || '(missing message)')}
+            {this._trans.__(this.props.message || '(missing message)')}
           </MuiAlert>
         </Snackbar>
       </Portal>

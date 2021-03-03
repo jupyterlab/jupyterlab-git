@@ -60,7 +60,7 @@ export interface IGitPanelProps {
    * Git extension settings.
    */
   settings: ISettingRegistry.ISettings;
-  
+
   /**
    * The application language translator.
    */
@@ -349,8 +349,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             root: tabClass,
             selected: selectedTabClass
           }}
-          title={this._trans.__("View changed files")}
-          label={this._trans.__("Changes")}
+          title={this._trans.__('View changed files')}
+          label={this._trans.__('Changes')}
           disableFocusRipple={true}
           disableRipple={true}
         />
@@ -359,8 +359,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             root: tabClass,
             selected: selectedTabClass
           }}
-          title={this._trans.__("View commit history")}
-          label={this._trans.__("History")}
+          title={this._trans.__('View commit history')}
+          label={this._trans.__('History')}
           disableFocusRipple={true}
           disableRipple={true}
         />
@@ -433,14 +433,15 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         <div className={warningTextClass}>
           {path ? (
             <React.Fragment>
-              <b title={path}>{PathExt.basename(path)}</b> {this._trans.__('is not')}
+              <b title={path}>{PathExt.basename(path)}</b>{' '}
+              {this._trans.__('is not')}
             </React.Fragment>
           ) : (
             this._trans.__('You are not currently in')
           )}
-          {
-            this._trans.__(' a Git repository. To use Git, navigate to a local repository, initialize a repository here, or clone an existing repository.')
-          }
+          {this._trans.__(
+            ' a Git repository. To use Git, navigate to a local repository, initialize a repository here, or clone an existing repository.'
+          )}
         </div>
         <button
           className={repoButtonClass}
@@ -522,7 +523,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         }
         this._previousRepoPath = path;
       } catch (error) {
-        throw new Error(this._trans.__('Failed to set your identity. ') + error.message);
+        throw new Error(
+          this._trans.__('Failed to set your identity. ') + error.message
+        );
       }
     }
     return Promise.resolve(true);

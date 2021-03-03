@@ -13,7 +13,9 @@ import { TranslationBundle } from '@jupyterlab/translation';
  * @throws {ServerConnection.ResponseError} If the response was not ok
  * @throws {ServerConnection.NetworkError} If the request failed to reach the server
  */
-export async function getServerSettings(trans: TranslationBundle): Promise<Git.IServerSettings> {
+export async function getServerSettings(
+  trans: TranslationBundle
+): Promise<Git.IServerSettings> {
   try {
     const endpoint = 'settings' + URLExt.objectToQueryString({ version });
     const settings = await requestAPI<Git.IServerSettings>(endpoint, 'GET');
@@ -22,10 +24,11 @@ export async function getServerSettings(trans: TranslationBundle): Promise<Git.I
     if (error instanceof Git.GitResponseError) {
       const response = error.response;
       if (response.status === 404) {
-        const message =
-          trans.__('Git server extension is unavailable. Please ensure you have installed the ' +
-          'JupyterLab Git server extension by running: pip install --upgrade jupyterlab-git. ' +
-          'To confirm that the server extension is installed, run: jupyter server extension list.');
+        const message = trans.__(
+          'Git server extension is unavailable. Please ensure you have installed the ' +
+            'JupyterLab Git server extension by running: pip install --upgrade jupyterlab-git. ' +
+            'To confirm that the server extension is installed, run: jupyter server extension list.'
+        );
         throw new ServerConnection.ResponseError(response, message);
       } else {
         const message = error.message;

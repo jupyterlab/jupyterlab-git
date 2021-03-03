@@ -32,7 +32,11 @@ const MAX_HEIGHT = 400; // Maximal HTML element height for the tags list
  * @param error - error
  * @param logger - the logger
  */
-function onTagError(error: any, logger: Logger, trans: TranslationBundle): void {
+function onTagError(
+  error: any,
+  logger: Logger,
+  trans: TranslationBundle
+): void {
   if (error.message.includes('following files would be overwritten')) {
     // Empty log message to hide the executing alert
     logger.log({
@@ -184,13 +188,13 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
             type="text"
             onChange={this._onFilterChange}
             value={this.state.filter}
-            placeholder={this.props.trans.__("Filter")}
-            title={this.props.trans.__("Filter branch menu")}
+            placeholder={this.props.trans.__('Filter')}
+            title={this.props.trans.__('Filter branch menu')}
           />
           {this.state.filter ? (
             <button className={filterClearClass}>
               <ClearIcon
-                titleAccess={this.props.trans.__("Clear the current filter")}
+                titleAccess={this.props.trans.__('Clear the current filter')}
                 fontSize="small"
                 onClick={this._resetFilter}
               />
@@ -291,7 +295,10 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
      */
     async function onClick(): Promise<void> {
       if (!self.props.branching) {
-        showErrorMessage(self.props.trans.__('Checkout tags is disabled'), self.props.trans.__(CHANGES_ERR_MSG));
+        showErrorMessage(
+          self.props.trans.__('Checkout tags is disabled'),
+          self.props.trans.__(CHANGES_ERR_MSG)
+        );
         return;
       }
 

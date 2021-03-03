@@ -14,7 +14,6 @@ import {
 import { CommandRegistry } from '@lumino/commands';
 import { SUBMIT_COMMIT_COMMAND } from '../commandsAndMenu';
 
-
 /**
  * Interface describing component properties.
  */
@@ -31,7 +30,7 @@ export interface ICommitBoxProps {
   /**
    * The application language translator.
    */
-  translator?: ITranslator;  
+  translator?: ITranslator;
   /**
    * Callback to invoke in order to commit changes.
    *
@@ -103,14 +102,19 @@ export class CommitBox extends React.Component<
     const shortcutHint = CommandRegistry.formatKeystroke(
       this._getSubmitKeystroke()
     );
-    const summaryPlaceholder = this._trans.__('Summary (%1 to commit)', shortcutHint);
+    const summaryPlaceholder = this._trans.__(
+      'Summary (%1 to commit)',
+      shortcutHint
+    );
     return (
       <form className={[commitFormClass, 'jp-git-CommitBox'].join(' ')}>
         <input
           className={commitSummaryClass}
           type="text"
           placeholder={summaryPlaceholder}
-          title={this._trans.__("Enter a commit message summary (a single line, preferably less than 50 characters)")}
+          title={this._trans.__(
+            'Enter a commit message summary (a single line, preferably less than 50 characters)'
+          )}
           value={this.state.summary}
           onChange={this._onSummaryChange}
           onKeyPress={this._onSummaryKeyPress}
@@ -118,8 +122,8 @@ export class CommitBox extends React.Component<
         <TextareaAutosize
           className={commitDescriptionClass}
           minRows={5}
-          placeholder={this._trans.__("Description (optional)")}
-          title={this._trans.__("Enter a commit message description")}
+          placeholder={this._trans.__('Description (optional)')}
+          title={this._trans.__('Enter a commit message description')}
           value={this.state.description}
           onChange={this._onDescriptionChange}
         />

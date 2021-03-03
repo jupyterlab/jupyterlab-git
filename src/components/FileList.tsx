@@ -189,15 +189,22 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
     const result = await showDialog({
       title: this._trans.__('Discard all changes'),
-      body:
-      this._trans.__('Are you sure you want to permanently discard changes to all files? This action cannot be undone.'),
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: this._trans.__('Discard') })]
+      body: this._trans.__(
+        'Are you sure you want to permanently discard changes to all files? This action cannot be undone.'
+      ),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: this._trans.__('Discard') })
+      ]
     });
     if (result.button.accept) {
       try {
         await this.props.model.checkout();
       } catch (reason) {
-        showErrorMessage(this._trans.__('Discard all unstaged changes failed.'), reason);
+        showErrorMessage(
+          this._trans.__('Discard all unstaged changes failed.'),
+          reason
+        );
       }
     }
   };
@@ -207,9 +214,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event.stopPropagation();
     const result = await showDialog({
       title: this._trans.__('Discard all changes'),
-      body:
-      this._trans.__('Are you sure you want to permanently discard changes to all files? This action cannot be undone.'),
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: this._trans.__('Discard') })]
+      body: this._trans.__(
+        'Are you sure you want to permanently discard changes to all files? This action cannot be undone.'
+      ),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: this._trans.__('Discard') })
+      ]
     });
     if (result.button.accept) {
       try {

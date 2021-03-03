@@ -123,11 +123,13 @@ export class ResetRevertDialog extends React.Component<
       >
         <div className={titleWrapperClass}>
           <p className={titleClass}>
-            {isRevert ? this.props.trans.__('Revert Changes') : this.props.trans.__('Reset Changes')}
+            {isRevert
+              ? this.props.trans.__('Revert Changes')
+              : this.props.trans.__('Reset Changes')}
           </p>
           <button className={closeButtonClass}>
             <ClearIcon
-              titleAccess={this.props.trans.__("Close this dialog")}
+              titleAccess={this.props.trans.__('Close this dialog')}
               fontSize="small"
               onClick={this._onClose}
             />
@@ -136,8 +138,13 @@ export class ResetRevertDialog extends React.Component<
         <div className={contentWrapperClass}>
           <p>
             {isRevert
-              ? this.props.trans.__("These changes will be reverted. Only commit if you're sure you're okay losing these changes.")
-              : this.props.trans.__(`All changes after commit %1 will be gone forever (hard reset). Are you sure?`, shortCommit)}
+              ? this.props.trans.__(
+                  "These changes will be reverted. Only commit if you're sure you're okay losing these changes."
+                )
+              : this.props.trans.__(
+                  `All changes after commit %1 will be gone forever (hard reset). Are you sure?`,
+                  shortCommit
+                )}
           </p>
           {isRevert ? (
             <div className={commitFormClass}>
@@ -145,7 +152,9 @@ export class ResetRevertDialog extends React.Component<
                 className={commitSummaryClass}
                 type="text"
                 placeholder={this._defaultSummary()}
-                title={this.props.trans.__("Enter a commit message summary (a single line, preferably less than 50 characters)")}
+                title={this.props.trans.__(
+                  'Enter a commit message summary (a single line, preferably less than 50 characters)'
+                )}
                 value={this.state.summary}
                 onChange={this._onSummaryChange}
               />
@@ -153,7 +162,9 @@ export class ResetRevertDialog extends React.Component<
                 className={commitDescriptionClass}
                 minRows={5}
                 placeholder={this._defaultDescription()}
-                title={this.props.trans.__("Enter a commit message description")}
+                title={this.props.trans.__(
+                  'Enter a commit message description'
+                )}
                 value={this.state.description}
                 onChange={this._onDescriptionChange}
               />
@@ -165,7 +176,7 @@ export class ResetRevertDialog extends React.Component<
             disabled={this.state.disabled}
             className={classes(buttonClass, cancelButtonClass)}
             type="button"
-            title={this.props.trans.__("Cancel changes")}
+            title={this.props.trans.__('Cancel changes')}
             value="Cancel"
             onClick={this._onClose}
           />
@@ -173,7 +184,7 @@ export class ResetRevertDialog extends React.Component<
             disabled={this.state.disabled}
             className={classes(buttonClass, submitButtonClass)}
             type="button"
-            title={this.props.trans.__("Submit changes")}
+            title={this.props.trans.__('Submit changes')}
             value="Submit"
             onClick={this._onSubmit}
           />
@@ -311,7 +322,10 @@ export class ResetRevertDialog extends React.Component<
    * @returns default commit description
    */
   private _defaultDescription(): string {
-    return this.props.trans.__(`This reverts commit %1`, this.props.commit.commit);
+    return this.props.trans.__(
+      `This reverts commit %1`,
+      this.props.commit.commit
+    );
   }
 
   /**

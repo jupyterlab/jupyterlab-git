@@ -2,10 +2,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
-import { 
-  ITranslator,
-  TranslationBundle 
-} from '@jupyterlab/translation';
+import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { classes } from 'typestyle';
@@ -130,7 +127,7 @@ export class NewBranchDialog extends React.Component<
   constructor(props: INewBranchDialogProps) {
     super(props);
 
-    this._trans = this.props.trans;    
+    this._trans = this.props.trans;
     this._branchList = React.createRef<VariableSizeList>();
 
     this.state = {
@@ -159,7 +156,7 @@ export class NewBranchDialog extends React.Component<
           <p className={titleClass}>{this._trans.__('Create a Branch')}</p>
           <button className={closeButtonClass}>
             <ClearIcon
-              titleAccess={this._trans.__("Close this dialog")}
+              titleAccess={this._trans.__('Close this dialog')}
               fontSize="small"
               onClick={this._onClose}
             />
@@ -176,7 +173,7 @@ export class NewBranchDialog extends React.Component<
             onChange={this._onNameChange}
             value={this.state.name}
             placeholder=""
-            title={this._trans.__("Enter a branch name")}
+            title={this._trans.__('Enter a branch name')}
           />
           <p>{this._trans.__('Create branch based on...')}</p>
           <div className={filterWrapperClass}>
@@ -186,13 +183,13 @@ export class NewBranchDialog extends React.Component<
                 type="text"
                 onChange={this._onFilterChange}
                 value={this.state.filter}
-                placeholder={this._trans.__("Filter")}
-                title={this._trans.__("Filter branch menu")}
+                placeholder={this._trans.__('Filter')}
+                title={this._trans.__('Filter branch menu')}
               />
               {this.state.filter ? (
                 <button className={filterClearClass}>
                   <ClearIcon
-                    titleAccess={this._trans.__("Clear the current filter")}
+                    titleAccess={this._trans.__('Clear the current filter')}
                     fontSize="small"
                     onClick={this._resetFilter}
                   />
@@ -206,15 +203,17 @@ export class NewBranchDialog extends React.Component<
           <input
             className={classes(buttonClass, cancelButtonClass)}
             type="button"
-            title={this._trans.__("Close this dialog without creating a new branch")}
-            value={this._trans.__("Cancel")}
+            title={this._trans.__(
+              'Close this dialog without creating a new branch'
+            )}
+            value={this._trans.__('Cancel')}
             onClick={this._onClose}
           />
           <input
             className={classes(buttonClass, createButtonClass)}
             type="button"
-            title={this._trans.__("Create a new branch")}
-            value={this._trans.__("Create Branch")}
+            title={this._trans.__('Create a new branch')}
+            value={this._trans.__('Create Branch')}
             onClick={this._onCreate}
             disabled={this.state.name === '' || this.state.error !== ''}
           />
@@ -325,7 +324,9 @@ export class NewBranchDialog extends React.Component<
           >
             {branch.name}
           </p>
-          {desc ? <p className={listItemDescClass}>{this._trans.__(desc)}</p> : null}
+          {desc ? (
+            <p className={listItemDescClass}>{this._trans.__(desc)}</p>
+          ) : null}
         </div>
       </ListItem>
     );

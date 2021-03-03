@@ -79,7 +79,11 @@ export class GitWidget extends ReactWidget {
             >
               {(sender, log) =>
                 log?.message ? (
-                  <Feedback log={log} settings={this._settings} translator={this.translator} />
+                  <Feedback
+                    log={log}
+                    settings={this._settings}
+                    translator={this.translator}
+                  />
                 ) : null
               }
             </UseSignal>

@@ -29,11 +29,11 @@ export interface IHistorySideBarProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
-   
+
   /**
    * The application language translator.
    */
-  trans?: TranslationBundle; 
+  trans?: TranslationBundle;
 }
 
 /**

@@ -34,7 +34,9 @@ export class GitCredentialsForm
     text.textContent = textContent;
     warning.textContent = warningContent;
     this._user.placeholder = this._trans.__('username');
-    this._password.placeholder = this._trans.__('password / personal access token');
+    this._password.placeholder = this._trans.__(
+      'password / personal access token'
+    );
 
     label.appendChild(text);
     label.appendChild(this._user);

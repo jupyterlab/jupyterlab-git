@@ -89,7 +89,7 @@ export interface IToolbarProps {
    * Current repository.
    */
   repository: string;
-  
+
   /**
    * The application language translator.
    */
@@ -115,7 +115,6 @@ export interface IToolbarState {
  * React component for rendering a panel toolbar.
  */
 export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
-  
   private translator: ITranslator;
   private _trans: TranslationBundle;
   /**
@@ -183,7 +182,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
               hasRemote
                 ? this._trans.__('Pull latest changes') +
                   (this.props.nCommitsBehind > 0
-                    ? this._trans.__(` (behind by %1 commits)`, this.props.nCommitsBehind)
+                    ? this._trans.__(
+                        ` (behind by %1 commits)`,
+                        this.props.nCommitsBehind
+                      )
                     : '')
                 : this._trans.__('No remote repository defined')
             }
@@ -207,7 +209,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
                 ? hasUpstream
                   ? this._trans.__('Push committed changes') +
                     (this.props.nCommitsAhead > 0
-                      ? this._trans.__(` (ahead by %1 commits)`, this.props.nCommitsAhead)
+                      ? this._trans.__(
+                          ` (ahead by %1 commits)`,
+                          this.props.nCommitsAhead
+                        )
                       : '')
                   : this._trans.__('Publish branch')
                 : this._trans.__('No remote repository defined')
@@ -219,7 +224,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           className={toolbarButtonClass}
           icon={refreshIcon}
           onClick={this._onRefreshClick}
-          title={this._trans.__('Refresh the repository to detect local and remote changes')}
+          title={this._trans.__(
+            'Refresh the repository to detect local and remote changes'
+          )}
         />
       </div>
     );
@@ -236,11 +243,17 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <button
           disabled
           className={toolbarMenuButtonClass}
-          title={this._trans.__(`Current repository: %1`, this.props.repository)}
+          title={this._trans.__(
+            `Current repository: %1`,
+            this.props.repository
+          )}
         >
           <desktopIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
-            <p className={toolbarMenuButtonTitleClass}> {this._trans.__('Current Repository')} </p>
+            <p className={toolbarMenuButtonTitleClass}>
+              {' '}
+              {this._trans.__('Current Repository')}{' '}
+            </p>
             <p className={toolbarMenuButtonSubtitleClass}>
               {PathExt.basename(this.props.repository)}
             </p>
@@ -271,7 +284,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         >
           <branchIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
-            <p className={toolbarMenuButtonTitleClass}>{this._trans.__('Current Branch')}</p>
+            <p className={toolbarMenuButtonTitleClass}>
+              {this._trans.__('Current Branch')}
+            </p>
             <p className={toolbarMenuButtonSubtitleClass}>
               {this.props.currentBranch || ''}
             </p>
@@ -307,8 +322,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
               root: tabClass,
               selected: selectedTabClass
             }}
-            title={this._trans.__("View branches")}
-            label={this._trans.__("Branches")}
+            title={this._trans.__('View branches')}
+            label={this._trans.__('Branches')}
             disableFocusRipple={true}
             disableRipple={true}
           ></Tab>
@@ -317,8 +332,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
               root: tabClass,
               selected: selectedTabClass
             }}
-            title={this._trans.__("View tags")}
-            label={this._trans.__("Tags")}
+            title={this._trans.__('View tags')}
+            label={this._trans.__('Tags')}
             disableFocusRipple={true}
             disableRipple={true}
           ></Tab>

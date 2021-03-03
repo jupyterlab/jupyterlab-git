@@ -1,6 +1,4 @@
-import {
-  TranslationBundle
-} from '@jupyterlab/translation';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
 /**

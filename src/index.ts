@@ -83,22 +83,29 @@ async function activate(
     // Version validation
     if (!gitVersion) {
       throw new Error(
-        trans.__('git command not found - please ensure you have Git > 2 installed')
+        trans.__(
+          'git command not found - please ensure you have Git > 2 installed'
+        )
       );
     } else {
       const gitVersion_ = gitVersion.split('.');
       if (Number.parseInt(gitVersion_[0]) < 2) {
-        throw new Error(trans.__(`git command version must be > 2; got %1.`, gitVersion));
+        throw new Error(
+          trans.__(`git command version must be > 2; got %1.`, gitVersion)
+        );
       }
     }
 
     if (frontendVersion && frontendVersion !== serverVersion) {
       throw new Error(
-        trans.__('The versions of the JupyterLab Git server frontend and backend do not match. ' +
-                 `The @jupyterlab/git frontend extension has version: %1 ` +
-                 `while the python package has version %2. ` +
-                 'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git', frontendVersion, serverVersion
-                 )
+        trans.__(
+          'The versions of the JupyterLab Git server frontend and backend do not match. ' +
+            `The @jupyterlab/git frontend extension has version: %1 ` +
+            `while the python package has version %2. ` +
+            'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git',
+          frontendVersion,
+          serverVersion
+        )
       );
     }
   } catch (error) {

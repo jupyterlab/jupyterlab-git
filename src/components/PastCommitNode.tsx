@@ -43,7 +43,7 @@ export interface IPastCommitNodeProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
-  
+
   /**
    * The application language translator.
    */
