@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/quotes */
 import { TranslationBundle } from '@jupyterlab/translation';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';

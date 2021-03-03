@@ -245,6 +245,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
     return (
       <ListItem
         button
+        // eslint-disable-next-line @typescript-eslint/quotes
         title={this.props.trans.__(`Checkout to tag: %1`, tag)}
         className={listItemClass}
         onClick={this._onTagClickFactory(tag)}

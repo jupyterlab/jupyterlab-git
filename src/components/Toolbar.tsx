@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/quotes */
 import { PathExt } from '@jupyterlab/coreutils';
 import {
   caretDownIcon,

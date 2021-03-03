@@ -257,6 +257,7 @@ export class BranchMenu extends React.Component<
     return (
       <ListItem
         button
+        // eslint-disable-next-line @typescript-eslint/quotes
         title={this.props.trans.__(`Switch to branch: %1`, branch.name)}
         className={classes(
           listItemClass,
