@@ -2,7 +2,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { classes } from 'typestyle';
@@ -83,7 +83,7 @@ export interface INewBranchDialogProps {
   /**
    * The application language translator.
    */
-  trans?: TranslationBundle;
+  trans: TranslationBundle;
 }
 
 /**
@@ -127,9 +127,7 @@ export class NewBranchDialog extends React.Component<
   constructor(props: INewBranchDialogProps) {
     super(props);
 
-    this._trans = this.props.trans;
     this._branchList = React.createRef<VariableSizeList>();
-
     this.state = {
       name: '',
       base: props.currentBranch || '',
@@ -153,10 +151,10 @@ export class NewBranchDialog extends React.Component<
         onClose={this._onClose}
       >
         <div className={titleWrapperClass}>
-          <p className={titleClass}>{this._trans.__('Create a Branch')}</p>
+          <p className={titleClass}>{this.props.trans.__('Create a Branch')}</p>
           <button className={closeButtonClass}>
             <ClearIcon
-              titleAccess={this._trans.__('Close this dialog')}
+              titleAccess={this.props.trans.__('Close this dialog')}
               fontSize="small"
               onClick={this._onClose}
             />
@@ -166,16 +164,16 @@ export class NewBranchDialog extends React.Component<
           {this.state.error ? (
             <p className={errorMessageClass}>{this.state.error}</p>
           ) : null}
-          <p>{this._trans.__('Name')}</p>
+          <p>{this.props.trans.__('Name')}</p>
           <input
             className={nameInputClass}
             type="text"
             onChange={this._onNameChange}
             value={this.state.name}
             placeholder=""
-            title={this._trans.__('Enter a branch name')}
+            title={this.props.trans.__('Enter a branch name')}
           />
-          <p>{this._trans.__('Create branch based on...')}</p>
+          <p>{this.props.trans.__('Create branch based on...')}</p>
           <div className={filterWrapperClass}>
             <div className={filterClass}>
               <input
@@ -183,13 +181,15 @@ export class NewBranchDialog extends React.Component<
                 type="text"
                 onChange={this._onFilterChange}
                 value={this.state.filter}
-                placeholder={this._trans.__('Filter')}
-                title={this._trans.__('Filter branch menu')}
+                placeholder={this.props.trans.__('Filter')}
+                title={this.props.trans.__('Filter branch menu')}
               />
               {this.state.filter ? (
                 <button className={filterClearClass}>
                   <ClearIcon
-                    titleAccess={this._trans.__('Clear the current filter')}
+                    titleAccess={this.props.trans.__(
+                      'Clear the current filter'
+                    )}
                     fontSize="small"
                     onClick={this._resetFilter}
                   />
@@ -203,17 +203,17 @@ export class NewBranchDialog extends React.Component<
           <input
             className={classes(buttonClass, cancelButtonClass)}
             type="button"
-            title={this._trans.__(
+            title={this.props.trans.__(
               'Close this dialog without creating a new branch'
             )}
-            value={this._trans.__('Cancel')}
+            value={this.props.trans.__('Cancel')}
             onClick={this._onClose}
           />
           <input
             className={classes(buttonClass, createButtonClass)}
             type="button"
-            title={this._trans.__('Create a new branch')}
-            value={this._trans.__('Create Branch')}
+            title={this.props.trans.__('Create a new branch')}
+            value={this.props.trans.__('Create Branch')}
             onClick={this._onCreate}
             disabled={this.state.name === '' || this.state.error !== ''}
           />
@@ -306,8 +306,11 @@ export class NewBranchDialog extends React.Component<
     return (
       <ListItem
         button
-        // eslint-disable-next-line @typescript-eslint/quotes
-        title={this._trans.__(`Create a new branch based on: %1`, branch.name)}
+        title={this.props.trans.__(
+          // eslint-disable-next-line @typescript-eslint/quotes
+          `Create a new branch based on: %1`,
+          branch.name
+        )}
         className={classes(
           listItemClass,
           isCurrent ? activeListItemClass : null
@@ -326,7 +329,7 @@ export class NewBranchDialog extends React.Component<
             {branch.name}
           </p>
           {desc ? (
-            <p className={listItemDescClass}>{this._trans.__(desc)}</p>
+            <p className={listItemDescClass}>{this.props.trans.__(desc)}</p>
           ) : null}
         </div>
       </ListItem>
@@ -428,7 +431,7 @@ export class NewBranchDialog extends React.Component<
 
     this.props.logger.log({
       level: Level.RUNNING,
-      message: this._trans.__('Creating branch...')
+      message: this.props.trans.__('Creating branch...')
     });
     try {
       await this.props.model.checkout(opts);
@@ -438,14 +441,14 @@ export class NewBranchDialog extends React.Component<
       });
       this.props.logger.log({
         level: Level.ERROR,
-        message: this._trans.__('Failed to create branch.')
+        message: this.props.trans.__('Failed to create branch.')
       });
       return;
     }
 
     this.props.logger.log({
       level: Level.SUCCESS,
-      message: this._trans.__('Branch created.')
+      message: this.props.trans.__('Branch created.')
     });
     // Close the branch dialog:
     this.props.onClose();
@@ -458,7 +461,5 @@ export class NewBranchDialog extends React.Component<
     });
   }
 
-  protected translator: ITranslator;
-  private _trans: TranslationBundle;
   private _branchList: React.RefObject<VariableSizeList>;
 }

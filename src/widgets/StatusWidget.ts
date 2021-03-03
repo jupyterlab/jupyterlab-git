@@ -1,11 +1,7 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { Widget } from '@lumino/widgets';
-import {
-  nullTranslator,
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { statusWidgetClass } from '../style/StatusWidget';
 import { IGitExtension } from '../tokens';
 import { sleep } from '../utils';
@@ -16,13 +12,13 @@ import { sleep } from '../utils';
 export class StatusWidget extends Widget {
   /**
    * Returns a status bar widget.
-   * @param translator - The language translator
+   * @param trans - The language translator
    * @returns widget
    */
-  constructor(translator?: ITranslator) {
+  constructor(trans: TranslationBundle) {
     super();
     this.addClass(statusWidgetClass);
-    this._trans = (translator || nullTranslator).load('jupyterlab-git');
+    this._trans = trans;
   }
 
   /**
@@ -74,10 +70,10 @@ export function addStatusBarWidget(
   statusBar: IStatusBar,
   model: IGitExtension,
   settings: ISettingRegistry.ISettings,
-  translator: ITranslator
+  trans: TranslationBundle
 ): void {
   // Add a status bar widget to provide Git status updates:
-  const statusWidget = new StatusWidget(translator);
+  const statusWidget = new StatusWidget(trans);
   statusBar.registerStatusItem('git-status', {
     align: 'left',
     item: statusWidget,

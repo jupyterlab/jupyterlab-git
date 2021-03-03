@@ -41,7 +41,7 @@ const MAX_HEIGHT = 400; // Maximal HTML element height for the branches list
 function onBranchError(
   error: any,
   logger: Logger,
-  trans?: TranslationBundle
+  trans: TranslationBundle
 ): void {
   if (error.message.includes('following files would be overwritten')) {
     // Empty log message to hide the executing alert
@@ -122,7 +122,7 @@ export interface IBranchMenuProps {
   /**
    * The application language translator.
    */
-  trans?: TranslationBundle;
+  trans: TranslationBundle;
 }
 
 /**

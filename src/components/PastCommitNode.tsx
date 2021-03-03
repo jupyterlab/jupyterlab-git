@@ -47,7 +47,7 @@ export interface IPastCommitNodeProps {
   /**
    * The application language translator.
    */
-  trans?: TranslationBundle;
+  trans: TranslationBundle;
 }
 
 /**

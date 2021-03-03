@@ -11,7 +11,7 @@ import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
 import { gitWidgetStyle } from '../style/GitWidgetStyle';
 import { ILogMessage, Level } from '../tokens';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * A class that exposes the git plugin Widget.
@@ -22,14 +22,14 @@ export class GitWidget extends ReactWidget {
     settings: ISettingRegistry.ISettings,
     commands: CommandRegistry,
     filebrowser: FileBrowserModel,
-    translator?: ITranslator,
+    trans: TranslationBundle,
     options?: Widget.IOptions
   ) {
     super(options);
     this.node.id = 'GitSession-root';
     this.addClass(gitWidgetStyle);
 
-    this.translator = translator || nullTranslator;
+    this._trans = trans;
     this._commands = commands;
     this._filebrowser = filebrowser;
     this._model = model;
@@ -71,7 +71,7 @@ export class GitWidget extends ReactWidget {
               logger={logger}
               model={this._model}
               settings={this._settings}
-              translator={this.translator}
+              trans={this._trans}
             />
             <UseSignal
               signal={logger.signal}
@@ -82,7 +82,7 @@ export class GitWidget extends ReactWidget {
                   <Feedback
                     log={log}
                     settings={this._settings}
-                    translator={this.translator}
+                    trans={this._trans}
                   />
                 ) : null
               }
@@ -97,5 +97,5 @@ export class GitWidget extends ReactWidget {
   private _filebrowser: FileBrowserModel;
   private _model: GitExtension;
   private _settings: ISettingRegistry.ISettings;
-  protected translator: ITranslator;
+  private _trans: TranslationBundle;
 }

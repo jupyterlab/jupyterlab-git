@@ -9,7 +9,6 @@ import { requestAPI } from './git';
 import { TaskHandler } from './taskhandler';
 import { Git, IGitExtension } from './tokens';
 import { decodeStage } from './utils';
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
@@ -29,15 +28,13 @@ export class GitExtension implements IGitExtension {
     serverRoot: string,
     docmanager: IDocumentManager = null,
     docRegistry: DocumentRegistry = null,
-    settings?: ISettingRegistry.ISettings,
-    translator?: ITranslator
+    settings?: ISettingRegistry.ISettings
   ) {
     this._serverRoot = serverRoot;
     this._docmanager = docmanager;
     this._docRegistry = docRegistry;
     this._settings = settings || null;
     this._taskHandler = new TaskHandler(this);
-    this._translator = translator || nullTranslator;
 
     // Initialize repository status
     this._clearStatus();
@@ -1285,7 +1282,6 @@ export class GitExtension implements IGitExtension {
     this.__currentMarker = this._markerCache.get(path, branch);
   }
 
-  protected _translator: ITranslator;
   private _status: Git.IStatus;
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];

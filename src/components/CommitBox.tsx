@@ -6,11 +6,7 @@ import {
   commitDescriptionClass,
   commitButtonClass
 } from '../style/CommitBox';
-import {
-  nullTranslator,
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { SUBMIT_COMMIT_COMMAND } from '../commandsAndMenu';
 
@@ -30,7 +26,7 @@ export interface ICommitBoxProps {
   /**
    * The application language translator.
    */
-  translator?: ITranslator;
+  trans: TranslationBundle;
   /**
    * Callback to invoke in order to commit changes.
    *
@@ -70,8 +66,6 @@ export class CommitBox extends React.Component<
    */
   constructor(props: ICommitBoxProps) {
     super(props);
-    this.translator = props.translator || nullTranslator;
-    this._trans = this.translator.load('jupyterlab-git');
     this.state = {
       summary: '',
       description: ''
@@ -94,15 +88,15 @@ export class CommitBox extends React.Component<
   render(): React.ReactElement {
     const disabled = !this._canCommit();
     const title = !this.props.hasFiles
-      ? this._trans.__('Disabled: No files are staged for commit')
+      ? this.props.trans.__('Disabled: No files are staged for commit')
       : !this.state.summary
-      ? this._trans.__('Disabled: No commit message summary')
-      : this._trans.__('Commit');
+      ? this.props.trans.__('Disabled: No commit message summary')
+      : this.props.trans.__('Commit');
 
     const shortcutHint = CommandRegistry.formatKeystroke(
       this._getSubmitKeystroke()
     );
-    const summaryPlaceholder = this._trans.__(
+    const summaryPlaceholder = this.props.trans.__(
       'Summary (%1 to commit)',
       shortcutHint
     );
@@ -112,7 +106,7 @@ export class CommitBox extends React.Component<
           className={commitSummaryClass}
           type="text"
           placeholder={summaryPlaceholder}
-          title={this._trans.__(
+          title={this.props.trans.__(
             'Enter a commit message summary (a single line, preferably less than 50 characters)'
           )}
           value={this.state.summary}
@@ -122,8 +116,8 @@ export class CommitBox extends React.Component<
         <TextareaAutosize
           className={commitDescriptionClass}
           minRows={5}
-          placeholder={this._trans.__('Description (optional)')}
-          title={this._trans.__('Enter a commit message description')}
+          placeholder={this.props.trans.__('Description (optional)')}
+          title={this.props.trans.__('Enter a commit message description')}
           value={this.state.description}
           onChange={this._onDescriptionChange}
         />
@@ -230,6 +224,4 @@ export class CommitBox extends React.Component<
       description: ''
     });
   }
-  private translator: ITranslator;
-  private _trans: TranslationBundle;
 }

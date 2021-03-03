@@ -2,11 +2,7 @@ import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
-import {
-  nullTranslator,
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { ListChildComponentProps } from 'react-window';
@@ -51,14 +47,12 @@ export interface IFileListProps {
   /**
    * The application language translator.
    */
-  translator?: ITranslator;
+  trans: TranslationBundle;
 }
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
   constructor(props: IFileListProps) {
     super(props);
-    this.translator = props.translator || nullTranslator;
-    this._trans = this.translator.load('jupyterlab-git');
 
     this.state = {
       selectedFile: null
@@ -188,13 +182,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event.stopPropagation();
 
     const result = await showDialog({
-      title: this._trans.__('Discard all changes'),
-      body: this._trans.__(
+      title: this.props.trans.__('Discard all changes'),
+      body: this.props.trans.__(
         'Are you sure you want to permanently discard changes to all files? This action cannot be undone.'
       ),
       buttons: [
         Dialog.cancelButton(),
-        Dialog.warnButton({ label: this._trans.__('Discard') })
+        Dialog.warnButton({ label: this.props.trans.__('Discard') })
       ]
     });
     if (result.button.accept) {
@@ -202,7 +196,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         await this.props.model.checkout();
       } catch (reason) {
         showErrorMessage(
-          this._trans.__('Discard all unstaged changes failed.'),
+          this.props.trans.__('Discard all unstaged changes failed.'),
           reason
         );
       }
@@ -213,20 +207,23 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   discardAllChanges = async (event: React.MouseEvent) => {
     event.stopPropagation();
     const result = await showDialog({
-      title: this._trans.__('Discard all changes'),
-      body: this._trans.__(
+      title: this.props.trans.__('Discard all changes'),
+      body: this.props.trans.__(
         'Are you sure you want to permanently discard changes to all files? This action cannot be undone.'
       ),
       buttons: [
         Dialog.cancelButton(),
-        Dialog.warnButton({ label: this._trans.__('Discard') })
+        Dialog.warnButton({ label: this.props.trans.__('Discard') })
       ]
     });
     if (result.button.accept) {
       try {
         await this.props.model.resetToCommit();
       } catch (reason) {
-        showErrorMessage(this._trans.__('Discard all changes failed.'), reason);
+        showErrorMessage(
+          this.props.trans.__('Discard all changes failed.'),
+          reason
+        );
       }
     }
   };
@@ -361,20 +358,20 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const diffButton = this._createDiffButton(file);
     return (
       <FileItem
-        translator={this.translator}
+        trans={this.props.trans}
         actions={
           <React.Fragment>
             <ActionButton
               className={hiddenButtonStyle}
               icon={openIcon}
-              title={this._trans.__('Open this file')}
+              title={this.props.trans.__('Open this file')}
               onClick={openFile}
             />
             {diffButton}
             <ActionButton
               className={hiddenButtonStyle}
               icon={removeIcon}
-              title={this._trans.__('Unstage this change')}
+              title={this.props.trans.__('Unstage this change')}
               onClick={() => {
                 this.resetStagedFile(file.to);
               }}
@@ -412,13 +409,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             className={hiddenButtonStyle}
             disabled={files.length === 0}
             icon={removeIcon}
-            title={this._trans.__('Unstage all changes')}
+            title={this.props.trans.__('Unstage all changes')}
             onClick={this.resetAllStagedFiles}
           />
         }
         collapsible
         files={files}
-        heading={this._trans.__('Staged')}
+        heading={this.props.trans.__('Staged')}
         height={height}
         rowRenderer={this._renderStagedRow}
       />
@@ -446,20 +443,20 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const diffButton = this._createDiffButton(file);
     return (
       <FileItem
-        translator={this.translator}
+        trans={this.props.trans}
         actions={
           <React.Fragment>
             <ActionButton
               className={hiddenButtonStyle}
               icon={openIcon}
-              title={this._trans.__('Open this file')}
+              title={this.props.trans.__('Open this file')}
               onClick={openFile}
             />
             {diffButton}
             <ActionButton
               className={hiddenButtonStyle}
               icon={discardIcon}
-              title={this._trans.__('Discard changes')}
+              title={this.props.trans.__('Discard changes')}
               onClick={() => {
                 this.discardChanges(file);
               }}
@@ -467,7 +464,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             <ActionButton
               className={hiddenButtonStyle}
               icon={addIcon}
-              title={this._trans.__('Stage this change')}
+              title={this.props.trans.__('Stage this change')}
               onClick={() => {
                 this.addFile(file.to);
               }}
@@ -507,20 +504,20 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               disabled={disabled}
               icon={discardIcon}
-              title={this._trans.__('Discard All Changes')}
+              title={this.props.trans.__('Discard All Changes')}
               onClick={this.discardAllUnstagedFiles}
             />
             <ActionButton
               className={hiddenButtonStyle}
               disabled={disabled}
               icon={addIcon}
-              title={this._trans.__('Stage all changes')}
+              title={this.props.trans.__('Stage all changes')}
               onClick={this.addAllUnstagedFiles}
             />
           </React.Fragment>
         }
         collapsible
-        heading={this._trans.__('Changed')}
+        heading={this.props.trans.__('Changed')}
         height={height}
         files={files}
         rowRenderer={this._renderChangedRow}
@@ -545,13 +542,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const file = data[index] as Git.IStatusFile;
     return (
       <FileItem
-        translator={this.translator}
+        trans={this.props.trans}
         actions={
           <React.Fragment>
             <ActionButton
               className={hiddenButtonStyle}
               icon={openIcon}
-              title={this._trans.__('Open this file')}
+              title={this.props.trans.__('Open this file')}
               onClick={() => {
                 this.props.commands.execute(
                   CommandIDs.gitFileOpen,
@@ -562,7 +559,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             <ActionButton
               className={hiddenButtonStyle}
               icon={addIcon}
-              title={this._trans.__('Track this file')}
+              title={this.props.trans.__('Track this file')}
               onClick={() => {
                 this.addFile(file.to);
               }}
@@ -598,12 +595,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             className={hiddenButtonStyle}
             disabled={files.length === 0}
             icon={addIcon}
-            title={this._trans.__('Track all untracked files')}
+            title={this.props.trans.__('Track all untracked files')}
             onClick={this.addAllUntrackedFiles}
           />
         }
         collapsible
-        heading={this._trans.__('Untracked')}
+        heading={this.props.trans.__('Untracked')}
         height={height}
         files={files}
         rowRenderer={this._renderUntrackedRow}
@@ -634,7 +631,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       <ActionButton
         className={hiddenButtonStyle}
         icon={openIcon}
-        title={this._trans.__('Open this file')}
+        title={this.props.trans.__('Open this file')}
         onClick={openFile}
       />
     );
@@ -647,14 +644,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           <ActionButton
             className={hiddenButtonStyle}
             icon={openIcon}
-            title={this._trans.__('Open this file')}
+            title={this.props.trans.__('Open this file')}
             onClick={openFile}
           />
           {diffButton}
           <ActionButton
             className={hiddenButtonStyle}
             icon={discardIcon}
-            title={this._trans.__('Discard changes')}
+            title={this.props.trans.__('Discard changes')}
             onClick={() => {
               this.discardChanges(file);
             }}
@@ -673,14 +670,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           <ActionButton
             className={hiddenButtonStyle}
             icon={openIcon}
-            title={this._trans.__('Open this file')}
+            title={this.props.trans.__('Open this file')}
             onClick={openFile}
           />
           {diffButton}
           <ActionButton
             className={hiddenButtonStyle}
             icon={discardIcon}
-            title={this._trans.__('Discard changes')}
+            title={this.props.trans.__('Discard changes')}
             onClick={() => {
               this.discardChanges(file);
             }}
@@ -696,7 +693,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
     return (
       <FileItem
-        translator={this.translator}
+        trans={this.props.trans}
         actions={actions}
         file={file}
         markBox={true}
@@ -723,11 +720,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             className={hiddenButtonStyle}
             disabled={files.length === 0}
             icon={discardIcon}
-            title={this._trans.__('Discard All Changes')}
+            title={this.props.trans.__('Discard All Changes')}
             onClick={this.discardAllChanges}
           />
         }
-        heading={this._trans.__('Changed')}
+        heading={this.props.trans.__('Changed')}
         height={height}
         files={files}
         rowRenderer={this._renderSimpleStageRow}
@@ -748,7 +745,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         <ActionButton
           className={hiddenButtonStyle}
           icon={diffIcon}
-          title={this._trans.__('Diff this file')}
+          title={this.props.trans.__('Diff this file')}
           onClick={() => this._openDiffView(file)}
         />
       )
@@ -772,6 +769,4 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       console.error(`Failed to open diff view for ${file.to}.\n${reason}`);
     }
   }
-  protected translator: ITranslator;
-  private _trans: TranslationBundle;
 }

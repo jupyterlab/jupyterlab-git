@@ -29,11 +29,7 @@ import { diffIcon } from './style/icons';
 import { Git, Level } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { GitCloneForm } from './widgets/GitCloneForm';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import { TranslationBundle } from '@jupyterlab/translation';
 
 interface IGitCloneArgs {
   /**
@@ -658,9 +654,8 @@ export function addCommands(
  */
 export function createGitMenu(
   commands: CommandRegistry,
-  translator?: ITranslator
+  trans: TranslationBundle
 ): Menu {
-  const trans = (translator || nullTranslator).load('jupyterlab-git');
   const RESOURCES = [
     {
       text: trans.__('Set Up Remotes'),
@@ -728,7 +723,7 @@ namespace Private {
   export async function showGitOperationDialog<T>(
     model: GitExtension,
     operation: Operation,
-    trans?: TranslationBundle,
+    trans: TranslationBundle,
     args?: T,
     authentication?: Git.IAuth,
     retry = false

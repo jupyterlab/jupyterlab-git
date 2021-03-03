@@ -1,4 +1,4 @@
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Color } from '@material-ui/lab/Alert';
 import * as React from 'react';
@@ -30,7 +30,7 @@ export interface IFeedbackProps {
   /**
    * The application language translator.
    */
-  translator?: ITranslator;
+  trans: TranslationBundle;
 }
 
 export interface IFeedbackState {
@@ -112,7 +112,6 @@ export class Feedback extends React.Component<IFeedbackProps, IFeedbackState> {
     }
 
     const log = this.state.logStack[0];
-    const translator = this.props.translator || nullTranslator;
 
     return (
       <React.Fragment>
@@ -133,7 +132,7 @@ export class Feedback extends React.Component<IFeedbackProps, IFeedbackState> {
           message={log?.message || this.props.log.message}
           severity={LEVEL_TO_SEVERITY.get(log?.level || this.props.log.level)}
           onClose={() => this.setState({ showAlert: false })}
-          translator={translator}
+          trans={this.props.trans}
         />
       </React.Fragment>
     );

@@ -60,7 +60,7 @@ export interface IResetRevertDialogProps {
   /**
    * The application language translator.
    */
-  trans?: TranslationBundle;
+  trans: TranslationBundle;
 }
 
 /**

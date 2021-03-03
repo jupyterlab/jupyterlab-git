@@ -127,8 +127,7 @@ async function activate(
     serverSettings.serverRoot,
     docmanager,
     app.docRegistry,
-    settings,
-    translator
+    settings
   );
 
   // Whenever we restore the application, sync the Git extension path
@@ -163,7 +162,7 @@ async function activate(
       settings,
       app.commands,
       factory.defaultBrowser.model,
-      translator
+      trans
     );
     gitPlugin.id = 'jp-git-sessions';
     gitPlugin.title.icon = gitIcon;
@@ -179,13 +178,13 @@ async function activate(
     app.shell.add(gitPlugin, 'left', { rank: 200 });
 
     // Add a menu for the plugin
-    mainMenu.addMenu(createGitMenu(app.commands, translator), { rank: 60 });
+    mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });
 
     // Add a clone button to the file browser extension toolbar
     addCloneButton(gitExtension, factory.defaultBrowser, app.commands);
 
     // Add the status bar widget
-    addStatusBarWidget(statusBar, gitExtension, settings, translator);
+    addStatusBarWidget(statusBar, gitExtension, settings, trans);
   }
 
   return gitExtension;

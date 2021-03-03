@@ -57,7 +57,7 @@ export interface ISinglePastCommitInfoProps {
   /**
    * The application language translator.
    */
-  trans?: TranslationBundle;
+  trans: TranslationBundle;
 }
 
 /**

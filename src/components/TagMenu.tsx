@@ -106,7 +106,7 @@ export interface ITagMenuProps {
   /**
    * The application language translator.
    */
-  trans?: TranslationBundle;
+  trans: TranslationBundle;
 }
 
 /**
