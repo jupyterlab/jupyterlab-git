@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/quotes */
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Dialog,
@@ -525,16 +526,12 @@ export function addCommands(
     caption: trans.__('Delete this file'),
     execute: async args => {
       const file: Git.IStatusFile = args as any;
-      var text1: string = trans.__(
-        'Are you sure you want to permanently delete'
-      );
-      var text2: string = trans.__('This action cannot be undone.');
-
       const result = await showDialog({
         title: trans.__('Delete File'),
         body: (
           <span>
-            {text1} <b>{file.to}</b>? {text2}
+            {trans.__('Are you sure you want to permanently delete')}
+            <b>{file.to}</b>? {trans.__('This action cannot be undone.')}
           </span>
         ),
         buttons: [

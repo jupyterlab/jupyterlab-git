@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/quotes */
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
