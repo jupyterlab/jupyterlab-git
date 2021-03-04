@@ -250,16 +250,9 @@ export class GitExtension implements IGitExtension {
    * @param path the file path relative to the server root
    */
   getFile(path: string): Git.IStatusFile {
-    const matchingFiles = this._status.files.find(status => {
+    return this._status.files.find(status => {
       return this.getRelativeFilePath(status.to) === path;
     });
-    if (matchingFiles.length === 0) {
-      return;
-    }
-    if (matchingFiles.length > 1) {
-      console.warn('More than one file matching given path', path);
-    }
-    return matchingFiles[0];
   }
 
   /**
