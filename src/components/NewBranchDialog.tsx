@@ -307,8 +307,7 @@ export class NewBranchDialog extends React.Component<
       <ListItem
         button
         title={this.props.trans.__(
-          // eslint-disable-next-line @typescript-eslint/quotes
-          `Create a new branch based on: %1`,
+          'Create a new branch based on: %1',
           branch.name
         )}
         className={classes(
