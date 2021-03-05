@@ -508,9 +508,10 @@ export function addCommands(
         } else {
           showErrorMessage(
             trans.__('Diff Not Supported'),
-            trans.__(`Diff is not supported for %1 files.`, PathExt.extname(
-              filePath
-            ).toLocaleLowerCase())
+            trans.__(
+              `Diff is not supported for %1 files.`,
+              PathExt.extname(filePath).toLocaleLowerCase()
+            )
           );
         }
       }
@@ -595,7 +596,10 @@ export function addCommands(
 
   commands.addCommand(ContextCommandIDs.gitFileDelete, {
     label: trans.__('Delete'),
-    caption: pluralizedContextLabel(trans.__('Delete this file'), trans.__('Delete these files')),
+    caption: pluralizedContextLabel(
+      trans.__('Delete this file'),
+      trans.__('Delete these files')
+    ),
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
       const fileList = representFiles(files);
@@ -604,7 +608,10 @@ export function addCommands(
         title: trans.__('Delete Files'),
         body: (
           <span>
-            {trans.__('Are you sure you want to permanently delete %1? This action cannot be undone.', fileList)}
+            {trans.__(
+              'Are you sure you want to permanently delete %1? This action cannot be undone.',
+              fileList
+            )}
           </span>
         ),
         buttons: [
@@ -643,8 +650,11 @@ export function addCommands(
         title: trans.__('Discard changes'),
         body: (
           <span>
-            {trans.__('Are you sure you want to permanently discard changes to %1? \
-            This action cannot be undone.', fileList)}
+            {trans.__(
+              'Are you sure you want to permanently discard changes to %1? \
+            This action cannot be undone.',
+              fileList
+            )}
           </span>
         ),
         buttons: [
@@ -669,9 +679,11 @@ export function addCommands(
               await model.checkout({ filename: file.to });
             }
           } catch (reason) {
-            showErrorMessage(trans.__(`Discard changes for %1 failed.`, file.to), reason, [
-              Dialog.warnButton({ label: trans.__('DISMISS') })
-            ]);
+            showErrorMessage(
+              trans.__(`Discard changes for %1 failed.`, file.to),
+              reason,
+              [Dialog.warnButton({ label: trans.__('DISMISS') })]
+            );
           }
         }
       }
@@ -705,7 +717,10 @@ export function addCommands(
         .map(file => PathExt.extname(file.to))
         .filter(extension => extension.length > 0);
       const subject = extensions.length > 1 ? 'extensions' : 'extension';
-      return trans.__(`Ignore %1 ${trans.__(subject)} (add to .gitignore)`, extensions.join(', '));
+      return trans.__(
+        `Ignore %1 ${trans.__(subject)} (add to .gitignore)`,
+        extensions.join(', ')
+      );
     },
     caption: pluralizedContextLabel(
       trans.__('Ignore this file extension (add to .gitignore)'),
@@ -719,7 +734,10 @@ export function addCommands(
           if (extension.length > 0) {
             const result = await showDialog({
               title: trans.__('Ignore file extension'),
-              body: trans.__(`Are you sure you want to ignore all %1 files within this git repository?`, extension),
+              body: trans.__(
+                `Are you sure you want to ignore all %1 files within this git repository?`,
+                extension
+              ),
               buttons: [
                 Dialog.cancelButton(),
                 Dialog.okButton({ label: trans.__('Ignore') })
