@@ -7,9 +7,8 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
-import { CommandIDs } from '../commandsAndMenu';
 import { cloneIcon } from '../style/icons';
-import { IGitExtension } from '../tokens';
+import { CommandIDs, IGitExtension } from '../tokens';
 
 export function addCloneButton(
   model: IGitExtension,

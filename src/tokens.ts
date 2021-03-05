@@ -249,6 +249,15 @@ export interface IGitExtension extends IDisposable {
   ensureGitignore(): Promise<void>;
 
   /**
+   * Match files status information based on a provided file path.
+   *
+   * If the file is tracked and has no changes, undefined will be returned
+   *
+   * @param path the file path relative to the server root
+   */
+  getFile(path: string): Git.IStatusFile;
+
+  /**
    * Get current mark of file named fname
    *
    * @param fname Filename
@@ -625,7 +634,7 @@ export namespace Git {
 
   /** Interface for changed_files request result
    * lists the names of files that have differences between two commits
-   * or beween two branches, or that were changed by a single commit
+   * or between two branches, or that were changed by a single commit
    */
   export interface IChangedFilesResult {
     code: number;
@@ -820,4 +829,39 @@ export interface ILogMessage {
    * Message text.
    */
   message: string;
+}
+
+/**
+ * The command IDs used in the git context menus.
+ */
+export enum ContextCommandIDs {
+  gitFileAdd = 'git:context-add',
+  gitFileDiff = 'git:context-diff',
+  gitFileDiscard = 'git:context-discard',
+  gitFileDelete = 'git:context-delete',
+  gitFileOpen = 'git:context-open',
+  gitFileUnstage = 'git:context-unstage',
+  gitFileStage = 'git:context-stage',
+  gitFileTrack = 'git:context-track',
+  gitIgnore = 'git:context-ignore',
+  gitIgnoreExtension = 'git:context-ignoreExtension',
+  gitNoAction = 'git:no-action'
+}
+
+/**
+ * The command IDs used by the git plugin.
+ */
+export enum CommandIDs {
+  gitUI = 'git:ui',
+  gitTerminalCommand = 'git:terminal-command',
+  gitInit = 'git:init',
+  gitOpenUrl = 'git:open-url',
+  gitToggleSimpleStaging = 'git:toggle-simple-staging',
+  gitToggleDoubleClickDiff = 'git:toggle-double-click-diff',
+  gitAddRemote = 'git:add-remote',
+  gitClone = 'git:clone',
+  gitOpenGitignore = 'git:open-gitignore',
+  gitPush = 'git:push',
+  gitPull = 'git:pull',
+  gitSubmitCommand = 'git:submit-commit'
 }

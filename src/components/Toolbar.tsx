@@ -9,7 +9,6 @@ import { CommandRegistry } from '@lumino/commands';
 import { Badge, Tab, Tabs } from '@material-ui/core';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { CommandIDs } from '../commandsAndMenu';
 import { Logger } from '../logger';
 import {
   selectedTabClass,
@@ -32,7 +31,7 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { Git, IGitExtension, Level } from '../tokens';
+import { CommandIDs, Git, IGitExtension, Level } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { BranchMenu } from './BranchMenu';
 import { TagMenu } from './TagMenu';

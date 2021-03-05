@@ -6,7 +6,7 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { ListChildComponentProps } from 'react-window';
-import { CommandIDs } from '../commandsAndMenu';
+import { addMenuItems, CommandArguments } from '../commandsAndMenu';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { fileListWrapperClass } from '../style/FileListStyle';
@@ -17,7 +17,7 @@ import {
   openIcon,
   removeIcon
 } from '../style/icons';
-import { Git } from '../tokens';
+import { ContextCommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { isDiffSupported } from './diff/Diff';
 import { FileItem } from './FileItem';
@@ -50,6 +50,58 @@ export interface IFileListProps {
   trans: TranslationBundle;
 }
 
+export type ContextCommands = Record<Git.Status, ContextCommandIDs[]>;
+
+export const CONTEXT_COMMANDS: ContextCommands = {
+  'partially-staged': [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileUnstage,
+    ContextCommandIDs.gitFileDiff
+  ],
+  unstaged: [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileStage,
+    ContextCommandIDs.gitFileDiscard,
+    ContextCommandIDs.gitFileDiff
+  ],
+  untracked: [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileTrack,
+    ContextCommandIDs.gitIgnore,
+    ContextCommandIDs.gitIgnoreExtension,
+    ContextCommandIDs.gitFileDelete
+  ],
+  staged: [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileUnstage,
+    ContextCommandIDs.gitFileDiff
+  ]
+};
+
+const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
+  'partially-staged': [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileDiscard,
+    ContextCommandIDs.gitFileDiff
+  ],
+  staged: [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileDiscard,
+    ContextCommandIDs.gitFileDiff
+  ],
+  unstaged: [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileDiscard,
+    ContextCommandIDs.gitFileDiff
+  ],
+  untracked: [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitIgnore,
+    ContextCommandIDs.gitIgnoreExtension,
+    ContextCommandIDs.gitFileDelete
+  ]
+};
+
 export class FileList extends React.Component<IFileListProps, IFileListState> {
   constructor(props: IFileListProps) {
     super(props);
@@ -76,42 +128,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
 
     const contextMenu = new Menu({ commands: this.props.commands });
-    const commands = [CommandIDs.gitFileOpen];
-    switch (selectedFile.status) {
-      case 'unstaged':
-        commands.push(
-          CommandIDs.gitFileStage,
-          CommandIDs.gitFileDiscard,
-          CommandIDs.gitFileDiff
-        );
-        break;
-      case 'untracked':
-        commands.push(
-          CommandIDs.gitFileTrack,
-          CommandIDs.gitIgnore,
-          CommandIDs.gitIgnoreExtension,
-          CommandIDs.gitFileDelete
-        );
-        break;
-      case 'staged':
-        commands.push(CommandIDs.gitFileUnstage, CommandIDs.gitFileDiff);
-        break;
-    }
+    const commands = CONTEXT_COMMANDS[selectedFile.status];
+    addMenuItems(commands, contextMenu, [selectedFile]);
 
-    commands.forEach(command => {
-      if (command === CommandIDs.gitFileDiff) {
-        contextMenu.addItem({
-          command,
-          args: {
-            filePath: selectedFile.to,
-            isText: !selectedFile.is_binary,
-            status: selectedFile.status
-          }
-        });
-      } else {
-        contextMenu.addItem({ command, args: selectedFile as any });
-      }
-    });
     contextMenu.open(event.clientX, event.clientY);
   };
 
@@ -128,34 +147,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event.preventDefault();
 
     const contextMenu = new Menu({ commands: this.props.commands });
-    const commands = [CommandIDs.gitFileOpen];
-    switch (selectedFile.status) {
-      case 'untracked':
-        commands.push(
-          CommandIDs.gitIgnore,
-          CommandIDs.gitIgnoreExtension,
-          CommandIDs.gitFileDelete
-        );
-        break;
-      default:
-        commands.push(CommandIDs.gitFileDiscard, CommandIDs.gitFileDiff);
-        break;
-    }
-
-    commands.forEach(command => {
-      if (command === CommandIDs.gitFileDiff) {
-        contextMenu.addItem({
-          command,
-          args: {
-            filePath: selectedFile.to,
-            isText: !selectedFile.is_binary,
-            status: selectedFile.status
-          }
-        });
-      } else {
-        contextMenu.addItem({ command, args: selectedFile as any });
-      }
-    });
+    const commands = SIMPLE_CONTEXT_COMMANDS[selectedFile.status];
+    addMenuItems(commands, contextMenu, [selectedFile]);
     contextMenu.open(event.clientX, event.clientY);
   };
 
@@ -235,7 +228,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Discard changes in a specific unstaged or staged file */
   discardChanges = async (file: Git.IStatusFile) => {
-    await this.props.commands.execute(CommandIDs.gitFileDiscard, file as any);
+    await this.props.commands.execute(ContextCommandIDs.gitFileDiscard, ({
+      files: [file]
+    } as CommandArguments.IGitContextAction) as any);
   };
 
   /** Add all untracked files */
@@ -353,7 +348,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
     const openFile = () => {
-      this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, ({
+        files: [file]
+      } as CommandArguments.IGitContextAction) as any);
     };
     const diffButton = this._createDiffButton(file);
     return (
@@ -438,7 +435,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
     const openFile = () => {
-      this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, ({
+        files: [file]
+      } as CommandArguments.IGitContextAction) as any);
     };
     const diffButton = this._createDiffButton(file);
     return (
@@ -550,10 +549,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
               onClick={() => {
-                this.props.commands.execute(
-                  CommandIDs.gitFileOpen,
-                  file as any
-                );
+                this.props.commands.execute(ContextCommandIDs.gitFileOpen, ({
+                  files: [file]
+                } as CommandArguments.IGitContextAction) as any);
               }}
             />
             <ActionButton
@@ -571,7 +569,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         onDoubleClick={() => {
           if (!doubleClickDiff) {
-            this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
+            this.props.commands.execute(ContextCommandIDs.gitFileOpen, ({
+              files: [file]
+            } as CommandArguments.IGitContextAction) as any);
           }
         }}
         selected={this._isSelectedFile(file)}
@@ -623,7 +623,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       .composite as boolean;
 
     const openFile = () => {
-      this.props.commands.execute(CommandIDs.gitFileOpen, file as any);
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, ({
+        files: [file]
+      } as CommandArguments.IGitContextAction) as any);
     };
 
     // Default value for actions and double click
@@ -760,11 +762,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    */
   private async _openDiffView(file: Git.IStatusFile): Promise<void> {
     try {
-      await this.props.commands.execute(CommandIDs.gitFileDiff, {
-        filePath: file.to,
-        isText: !file.is_binary,
-        status: file.status
-      });
+      await this.props.commands.execute(ContextCommandIDs.gitFileDiff, ({
+        files: [
+          {
+            filePath: file.to,
+            isText: !file.is_binary,
+            status: file.status
+          }
+        ]
+      } as CommandArguments.IGitFileDiff) as any);
     } catch (reason) {
       console.error(`Failed to open diff view for ${file.to}.\n${reason}`);
     }

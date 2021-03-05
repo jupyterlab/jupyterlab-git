@@ -6,7 +6,8 @@ import {
   MainAreaWidget,
   ReactWidget,
   showDialog,
-  showErrorMessage
+  showErrorMessage,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
@@ -15,6 +16,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
+import { ArrayExt, toArray } from '@lumino/algorithm';
 import * as React from 'react';
 import {
   Diff,
@@ -25,11 +27,28 @@ import { getRefValue, IDiffContext } from './components/diff/model';
 import { AUTH_ERROR_MESSAGES } from './git';
 import { logger } from './logger';
 import { GitExtension } from './model';
-import { diffIcon } from './style/icons';
-import { Git, Level } from './tokens';
+import {
+  addIcon,
+  diffIcon,
+  discardIcon,
+  gitIcon,
+  openIcon,
+  removeIcon
+} from './style/icons';
+import {
+  CommandIDs,
+  ContextCommandIDs,
+  Git,
+  IGitExtension,
+  Level
+} from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { GitCloneForm } from './widgets/GitCloneForm';
 import { TranslationBundle } from '@jupyterlab/translation';
+import { Contents } from '@jupyterlab/services';
+import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
+import { Message } from '@lumino/messaging';
+import { CONTEXT_COMMANDS } from './components/FileList';
 
 interface IGitCloneArgs {
   /**
@@ -51,34 +70,32 @@ enum Operation {
   Push = 'Push'
 }
 
-/**
- * The command IDs used by the git plugin.
- */
-export namespace CommandIDs {
-  export const gitUI = 'git:ui';
-  export const gitTerminalCommand = 'git:terminal-command';
-  export const gitInit = 'git:init';
-  export const gitOpenUrl = 'git:open-url';
-  export const gitToggleSimpleStaging = 'git:toggle-simple-staging';
-  export const gitToggleDoubleClickDiff = 'git:toggle-double-click-diff';
-  export const gitAddRemote = 'git:add-remote';
-  export const gitClone = 'git:clone';
-  export const gitOpenGitignore = 'git:open-gitignore';
-  export const gitPush = 'git:push';
-  export const gitPull = 'git:pull';
-  // Context menu commands
-  export const gitFileDiff = 'git:context-diff';
-  export const gitFileDiscard = 'git:context-discard';
-  export const gitFileDelete = 'git:context-delete';
-  export const gitFileOpen = 'git:context-open';
-  export const gitFileUnstage = 'git:context-unstage';
-  export const gitFileStage = 'git:context-stage';
-  export const gitFileTrack = 'git:context-track';
-  export const gitIgnore = 'git:context-ignore';
-  export const gitIgnoreExtension = 'git:context-ignoreExtension';
+interface IFileDiffArgument {
+  context?: IDiffContext;
+  filePath: string;
+  isText: boolean;
+  status?: Git.Status;
 }
 
-export const SUBMIT_COMMIT_COMMAND = 'git:submit-commit';
+export namespace CommandArguments {
+  export interface IGitFileDiff {
+    files: IFileDiffArgument[];
+  }
+  export interface IGitContextAction {
+    files: Git.IStatusFile[];
+  }
+}
+
+function pluralizedContextLabel(singular: string, plural: string) {
+  return (args: any) => {
+    const { files } = (args as any) as CommandArguments.IGitContextAction;
+    if (files.length > 1) {
+      return plural;
+    } else {
+      return singular;
+    }
+  };
+}
 
 /**
  * Add the commands for the git extension.
@@ -101,7 +118,7 @@ export function addCommands(
    * The label and caption are given to ensure that the command will
    * show up in the shortcut editor UI with a nice description.
    */
-  commands.addCommand(SUBMIT_COMMIT_COMMAND, {
+  commands.addCommand(CommandIDs.gitSubmitCommand, {
     label: 'Commit from the Commit Box',
     caption:
       'Submit the commit using the summary and description from commit box',
@@ -396,138 +413,198 @@ export function addCommands(
   });
 
   /* Context menu commands */
-  commands.addCommand(CommandIDs.gitFileOpen, {
+  commands.addCommand(ContextCommandIDs.gitFileOpen, {
     label: trans.__('Open'),
-    caption: trans.__('Open selected file'),
+    caption: pluralizedContextLabel(
+      trans.__('Open selected file'),
+      trans.__('Open selected files')
+    ),
     execute: async args => {
-      const file: Git.IStatusFileResult = args as any;
-
-      const { x, y, to } = file;
-      if (x === 'D' || y === 'D') {
-        await showErrorMessage(
-          trans.__('Open File Failed'),
-          trans.__('This file has been deleted!')
-        );
-        return;
-      }
-      try {
-        if (to[to.length - 1] !== '/') {
-          commands.execute('docmanager:open', {
-            path: model.getRelativeFilePath(to)
-          });
-        } else {
-          console.log('Cannot open a folder here');
-        }
-      } catch (err) {
-        console.error(`Fail to open ${to}.`);
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.gitFileDiff, {
-    label: trans.__('Diff'),
-    caption: trans.__('Diff selected file'),
-    execute: args => {
-      const { context, filePath, isText, status } = (args as any) as {
-        context?: IDiffContext;
-        filePath: string;
-        isText: boolean;
-        status?: Git.Status;
-      };
-
-      let diffContext = context;
-      if (!diffContext) {
-        const specialRef = status === 'staged' ? 'INDEX' : 'WORKING';
-        diffContext = {
-          currentRef: { specialRef },
-          previousRef: { gitRef: 'HEAD' }
-        };
-      }
-
-      if (isDiffSupported(filePath) || isText) {
-        const id = `nbdiff-${filePath}-${getRefValue(diffContext.currentRef)}`;
-        const mainAreaItems = shell.widgets('main');
-        let mainAreaItem = mainAreaItems.next();
-        while (mainAreaItem) {
-          if (mainAreaItem.id === id) {
-            shell.activateById(id);
-            break;
-          }
-          mainAreaItem = mainAreaItems.next();
-        }
-
-        if (!mainAreaItem) {
-          const serverRepoPath = model.getRelativeFilePath();
-          const nbDiffWidget = ReactWidget.create(
-            <RenderMimeProvider value={renderMime}>
-              <Diff
-                path={filePath}
-                diffContext={diffContext}
-                topRepoPath={serverRepoPath}
-              />
-            </RenderMimeProvider>
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      for (const file of files) {
+        const { x, y, to } = file;
+        if (x === 'D' || y === 'D') {
+          await showErrorMessage(
+            trans.__('Open File Failed'),
+            trans.__('This file has been deleted!')
           );
-          nbDiffWidget.id = id;
-          nbDiffWidget.title.label = PathExt.basename(filePath);
-          nbDiffWidget.title.icon = diffIcon;
-          nbDiffWidget.title.closable = true;
-          nbDiffWidget.addClass('jp-git-diff-parent-diff-widget');
-
-          shell.add(nbDiffWidget, 'main');
-          shell.activateById(nbDiffWidget.id);
+          return;
         }
-      } else {
-        showErrorMessage(
-          trans.__('Diff Not Supported'),
-          trans.__(
-            `Diff is not supported for %1 files.`,
-            PathExt.extname(filePath).toLocaleLowerCase()
-          )
-        );
+        try {
+          if (to[to.length - 1] !== '/') {
+            commands.execute('docmanager:open', {
+              path: model.getRelativeFilePath(to)
+            });
+          } else {
+            console.log('Cannot open a folder here');
+          }
+        } catch (err) {
+          console.error(`Fail to open ${to}.`);
+        }
       }
-    }
+    },
+    icon: openIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
-  commands.addCommand(CommandIDs.gitFileStage, {
+  commands.addCommand(ContextCommandIDs.gitFileDiff, {
+    label: trans.__('Diff'),
+    caption: pluralizedContextLabel(
+      trans.__('Diff selected file'),
+      trans.__('Diff selected files')
+    ),
+    execute: args => {
+      const { files } = (args as any) as CommandArguments.IGitFileDiff;
+      for (const file of files) {
+        const { context, filePath, isText, status } = file;
+
+        // nothing to compare to for untracked files
+        if (status === 'untracked') {
+          continue;
+        }
+
+        let diffContext = context;
+        if (!diffContext) {
+          const specialRef = status === 'staged' ? 'INDEX' : 'WORKING';
+          diffContext = {
+            currentRef: { specialRef },
+            previousRef: { gitRef: 'HEAD' }
+          };
+        }
+
+        if (isDiffSupported(filePath) || isText) {
+          const id = `nbdiff-${filePath}-${getRefValue(
+            diffContext.currentRef
+          )}`;
+          const mainAreaItems = shell.widgets('main');
+          let mainAreaItem = mainAreaItems.next();
+          while (mainAreaItem) {
+            if (mainAreaItem.id === id) {
+              shell.activateById(id);
+              break;
+            }
+            mainAreaItem = mainAreaItems.next();
+          }
+
+          if (!mainAreaItem) {
+            const serverRepoPath = model.getRelativeFilePath();
+            const nbDiffWidget = ReactWidget.create(
+              <RenderMimeProvider value={renderMime}>
+                <Diff
+                  path={filePath}
+                  diffContext={diffContext}
+                  topRepoPath={serverRepoPath}
+                />
+              </RenderMimeProvider>
+            );
+            nbDiffWidget.id = id;
+            nbDiffWidget.title.label = PathExt.basename(filePath);
+            nbDiffWidget.title.icon = diffIcon;
+            nbDiffWidget.title.closable = true;
+            nbDiffWidget.addClass('jp-git-diff-parent-diff-widget');
+
+            shell.add(nbDiffWidget, 'main');
+            shell.activateById(nbDiffWidget.id);
+          }
+        } else {
+          showErrorMessage(
+            trans.__('Diff Not Supported'),
+            trans.__(`Diff is not supported for %1 files.`, PathExt.extname(
+              filePath
+            ).toLocaleLowerCase())
+          );
+        }
+      }
+    },
+    icon: diffIcon.bindprops({ stylesheet: 'menuItem' })
+  });
+
+  commands.addCommand(ContextCommandIDs.gitFileAdd, {
+    label: trans.__('Add'),
+    caption: pluralizedContextLabel(
+      trans.__('Stage or track the changes to selected file'),
+      trans.__('Stage or track the changes of selected files')
+    ),
+    execute: async args => {
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      for (const file of files) {
+        await model.add(file.to);
+      }
+    },
+    icon: addIcon.bindprops({ stylesheet: 'menuItem' })
+  });
+
+  commands.addCommand(ContextCommandIDs.gitFileStage, {
     label: trans.__('Stage'),
-    caption: trans.__('Stage the changes of selected file'),
+    caption: pluralizedContextLabel(
+      trans.__('Stage the changes of selected file'),
+      trans.__('Stage the changes of selected files')
+    ),
     execute: async args => {
-      const selectedFile: Git.IStatusFile = args as any;
-      await model.add(selectedFile.to);
-    }
-  });
-
-  commands.addCommand(CommandIDs.gitFileTrack, {
-    label: trans.__('Track'),
-    caption: trans.__('Start tracking selected file'),
-    execute: async args => {
-      const selectedFile: Git.IStatusFile = args as any;
-      await model.add(selectedFile.to);
-    }
-  });
-
-  commands.addCommand(CommandIDs.gitFileUnstage, {
-    label: trans.__('Unstage'),
-    caption: trans.__('Unstage the changes of selected file'),
-    execute: async args => {
-      const selectedFile: Git.IStatusFile = args as any;
-      if (selectedFile.x !== 'D') {
-        await model.reset(selectedFile.to);
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      for (const file of files) {
+        await model.add(file.to);
       }
-    }
+    },
+    icon: addIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
-  commands.addCommand(CommandIDs.gitFileDelete, {
-    label: trans.__('Delete'),
-    caption: trans.__('Delete this file'),
+  commands.addCommand(ContextCommandIDs.gitFileTrack, {
+    label: trans.__('Track'),
+    caption: pluralizedContextLabel(
+      trans.__('Start tracking selected file'),
+      trans.__('Start tracking selected files')
+    ),
     execute: async args => {
-      const file: Git.IStatusFile = args as any;
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      for (const file of files) {
+        await model.add(file.to);
+      }
+    },
+    icon: addIcon.bindprops({ stylesheet: 'menuItem' })
+  });
+
+  commands.addCommand(ContextCommandIDs.gitFileUnstage, {
+    label: trans.__('Unstage'),
+    caption: pluralizedContextLabel(
+      trans.__('Unstage the changes of selected file'),
+      trans.__('Unstage the changes of selected files')
+    ),
+    execute: async args => {
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      for (const file of files) {
+        if (file.x !== 'D') {
+          await model.reset(file.to);
+        }
+      }
+    },
+    icon: removeIcon.bindprops({ stylesheet: 'menuItem' })
+  });
+
+  function representFiles(files: Git.IStatusFile[]): JSX.Element {
+    if (files.length > 1) {
+      const elements = files.map(file => (
+        <li key={file.to}>
+          <b>{file.to}</b>
+        </li>
+      ));
+      return <ul>{elements}</ul>;
+    } else {
+      return <b>{files[0].to}</b>;
+    }
+  }
+
+  commands.addCommand(ContextCommandIDs.gitFileDelete, {
+    label: trans.__('Delete'),
+    caption: pluralizedContextLabel(trans.__('Delete this file'), trans.__('Delete these files')),
+    execute: async args => {
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const fileList = representFiles(files);
+
       const result = await showDialog({
-        title: trans.__('Delete File'),
+        title: trans.__('Delete Files'),
         body: (
           <span>
-            {trans.__('Are you sure you want to permanently delete')}
-            <b>{file.to}</b>? {trans.__('This action cannot be undone.')}
+            {trans.__('Are you sure you want to permanently delete %1? This action cannot be undone.', fileList)}
           </span>
         ),
         buttons: [
@@ -536,33 +613,38 @@ export function addCommands(
         ]
       });
       if (result.button.accept) {
-        try {
-          await app.commands.execute('docmanager:delete-file', {
-            path: model.getRelativeFilePath(file.to)
-          });
-        } catch (reason) {
-          showErrorMessage(trans.__(`Deleting %1 failed.`, file.to), reason, [
-            Dialog.warnButton({ label: trans.__('DISMISS') })
-          ]);
+        for (const file of files) {
+          try {
+            await app.commands.execute('docmanager:delete-file', {
+              path: model.getRelativeFilePath(file.to)
+            });
+          } catch (reason) {
+            showErrorMessage(trans.__(`Deleting %1 failed.`, file.to), reason, [
+              Dialog.warnButton({ label: trans.__('DISMISS') })
+            ]);
+          }
         }
       }
-    }
+    },
+    icon: closeIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
-  commands.addCommand(CommandIDs.gitFileDiscard, {
+  commands.addCommand(ContextCommandIDs.gitFileDiscard, {
     label: trans.__('Discard'),
-    caption: trans.__('Discard recent changes of selected file'),
+    caption: pluralizedContextLabel(
+      trans.__('Discard recent changes of selected file'),
+      trans.__('Discard recent changes of selected files')
+    ),
     execute: async args => {
-      const file: Git.IStatusFile = args as any;
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const fileList = representFiles(files);
 
       const result = await showDialog({
         title: trans.__('Discard changes'),
         body: (
           <span>
-            {trans.__(
-              'Are you sure you want to permanently discard changes to '
-            )}
-            <b>{file.to}</b>? {trans.__('This action cannot be undone.')}
+            {trans.__('Are you sure you want to permanently discard changes to %1? \
+            This action cannot be undone.', fileList)}
           </span>
         ),
         buttons: [
@@ -571,85 +653,106 @@ export function addCommands(
         ]
       });
       if (result.button.accept) {
-        try {
-          if (file.status === 'staged' || file.status === 'partially-staged') {
-            await model.reset(file.to);
+        for (const file of files) {
+          try {
+            if (
+              file.status === 'staged' ||
+              file.status === 'partially-staged'
+            ) {
+              await model.reset(file.to);
+            }
+            if (
+              file.status === 'unstaged' ||
+              (file.status === 'partially-staged' && file.x !== 'A')
+            ) {
+              // resetting an added file moves it to untracked category => checkout will fail
+              await model.checkout({ filename: file.to });
+            }
+          } catch (reason) {
+            showErrorMessage(trans.__(`Discard changes for %1 failed.`, file.to), reason, [
+              Dialog.warnButton({ label: trans.__('DISMISS') })
+            ]);
           }
-          if (
-            file.status === 'unstaged' ||
-            (file.status === 'partially-staged' && file.x !== 'A')
-          ) {
-            // resetting an added file moves it to untracked category => checkout will fail
-            await model.checkout({ filename: file.to });
-          }
-        } catch (reason) {
-          showErrorMessage(`Discard changes for ${file.to} failed.`, reason, [
-            Dialog.warnButton({ label: trans.__('DISMISS') })
-          ]);
+        }
+      }
+    },
+    icon: discardIcon.bindprops({ stylesheet: 'menuItem' })
+  });
+
+  commands.addCommand(ContextCommandIDs.gitIgnore, {
+    label: pluralizedContextLabel(
+      trans.__('Ignore this file (add to .gitignore)'),
+      trans.__('Ignore these files (add to .gitignore)')
+    ),
+    caption: pluralizedContextLabel(
+      trans.__('Ignore this file (add to .gitignore)'),
+      trans.__('Ignore these files (add to .gitignore)')
+    ),
+    execute: async args => {
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      for (const file of files) {
+        if (file) {
+          await model.ignore(file.to, false);
         }
       }
     }
   });
 
-  commands.addCommand(CommandIDs.gitIgnore, {
-    label: () => trans.__('Ignore this file (add to .gitignore)'),
-    caption: () => trans.__('Ignore this file (add to .gitignore)'),
-    execute: async args => {
-      const selectedFile: Git.IStatusFile = args as any;
-      if (selectedFile) {
-        await model.ignore(selectedFile.to, false);
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.gitIgnoreExtension, {
+  commands.addCommand(ContextCommandIDs.gitIgnoreExtension, {
     label: args => {
-      const selectedFile: Git.IStatusFile = args as any;
-      return trans.__(
-        `Ignore %1 extension (add to .gitignore)`,
-        PathExt.extname(selectedFile.to)
-      );
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const extensions = files
+        .map(file => PathExt.extname(file.to))
+        .filter(extension => extension.length > 0);
+      const subject = extensions.length > 1 ? 'extensions' : 'extension';
+      return trans.__(`Ignore %1 ${trans.__(subject)} (add to .gitignore)`, extensions.join(', '));
     },
-    caption: trans.__('Ignore this file extension (add to .gitignore)'),
+    caption: pluralizedContextLabel(
+      trans.__('Ignore this file extension (add to .gitignore)'),
+      trans.__('Ignore these files extension (add to .gitignore)')
+    ),
     execute: async args => {
-      const selectedFile: Git.IStatusFile = args as any;
-      if (selectedFile) {
-        const extension = PathExt.extname(selectedFile.to);
-        if (extension.length > 0) {
-          const result = await showDialog({
-            title: trans.__('Ignore file extension'),
-            body: trans.__(
-              `Are you sure you want to ignore all %1 files within this git repository?`,
-              extension
-            ),
-            buttons: [
-              Dialog.cancelButton({ label: trans.__('Cancel') }),
-              Dialog.okButton({ label: trans.__('Ignore') })
-            ]
-          });
-          if (result.button.label === trans.__('Ignore')) {
-            await model.ignore(selectedFile.to, true);
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      for (const selectedFile of files) {
+        if (selectedFile) {
+          const extension = PathExt.extname(selectedFile.to);
+          if (extension.length > 0) {
+            const result = await showDialog({
+              title: trans.__('Ignore file extension'),
+              body: trans.__(`Are you sure you want to ignore all %1 files within this git repository?`, extension),
+              buttons: [
+                Dialog.cancelButton(),
+                Dialog.okButton({ label: trans.__('Ignore') })
+              ]
+            });
+            if (result.button.label === trans.__('Ignore')) {
+              await model.ignore(selectedFile.to, true);
+            }
           }
         }
       }
     },
     isVisible: args => {
-      const selectedFile: Git.IStatusFile = args as any;
-      const extension = PathExt.extname(selectedFile.to);
-      return extension.length > 0;
+      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      return files.some(selectedFile => {
+        const extension = PathExt.extname(selectedFile.to);
+        return extension.length > 0;
+      });
     }
+  });
+
+  commands.addCommand(ContextCommandIDs.gitNoAction, {
+    label: trans.__('No actions available'),
+    isEnabled: () => false,
+    execute: () => void 0
   });
 }
 
 /**
  * Adds commands and menu items.
  *
- * @private
- * @param app - Jupyter front end
- * @param gitExtension - Git extension instance
- * @param fileBrowser - file browser instance
- * @param settings - extension settings
- * @param trans - language translator
+ * @param commands - Jupyter App commands registry
+ *  @param trans - language translator
  * @returns menu
  */
 export function createGitMenu(
@@ -704,6 +807,171 @@ export function createGitMenu(
   menu.addItem({ type: 'submenu', submenu: tutorial });
 
   return menu;
+}
+
+// matches only non-directory items
+const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+
+export function addMenuItems(
+  commands: ContextCommandIDs[],
+  contextMenu: Menu,
+  selectedFiles: Git.IStatusFile[]
+): void {
+  commands.forEach(command => {
+    if (command === ContextCommandIDs.gitFileDiff) {
+      contextMenu.addItem({
+        command,
+        args: ({
+          files: selectedFiles.map(file => {
+            return {
+              filePath: file.to,
+              isText: !file.is_binary,
+              status: file.status
+            };
+          })
+        } as CommandArguments.IGitFileDiff) as any
+      });
+    } else {
+      contextMenu.addItem({
+        command,
+        args: ({
+          files: selectedFiles
+        } as CommandArguments.IGitContextAction) as any
+      });
+    }
+  });
+}
+
+/**
+ * Add Git context (sub)menu to the file browser context menu.
+ */
+export function addFileBrowserContextMenu(
+  model: IGitExtension,
+  tracker: WidgetTracker<FileBrowser>,
+  commands: CommandRegistry,
+  contextMenu: ContextMenuSvg
+): void {
+  function getSelectedBrowserItems(): Contents.IModel[] {
+    const widget = tracker.currentWidget;
+    if (!widget) {
+      return [];
+    }
+    return toArray(widget.selectedItems());
+  }
+
+  class GitMenu extends Menu {
+    private _commands: ContextCommandIDs[];
+    private _paths: string[];
+
+    protected onBeforeAttach(msg: Message) {
+      // Render using the most recent model (even if possibly outdated)
+      this.updateItems();
+      const renderedStatus = model.status;
+
+      // Trigger refresh before the menu is displayed
+      model
+        .refreshStatus()
+        .then(() => {
+          if (model.status !== renderedStatus) {
+            // update items if needed
+            this.updateItems();
+          }
+        })
+        .catch(error => {
+          console.error(
+            'Fail to refresh model when displaying git context menu.',
+            error
+          );
+        });
+      super.onBeforeAttach(msg);
+    }
+
+    protected updateItems(): void {
+      const wasShown = this.isVisible;
+      const parent = this.parentMenu;
+
+      const items = getSelectedBrowserItems();
+      const statuses = new Set<Git.Status>(
+        items
+          .map(item => model.getFile(item.path)?.status)
+          .filter(status => typeof status !== 'undefined')
+      );
+
+      // get commands and de-duplicate them
+      const allCommands = new Set<ContextCommandIDs>(
+        // flatten the list of lists of commands
+        []
+          .concat(...[...statuses].map(status => CONTEXT_COMMANDS[status]))
+          // filter out the Open and Delete commands as
+          // those are not needed in file browser
+          .filter(
+            command =>
+              command !== ContextCommandIDs.gitFileOpen &&
+              command !== ContextCommandIDs.gitFileDelete &&
+              typeof command !== 'undefined'
+          )
+          // replace stage and track with a single "add" operation
+          .map(command =>
+            command === ContextCommandIDs.gitFileStage ||
+            command === ContextCommandIDs.gitFileTrack
+              ? ContextCommandIDs.gitFileAdd
+              : command
+          )
+      );
+
+      // if looking at a tracked file with no changes,
+      // it has no status, nor any actions available
+      // (although `git rm` would be a valid action)
+      if (allCommands.size === 0 && statuses.size === 0) {
+        allCommands.add(ContextCommandIDs.gitNoAction);
+      }
+
+      const commandsChanged =
+        !this._commands ||
+        this._commands.length !== allCommands.size ||
+        !this._commands.every(command => allCommands.has(command));
+
+      const paths = items.map(item => item.path);
+
+      const filesChanged =
+        !this._paths || !ArrayExt.shallowEqual(this._paths, paths);
+
+      if (commandsChanged || filesChanged) {
+        const commandsList = [...allCommands];
+        this.clearItems();
+        addMenuItems(
+          commandsList,
+          this,
+          paths
+            .map(path => model.getFile(path))
+            // if file cannot be resolved (has no action available),
+            // omit the undefined result
+            .filter(file => typeof file !== 'undefined')
+        );
+        if (wasShown) {
+          // show he menu again after downtime for refresh
+          parent.triggerActiveItem();
+        }
+        this._commands = commandsList;
+        this._paths = paths;
+      }
+    }
+
+    onBeforeShow(msg: Message): void {
+      super.onBeforeShow(msg);
+    }
+  }
+
+  const gitMenu = new GitMenu({ commands });
+  gitMenu.title.label = 'Git';
+  gitMenu.title.icon = gitIcon.bindprops({ stylesheet: 'menuItem' });
+
+  contextMenu.addItem({
+    type: 'submenu',
+    submenu: gitMenu,
+    selector: selectorNotDir,
+    rank: 5
+  });
 }
 
 /* eslint-disable no-inner-declarations */

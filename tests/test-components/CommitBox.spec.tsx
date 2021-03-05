@@ -3,15 +3,15 @@ import 'jest';
 import { shallow } from 'enzyme';
 import { CommitBox} from '../../src/components/CommitBox';
 import { CommandRegistry } from '@lumino/commands';
-import { SUBMIT_COMMIT_COMMAND } from '../../src/commandsAndMenu';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { CommandIDs } from '../../src/tokens';
 
 describe('CommitBox', () => {
 
   const defaultCommands = new CommandRegistry()
   defaultCommands.addKeyBinding({
     keys: ['Accel Enter'],
-    command: SUBMIT_COMMIT_COMMAND,
+    command: CommandIDs.gitSubmitCommand,
     selector: '.jp-git-CommitBox'
   })
 
@@ -67,7 +67,7 @@ describe('CommitBox', () => {
       const adjustedCommands = new CommandRegistry()
       adjustedCommands.addKeyBinding({
         keys: ['Shift Enter'],
-        command: SUBMIT_COMMIT_COMMAND,
+        command: CommandIDs.gitSubmitCommand,
         selector: '.jp-git-CommitBox'
       })
       const props = {

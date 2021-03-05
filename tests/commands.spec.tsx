@@ -3,10 +3,10 @@ import { showDialog } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import 'jest';
-import { addCommands, CommandIDs } from '../src/commandsAndMenu';
+import { CommandArguments, addCommands} from '../src/commandsAndMenu';
 import * as git from '../src/git';
 import { GitExtension } from '../src/model';
-import { Git } from '../src/tokens';
+import { ContextCommandIDs, CommandIDs, Git } from '../src/tokens';
 import {
   defaultMockedResponses,
   IMockedResponses,
@@ -128,14 +128,14 @@ describe('git-commands', () => {
           model.pathRepository = '/path/to/repo';
           await model.ready;
 
-          await commands.execute(CommandIDs.gitFileDiscard, {
+          await commands.execute(ContextCommandIDs.gitFileDiscard, ({files: [{
             x,
             y: ' ',
             from: 'from',
             to: path,
             status: status as Git.Status,
             is_binary: false
-          });
+          }]} as CommandArguments.IGitContextAction) as any);
 
           if (status === 'staged' || status === 'partially-staged') {
             expect(spyReset).toHaveBeenCalledWith(path);

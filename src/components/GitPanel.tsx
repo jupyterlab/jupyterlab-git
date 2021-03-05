@@ -9,7 +9,6 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
-import { CommandIDs } from '../commandsAndMenu';
 import { Logger } from '../logger';
 import { GitExtension } from '../model';
 import {
@@ -21,7 +20,7 @@ import {
   tabsClass,
   warningTextClass
 } from '../style/GitPanel';
-import { Git, ILogMessage, Level } from '../tokens';
+import { CommandIDs, Git, ILogMessage, Level } from '../tokens';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import { CommitBox } from './CommitBox';
 import { FileList } from './FileList';
