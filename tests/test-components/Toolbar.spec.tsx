@@ -2,7 +2,6 @@ import { refreshIcon } from '@jupyterlab/ui-components';
 import { shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
-import { CommandIDs } from '../../src/commandsAndMenu';
 import { ActionButton } from '../../src/components/ActionButton';
 import { IToolbarProps, Toolbar } from '../../src/components/Toolbar';
 import * as git from '../../src/git';
@@ -11,6 +10,7 @@ import { GitExtension } from '../../src/model';
 import { pullIcon, pushIcon } from '../../src/style/icons';
 import { toolbarMenuButtonClass } from '../../src/style/Toolbar';
 import { mockedRequestAPI } from '../utils';
+import { CommandIDs } from '../../src/tokens';
 
 jest.mock('../../src/git');
 
