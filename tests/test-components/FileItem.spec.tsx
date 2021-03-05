@@ -2,8 +2,12 @@ import { FileItem, IFileItemProps } from '../../src/components/FileItem';
 import * as React from 'react';
 import 'jest';
 import { shallow } from 'enzyme';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 describe('FileItem', () => {
+  let translator: ITranslator;
+  const trans = (translator || nullTranslator).load('jupyterlab-git');
+
   const props: IFileItemProps = {
     contextMenu: () => {},
     file: {
@@ -18,7 +22,8 @@ describe('FileItem', () => {
     onDoubleClick: () => {},
     selected: false,
     selectFile: () => {},
-    style: {}
+    style: {},
+    trans: trans
   };
 
   describe('#render()', () => {

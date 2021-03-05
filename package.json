@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/git",
-  "version": "0.30.0-beta.1",
+  "version": "0.30.0-beta.2",
   "description": "A JupyterLab extension for version control using git",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -73,6 +73,7 @@
     "outputDir": "jupyterlab_git/labextension"
   },
   "dependencies": {
+    "@jupyterlab/translation": "^3.0.0",
     "@jupyterlab/application": "^3.0.0",
     "@jupyterlab/apputils": "^3.0.0",
     "@jupyterlab/codemirror": "^3.0.0",

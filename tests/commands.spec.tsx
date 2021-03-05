@@ -1,5 +1,6 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { showDialog } from '@jupyterlab/apputils';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import 'jest';
 import { addCommands, CommandIDs } from '../src/commandsAndMenu';
@@ -35,8 +36,10 @@ describe('git-commands', () => {
       commands,
       shell: null as any
     };
+    let translator: ITranslator;
+    const trans = (translator || nullTranslator).load('jupyterlab-git');
     model = new GitExtension(app as any);
-    addCommands(app as JupyterFrontEnd, model, null, null, null);
+    addCommands(app as JupyterFrontEnd, model, null, null, null, trans);
   });
 
   describe('git:add-remote', () => {

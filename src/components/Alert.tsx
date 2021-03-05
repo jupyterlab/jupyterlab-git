@@ -1,3 +1,4 @@
+import { TranslationBundle } from '@jupyterlab/translation';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { Button } from '@material-ui/core';
 import Portal from '@material-ui/core/Portal';
@@ -60,6 +61,11 @@ export interface IAlertProps {
    * Alert severity.
    */
   severity?: Color;
+
+  /**
+   * The application language translator.
+   */
+  trans: TranslationBundle;
 }
 
 /**
@@ -96,10 +102,12 @@ export class Alert extends React.Component<IAlertProps> {
           color="inherit"
           size="small"
           onClick={() => {
-            showErrorMessage('Error', this.props.error);
+            showErrorMessage(this.props.trans.__('Error'), this.props.error, [
+              Dialog.warnButton({ label: this.props.trans.__('Dismiss') })
+            ]);
           }}
         >
-          SHOW
+          {this.props.trans.__('SHOW')}
         </Button>
       );
     } else if (this.props.details) {
@@ -109,13 +117,15 @@ export class Alert extends React.Component<IAlertProps> {
           size="small"
           onClick={() => {
             showDialog({
-              title: 'Detailed message',
-              body: this.props.details,
-              buttons: [Dialog.okButton({ label: 'DISMISS' })]
+              title: this.props.trans.__('Detailed message'),
+              body: this.props.trans.__(this.props.details),
+              buttons: [
+                Dialog.okButton({ label: this.props.trans.__('DISMISS') })
+              ]
             });
           }}
         >
-          Details
+          {this.props.trans.__('Details')}
         </Button>
       );
     }
@@ -135,7 +145,7 @@ export class Alert extends React.Component<IAlertProps> {
           onClose={this._onClose}
         >
           <MuiAlert action={action} variant="filled" severity={severity}>
-            {this.props.message || '(missing message)'}
+            {this.props.trans.__(this.props.message || '(missing message)')}
           </MuiAlert>
         </Snackbar>
       </Portal>

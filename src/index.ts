@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/quotes */
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
@@ -19,6 +20,7 @@ import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 import { addStatusBarWidget } from './widgets/StatusWidget';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 export { Git, IGitExtension } from './tokens';
 
@@ -34,7 +36,8 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     IRenderMimeRegistry,
     ISettingRegistry,
     IDocumentManager,
-    IStatusBar
+    IStatusBar,
+    ITranslator
   ],
   provides: IGitExtension,
   activate,
@@ -57,13 +60,16 @@ async function activate(
   renderMime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   docmanager: IDocumentManager,
-  statusBar: IStatusBar
+  statusBar: IStatusBar,
+  translator?: ITranslator
 ): Promise<IGitExtension> {
   let gitExtension: GitExtension | null = null;
   let settings: ISettingRegistry.ISettings;
   let serverSettings: Git.IServerSettings;
   // Get a reference to the default file browser extension
   const filebrowser = factory.defaultBrowser;
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab-git');
 
   // Attempt to load application settings
   try {
@@ -72,27 +78,35 @@ async function activate(
     console.error(`Failed to load settings for the Git Extension.\n${error}`);
   }
   try {
-    serverSettings = await getServerSettings();
+    serverSettings = await getServerSettings(trans);
     const { frontendVersion, gitVersion, serverVersion } = serverSettings;
 
     // Version validation
     if (!gitVersion) {
       throw new Error(
-        'git command not found - please ensure you have Git > 2 installed'
+        trans.__(
+          'git command not found - please ensure you have Git > 2 installed'
+        )
       );
     } else {
       const gitVersion_ = gitVersion.split('.');
       if (Number.parseInt(gitVersion_[0]) < 2) {
-        throw new Error(`git command version must be > 2; got ${gitVersion}.`);
+        throw new Error(
+          trans.__(`git command version must be > 2; got %1.`, gitVersion)
+        );
       }
     }
 
     if (frontendVersion && frontendVersion !== serverVersion) {
       throw new Error(
-        'The versions of the JupyterLab Git server frontend and backend do not match. ' +
-          `The @jupyterlab/git frontend extension has version: ${frontendVersion} ` +
-          `while the python package has version ${serverVersion}. ` +
-          'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git'
+        trans.__(
+          'The versions of the JupyterLab Git server frontend and backend do not match. ' +
+            `The @jupyterlab/git frontend extension has version: %1 ` +
+            `while the python package has version %2. ` +
+            'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git',
+          frontendVersion,
+          serverVersion
+        )
       );
     }
   } catch (error) {
@@ -102,9 +116,9 @@ async function activate(
       error
     );
     showErrorMessage(
-      'Failed to load the jupyterlab-git server extension',
+      trans.__('Failed to load the jupyterlab-git server extension'),
       error.message,
-      [Dialog.warnButton({ label: 'DISMISS' })]
+      [Dialog.warnButton({ label: trans.__('DISMISS') })]
     );
     return null;
   }
@@ -138,7 +152,8 @@ async function activate(
       gitExtension,
       factory.defaultBrowser,
       settings,
-      renderMime
+      renderMime,
+      trans
     );
 
     // Create the Git widget sidebar
@@ -146,7 +161,8 @@ async function activate(
       gitExtension,
       settings,
       app.commands,
-      factory.defaultBrowser.model
+      factory.defaultBrowser.model,
+      trans
     );
     gitPlugin.id = 'jp-git-sessions';
     gitPlugin.title.icon = gitIcon;
@@ -162,13 +178,13 @@ async function activate(
     app.shell.add(gitPlugin, 'left', { rank: 200 });
 
     // Add a menu for the plugin
-    mainMenu.addMenu(createGitMenu(app.commands), { rank: 60 });
+    mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });
 
     // Add a clone button to the file browser extension toolbar
     addCloneButton(gitExtension, factory.defaultBrowser, app.commands);
 
     // Add the status bar widget
-    addStatusBarWidget(statusBar, gitExtension, settings);
+    addStatusBarWidget(statusBar, gitExtension, settings, trans);
   }
 
   return gitExtension;

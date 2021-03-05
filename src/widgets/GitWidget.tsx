@@ -11,6 +11,7 @@ import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
 import { gitWidgetStyle } from '../style/GitWidgetStyle';
 import { ILogMessage, Level } from '../tokens';
+import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * A class that exposes the git plugin Widget.
@@ -21,12 +22,14 @@ export class GitWidget extends ReactWidget {
     settings: ISettingRegistry.ISettings,
     commands: CommandRegistry,
     filebrowser: FileBrowserModel,
+    trans: TranslationBundle,
     options?: Widget.IOptions
   ) {
     super(options);
     this.node.id = 'GitSession-root';
     this.addClass(gitWidgetStyle);
 
+    this._trans = trans;
     this._commands = commands;
     this._filebrowser = filebrowser;
     this._model = model;
@@ -68,6 +71,7 @@ export class GitWidget extends ReactWidget {
               logger={logger}
               model={this._model}
               settings={this._settings}
+              trans={this._trans}
             />
             <UseSignal
               signal={logger.signal}
@@ -75,7 +79,11 @@ export class GitWidget extends ReactWidget {
             >
               {(sender, log) =>
                 log?.message ? (
-                  <Feedback log={log} settings={this._settings} />
+                  <Feedback
+                    log={log}
+                    settings={this._settings}
+                    trans={this._trans}
+                  />
                 ) : null
               }
             </UseSignal>
@@ -89,4 +97,5 @@ export class GitWidget extends ReactWidget {
   private _filebrowser: FileBrowserModel;
   private _model: GitExtension;
   private _settings: ISettingRegistry.ISettings;
+  private _trans: TranslationBundle;
 }

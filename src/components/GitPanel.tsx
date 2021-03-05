@@ -7,6 +7,7 @@ import { JSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
+import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import { CommandIDs } from '../commandsAndMenu';
 import { Logger } from '../logger';
@@ -55,6 +56,11 @@ export interface IGitPanelProps {
    * Git extension settings.
    */
   settings: ISettingRegistry.ISettings;
+
+  /**
+   * The application language translator.
+   */
+  trans: TranslationBundle;
 }
 
 /**
@@ -114,15 +120,16 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   constructor(props: IGitPanelProps) {
     super(props);
+    const { branches, currentBranch, pathRepository } = props.model;
 
     this.state = {
-      branches: [],
-      currentBranch: '',
+      branches: branches,
+      currentBranch: currentBranch ? currentBranch.name : 'master',
       files: [],
       nCommitsAhead: 0,
       nCommitsBehind: 0,
       pastCommits: [],
-      repository: null,
+      repository: pathRepository,
       tab: 0
     };
   }
@@ -207,7 +214,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   commitMarkedFiles = async (message: string): Promise<void> => {
     this.props.logger.log({
       level: Level.RUNNING,
-      message: 'Staging files...'
+      message: this.props.trans.__('Staging files...')
     });
     await this.props.model.reset();
     await this.props.model.add(...this._markedFiles.map(file => file.to));
@@ -228,7 +235,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
     const errorLog: ILogMessage = {
       level: Level.ERROR,
-      message: 'Failed to commit changes.'
+      message: this.props.trans.__('Failed to commit changes.')
     };
 
     try {
@@ -241,14 +248,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
       this.props.logger.log({
         level: Level.RUNNING,
-        message: 'Committing changes...'
+        message: this.props.trans.__('Committing changes...')
       });
 
       await this.props.model.commit(message);
 
       this.props.logger.log({
         level: Level.SUCCESS,
-        message: 'Committed changes.'
+        message: this.props.trans.__('Committed changes.')
       });
     } catch (error) {
       console.error(error);
@@ -297,6 +304,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         nCommitsAhead={this.state.nCommitsAhead}
         nCommitsBehind={this.state.nCommitsBehind}
         repository={this.state.repository || ''}
+        trans={this.props.trans}
       />
     );
   }
@@ -335,8 +343,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             root: tabClass,
             selected: selectedTabClass
           }}
-          title="View changed files"
-          label="Changes"
+          title={this.props.trans.__('View changed files')}
+          label={this.props.trans.__('Changes')}
           disableFocusRipple={true}
           disableRipple={true}
         />
@@ -345,8 +353,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             root: tabClass,
             selected: selectedTabClass
           }}
-          title="View commit history"
-          label="History"
+          title={this.props.trans.__('View commit history')}
+          label={this.props.trans.__('History')}
           disableFocusRipple={true}
           disableRipple={true}
         />
@@ -367,16 +375,21 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           model={this.props.model}
           commands={this.props.commands}
           settings={this.props.settings}
+          trans={this.props.trans}
         />
         {this.props.settings.composite['simpleStaging'] ? (
           <CommitBox
             hasFiles={this._markedFiles.length > 0}
+            trans={this.props.trans}
             onCommit={this.commitMarkedFiles}
+            commands={this.props.commands}
           />
         ) : (
           <CommitBox
             hasFiles={this._hasStagedFile()}
+            trans={this.props.trans}
             onCommit={this.commitStagedFiles}
+            commands={this.props.commands}
           />
         )}
       </React.Fragment>
@@ -395,6 +408,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         commits={this.state.pastCommits}
         model={this.props.model}
         commands={this.props.commands}
+        trans={this.props.trans}
       />
     );
   }
@@ -413,26 +427,27 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         <div className={warningTextClass}>
           {path ? (
             <React.Fragment>
-              <b title={path}>{PathExt.basename(path)}</b> is not
+              <b title={path}>{PathExt.basename(path)}</b>{' '}
+              {this.props.trans.__('is not')}
             </React.Fragment>
           ) : (
-            'You are not currently in'
+            this.props.trans.__('You are not currently in')
           )}
-          {
+          {this.props.trans.__(
             ' a Git repository. To use Git, navigate to a local repository, initialize a repository here, or clone an existing repository.'
-          }
+          )}
         </div>
         <button
           className={repoButtonClass}
           onClick={() => commands.execute('filebrowser:toggle-main')}
         >
-          Open the FileBrowser
+          {this.props.trans.__('Open the FileBrowser')}
         </button>
         <button
           className={repoButtonClass}
           onClick={() => commands.execute(CommandIDs.gitInit)}
         >
-          Initialize a Repository
+          {this.props.trans.__('Initialize a Repository')}
         </button>
         <button
           className={repoButtonClass}
@@ -441,7 +456,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             await commands.execute('filebrowser:toggle-main');
           }}
         >
-          Clone a Repository
+          {this.props.trans.__('Clone a Repository')}
         </button>
       </React.Fragment>
     );
@@ -479,7 +494,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         // If the user name or e-mail is unknown, ask the user to set it
         if (keys.indexOf('user.name') < 0 || keys.indexOf('user.email') < 0) {
           const result = await showDialog({
-            title: 'Who is committing?',
+            title: this.props.trans.__('Who is committing?'),
             body: new GitAuthorForm()
           });
           if (!result.button.accept) {
@@ -502,7 +517,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         }
         this._previousRepoPath = path;
       } catch (error) {
-        throw new Error('Failed to set your identity. ' + error.message);
+        throw new Error(
+          this.props.trans.__('Failed to set your identity. ') + error.message
+        );
       }
     }
     return Promise.resolve(true);
