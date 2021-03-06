@@ -11,19 +11,19 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   addCommands,
   addFileBrowserContextMenu,
   createGitMenu
 } from './commandsAndMenu';
+import { addStatusBarWidget } from './components/StatusWidget';
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
 import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
-import { addStatusBarWidget } from './widgets/StatusWidget';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 export { Git, IGitExtension } from './tokens';
 
