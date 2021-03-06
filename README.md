@@ -137,7 +137,10 @@ If they do not match or one is missing, please [reinstall the package](README.md
     ```bash
     jupyter labextension install @jupyterlab/git
     ```
-
+    
+    If you see `@jupyterlab/git`, your installation may have been corrupted. You can run `jupyter lab clean --all` and
+    reinstall all your extensions.
+    
 ## Contributing
 
 If you would like to contribute to the project, please read our [contributor documentation](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md).
