@@ -137,7 +137,9 @@ If they do not match or one is missing, please [reinstall the package](README.md
     ```bash
     jupyter labextension install @jupyterlab/git
     ```
-
+    
+    If you see `@jupyterlab/git` under the  `Uninstalled core extensions: ` remove jupyter\lab\settings\build_config.json and re-install.
+    
 ## Contributing
 
 If you would like to contribute to the project, please read our [contributor documentation](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md).
