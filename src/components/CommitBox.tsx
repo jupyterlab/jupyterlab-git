@@ -7,7 +7,7 @@ import {
   commitButtonClass
 } from '../style/CommitBox';
 import { CommandRegistry } from '@lumino/commands';
-import { SUBMIT_COMMIT_COMMAND } from '../commandsAndMenu';
+import { CommandIDs } from '../tokens';
 
 /**
  * Interface describing component properties.
@@ -136,7 +136,7 @@ export class CommitBox extends React.Component<
    */
   private _getSubmitKeystroke = (): string => {
     const binding = this.props.commands.keyBindings.find(
-      binding => binding.command === SUBMIT_COMMIT_COMMAND
+      binding => binding.command === CommandIDs.gitSubmitCommand
     );
     return binding.keys.join(' ');
   };
@@ -201,7 +201,7 @@ export class CommitBox extends React.Component<
     _: CommandRegistry,
     commandArgs: CommandRegistry.ICommandExecutedArgs
   ): void => {
-    if (commandArgs.id === SUBMIT_COMMIT_COMMAND && this._canCommit()) {
+    if (commandArgs.id === CommandIDs.gitSubmitCommand && this._canCommit()) {
       this._onCommitSubmit();
     }
   };
