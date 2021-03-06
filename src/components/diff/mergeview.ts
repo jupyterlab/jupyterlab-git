@@ -1869,13 +1869,22 @@ namespace Private {
     }
   }
 
-  export function posMin(a: CodeMirror.Position, b: CodeMirror.Position) {
+  export function posMin(
+    a: CodeMirror.Position,
+    b: CodeMirror.Position
+  ): CodeMirror.Position {
     return (a.line - b.line || a.ch - b.ch) < 0 ? a : b;
   }
-  export function posMax(a: CodeMirror.Position, b: CodeMirror.Position) {
+  export function posMax(
+    a: CodeMirror.Position,
+    b: CodeMirror.Position
+  ): CodeMirror.Position {
     return (a.line - b.line || a.ch - b.ch) > 0 ? a : b;
   }
-  export function posEq(a: CodeMirror.Position, b: CodeMirror.Position) {
+  export function posEq(
+    a: CodeMirror.Position,
+    b: CodeMirror.Position
+  ): boolean {
     return a.line == b.line && a.ch == b.ch;
   }
 
@@ -1907,7 +1916,12 @@ namespace Private {
     }
   }
 
-  export function goNearbyDiff(cm: CodeMirror.Editor, dir: number) {
+  export function goNearbyDiff(
+    cm: CodeMirror.Editor,
+    dir: number
+  ): void | {
+    toString(): 'CodeMirror.PASS';
+  } {
     let found = null;
     const views = cm.state.diffViews;
     // @ts-ignore

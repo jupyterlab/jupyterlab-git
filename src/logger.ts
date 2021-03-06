@@ -22,7 +22,7 @@ export class Logger {
    *
    * @param message Log message
    */
-  log(message: ILogMessage) {
+  log(message: ILogMessage): void {
     this._signal.emit(message);
   }
 

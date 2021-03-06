@@ -43,7 +43,7 @@ export interface IDiffProps {
  * The parent diff component which maintains a registry of various diff providers.
  * Based on the extension of the file, it delegates to the relevant diff provider.
  */
-export function Diff(props: IDiffProps) {
+export function Diff(props: IDiffProps): JSX.Element {
   const fileExtension = PathExt.extname(props.path).toLocaleLowerCase();
   if (fileExtension in DIFF_PROVIDER_REGISTRY) {
     const DiffProvider = DIFF_PROVIDER_REGISTRY[fileExtension];

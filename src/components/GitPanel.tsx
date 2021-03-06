@@ -162,7 +162,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     Signal.clearData(this);
   }
 
-  refreshBranch = async () => {
+  refreshBranch = async (): Promise<void> => {
     const { currentBranch } = this.props.model;
 
     this.setState({
@@ -171,7 +171,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     });
   };
 
-  refreshHistory = async () => {
+  refreshHistory = async (): Promise<void> => {
     if (this.props.model.pathRepository !== null) {
       // Get git log for current branch
       const logData = await this.props.model.log(
@@ -191,7 +191,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   /**
    * Refresh widget, update all content
    */
-  refreshView = async () => {
+  refreshView = async (): Promise<void> => {
     if (this.props.model.pathRepository !== null) {
       await this.refreshBranch();
       await this.refreshHistory();
