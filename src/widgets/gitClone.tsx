@@ -14,7 +14,7 @@ export function addCloneButton(
   model: IGitExtension,
   filebrowser: FileBrowser,
   commands: CommandRegistry
-) {
+): void {
   filebrowser.toolbar.addItem(
     'gitClone',
     ReactWidget.create(

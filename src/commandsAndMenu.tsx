@@ -115,7 +115,7 @@ export function addCommands(
   fileBrowser: FileBrowser,
   settings: ISettingRegistry.ISettings,
   renderMime: IRenderMimeRegistry
-) {
+): void {
   const { commands, shell } = app;
 
   /**

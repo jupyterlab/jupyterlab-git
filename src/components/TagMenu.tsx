@@ -134,7 +134,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
     };
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.props.model
       .tags()
       .then(response => {
