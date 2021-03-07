@@ -65,7 +65,7 @@ export class CellDiff extends React.Component<ICellDiffProps> {
     }
   }
 
-  render() {
+  render(): JSX.Element {
     const chunk = this.props.cellChunk;
     return (
       <RenderMimeConsumer>
@@ -119,11 +119,11 @@ export class NBDiff extends React.Component<IDiffProps, INBDiffState> {
     };
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.performDiff(this.props.diffContext);
   }
 
-  render() {
+  render(): JSX.Element {
     if (this.state.errorMessage !== undefined) {
       return (
         <div>

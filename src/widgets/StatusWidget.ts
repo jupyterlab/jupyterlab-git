@@ -86,7 +86,9 @@ namespace Private {
    * @param widget - status widget
    * @returns callback
    */
-  export function createEventCallback(widget: StatusWidget) {
+  export function createEventCallback(
+    widget: StatusWidget
+  ): (model: IGitExtension, event: string) => void {
     return onEvent;
 
     /**
@@ -151,7 +153,9 @@ namespace Private {
    * @param settings - extension settings
    * @returns callback
    */
-  export function isStatusWidgetActive(settings?: ISettingRegistry.ISettings) {
+  export function isStatusWidgetActive(
+    settings?: ISettingRegistry.ISettings
+  ): () => boolean {
     return settings ? isActive : inactive;
 
     /**

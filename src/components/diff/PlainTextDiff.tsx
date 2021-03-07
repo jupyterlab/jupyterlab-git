@@ -31,11 +31,11 @@ export class PlainTextDiff extends React.Component<
     this._mergeViewRef = React.createRef<HTMLDivElement>();
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     this._performDiff(this.props.diffContext);
   }
 
-  render() {
+  render(): JSX.Element {
     if (this.state.errorMessage !== null) {
       return (
         <div>

@@ -89,7 +89,7 @@ export class Feedback extends React.Component<IFeedbackProps, IFeedbackState> {
     return state;
   }
 
-  render() {
+  render(): JSX.Element {
     if (this.state.logStack.length > 1) {
       setTimeout(() => {
         if (this.state.logStack.length > 1) {

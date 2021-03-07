@@ -115,7 +115,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   openContextMenu = (
     selectedFile: Git.IStatusFile,
     event: React.MouseEvent
-  ) => {
+  ): void => {
     event.preventDefault();
 
     this.setState({
@@ -138,7 +138,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   openSimpleContextMenu = (
     selectedFile: Git.IStatusFile,
     event: React.MouseEvent
-  ) => {
+  ): void => {
     event.preventDefault();
 
     const contextMenu = new Menu({ commands: this.props.commands });
@@ -148,25 +148,25 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Reset all staged files */
-  resetAllStagedFiles = async (event: React.MouseEvent) => {
+  resetAllStagedFiles = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
     await this.props.model.reset();
   };
 
   /** Reset a specific staged file */
-  resetStagedFile = async (file: string) => {
+  resetStagedFile = async (file: string): Promise<void> => {
     await this.props.model.reset(file);
   };
 
   /** Add all unstaged files */
-  addAllUnstagedFiles = async (event: React.MouseEvent) => {
+  addAllUnstagedFiles = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
 
     await this.props.model.addAllUnstaged();
   };
 
   /** Discard changes in all unstaged files */
-  discardAllUnstagedFiles = async (event: React.MouseEvent) => {
+  discardAllUnstagedFiles = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
 
     const result = await showDialog({
@@ -185,7 +185,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Discard changes in all unstaged and staged files */
-  discardAllChanges = async (event: React.MouseEvent) => {
+  discardAllChanges = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
     const result = await showDialog({
       title: 'Discard all changes',
@@ -203,39 +203,39 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Add a specific unstaged file */
-  addFile = async (...file: string[]) => {
+  addFile = async (...file: string[]): Promise<void> => {
     await this.props.model.add(...file);
   };
 
   /** Discard changes in a specific unstaged or staged file */
-  discardChanges = async (file: Git.IStatusFile) => {
+  discardChanges = async (file: Git.IStatusFile): Promise<void> => {
     await this.props.commands.execute(ContextCommandIDs.gitFileDiscard, ({
       files: [file]
     } as CommandArguments.IGitContextAction) as any);
   };
 
   /** Add all untracked files */
-  addAllUntrackedFiles = async (event: React.MouseEvent) => {
+  addAllUntrackedFiles = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
     await this.props.model.addAllUntracked();
   };
 
-  addAllMarkedFiles = async () => {
+  addAllMarkedFiles = async (): Promise<void> => {
     await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
-  updateSelectedFile = (file: Git.IStatusFile | null) => {
+  updateSelectedFile = (file: Git.IStatusFile | null): void => {
     this.setState({ selectedFile: file });
   };
 
-  get markedFiles() {
+  get markedFiles(): Git.IStatusFile[] {
     return this.props.files.filter(file => this.props.model.getMark(file.to));
   }
 
   /**
    * Render the modified files
    */
-  render() {
+  render(): JSX.Element {
     if (this.props.settings.composite['simpleStaging']) {
       return (
         <div className={fileListWrapperClass}>
