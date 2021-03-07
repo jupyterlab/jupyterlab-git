@@ -718,8 +718,9 @@ export function addCommands(
         .filter(extension => extension.length > 0);
       const subject = extensions.length > 1 ? 'extensions' : 'extension';
       return trans.__(
-        `Ignore %1 ${trans.__(subject)} (add to .gitignore)`,
-        extensions.join(', ')
+        `Ignore %1 %2 (add to .gitignore)`,
+        extensions.join(', '),
+        trans.__(subject)
       );
     },
     caption: pluralizedContextLabel(

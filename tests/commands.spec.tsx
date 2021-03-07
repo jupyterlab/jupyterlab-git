@@ -1,6 +1,6 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { showDialog } from '@jupyterlab/apputils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import 'jest';
 import { CommandArguments, addCommands} from '../src/commandsAndMenu';
@@ -36,8 +36,7 @@ describe('git-commands', () => {
       commands,
       shell: null as any
     };
-    let translator: ITranslator;
-    const trans = (translator || nullTranslator).load('jupyterlab-git');
+    const trans = nullTranslator.load('jupyterlab-git');
     model = new GitExtension(app as any);
     addCommands(app as JupyterFrontEnd, model, null, null, null, trans);
   });

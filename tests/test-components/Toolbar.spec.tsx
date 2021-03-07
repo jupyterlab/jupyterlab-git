@@ -1,4 +1,4 @@
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { refreshIcon } from '@jupyterlab/ui-components';
 import { shallow } from 'enzyme';
 import 'jest';
@@ -25,8 +25,7 @@ async function createModel() {
 
 describe('Toolbar', () => {
   let model: GitExtension;
-  let translator: ITranslator;
-  const trans = (translator || nullTranslator).load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab-git');
 
   function createProps(props?: Partial<IToolbarProps>): IToolbarProps {
     return {

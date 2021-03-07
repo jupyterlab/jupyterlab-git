@@ -10,7 +10,7 @@ import { GitExtension } from '../../src/model';
 import { listItemClass, nameClass } from '../../src/style/BranchMenu';
 import { mockedRequestAPI, defaultMockedResponses } from '../utils';
 import ClearIcon from '@material-ui/icons/Clear';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 jest.mock('../../src/git');
 jest.mock('@jupyterlab/apputils');
@@ -60,8 +60,7 @@ async function createModel() {
 
 describe('BranchMenu', () => {
   let model: GitExtension;
-  let translator: ITranslator;
-  const trans = (translator || nullTranslator).load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab-git');
 
   beforeEach(async () => {
     jest.restoreAllMocks();

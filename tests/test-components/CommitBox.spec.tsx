@@ -3,7 +3,7 @@ import 'jest';
 import { shallow } from 'enzyme';
 import { CommitBox} from '../../src/components/CommitBox';
 import { CommandRegistry } from '@lumino/commands';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { CommandIDs } from '../../src/tokens';
 
 describe('CommitBox', () => {
@@ -15,8 +15,7 @@ describe('CommitBox', () => {
     selector: '.jp-git-CommitBox'
   })
 
-  let translator: ITranslator;
-  const trans = (translator ||  nullTranslator).load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab-git');
 
   describe('#constructor()', () => {
     it('should return a new instance', () => {

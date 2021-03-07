@@ -1,5 +1,5 @@
 import * as apputils from '@jupyterlab/apputils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import 'jest';
 import { GitPanel, IGitPanelProps } from '../../src/components/GitPanel';
@@ -45,8 +45,7 @@ function MockSettings() {
 }
 
 describe('GitPanel', () => {
-  let translator: ITranslator;
-  const trans = (translator || nullTranslator).load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab-git');
 
   const props: IGitPanelProps = {
     model: null,
