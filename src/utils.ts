@@ -34,6 +34,6 @@ export function decodeStage(x: string, y: string): Git.Status {
  * @param ms - duration (in milliseconds)
  * @returns a promise
  */
-export function sleep(ms: number) {
+export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }

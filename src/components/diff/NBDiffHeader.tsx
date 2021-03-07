@@ -11,7 +11,7 @@ export interface INBDiffHeaderProps {
  * being rendered. Shows the path to the file and the previous and current ref
  * being used for the diff.
  */
-export function NBDiffHeader(props: INBDiffHeaderProps) {
+export function NBDiffHeader(props: INBDiffHeaderProps): JSX.Element {
   return (
     <div>
       <div className="jp-git-diff-header-path">{props.path}</div>

@@ -70,14 +70,14 @@ export class GitExtension implements IGitExtension {
   /**
    * Branch list for the current repository.
    */
-  get branches() {
+  get branches(): Git.IBranch[] {
     return this._branches;
   }
 
   /**
    * The current repository branch.
    */
-  get currentBranch() {
+  get currentBranch(): Git.IBranch {
     return this._currentBranch;
   }
 
@@ -1032,7 +1032,7 @@ export class GitExtension implements IGitExtension {
    * @param fname - filename
    * @param mark - mark to set
    */
-  addMark(fname: string, mark: boolean) {
+  addMark(fname: string, mark: boolean): void {
     this._currentMarker.add(fname, mark);
   }
 
@@ -1051,7 +1051,7 @@ export class GitExtension implements IGitExtension {
    *
    * @param fname - filename
    */
-  toggleMark(fname: string) {
+  toggleMark(fname: string): void {
     this._currentMarker.toggle(fname);
   }
 
@@ -1148,7 +1148,7 @@ export class GitExtension implements IGitExtension {
   /**
    * Clear repository status
    */
-  protected _clearStatus() {
+  protected _clearStatus(): void {
     this._status = {
       branch: null,
       remote: null,
@@ -1193,7 +1193,7 @@ export class GitExtension implements IGitExtension {
    *
    * @param v - repository status
    */
-  protected _setStatus(v: Git.IStatus) {
+  protected _setStatus(v: Git.IStatus): void {
     this._status = v;
     this._statusChanged.emit(this._status);
   }
@@ -1326,22 +1326,22 @@ export class GitExtension implements IGitExtension {
 export class BranchMarker implements Git.IBranchMarker {
   constructor(private _refresh: () => void) {}
 
-  add(fname: string, mark = true) {
+  add(fname: string, mark = true): void {
     if (!(fname in this._marks)) {
       this.set(fname, mark);
     }
   }
 
-  get(fname: string) {
+  get(fname: string): boolean {
     return this._marks[fname];
   }
 
-  set(fname: string, mark: boolean) {
+  set(fname: string, mark: boolean): void {
     this._marks[fname] = mark;
     this._refresh();
   }
 
-  toggle(fname: string) {
+  toggle(fname: string): void {
     this.set(fname, !this._marks[fname]);
   }
 
