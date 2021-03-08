@@ -13,8 +13,7 @@ import {
 import { Git } from '../tokens';
 import { FilePath } from './FilePath';
 
-// Git status codes https://git-scm.com/docs/git-status
-export const STATUS_CODES = {
+export const STATUS_CODES: Record<Git.StatusCode, string> = {
   M: 'Modified',
   A: 'Added',
   D: 'Deleted',
@@ -22,7 +21,9 @@ export const STATUS_CODES = {
   C: 'Copied',
   U: 'Updated',
   '?': 'Untracked',
-  '!': 'Ignored'
+  '!': 'Ignored',
+  ' ': 'Unchanged',
+  '': 'Unchanged'
 };
 
 /**
@@ -124,7 +125,7 @@ export interface IFileItemProps {
 }
 
 export class FileItem extends React.PureComponent<IFileItemProps> {
-  protected _getFileChangedLabel(change: keyof typeof STATUS_CODES): string {
+  protected _getFileChangedLabel(change: Git.StatusCode): string {
     return STATUS_CODES[change];
   }
 
@@ -157,7 +158,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
   render(): JSX.Element {
     const { file } = this.props;
     const status_code = file.status === 'staged' ? file.x : file.y;
-    const status = this._getFileChangedLabel(status_code as any);
+    const status = this._getFileChangedLabel(status_code);
 
     return (
       <div

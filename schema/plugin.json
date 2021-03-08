@@ -58,6 +58,16 @@
       "title": "Simple staging flag",
       "description": "If true, use a simplified concept of staging. Only files with changes are shown (instead of showing staged/changed/untracked), and all files with changes will be automatically staged",
       "default": false
+    },
+    "colorFilesByStatus": {
+      "type": "boolean",
+      "title": "Color files in file browser",
+      "default": true
+    },
+    "showFileStatusIndicator": {
+      "type": "boolean",
+      "title": "Show file status indicator in file browser",
+      "default": true
     }
   },
   "jupyter.lab.shortcuts": [

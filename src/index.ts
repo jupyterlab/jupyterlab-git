@@ -25,6 +25,7 @@ import { GitWidget } from './widgets/GitWidget';
 import { addStatusBarWidget } from './widgets/StatusWidget';
 
 export { Git, IGitExtension } from './tokens';
+import { substituteListingRenderer } from './browserDecorations';
 
 /**
  * The default running sessions extension.
@@ -131,6 +132,17 @@ async function activate(
       gitExtension.pathRepository = change.newValue;
     }
   );
+
+  // Reflect status changes in the browser listing
+  gitExtension.statusChanged.connect(() => {
+    filebrowser.model.refresh();
+  });
+
+  // Trigger initial refresh when repository changes
+  gitExtension.repositoryChanged.connect(() => {
+    gitExtension.refreshStatus();
+  });
+
   // Whenever a user adds/renames/saves/deletes/modifies a file within the lab environment, refresh the Git status
   filebrowser.model.fileChanged.connect(() => gitExtension.refreshStatus());
 
@@ -181,6 +193,8 @@ async function activate(
       app.commands,
       app.contextMenu
     );
+
+    substituteListingRenderer(gitExtension, factory.defaultBrowser, settings);
   }
 
   return gitExtension;

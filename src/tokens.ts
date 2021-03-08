@@ -604,8 +604,8 @@ export namespace Git {
    * has the status of each changed file
    */
   export interface IStatusFileResult {
-    x: string;
-    y: string;
+    x: StatusCode;
+    y: StatusCode;
     to: string;
     from: string;
     is_binary: boolean | null;
@@ -749,6 +749,22 @@ export namespace Git {
     | 'unstaged'
     | 'partially-staged'
     | null;
+
+  /**
+   * Git status codes https://git-scm.com/docs/git-status
+   */
+  export type StatusCode =
+    | 'M'
+    | 'A'
+    | 'D'
+    | 'R'
+    | 'C'
+    | 'U'
+    | '?'
+    | '!'
+    // TODO: is this ' ' or ''? The codabase is inconsistent!
+    | ' '
+    | '';
 
   export interface ITagResult {
     code: number;
