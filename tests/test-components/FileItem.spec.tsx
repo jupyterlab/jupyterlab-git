@@ -22,7 +22,7 @@ describe('FileItem', () => {
     selected: false,
     selectFile: () => {},
     style: {},
-    trans: trans
+    trans
   };
 
   describe('#render()', () => {
