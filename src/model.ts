@@ -568,6 +568,7 @@ export class GitExtension implements IGitExtension {
     this._isDisposed = true;
     this._fetchPoll.dispose();
     this._statusPoll.dispose();
+    this._taskHandler.dispose();
     Signal.clearData(this);
   }
 

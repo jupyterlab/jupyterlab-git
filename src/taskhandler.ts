@@ -1,13 +1,21 @@
 import { LinkedList } from '@lumino/collections';
 import { UUID } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * A generic task handler
  */
-export class TaskHandler<T> {
+export class TaskHandler<T> implements IDisposable {
   constructor(model: T) {
     this._taskChanged = new Signal<T, string>(model);
+  }
+
+  /**
+   * Boolean indicating whether the handler has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
   }
 
   /**
@@ -47,6 +55,17 @@ export class TaskHandler<T> {
     }
     // Return the task identifier to allow consumers to remove the task once completed:
     return id;
+  }
+
+  /**
+   * Dispose of task handler.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
   }
 
   /**
@@ -105,6 +124,7 @@ export class TaskHandler<T> {
     return UUID.uuid4();
   }
 
+  private _isDisposed = false;
   private _taskChanged: Signal<T, string>;
   private _taskList: LinkedList<any> = new LinkedList();
 }
