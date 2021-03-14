@@ -68,6 +68,21 @@
       },
       "@material-ui/lab": {
         "singleton": true
+      },
+      "codemirror": {
+        "bundled": false,
+        "singleton": true
+      },
+      "nbdime": {
+        "singleton": true
+      },
+      "react": {
+        "bundled": false,
+        "singleton": true
+      },
+      "react-dom": {
+        "bundled": false,
+        "singleton": true
       }
     },
     "outputDir": "jupyterlab_git/labextension"

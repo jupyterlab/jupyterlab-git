@@ -1,9 +1,12 @@
+import { Toolbar } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServerConnection } from '@jupyterlab/services';
 import { JSONObject, ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
+import { DiffModel } from './components/diff/model';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
@@ -356,7 +359,10 @@ export interface IGitExtension extends IDisposable {
    * @param filetypes File type list
    * @param callback Callback to use for the provided file types
    */
-  registerDiffProvider(filetypes: string[], callback: Git.IDiffCallback): void;
+  registerDiffProvider<T>(
+    filetypes: string[],
+    callback: Git.IDiffCallback<T>
+  ): void;
 
   /**
    * Move files from the "staged" to the "unstaged" area.
@@ -445,12 +451,18 @@ export interface IGitExtension extends IDisposable {
 }
 
 export namespace Git {
-  /** Function type for diffing a file's revisions */
-  export type IDiffCallback = (
-    filename: string,
-    revisionA: string,
-    revisionB: string
-  ) => void;
+  /**
+   * Callback to generate a comparison widget
+   *
+   * T is the content type to be compared
+   *
+   * The toolbar is the one of the MainAreaWidget in which the diff widget
+   * will be displayed.
+   */
+  export type IDiffCallback<T> = (
+    model: DiffModel<T>,
+    toolbar?: Toolbar
+  ) => Promise<Widget>;
 
   /**
    * Interface for GitAllHistory request result,
@@ -860,6 +872,7 @@ export enum CommandIDs {
   gitToggleDoubleClickDiff = 'git:toggle-double-click-diff',
   gitAddRemote = 'git:add-remote',
   gitClone = 'git:clone',
+  gitCompareFiles = 'git:compare-files',
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
   gitPull = 'git:pull',

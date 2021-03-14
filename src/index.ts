@@ -17,6 +17,7 @@ import {
   addFileBrowserContextMenu,
   createGitMenu
 } from './commandsAndMenu';
+import { createNotebookDiff } from './components/diff/NotebookDiff';
 import { addStatusBarWidget } from './components/StatusWidget';
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
@@ -156,7 +157,8 @@ async function activate(
       factory.defaultBrowser,
       settings,
       trans,
-      renderMime
+      renderMime,
+      settingRegistry
     );
 
     // Create the Git widget sidebar
@@ -197,6 +199,9 @@ async function activate(
       app.contextMenu
     );
   }
+
+  // Register default diff providers
+  gitExtension.registerDiffProvider(['.ipynb'], createNotebookDiff);
 
   return gitExtension;
 }

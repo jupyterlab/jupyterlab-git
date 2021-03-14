@@ -3,7 +3,6 @@ import {
   Dialog,
   InputDialog,
   MainAreaWidget,
-  ReactWidget,
   showDialog,
   showErrorMessage,
   WidgetTracker
@@ -11,21 +10,23 @@ import {
 import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
-import { CommandRegistry } from '@lumino/commands';
-import { Menu } from '@lumino/widgets';
+import { TranslationBundle } from '@jupyterlab/translation';
+import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
 import { ArrayExt, toArray } from '@lumino/algorithm';
+import { CommandRegistry } from '@lumino/commands';
+import { Message } from '@lumino/messaging';
+import { Menu } from '@lumino/widgets';
 import * as React from 'react';
-import {
-  Diff,
-  isDiffSupported,
-  RenderMimeProvider
-} from './components/diff/Diff';
-import { getRefValue, IDiffContext } from './components/diff/model';
+import { DiffWidget } from './components/diff/DiffWidget';
+import { DiffModel, IDiffContext, SpecialRef } from './components/diff/model';
+import { createPlainTextDiff } from './components/diff/PlainTextDiff';
+import { CONTEXT_COMMANDS } from './components/FileList';
 import { AUTH_ERROR_MESSAGES } from './git';
 import { logger } from './logger';
-import { GitExtension } from './model';
+import { getDiffProvider, GitExtension } from './model';
 import {
   addIcon,
   diffIcon,
@@ -43,11 +44,6 @@ import {
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { GitCloneForm } from './widgets/GitCloneForm';
-import { TranslationBundle } from '@jupyterlab/translation';
-import { Contents } from '@jupyterlab/services';
-import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
-import { Message } from '@lumino/messaging';
-import { CONTEXT_COMMANDS } from './components/FileList';
 
 interface IGitCloneArgs {
   /**
@@ -105,7 +101,8 @@ export function addCommands(
   fileBrowser: FileBrowser,
   settings: ISettingRegistry.ISettings,
   trans: TranslationBundle,
-  renderMime: IRenderMimeRegistry
+  renderMime: IRenderMimeRegistry,
+  settingsRegistry: ISettingRegistry
 ): void {
   const { commands, shell } = app;
 
@@ -464,17 +461,19 @@ export function addCommands(
 
         let diffContext = context;
         if (!diffContext) {
-          const specialRef = status === 'staged' ? 'INDEX' : 'WORKING';
+          const specialRef =
+            status === 'staged' ? SpecialRef.INDEX : SpecialRef.WORKING;
           diffContext = {
-            currentRef: { specialRef },
-            previousRef: { gitRef: 'HEAD' }
+            currentRef: specialRef,
+            previousRef: 'HEAD'
           };
         }
 
-        if (isDiffSupported(filePath) || isText) {
-          const id = `nbdiff-${filePath}-${getRefValue(
-            diffContext.currentRef
-          )}`;
+        const buildWidget =
+          getDiffProvider(filePath) ?? (isText && createPlainTextDiff);
+
+        if (buildWidget) {
+          const id = `diff-${filePath}-${diffContext.currentRef}`;
           const mainAreaItems = shell.widgets('main');
           let mainAreaItem = mainAreaItems.next();
           while (mainAreaItem) {
@@ -486,24 +485,41 @@ export function addCommands(
           }
 
           if (!mainAreaItem) {
-            const serverRepoPath = model.getRelativeFilePath();
-            const nbDiffWidget = ReactWidget.create(
-              <RenderMimeProvider value={renderMime}>
-                <Diff
-                  path={filePath}
-                  diffContext={diffContext}
-                  topRepoPath={serverRepoPath}
-                />
-              </RenderMimeProvider>
-            );
-            nbDiffWidget.id = id;
-            nbDiffWidget.title.label = PathExt.basename(filePath);
-            nbDiffWidget.title.icon = diffIcon;
-            nbDiffWidget.title.closable = true;
-            nbDiffWidget.addClass('jp-git-diff-parent-diff-widget');
+            const repositoryPath = model.getRelativeFilePath();
+            const diffWidget = new DiffWidget({
+              buildWidget,
+              getModel: () => {
+                return Promise.resolve(
+                  new DiffModel<string>({
+                    challenger: {
+                      label:
+                        (SpecialRef[diffContext.currentRef as any] as any) ||
+                        diffContext.currentRef,
+                      source: diffContext.currentRef
+                    },
+                    filename: filePath,
+                    reference: {
+                      label:
+                        (SpecialRef[diffContext.previousRef as any] as any) ||
+                        diffContext.previousRef,
+                      source: diffContext.previousRef
+                    },
+                    renderMime,
+                    repositoryPath,
+                    settingsRegistry: settingsRegistry
+                  })
+                );
+              }
+            });
+            diffWidget.id = id;
+            diffWidget.title.label = PathExt.basename(filePath);
+            diffWidget.title.caption = PathExt.join(repositoryPath, filePath);
+            diffWidget.title.icon = diffIcon;
+            diffWidget.title.closable = true;
+            diffWidget.addClass('jp-git-diff-parent-diff-widget');
 
-            shell.add(nbDiffWidget, 'main');
-            shell.activateById(nbDiffWidget.id);
+            shell.add(diffWidget, 'main');
+            shell.activateById(diffWidget.id);
           }
         } else {
           showErrorMessage(
