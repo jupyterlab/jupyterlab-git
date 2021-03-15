@@ -13,7 +13,9 @@ import { decodeStage } from './utils';
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
 // Available diff providers
-const DIFF_PROVIDERS: { [key: string]: Git.IDiffCallback<any> } = {};
+const DIFF_PROVIDERS: {
+  [key: string]: { name: string; callback: Git.Diff.ICallback<any> };
+} = {};
 
 /**
  * Get the diff provider for a filename
@@ -22,8 +24,8 @@ const DIFF_PROVIDERS: { [key: string]: Git.IDiffCallback<any> } = {};
  */
 export function getDiffProvider(
   filename: string
-): Git.IDiffCallback<any> | undefined {
-  return DIFF_PROVIDERS[PathExt.extname(filename).toLocaleLowerCase()];
+): Git.Diff.ICallback<any> | undefined {
+  return DIFF_PROVIDERS[PathExt.extname(filename).toLocaleLowerCase()].callback;
 }
 
 /**
@@ -1076,11 +1078,12 @@ export class GitExtension implements IGitExtension {
    * @param callback Callback to use for the provided file types
    */
   registerDiffProvider<T>(
+    name: string,
     fileExtensions: string[],
-    callback: Git.IDiffCallback<T>
+    callback: Git.Diff.ICallback<T>
   ): void {
     fileExtensions.forEach(fileExtension => {
-      DIFF_PROVIDERS[fileExtension.toLocaleLowerCase()] = callback;
+      DIFF_PROVIDERS[fileExtension.toLocaleLowerCase()] = { name, callback };
     });
   }
 

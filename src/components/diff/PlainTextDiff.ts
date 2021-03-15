@@ -13,7 +13,7 @@ import { DiffModel } from './model';
  * @param toolbar MainAreaWidget toolbar
  * @returns PlainText diff widget
  */
-export const createPlainTextDiff: Git.IDiffCallback<string> = async (
+export const createPlainTextDiff: Git.Diff.ICallback<string> = async (
   model: DiffModel<string>,
   toolbar?: Toolbar
 ): Promise<PlainTextDiff> => {

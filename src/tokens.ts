@@ -1,7 +1,9 @@
 import { Toolbar } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ServerConnection } from '@jupyterlab/services';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { JSONObject, ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
@@ -356,12 +358,14 @@ export interface IGitExtension extends IDisposable {
   /**
    * Register a new diff provider for specified file types
    *
-   * @param filetypes File type list
+   * @param name provider name
+   * @param fileExtensions File extensions list
    * @param callback Callback to use for the provided file types
    */
   registerDiffProvider<T>(
-    filetypes: string[],
-    callback: Git.IDiffCallback<T>
+    name: string,
+    fileExtensions: string[],
+    callback: Git.Diff.ICallback<T>
   ): void;
 
   /**
@@ -451,18 +455,101 @@ export interface IGitExtension extends IDisposable {
 }
 
 export namespace Git {
-  /**
-   * Callback to generate a comparison widget
-   *
-   * T is the content type to be compared
-   *
-   * The toolbar is the one of the MainAreaWidget in which the diff widget
-   * will be displayed.
-   */
-  export type IDiffCallback<T> = (
-    model: DiffModel<T>,
-    toolbar?: Toolbar
-  ) => Promise<Widget>;
+  export namespace Diff {
+    /**
+     * Callback to generate a comparison widget
+     *
+     * T is the content type to be compared
+     *
+     * The toolbar is the one of the MainAreaWidget in which the diff widget
+     * will be displayed.
+     */
+    export type ICallback<T> = (
+      model: DiffModel<T>,
+      toolbar?: Toolbar
+    ) => Promise<Widget>;
+
+    /**
+     * Content and its context for diff
+     */
+    export interface IContent<T> {
+      /**
+       * Content
+       */
+      content: T;
+      /**
+       * Content label
+       *
+       * Note: It is the preferred displayed information
+       */
+      label: string;
+      /**
+       * Source of the content
+       *
+       * Note: It is a machine friendly reference
+       */
+      source: any;
+    }
+
+    /**
+     * Model which indicates the context in which a Git diff is being performed.
+     *
+     * It can be:
+     * - a regular Git ref, i.e, https://git-scm.com/book/en/v2/Git-Internals-Git-References
+     * - special/reserved references
+     *
+     * 1. WORKING: The Working Tree
+     * 2. INDEX: The Staging Area
+     *
+     * To differentiate with the regular Git ref they are passed as number
+     */
+    export interface IContext {
+      currentRef: string | SpecialRef;
+      previousRef: string | SpecialRef;
+    }
+
+    /**
+     * DiffModel properties
+     */
+    export interface IModel<T> {
+      /**
+       * Challenger data
+       */
+      challenger: IContent<T>;
+      readonly changed: ISignal<IModel<T>, IModelChange>;
+      /**
+       * File of the name being diff at reference state
+       */
+      readonly filename: string;
+      /**
+       * Reference data
+       */
+      reference: IContent<T>;
+      /**
+       * Rendermime registry
+       */
+      readonly renderMime: IRenderMimeRegistry;
+      /**
+       * Application settings registry
+       */
+      readonly settingsRegistry?: ISettingRegistry;
+    }
+
+    /**
+     * DiffModel changed signal argument
+     */
+    export interface IModelChange {
+      /**
+       * Which content did change
+       */
+      type: 'reference' | 'challenger';
+    }
+
+    export enum SpecialRef {
+      'WORKING',
+      'INDEX'
+    }
+  }
 
   /**
    * Interface for GitAllHistory request result,

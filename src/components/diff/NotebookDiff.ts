@@ -7,6 +7,7 @@
 
 import { Toolbar } from '@jupyterlab/apputils';
 import { INotebookContent } from '@jupyterlab/nbformat';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
@@ -57,7 +58,7 @@ interface INbdimeDiff {
  * @param toolbar MainAreaWidget toolbar
  * @returns Diff notebook widget
  */
-export const createNotebookDiff: Git.IDiffCallback<string> = async (
+export const createNotebookDiff: Git.Diff.ICallback<string> = async (
   model: DiffModel<string>,
   toolbar?: Toolbar
 ): Promise<NotebookDiff> => {
@@ -118,7 +119,7 @@ export class NotebookDiff extends Panel {
     this._scroller.node.tabIndex = -1;
     this.addWidget(this._scroller);
 
-    const nbdWidget = new NotebookDiffWidget(nbModel, model.renderMimeRegistry);
+    const nbdWidget = this.createDiffView(nbModel, model.renderMime);
 
     this._scroller.addWidget(nbdWidget);
     nbdWidget
@@ -158,6 +159,13 @@ export class NotebookDiff extends Panel {
    */
   get ready(): Promise<void> {
     return this._isReady;
+  }
+
+  protected createDiffView(
+    model: NotebookDiffModel,
+    renderMime: IRenderMimeRegistry
+  ): NotebookDiffWidget {
+    return new NotebookDiffWidget(model, renderMime);
   }
 
   /**

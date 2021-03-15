@@ -27,6 +27,8 @@ import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 
 export { Git, IGitExtension } from './tokens';
+export { NotebookDiff } from './components/diff/NotebookDiff';
+export { PlainTextDiff } from './components/diff/PlainTextDiff';
 
 /**
  * The default running sessions extension.
@@ -201,7 +203,7 @@ async function activate(
   }
 
   // Register default diff providers
-  gitExtension.registerDiffProvider(['.ipynb'], createNotebookDiff);
+  gitExtension.registerDiffProvider('Nbdime', ['.ipynb'], createNotebookDiff);
 
   return gitExtension;
 }

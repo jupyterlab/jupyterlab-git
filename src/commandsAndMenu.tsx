@@ -21,7 +21,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Menu, Panel } from '@lumino/widgets';
 import * as React from 'react';
-import { DiffModel, IDiffContext, SpecialRef } from './components/diff/model';
+import { DiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
 import { CONTEXT_COMMANDS } from './components/FileList';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
@@ -66,7 +66,7 @@ enum Operation {
 }
 
 interface IFileDiffArgument {
-  context?: IDiffContext;
+  context?: Git.Diff.IContext;
   filePath: string;
   isText: boolean;
   status?: Git.Status;
@@ -462,7 +462,9 @@ export function addCommands(
         let diffContext = context;
         if (!diffContext) {
           const specialRef =
-            status === 'staged' ? SpecialRef.INDEX : SpecialRef.WORKING;
+            status === 'staged'
+              ? Git.Diff.SpecialRef.INDEX
+              : Git.Diff.SpecialRef.WORKING;
           diffContext = {
             currentRef: specialRef,
             previousRef: 'HEAD'
@@ -505,8 +507,10 @@ export function addCommands(
             shell.activateById(diffWidget.id);
 
             // Load content to be diff
-            const challengerRef = SpecialRef[diffContext.currentRef as any]
-              ? { special: SpecialRef[diffContext.currentRef as any] }
+            const challengerRef = Git.Diff.SpecialRef[
+              diffContext.currentRef as any
+            ]
+              ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
               : { git: diffContext.currentRef };
 
             requestAPI<Git.IDiffContent>('diffcontent', 'POST', {
@@ -521,16 +525,18 @@ export function addCommands(
                   challenger: {
                     content: data['curr_content'],
                     label:
-                      (SpecialRef[diffContext.currentRef as any] as any) ||
-                      diffContext.currentRef,
+                      (Git.Diff.SpecialRef[
+                        diffContext.currentRef as any
+                      ] as any) || diffContext.currentRef,
                     source: diffContext.currentRef
                   },
                   filename,
                   reference: {
                     content: data['prev_content'],
                     label:
-                      (SpecialRef[diffContext.previousRef as any] as any) ||
-                      diffContext.previousRef,
+                      (Git.Diff.SpecialRef[
+                        diffContext.previousRef as any
+                      ] as any) || diffContext.previousRef,
                     source: diffContext.previousRef
                   },
                   renderMime,
