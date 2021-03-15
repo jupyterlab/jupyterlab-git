@@ -1,20 +1,21 @@
 """
 Module for executing git commands, sending results back to the handlers
 """
+import datetime
 import os
+import pathlib
 import re
 import shlex
 import subprocess
 from urllib.parse import unquote
 
-import pathlib
+import nbformat
 import pexpect
 import tornado
 import tornado.locks
-import datetime
+from nbdime import diff_notebooks
 
 from .log import get_logger
-
 
 # Regex pattern to capture (key, value) of Git configuration options.
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
@@ -321,6 +322,34 @@ class Git:
             result["error"] = fetch_error
 
         return result
+
+    async def get_nbdiff(self, prev_content: str, curr_content: str) -> dict:
+        """Compute the diff between two notebooks.
+
+        Args:
+            prev_content: Notebook previous content
+            curr_content: Notebook current content
+        Returns:
+            {"base": Dict, "diff": Dict}
+        """
+
+        def read_notebook(content):
+            if not content:
+                return nbformat.v4.new_notebook()
+            if isinstance(content, dict):
+                # Content may come from model as a dict directly
+                return nbformat.from_dict(content)
+            else:
+                return nbformat.reads(content, as_version=4)
+
+        current_loop = tornado.ioloop.IOLoop.current()
+        prev_nb = await current_loop.run_in_executor(None, read_notebook, prev_content)
+        curr_nb = await current_loop.run_in_executor(None, read_notebook, curr_content)
+        thediff = await current_loop.run_in_executor(
+            None, diff_notebooks, prev_nb, curr_nb
+        )
+
+        return {"base": prev_nb, "diff": thediff}
 
     async def status(self, current_path):
         """

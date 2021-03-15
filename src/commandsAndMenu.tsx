@@ -17,14 +17,14 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
 import { ArrayExt, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { Menu } from '@lumino/widgets';
+import { Menu, Panel } from '@lumino/widgets';
 import * as React from 'react';
-import { DiffWidget } from './components/diff/DiffWidget';
 import { DiffModel, IDiffContext, SpecialRef } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
 import { CONTEXT_COMMANDS } from './components/FileList';
-import { AUTH_ERROR_MESSAGES } from './git';
+import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
 import { logger } from './logger';
 import { getDiffProvider, GitExtension } from './model';
 import {
@@ -469,10 +469,10 @@ export function addCommands(
           };
         }
 
-        const buildWidget =
+        const buildDiffWidget =
           getDiffProvider(filePath) ?? (isText && createPlainTextDiff);
 
-        if (buildWidget) {
+        if (buildDiffWidget) {
           const id = `diff-${filePath}-${diffContext.currentRef}`;
           const mainAreaItems = shell.widgets('main');
           let mainAreaItem = mainAreaItems.next();
@@ -486,40 +486,71 @@ export function addCommands(
 
           if (!mainAreaItem) {
             const repositoryPath = model.getRelativeFilePath();
-            const diffWidget = new DiffWidget({
-              buildWidget,
-              getModel: () => {
-                return Promise.resolve(
-                  new DiffModel<string>({
-                    challenger: {
-                      label:
-                        (SpecialRef[diffContext.currentRef as any] as any) ||
-                        diffContext.currentRef,
-                      source: diffContext.currentRef
-                    },
-                    filename: filePath,
-                    reference: {
-                      label:
-                        (SpecialRef[diffContext.previousRef as any] as any) ||
-                        diffContext.previousRef,
-                      source: diffContext.previousRef
-                    },
-                    renderMime,
-                    repositoryPath,
-                    settingsRegistry: settingsRegistry
-                  })
-                );
-              }
+            const filename = PathExt.join(repositoryPath, filePath);
+
+            const content = new Panel();
+            const modelIsLoading = new PromiseDelegate<void>();
+            const diffWidget = new MainAreaWidget<Panel>({
+              content,
+              reveal: modelIsLoading.promise
             });
             diffWidget.id = id;
             diffWidget.title.label = PathExt.basename(filePath);
-            diffWidget.title.caption = PathExt.join(repositoryPath, filePath);
+            diffWidget.title.caption = filename;
             diffWidget.title.icon = diffIcon;
             diffWidget.title.closable = true;
             diffWidget.addClass('jp-git-diff-parent-diff-widget');
 
             shell.add(diffWidget, 'main');
             shell.activateById(diffWidget.id);
+
+            // Load content to be diff
+            const challengerRef = SpecialRef[diffContext.currentRef as any]
+              ? { special: SpecialRef[diffContext.currentRef as any] }
+              : { git: diffContext.currentRef };
+
+            requestAPI<Git.IDiffContent>('diffcontent', 'POST', {
+              filename: filePath,
+              prev_ref: { git: diffContext.previousRef },
+              curr_ref: challengerRef,
+              top_repo_path: repositoryPath
+            })
+              .then(data => {
+                // Create the diff widget
+                const diffFileModel = new DiffModel<string>({
+                  challenger: {
+                    content: data['curr_content'],
+                    label:
+                      (SpecialRef[diffContext.currentRef as any] as any) ||
+                      diffContext.currentRef,
+                    source: diffContext.currentRef
+                  },
+                  filename,
+                  reference: {
+                    content: data['prev_content'],
+                    label:
+                      (SpecialRef[diffContext.previousRef as any] as any) ||
+                      diffContext.previousRef,
+                    source: diffContext.previousRef
+                  },
+                  renderMime,
+                  settingsRegistry: settingsRegistry
+                });
+
+                return buildDiffWidget(diffFileModel, diffWidget.toolbar);
+              })
+              .then(widget => {
+                // Load the diff widget
+                modelIsLoading.resolve();
+                content.addWidget(widget);
+              })
+              .catch(reason => {
+                console.error(reason);
+                const msg = `Load Diff Model Error (${
+                  reason.message || reason
+                })`;
+                modelIsLoading.reject(msg);
+              });
           }
         } else {
           showErrorMessage(

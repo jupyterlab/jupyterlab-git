@@ -32,7 +32,7 @@ export interface IDiffContent<T> {
   /**
    * Content
    */
-  content?: T;
+  content: T;
   /**
    * Content label
    *
@@ -56,9 +56,7 @@ export interface IDiffModelProps<T> {
    */
   challenger: IDiffContent<T>;
   /**
-   * File of the name being diff
-   *
-   * This is the full path relative to the server root
+   * File of the name being diff at reference state
    */
   filename: string;
   /**
@@ -69,7 +67,6 @@ export interface IDiffModelProps<T> {
    * Rendermime registry
    */
   renderMime: IRenderMimeRegistry;
-  repositoryPath: string;
   /**
    * Application settings registry
    */
@@ -95,7 +92,6 @@ export class DiffModel<T> implements IDisposable {
     this._filename = props.filename;
     this._reference = props.reference;
     this._renderMime = props.renderMime;
-    this._repositoryPath = props.repositoryPath;
     this._settingsRegistry = props.settingsRegistry || null;
 
     this._changed = new Signal<DiffModel<T>, IDiffModelChange>(this);
@@ -135,10 +131,6 @@ export class DiffModel<T> implements IDisposable {
     return this._renderMime;
   }
 
-  get repositoryPath(): string {
-    return this._repositoryPath;
-  }
-
   get settingsRegistry(): ISettingRegistry | null {
     return this._settingsRegistry;
   }
@@ -168,6 +160,5 @@ export class DiffModel<T> implements IDisposable {
   private _isDisposed = false;
   private _filename: string;
   private _renderMime: IRenderMimeRegistry;
-  private _repositoryPath: string;
   private _settingsRegistry: ISettingRegistry | null;
 }

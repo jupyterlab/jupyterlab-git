@@ -6,7 +6,6 @@
 /* eslint-disable no-inner-declarations */
 
 import { Toolbar } from '@jupyterlab/apputils';
-import { PathExt } from '@jupyterlab/coreutils';
 import { INotebookContent } from '@jupyterlab/nbformat';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
@@ -20,7 +19,7 @@ import {
 } from 'nbdime/lib/diff/widget/common';
 import { requestAPI } from '../../git';
 import { Git } from '../../tokens';
-import { DiffModel, SpecialRef } from './model';
+import { DiffModel } from './model';
 
 /**
  * Class of the outermost widget, the draggable tab
@@ -62,23 +61,10 @@ export const createNotebookDiff: Git.IDiffCallback<string> = async (
   model: DiffModel<string>,
   toolbar?: Toolbar
 ): Promise<NotebookDiff> => {
-  // FIXME request a specific endpoint to compute the diff if the content is known
-
-  // Build the notebook diff model
-  const challengerRef = SpecialRef[model.challenger.source]
-    ? { special: SpecialRef[model.challenger.source] }
-    : { git: model.challenger.source };
-
-  const data = await requestAPI<INbdimeDiff>(
-    'gitdiff',
-    'POST',
-    {
-      file_path: PathExt.join(model.repositoryPath, model.filename),
-      ref_local: { git: model.reference.source },
-      ref_remote: challengerRef
-    },
-    'nbdime/api'
-  );
+  const data = await requestAPI<INbdimeDiff>('diffnotebook', 'POST', {
+    currentContent: model.challenger.content,
+    previousContent: model.reference.content
+  });
   const nbModel = new NotebookDiffModel(data.base, data.diff);
 
   // Add element in toolbar

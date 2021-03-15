@@ -2,10 +2,9 @@ import { Toolbar } from '@jupyterlab/apputils';
 import { Mode } from '@jupyterlab/codemirror';
 import { Widget } from '@lumino/widgets';
 import { MergeView } from 'codemirror';
-import { requestAPI } from '../../git';
 import { Git } from '../../tokens';
 import { mergeView } from './mergeview';
-import { DiffModel, SpecialRef } from './model';
+import { DiffModel } from './model';
 
 /**
  * Diff callback to be registered for plain-text files.
@@ -18,23 +17,6 @@ export const createPlainTextDiff: Git.IDiffCallback<string> = async (
   model: DiffModel<string>,
   toolbar?: Toolbar
 ): Promise<PlainTextDiff> => {
-  // If the content is not set request the backend with the source information
-  if (!model.reference.content && !model.challenger.content) {
-    const challengerRef = SpecialRef[model.challenger.source]
-      ? { special: SpecialRef[model.challenger.source] }
-      : { git: model.challenger.source };
-
-    const data = await requestAPI<Git.IDiffContent>('diffcontent', 'POST', {
-      filename: model.filename,
-      prev_ref: { git: model.reference.source },
-      curr_ref: challengerRef,
-      top_repo_path: model.repositoryPath
-    });
-
-    model.reference.content = data['prev_content'];
-    model.challenger.content = data['curr_content'];
-  }
-
   return Promise.resolve(new PlainTextDiff(model));
 };
 
