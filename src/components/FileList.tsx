@@ -180,7 +180,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         'Are you sure you want to permanently discard changes to all files? This action cannot be undone.'
       ),
       buttons: [
-        Dialog.cancelButton(),
+        Dialog.cancelButton({ label: this.props.trans.__('Cancel') }),
         Dialog.warnButton({ label: this.props.trans.__('Discard') })
       ]
     });
@@ -205,7 +205,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         'Are you sure you want to permanently discard changes to all files? This action cannot be undone.'
       ),
       buttons: [
-        Dialog.cancelButton(),
+        Dialog.cancelButton({ label: this.props.trans.__('Cancel') }),
         Dialog.warnButton({ label: this.props.trans.__('Discard') })
       ]
     });

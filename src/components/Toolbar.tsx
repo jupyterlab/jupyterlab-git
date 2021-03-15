@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/quotes */
 import { PathExt } from '@jupyterlab/coreutils';
 import {
   caretDownIcon,
@@ -174,7 +173,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
                 ? this.props.trans.__('Pull latest changes') +
                   (this.props.nCommitsBehind > 0
                     ? this.props.trans.__(
-                        ` (behind by %1 commits)`,
+                        ' (behind by %1 commits)',
                         this.props.nCommitsBehind
                       )
                     : '')
@@ -201,7 +200,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
                   ? this.props.trans.__('Push committed changes') +
                     (this.props.nCommitsAhead > 0
                       ? this.props.trans.__(
-                          ` (ahead by %1 commits)`,
+                          ' (ahead by %1 commits)',
                           this.props.nCommitsAhead
                         )
                       : '')
@@ -235,7 +234,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           disabled
           className={toolbarMenuButtonClass}
           title={this.props.trans.__(
-            `Current repository: %1`,
+            'Current repository: %1',
             this.props.repository
           )}
         >

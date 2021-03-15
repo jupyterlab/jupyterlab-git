@@ -517,7 +517,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         this._previousRepoPath = path;
       } catch (error) {
         throw new Error(
-          this.props.trans.__('Failed to set your identity. ') + error.message
+          this.props.trans.__('Failed to set your identity. %1', error.message)
         );
       }
     }

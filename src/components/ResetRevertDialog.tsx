@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/quotes */
 import { TranslationBundle } from '@jupyterlab/translation';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -143,7 +142,7 @@ export class ResetRevertDialog extends React.Component<
                   "These changes will be reverted. Only commit if you're sure you're okay losing these changes."
                 )
               : this.props.trans.__(
-                  `All changes after commit %1 will be gone forever (hard reset). Are you sure?`,
+                  'All changes after commit %1 will be gone forever (hard reset). Are you sure?',
                   shortCommit
                 )}
           </p>
@@ -314,7 +313,7 @@ export class ResetRevertDialog extends React.Component<
    */
   private _defaultSummary(): string {
     const summary = this.props.commit.commit_msg.split('\n')[0];
-    return this.props.trans.__(`Revert '%1'`, summary);
+    return this.props.trans.__("Revert '%1'", summary);
   }
 
   /**
@@ -324,7 +323,7 @@ export class ResetRevertDialog extends React.Component<
    */
   private _defaultDescription(): string {
     return this.props.trans.__(
-      `This reverts commit %1`,
+      'This reverts commit %1',
       this.props.commit.commit
     );
   }

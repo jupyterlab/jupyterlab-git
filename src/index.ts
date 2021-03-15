@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/quotes */
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
@@ -96,7 +95,7 @@ async function activate(
       const gitVersion_ = gitVersion.split('.');
       if (Number.parseInt(gitVersion_[0]) < 2) {
         throw new Error(
-          trans.__(`git command version must be > 2; got %1.`, gitVersion)
+          trans.__('git command version must be > 2; got %1.', gitVersion)
         );
       }
     }
@@ -105,8 +104,8 @@ async function activate(
       throw new Error(
         trans.__(
           'The versions of the JupyterLab Git server frontend and backend do not match. ' +
-            `The @jupyterlab/git frontend extension has version: %1 ` +
-            `while the python package has version %2. ` +
+            'The @jupyterlab/git frontend extension has version: %1 ' +
+            'while the python package has version %2. ' +
             'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git',
           frontendVersion,
           serverVersion
@@ -156,8 +155,8 @@ async function activate(
       gitExtension,
       factory.defaultBrowser,
       settings,
-      renderMime,
-      trans
+      trans,
+      renderMime
     );
 
     // Create the Git widget sidebar

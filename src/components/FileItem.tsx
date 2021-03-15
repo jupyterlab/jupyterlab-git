@@ -182,7 +182,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         }
         onDoubleClick={this.props.onDoubleClick}
         style={this.props.style}
-        title={`${this.props.file.to} ● ${this.props.trans.__(status)}`}
+        title={this.props.trans.__(`%1 ● ${status}`, this.props.file.to)}
       >
         {this.props.markBox && (
           <GitMarkBox

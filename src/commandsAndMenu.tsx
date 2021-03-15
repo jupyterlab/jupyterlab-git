@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/quotes */
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Dialog,
@@ -105,8 +104,8 @@ export function addCommands(
   model: GitExtension,
   fileBrowser: FileBrowser,
   settings: ISettingRegistry.ISettings,
-  renderMime: IRenderMimeRegistry,
-  trans: TranslationBundle
+  trans: TranslationBundle,
+  renderMime: IRenderMimeRegistry
 ) {
   const { commands, shell } = app;
 
@@ -119,9 +118,10 @@ export function addCommands(
    * show up in the shortcut editor UI with a nice description.
    */
   commands.addCommand(CommandIDs.gitSubmitCommand, {
-    label: 'Commit from the Commit Box',
-    caption:
-      'Submit the commit using the summary and description from commit box',
+    label: trans.__('Commit from the Commit Box'),
+    caption: trans.__(
+      'Submit the commit using the summary and description from commit box'
+    ),
     execute: () => void 0,
     isVisible: () => false
   });
@@ -509,7 +509,7 @@ export function addCommands(
           showErrorMessage(
             trans.__('Diff Not Supported'),
             trans.__(
-              `Diff is not supported for %1 files.`,
+              'Diff is not supported for %1 files.',
               PathExt.extname(filePath).toLocaleLowerCase()
             )
           );
@@ -626,7 +626,7 @@ export function addCommands(
               path: model.getRelativeFilePath(file.to)
             });
           } catch (reason) {
-            showErrorMessage(trans.__(`Deleting %1 failed.`, file.to), reason, [
+            showErrorMessage(trans.__('Deleting %1 failed.', file.to), reason, [
               Dialog.warnButton({ label: trans.__('DISMISS') })
             ]);
           }
@@ -680,7 +680,7 @@ export function addCommands(
             }
           } catch (reason) {
             showErrorMessage(
-              trans.__(`Discard changes for %1 failed.`, file.to),
+              trans.__('Discard changes for %1 failed.', file.to),
               reason,
               [Dialog.warnButton({ label: trans.__('DISMISS') })]
             );
@@ -718,7 +718,7 @@ export function addCommands(
         .filter(extension => extension.length > 0);
       const subject = extensions.length > 1 ? 'extensions' : 'extension';
       return trans.__(
-        `Ignore %1 %2 (add to .gitignore)`,
+        'Ignore %1 %2 (add to .gitignore)',
         extensions.join(', '),
         trans.__(subject)
       );
@@ -736,7 +736,7 @@ export function addCommands(
             const result = await showDialog({
               title: trans.__('Ignore file extension'),
               body: trans.__(
-                `Are you sure you want to ignore all %1 files within this git repository?`,
+                'Are you sure you want to ignore all %1 files within this git repository?',
                 extension
               ),
               buttons: [
