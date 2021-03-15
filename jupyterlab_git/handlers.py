@@ -3,7 +3,6 @@ Module with all the individual handlers, which execute git commands and return t
 """
 import json
 import os
-from http import HTTPStatus
 from pathlib import Path
 
 import tornado
@@ -688,14 +687,14 @@ class GitDiffNotebookHandler(GitHandler):
         except KeyError as e:
             get_logger().error(f"Missing key in POST request.", exc_info=e)
             raise tornado.web.HTTPError(
-                status_code=HTTPStatus.BAD_REQUEST, reason=f"Missing POST key: {e}"
+                status_code=400, reason=f"Missing POST key: {e}"
             )
         try:
             content = await self.git.get_nbdiff(prev_content, curr_content)
         except Exception as e:
             get_logger().error(f"Error computing notebook diff.", exc_info=e)
             raise tornado.web.HTTPError(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                status_code=500,
                 reason=f"Error diffing content: {e}.",
             ) from e
         self.finish(json.dumps(content))
