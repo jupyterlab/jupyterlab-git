@@ -118,7 +118,7 @@ export class Alert extends React.Component<IAlertProps> {
           onClick={() => {
             showDialog({
               title: this.props.trans.__('Detailed message'),
-              body: this.props.trans.__(this.props.details),
+              body: this.props.details,
               buttons: [
                 Dialog.okButton({ label: this.props.trans.__('DISMISS') })
               ]
@@ -145,7 +145,7 @@ export class Alert extends React.Component<IAlertProps> {
           onClose={this._onClose}
         >
           <MuiAlert action={action} variant="filled" severity={severity}>
-            {this.props.trans.__(this.props.message || '(missing message)')}
+            {this.props.message || this.props.trans.__('(missing message)')}
           </MuiAlert>
         </Snackbar>
       </Portal>

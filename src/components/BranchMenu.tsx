@@ -25,8 +25,6 @@ import { Git, IGitExtension, Level } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { NewBranchDialog } from './NewBranchDialog';
 
-const CHANGES_ERR_MSG =
-  'The current branch contains files with uncommitted changes. Please commit or discard these changes before switching to or creating another branch.';
 const ITEM_HEIGHT = 24.8; // HTML element height for a single branch
 const MIN_HEIGHT = 150; // Minimal HTML element height for the branches list
 const MAX_HEIGHT = 400; // Maximal HTML element height for the branches list
@@ -147,6 +145,9 @@ export class BranchMenu extends React.Component<
   IBranchMenuProps,
   IBranchMenuState
 > {
+  CHANGES_ERR_MSG = this.props.trans.__(
+    'The current branch contains files with uncommitted changes. Please commit or discard these changes before switching to or creating another branch.'
+  );
   /**
    * Returns a React component for rendering a branch menu.
    *
@@ -363,7 +364,7 @@ export class BranchMenu extends React.Component<
     if (!this.props.branching) {
       showErrorMessage(
         this.props.trans.__('Creating a new branch is disabled'),
-        this.props.trans.__(CHANGES_ERR_MSG)
+        this.CHANGES_ERR_MSG
       );
       return;
     }
@@ -402,7 +403,7 @@ export class BranchMenu extends React.Component<
       if (!self.props.branching) {
         showErrorMessage(
           self.props.trans.__('Switching branches is disabled'),
-          self.props.trans.__(CHANGES_ERR_MSG)
+          self.CHANGES_ERR_MSG
         );
         return;
       }
