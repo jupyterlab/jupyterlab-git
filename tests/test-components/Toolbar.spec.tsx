@@ -1,3 +1,4 @@
+import { nullTranslator } from '@jupyterlab/translation';
 import { refreshIcon } from '@jupyterlab/ui-components';
 import { shallow } from 'enzyme';
 import 'jest';
@@ -24,6 +25,7 @@ async function createModel() {
 
 describe('Toolbar', () => {
   let model: GitExtension;
+  const trans = nullTranslator.load('jupyterlab-git');
 
   function createProps(props?: Partial<IToolbarProps>): IToolbarProps {
     return {
@@ -55,6 +57,7 @@ describe('Toolbar', () => {
       commands: {
         execute: jest.fn()
       } as any,
+      trans: trans,
       ...props
     };
   }

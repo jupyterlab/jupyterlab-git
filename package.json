@@ -73,6 +73,7 @@
     "outputDir": "jupyterlab_git/labextension"
   },
   "dependencies": {
+    "@jupyterlab/translation": "^3.0.0",
     "@jupyterlab/application": "^3.0.0",
     "@jupyterlab/apputils": "^3.0.0",
     "@jupyterlab/codemirror": "^3.0.0",

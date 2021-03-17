@@ -43,21 +43,11 @@ import {
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { GitCloneForm } from './widgets/GitCloneForm';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { Contents } from '@jupyterlab/services';
 import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { CONTEXT_COMMANDS } from './components/FileList';
-
-const RESOURCES = [
-  {
-    text: 'Set Up Remotes',
-    url: 'https://www.atlassian.com/git/tutorials/setting-up-a-repository'
-  },
-  {
-    text: 'Git Documentation',
-    url: 'https://git-scm.com/doc'
-  }
-];
 
 interface IGitCloneArgs {
   /**
@@ -114,6 +104,7 @@ export function addCommands(
   model: GitExtension,
   fileBrowser: FileBrowser,
   settings: ISettingRegistry.ISettings,
+  trans: TranslationBundle,
   renderMime: IRenderMimeRegistry
 ): void {
   const { commands, shell } = app;
@@ -127,9 +118,10 @@ export function addCommands(
    * show up in the shortcut editor UI with a nice description.
    */
   commands.addCommand(CommandIDs.gitSubmitCommand, {
-    label: 'Commit from the Commit Box',
-    caption:
-      'Submit the commit using the summary and description from commit box',
+    label: trans.__('Commit from the Commit Box'),
+    caption: trans.__(
+      'Submit the commit using the summary and description from commit box'
+    ),
     execute: () => void 0,
     isVisible: () => false
   });
@@ -138,8 +130,8 @@ export function addCommands(
    * Add open terminal in the Git repository
    */
   commands.addCommand(CommandIDs.gitTerminalCommand, {
-    label: 'Open Git Repository in Terminal',
-    caption: 'Open a New Terminal to the Git Repository',
+    label: trans.__('Open Git Repository in Terminal'),
+    caption: trans.__('Open a New Terminal to the Git Repository'),
     execute: async args => {
       const main = (await commands.execute(
         'terminal:create-new',
@@ -166,8 +158,8 @@ export function addCommands(
 
   /** Add open/go to git interface command */
   commands.addCommand(CommandIDs.gitUI, {
-    label: 'Git Interface',
-    caption: 'Go to Git user interface',
+    label: trans.__('Git Interface'),
+    caption: trans.__('Go to Git user interface'),
     execute: () => {
       try {
         shell.activateById('jp-git-sessions');
@@ -179,35 +171,42 @@ export function addCommands(
 
   /** Add git init command */
   commands.addCommand(CommandIDs.gitInit, {
-    label: 'Initialize a Repository',
-    caption: 'Create an empty Git repository or reinitialize an existing one',
+    label: trans.__('Initialize a Repository'),
+    caption: trans.__(
+      'Create an empty Git repository or reinitialize an existing one'
+    ),
     execute: async () => {
       const currentPath = fileBrowser.model.path;
       const result = await showDialog({
-        title: 'Initialize a Repository',
-        body: 'Do you really want to make this directory a Git Repo?',
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Yes' })]
+        title: trans.__('Initialize a Repository'),
+        body: trans.__('Do you really want to make this directory a Git Repo?'),
+        buttons: [
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
+          Dialog.warnButton({ label: trans.__('Yes') })
+        ]
       });
 
       if (result.button.accept) {
         logger.log({
-          message: 'Initializing...',
+          message: trans.__('Initializing...'),
           level: Level.RUNNING
         });
         try {
           await model.init(currentPath);
           model.pathRepository = currentPath;
           logger.log({
-            message: 'Git repository initialized.',
+            message: trans.__('Git repository initialized.'),
             level: Level.SUCCESS
           });
         } catch (error) {
           console.error(
-            'Encountered an error when initializing the repository. Error: ',
+            trans.__(
+              'Encountered an error when initializing the repository. Error: '
+            ),
             error
           );
           logger.log({
-            message: 'Failed to initialize the Git repository',
+            message: trans.__('Failed to initialize the Git repository'),
             level: Level.ERROR,
             error
           });
@@ -228,7 +227,7 @@ export function addCommands(
 
   /** add toggle for simple staging */
   commands.addCommand(CommandIDs.gitToggleSimpleStaging, {
-    label: 'Simple staging',
+    label: trans.__('Simple staging'),
     isToggled: () => !!settings.composite['simpleStaging'],
     execute: args => {
       settings.set('simpleStaging', !settings.composite['simpleStaging']);
@@ -237,7 +236,7 @@ export function addCommands(
 
   /** add toggle for double click opens diffs */
   commands.addCommand(CommandIDs.gitToggleDoubleClickDiff, {
-    label: 'Double click opens diff',
+    label: trans.__('Double click opens diff'),
     isToggled: () => !!settings.composite['doubleClickDiff'],
     execute: args => {
       settings.set('doubleClickDiff', !settings.composite['doubleClickDiff']);
@@ -246,12 +245,14 @@ export function addCommands(
 
   /** Command to add a remote Git repository */
   commands.addCommand(CommandIDs.gitAddRemote, {
-    label: 'Add Remote Repository',
-    caption: 'Add a Git remote repository',
+    label: trans.__('Add Remote Repository'),
+    caption: trans.__('Add a Git remote repository'),
     isEnabled: () => model.pathRepository !== null,
     execute: async args => {
       if (model.pathRepository === null) {
-        console.warn('Not in a Git repository. Unable to add a remote.');
+        console.warn(
+          trans.__('Not in a Git repository. Unable to add a remote.')
+        );
         return;
       }
       let url = args['url'] as string;
@@ -259,8 +260,8 @@ export function addCommands(
 
       if (!url) {
         const result = await InputDialog.getText({
-          title: 'Add a remote repository',
-          placeholder: 'Remote Git repository URL'
+          title: trans.__('Add a remote repository'),
+          placeholder: trans.__('Remote Git repository URL')
         });
 
         if (result.button.accept) {
@@ -273,7 +274,10 @@ export function addCommands(
           await model.addRemote(url, name);
         } catch (error) {
           console.error(error);
-          showErrorMessage('Error when adding remote repository', error);
+          showErrorMessage(
+            trans.__('Error when adding remote repository'),
+            error
+          );
         }
       }
     }
@@ -281,30 +285,34 @@ export function addCommands(
 
   /** Add git clone command */
   commands.addCommand(CommandIDs.gitClone, {
-    label: 'Clone a Repository',
-    caption: 'Clone a repository from a URL',
+    label: trans.__('Clone a Repository'),
+    caption: trans.__('Clone a repository from a URL'),
     isEnabled: () => model.pathRepository === null,
     execute: async () => {
       const result = await showDialog({
-        title: 'Clone a repo',
-        body: new GitCloneForm(),
+        title: trans.__('Clone a repo'),
+        body: new GitCloneForm(trans),
         focusNodeSelector: 'input',
-        buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'CLONE' })]
+        buttons: [
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
+          Dialog.okButton({ label: trans.__('CLONE') })
+        ]
       });
 
       if (result.button.accept && result.value) {
         logger.log({
           level: Level.RUNNING,
-          message: 'Cloning...'
+          message: trans.__('Cloning...')
         });
         try {
           const details = await Private.showGitOperationDialog<IGitCloneArgs>(
             model,
             Operation.Clone,
+            trans,
             { path: fileBrowser.model.path, url: result.value }
           );
           logger.log({
-            message: 'Successfully cloned',
+            message: trans.__('Successfully cloned'),
             level: Level.SUCCESS,
             details
           });
@@ -315,7 +323,7 @@ export function addCommands(
             error
           );
           logger.log({
-            message: 'Failed to clone',
+            message: trans.__('Failed to clone'),
             level: Level.ERROR,
             error
           });
@@ -326,8 +334,8 @@ export function addCommands(
 
   /** Add git open gitignore command */
   commands.addCommand(CommandIDs.gitOpenGitignore, {
-    label: 'Open .gitignore',
-    caption: 'Open .gitignore',
+    label: trans.__('Open .gitignore'),
+    caption: trans.__('Open .gitignore'),
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       await model.ensureGitignore();
@@ -336,31 +344,32 @@ export function addCommands(
 
   /** Add git push command */
   commands.addCommand(CommandIDs.gitPush, {
-    label: 'Push to Remote',
-    caption: 'Push code to remote repository',
+    label: trans.__('Push to Remote'),
+    caption: trans.__('Push code to remote repository'),
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       logger.log({
         level: Level.RUNNING,
-        message: 'Pushing...'
+        message: trans.__('Pushing...')
       });
       try {
         const details = await Private.showGitOperationDialog(
           model,
-          Operation.Push
+          Operation.Push,
+          trans
         );
         logger.log({
-          message: 'Successfully pushed',
+          message: trans.__('Successfully pushed'),
           level: Level.SUCCESS,
           details
         });
       } catch (error) {
         console.error(
-          'Encountered an error when pushing changes. Error: ',
+          trans.__('Encountered an error when pushing changes. Error: '),
           error
         );
         logger.log({
-          message: 'Failed to push',
+          message: trans.__('Failed to push'),
           level: Level.ERROR,
           error
         });
@@ -370,21 +379,22 @@ export function addCommands(
 
   /** Add git pull command */
   commands.addCommand(CommandIDs.gitPull, {
-    label: 'Pull from Remote',
-    caption: 'Pull latest code from remote repository',
+    label: trans.__('Pull from Remote'),
+    caption: trans.__('Pull latest code from remote repository'),
     isEnabled: () => model.pathRepository !== null,
     execute: async () => {
       logger.log({
         level: Level.RUNNING,
-        message: 'Pulling...'
+        message: trans.__('Pulling...')
       });
       try {
         const details = await Private.showGitOperationDialog(
           model,
-          Operation.Pull
+          Operation.Pull,
+          trans
         );
         logger.log({
-          message: 'Successfully pulled',
+          message: trans.__('Successfully pulled'),
           level: Level.SUCCESS,
           details
         });
@@ -394,7 +404,7 @@ export function addCommands(
           error
         );
         logger.log({
-          message: 'Failed to pull',
+          message: trans.__('Failed to pull'),
           level: Level.ERROR,
           error
         });
@@ -404,10 +414,10 @@ export function addCommands(
 
   /* Context menu commands */
   commands.addCommand(ContextCommandIDs.gitFileOpen, {
-    label: 'Open',
+    label: trans.__('Open'),
     caption: pluralizedContextLabel(
-      'Open selected file',
-      'Open selected files'
+      trans.__('Open selected file'),
+      trans.__('Open selected files')
     ),
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
@@ -415,8 +425,8 @@ export function addCommands(
         const { x, y, to } = file;
         if (x === 'D' || y === 'D') {
           await showErrorMessage(
-            'Open File Failed',
-            'This file has been deleted!'
+            trans.__('Open File Failed'),
+            trans.__('This file has been deleted!')
           );
           return;
         }
@@ -437,10 +447,10 @@ export function addCommands(
   });
 
   commands.addCommand(ContextCommandIDs.gitFileDiff, {
-    label: 'Diff',
+    label: trans.__('Diff'),
     caption: pluralizedContextLabel(
-      'Diff selected file',
-      'Diff selected files'
+      trans.__('Diff selected file'),
+      trans.__('Diff selected files')
     ),
     execute: args => {
       const { files } = (args as any) as CommandArguments.IGitFileDiff;
@@ -497,10 +507,11 @@ export function addCommands(
           }
         } else {
           showErrorMessage(
-            'Diff Not Supported',
-            `Diff is not supported for ${PathExt.extname(
-              filePath
-            ).toLocaleLowerCase()} files.`
+            trans.__('Diff Not Supported'),
+            trans.__(
+              'Diff is not supported for %1 files.',
+              PathExt.extname(filePath).toLocaleLowerCase()
+            )
           );
         }
       }
@@ -509,10 +520,10 @@ export function addCommands(
   });
 
   commands.addCommand(ContextCommandIDs.gitFileAdd, {
-    label: 'Add',
+    label: trans.__('Add'),
     caption: pluralizedContextLabel(
-      'Stage or track the changes to selected file',
-      'Stage or track the changes of selected files'
+      trans.__('Stage or track the changes to selected file'),
+      trans.__('Stage or track the changes of selected files')
     ),
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
@@ -524,10 +535,10 @@ export function addCommands(
   });
 
   commands.addCommand(ContextCommandIDs.gitFileStage, {
-    label: 'Stage',
+    label: trans.__('Stage'),
     caption: pluralizedContextLabel(
-      'Stage the changes of selected file',
-      'Stage the changes of selected files'
+      trans.__('Stage the changes of selected file'),
+      trans.__('Stage the changes of selected files')
     ),
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
@@ -539,10 +550,10 @@ export function addCommands(
   });
 
   commands.addCommand(ContextCommandIDs.gitFileTrack, {
-    label: 'Track',
+    label: trans.__('Track'),
     caption: pluralizedContextLabel(
-      'Start tracking selected file',
-      'Start tracking selected files'
+      trans.__('Start tracking selected file'),
+      trans.__('Start tracking selected files')
     ),
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
@@ -554,10 +565,10 @@ export function addCommands(
   });
 
   commands.addCommand(ContextCommandIDs.gitFileUnstage, {
-    label: 'Unstage',
+    label: trans.__('Unstage'),
     caption: pluralizedContextLabel(
-      'Unstage the changes of selected file',
-      'Unstage the changes of selected files'
+      trans.__('Unstage the changes of selected file'),
+      trans.__('Unstage the changes of selected files')
     ),
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
@@ -584,21 +595,29 @@ export function addCommands(
   }
 
   commands.addCommand(ContextCommandIDs.gitFileDelete, {
-    label: 'Delete',
-    caption: pluralizedContextLabel('Delete this file', 'Delete these files'),
+    label: trans.__('Delete'),
+    caption: pluralizedContextLabel(
+      trans.__('Delete this file'),
+      trans.__('Delete these files')
+    ),
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
       const fileList = representFiles(files);
 
       const result = await showDialog({
-        title: 'Delete Files',
+        title: trans.__('Delete Files'),
         body: (
           <span>
-            Are you sure you want to permanently delete {fileList}? This action
-            cannot be undone.
+            {trans.__(
+              'Are you sure you want to permanently delete %1? This action cannot be undone.',
+              fileList
+            )}
           </span>
         ),
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
+        buttons: [
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
+          Dialog.warnButton({ label: trans.__('Delete') })
+        ]
       });
       if (result.button.accept) {
         for (const file of files) {
@@ -607,8 +626,8 @@ export function addCommands(
               path: model.getRelativeFilePath(file.to)
             });
           } catch (reason) {
-            showErrorMessage(`Deleting ${file.to} failed.`, reason, [
-              Dialog.warnButton({ label: 'DISMISS' })
+            showErrorMessage(trans.__('Deleting %1 failed.', file.to), reason, [
+              Dialog.warnButton({ label: trans.__('DISMISS') })
             ]);
           }
         }
@@ -618,26 +637,29 @@ export function addCommands(
   });
 
   commands.addCommand(ContextCommandIDs.gitFileDiscard, {
-    label: 'Discard',
+    label: trans.__('Discard'),
     caption: pluralizedContextLabel(
-      'Discard recent changes of selected file',
-      'Discard recent changes of selected files'
+      trans.__('Discard recent changes of selected file'),
+      trans.__('Discard recent changes of selected files')
     ),
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
       const fileList = representFiles(files);
 
       const result = await showDialog({
-        title: 'Discard changes',
+        title: trans.__('Discard changes'),
         body: (
           <span>
-            Are you sure you want to permanently discard changes to {fileList}?
-            This action cannot be undone.
+            {trans.__(
+              'Are you sure you want to permanently discard changes to %1? \
+            This action cannot be undone.',
+              fileList
+            )}
           </span>
         ),
         buttons: [
-          Dialog.cancelButton(),
-          Dialog.warnButton({ label: 'Discard' })
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
+          Dialog.warnButton({ label: trans.__('Discard') })
         ]
       });
       if (result.button.accept) {
@@ -657,9 +679,11 @@ export function addCommands(
               await model.checkout({ filename: file.to });
             }
           } catch (reason) {
-            showErrorMessage(`Discard changes for ${file.to} failed.`, reason, [
-              Dialog.warnButton({ label: 'DISMISS' })
-            ]);
+            showErrorMessage(
+              trans.__('Discard changes for %1 failed.', file.to),
+              reason,
+              [Dialog.warnButton({ label: trans.__('DISMISS') })]
+            );
           }
         }
       }
@@ -669,12 +693,12 @@ export function addCommands(
 
   commands.addCommand(ContextCommandIDs.gitIgnore, {
     label: pluralizedContextLabel(
-      'Ignore this file (add to .gitignore)',
-      'Ignore these files (add to .gitignore)'
+      trans.__('Ignore this file (add to .gitignore)'),
+      trans.__('Ignore these files (add to .gitignore)')
     ),
     caption: pluralizedContextLabel(
-      'Ignore this file (add to .gitignore)',
-      'Ignore these files (add to .gitignore)'
+      trans.__('Ignore this file (add to .gitignore)'),
+      trans.__('Ignore these files (add to .gitignore)')
     ),
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
@@ -693,11 +717,15 @@ export function addCommands(
         .map(file => PathExt.extname(file.to))
         .filter(extension => extension.length > 0);
       const subject = extensions.length > 1 ? 'extensions' : 'extension';
-      return `Ignore ${extensions.join(', ')} ${subject} (add to .gitignore)`;
+      return trans.__(
+        'Ignore %1 %2 (add to .gitignore)',
+        extensions.join(', '),
+        trans.__(subject)
+      );
     },
     caption: pluralizedContextLabel(
-      'Ignore this file extension (add to .gitignore)',
-      'Ignore these files extension (add to .gitignore)'
+      trans.__('Ignore this file extension (add to .gitignore)'),
+      trans.__('Ignore these files extension (add to .gitignore)')
     ),
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
@@ -706,14 +734,17 @@ export function addCommands(
           const extension = PathExt.extname(selectedFile.to);
           if (extension.length > 0) {
             const result = await showDialog({
-              title: 'Ignore file extension',
-              body: `Are you sure you want to ignore all ${extension} files within this git repository?`,
+              title: trans.__('Ignore file extension'),
+              body: trans.__(
+                'Are you sure you want to ignore all %1 files within this git repository?',
+                extension
+              ),
               buttons: [
                 Dialog.cancelButton(),
-                Dialog.okButton({ label: 'Ignore' })
+                Dialog.okButton({ label: trans.__('Ignore') })
               ]
             });
-            if (result.button.label === 'Ignore') {
+            if (result.button.label === trans.__('Ignore')) {
               await model.ignore(selectedFile.to, true);
             }
           }
@@ -730,7 +761,7 @@ export function addCommands(
   });
 
   commands.addCommand(ContextCommandIDs.gitNoAction, {
-    label: 'No actions available',
+    label: trans.__('No actions available'),
     isEnabled: () => false,
     execute: () => void 0
   });
@@ -740,9 +771,24 @@ export function addCommands(
  * Adds commands and menu items.
  *
  * @param commands - Jupyter App commands registry
+ *  @param trans - language translator
  * @returns menu
  */
-export function createGitMenu(commands: CommandRegistry): Menu {
+export function createGitMenu(
+  commands: CommandRegistry,
+  trans: TranslationBundle
+): Menu {
+  const RESOURCES = [
+    {
+      text: trans.__('Set Up Remotes'),
+      url: 'https://www.atlassian.com/git/tutorials/setting-up-a-repository'
+    },
+    {
+      text: trans.__('Git Documentation'),
+      url: 'https://git-scm.com/doc'
+    }
+  ];
+
   const menu = new Menu({ commands });
   menu.title.label = 'Git';
   [
@@ -769,7 +815,7 @@ export function createGitMenu(commands: CommandRegistry): Menu {
   menu.addItem({ type: 'separator' });
 
   const tutorial = new Menu({ commands });
-  tutorial.title.label = ' Help ';
+  tutorial.title.label = trans.__(' Help ');
   RESOURCES.map(args => {
     tutorial.addItem({
       args,
@@ -955,6 +1001,7 @@ namespace Private {
    * @private
    * @param model - Git extension model
    * @param operation - Git operation name
+   * @param trans - language translator
    * @param args - Git operation arguments
    * @param authentication - Git authentication information
    * @param retry - Is this operation retried?
@@ -963,6 +1010,7 @@ namespace Private {
   export async function showGitOperationDialog<T>(
     model: GitExtension,
     operation: Operation,
+    trans: TranslationBundle,
     args?: T,
     authentication?: Git.IAuth,
     retry = false
@@ -996,10 +1044,11 @@ namespace Private {
       ) {
         // If the error is an authentication error, ask the user credentials
         const credentials = await showDialog({
-          title: 'Git credentials required',
+          title: trans.__('Git credentials required'),
           body: new GitCredentialsForm(
-            'Enter credentials for remote repository',
-            retry ? 'Incorrect username or password.' : ''
+            trans,
+            trans.__('Enter credentials for remote repository'),
+            retry ? trans.__('Incorrect username or password.') : ''
           )
         });
 
@@ -1008,6 +1057,7 @@ namespace Private {
           return await showGitOperationDialog<T>(
             model,
             operation,
+            trans,
             args,
             credentials.value,
             true

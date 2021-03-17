@@ -3,6 +3,7 @@ import 'jest';
 import { shallow } from 'enzyme';
 import { CommitBox} from '../../src/components/CommitBox';
 import { CommandRegistry } from '@lumino/commands';
+import { nullTranslator } from '@jupyterlab/translation';
 import { CommandIDs } from '../../src/tokens';
 
 describe('CommitBox', () => {
@@ -14,12 +15,15 @@ describe('CommitBox', () => {
     selector: '.jp-git-CommitBox'
   })
 
+  const trans = nullTranslator.load('jupyterlab-git');
+
   describe('#constructor()', () => {
     it('should return a new instance', () => {
       const box = new CommitBox({
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       });
       expect(box).toBeInstanceOf(CommitBox);
     });
@@ -28,7 +32,8 @@ describe('CommitBox', () => {
       const box = new CommitBox({
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       });
       expect(box.state.summary).toEqual('');
     });
@@ -37,7 +42,8 @@ describe('CommitBox', () => {
       const box = new CommitBox({
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       });
       expect(box.state.description).toEqual('');
     });
@@ -48,7 +54,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="text"]').first();
@@ -65,7 +72,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: adjustedCommands
+        commands: adjustedCommands,
+        trans: trans
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="text"]').first();
@@ -76,7 +84,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="text"]').first();
@@ -87,7 +96,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('TextareaAutosize').first();
@@ -98,7 +108,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('TextareaAutosize').first();
@@ -109,7 +120,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -120,7 +132,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -131,7 +144,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -143,7 +157,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: true,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -155,7 +170,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: true,
-        commands: defaultCommands
+        commands: defaultCommands,
+        trans: trans
       };
       const component = shallow(<CommitBox {...props} />);
       component.setState({

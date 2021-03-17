@@ -1,3 +1,4 @@
+import { TranslationBundle } from '@jupyterlab/translation';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Color } from '@material-ui/lab/Alert';
 import * as React from 'react';
@@ -25,6 +26,11 @@ export interface IFeedbackProps {
    * Extension settings
    */
   settings: ISettingRegistry.ISettings;
+
+  /**
+   * The application language translator.
+   */
+  trans: TranslationBundle;
 }
 
 export interface IFeedbackState {
@@ -126,6 +132,7 @@ export class Feedback extends React.Component<IFeedbackProps, IFeedbackState> {
           message={log?.message || this.props.log.message}
           severity={LEVEL_TO_SEVERITY.get(log?.level || this.props.log.level)}
           onClose={() => this.setState({ showAlert: false })}
+          trans={this.props.trans}
         />
       </React.Fragment>
     );

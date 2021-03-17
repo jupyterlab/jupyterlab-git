@@ -6,6 +6,7 @@ import {
   commitDescriptionClass,
   commitButtonClass
 } from '../style/CommitBox';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { CommandIDs } from '../tokens';
 
@@ -22,7 +23,10 @@ export interface ICommitBoxProps {
    * Boolean indicating whether files currently exist which have changes to commit.
    */
   hasFiles: boolean;
-
+  /**
+   * The application language translator.
+   */
+  trans: TranslationBundle;
   /**
    * Callback to invoke in order to commit changes.
    *
@@ -84,22 +88,27 @@ export class CommitBox extends React.Component<
   render(): React.ReactElement {
     const disabled = !this._canCommit();
     const title = !this.props.hasFiles
-      ? 'Disabled: No files are staged for commit'
+      ? this.props.trans.__('Disabled: No files are staged for commit')
       : !this.state.summary
-      ? 'Disabled: No commit message summary'
-      : 'Commit';
+      ? this.props.trans.__('Disabled: No commit message summary')
+      : this.props.trans.__('Commit');
 
     const shortcutHint = CommandRegistry.formatKeystroke(
       this._getSubmitKeystroke()
     );
-    const summaryPlaceholder = 'Summary (' + shortcutHint + ' to commit)';
+    const summaryPlaceholder = this.props.trans.__(
+      'Summary (%1 to commit)',
+      shortcutHint
+    );
     return (
       <form className={[commitFormClass, 'jp-git-CommitBox'].join(' ')}>
         <input
           className={commitSummaryClass}
           type="text"
           placeholder={summaryPlaceholder}
-          title="Enter a commit message summary (a single line, preferably less than 50 characters)"
+          title={this.props.trans.__(
+            'Enter a commit message summary (a single line, preferably less than 50 characters)'
+          )}
           value={this.state.summary}
           onChange={this._onSummaryChange}
           onKeyPress={this._onSummaryKeyPress}
@@ -107,8 +116,8 @@ export class CommitBox extends React.Component<
         <TextareaAutosize
           className={commitDescriptionClass}
           minRows={5}
-          placeholder="Description (optional)"
-          title="Enter a commit message description"
+          placeholder={this.props.trans.__('Description (optional)')}
+          title={this.props.trans.__('Enter a commit message description')}
           value={this.state.description}
           onChange={this._onDescriptionChange}
         />
