@@ -19,5 +19,3 @@ dependencies:
   - wheel
   # additional packages for demos
   - nbgitpuller
-  # Fix binder
-  - sqlalchemy <1.4.0
