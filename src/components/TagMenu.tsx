@@ -19,8 +19,6 @@ import {
 import { tagIcon } from '../style/icons';
 import { IGitExtension, Level } from '../tokens';
 
-const CHANGES_ERR_MSG =
-  'The repository contains files with uncommitted changes. Please commit or discard these changes before switching to a tag.';
 const ITEM_HEIGHT = 24.8; // HTML element height for a single branch
 const MIN_HEIGHT = 150; // Minimal HTML element height for the tags list
 const MAX_HEIGHT = 400; // Maximal HTML element height for the tags list
@@ -297,7 +295,9 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
       if (!self.props.branching) {
         showErrorMessage(
           self.props.trans.__('Checkout tags is disabled'),
-          self.props.trans.__(CHANGES_ERR_MSG)
+          self.props.trans.__(
+            'The repository contains files with uncommitted changes. Please commit or discard these changes before switching to a tag.'
+          )
         );
         return;
       }

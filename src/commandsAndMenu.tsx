@@ -716,11 +716,11 @@ export function addCommands(
       const extensions = files
         .map(file => PathExt.extname(file.to))
         .filter(extension => extension.length > 0);
-      const subject = extensions.length > 1 ? 'extensions' : 'extension';
-      return trans.__(
-        'Ignore %1 %2 (add to .gitignore)',
-        extensions.join(', '),
-        trans.__(subject)
+      return trans._n(
+        'Ignore %2 extension (add to .gitignore)',
+        'Ignore %2 extensions (add to .gitignore)',
+        extensions.length,
+        extensions.join(', ')
       );
     },
     caption: pluralizedContextLabel(
