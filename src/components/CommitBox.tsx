@@ -125,7 +125,7 @@ export class CommitBox extends React.Component<
           className={commitButtonClass}
           type="button"
           title={title}
-          value="Commit"
+          value={this.props.trans.__('Commit')}
           disabled={disabled}
           onClick={this._onCommitSubmit}
         />
