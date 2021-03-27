@@ -83,6 +83,7 @@ export const createNotebookDiff: Git.Diff.ICallback<string> = async (
 
   // Create the notebook diff view
   const diffWidget = new NotebookDiff(model, nbModel);
+  diffWidget.addClass('jp-git-diff-root');
 
   await diffWidget.ready;
 
@@ -186,10 +187,11 @@ namespace Private {
    */
   export function diffHeader(baseLabel: string, remoteLabel: string): Widget {
     const node = document.createElement('div');
-    node.className = 'nbdime-Diff';
-    node.innerHTML = `<div class=nbdime-header-banner>
-        <span class="nbdime-header-base">${baseLabel}</span>
-        <span class="nbdime-header-remote">${remoteLabel}</span>
+    node.className = 'jp-git-diff-header';
+    node.innerHTML = `<div class="jp-git-diff-banner">
+        <span>${baseLabel}</span>
+        <span class="jp-spacer"></span>
+        <span>${remoteLabel}</span>
       </div>`;
 
     return new Widget({ node });

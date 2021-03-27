@@ -91,6 +91,7 @@ export class PlainTextDiff extends Widget {
     head.innerHTML = `
     <div class="jp-git-diff-banner">
       <span>${baseLabel}</span>
+      <span class="jp-spacer"></span>
       <span>${remoteLabel}</span>
     </div>
     <div class="jp-git-PlainText-diff"></div>`;
