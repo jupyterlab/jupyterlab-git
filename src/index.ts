@@ -16,13 +16,13 @@ import {
   addFileBrowserContextMenu,
   createGitMenu
 } from './commandsAndMenu';
+import { addStatusBarWidget } from './components/StatusWidget';
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
 import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
-import { addStatusBarWidget } from './widgets/StatusWidget';
 
 export { Git, IGitExtension } from './tokens';
 

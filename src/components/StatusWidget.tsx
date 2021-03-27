@@ -1,14 +1,16 @@
+import { ReactWidget } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { Widget } from '@lumino/widgets';
-import { statusWidgetClass } from '../style/StatusWidget';
+import React from 'react';
+import { gitIcon } from '../style/icons';
+import {
+  statusAnimatedIconClass,
+  statusIconClass
+} from '../style/StatusWidget';
 import { IGitExtension } from '../tokens';
 import { sleep } from '../utils';
 
-/**
- * Class for creating a status bar widget.
- */
-export class StatusWidget extends Widget {
+export class StatusWidget extends ReactWidget {
   /**
    * Returns a status bar widget.
    *
@@ -16,7 +18,6 @@ export class StatusWidget extends Widget {
    */
   constructor() {
     super();
-    this.addClass(statusWidgetClass);
   }
 
   /**
@@ -25,16 +26,23 @@ export class StatusWidget extends Widget {
   set status(text: string) {
     this._status = text;
     if (!this._locked) {
-      this._lock();
-      this.refresh();
+      this._animate();
     }
   }
 
-  /**
-   * Refreshes the status widget.
-   */
-  refresh(): void {
-    this.node.textContent = 'Git: ' + this._status;
+  render(): JSX.Element {
+    return (
+      <div title={`Git: ${this._status}`}>
+        <gitIcon.react
+          className={
+            this._status !== 'idle' ? statusAnimatedIconClass : statusIconClass
+          }
+          left={'1px'}
+          top={'3px'}
+          stylesheet={'statusBar'}
+        />
+      </div>
+    );
   }
 
   /**
@@ -44,11 +52,12 @@ export class StatusWidget extends Widget {
    *
    * -   This is used to throttle updates in order to prevent "flashing" messages.
    */
-  async _lock(): Promise<void> {
+  async _animate(): Promise<void> {
     this._locked = true;
+    this.update();
     await sleep(500);
     this._locked = false;
-    this.refresh();
+    this.update();
   }
 
   /**
