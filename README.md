@@ -140,7 +140,7 @@ If they do not match or one is missing, please [reinstall the package](README.md
     jupyter labextension install @jupyterlab/git
     ```
     
-    If you see `@jupyterlab/git`, your installation may have been corrupted. You can run `jupyter lab clean --all` and
+    If you see `@jupyterlab/git` under `Uninstalled core extensions: `, your installation may have been corrupted. You can run `jupyter lab clean --all` and
     reinstall all your extensions.
     
 ## Contributing
