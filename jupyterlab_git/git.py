@@ -1217,48 +1217,39 @@ class Git:
             raise error
         return model["content"]
 
-    async def diff_content(self, filename, prev_ref, curr_ref, top_repo_path):
+    async def get_content_at_reference(self, filename, reference, top_repo_path):
         """
-        Collect get content of prev and curr and return.
+        Collect get content of the file at the git reference.
         """
-        if prev_ref["git"]:
-            is_binary = await self._is_binary(filename, prev_ref["git"], top_repo_path)
-            if is_binary:
-                raise tornado.web.HTTPError(
-                    log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8."
-                )
-
-            prev_content = await self.show(filename, prev_ref["git"], top_repo_path)
-        else:
-            prev_content = ""
-
-        if "special" in curr_ref:
-            if curr_ref["special"] == "WORKING":
-                curr_content = self.get_content(filename, top_repo_path)
-            elif curr_ref["special"] == "INDEX":
+        if "special" in reference:
+            if reference["special"] == "WORKING":
+                content = self.get_content(filename, top_repo_path)
+            elif reference["special"] == "INDEX":
                 is_binary = await self._is_binary(filename, "INDEX", top_repo_path)
                 if is_binary:
                     raise tornado.web.HTTPError(
-                        log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8."
+                        log_message="Error occurred while executing command to retrieve plaintext content as file is not UTF-8."
                     )
 
-                curr_content = await self.show(filename, "", top_repo_path)
+                content = await self.show(filename, "", top_repo_path)
             else:
                 raise tornado.web.HTTPError(
-                    log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(
-                        curr_ref["special"]
+                    log_message="Error while retrieving plaintext content, unknown special ref '{}'.".format(
+                        reference["special"]
                     )
                 )
-        else:
-            is_binary = await self._is_binary(filename, curr_ref["git"], top_repo_path)
+        elif reference["git"]:
+            is_binary = await self._is_binary(filename, reference["git"], top_repo_path)
             if is_binary:
                 raise tornado.web.HTTPError(
-                    log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8."
+                    log_message="Error occurred while executing command to retrieve plaintext content as file is not UTF-8."
                 )
 
-            curr_content = await self.show(filename, curr_ref["git"], top_repo_path)
+            content = await self.show(filename, reference["git"], top_repo_path)
+        else:
+            content = ""
 
-        return {"prev_content": prev_content, "curr_content": curr_content}
+        return {"content": content}
 
     async def _is_binary(self, filename, ref, top_repo_path):
         """

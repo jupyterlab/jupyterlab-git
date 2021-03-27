@@ -474,9 +474,9 @@ export namespace Git {
      */
     export interface IContent<T> {
       /**
-       * Content
+       * Asynchronous content getter for the source
        */
-      content: T;
+      content: () => Promise<T>;
       /**
        * Content label
        *
@@ -516,6 +516,9 @@ export namespace Git {
        * Challenger data
        */
       challenger: IContent<T>;
+      /**
+       * Signal emitted when the reference or the challenger changes
+       */
       readonly changed: ISignal<IModel<T>, IModelChange>;
       /**
        * File of the name being diff at reference state
@@ -664,13 +667,9 @@ export namespace Git {
    */
   export interface IDiffContent {
     /**
-     * Current file content
+     * File content
      */
-    curr_content: string;
-    /**
-     * Previous file content
-     */
-    prev_content: string;
+    content: string;
   }
 
   /**

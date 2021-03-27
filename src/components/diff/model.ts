@@ -28,6 +28,9 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     return this._changed;
   }
 
+  /**
+   * Challenger description
+   */
   get challenger(): Git.Diff.IContent<T> {
     return this._challenger;
   }
@@ -36,10 +39,16 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     this._changed.emit({ type: 'challenger' });
   }
 
+  /**
+   * File to be compared
+   */
   get filename(): string {
     return this._filename;
   }
 
+  /**
+   * Reference description
+   */
   get reference(): Git.Diff.IContent<T> {
     return this._reference;
   }
@@ -48,10 +57,16 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     this._changed.emit({ type: 'reference' });
   }
 
+  /**
+   * Render mime registry
+   */
   get renderMime(): IRenderMimeRegistry {
     return this._renderMime;
   }
 
+  /**
+   * Settings registry
+   */
   get settingsRegistry(): ISettingRegistry | null {
     return this._settingsRegistry;
   }

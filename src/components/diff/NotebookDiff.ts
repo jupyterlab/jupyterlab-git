@@ -63,8 +63,8 @@ export const createNotebookDiff: Git.Diff.ICallback<string> = async (
   toolbar?: Toolbar
 ): Promise<NotebookDiff> => {
   const data = await requestAPI<INbdimeDiff>('diffnotebook', 'POST', {
-    currentContent: model.challenger.content,
-    previousContent: model.reference.content
+    currentContent: await model.challenger.content(),
+    previousContent: await model.reference.content()
   });
   const nbModel = new NotebookDiffModel(data.base, data.diff);
 

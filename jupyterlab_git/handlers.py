@@ -653,10 +653,9 @@ class GitConfigHandler(GitHandler):
         self.finish(json.dumps(response))
 
 
-class GitDiffContentHandler(GitHandler):
+class GitContentHandler(GitHandler):
     """
-    Handler for plain text diffs. Uses git show $REF:$FILE
-    Returns `prev_content` and `curr_content` with content of given file.
+    Handler to get file content at a certain git reference
     """
 
     @tornado.web.authenticated
@@ -664,11 +663,10 @@ class GitDiffContentHandler(GitHandler):
         cm = self.contents_manager
         data = self.get_json_body()
         filename = data["filename"]
-        prev_ref = data["prev_ref"]
-        curr_ref = data["curr_ref"]
+        reference = data["reference"]
         top_repo_path = os.path.join(cm.root_dir, url2path(data["top_repo_path"]))
-        response = await self.git.diff_content(
-            filename, prev_ref, curr_ref, top_repo_path
+        response = await self.git.get_content_at_reference(
+            filename, reference, top_repo_path
         )
         self.finish(json.dumps(response))
 
@@ -824,10 +822,10 @@ def setup_handlers(web_app):
         ("/git/clone", GitCloneHandler),
         ("/git/commit", GitCommitHandler),
         ("/git/config", GitConfigHandler),
+        ("/git/content", GitContentHandler),
         ("/git/delete_commit", GitDeleteCommitHandler),
         ("/git/detailed_log", GitDetailedLogHandler),
         ("/git/diff", GitDiffHandler),
-        ("/git/diffcontent", GitDiffContentHandler),
         ("/git/diffnotebook", GitDiffNotebookHandler),
         ("/git/init", GitInitHandler),
         ("/git/log", GitLogHandler),

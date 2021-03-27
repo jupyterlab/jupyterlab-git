@@ -1,5 +1,6 @@
 import { Toolbar } from '@jupyterlab/apputils';
 import { Mode } from '@jupyterlab/codemirror';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { MergeView } from 'codemirror';
 import { Git } from '../../tokens';
@@ -17,7 +18,9 @@ export const createPlainTextDiff: Git.Diff.ICallback<string> = async (
   model: DiffModel<string>,
   toolbar?: Toolbar
 ): Promise<PlainTextDiff> => {
-  return Promise.resolve(new PlainTextDiff(model));
+  const widget = new PlainTextDiff(model);
+  await widget.ready;
+  return widget;
 };
 
 /**
@@ -31,7 +34,32 @@ export class PlainTextDiff extends Widget {
         model.challenger.label
       )
     });
+    const getReady = new PromiseDelegate<void>();
+    this._isReady = getReady.promise;
+    this._container = this.node.lastElementChild as HTMLElement;
     this._model = model;
+
+    // Load file content early
+    Promise.all([
+      this._model.reference.content(),
+      this._model.challenger.content()
+    ])
+      .then(([reference, challenger]) => {
+        this._reference = reference;
+        this._challenger = challenger;
+
+        getReady.resolve();
+      })
+      .catch(reason => {
+        getReady.reject(reason);
+      });
+  }
+
+  /**
+   * Promise which fulfills when the widget is ready.
+   */
+  get ready(): Promise<void> {
+    return this._isReady;
   }
 
   /**
@@ -40,6 +68,15 @@ export class PlainTextDiff extends Widget {
    */
   onAfterAttach(): void {
     this.createDiffView();
+  }
+
+  /**
+   * Undo onAfterAttach
+   */
+  onBeforeDetach(): void {
+    while (this._container.children.length > 0) {
+      this._container.children[0].remove();
+    }
   }
 
   /**
@@ -52,36 +89,41 @@ export class PlainTextDiff extends Widget {
     const head = document.createElement('div');
     head.className = 'jp-git-diff-root';
     head.innerHTML = `
-    <div class=jp-git-diff-banner>
+    <div class="jp-git-diff-banner">
       <span>${baseLabel}</span>
       <span>${remoteLabel}</span>
-    </div>`;
-    const container = document.createElement('div');
-    container.className = 'jp-git-PlainText-diff';
-    head.appendChild(container);
+    </div>
+    <div class="jp-git-PlainText-diff"></div>`;
     return head;
   }
 
   /**
    * Create the Plain Text Diff view
    */
-  protected createDiffView(): void {
+  protected async createDiffView(): Promise<void> {
     if (!this._mergeView) {
       const mode =
         Mode.findByFileName(this._model.filename) ||
         Mode.findBest(this._model.filename);
 
-      this._mergeView = mergeView(
-        this.node.getElementsByClassName(
-          'jp-git-PlainText-diff'
-        )[0] as HTMLElement,
-        {
-          value: this._model.challenger.content,
-          orig: this._model.reference.content,
-          mode: mode.mime,
-          ...PlainTextDiff.getDefaultOptions()
-        }
-      ) as MergeView.MergeViewEditor;
+      await this.ready;
+
+      if (!this._reference) {
+        this._reference = await this._model.reference.content();
+      }
+      if (!this._challenger) {
+        this._challenger = await this._model.challenger.content();
+      }
+
+      this._mergeView = mergeView(this._container, {
+        value: this._challenger,
+        orig: this._reference,
+        mode: mode.mime,
+        ...PlainTextDiff.getDefaultOptions()
+      }) as MergeView.MergeViewEditor;
+
+      this._reference = null;
+      this._challenger = null;
     }
   }
 
@@ -97,6 +139,11 @@ export class PlainTextDiff extends Widget {
     };
   }
 
+  protected _container: HTMLElement;
+  protected _isReady: Promise<void>;
   protected _mergeView: MergeView.MergeViewEditor;
   protected _model: DiffModel<string>;
+
+  private _reference: string | null = null;
+  private _challenger: string | null = null;
 }

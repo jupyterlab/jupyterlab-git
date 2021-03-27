@@ -501,50 +501,52 @@ export function addCommands(
             diffWidget.title.caption = filename;
             diffWidget.title.icon = diffIcon;
             diffWidget.title.closable = true;
-            diffWidget.addClass('jp-git-diff-parent-diff-widget');
+            diffWidget.addClass('jp-git-diff-parent-widget');
 
             shell.add(diffWidget, 'main');
             shell.activateById(diffWidget.id);
 
-            // Load content to be diff
             const challengerRef = Git.Diff.SpecialRef[
               diffContext.currentRef as any
             ]
               ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
               : { git: diffContext.currentRef };
 
-            requestAPI<Git.IDiffContent>('diffcontent', 'POST', {
-              filename: filePath,
-              prev_ref: { git: diffContext.previousRef },
-              curr_ref: challengerRef,
-              top_repo_path: repositoryPath
-            })
-              .then(data => {
-                // Create the diff widget
-                const diffFileModel = new DiffModel<string>({
-                  challenger: {
-                    content: data['curr_content'],
-                    label:
-                      (Git.Diff.SpecialRef[
-                        diffContext.currentRef as any
-                      ] as any) || diffContext.currentRef,
-                    source: diffContext.currentRef
-                  },
-                  filename,
-                  reference: {
-                    content: data['prev_content'],
-                    label:
-                      (Git.Diff.SpecialRef[
-                        diffContext.previousRef as any
-                      ] as any) || diffContext.previousRef,
-                    source: diffContext.previousRef
-                  },
-                  renderMime,
-                  settingsRegistry: settingsRegistry
-                });
+            // Create the diff widget
+            const diffFileModel = new DiffModel<string>({
+              challenger: {
+                content: async () => {
+                  return requestAPI<Git.IDiffContent>('content', 'POST', {
+                    filename: filePath,
+                    reference: challengerRef,
+                    top_repo_path: repositoryPath
+                  }).then(data => data.content);
+                },
+                label:
+                  (Git.Diff.SpecialRef[diffContext.currentRef as any] as any) ||
+                  diffContext.currentRef,
+                source: diffContext.currentRef
+              },
+              filename,
+              reference: {
+                content: async () => {
+                  return requestAPI<Git.IDiffContent>('content', 'POST', {
+                    filename: filePath,
+                    reference: { git: diffContext.previousRef },
+                    top_repo_path: repositoryPath
+                  }).then(data => data.content);
+                },
+                label:
+                  (Git.Diff.SpecialRef[
+                    diffContext.previousRef as any
+                  ] as any) || diffContext.previousRef,
+                source: diffContext.previousRef
+              },
+              renderMime,
+              settingsRegistry: settingsRegistry
+            });
 
-                return buildDiffWidget(diffFileModel, diffWidget.toolbar);
-              })
+            buildDiffWidget(diffFileModel, diffWidget.toolbar)
               .then(widget => {
                 // Load the diff widget
                 modelIsLoading.resolve();

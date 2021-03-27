@@ -25,7 +25,8 @@ const DIFF_PROVIDERS: {
 export function getDiffProvider(
   filename: string
 ): Git.Diff.ICallback<any> | undefined {
-  return DIFF_PROVIDERS[PathExt.extname(filename).toLocaleLowerCase()].callback;
+  return DIFF_PROVIDERS[PathExt.extname(filename)?.toLocaleLowerCase()]
+    ?.callback;
 }
 
 /**
