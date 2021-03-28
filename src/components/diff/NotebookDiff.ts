@@ -19,6 +19,7 @@ import {
   UNCHANGED_DIFF_CLASS
 } from 'nbdime/lib/diff/widget/common';
 import { requestAPI } from '../../git';
+import { Git } from '../../tokens';
 import { DiffModel } from './model';
 
 /**
@@ -62,9 +63,15 @@ export const createNotebookDiff = async (
   renderMime: IRenderMimeRegistry,
   toolbar?: Toolbar
 ): Promise<NotebookDiff> => {
-  // Add element in toolbar
-  const checkbox = document.createElement('input');
+  // Create the notebook diff view
+  const diffWidget = new NotebookDiff(model, renderMime);
+  diffWidget.addClass('jp-git-diff-root');
+
+  await diffWidget.ready;
+
+  // Add elements in toolbar
   if (toolbar) {
+    const checkbox = document.createElement('input');
     const label = document.createElement('label');
     checkbox.className = 'nbdime-hide-unchanged';
     checkbox.type = 'checkbox';
@@ -73,16 +80,8 @@ export const createNotebookDiff = async (
     label.appendChild(document.createElement('span')).textContent =
       'Hide unchanged cells';
     toolbar.addItem('hideUnchanged', new Widget({ node: label }));
-  }
 
-  // Create the notebook diff view
-  const diffWidget = new NotebookDiff(model, renderMime);
-  diffWidget.addClass('jp-git-diff-root');
-
-  await diffWidget.ready;
-
-  // Connect toolbar checkbox and notebook diff widget
-  if (toolbar) {
+    // Connect toolbar checkbox and notebook diff widget
     diffWidget.areUnchangedCellsHidden = checkbox.checked;
     checkbox.onchange = () => {
       diffWidget.areUnchangedCellsHidden = checkbox.checked;
@@ -95,63 +94,20 @@ export const createNotebookDiff = async (
 /**
  * NotebookDiff widget
  */
-export class NotebookDiff extends Panel {
+export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
   constructor(model: DiffModel<string>, renderMime: IRenderMimeRegistry) {
     super();
     const getReady = new PromiseDelegate<void>();
     this._isReady = getReady.promise;
     this._model = model;
+    this._renderMime = renderMime;
 
     this.addClass(NBDIME_CLASS);
 
-    const header = Private.diffHeader(
-      model.reference.label,
-      model.challenger.label
-    );
-    this.addWidget(header);
-
-    this._scroller = new Panel();
-    this._scroller.addClass(ROOT_CLASS);
-    this._scroller.node.tabIndex = -1;
-    this.addWidget(this._scroller);
-
-    Promise.all([
-      this._model.reference.content(),
-      this._model.challenger.content()
-    ])
-      .then(([previousContent, currentContent]) => {
-        return requestAPI<INbdimeDiff>('diffnotebook', 'POST', {
-          currentContent,
-          previousContent
-        });
-      })
-      .then(data => {
-        const nbModel = new NotebookDiffModel(data.base, data.diff);
-
-        const nbdWidget = this.createDiffView(nbModel, renderMime);
-
-        this._scroller.addWidget(nbdWidget);
-        nbdWidget
-          .init()
-          .then(() => {
-            Private.markUnchangedRanges(this._scroller.node);
-            getReady.resolve();
-          })
-          .catch(reason => {
-            // FIXME there is a bug in nbdime and init got reject due to recursion limit hit
-            // console.error(`Failed to init notebook diff view: ${reason}`);
-            // getReady.reject(reason);
-            console.debug(`Failed to init notebook diff view: ${reason}`);
-            Private.markUnchangedRanges(this._scroller.node);
-
-            getReady.resolve();
-          });
-      })
-      .catch(reason => {
-        this.showError(reason);
-
-        getReady.resolve();
-      });
+    this.refresh().then(() => {
+      getReady.resolve();
+      this._model.changed.connect(this.refresh.bind(this));
+    });
   }
 
   /**
@@ -177,6 +133,62 @@ export class NotebookDiff extends Panel {
     return this._isReady;
   }
 
+  /**
+   * Refresh diff
+   *
+   * Note: Update the content and recompute the diff
+   */
+  async refresh(): Promise<void> {
+    if (!this._scroller?.parent) {
+      while (this.widgets.length > 0) {
+        this.widgets[0].dispose();
+      }
+
+      const header = Private.diffHeader(
+        this._model.reference.label,
+        this._model.challenger.label
+      );
+      this.addWidget(header);
+
+      this._scroller = new Panel();
+      this._scroller.addClass(ROOT_CLASS);
+      this._scroller.node.tabIndex = -1;
+      this.addWidget(this._scroller);
+    }
+
+    try {
+      const previousContent = await this._model.reference.content();
+      const currentContent = await this._model.challenger.content();
+
+      const data = await requestAPI<INbdimeDiff>('diffnotebook', 'POST', {
+        currentContent,
+        previousContent
+      });
+
+      const nbModel = new NotebookDiffModel(data.base, data.diff);
+
+      const nbdWidget = this.createDiffView(nbModel, this._renderMime);
+
+      while (this._scroller.widgets.length > 0) {
+        this._scroller.widgets[0].dispose();
+      }
+      this._scroller.addWidget(nbdWidget);
+      try {
+        await nbdWidget.init();
+
+        Private.markUnchangedRanges(this._scroller.node);
+      } catch (reason) {
+        // FIXME there is a bug in nbdime and init got reject due to recursion limit hit
+        // console.error(`Failed to init notebook diff view: ${reason}`);
+        // getReady.reject(reason);
+        console.debug(`Failed to init notebook diff view: ${reason}`);
+        Private.markUnchangedRanges(this._scroller.node);
+      }
+    } catch (reason) {
+      this.showError(reason);
+    }
+  }
+
   protected createDiffView(
     model: NotebookDiffModel,
     renderMime: IRenderMimeRegistry
@@ -188,7 +200,9 @@ export class NotebookDiff extends Panel {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._scroller.node.focus();
+    if (this._scroller?.parent) {
+      this._scroller.node.focus();
+    }
   }
 
   /**
@@ -213,6 +227,7 @@ export class NotebookDiff extends Panel {
   protected _areUnchangedCellsHidden = false;
   protected _isReady: Promise<void>;
   protected _model: DiffModel<string>;
+  protected _renderMime: IRenderMimeRegistry;
   protected _scroller: Panel;
 }
 

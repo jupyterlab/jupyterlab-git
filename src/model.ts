@@ -1215,8 +1215,32 @@ export class GitExtension implements IGitExtension {
    * @param v - repository status
    */
   protected _setStatus(v: Git.IStatus): void {
-    this._status = v;
-    this._statusChanged.emit(this._status);
+    let areEqual =
+      this._status.ahead === v.ahead &&
+      this._status.behind === v.behind &&
+      this._status.branch === v.branch &&
+      this._status.files.length === v.files.length;
+    if (areEqual) {
+      for (const file of v.files) {
+        if (
+          this._status.files.findIndex(
+            oldFile =>
+              oldFile.from === file.from &&
+              oldFile.to === file.to &&
+              oldFile.x === file.x &&
+              oldFile.y === file.y
+          )
+        ) {
+          areEqual = false;
+          break;
+        }
+      }
+    }
+
+    if (!areEqual) {
+      this._status = v;
+      this._statusChanged.emit(this._status);
+    }
   }
 
   /**

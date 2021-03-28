@@ -5,6 +5,8 @@ import {
   MainAreaWidget,
   showDialog,
   showErrorMessage,
+  Toolbar,
+  ToolbarButton,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -456,22 +458,22 @@ export function addCommands(
           continue;
         }
 
-        let diffContext = context;
-        if (!diffContext) {
-          const specialRef =
-            status === 'staged'
-              ? Git.Diff.SpecialRef.INDEX
-              : Git.Diff.SpecialRef.WORKING;
-          diffContext = {
-            currentRef: specialRef,
-            previousRef: 'HEAD'
-          };
-        }
-
         const buildDiffWidget =
           getDiffProvider(filePath) ?? (isText && createPlainTextDiff);
 
         if (buildDiffWidget) {
+          let diffContext = context;
+          if (!diffContext) {
+            const specialRef =
+              status === 'staged'
+                ? Git.Diff.SpecialRef.INDEX
+                : Git.Diff.SpecialRef.WORKING;
+            diffContext = {
+              currentRef: specialRef,
+              previousRef: 'HEAD'
+            };
+          }
+
           const id = `diff-${filePath}-${diffContext.currentRef}`;
           const mainAreaItems = shell.widgets('main');
           let mainAreaItem = mainAreaItems.next();
@@ -543,6 +545,38 @@ export function addCommands(
 
             buildDiffWidget(diffFileModel, diffWidget.toolbar)
               .then(widget => {
+                diffWidget.toolbar.addItem(
+                  'spacer',
+                  Toolbar.createSpacerItem()
+                );
+
+                const refreshButton = new ToolbarButton({
+                  label: trans.__('Refresh'),
+                  onClick: async () => {
+                    await widget.refresh();
+                    refreshButton.hide();
+                  },
+                  tooltip: trans.__('Refresh diff widget'),
+                  className: 'jp-git-diff-refresh'
+                });
+                refreshButton.hide();
+                diffWidget.toolbar.addItem('refresh', refreshButton);
+
+                // Trigger refresh button display
+                if (diffContext.previousRef === 'HEAD') {
+                  model.headChanged.connect(() => {
+                    refreshButton.show();
+                  });
+                }
+                // If the diff is on the current file and it is updated => refresh is required
+                if (diffContext.currentRef === Git.Diff.SpecialRef.WORKING) {
+                  fileBrowser.model.fileChanged.connect((sender, change) => {
+                    if (change.newValue.path === filename) {
+                      refreshButton.show();
+                    }
+                  });
+                }
+
                 // Load the diff widget
                 modelIsLoading.resolve();
                 content.addWidget(widget);

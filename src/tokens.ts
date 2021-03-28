@@ -455,6 +455,18 @@ export interface IGitExtension extends IDisposable {
 export namespace Git {
   export namespace Diff {
     /**
+     * Diff widget interface
+     */
+    export interface IDiffWidget extends Widget {
+      /**
+       * Refresh the diff widget
+       *
+       * Note: Update the content and recompute the diff
+       */
+      refresh(): Promise<void>;
+    }
+
+    /**
      * Callback to generate a comparison widget
      *
      * T is the content type to be compared
@@ -465,7 +477,7 @@ export namespace Git {
     export type ICallback<T> = (
       model: DiffModel<T>,
       toolbar?: Toolbar
-    ) => Promise<Widget>;
+    ) => Promise<IDiffWidget>;
 
     /**
      * Content and its context for diff
@@ -487,6 +499,12 @@ export namespace Git {
        * Note: It is a machine friendly reference
        */
       source: any;
+      /**
+       * Last time at which the content was updated.
+       *
+       * Optional, can be useful to trigger model changed signal
+       */
+      updateAt?: number;
     }
 
     /**

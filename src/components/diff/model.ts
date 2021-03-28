@@ -18,7 +18,8 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
    * A signal emitted when the model changed.
    *
    * Note: The signal is emitted for any set on reference or
-   * on challenger without testing for a value difference.
+   * on challenger change except for the content; i.e. the content
+   * is not fetch to check if it changed.
    */
   get changed(): ISignal<DiffModel<T>, Git.Diff.IModelChange> {
     return this._changed;
@@ -31,8 +32,15 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     return this._challenger;
   }
   set challenger(v: Git.Diff.IContent<T>) {
+    const emitSignal =
+      this._challenger.label !== v.label ||
+      this._challenger.source !== v.source ||
+      this._challenger.updateAt !== v.updateAt;
     this._challenger = v;
-    this._changed.emit({ type: 'challenger' });
+
+    if (emitSignal) {
+      this._changed.emit({ type: 'challenger' });
+    }
   }
 
   /**
@@ -49,8 +57,14 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     return this._reference;
   }
   set reference(v: Git.Diff.IContent<T>) {
+    const emitSignal =
+      this._reference.label !== v.label ||
+      this._reference.source !== v.source ||
+      this._reference.updateAt !== v.updateAt;
     this._reference = v;
-    this._changed.emit({ type: 'reference' });
+    if (emitSignal) {
+      this._changed.emit({ type: 'reference' });
+    }
   }
 
   /**

@@ -26,7 +26,7 @@ export const createPlainTextDiff: Git.Diff.ICallback<string> = async (
 /**
  * Plain Text Diff widget
  */
-export class PlainTextDiff extends Widget {
+export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   constructor(model: DiffModel<string>) {
     super({
       node: PlainTextDiff.createNode(
@@ -49,10 +49,12 @@ export class PlainTextDiff extends Widget {
         this._challenger = challenger;
 
         getReady.resolve();
+        this._model.changed.connect(this.refresh.bind(this));
       })
       .catch(reason => {
         this.showError(reason);
         getReady.resolve();
+        this._model.changed.connect(this.refresh.bind(this));
       });
   }
 
@@ -78,6 +80,18 @@ export class PlainTextDiff extends Widget {
    */
   onBeforeDetach(): void {
     this._container.innerHTML = '';
+  }
+
+  async refresh(): Promise<void> {
+    await this.ready;
+    try {
+      // Clear all
+      this._container.innerHTML = '';
+      this._mergeView = null;
+      this.createDiffView();
+    } catch (reason) {
+      this.showError(reason);
+    }
   }
 
   /**
