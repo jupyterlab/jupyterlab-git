@@ -632,16 +632,12 @@ export function addCommands(
   });
 
   function representFiles(files: Git.IStatusFile[]): JSX.Element {
-    if (files.length > 1) {
-      const elements = files.map(file => (
-        <li key={file.to}>
-          <b>{file.to}</b>
-        </li>
-      ));
-      return <ul>{elements}</ul>;
-    } else {
-      return <b>{files[0].to}</b>;
-    }
+    const elements = files.map(file => (
+      <li key={file.to}>
+        <b>{file.to}</b>
+      </li>
+    ));
+    return <ul>{elements}</ul>;
   }
 
   commands.addCommand(ContextCommandIDs.gitFileDelete, {
@@ -659,9 +655,10 @@ export function addCommands(
         body: (
           <span>
             {trans.__(
-              'Are you sure you want to permanently delete %1? This action cannot be undone.',
-              fileList
+              'Are you sure you want to permanently delete the following files? \
+              This action cannot be undone.'
             )}
+            {fileList}
           </span>
         ),
         buttons: [
@@ -701,10 +698,10 @@ export function addCommands(
         body: (
           <span>
             {trans.__(
-              'Are you sure you want to permanently discard changes to %1? \
-            This action cannot be undone.',
-              fileList
+              'Are you sure you want to permanently discard changes to the following files? \
+              This action cannot be undone.'
             )}
+            {fileList}
           </span>
         ),
         buttons: [
