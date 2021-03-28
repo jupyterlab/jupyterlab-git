@@ -335,10 +335,16 @@ class Git:
 
         def read_notebook(content):
             if not content:
-                return nbformat.v4.new_notebook()
+                return nbformat.versions[nbformat.current_nbformat].new_notebook()
             if isinstance(content, dict):
                 # Content may come from model as a dict directly
-                return nbformat.from_dict(content)
+                return (
+                    nbformat.versions[
+                        content.get("nbformat", nbformat.current_nbformat)
+                    ]
+                    .nbjson.JSONReader()
+                    .to_notebook(content)
+                )
             else:
                 return nbformat.reads(content, as_version=4)
 

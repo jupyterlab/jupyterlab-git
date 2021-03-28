@@ -1,5 +1,3 @@
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Git } from '../../tokens';
@@ -12,8 +10,6 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     this._challenger = props.challenger;
     this._filename = props.filename;
     this._reference = props.reference;
-    this._renderMime = props.renderMime;
-    this._settingsRegistry = props.settingsRegistry || null;
 
     this._changed = new Signal<DiffModel<T>, Git.Diff.IModelChange>(this);
   }
@@ -58,20 +54,6 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
   }
 
   /**
-   * Render mime registry
-   */
-  get renderMime(): IRenderMimeRegistry {
-    return this._renderMime;
-  }
-
-  /**
-   * Settings registry
-   */
-  get settingsRegistry(): ISettingRegistry | null {
-    return this._settingsRegistry;
-  }
-
-  /**
    * Boolean indicating whether the model has been disposed.
    */
   get isDisposed(): boolean {
@@ -95,6 +77,4 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
   private _changed: Signal<DiffModel<T>, Git.Diff.IModelChange>;
   private _isDisposed = false;
   private _filename: string;
-  private _renderMime: IRenderMimeRegistry;
-  private _settingsRegistry: ISettingRegistry | null;
 }

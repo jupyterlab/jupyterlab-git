@@ -112,7 +112,6 @@ setup_args = dict(
             "pytest-asyncio",
             "pytest-cov",
             "pytest-tornasync",
-            "requests",
         ],
     },
 )

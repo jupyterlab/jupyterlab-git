@@ -1,12 +1,9 @@
 .jp-git-diff-error {
     width: auto;
     padding: 16px;
-    left: 10px;
-    top: 5px;
     color: var(--jp-ui-font-color1);
     font-size: var(--jp-ui-font-size1);
     background: var(--jp-error-color3);
-    position: absolute;
 }
 
 .jp-git-diff-error-message {

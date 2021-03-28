@@ -51,7 +51,8 @@ export class PlainTextDiff extends Widget {
         getReady.resolve();
       })
       .catch(reason => {
-        getReady.reject(reason);
+        this.showError(reason);
+        getReady.resolve();
       });
   }
 
@@ -67,16 +68,16 @@ export class PlainTextDiff extends Widget {
    * is attached so CodeMirror get proper size.
    */
   onAfterAttach(): void {
-    this.createDiffView();
+    this.createDiffView().catch(reason => {
+      this.showError(reason);
+    });
   }
 
   /**
    * Undo onAfterAttach
    */
   onBeforeDetach(): void {
-    while (this._container.children.length > 0) {
-      this._container.children[0].remove();
-    }
+    this._container.innerHTML = '';
   }
 
   /**
@@ -126,6 +127,20 @@ export class PlainTextDiff extends Widget {
       this._reference = null;
       this._challenger = null;
     }
+  }
+
+  /**
+   * Display an error instead of the file diff
+   *
+   * @param error Error object
+   */
+  protected showError(error: any): void {
+    console.error('Failed to load file diff.', error, error?.traceback);
+    const msg = ((error.message || error) as string).replace('\n', '<br />');
+    this.node.innerHTML = `<p class="jp-git-diff-error">
+      <span>Error Loading File Diff:</span>
+      <span class="jp-git-diff-error-message">${msg}</span>
+    </p>`;
   }
 
   protected static getDefaultOptions(): Partial<MergeView.MergeViewEditorConfiguration> {

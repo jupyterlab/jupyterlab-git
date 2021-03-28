@@ -9,7 +9,6 @@ import {
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
@@ -100,9 +99,7 @@ export function addCommands(
   model: GitExtension,
   fileBrowser: FileBrowser,
   settings: ISettingRegistry.ISettings,
-  trans: TranslationBundle,
-  renderMime: IRenderMimeRegistry,
-  settingsRegistry: ISettingRegistry
+  trans: TranslationBundle
 ): void {
   const { commands, shell } = app;
 
@@ -541,9 +538,7 @@ export function addCommands(
                     diffContext.previousRef as any
                   ] as any) || diffContext.previousRef,
                 source: diffContext.previousRef
-              },
-              renderMime,
-              settingsRegistry: settingsRegistry
+              }
             });
 
             buildDiffWidget(diffFileModel, diffWidget.toolbar)

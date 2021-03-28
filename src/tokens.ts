@@ -1,9 +1,7 @@
 import { Toolbar } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ServerConnection } from '@jupyterlab/services';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { JSONObject, ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
@@ -528,14 +526,6 @@ export namespace Git {
        * Reference data
        */
       reference: IContent<T>;
-      /**
-       * Rendermime registry
-       */
-      readonly renderMime: IRenderMimeRegistry;
-      /**
-       * Application settings registry
-       */
-      readonly settingsRegistry?: ISettingRegistry;
     }
 
     /**

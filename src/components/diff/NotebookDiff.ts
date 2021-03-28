@@ -19,7 +19,6 @@ import {
   UNCHANGED_DIFF_CLASS
 } from 'nbdime/lib/diff/widget/common';
 import { requestAPI } from '../../git';
-import { Git } from '../../tokens';
 import { DiffModel } from './model';
 
 /**
@@ -30,7 +29,7 @@ const NBDIME_CLASS = 'nbdime-Widget';
 /**
  * Class of the root of the actual diff, the scroller element
  */
-const ROOT_CLASS = 'nbdime-root';
+export const ROOT_CLASS = 'nbdime-root';
 
 /**
  * DOM class for whether or not to hide unchanged cells
@@ -58,16 +57,11 @@ interface INbdimeDiff {
  * @param toolbar MainAreaWidget toolbar
  * @returns Diff notebook widget
  */
-export const createNotebookDiff: Git.Diff.ICallback<string> = async (
+export const createNotebookDiff = async (
   model: DiffModel<string>,
+  renderMime: IRenderMimeRegistry,
   toolbar?: Toolbar
 ): Promise<NotebookDiff> => {
-  const data = await requestAPI<INbdimeDiff>('diffnotebook', 'POST', {
-    currentContent: await model.challenger.content(),
-    previousContent: await model.reference.content()
-  });
-  const nbModel = new NotebookDiffModel(data.base, data.diff);
-
   // Add element in toolbar
   const checkbox = document.createElement('input');
   if (toolbar) {
@@ -82,7 +76,7 @@ export const createNotebookDiff: Git.Diff.ICallback<string> = async (
   }
 
   // Create the notebook diff view
-  const diffWidget = new NotebookDiff(model, nbModel);
+  const diffWidget = new NotebookDiff(model, renderMime);
   diffWidget.addClass('jp-git-diff-root');
 
   await diffWidget.ready;
@@ -102,10 +96,11 @@ export const createNotebookDiff: Git.Diff.ICallback<string> = async (
  * NotebookDiff widget
  */
 export class NotebookDiff extends Panel {
-  constructor(model: DiffModel<string>, nbModel: NotebookDiffModel) {
+  constructor(model: DiffModel<string>, renderMime: IRenderMimeRegistry) {
     super();
     const getReady = new PromiseDelegate<void>();
     this._isReady = getReady.promise;
+    this._model = model;
 
     this.addClass(NBDIME_CLASS);
 
@@ -120,21 +115,41 @@ export class NotebookDiff extends Panel {
     this._scroller.node.tabIndex = -1;
     this.addWidget(this._scroller);
 
-    const nbdWidget = this.createDiffView(nbModel, model.renderMime);
+    Promise.all([
+      this._model.reference.content(),
+      this._model.challenger.content()
+    ])
+      .then(([previousContent, currentContent]) => {
+        return requestAPI<INbdimeDiff>('diffnotebook', 'POST', {
+          currentContent,
+          previousContent
+        });
+      })
+      .then(data => {
+        const nbModel = new NotebookDiffModel(data.base, data.diff);
 
-    this._scroller.addWidget(nbdWidget);
-    nbdWidget
-      .init()
-      .then(() => {
-        Private.markUnchangedRanges(this._scroller.node);
-        getReady.resolve();
+        const nbdWidget = this.createDiffView(nbModel, renderMime);
+
+        this._scroller.addWidget(nbdWidget);
+        nbdWidget
+          .init()
+          .then(() => {
+            Private.markUnchangedRanges(this._scroller.node);
+            getReady.resolve();
+          })
+          .catch(reason => {
+            // FIXME there is a bug in nbdime and init got reject due to recursion limit hit
+            // console.error(`Failed to init notebook diff view: ${reason}`);
+            // getReady.reject(reason);
+            console.debug(`Failed to init notebook diff view: ${reason}`);
+            Private.markUnchangedRanges(this._scroller.node);
+
+            getReady.resolve();
+          });
       })
       .catch(reason => {
-        // FIXME there is a bug in nbdime and init got reject due to recursion limit hit
-        // console.error(`Failed to init notebook diff view: ${reason}`);
-        // getReady.reject(reason);
-        console.debug(`Failed to init notebook diff view: ${reason}`);
-        Private.markUnchangedRanges(this._scroller.node);
+        this.showError(reason);
+
         getReady.resolve();
       });
   }
@@ -176,8 +191,28 @@ export class NotebookDiff extends Panel {
     this._scroller.node.focus();
   }
 
+  /**
+   * Display an error instead of the file diff
+   *
+   * @param error Error object
+   */
+  protected showError(error: any): void {
+    console.error('Failed to load file diff.', error, error?.traceback);
+
+    while (this.widgets.length > 0) {
+      this.widgets[0].dispose();
+    }
+
+    const msg = ((error.message || error) as string).replace('\n', '<br />');
+    this.node.innerHTML = `<p class="jp-git-diff-error">
+      <span>Error Loading Notebook Diff:</span>
+      <span class="jp-git-diff-error-message">${msg}</span>
+    </p>`;
+  }
+
   protected _areUnchangedCellsHidden = false;
   protected _isReady: Promise<void>;
+  protected _model: DiffModel<string>;
   protected _scroller: Panel;
 }
 
