@@ -98,7 +98,7 @@ function pluralizedContextLabel(singular: string, plural: string) {
  */
 export function addCommands(
   app: JupyterFrontEnd,
-  model: GitExtension,
+  gitModel: GitExtension,
   fileBrowser: FileBrowser,
   settings: ISettingRegistry.ISettings,
   trans: TranslationBundle
@@ -135,11 +135,13 @@ export function addCommands(
       )) as MainAreaWidget<ITerminal.ITerminal>;
 
       try {
-        if (model.pathRepository !== null) {
+        if (gitModel.pathRepository !== null) {
           const terminal = main.content;
           terminal.session.send({
             type: 'stdin',
-            content: [`cd "${model.pathRepository.split('"').join('\\"')}"\n`]
+            content: [
+              `cd "${gitModel.pathRepository.split('"').join('\\"')}"\n`
+            ]
           });
         }
 
@@ -149,7 +151,7 @@ export function addCommands(
         main.dispose();
       }
     },
-    isEnabled: () => model.pathRepository !== null
+    isEnabled: () => gitModel.pathRepository !== null
   });
 
   /** Add open/go to git interface command */
@@ -188,8 +190,8 @@ export function addCommands(
           level: Level.RUNNING
         });
         try {
-          await model.init(currentPath);
-          model.pathRepository = currentPath;
+          await gitModel.init(currentPath);
+          gitModel.pathRepository = currentPath;
           logger.log({
             message: trans.__('Git repository initialized.'),
             level: Level.SUCCESS
@@ -209,7 +211,7 @@ export function addCommands(
         }
       }
     },
-    isEnabled: () => model.pathRepository === null
+    isEnabled: () => gitModel.pathRepository === null
   });
 
   /** Open URL externally */
@@ -243,9 +245,9 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitAddRemote, {
     label: trans.__('Add Remote Repository'),
     caption: trans.__('Add a Git remote repository'),
-    isEnabled: () => model.pathRepository !== null,
+    isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
-      if (model.pathRepository === null) {
+      if (gitModel.pathRepository === null) {
         console.warn(
           trans.__('Not in a Git repository. Unable to add a remote.')
         );
@@ -267,7 +269,7 @@ export function addCommands(
 
       if (url) {
         try {
-          await model.addRemote(url, name);
+          await gitModel.addRemote(url, name);
         } catch (error) {
           console.error(error);
           showErrorMessage(
@@ -283,7 +285,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitClone, {
     label: trans.__('Clone a Repository'),
     caption: trans.__('Clone a repository from a URL'),
-    isEnabled: () => model.pathRepository === null,
+    isEnabled: () => gitModel.pathRepository === null,
     execute: async () => {
       const result = await showDialog({
         title: trans.__('Clone a repo'),
@@ -302,7 +304,7 @@ export function addCommands(
         });
         try {
           const details = await Private.showGitOperationDialog<IGitCloneArgs>(
-            model,
+            gitModel,
             Operation.Clone,
             trans,
             { path: fileBrowser.model.path, url: result.value }
@@ -332,9 +334,9 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitOpenGitignore, {
     label: trans.__('Open .gitignore'),
     caption: trans.__('Open .gitignore'),
-    isEnabled: () => model.pathRepository !== null,
+    isEnabled: () => gitModel.pathRepository !== null,
     execute: async () => {
-      await model.ensureGitignore();
+      await gitModel.ensureGitignore();
     }
   });
 
@@ -342,7 +344,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitPush, {
     label: trans.__('Push to Remote'),
     caption: trans.__('Push code to remote repository'),
-    isEnabled: () => model.pathRepository !== null,
+    isEnabled: () => gitModel.pathRepository !== null,
     execute: async () => {
       logger.log({
         level: Level.RUNNING,
@@ -350,7 +352,7 @@ export function addCommands(
       });
       try {
         const details = await Private.showGitOperationDialog(
-          model,
+          gitModel,
           Operation.Push,
           trans
         );
@@ -377,7 +379,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitPull, {
     label: trans.__('Pull from Remote'),
     caption: trans.__('Pull latest code from remote repository'),
-    isEnabled: () => model.pathRepository !== null,
+    isEnabled: () => gitModel.pathRepository !== null,
     execute: async () => {
       logger.log({
         level: Level.RUNNING,
@@ -385,7 +387,7 @@ export function addCommands(
       });
       try {
         const details = await Private.showGitOperationDialog(
-          model,
+          gitModel,
           Operation.Pull,
           trans
         );
@@ -406,6 +408,102 @@ export function addCommands(
         });
       }
     }
+  });
+
+  /**
+   * Git display diff command - internal command
+   *
+   * @params model {Git.Diff.IModel<string>}: The diff model to display
+   * @params isText {boolean}: Optional, whether the content is a plain text
+   * @returns the main area widget or null
+   */
+  commands.addCommand(CommandIDs.gitShowDiff, {
+    label: trans.__('Show Diff'),
+    caption: trans.__('Display a file diff.'),
+    execute: async args => {
+      const { model, isText } = (args as any) as {
+        model: Git.Diff.IModel<string>;
+        isText?: boolean;
+      };
+
+      const buildDiffWidget =
+        getDiffProvider(model.filename) ?? (isText && createPlainTextDiff);
+
+      if (buildDiffWidget) {
+        const id = `diff-${model.filename}-${model.reference.label}-${model.challenger.label}`;
+        const mainAreaItems = shell.widgets('main');
+        let mainAreaItem = mainAreaItems.next();
+        while (mainAreaItem) {
+          if (mainAreaItem.id === id) {
+            shell.activateById(id);
+            break;
+          }
+          mainAreaItem = mainAreaItems.next();
+        }
+
+        if (!mainAreaItem) {
+          const content = new Panel();
+          const modelIsLoading = new PromiseDelegate<void>();
+          const diffWidget = (mainAreaItem = new MainAreaWidget<Panel>({
+            content,
+            reveal: modelIsLoading.promise
+          }));
+          diffWidget.id = id;
+          diffWidget.title.label = PathExt.basename(model.filename);
+          diffWidget.title.caption = model.filename;
+          diffWidget.title.icon = diffIcon;
+          diffWidget.title.closable = true;
+          diffWidget.addClass('jp-git-diff-parent-widget');
+
+          shell.add(diffWidget, 'main');
+          shell.activateById(diffWidget.id);
+
+          // Create the diff widget
+          try {
+            const widget = await buildDiffWidget(model, diffWidget.toolbar);
+
+            diffWidget.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+
+            const refreshButton = new ToolbarButton({
+              label: trans.__('Refresh'),
+              onClick: async () => {
+                await widget.refresh();
+                refreshButton.hide();
+              },
+              tooltip: trans.__('Refresh diff widget'),
+              className: 'jp-git-diff-refresh'
+            });
+            refreshButton.hide();
+            diffWidget.toolbar.addItem('refresh', refreshButton);
+
+            model.changed.connect(() => {
+              refreshButton.show();
+            });
+
+            // Load the diff widget
+            modelIsLoading.resolve();
+            content.addWidget(widget);
+          } catch (reason) {
+            console.error(reason);
+            const msg = `Load Diff Model Error (${reason.message || reason})`;
+            modelIsLoading.reject(msg);
+          }
+        }
+
+        return mainAreaItem;
+      } else {
+        await showErrorMessage(
+          trans.__('Diff Not Supported'),
+          trans.__(
+            'Diff is not supported for %1 files.',
+            PathExt.extname(model.filename).toLocaleLowerCase()
+          )
+        );
+
+        return null;
+      }
+    },
+    icon: diffIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
   /* Context menu commands */
@@ -429,7 +527,7 @@ export function addCommands(
         try {
           if (to[to.length - 1] !== '/') {
             commands.execute('docmanager:open', {
-              path: model.getRelativeFilePath(to)
+              path: gitModel.getRelativeFilePath(to)
             });
           } else {
             console.log('Cannot open a folder here');
@@ -448,7 +546,7 @@ export function addCommands(
       trans.__('Diff selected file'),
       trans.__('Diff selected files')
     ),
-    execute: args => {
+    execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitFileDiff;
       for (const file of files) {
         const { context, filePath, isText, status } = file;
@@ -458,145 +556,85 @@ export function addCommands(
           continue;
         }
 
-        const buildDiffWidget =
-          getDiffProvider(filePath) ?? (isText && createPlainTextDiff);
+        const repositoryPath = gitModel.getRelativeFilePath();
+        const filename = PathExt.join(repositoryPath, filePath);
 
-        if (buildDiffWidget) {
-          let diffContext = context;
-          if (!diffContext) {
-            const specialRef =
-              status === 'staged'
-                ? Git.Diff.SpecialRef.INDEX
-                : Git.Diff.SpecialRef.WORKING;
-            diffContext = {
-              currentRef: specialRef,
-              previousRef: 'HEAD'
-            };
+        let diffContext = context;
+        if (!diffContext) {
+          const specialRef =
+            status === 'staged'
+              ? Git.Diff.SpecialRef.INDEX
+              : Git.Diff.SpecialRef.WORKING;
+          diffContext = {
+            currentRef: specialRef,
+            previousRef: 'HEAD'
+          };
+        }
+
+        const challengerRef = Git.Diff.SpecialRef[diffContext.currentRef as any]
+          ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
+          : { git: diffContext.currentRef };
+
+        // Create the diff widget
+        const model = new DiffModel<string>({
+          challenger: {
+            content: async () => {
+              return requestAPI<Git.IDiffContent>('content', 'POST', {
+                filename: filePath,
+                reference: challengerRef,
+                top_repo_path: repositoryPath
+              }).then(data => data.content);
+            },
+            label:
+              (Git.Diff.SpecialRef[diffContext.currentRef as any] as any) ||
+              diffContext.currentRef,
+            source: diffContext.currentRef,
+            updateAt: Date.now()
+          },
+          filename,
+          reference: {
+            content: async () => {
+              return requestAPI<Git.IDiffContent>('content', 'POST', {
+                filename: filePath,
+                reference: { git: diffContext.previousRef },
+                top_repo_path: repositoryPath
+              }).then(data => data.content);
+            },
+            label:
+              (Git.Diff.SpecialRef[diffContext.previousRef as any] as any) ||
+              diffContext.previousRef,
+            source: diffContext.previousRef,
+            updateAt: Date.now()
           }
+        });
 
-          const id = `diff-${filePath}-${diffContext.currentRef}`;
-          const mainAreaItems = shell.widgets('main');
-          let mainAreaItem = mainAreaItems.next();
-          while (mainAreaItem) {
-            if (mainAreaItem.id === id) {
-              shell.activateById(id);
-              break;
-            }
-            mainAreaItem = mainAreaItems.next();
-          }
+        const widget = await commands.execute(CommandIDs.gitShowDiff, {
+          model,
+          isText
+        } as any);
 
-          if (!mainAreaItem) {
-            const repositoryPath = model.getRelativeFilePath();
-            const filename = PathExt.join(repositoryPath, filePath);
-
-            const content = new Panel();
-            const modelIsLoading = new PromiseDelegate<void>();
-            const diffWidget = new MainAreaWidget<Panel>({
-              content,
-              reveal: modelIsLoading.promise
+        if (widget) {
+          // Trigger diff model update
+          if (diffContext.previousRef === 'HEAD') {
+            gitModel.headChanged.connect(() => {
+              model.reference = {
+                ...model.reference,
+                updateAt: Date.now()
+              };
             });
-            diffWidget.id = id;
-            diffWidget.title.label = PathExt.basename(filePath);
-            diffWidget.title.caption = filename;
-            diffWidget.title.icon = diffIcon;
-            diffWidget.title.closable = true;
-            diffWidget.addClass('jp-git-diff-parent-widget');
-
-            shell.add(diffWidget, 'main');
-            shell.activateById(diffWidget.id);
-
-            const challengerRef = Git.Diff.SpecialRef[
-              diffContext.currentRef as any
-            ]
-              ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
-              : { git: diffContext.currentRef };
-
-            // Create the diff widget
-            const diffFileModel = new DiffModel<string>({
-              challenger: {
-                content: async () => {
-                  return requestAPI<Git.IDiffContent>('content', 'POST', {
-                    filename: filePath,
-                    reference: challengerRef,
-                    top_repo_path: repositoryPath
-                  }).then(data => data.content);
-                },
-                label:
-                  (Git.Diff.SpecialRef[diffContext.currentRef as any] as any) ||
-                  diffContext.currentRef,
-                source: diffContext.currentRef
-              },
-              filename,
-              reference: {
-                content: async () => {
-                  return requestAPI<Git.IDiffContent>('content', 'POST', {
-                    filename: filePath,
-                    reference: { git: diffContext.previousRef },
-                    top_repo_path: repositoryPath
-                  }).then(data => data.content);
-                },
-                label:
-                  (Git.Diff.SpecialRef[
-                    diffContext.previousRef as any
-                  ] as any) || diffContext.previousRef,
-                source: diffContext.previousRef
+          }
+          // If the diff is on the current file and it is updated => diff model changed
+          if (diffContext.currentRef === Git.Diff.SpecialRef.WORKING) {
+            // FIXME This is not triggered by notebook save
+            fileBrowser.model.fileChanged.connect((sender, change) => {
+              if (change.newValue.path === filename) {
+                model.challenger = {
+                  ...model.challenger,
+                  updateAt: new Date(change.newValue.last_modified).valueOf()
+                };
               }
             });
-
-            buildDiffWidget(diffFileModel, diffWidget.toolbar)
-              .then(widget => {
-                diffWidget.toolbar.addItem(
-                  'spacer',
-                  Toolbar.createSpacerItem()
-                );
-
-                const refreshButton = new ToolbarButton({
-                  label: trans.__('Refresh'),
-                  onClick: async () => {
-                    await widget.refresh();
-                    refreshButton.hide();
-                  },
-                  tooltip: trans.__('Refresh diff widget'),
-                  className: 'jp-git-diff-refresh'
-                });
-                refreshButton.hide();
-                diffWidget.toolbar.addItem('refresh', refreshButton);
-
-                // Trigger refresh button display
-                if (diffContext.previousRef === 'HEAD') {
-                  model.headChanged.connect(() => {
-                    refreshButton.show();
-                  });
-                }
-                // If the diff is on the current file and it is updated => refresh is required
-                if (diffContext.currentRef === Git.Diff.SpecialRef.WORKING) {
-                  fileBrowser.model.fileChanged.connect((sender, change) => {
-                    if (change.newValue.path === filename) {
-                      refreshButton.show();
-                    }
-                  });
-                }
-
-                // Load the diff widget
-                modelIsLoading.resolve();
-                content.addWidget(widget);
-              })
-              .catch(reason => {
-                console.error(reason);
-                const msg = `Load Diff Model Error (${
-                  reason.message || reason
-                })`;
-                modelIsLoading.reject(msg);
-              });
           }
-        } else {
-          showErrorMessage(
-            trans.__('Diff Not Supported'),
-            trans.__(
-              'Diff is not supported for %1 files.',
-              PathExt.extname(filePath).toLocaleLowerCase()
-            )
-          );
         }
       }
     },
@@ -612,7 +650,7 @@ export function addCommands(
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
       for (const file of files) {
-        await model.add(file.to);
+        await gitModel.add(file.to);
       }
     },
     icon: addIcon.bindprops({ stylesheet: 'menuItem' })
@@ -627,7 +665,7 @@ export function addCommands(
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
       for (const file of files) {
-        await model.add(file.to);
+        await gitModel.add(file.to);
       }
     },
     icon: addIcon.bindprops({ stylesheet: 'menuItem' })
@@ -642,7 +680,7 @@ export function addCommands(
     execute: async args => {
       const { files } = (args as any) as CommandArguments.IGitContextAction;
       for (const file of files) {
-        await model.add(file.to);
+        await gitModel.add(file.to);
       }
     },
     icon: addIcon.bindprops({ stylesheet: 'menuItem' })
@@ -658,7 +696,7 @@ export function addCommands(
       const { files } = (args as any) as CommandArguments.IGitContextAction;
       for (const file of files) {
         if (file.x !== 'D') {
-          await model.reset(file.to);
+          await gitModel.reset(file.to);
         }
       }
     },
@@ -704,7 +742,7 @@ export function addCommands(
         for (const file of files) {
           try {
             await app.commands.execute('docmanager:delete-file', {
-              path: model.getRelativeFilePath(file.to)
+              path: gitModel.getRelativeFilePath(file.to)
             });
           } catch (reason) {
             showErrorMessage(trans.__('Deleting %1 failed.', file.to), reason, [
@@ -750,14 +788,14 @@ export function addCommands(
               file.status === 'staged' ||
               file.status === 'partially-staged'
             ) {
-              await model.reset(file.to);
+              await gitModel.reset(file.to);
             }
             if (
               file.status === 'unstaged' ||
               (file.status === 'partially-staged' && file.x !== 'A')
             ) {
               // resetting an added file moves it to untracked category => checkout will fail
-              await model.checkout({ filename: file.to });
+              await gitModel.checkout({ filename: file.to });
             }
           } catch (reason) {
             showErrorMessage(
@@ -785,7 +823,7 @@ export function addCommands(
       const { files } = (args as any) as CommandArguments.IGitContextAction;
       for (const file of files) {
         if (file) {
-          await model.ignore(file.to, false);
+          await gitModel.ignore(file.to, false);
         }
       }
     }
@@ -826,7 +864,7 @@ export function addCommands(
               ]
             });
             if (result.button.label === trans.__('Ignore')) {
-              await model.ignore(selectedFile.to, true);
+              await gitModel.ignore(selectedFile.to, true);
             }
           }
         }

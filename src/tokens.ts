@@ -6,7 +6,6 @@ import { JSONObject, ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { DiffModel } from './components/diff/model';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
@@ -475,7 +474,7 @@ export namespace Git {
      * will be displayed.
      */
     export type ICallback<T> = (
-      model: DiffModel<T>,
+      model: IModel<T>,
       toolbar?: Toolbar
     ) => Promise<IDiffWidget>;
 
@@ -966,9 +965,9 @@ export enum CommandIDs {
   gitToggleDoubleClickDiff = 'git:toggle-double-click-diff',
   gitAddRemote = 'git:add-remote',
   gitClone = 'git:clone',
-  gitCompareFiles = 'git:compare-files',
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
   gitPull = 'git:pull',
-  gitSubmitCommand = 'git:submit-commit'
+  gitSubmitCommand = 'git:submit-commit',
+  gitShowDiff = 'git:show-diff'
 }

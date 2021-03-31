@@ -17,7 +17,6 @@ import {
   addFileBrowserContextMenu,
   createGitMenu
 } from './commandsAndMenu';
-import { DiffModel } from './components/diff/model';
 import { createNotebookDiff } from './components/diff/NotebookDiff';
 import { addStatusBarWidget } from './components/StatusWidget';
 import { GitExtension } from './model';
@@ -195,11 +194,11 @@ async function activate(
     );
   }
 
-  // Register default diff providers
+  // Register diff providers
   gitExtension.registerDiffProvider(
     'Nbdime',
     ['.ipynb'],
-    (model: DiffModel<string>, toolbar?: Toolbar) =>
+    (model: Git.Diff.IModel<string>, toolbar?: Toolbar) =>
       createNotebookDiff(model, renderMime, toolbar)
   );
 

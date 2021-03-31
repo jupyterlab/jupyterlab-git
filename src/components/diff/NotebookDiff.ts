@@ -20,7 +20,6 @@ import {
 } from 'nbdime/lib/diff/widget/common';
 import { requestAPI } from '../../git';
 import { Git } from '../../tokens';
-import { DiffModel } from './model';
 
 /**
  * Class of the outermost widget, the draggable tab
@@ -59,7 +58,7 @@ interface INbdimeDiff {
  * @returns Diff notebook widget
  */
 export const createNotebookDiff = async (
-  model: DiffModel<string>,
+  model: Git.Diff.IModel<string>,
   renderMime: IRenderMimeRegistry,
   toolbar?: Toolbar
 ): Promise<NotebookDiff> => {
@@ -95,7 +94,7 @@ export const createNotebookDiff = async (
  * NotebookDiff widget
  */
 export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
-  constructor(model: DiffModel<string>, renderMime: IRenderMimeRegistry) {
+  constructor(model: Git.Diff.IModel<string>, renderMime: IRenderMimeRegistry) {
     super();
     const getReady = new PromiseDelegate<void>();
     this._isReady = getReady.promise;
@@ -104,10 +103,17 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
 
     this.addClass(NBDIME_CLASS);
 
-    this.refresh().then(() => {
-      getReady.resolve();
-      this._model.changed.connect(this.refresh.bind(this));
-    });
+    this.refresh()
+      .then(() => {
+        getReady.resolve();
+      })
+      .catch(reason => {
+        console.error(
+          'Failed to refresh Notebook diff.',
+          reason,
+          reason?.traceback
+        );
+      });
   }
 
   /**
@@ -157,6 +163,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
     }
 
     try {
+      // ENH request content only if it changed
       const previousContent = await this._model.reference.content();
       const currentContent = await this._model.challenger.content();
 
@@ -210,8 +217,12 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
    *
    * @param error Error object
    */
-  protected showError(error: any): void {
-    console.error('Failed to load file diff.', error, error?.traceback);
+  protected showError(error: Error): void {
+    console.error(
+      'Failed to load file diff.',
+      error,
+      (error as any)?.traceback
+    );
 
     while (this.widgets.length > 0) {
       this.widgets[0].dispose();
@@ -226,7 +237,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
 
   protected _areUnchangedCellsHidden = false;
   protected _isReady: Promise<void>;
-  protected _model: DiffModel<string>;
+  protected _model: Git.Diff.IModel<string>;
   protected _renderMime: IRenderMimeRegistry;
   protected _scroller: Panel;
 }

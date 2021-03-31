@@ -5,7 +5,6 @@ import { Widget } from '@lumino/widgets';
 import { MergeView } from 'codemirror';
 import { Git } from '../../tokens';
 import { mergeView } from './mergeview';
-import { DiffModel } from './model';
 
 /**
  * Diff callback to be registered for plain-text files.
@@ -15,7 +14,7 @@ import { DiffModel } from './model';
  * @returns PlainText diff widget
  */
 export const createPlainTextDiff: Git.Diff.ICallback<string> = async (
-  model: DiffModel<string>,
+  model: Git.Diff.IModel<string>,
   toolbar?: Toolbar
 ): Promise<PlainTextDiff> => {
   const widget = new PlainTextDiff(model);
@@ -27,7 +26,7 @@ export const createPlainTextDiff: Git.Diff.ICallback<string> = async (
  * Plain Text Diff widget
  */
 export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
-  constructor(model: DiffModel<string>) {
+  constructor(model: Git.Diff.IModel<string>) {
     super({
       node: PlainTextDiff.createNode(
         model.reference.label,
@@ -49,12 +48,10 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
         this._challenger = challenger;
 
         getReady.resolve();
-        this._model.changed.connect(this.refresh.bind(this));
       })
       .catch(reason => {
         this.showError(reason);
         getReady.resolve();
-        this._model.changed.connect(this.refresh.bind(this));
       });
   }
 
@@ -82,12 +79,18 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     this._container.innerHTML = '';
   }
 
+  /**
+   * Refresh diff
+   *
+   * Note: Update the content and recompute the diff
+   */
   async refresh(): Promise<void> {
     await this.ready;
     try {
       // Clear all
       this._container.innerHTML = '';
       this._mergeView = null;
+      // ENH request content only if it changed
       this.createDiffView();
     } catch (reason) {
       this.showError(reason);
@@ -148,8 +151,12 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
    *
    * @param error Error object
    */
-  protected showError(error: any): void {
-    console.error('Failed to load file diff.', error, error?.traceback);
+  protected showError(error: Error): void {
+    console.error(
+      'Failed to load file diff.',
+      error,
+      (error as any)?.traceback
+    );
     const msg = ((error.message || error) as string).replace('\n', '<br />');
     this.node.innerHTML = `<p class="jp-git-diff-error">
       <span>Error Loading File Diff:</span>
@@ -172,7 +179,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   protected _container: HTMLElement;
   protected _isReady: Promise<void>;
   protected _mergeView: MergeView.MergeViewEditor;
-  protected _model: DiffModel<string>;
+  protected _model: Git.Diff.IModel<string>;
 
   private _reference: string | null = null;
   private _challenger: string | null = null;
