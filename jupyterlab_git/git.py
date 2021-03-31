@@ -1191,6 +1191,7 @@ class Git:
                     filename
                 ),
                 "fatal: Path '{}' does not exist in '{}'".format(filename, ref),
+                "fatal: Invalid object name 'HEAD'",
             ],
         )
         lower_error = error.lower()
@@ -1301,10 +1302,17 @@ class Git:
         code, output, error = await execute(command, cwd=top_repo_path)
 
         if code != 0:
-            err_msg = "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(
-                filename
-            ).lower()
-            if err_msg in error.lower():
+            error_messages = map(
+                lambda n: n.lower(),
+                [
+                    "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(
+                        filename
+                    ),
+                    "fatal: bad revision 'HEAD'",
+                ],
+            )
+            lower_error = error.lower()
+            if any([msg in lower_error for msg in error_messages]):
                 return False
 
             raise tornado.web.HTTPError(
