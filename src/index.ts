@@ -148,7 +148,9 @@ async function activate(
     }
   );
   // Whenever a user adds/renames/saves/deletes/modifies a file within the lab environment, refresh the Git status
-  filebrowser.model.fileChanged.connect(() => gitExtension.refreshStatus());
+  app.serviceManager.contents.fileChanged.connect(() =>
+    gitExtension.refreshStatus()
+  );
 
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {

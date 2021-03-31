@@ -625,12 +625,18 @@ export function addCommands(
           }
           // If the diff is on the current file and it is updated => diff model changed
           if (diffContext.currentRef === Git.Diff.SpecialRef.WORKING) {
-            // FIXME This is not triggered by notebook save
-            fileBrowser.model.fileChanged.connect((sender, change) => {
-              if (change.newValue.path === filename) {
+            // More robust than fileBrowser.model.fileChanged
+            app.serviceManager.contents.fileChanged.connect((_, change) => {
+              const updateAt = new Date(
+                change.newValue.last_modified
+              ).valueOf();
+              if (
+                change.newValue.path === filename &&
+                model.challenger.updateAt !== updateAt
+              ) {
                 model.challenger = {
                   ...model.challenger,
-                  updateAt: new Date(change.newValue.last_modified).valueOf()
+                  updateAt
                 };
               }
             });
