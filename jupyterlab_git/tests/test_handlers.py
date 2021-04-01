@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 from unittest.mock import ANY, Mock, call, patch
 
 import requests
@@ -512,9 +513,10 @@ class TestUpstream(ServerTest):
         assert payload == upstream
 
 
-class TestDiffContent(ServerTest):
+class TestContent(ServerTest):
+
     @patch("jupyterlab_git.git.execute")
-    def test_diffcontent(self, mock_execute):
+    def test_content(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
@@ -523,40 +525,61 @@ class TestDiffContent(ServerTest):
         mock_execute.side_effect = [
             maybe_future((0, "1\t1\t{}".format(filename), "")),
             maybe_future((0, content, "")),
-            maybe_future((0, "1\t1\t{}".format(filename), "")),
-            maybe_future((0, content, "")),
         ]
 
         # When
         body = {
             "filename": filename,
-            "prev_ref": {"git": "previous"},
-            "curr_ref": {"git": "current"},
+            "reference": {"git": "previous"},
             "top_repo_path": top_repo_path,
         }
-        response = self.tester.post(["diffcontent"], body=body)
+        response = self.tester.post(["content"], body=body)
 
         # Then
         assert response.status_code == 200
         payload = response.json()
-        assert payload["prev_content"] == content
-        assert payload["curr_content"] == content
+        assert payload["content"] == content
         mock_execute.assert_has_calls(
             [
                 call(
                     ["git", "show", "{}:{}".format("previous", filename)],
-                    cwd=os.path.join(self.notebook_dir, top_repo_path),
-                ),
-                call(
-                    ["git", "show", "{}:{}".format("current", filename)],
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
                 ),
             ],
-            any_order=True,
         )
 
+
     @patch("jupyterlab_git.git.execute")
-    def test_diffcontent_working(self, mock_execute):
+    def test_content_working(self, mock_execute):
+        # Given
+        top_repo_path = "path/to/repo"
+        filename = "my/file"
+        content = "dummy content file\nwith multiple lines"
+
+        mock_execute.side_effect = [
+            maybe_future((0, content, "")),
+        ]
+
+        dummy_file = Path(self.notebook_dir) / top_repo_path / filename
+        dummy_file.parent.mkdir(parents=True)
+        dummy_file.write_text(content)
+
+        # When
+        body = {
+            "filename": filename,
+            "reference": {"special": "WORKING"},
+            "top_repo_path": top_repo_path,
+        }
+        response = self.tester.post(["content"], body=body)
+
+        # Then
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["content"] == content
+
+
+    @patch("jupyterlab_git.git.execute")
+    def test_content_index(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
@@ -565,81 +588,32 @@ class TestDiffContent(ServerTest):
         mock_execute.side_effect = [
             maybe_future((0, "1\t1\t{}".format(filename), "")),
             maybe_future((0, content, "")),
-            maybe_future((0, content, "")),
-        ]
-
-        dummy_file = os.path.join(self.notebook_dir, top_repo_path, filename)
-        os.makedirs(os.path.dirname(dummy_file))
-        with open(dummy_file, "w") as f:
-            f.write(content)
-
-        # When
-        body = {
-            "filename": filename,
-            "prev_ref": {"git": "previous"},
-            "curr_ref": {"special": "WORKING"},
-            "top_repo_path": top_repo_path,
-        }
-        response = self.tester.post(["diffcontent"], body=body)
-
-        # Then
-        assert response.status_code == 200
-        payload = response.json()
-        assert payload["prev_content"] == content
-        assert payload["curr_content"] == content
-        mock_execute.assert_has_calls(
-            [
-                call(
-                    ["git", "show", "{}:{}".format("previous", filename)],
-                    cwd=os.path.join(self.notebook_dir, top_repo_path),
-                )
-            ]
-        )
-
-    @patch("jupyterlab_git.git.execute")
-    def test_diffcontent_index(self, mock_execute):
-        # Given
-        top_repo_path = "path/to/repo"
-        filename = "my/file"
-        content = "dummy content file\nwith multiple lines"
-
-        mock_execute.side_effect = [
-            maybe_future((0, "1\t1\t{}".format(filename), "")),
-            maybe_future((0, content, "")),
-            maybe_future((0, "1\t1\t{}".format(filename), "")),
-            maybe_future((0, content, "")),
         ]
 
         # When
         body = {
             "filename": filename,
-            "prev_ref": {"git": "previous"},
-            "curr_ref": {"special": "INDEX"},
+            "reference": {"special": "INDEX"},
             "top_repo_path": top_repo_path,
         }
-        response = self.tester.post(["diffcontent"], body=body)
+        response = self.tester.post(["content"], body=body)
 
         # Then
         assert response.status_code == 200
         payload = response.json()
-        assert payload["prev_content"] == content
-        assert payload["curr_content"] == content
+        assert payload["content"] == content
         mock_execute.assert_has_calls(
             [
-                call(
-                    ["git", "show", "{}:{}".format("previous", filename)],
-                    cwd=os.path.join(self.notebook_dir, top_repo_path),
-                ),
                 call(
                     ["git", "show", "{}:{}".format("", filename)],
                     cwd=os.path.join(self.notebook_dir, top_repo_path),
                 ),
             ],
-            any_order=True,
         )
 
+
     @patch("jupyterlab_git.git.execute")
-    def test_diffcontent_unknown_special(self, mock_execute):
+    def test_content_unknown_special(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
@@ -648,23 +622,20 @@ class TestDiffContent(ServerTest):
         mock_execute.side_effect = [
             maybe_future((0, "1\t1\t{}".format(filename), "")),
             maybe_future((0, content, "")),
-            maybe_future((0, "1\t1\t{}".format(filename), "")),
-            maybe_future((0, content, "")),
         ]
 
         # When
         body = {
             "filename": filename,
-            "prev_ref": {"git": "previous"},
-            "curr_ref": {"special": "unknown"},
+            "reference": {"special": "unknown"},
             "top_repo_path": top_repo_path,
         }
 
         with assert_http_error(500, msg="unknown special ref"):
-            self.tester.post(["diffcontent"], body=body)
-
+            self.tester.post(["content"], body=body)
+        
     @patch("jupyterlab_git.git.execute")
-    def test_diffcontent_show_handled_error(self, mock_execute):
+    def test_content_show_handled_error(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
@@ -682,20 +653,19 @@ class TestDiffContent(ServerTest):
         # When
         body = {
             "filename": filename,
-            "prev_ref": {"git": "previous"},
-            "curr_ref": {"git": "current"},
+            "reference": {"git": "current"},
             "top_repo_path": top_repo_path,
         }
-        response = self.tester.post(["diffcontent"], body=body)
+        response = self.tester.post(["content"], body=body)
 
         # Then
         assert response.status_code == 200
         payload = response.json()
-        assert payload["prev_content"] == ""
-        assert payload["curr_content"] == ""
+        assert payload["content"] == ""
+
 
     @patch("jupyterlab_git.git.execute")
-    def test_diffcontent_binary(self, mock_execute):
+    def test_content_binary(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
@@ -705,17 +675,17 @@ class TestDiffContent(ServerTest):
         # When
         body = {
             "filename": filename,
-            "prev_ref": {"git": "previous"},
-            "curr_ref": {"git": "current"},
+            "reference": {"git": "current"},
             "top_repo_path": top_repo_path,
         }
 
         # Then
         with assert_http_error(500, msg="file is not UTF-8"):
-            self.tester.post(["diffcontent"], body=body)
+            self.tester.post(["content"], body=body)
+
 
     @patch("jupyterlab_git.git.execute")
-    def test_diffcontent_show_unhandled_error(self, mock_execute):
+    def test_content_show_unhandled_error(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/file"
@@ -725,47 +695,32 @@ class TestDiffContent(ServerTest):
         # When
         body = {
             "filename": filename,
-            "prev_ref": {"git": "previous"},
-            "curr_ref": {"git": "current"},
+            "reference": {"git": "current"},
             "top_repo_path": top_repo_path,
         }
 
         # Then
         with assert_http_error(500, msg="Dummy error"):
-            self.tester.post(["diffcontent"], body=body)
+            self.tester.post(["content"], body=body)
+
 
     @patch("jupyterlab_git.git.execute")
-    def test_diffcontent_getcontent_deleted_file(self, mock_execute):
+    def test_content_getcontent_deleted_file(self, mock_execute):
         # Given
         top_repo_path = "path/to/repo"
         filename = "my/absent_file"
         content = "dummy content file\nwith multiple lines"
 
-        mock_execute.side_effect = [
-            maybe_future((0, "1\t1\t{}".format(filename), "")),
-            maybe_future((0, content, "")),
-        ]
-
         # When
         body = {
             "filename": filename,
-            "prev_ref": {"git": "previous"},
-            "curr_ref": {"special": "WORKING"},
+            "reference": {"special": "WORKING"},
             "top_repo_path": top_repo_path,
         }
         # Then
-        response = self.tester.post(["diffcontent"], body=body)
+        response = self.tester.post(["content"], body=body)
 
         # Then
         assert response.status_code == 200
         payload = response.json()
-        assert payload["prev_content"] == content
-        assert payload["curr_content"] == ""
-        mock_execute.assert_has_calls(
-            [
-                call(
-                    ["git", "show", "{}:{}".format("previous", filename)],
-                    cwd=os.path.join(self.notebook_dir, top_repo_path),
-                )
-            ]
-        )
+        assert payload["content"] == ""

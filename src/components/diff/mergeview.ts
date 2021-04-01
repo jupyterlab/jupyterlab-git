@@ -1338,6 +1338,7 @@ function getDiff(
   }
 
   const diff = dmp.diff_main(a, b);
+  dmp.diff_cleanupSemantic(diff);
   // The library sometimes leaves in empty parts, which confuse the algorithm
   for (let i = 0; i < diff.length; ++i) {
     const part = diff[i];
