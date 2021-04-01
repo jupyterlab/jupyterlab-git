@@ -1,9 +1,11 @@
+import { Toolbar } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServerConnection } from '@jupyterlab/services';
 import { JSONObject, ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
 
@@ -353,10 +355,15 @@ export interface IGitExtension extends IDisposable {
   /**
    * Register a new diff provider for specified file types
    *
-   * @param filetypes File type list
+   * @param name provider name
+   * @param fileExtensions File extensions list
    * @param callback Callback to use for the provided file types
    */
-  registerDiffProvider(filetypes: string[], callback: Git.IDiffCallback): void;
+  registerDiffProvider<T>(
+    name: string,
+    fileExtensions: string[],
+    callback: Git.Diff.ICallback<T>
+  ): void;
 
   /**
    * Move files from the "staged" to the "unstaged" area.
@@ -445,12 +452,114 @@ export interface IGitExtension extends IDisposable {
 }
 
 export namespace Git {
-  /** Function type for diffing a file's revisions */
-  export type IDiffCallback = (
-    filename: string,
-    revisionA: string,
-    revisionB: string
-  ) => void;
+  export namespace Diff {
+    /**
+     * Diff widget interface
+     */
+    export interface IDiffWidget extends Widget {
+      /**
+       * Refresh the diff widget
+       *
+       * Note: Update the content and recompute the diff
+       */
+      refresh(): Promise<void>;
+    }
+
+    /**
+     * Callback to generate a comparison widget
+     *
+     * T is the content type to be compared
+     *
+     * The toolbar is the one of the MainAreaWidget in which the diff widget
+     * will be displayed.
+     */
+    export type ICallback<T> = (
+      model: IModel<T>,
+      toolbar?: Toolbar
+    ) => Promise<IDiffWidget>;
+
+    /**
+     * Content and its context for diff
+     */
+    export interface IContent<T> {
+      /**
+       * Asynchronous content getter for the source
+       */
+      content: () => Promise<T>;
+      /**
+       * Content label
+       *
+       * Note: It is the preferred displayed information
+       */
+      label: string;
+      /**
+       * Source of the content
+       *
+       * Note: It is a machine friendly reference
+       */
+      source: any;
+      /**
+       * Last time at which the content was updated.
+       *
+       * Optional, can be useful to trigger model changed signal
+       */
+      updateAt?: number;
+    }
+
+    /**
+     * Model which indicates the context in which a Git diff is being performed.
+     *
+     * It can be:
+     * - a regular Git ref, i.e, https://git-scm.com/book/en/v2/Git-Internals-Git-References
+     * - special/reserved references
+     *
+     * 1. WORKING: The Working Tree
+     * 2. INDEX: The Staging Area
+     *
+     * To differentiate with the regular Git ref they are passed as number
+     */
+    export interface IContext {
+      currentRef: string | SpecialRef;
+      previousRef: string | SpecialRef;
+    }
+
+    /**
+     * DiffModel properties
+     */
+    export interface IModel<T> {
+      /**
+       * Challenger data
+       */
+      challenger: IContent<T>;
+      /**
+       * Signal emitted when the reference or the challenger changes
+       */
+      readonly changed: ISignal<IModel<T>, IModelChange>;
+      /**
+       * File of the name being diff at reference state
+       */
+      readonly filename: string;
+      /**
+       * Reference data
+       */
+      reference: IContent<T>;
+    }
+
+    /**
+     * DiffModel changed signal argument
+     */
+    export interface IModelChange {
+      /**
+       * Which content did change
+       */
+      type: 'reference' | 'challenger';
+    }
+
+    export enum SpecialRef {
+      'WORKING',
+      'INDEX'
+    }
+  }
 
   /**
    * Interface for GitAllHistory request result,
@@ -565,13 +674,9 @@ export namespace Git {
    */
   export interface IDiffContent {
     /**
-     * Current file content
+     * File content
      */
-    curr_content: string;
-    /**
-     * Previous file content
-     */
-    prev_content: string;
+    content: string;
   }
 
   /**
@@ -863,5 +968,6 @@ export enum CommandIDs {
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
   gitPull = 'git:pull',
-  gitSubmitCommand = 'git:submit-commit'
+  gitSubmitCommand = 'git:submit-commit',
+  gitShowDiff = 'git:show-diff'
 }

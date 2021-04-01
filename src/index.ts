@@ -3,7 +3,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
+import { Dialog, showErrorMessage, Toolbar } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
@@ -17,6 +17,7 @@ import {
   addFileBrowserContextMenu,
   createGitMenu
 } from './commandsAndMenu';
+import { createNotebookDiff } from './components/diff/NotebookDiff';
 import { addStatusBarWidget } from './components/StatusWidget';
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
@@ -25,6 +26,8 @@ import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 
+export { NotebookDiff } from './components/diff/NotebookDiff';
+export { PlainTextDiff } from './components/diff/PlainTextDiff';
 export { Git, IGitExtension } from './tokens';
 
 /**
@@ -145,19 +148,14 @@ async function activate(
     }
   );
   // Whenever a user adds/renames/saves/deletes/modifies a file within the lab environment, refresh the Git status
-  filebrowser.model.fileChanged.connect(() => gitExtension.refreshStatus());
+  app.serviceManager.contents.fileChanged.connect(() =>
+    gitExtension.refreshStatus()
+  );
 
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Add JupyterLab commands
-    addCommands(
-      app,
-      gitExtension,
-      factory.defaultBrowser,
-      settings,
-      trans,
-      renderMime
-    );
+    addCommands(app, gitExtension, factory.defaultBrowser, settings, trans);
 
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
@@ -197,6 +195,14 @@ async function activate(
       app.contextMenu
     );
   }
+
+  // Register diff providers
+  gitExtension.registerDiffProvider(
+    'Nbdime',
+    ['.ipynb'],
+    (model: Git.Diff.IModel<string>, toolbar?: Toolbar) =>
+      createNotebookDiff(model, renderMime, toolbar)
+  );
 
   return gitExtension;
 }

@@ -12,6 +12,22 @@ import { decodeStage } from './utils';
 
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
+// Available diff providers
+const DIFF_PROVIDERS: {
+  [key: string]: { name: string; callback: Git.Diff.ICallback<any> };
+} = {};
+
+/**
+ * Get the diff provider for a filename
+ * @param filename Filename to look for
+ * @returns The diff provider callback or undefined
+ */
+export function getDiffProvider(
+  filename: string
+): Git.Diff.ICallback<any> | undefined {
+  return DIFF_PROVIDERS[PathExt.extname(filename)?.toLocaleLowerCase()]
+    ?.callback;
+}
 
 /**
  * Class for creating a model for retrieving info from, and interacting with, a remote Git repository.
@@ -568,6 +584,7 @@ export class GitExtension implements IGitExtension {
     this._isDisposed = true;
     this._fetchPoll.dispose();
     this._statusPoll.dispose();
+    this._taskHandler.dispose();
     Signal.clearData(this);
   }
 
@@ -1058,12 +1075,16 @@ export class GitExtension implements IGitExtension {
   /**
    * Register a new diff provider for specified file types
    *
-   * @param filetypes File type list
+   * @param fileExtensions File type list
    * @param callback Callback to use for the provided file types
    */
-  registerDiffProvider(filetypes: string[], callback: Git.IDiffCallback): void {
-    filetypes.forEach(fileType => {
-      this._diffProviders[fileType] = callback;
+  registerDiffProvider<T>(
+    name: string,
+    fileExtensions: string[],
+    callback: Git.Diff.ICallback<T>
+  ): void {
+    fileExtensions.forEach(fileExtension => {
+      DIFF_PROVIDERS[fileExtension.toLocaleLowerCase()] = { name, callback };
     });
   }
 
@@ -1194,8 +1215,32 @@ export class GitExtension implements IGitExtension {
    * @param v - repository status
    */
   protected _setStatus(v: Git.IStatus): void {
-    this._status = v;
-    this._statusChanged.emit(this._status);
+    let areEqual =
+      this._status.ahead === v.ahead &&
+      this._status.behind === v.behind &&
+      this._status.branch === v.branch &&
+      this._status.files.length === v.files.length;
+    if (areEqual) {
+      for (const file of v.files) {
+        if (
+          this._status.files.findIndex(
+            oldFile =>
+              oldFile.from === file.from &&
+              oldFile.to === file.to &&
+              oldFile.x === file.x &&
+              oldFile.y === file.y
+          )
+        ) {
+          areEqual = false;
+          break;
+        }
+      }
+    }
+
+    if (!areEqual) {
+      this._status = v;
+      this._statusChanged.emit(this._status);
+    }
   }
 
   /**
@@ -1302,7 +1347,6 @@ export class GitExtension implements IGitExtension {
   private _serverRoot: string;
   private _docmanager: IDocumentManager | null;
   private _docRegistry: DocumentRegistry | null;
-  private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
   private _fetchPoll: Poll;
   private _isDisposed = false;
   private _markerCache: Markers = new Markers(() => this._markChanged.emit());

@@ -100,22 +100,14 @@ describe('IGitExtension', () => {
         }
       });
 
-      const testStatusSignal = testEmission(model.statusChanged, {
-        test: (caller, files) => {
-          expect(caller).toBe(model);
-        }
-      });
-
       model.pathRepository = path;
       await model.ready;
       await testPathSignal;
-      await testStatusSignal;
 
       path = null;
       model.pathRepository = path;
       await model.ready;
       await testPathSignal;
-      await testStatusSignal;
     });
   });
 

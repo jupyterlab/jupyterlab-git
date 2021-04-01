@@ -1,5 +1,11 @@
 .jp-git-PlainText-diff {
   width: 100%;
+  max-height: calc(100% - 23px);
+}
+
+.jp-git-PlainText-diff .CodeMirror-merge,
+.jp-git-PlainText-diff .CodeMirror-merge .CodeMirror,
+.jp-git-PlainText-diff .CodeMirror-merge .CodeMirror-merge-pane {
   height: 100%;
 }
 
@@ -19,14 +25,12 @@
 
 .jp-git-PlainText-diff .CodeMirror-merge-r-inserted,
 .jp-git-PlainText-diff .CodeMirror-merge-l-inserted {
-  background-color: var(--jp-git-diff-added-color);
   background-position: bottom left;
   background-repeat: repeat-x;
 }
 
 .jp-git-PlainText-diff .CodeMirror-merge-r-deleted,
 .jp-git-PlainText-diff .CodeMirror-merge-l-deleted {
-  background-color: var(--jp-git-diff-deleted-color);
   background-position: bottom left;
   background-repeat: repeat-x;
 }

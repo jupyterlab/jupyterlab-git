@@ -6,7 +6,7 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
 import { CommandArguments } from '../commandsAndMenu';
 import { LoggerContext } from '../logger';
-import { GitExtension } from '../model';
+import { getDiffProvider, GitExtension } from '../model';
 import {
   deletionsMadeIcon,
   diffIcon,
@@ -28,7 +28,6 @@ import {
 } from '../style/SinglePastCommitInfo';
 import { ContextCommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
-import { isDiffSupported } from './diff/Diff';
 import { FilePath } from './FilePath';
 import { ResetRevertDialog } from './ResetRevertDialog';
 
@@ -259,7 +258,7 @@ export class SinglePastCommitInfo extends React.Component<
     const { data, index, style } = props;
     const file = data[index];
     const path = file.modified_file_path;
-    const flg = isDiffSupported(path) || !file.is_binary;
+    const flg = !!getDiffProvider(path) || !file.is_binary;
     return (
       <li
         className={commitDetailFileClass}
@@ -357,12 +356,8 @@ export class SinglePastCommitInfo extends React.Component<
               filePath: fpath,
               isText: bool,
               context: {
-                previousRef: {
-                  gitRef: self.props.commit.pre_commit
-                },
-                currentRef: {
-                  gitRef: self.props.commit.commit
-                }
+                previousRef: self.props.commit.pre_commit,
+                currentRef: self.props.commit.commit
               }
             }
           ]

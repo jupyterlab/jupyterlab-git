@@ -516,15 +516,13 @@ async def test_upstream_handler_localbranch(mock_git, jp_fetch):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_diffcontent(mock_execute, jp_fetch, jp_root_dir):
+async def test_content(mock_execute, jp_fetch, jp_root_dir):
     # Given
     top_repo_path = "path/to/repo"
     filename = "my/file"
     content = "dummy content file\nwith multiple lines"
 
     mock_execute.side_effect = [
-        maybe_future((0, "1\t1\t{}".format(filename), "")),
-        maybe_future((0, content, "")),
         maybe_future((0, "1\t1\t{}".format(filename), "")),
         maybe_future((0, content, "")),
     ]
@@ -532,42 +530,33 @@ async def test_diffcontent(mock_execute, jp_fetch, jp_root_dir):
     # When
     body = {
         "filename": filename,
-        "prev_ref": {"git": "previous"},
-        "curr_ref": {"git": "current"},
+        "reference": {"git": "previous"},
         "top_repo_path": top_repo_path,
     }
-    response = await jp_fetch(NS, "diffcontent", body=json.dumps(body), method="POST")
+    response = await jp_fetch(NS, "content", body=json.dumps(body), method="POST")
 
     # Then
     assert response.code == 200
     payload = json.loads(response.body)
-    assert payload["prev_content"] == content
-    assert payload["curr_content"] == content
+    assert payload["content"] == content
     mock_execute.assert_has_calls(
         [
             call(
                 ["git", "show", "{}:{}".format("previous", filename)],
                 cwd=str(jp_root_dir / top_repo_path),
             ),
-            call(
-                ["git", "show", "{}:{}".format("current", filename)],
-                cwd=str(jp_root_dir / top_repo_path),
-            ),
         ],
-        any_order=True,
     )
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_diffcontent_working(mock_execute, jp_fetch, jp_root_dir):
+async def test_content_working(mock_execute, jp_fetch, jp_root_dir):
     # Given
     top_repo_path = "path/to/repo"
     filename = "my/file"
     content = "dummy content file\nwith multiple lines"
 
     mock_execute.side_effect = [
-        maybe_future((0, "1\t1\t{}".format(filename), "")),
-        maybe_future((0, content, "")),
         maybe_future((0, content, "")),
     ]
 
@@ -578,29 +567,19 @@ async def test_diffcontent_working(mock_execute, jp_fetch, jp_root_dir):
     # When
     body = {
         "filename": filename,
-        "prev_ref": {"git": "previous"},
-        "curr_ref": {"special": "WORKING"},
+        "reference": {"special": "WORKING"},
         "top_repo_path": top_repo_path,
     }
-    response = await jp_fetch(NS, "diffcontent", body=json.dumps(body), method="POST")
+    response = await jp_fetch(NS, "content", body=json.dumps(body), method="POST")
 
     # Then
     assert response.code == 200
     payload = json.loads(response.body)
-    assert payload["prev_content"] == content
-    assert payload["curr_content"] == content
-    mock_execute.assert_has_calls(
-        [
-            call(
-                ["git", "show", "{}:{}".format("previous", filename)],
-                cwd=str(jp_root_dir / top_repo_path),
-            )
-        ]
-    )
+    assert payload["content"] == content
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_diffcontent_index(mock_execute, jp_fetch, jp_root_dir):
+async def test_content_index(mock_execute, jp_fetch, jp_root_dir):
     # Given
     top_repo_path = "path/to/repo"
     filename = "my/file"
@@ -609,41 +588,32 @@ async def test_diffcontent_index(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.side_effect = [
         maybe_future((0, "1\t1\t{}".format(filename), "")),
         maybe_future((0, content, "")),
-        maybe_future((0, "1\t1\t{}".format(filename), "")),
-        maybe_future((0, content, "")),
     ]
 
     # When
     body = {
         "filename": filename,
-        "prev_ref": {"git": "previous"},
-        "curr_ref": {"special": "INDEX"},
+        "reference": {"special": "INDEX"},
         "top_repo_path": top_repo_path,
     }
-    response = await jp_fetch(NS, "diffcontent", body=json.dumps(body), method="POST")
+    response = await jp_fetch(NS, "content", body=json.dumps(body), method="POST")
 
     # Then
     assert response.code == 200
     payload = json.loads(response.body)
-    assert payload["prev_content"] == content
-    assert payload["curr_content"] == content
+    assert payload["content"] == content
     mock_execute.assert_has_calls(
         [
-            call(
-                ["git", "show", "{}:{}".format("previous", filename)],
-                cwd=str(jp_root_dir / top_repo_path),
-            ),
             call(
                 ["git", "show", "{}:{}".format("", filename)],
                 cwd=str(jp_root_dir / top_repo_path),
             ),
         ],
-        any_order=True,
     )
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_diffcontent_unknown_special(mock_execute, jp_fetch):
+async def test_content_unknown_special(mock_execute, jp_fetch):
     # Given
     top_repo_path = "path/to/repo"
     filename = "my/file"
@@ -652,25 +622,22 @@ async def test_diffcontent_unknown_special(mock_execute, jp_fetch):
     mock_execute.side_effect = [
         maybe_future((0, "1\t1\t{}".format(filename), "")),
         maybe_future((0, content, "")),
-        maybe_future((0, "1\t1\t{}".format(filename), "")),
-        maybe_future((0, content, "")),
     ]
 
     # When
     body = {
         "filename": filename,
-        "prev_ref": {"git": "previous"},
-        "curr_ref": {"special": "unknown"},
+        "reference": {"special": "unknown"},
         "top_repo_path": top_repo_path,
     }
 
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(NS, "diffcontent", body=json.dumps(body), method="POST")
+        await jp_fetch(NS, "content", body=json.dumps(body), method="POST")
     assert_http_error(e, 500, expected_message="unknown special ref")
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_diffcontent_show_handled_error(mock_execute, jp_fetch):
+async def test_content_show_handled_error(mock_execute, jp_fetch):
     # Given
     top_repo_path = "path/to/repo"
     filename = "my/file"
@@ -688,21 +655,19 @@ async def test_diffcontent_show_handled_error(mock_execute, jp_fetch):
     # When
     body = {
         "filename": filename,
-        "prev_ref": {"git": "previous"},
-        "curr_ref": {"git": "current"},
+        "reference": {"git": "current"},
         "top_repo_path": top_repo_path,
     }
-    response = await jp_fetch(NS, "diffcontent", body=json.dumps(body), method="POST")
+    response = await jp_fetch(NS, "content", body=json.dumps(body), method="POST")
 
     # Then
     assert response.code == 200
     payload = json.loads(response.body)
-    assert payload["prev_content"] == ""
-    assert payload["curr_content"] == ""
+    assert payload["content"] == ""
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_diffcontent_binary(mock_execute, jp_fetch):
+async def test_content_binary(mock_execute, jp_fetch):
     # Given
     top_repo_path = "path/to/repo"
     filename = "my/file"
@@ -712,19 +677,18 @@ async def test_diffcontent_binary(mock_execute, jp_fetch):
     # When
     body = {
         "filename": filename,
-        "prev_ref": {"git": "previous"},
-        "curr_ref": {"git": "current"},
+        "reference": {"git": "current"},
         "top_repo_path": top_repo_path,
     }
 
     # Then
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(NS, "diffcontent", body=json.dumps(body), method="POST")
+        await jp_fetch(NS, "content", body=json.dumps(body), method="POST")
     assert_http_error(e, 500, expected_message="file is not UTF-8")
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_diffcontent_show_unhandled_error(mock_execute, jp_fetch):
+async def test_content_show_unhandled_error(mock_execute, jp_fetch):
     # Given
     top_repo_path = "path/to/repo"
     filename = "my/file"
@@ -734,49 +698,33 @@ async def test_diffcontent_show_unhandled_error(mock_execute, jp_fetch):
     # When
     body = {
         "filename": filename,
-        "prev_ref": {"git": "previous"},
-        "curr_ref": {"git": "current"},
+        "reference": {"git": "current"},
         "top_repo_path": top_repo_path,
     }
 
     # Then
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(NS, "diffcontent", body=json.dumps(body), method="POST")
+        await jp_fetch(NS, "content", body=json.dumps(body), method="POST")
     assert_http_error(e, 500, expected_message="Dummy error")
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_diffcontent_getcontent_deleted_file(mock_execute, jp_fetch, jp_root_dir):
+async def test_content_getcontent_deleted_file(mock_execute, jp_fetch, jp_root_dir):
     # Given
     top_repo_path = "path/to/repo"
     filename = "my/absent_file"
     content = "dummy content file\nwith multiple lines"
 
-    mock_execute.side_effect = [
-        maybe_future((0, "1\t1\t{}".format(filename), "")),
-        maybe_future((0, content, "")),
-    ]
-
     # When
     body = {
         "filename": filename,
-        "prev_ref": {"git": "previous"},
-        "curr_ref": {"special": "WORKING"},
+        "reference": {"special": "WORKING"},
         "top_repo_path": top_repo_path,
     }
     # Then
-    response = await jp_fetch(NS, "diffcontent", body=json.dumps(body), method="POST")
+    response = await jp_fetch(NS, "content", body=json.dumps(body), method="POST")
 
     # Then
     assert response.code == 200
     payload = json.loads(response.body)
-    assert payload["prev_content"] == content
-    assert payload["curr_content"] == ""
-    mock_execute.assert_has_calls(
-        [
-            call(
-                ["git", "show", "{}:{}".format("previous", filename)],
-                cwd=str(jp_root_dir / top_repo_path),
-            )
-        ]
-    )
+    assert payload["content"] == ""

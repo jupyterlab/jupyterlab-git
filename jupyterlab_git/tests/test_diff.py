@@ -1,3 +1,5 @@
+import json
+import nbformat
 from pathlib import Path
 from subprocess import CalledProcessError
 from unittest.mock import Mock, call, patch
@@ -233,3 +235,45 @@ async def test_is_binary_file(args, cli_result, cmd, expected):
             mock_execute.assert_called_once_with(cmd, cwd="/bin")
 
             assert actual_response == expected
+
+
+@pytest.mark.asyncio
+async def test_Git_get_nbdiff_file():
+    HERE = Path(__file__).parent.resolve()
+
+    manager = Git(FakeContentManager(Path("/bin")))
+    prev_content = (HERE / "samples" / "ipynb_base.json").read_text()
+    curr_content = (HERE / "samples" / "ipynb_remote.json").read_text()
+
+    result = await manager.get_nbdiff(prev_content, curr_content)
+
+    expected_result = json.loads((HERE / "samples" / "ipynb_nbdiff.json").read_text())
+    assert result == expected_result
+
+
+@pytest.mark.asyncio
+async def test_Git_get_nbdiff_dict():
+    HERE = Path(__file__).parent.resolve()
+
+    manager = Git(FakeContentManager(Path("/bin")))
+    prev_content = json.loads((HERE / "samples" / "ipynb_base.json").read_text())
+    curr_content = json.loads((HERE / "samples" / "ipynb_remote.json").read_text())
+
+    result = await manager.get_nbdiff(prev_content, curr_content)
+
+    expected_result = json.loads((HERE / "samples" / "ipynb_nbdiff.json").read_text())
+    assert result == expected_result
+
+
+@pytest.mark.asyncio
+async def test_Git_get_nbdiff_no_content():
+    HERE = Path(__file__).parent.resolve()
+
+    manager = Git(FakeContentManager(Path("/bin")))
+
+    result = await manager.get_nbdiff("", "")
+
+    assert result == {
+        "base": nbformat.versions[nbformat.current_nbformat].new_notebook(),
+        "diff": [],
+    }

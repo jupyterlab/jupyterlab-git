@@ -7,7 +7,7 @@ import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { ListChildComponentProps } from 'react-window';
 import { addMenuItems, CommandArguments } from '../commandsAndMenu';
-import { GitExtension } from '../model';
+import { getDiffProvider, GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { fileListWrapperClass } from '../style/FileListStyle';
 import {
@@ -19,7 +19,6 @@ import {
 } from '../style/icons';
 import { ContextCommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
-import { isDiffSupported } from './diff/Diff';
 import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
 
@@ -743,7 +742,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    */
   private _createDiffButton(file: Git.IStatusFile): JSX.Element {
     return (
-      (isDiffSupported(file.to) || !file.is_binary) && (
+      (getDiffProvider(file.to) || !file.is_binary) && (
         <ActionButton
           className={hiddenButtonStyle}
           icon={diffIcon}
