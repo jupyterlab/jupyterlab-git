@@ -63,7 +63,7 @@
       "type": "boolean",
       "title": "Trigger push on commit",
       "description": "Whether to trigger or not a push for each commit.",
-      "default": true
+      "default": false
     }
   },
   "jupyter.lab.shortcuts": [
