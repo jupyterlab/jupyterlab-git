@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import url('~nbdime/lib/styles/common.css');
+@import url('~nbdime/lib/styles/diff.css');
+@import url('~nbdime/lib/styles/merge.css');
+@import url('~nbdime/lib/styles/variables.css');
 @import 'diff-common.css';
 @import 'diff-nb.css';
 @import 'diff-text.css';

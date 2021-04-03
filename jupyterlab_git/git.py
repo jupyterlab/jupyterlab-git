@@ -1,20 +1,21 @@
 """
 Module for executing git commands, sending results back to the handlers
 """
+import datetime
 import os
+import pathlib
 import re
 import shlex
 import subprocess
 from urllib.parse import unquote
 
-import pathlib
+import nbformat
 import pexpect
 import tornado
 import tornado.locks
-import datetime
+from nbdime import diff_notebooks
 
 from .log import get_logger
-
 
 # Regex pattern to capture (key, value) of Git configuration options.
 # See https://git-scm.com/docs/git-config#_syntax for git var syntax
@@ -321,6 +322,40 @@ class Git:
             result["error"] = fetch_error
 
         return result
+
+    async def get_nbdiff(self, prev_content: str, curr_content: str) -> dict:
+        """Compute the diff between two notebooks.
+
+        Args:
+            prev_content: Notebook previous content
+            curr_content: Notebook current content
+        Returns:
+            {"base": Dict, "diff": Dict}
+        """
+
+        def read_notebook(content):
+            if not content:
+                return nbformat.versions[nbformat.current_nbformat].new_notebook()
+            if isinstance(content, dict):
+                # Content may come from model as a dict directly
+                return (
+                    nbformat.versions[
+                        content.get("nbformat", nbformat.current_nbformat)
+                    ]
+                    .nbjson.JSONReader()
+                    .to_notebook(content)
+                )
+            else:
+                return nbformat.reads(content, as_version=4)
+
+        current_loop = tornado.ioloop.IOLoop.current()
+        prev_nb = await current_loop.run_in_executor(None, read_notebook, prev_content)
+        curr_nb = await current_loop.run_in_executor(None, read_notebook, curr_content)
+        thediff = await current_loop.run_in_executor(
+            None, diff_notebooks, prev_nb, curr_nb
+        )
+
+        return {"base": prev_nb, "diff": thediff}
 
     async def status(self, current_path):
         """
@@ -1156,6 +1191,7 @@ class Git:
                     filename
                 ),
                 "fatal: Path '{}' does not exist in '{}'".format(filename, ref),
+                "fatal: Invalid object name 'HEAD'",
             ],
         )
         lower_error = error.lower()
@@ -1188,48 +1224,39 @@ class Git:
             raise error
         return model["content"]
 
-    async def diff_content(self, filename, prev_ref, curr_ref, top_repo_path):
+    async def get_content_at_reference(self, filename, reference, top_repo_path):
         """
-        Collect get content of prev and curr and return.
+        Collect get content of the file at the git reference.
         """
-        if prev_ref["git"]:
-            is_binary = await self._is_binary(filename, prev_ref["git"], top_repo_path)
-            if is_binary:
-                raise tornado.web.HTTPError(
-                    log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8."
-                )
-
-            prev_content = await self.show(filename, prev_ref["git"], top_repo_path)
-        else:
-            prev_content = ""
-
-        if "special" in curr_ref:
-            if curr_ref["special"] == "WORKING":
-                curr_content = self.get_content(filename, top_repo_path)
-            elif curr_ref["special"] == "INDEX":
+        if "special" in reference:
+            if reference["special"] == "WORKING":
+                content = self.get_content(filename, top_repo_path)
+            elif reference["special"] == "INDEX":
                 is_binary = await self._is_binary(filename, "INDEX", top_repo_path)
                 if is_binary:
                     raise tornado.web.HTTPError(
-                        log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8."
+                        log_message="Error occurred while executing command to retrieve plaintext content as file is not UTF-8."
                     )
 
-                curr_content = await self.show(filename, "", top_repo_path)
+                content = await self.show(filename, "", top_repo_path)
             else:
                 raise tornado.web.HTTPError(
-                    log_message="Error while retrieving plaintext diff, unknown special ref '{}'.".format(
-                        curr_ref["special"]
+                    log_message="Error while retrieving plaintext content, unknown special ref '{}'.".format(
+                        reference["special"]
                     )
                 )
-        else:
-            is_binary = await self._is_binary(filename, curr_ref["git"], top_repo_path)
+        elif reference["git"]:
+            is_binary = await self._is_binary(filename, reference["git"], top_repo_path)
             if is_binary:
                 raise tornado.web.HTTPError(
-                    log_message="Error occurred while executing command to retrieve plaintext diff as file is not UTF-8."
+                    log_message="Error occurred while executing command to retrieve plaintext content as file is not UTF-8."
                 )
 
-            curr_content = await self.show(filename, curr_ref["git"], top_repo_path)
+            content = await self.show(filename, reference["git"], top_repo_path)
+        else:
+            content = ""
 
-        return {"prev_content": prev_content, "curr_content": curr_content}
+        return {"content": content}
 
     async def _is_binary(self, filename, ref, top_repo_path):
         """
@@ -1275,10 +1302,17 @@ class Git:
         code, output, error = await execute(command, cwd=top_repo_path)
 
         if code != 0:
-            err_msg = "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(
-                filename
-            ).lower()
-            if err_msg in error.lower():
+            error_messages = map(
+                lambda n: n.lower(),
+                [
+                    "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(
+                        filename
+                    ),
+                    "fatal: bad revision 'HEAD'",
+                ],
+            )
+            lower_error = error.lower()
+            if any([msg in lower_error for msg in error_messages]):
                 return False
 
             raise tornado.web.HTTPError(
