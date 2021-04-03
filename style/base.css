@@ -2,6 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+
+/* Import same style from nbdime than nbdime-jupyterlab
+ * see index.ts
+ */
 @import url('~nbdime/lib/common/collapsible.css');
 @import url('~nbdime/lib/upstreaming/flexpanel.css');
 @import url('~nbdime/lib/common/dragpanel.css');
