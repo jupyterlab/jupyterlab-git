@@ -254,6 +254,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       console.error(error);
       this.props.logger.log({ ...errorLog, error });
     }
+    const hasRemote = this.props.model.branches.some(
+      branch => branch.is_remote_branch
+    );
+    // If enabled commit and push, push here
+    if (this.props.settings.composite['commitAndPush'] && hasRemote) {
+      await this.props.commands.execute(CommandIDs.gitPush);
+    }
   };
 
   /**
@@ -360,6 +367,12 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns React element
    */
   private _renderChanges(): React.ReactElement {
+    const hasRemote = this.props.model.branches.some(
+      branch => branch.is_remote_branch
+    );
+    const commitAndPush =
+      (this.props.settings.composite['commitAndPush'] as boolean) && hasRemote;
+    const buttonLabel = commitAndPush ? 'Commit and Push' : 'Commit';
     return (
       <React.Fragment>
         <FileList
@@ -370,15 +383,17 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         />
         {this.props.settings.composite['simpleStaging'] ? (
           <CommitBox
-            hasFiles={this._markedFiles.length > 0}
-            onCommit={this.commitMarkedFiles}
             commands={this.props.commands}
+            hasFiles={this._markedFiles.length > 0}
+            label={buttonLabel}
+            onCommit={this.commitMarkedFiles}
           />
         ) : (
           <CommitBox
-            hasFiles={this._hasStagedFile()}
-            onCommit={this.commitStagedFiles}
             commands={this.props.commands}
+            hasFiles={this._hasStagedFile()}
+            label={buttonLabel}
+            onCommit={this.commitStagedFiles}
           />
         )}
       </React.Fragment>

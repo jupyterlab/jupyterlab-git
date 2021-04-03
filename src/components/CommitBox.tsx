@@ -1,12 +1,12 @@
+import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import {
-  commitFormClass,
-  commitSummaryClass,
+  commitButtonClass,
   commitDescriptionClass,
-  commitButtonClass
+  commitFormClass,
+  commitSummaryClass
 } from '../style/CommitBox';
-import { CommandRegistry } from '@lumino/commands';
 import { CommandIDs } from '../tokens';
 
 /**
@@ -22,6 +22,11 @@ export interface ICommitBoxProps {
    * Boolean indicating whether files currently exist which have changes to commit.
    */
   hasFiles: boolean;
+
+  /**
+   * Commit button label
+   */
+  label: string;
 
   /**
    * Callback to invoke in order to commit changes.
@@ -87,7 +92,7 @@ export class CommitBox extends React.Component<
       ? 'Disabled: No files are staged for commit'
       : !this.state.summary
       ? 'Disabled: No commit message summary'
-      : 'Commit';
+      : this.props.label;
 
     const shortcutHint = CommandRegistry.formatKeystroke(
       this._getSubmitKeystroke()
@@ -116,7 +121,7 @@ export class CommitBox extends React.Component<
           className={commitButtonClass}
           type="button"
           title={title}
-          value="Commit"
+          value={this.props.label}
           disabled={disabled}
           onClick={this._onCommitSubmit}
         />

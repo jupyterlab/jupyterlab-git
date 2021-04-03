@@ -1,25 +1,25 @@
-import * as React from 'react';
-import 'jest';
-import { shallow } from 'enzyme';
-import { CommitBox} from '../../src/components/CommitBox';
 import { CommandRegistry } from '@lumino/commands';
+import { shallow } from 'enzyme';
+import 'jest';
+import * as React from 'react';
+import { CommitBox } from '../../src/components/CommitBox';
 import { CommandIDs } from '../../src/tokens';
 
 describe('CommitBox', () => {
-
-  const defaultCommands = new CommandRegistry()
+  const defaultCommands = new CommandRegistry();
   defaultCommands.addKeyBinding({
     keys: ['Accel Enter'],
     command: CommandIDs.gitSubmitCommand,
     selector: '.jp-git-CommitBox'
-  })
+  });
 
   describe('#constructor()', () => {
     it('should return a new instance', () => {
       const box = new CommitBox({
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       });
       expect(box).toBeInstanceOf(CommitBox);
     });
@@ -28,7 +28,8 @@ describe('CommitBox', () => {
       const box = new CommitBox({
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       });
       expect(box.state.summary).toEqual('');
     });
@@ -37,7 +38,8 @@ describe('CommitBox', () => {
       const box = new CommitBox({
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       });
       expect(box.state.description).toEqual('');
     });
@@ -48,35 +50,42 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="text"]').first();
-      expect(node.prop('placeholder')).toEqual('Summary (Ctrl+Enter to commit)');
+      expect(node.prop('placeholder')).toEqual(
+        'Summary (Ctrl+Enter to commit)'
+      );
     });
 
     it('should adjust placeholder text for the commit message summary when keybinding changes', () => {
-      const adjustedCommands = new CommandRegistry()
+      const adjustedCommands = new CommandRegistry();
       adjustedCommands.addKeyBinding({
         keys: ['Shift Enter'],
         command: CommandIDs.gitSubmitCommand,
         selector: '.jp-git-CommitBox'
-      })
+      });
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: adjustedCommands
+        commands: adjustedCommands,
+        label: 'Commit'
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="text"]').first();
-      expect(node.prop('placeholder')).toEqual('Summary (Shift+Enter to commit)');
+      expect(node.prop('placeholder')).toEqual(
+        'Summary (Shift+Enter to commit)'
+      );
     });
 
     it('should set a `title` attribute on the input element to provide a commit message summary', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="text"]').first();
@@ -87,7 +96,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('TextareaAutosize').first();
@@ -98,7 +108,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('TextareaAutosize').first();
@@ -109,7 +120,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -120,7 +132,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -131,7 +144,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: false,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -143,7 +157,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: true,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       };
       const component = shallow(<CommitBox {...props} />);
       const node = component.find('input[type="button"]').first();
@@ -155,7 +170,8 @@ describe('CommitBox', () => {
       const props = {
         onCommit: async () => {},
         hasFiles: true,
-        commands: defaultCommands
+        commands: defaultCommands,
+        label: 'Commit'
       };
       const component = shallow(<CommitBox {...props} />);
       component.setState({
