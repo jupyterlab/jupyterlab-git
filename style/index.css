@@ -1,12 +1,5 @@
 /* Import same style from nbdime than nbdime-jupyterlab
  * see index.ts
  */
-@import url('~nbdime/lib/common/collapsible.css');
-@import url('~nbdime/lib/upstreaming/flexpanel.css');
-@import url('~nbdime/lib/common/dragpanel.css');
-@import url('~nbdime/lib/styles/variables.css');
-@import url('~nbdime/lib/styles/common.css');
-@import url('~nbdime/lib/styles/diff.css');
-@import url('~nbdime/lib/styles/merge.css');
 
 @import url('base.css');
