@@ -2,12 +2,12 @@ import { showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
-import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import { Logger } from '../logger';
 import { GitExtension } from '../model';
@@ -260,8 +260,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       console.error(error);
       this.props.logger.log({ ...errorLog, error });
     }
+    const hasRemote = this.props.model.branches.some(
+      branch => branch.is_remote_branch
+    );
     // If enabled commit and push, push here
-    if (this.props.settings.composite['useCommitAndPush']) {
+    if (this.props.settings.composite['commitAndPush'] && hasRemote) {
       await this.props.commands.execute(CommandIDs.gitPush);
     }
   };
@@ -371,6 +374,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns React element
    */
   private _renderChanges(): React.ReactElement {
+    const hasRemote = this.props.model.branches.some(
+      branch => branch.is_remote_branch
+    );
+    const commitAndPush =
+      (this.props.settings.composite['commitAndPush'] as boolean) && hasRemote;
+    const buttonLabel = commitAndPush
+      ? this.props.trans.__('Commit and Push')
+      : this.props.trans.__('Commit');
     return (
       <React.Fragment>
         <FileList
@@ -382,21 +393,19 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         />
         {this.props.settings.composite['simpleStaging'] ? (
           <CommitBox
+            commands={this.props.commands}
             hasFiles={this._markedFiles.length > 0}
             trans={this.props.trans}
-            useCommitAndPush={this.props.settings.composite['useCommitAndPush'] as boolean}
+            label={buttonLabel}
             onCommit={this.commitMarkedFiles}
-            commands={this.props.commands}
-            branches={this.state.branches}
           />
         ) : (
           <CommitBox
+            commands={this.props.commands}
             hasFiles={this._hasStagedFile()}
             trans={this.props.trans}
-            useCommitAndPush={this.props.settings.composite['useCommitAndPush'] as boolean}
+            label={buttonLabel}
             onCommit={this.commitStagedFiles}
-            commands={this.props.commands}
-            branches={this.state.branches}
           />
         )}
       </React.Fragment>
