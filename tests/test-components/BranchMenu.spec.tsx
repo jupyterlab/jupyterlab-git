@@ -1,5 +1,6 @@
-import { mount, render, shallow } from 'enzyme';
 import { showDialog } from '@jupyterlab/apputils';
+import ClearIcon from '@material-ui/icons/Clear';
+import { mount, render, shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
 import { ActionButton } from '../../src/components/ActionButton';
@@ -8,7 +9,7 @@ import * as git from '../../src/git';
 import { Logger } from '../../src/logger';
 import { GitExtension } from '../../src/model';
 import { listItemClass, nameClass } from '../../src/style/BranchMenu';
-import { mockedRequestAPI, defaultMockedResponses } from '../utils';
+import { defaultMockedResponses, mockedRequestAPI } from '../utils';
 
 jest.mock('../../src/git');
 jest.mock('@jupyterlab/apputils');
@@ -130,7 +131,7 @@ describe('BranchMenu', () => {
       component.setState({
         filter: 'foo'
       });
-      const nodes = component.find('ClearIcon');
+      const nodes = component.find(ClearIcon);
       expect(nodes.length).toEqual(1);
     });
 
@@ -140,7 +141,7 @@ describe('BranchMenu', () => {
         filter: 'foo'
       });
       const html = component
-        .find('ClearIcon')
+        .find(ClearIcon)
         .first()
         .html();
       expect(html.includes('<title>')).toEqual(true);
@@ -167,7 +168,7 @@ describe('BranchMenu', () => {
 
       // Should contain the branch names...
       for (let i = 0; i < branches.length; i++) {
-        expect(nodes[i].lastChild.data).toEqual(branches[i].name);
+        expect((nodes[i] as any).lastChild.data).toEqual(branches[i].name);
       }
     });
 
@@ -280,7 +281,7 @@ describe('BranchMenu', () => {
       expect(nodes.length).toEqual(branches.length);
 
       for (let i = 0; i < branches.length; i++) {
-        expect(nodes[i].attribs['title'].length).toBeGreaterThan(0);
+        expect((nodes[i] as any).attribs['title'].length).toBeGreaterThan(0);
       }
     });
 
