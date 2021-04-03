@@ -408,8 +408,8 @@ export function addCommands(
    * @returns the main area widget or null
    */
   commands.addCommand(CommandIDs.gitShowDiff, {
-    label: trans.__('Show Diff'),
-    caption: trans.__('Display a file diff.'),
+    label: 'Show Diff',
+    caption: 'Display a file diff.',
     execute: async args => {
       const { model, isText } = (args as any) as {
         model: Git.Diff.IModel<string>;
@@ -455,12 +455,12 @@ export function addCommands(
             diffWidget.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
             const refreshButton = new ToolbarButton({
-              label: trans.__('Refresh'),
+              label: 'Refresh',
               onClick: async () => {
                 await widget.refresh();
                 refreshButton.hide();
               },
-              tooltip: trans.__('Refresh diff widget'),
+              tooltip: 'Refresh diff widget',
               className: 'jp-git-diff-refresh'
             });
             refreshButton.hide();
@@ -483,11 +483,10 @@ export function addCommands(
         return mainAreaItem;
       } else {
         await showErrorMessage(
-          trans.__('Diff Not Supported'),
-          trans.__(
-            'Diff is not supported for %1 files.',
-            PathExt.extname(model.filename).toLocaleLowerCase()
-          )
+          'Diff Not Supported',
+          `Diff is not supported for ${PathExt.extname(
+            model.filename
+          ).toLocaleLowerCase()} files.`
         );
 
         return null;
