@@ -514,7 +514,6 @@ class TestUpstream(ServerTest):
 
 
 class TestContent(ServerTest):
-
     @patch("jupyterlab_git.git.execute")
     def test_content(self, mock_execute):
         # Given
@@ -548,7 +547,6 @@ class TestContent(ServerTest):
             ],
         )
 
-
     @patch("jupyterlab_git.git.execute")
     def test_content_working(self, mock_execute):
         # Given
@@ -576,7 +574,6 @@ class TestContent(ServerTest):
         assert response.status_code == 200
         payload = response.json()
         assert payload["content"] == content
-
 
     @patch("jupyterlab_git.git.execute")
     def test_content_index(self, mock_execute):
@@ -611,7 +608,6 @@ class TestContent(ServerTest):
             ],
         )
 
-
     @patch("jupyterlab_git.git.execute")
     def test_content_unknown_special(self, mock_execute):
         # Given
@@ -633,7 +629,7 @@ class TestContent(ServerTest):
 
         with assert_http_error(500, msg="unknown special ref"):
             self.tester.post(["content"], body=body)
-        
+
     @patch("jupyterlab_git.git.execute")
     def test_content_show_handled_error(self, mock_execute):
         # Given
@@ -663,7 +659,6 @@ class TestContent(ServerTest):
         payload = response.json()
         assert payload["content"] == ""
 
-
     @patch("jupyterlab_git.git.execute")
     def test_content_binary(self, mock_execute):
         # Given
@@ -683,7 +678,6 @@ class TestContent(ServerTest):
         with assert_http_error(500, msg="file is not UTF-8"):
             self.tester.post(["content"], body=body)
 
-
     @patch("jupyterlab_git.git.execute")
     def test_content_show_unhandled_error(self, mock_execute):
         # Given
@@ -702,7 +696,6 @@ class TestContent(ServerTest):
         # Then
         with assert_http_error(500, msg="Dummy error"):
             self.tester.post(["content"], body=body)
-
 
     @patch("jupyterlab_git.git.execute")
     def test_content_getcontent_deleted_file(self, mock_execute):
