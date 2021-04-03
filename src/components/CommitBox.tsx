@@ -1,13 +1,13 @@
+import { TranslationBundle } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import {
-  commitFormClass,
-  commitSummaryClass,
+  commitButtonClass,
   commitDescriptionClass,
-  commitButtonClass
+  commitFormClass,
+  commitSummaryClass
 } from '../style/CommitBox';
-import { TranslationBundle } from '@jupyterlab/translation';
-import { CommandRegistry } from '@lumino/commands';
 import { CommandIDs } from '../tokens';
 
 /**
@@ -23,10 +23,17 @@ export interface ICommitBoxProps {
    * Boolean indicating whether files currently exist which have changes to commit.
    */
   hasFiles: boolean;
+
+  /**
+   * Commit button label
+   */
+  label: string;
+
   /**
    * The application language translator.
    */
   trans: TranslationBundle;
+
   /**
    * Callback to invoke in order to commit changes.
    *
@@ -91,7 +98,7 @@ export class CommitBox extends React.Component<
       ? this.props.trans.__('Disabled: No files are staged for commit')
       : !this.state.summary
       ? this.props.trans.__('Disabled: No commit message summary')
-      : this.props.trans.__('Commit');
+      : this.props.label;
 
     const shortcutHint = CommandRegistry.formatKeystroke(
       this._getSubmitKeystroke()
@@ -125,7 +132,7 @@ export class CommitBox extends React.Component<
           className={commitButtonClass}
           type="button"
           title={title}
-          value={this.props.trans.__('Commit')}
+          value={this.props.label}
           disabled={disabled}
           onClick={this._onCommitSubmit}
         />
