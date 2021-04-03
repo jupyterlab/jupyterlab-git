@@ -1,6 +1,9 @@
 import * as apputils from '@jupyterlab/apputils';
 import { JSONObject } from '@lumino/coreutils';
+import { shallow } from 'enzyme';
 import 'jest';
+import React from 'react';
+import { CommitBox } from '../../src/components/CommitBox';
 import { GitPanel, IGitPanelProps } from '../../src/components/GitPanel';
 import * as git from '../../src/git';
 import { Logger } from '../../src/logger';
@@ -33,13 +36,15 @@ const mockedResponses: IMockedResponses = {
  * @private
  * @returns mock settings
  */
-function MockSettings() {
+function MockSettings(commitAndPush = true) {
   return {
     changed: {
       connect: () => true,
       disconnect: () => true
     },
-    composite: {}
+    composite: {
+      commitAndPush
+    }
   };
 }
 
@@ -49,7 +54,9 @@ describe('GitPanel', () => {
     commands: null,
     logger: new Logger(),
     settings: null,
-    filebrowser: null
+    filebrowser: {
+      path: '/dummy/path'
+    } as any
   };
 
   beforeEach(async () => {
@@ -61,8 +68,7 @@ describe('GitPanel', () => {
     props.model = new GitModel('/server/root');
     props.model.pathRepository = '/path/to/repo';
 
-    // @ts-ignore
-    props.settings = MockSettings();
+    props.settings = MockSettings() as any;
 
     await props.model.ready;
   });
@@ -226,6 +232,89 @@ describe('GitPanel', () => {
       expect(identity).toHaveBeenCalledTimes(1);
       expect(identity).toHaveBeenCalledWith();
       expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('#render()', () => {
+    beforeEach(() => {
+      props.commands = {
+        keyBindings: { find: jest.fn() }
+      } as any;
+      props.model = {
+        branches: [],
+        headChanged: {
+          connect: jest.fn()
+        },
+        markChanged: {
+          connect: jest.fn()
+        },
+        repositoryChanged: {
+          connect: jest.fn()
+        },
+        statusChanged: {
+          connect: jest.fn()
+        }
+      } as any;
+
+      props.settings = MockSettings() as any;
+    });
+
+    it('should render Commit and Push if there is a remote branch', () => {
+      (props.model as any).branches = [
+        {
+          is_remote_branch: true,
+          is_current_branch: false,
+          name: 'remote',
+          tag: null,
+          top_commit: 'hash',
+          upstream: 'origin'
+        }
+      ];
+
+      const panel = shallow(<GitPanel {...props} />);
+      panel.setState({
+        repository: '/path'
+      });
+      expect(panel.find(CommitBox).prop('label')).toEqual('Commit and Push');
+    });
+
+    it('should render Commit if there is no remote branch', () => {
+      (props.model as any).branches = [
+        {
+          is_remote_branch: false,
+          is_current_branch: false,
+          name: 'local',
+          tag: null,
+          top_commit: 'hash',
+          upstream: null
+        }
+      ];
+
+      const panel = shallow(<GitPanel {...props} />);
+      panel.setState({
+        repository: '/path'
+      });
+      expect(panel.find(CommitBox).prop('label')).toEqual('Commit');
+    });
+
+    it('should render Commit if there is a remote branch but commitAndPush is false', () => {
+      (props.model as any).branches = [
+        {
+          is_remote_branch: true,
+          is_current_branch: false,
+          name: 'remote',
+          tag: null,
+          top_commit: 'hash',
+          upstream: 'origin'
+        }
+      ];
+      props.settings = MockSettings(false) as any;
+
+      const panel = shallow(<GitPanel {...props} />);
+      panel.setState({
+        repository: '/path'
+      });
+      expect(panel.find(CommitBox).prop('label')).toEqual('Commit');
     });
   });
 });
