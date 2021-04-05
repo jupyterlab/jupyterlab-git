@@ -164,17 +164,13 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
 
     try {
       // ENH request content only if it changed
-      const previousContent = await this._model.reference.content();
-      const currentContent = await this._model.challenger.content();
+      const referenceContent = await this._model.reference.content();
+      const challengerContent = await this._model.challenger.content();
 
-      const data = await requestAPI<INbdimeDiff>('diffnotebook', 'POST', {
-        currentContent,
-        previousContent
-      });
-
-      const nbModel = new NotebookDiffModel(data.base, data.diff);
-
-      const nbdWidget = this.createDiffView(nbModel, this._renderMime);
+      const nbdWidget = await this.createDiffView(
+        challengerContent,
+        referenceContent
+      );
 
       while (this._scroller.widgets.length > 0) {
         this._scroller.widgets[0].dispose();
@@ -196,11 +192,18 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
     }
   }
 
-  protected createDiffView(
-    model: NotebookDiffModel,
-    renderMime: IRenderMimeRegistry
-  ): NotebookDiffWidget {
-    return new NotebookDiffWidget(model, renderMime);
+  protected async createDiffView(
+    challengerContent: string,
+    referenceContent: string
+  ): Promise<NotebookDiffWidget> {
+    const data = await requestAPI<INbdimeDiff>('diffnotebook', 'POST', {
+      currentContent: challengerContent,
+      previousContent: referenceContent
+    });
+
+    const model = new NotebookDiffModel(data.base, data.diff);
+
+    return new NotebookDiffWidget(model, this._renderMime);
   }
 
   /**
