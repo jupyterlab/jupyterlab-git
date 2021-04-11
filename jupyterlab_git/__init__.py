@@ -51,8 +51,7 @@ def _load_jupyter_server_extension(server_app):
         JupyterLab application instance
     """
     config = JupyterLabGit(config=server_app.config)
-    git = Git(server_app.web_app.settings["contents_manager"], config)
-    server_app.web_app.settings["git"] = git
+    server_app.web_app.settings["git"] = Git(config)
     setup_handlers(server_app.web_app)
 
 
