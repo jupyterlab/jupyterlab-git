@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/git",
-  "version": "0.30.0-beta.3",
+  "version": "0.30.0",
   "description": "A JupyterLab extension for version control using git",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -45,48 +45,6 @@
     "style/index.js"
   ],
   "styleModule": "style/index.js",
-  "jupyterlab": {
-    "discovery": {
-      "server": {
-        "managers": [
-          "pip",
-          "conda"
-        ],
-        "base": {
-          "name": "jupyterlab-git"
-        }
-      }
-    },
-    "extension": true,
-    "schemaDir": "schema",
-    "sharedPackages": {
-      "@material-ui/core": {
-        "singleton": true
-      },
-      "@material-ui/icons": {
-        "singleton": true
-      },
-      "@material-ui/lab": {
-        "singleton": true
-      },
-      "codemirror": {
-        "bundled": false,
-        "singleton": true
-      },
-      "nbdime": {
-        "singleton": true
-      },
-      "react": {
-        "bundled": false,
-        "singleton": true
-      },
-      "react-dom": {
-        "bundled": false,
-        "singleton": true
-      }
-    },
-    "outputDir": "jupyterlab_git/labextension"
-  },
   "dependencies": {
     "@jupyterlab/application": "^3.0.0",
     "@jupyterlab/apputils": "^3.0.0",
@@ -114,7 +72,8 @@
     "@material-ui/icons": "^4.5.1",
     "@material-ui/lab": "^4.0.0-alpha.54",
     "diff-match-patch": "^1.0.4",
-    "nbdime": "^6.1.0-beta.1",
+    "nbdime": "^6.1.0",
+    "nbdime-jupyterlab": "^2.1.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-textarea-autosize": "^7.1.2",
@@ -125,7 +84,7 @@
   "devDependencies": {
     "@babel/core": "^7.5.0",
     "@babel/preset-env": "^7.5.0",
-    "@jupyterlab/builder": "^3.0.0-rc.13",
+    "@jupyterlab/builder": "^3.0.0",
     "@jupyterlab/testutils": "^3.0.0",
     "@types/codemirror": "^0.0.97",
     "@types/diff-match-patch": "^1.0.32",
@@ -186,5 +145,52 @@
   "homepage": "https://github.com/jupyterlab/jupyterlab-git",
   "resolutions": {
     "@types/react": "^17.0.0"
+  },
+  "jupyterlab": {
+    "discovery": {
+      "server": {
+        "managers": [
+          "pip",
+          "conda"
+        ],
+        "base": {
+          "name": "jupyterlab-git"
+        }
+      }
+    },
+    "extension": true,
+    "schemaDir": "schema",
+    "sharedPackages": {
+      "@material-ui/core": {
+        "singleton": true
+      },
+      "@material-ui/icons": {
+        "singleton": true
+      },
+      "@material-ui/lab": {
+        "singleton": true
+      },
+      "codemirror": {
+        "bundled": false,
+        "singleton": true
+      },
+      "nbdime": {
+        "bundled": false,
+        "singleton": true
+      },
+      "nbdime-jupyterlab": {
+        "bundled": false,
+        "singleton": true
+      },
+      "react": {
+        "bundled": false,
+        "singleton": true
+      },
+      "react-dom": {
+        "bundled": false,
+        "singleton": true
+      }
+    },
+    "outputDir": "jupyterlab_git/labextension"
   }
 }
