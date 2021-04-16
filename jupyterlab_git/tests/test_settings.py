@@ -2,14 +2,14 @@ import json
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from packaging.version import parse
-
 import pytest
 import tornado
-from jupyterlab_git import __version__
-from jupyterlab_git.handlers import GitSettingsHandler
+from packaging.version import parse
 
-from .testutils import NS, assert_http_error, maybe_future
+from jupyterlab_git import __version__
+from jupyterlab_git.handlers import NAMESPACE, GitSettingsHandler
+
+from .testutils import assert_http_error, maybe_future
 
 
 @patch("jupyterlab_git.git.execute")
@@ -23,7 +23,7 @@ async def test_git_get_settings_success(mock_execute, jp_fetch, jp_root_dir):
 
     # When
     response = await jp_fetch(
-        NS, "settings", method="GET", params={"version": jlab_version}
+        NAMESPACE, "settings", method="GET", params={"version": jlab_version}
     )
 
     # Then
@@ -49,7 +49,7 @@ async def test_git_get_settings_no_git(mock_execute, jp_fetch, jp_root_dir):
 
     # When
     response = await jp_fetch(
-        NS, "settings", method="GET", params={"version": jlab_version}
+        NAMESPACE, "settings", method="GET", params={"version": jlab_version}
     )
 
     # Then
@@ -74,7 +74,7 @@ async def test_git_get_settings_no_jlab(mock_execute, jp_fetch, jp_root_dir):
     )
 
     # When
-    response = await jp_fetch(NS, "settings", method="GET")
+    response = await jp_fetch(NAMESPACE, "settings", method="GET")
 
     # Then
     mock_execute.assert_called_once_with(["git", "--version"], cwd=".")

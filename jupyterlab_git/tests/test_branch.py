@@ -8,7 +8,7 @@ import tornado
 # local lib
 from jupyterlab_git.git import Git
 
-from .testutils import FakeContentManager, maybe_future
+from .testutils import maybe_future
 
 
 @pytest.mark.parametrize(
@@ -24,7 +24,7 @@ from .testutils import FakeContentManager, maybe_future
     ],
 )
 def test_is_remote_branch(branch, expected):
-    actual_response = Git(FakeContentManager(Path("/bin")))._is_remote_branch(branch)
+    actual_response = Git()._is_remote_branch(branch)
     assert expected == actual_response
 
 
@@ -37,9 +37,7 @@ async def test_get_current_branch_success():
 
         # When
         actual_response = await (
-            Git(FakeContentManager(Path("/bin"))).get_current_branch(
-                current_path="test_curr_path"
-            )
+            Git().get_current_branch(path=str(Path("/bin/test_curr_path")))
         )
 
         # Then
@@ -53,7 +51,7 @@ async def test_get_current_branch_success():
 @pytest.mark.asyncio
 async def test_checkout_branch_noref_success():
     branch = "test-branch"
-    curr_path = "test_curr_path"
+    curr_path = str(Path("/bin/test_curr_path"))
     stdout_message = "checkout output from git"
     stderr_message = ""
     rc = 0
@@ -68,9 +66,9 @@ async def test_checkout_branch_noref_success():
             )
 
             # When
-            actual_response = await Git(
-                FakeContentManager(Path("/bin"))
-            ).checkout_branch(branchname=branch, current_path=curr_path)
+            actual_response = await Git().checkout_branch(
+                branchname=branch, path=curr_path
+            )
 
             # Then
             mock__get_branch_reference.assert_has_calls([call(branch, curr_path)])
@@ -87,7 +85,7 @@ async def test_checkout_branch_noref_success():
 @pytest.mark.asyncio
 async def test_checkout_branch_noref_failure():
     branch = "test-branch"
-    curr_path = "test_curr_path"
+    curr_path = str(Path("/bin/test_curr_path"))
     stdout_message = ""
     stderr_message = (
         "error: pathspec '{}' did not match any file(s) known to git".format(branch)
@@ -103,9 +101,9 @@ async def test_checkout_branch_noref_failure():
             )
 
             # When
-            actual_response = await Git(
-                FakeContentManager(Path("/bin"))
-            ).checkout_branch(branchname=branch, current_path=curr_path)
+            actual_response = await Git().checkout_branch(
+                branchname=branch, path=curr_path
+            )
 
             # Then
             mock__get_branch_reference.assert_has_calls([call(branch, curr_path)])
@@ -126,7 +124,7 @@ async def test_checkout_branch_noref_failure():
 @pytest.mark.asyncio
 async def test_checkout_branch_remoteref_success():
     branch = "test-branch"
-    curr_path = "test_curr_path"
+    curr_path = str(Path("/bin/test_curr_path"))
     stdout_message = "checkout output from git"
     stderr_message = ""
     rc = 0
@@ -143,9 +141,9 @@ async def test_checkout_branch_remoteref_success():
             )
 
             # When
-            actual_response = await Git(
-                FakeContentManager(Path("/bin"))
-            ).checkout_branch(branchname=branch, current_path=curr_path)
+            actual_response = await Git().checkout_branch(
+                branchname=branch, path=curr_path
+            )
 
             # Then
             mock__get_branch_reference.assert_has_calls([call(branch, curr_path)])
@@ -162,7 +160,7 @@ async def test_checkout_branch_remoteref_success():
 @pytest.mark.asyncio
 async def test_checkout_branch_headsref_failure():
     branch = "test-branch"
-    curr_path = "test_curr_path"
+    curr_path = str(Path("/bin/test_curr_path"))
     stdout_message = ""
     stderr_message = (
         "error: pathspec '{}' did not match any file(s) known to git".format(branch)
@@ -181,9 +179,9 @@ async def test_checkout_branch_headsref_failure():
             )
 
             # When
-            actual_response = await Git(
-                FakeContentManager(Path("/bin"))
-            ).checkout_branch(branchname=branch, current_path=curr_path)
+            actual_response = await Git().checkout_branch(
+                branchname=branch, path=curr_path
+            )
 
             # Then
             mock__get_branch_reference.assert_has_calls([call(branch, curr_path)])
@@ -219,9 +217,9 @@ async def test_checkout_branch_headsref_success():
             )
 
             # When
-            actual_response = await Git(
-                FakeContentManager(Path("/bin"))
-            ).checkout_branch(branchname=branch, current_path="test_curr_path")
+            actual_response = await Git().checkout_branch(
+                branchname=branch, path=str(Path("/bin/test_curr_path"))
+            )
 
             # Then
             cmd = ["git", "checkout", branch]
@@ -253,9 +251,9 @@ async def test_checkout_branch_remoteref_failure():
             )
 
             # When
-            actual_response = await Git(
-                FakeContentManager(Path("/bin"))
-            ).checkout_branch(branchname=branch, current_path="test_curr_path")
+            actual_response = await Git().checkout_branch(
+                branchname=branch, path=str(Path("/bin/test_curr_path"))
+            )
 
             # Then
             cmd = ["git", "checkout", "--track", branch]
@@ -282,9 +280,9 @@ async def test_get_branch_reference_success():
         mock_execute.return_value = maybe_future((0, reference, ""))
 
         # When
-        actual_response = await Git(
-            FakeContentManager(Path("/bin"))
-        )._get_branch_reference(branchname=branch, current_path="test_curr_path")
+        actual_response = await Git()._get_branch_reference(
+            branchname=branch, path=str(Path("/bin/test_curr_path"))
+        )
 
         # Then
         mock_execute.assert_called_once_with(
@@ -312,9 +310,9 @@ async def test_get_branch_reference_failure():
         )
 
         # When
-        actual_response = await Git(
-            FakeContentManager(Path("/bin"))
-        )._get_branch_reference(branchname=branch, current_path="test_curr_path")
+        actual_response = await Git()._get_branch_reference(
+            branchname=branch, path=str(Path("/bin/test_curr_path"))
+        )
 
         # Then
         mock_execute.assert_called_once_with(
@@ -338,9 +336,7 @@ async def test_get_current_branch_failure():
 
         # When
         with pytest.raises(Exception) as error:
-            await Git(FakeContentManager(Path("/bin"))).get_current_branch(
-                current_path="test_curr_path"
-            )
+            await Git().get_current_branch(path=str(Path("/bin/test_curr_path")))
 
         # Then
         mock_execute.assert_called_once_with(
@@ -367,9 +363,9 @@ async def test_get_current_branch_detached_success():
         mock_execute.return_value = maybe_future((0, "\n".join(process_output), ""))
 
         # When
-        actual_response = await Git(
-            FakeContentManager(Path("/bin"))
-        )._get_current_branch_detached(current_path="test_curr_path")
+        actual_response = await Git()._get_current_branch_detached(
+            path=str(Path("/bin/test_curr_path"))
+        )
 
         # Then
         mock_execute.assert_called_once_with(
@@ -393,8 +389,8 @@ async def test_get_current_branch_detached_failure():
 
         # When
         with pytest.raises(Exception) as error:
-            await Git(FakeContentManager(Path("/bin")))._get_current_branch_detached(
-                current_path="test_curr_path"
+            await Git()._get_current_branch_detached(
+                path=str(Path("/bin/test_curr_path"))
             )
 
         # Then
@@ -429,9 +425,9 @@ async def test_get_upstream_branch_success(branch, upstream, remotename):
         ]
 
         # When
-        actual_response = await Git(
-            FakeContentManager(Path("/bin"))
-        ).get_upstream_branch(current_path="test_curr_path", branch_name=branch)
+        actual_response = await Git().get_upstream_branch(
+            path=str(Path("/bin/test_curr_path")), branch_name=branch
+        )
 
         # Then
         mock_execute.assert_has_calls(
@@ -485,8 +481,8 @@ async def test_get_upstream_branch_failure(outputs, message):
         mock_execute.return_value = maybe_future(outputs)
 
         # When
-        response = await Git(FakeContentManager(Path("/bin"))).get_upstream_branch(
-            current_path="test_curr_path", branch_name="blah"
+        response = await Git().get_upstream_branch(
+            path=str(Path("/bin/test_curr_path")), branch_name="blah"
         )
         expected = {
             "code": 128,
@@ -515,8 +511,8 @@ async def test_get_tag_success():
         mock_execute.return_value = maybe_future((0, "v0.3.0", ""))
 
         # When
-        actual_response = await Git(FakeContentManager(Path("/bin")))._get_tag(
-            current_path="test_curr_path",
+        actual_response = await Git()._get_tag(
+            path=str(Path("/bin/test_curr_path")),
             commit_sha="abcdefghijklmnopqrstuvwxyz01234567890123",
         )
 
@@ -545,8 +541,8 @@ async def test_get_tag_failure():
 
         # When
         with pytest.raises(Exception) as error:
-            await Git(FakeContentManager(Path("/bin")))._get_tag(
-                current_path="test_curr_path", commit_sha="blah"
+            await Git()._get_tag(
+                path=str(Path("/bin/test_curr_path")), commit_sha="blah"
             )
 
         assert (
@@ -555,8 +551,8 @@ async def test_get_tag_failure():
             == str(error.value)
         )
 
-        actual_response = await Git(FakeContentManager(Path("/bin")))._get_tag(
-            current_path="test_curr_path",
+        actual_response = await Git()._get_tag(
+            path=str(Path("/bin/test_curr_path")),
             commit_sha="01234567899999abcdefghijklmnopqrstuvwxyz",
         )
 
@@ -592,7 +588,7 @@ async def test_no_tags():
         )
 
         # When
-        actual_response = await Git(FakeContentManager(Path("/bin")))._get_tag(
+        actual_response = await Git()._get_tag(
             "/path/foo", "768c79ad661598889f29bdf8916f4cc488f5062a"
         )
 
@@ -680,9 +676,7 @@ async def test_branch_success():
         }
 
         # When
-        actual_response = await Git(FakeContentManager(Path("/bin"))).branch(
-            current_path="test_curr_path"
-        )
+        actual_response = await Git().branch(path=str(Path("/bin/test_curr_path")))
 
         # Then
         mock_execute.assert_has_calls(
@@ -738,9 +732,7 @@ async def test_branch_failure():
         }
 
         # When
-        actual_response = await Git(FakeContentManager(Path("/bin"))).branch(
-            current_path="test_curr_path"
-        )
+        actual_response = await Git().branch(path=str(Path("/bin/test_curr_path")))
 
         # Then
         mock_execute.assert_called_once_with(
@@ -817,9 +809,7 @@ async def test_branch_success_detached_head():
         }
 
         # When
-        actual_response = await Git(FakeContentManager(Path("/bin"))).branch(
-            current_path="test_curr_path"
-        )
+        actual_response = await Git().branch(path=str(Path("/bin/test_curr_path")))
 
         # Then
         mock_execute.assert_has_calls(

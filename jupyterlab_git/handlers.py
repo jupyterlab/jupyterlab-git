@@ -39,12 +39,12 @@ class GitHandler(APIHandler):
     def git(self) -> Git:
         return self.settings["git"]
 
-    @functools.lrucache
+    @functools.lru_cache
     def url2localpath(
         self, path: str, with_contents_manager: bool = False
     ) -> Union[str, Tuple[str, ContentsManager]]:
         """Get the local path from a JupyterLab server path.
-        
+
         Optionally it can also return the contents manager for that path.
         """
         cm = self.contents_manager
@@ -56,7 +56,7 @@ class GitHandler(APIHandler):
             _, cm, path = hybridcontents.hybridmanager._resolve_path(path, cm)
 
         local_path = os.path.join(os.path.expanduser(cm.root_dir), url2path(path))
-        return local_path, cm if with_contents_manager else local_path
+        return (local_path, cm) if with_contents_manager else local_path
 
 
 class GitCloneHandler(GitHandler):
@@ -809,12 +809,11 @@ def setup_handlers(web_app):
     """
 
     handlers_with_path = [
-        ("/add", GitAddHandler),
         ("/add_all_unstaged", GitAddAllUnstagedHandler),
         ("/add_all_untracked", GitAddAllUntrackedHandler),
         ("/all_history", GitAllHistoryHandler),
-        ("/branch", GitBranchHandler),
         ("/branch/delete", GitBranchDeleteHandler),
+        ("/branch", GitBranchHandler),
         ("/changed_files", GitChangedFilesHandler),
         ("/checkout", GitCheckoutHandler),
         ("/clone", GitCloneHandler),
@@ -839,6 +838,7 @@ def setup_handlers(web_app):
         ("/ignore", GitIgnoreHandler),
         ("/tags", GitTagHandler),
         ("/tag_checkout", GitTagCheckoutHandler),
+        ("/add", GitAddHandler),
     ]
 
     handlers = [

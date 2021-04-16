@@ -6,7 +6,7 @@ import tornado
 
 from jupyterlab_git.git import Git
 
-from .testutils import FakeContentManager, maybe_future
+from .testutils import maybe_future
 
 
 @pytest.mark.asyncio
@@ -18,8 +18,8 @@ async def test_git_clone_success():
             mock_execute.return_value = maybe_future((0, output, "error"))
 
             # When
-            actual_response = await Git(FakeContentManager(Path("/bin"))).clone(
-                current_path="test_curr_path", repo_url="ghjkhjkl"
+            actual_response = await Git().clone(
+                path=str(Path("/bin/test_curr_path")), repo_url="ghjkhjkl"
             )
 
             # Then
@@ -46,8 +46,8 @@ async def test_git_clone_failure_from_git():
             )
 
             # When
-            actual_response = await Git(FakeContentManager(Path("/bin"))).clone(
-                current_path="test_curr_path", repo_url="ghjkhjkl"
+            actual_response = await Git().clone(
+                path=str(Path("/bin/test_curr_path")), repo_url="ghjkhjkl"
             )
 
             # Then
@@ -72,8 +72,8 @@ async def test_git_clone_with_auth_success():
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
-            actual_response = await Git(FakeContentManager(Path("/bin"))).clone(
-                current_path="test_curr_path", repo_url="ghjkhjkl", auth=auth
+            actual_response = await Git().clone(
+                path=str(Path("/bin/test_curr_path")), repo_url="ghjkhjkl", auth=auth
             )
 
             # Then
@@ -103,8 +103,8 @@ async def test_git_clone_with_auth_wrong_repo_url_failure_from_git():
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
-            actual_response = await Git(FakeContentManager(Path("/bin"))).clone(
-                current_path="test_curr_path", repo_url="ghjkhjkl", auth=auth
+            actual_response = await Git().clone(
+                path=str(Path("/bin/test_curr_path")), repo_url="ghjkhjkl", auth=auth
             )
 
             # Then
@@ -141,8 +141,8 @@ async def test_git_clone_with_auth_auth_failure_from_git():
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
-            actual_response = await Git(FakeContentManager(Path("/bin"))).clone(
-                current_path="test_curr_path", repo_url="ghjkhjkl", auth=auth
+            actual_response = await Git().clone(
+                path=str(Path("/bin/test_curr_path")), repo_url="ghjkhjkl", auth=auth
             )
 
             # Then

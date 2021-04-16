@@ -8,7 +8,7 @@ import tornado
 from jupyterlab_git import JupyterLabGit
 from jupyterlab_git.git import Git
 
-from .testutils import FakeContentManager, maybe_future
+from .testutils import maybe_future
 
 
 @pytest.mark.asyncio
@@ -18,12 +18,10 @@ async def test_init():
         mock_execute.return_value = maybe_future((0, "", ""))
 
         # When
-        actual_response = await Git(FakeContentManager(Path("/bin"))).init(
-            "test_curr_path"
-        )
+        actual_response = await Git().init("test_curr_path")
 
         mock_execute.assert_called_once_with(
-            ["git", "init"], cwd=str(Path("/bin") / "test_curr_path")
+            ["git", "init"], cwd="test_curr_path"
         )
 
         assert {"code": 0, "actions": None} == actual_response
@@ -40,12 +38,11 @@ async def test_init_and_post_init():
 
         # When
         actual_response = await Git(
-            FakeContentManager(Path("/bin")),
             JupyterLabGit(actions={"post_init": ['echo "hello"']}),
         ).init("test_curr_path")
 
         mock_execute.assert_called_with(
-            ["echo", "hello"], cwd=str(Path("/bin") / "test_curr_path")
+            ["echo", "hello"], cwd="test_curr_path"
         )
 
         assert {
@@ -67,13 +64,12 @@ async def test_init_and_post_init_fail():
 
         # When
         actual_response = await Git(
-            FakeContentManager(Path("/bin")),
             JupyterLabGit(actions={"post_init": ["not_there arg"]}),
         ).init("test_curr_path")
 
         mock_execute.assert_called_with(
-            ["not_there", "arg"], cwd=str(Path("/bin") / "test_curr_path")
-        )
+            ["not_there", "arg"], cwd="test_curr_path")
+        
 
         assert {
             "code": 1,
@@ -101,12 +97,11 @@ async def test_init_and_post_init_fail_to_run():
 
         # When
         actual_response = await Git(
-            FakeContentManager(Path("/bin")),
             JupyterLabGit(actions={"post_init": ["not_there arg"]}),
         ).init("test_curr_path")
 
         mock_execute.assert_called_with(
-            ["not_there", "arg"], cwd=str(Path("/bin") / "test_curr_path")
+            ["not_there", "arg"], cwd="test_curr_path"
         )
 
         assert {

@@ -11,8 +11,6 @@ except ImportError:
 import tornado
 from jupyter_server.utils import ensure_async
 
-NS = "/git"
-
 
 def assert_http_error(error, expected_code, expected_message=None):
     """Check that the error matches the expected output error."""
@@ -43,9 +41,6 @@ def assert_http_error(error, expected_code, expected_message=None):
 
 
 class FakeContentManager:
-    def __init__(self, root_dir):
-        self.root_dir = root_dir
-
     def get(self, path=None):
         return {"content": ""}
 

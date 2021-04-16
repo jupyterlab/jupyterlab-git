@@ -4,28 +4,30 @@ from unittest.mock import Mock, patch
 
 import pytest
 import tornado
-from jupyterlab_git.handlers import GitRemoteAddHandler
 
-from .testutils import NS, assert_http_error, maybe_future
+from jupyterlab_git.handlers import NAMESPACE, GitRemoteAddHandler
+
+from .testutils import assert_http_error, maybe_future
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_add_remote_success_no_name(mock_execute, jp_fetch):
+async def test_git_add_remote_success_no_name(mock_execute, jp_fetch, jp_root_dir):
     # Given
-    path = "test_path"
+    local_path = jp_root_dir / "test_path"
     url = "http://github.com/myid/myrepository.git"
     mock_execute.return_value = maybe_future((0, "", ""))
 
     # When
     body = {
-        "top_repo_path": path,
         "url": url,
     }
-    response = await jp_fetch(NS, "remote", "add", body=json.dumps(body), method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "remote", "add", body=json.dumps(body), method="POST"
+    )
 
     # Then
     command = ["git", "remote", "add", "origin", url]
-    mock_execute.assert_called_once_with(command, cwd=path)
+    mock_execute.assert_called_once_with(command, cwd=str(local_path))
 
     assert response.code == 201
     payload = json.loads(response.body)
@@ -36,20 +38,22 @@ async def test_git_add_remote_success_no_name(mock_execute, jp_fetch):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_add_remote_success(mock_execute, jp_fetch):
+async def test_git_add_remote_success(mock_execute, jp_fetch, jp_root_dir):
     # Given
-    path = "test_path"
+    local_path = jp_root_dir / "test_path"
     url = "http://github.com/myid/myrepository.git"
     name = "distant"
     mock_execute.return_value = maybe_future((0, "", ""))
 
     # When
-    body = {"top_repo_path": path, "url": url, "name": name}
-    response = await jp_fetch(NS, "remote", "add", body=json.dumps(body), method="POST")
+    body = {"url": url, "name": name}
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "remote", "add", body=json.dumps(body), method="POST"
+    )
 
     # Then
     command = ["git", "remote", "add", name, url]
-    mock_execute.assert_called_once_with(command, cwd=path)
+    mock_execute.assert_called_once_with(command, cwd=str(local_path))
 
     assert response.code == 201
     payload = json.loads(response.body)
@@ -60,9 +64,9 @@ async def test_git_add_remote_success(mock_execute, jp_fetch):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_add_remote_failure(mock_execute, jp_fetch):
+async def test_git_add_remote_failure(mock_execute, jp_fetch, jp_root_dir):
     # Given
-    path = "test_path"
+    local_path = jp_root_dir / "test_path"
     url = "http://github.com/myid/myrepository.git"
     error_msg = "Fake failure"
     error_code = 128
@@ -70,15 +74,14 @@ async def test_git_add_remote_failure(mock_execute, jp_fetch):
 
     # When
     body = {
-        "top_repo_path": path,
         "url": url,
     }
 
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(NS, "remote", "add", body=json.dumps(body), method="POST")
+        await jp_fetch(NAMESPACE, local_path.name, "remote", "add", body=json.dumps(body), method="POST")
     assert_http_error(e, 500)
 
     # Then
     mock_execute.assert_called_once_with(
-        ["git", "remote", "add", "origin", url], cwd=path
+        ["git", "remote", "add", "origin", url], cwd=str(local_path)
     )
