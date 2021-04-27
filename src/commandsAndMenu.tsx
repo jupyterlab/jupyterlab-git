@@ -151,7 +151,9 @@ export function addCommands(
         main.dispose();
       }
     },
-    isEnabled: () => gitModel.pathRepository !== null && app.serviceManager.terminals.isAvailable()
+    isEnabled: () =>
+      gitModel.pathRepository !== null &&
+      app.serviceManager.terminals.isAvailable()
   });
 
   /** Add open/go to git interface command */
