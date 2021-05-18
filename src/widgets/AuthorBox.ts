@@ -7,7 +7,8 @@ import { Git } from '../tokens';
  */
 export class GitAuthorForm
   extends Widget
-  implements Dialog.IBodyWidget<Git.IIdentity> {
+  implements Dialog.IBodyWidget<Git.IIdentity>
+{
   constructor() {
     super();
     this.node.appendChild(this.createBody());

@@ -227,9 +227,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Discard changes in a specific unstaged or staged file */
   discardChanges = async (file: Git.IStatusFile): Promise<void> => {
-    await this.props.commands.execute(ContextCommandIDs.gitFileDiscard, ({
+    await this.props.commands.execute(ContextCommandIDs.gitFileDiscard, {
       files: [file]
-    } as CommandArguments.IGitContextAction) as any);
+    } as CommandArguments.IGitContextAction as any);
   };
 
   /** Add all untracked files */
@@ -347,9 +347,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
     const openFile = () => {
-      this.props.commands.execute(ContextCommandIDs.gitFileOpen, ({
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
         files: [file]
-      } as CommandArguments.IGitContextAction) as any);
+      } as CommandArguments.IGitContextAction as any);
     };
     const diffButton = this._createDiffButton(file);
     return (
@@ -434,9 +434,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
     const openFile = () => {
-      this.props.commands.execute(ContextCommandIDs.gitFileOpen, ({
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
         files: [file]
-      } as CommandArguments.IGitContextAction) as any);
+      } as CommandArguments.IGitContextAction as any);
     };
     const diffButton = this._createDiffButton(file);
     return (
@@ -548,9 +548,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
               onClick={() => {
-                this.props.commands.execute(ContextCommandIDs.gitFileOpen, ({
+                this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
                   files: [file]
-                } as CommandArguments.IGitContextAction) as any);
+                } as CommandArguments.IGitContextAction as any);
               }}
             />
             <ActionButton
@@ -568,9 +568,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         onDoubleClick={() => {
           if (!doubleClickDiff) {
-            this.props.commands.execute(ContextCommandIDs.gitFileOpen, ({
+            this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
               files: [file]
-            } as CommandArguments.IGitContextAction) as any);
+            } as CommandArguments.IGitContextAction as any);
           }
         }}
         selected={this._isSelectedFile(file)}
@@ -622,9 +622,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       .composite as boolean;
 
     const openFile = () => {
-      this.props.commands.execute(ContextCommandIDs.gitFileOpen, ({
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
         files: [file]
-      } as CommandArguments.IGitContextAction) as any);
+      } as CommandArguments.IGitContextAction as any);
     };
 
     // Default value for actions and double click
@@ -761,7 +761,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    */
   private async _openDiffView(file: Git.IStatusFile): Promise<void> {
     try {
-      await this.props.commands.execute(ContextCommandIDs.gitFileDiff, ({
+      await this.props.commands.execute(ContextCommandIDs.gitFileDiff, {
         files: [
           {
             filePath: file.to,
@@ -769,7 +769,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             status: file.status
           }
         ]
-      } as CommandArguments.IGitFileDiff) as any);
+      } as CommandArguments.IGitFileDiff as any);
     } catch (reason) {
       console.error(`Failed to open diff view for ${file.to}.\n${reason}`);
     }

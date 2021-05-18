@@ -350,7 +350,7 @@ export class SinglePastCommitInfo extends React.Component<
       event.stopPropagation();
 
       try {
-        self.props.commands.execute(ContextCommandIDs.gitFileDiff, ({
+        self.props.commands.execute(ContextCommandIDs.gitFileDiff, {
           files: [
             {
               filePath: fpath,
@@ -361,7 +361,7 @@ export class SinglePastCommitInfo extends React.Component<
               }
             }
           ]
-        } as CommandArguments.IGitFileDiff) as any);
+        } as CommandArguments.IGitFileDiff as any);
       } catch (err) {
         console.error(`Failed to open diff view for ${fpath}.\n${err}`);
       }
