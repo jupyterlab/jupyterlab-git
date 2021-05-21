@@ -144,7 +144,8 @@
   },
   "homepage": "https://github.com/jupyterlab/jupyterlab-git",
   "resolutions": {
-    "@types/react": "^17.0.0"
+    "@types/react": "^17.0.0",
+    "codemirror": "~5.61.0"
   },
   "jupyterlab": {
     "discovery": {

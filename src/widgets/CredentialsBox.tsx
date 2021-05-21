@@ -8,7 +8,8 @@ import { Git } from '../tokens';
  */
 export class GitCredentialsForm
   extends Widget
-  implements Dialog.IBodyWidget<Git.IAuth> {
+  implements Dialog.IBodyWidget<Git.IAuth>
+{
   constructor(
     trans: TranslationBundle,
     textContent = trans.__('Enter credentials for remote repository'),
