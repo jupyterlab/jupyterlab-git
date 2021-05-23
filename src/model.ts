@@ -1,4 +1,4 @@
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -149,8 +149,12 @@ export class GitExtension implements IGitExtension {
     } else {
       const currentReady = this._readyPromise;
       this._pendingReadyPromise += 1;
-      this._readyPromise = Promise.all([currentReady, this.showTopLevel(v)])
+      this._readyPromise = Promise.all([currentReady, this.showPrefix(v)])
         .then(([_, path]) => {
+          if (path !== null) {
+            // Remove relative path to get the Git repository root path
+            path = v.slice(0, v.length - path.length);
+          }
           change.newValue = this._pathRepository = path;
 
           if (change.newValue !== change.oldValue) {
@@ -249,10 +253,9 @@ export class GitExtension implements IGitExtension {
   async add(...filename: string[]): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:add:files', async () => {
-      await requestAPI<void>('add', 'POST', {
+      await requestAPI<void>(URLExt.join(path, 'add'), 'POST', {
         add_all: !filename,
-        filename: filename || '',
-        top_repo_path: path
+        filename: filename || ''
       });
     });
     await this.refreshStatus();
@@ -285,9 +288,7 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>(
       'git:add:files:all_unstaged',
       async () => {
-        await requestAPI<void>('add_all_unstaged', 'POST', {
-          top_repo_path: path
-        });
+        await requestAPI<void>(URLExt.join(path, 'add_all_unstaged'), 'POST');
       }
     );
     await this.refreshStatus();
@@ -307,9 +308,7 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>(
       'git:add:files:all_untracked',
       async () => {
-        await requestAPI<void>('add_all_untracked', 'POST', {
-          top_repo_path: path
-        });
+        await requestAPI<void>(URLExt.join(path, 'add_all_untracked'), 'POST');
       }
     );
     await this.refreshStatus();
@@ -329,8 +328,7 @@ export class GitExtension implements IGitExtension {
   async addRemote(url: string, name?: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:add:remote', async () => {
-      await requestAPI<void>('remote/add', 'POST', {
-        top_repo_path: path,
+      await requestAPI<void>(URLExt.join(path, 'remote', 'add'), 'POST', {
         url,
         name
       });
@@ -356,10 +354,13 @@ export class GitExtension implements IGitExtension {
     return await this._taskHandler.execute<Git.IAllHistory>(
       'git:fetch:history',
       async () => {
-        return await requestAPI<Git.IAllHistory>('all_history', 'POST', {
-          current_path: path,
-          history_count: count
-        });
+        return await requestAPI<Git.IAllHistory>(
+          URLExt.join(path, 'all_history'),
+          'POST',
+          {
+            history_count: count
+          }
+        );
       }
     );
   }
@@ -391,8 +392,7 @@ export class GitExtension implements IGitExtension {
       branchname: '',
       startpoint: '',
       checkout_all: true,
-      filename: '',
-      top_repo_path: path
+      filename: ''
     };
 
     if (options !== undefined) {
@@ -427,7 +427,7 @@ export class GitExtension implements IGitExtension {
         }
 
         const d = await requestAPI<Git.ICheckoutResult>(
-          'checkout',
+          URLExt.join(path, 'checkout'),
           'POST',
           body
         );
@@ -464,11 +464,14 @@ export class GitExtension implements IGitExtension {
     return await this._taskHandler.execute<Git.IResultWithMessage>(
       'git:clone',
       async () => {
-        return await requestAPI<Git.IResultWithMessage>('clone', 'POST', {
-          current_path: path,
-          clone_url: url,
-          auth: auth as any
-        });
+        return await requestAPI<Git.IResultWithMessage>(
+          URLExt.join(path, 'clone'),
+          'POST',
+          {
+            clone_url: url,
+            auth: auth as any
+          }
+        );
       }
     );
   }
@@ -486,9 +489,8 @@ export class GitExtension implements IGitExtension {
   async commit(message: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute('git:commit:create', async () => {
-      await requestAPI('commit', 'POST', {
-        commit_msg: message,
-        top_repo_path: path
+      await requestAPI(URLExt.join(path, 'commit'), 'POST', {
+        commit_msg: message
       });
     });
     await this.refresh();
@@ -510,12 +512,14 @@ export class GitExtension implements IGitExtension {
       'git:config:' + (options ? 'set' : 'get'),
       async () => {
         if (options) {
-          await requestAPI('config', 'POST', {
-            path,
+          await requestAPI(URLExt.join(path, 'config'), 'POST', {
             options
           });
         } else {
-          return await requestAPI<JSONObject>('config', 'POST', { path });
+          return await requestAPI<JSONObject>(
+            URLExt.join(path, 'config'),
+            'POST'
+          );
         }
       }
     );
@@ -534,10 +538,13 @@ export class GitExtension implements IGitExtension {
   async deleteBranch(branchName: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:branch:delete', async () => {
-      return await requestAPI<void>('branch/delete', 'POST', {
-        current_path: path,
-        branch: branchName
-      });
+      return await requestAPI<void>(
+        URLExt.join(path, 'branch', 'delete'),
+        'POST',
+        {
+          branch: branchName
+        }
+      );
     });
   }
 
@@ -557,11 +564,10 @@ export class GitExtension implements IGitExtension {
       'git:fetch:commit_log',
       async () => {
         return await requestAPI<Git.ISingleCommitFilePathInfo>(
-          'detailed_log',
+          URLExt.join(path, 'detailed_log'),
           'POST',
           {
-            selected_hash: hash,
-            current_path: path
+            selected_hash: hash
           }
         );
       }
@@ -598,9 +604,7 @@ export class GitExtension implements IGitExtension {
   async ensureGitignore(): Promise<void> {
     const path = await this._getPathRepository();
 
-    await requestAPI('ignore', 'POST', {
-      top_repo_path: path
-    });
+    await requestAPI(URLExt.join(path, 'ignore'), 'POST');
     this._openGitignore();
     await this.refreshStatus();
   }
@@ -639,8 +643,7 @@ export class GitExtension implements IGitExtension {
   async ignore(filePath: string, useExtension: boolean): Promise<void> {
     const path = await this._getPathRepository();
 
-    await requestAPI('ignore', 'POST', {
-      top_repo_path: path,
+    await requestAPI(URLExt.join(path, 'ignore'), 'POST', {
       file_path: filePath,
       use_extension: useExtension
     });
@@ -660,9 +663,7 @@ export class GitExtension implements IGitExtension {
    */
   async init(path: string): Promise<void> {
     await this._taskHandler.execute<void>('git:init', async () => {
-      await requestAPI('init', 'POST', {
-        current_path: path
-      });
+      await requestAPI(URLExt.join(path, 'init'), 'POST');
     });
   }
 
@@ -681,10 +682,13 @@ export class GitExtension implements IGitExtension {
     return await this._taskHandler.execute<Git.ILogResult>(
       'git:fetch:log',
       async () => {
-        return await requestAPI<Git.ILogResult>('log', 'POST', {
-          current_path: path,
-          history_count: count
-        });
+        return await requestAPI<Git.ILogResult>(
+          URLExt.join(path, 'log'),
+          'POST',
+          {
+            history_count: count
+          }
+        );
       }
     );
   }
@@ -704,13 +708,17 @@ export class GitExtension implements IGitExtension {
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:pull',
       async () => {
-        return await requestAPI<Git.IResultWithMessage>('pull', 'POST', {
-          current_path: path,
-          auth: auth as any,
-          cancel_on_conflict:
-            (this._settings?.composite['cancelPullMergeConflict'] as boolean) ||
-            false
-        });
+        return await requestAPI<Git.IResultWithMessage>(
+          URLExt.join(path, 'pull'),
+          'POST',
+          {
+            auth: auth as any,
+            cancel_on_conflict:
+              (this._settings?.composite[
+                'cancelPullMergeConflict'
+              ] as boolean) || false
+          }
+        );
       }
     );
     this.refreshBranch(); // Will emit headChanged if required
@@ -732,10 +740,13 @@ export class GitExtension implements IGitExtension {
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
       async () => {
-        return await requestAPI<Git.IResultWithMessage>('push', 'POST', {
-          current_path: path,
-          auth: auth as any
-        });
+        return await requestAPI<Git.IResultWithMessage>(
+          URLExt.join(path, 'push'),
+          'POST',
+          {
+            auth: auth as any
+          }
+        );
       }
     );
     this.refreshBranch();
@@ -832,9 +843,10 @@ export class GitExtension implements IGitExtension {
       const data = await this._taskHandler.execute<Git.IStatusResult>(
         'git:refresh:status',
         async () => {
-          return await requestAPI<Git.IStatusResult>('status', 'POST', {
-            current_path: path
-          });
+          return await requestAPI<Git.IStatusResult>(
+            URLExt.join(path, 'status'),
+            'POST'
+          );
         }
       );
 
@@ -883,10 +895,9 @@ export class GitExtension implements IGitExtension {
       } else {
         files = [filename];
       }
-      await requestAPI('reset', 'POST', {
+      await requestAPI(URLExt.join(path, 'reset'), 'POST', {
         reset_all: filename === undefined,
-        filename: filename === undefined ? null : filename,
-        top_repo_path: path
+        filename: filename === undefined ? null : filename
       });
 
       files.forEach(file => {
@@ -915,9 +926,8 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>('git:reset:hard', async () => {
       const files = (await this._changedFiles(null, null, hash)).files;
 
-      await requestAPI('reset_to_commit', 'POST', {
-        commit_id: hash,
-        top_repo_path: path
+      await requestAPI(URLExt.join(path, 'reset_to_commit'), 'POST', {
+        commit_id: hash
       });
 
       files?.forEach(file => {
@@ -942,15 +952,12 @@ export class GitExtension implements IGitExtension {
         'git:fetch:prefix_path',
         async () => {
           return await requestAPI<Git.IShowPrefixResult>(
-            'show_prefix',
-            'POST',
-            {
-              current_path: path
-            }
+            URLExt.join(path, 'show_prefix'),
+            'POST'
           );
         }
       );
-      return data.under_repo_path || null;
+      return data.path || null;
     } catch (error) {
       if (
         error instanceof Git.GitResponseError &&
@@ -978,15 +985,12 @@ export class GitExtension implements IGitExtension {
         'git:fetch:top_level_path',
         async () => {
           return await requestAPI<Git.IShowTopLevelResult>(
-            'show_top_level',
-            'POST',
-            {
-              current_path: path
-            }
+            URLExt.join(path, 'show_top_level'),
+            'POST'
           );
         }
       );
-      return data.top_repo_path || null;
+      return data.path || null;
     } catch (error) {
       if (
         error instanceof Git.GitResponseError &&
@@ -1013,9 +1017,10 @@ export class GitExtension implements IGitExtension {
     return await this._taskHandler.execute<Git.ITagResult>(
       'git:tag:list',
       async () => {
-        return await requestAPI<Git.ITagResult>('tags', 'POST', {
-          current_path: path
-        });
+        return await requestAPI<Git.ITagResult>(
+          URLExt.join(path, 'tags'),
+          'POST'
+        );
       }
     );
   }
@@ -1035,10 +1040,13 @@ export class GitExtension implements IGitExtension {
     return await this._taskHandler.execute<Git.ICheckoutResult>(
       'git:tag:checkout',
       async () => {
-        return await requestAPI<Git.ICheckoutResult>('tag_checkout', 'POST', {
-          current_path: path,
-          tag_id: tag
-        });
+        return await requestAPI<Git.ICheckoutResult>(
+          URLExt.join(path, 'tag_checkout'),
+          'POST',
+          {
+            tag_id: tag
+          }
+        );
       }
     );
   }
@@ -1104,9 +1112,8 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>('git:commit:revert', async () => {
       const files = (await this._changedFiles(null, null, hash + '^!')).files;
 
-      await requestAPI('delete_commit', 'POST', {
-        commit_id: hash,
-        top_repo_path: path
+      await requestAPI(URLExt.join(path, 'delete_commit'), 'POST', {
+        commit_id: hash
       });
 
       files?.forEach(file => {
@@ -1131,9 +1138,10 @@ export class GitExtension implements IGitExtension {
     return await this._taskHandler.execute<Git.IBranchResult>(
       'git:fetch:branches',
       async () => {
-        return await requestAPI<Git.IBranchResult>('branch', 'POST', {
-          current_path: path
-        });
+        return await requestAPI<Git.IBranchResult>(
+          URLExt.join(path, 'branch'),
+          'POST'
+        );
       }
     );
   }
@@ -1158,12 +1166,15 @@ export class GitExtension implements IGitExtension {
     remote?: string,
     singleCommit?: string
   ): Promise<Git.IChangedFilesResult> {
-    return await requestAPI<Git.IChangedFilesResult>('changed_files', 'POST', {
-      current_path: this.pathRepository,
-      base: base,
-      remote: remote,
-      single_commit: singleCommit
-    });
+    return await requestAPI<Git.IChangedFilesResult>(
+      URLExt.join(this.pathRepository, 'changed_files'),
+      'POST',
+      {
+        base: base,
+        remote: remote,
+        single_commit: singleCommit
+      }
+    );
   }
 
   /**
@@ -1248,8 +1259,8 @@ export class GitExtension implements IGitExtension {
    */
   private _fetchRemotes = async (): Promise<void> => {
     try {
-      const current_path = await this._getPathRepository();
-      await requestAPI('remote/fetch', 'POST', { current_path });
+      const path = await this._getPathRepository();
+      await requestAPI(URLExt.join(path, 'remote', 'fetch'), 'POST');
     } catch (error) {
       console.error('Failed to fetch remotes', error);
     }

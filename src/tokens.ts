@@ -597,21 +597,35 @@ export namespace Git {
     serverVersion: string;
   }
 
-  /** Interface for GitShowTopLevel request result,
+  /**
+   * Interface for GitShowTopLevel request result,
    * has the Git root directory inside a repository
    */
   export interface IShowTopLevelResult {
+    /**
+     * Git command return code
+     */
     code: number;
-    top_repo_path?: string;
+    /**
+     * Git repository root path
+     */
+    path?: string;
   }
 
-  /** Interface for GitShowPrefix request result,
+  /**
+   * Interface for GitShowPrefix request result,
    * has the prefix path of a directory in a repository,
    * with respect to the root directory.
    */
   export interface IShowPrefixResult {
+    /**
+     * Git command return code
+     */
     code: number;
-    under_repo_path?: string;
+    /**
+     * Relative path of the current folder within its Git repository
+     */
+    path?: string;
   }
 
   /**

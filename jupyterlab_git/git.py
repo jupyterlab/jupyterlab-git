@@ -725,9 +725,14 @@ class Git:
             cwd=path,
         )
         if code == 0:
-            result = {"code": code, "under_repo_path": my_output.strip("\n")}
+            result = {"code": code, "path": my_output.strip("\n")}
             return result
         else:
+            # Handle special case where cwd not inside a git repo
+            lower_error = my_error.lower()
+            if "fatal: not a git repository" in lower_error:
+                return {"code": 0, "path": None}
+
             return {
                 "code": code,
                 "command": " ".join(cmd),
