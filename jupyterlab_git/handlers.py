@@ -751,15 +751,12 @@ class GitSettingsHandler(GitHandler):
                 "[jupyterlab_git] Failed to execute 'git' command: {!s}".format(error)
             )
         server_version = str(__version__)
-        # Similar to https://github.com/jupyter/nbdime/blob/master/nbdime/webapp/nb_server_extension.py#L90-L91
-        root_dir = getattr(self.contents_manager, "root_dir", None)
-        server_root = None if root_dir is None else Path(root_dir).as_posix()
+
         self.finish(
             json.dumps(
                 {
                     "frontendVersion": jlab_version,
                     "gitVersion": git_version,
-                    "serverRoot": server_root,
                     "serverVersion": server_version,
                 }
             )

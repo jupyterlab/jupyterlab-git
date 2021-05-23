@@ -15,7 +15,6 @@ jest.mock('@jupyterlab/settingregistry');
 
 describe('plugin', () => {
   const mockGit = git as jest.Mocked<typeof git>;
-  const fakeRoot = '/path/to/server';
   let app: jest.Mocked<JupyterLab>;
   let mockResponses: IMockedResponses = {};
   let settingRegistry: jest.Mocked<ISettingRegistry>;
@@ -41,7 +40,6 @@ describe('plugin', () => {
           return {
             gitVersion: null,
             frontendVersion: version,
-            serverRoot: fakeRoot,
             serverVersion: version
           };
         }
@@ -77,7 +75,6 @@ describe('plugin', () => {
           return {
             gitVersion: '1.8.7',
             frontendVersion: version,
-            serverRoot: fakeRoot,
             serverVersion: version
           };
         }
@@ -112,7 +109,6 @@ describe('plugin', () => {
           return {
             gitVersion: '2.22.0',
             frontendVersion: version,
-            serverRoot: fakeRoot,
             serverVersion: '0.1.0'
           };
         }

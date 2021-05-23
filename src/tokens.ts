@@ -588,10 +588,6 @@ export namespace Git {
      */
     gitVersion?: string;
     /**
-     * Server absolute root path (as posix)
-     */
-    serverRoot: string;
-    /**
      * Server extension version formatted as Python package version
      */
     serverVersion: string;

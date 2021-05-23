@@ -41,12 +41,10 @@ export class GitExtension implements IGitExtension {
    * @returns extension model
    */
   constructor(
-    serverRoot: string,
     docmanager: IDocumentManager = null,
     docRegistry: DocumentRegistry = null,
     settings?: ISettingRegistry.ISettings
   ) {
-    this._serverRoot = serverRoot;
     this._docmanager = docmanager;
     this._docRegistry = docRegistry;
     this._settings = settings || null;
@@ -621,13 +619,10 @@ export class GitExtension implements IGitExtension {
    * @returns relative path
    */
   getRelativeFilePath(path?: string): string | null {
-    if (this.pathRepository === null || this._serverRoot === void 0) {
+    if (this.pathRepository === null) {
       return null;
     }
-    return PathExt.join(
-      PathExt.relative(this._serverRoot, this.pathRepository),
-      path || ''
-    );
+    return PathExt.join(this.pathRepository, path || '');
   }
 
   /**
@@ -1355,7 +1350,6 @@ export class GitExtension implements IGitExtension {
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];
   private _currentBranch: Git.IBranch | null = null;
-  private _serverRoot: string;
   private _docmanager: IDocumentManager | null;
   private _docRegistry: DocumentRegistry | null;
   private _fetchPoll: Poll;

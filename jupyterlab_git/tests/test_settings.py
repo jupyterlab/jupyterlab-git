@@ -1,19 +1,16 @@
 import json
-from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
-import pytest
-import tornado
 from packaging.version import parse
 
 from jupyterlab_git import __version__
-from jupyterlab_git.handlers import NAMESPACE, GitSettingsHandler
+from jupyterlab_git.handlers import NAMESPACE
 
-from .testutils import assert_http_error, maybe_future
+from .testutils import maybe_future
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_get_settings_success(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_get_settings_success(mock_execute, jp_fetch):
     # Given
     git_version = "2.10.3"
     jlab_version = "2.1.42-alpha.24"
@@ -34,13 +31,12 @@ async def test_git_get_settings_success(mock_execute, jp_fetch, jp_root_dir):
     assert payload == {
         "frontendVersion": str(parse(jlab_version)),
         "gitVersion": git_version,
-        "serverRoot": jp_root_dir.as_posix(),
         "serverVersion": str(parse(__version__)),
     }
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_get_settings_no_git(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_get_settings_no_git(mock_execute, jp_fetch):
     # Given
     jlab_version = "2.1.42-alpha.24"
     mock_execute.side_effect = FileNotFoundError(
@@ -60,13 +56,12 @@ async def test_git_get_settings_no_git(mock_execute, jp_fetch, jp_root_dir):
     assert payload == {
         "frontendVersion": str(parse(jlab_version)),
         "gitVersion": None,
-        "serverRoot": jp_root_dir.as_posix(),
         "serverVersion": str(parse(__version__)),
     }
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_get_settings_no_jlab(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_get_settings_no_jlab(mock_execute, jp_fetch):
     # Given
     git_version = "2.10.3"
     mock_execute.return_value = maybe_future(
@@ -84,6 +79,5 @@ async def test_git_get_settings_no_jlab(mock_execute, jp_fetch, jp_root_dir):
     assert payload == {
         "frontendVersion": None,
         "gitVersion": git_version,
-        "serverRoot": jp_root_dir.as_posix(),
         "serverVersion": str(parse(__version__)),
     }
