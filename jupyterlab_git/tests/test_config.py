@@ -1,11 +1,7 @@
 import json
-from unittest.mock import Mock, call, patch
+from unittest.mock import call, patch
 
-import pytest
-import tornado
-
-from jupyterlab_git.git import Git
-from jupyterlab_git.handlers import GitConfigHandler, NAMESPACE
+from jupyterlab_git.handlers import NAMESPACE
 
 from .testutils import maybe_future
 

@@ -1,11 +1,10 @@
 import json
-import subprocess
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 import tornado
 
-from jupyterlab_git.handlers import NAMESPACE, GitRemoteAddHandler
+from jupyterlab_git.handlers import NAMESPACE
 
 from .testutils import assert_http_error, maybe_future
 
@@ -22,7 +21,12 @@ async def test_git_add_remote_success_no_name(mock_execute, jp_fetch, jp_root_di
         "url": url,
     }
     response = await jp_fetch(
-        NAMESPACE, local_path.name, "remote", "add", body=json.dumps(body), method="POST"
+        NAMESPACE,
+        local_path.name,
+        "remote",
+        "add",
+        body=json.dumps(body),
+        method="POST",
     )
 
     # Then
@@ -48,7 +52,12 @@ async def test_git_add_remote_success(mock_execute, jp_fetch, jp_root_dir):
     # When
     body = {"url": url, "name": name}
     response = await jp_fetch(
-        NAMESPACE, local_path.name, "remote", "add", body=json.dumps(body), method="POST"
+        NAMESPACE,
+        local_path.name,
+        "remote",
+        "add",
+        body=json.dumps(body),
+        method="POST",
     )
 
     # Then
@@ -78,7 +87,14 @@ async def test_git_add_remote_failure(mock_execute, jp_fetch, jp_root_dir):
     }
 
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(NAMESPACE, local_path.name, "remote", "add", body=json.dumps(body), method="POST")
+        await jp_fetch(
+            NAMESPACE,
+            local_path.name,
+            "remote",
+            "add",
+            body=json.dumps(body),
+            method="POST",
+        )
     assert_http_error(e, 500)
 
     # Then

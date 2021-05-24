@@ -1,8 +1,6 @@
-from pathlib import Path
-from unittest.mock import Mock, call, patch
+from unittest.mock import patch
 
 import pytest
-import tornado
 
 from jupyterlab_git.git import Git
 

@@ -2,7 +2,7 @@ import json
 import nbformat
 from pathlib import Path
 from subprocess import CalledProcessError
-from unittest.mock import Mock, call, patch
+from unittest.mock import patch
 
 import pytest
 import tornado

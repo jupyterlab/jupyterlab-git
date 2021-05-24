@@ -1,10 +1,7 @@
-from pathlib import Path
 from platform import system
 
 import pytest
 from jupyterlab_git.git import Git
-
-from .testutils import maybe_future
 
 
 @pytest.mark.parametrize("ignore_content", [None, "dummy", "dummy\n"])

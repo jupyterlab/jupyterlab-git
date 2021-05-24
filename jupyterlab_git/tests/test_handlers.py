@@ -1,14 +1,11 @@
 import json
-from unittest.mock import ANY, Mock, call, patch
+from unittest.mock import ANY, MagicMock, Mock, call, patch
 
 import pytest
 import tornado
 
 from jupyterlab_git.git import Git
-from jupyterlab_git.handlers import (
-    NAMESPACE,
-    setup_handlers,
-)
+from jupyterlab_git.handlers import NAMESPACE, setup_handlers, GitHandler
 
 from .testutils import assert_http_error, maybe_future
 
@@ -21,10 +18,26 @@ def test_mapping_added():
     mock_web_app.add_handlers.assert_called_once_with(".*", ANY)
 
 
+@pytest.mark.parametrize(
+    "path, with_cm", (("url", False), ("url/to/path", False), ("url/to/path", True))
+)
+def test_GitHandler_url2localpath(path, with_cm, jp_web_app, jp_root_dir):
+    req = tornado.httputil.HTTPServerRequest()
+    req.connection = MagicMock()
+    handler = GitHandler(jp_web_app, req)
+    if with_cm:
+        assert (
+            str(jp_root_dir / path),
+            handler.contents_manager,
+        ) == handler.url2localpath(path, with_cm)
+    else:
+        assert str(jp_root_dir / path) == handler.url2localpath(path, with_cm)
+
+
 @patch("jupyterlab_git.handlers.GitAllHistoryHandler.git", spec=Git)
 async def test_all_history_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     # Given
-    show_top_level = {"code": 0, "top_repo_path": "foo"}
+    show_top_level = {"code": 0, "path": "foo"}
     branch = "branch_foo"
     log = "log_foo"
     status = "status_foo"
@@ -64,11 +77,11 @@ async def test_all_history_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
 @patch("jupyterlab_git.git.execute")
 async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
     # Given
-    top_repo_path = "path/to/repo"
+    path = "path/to/repo"
 
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future((0, str(top_repo_path), ""))
+    mock_execute.return_value = maybe_future((0, str(path), ""))
 
     # When
     response = await jp_fetch(
@@ -82,7 +95,7 @@ async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
     # Then
     assert response.code == 200
     payload = json.loads(response.body)
-    assert payload["path"] == str(top_repo_path)
+    assert payload["path"] == str(path)
     mock_execute.assert_has_calls(
         [
             call(
@@ -128,11 +141,11 @@ async def test_git_show_prefix_not_a_git_repo(mock_execute, jp_fetch, jp_root_di
 @patch("jupyterlab_git.git.execute")
 async def test_git_show_top_level(mock_execute, jp_fetch, jp_root_dir):
     # Given
-    top_repo_path = "path/to/repo"
+    path = "path/to/repo"
 
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future((0, str(top_repo_path), ""))
+    mock_execute.return_value = maybe_future((0, str(path), ""))
 
     # When
     response = await jp_fetch(
@@ -146,7 +159,7 @@ async def test_git_show_top_level(mock_execute, jp_fetch, jp_root_dir):
     # Then
     assert response.code == 200
     payload = json.loads(response.body)
-    assert payload["path"] == str(top_repo_path)
+    assert payload["path"] == str(path)
     mock_execute.assert_has_calls(
         [
             call(
@@ -607,7 +620,6 @@ async def test_upstream_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
 async def test_content(mock_execute, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    top_repo_path = "path/to/repo"
     filename = "my/file"
     content = "dummy content file\nwith multiple lines"
 

@@ -1,11 +1,8 @@
-# python lib
 from pathlib import Path
-from unittest.mock import Mock, call, patch
+from unittest.mock import call, patch
 
 import pytest
-import tornado
 
-# local lib
 from jupyterlab_git.git import Git
 
 from .testutils import maybe_future

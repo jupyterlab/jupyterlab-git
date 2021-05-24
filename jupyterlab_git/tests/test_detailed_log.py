@@ -1,10 +1,8 @@
-# python lib
 from pathlib import Path
-from unittest.mock import Mock, call, patch
+from unittest.mock import patch
 
 import pytest
 
-# local lib
 from jupyterlab_git.git import Git
 
 from .testutils import maybe_future

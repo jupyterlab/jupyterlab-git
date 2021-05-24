@@ -1,9 +1,6 @@
-from pathlib import Path
-from subprocess import CalledProcessError
-from unittest.mock import Mock, call, patch
+from unittest.mock import call, patch
 
 import pytest
-import tornado
 
 # local lib
 from jupyterlab_git.git import Git
