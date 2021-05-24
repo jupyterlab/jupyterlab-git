@@ -68,6 +68,62 @@ async def test_all_history_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.git.execute")
+async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
+    # Given
+    top_repo_path = "path/to/repo"
+
+    local_path = jp_root_dir / "test_path"
+
+    mock_execute.return_value = maybe_future((0, str(top_repo_path), ""))
+
+    # When
+    response = await jp_fetch(
+        NAMESPACE, local_path.name + "/subfolder", "show_prefix", body="{}", method="POST"
+    )
+
+    # Then
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload["path"] == str(top_repo_path)
+    mock_execute.assert_has_calls(
+        [
+            call(
+                ["git", "rev-parse", "--show-prefix"],
+                cwd=str(local_path / "subfolder"),
+            ),
+        ]
+    )
+
+
+@patch("jupyterlab_git.git.execute")
+async def test_git_show_prefix_not_a_git_repo(mock_execute, jp_fetch, jp_root_dir):
+    # Given
+    local_path = jp_root_dir / "test_path"
+
+    mock_execute.return_value = maybe_future(
+        (128, "", "fatal: not a git repository (or any")
+    )
+
+    # When
+    response = await jp_fetch(
+        NAMESPACE, local_path.name + "/subfolder", "show_prefix", body="{}", method="POST"
+    )
+
+    # Then
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload["path"] is None
+    mock_execute.assert_has_calls(
+        [
+            call(
+                ["git", "rev-parse", "--show-prefix"],
+                cwd=str(local_path / "subfolder"),
+            ),
+        ]
+    )
+
+
+@patch("jupyterlab_git.git.execute")
 async def test_git_show_top_level(mock_execute, jp_fetch, jp_root_dir):
     # Given
     top_repo_path = "path/to/repo"

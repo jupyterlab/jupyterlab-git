@@ -1,12 +1,52 @@
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Git } from '../src/tokens';
 
-export interface IMockedResponses {
-  [url: string]: {
-    body?: (body: Object) => ReadonlyJSONObject;
-    status?: number;
-  };
+export interface IMockedResponse {
+  // Response body
+  body?: (body: Object) => ReadonlyJSONObject;
+  // Response status code
+  status?: number;
 }
+
+export interface IMockedResponses {
+  // Folder path in URI; default = DEFAULT_REPOSITORY_PATH
+  path?: string;
+  // Endpoints
+  add_all_unstaged?: IMockedResponse;
+  add_all_untracked?: IMockedResponse;
+  all_history?: IMockedResponse;
+  'branch/delete'?: IMockedResponse;
+  branch?: IMockedResponse;
+  changed_files?: IMockedResponse;
+  checkout?: IMockedResponse;
+  clone?: IMockedResponse;
+  commit?: IMockedResponse;
+  config?: IMockedResponse;
+  content?: IMockedResponse;
+  delete_commit?: IMockedResponse;
+  detailed_log?: IMockedResponse;
+  diff?: IMockedResponse;
+  init?: IMockedResponse;
+  log?: IMockedResponse;
+  pull?: IMockedResponse;
+  push?: IMockedResponse;
+  'remote/add'?: IMockedResponse;
+  'remote/fetch'?: IMockedResponse;
+  reset?: IMockedResponse;
+  reset_to_commit?: IMockedResponse;
+  show_prefix?: IMockedResponse;
+  show_top_level?: IMockedResponse;
+  status?: IMockedResponse;
+  upstream?: IMockedResponse;
+  ignore?: IMockedResponse;
+  tags?: IMockedResponse;
+  tag_checkout?: IMockedResponse;
+  add?: IMockedResponse;
+  diffnotebook?: IMockedResponse;
+  settings?: IMockedResponse;
+}
+
+export const DEFAULT_REPOSITORY_PATH = 'path/to/repo';
 
 export const defaultMockedResponses: IMockedResponses = {
   branch: {
@@ -18,11 +58,11 @@ export const defaultMockedResponses: IMockedResponses = {
       };
     }
   },
-  show_top_level: {
-    body: request => {
+  show_prefix: {
+    body: () => {
       return {
         code: 0,
-        top_repo_path: (request as any)['current_path']
+        path: ''
       };
     }
   },
@@ -45,7 +85,9 @@ export function mockedRequestAPI(
     body?: ReadonlyJSONObject | null,
     namespace?: string
   ) => {
-    const reply = mockedResponses[url + method] || mockedResponses[url];
+    const path = mockedResponses.path ?? DEFAULT_REPOSITORY_PATH;
+    url = url.replace(new RegExp(`^${path}/`), ''); // Remove path + '/'
+    const reply = mockedResponses[url + method as keyof Omit<IMockedResponses, 'path'>] ?? mockedResponses[url as keyof Omit<IMockedResponses, 'path'>];
     if (reply) {
       if (reply.status) {
         throw new Git.GitResponseError(

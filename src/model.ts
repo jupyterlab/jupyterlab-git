@@ -622,7 +622,7 @@ export class GitExtension implements IGitExtension {
     if (this.pathRepository === null) {
       return null;
     }
-    return PathExt.join(this.pathRepository, path || '');
+    return PathExt.join(this.pathRepository, path ?? '');
   }
 
   /**
@@ -952,7 +952,7 @@ export class GitExtension implements IGitExtension {
           );
         }
       );
-      return data.path || null;
+      return data.path ?? null;
     } catch (error) {
       if (
         error instanceof Git.GitResponseError &&
@@ -985,7 +985,7 @@ export class GitExtension implements IGitExtension {
           );
         }
       );
-      return data.path || null;
+      return data.path ?? null;
     } catch (error) {
       if (
         error instanceof Git.GitResponseError &&

@@ -10,14 +10,14 @@ import { Logger } from '../../src/logger';
 import { GitExtension } from '../../src/model';
 import { pullIcon, pushIcon } from '../../src/style/icons';
 import { toolbarMenuButtonClass } from '../../src/style/Toolbar';
-import { mockedRequestAPI } from '../utils';
+import { DEFAULT_REPOSITORY_PATH, mockedRequestAPI } from '../utils';
 import { CommandIDs } from '../../src/tokens';
 
 jest.mock('../../src/git');
 
 async function createModel() {
-  const model = new GitExtension('/server/root');
-  model.pathRepository = '/path/to/repo';
+  const model = new GitExtension();
+  model.pathRepository = DEFAULT_REPOSITORY_PATH;
 
   await model.ready;
   return model;

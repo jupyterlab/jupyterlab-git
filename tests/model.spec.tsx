@@ -5,6 +5,7 @@ import { GitExtension } from '../src/model';
 import { Git, IGitExtension } from '../src/tokens';
 import {
   defaultMockedResponses,
+  DEFAULT_REPOSITORY_PATH,
   IMockedResponses,
   mockedRequestAPI
 } from './utils';
@@ -13,7 +14,6 @@ jest.mock('../src/git');
 
 describe('IGitExtension', () => {
   const mockGit = git as jest.Mocked<typeof git>;
-  const fakeRoot = '/path/to/server';
   let model: IGitExtension;
   const docmanager = jest.mock('@jupyterlab/docmanager') as any;
   let mockResponses: IMockedResponses;
@@ -31,12 +31,12 @@ describe('IGitExtension', () => {
 
     mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
 
-    model = new GitExtension(fakeRoot, docmanager as any, docregistry as any);
+    model = new GitExtension(docmanager as any, docregistry as any);
   });
 
   describe('#pathRepository', () => {
     it('should be null if not in a git repository', async () => {
-      const path = '/path/to/server/repo';
+      const path = DEFAULT_REPOSITORY_PATH;
       expect(model.pathRepository).toBeNull();
 
       model.pathRepository = path;
@@ -49,34 +49,34 @@ describe('IGitExtension', () => {
     });
 
     it('should be equal to the top repository folder', async () => {
-      const path = '/path/to/server/repo';
+      mockResponses.path = DEFAULT_REPOSITORY_PATH + '/subdir';
 
-      mockResponses['show_top_level'] = {
+      mockResponses['show_prefix'] = {
         body: () => {
           return {
             code: 0,
-            top_repo_path: path
+            path: 'subdir/'
           };
         }
       };
 
-      model.pathRepository = path + '/subdir';
+      model.pathRepository = mockResponses.path;
       await model.ready;
-      expect(model.pathRepository).toBe(path);
+      expect(model.pathRepository).toBe(DEFAULT_REPOSITORY_PATH);
     });
 
     it('should not be ready before all requests have be processed.', async () => {
-      const path = '/path/to/server/repo';
+      mockResponses.path = DEFAULT_REPOSITORY_PATH + '/subdir';
 
       expect(model.isReady).toBe(true);
 
-      model.pathRepository = path + '/subdir';
+      model.pathRepository = mockResponses.path;
       expect(model.isReady).toBe(false);
       await model.ready;
       expect(model.isReady).toBe(true);
-      expect(model.pathRepository).toBe(path + '/subdir');
+      expect(model.pathRepository).toBe(mockResponses.path);
 
-      model.pathRepository = path + '/subdir';
+      model.pathRepository = mockResponses.path;
       model.ready.then(() => {
         expect(model.isReady).toBe(false);
       });
@@ -84,15 +84,17 @@ describe('IGitExtension', () => {
       model.ready.then(() => {
         expect(model.isReady).toBe(false);
       });
-      model.pathRepository = path;
+
+      mockResponses.path = DEFAULT_REPOSITORY_PATH
+      model.pathRepository = mockResponses.path;
       expect(model.isReady).toBe(false);
       await model.ready;
       expect(model.isReady).toBe(true);
-      expect(model.pathRepository).toBe(path);
+      expect(model.pathRepository).toBe(mockResponses.path);
     });
 
     it('should emit repositoryChanged signal and request a refresh', async () => {
-      let path = '/path/to/server/repo';
+      let path = DEFAULT_REPOSITORY_PATH;
 
       const testPathSignal = testEmission(model.repositoryChanged, {
         test: (model, change) => {
@@ -113,28 +115,31 @@ describe('IGitExtension', () => {
 
   describe('#showPrefix', () => {
     it('should return a string if the folder is a git repository', async () => {
-      const fakeRepo = '/repo';
+      const fakeRepo = 'cwd/';
+      mockResponses.path = 'repo/cwd';
       mockResponses['show_prefix'] = {
         body: () => {
-          return { code: 0, under_repo_path: fakeRepo };
+          return { code: 0, path: fakeRepo };
         }
       };
-      const topLevel = await model.showPrefix('/repo/cwd');
-      expect(topLevel).toEqual(fakeRepo);
+      const relativePath = await model.showPrefix(mockResponses.path);
+      expect(relativePath).toEqual(fakeRepo);
     });
 
     it('should return null if the repository is not a git repository', async () => {
+      mockResponses.path = 'repo/cwd';
       mockResponses['show_prefix'] = {
         body: () => {
-          return { code: 128 };
+          return { code: 128, path: null };
         },
         status: 500
       };
-      const topLevel = await model.showPrefix('/repo/cwd');
+      const topLevel = await model.showPrefix(mockResponses.path);
       expect(topLevel).toBeNull();
     });
 
     it('should throw an exception if the server otherwise', async () => {
+      mockResponses.path = 'repo/cwd';
       mockResponses['show_prefix'] = {
         body: () => {
           return { code: 128 };
@@ -142,7 +147,7 @@ describe('IGitExtension', () => {
         status: 401
       };
       try {
-        await model.showPrefix('/repo/cwd');
+        await model.showPrefix(mockResponses.path);
       } catch (error) {
         expect(error).toBeInstanceOf(Git.GitResponseError);
       }
@@ -151,28 +156,31 @@ describe('IGitExtension', () => {
 
   describe('#showTopLevel', () => {
     it('should return a string if the folder is a git repository', async () => {
+      mockResponses.path = DEFAULT_REPOSITORY_PATH + '/cwd';
       const fakeRepo = '/path/to/repo';
       mockResponses['show_top_level'] = {
         body: () => {
-          return { code: 0, top_repo_path: fakeRepo };
+          return { code: 0, path: fakeRepo };
         }
       };
-      const topLevel = await model.showTopLevel('/path/to/repo/cwd');
+      const topLevel = await model.showTopLevel(mockResponses.path);
       expect(topLevel).toEqual(fakeRepo);
     });
 
     it('should return null if the repository is not a git repository', async () => {
+      mockResponses.path = DEFAULT_REPOSITORY_PATH + '/cwd';
       mockResponses['show_top_level'] = {
         body: () => {
           return { code: 128 };
         },
         status: 500
       };
-      const topLevel = await model.showTopLevel('/path/to/repo/cwd');
+      const topLevel = await model.showTopLevel(mockResponses.path);
       expect(topLevel).toBeNull();
     });
 
     it('should throw an exception if the server otherwise', async () => {
+      mockResponses.path = DEFAULT_REPOSITORY_PATH + '/cwd';
       mockResponses['show_top_level'] = {
         body: () => {
           return { code: 128 };
@@ -180,7 +188,7 @@ describe('IGitExtension', () => {
         status: 401
       };
       try {
-        await model.showTopLevel('/path/to/repo/cwd');
+        await model.showTopLevel(mockResponses.path);
       } catch (error) {
         expect(error).toBeInstanceOf(Git.GitResponseError);
       }
@@ -206,7 +214,7 @@ describe('IGitExtension', () => {
       expect(model.status.branch).toBeNull();
       expect(model.status.files).toHaveLength(0);
 
-      model.pathRepository = '/path/to/server/repo';
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
       const branch = 'master';
       await model.ready;
       status = {
@@ -253,7 +261,7 @@ describe('IGitExtension', () => {
         }
       });
 
-      model.pathRepository = '/path/to/server/repo';
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
       await model.ready;
 
       await model.refreshStatus();
@@ -264,20 +272,21 @@ describe('IGitExtension', () => {
   describe('#getRelativeFilePath', () => {
     it('should return relative path correctly ', async () => {
       const testData = [
-        [
-          'somefolder/file',
-          '/path/to/server/dir1/dir2/repo',
-          'dir1/dir2/repo/somefolder/file'
-        ],
-        ['file', '/path/to/server/repo', 'repo/file'],
-        ['somefolder/file', '/path/to/server/repo', 'repo/somefolder/file'],
-        ['somefolder/file', '/path/to/server', 'somefolder/file'],
-        ['file', '/path/to/server', 'file'],
+        // [
+        //   'somefolder/file',
+        //   'dir1/dir2/repo',
+        //   'dir1/dir2/repo/somefolder/file'
+        // ],
+        // ['file', 'repo', 'repo/file'],
+        // ['somefolder/file', 'repo', 'repo/somefolder/file'],
+        ['somefolder/file', '', 'somefolder/file'],
+        ['file', '', 'file'],
         ['file', null, null]
       ];
 
       for (const testDatum of testData) {
         // Given
+        mockResponses.path = testDatum[1];
         model.pathRepository = testDatum[1];
         await model.ready;
         // When
@@ -337,7 +346,7 @@ describe('IGitExtension', () => {
         }
       };
 
-      model.pathRepository = '/path/to/server/repo';
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
       await model.ready;
 
       const testSignal = testEmission(model.headChanged, {
@@ -359,7 +368,7 @@ describe('IGitExtension', () => {
         body: () => null
       };
 
-      model.pathRepository = '/path/to/server/repo';
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
       await model.ready;
 
       await model.pull();
@@ -378,7 +387,7 @@ describe('IGitExtension', () => {
         body: () => null
       };
 
-      model.pathRepository = '/path/to/server/repo';
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
       await model.ready;
 
       await model.push();
@@ -405,7 +414,7 @@ describe('IGitExtension', () => {
         }
       };
 
-      model.pathRepository = '/path/to/server/repo';
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
       await model.ready;
 
       await model.resetToCommit('dummyhash');

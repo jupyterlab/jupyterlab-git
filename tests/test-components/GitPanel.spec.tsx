@@ -11,6 +11,7 @@ import { Logger } from '../../src/logger';
 import { GitExtension as GitModel } from '../../src/model';
 import {
   defaultMockedResponses,
+  DEFAULT_REPOSITORY_PATH,
   IMockedResponses,
   mockedRequestAPI
 } from '../utils';
@@ -69,8 +70,8 @@ describe('GitPanel', () => {
     const mock = git as jest.Mocked<typeof git>;
     mock.requestAPI.mockImplementation(mockedRequestAPI(mockedResponses));
 
-    props.model = new GitModel('/server/root');
-    props.model.pathRepository = '/path/to/repo';
+    props.model = new GitModel();
+    props.model.pathRepository = DEFAULT_REPOSITORY_PATH;
 
     props.settings = MockSettings() as any;
 

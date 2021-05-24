@@ -8,7 +8,7 @@ import * as git from '../../src/git';
 import { Logger } from '../../src/logger';
 import { GitExtension } from '../../src/model';
 import { listItemClass, nameClass } from '../../src/style/BranchMenu';
-import { mockedRequestAPI, defaultMockedResponses } from '../utils';
+import { mockedRequestAPI, defaultMockedResponses, DEFAULT_REPOSITORY_PATH } from '../utils';
 import ClearIcon from '@material-ui/icons/Clear';
 import { nullTranslator } from '@jupyterlab/translation';
 
@@ -51,8 +51,8 @@ const BRANCHES = [
 ];
 
 async function createModel() {
-  const model = new GitExtension('/server/root');
-  model.pathRepository = '/path/to/repo';
+  const model = new GitExtension();
+  model.pathRepository = DEFAULT_REPOSITORY_PATH;
 
   await model.ready;
   return model;
