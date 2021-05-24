@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from unittest.mock import ANY, Mock, call, patch
 
 import pytest
@@ -8,11 +7,6 @@ import tornado
 from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import (
     NAMESPACE,
-    GitAllHistoryHandler,
-    GitBranchHandler,
-    GitLogHandler,
-    GitPushHandler,
-    GitUpstreamHandler,
     setup_handlers,
 )
 
@@ -28,7 +22,7 @@ def test_mapping_added():
 
 
 @patch("jupyterlab_git.handlers.GitAllHistoryHandler.git", spec=Git)
-async def test_all_history_handler_localbranch(mock_git, jp_fetch, jp_root_dir): 
+async def test_all_history_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     # Given
     show_top_level = {"code": 0, "top_repo_path": "foo"}
     branch = "branch_foo"
@@ -78,7 +72,11 @@ async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
 
     # When
     response = await jp_fetch(
-        NAMESPACE, local_path.name + "/subfolder", "show_prefix", body="{}", method="POST"
+        NAMESPACE,
+        local_path.name + "/subfolder",
+        "show_prefix",
+        body="{}",
+        method="POST",
     )
 
     # Then
@@ -106,7 +104,11 @@ async def test_git_show_prefix_not_a_git_repo(mock_execute, jp_fetch, jp_root_di
 
     # When
     response = await jp_fetch(
-        NAMESPACE, local_path.name + "/subfolder", "show_prefix", body="{}", method="POST"
+        NAMESPACE,
+        local_path.name + "/subfolder",
+        "show_prefix",
+        body="{}",
+        method="POST",
     )
 
     # Then
@@ -134,7 +136,11 @@ async def test_git_show_top_level(mock_execute, jp_fetch, jp_root_dir):
 
     # When
     response = await jp_fetch(
-        NAMESPACE, local_path.name + "/subfolder", "show_top_level", body="{}", method="POST"
+        NAMESPACE,
+        local_path.name + "/subfolder",
+        "show_top_level",
+        body="{}",
+        method="POST",
     )
 
     # Then
@@ -162,7 +168,11 @@ async def test_git_show_top_level_not_a_git_repo(mock_execute, jp_fetch, jp_root
 
     # When
     response = await jp_fetch(
-        NAMESPACE, local_path.name + "/subfolder", "show_top_level", body="{}", method="POST"
+        NAMESPACE,
+        local_path.name + "/subfolder",
+        "show_top_level",
+        body="{}",
+        method="POST",
     )
 
     # Then
@@ -180,7 +190,7 @@ async def test_git_show_top_level_not_a_git_repo(mock_execute, jp_fetch, jp_root
 
 
 @patch("jupyterlab_git.handlers.GitBranchHandler.git", spec=Git)
-async def test_branch_handler_localbranch(mock_git, jp_fetch, jp_root_dir): 
+async def test_branch_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     branch = {
@@ -232,7 +242,9 @@ async def test_branch_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     mock_git.branch.return_value = maybe_future(branch)
 
     # When
-    response = await jp_fetch(NAMESPACE, local_path.name, "branch", body="{}", method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "branch", body="{}", method="POST"
+    )
 
     # Then
     mock_git.branch.assert_called_with(str(local_path))
@@ -243,7 +255,7 @@ async def test_branch_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.handlers.GitLogHandler.git", spec=Git)
-async def test_log_handler(mock_git, jp_fetch, jp_root_dir): 
+async def test_log_handler(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     log = {"code": 0, "commits": []}
@@ -251,7 +263,9 @@ async def test_log_handler(mock_git, jp_fetch, jp_root_dir):
 
     # When
     body = {"history_count": 20}
-    response = await jp_fetch(NAMESPACE, local_path.name, "log", body=json.dumps(body), method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "log", body=json.dumps(body), method="POST"
+    )
 
     # Then
     mock_git.log.assert_called_with(str(local_path), 20)
@@ -262,14 +276,16 @@ async def test_log_handler(mock_git, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.handlers.GitLogHandler.git", spec=Git)
-async def test_log_handler_no_history_count(mock_git, jp_fetch, jp_root_dir): 
+async def test_log_handler_no_history_count(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     log = {"code": 0, "commits": []}
     mock_git.log.return_value = maybe_future(log)
 
     # When
-    response = await jp_fetch(NAMESPACE, local_path.name, "log", body="{}", method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "log", body="{}", method="POST"
+    )
 
     # Then
     mock_git.log.assert_called_with(str(local_path), 25)
@@ -280,7 +296,7 @@ async def test_log_handler_no_history_count(mock_git, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
-async def test_push_handler_localbranch(mock_git, jp_fetch, jp_root_dir): 
+async def test_push_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     mock_git.get_current_branch.return_value = maybe_future("localbranch")
@@ -290,12 +306,16 @@ async def test_push_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     mock_git.push.return_value = maybe_future({"code": 0})
 
     # When
-    response = await jp_fetch(NAMESPACE, local_path.name, "push", body="{}", method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "push", body="{}", method="POST"
+    )
 
     # Then
     mock_git.get_current_branch.assert_called_with(str(local_path))
     mock_git.get_upstream_branch.assert_called_with(str(local_path), "localbranch")
-    mock_git.push.assert_called_with(".", "HEAD:localbranch", str(local_path), None, False)
+    mock_git.push.assert_called_with(
+        ".", "HEAD:localbranch", str(local_path), None, False
+    )
 
     assert response.code == 200
     payload = json.loads(response.body)
@@ -303,7 +323,7 @@ async def test_push_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
-async def test_push_handler_remotebranch(mock_git, jp_fetch, jp_root_dir): 
+async def test_push_handler_remotebranch(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     mock_git.get_current_branch.return_value = maybe_future("foo/bar")
@@ -316,7 +336,9 @@ async def test_push_handler_remotebranch(mock_git, jp_fetch, jp_root_dir):
     mock_git.push.return_value = maybe_future({"code": 0})
 
     # When
-    response = await jp_fetch(NAMESPACE, local_path.name, "push", body="{}", method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "push", body="{}", method="POST"
+    )
 
     # Then
     mock_git.get_current_branch.assert_called_with(str(local_path))
@@ -331,7 +353,7 @@ async def test_push_handler_remotebranch(mock_git, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
-async def test_push_handler_noupstream(mock_git, jp_fetch, jp_root_dir): 
+async def test_push_handler_noupstream(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     mock_git.get_current_branch.return_value = maybe_future("foo")
@@ -368,7 +390,7 @@ async def test_push_handler_noupstream(mock_git, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
-async def test_push_handler_multipleupstream(mock_git, jp_fetch, jp_root_dir): 
+async def test_push_handler_multipleupstream(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     remotes = ["origin", "upstream"]
@@ -401,7 +423,7 @@ async def test_push_handler_multipleupstream(mock_git, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
-async def test_push_handler_noupstream_unique_remote(mock_git, jp_fetch, jp_root_dir): 
+async def test_push_handler_noupstream_unique_remote(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     remote = "origin"
@@ -413,7 +435,9 @@ async def test_push_handler_noupstream_unique_remote(mock_git, jp_fetch, jp_root
     mock_git.push.return_value = maybe_future({"code": 0})
 
     # When
-    response = await jp_fetch(NAMESPACE, local_path.name, "push", body="{}", method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "push", body="{}", method="POST"
+    )
 
     # Then
     mock_git.get_current_branch.assert_called_with(str(local_path))
@@ -430,7 +454,7 @@ async def test_push_handler_noupstream_unique_remote(mock_git, jp_fetch, jp_root
 
 
 @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
-async def test_push_handler_noupstream_pushdefault(mock_git, jp_fetch, jp_root_dir): 
+async def test_push_handler_noupstream_pushdefault(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     remote = "rorigin"
@@ -444,7 +468,9 @@ async def test_push_handler_noupstream_pushdefault(mock_git, jp_fetch, jp_root_d
     mock_git.push.return_value = maybe_future({"code": 0})
 
     # When
-    response = await jp_fetch(NAMESPACE, local_path.name, "push", body="{}", method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "push", body="{}", method="POST"
+    )
 
     # Then
     mock_git.get_current_branch.assert_called_with(str(local_path))
@@ -461,7 +487,9 @@ async def test_push_handler_noupstream_pushdefault(mock_git, jp_fetch, jp_root_d
 
 
 @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
-async def test_push_handler_noupstream_pass_remote_nobranch(mock_git, jp_fetch, jp_root_dir): 
+async def test_push_handler_noupstream_pass_remote_nobranch(
+    mock_git, jp_fetch, jp_root_dir
+):
     # Given
     local_path = jp_root_dir / "test_path"
     mock_git.get_current_branch.return_value = maybe_future("foo")
@@ -475,7 +503,9 @@ async def test_push_handler_noupstream_pass_remote_nobranch(mock_git, jp_fetch, 
 
     # When
     body = {"remote": remote}
-    response = await jp_fetch(NAMESPACE, local_path.name, "push", body=json.dumps(body), method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "push", body=json.dumps(body), method="POST"
+    )
 
     # Then
     mock_git.get_current_branch.assert_called_with(str(local_path))
@@ -490,7 +520,9 @@ async def test_push_handler_noupstream_pass_remote_nobranch(mock_git, jp_fetch, 
 
 
 @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
-async def test_push_handler_noupstream_pass_remote_branch(mock_git, jp_fetch, jp_root_dir): 
+async def test_push_handler_noupstream_pass_remote_branch(
+    mock_git, jp_fetch, jp_root_dir
+):
     # Given
     local_path = jp_root_dir / "test_path"
     mock_git.get_current_branch.return_value = maybe_future("foo")
@@ -505,7 +537,9 @@ async def test_push_handler_noupstream_pass_remote_branch(mock_git, jp_fetch, jp
 
     # When
     body = {"remote": "/".join((remote, remote_branch))}
-    response = await jp_fetch(NAMESPACE, local_path.name, "push", body=json.dumps(body), method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "push", body=json.dumps(body), method="POST"
+    )
 
     # Then
     mock_git.get_current_branch.assert_called_with(str(local_path))
@@ -522,7 +556,7 @@ async def test_push_handler_noupstream_pass_remote_branch(mock_git, jp_fetch, jp
 
 
 @patch("jupyterlab_git.handlers.GitUpstreamHandler.git", spec=Git)
-async def test_upstream_handler_forward_slashes(mock_git, jp_fetch, jp_root_dir): 
+async def test_upstream_handler_forward_slashes(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     mock_git.get_current_branch.return_value = maybe_future("foo/bar")
@@ -548,7 +582,7 @@ async def test_upstream_handler_forward_slashes(mock_git, jp_fetch, jp_root_dir)
 
 
 @patch("jupyterlab_git.handlers.GitUpstreamHandler.git", spec=Git)
-async def test_upstream_handler_localbranch(mock_git, jp_fetch, jp_root_dir): 
+async def test_upstream_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     mock_git.get_current_branch.return_value = maybe_future("foo/bar")
@@ -671,7 +705,7 @@ async def test_content_index(mock_execute, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_content_unknown_special(mock_execute, jp_fetch, jp_root_dir): 
+async def test_content_unknown_special(mock_execute, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     filename = "my/file"
@@ -689,12 +723,14 @@ async def test_content_unknown_special(mock_execute, jp_fetch, jp_root_dir):
     }
 
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST")
+        await jp_fetch(
+            NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST"
+        )
     assert_http_error(e, 500, expected_message="unknown special ref")
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_content_show_handled_error(mock_execute, jp_fetch, jp_root_dir): 
+async def test_content_show_handled_error(mock_execute, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     filename = "my/file"
@@ -725,7 +761,7 @@ async def test_content_show_handled_error(mock_execute, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_content_binary(mock_execute, jp_fetch, jp_root_dir): 
+async def test_content_binary(mock_execute, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     filename = "my/file"
@@ -740,12 +776,14 @@ async def test_content_binary(mock_execute, jp_fetch, jp_root_dir):
 
     # Then
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST")
+        await jp_fetch(
+            NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST"
+        )
     assert_http_error(e, 500, expected_message="file is not UTF-8")
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_content_show_unhandled_error(mock_execute, jp_fetch, jp_root_dir): 
+async def test_content_show_unhandled_error(mock_execute, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     filename = "my/file"
@@ -760,7 +798,9 @@ async def test_content_show_unhandled_error(mock_execute, jp_fetch, jp_root_dir)
 
     # Then
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST")
+        await jp_fetch(
+            NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST"
+        )
     assert_http_error(e, 500, expected_message="Dummy error")
 
 
