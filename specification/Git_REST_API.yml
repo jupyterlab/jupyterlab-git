@@ -14,7 +14,23 @@ info:
       - application/json
 
 paths:
-  /all_history:
+  /{path}/add_all_unstaged:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/add_all_untracked:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/all_history:
       post:
         summary: Get all git information of current repo
         description: |
@@ -25,8 +41,8 @@ paths:
           and may fail individually, so each request has its own code to indicate execution status
           (zero for success, none-zero for failure)
         parameters:
-          - name: current_path
-            description: path of directory
+          - name: path
+            description: Git repository path
             in: path
             required: true
             type: string
@@ -39,7 +55,7 @@ paths:
                 "data":{
                   "showtoplevel": {
                     "code": 0, 
-                    "top_repo_path": "/absolute/path/to/root/of/repo"
+                    "path": "/absolute/path/to/root/of/repo"
                   }
                   "branch"?: {
                     "code": 0,
@@ -84,6 +100,226 @@ paths:
                 "command": "git showtoplevel"
                 "message": "Not in a Git repository"
               }
+  /{path}/branch/delete:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/branch:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/changed_files:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/checkout:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/clone:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/commit:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/config:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/content:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/delete_commit:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/detailed_log:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/diff:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/init:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/log:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/pull:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/push:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/remote/add:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/remote/fetch:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/reset:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/reset_to_commit:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/show_prefix:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/show_top_level:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/status:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/upstream:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/ignore:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/tags:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/tag_checkout:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /{path}/add:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+  /diffnotebook:
+    post:
+  /settings:
+    post:
 
 ### git showtoplevel - Show the absolute path of the top-level directory
 Request with a "current_path", if it"s a git repo, return the absolute path of the top-level directory with a zero "code", if not, return error message with a non-zero "code".
@@ -109,7 +345,7 @@ on git command success
 ```bash
     {
         "code": 0, 
-        "top_repo_path": "/absolute/path/to/root/of/repo"
+        "path": "/absolute/path/to/root/of/repo"
      }
 
 ```
@@ -390,7 +626,7 @@ on git command failure
 ```
 
 ### git add - Add file contents to the index
-Request with a "add_all" (check if add all changes), a target "filename", and a "top_repo_path" to add file contents to the index.
+Request with a "add_all" (check if add all changes), a target "filename", and a "path" to add file contents to the index.
 
 URL:
 ```bash 
@@ -400,8 +636,7 @@ Request JSON:
 ```bash
     {
         "add_all": false, 
-        "filename": "file/or/folder/path", 
-        "top_repo_path": "/absolute/path/to/root/of/repo"
+        "filename": "file/or/folder/path"
     }
 ```
 HTTP response
@@ -428,7 +663,7 @@ on git command failure
 ```
 
 ### git add_all_untracked - Add all the untracked file contents to the index
-Request with a "top_repo_path" to add  and ONLY add all the untracked file contents to the index.
+Request with a "path" to add  and ONLY add all the untracked file contents to the index.
 
 URL:
 ```bash 
@@ -436,9 +671,7 @@ URL:
 ```
 Request JSON:
 ```bash
-    {
-        "top_repo_path": "/absolute/path/to/root/of/repo"
-    }
+    {}
 ```
 HTTP response
 ```bash
@@ -465,7 +698,7 @@ on git command failure
 
 ### git checkout - Switch branches or restore working tree files
 Request with a "checkout_branch" (if it"s a switch-branch request), a "new_check" (if the target branch needs to be created), a branch target "branchname",
-a "checkout_all" (if discard all changes), a restore target "filename" and a "top_repo_path" to determine the checkout action and target
+a "checkout_all" (if discard all changes), a restore target "filename" and a "path" to determine the checkout action and target
 
 URL:
 ```bash 
@@ -478,8 +711,7 @@ Request JSON:
         "new_check": false,
         "branchname": "target-branch-name",
         "checkout_all": false, 
-        "filename": "file/or/folder/path", 
-        "top_repo_path": "/absolute/path/to/root/of/repo"
+        "filename": "file/or/folder/path"
     }
 ```
 HTTP response
@@ -506,7 +738,7 @@ on git command failure
 ```
 
 ### git reset - Reset current HEAD to the specified state
-Request with a "reset_all" (check if reset all changes), a target "filename", and a "top_repo_path" to reset file contents to the index.
+Request with a "reset_all" (check if reset all changes), a target "filename", and a "path" to reset file contents to the index.
 
 URL:
 ```bash 
@@ -516,8 +748,7 @@ Request JSON:
 ```bash
     {
         "reset_all": false, 
-        "filename": "file/or/folder/path", 
-        "top_repo_path": "/absolute/path/to/root/of/repo"
+        "filename": "file/or/folder/path"
     }
 ```
 HTTP response
@@ -544,7 +775,7 @@ on git command failure
 ```
 
 ### git commit - Record changes to the repository
-Request with a "commit_msg" and a "top_repo_path" to commit changes.
+Request with a "commit_msg" and a "path" to commit changes.
 
 URL:
 ```bash 
@@ -553,8 +784,7 @@ URL:
 Request JSON:
 ```bash
     {
-        "commit_msg": "typed-in-message-for-commit", 
-        "top_repo_path": "/absolute/path/to/root/of/repo"
+        "commit_msg": "typed-in-message-for-commit"
     }
 ```
 HTTP response
