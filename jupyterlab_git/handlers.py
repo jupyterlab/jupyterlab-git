@@ -53,7 +53,7 @@ class GitHandler(APIHandler):
         if hybridcontents is not None and isinstance(
             cm, hybridcontents.HybridContentsManager
         ):
-            _, cm, path = hybridcontents.hybridmanager._resolve_path(path, cm)
+            _, cm, path = hybridcontents.hybridmanager._resolve_path(path, cm.managers)
 
         local_path = os.path.join(os.path.expanduser(cm.root_dir), url2path(path))
         return (local_path, cm) if with_contents_manager else local_path
@@ -104,7 +104,7 @@ class GitAllHistoryHandler(GitHandler):
         local_path = self.url2localpath(path)
 
         show_top_level = await self.git.show_top_level(local_path)
-        if show_top_level.get("top_repo_path") is None:
+        if show_top_level.get("path") is None:
             self.set_status(500)
             self.finish(json.dumps(show_top_level))
         else:
