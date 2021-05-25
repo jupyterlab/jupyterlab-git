@@ -26,7 +26,7 @@ describe('IGitExtension', () => {
     };
 
     mockResponses = {
-      ...defaultMockedResponses
+      responses: {...defaultMockedResponses}
     };
 
     mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
@@ -51,7 +51,7 @@ describe('IGitExtension', () => {
     it('should be equal to the top repository folder', async () => {
       mockResponses.path = DEFAULT_REPOSITORY_PATH + '/subdir';
 
-      mockResponses['show_prefix'] = {
+      mockResponses.responses['show_prefix'] = {
         body: () => {
           return {
             code: 0,
@@ -117,7 +117,7 @@ describe('IGitExtension', () => {
     it('should return a string if the folder is a git repository', async () => {
       const fakeRepo = 'cwd/';
       mockResponses.path = 'repo/cwd';
-      mockResponses['show_prefix'] = {
+      mockResponses.responses['show_prefix'] = {
         body: () => {
           return { code: 0, path: fakeRepo };
         }
@@ -128,7 +128,7 @@ describe('IGitExtension', () => {
 
     it('should return null if the repository is not a git repository', async () => {
       mockResponses.path = 'repo/cwd';
-      mockResponses['show_prefix'] = {
+      mockResponses.responses['show_prefix'] = {
         body: () => {
           return { code: 128, path: null };
         },
@@ -140,7 +140,7 @@ describe('IGitExtension', () => {
 
     it('should throw an exception if the server otherwise', async () => {
       mockResponses.path = 'repo/cwd';
-      mockResponses['show_prefix'] = {
+      mockResponses.responses['show_prefix'] = {
         body: () => {
           return { code: 128 };
         },
@@ -158,7 +158,7 @@ describe('IGitExtension', () => {
     it('should return a string if the folder is a git repository', async () => {
       mockResponses.path = DEFAULT_REPOSITORY_PATH + '/cwd';
       const fakeRepo = '/path/to/repo';
-      mockResponses['show_top_level'] = {
+      mockResponses.responses['show_top_level'] = {
         body: () => {
           return { code: 0, path: fakeRepo };
         }
@@ -169,7 +169,7 @@ describe('IGitExtension', () => {
 
     it('should return null if the repository is not a git repository', async () => {
       mockResponses.path = DEFAULT_REPOSITORY_PATH + '/cwd';
-      mockResponses['show_top_level'] = {
+      mockResponses.responses['show_top_level'] = {
         body: () => {
           return { code: 128 };
         },
@@ -181,7 +181,7 @@ describe('IGitExtension', () => {
 
     it('should throw an exception if the server otherwise', async () => {
       mockResponses.path = DEFAULT_REPOSITORY_PATH + '/cwd';
-      mockResponses['show_top_level'] = {
+      mockResponses.responses['show_top_level'] = {
         body: () => {
           return { code: 128 };
         },
@@ -205,7 +205,7 @@ describe('IGitExtension', () => {
         files: []
       };
 
-      mockResponses['status'] = {
+      mockResponses.responses['status'] = {
         body: () => {
           return { code: 0, ...status } as any;
         }
@@ -245,7 +245,7 @@ describe('IGitExtension', () => {
         files: [{ x: '', y: '', from: '', to: '', is_binary: null }]
       };
 
-      mockResponses['status'] = {
+      mockResponses.responses['status'] = {
         body: () => {
           return { code: 0, ...status } as any;
         }
@@ -272,13 +272,13 @@ describe('IGitExtension', () => {
   describe('#getRelativeFilePath', () => {
     it('should return relative path correctly ', async () => {
       const testData = [
-        // [
-        //   'somefolder/file',
-        //   'dir1/dir2/repo',
-        //   'dir1/dir2/repo/somefolder/file'
-        // ],
-        // ['file', 'repo', 'repo/file'],
-        // ['somefolder/file', 'repo', 'repo/somefolder/file'],
+        [
+          'somefolder/file',
+          'dir1/dir2/repo',
+          'dir1/dir2/repo/somefolder/file'
+        ],
+        ['file', 'repo', 'repo/file'],
+        ['somefolder/file', 'repo', 'repo/somefolder/file'],
         ['somefolder/file', '', 'somefolder/file'],
         ['file', '', 'file'],
         ['file', null, null]
@@ -299,12 +299,12 @@ describe('IGitExtension', () => {
 
   describe('#checkout', () => {
     it('should emit headChanged signal if checkout branch', async () => {
-      mockResponses['checkout'] = {
+      mockResponses.responses['checkout'] = {
         body: () => {
           return {};
         }
       };
-      mockResponses['branch'] = {
+      mockResponses.responses['branch'] = {
         body: () => {
           return {
             code: 0,
@@ -337,7 +337,7 @@ describe('IGitExtension', () => {
           };
         }
       };
-      mockResponses['changed_files'] = {
+      mockResponses.responses['changed_files'] = {
         body: () => {
           return {
             code: 0,
@@ -364,7 +364,7 @@ describe('IGitExtension', () => {
   describe('#pull', () => {
     it('should refresh branches if successful', async () => {
       const spy = jest.spyOn(GitExtension.prototype, 'refreshBranch');
-      mockResponses['pull'] = {
+      mockResponses.responses['pull'] = {
         body: () => null
       };
 
@@ -383,7 +383,7 @@ describe('IGitExtension', () => {
   describe('#push', () => {
     it('should refresh branches  if successful', async () => {
       const spy = jest.spyOn(GitExtension.prototype, 'refreshBranch');
-      mockResponses['push'] = {
+      mockResponses.responses['push'] = {
         body: () => null
       };
 
@@ -402,10 +402,10 @@ describe('IGitExtension', () => {
   describe('#resetToCommit', () => {
     it('should refresh branches if successfully reset to commit', async () => {
       const spy = jest.spyOn(GitExtension.prototype, 'refreshBranch');
-      mockResponses['reset_to_commit'] = {
+      mockResponses.responses['reset_to_commit'] = {
         body: () => null
       };
-      mockResponses['changed_files'] = {
+      mockResponses.responses['changed_files'] = {
         body: () => {
           return {
             code: 0,

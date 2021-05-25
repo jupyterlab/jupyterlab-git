@@ -8,47 +8,21 @@ export interface IMockedResponse {
   status?: number;
 }
 
-export interface IMockedResponses {
+export interface IMockedResponses
+  extends Record<string, string | IMockedResponse> {
   // Folder path in URI; default = DEFAULT_REPOSITORY_PATH
   path?: string;
-  // Endpoints
-  add_all_unstaged?: IMockedResponse;
-  add_all_untracked?: IMockedResponse;
-  all_history?: IMockedResponse;
-  'branch/delete'?: IMockedResponse;
-  branch?: IMockedResponse;
-  changed_files?: IMockedResponse;
-  checkout?: IMockedResponse;
-  clone?: IMockedResponse;
-  commit?: IMockedResponse;
-  config?: IMockedResponse;
-  content?: IMockedResponse;
-  delete_commit?: IMockedResponse;
-  detailed_log?: IMockedResponse;
-  diff?: IMockedResponse;
-  init?: IMockedResponse;
-  log?: IMockedResponse;
-  pull?: IMockedResponse;
-  push?: IMockedResponse;
-  'remote/add'?: IMockedResponse;
-  'remote/fetch'?: IMockedResponse;
-  reset?: IMockedResponse;
-  reset_to_commit?: IMockedResponse;
-  show_prefix?: IMockedResponse;
-  show_top_level?: IMockedResponse;
-  status?: IMockedResponse;
-  upstream?: IMockedResponse;
-  ignore?: IMockedResponse;
-  tags?: IMockedResponse;
-  tag_checkout?: IMockedResponse;
-  add?: IMockedResponse;
-  diffnotebook?: IMockedResponse;
-  settings?: IMockedResponse;
+  // Endpoint
+  responses?: {
+    [endpoint: string]: IMockedResponse;
+  };
 }
 
 export const DEFAULT_REPOSITORY_PATH = 'path/to/repo';
 
-export const defaultMockedResponses: IMockedResponses = {
+export const defaultMockedResponses: {
+  [endpoint: string]: IMockedResponse;
+} = {
   branch: {
     body: () => {
       return {
@@ -76,18 +50,18 @@ export const defaultMockedResponses: IMockedResponses = {
   }
 };
 
-export function mockedRequestAPI(
-  mockedResponses: IMockedResponses = defaultMockedResponses
-) {
+export function mockedRequestAPI(mockedResponses?: IMockedResponses) {
   const mockedImplementation = (
     url: string,
     method?: string,
     body?: ReadonlyJSONObject | null,
     namespace?: string
   ) => {
+    mockedResponses = mockedResponses ?? {};
     const path = mockedResponses.path ?? DEFAULT_REPOSITORY_PATH;
+    const responses = mockedResponses.responses ?? defaultMockedResponses;
     url = url.replace(new RegExp(`^${path}/`), ''); // Remove path + '/'
-    const reply = mockedResponses[url + method as keyof Omit<IMockedResponses, 'path'>] ?? mockedResponses[url as keyof Omit<IMockedResponses, 'path'>];
+    const reply = responses[url + method] ?? responses[url];
     if (reply) {
       if (reply.status) {
         throw new Git.GitResponseError(
