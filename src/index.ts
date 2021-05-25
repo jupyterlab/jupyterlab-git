@@ -28,6 +28,7 @@ import { GitWidget } from './widgets/GitWidget';
 
 export { NotebookDiff } from './components/diff/NotebookDiff';
 export { PlainTextDiff } from './components/diff/PlainTextDiff';
+export { DiffModel } from './components/diff/model';
 export { Git, IGitExtension } from './tokens';
 
 /**

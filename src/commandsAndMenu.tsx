@@ -84,7 +84,7 @@ export namespace CommandArguments {
 
 function pluralizedContextLabel(singular: string, plural: string) {
   return (args: any) => {
-    const { files } = (args as any) as CommandArguments.IGitContextAction;
+    const { files } = args as any as CommandArguments.IGitContextAction;
     if (files.length > 1) {
       return plural;
     } else {
@@ -151,7 +151,9 @@ export function addCommands(
         main.dispose();
       }
     },
-    isEnabled: () => gitModel.pathRepository !== null
+    isEnabled: () =>
+      gitModel.pathRepository !== null &&
+      app.serviceManager.terminals.isAvailable()
   });
 
   /** Add open/go to git interface command */
@@ -421,7 +423,7 @@ export function addCommands(
     label: trans.__('Show Diff'),
     caption: trans.__('Display a file diff.'),
     execute: async args => {
-      const { model, isText } = (args as any) as {
+      const { model, isText } = args as any as {
         model: Git.Diff.IModel<string>;
         isText?: boolean;
       };
@@ -514,7 +516,7 @@ export function addCommands(
       trans.__('Open selected files')
     ),
     execute: async args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       for (const file of files) {
         const { x, y, to } = file;
         if (x === 'D' || y === 'D') {
@@ -547,7 +549,7 @@ export function addCommands(
       trans.__('Diff selected files')
     ),
     execute: async args => {
-      const { files } = (args as any) as CommandArguments.IGitFileDiff;
+      const { files } = args as any as CommandArguments.IGitFileDiff;
       for (const file of files) {
         const { context, filePath, isText, status } = file;
 
@@ -660,7 +662,7 @@ export function addCommands(
       trans.__('Stage or track the changes of selected files')
     ),
     execute: async args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       for (const file of files) {
         await gitModel.add(file.to);
       }
@@ -675,7 +677,7 @@ export function addCommands(
       trans.__('Stage the changes of selected files')
     ),
     execute: async args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       for (const file of files) {
         await gitModel.add(file.to);
       }
@@ -690,7 +692,7 @@ export function addCommands(
       trans.__('Start tracking selected files')
     ),
     execute: async args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       for (const file of files) {
         await gitModel.add(file.to);
       }
@@ -705,7 +707,7 @@ export function addCommands(
       trans.__('Unstage the changes of selected files')
     ),
     execute: async args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       for (const file of files) {
         if (file.x !== 'D') {
           await gitModel.reset(file.to);
@@ -731,7 +733,7 @@ export function addCommands(
       trans.__('Delete these files')
     ),
     execute: async args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       const fileList = representFiles(files);
 
       const result = await showDialog({
@@ -774,7 +776,7 @@ export function addCommands(
       trans.__('Discard recent changes of selected files')
     ),
     execute: async args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       const fileList = representFiles(files);
 
       const result = await showDialog({
@@ -832,7 +834,7 @@ export function addCommands(
       trans.__('Ignore these files (add to .gitignore)')
     ),
     execute: async args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       for (const file of files) {
         if (file) {
           await gitModel.ignore(file.to, false);
@@ -843,7 +845,7 @@ export function addCommands(
 
   commands.addCommand(ContextCommandIDs.gitIgnoreExtension, {
     label: args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       const extensions = files
         .map(file => PathExt.extname(file.to))
         .filter(extension => extension.length > 0);
@@ -859,7 +861,7 @@ export function addCommands(
       trans.__('Ignore these files extension (add to .gitignore)')
     ),
     execute: async args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       for (const selectedFile of files) {
         if (selectedFile) {
           const extension = PathExt.extname(selectedFile.to);
@@ -883,7 +885,7 @@ export function addCommands(
       }
     },
     isVisible: args => {
-      const { files } = (args as any) as CommandArguments.IGitContextAction;
+      const { files } = args as any as CommandArguments.IGitContextAction;
       return files.some(selectedFile => {
         const extension = PathExt.extname(selectedFile.to);
         return extension.length > 0;
@@ -971,7 +973,7 @@ export function addMenuItems(
     if (command === ContextCommandIDs.gitFileDiff) {
       contextMenu.addItem({
         command,
-        args: ({
+        args: {
           files: selectedFiles.map(file => {
             return {
               filePath: file.to,
@@ -979,14 +981,14 @@ export function addMenuItems(
               status: file.status
             };
           })
-        } as CommandArguments.IGitFileDiff) as any
+        } as CommandArguments.IGitFileDiff as any
       });
     } else {
       contextMenu.addItem({
         command,
-        args: ({
+        args: {
           files: selectedFiles
-        } as CommandArguments.IGitContextAction) as any
+        } as CommandArguments.IGitContextAction as any
       });
     }
   });
@@ -1152,7 +1154,7 @@ namespace Private {
       switch (operation) {
         case Operation.Clone:
           // eslint-disable-next-line no-case-declarations
-          const { path, url } = (args as any) as IGitCloneArgs;
+          const { path, url } = args as any as IGitCloneArgs;
           result = await model.clone(path, url, authentication);
           break;
         case Operation.Pull:

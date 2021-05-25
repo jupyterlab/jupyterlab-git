@@ -84,13 +84,14 @@ export const toolbarMenuButtonSubtitleClass = style({
   fontWeight: 700
 });
 
+// Styles overriding default button style are marked as important to ensure application
 export const toolbarButtonClass = style({
   boxSizing: 'border-box',
   height: '24px',
-  width: 'var(--jp-private-running-button-width)',
+  width: 'var(--jp-private-running-button-width) !important',
 
   margin: 'auto 0 auto 0',
-  padding: '0px 6px',
+  padding: '0px 6px !important',
 
   border: 'none',
   outline: 'none',

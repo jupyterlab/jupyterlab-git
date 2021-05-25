@@ -67,9 +67,15 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
    * is attached so CodeMirror get proper size.
    */
   onAfterAttach(): void {
-    this.createDiffView().catch(reason => {
-      this.showError(reason);
-    });
+    this.ready
+      .then(() => {
+        if (this._challenger !== null && this._reference !== null) {
+          this.createDiffView(this._challenger, this._reference);
+        }
+      })
+      .catch(reason => {
+        this.showError(reason);
+      });
   }
 
   /**
@@ -90,8 +96,18 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
       // Clear all
       this._container.innerHTML = '';
       this._mergeView = null;
+
       // ENH request content only if it changed
-      this.createDiffView();
+      if (this._reference !== null) {
+        this._reference = await this._model.reference.content();
+      }
+      if (this._challenger !== null) {
+        this._challenger = await this._model.challenger.content();
+      }
+
+      this.createDiffView(this._challenger, this._reference);
+      this._challenger = null;
+      this._reference = null;
     } catch (reason) {
       this.showError(reason);
     }
@@ -119,31 +135,24 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   /**
    * Create the Plain Text Diff view
    */
-  protected async createDiffView(): Promise<void> {
+  protected async createDiffView(
+    challengerContent: string,
+    referenceContent: string
+  ): Promise<void> {
     if (!this._mergeView) {
       const mode =
         Mode.findByFileName(this._model.filename) ||
         Mode.findBest(this._model.filename);
 
-      await this.ready;
-
-      if (!this._reference) {
-        this._reference = await this._model.reference.content();
-      }
-      if (!this._challenger) {
-        this._challenger = await this._model.challenger.content();
-      }
-
       this._mergeView = mergeView(this._container, {
-        value: this._challenger,
-        orig: this._reference,
+        value: challengerContent,
+        orig: referenceContent,
         mode: mode.mime,
-        ...PlainTextDiff.getDefaultOptions()
+        ...this.getDefaultOptions()
       }) as MergeView.MergeViewEditor;
-
-      this._reference = null;
-      this._challenger = null;
     }
+
+    return Promise.resolve();
   }
 
   /**
@@ -164,7 +173,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     </p>`;
   }
 
-  protected static getDefaultOptions(): Partial<MergeView.MergeViewEditorConfiguration> {
+  protected getDefaultOptions(): Partial<MergeView.MergeViewEditorConfiguration> {
     // FIXME add options from settings and connect settings to update options
     return {
       lineNumbers: true,
