@@ -39,7 +39,7 @@ class GitHandler(APIHandler):
     def git(self) -> Git:
         return self.settings["git"]
 
-    @functools.lru_cache
+    @functools.lru_cache()
     def url2localpath(
         self, path: str, with_contents_manager: bool = False
     ) -> Union[str, Tuple[str, ContentsManager]]:
