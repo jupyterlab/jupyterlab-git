@@ -3,12 +3,13 @@ import { showDialog } from '@jupyterlab/apputils';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import 'jest';
-import { CommandArguments, addCommands} from '../src/commandsAndMenu';
+import { CommandArguments, addCommands } from '../src/commandsAndMenu';
 import * as git from '../src/git';
 import { GitExtension } from '../src/model';
 import { ContextCommandIDs, CommandIDs, Git } from '../src/tokens';
 import {
   defaultMockedResponses,
+  DEFAULT_REPOSITORY_PATH,
   IMockedResponses,
   mockedRequestAPI
 } from './utils';
@@ -45,7 +46,7 @@ describe('git-commands', () => {
     it('should admit user and name arguments', async () => {
       const name = 'ref';
       const url = 'https://www.mygitserver.com/me/myrepo.git';
-      const path = '/path/to/repo';
+      const path = DEFAULT_REPOSITORY_PATH;
 
       mockGit.requestAPI.mockImplementation(
         mockedRequestAPI({
@@ -63,8 +64,7 @@ describe('git-commands', () => {
 
       await commands.execute(CommandIDs.gitAddRemote, { url, name });
 
-      expect(mockGit.requestAPI).toBeCalledWith('remote/add', 'POST', {
-        top_repo_path: path,
+      expect(mockGit.requestAPI).toBeCalledWith(`${path}/remote/add`, 'POST', {
         url,
         name
       });
@@ -73,7 +73,7 @@ describe('git-commands', () => {
     it('has optional argument name', async () => {
       const name = 'origin';
       const url = 'https://www.mygitserver.com/me/myrepo.git';
-      const path = '/path/to/repo';
+      const path = DEFAULT_REPOSITORY_PATH;
 
       mockGit.requestAPI.mockImplementation(
         mockedRequestAPI({
@@ -91,8 +91,7 @@ describe('git-commands', () => {
 
       await commands.execute(CommandIDs.gitAddRemote, { url });
 
-      expect(mockGit.requestAPI).toBeCalledWith('remote/add', 'POST', {
-        top_repo_path: path,
+      expect(mockGit.requestAPI).toBeCalledWith(`${path}/remote/add`, 'POST', {
         url
       });
     });
@@ -124,17 +123,21 @@ describe('git-commands', () => {
           spyCheckout.mockResolvedValueOnce(undefined);
 
           const path = 'file/path.ext';
-          model.pathRepository = '/path/to/repo';
+          model.pathRepository = DEFAULT_REPOSITORY_PATH;
           await model.ready;
 
-          await commands.execute(ContextCommandIDs.gitFileDiscard, ({files: [{
-            x,
-            y: ' ',
-            from: 'from',
-            to: path,
-            status: status as Git.Status,
-            is_binary: false
-          }]} as CommandArguments.IGitContextAction) as any);
+          await commands.execute(ContextCommandIDs.gitFileDiscard, ({
+            files: [
+              {
+                x,
+                y: ' ',
+                from: 'from',
+                to: path,
+                status: status as Git.Status,
+                is_binary: false
+              }
+            ]
+          } as CommandArguments.IGitContextAction) as any);
 
           if (status === 'staged' || status === 'partially-staged') {
             expect(spyReset).toHaveBeenCalledWith(path);

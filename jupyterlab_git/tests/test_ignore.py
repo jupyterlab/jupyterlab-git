@@ -1,10 +1,7 @@
-from pathlib import Path
 from platform import system
 
 import pytest
 from jupyterlab_git.git import Git
-
-from .testutils import FakeContentManager, maybe_future
 
 
 @pytest.mark.parametrize("ignore_content", [None, "dummy", "dummy\n"])
@@ -16,9 +13,7 @@ async def test_ensure_gitignore(tmp_path, ignore_content):
         ignore_file.write_text(ignore_content)
 
     # When
-    actual_response = await Git(FakeContentManager(Path("/bin"))).ensure_gitignore(
-        str(tmp_path)
-    )
+    actual_response = await Git().ensure_gitignore(str(tmp_path))
 
     # Then
     assert {"code": 0} == actual_response
@@ -35,9 +30,7 @@ async def test_ensure_gitignore_failure(tmp_path):
     ignore_file.chmod(200)  # Set read only to generate an error
 
     # When
-    response = await Git(FakeContentManager(Path("/bin"))).ensure_gitignore(
-        str(tmp_path)
-    )
+    response = await Git().ensure_gitignore(str(tmp_path))
 
     # Then
     assert response["code"] == -1
@@ -51,9 +44,7 @@ async def test_ignore(tmp_path):
     file_ignore = "to_ignore.txt"
 
     # When
-    response = await Git(FakeContentManager(Path("/bin"))).ignore(
-        str(tmp_path), file_ignore
-    )
+    response = await Git().ignore(str(tmp_path), file_ignore)
 
     # Then
     assert {"code": 0} == response
@@ -70,9 +61,7 @@ async def test_ignore_failure(tmp_path):
     ignore_file.chmod(200)  # Set read only to generate an error
 
     # When
-    response = await Git(FakeContentManager(Path("/bin"))).ignore(
-        str(tmp_path), "to_ignore.txt"
-    )
+    response = await Git().ignore(str(tmp_path), "to_ignore.txt")
 
     # Then
     assert response["code"] == -1

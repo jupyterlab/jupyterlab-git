@@ -1,14 +1,11 @@
-from pathlib import Path
-from subprocess import CalledProcessError
-from unittest.mock import Mock, call, patch
+from unittest.mock import call, patch
 
 import pytest
-import tornado
 
 # local lib
 from jupyterlab_git.git import Git
 
-from .testutils import FakeContentManager, maybe_future
+from .testutils import maybe_future
 
 
 @pytest.mark.asyncio
@@ -171,7 +168,6 @@ from .testutils import FakeContentManager, maybe_future
 async def test_status(output, diff_output, expected):
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        root = Path("/bin")
         repository = "test_curr_path"
         mock_execute.side_effect = [
             maybe_future((0, "\x00".join(output) + "\x00", "")),
@@ -179,16 +175,14 @@ async def test_status(output, diff_output, expected):
         ]
 
         # When
-        actual_response = await Git(FakeContentManager(root)).status(
-            current_path=repository
-        )
+        actual_response = await Git().status(path=repository)
 
         # Then
         mock_execute.assert_has_calls(
             [
                 call(
                     ["git", "status", "--porcelain", "-b", "-u", "-z"],
-                    cwd=str(root / repository),
+                    cwd=repository,
                 ),
                 call(
                     [
@@ -199,7 +193,7 @@ async def test_status(output, diff_output, expected):
                         "--cached",
                         "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
                     ],
-                    cwd=str(root / repository),
+                    cwd=repository,
                 ),
             ]
         )

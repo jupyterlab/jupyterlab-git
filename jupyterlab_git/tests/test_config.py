@@ -1,28 +1,28 @@
 import json
-from unittest.mock import Mock, call, patch
+from unittest.mock import call, patch
 
-import pytest
-import tornado
+from jupyterlab_git.handlers import NAMESPACE
 
-from jupyterlab_git.git import Git
-from jupyterlab_git.handlers import GitConfigHandler
-
-from .testutils import FakeContentManager, NS, maybe_future
+from .testutils import maybe_future
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_get_config_success(mock_execute, jp_fetch):
+async def test_git_get_config_success(mock_execute, jp_fetch, jp_root_dir):
     # Given
     mock_execute.return_value = maybe_future(
         (0, "user.name=John Snow\nuser.email=john.snow@iscoming.com", "")
     )
+    local_path = jp_root_dir / "test_path"
 
     # When
-    body = {"path": "test_path"}
-    response = await jp_fetch(NS, "config", body=json.dumps(body), method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "config", body="{}", method="POST"
+    )
 
     # Then
-    mock_execute.assert_called_once_with(["git", "config", "--list"], cwd="test_path")
+    mock_execute.assert_called_once_with(
+        ["git", "config", "--list"], cwd=str(local_path)
+    )
 
     assert response.code == 201
     payload = json.loads(response.body)
@@ -36,7 +36,7 @@ async def test_git_get_config_success(mock_execute, jp_fetch):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_get_config_multiline(mock_execute, jp_fetch):
+async def test_git_get_config_multiline(mock_execute, jp_fetch, jp_root_dir):
     # Given
     output = (
         "user.name=John Snow\n"
@@ -51,13 +51,17 @@ async def test_git_get_config_multiline(mock_execute, jp_fetch):
         'alias.topic-start=!f(){     topic_branch="$1";     git topic-create "$topic_branch";     git topic-push;   };f'
     )
     mock_execute.return_value = maybe_future((0, output, ""))
+    local_path = jp_root_dir / "test_path"
 
     # When
-    body = {"path": "test_path"}
-    response = await jp_fetch(NS, "config", body=json.dumps(body), method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "config", body="{}", method="POST"
+    )
 
     # Then
-    mock_execute.assert_called_once_with(["git", "config", "--list"], cwd="test_path")
+    mock_execute.assert_called_once_with(
+        ["git", "config", "--list"], cwd=str(local_path)
+    )
 
     assert response.code == 201
     payload = json.loads(response.body)
@@ -75,7 +79,7 @@ async def test_git_get_config_multiline(mock_execute, jp_fetch):
     "jupyterlab_git.handlers.ALLOWED_OPTIONS",
     ["alias.summary", "alias.topic-base-branch-name"],
 )
-async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch):
+async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch, jp_root_dir):
     # Given
     output = (
         "user.name=John Snow\n"
@@ -90,13 +94,17 @@ async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch):
         'alias.topic-start=!f(){     topic_branch="$1";     git topic-create "$topic_branch";     git topic-push;   };f'
     )
     mock_execute.return_value = maybe_future((0, output, ""))
+    local_path = jp_root_dir / "test_path"
 
     # When
-    body = {"path": "test_path"}
-    response = await jp_fetch(NS, "config", body=json.dumps(body), method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "config", body="{}", method="POST"
+    )
 
     # Then
-    mock_execute.assert_called_once_with(["git", "config", "--list"], cwd="test_path")
+    mock_execute.assert_called_once_with(
+        ["git", "config", "--list"], cwd=str(local_path)
+    )
 
     assert response.code == 201
     payload = json.loads(response.body)
@@ -114,19 +122,21 @@ async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_set_config_success(mock_execute, jp_fetch):
+async def test_git_set_config_success(mock_execute, jp_fetch, jp_root_dir):
     # Given
     mock_execute.return_value = maybe_future((0, "", ""))
+    local_path = jp_root_dir / "test_path"
 
     # When
     body = {
-        "path": "test_path",
         "options": {
             "user.name": "John Snow",
             "user.email": "john.snow@iscoming.com",
         },
     }
-    response = await jp_fetch(NS, "config", body=json.dumps(body), method="POST")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "config", body=json.dumps(body), method="POST"
+    )
 
     # Then
     assert mock_execute.call_count == 2
@@ -134,11 +144,11 @@ async def test_git_set_config_success(mock_execute, jp_fetch):
         [
             call(
                 ["git", "config", "--add", "user.email", "john.snow@iscoming.com"],
-                cwd="test_path",
+                cwd=str(local_path),
             ),
             call(
                 ["git", "config", "--add", "user.name", "John Snow"],
-                cwd="test_path",
+                cwd=str(local_path),
             ),
         ],
         any_order=True,

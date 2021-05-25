@@ -29,7 +29,7 @@
     "eslint:check": "eslint . --ext .ts,.tsx",
     "install:extension": "jupyter labextension develop --overwrite .",
     "prepare": "jlpm run clean && jlpm run build:prod",
-    "test": "jest",
+    "test": "jest --no-cache",
     "watch": "run-p watch:src watch:labextension",
     "watch:labextension": "jupyter labextension watch .",
     "watch:src": "tsc -w"
@@ -85,7 +85,7 @@
     "@babel/core": "^7.5.0",
     "@babel/preset-env": "^7.5.0",
     "@jupyterlab/builder": "^3.0.0",
-    "@jupyterlab/testutils": "^3.0.0",
+    "@jupyterlab/testutils": "3.0.0 - 3.0.7 || ^3.0.12",
     "@types/codemirror": "^0.0.97",
     "@types/diff-match-patch": "^1.0.32",
     "@types/enzyme": "^3.1.15",

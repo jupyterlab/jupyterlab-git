@@ -130,12 +130,7 @@ async function activate(
     return null;
   }
   // Create the Git model
-  gitExtension = new GitExtension(
-    serverSettings.serverRoot,
-    docmanager,
-    app.docRegistry,
-    settings
-  );
+  gitExtension = new GitExtension(docmanager, app.docRegistry, settings);
 
   // Whenever we restore the application, sync the Git extension path
   Promise.all([app.restored, filebrowser.model.restored]).then(() => {

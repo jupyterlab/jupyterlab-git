@@ -113,6 +113,7 @@ setup_args = dict(
             "pytest-cov",
             "pytest-tornasync",
         ],
+        "tests": ["hybridcontents"],
     },
 )
 

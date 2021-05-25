@@ -1,14 +1,28 @@
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Git } from '../src/tokens';
 
-export interface IMockedResponses {
-  [url: string]: {
-    body?: (body: Object) => ReadonlyJSONObject;
-    status?: number;
+export interface IMockedResponse {
+  // Response body
+  body?: (body: Object) => ReadonlyJSONObject;
+  // Response status code
+  status?: number;
+}
+
+export interface IMockedResponses
+  extends Record<string, string | IMockedResponse> {
+  // Folder path in URI; default = DEFAULT_REPOSITORY_PATH
+  path?: string;
+  // Endpoint
+  responses?: {
+    [endpoint: string]: IMockedResponse;
   };
 }
 
-export const defaultMockedResponses: IMockedResponses = {
+export const DEFAULT_REPOSITORY_PATH = 'path/to/repo';
+
+export const defaultMockedResponses: {
+  [endpoint: string]: IMockedResponse;
+} = {
   branch: {
     body: () => {
       return {
@@ -18,11 +32,11 @@ export const defaultMockedResponses: IMockedResponses = {
       };
     }
   },
-  show_top_level: {
-    body: request => {
+  show_prefix: {
+    body: () => {
       return {
         code: 0,
-        top_repo_path: (request as any)['current_path']
+        path: ''
       };
     }
   },
@@ -36,16 +50,18 @@ export const defaultMockedResponses: IMockedResponses = {
   }
 };
 
-export function mockedRequestAPI(
-  mockedResponses: IMockedResponses = defaultMockedResponses
-) {
+export function mockedRequestAPI(mockedResponses?: IMockedResponses) {
   const mockedImplementation = (
     url: string,
     method?: string,
     body?: ReadonlyJSONObject | null,
     namespace?: string
   ) => {
-    const reply = mockedResponses[url + method] || mockedResponses[url];
+    mockedResponses = mockedResponses ?? {};
+    const path = mockedResponses.path ?? DEFAULT_REPOSITORY_PATH;
+    const responses = mockedResponses.responses ?? defaultMockedResponses;
+    url = url.replace(new RegExp(`^${path}/`), ''); // Remove path + '/'
+    const reply = responses[url + method] ?? responses[url];
     if (reply) {
       if (reply.status) {
         throw new Git.GitResponseError(

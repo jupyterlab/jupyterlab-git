@@ -9,7 +9,7 @@ import {
   ToolbarButton,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt, URLExt } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
 import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -581,11 +581,14 @@ export function addCommands(
         const model = new DiffModel<string>({
           challenger: {
             content: async () => {
-              return requestAPI<Git.IDiffContent>('content', 'POST', {
-                filename: filePath,
-                reference: challengerRef,
-                top_repo_path: repositoryPath
-              }).then(data => data.content);
+              return requestAPI<Git.IDiffContent>(
+                URLExt.join(repositoryPath, 'content'),
+                'POST',
+                {
+                  filename: filePath,
+                  reference: challengerRef
+                }
+              ).then(data => data.content);
             },
             label:
               (Git.Diff.SpecialRef[diffContext.currentRef as any] as any) ||
@@ -596,11 +599,14 @@ export function addCommands(
           filename,
           reference: {
             content: async () => {
-              return requestAPI<Git.IDiffContent>('content', 'POST', {
-                filename: filePath,
-                reference: { git: diffContext.previousRef },
-                top_repo_path: repositoryPath
-              }).then(data => data.content);
+              return requestAPI<Git.IDiffContent>(
+                URLExt.join(repositoryPath, 'content'),
+                'POST',
+                {
+                  filename: filePath,
+                  reference: { git: diffContext.previousRef }
+                }
+              ).then(data => data.content);
             },
             label:
               (Git.Diff.SpecialRef[diffContext.previousRef as any] as any) ||

@@ -1,13 +1,11 @@
-# python lib
 from pathlib import Path
-from unittest.mock import Mock, call, patch
+from unittest.mock import patch
 
 import pytest
 
-# local lib
 from jupyterlab_git.git import Git
 
-from .testutils import FakeContentManager, maybe_future
+from .testutils import maybe_future
 
 
 @pytest.mark.asyncio
@@ -91,9 +89,9 @@ async def test_detailed_log():
         }
 
         # When
-        actual_response = await Git(FakeContentManager(Path("/bin"))).detailed_log(
+        actual_response = await Git().detailed_log(
             selected_hash="f29660a2472e24164906af8653babeb48e4bf2ab",
-            current_path="test_curr_path",
+            path=str(Path("/bin/test_curr_path")),
         )
 
         # Then

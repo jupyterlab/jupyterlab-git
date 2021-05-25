@@ -6,7 +6,11 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { JupyterLab } from '@jupyterlab/application';
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-import { IMockedResponses, mockedRequestAPI } from './utils';
+import {
+  defaultMockedResponses,
+  IMockedResponses,
+  mockedRequestAPI
+} from './utils';
 
 jest.mock('../src/git');
 jest.mock('@jupyterlab/application');
@@ -15,20 +19,20 @@ jest.mock('@jupyterlab/settingregistry');
 
 describe('plugin', () => {
   const mockGit = git as jest.Mocked<typeof git>;
-  const fakeRoot = '/path/to/server';
   let app: jest.Mocked<JupyterLab>;
   let mockResponses: IMockedResponses = {};
   let settingRegistry: jest.Mocked<ISettingRegistry>;
 
   beforeAll(() => {
     app = new JupyterLab() as jest.Mocked<JupyterLab>;
-    settingRegistry = new SettingRegistry({ connector: null }) as jest.Mocked<
-      SettingRegistry
-    >;
+    settingRegistry = new SettingRegistry({
+      connector: null
+    }) as jest.Mocked<SettingRegistry>;
   });
 
   beforeEach(() => {
     jest.resetAllMocks();
+    mockResponses = { responses: { ...defaultMockedResponses } };
     mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
   });
 
@@ -36,12 +40,11 @@ describe('plugin', () => {
     it('should fail if no git is installed', async () => {
       // Given
       const endpoint = 'settings' + URLExt.objectToQueryString({ version });
-      mockResponses[endpoint] = {
+      mockResponses.responses[endpoint] = {
         body: request => {
           return {
             gitVersion: null,
             frontendVersion: version,
-            serverRoot: fakeRoot,
             serverVersion: version
           };
         }
@@ -72,12 +75,11 @@ describe('plugin', () => {
     it('should fail if git version is < 2', async () => {
       // Given
       const endpoint = 'settings' + URLExt.objectToQueryString({ version });
-      mockResponses[endpoint] = {
+      mockResponses.responses[endpoint] = {
         body: request => {
           return {
             gitVersion: '1.8.7',
             frontendVersion: version,
-            serverRoot: fakeRoot,
             serverVersion: version
           };
         }
@@ -107,12 +109,11 @@ describe('plugin', () => {
     it('should fail if server and extension version do not match', async () => {
       // Given
       const endpoint = 'settings' + URLExt.objectToQueryString({ version });
-      mockResponses[endpoint] = {
+      mockResponses.responses[endpoint] = {
         body: request => {
           return {
             gitVersion: '2.22.0',
             frontendVersion: version,
-            serverRoot: fakeRoot,
             serverVersion: '0.1.0'
           };
         }
@@ -145,7 +146,7 @@ describe('plugin', () => {
     it('should fail if the server extension is not installed', async () => {
       // Given
       const endpoint = 'settings' + URLExt.objectToQueryString({ version });
-      mockResponses[endpoint] = {
+      mockResponses.responses[endpoint] = {
         status: 404
       };
       const mockedErrorMessage = showErrorMessage as jest.MockedFunction<
