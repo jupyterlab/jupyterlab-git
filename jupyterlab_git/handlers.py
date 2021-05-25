@@ -1,8 +1,6 @@
 """
 Module with all the individual handlers, which execute git commands and return the results to the frontend.
 """
-from __future__ import annotations  # Ensure type annotation are handled as string
-
 import functools
 import json
 import os
