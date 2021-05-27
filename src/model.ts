@@ -1,5 +1,5 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
@@ -77,6 +77,10 @@ export class GitExtension implements IGitExtension {
    */
   get branches() {
     return this._branches;
+  }
+
+  public get connectionStatus(): boolean {
+    return this._connectionStatus;
   }
 
   get commands(): CommandRegistry | null {
@@ -201,6 +205,13 @@ export class GitExtension implements IGitExtension {
    */
   get statusChanged(): ISignal<IGitExtension, Git.IStatusFile[]> {
     return this._statusChanged;
+  }
+
+  /**
+   * A signal emitted when the connection status changes.
+   */
+  get connectionStatusChanged(): ISignal<IGitExtension, boolean> {
+    return this._connectionStatusChanged;
   }
 
   /**
@@ -693,6 +704,30 @@ export class GitExtension implements IGitExtension {
     }
   }
 
+  async changeConnectionStatus(
+    path: string,
+    enabled: boolean
+  ): Promise<Response> {
+    try {
+      const response = await httpGitRequest(
+        '/external_vcs/connection',
+        'POST',
+        {
+          repostiry_path: path,
+          enabled
+        }
+      );
+      if (response.status !== 200) {
+        return response.json().then((data: any) => {
+          throw new ServerConnection.ResponseError(response, data.message);
+        });
+      }
+      return response;
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    }
+  }
+
   /**
    * Make request for git commit logs
    *
@@ -806,6 +841,7 @@ export class GitExtension implements IGitExtension {
    */
   async refresh(): Promise<void> {
     await this.refreshBranch();
+    await this.refreshConnectionStatus();
     await this.refreshStatus();
   }
 
@@ -827,6 +863,12 @@ export class GitExtension implements IGitExtension {
       this._branches = [];
       this._currentBranch = null;
     }
+  }
+
+  async refreshConnectionStatus(): Promise<void> {
+    const response = await this._getConnectionStatus();
+
+    this._connectionStatus = response.enabled;
   }
 
   /**
@@ -1010,6 +1052,40 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Make request to get connection status
+   *
+   * @returns Connection status
+   */
+  protected async _getConnectionStatus(): Promise<Git.IConnectionResult> {
+    await this.ready;
+    const path = this.pathRepository;
+
+    if (path === null) {
+      return Promise.resolve({
+        code: -1,
+        enabled: false
+      });
+    }
+
+    try {
+      const response = await httpGitRequest(
+        `/external_vcs/connection${URLExt.objectToQueryString({
+          repostiry_path: path
+        })}`,
+        'GET',
+        null
+      );
+      if (response.status !== 200) {
+        const data = await response.json();
+        throw new ServerConnection.ResponseError(response, data.message);
+      }
+      return response.json();
+    } catch (err) {
+      throw new ServerConnection.NetworkError(err);
+    }
+  }
+
+  /**
    * Set repository status
    *
    * @param v Repository status
@@ -1017,6 +1093,16 @@ export class GitExtension implements IGitExtension {
   protected _setStatus(v: Git.IStatusFile[]) {
     this._status = v;
     this._statusChanged.emit(this._status);
+  }
+
+  /**
+   * Set connection status
+   *
+   * @param enabled Connection status
+   */
+  protected _setConnectionStatus(connectionStatus: boolean) {
+    this._connectionStatus = connectionStatus;
+    this._connectionStatusChanged.emit(this._connectionStatus);
   }
 
   private async _getServerRoot(): Promise<string> {
@@ -1053,6 +1139,7 @@ export class GitExtension implements IGitExtension {
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[];
   private _currentBranch: Git.IBranch;
+  private _connectionStatus: boolean;
   private _serverRoot: string;
   private _app: JupyterFrontEnd | null;
   private _diffProviders: { [key: string]: Git.IDiffCallback } = {};
@@ -1069,6 +1156,7 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     IChangedArgs<string | null>
   >(this);
+  private _connectionStatusChanged = new Signal<IGitExtension, boolean>(this);
   private _statusChanged = new Signal<IGitExtension, Git.IStatusFile[]>(this);
 }
 

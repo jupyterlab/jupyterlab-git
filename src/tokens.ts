@@ -19,6 +19,8 @@ export interface IGitExtension extends IDisposable {
    */
   currentBranch: Git.IBranch;
 
+  connectionStatus: boolean;
+
   /**
    * A signal emitted when the HEAD of the git repository changes.
    */
@@ -55,6 +57,11 @@ export interface IGitExtension extends IDisposable {
    * A signal emitted when the current status of the git repository changes.
    */
   readonly statusChanged: ISignal<IGitExtension, Git.IStatusFileResult[]>;
+
+  /**
+   * A signal emitted when the connection status of the git repository changes.
+   */
+  readonly connectionStatusChanged: ISignal<IGitExtension, boolean>;
 
   /**
    * Make request to add one or all files into
@@ -191,6 +198,8 @@ export interface IGitExtension extends IDisposable {
    */
   init(path: string): Promise<Response>;
 
+  changeConnectionStatus(path: string, enabled: boolean): Promise<Response>;
+
   /**
    * Make request for git commit logs
    *
@@ -224,6 +233,11 @@ export interface IGitExtension extends IDisposable {
    * Make request for a list of all git branches
    */
   refreshBranch(): Promise<void>;
+
+  /**
+   * Make request for a connection status
+   */
+  refreshConnectionStatus(): Promise<void>;
 
   /**
    * Request git status refresh
@@ -363,6 +377,10 @@ export namespace Git {
     code: number;
     branches?: IBranch[];
     current_branch?: IBranch;
+  }
+
+  export interface IConnectionResult {
+    enabled: boolean;
   }
 
   /** Interface for GitStatus request result,

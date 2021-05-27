@@ -165,3 +165,25 @@ export const closeMenuIconClass = style({
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center'
 });
+
+export const changeConnectionStatusBarClass = style({
+  display: 'flex',
+  width: '100%',
+  justifyContent: 'space-between',
+  alignItems: 'center'
+});
+
+export const changeConnectionStatusBarLeftClass = style({
+  display: 'flex',
+  flexDirection: 'column'
+});
+
+export const changeConnectionStatusButtonClass = style({
+  boxSizing: 'border-box',
+  height: '2em',
+  color: 'white',
+  fontSize: 'var(--jp-ui-font-size1)',
+  backgroundColor: 'var(--jp-brand-color1)',
+  border: '0',
+  borderRadius: '3px'
+});

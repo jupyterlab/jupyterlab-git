@@ -21,7 +21,10 @@ import {
   toolbarMenuButtonTitleClass,
   toolbarMenuButtonTitleWrapperClass,
   toolbarMenuWrapperClass,
-  toolbarNavClass
+  toolbarNavClass,
+  changeConnectionStatusBarClass,
+  changeConnectionStatusBarLeftClass,
+  changeConnectionStatusButtonClass
 } from '../style/Toolbar';
 import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
@@ -115,6 +118,11 @@ export interface IToolbarState {
    * Current branch name.
    */
   branch: string;
+
+  /**
+   * Connection status.
+   */
+  enabled: boolean;
 }
 
 /**
@@ -136,7 +144,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       branchMenu: false,
       repoMenu: false,
       repository: repo || '',
-      branch: repo ? this.props.model.currentBranch.name : ''
+      branch: repo ? this.props.model.currentBranch.name : '',
+      enabled: false
     };
   }
 
@@ -164,6 +173,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       <div className={toolbarClass}>
         {this._renderTopNav()}
         {this._renderRepoMenu()}
+        {this._renderConnectionsMenu()}
         {this._renderBranchMenu()}
       </div>
     );
@@ -241,6 +251,50 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   /**
+   * Renders a connections menu.
+   *
+   * @returns React element
+   */
+  private _renderConnectionsMenu(): React.ReactElement {
+    if (!this.state.repository) {
+      return undefined;
+    }
+
+    return (
+      <div className={toolbarMenuWrapperClass}>
+        <button
+          disabled
+          className={toolbarMenuButtonClass}
+          title={`Current connection state: ${this.state.enabled}`}
+          onClick={this._onRepositoryClick}
+        >
+          <div className={changeConnectionStatusBarClass}>
+            <div className={changeConnectionStatusBarLeftClass}>
+              <p className={toolbarMenuButtonTitleClass}>Connection state</p>
+              <p className={toolbarMenuButtonSubtitleClass}>
+                {this.state.enabled ? 'enabled' : 'disabled'}
+              </p>
+            </div>
+            <input
+              className={changeConnectionStatusButtonClass}
+              type="button"
+              title={
+                this.state.enabled ? 'Disable connection' : 'Enable connection'
+              }
+              value={this.state.enabled ? 'Disable' : 'Enable'}
+              onClick={
+                this.state.enabled
+                  ? this._onDisableConnectionStatusClick
+                  : this._onEnableConnectionStatusClick
+              }
+            />
+          </div>
+        </button>
+      </div>
+    );
+  }
+
+  /**
    * Renders a branch menu.
    *
    * @returns React element
@@ -299,6 +353,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
 
     // When the status changes, we may have checked out a new branch (e.g., via the command-line and not via the extension) or changed repositories:
     this.props.model.statusChanged.connect(this._syncState, this);
+    this.props.model.connectionStatusChanged.connect(this._syncState, this);
   }
 
   /**
@@ -314,8 +369,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    */
   private _syncState(): void {
     const repo = this.props.model.pathRepository;
+    const enabled = this.props.model.connectionStatus;
+
     this.setState({
       repository: repo || '',
+      enabled,
       branch: repo ? this.props.model.currentBranch.name : ''
     });
   }
@@ -377,5 +435,19 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    */
   private _onRefreshClick = (): void => {
     this.props.refresh();
+  };
+
+  private _onEnableConnectionStatusClick = (): void => {
+    this.props.model.changeConnectionStatus(
+      this.props.model.pathRepository,
+      true
+    );
+  };
+
+  private _onDisableConnectionStatusClick = (): void => {
+    this.props.model.changeConnectionStatus(
+      this.props.model.pathRepository,
+      false
+    );
   };
 }
