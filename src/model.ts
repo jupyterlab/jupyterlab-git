@@ -722,6 +722,7 @@ export class GitExtension implements IGitExtension {
           throw new ServerConnection.ResponseError(response, data.message);
         });
       }
+      this._setConnectionStatus(enabled);
       return response;
     } catch (err) {
       throw new ServerConnection.NetworkError(err);
