@@ -713,11 +713,11 @@ export class GitExtension implements IGitExtension {
         '/external_vcs/connection',
         'POST',
         {
-          repostiry_path: path,
+          repository_path: path,
           enabled
         }
       );
-      if (response.status !== 200) {
+      if (!response.ok) {
         return response.json().then((data: any) => {
           throw new ServerConnection.ResponseError(response, data.message);
         });
@@ -1071,7 +1071,7 @@ export class GitExtension implements IGitExtension {
     try {
       const response = await httpGitRequest(
         `/external_vcs/connection${URLExt.objectToQueryString({
-          repostiry_path: path
+          repository_path: path
         })}`,
         'GET',
         null
