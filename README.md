@@ -134,8 +134,8 @@ Requires NodeJS
 # Install new-ish JupyterLab
 pip install -U jupyterlab
 
-# Clone the repo to your local environment
-git clone https://github.com/jupyterlab/jupyterlab-git.git
+# Clone the repo to your local environment, ensure the git branch name is jlab-2
+git clone -b jlab-2 https://github.com/jupyterlab/jupyterlab-git.git
 cd jupyterlab-git
 
 # Install the server extension in development mode and enable it
