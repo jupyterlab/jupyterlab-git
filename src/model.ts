@@ -844,19 +844,35 @@ export class GitExtension implements IGitExtension {
           );
         }
       );
-
-      this._setStatus({
-        branch: data.branch || null,
-        remote: data.remote || null,
-        ahead: data.ahead || 0,
-        behind: data.behind || 0,
-        files: data.files?.map(file => {
+      let files = data.files?.map(file => {
           return {
             ...file,
             status: decodeStage(file.x, file.y),
             type: this._resolveFileType(file.to)
           };
-        })
+      });
+      // if a file is changed on remote add it to list of files with appropriate status.
+      let remoteChangedFiles: null | string[] = null;
+      if (data.remote && data.behind > 0) {
+        remoteChangedFiles = (await this._changedFiles('WORKING', data.remote)).files;
+        remoteChangedFiles?.forEach( (element) => {
+          files.push({
+            status: "remote-changed",
+            type: this._resolveFileType(element),
+            x: "?",
+            y: "?",
+            to: element,
+            from: "?",
+            is_binary: false,
+          })
+        });
+      };
+      this._setStatus({
+        branch: data.branch || null,
+        remote: data.remote || null,
+        ahead: data.ahead || 0,
+        behind: data.behind || 0,
+        files: files
       });
     } catch (err) {
       // TODO we should notify the user
