@@ -860,7 +860,7 @@ export class GitExtension implements IGitExtension {
             status: "remote-changed",
             type: this._resolveFileType(element),
             x: "?",
-            y: "?",
+            y: "B",
             to: element,
             from: "?",
             is_binary: false,

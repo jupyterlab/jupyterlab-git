@@ -77,8 +77,8 @@ export const CONTEXT_COMMANDS: ContextCommands = {
   ],
   'remote-changed': [
     ContextCommandIDs.gitFileOpen,
-    ContextCommandIDs.gitFileUnstage,
-    ContextCommandIDs.gitFileDiff
+    // ContextCommandIDs.gitFileDiff // save this for later date.
+    // need to change diff to diff with upstream changes
 
   ]
 };
@@ -91,7 +91,6 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
   ],
   'remote-changed': [
     ContextCommandIDs.gitFileOpen,
-    ContextCommandIDs.gitFileUnstage,
     ContextCommandIDs.gitFileDiff
   ],
   staged: [
@@ -256,6 +255,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   updateSelectedFile = (file: Git.IStatusFile | null): void => {
     this.setState({ selectedFile: file });
   };
+
+  pullFromRemote = async (event: React.MouseEvent): Promise<void> => {
+    event.stopPropagation();
+    await this.props.model.pull();
+  } 
 
   get markedFiles(): Git.IStatusFile[] {
     return this.props.files.filter(file => this.props.model.getMark(file.to));
@@ -604,33 +608,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param files Untracked files
    * @param height Height of the HTML element
    */
-  private _renderRemoteChanged(files: Git.IStatusFile[], height: number) {
-    return (
-      <GitStage
-        actions={
-          <ActionButton
-            className={hiddenButtonStyle}
-            disabled={files.length === 0}
-            icon={addIcon}
-            title={this.props.trans.__('Track files changed on remote branch')}
-            onClick={()=>void 0}
-          />
-        }
-        collapsible
-        heading={this.props.trans.__('Remote Changes')}
-        height={height}
-        files={files}
-        rowRenderer={this._renderUntrackedRow}
-      />
-    );
-  }
-
-  /**
-   * Render the untracked files list.
-   *
-   * @param files Untracked files
-   * @param height Height of the HTML element
-   */
   private _renderUntracked(files: Git.IStatusFile[], height: number) {
     return (
       <GitStage
@@ -651,6 +628,85 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       />
     );
   }  
+
+
+  /**
+   * Render a untracked file.
+   *
+   * Note: This is actually a React.FunctionComponent but defined as
+   * a private method as it needs access to FileList properties.
+   *
+   * @param rowProps Row properties
+   */
+  private _renderRemoteChangedRow = (
+    rowProps: ListChildComponentProps
+  ): JSX.Element => {
+    const doubleClickDiff = this.props.settings.get('doubleClickDiff')
+      .composite as boolean;
+    const { data, index, style } = rowProps;
+    const file = data[index] as Git.IStatusFile;
+    // const diffButton = this._createDiffButton(file);
+    return (
+      <FileItem
+        trans={this.props.trans}
+        actions={
+          <React.Fragment>
+            {/** diffButton */}
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={openIcon}
+              title={this.props.trans.__('Open this file')}
+              onClick={() => {
+                this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+                  files: [file]
+                } as CommandArguments.IGitContextAction as any);
+              }}
+            />
+          </React.Fragment>
+        }
+        file={file}
+        contextMenu={this.openContextMenu}
+        model={this.props.model}
+        onDoubleClick={() => {
+          if (!doubleClickDiff) {
+            this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+              files: [file]
+            } as CommandArguments.IGitContextAction as any);
+          }
+        }}
+        selected={this._isSelectedFile(file)}
+        selectFile={this.updateSelectedFile}
+        style={style}
+      />
+    );
+  };
+
+  /**
+   * Render the a file that has changed on remote to files list.
+   *
+   * @param files Untracked files
+   * @param height Height of the HTML element
+   */
+  private _renderRemoteChanged(files: Git.IStatusFile[], height: number) {
+    return (
+      <GitStage
+      actions={
+        <ActionButton
+            className={hiddenButtonStyle}
+            disabled={files.length === 0}
+            icon={addIcon}
+            title={this.props.trans.__('Pull from remote branch')}
+            onClick={this.pullFromRemote}
+          />
+        }
+        collapsible
+        heading={this.props.trans.__('Remote Changes')}
+        height={height}
+        files={files}
+        rowRenderer={this._renderRemoteChangedRow}
+      />
+    );
+  }
 
   /**
    * Render a modified file in simple mode.

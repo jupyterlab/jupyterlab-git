@@ -22,6 +22,7 @@ export const STATUS_CODES = {
   R: 'Renamed',
   C: 'Copied',
   U: 'Updated',
+  B: 'Behind',
   '?': 'Untracked',
   '!': 'Ignored'
 };
