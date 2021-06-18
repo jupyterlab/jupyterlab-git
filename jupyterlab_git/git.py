@@ -1193,7 +1193,9 @@ class Git:
         """
         relative_repo = os.path.relpath(path, contents_manager.root_dir)
         try:
-            model = await ensure_async(contents_manager.get(path=os.path.join(relative_repo, filename)))
+            model = await ensure_async(
+                contents_manager.get(path=os.path.join(relative_repo, filename))
+            )
         except tornado.web.HTTPError as error:
             # Handle versioned file being deleted case
             if error.status_code == 404 and error.log_message.startswith(
