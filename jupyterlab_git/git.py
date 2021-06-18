@@ -14,6 +14,7 @@ import pexpect
 import tornado
 import tornado.locks
 from nbdime import diff_notebooks
+from jupyter_server.utils import ensure_async
 
 from .log import get_logger
 
@@ -1186,13 +1187,15 @@ class Git:
                 )
             )
 
-    def get_content(self, contents_manager, filename, path):
+    async def get_content(self, contents_manager, filename, path):
         """
         Get the file content of filename.
         """
         relative_repo = os.path.relpath(path, contents_manager.root_dir)
         try:
-            model = contents_manager.get(path=os.path.join(relative_repo, filename))
+            model = await ensure_async(
+                contents_manager.get(path=os.path.join(relative_repo, filename))
+            )
         except tornado.web.HTTPError as error:
             # Handle versioned file being deleted case
             if error.status_code == 404 and error.log_message.startswith(
@@ -1210,7 +1213,7 @@ class Git:
         """
         if "special" in reference:
             if reference["special"] == "WORKING":
-                content = self.get_content(contents_manager, filename, path)
+                content = await self.get_content(contents_manager, filename, path)
             elif reference["special"] == "INDEX":
                 is_binary = await self._is_binary(filename, "INDEX", path)
                 if is_binary:
