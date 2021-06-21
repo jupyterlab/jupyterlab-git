@@ -78,7 +78,7 @@ setup_args = dict(
     packages=setuptools.find_packages(),
     install_requires=[
         "jupyter_server",
-        "nbdime~=3.0",
+        "nbdime~=3.1",
         "nbformat",
         "packaging",
         "pexpect",
