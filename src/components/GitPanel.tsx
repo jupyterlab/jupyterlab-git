@@ -138,7 +138,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   componentDidMount(): void {
     const { model, settings } = this.props;
-
+    console.log("successfully mounted")
     model.repositoryChanged.connect((_, args) => {
       this.setState({
         repository: args.newValue

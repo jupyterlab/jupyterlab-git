@@ -717,6 +717,29 @@ export class GitExtension implements IGitExtension {
     return data;
   }
 
+    /**
+   * FOR TESTING ONLY - SHOW A GIT DIALOG
+   *
+   * @param auth - remote authentication information
+   * @returns promise which resolves upon fetching changes
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+     async show(
+      auth?: Git.IAuth,
+      Base?: string,
+      Remote?: string
+    ): Promise<Git.IChangedFilesResult> {
+      // const files_output = (await this._changedFiles('WORKING', 'HEAD')).files;
+      return await requestAPI<Git.IChangedFilesResult>('show', 'POST', {
+        current_path: this.pathRepository, 
+        base: Base,
+        remote: Remote
+      });
+    }
+
   /**
    * Push local changes to a remote repository.
    *

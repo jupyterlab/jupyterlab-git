@@ -12,6 +12,8 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+// import { Widget } from '@lumino/widgets';
+
 import {
   addCommands,
   addFileBrowserContextMenu,
@@ -25,11 +27,15 @@ import { gitIcon } from './style/icons';
 import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
+// import { GitPanel } from './components/GitPanel';
 
 export { NotebookDiff } from './components/diff/NotebookDiff';
 export { PlainTextDiff } from './components/diff/PlainTextDiff';
 export { DiffModel } from './components/diff/model';
 export { Git, IGitExtension } from './tokens';
+// import { toArray } from '@lumino/algorithm';
+// import { Contents } from '@jupyterlab/services';
+// import { Toolbar } from './widgets/Toolbar';
 
 /**
  * The default running sessions extension.
@@ -75,6 +81,7 @@ async function activate(
   let serverSettings: Git.IServerSettings;
   // Get a reference to the default file browser extension
   const filebrowser = factory.defaultBrowser;
+  console.log(`filebrowser.node.baseURI is ${filebrowser.node.baseURI}`);
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab-git');
 
@@ -136,6 +143,7 @@ async function activate(
     app.docRegistry,
     settings
   );
+  console.log(`serverSettings.serverRoot is ${serverSettings.serverRoot}`);
 
   // Whenever we restore the application, sync the Git extension path
   Promise.all([app.restored, filebrowser.model.restored]).then(() => {
@@ -195,9 +203,24 @@ async function activate(
       app.commands,
       app.contextMenu
     );
-  }
+    // testing
+    console.log(`status.ahead is ${gitExtension.status.ahead}`);
+    console.log(`status.behind is ${gitExtension.status.behind}`);
+    console.log(`status.branch is ${gitExtension.status.branch}`);
+    console.log(`status.remote is ${gitExtension.status.remote}`);
 
-  // Register diff providers
+    // *********
+    // guess n chek to find list of all files
+    // const widget = factory.tracker.currentWidget;
+    // if (!widget) {
+    //   [];
+    // }
+    // let items = toArray(widget.selectedItems());
+
+
+  }
+  
+    // Register diff providers
   gitExtension.registerDiffProvider(
     'Nbdime',
     ['.ipynb'],
@@ -206,4 +229,6 @@ async function activate(
   );
 
   return gitExtension;
+  
 }
+

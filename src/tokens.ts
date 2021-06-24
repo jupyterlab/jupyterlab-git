@@ -969,5 +969,6 @@ export enum CommandIDs {
   gitPush = 'git:push',
   gitPull = 'git:pull',
   gitSubmitCommand = 'git:submit-commit',
-  gitShowDiff = 'git:show-diff'
+  gitShowDiff = 'git:show-diff',
+  gitShowDialog = 'git:show-dialog'
 }

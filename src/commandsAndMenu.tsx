@@ -63,7 +63,8 @@ interface IGitCloneArgs {
 enum Operation {
   Clone = 'Clone',
   Pull = 'Pull',
-  Push = 'Push'
+  Push = 'Push',
+  ShowDialog = 'Show'
 }
 
 interface IFileDiffArgument {
@@ -411,6 +412,46 @@ export function addCommands(
       }
     }
   });
+
+    /** Add test SHOW MENU COMMAND */
+    commands.addCommand(CommandIDs.gitShowDialog, {
+      label: trans.__('Show Git Dialog Test'),
+      caption: trans.__('Git dialog test'),
+      isEnabled: () => gitModel.pathRepository !== null,
+      execute: async () => {
+        logger.log({
+          level: Level.RUNNING,
+          message: trans.__('Showing git dialog...')
+        });
+        try {
+          console.log(`testing out a new display`);
+          const details = await Private.showGitDialog(
+            gitModel,
+            Operation.ShowDialog,
+            trans,
+            'Select the changed files!',
+            [Dialog.okButton({ label: 'Okay' }),
+            Dialog.cancelButton()]
+            );
+            
+          logger.log({
+            message: trans.__('Successfully showed dialog!!!'),
+            level: Level.SUCCESS,
+            details
+          });
+        } catch (error) {
+          console.error(
+            'Encountered an error when showing dialog. Error: ',
+            error
+          );
+          logger.log({
+            message: trans.__('Failed to show dialog'),
+            level: Level.ERROR,
+            error
+          });
+        }
+      }
+    });
 
   /**
    * Git display diff command - internal command
@@ -924,7 +965,8 @@ export function createGitMenu(
     CommandIDs.gitPush,
     CommandIDs.gitPull,
     CommandIDs.gitAddRemote,
-    CommandIDs.gitTerminalCommand
+    CommandIDs.gitTerminalCommand,
+    CommandIDs.gitShowDialog
   ].forEach(command => {
     menu.addItem({ command });
   });
@@ -1196,5 +1238,87 @@ namespace Private {
       throw error;
     }
   }
+  /**
+   * Git show dialog command - internal command, JUST FOR TESTING
+   *
+   * @params model {Git.Diff.IModel<string>}: The diff model to display
+   * @params isText {boolean}: Optional, whether the content is a plain text
+   * @returns the main area widget or null
+   *             
+   * 
+   */
+   export async function showGitDialog<T>(
+    model: GitExtension,
+    operation: Operation,
+    trans: TranslationBundle,
+    Title?: string,
+    Buttons?: any,
+    retry = false,
+    args?: T,
+    authentication?: Git.IAuth,
+  ): Promise<any> {
+    try {
+      let result: Git.IResultWithMessage;
+      let test_result: Git.IChangedFilesResult;
+      // the Git action
+      switch (operation) {
+        case Operation.ShowDialog:
+          test_result = await model.show(authentication, "WORKING", "HEAD");
+          break;  
+        default:
+          result = { code: -1, message: 'Unknown command' };
+          break;
+      }
+      if (result) {
+        return result.message;
+      } else {
+        
+
+        const myDialog = await InputDialog.getItem({
+          title: Title,
+          items: ['saraj', 'sarah', 'haras']
+        }).then(value => {
+          console.log('you picked '+ value.value)
+        });
+
+        
+        const myListOfFiles = test_result.files.join(",");
+        console.warn(`printing out the list of files changed ${myListOfFiles}`);
+        return myDialog;
+      }
+    } catch (error) {
+      if (
+        AUTH_ERROR_MESSAGES.some(
+          errorMessage => error.message.indexOf(errorMessage) > -1
+        )
+      ) {
+        // If the error is an authentication error, ask the user credentials
+        const credentials = await showDialog({
+          title: trans.__('This test did not work!'),
+          body: new GitCredentialsForm(
+            trans,
+            trans.__('Enter credentials for remote repository'),
+            retry ? trans.__('Incorrect username or password.') : ''
+          )
+        });
+
+        if (credentials.button.accept) {
+          // Retry the operation if the user provides its credentials
+          return await showGitOperationDialog<T>(
+            model,
+            operation,
+            trans,
+            args,
+            credentials.value,
+            true
+          );
+        }
+      }
+      // Throw the error if it cannot be handled or
+      // if the user did not accept to provide its credentials
+      throw error;
+    }
+  }  
 }
+ 
 /* eslint-enable no-inner-declarations */

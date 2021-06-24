@@ -153,7 +153,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       branch => branch.is_remote_branch
     );
     const hasUpstream = activeBranch[0]?.upstream !== null;
-
+    console.log(`inside toolbar.tsx, this.props.nCommitsAhead is ${this.props.nCommitsAhead}`)
+    console.log(`inside toolbar.tsx, this.props.repository is ${this.props.repository}`)
+    console.log(`inside toolbar.tsx, activeBranch is  ${activeBranch}`)
+    // is a method
+    // console.log(`inside toolbar.tsx, hasUpstream is is ${this.props.model.reset}`)  
     return (
       <div className={toolbarNavClass}>
         <span className={spacer} />
