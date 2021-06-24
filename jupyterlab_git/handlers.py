@@ -646,7 +646,7 @@ class GitConfigHandler(GitHandler):
         """
         POST get (if no options are passed) or set configuration options
         """
-        data = self.get_json_body()
+        data = self.get_json_body() or {}
         options = data.get("options", {})
 
         filtered_options = {k: v for k, v in options.items() if k in ALLOWED_OPTIONS}
