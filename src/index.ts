@@ -143,6 +143,12 @@ async function activate(
       gitExtension.pathRepository = change.newValue;
     }
   );
+
+  // Whenever the `HEAD` of the Git repository changes, refresh the file browser
+  gitExtension.headChanged.connect(() => {
+    filebrowser.model.refresh();
+  });
+
   // Whenever a user adds/renames/saves/deletes/modifies a file within the lab environment, refresh the Git status
   app.serviceManager.contents.fileChanged.connect(() =>
     gitExtension.refreshStatus()
