@@ -235,7 +235,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           className={toolbarMenuButtonClass}
           title={this.props.trans.__(
             'Current repository: %1',
-            this.props.repository
+            '/' + this.props.repository
           )}
         >
           <desktopIcon.react className={toolbarMenuButtonIconClass} />
@@ -245,7 +245,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
               {this.props.trans.__('Current Repository')}{' '}
             </p>
             <p className={toolbarMenuButtonSubtitleClass}>
-              {PathExt.basename(this.props.repository)}
+              {PathExt.basename(this.props.repository) || '/'}
             </p>
           </div>
         </button>

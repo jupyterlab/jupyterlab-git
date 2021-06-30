@@ -147,11 +147,18 @@ export class GitExtension implements IGitExtension {
     } else {
       const currentReady = this._readyPromise;
       this._pendingReadyPromise += 1;
-      this._readyPromise = Promise.all([currentReady, this.showPrefix(v)])
+      const currentFolder = v;
+      this._readyPromise = Promise.all([
+        currentReady,
+        this.showPrefix(currentFolder)
+      ])
         .then(([_, path]) => {
           if (path !== null) {
             // Remove relative path to get the Git repository root path
-            path = v.slice(0, v.length - path.length);
+            path = currentFolder.slice(
+              0,
+              Math.max(0, currentFolder.length - path.length)
+            );
           }
           change.newValue = this._pathRepository = path;
 
@@ -162,7 +169,9 @@ export class GitExtension implements IGitExtension {
         })
         .catch(reason => {
           this._pendingReadyPromise -= 1;
-          console.error(`Fail to find Git top level for path ${v}.\n${reason}`);
+          console.error(
+            `Fail to find Git top level for path ${currentFolder}.\n${reason}`
+          );
         });
     }
   }
