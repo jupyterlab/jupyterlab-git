@@ -277,7 +277,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   render(): React.ReactElement {
     return (
       <div className={panelWrapperClass}>
-        {this.state.repository ? (
+        {this.state.repository !== null ? (
           <React.Fragment>
             {this._renderToolbar()}
             {this._renderMain()}

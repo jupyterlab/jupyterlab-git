@@ -7,6 +7,7 @@ import pathlib
 import re
 import shlex
 import subprocess
+import traceback
 from urllib.parse import unquote
 
 import nbformat
@@ -152,7 +153,8 @@ async def execute(
         get_logger().debug(
             "Code: {}\nOutput: {}\nError: {}".format(code, log_output, log_error)
         )
-    except BaseException:
+    except BaseException as e:
+        code, output, error = -1, "", traceback.format_exc()
         get_logger().warning("Fail to execute {!s}".format(cmdline), exc_info=True)
     finally:
         execution_lock.release()
