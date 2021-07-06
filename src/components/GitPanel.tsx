@@ -105,6 +105,16 @@ export interface IGitPanelState {
    * Panel tab identifier.
    */
   tab: number;
+
+  /**
+   * Commit message summary.
+   */
+  summary: string;
+
+  /**
+   * Commit message description.
+   */
+  description: string;
 }
 
 /**
@@ -129,7 +139,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       nCommitsBehind: 0,
       pastCommits: [],
       repository: pathRepository,
-      tab: 0
+      tab: 0,
+      summary: '',
+      description: ''
     };
   }
 
@@ -391,23 +403,21 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           settings={this.props.settings}
           trans={this.props.trans}
         />
-        {this.props.settings.composite['simpleStaging'] ? (
-          <CommitBox
-            commands={this.props.commands}
-            hasFiles={this._markedFiles.length > 0}
-            trans={this.props.trans}
-            label={buttonLabel}
-            onCommit={this.commitMarkedFiles}
-          />
-        ) : (
-          <CommitBox
-            commands={this.props.commands}
-            hasFiles={this._hasStagedFile()}
-            trans={this.props.trans}
-            label={buttonLabel}
-            onCommit={this.commitStagedFiles}
-          />
-        )}
+        <CommitBox
+          commands={this.props.commands}
+          hasFiles={
+            this.props.settings.composite['simpleStaging']
+              ? this._markedFiles.length > 0
+              : this._hasStagedFile()
+          }
+          trans={this.props.trans}
+          label={buttonLabel}
+          summary={this.state.summary}
+          description={this.state.description}
+          onSummaryChange={this._onSummaryChange}
+          onDescriptionChange={this._onDescriptionChange}
+          onCommitSubmit={this._onCommitSubmit}
+        />
       </React.Fragment>
     );
   }
@@ -491,6 +501,42 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     this.setState({
       tab: tab
     });
+  };
+
+  /**
+   * Callback invoked upon updating a commit message description.
+   *
+   * @param event - event object
+   */
+  private _onDescriptionChange = (event: any): void => {
+    this.setState({
+      description: event.target.value
+    });
+  };
+
+  /**
+   * Callback invoked upon updating a commit message summary.
+   *
+   * @param event - event object
+   */
+  private _onSummaryChange = (event: any): void => {
+    this.setState({
+      summary: event.target.value
+    });
+  };
+
+  /**
+   * Callback invoked upon clicking a commit message submit button or otherwise submitting the form.
+   */
+  private _onCommitSubmit = (): void => {
+    const msg = this.state.summary + '\n\n' + this.state.description + '\n';
+    this.props.settings.composite['simpleStaging'] ? this.commitMarkedFiles(msg) : this.commitStagedFiles(msg);
+
+    // NOTE: we assume here that committing changes always works
+    this.setState({
+      summary: '',
+      description: ''
+    })
   };
 
   /**
