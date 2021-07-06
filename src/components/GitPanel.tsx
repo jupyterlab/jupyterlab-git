@@ -268,16 +268,18 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         level: Level.SUCCESS,
         message: this.props.trans.__('Committed changes.')
       });
+
+      const hasRemote = this.props.model.branches.some(
+        branch => branch.is_remote_branch
+      );
+
+      // If enabled commit and push, push here
+      if (this.props.settings.composite['commitAndPush'] && hasRemote) {
+        await this.props.commands.execute(CommandIDs.gitPush);
+      }
     } catch (error) {
-      console.error(error);
       this.props.logger.log({ ...errorLog, error });
-    }
-    const hasRemote = this.props.model.branches.some(
-      branch => branch.is_remote_branch
-    );
-    // If enabled commit and push, push here
-    if (this.props.settings.composite['commitAndPush'] && hasRemote) {
-      await this.props.commands.execute(CommandIDs.gitPush);
+      throw error;
     }
   };
 
@@ -528,15 +530,23 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   /**
    * Callback invoked upon clicking a commit message submit button or otherwise submitting the form.
    */
-  private _onCommitSubmit = (): void => {
+  private _onCommitSubmit = async (): Promise<void> => {
     const msg = this.state.summary + '\n\n' + this.state.description + '\n';
-    this.props.settings.composite['simpleStaging'] ? this.commitMarkedFiles(msg) : this.commitStagedFiles(msg);
+    const onCommit = this.props.settings.composite['simpleStaging']
+      ? this.commitMarkedFiles
+      : this.commitStagedFiles;
 
-    // NOTE: we assume here that committing changes always works
-    this.setState({
-      summary: '',
-      description: ''
-    })
+    try {
+      await onCommit(msg);
+
+      // Only erase commit message upon success
+      this.setState({
+        summary: '',
+        description: ''
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   /**

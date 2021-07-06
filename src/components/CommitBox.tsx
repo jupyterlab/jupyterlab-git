@@ -61,7 +61,7 @@ export interface ICommitBoxProps {
   /**
    * Callback invoked upon clicking a commit message submit button or otherwise submitting the form.
    */
-  onCommitSubmit: () => void;
+  onCommitSubmit: () => Promise<void>;
 }
 
 /**
