@@ -78,10 +78,31 @@ describe('GitPanel', () => {
     await props.model.ready;
   });
 
-  describe('#commitStagedFiles()', () => {
-    it('should commit when commit message is provided', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
+  describe('#constructor()', () => {
+    it('should return a new instance', () => {
+      const panel = new GitPanel(props);
+      expect(panel).toBeInstanceOf(GitPanel);
+    });
 
+    it('should set the default commit message summary to an empty string', () => {
+      const panel = new GitPanel(props);
+      expect(panel.state.summary).toEqual('');
+    });
+
+    it('should set the default commit message description to an empty string', () => {
+      const panel = new GitPanel(props);
+      expect(panel.state.summary).toEqual('');
+    });
+  });
+
+  describe('#commitStagedFiles()', () => {
+    let spy: jest.SpyInstance<Promise<void>>;
+
+    beforeEach(() => {
+      spy = jest.spyOn(GitModel.prototype, 'commit').mockResolvedValue();
+    });
+
+    it('should commit when commit message is provided', async () => {
       // Mock identity look up
       const identity = jest
         .spyOn(GitModel.prototype, 'config')
@@ -100,16 +121,12 @@ describe('GitPanel', () => {
     });
 
     it('should not commit without a commit message', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
       const panel = new GitPanel(props);
       await panel.commitStagedFiles('');
       expect(spy).not.toHaveBeenCalled();
-      spy.mockRestore();
     });
 
     it('should prompt for user identity if user.name is not set', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
-
       // Mock identity look up
       const identity = jest
         .spyOn(GitModel.prototype, 'config')
@@ -157,8 +174,6 @@ describe('GitPanel', () => {
     });
 
     it('should prompt for user identity if user.email is not set', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
-
       // Mock identity look up
       const identity = jest
         .spyOn(GitModel.prototype, 'config')
@@ -206,8 +221,6 @@ describe('GitPanel', () => {
     });
 
     it('should not commit if no user identity is set and the user rejects the dialog', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
-
       // Mock identity look up
       const identity = jest
         .spyOn(GitModel.prototype, 'config')
