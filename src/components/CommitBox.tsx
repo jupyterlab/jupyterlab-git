@@ -45,23 +45,25 @@ export interface ICommitBoxProps {
   description: string;
 
   /**
-   * Callback invoked upon updating a commit message summary.
+   * Updates the commit message summary.
    *
-   * @param event - event object
+   * @param summary - commit message summary
    */
-  onSummaryChange: (event: any) => void;
+  setSummary: (summary: string) => void;
 
   /**
-   * Callback invoked upon updating a commit message description.
+   * Updates the commit message description.
    *
-   * @param event - event object
+   * @param description - commit message description
    */
-  onDescriptionChange: (event: any) => void;
+  setDescription: (description: string) => void;
 
   /**
-   * Callback invoked upon clicking a commit message submit button or otherwise submitting the form.
+   * Callback to invoke in order to commit changes.
+   *
+   * @returns a promise which commits changes
    */
-  onCommitSubmit: () => Promise<void>;
+  onCommit: () => Promise<void>;
 }
 
 /**
@@ -116,7 +118,7 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
             'Enter a commit message summary (a single line, preferably less than 50 characters)'
           )}
           value={this.props.summary}
-          onChange={this.props.onSummaryChange}
+          onChange={this._onSummaryChange}
           onKeyPress={this._onSummaryKeyPress}
         />
         <TextareaAutosize
@@ -125,7 +127,7 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
           placeholder={this.props.trans.__('Description (optional)')}
           title={this.props.trans.__('Enter a commit message description')}
           value={this.props.description}
-          onChange={this.props.onDescriptionChange}
+          onChange={this._onDescriptionChange}
         />
         <input
           className={commitButtonClass}
@@ -133,7 +135,7 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
           title={title}
           value={this.props.label}
           disabled={disabled}
-          onClick={this.props.onCommitSubmit}
+          onClick={this.props.onCommit}
         />
       </form>
     );
@@ -154,6 +156,24 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
       binding => binding.command === CommandIDs.gitSubmitCommand
     );
     return binding.keys.join(' ');
+  };
+
+  /**
+   * Callback invoked upon updating a commit message description.
+   *
+   * @param event - event object
+   */
+  private _onDescriptionChange = (event: any): void => {
+    this.props.setDescription(event.target.value);
+  };
+
+  /**
+   * Callback invoked upon updating a commit message summary.
+   *
+   * @param event - event object
+   */
+  private _onSummaryChange = (event: any): void => {
+    this.props.setSummary(event.target.value);
   };
 
   /**
@@ -184,7 +204,7 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
     commandArgs: CommandRegistry.ICommandExecutedArgs
   ): void => {
     if (commandArgs.id === CommandIDs.gitSubmitCommand && this._canCommit()) {
-      this.props.onCommitSubmit();
+      this.props.onCommit();
     }
   };
 }

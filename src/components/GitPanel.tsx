@@ -217,64 +217,36 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   };
 
   /**
-   * Commits all marked files.
+   * Commits files.
    *
-   * @param message - commit message
-   * @returns a promise which commits the files
+   * @returns a promise which commits changes
    */
-  commitMarkedFiles = async (message: string): Promise<void> => {
-    this.props.logger.log({
-      level: Level.RUNNING,
-      message: this.props.trans.__('Staging files...')
-    });
-    await this.props.model.reset();
-    await this.props.model.add(...this._markedFiles.map(file => file.to));
+  commitFiles = async (): Promise<void> => {
+    let msg = this.state.commitSummary;
 
-    await this.commitStagedFiles(message);
-  };
+    // Only include description if not empty
+    if (this.state.commitDescription) {
+      msg = msg + '\n\n' + this.state.commitDescription + '\n';
+    }
 
-  /**
-   * Commits all staged files.
-   *
-   * @param message - commit message
-   * @returns a promise which commits the files
-   */
-  commitStagedFiles = async (message: string): Promise<void> => {
-    if (!message) {
+    if (!msg) {
       return;
     }
 
-    const errorLog: ILogMessage = {
-      level: Level.ERROR,
-      message: this.props.trans.__('Failed to commit changes.')
-    };
+    const commit = this.props.settings.composite['simpleStaging']
+      ? this._commitMarkedFiles
+      : this._commitStagedFiles;
 
     try {
-      await this._hasIdentity(this.props.model.pathRepository);
+      await commit(msg);
 
-      this.props.logger.log({
-        level: Level.RUNNING,
-        message: this.props.trans.__('Committing changes...')
+      // Only erase commit message upon success
+      this.setState({
+        commitSummary: '',
+        commitDescription: ''
       });
-
-      await this.props.model.commit(message);
-
-      this.props.logger.log({
-        level: Level.SUCCESS,
-        message: this.props.trans.__('Committed changes.')
-      });
-
-      const hasRemote = this.props.model.branches.some(
-        branch => branch.is_remote_branch
-      );
-
-      // If enabled commit and push, push here
-      if (this.props.settings.composite['commitAndPush'] && hasRemote) {
-        await this.props.commands.execute(CommandIDs.gitPush);
-      }
     } catch (error) {
-      this.props.logger.log({ ...errorLog, error });
-      throw error;
+      console.error(error);
     }
   };
 
@@ -411,9 +383,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           label={buttonLabel}
           summary={this.state.commitSummary}
           description={this.state.commitDescription}
-          onSummaryChange={this._onSummaryChange}
-          onDescriptionChange={this._onDescriptionChange}
-          onCommitSubmit={this._onCommitSubmit}
+          setSummary={this._setCommitSummary}
+          setDescription={this._setCommitDescription}
+          onCommit={this.commitFiles}
         />
       </React.Fragment>
     );
@@ -501,47 +473,82 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   };
 
   /**
-   * Callback invoked upon updating a commit message description.
+   * Updates the commit message description.
    *
-   * @param event - event object
+   * @param description - commit message description
    */
-  private _onDescriptionChange = (event: any): void => {
+  private _setCommitDescription = (description: string): void => {
     this.setState({
-      commitDescription: event.target.value
+      commitDescription: description
     });
   };
 
   /**
-   * Callback invoked upon updating a commit message summary.
+   * Updates the commit message summary.
    *
-   * @param event - event object
+   * @param summary - commit message summary
    */
-  private _onSummaryChange = (event: any): void => {
+  private _setCommitSummary = (summary: string): void => {
     this.setState({
-      commitSummary: event.target.value
+      commitSummary: summary
     });
   };
 
   /**
-   * Callback invoked upon clicking a commit message submit button or otherwise submitting the form.
+   * Commits all marked files.
+   *
+   * @param message - commit message
+   * @returns a promise which commits the files
    */
-  private _onCommitSubmit = async (): Promise<void> => {
-    const msg =
-      this.state.commitSummary + '\n\n' + this.state.commitDescription + '\n';
-    const onCommit = this.props.settings.composite['simpleStaging']
-      ? this.commitMarkedFiles
-      : this.commitStagedFiles;
+  private _commitMarkedFiles = async (message: string): Promise<void> => {
+    this.props.logger.log({
+      level: Level.RUNNING,
+      message: this.props.trans.__('Staging files...')
+    });
+    await this.props.model.reset();
+    await this.props.model.add(...this._markedFiles.map(file => file.to));
+
+    await this._commitStagedFiles(message);
+  };
+
+  /**
+   * Commits all staged files.
+   *
+   * @param message - commit message
+   * @returns a promise which commits the files
+   */
+  private _commitStagedFiles = async (message: string): Promise<void> => {
+    const errorLog: ILogMessage = {
+      level: Level.ERROR,
+      message: this.props.trans.__('Failed to commit changes.')
+    };
 
     try {
-      await onCommit(msg);
+      await this._hasIdentity(this.props.model.pathRepository);
 
-      // Only erase commit message upon success
-      this.setState({
-        commitSummary: '',
-        commitDescription: ''
+      this.props.logger.log({
+        level: Level.RUNNING,
+        message: this.props.trans.__('Committing changes...')
       });
+
+      await this.props.model.commit(message);
+
+      this.props.logger.log({
+        level: Level.SUCCESS,
+        message: this.props.trans.__('Committed changes.')
+      });
+
+      const hasRemote = this.props.model.branches.some(
+        branch => branch.is_remote_branch
+      );
+
+      // If enabled commit and push, push here
+      if (this.props.settings.composite['commitAndPush'] && hasRemote) {
+        await this.props.commands.execute(CommandIDs.gitPush);
+      }
     } catch (error) {
-      console.error(error);
+      this.props.logger.log({ ...errorLog, error });
+      throw error;
     }
   };
 
@@ -571,7 +578,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             );
           }
 
-          const {name, email} = result.value;
+          const { name, email } = result.value;
           await this.props.model.config({
             'user.name': name,
             'user.email': email

@@ -17,9 +17,9 @@ describe('CommitBox', () => {
   const trans = nullTranslator.load('jupyterlab-git');
 
   const defaultProps: ICommitBoxProps = {
-    onCommitSubmit: async () => {},
-    onSummaryChange: () => {},
-    onDescriptionChange: () => {},
+    onCommit: async () => {},
+    setSummary: () => {},
+    setDescription: () => {},
     summary: '',
     description: '',
     hasFiles: false,
