@@ -250,12 +250,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     };
 
     try {
-      const res = await this._hasIdentity(this.props.model.pathRepository);
-
-      if (!res) {
-        this.props.logger.log(errorLog);
-        return;
-      }
+      await this._hasIdentity(this.props.model.pathRepository);
 
       this.props.logger.log({
         level: Level.RUNNING,
@@ -554,9 +549,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * Determines whether a user has a known Git identity.
    *
    * @param path - repository path
-   * @returns a promise which returns a success status
    */
-  private async _hasIdentity(path: string): Promise<boolean> {
+  private async _hasIdentity(path: string): Promise<void> {
     // If the repository path changes, check the user identity
     if (path !== this._previousRepoPath) {
       try {
@@ -570,32 +564,30 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             title: this.props.trans.__('Who is committing?'),
             body: new GitAuthorForm()
           });
+
           if (!result.button.accept) {
-            console.log('User refuses to set identity.');
-            return false;
+            throw new Error(
+              this.props.trans.__('User refused to set identity.')
+            );
           }
-          const identity = result.value;
-          try {
-            await this.props.model.config({
-              'user.name': identity.name,
-              'user.email': identity.email
-            });
-          } catch (error) {
-            if (error instanceof Git.GitResponseError) {
-              console.log(error);
-              return false;
-            }
-            throw error;
-          }
+
+          const {name, email} = result.value;
+          await this.props.model.config({
+            'user.name': name,
+            'user.email': email
+          });
         }
         this._previousRepoPath = path;
       } catch (error) {
+        if (error instanceof Git.GitResponseError) {
+          throw error;
+        }
+
         throw new Error(
           this.props.trans.__('Failed to set your identity. %1', error.message)
         );
       }
     }
-    return Promise.resolve(true);
   }
 
   private _hasStagedFile(): boolean {

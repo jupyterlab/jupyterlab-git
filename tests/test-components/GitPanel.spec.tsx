@@ -249,7 +249,13 @@ describe('GitPanel', () => {
       });
 
       const panel = new GitPanel(props);
-      await panel.commitStagedFiles('Initial commit');
+      try {
+        await panel.commitStagedFiles('Initial commit');
+      } catch (error) {
+        expect(error.message).toEqual(
+          'Failed to set your identity. User refused to set identity.'
+        );
+      }
       expect(identity).toHaveBeenCalledTimes(1);
       expect(identity).toHaveBeenCalledWith();
       expect(spy).not.toHaveBeenCalled();
