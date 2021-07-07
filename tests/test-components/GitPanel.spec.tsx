@@ -86,12 +86,12 @@ describe('GitPanel', () => {
 
     it('should set the default commit message summary to an empty string', () => {
       const panel = new GitPanel(props);
-      expect(panel.state.summary).toEqual('');
+      expect(panel.state.commitSummary).toEqual('');
     });
 
     it('should set the default commit message description to an empty string', () => {
       const panel = new GitPanel(props);
-      expect(panel.state.summary).toEqual('');
+      expect(panel.state.commitDescription).toEqual('');
     });
   });
 

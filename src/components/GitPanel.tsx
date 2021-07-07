@@ -109,12 +109,12 @@ export interface IGitPanelState {
   /**
    * Commit message summary.
    */
-  summary: string;
+  commitSummary: string;
 
   /**
    * Commit message description.
    */
-  description: string;
+  commitDescription: string;
 }
 
 /**
@@ -140,8 +140,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       pastCommits: [],
       repository: pathRepository,
       tab: 0,
-      summary: '',
-      description: ''
+      commitSummary: '',
+      commitDescription: ''
     };
   }
 
@@ -414,8 +414,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           }
           trans={this.props.trans}
           label={buttonLabel}
-          summary={this.state.summary}
-          description={this.state.description}
+          summary={this.state.commitSummary}
+          description={this.state.commitDescription}
           onSummaryChange={this._onSummaryChange}
           onDescriptionChange={this._onDescriptionChange}
           onCommitSubmit={this._onCommitSubmit}
@@ -512,7 +512,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   private _onDescriptionChange = (event: any): void => {
     this.setState({
-      description: event.target.value
+      commitDescription: event.target.value
     });
   };
 
@@ -523,7 +523,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   private _onSummaryChange = (event: any): void => {
     this.setState({
-      summary: event.target.value
+      commitSummary: event.target.value
     });
   };
 
@@ -531,7 +531,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * Callback invoked upon clicking a commit message submit button or otherwise submitting the form.
    */
   private _onCommitSubmit = async (): Promise<void> => {
-    const msg = this.state.summary + '\n\n' + this.state.description + '\n';
+    const msg =
+      this.state.commitSummary + '\n\n' + this.state.commitDescription + '\n';
     const onCommit = this.props.settings.composite['simpleStaging']
       ? this.commitMarkedFiles
       : this.commitStagedFiles;
@@ -541,8 +542,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
       // Only erase commit message upon success
       this.setState({
-        summary: '',
-        description: ''
+        commitSummary: '',
+        commitDescription: ''
       });
     } catch (error) {
       console.error(error);
