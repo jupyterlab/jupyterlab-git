@@ -105,6 +105,16 @@ export interface IGitPanelState {
    * Panel tab identifier.
    */
   tab: number;
+
+  /**
+   * Commit message summary.
+   */
+  commitSummary: string;
+
+  /**
+   * Commit message description.
+   */
+  commitDescription: string;
 }
 
 /**
@@ -129,7 +139,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       nCommitsBehind: 0,
       pastCommits: [],
       repository: pathRepository,
-      tab: 0
+      tab: 0,
+      commitSummary: '',
+      commitDescription: ''
     };
   }
 
@@ -205,67 +217,36 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   };
 
   /**
-   * Commits all marked files.
+   * Commits files.
    *
-   * @param message - commit message
-   * @returns a promise which commits the files
+   * @returns a promise which commits changes
    */
-  commitMarkedFiles = async (message: string): Promise<void> => {
-    this.props.logger.log({
-      level: Level.RUNNING,
-      message: this.props.trans.__('Staging files...')
-    });
-    await this.props.model.reset();
-    await this.props.model.add(...this._markedFiles.map(file => file.to));
+  commitFiles = async (): Promise<void> => {
+    let msg = this.state.commitSummary;
 
-    await this.commitStagedFiles(message);
-  };
+    // Only include description if not empty
+    if (this.state.commitDescription) {
+      msg = msg + '\n\n' + this.state.commitDescription + '\n';
+    }
 
-  /**
-   * Commits all staged files.
-   *
-   * @param message - commit message
-   * @returns a promise which commits the files
-   */
-  commitStagedFiles = async (message: string): Promise<void> => {
-    if (!message) {
+    if (!msg) {
       return;
     }
 
-    const errorLog: ILogMessage = {
-      level: Level.ERROR,
-      message: this.props.trans.__('Failed to commit changes.')
-    };
+    const commit = this.props.settings.composite['simpleStaging']
+      ? this._commitMarkedFiles
+      : this._commitStagedFiles;
 
     try {
-      const res = await this._hasIdentity(this.props.model.pathRepository);
+      await commit(msg);
 
-      if (!res) {
-        this.props.logger.log(errorLog);
-        return;
-      }
-
-      this.props.logger.log({
-        level: Level.RUNNING,
-        message: this.props.trans.__('Committing changes...')
-      });
-
-      await this.props.model.commit(message);
-
-      this.props.logger.log({
-        level: Level.SUCCESS,
-        message: this.props.trans.__('Committed changes.')
+      // Only erase commit message upon success
+      this.setState({
+        commitSummary: '',
+        commitDescription: ''
       });
     } catch (error) {
       console.error(error);
-      this.props.logger.log({ ...errorLog, error });
-    }
-    const hasRemote = this.props.model.branches.some(
-      branch => branch.is_remote_branch
-    );
-    // If enabled commit and push, push here
-    if (this.props.settings.composite['commitAndPush'] && hasRemote) {
-      await this.props.commands.execute(CommandIDs.gitPush);
     }
   };
 
@@ -391,23 +372,21 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           settings={this.props.settings}
           trans={this.props.trans}
         />
-        {this.props.settings.composite['simpleStaging'] ? (
-          <CommitBox
-            commands={this.props.commands}
-            hasFiles={this._markedFiles.length > 0}
-            trans={this.props.trans}
-            label={buttonLabel}
-            onCommit={this.commitMarkedFiles}
-          />
-        ) : (
-          <CommitBox
-            commands={this.props.commands}
-            hasFiles={this._hasStagedFile()}
-            trans={this.props.trans}
-            label={buttonLabel}
-            onCommit={this.commitStagedFiles}
-          />
-        )}
+        <CommitBox
+          commands={this.props.commands}
+          hasFiles={
+            this.props.settings.composite['simpleStaging']
+              ? this._markedFiles.length > 0
+              : this._hasStagedFile()
+          }
+          trans={this.props.trans}
+          label={buttonLabel}
+          summary={this.state.commitSummary}
+          description={this.state.commitDescription}
+          setSummary={this._setCommitSummary}
+          setDescription={this._setCommitDescription}
+          onCommit={this.commitFiles}
+        />
       </React.Fragment>
     );
   }
@@ -494,12 +473,91 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   };
 
   /**
+   * Updates the commit message description.
+   *
+   * @param description - commit message description
+   */
+  private _setCommitDescription = (description: string): void => {
+    this.setState({
+      commitDescription: description
+    });
+  };
+
+  /**
+   * Updates the commit message summary.
+   *
+   * @param summary - commit message summary
+   */
+  private _setCommitSummary = (summary: string): void => {
+    this.setState({
+      commitSummary: summary
+    });
+  };
+
+  /**
+   * Commits all marked files.
+   *
+   * @param message - commit message
+   * @returns a promise which commits the files
+   */
+  private _commitMarkedFiles = async (message: string): Promise<void> => {
+    this.props.logger.log({
+      level: Level.RUNNING,
+      message: this.props.trans.__('Staging files...')
+    });
+    await this.props.model.reset();
+    await this.props.model.add(...this._markedFiles.map(file => file.to));
+
+    await this._commitStagedFiles(message);
+  };
+
+  /**
+   * Commits all staged files.
+   *
+   * @param message - commit message
+   * @returns a promise which commits the files
+   */
+  private _commitStagedFiles = async (message: string): Promise<void> => {
+    const errorLog: ILogMessage = {
+      level: Level.ERROR,
+      message: this.props.trans.__('Failed to commit changes.')
+    };
+
+    try {
+      await this._hasIdentity(this.props.model.pathRepository);
+
+      this.props.logger.log({
+        level: Level.RUNNING,
+        message: this.props.trans.__('Committing changes...')
+      });
+
+      await this.props.model.commit(message);
+
+      this.props.logger.log({
+        level: Level.SUCCESS,
+        message: this.props.trans.__('Committed changes.')
+      });
+
+      const hasRemote = this.props.model.branches.some(
+        branch => branch.is_remote_branch
+      );
+
+      // If enabled commit and push, push here
+      if (this.props.settings.composite['commitAndPush'] && hasRemote) {
+        await this.props.commands.execute(CommandIDs.gitPush);
+      }
+    } catch (error) {
+      this.props.logger.log({ ...errorLog, error });
+      throw error;
+    }
+  };
+
+  /**
    * Determines whether a user has a known Git identity.
    *
    * @param path - repository path
-   * @returns a promise which returns a success status
    */
-  private async _hasIdentity(path: string): Promise<boolean> {
+  private async _hasIdentity(path: string): Promise<void> {
     // If the repository path changes, check the user identity
     if (path !== this._previousRepoPath) {
       try {
@@ -513,32 +571,30 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             title: this.props.trans.__('Who is committing?'),
             body: new GitAuthorForm()
           });
+
           if (!result.button.accept) {
-            console.log('User refuses to set identity.');
-            return false;
+            throw new Error(
+              this.props.trans.__('User refused to set identity.')
+            );
           }
-          const identity = result.value;
-          try {
-            await this.props.model.config({
-              'user.name': identity.name,
-              'user.email': identity.email
-            });
-          } catch (error) {
-            if (error instanceof Git.GitResponseError) {
-              console.log(error);
-              return false;
-            }
-            throw error;
-          }
+
+          const { name, email } = result.value;
+          await this.props.model.config({
+            'user.name': name,
+            'user.email': email
+          });
         }
         this._previousRepoPath = path;
       } catch (error) {
+        if (error instanceof Git.GitResponseError) {
+          throw error;
+        }
+
         throw new Error(
           this.props.trans.__('Failed to set your identity. %1', error.message)
         );
       }
     }
-    return Promise.resolve(true);
   }
 
   private _hasStagedFile(): boolean {

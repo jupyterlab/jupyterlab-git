@@ -35,19 +35,6 @@ export interface ICommitBoxProps {
   trans: TranslationBundle;
 
   /**
-   * Callback to invoke in order to commit changes.
-   *
-   * @param msg - commit message
-   * @returns a promise which commits changes
-   */
-  onCommit: (msg: string) => Promise<void>;
-}
-
-/**
- * Interface describing component state.
- */
-export interface ICommitBoxState {
-  /**
    * Commit message summary.
    */
   summary: string;
@@ -56,15 +43,33 @@ export interface ICommitBoxState {
    * Commit message description.
    */
   description: string;
+
+  /**
+   * Updates the commit message summary.
+   *
+   * @param summary - commit message summary
+   */
+  setSummary: (summary: string) => void;
+
+  /**
+   * Updates the commit message description.
+   *
+   * @param description - commit message description
+   */
+  setDescription: (description: string) => void;
+
+  /**
+   * Callback to invoke in order to commit changes.
+   *
+   * @returns a promise which commits changes
+   */
+  onCommit: () => Promise<void>;
 }
 
 /**
  * React component for entering a commit message.
  */
-export class CommitBox extends React.Component<
-  ICommitBoxProps,
-  ICommitBoxState
-> {
+export class CommitBox extends React.Component<ICommitBoxProps> {
   /**
    * Returns a React component for entering a commit message.
    *
@@ -73,10 +78,6 @@ export class CommitBox extends React.Component<
    */
   constructor(props: ICommitBoxProps) {
     super(props);
-    this.state = {
-      summary: '',
-      description: ''
-    };
   }
 
   componentDidMount(): void {
@@ -96,7 +97,7 @@ export class CommitBox extends React.Component<
     const disabled = !this._canCommit();
     const title = !this.props.hasFiles
       ? this.props.trans.__('Disabled: No files are staged for commit')
-      : !this.state.summary
+      : !this.props.summary
       ? this.props.trans.__('Disabled: No commit message summary')
       : this.props.label;
 
@@ -116,7 +117,7 @@ export class CommitBox extends React.Component<
           title={this.props.trans.__(
             'Enter a commit message summary (a single line, preferably less than 50 characters)'
           )}
-          value={this.state.summary}
+          value={this.props.summary}
           onChange={this._onSummaryChange}
           onKeyPress={this._onSummaryKeyPress}
         />
@@ -125,7 +126,7 @@ export class CommitBox extends React.Component<
           minRows={5}
           placeholder={this.props.trans.__('Description (optional)')}
           title={this.props.trans.__('Enter a commit message description')}
-          value={this.state.description}
+          value={this.props.description}
           onChange={this._onDescriptionChange}
         />
         <input
@@ -134,7 +135,7 @@ export class CommitBox extends React.Component<
           title={title}
           value={this.props.label}
           disabled={disabled}
-          onClick={this._onCommitSubmit}
+          onClick={this.props.onCommit}
         />
       </form>
     );
@@ -144,7 +145,7 @@ export class CommitBox extends React.Component<
    * Whether a commit can be performed (files are staged and summary is not empty).
    */
   private _canCommit(): boolean {
-    return !!(this.props.hasFiles && this.state.summary);
+    return !!(this.props.hasFiles && this.props.summary);
   }
 
   /**
@@ -158,25 +159,12 @@ export class CommitBox extends React.Component<
   };
 
   /**
-   * Callback invoked upon clicking a commit message submit button or otherwise submitting the form.
-   */
-  private _onCommitSubmit = (): void => {
-    const msg = this.state.summary + '\n\n' + this.state.description + '\n';
-    this.props.onCommit(msg);
-
-    // NOTE: we assume here that committing changes always works and we can safely clear component state
-    this._reset();
-  };
-
-  /**
    * Callback invoked upon updating a commit message description.
    *
    * @param event - event object
    */
   private _onDescriptionChange = (event: any): void => {
-    this.setState({
-      description: event.target.value
-    });
+    this.props.setDescription(event.target.value);
   };
 
   /**
@@ -185,9 +173,7 @@ export class CommitBox extends React.Component<
    * @param event - event object
    */
   private _onSummaryChange = (event: any): void => {
-    this.setState({
-      summary: event.target.value
-    });
+    this.props.setSummary(event.target.value);
   };
 
   /**
@@ -218,17 +204,7 @@ export class CommitBox extends React.Component<
     commandArgs: CommandRegistry.ICommandExecutedArgs
   ): void => {
     if (commandArgs.id === CommandIDs.gitSubmitCommand && this._canCommit()) {
-      this._onCommitSubmit();
+      this.props.onCommit();
     }
   };
-
-  /**
-   * Resets component state (e.g., in order to re-initialize the commit message input box).
-   */
-  private _reset(): void {
-    this.setState({
-      summary: '',
-      description: ''
-    });
-  }
 }
