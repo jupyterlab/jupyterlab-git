@@ -461,7 +461,7 @@ export namespace Git {
    */
   export interface IAuth {
     username: string;
-    password: string;
+    password_secret: string;
   }
 
   /**
