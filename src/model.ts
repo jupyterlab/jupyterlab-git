@@ -494,7 +494,7 @@ export class GitExtension implements IGitExtension {
         auth
       };
 
-      const response = await httpGitRequest('/git/clone', 'POST', obj);
+      const response = await httpGitRequest('/external_vcs/clone', 'POST', obj);
       if (response.status !== 200) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
@@ -793,7 +793,7 @@ export class GitExtension implements IGitExtension {
           : false
       };
 
-      const response = await httpGitRequest('/git/pull', 'POST', obj);
+      const response = await httpGitRequest('/external_vcs/pull', 'POST', obj);
       if (response.status !== 200) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
@@ -825,7 +825,7 @@ export class GitExtension implements IGitExtension {
         auth
       };
 
-      const response = await httpGitRequest('/git/push', 'POST', obj);
+      const response = await httpGitRequest('/external_vcs/push', 'POST', obj);
       if (response.status !== 200) {
         const data = await response.json();
         throw new ServerConnection.ResponseError(response, data.message);
