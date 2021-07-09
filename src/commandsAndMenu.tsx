@@ -509,6 +509,17 @@ export function addCommands(
   });
 
   /* Context menu commands */
+  commands.addCommand(ContextCommandIDs.gitCommitAmendStaged, {
+    label: trans.__('Commit Staged (Amend)'),
+    caption: pluralizedContextLabel(
+      trans.__('Amend previous commit to include current staged change'),
+      trans.__('Amend previous commit to include current staged changes')
+    ),
+    execute: async _ => {
+      await gitModel.commit('', true);
+    }
+  });
+
   commands.addCommand(ContextCommandIDs.gitFileOpen, {
     label: trans.__('Open'),
     caption: pluralizedContextLabel(
