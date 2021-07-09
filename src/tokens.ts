@@ -863,6 +863,7 @@ export namespace Git {
     | 'staged'
     | 'unstaged'
     | 'partially-staged'
+    | 'remote-changed'
     | null;
 
   export interface ITagResult {
