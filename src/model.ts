@@ -487,17 +487,19 @@ export class GitExtension implements IGitExtension {
    * Commit all staged file changes.
    *
    * @param message - commit message
+   * @param amend - flag to indicate amending commit
    * @returns promise which resolves upon committing file changes
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async commit(message: string): Promise<void> {
+  async commit(message: string, amend = false): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute('git:commit:create', async () => {
       await requestAPI(URLExt.join(path, 'commit'), 'POST', {
-        commit_msg: message
+        commit_msg: message,
+        amend: amend
       });
     });
     await this.refresh();
