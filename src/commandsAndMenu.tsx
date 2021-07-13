@@ -34,7 +34,8 @@ import {
   discardIcon,
   gitIcon,
   openIcon,
-  removeIcon
+  removeIcon,
+  historyIcon
 } from './style/icons';
 import {
   CommandIDs,
@@ -897,6 +898,21 @@ export function addCommands(
     }
   });
 
+  commands.addCommand(ContextCommandIDs.gitFileHistory, {
+    label: trans.__('History'),
+    caption: trans.__('View the history of this file'),
+    execute: args => {
+      const {
+        files: [file]
+      } = args as any as CommandArguments.IGitContextAction;
+      if (file && file.status === 'unmodified') {
+        gitModel.selectedHistoryFile = file.to;
+        shell.activateById('jp-git-sessions');
+      }
+    },
+    icon: historyIcon.bindprops({ stylesheet: 'menuItem' })
+  });
+
   commands.addCommand(ContextCommandIDs.gitNoAction, {
     label: trans.__('No actions available'),
     isEnabled: () => false,
@@ -1051,9 +1067,7 @@ export function addFileBrowserContextMenu(
 
       const items = getSelectedBrowserItems();
       const statuses = new Set<Git.Status>(
-        items
-          .map(item => model.getFile(item.path)?.status)
-          .filter(status => typeof status !== 'undefined')
+        items.map(item => model.getFile(item.path).status)
       );
 
       // get commands and de-duplicate them
@@ -1101,14 +1115,10 @@ export function addFileBrowserContextMenu(
         addMenuItems(
           commandsList,
           this,
-          paths
-            .map(path => model.getFile(path))
-            // if file cannot be resolved (has no action available),
-            // omit the undefined result
-            .filter(file => typeof file !== 'undefined')
+          paths.map(path => model.getFile(path))
         );
         if (wasShown) {
-          // show he menu again after downtime for refresh
+          // show the menu again after downtime for refresh
           parent.triggerActiveItem();
         }
         this._commands = commandsList;

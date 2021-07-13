@@ -75,7 +75,8 @@ export const CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileUnstage,
     ContextCommandIDs.gitFileDiff,
     ContextCommandIDs.gitCommitAmendStaged
-  ]
+  ],
+  unmodified: [ContextCommandIDs.gitFileHistory]
 };
 
 const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
@@ -99,7 +100,8 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitIgnore,
     ContextCommandIDs.gitIgnoreExtension,
     ContextCommandIDs.gitFileDelete
-  ]
+  ],
+  unmodified: [ContextCommandIDs.gitFileHistory]
 };
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {

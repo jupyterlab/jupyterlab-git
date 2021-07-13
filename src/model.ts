@@ -187,6 +187,16 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Selected file for single file history
+   */
+  get selectedHistoryFile(): string {
+    return this._selectedHistoryFile;
+  }
+  set selectedHistoryFile(file: string) {
+    this._selectedHistoryFile = file;
+  }
+
+  /**
    * Git repository status
    */
   get status(): Git.IStatus {
@@ -271,14 +281,23 @@ export class GitExtension implements IGitExtension {
   /**
    * Match files status information based on a provided file path.
    *
-   * If the file is tracked and has no changes, undefined will be returned
+   * If the file is tracked and has no changes, a StatusFile of unmodified will be returned
    *
    * @param path the file path relative to the server root
    */
   getFile(path: string): Git.IStatusFile {
-    return this._status.files.find(status => {
-      return this.getRelativeFilePath(status.to) === path;
-    });
+    return (
+      this._status.files.find(status => {
+        return this.getRelativeFilePath(status.to) === path;
+      }) ?? {
+        x: '',
+        y: '',
+        to: path,
+        from: '',
+        is_binary: null,
+        status: 'unmodified'
+      }
+    );
   }
 
   /**
@@ -1375,6 +1394,7 @@ export class GitExtension implements IGitExtension {
   private _standbyCondition: () => boolean = () => false;
   private _statusPoll: Poll;
   private _taskHandler: TaskHandler<IGitExtension>;
+  private _selectedHistoryFile: string = '';
 
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
