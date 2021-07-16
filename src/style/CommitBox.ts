@@ -38,6 +38,10 @@ export const commitSummaryClass = style({
     },
     '&:focus': {
       border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+    },
+    '&:disabled': {
+      cursor: 'not-allowed',
+      backgroundColor: 'var(--jp-layout-color3)'
     }
   }
 });
@@ -80,6 +84,10 @@ export const commitDescriptionClass = style({
     },
     '&::-ms-input-placeholder': {
       color: 'var(--jp-ui-font-color3)'
+    },
+    '&:disabled': {
+      cursor: 'not-allowed',
+      backgroundColor: 'var(--jp-layout-color3)'
     }
   }
 });
@@ -118,4 +126,12 @@ export const commitButtonClass = style({
       backgroundColor: 'var(--jp-layout-color3)'
     }
   }
+});
+
+export const commitInputWrapperClass = style({
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-around'
 });

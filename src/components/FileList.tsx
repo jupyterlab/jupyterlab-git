@@ -73,7 +73,8 @@ export const CONTEXT_COMMANDS: ContextCommands = {
   staged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileUnstage,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitCommitAmendStaged
   ]
 };
 

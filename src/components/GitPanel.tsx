@@ -115,6 +115,11 @@ export interface IGitPanelState {
    * Commit message description.
    */
   commitDescription: string;
+
+  /**
+   * Amend option toggle
+   */
+  commitAmend: boolean;
 }
 
 /**
@@ -141,7 +146,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       repository: pathRepository,
       tab: 0,
       commitSummary: '',
-      commitDescription: ''
+      commitDescription: '',
+      commitAmend: false
     };
   }
 
@@ -229,7 +235,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       msg = msg + '\n\n' + this.state.commitDescription + '\n';
     }
 
-    if (!msg) {
+    if (!msg && !this.state.commitAmend) {
       return;
     }
 
@@ -238,7 +244,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       : this._commitStagedFiles;
 
     try {
-      await commit(msg);
+      if (this.state.commitAmend) {
+        await commit(null);
+      } else {
+        await commit(msg);
+      }
 
       // Only erase commit message upon success
       this.setState({
@@ -383,8 +393,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           label={buttonLabel}
           summary={this.state.commitSummary}
           description={this.state.commitDescription}
+          amend={this.state.commitAmend}
           setSummary={this._setCommitSummary}
           setDescription={this._setCommitDescription}
+          setAmend={this._setCommitAmend}
           onCommit={this.commitFiles}
         />
       </React.Fragment>
@@ -495,6 +507,17 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   };
 
   /**
+   * Updates the amend option
+   *
+   * @param amend - whether the amend is checked
+   */
+  private _setCommitAmend = (amend: boolean): void => {
+    this.setState({
+      commitAmend: amend
+    });
+  };
+
+  /**
    * Commits all marked files.
    *
    * @param message - commit message
@@ -517,7 +540,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @param message - commit message
    * @returns a promise which commits the files
    */
-  private _commitStagedFiles = async (message: string): Promise<void> => {
+  private _commitStagedFiles = async (message?: string): Promise<void> => {
     const errorLog: ILogMessage = {
       level: Level.ERROR,
       message: this.props.trans.__('Failed to commit changes.')
@@ -531,7 +554,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         message: this.props.trans.__('Committing changes...')
       });
 
-      await this.props.model.commit(message);
+      if (this.state.commitAmend) {
+        await this.props.model.commit(null, true);
+      } else {
+        await this.props.model.commit(message);
+      }
 
       this.props.logger.log({
         level: Level.SUCCESS,

@@ -950,6 +950,7 @@ export interface ILogMessage {
  * The command IDs used in the git context menus.
  */
 export enum ContextCommandIDs {
+  gitCommitAmendStaged = 'git:context-commitAmendStaged',
   gitFileAdd = 'git:context-add',
   gitFileDiff = 'git:context-diff',
   gitFileDiscard = 'git:context-discard',
@@ -977,6 +978,7 @@ export enum CommandIDs {
   gitClone = 'git:clone',
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
+  gitForcePush = 'git:force-push',
   gitPull = 'git:pull',
   gitSubmitCommand = 'git:submit-commit',
   gitShowDiff = 'git:show-diff'
