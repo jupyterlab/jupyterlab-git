@@ -484,17 +484,17 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Commit all staged file changes.
+   * Commit all staged file changes. If message is None, then the commit is amended
    *
    * @param message - commit message
-   * @param amend - flag to indicate amending commit
+   * @param amend - whether this is an amend commit
    * @returns promise which resolves upon committing file changes
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async commit(message: string, amend = false): Promise<void> {
+  async commit(message?: string, amend = false): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute('git:commit:create', async () => {
       await requestAPI(URLExt.join(path, 'commit'), 'POST', {
@@ -735,13 +735,14 @@ export class GitExtension implements IGitExtension {
    * Push local changes to a remote repository.
    *
    * @param auth - remote authentication information
+   * @param force - whether or not to force the push
    * @returns promise which resolves upon pushing changes
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async push(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
+  async push(auth?: Git.IAuth, force = false): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
@@ -750,7 +751,8 @@ export class GitExtension implements IGitExtension {
           URLExt.join(path, 'push'),
           'POST',
           {
-            auth: auth as any
+            auth: auth as any,
+            force: force
           }
         );
       }
