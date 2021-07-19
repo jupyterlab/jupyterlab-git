@@ -203,6 +203,8 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
 
     const model = new NotebookDiffModel(data.base, data.diff);
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return new NotebookDiffWidget(model, this._renderMime);
   }
 
