@@ -17,10 +17,8 @@ import { ITerminal } from '@jupyterlab/terminal';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
 import { ArrayExt, toArray } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
-import { Menu, Panel } from '@lumino/widgets';
+import { ContextMenu, Menu, Panel } from '@lumino/widgets';
 import * as React from 'react';
 import { DiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
@@ -900,70 +898,6 @@ export function addCommands(
   });
 }
 
-/**
- * Adds commands and menu items.
- *
- * @param commands - Jupyter App commands registry
- *  @param trans - language translator
- * @returns menu
- */
-export function createGitMenu(
-  commands: CommandRegistry,
-  trans: TranslationBundle
-): Menu {
-  const RESOURCES = [
-    {
-      text: trans.__('Set Up Remotes'),
-      url: 'https://www.atlassian.com/git/tutorials/setting-up-a-repository'
-    },
-    {
-      text: trans.__('Git Documentation'),
-      url: 'https://git-scm.com/doc'
-    }
-  ];
-
-  const menu = new Menu({ commands });
-  menu.title.label = 'Git';
-  [
-    CommandIDs.gitInit,
-    CommandIDs.gitClone,
-    CommandIDs.gitPush,
-    CommandIDs.gitPull,
-    CommandIDs.gitAddRemote,
-    CommandIDs.gitTerminalCommand
-  ].forEach(command => {
-    menu.addItem({ command });
-  });
-
-  menu.addItem({ type: 'separator' });
-
-  menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
-
-  menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
-
-  menu.addItem({ type: 'separator' });
-
-  menu.addItem({ command: CommandIDs.gitOpenGitignore });
-
-  menu.addItem({ type: 'separator' });
-
-  const tutorial = new Menu({ commands });
-  tutorial.title.label = trans.__(' Help ');
-  RESOURCES.map(args => {
-    tutorial.addItem({
-      args,
-      command: CommandIDs.gitOpenUrl
-    });
-  });
-
-  menu.addItem({ type: 'submenu', submenu: tutorial });
-
-  return menu;
-}
-
-// matches only non-directory items
-const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
-
 export function addMenuItems(
   commands: ContextCommandIDs[],
   contextMenu: Menu,
@@ -995,12 +929,11 @@ export function addMenuItems(
 }
 
 /**
- * Add Git context (sub)menu to the file browser context menu.
+ * Populate Git context submenu depending on the selected files.
  */
 export function addFileBrowserContextMenu(
   model: IGitExtension,
   tracker: WidgetTracker<FileBrowser>,
-  commands: CommandRegistry,
   contextMenu: ContextMenuSvg
 ): void {
   function getSelectedBrowserItems(): Contents.IModel[] {
@@ -1011,119 +944,117 @@ export function addFileBrowserContextMenu(
     return toArray(widget.selectedItems());
   }
 
-  class GitMenu extends Menu {
-    private _commands: ContextCommandIDs[];
-    private _paths: string[];
+  let _commands: ContextCommandIDs[];
+  let _paths: string[];
 
-    protected onBeforeAttach(msg: Message) {
-      // Render using the most recent model (even if possibly outdated)
-      this.updateItems();
-      const renderedStatus = model.status;
+  function updateItems(menu: Menu): void {
+    const wasShown = menu.isVisible;
+    const parent = menu.parentMenu;
 
-      // Trigger refresh before the menu is displayed
-      model
-        .refreshStatus()
-        .then(() => {
-          if (model.status !== renderedStatus) {
-            // update items if needed
-            this.updateItems();
-          }
-        })
-        .catch(error => {
-          console.error(
-            'Fail to refresh model when displaying git context menu.',
-            error
-          );
-        });
-      super.onBeforeAttach(msg);
+    const items = getSelectedBrowserItems();
+    const statuses = new Set<Git.Status>(
+      items
+        .map(item => model.getFile(item.path)?.status)
+        .filter(status => typeof status !== 'undefined')
+    );
+
+    // get commands and de-duplicate them
+    const allCommands = new Set<ContextCommandIDs>(
+      // flatten the list of lists of commands
+      []
+        .concat(...[...statuses].map(status => CONTEXT_COMMANDS[status]))
+        // filter out the Open and Delete commands as
+        // those are not needed in file browser
+        .filter(
+          command =>
+            command !== ContextCommandIDs.gitFileOpen &&
+            command !== ContextCommandIDs.gitFileDelete &&
+            typeof command !== 'undefined'
+        )
+        // replace stage and track with a single "add" operation
+        .map(command =>
+          command === ContextCommandIDs.gitFileStage ||
+          command === ContextCommandIDs.gitFileTrack
+            ? ContextCommandIDs.gitFileAdd
+            : command
+        )
+    );
+
+    // if looking at a tracked file with no changes,
+    // it has no status, nor any actions available
+    // (although `git rm` would be a valid action)
+    if (allCommands.size === 0 && statuses.size === 0) {
+      allCommands.add(ContextCommandIDs.gitNoAction);
     }
 
-    protected updateItems(): void {
-      const wasShown = this.isVisible;
-      const parent = this.parentMenu;
+    const commandsChanged =
+      !_commands ||
+      _commands.length !== allCommands.size ||
+      !_commands.every(command => allCommands.has(command));
 
-      const items = getSelectedBrowserItems();
-      const statuses = new Set<Git.Status>(
-        items
-          .map(item => model.getFile(item.path)?.status)
-          .filter(status => typeof status !== 'undefined')
+    const paths = items.map(item => item.path);
+
+    const filesChanged = !_paths || !ArrayExt.shallowEqual(_paths, paths);
+
+    if (commandsChanged || filesChanged) {
+      const commandsList = [...allCommands];
+      menu.clearItems();
+      addMenuItems(
+        commandsList,
+        menu,
+        paths
+          .map(path => model.getFile(path))
+          // if file cannot be resolved (has no action available),
+          // omit the undefined result
+          .filter(file => typeof file !== 'undefined')
       );
-
-      // get commands and de-duplicate them
-      const allCommands = new Set<ContextCommandIDs>(
-        // flatten the list of lists of commands
-        []
-          .concat(...[...statuses].map(status => CONTEXT_COMMANDS[status]))
-          // filter out the Open and Delete commands as
-          // those are not needed in file browser
-          .filter(
-            command =>
-              command !== ContextCommandIDs.gitFileOpen &&
-              command !== ContextCommandIDs.gitFileDelete &&
-              typeof command !== 'undefined'
-          )
-          // replace stage and track with a single "add" operation
-          .map(command =>
-            command === ContextCommandIDs.gitFileStage ||
-            command === ContextCommandIDs.gitFileTrack
-              ? ContextCommandIDs.gitFileAdd
-              : command
-          )
-      );
-
-      // if looking at a tracked file with no changes,
-      // it has no status, nor any actions available
-      // (although `git rm` would be a valid action)
-      if (allCommands.size === 0 && statuses.size === 0) {
-        allCommands.add(ContextCommandIDs.gitNoAction);
+      if (wasShown) {
+        // show he menu again after downtime for refresh
+        parent.triggerActiveItem();
       }
-
-      const commandsChanged =
-        !this._commands ||
-        this._commands.length !== allCommands.size ||
-        !this._commands.every(command => allCommands.has(command));
-
-      const paths = items.map(item => item.path);
-
-      const filesChanged =
-        !this._paths || !ArrayExt.shallowEqual(this._paths, paths);
-
-      if (commandsChanged || filesChanged) {
-        const commandsList = [...allCommands];
-        this.clearItems();
-        addMenuItems(
-          commandsList,
-          this,
-          paths
-            .map(path => model.getFile(path))
-            // if file cannot be resolved (has no action available),
-            // omit the undefined result
-            .filter(file => typeof file !== 'undefined')
-        );
-        if (wasShown) {
-          // show he menu again after downtime for refresh
-          parent.triggerActiveItem();
-        }
-        this._commands = commandsList;
-        this._paths = paths;
-      }
-    }
-
-    onBeforeShow(msg: Message): void {
-      super.onBeforeShow(msg);
+      _commands = commandsList;
+      _paths = paths;
     }
   }
 
-  const gitMenu = new GitMenu({ commands });
-  gitMenu.title.label = 'Git';
-  gitMenu.title.icon = gitIcon.bindprops({ stylesheet: 'menuItem' });
+  function updateGitMenu(contextMenu: ContextMenu) {
+    const gitMenu =
+      contextMenu.menu.items.find(
+        item =>
+          item.type === 'submenu' && item.submenu?.id === 'jp-contextmenu-git'
+      )?.submenu ?? null;
 
-  contextMenu.addItem({
-    type: 'submenu',
-    submenu: gitMenu,
-    selector: selectorNotDir,
-    rank: 5
-  });
+    if (!gitMenu) {
+      return; // Bail early if the open with menu is not displayed
+    }
+
+    // Icon for submenu cannot be set from settings => TODO open upstream PR
+    if (!gitMenu.title.icon) {
+      gitMenu.title.icon = gitIcon.bindprops({ stylesheet: 'menuItem' });
+    }
+
+    // Render using the most recent model (even if possibly outdated)
+    updateItems(gitMenu);
+    const renderedStatus = model.status;
+
+    // Trigger refresh before the menu is displayed
+    model
+      .refreshStatus()
+      .then(() => {
+        if (model.status !== renderedStatus) {
+          // update items if needed
+          updateItems(gitMenu);
+        }
+      })
+      .catch(error => {
+        console.error(
+          'Fail to refresh model when displaying git context menu.',
+          error
+        );
+      });
+  }
+
+  contextMenu.opened.connect(updateGitMenu);
 }
 
 /* eslint-disable no-inner-declarations */

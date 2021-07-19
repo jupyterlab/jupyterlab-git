@@ -12,11 +12,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  addCommands,
-  addFileBrowserContextMenu,
-  createGitMenu
-} from './commandsAndMenu';
+import { addCommands, addFileBrowserContextMenu } from './commandsAndMenu';
 import { createNotebookDiff } from './components/diff/NotebookDiff';
 import { addStatusBarWidget } from './components/StatusWidget';
 import { GitExtension } from './model';
@@ -180,9 +176,6 @@ async function activate(
     // sessions widget in the sidebar.
     app.shell.add(gitPlugin, 'left', { rank: 200 });
 
-    // Add a menu for the plugin
-    mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });
-
     // Add a clone button to the file browser extension toolbar
     addCloneButton(gitExtension, factory.defaultBrowser, app.commands);
 
@@ -190,12 +183,7 @@ async function activate(
     addStatusBarWidget(statusBar, gitExtension, settings, trans);
 
     // Add the context menu items for the default file browser
-    addFileBrowserContextMenu(
-      gitExtension,
-      factory.tracker,
-      app.commands,
-      app.contextMenu
-    );
+    addFileBrowserContextMenu(gitExtension, factory.tracker, app.contextMenu);
   }
 
   // Register diff providers
