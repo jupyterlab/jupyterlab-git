@@ -5,6 +5,14 @@ var tsOptions = tsConfig['compilerOptions'];
 tsOptions['rootDir'] = null;
 tsOptions['inlineSourceMap'] = true;
 
+const esModules = [
+  '.*@jupyterlab/',
+  'lib0',
+  'y\\-protocols',
+  'y\\-websocket',
+  'yjs'
+].join('|');
+
 module.exports = {
   automock: false,
   moduleNameMapper: {
@@ -20,7 +28,7 @@ module.exports = {
   setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
   testPathIgnorePatterns: ['/lib/', '/node_modules/', '/jupyterlab_git/'],
   testRegex: '/tests/.*.spec.ts[x]?$',
-  transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
+  transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
   globals: {
     'ts-jest': {
       tsconfig: tsOptions

@@ -72,5 +72,86 @@
       "keys": ["Accel Enter"],
       "selector": ".jp-git-CommitBox"
     }
-  ]
+  ],
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-git",
+        "label": "Git",
+        "rank": 60,
+        "items": [
+          {
+            "command": "git:init"
+          },
+          {
+            "command": "git:clone"
+          },
+          {
+            "command": "git:push"
+          },
+          {
+            "command": "git:pull"
+          },
+          {
+            "command": "git:add-remote"
+          },
+          {
+            "command": "git:terminal-command"
+          },
+          {
+            "type": "separator"
+          },
+          {
+            "command": "git:toggle-simple-staging"
+          },
+          {
+            "command": "git:toggle-double-click-diff"
+          },
+          {
+            "type": "separator"
+          },
+          {
+            "command": "git:open-gitignore"
+          },
+          {
+            "type": "separator"
+          },
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-git-help",
+              "label": "Help",
+              "items": [
+                {
+                  "command": "git:open-url",
+                  "args": {
+                    "text": "Set Up Remotes",
+                    "url": "https://www.atlassian.com/git/tutorials/setting-up-a-repository"
+                  }
+                },
+                {
+                  "command": "git:open-url",
+                  "args": {
+                    "text": "Git Documentation",
+                    "url": "https://git-scm.com/doc"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "context": [
+      {
+        "type": "submenu",
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "rank": 5,
+        "submenu": {
+          "id": "jp-contextmenu-git",
+          "label": "Git"
+        }
+      }
+    ]
+  }
 }
