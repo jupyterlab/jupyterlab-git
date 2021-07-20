@@ -4,6 +4,7 @@ import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
+import { diffIcon } from '../style/icons';
 import {
   branchClass,
   branchWrapperClass,
@@ -15,10 +16,11 @@ import {
   iconButtonClass,
   localBranchClass,
   remoteBranchClass,
+  singleFileCommitClass,
   workingBranchClass
 } from '../style/PastCommitNode';
 import { Git } from '../tokens';
-import { SinglePastCommitInfo } from './SinglePastCommitInfo';
+import { ActionButton } from './ActionButton';
 
 /**
  * Interface describing component properties.
@@ -48,6 +50,15 @@ export interface IPastCommitNodeProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Callback invoked upon clicking to display a file diff.
+   *
+   * @param event - event object
+   */
+  onOpenDiff?: (
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>
+  ) => Promise<void>;
 }
 
 /**
@@ -64,7 +75,7 @@ export interface IPastCommitNodeState {
  * React component for rendering an individual commit.
  */
 export class PastCommitNode extends React.Component<
-  IPastCommitNodeProps,
+  React.PropsWithChildren<IPastCommitNodeProps>,
   IPastCommitNodeState
 > {
   /**
@@ -73,7 +84,7 @@ export class PastCommitNode extends React.Component<
    * @param props - component properties
    * @returns React component
    */
-  constructor(props: IPastCommitNodeProps) {
+  constructor(props: React.PropsWithChildren<IPastCommitNodeProps>) {
     super(props);
     this.state = {
       expanded: false
@@ -90,7 +101,11 @@ export class PastCommitNode extends React.Component<
       <li
         className={classes(
           commitWrapperClass,
-          this.state.expanded ? commitExpandedClass : null
+          !this.props.children && !!this.props.onOpenDiff
+            ? singleFileCommitClass
+            : this.state.expanded
+            ? commitExpandedClass
+            : null
         )}
         onClick={this._onCommitClick}
       >
@@ -104,23 +119,25 @@ export class PastCommitNode extends React.Component<
           <span className={commitHeaderItemClass}>
             {this.props.commit.date}
           </span>
-          {this.state.expanded ? (
-            <caretUpIcon.react className={iconButtonClass} tag="span" />
+          {this.props.children ? (
+            this.state.expanded ? (
+              <caretUpIcon.react className={iconButtonClass} tag="span" />
+            ) : (
+              <caretDownIcon.react className={iconButtonClass} tag="span" />
+            )
           ) : (
-            <caretDownIcon.react className={iconButtonClass} tag="span" />
+            !!this.props.onOpenDiff && (
+              <ActionButton
+                icon={diffIcon}
+                title={this.props.trans.__('View file changes')}
+              />
+            )
           )}
         </div>
         <div className={branchWrapperClass}>{this._renderBranches()}</div>
         <div className={commitBodyClass}>
           {this.props.commit.commit_msg}
-          {this.state.expanded && (
-            <SinglePastCommitInfo
-              commit={this.props.commit}
-              model={this.props.model}
-              commands={this.props.commands}
-              trans={this.props.trans}
-            />
-          )}
+          {this.state.expanded && this.props.children}
         </div>
       </li>
     );
@@ -174,9 +191,15 @@ export class PastCommitNode extends React.Component<
    *
    * @param event - event object
    */
-  private _onCommitClick = (): void => {
-    this.setState({
-      expanded: !this.state.expanded
-    });
+  private _onCommitClick = (
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>
+  ): void => {
+    if (this.props.children) {
+      this.setState({
+        expanded: !this.state.expanded
+      });
+    } else if (!!this.props.onOpenDiff) {
+      this.props.onOpenDiff(event);
+    }
   };
 }

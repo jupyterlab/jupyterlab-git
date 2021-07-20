@@ -436,15 +436,15 @@ class Git:
         """
         Execute git log command & return the result.
         """
+        is_single_file = follow_path != "."
         cmd = [
             "git",
             "log",
             "--pretty=format:%H%n%an%n%ar%n%s",
             ("-%d" % history_count),
-            "--follow",
-            "--",
-            follow_path,
         ]
+        if is_single_file:
+            cmd = cmd + ["--numstat", "-z", "--follow", "--", follow_path]
         code, my_output, my_error = await execute(
             cmd,
             cwd=path,
@@ -453,30 +453,25 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
-        line_array = my_output.splitlines()
+        line_array = my_output.replace("\0\0", "\n").splitlines()
         i = 0
-        PREVIOUS_COMMIT_OFFSET = 4
+        PREVIOUS_COMMIT_OFFSET = 5 if is_single_file else 4
         while i < len(line_array):
+            commit = {
+                "commit": line_array[i],
+                "author": line_array[i + 1],
+                "date": line_array[i + 2],
+                "commit_msg": line_array[i + 3],
+                "pre_commit": "",
+            }
+
+            if is_single_file:
+                commit["is_binary"] = line_array[i + 4].startswith("-\t-\t")
+
             if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
-                result.append(
-                    {
-                        "commit": line_array[i],
-                        "author": line_array[i + 1],
-                        "date": line_array[i + 2],
-                        "commit_msg": line_array[i + 3],
-                        "pre_commit": line_array[i + PREVIOUS_COMMIT_OFFSET],
-                    }
-                )
-            else:
-                result.append(
-                    {
-                        "commit": line_array[i],
-                        "author": line_array[i + 1],
-                        "date": line_array[i + 2],
-                        "commit_msg": line_array[i + 3],
-                        "pre_commit": "",
-                    }
-                )
+                commit["pre_commit"] = line_array[i + PREVIOUS_COMMIT_OFFSET]
+
+            result.append(commit)
             i += PREVIOUS_COMMIT_OFFSET
         return {"code": code, "commits": result}
 

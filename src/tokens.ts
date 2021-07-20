@@ -58,7 +58,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * Selected file for single file history
    */
-  selectedHistoryFile: string;
+  selectedHistoryFile: Git.IStatusFile | null;
 
   /**
    * Git repository status.
@@ -74,6 +74,14 @@ export interface IGitExtension extends IDisposable {
    * A signal emitted whenever a model task event occurs.
    */
   readonly taskChanged: ISignal<IGitExtension, string>;
+
+  /**
+   * A signal emitted when the current file selected for history of the Git repository changes.
+   */
+  readonly selectedHistoryFileChanged: ISignal<
+    IGitExtension,
+    Git.IStatusFile | null
+  >;
 
   /**
    * Add one or more files to the repository staging area.
@@ -770,6 +778,7 @@ export namespace Git {
     date: string;
     commit_msg: string;
     pre_commit: string;
+    is_binary?: boolean; // for single file history
   }
 
   /** Interface for GitCommit request result,

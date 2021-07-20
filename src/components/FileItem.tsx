@@ -133,7 +133,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
     super(props);
   }
   protected _getFileChangedLabel(change: keyof typeof STATUS_CODES): string {
-    return STATUS_CODES[change];
+    return STATUS_CODES[change] || 'Unmodified';
   }
 
   protected _getFileChangedLabelClass(change: string): string {

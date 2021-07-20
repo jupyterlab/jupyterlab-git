@@ -47,7 +47,6 @@ export class GitWidget extends ReactWidget {
    * The default implementation of this handler is a no-op.
    */
   onBeforeShow(msg: Message): void {
-    // TODO: Do something here with the model @fcollonval
     // Trigger refresh when the widget is displayed
     this._model.refresh().catch(error => {
       console.error('Fail to refresh model when displaying GitWidget.', error);

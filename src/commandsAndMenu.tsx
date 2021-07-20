@@ -906,7 +906,7 @@ export function addCommands(
         files: [file]
       } = args as any as CommandArguments.IGitContextAction;
       if (file && file.status === 'unmodified') {
-        gitModel.selectedHistoryFile = file.to;
+        gitModel.selectedHistoryFile = file;
         shell.activateById('jp-git-sessions');
       }
     },

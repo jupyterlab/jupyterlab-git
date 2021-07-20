@@ -189,11 +189,12 @@ export class GitExtension implements IGitExtension {
   /**
    * Selected file for single file history
    */
-  get selectedHistoryFile(): string {
+  get selectedHistoryFile(): Git.IStatusFile | null {
     return this._selectedHistoryFile;
   }
-  set selectedHistoryFile(file: string) {
+  set selectedHistoryFile(file: Git.IStatusFile | null) {
     this._selectedHistoryFile = file;
+    this._selectedHistoryFileChanged.emit(file);
   }
 
   /**
@@ -215,6 +216,16 @@ export class GitExtension implements IGitExtension {
    */
   get markChanged(): ISignal<IGitExtension, void> {
     return this._markChanged;
+  }
+
+  /**
+   * A signal emitted when the current file selected for history of the Git repository changes.
+   */
+  get selectedHistoryFileChanged(): ISignal<
+    IGitExtension,
+    Git.IStatusFile | null
+  > {
+    return this._selectedHistoryFileChanged;
   }
 
   /**
@@ -295,7 +306,8 @@ export class GitExtension implements IGitExtension {
         to: path,
         from: '',
         is_binary: null,
-        status: 'unmodified'
+        status: 'unmodified',
+        type: {} as DocumentRegistry.IFileType
       }
     );
   }
@@ -712,7 +724,9 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             history_count: count,
-            follow_path: this.selectedHistoryFile || '.'
+            follow_path: !!this.selectedHistoryFile
+              ? this.selectedHistoryFile.to
+              : '.'
           }
         );
       }
@@ -1395,10 +1409,14 @@ export class GitExtension implements IGitExtension {
   private _standbyCondition: () => boolean = () => false;
   private _statusPoll: Poll;
   private _taskHandler: TaskHandler<IGitExtension>;
-  private _selectedHistoryFile: string = '';
+  private _selectedHistoryFile: Git.IStatusFile | null = null;
 
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
+  private _selectedHistoryFileChanged = new Signal<
+    IGitExtension,
+    Git.IStatusFile | null
+  >(this);
   private _repositoryChanged = new Signal<
     IGitExtension,
     IChangedArgs<string | null>

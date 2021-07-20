@@ -176,6 +176,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         this.refreshHistory();
       }
     }, this);
+    model.selectedHistoryFileChanged.connect(() => {
+      this.setState({ tab: 1 });
+      this.refreshHistory();
+    }, this);
     model.markChanged.connect(() => this.forceUpdate(), this);
 
     settings.changed.connect(this.refreshView, this);
