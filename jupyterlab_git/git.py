@@ -432,7 +432,7 @@ class Git:
 
         return data
 
-    async def log(self, path, history_count=10):
+    async def log(self, path, history_count=10, follow_path="."):
         """
         Execute git log command & return the result.
         """
@@ -441,6 +441,9 @@ class Git:
             "log",
             "--pretty=format:%H%n%an%n%ar%n%s",
             ("-%d" % history_count),
+            "--follow",
+            "--",
+            follow_path,
         ]
         code, my_output, my_error = await execute(
             cmd,

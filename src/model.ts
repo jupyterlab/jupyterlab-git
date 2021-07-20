@@ -711,7 +711,8 @@ export class GitExtension implements IGitExtension {
           URLExt.join(path, 'log'),
           'POST',
           {
-            history_count: count
+            history_count: count,
+            follow_path: this.selectedHistoryFile || '.'
           }
         );
       }
