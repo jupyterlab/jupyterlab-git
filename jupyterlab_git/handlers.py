@@ -196,7 +196,7 @@ class GitStatusHandler(GitHandler):
 
 class GitLogHandler(GitHandler):
     """
-    Handler for 'git log --pretty=format:%H-%an-%ar-%s --follow --'.
+    Handler for 'git log'.
     Fetches Commit SHA, Author Name, Commit Date & Commit Message.
     """
 
@@ -208,7 +208,7 @@ class GitLogHandler(GitHandler):
         """
         body = self.get_json_body()
         history_count = body.get("history_count", 25)
-        follow_path = body.get("follow_path", ".")
+        follow_path = body.get("follow_path")
         result = await self.git.log(
             self.url2localpath(path), history_count, follow_path
         )

@@ -432,11 +432,11 @@ class Git:
 
         return data
 
-    async def log(self, path, history_count=10, follow_path="."):
+    async def log(self, path, history_count=10, follow_path=None):
         """
         Execute git log command & return the result.
         """
-        is_single_file = follow_path != "."
+        is_single_file = follow_path != None
         cmd = [
             "git",
             "log",
@@ -444,7 +444,12 @@ class Git:
             ("-%d" % history_count),
         ]
         if is_single_file:
-            cmd = cmd + ["--numstat", "-z", "--follow", "--", follow_path]
+            cmd = cmd + [
+                "--numstat",
+                "--follow",
+                "--",
+                follow_path,
+            ]
         code, my_output, my_error = await execute(
             cmd,
             cwd=path,
@@ -453,7 +458,10 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
-        line_array = my_output.replace("\0\0", "\n").splitlines()
+        if is_single_file:
+            # an extra newline get outputted when --numstat is used
+            my_output = my_output.replace("\n\n", "\n")
+        line_array = my_output.splitlines()
         i = 0
         PREVIOUS_COMMIT_OFFSET = 5 if is_single_file else 4
         while i < len(line_array):

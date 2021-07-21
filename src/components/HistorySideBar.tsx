@@ -1,11 +1,11 @@
 import { TranslationBundle } from '@jupyterlab/translation';
+import { closeIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { CommandArguments } from '../commandsAndMenu';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { historySideBarStyle } from '../style/HistorySideBarStyle';
-import { removeIcon } from '../style/icons';
 import { ContextCommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
@@ -112,7 +112,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
           actions={
             <ActionButton
               className={hiddenButtonStyle}
-              icon={removeIcon}
+              icon={closeIcon}
               title={props.trans.__('Discard file history')}
               onClick={removeSelectedFile}
             />

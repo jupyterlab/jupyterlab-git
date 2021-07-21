@@ -902,13 +902,18 @@ export function addCommands(
     label: trans.__('History'),
     caption: trans.__('View the history of this file'),
     execute: args => {
-      const {
-        files: [file]
-      } = args as any as CommandArguments.IGitContextAction;
-      if (file && file.status === 'unmodified') {
+      const { files } = args as any as CommandArguments.IGitContextAction;
+      const file = files[0];
+      if (!file) {
+        return;
+      } else if (file.status === 'unmodified') {
         gitModel.selectedHistoryFile = file;
         shell.activateById('jp-git-sessions');
       }
+    },
+    isEnabled: args => {
+      const { files } = args as any as CommandArguments.IGitContextAction;
+      return files.length === 1;
     },
     icon: historyIcon.bindprops({ stylesheet: 'menuItem' })
   });
@@ -1092,10 +1097,9 @@ export function addFileBrowserContextMenu(
           )
       );
 
-      // if looking at a tracked file with no changes,
-      // it has no status, nor any actions available
+      // if looking at a tracked file without any actions available
       // (although `git rm` would be a valid action)
-      if (allCommands.size === 0 && statuses.size === 0) {
+      if (allCommands.size === 0) {
         allCommands.add(ContextCommandIDs.gitNoAction);
       }
 

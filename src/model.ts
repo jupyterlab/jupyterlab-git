@@ -193,8 +193,10 @@ export class GitExtension implements IGitExtension {
     return this._selectedHistoryFile;
   }
   set selectedHistoryFile(file: Git.IStatusFile | null) {
-    this._selectedHistoryFile = file;
-    this._selectedHistoryFileChanged.emit(file);
+    if (this._selectedHistoryFile !== file) {
+      this._selectedHistoryFile = file;
+      this._selectedHistoryFileChanged.emit(file);
+    }
   }
 
   /**
@@ -724,9 +726,7 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             history_count: count,
-            follow_path: !!this.selectedHistoryFile
-              ? this.selectedHistoryFile.to
-              : '.'
+            follow_path: this.selectedHistoryFile?.to
           }
         );
       }

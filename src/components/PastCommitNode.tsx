@@ -4,7 +4,6 @@ import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
-import { diffIcon } from '../style/icons';
 import {
   branchClass,
   branchWrapperClass,
@@ -20,7 +19,6 @@ import {
   workingBranchClass
 } from '../style/PastCommitNode';
 import { Git } from '../tokens';
-import { ActionButton } from './ActionButton';
 
 /**
  * Interface describing component properties.
@@ -107,6 +105,11 @@ export class PastCommitNode extends React.Component<
             ? commitExpandedClass
             : null
         )}
+        title={
+          this.props.children
+            ? this.props.trans.__('View commit details')
+            : this.props.trans.__('View file changes')
+        }
         onClick={this._onCommitClick}
       >
         <div className={commitHeaderClass}>
@@ -119,19 +122,10 @@ export class PastCommitNode extends React.Component<
           <span className={commitHeaderItemClass}>
             {this.props.commit.date}
           </span>
-          {this.props.children ? (
-            this.state.expanded ? (
-              <caretUpIcon.react className={iconButtonClass} tag="span" />
-            ) : (
-              <caretDownIcon.react className={iconButtonClass} tag="span" />
-            )
+          {this.props.children && this.state.expanded ? (
+            <caretUpIcon.react className={iconButtonClass} tag="span" />
           ) : (
-            !!this.props.onOpenDiff && (
-              <ActionButton
-                icon={diffIcon}
-                title={this.props.trans.__('View file changes')}
-              />
-            )
+            <caretDownIcon.react className={iconButtonClass} tag="span" />
           )}
         </div>
         <div className={branchWrapperClass}>{this._renderBranches()}</div>
@@ -198,8 +192,8 @@ export class PastCommitNode extends React.Component<
       this.setState({
         expanded: !this.state.expanded
       });
-    } else if (!!this.props.onOpenDiff) {
-      this.props.onOpenDiff(event);
+    } else {
+      this.props.onOpenDiff?.call(this, event);
     }
   };
 }
