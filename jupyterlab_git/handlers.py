@@ -473,7 +473,7 @@ class GitCommitHandler(GitHandler):
         """
         data = self.get_json_body()
         commit_msg = data["commit_msg"]
-        amend = data["amend"]
+        amend = data.get("amend", False)
         body = await self.git.commit(commit_msg, amend, self.url2localpath(path))
 
         if body["code"] != 0:

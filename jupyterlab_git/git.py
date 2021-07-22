@@ -991,7 +991,7 @@ class Git:
         """
         command = ["git", "push"]
         if force:
-            command.append("--force")
+            command.append("--force-with-lease")
         if set_upstream:
             command.append("--set-upstream")
         command.extend([remote, branch])

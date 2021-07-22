@@ -345,10 +345,13 @@ export function addCommands(
 
   /** Add git push command */
   commands.addCommand(CommandIDs.gitPush, {
-    label: trans.__('Push to Remote'),
+    label: args =>
+      args.force
+        ? trans.__('Push to Remote (Force)')
+        : trans.__('Push to Remote'),
     caption: trans.__('Push code to remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
-    execute: async () => {
+    execute: async args => {
       logger.log({
         level: Level.RUNNING,
         message: trans.__('Pushing...')
@@ -356,42 +359,7 @@ export function addCommands(
       try {
         const details = await Private.showGitOperationDialog(
           gitModel,
-          Operation.Push,
-          trans
-        );
-        logger.log({
-          message: trans.__('Successfully pushed'),
-          level: Level.SUCCESS,
-          details
-        });
-      } catch (error) {
-        console.error(
-          trans.__('Encountered an error when pushing changes. Error: '),
-          error
-        );
-        logger.log({
-          message: trans.__('Failed to push'),
-          level: Level.ERROR,
-          error
-        });
-      }
-    }
-  });
-
-  /** Add git push force command */
-  commands.addCommand(CommandIDs.gitForcePush, {
-    label: trans.__('Push to Remote (Force)'),
-    caption: trans.__('Force push code to remote repository'),
-    isEnabled: () => gitModel.pathRepository !== null,
-    execute: async () => {
-      logger.log({
-        level: Level.RUNNING,
-        message: trans.__('Pushing...')
-      });
-      try {
-        const details = await Private.showGitOperationDialog(
-          gitModel,
-          Operation.ForcePush,
+          args.force ? Operation.ForcePush : Operation.Push,
           trans
         );
         logger.log({
@@ -964,11 +932,13 @@ export function createGitMenu(
     CommandIDs.gitInit,
     CommandIDs.gitClone,
     CommandIDs.gitPush,
-    CommandIDs.gitForcePush,
     CommandIDs.gitPull,
     CommandIDs.gitAddRemote,
     CommandIDs.gitTerminalCommand
   ].forEach(command => {
+    if (command === CommandIDs.gitPush) {
+      menu.addItem({ command, args: { force: true } });
+    }
     menu.addItem({ command });
   });
 

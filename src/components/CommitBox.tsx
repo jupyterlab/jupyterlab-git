@@ -130,7 +130,7 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
           title={
             this.props.amend
               ? this.props.trans.__(
-                  'You are amending this commit to the previous one, so the previous commit summary will be used'
+                  'Amending the commit will re-use the previous commit summary'
                 )
               : this.props.trans.__(
                   'Enter a commit message summary (a single line, preferably less than 50 characters)'
@@ -148,7 +148,7 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
           title={
             this.props.amend
               ? this.props.trans.__(
-                  'You are amending this commit to the previous one, so the previous commit message will be used'
+                  'Amending the commit will re-use the previous commit summary'
                 )
               : this.props.trans.__('Enter a commit message description')
           }
@@ -182,7 +182,7 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
    */
   private _canCommit(): boolean {
     if (this.props.amend) {
-      return true;
+      return this.props.hasFiles;
     }
     return !!(this.props.hasFiles && this.props.summary);
   }
