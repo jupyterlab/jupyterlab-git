@@ -55,13 +55,15 @@ export const CONTEXT_COMMANDS: ContextCommands = {
   'partially-staged': [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileUnstage,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
   ],
   unstaged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileStage,
     ContextCommandIDs.gitFileDiscard,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
   ],
   untracked: [
     ContextCommandIDs.gitFileOpen,
@@ -74,7 +76,8 @@ export const CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileUnstage,
     ContextCommandIDs.gitFileDiff,
-    ContextCommandIDs.gitCommitAmendStaged
+    ContextCommandIDs.gitCommitAmendStaged,
+    ContextCommandIDs.gitFileHistory
   ],
   unmodified: [ContextCommandIDs.gitFileHistory]
 };
@@ -83,17 +86,20 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
   'partially-staged': [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileDiscard,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
   ],
   staged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileDiscard,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
   ],
   unstaged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileDiscard,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
   ],
   untracked: [
     ContextCommandIDs.gitFileOpen,

@@ -118,7 +118,9 @@ export class PastCommitNode extends React.Component<
             {this.props.commit.author}
           </span>
           <span className={commitHeaderItemClass}>
-            {this.props.commit.commit.slice(0, 7)}
+            {+this.props.commit.commit in Git.Diff.SpecialRef
+              ? Git.Diff.SpecialRef[+this.props.commit.commit]
+              : this.props.commit.commit.slice(0, 7)}
           </span>
           <span className={commitHeaderItemClass}>
             {this.props.commit.date}

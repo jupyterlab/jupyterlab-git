@@ -906,10 +906,9 @@ export function addCommands(
       const file = files[0];
       if (!file) {
         return;
-      } else if (file.status === 'unmodified') {
-        gitModel.selectedHistoryFile = file;
-        shell.activateById('jp-git-sessions');
       }
+      gitModel.selectedHistoryFile = file;
+      shell.activateById('jp-git-sessions');
     },
     isEnabled: args => {
       const { files } = args as any as CommandArguments.IGitContextAction;

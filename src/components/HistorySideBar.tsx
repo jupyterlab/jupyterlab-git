@@ -105,6 +105,27 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
       }
     };
 
+  /**
+   * Commit info for 'Uncommitted Changes' history.
+   */
+  const uncommitted = React.useMemo<Git.ISingleCommitInfo>(() => {
+    return {
+      author: props.trans.__('You'),
+      // INDEX or WORKING special ref
+      commit: `${+(props.model.selectedHistoryFile?.status === 'staged')}`,
+      pre_commit: 'HEAD',
+      is_binary: !!props.commits[0]?.is_binary,
+      commit_msg: props.trans.__('Uncommitted Changes'),
+      date: props.trans.__('now')
+    };
+  }, [props.model.selectedHistoryFile]);
+
+  const commits =
+    props.model.selectedHistoryFile &&
+    props.model.selectedHistoryFile?.status !== 'unmodified'
+      ? [uncommitted, ...props.commits]
+      : props.commits;
+
   return (
     <ol className={historySideBarStyle}>
       {!!props.model.selectedHistoryFile && (
@@ -124,8 +145,8 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
           onDoubleClick={removeSelectedFile}
         />
       )}
-      {props.commits.map((commit: Git.ISingleCommitInfo) => {
-        const commitNodeProps = {
+      {commits.map((commit: Git.ISingleCommitInfo) => {
+        const commonProps = {
           commit,
           branches: props.branches,
           model: props.model,
@@ -133,7 +154,8 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
           trans: props.trans
         };
 
-        // Only pass down callback when single file history is open and diff is viewable
+        // Only pass down callback when single file history is open
+        // and its diff is viewable
         const onOpenDiff =
           props.model.selectedHistoryFile && !commit.is_binary
             ? openDiff(commit)(
@@ -145,12 +167,12 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
         return (
           <PastCommitNode
             key={commit.commit}
-            {...commitNodeProps}
+            {...commonProps}
             onOpenDiff={onOpenDiff}
           >
             {!props.model.selectedHistoryFile && (
               <SinglePastCommitInfo
-                {...commitNodeProps}
+                {...commonProps}
                 onOpenDiff={openDiff(commit)}
               />
             )}
