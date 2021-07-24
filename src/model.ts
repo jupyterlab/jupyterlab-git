@@ -309,7 +309,7 @@ export class GitExtension implements IGitExtension {
         from: '',
         is_binary: null,
         status: 'unmodified',
-        type: {} as DocumentRegistry.IFileType
+        type: this._resolveFileType(path)
       }
     );
   }

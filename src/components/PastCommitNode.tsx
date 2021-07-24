@@ -4,6 +4,7 @@ import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
+import { diffIcon } from '../style/icons';
 import {
   branchClass,
   branchWrapperClass,
@@ -122,10 +123,14 @@ export class PastCommitNode extends React.Component<
           <span className={commitHeaderItemClass}>
             {this.props.commit.date}
           </span>
-          {this.props.children && this.state.expanded ? (
-            <caretUpIcon.react className={iconButtonClass} tag="span" />
+          {this.props.children ? (
+            this.state.expanded ? (
+              <caretUpIcon.react className={iconButtonClass} tag="span" />
+            ) : (
+              <caretDownIcon.react className={iconButtonClass} tag="span" />
+            )
           ) : (
-            <caretDownIcon.react className={iconButtonClass} tag="span" />
+            <diffIcon.react className={iconButtonClass} tag="span" />
           )}
         </div>
         <div className={branchWrapperClass}>{this._renderBranches()}</div>

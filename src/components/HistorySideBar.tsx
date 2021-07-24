@@ -5,7 +5,10 @@ import * as React from 'react';
 import { CommandArguments } from '../commandsAndMenu';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
-import { historySideBarStyle } from '../style/HistorySideBarStyle';
+import {
+  historySideBarStyle,
+  selectedHistoryFileStyle
+} from '../style/HistorySideBarStyle';
 import { ContextCommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
@@ -106,7 +109,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
     <ol className={historySideBarStyle}>
       {!!props.model.selectedHistoryFile && (
         <FileItem
-          style={{ overflowX: 'hidden', flexGrow: 0, flexShrink: 0 }}
+          className={selectedHistoryFileStyle}
           model={props.model}
           trans={props.trans}
           actions={
