@@ -7,6 +7,7 @@ import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
   historySideBarStyle,
+  noHistoryFoundStyle,
   selectedHistoryFileStyle
 } from '../style/HistorySideBarStyle';
 import { ContextCommandIDs, Git } from '../tokens';
@@ -145,40 +146,46 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
           onDoubleClick={removeSelectedFile}
         />
       )}
-      {commits.map((commit: Git.ISingleCommitInfo) => {
-        const commonProps = {
-          commit,
-          branches: props.branches,
-          model: props.model,
-          commands: props.commands,
-          trans: props.trans
-        };
+      {commits.length ? (
+        commits.map((commit: Git.ISingleCommitInfo) => {
+          const commonProps = {
+            commit,
+            branches: props.branches,
+            model: props.model,
+            commands: props.commands,
+            trans: props.trans
+          };
 
-        // Only pass down callback when single file history is open
-        // and its diff is viewable
-        const onOpenDiff =
-          props.model.selectedHistoryFile && !commit.is_binary
-            ? openDiff(commit)(
-                props.model.selectedHistoryFile.to,
-                !commit.is_binary
-              )
-            : undefined;
+          // Only pass down callback when single file history is open
+          // and its diff is viewable
+          const onOpenDiff =
+            props.model.selectedHistoryFile && !commit.is_binary
+              ? openDiff(commit)(
+                  props.model.selectedHistoryFile.to,
+                  !commit.is_binary
+                )
+              : undefined;
 
-        return (
-          <PastCommitNode
-            key={commit.commit}
-            {...commonProps}
-            onOpenDiff={onOpenDiff}
-          >
-            {!props.model.selectedHistoryFile && (
-              <SinglePastCommitInfo
-                {...commonProps}
-                onOpenDiff={openDiff(commit)}
-              />
-            )}
-          </PastCommitNode>
-        );
-      })}
+          return (
+            <PastCommitNode
+              key={commit.commit}
+              {...commonProps}
+              onOpenDiff={onOpenDiff}
+            >
+              {!props.model.selectedHistoryFile && (
+                <SinglePastCommitInfo
+                  {...commonProps}
+                  onOpenDiff={openDiff(commit)}
+                />
+              )}
+            </PastCommitNode>
+          );
+        })
+      ) : (
+        <li className={noHistoryFoundStyle}>
+          {props.trans.__('No history found for the selected file.')}
+        </li>
+      )}
     </ol>
   );
 };

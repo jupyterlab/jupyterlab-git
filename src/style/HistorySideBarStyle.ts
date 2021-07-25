@@ -14,6 +14,15 @@ export const selectedHistoryFileStyle = style({
   backgroundColor: 'var(--jp-toolbar-active-background)'
 });
 
+export const noHistoryFoundStyle = style({
+  display: 'flex',
+  justifyContent: 'center',
+
+  padding: '10px 0',
+
+  color: 'var(--jp-ui-font-color2)'
+});
+
 export const historySideBarStyle = style({
   display: 'flex',
   flexDirection: 'column',
