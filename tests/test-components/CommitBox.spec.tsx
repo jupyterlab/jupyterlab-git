@@ -130,5 +130,29 @@ describe('CommitBox', () => {
       const prop = node.prop('disabled');
       expect(prop).toEqual(false);
     });
+
+    it('should apply a class to disable the commit input fields when the amend field is checked', () => {
+      const props = {
+        ...defaultProps,
+        summary: 'beep boop',
+        amend: true
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="text"]').first();
+      const prop = node.prop('disabled');
+      expect(prop).toEqual(true);
+    });
+
+    it('should not apply a class to disable the commit button when the amend field is checked', () => {
+      const props = {
+        ...defaultProps,
+        hasFiles: true,
+        amend: true
+      };
+      const component = shallow(<CommitBox {...props} />);
+      const node = component.find('input[type="button"]').first();
+      const prop = node.prop('disabled');
+      expect(prop).toEqual(false);
+    });
   });
 });
