@@ -112,10 +112,13 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
   const uncommitted = React.useMemo<Git.ISingleCommitInfo>(() => {
     return {
       author: props.trans.__('You'),
-      // INDEX or WORKING special ref
-      commit: `${+(props.model.selectedHistoryFile?.status === 'staged')}`,
+      commit: `${
+        props.model.selectedHistoryFile?.status === 'staged'
+          ? Git.Diff.SpecialRef.INDEX
+          : Git.Diff.SpecialRef.WORKING
+      }`,
       pre_commit: 'HEAD',
-      is_binary: !!props.commits[0]?.is_binary,
+      is_binary: props.commits[0]?.is_binary ?? false,
       commit_msg: props.trans.__('Uncommitted Changes'),
       date: props.trans.__('now')
     };
