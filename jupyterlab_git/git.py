@@ -916,11 +916,18 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
-    async def commit(self, commit_msg, path):
+    async def commit(self, commit_msg, amend, path):
         """
         Execute git commit <filename> command & return the result.
+
+        If the amend argument is true, amend the commit instead of creating a new one.
         """
-        cmd = ["git", "commit", "-m", commit_msg]
+        cmd = ["git", "commit"]
+        if amend:
+            cmd.extend(["--amend", "--no-edit"])
+        else:
+            cmd.extend(["--m", commit_msg])
+
         code, _, error = await execute(cmd, cwd=path)
 
         if code != 0:
@@ -976,11 +983,15 @@ class Git:
 
         return response
 
-    async def push(self, remote, branch, path, auth=None, set_upstream=False):
+    async def push(
+        self, remote, branch, path, auth=None, set_upstream=False, force=False
+    ):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
         """
         command = ["git", "push"]
+        if force:
+            command.append("--force-with-lease")
         if set_upstream:
             command.append("--set-upstream")
         command.extend([remote, branch])

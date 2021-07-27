@@ -63,7 +63,8 @@ interface IGitCloneArgs {
 enum Operation {
   Clone = 'Clone',
   Pull = 'Pull',
-  Push = 'Push'
+  Push = 'Push',
+  ForcePush = 'ForcePush'
 }
 
 interface IFileDiffArgument {
@@ -344,10 +345,13 @@ export function addCommands(
 
   /** Add git push command */
   commands.addCommand(CommandIDs.gitPush, {
-    label: trans.__('Push to Remote'),
+    label: args =>
+      args.force
+        ? trans.__('Push to Remote (Force)')
+        : trans.__('Push to Remote'),
     caption: trans.__('Push code to remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
-    execute: async () => {
+    execute: async args => {
       logger.log({
         level: Level.RUNNING,
         message: trans.__('Pushing...')
@@ -355,7 +359,7 @@ export function addCommands(
       try {
         const details = await Private.showGitOperationDialog(
           gitModel,
-          Operation.Push,
+          args.force ? Operation.ForcePush : Operation.Push,
           trans
         );
         logger.log({
@@ -932,6 +936,9 @@ export function createGitMenu(
     CommandIDs.gitAddRemote,
     CommandIDs.gitTerminalCommand
   ].forEach(command => {
+    if (command === CommandIDs.gitPush) {
+      menu.addItem({ command, args: { force: true } });
+    }
     menu.addItem({ command });
   });
 
@@ -1162,6 +1169,9 @@ namespace Private {
           break;
         case Operation.Push:
           result = await model.push(authentication);
+          break;
+        case Operation.ForcePush:
+          result = await model.push(authentication, true);
           break;
         default:
           result = { code: -1, message: 'Unknown git command' };

@@ -6,7 +6,8 @@ import {
   commitButtonClass,
   commitDescriptionClass,
   commitFormClass,
-  commitSummaryClass
+  commitSummaryClass,
+  commitInputWrapperClass
 } from '../style/CommitBox';
 import { CommandIDs } from '../tokens';
 
@@ -45,6 +46,11 @@ export interface ICommitBoxProps {
   description: string;
 
   /**
+   * Whether the "amend" checkbox is checked
+   */
+  amend: boolean;
+
+  /**
    * Updates the commit message summary.
    *
    * @param summary - commit message summary
@@ -57,6 +63,13 @@ export interface ICommitBoxProps {
    * @param description - commit message description
    */
   setDescription: (description: string) => void;
+
+  /**
+   * Updates the amend checkbox state
+   *
+   * @param amend - amend toggle on/off
+   */
+  setAmend: (amend: boolean) => void;
 
   /**
    * Callback to invoke in order to commit changes.
@@ -114,29 +127,52 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
           className={commitSummaryClass}
           type="text"
           placeholder={summaryPlaceholder}
-          title={this.props.trans.__(
-            'Enter a commit message summary (a single line, preferably less than 50 characters)'
-          )}
+          title={
+            this.props.amend
+              ? this.props.trans.__(
+                  'Amending the commit will re-use the previous commit summary'
+                )
+              : this.props.trans.__(
+                  'Enter a commit message summary (a single line, preferably less than 50 characters)'
+                )
+          }
           value={this.props.summary}
           onChange={this._onSummaryChange}
           onKeyPress={this._onSummaryKeyPress}
+          disabled={this.props.amend}
         />
         <TextareaAutosize
           className={commitDescriptionClass}
           minRows={5}
           placeholder={this.props.trans.__('Description (optional)')}
-          title={this.props.trans.__('Enter a commit message description')}
+          title={
+            this.props.amend
+              ? this.props.trans.__(
+                  'Amending the commit will re-use the previous commit summary'
+                )
+              : this.props.trans.__('Enter a commit message description')
+          }
           value={this.props.description}
           onChange={this._onDescriptionChange}
+          disabled={this.props.amend}
         />
-        <input
-          className={commitButtonClass}
-          type="button"
-          title={title}
-          value={this.props.label}
-          disabled={disabled}
-          onClick={this.props.onCommit}
-        />
+        <div className={commitInputWrapperClass}>
+          <input
+            className={commitButtonClass}
+            type="button"
+            title={title}
+            value={this.props.label}
+            disabled={disabled}
+            onClick={this.props.onCommit}
+          />
+          <input
+            type="checkbox"
+            id="commit-amend"
+            onChange={this._onAmendChange}
+            checked={this.props.amend}
+          />
+          <label htmlFor="commit-amend">Amend</label>
+        </div>
       </form>
     );
   }
@@ -145,6 +181,9 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
    * Whether a commit can be performed (files are staged and summary is not empty).
    */
   private _canCommit(): boolean {
+    if (this.props.amend) {
+      return this.props.hasFiles;
+    }
     return !!(this.props.hasFiles && this.props.summary);
   }
 
@@ -174,6 +213,15 @@ export class CommitBox extends React.Component<ICommitBoxProps> {
    */
   private _onSummaryChange = (event: any): void => {
     this.props.setSummary(event.target.value);
+  };
+
+  /**
+   * Callback invoked when the amend checkbox is toggled
+   *
+   * @param event - event object
+   */
+  private _onAmendChange = (event: any): void => {
+    this.props.setAmend(event.target.checked);
   };
 
   /**

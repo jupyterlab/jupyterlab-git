@@ -463,7 +463,7 @@ class GitCheckoutHandler(GitHandler):
 
 class GitCommitHandler(GitHandler):
     """
-    Handler for 'git commit -m <message>'. Commits files.
+    Handler for 'git commit -m <message>' and 'git commit --amend'. Commits files.
     """
 
     @tornado.web.authenticated
@@ -473,7 +473,8 @@ class GitCommitHandler(GitHandler):
         """
         data = self.get_json_body()
         commit_msg = data["commit_msg"]
-        body = await self.git.commit(commit_msg, self.url2localpath(path))
+        amend = data.get("amend", False)
+        body = await self.git.commit(commit_msg, amend, self.url2localpath(path))
 
         if body["code"] != 0:
             self.set_status(500)
@@ -533,11 +534,13 @@ class GitPushHandler(GitHandler):
         Request body:
         {
             remote?: string # Remote to push to; i.e. <remote_name> or <remote_name>/<branch>
+            force: boolean # Whether or not to force the push
         }
         """
         local_path = self.url2localpath(path)
         data = self.get_json_body()
         known_remote = data.get("remote")
+        force = data.get("force", False)
 
         current_local_branch = await self.git.get_current_branch(local_path)
 
@@ -565,6 +568,7 @@ class GitPushHandler(GitHandler):
                 local_path,
                 data.get("auth", None),
                 set_upstream,
+                force,
             )
 
         else:
@@ -590,6 +594,7 @@ class GitPushHandler(GitHandler):
                     local_path,
                     data.get("auth", None),
                     set_upstream=True,
+                    force=force,
                 )
             else:
                 response = {
