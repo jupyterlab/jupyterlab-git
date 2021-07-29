@@ -5,7 +5,7 @@ import { shallow } from 'enzyme';
 import { nullTranslator } from '@jupyterlab/translation';
 
 describe('FileItem', () => {
-  const trans = nullTranslator.load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab_git');
 
   const props: IFileItemProps = {
     contextMenu: () => {},

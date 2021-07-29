@@ -76,7 +76,7 @@ async function activate(
   // Get a reference to the default file browser extension
   const filebrowser = factory.defaultBrowser;
   translator = translator || nullTranslator;
-  const trans = translator.load('jupyterlab-git');
+  const trans = translator.load('jupyterlab_git');
 
   // Attempt to load application settings
   try {
