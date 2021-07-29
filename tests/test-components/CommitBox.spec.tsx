@@ -14,7 +14,7 @@ describe('CommitBox', () => {
     selector: '.jp-git-CommitBox'
   });
 
-  const trans = nullTranslator.load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab_git');
 
   const defaultProps: ICommitBoxProps = {
     onCommit: async () => {},

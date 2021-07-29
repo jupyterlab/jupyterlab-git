@@ -25,7 +25,7 @@ async function createModel() {
 
 describe('Toolbar', () => {
   let model: GitExtension;
-  const trans = nullTranslator.load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab_git');
 
   function createProps(props?: Partial<IToolbarProps>): IToolbarProps {
     return {

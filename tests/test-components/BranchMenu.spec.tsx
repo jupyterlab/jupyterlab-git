@@ -8,7 +8,11 @@ import * as git from '../../src/git';
 import { Logger } from '../../src/logger';
 import { GitExtension } from '../../src/model';
 import { listItemClass, nameClass } from '../../src/style/BranchMenu';
-import { mockedRequestAPI, defaultMockedResponses, DEFAULT_REPOSITORY_PATH } from '../utils';
+import {
+  mockedRequestAPI,
+  defaultMockedResponses,
+  DEFAULT_REPOSITORY_PATH
+} from '../utils';
 import ClearIcon from '@material-ui/icons/Clear';
 import { nullTranslator } from '@jupyterlab/translation';
 
@@ -60,7 +64,7 @@ async function createModel() {
 
 describe('BranchMenu', () => {
   let model: GitExtension;
-  const trans = nullTranslator.load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab_git');
 
   beforeEach(async () => {
     jest.restoreAllMocks();
@@ -143,10 +147,7 @@ describe('BranchMenu', () => {
       component.setState({
         filter: 'foo'
       });
-      const html = component
-        .find(ClearIcon)
-        .first()
-        .html();
+      const html = component.find(ClearIcon).first().html();
       expect(html.includes('<title>')).toEqual(true);
     });
 

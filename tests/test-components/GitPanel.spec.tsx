@@ -51,7 +51,7 @@ function MockSettings(commitAndPush = true) {
 }
 
 describe('GitPanel', () => {
-  const trans = nullTranslator.load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab_git');
 
   const props: IGitPanelProps = {
     model: null,
