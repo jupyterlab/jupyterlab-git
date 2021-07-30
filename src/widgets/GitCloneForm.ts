@@ -27,7 +27,7 @@ export class GitCloneForm extends Widget {
     const text = document.createElement('span');
 
     node.className = 'jp-RedirectForm';
-    text.textContent = trans.__('Enter the Clone URI of the repository');
+    text.textContent = trans.__('Enter the Clone URL of the repository');
     input.placeholder = 'https://host.com/org/repo.git';
 
     label.appendChild(text);
