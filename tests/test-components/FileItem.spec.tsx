@@ -29,7 +29,7 @@ describe('FileItem', () => {
     const component = shallow(<FileItem {...props} />);
     it('should display the full path on hover', () => {
       expect(
-        component.find('[title="some/file/path/file-name ● Modified"]')
+        component.find('[title="some/file/path/file-name • Modified"]')
       ).toHaveLength(1);
     });
   });

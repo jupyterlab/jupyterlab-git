@@ -281,7 +281,7 @@ async def test_log_handler(mock_git, jp_fetch, jp_root_dir):
     )
 
     # Then
-    mock_git.log.assert_called_with(str(local_path), 20)
+    mock_git.log.assert_called_with(str(local_path), 20, None)
 
     assert response.code == 200
     payload = json.loads(response.body)
@@ -301,7 +301,7 @@ async def test_log_handler_no_history_count(mock_git, jp_fetch, jp_root_dir):
     )
 
     # Then
-    mock_git.log.assert_called_with(str(local_path), 25)
+    mock_git.log.assert_called_with(str(local_path), 25, None)
 
     assert response.code == 200
     payload = json.loads(response.body)

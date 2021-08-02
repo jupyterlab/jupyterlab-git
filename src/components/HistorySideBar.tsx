@@ -186,7 +186,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
         })
       ) : (
         <li className={noHistoryFoundStyle}>
-          {props.trans.__('No history found for the selected file.')}
+          {props.trans.__('No history found.')}
         </li>
       )}
     </ol>
