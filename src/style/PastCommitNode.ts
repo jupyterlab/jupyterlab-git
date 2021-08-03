@@ -75,3 +75,11 @@ export const iconButtonClass = style({
   /* top | right | bottom | left */
   margin: 'auto 8px auto auto'
 });
+
+export const singleFileCommitClass = style({
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2)'
+    }
+  }
+});

@@ -187,6 +187,19 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Selected file for single file history
+   */
+  get selectedHistoryFile(): Git.IStatusFile | null {
+    return this._selectedHistoryFile;
+  }
+  set selectedHistoryFile(file: Git.IStatusFile | null) {
+    if (this._selectedHistoryFile !== file) {
+      this._selectedHistoryFile = file;
+      this._selectedHistoryFileChanged.emit(file);
+    }
+  }
+
+  /**
    * Git repository status
    */
   get status(): Git.IStatus {
@@ -205,6 +218,16 @@ export class GitExtension implements IGitExtension {
    */
   get markChanged(): ISignal<IGitExtension, void> {
     return this._markChanged;
+  }
+
+  /**
+   * A signal emitted when the current file selected for history of the Git repository changes.
+   */
+  get selectedHistoryFileChanged(): ISignal<
+    IGitExtension,
+    Git.IStatusFile | null
+  > {
+    return this._selectedHistoryFileChanged;
   }
 
   /**
@@ -271,14 +294,24 @@ export class GitExtension implements IGitExtension {
   /**
    * Match files status information based on a provided file path.
    *
-   * If the file is tracked and has no changes, undefined will be returned
+   * If the file is tracked and has no changes, a StatusFile of unmodified will be returned
    *
    * @param path the file path relative to the server root
    */
   getFile(path: string): Git.IStatusFile {
-    return this._status.files.find(status => {
-      return this.getRelativeFilePath(status.to) === path;
-    });
+    return (
+      this._status.files.find(status => {
+        return this.getRelativeFilePath(status.to) === path;
+      }) ?? {
+        x: '',
+        y: '',
+        to: path,
+        from: '',
+        is_binary: null,
+        status: 'unmodified',
+        type: this._resolveFileType(path)
+      }
+    );
   }
 
   /**
@@ -692,7 +725,8 @@ export class GitExtension implements IGitExtension {
           URLExt.join(path, 'log'),
           'POST',
           {
-            history_count: count
+            history_count: count,
+            follow_path: this.selectedHistoryFile?.to
           }
         );
       }
@@ -1375,9 +1409,14 @@ export class GitExtension implements IGitExtension {
   private _standbyCondition: () => boolean = () => false;
   private _statusPoll: Poll;
   private _taskHandler: TaskHandler<IGitExtension>;
+  private _selectedHistoryFile: Git.IStatusFile | null = null;
 
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
+  private _selectedHistoryFileChanged = new Signal<
+    IGitExtension,
+    Git.IStatusFile | null
+  >(this);
   private _repositoryChanged = new Signal<
     IGitExtension,
     IChangedArgs<string | null>

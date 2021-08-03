@@ -56,6 +56,11 @@ export interface IGitExtension extends IDisposable {
   refreshStandbyCondition: () => boolean;
 
   /**
+   * Selected file for single file history
+   */
+  selectedHistoryFile: Git.IStatusFile | null;
+
+  /**
    * Git repository status.
    */
   readonly status: Git.IStatus;
@@ -69,6 +74,14 @@ export interface IGitExtension extends IDisposable {
    * A signal emitted whenever a model task event occurs.
    */
   readonly taskChanged: ISignal<IGitExtension, string>;
+
+  /**
+   * A signal emitted when the current file selected for history of the Git repository changes.
+   */
+  readonly selectedHistoryFileChanged: ISignal<
+    IGitExtension,
+    Git.IStatusFile | null
+  >;
 
   /**
    * Add one or more files to the repository staging area.
@@ -253,7 +266,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * Match files status information based on a provided file path.
    *
-   * If the file is tracked and has no changes, undefined will be returned
+   * If the file is tracked and has no changes, a StatusFile of unmodified will be returned
    *
    * @param path the file path relative to the server root
    */
@@ -765,6 +778,7 @@ export namespace Git {
     date: string;
     commit_msg: string;
     pre_commit: string;
+    is_binary?: boolean; // for single file history
   }
 
   /** Interface for GitCommit request result,
@@ -863,6 +877,7 @@ export namespace Git {
     | 'staged'
     | 'unstaged'
     | 'partially-staged'
+    | 'unmodified'
     | null;
 
   export interface ITagResult {
@@ -959,6 +974,7 @@ export enum ContextCommandIDs {
   gitFileUnstage = 'git:context-unstage',
   gitFileStage = 'git:context-stage',
   gitFileTrack = 'git:context-track',
+  gitFileHistory = 'git:context-history',
   gitIgnore = 'git:context-ignore',
   gitIgnoreExtension = 'git:context-ignoreExtension',
   gitNoAction = 'git:no-action'

@@ -4,7 +4,6 @@ import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
-import { CommandArguments } from '../commandsAndMenu';
 import { LoggerContext } from '../logger';
 import { getDiffProvider, GitExtension } from '../model';
 import {
@@ -26,7 +25,7 @@ import {
   iconClass,
   insertionsIconClass
 } from '../style/SinglePastCommitInfo';
-import { ContextCommandIDs, Git } from '../tokens';
+import { Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { FilePath } from './FilePath';
 import { ResetRevertDialog } from './ResetRevertDialog';
@@ -57,6 +56,18 @@ export interface ISinglePastCommitInfoProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Returns a callback to be invoked on click to display a file diff.
+   *
+   * @param filePath file path
+   * @param isText indicates whether the file supports displaying a diff
+   * @returns callback
+   */
+  onOpenDiff: (
+    filePath: string,
+    isText: boolean
+  ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
 /**
@@ -262,7 +273,7 @@ export class SinglePastCommitInfo extends React.Component<
     return (
       <li
         className={commitDetailFileClass}
-        onClick={this._onDiffClickFactory(path, flg)}
+        onClick={this.props.onOpenDiff(path, flg)}
         style={style}
         title={path}
       >
@@ -311,60 +322,4 @@ export class SinglePastCommitInfo extends React.Component<
       resetRevertDialog: false
     });
   };
-
-  /**
-   * Returns a callback to be invoked clicking a button to display a file diff.
-   *
-   * @param fpath - modified file path
-   * @param bool - boolean indicating whether a displaying a diff is supported for this file path
-   * @returns callback
-   */
-  private _onDiffClickFactory(fpath: string, bool: boolean) {
-    const self = this;
-    if (bool) {
-      return onShowDiff;
-    }
-    return onClick;
-
-    /**
-     * Callback invoked upon clicking a button to display a file diff.
-     *
-     * @private
-     * @param event - event object
-     */
-    function onClick(event: React.MouseEvent<HTMLLIElement, MouseEvent>) {
-      // Prevent the commit component from being collapsed:
-      event.stopPropagation();
-    }
-
-    /**
-     * Callback invoked upon clicking a button to display a file diff.
-     *
-     * @private
-     * @param event - event object
-     */
-    async function onShowDiff(
-      event: React.MouseEvent<HTMLLIElement, MouseEvent>
-    ) {
-      // Prevent the commit component from being collapsed:
-      event.stopPropagation();
-
-      try {
-        self.props.commands.execute(ContextCommandIDs.gitFileDiff, {
-          files: [
-            {
-              filePath: fpath,
-              isText: bool,
-              context: {
-                previousRef: self.props.commit.pre_commit,
-                currentRef: self.props.commit.commit
-              }
-            }
-          ]
-        } as CommandArguments.IGitFileDiff as any);
-      } catch (err) {
-        console.error(`Failed to open diff view for ${fpath}.\n${err}`);
-      }
-    }
-  }
 }

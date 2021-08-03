@@ -244,6 +244,9 @@ describe('GitPanel', () => {
         },
         statusChanged: {
           connect: jest.fn()
+        },
+        selectedHistoryFileChanged: {
+          connect: jest.fn()
         }
       } as any;
 

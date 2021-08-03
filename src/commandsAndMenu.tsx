@@ -34,7 +34,8 @@ import {
   discardIcon,
   gitIcon,
   openIcon,
-  removeIcon
+  removeIcon,
+  historyIcon
 } from './style/icons';
 import {
   CommandIDs,
@@ -897,6 +898,25 @@ export function addCommands(
     }
   });
 
+  commands.addCommand(ContextCommandIDs.gitFileHistory, {
+    label: trans.__('History'),
+    caption: trans.__('View the history of this file'),
+    execute: args => {
+      const { files } = args as any as CommandArguments.IGitContextAction;
+      const file = files[0];
+      if (!file) {
+        return;
+      }
+      gitModel.selectedHistoryFile = file;
+      shell.activateById('jp-git-sessions');
+    },
+    isEnabled: args => {
+      const { files } = args as any as CommandArguments.IGitContextAction;
+      return files.length === 1;
+    },
+    icon: historyIcon.bindprops({ stylesheet: 'menuItem' })
+  });
+
   commands.addCommand(ContextCommandIDs.gitNoAction, {
     label: trans.__('No actions available'),
     isEnabled: () => false,
@@ -1051,9 +1071,7 @@ export function addFileBrowserContextMenu(
 
       const items = getSelectedBrowserItems();
       const statuses = new Set<Git.Status>(
-        items
-          .map(item => model.getFile(item.path)?.status)
-          .filter(status => typeof status !== 'undefined')
+        items.map(item => model.getFile(item.path).status)
       );
 
       // get commands and de-duplicate them
@@ -1078,10 +1096,9 @@ export function addFileBrowserContextMenu(
           )
       );
 
-      // if looking at a tracked file with no changes,
-      // it has no status, nor any actions available
+      // if looking at a tracked file without any actions available
       // (although `git rm` would be a valid action)
-      if (allCommands.size === 0 && statuses.size === 0) {
+      if (allCommands.size === 0) {
         allCommands.add(ContextCommandIDs.gitNoAction);
       }
 
@@ -1101,14 +1118,10 @@ export function addFileBrowserContextMenu(
         addMenuItems(
           commandsList,
           this,
-          paths
-            .map(path => model.getFile(path))
-            // if file cannot be resolved (has no action available),
-            // omit the undefined result
-            .filter(file => typeof file !== 'undefined')
+          paths.map(path => model.getFile(path))
         );
         if (wasShown) {
-          // show he menu again after downtime for refresh
+          // show the menu again after downtime for refresh
           parent.triggerActiveItem();
         }
         this._commands = commandsList;

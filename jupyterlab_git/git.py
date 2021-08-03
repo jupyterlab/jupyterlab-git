@@ -432,16 +432,24 @@ class Git:
 
         return data
 
-    async def log(self, path, history_count=10):
+    async def log(self, path, history_count=10, follow_path=None):
         """
         Execute git log command & return the result.
         """
+        is_single_file = follow_path != None
         cmd = [
             "git",
             "log",
             "--pretty=format:%H%n%an%n%ar%n%s",
             ("-%d" % history_count),
         ]
+        if is_single_file:
+            cmd = cmd + [
+                "--numstat",
+                "--follow",
+                "--",
+                follow_path,
+            ]
         code, my_output, my_error = await execute(
             cmd,
             cwd=path,
@@ -450,30 +458,28 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
+        if is_single_file:
+            # an extra newline get outputted when --numstat is used
+            my_output = my_output.replace("\n\n", "\n")
         line_array = my_output.splitlines()
         i = 0
-        PREVIOUS_COMMIT_OFFSET = 4
+        PREVIOUS_COMMIT_OFFSET = 5 if is_single_file else 4
         while i < len(line_array):
+            commit = {
+                "commit": line_array[i],
+                "author": line_array[i + 1],
+                "date": line_array[i + 2],
+                "commit_msg": line_array[i + 3],
+                "pre_commit": "",
+            }
+
+            if is_single_file:
+                commit["is_binary"] = line_array[i + 4].startswith("-\t-\t")
+
             if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
-                result.append(
-                    {
-                        "commit": line_array[i],
-                        "author": line_array[i + 1],
-                        "date": line_array[i + 2],
-                        "commit_msg": line_array[i + 3],
-                        "pre_commit": line_array[i + PREVIOUS_COMMIT_OFFSET],
-                    }
-                )
-            else:
-                result.append(
-                    {
-                        "commit": line_array[i],
-                        "author": line_array[i + 1],
-                        "date": line_array[i + 2],
-                        "commit_msg": line_array[i + 3],
-                        "pre_commit": "",
-                    }
-                )
+                commit["pre_commit"] = line_array[i + PREVIOUS_COMMIT_OFFSET]
+
+            result.append(commit)
             i += PREVIOUS_COMMIT_OFFSET
         return {"code": code, "commits": result}
 

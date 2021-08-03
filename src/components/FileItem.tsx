@@ -119,9 +119,13 @@ export interface IFileItemProps {
    */
   selectFile?: (file: Git.IStatusFile | null) => void;
   /**
+   * Optional style class
+   */
+  className?: string;
+  /**
    * Inline styling for the windowing
    */
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
   /**
    * The application language translator.
    */
@@ -133,7 +137,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
     super(props);
   }
   protected _getFileChangedLabel(change: keyof typeof STATUS_CODES): string {
-    return STATUS_CODES[change];
+    return STATUS_CODES[change] || 'Unmodified';
   }
 
   protected _getFileChangedLabelClass(change: string): string {
@@ -157,9 +161,13 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
   }
 
   protected _getFileClass(): string {
-    return this.props.selected
+    const baseClass = this.props.selected
       ? classes(fileStyle, selectedFileStyle)
       : fileStyle;
+
+    return this.props.className
+      ? `${baseClass} ${this.props.className}`
+      : baseClass;
   }
 
   render(): JSX.Element {
@@ -182,7 +190,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         }
         onDoubleClick={this.props.onDoubleClick}
         style={this.props.style}
-        title={this.props.trans.__(`%1 ● ${status}`, this.props.file.to)}
+        title={this.props.trans.__(`%1 • ${status}`, this.props.file.to)}
       >
         {this.props.markBox && (
           <GitMarkBox
