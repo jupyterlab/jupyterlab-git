@@ -212,7 +212,8 @@ export const listItemContentClass = style({
 });
 
 export const listItemDescClass = style({
-  marginBottom: 'auto'
+  marginBottom: 'auto',
+  whiteSpace: 'break-spaces'
 });
 
 export const listItemIconClass = style({
