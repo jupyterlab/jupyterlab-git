@@ -259,7 +259,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderBranchMenu(): React.ReactElement | null {
-    if (!this.props.model.pathRepository) {
+    if (this.props.model.pathRepository === null) {
       return null;
     }
     return (
