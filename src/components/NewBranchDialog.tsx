@@ -35,13 +35,6 @@ import {
 } from '../style/NewBranchDialog';
 import { Git, IGitExtension, Level } from '../tokens';
 
-const BRANCH_DESC = {
-  current:
-    'The current branch. Pick this if you want to build on work done in this branch.',
-  default:
-    'The default branch. Pick this if you want to start fresh from the default branch.'
-};
-
 const ITEM_HEIGHT = 27.5; // HTML element height for a single branch
 const CURRENT_BRANCH_HEIGHT = 66.5; // HTML element height for the current branch with description
 const HEIGHT = 200; // HTML element height for the branches list
@@ -245,7 +238,9 @@ export class NewBranchDialog extends React.Component<
         itemKey={(index, data) => data[index].name}
         itemSize={index => {
           const branch = branches[index];
-          return branch.name === this.props.currentBranch
+          return [this.props.currentBranch, 'master', 'main'].includes(
+            branch.name
+          )
             ? CURRENT_BRANCH_HEIGHT
             : ITEM_HEIGHT;
         }}
@@ -295,14 +290,23 @@ export class NewBranchDialog extends React.Component<
     const { data, index, style } = props;
     const branch = data[index] as Git.IBranch;
 
+    const isBase = branch.name === this.state.base;
     const isCurrent = branch.name === this.props.currentBranch;
 
     let isBold;
     let desc;
     if (isCurrent) {
       isBold = true;
-      desc = BRANCH_DESC['current'];
+      desc = this.props.trans.__(
+        'The current branch. Pick this if you want to build on work done in this branch.'
+      );
+    } else if (['master', 'main'].includes(branch.name)) {
+      isBold = true;
+      desc = this.props.trans.__(
+        'The default branch. Pick this if you want to start fresh from the default branch.'
+      );
     }
+
     return (
       <ListItem
         button
@@ -310,10 +314,7 @@ export class NewBranchDialog extends React.Component<
           'Create a new branch based on: %1',
           branch.name
         )}
-        className={classes(
-          listItemClass,
-          isCurrent ? activeListItemClass : null
-        )}
+        className={classes(listItemClass, isBase ? activeListItemClass : null)}
         onClick={this._onBranchClickFactory(branch.name)}
         style={style}
       >
