@@ -40,6 +40,22 @@ For JupyterLab < 3, you will need to run the following command after installing 
 jupyter lab build
 ```
 
+### Authentication to remote repository hosts
+
+This extensions does not handle credentials or authentication details. In order to connect to a remote host, it is recommended to use SSH.
+
+If you are seeing errors similar to ```
+[E yyyy-mm-dd hh:mm:ss ServerApp] 500 POST /git/....``` on the console which is running the Jupyter lab server, you probably need to set up your local Git repository's SSH connection.
+
+On the example of a GitHub-hosted repository, here is a short list of steps to follow (skip any that is already accomplished for your project):
+
+1. [Create an SSH keypair](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+2. [Register the public part of it with your Github account](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+3. Optionally, if you have more than one key managed by your ssh agent: [Create a config file for the ssh-agent](https://stackoverflow.com/a/21938804)
+4. [Tell your local Git repo to connect to remote via ssh](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-https-to-ssh)
+
+You should now be able to pull and push committed changes to and from your remote repository using the respective buttons on the top of the extension's panel.
+
 ### Uninstall
 
 ```bash
@@ -140,10 +156,10 @@ If they do not match or one is missing, please [reinstall the package](README.md
     ```bash
     jupyter labextension install @jupyterlab/git
     ```
-    
+
     If you see `@jupyterlab/git` under `Uninstalled core extensions: `, your installation may have been corrupted. You can run `jupyter lab clean --all` and
     reinstall all your extensions.
-    
+
 ## Contributing
 
 If you would like to contribute to the project, please read our [contributor documentation](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md).
