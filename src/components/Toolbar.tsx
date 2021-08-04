@@ -1,4 +1,4 @@
-import { PathExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
   caretDownIcon,
   caretUpIcon,
@@ -228,6 +228,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderRepoMenu(): React.ReactElement {
+    const repositoryName =
+      PathExt.basename(
+        this.props.repository || PageConfig.getOption('serverRoot')
+      ) || 'Jupyter Server Root';
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
@@ -235,18 +239,15 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           className={toolbarMenuButtonClass}
           title={this.props.trans.__(
             'Current repository: %1',
-            '/' + this.props.repository
+            PageConfig.getOption('serverRoot') + '/' + this.props.repository
           )}
         >
           <desktopIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>
-              {' '}
-              {this.props.trans.__('Current Repository')}{' '}
+              {this.props.trans.__('Current Repository')}
             </p>
-            <p className={toolbarMenuButtonSubtitleClass}>
-              {PathExt.basename(this.props.repository) || '/'}
-            </p>
+            <p className={toolbarMenuButtonSubtitleClass}>{repositoryName}</p>
           </div>
         </button>
       </div>
