@@ -19,6 +19,7 @@ To see the extension in action, open the example notebook included in the Binder
 ## Usage
 
 - Open the Git extension from the _Git_ tab on the left panel
+- [Set up authentication](#authentication-to-remote-repository-hosts)
 
 ## Install
 
@@ -40,23 +41,6 @@ For JupyterLab < 3, you will need to run the following command after installing 
 jupyter lab build
 ```
 
-### Authentication to remote repository hosts
-
-This extensions does not handle credentials or authentication details. In order to connect to a remote host, it is recommended to use SSH.
-
-If you are seeing errors similar to `[E yyyy-mm-dd hh:mm:ss ServerApp] 500 POST /git/<clone|push|pull|status>` on the console which is running the JupyterLab server, you probably need to set up a credentials store for your local Git repository. One of the possibility is to use SSH.
-
-Here are the steps to follow (skip any that is already accomplished for your project):
-
-1. [Create a SSH key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
-2. Register the public part of it to your Git server:  
-   * [GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
-   * [GitLab](https://docs.gitlab.com/ee/ssh/index.html#add-an-ssh-key-to-your-gitlab-account)
-3. Optionally, if you have more than one key managed by your ssh agent: [Create a config file for the ssh-agent](https://stackoverflow.com/a/21938804)
-4. Tell your local Git repository to [connect to remote via ssh](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-https-to-ssh)
-
-You should now be able to pull and push committed changes to and from your remote repository using the respective buttons on the top of the extension's panel.
-
 ### Uninstall
 
 ```bash
@@ -76,6 +60,23 @@ jupyter labextension uninstall @jupyterlab/git
 ```
 
 ## Settings
+
+### Authentication to remote repository hosts
+
+This extensions does not handle credentials or authentication details. In order to connect to a remote host, it is recommended to use SSH.
+
+If you are seeing errors similar to `[E yyyy-mm-dd hh:mm:ss ServerApp] 500 POST /git/<clone|push|pull|status>` on the console which is running the JupyterLab server, you probably need to set up a credentials store for your local Git repository. One of the possibility is to use SSH.
+
+Here are the steps to follow (skip any that is already accomplished for your project):
+
+1. [Create a SSH key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+2. Register the public part of it to your Git server:  
+   * [GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+   * [GitLab](https://docs.gitlab.com/ee/ssh/index.html#add-an-ssh-key-to-your-gitlab-account)
+3. Optionally, if you have more than one key managed by your ssh agent: [Create a config file for the ssh-agent](https://stackoverflow.com/a/21938804)
+4. Tell your local Git repository to [connect to remote via ssh](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-https-to-ssh)
+
+You should now be able to pull and push committed changes to and from your remote repository using the respective buttons on the top of the extension's panel.
 
 ### UI Settings
 
