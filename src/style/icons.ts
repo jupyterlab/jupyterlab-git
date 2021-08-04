@@ -3,6 +3,7 @@ import { LabIcon } from '@jupyterlab/ui-components';
 // icon svg import statements
 import addSvg from '../../style/icons/add.svg';
 import branchSvg from '../../style/icons/branch.svg';
+import clockSvg from '../../style/icons/clock.svg';
 import cloneSvg from '../../style/icons/clone.svg';
 import deletionsMadeSvg from '../../style/icons/deletions.svg';
 import desktopSvg from '../../style/icons/desktop.svg';
@@ -17,7 +18,7 @@ import removeSvg from '../../style/icons/remove.svg';
 import rewindSvg from '../../style/icons/rewind.svg';
 import tagSvg from '../../style/icons/tag.svg';
 import trashSvg from '../../style/icons/trash.svg';
-import clockSvg from '../../style/icons/clock.svg';
+import verticalMoreSvg from '../../style/icons/vertical-more.svg';
 
 export const gitIcon = new LabIcon({ name: 'git', svgstr: gitSvg });
 export const addIcon = new LabIcon({
@@ -52,6 +53,10 @@ export const insertionsMadeIcon = new LabIcon({
   name: 'git:insertions',
   svgstr: insertionsMadeSvg
 });
+export const historyIcon = new LabIcon({
+  name: 'git:history',
+  svgstr: clockSvg
+});
 export const openIcon = new LabIcon({
   name: 'git:open-file',
   svgstr: openSvg
@@ -80,7 +85,7 @@ export const trashIcon = new LabIcon({
   name: 'git:trash',
   svgstr: trashSvg
 });
-export const historyIcon = new LabIcon({
-  name: 'git:history',
-  svgstr: clockSvg
+export const verticalMoreIcon = new LabIcon({
+  name: 'git:vertical-more',
+  svgstr: verticalMoreSvg
 });

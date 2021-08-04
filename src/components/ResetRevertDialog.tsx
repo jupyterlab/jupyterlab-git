@@ -3,7 +3,6 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import ClearIcon from '@material-ui/icons/Clear';
 import * as React from 'react';
-import TextareaAutosize from 'react-textarea-autosize';
 import { classes } from 'typestyle';
 import { Logger } from '../logger';
 import {
@@ -11,9 +10,7 @@ import {
   buttonClass,
   cancelButtonClass,
   closeButtonClass,
-  commitDescriptionClass,
   commitFormClass,
-  commitSummaryClass,
   contentWrapperClass,
   resetRevertDialogClass,
   submitButtonClass,
@@ -21,6 +18,7 @@ import {
   titleWrapperClass
 } from '../style/ResetRevertDialog';
 import { Git, IGitExtension, Level } from '../tokens';
+import { CommitMessage } from './CommitMessage';
 
 /**
  * Interface describing component properties.
@@ -146,30 +144,19 @@ export class ResetRevertDialog extends React.Component<
                   shortCommit
                 )}
           </p>
-          {isRevert ? (
+          {isRevert && (
             <div className={commitFormClass}>
-              <input
-                className={commitSummaryClass}
-                type="text"
-                placeholder={this._defaultSummary()}
-                title={this.props.trans.__(
-                  'Enter a commit message summary (a single line, preferably less than 50 characters)'
-                )}
-                value={this.state.summary}
-                onChange={this._onSummaryChange}
-              />
-              <TextareaAutosize
-                className={commitDescriptionClass}
-                minRows={5}
-                placeholder={this._defaultDescription()}
-                title={this.props.trans.__(
-                  'Enter a commit message description'
-                )}
-                value={this.state.description}
-                onChange={this._onDescriptionChange}
+              <CommitMessage
+                trans={this.props.trans}
+                summary={this.state.summary}
+                summaryPlaceholder={this._defaultSummary()}
+                description={this.state.description}
+                descriptionPlaceholder={this._defaultDescription()}
+                setSummary={this._onSummaryChange}
+                setDescription={this._onDescriptionChange}
               />
             </div>
-          ) : null}
+          )}
         </div>
         <DialogActions className={actionsWrapperClass}>
           <input
@@ -195,23 +182,19 @@ export class ResetRevertDialog extends React.Component<
 
   /**
    * Callback invoked upon updating a commit message summary.
-   *
-   * @param event - event object
    */
-  private _onSummaryChange = (event: any): void => {
+  private _onSummaryChange = (summary: string): void => {
     this.setState({
-      summary: event.target.value
+      summary
     });
   };
 
   /**
    * Callback invoked upon updating a commit message description.
-   *
-   * @param event - event object
    */
-  private _onDescriptionChange = (event: any): void => {
+  private _onDescriptionChange = (description: string): void => {
     this.setState({
-      description: event.target.value
+      description
     });
   };
 

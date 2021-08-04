@@ -15,8 +15,7 @@ export const commitFormClass = style({
 });
 
 export const commitSummaryClass = style({
-  width: '100%',
-  height: '1.5em',
+  height: '2em',
 
   marginBottom: '1em',
   padding: 'var(--jp-code-padding)',
@@ -24,31 +23,11 @@ export const commitSummaryClass = style({
   outline: 'none',
   overflowX: 'auto',
 
-  color: 'var(--jp-ui-font-color1)',
-  fontSize: 'var(--jp-ui-font-size1)',
-  fontWeight: 300,
-
-  backgroundColor: 'var(--jp-layout-color1)',
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  borderRadius: '3px',
-
-  $nest: {
-    '&:active': {
-      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
-    },
-    '&:focus': {
-      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
-    },
-    '&:disabled': {
-      cursor: 'not-allowed',
-      backgroundColor: 'var(--jp-layout-color3)'
-    }
-  }
+  borderRadius: '3px'
 });
 
 export const commitDescriptionClass = style({
-  width: '100%',
-
   marginBottom: '1em',
   padding: 'var(--jp-code-padding)',
 
@@ -56,74 +35,44 @@ export const commitDescriptionClass = style({
   overflowX: 'auto',
   resize: 'none',
 
-  color: 'var(--jp-ui-font-color1)',
-  fontSize: 'var(--jp-ui-font-size1)',
-  fontWeight: 300,
-
-  backgroundColor: 'var(--jp-layout-color1)',
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
   borderRadius: '3px',
 
   $nest: {
-    '&:focus': {
-      outline: 'none',
-      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
-    },
-    '&:active': {
-      outline: 'none',
-      border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
-    },
-    '&::placeholder': {
+    '&>*::placeholder': {
       color: 'var(--jp-ui-font-color3)'
     },
-    '&::-webkit-input-placeholder': {
+    '&>*::-webkit-input-placeholder': {
       color: 'var(--jp-ui-font-color3)'
     },
-    '&::-moz-placeholder': {
+    '&>*::-moz-placeholder': {
       color: 'var(--jp-ui-font-color3)'
     },
-    '&::-ms-input-placeholder': {
+    '&>*::-ms-input-placeholder': {
       color: 'var(--jp-ui-font-color3)'
-    },
-    '&:disabled': {
-      cursor: 'not-allowed',
-      backgroundColor: 'var(--jp-layout-color3)'
     }
   }
 });
 
 export const commitButtonClass = style({
-  width: '100%',
-  height: '2em',
-
-  marginBottom: '0.5em',
-
-  color: 'white',
-  fontSize: 'var(--jp-ui-font-size1)',
-
   cursor: 'pointer',
-
-  backgroundColor: 'var(--md-blue-500)',
-  border: '0',
-  borderRadius: '3px',
+  color: 'var(--jp-ui-inverse-font-color1)',
+  backgroundColor: 'var(--jp-brand-color1)',
 
   $nest: {
     '&:hover': {
-      backgroundColor: 'var(--md-blue-600)'
-    },
-    '&:active': {
-      backgroundColor: 'var(--md-blue-700)'
-    },
-    '&:disabled': {
-      cursor: 'default',
-      color: 'var(--jp-ui-inverse-font-color0)',
-      backgroundColor: 'var(--jp-layout-color3)'
-    },
-    '&:disabled:hover': {
-      backgroundColor: 'var(--jp-layout-color3)'
-    },
-    '&:disabled:active': {
-      backgroundColor: 'var(--jp-layout-color3)'
+      backgroundColor: 'var(--jp-brand-color2)'
+    }
+  }
+});
+
+export const commitVariantSelector = style({
+  flex: '0 0 20px',
+  lineHeight: 'initial',
+
+  $nest: {
+    '& .jp-icon3[fill]': {
+      fill: 'var(--jp-ui-inverse-font-color1)'
     }
   }
 });
@@ -134,4 +83,31 @@ export const commitInputWrapperClass = style({
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'space-around'
+});
+
+export const commitPaperClass = style({
+  maxWidth: '250px'
+});
+
+export const commitVariantText = style({
+  fontSize: 'var(--jp-ui-font-size1)',
+  whiteSpace: 'break-spaces'
+});
+
+export const commitRoot = style({
+  color: 'var(--jp-ui-font-color1)',
+  fontSize: 'var(--jp-ui-font-size1)',
+  fontFamily: 'var(--jp-ui-font-family)',
+  backgroundColor: 'var(--jp-layout-color1)'
+});
+
+export const activeStyle = style({
+  outline: 'none',
+  border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+});
+
+export const disabledStyle = style({
+  cursor: 'not-allowed !important',
+  color: 'var(--jp-ui-font-color2) !important',
+  backgroundColor: 'var(--jp-layout-color3) !important'
 });
