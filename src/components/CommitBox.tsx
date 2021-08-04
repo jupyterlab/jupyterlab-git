@@ -29,8 +29,17 @@ import {
 import { CommandIDs } from '../tokens';
 import { CommitMessage } from './CommitMessage';
 
-export interface ICommitVariant {
+/**
+ * Commit action
+ */
+interface ICommitVariant {
+  /**
+   * Action title
+   */
   title: string;
+  /**
+   * Action description
+   */
   description: string;
 }
 
@@ -69,7 +78,7 @@ export interface ICommitBoxProps {
   description: string;
 
   /**
-   * Whether the "amend" checkbox is checked
+   * Whether commit is amending the previous one or not
    */
   amend: boolean;
 
@@ -102,7 +111,13 @@ export interface ICommitBoxProps {
   onCommit: () => Promise<void>;
 }
 
+/**
+ * CommitBox state
+ */
 export interface ICommitBoxState {
+  /**
+   * Whether the commit variant menu is opened or not.
+   */
   open: boolean;
 }
 
@@ -280,7 +295,12 @@ export class CommitBox extends React.Component<
     return binding.keys.join(' ');
   };
 
-  private _handleClose = (event: React.MouseEvent<Document, MouseEvent>) => {
+  /**
+   * Close the commit variant menu if needed.
+   */
+  private _handleClose = (
+    event: React.MouseEvent<Document, MouseEvent>
+  ): void => {
     if (
       this._anchorRef.current &&
       this._anchorRef.current.contains(event.target as HTMLElement)
@@ -291,17 +311,23 @@ export class CommitBox extends React.Component<
     this.setState({ open: false });
   };
 
+  /**
+   * Handle commit variant menu item click
+   */
   private _handleMenuItemClick = (
     event: React.MouseEvent<HTMLLIElement, MouseEvent>,
     index: number
-  ) => {
+  ): void => {
     this.setState({
       open: false
     });
     this.props.setAmend(index === 1);
   };
 
-  private _handleToggle = () => {
+  /**
+   * Toggle state of the commit variant menu visibility
+   */
+  private _handleToggle = (): void => {
     this.setState({ open: !this.state.open });
   };
 
