@@ -68,6 +68,7 @@ export const commitButtonClass = style({
 
 export const commitVariantSelector = style({
   flex: '0 0 20px',
+  lineHeight: 'initial',
 
   $nest: {
     '& .jp-icon3[fill]': {

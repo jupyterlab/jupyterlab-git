@@ -1,11 +1,10 @@
 import { TranslationBundle } from '@jupyterlab/translation';
-import { caretDownEmptyThinIcon, checkIcon } from '@jupyterlab/ui-components';
+import { checkIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Grow from '@material-ui/core/Grow';
-import Input from '@material-ui/core/Input';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Paper from '@material-ui/core/Paper';
@@ -14,22 +13,21 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import { listItemIconClass } from '../style/BranchMenu';
 import {
-  activeStyle,
   commitButtonClass,
-  commitDescriptionClass,
   commitFormClass,
   commitPaperClass,
   commitRoot,
-  commitSummaryClass,
   commitVariantSelector,
   disabledStyle
 } from '../style/CommitBox';
+import { verticalMoreIcon } from '../style/icons';
 import {
   listItemBoldTitleClass,
   listItemContentClass,
   listItemDescClass
 } from '../style/NewBranchDialog';
 import { CommandIDs } from '../tokens';
+import { CommitMessage } from './CommitMessage';
 
 export interface ICommitVariant {
   title: string;
@@ -174,61 +172,16 @@ export class CommitBox extends React.Component<
     );
     return (
       <div className={classes(commitFormClass, 'jp-git-CommitBox')}>
-        <Input
-          className={commitSummaryClass}
-          classes={{
-            root: commitRoot,
-            focused: activeStyle,
-            disabled: disabledStyle
-          }}
-          type="text"
-          placeholder={summaryPlaceholder}
-          title={
-            this.props.amend
-              ? this.props.trans.__(
-                  'Amending the commit will re-use the previous commit summary'
-                )
-              : this.props.trans.__(
-                  'Enter a commit message summary (a single line, preferably less than 50 characters)'
-                )
-          }
-          value={this.props.summary}
-          onChange={this._onSummaryChange}
-          onKeyPress={this._onSummaryKeyPress}
+        <CommitMessage
+          trans={this.props.trans}
+          summary={this.props.summary}
+          summaryPlaceholder={summaryPlaceholder}
+          description={this.props.description}
           disabled={this.props.amend}
-          disableUnderline={true}
-          fullWidth={true}
+          setSummary={this.props.setSummary}
+          setDescription={this.props.setDescription}
         />
-        <Input
-          className={commitDescriptionClass}
-          classes={{
-            root: commitRoot,
-            focused: activeStyle,
-            disabled: disabledStyle
-          }}
-          multiline
-          minRows={5}
-          maxRows={10}
-          placeholder={this.props.trans.__('Description (optional)')}
-          title={
-            this.props.amend
-              ? this.props.trans.__(
-                  'Amending the commit will re-use the previous commit summary'
-                )
-              : this.props.trans.__('Enter a commit message description')
-          }
-          value={this.props.description}
-          onChange={this._onDescriptionChange}
-          disabled={this.props.amend}
-          disableUnderline={true}
-          fullWidth={true}
-        />
-        <ButtonGroup
-          ref={this._anchorRef}
-          fullWidth={true}
-          size="small"
-          // className={commitInputWrapperClass}
-        >
+        <ButtonGroup ref={this._anchorRef} fullWidth={true} size="small">
           <Button
             classes={{
               root: commitButtonClass,
@@ -252,7 +205,7 @@ export class CommitBox extends React.Component<
             aria-haspopup="menu"
             onClick={this._handleToggle}
           >
-            <caretDownEmptyThinIcon.react tag="span" />
+            <verticalMoreIcon.react tag="span" />
           </Button>
         </ButtonGroup>
         <Popper
@@ -350,39 +303,6 @@ export class CommitBox extends React.Component<
 
   private _handleToggle = () => {
     this.setState({ open: !this.state.open });
-  };
-
-  /**
-   * Callback invoked upon updating a commit message description.
-   *
-   * @param event - event object
-   */
-  private _onDescriptionChange = (event: any): void => {
-    this.props.setDescription(event.target.value);
-  };
-
-  /**
-   * Callback invoked upon updating a commit message summary.
-   *
-   * @param event - event object
-   */
-  private _onSummaryChange = (event: any): void => {
-    this.props.setSummary(event.target.value);
-  };
-
-  /**
-   * Callback invoked upon a `'keypress'` event when entering a commit message summary.
-   *
-   * ## Notes
-   *
-   * -   Prevents triggering a `'submit'` action when hitting the `ENTER` key while entering a commit message summary.
-   *
-   * @param event - event object
-   */
-  private _onSummaryKeyPress = (event: React.KeyboardEvent): void => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-    }
   };
 
   /**
