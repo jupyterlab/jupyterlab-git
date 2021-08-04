@@ -44,15 +44,16 @@ jupyter lab build
 
 This extensions does not handle credentials or authentication details. In order to connect to a remote host, it is recommended to use SSH.
 
-If you are seeing errors similar to ```
-[E yyyy-mm-dd hh:mm:ss ServerApp] 500 POST /git/....``` on the console which is running the Jupyter lab server, you probably need to set up your local Git repository's SSH connection.
+If you are seeing errors similar to `[E yyyy-mm-dd hh:mm:ss ServerApp] 500 POST /git/<clone|push|pull|status>` on the console which is running the JupyterLab server, you probably need to set up a credentials store for your local Git repository. One of the possibility is to use SSH.
 
-On the example of a GitHub-hosted repository, here is a short list of steps to follow (skip any that is already accomplished for your project):
+Here are the steps to follow (skip any that is already accomplished for your project):
 
-1. [Create an SSH keypair](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
-2. [Register the public part of it with your Github account](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+1. [Create a SSH key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+2. Register the public part of it to your Git server:  
+   * [GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+   * [GitLab](https://docs.gitlab.com/ee/ssh/index.html#add-an-ssh-key-to-your-gitlab-account)
 3. Optionally, if you have more than one key managed by your ssh agent: [Create a config file for the ssh-agent](https://stackoverflow.com/a/21938804)
-4. [Tell your local Git repo to connect to remote via ssh](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-https-to-ssh)
+4. Tell your local Git repository to [connect to remote via ssh](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-https-to-ssh)
 
 You should now be able to pull and push committed changes to and from your remote repository using the respective buttons on the top of the extension's panel.
 
