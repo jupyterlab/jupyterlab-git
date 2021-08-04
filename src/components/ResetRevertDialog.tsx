@@ -151,6 +151,7 @@ export class ResetRevertDialog extends React.Component<
                 summary={this.state.summary}
                 summaryPlaceholder={this._defaultSummary()}
                 description={this.state.description}
+                descriptionPlaceholder={this._defaultDescription()}
                 setSummary={this._onSummaryChange}
                 setDescription={this._onDescriptionChange}
               />
@@ -181,23 +182,19 @@ export class ResetRevertDialog extends React.Component<
 
   /**
    * Callback invoked upon updating a commit message summary.
-   *
-   * @param event - event object
    */
-  private _onSummaryChange = (event: any): void => {
+  private _onSummaryChange = (summary: string): void => {
     this.setState({
-      summary: event.target.value
+      summary
     });
   };
 
   /**
    * Callback invoked upon updating a commit message description.
-   *
-   * @param event - event object
    */
-  private _onDescriptionChange = (event: any): void => {
+  private _onDescriptionChange = (description: string): void => {
     this.setState({
-      description: event.target.value
+      description
     });
   };
 

@@ -19,6 +19,11 @@ export interface ICommitMessageProps {
   description: string;
 
   /**
+   * Commit message description placeholder.
+   */
+  descriptionPlaceholder?: string;
+
+  /**
    * Whether the commit message can be edited or not.
    */
   disabled?: boolean;
@@ -130,7 +135,10 @@ export function CommitMessage(props: ICommitMessageProps): JSX.Element {
         multiline
         minRows={5}
         maxRows={10}
-        placeholder={props.trans.__('Description (optional)')}
+        placeholder={
+          props.descriptionPlaceholder ??
+          props.trans.__('Description (optional)')
+        }
         title={
           props.disabled
             ? props.trans.__(
