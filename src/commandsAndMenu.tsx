@@ -558,6 +558,16 @@ export function addCommands(
       for (const file of files) {
         const { context, filePath, isText, status } = file;
 
+        // Merge conflict
+        // TODO: handle
+        if (status === 'unmerged') {
+          logger.log({
+            message: 'File has conflicts!',
+            level: Level.ERROR
+          });
+          continue;
+        }
+
         // nothing to compare to for untracked files
         if (status === 'untracked') {
           continue;
