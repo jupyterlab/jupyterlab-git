@@ -878,6 +878,7 @@ export namespace Git {
     | 'unstaged'
     | 'partially-staged'
     | 'unmodified'
+    | 'unmerged'
     | null;
 
   export interface ITagResult {
