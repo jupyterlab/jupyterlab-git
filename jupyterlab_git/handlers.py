@@ -805,6 +805,22 @@ class GitTagCheckoutHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+class GitMergeDiffHandler(GitHandler):
+    """
+    Handler to show a 3-way diff of a file with merge conflicts.
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        data = self.get_json_body()
+        filename = data["filename"]
+        response = await self.git.get_unmerged_file_contents(
+            filename,
+            self.url2localpath(path),
+        )
+        self.finish(json.dumps(response))
+
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -842,6 +858,7 @@ def setup_handlers(web_app):
         ("/tags", GitTagHandler),
         ("/tag_checkout", GitTagCheckoutHandler),
         ("/add", GitAddHandler),
+        ("/merge_diff", GitMergeDiffHandler),
     ]
 
     handlers = [
