@@ -36,7 +36,8 @@ module.exports = {
       ],
       curly: ['error', 'all'],
       eqeqeq: 'error',
-      'prefer-arrow-callback': 'error'
+      'prefer-arrow-callback': 'error',
+      "react/prop-types": "off"
     },
     settings: {
       react: {

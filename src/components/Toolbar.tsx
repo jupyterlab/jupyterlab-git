@@ -26,10 +26,14 @@ import {
   changeConnectionStatusBarLeftClass,
   changeConnectionStatusButtonClass
 } from '../style/Toolbar';
-import { GitCredentialsForm } from '../widgets/CredentialsBox';
 import { GitPullPushDialog, Operation } from '../widgets/gitPushPull';
 import { IGitExtension } from '../tokens';
 import { BranchMenu } from './BranchMenu';
+import {
+  ShowReactDialog,
+  ShowReactDialogValidator
+} from '../widgets/CredentialsBox';
+import { IShowDialogResult } from '../commonData/interfaces';
 
 /**
  * Displays an error dialog when a Git operation fails.
@@ -49,27 +53,38 @@ async function showGitOperationDialog(
     body: new GitPullPushDialog(model, operation),
     buttons: [Dialog.okButton({ label: 'DISMISS' })]
   });
-  let retry = false;
-  while (!result.button.accept) {
-    const credentials = await showDialog({
-      title: 'Git credentials required',
-      body: new GitCredentialsForm(
-        'Enter credentials for remote repository',
-        retry ? 'Incorrect username or password.' : ''
-      ),
-      buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OK' })]
-    });
 
-    if (!credentials.button.accept) {
+  let errorMess = '';
+  let credentials: IShowDialogResult = {
+    isSubmited: false,
+    value: {
+      password_secret: '',
+      username: ''
+    }
+  };
+
+  while (!result.button.accept) {
+    credentials = await ShowReactDialog(errorMess, credentials.value);
+
+    errorMess = '';
+
+    if (!credentials.isSubmited) {
       break;
     }
 
-    result = await showDialog({
-      title: title,
-      body: new GitPullPushDialog(model, operation, credentials.value),
-      buttons: [Dialog.okButton({ label: 'DISMISS' })]
-    });
-    retry = true;
+    const { isCorrect, ans } = ShowReactDialogValidator(credentials.value);
+
+    if (!isCorrect) {
+      errorMess = ans;
+    } else {
+      result = await showDialog({
+        title: title,
+        body: new GitPullPushDialog(model, operation, credentials.value),
+        buttons: [Dialog.okButton({ label: 'DISMISS' })]
+      });
+
+      errorMess = 'Incorrect username or secret';
+    }
   }
 }
 

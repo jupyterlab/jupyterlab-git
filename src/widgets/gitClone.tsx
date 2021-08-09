@@ -13,7 +13,11 @@ import * as React from 'react';
 import { AUTH_ERROR_MESSAGES } from '../git';
 import { cloneButtonStyle } from '../style/CloneButton';
 import { IGitExtension } from '../tokens';
-import { GitCredentialsForm } from './CredentialsBox';
+import {
+  ShowReactDialog,
+  ShowReactDialogValidator
+} from '../widgets/CredentialsBox';
+import { IShowDialogResult } from '../commonData/interfaces';
 
 export function addCloneButton(model: IGitExtension, filebrowser: FileBrowser) {
   filebrowser.toolbar.addItem(
@@ -56,7 +60,15 @@ async function makeApiCall(
   try {
     let response = await model.clone(path, cloneUrl);
 
-    let retry = false;
+    let errorMess = '';
+    let result: IShowDialogResult = {
+      isSubmited: false,
+      value: {
+        password_secret: '',
+        username: ''
+      }
+    };
+
     while (response.code !== 0) {
       if (
         response.code === 128 &&
@@ -64,17 +76,18 @@ async function makeApiCall(
           message => response.message.indexOf(message) > -1
         ).indexOf(true) > -1
       ) {
-        // request user credentials and try to clone again
-        const result = await showDialog({
-          title: 'Git credentials required',
-          body: new GitCredentialsForm(
-            'Enter credentials for remote repository',
-            retry ? 'Incorrect username or password.' : ''
-          )
-        });
-        retry = true;
+        result = await ShowReactDialog(errorMess, result.value);
 
-        if (result.button.accept) {
+        if (result.isSubmited) {
+          const { ans, isCorrect } = ShowReactDialogValidator(result.value);
+
+          if (!isCorrect) {
+            errorMess = ans;
+            continue;
+          } else {
+            errorMess = 'Incorrect username or secret';
+          }
+
           // user accepted attempt to login
           // try to clone again
           response = await model.clone(path, cloneUrl, result.value);

@@ -13,7 +13,7 @@
     "jupyterlab-extension"
   ],
   "scripts": {
-    "build": "jlpm install && tsc",
+    "build": "tsc",
     "build:labextension": "jlpm build && jlpm clean:labextension && mkdirp jupyterlab_git/labextension && cd jupyterlab_git/labextension && npm pack ../..",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "clean:more": "jlpm clean && rimraf build dist MANIFEST",
@@ -60,15 +60,17 @@
     "@jupyterlab/services": "^5.0.0",
     "@jupyterlab/settingregistry": "^2.0.0",
     "@jupyterlab/terminal": "^2.0.0",
-    "@jupyterlab/ui-components": "^2.0.0",
+    "@jupyterlab/ui-components": "^2.3.0",
     "@lumino/polling": "^1.0.4",
     "@lumino/widgets": "^1.11.1",
     "@material-ui/core": "^4.8.2",
     "@material-ui/icons": "^4.5.1",
     "diff-match-patch": "^1.0.4",
+    "final-form": "^4.20.2",
     "nbdime": "^6.0.0",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
+    "react-final-form": "^6.5.3",
     "react-textarea-autosize": "^7.1.2",
     "typestyle": "^2.0.1"
   },
@@ -80,8 +82,8 @@
     "@types/diff-match-patch": "^1.0.32",
     "@types/enzyme": "3.1.15",
     "@types/jest": "^24",
-    "@types/react": "~16.8.13",
-    "@types/react-dom": "~16.0.5",
+    "@types/react": "~16.9.0",
+    "@types/react-dom": "~16.9.0",
     "@types/react-textarea-autosize": "^4.3.5",
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",
@@ -133,7 +135,7 @@
   },
   "homepage": "https://github.com/jupyterlab/jupyterlab-git",
   "resolutions": {
-    "@types/react": "~16.8.4",
+    "@types/react": "*",
     "**/extract-zip/mkdirp": "^0.5.3"
   }
 }
