@@ -363,7 +363,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     return (
       <FileItem
         trans={this.props.trans}
-        actions={diffButton}
+        actions={!file.is_binary && diffButton}
         file={file}
         contextMenu={this.openContextMenu}
         model={this.props.model}
@@ -387,12 +387,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             title={this.props.trans.__('Stage all changes')}
             onClick={() => {
               // TODO open modal with confirmation to stage with merge conflicts
+              // TODO REMOVE ACTION 
             }}
           />
         }
         collapsible
         files={files}
-        heading={this.props.trans.__('Unmerged')}
+        heading={this.props.trans.__('Conflicted')}
         height={height}
         rowRenderer={this._renderUnmergedRow}
       />
