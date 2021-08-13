@@ -58,7 +58,7 @@ describe('plugin', () => {
         app,
         null,
         null,
-        { defaultBrowser: null },
+        { tracker: { currentWidget: null } },
         null,
         settingRegistry
       );
@@ -93,7 +93,7 @@ describe('plugin', () => {
         app,
         null,
         null,
-        { defaultBrowser: null },
+        { tracker: { currentWidget: null } },
         null,
         settingRegistry
       );
@@ -127,7 +127,7 @@ describe('plugin', () => {
         app,
         null,
         null,
-        { defaultBrowser: null },
+        { tracker: { currentWidget: null } },
         null,
         settingRegistry
       );
@@ -158,7 +158,7 @@ describe('plugin', () => {
         app,
         null,
         null,
-        { defaultBrowser: null },
+        { tracker: { currentWidget: null } },
         null,
         settingRegistry
       );
