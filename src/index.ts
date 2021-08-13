@@ -74,7 +74,7 @@ async function activate(
   let settings: ISettingRegistry.ISettings;
   let serverSettings: Git.IServerSettings;
   // Get a reference to the default file browser extension
-  const filebrowser = factory.defaultBrowser;
+  const filebrowser = factory.tracker.currentWidget;
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab_git');
 
@@ -157,14 +157,14 @@ async function activate(
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Add JupyterLab commands
-    addCommands(app, gitExtension, factory.defaultBrowser, settings, trans);
+    addCommands(app, gitExtension, filebrowser.model, settings, trans);
 
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
       gitExtension,
       settings,
       app.commands,
-      factory.defaultBrowser.model,
+      filebrowser.model,
       trans
     );
     gitPlugin.id = 'jp-git-sessions';
@@ -184,7 +184,7 @@ async function activate(
     mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });
 
     // Add a clone button to the file browser extension toolbar
-    addCloneButton(gitExtension, factory.defaultBrowser, app.commands);
+    addCloneButton(gitExtension, filebrowser, app.commands);
 
     // Add the status bar widget
     addStatusBarWidget(statusBar, gitExtension, settings, trans);
