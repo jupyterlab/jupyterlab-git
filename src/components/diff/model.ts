@@ -25,6 +25,19 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     return this._changed;
   }
 
+  protected _didContentChange(
+    a: Git.Diff.IContent<T>,
+    b: Git.Diff.IContent<T>
+  ): boolean {
+    return (
+      a.label !== b.label || a.source !== b.source || a.updateAt !== b.updateAt
+    );
+  }
+
+  protected _emitChanged(type: Git.Diff.IModelChange['type']) {
+    this._changed.emit({ type });
+  }
+
   /**
    * Challenger description
    */
@@ -32,14 +45,11 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     return this._challenger;
   }
   set challenger(v: Git.Diff.IContent<T>) {
-    const emitSignal =
-      this._challenger.label !== v.label ||
-      this._challenger.source !== v.source ||
-      this._challenger.updateAt !== v.updateAt;
+    const emitSignal = this._didContentChange(this._challenger, v);
     this._challenger = v;
 
     if (emitSignal) {
-      this._changed.emit({ type: 'challenger' });
+      this._emitChanged('challenger');
     }
   }
 
@@ -57,13 +67,10 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     return this._reference;
   }
   set reference(v: Git.Diff.IContent<T>) {
-    const emitSignal =
-      this._reference.label !== v.label ||
-      this._reference.source !== v.source ||
-      this._reference.updateAt !== v.updateAt;
+    const emitSignal = this._didContentChange(this._reference, v);
     this._reference = v;
     if (emitSignal) {
-      this._changed.emit({ type: 'reference' });
+      this._emitChanged('reference');
     }
   }
 
@@ -91,4 +98,30 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
   private _changed: Signal<DiffModel<T>, Git.Diff.IModelChange>;
   private _isDisposed = false;
   private _filename: string;
+}
+
+/**
+ * Model for merge conflicts
+ */
+export class MergeDiffModel<T> extends DiffModel<T> {
+  constructor(props: Omit<Git.Diff.IModel<T>, 'changed'>) {
+    super(props);
+    this._base = props.base;
+  }
+
+  /**
+   * Base description
+   */
+  get base(): Git.Diff.IContent<T> {
+    return this._base;
+  }
+  set base(v: Git.Diff.IContent<T>) {
+    const emitSignal = this._didContentChange(this._base, v);
+    this._base = v;
+    if (emitSignal) {
+      this._emitChanged('base');
+    }
+  }
+
+  protected _base: Git.Diff.IContent<T>;
 }

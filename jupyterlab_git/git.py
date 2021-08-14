@@ -1173,38 +1173,6 @@ class Git:
                 )
             )
 
-    async def show_from_object(self, ref, path):
-        """
-        Execute git show <ref> command & return the result.
-        """
-        command = ["git", "show", ref]
-
-        code, output, error = await execute(command, cwd=path)
-
-        error_messages = map(
-            lambda n: n.lower(),
-            [
-                "fatal: Object '{}' exists on disk, but not here".format(ref),
-                "fatal: Object '{}' does not exist (neither on disk nor in the index)".format(
-                    ref
-                ),
-                # TODO fix this
-                "fatal: Object '{}' does not exist in 'HEAD'".format(ref),
-                "fatal: Invalid object name 'HEAD'",
-            ],
-        )
-        lower_error = error.lower()
-        if code == 0:
-            return output
-        elif any([msg in lower_error for msg in error_messages]):
-            return ""
-        else:
-            raise tornado.web.HTTPError(
-                log_message="Error [{}] occurred while executing [{}] command to retrieve plaintext diff.".format(
-                    error, " ".join(command)
-                )
-            )
-
     async def show(self, filename, ref, path):
         """
         Execute git show <ref:filename> command & return the result.
@@ -1480,32 +1448,3 @@ class Git:
                 "command": " ".join(command),
                 "message": error,
             }
-
-    async def get_unmerged_file_contents(self, filename, path):
-        """
-        Returns the three-way-diff contents of an unmerged file
-
-        Execute `git ls-files -uz <filename>` command & return the file contents
-        Of the three object refs.
-
-        Args:
-            filename (str): Filename (relative to the git repository)
-            path (str): Git repository filepath
-        """
-        command = ["git", "ls-files", "-u", "-z", filename]
-
-        code, output, error = await execute(command, cwd=path)
-        if code != 0:
-            return {
-                "code": code,
-                "command": " ".join(command),
-                "message": error,
-            }
-
-        result = []
-        line_iterable = iter(strip_and_split(output))
-        for line in line_iterable:
-            ref = line.split(" ")[1]
-            content = await self.show_from_object(ref, path)
-            result.append(content)
-        return {"code": code, "contents": result}
