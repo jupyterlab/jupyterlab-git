@@ -365,12 +365,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         trans={this.props.trans}
         actions={!file.is_binary && diffButton}
         file={file}
-        contextMenu={this.openContextMenu}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
         selectFile={this.updateSelectedFile}
         onDoubleClick={() => this._openDiffView(file)}
-        style={style} // TODO probably want to give a different 'danger' style
+        style={{ ...style, color: 'var(--jp-warn-color0)' }}
       />
     );
   };
@@ -379,18 +378,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     // Hide section if no merge conflicts are present
     return files.length > 0 ? (
       <GitStage
-        actions={
-          <ActionButton
-            className={hiddenButtonStyle}
-            disabled={files.length === 0}
-            icon={removeIcon}
-            title={this.props.trans.__('Stage all changes')}
-            onClick={() => {
-              // TODO open modal with confirmation to stage with merge conflicts
-              // TODO REMOVE ACTION 
-            }}
-          />
-        }
         collapsible
         files={files}
         heading={this.props.trans.__('Conflicted')}
