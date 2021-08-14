@@ -470,10 +470,12 @@ export function addCommands(
             const widget = await buildDiffWidget(model, diffWidget.toolbar);
 
             diffWidget.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+            const refreshLabel = trans.__('Refresh');
 
             const refreshButton = new ToolbarButton({
-              label: trans.__('Refresh'),
+              label: refreshLabel,
               onClick: async () => {
+                refreshButton.title.label = trans.__('Refreshing...');
                 await widget.refresh();
                 refreshButton.hide();
               },
@@ -484,6 +486,7 @@ export function addCommands(
             diffWidget.toolbar.addItem('refresh', refreshButton);
 
             model.changed.connect(() => {
+              refreshButton.title.label = refreshLabel;
               refreshButton.show();
             });
 
