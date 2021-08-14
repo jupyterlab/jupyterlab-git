@@ -34,7 +34,7 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     );
   }
 
-  protected _emitChanged(type: Git.Diff.IModelChange['type']) {
+  protected _emitChanged(type: Git.Diff.IModelChange['type']): void {
     this._changed.emit({ type });
   }
 
