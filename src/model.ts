@@ -1166,23 +1166,6 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * TODO: @navn
-   */
-  async getMergeDiff(filename: string): Promise<any> {
-    const path = await this._getPathRepository();
-    return await this._taskHandler.execute<any>(
-      'git:merge_diff:view', // TODO: what is this for?
-      async () => {
-        return await requestAPI<any>(
-          URLExt.join(path, 'merge_diff'),
-          'POST',
-          { filename }
-        );
-      }
-    );
-  }
-
-  /**
    * Make request for a list of all git branches in the repository
    * Retrieve a list of repository branches.
    *

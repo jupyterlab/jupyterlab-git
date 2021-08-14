@@ -22,8 +22,9 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Menu, Panel } from '@lumino/widgets';
 import * as React from 'react';
-import { DiffModel } from './components/diff/model';
+import { DiffModel, MergeDiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
+import { createPlainTextMergeDiff } from './components/diff/PlainTextMergeDiff';
 import { CONTEXT_COMMANDS } from './components/FileList';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
 import { logger } from './logger';
@@ -33,9 +34,9 @@ import {
   diffIcon,
   discardIcon,
   gitIcon,
+  historyIcon,
   openIcon,
-  removeIcon,
-  historyIcon
+  removeIcon
 } from './style/icons';
 import {
   CommandIDs,
@@ -422,6 +423,7 @@ export function addCommands(
    *
    * @params model {Git.Diff.IModel<string>}: The diff model to display
    * @params isText {boolean}: Optional, whether the content is a plain text
+   * @params isMerge {boolean}: Optional, whether the diff is a merge conflict
    * @returns the main area widget or null
    */
   commands.addCommand(CommandIDs.gitShowDiff, {
@@ -434,7 +436,8 @@ export function addCommands(
       };
 
       const buildDiffWidget =
-        getDiffProvider(model.filename) ?? (isText && createPlainTextDiff);
+        getDiffProvider(model.filename) ??
+        (isText && model.base ? createPlainTextMergeDiff : createPlainTextDiff);
 
       if (buildDiffWidget) {
         const id = `diff-${model.filename}-${model.reference.label}-${model.challenger.label}`;
@@ -565,33 +568,29 @@ export function addCommands(
 
         const repositoryPath = gitModel.getRelativeFilePath();
         const filename = PathExt.join(repositoryPath, filePath);
+        const specialRef =
+          status === 'staged'
+            ? Git.Diff.SpecialRef.INDEX
+            : Git.Diff.SpecialRef.WORKING;
 
-        // Merge conflict
-        if (status === 'unmerged') {
-          const t = await gitModel.getMergeDiff(filename);
-          // TODO: handle
-          console.log(t);
-          continue;
-        }
-
-        let diffContext = context;
-        if (!diffContext) {
-          const specialRef =
-            status === 'staged'
-              ? Git.Diff.SpecialRef.INDEX
-              : Git.Diff.SpecialRef.WORKING;
-          diffContext = {
-            currentRef: specialRef,
-            previousRef: 'HEAD'
-          };
-        }
+        const diffContext: Git.Diff.IContext =
+          status === 'unmerged'
+            ? {
+                currentRef: 'MERGE_HEAD',
+                previousRef: 'HEAD',
+                baseRef: 'ORIG_HEAD'
+              }
+            : context ?? {
+                currentRef: specialRef,
+                previousRef: 'HEAD'
+              };
 
         const challengerRef = Git.Diff.SpecialRef[diffContext.currentRef as any]
           ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
           : { git: diffContext.currentRef };
 
-        // Create the diff widget
-        const model = new DiffModel<string>({
+        // Base props used for Diff Model
+        const props = {
           challenger: {
             content: async () => {
               return requestAPI<Git.IDiffContent>(
@@ -626,8 +625,32 @@ export function addCommands(
               diffContext.previousRef,
             source: diffContext.previousRef,
             updateAt: Date.now()
+          },
+          // Only add base when diff-ing merge conflicts
+          base: diffContext.baseRef && {
+            content: async () => {
+              return requestAPI<Git.IDiffContent>(
+                URLExt.join(repositoryPath, 'content'),
+                'POST',
+                {
+                  filename: filePath,
+                  reference: { git: diffContext.baseRef }
+                }
+              ).then(data => data.content);
+            },
+            label:
+              (Git.Diff.SpecialRef[diffContext.baseRef as any] as any) ||
+              diffContext.baseRef,
+            source: diffContext.baseRef,
+            updateAt: Date.now()
           }
-        });
+        };
+
+        // Create the diff widget
+        const model =
+          status === 'unmerged'
+            ? new MergeDiffModel<string>(props)
+            : new DiffModel<string>(props);
 
         const widget = await commands.execute(CommandIDs.gitShowDiff, {
           model,

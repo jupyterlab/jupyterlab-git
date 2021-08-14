@@ -534,6 +534,8 @@ export namespace Git {
     export interface IContext {
       currentRef: string | SpecialRef;
       previousRef: string | SpecialRef;
+      // Used only during merge conflict diffs
+      baseRef?: string | SpecialRef;
     }
 
     /**
@@ -556,6 +558,10 @@ export namespace Git {
        * Reference data
        */
       reference: IContent<T>;
+      /**
+       * Optional base data, used only during merge conflicts
+       */
+      base?: IContent<T>;
     }
 
     /**
@@ -565,7 +571,7 @@ export namespace Git {
       /**
        * Which content did change
        */
-      type: 'reference' | 'challenger';
+      type: 'reference' | 'challenger' | 'base';
     }
 
     export enum SpecialRef {
