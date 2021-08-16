@@ -4,7 +4,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { MergeView } from 'codemirror';
 import { Git } from '../../tokens';
-import { mergeView } from './mergeview';
+import { mergeView, MergeView as LocalMergeView } from './mergeview';
 
 /**
  * Diff callback to be registered for plain-text files.
@@ -43,7 +43,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     Promise.all([
       this._model.reference.content(),
       this._model.challenger.content(),
-      this._model.base?.content()
+      this._model.base?.content() ?? Promise.resolve(null)
     ])
       .then(([reference, challenger, base]) => {
         this._reference = reference;
@@ -56,6 +56,13 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
         this.showError(reason);
         getReady.resolve();
       });
+  }
+
+  /**
+   * Helper to determine if three-way diff should be shown.
+   */
+  private _isConflict(): boolean {
+    return this._base !== null;
   }
 
   /**
@@ -73,7 +80,11 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     this.ready
       .then(() => {
         if (this._challenger !== null && this._reference !== null) {
-          this.createDiffView(this._challenger, this._reference, this._base);
+          this.createDiffView(
+            this._challenger,
+            this._reference,
+            this._isConflict() ? this._base : undefined
+          );
         }
       })
       .catch(reason => {
@@ -107,17 +118,19 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
       if (this._challenger !== null) {
         this._challenger = await this._model.challenger.content();
       }
+      if (this._base !== null) {
+        this._base = (await this._model.base?.content()) ?? null;
+      }
 
-      // Request base content only if base was provided in the model
-      this._base = await this._model.base?.content();
+      this.createDiffView(
+        this._challenger,
+        this._reference,
+        this._isConflict() ? this._base : undefined
+      );
 
-      this.createDiffView(this._challenger, this._reference, this._base);
       this._challenger = null;
       this._reference = null;
-
-      // Set to null only if base was provided in the model
-      // else leave as undefined
-      this._base = !!this._model.base && null;
+      this._base = null;
     } catch (reason) {
       this.showError(reason);
     }
@@ -142,6 +155,9 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
 
   /**
    * Create the Plain Text Diff view
+   *
+   * Note: baseContent will only be passed when displaying
+   *       a three-way merge conflict.
    */
   protected async createDiffView(
     challengerContent: string,
@@ -149,14 +165,11 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     baseContent?: string
   ): Promise<void> {
     if (!this._mergeView) {
-      // Empty base content ("") can be an edge case.
-      const isMergeConflict = baseContent !== undefined;
-
       const mode =
         Mode.findByFileName(this._model.filename) ||
         Mode.findBest(this._model.filename);
 
-      let options: Parameters<typeof mergeView>[1] = {
+      let options: LocalMergeView.IMergeViewEditorConfiguration = {
         value: challengerContent,
         orig: referenceContent,
         mode: mode.mime,
@@ -164,14 +177,15 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
       };
 
       // Show three-way diff on merge conflict
-      if (isMergeConflict) {
+      // Note: Empty base content ("") can be an edge case.
+      if (baseContent !== undefined) {
         options = {
           ...options,
           value: baseContent,
           origRight: referenceContent,
           origLeft: challengerContent,
-          readOnly: true,
-          revertButtons: false
+          readOnly: false,
+          revertButtons: true
         };
       }
 
@@ -221,5 +235,5 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
 
   private _reference: string | null = null;
   private _challenger: string | null = null;
-  private _base?: string | null;
+  private _base: string | null = null;
 }
