@@ -19,6 +19,7 @@ import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
 import { ArrayExt, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
+import { Message } from '@lumino/messaging';
 import { ContextMenu, Menu, Panel } from '@lumino/widgets';
 import * as React from 'react';
 import { DiffModel } from './components/diff/model';
@@ -1140,8 +1141,16 @@ export function addFileBrowserContextMenu(
     (contextMenu as any).opened.connect(updateGitMenu);
   } else {
     // matches only non-directory items
+
+    class GitMenu extends Menu {
+      protected onBeforeAttach(msg: Message): void {
+        updateGitMenu(contextMenu);
+        super.onBeforeAttach(msg);
+      }
+    }
+
     const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
-    gitMenu = new Menu({ commands: contextMenu.menu.commands });
+    gitMenu = new GitMenu({ commands: contextMenu.menu.commands });
     gitMenu.title.label = 'Git';
     gitMenu.title.icon = gitIcon.bindprops({ stylesheet: 'menuItem' });
 

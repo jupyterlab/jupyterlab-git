@@ -149,7 +149,8 @@
         "rank": 5,
         "submenu": {
           "id": "jp-contextmenu-git",
-          "label": "Git"
+          "label": "Git",
+          "icon": "git"
         }
       }
     ]
