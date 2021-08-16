@@ -647,7 +647,7 @@ export class GitExtension implements IGitExtension {
   async ensureGitignore(): Promise<void> {
     const path = await this._getPathRepository();
 
-    await requestAPI(URLExt.join(path, 'ignore'), 'POST');
+    await requestAPI(URLExt.join(path, 'ignore'), 'POST', {});
     this._openGitignore();
     await this.refreshStatus();
   }
