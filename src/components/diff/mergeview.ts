@@ -315,11 +315,11 @@ class DiffView implements MergeView.IDiffView {
       if (DiffView.updating || updatingFast) {
         return;
       }
-      clearTimeout(debounceChange);
+      window.clearTimeout(debounceChange);
       if (fast === true) {
         updatingFast = true;
       }
-      debounceChange = setTimeout(update, fast === true ? 20 : 250);
+      debounceChange = window.setTimeout(update, fast === true ? 20 : 250);
     }
     function change(
       _cm: CodeMirror.Editor,
