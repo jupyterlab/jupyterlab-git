@@ -469,13 +469,18 @@ export namespace Git {
     /**
      * Diff widget interface
      */
-    export interface IDiffWidget extends Widget {
+    export interface IDiffWidget<T> extends Widget {
       /**
        * Refresh the diff widget
        *
        * Note: Update the content and recompute the diff
        */
       refresh(): Promise<void>;
+      /**
+       * Gets the file contents of a resolved merge conflict,
+       * and rejects if unable to retrieve
+       */
+      getResolvedFile(): Promise<T>;
     }
 
     /**
@@ -489,7 +494,7 @@ export namespace Git {
     export type ICallback<T> = (
       model: IModel<T>,
       toolbar?: Toolbar
-    ) => Promise<IDiffWidget>;
+    ) => Promise<IDiffWidget<T>>;
 
     /**
      * Content and its context for diff
@@ -562,6 +567,10 @@ export namespace Git {
        * Optional base data, used only during merge conflicts
        */
       base?: IContent<T>;
+      /**
+       * Helper to check if the file is conflicted.
+       */
+      isConflict: boolean;
     }
 
     /**

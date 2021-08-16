@@ -6,7 +6,7 @@ import { Git } from '../../tokens';
  * Base DiffModel class
  */
 export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
-  constructor(props: Omit<Git.Diff.IModel<T>, 'changed'>) {
+  constructor(props: Omit<Git.Diff.IModel<T>, 'changed' | 'isConflict'>) {
     this._challenger = props.challenger;
     this._filename = props.filename;
     this._reference = props.reference;
@@ -84,14 +84,12 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
   get base(): Git.Diff.IContent<T> | undefined {
     return this._base;
   }
-  set base(v: Git.Diff.IContent<T>) {
-    // Only check changes if base is defined
-    const emitSignal = !this._base || this._didContentChange(this._base, v);
 
-    if (emitSignal) {
-      this._base = v;
-      this._changed.emit({ type: 'base' });
-    }
+  /**
+   * Helper to check if the file is conflicted.
+   */
+  get isConflict(): boolean {
+    return !!this._base;
   }
 
   /**

@@ -55,16 +55,4 @@ describe('DiffModel', () => {
 
     await testChallenger;
   });
-
-  it('should emit a signal if base changes', async () => {
-    const testBase = testChangedSignal('base');
-
-    model.base = {
-      content: () => Promise.resolve('content2'),
-      label: 'base2',
-      source: 'base2'
-    };
-
-    await testBase;
-  });
 });

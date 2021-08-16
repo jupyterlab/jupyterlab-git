@@ -26,8 +26,16 @@ button.jp-git-diff-refresh {
   border: solid 1px var(--jp-warn-color2);
 }
 
+button.jp-git-diff-resolve {
+  border: solid 1px var(--jp-success-color2);
+}
+
 button.jp-git-diff-refresh .jp-ToolbarButtonComponent-label {
   color: var(--jp-warn-color1);
+}
+
+button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
+  color: var(--jp-success-color1);
 }
 
 .jp-git-diff-banner {

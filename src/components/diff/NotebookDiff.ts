@@ -93,7 +93,10 @@ export const createNotebookDiff = async (
 /**
  * NotebookDiff widget
  */
-export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
+export class NotebookDiff
+  extends Panel
+  implements Git.Diff.IDiffWidget<string>
+{
   constructor(model: Git.Diff.IModel<string>, renderMime: IRenderMimeRegistry) {
     super();
     const getReady = new PromiseDelegate<void>();
@@ -137,6 +140,10 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
    */
   get ready(): Promise<void> {
     return this._isReady;
+  }
+
+  async getResolvedFile(): Promise<string> {
+    return Promise.resolve('');
   }
 
   /**

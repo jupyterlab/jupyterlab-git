@@ -4,7 +4,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { MergeView } from 'codemirror';
 import { Git } from '../../tokens';
-import { mergeView, MergeView as LocalMergeView } from './mergeview';
+import { MergeView as LocalMergeView, mergeView } from './mergeview';
 
 /**
  * Diff callback to be registered for plain-text files.
@@ -25,7 +25,10 @@ export const createPlainTextDiff: Git.Diff.ICallback<string> = async (
 /**
  * Plain Text Diff widget
  */
-export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
+export class PlainTextDiff
+  extends Widget
+  implements Git.Diff.IDiffWidget<string>
+{
   constructor(model: Git.Diff.IModel<string>) {
     super({
       node: PlainTextDiff.createNode(
@@ -70,6 +73,19 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
    */
   get ready(): Promise<void> {
     return this._isReady;
+  }
+
+  /**
+   * Gets the file contents of a resolved merge conflict,
+   * and rejects if unable to retrieve.
+   */
+  getResolvedFile(): Promise<string> {
+    const value = this._mergeView?.editor().getValue() ?? null;
+    if (value !== null) {
+      return Promise.resolve(value);
+    } else {
+      return Promise.reject('Failed to get a valid file value.');
+    }
   }
 
   /**

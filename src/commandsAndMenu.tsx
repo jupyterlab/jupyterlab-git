@@ -480,17 +480,36 @@ export function addCommands(
               tooltip: trans.__('Refresh diff widget'),
               className: 'jp-git-diff-refresh'
             });
-            refreshButton.hide();
-            diffWidget.toolbar.addItem('refresh', refreshButton);
 
-            const refresh = () => {
-              refreshButton.show();
-            };
-
-            model.changed.connect(refresh);
-            widget.disposed.connect(() => {
-              model.changed.disconnect(refresh);
+            const resolveButton = new ToolbarButton({
+              label: trans.__('Mark as resolved'),
+              onClick: async () => {
+                try {
+                  const resolvedFile: string = await widget.getResolvedFile();
+                  // TODO update the file without the conflicts, then close the tab
+                  console.log(resolvedFile);
+                } catch (reason) {
+                  console.error(reason);
+                }
+              },
+              tooltip: trans.__('Mark file as resolved'),
+              className: 'jp-git-diff-resolve'
             });
+
+            // Do not allow the user to refresh during merge conflicts
+            if (model.isConflict) {
+              diffWidget.toolbar.addItem('resolve', resolveButton);
+            } else {
+              refreshButton.hide();
+              diffWidget.toolbar.addItem('refresh', refreshButton);
+
+              const refresh = () => {
+                refreshButton.show();
+              };
+
+              model.changed.connect(refresh);
+              widget.disposed.connect(() => model.changed.disconnect(refresh));
+            }
 
             // Load the diff widget
             modelIsLoading.resolve();
