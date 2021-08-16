@@ -199,7 +199,10 @@ async function activate(
     app.shell.add(gitPlugin, 'left', { rank: 200 });
 
     // Add a menu for the plugin
-    mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });
+    if (app.version.split('.').slice(0, 2).join('.') < '3.1') {
+      // Support JLab 3.0
+      mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });
+    }
 
     // Add a clone button to the file browser extension toolbar
     addCloneButton(gitExtension, filebrowser, app.commands);
@@ -208,12 +211,7 @@ async function activate(
     addStatusBarWidget(statusBar, gitExtension, settings, trans);
 
     // Add the context menu items for the default file browser
-    addFileBrowserContextMenu(
-      gitExtension,
-      factory.tracker,
-      app.commands,
-      app.contextMenu
-    );
+    addFileBrowserContextMenu(gitExtension, factory.tracker, app.contextMenu);
   }
 
   // Register diff providers
