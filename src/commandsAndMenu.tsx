@@ -10,8 +10,8 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
-import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
-import { Contents } from '@jupyterlab/services';
+import { FileBrowser } from '@jupyterlab/filebrowser';
+import { Contents, ContentsManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { TranslationBundle } from '@jupyterlab/translation';
@@ -101,7 +101,7 @@ function pluralizedContextLabel(singular: string, plural: string) {
 export function addCommands(
   app: JupyterFrontEnd,
   gitModel: GitExtension,
-  fileBrowserModel: FileBrowserModel,
+  browserTracker: WidgetTracker<FileBrowser>,
   settings: ISettingRegistry.ISettings,
   trans: TranslationBundle
 ): void {
@@ -178,7 +178,7 @@ export function addCommands(
       'Create an empty Git repository or reinitialize an existing one'
     ),
     execute: async () => {
-      const currentPath = fileBrowserModel.path;
+      const currentPath = browserTracker.currentWidget.model.path;
       const result = await showDialog({
         title: trans.__('Initialize a Repository'),
         body: trans.__('Do you really want to make this directory a Git Repo?'),
@@ -311,14 +311,14 @@ export function addCommands(
             gitModel,
             Operation.Clone,
             trans,
-            { path: fileBrowserModel.path, url: result.value }
+            { path: browserTracker.currentWidget.model.path, url: result.value }
           );
           logger.log({
             message: trans.__('Successfully cloned'),
             level: Level.SUCCESS,
             details
           });
-          await fileBrowserModel.refresh();
+          await browserTracker.currentWidget.model.refresh();
         } catch (error) {
           console.error(
             'Encountered an error when cloning the repository. Error: ',
@@ -483,8 +483,13 @@ export function addCommands(
             refreshButton.hide();
             diffWidget.toolbar.addItem('refresh', refreshButton);
 
-            model.changed.connect(() => {
+            const refresh = () => {
               refreshButton.show();
+            };
+
+            model.changed.connect(refresh);
+            widget.disposed.connect(() => {
+              model.changed.disconnect(refresh);
             });
 
             // Load the diff widget
@@ -629,17 +634,26 @@ export function addCommands(
         if (widget) {
           // Trigger diff model update
           if (diffContext.previousRef === 'HEAD') {
-            gitModel.headChanged.connect(() => {
+            const updateHead = () => {
               model.reference = {
                 ...model.reference,
                 updateAt: Date.now()
               };
+            };
+
+            gitModel.headChanged.connect(updateHead);
+
+            widget.disposed.connect(() => {
+              gitModel.headChanged.disconnect(updateHead);
             });
           }
+
           // If the diff is on the current file and it is updated => diff model changed
           if (diffContext.currentRef === Git.Diff.SpecialRef.WORKING) {
-            // More robust than fileBrowser.model.fileChanged
-            app.serviceManager.contents.fileChanged.connect((_, change) => {
+            const updateCurrent = (
+              m: ContentsManager,
+              change: Contents.IChangedArgs
+            ) => {
               const updateAt = new Date(
                 change.newValue.last_modified
               ).valueOf();
@@ -652,6 +666,13 @@ export function addCommands(
                   updateAt
                 };
               }
+            };
+
+            // More robust than fileBrowser.model.fileChanged
+            app.serviceManager.contents.fileChanged.connect(updateCurrent);
+
+            widget.disposed.connect(() => {
+              app.serviceManager.contents.fileChanged.disconnect(updateCurrent);
             });
           }
         }

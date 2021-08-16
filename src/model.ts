@@ -633,6 +633,7 @@ export class GitExtension implements IGitExtension {
     this._fetchPoll.dispose();
     this._statusPoll.dispose();
     this._taskHandler.dispose();
+    this._settings.changed.disconnect(this._onSettingsChange, this);
     Signal.clearData(this);
   }
 
