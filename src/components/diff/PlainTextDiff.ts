@@ -30,6 +30,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     super({
       node: PlainTextDiff.createNode(
         model.reference.label,
+        model.base?.label,
         model.challenger.label
       )
     });
@@ -41,11 +42,13 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     // Load file content early
     Promise.all([
       this._model.reference.content(),
-      this._model.challenger.content()
+      this._model.challenger.content(),
+      this._model.base?.content()
     ])
-      .then(([reference, challenger]) => {
+      .then(([reference, challenger, base]) => {
         this._reference = reference;
         this._challenger = challenger;
+        this._base = base;
 
         getReady.resolve();
       })
@@ -70,7 +73,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     this.ready
       .then(() => {
         if (this._challenger !== null && this._reference !== null) {
-          this.createDiffView(this._challenger, this._reference);
+          this.createDiffView(this._challenger, this._reference, this._base);
         }
       })
       .catch(reason => {
@@ -105,9 +108,16 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
         this._challenger = await this._model.challenger.content();
       }
 
-      this.createDiffView(this._challenger, this._reference);
+      // Request base content only if base was provided in the model
+      this._base = await this._model.base?.content();
+
+      this.createDiffView(this._challenger, this._reference, this._base);
       this._challenger = null;
       this._reference = null;
+
+      // Set to null only if base was provided in the model
+      // else leave as undefined
+      this._base = !!this._model.base && null;
     } catch (reason) {
       this.showError(reason);
     }
@@ -116,17 +126,15 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   /**
    * Create wrapper node
    */
-  protected static createNode(
-    baseLabel: string,
-    remoteLabel: string
-  ): HTMLElement {
+  protected static createNode(...labels: string[]): HTMLElement {
     const head = document.createElement('div');
     head.className = 'jp-git-diff-root';
     head.innerHTML = `
     <div class="jp-git-diff-banner">
-      <span>${baseLabel}</span>
-      <span class="jp-spacer"></span>
-      <span>${remoteLabel}</span>
+      ${labels
+        .filter(label => !!label)
+        .map(label => `<span>${label}</span>`)
+        .join('<span class="jp-spacer"></span>')}
     </div>
     <div class="jp-git-PlainText-diff"></div>`;
     return head;
@@ -137,19 +145,40 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
    */
   protected async createDiffView(
     challengerContent: string,
-    referenceContent: string
+    referenceContent: string,
+    baseContent?: string
   ): Promise<void> {
     if (!this._mergeView) {
+      // Empty base content ("") can be an edge case.
+      const isMergeConflict = baseContent !== undefined;
+
       const mode =
         Mode.findByFileName(this._model.filename) ||
         Mode.findBest(this._model.filename);
 
-      this._mergeView = mergeView(this._container, {
+      let options: Parameters<typeof mergeView>[1] = {
         value: challengerContent,
         orig: referenceContent,
         mode: mode.mime,
         ...this.getDefaultOptions()
-      }) as MergeView.MergeViewEditor;
+      };
+
+      // Show three-way diff on merge conflict
+      if (isMergeConflict) {
+        options = {
+          ...options,
+          value: baseContent,
+          origRight: referenceContent,
+          origLeft: challengerContent,
+          readOnly: true,
+          revertButtons: false
+        };
+      }
+
+      this._mergeView = mergeView(
+        this._container,
+        options
+      ) as MergeView.MergeViewEditor;
     }
 
     return Promise.resolve();
@@ -192,4 +221,5 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
 
   private _reference: string | null = null;
   private _challenger: string | null = null;
+  private _base?: string | null;
 }

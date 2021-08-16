@@ -22,9 +22,8 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Menu, Panel } from '@lumino/widgets';
 import * as React from 'react';
-import { DiffModel, MergeDiffModel } from './components/diff/model';
+import { DiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
-import { createPlainTextMergeDiff } from './components/diff/PlainTextMergeDiff';
 import { CONTEXT_COMMANDS } from './components/FileList';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
 import { logger } from './logger';
@@ -436,8 +435,7 @@ export function addCommands(
       };
 
       const buildDiffWidget =
-        getDiffProvider(model.filename) ??
-        (isText && model.base ? createPlainTextMergeDiff : createPlainTextDiff);
+        getDiffProvider(model.filename) ?? (isText && createPlainTextDiff);
 
       if (buildDiffWidget) {
         const id = `diff-${model.filename}-${model.reference.label}-${model.challenger.label}`;
@@ -647,10 +645,7 @@ export function addCommands(
         };
 
         // Create the diff widget
-        const model =
-          status === 'unmerged'
-            ? new MergeDiffModel<string>(props)
-            : new DiffModel<string>(props);
+        const model = new DiffModel<string>(props);
 
         const widget = await commands.execute(CommandIDs.gitShowDiff, {
           model,
