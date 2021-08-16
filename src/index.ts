@@ -74,7 +74,7 @@ async function activate(
   let settings: ISettingRegistry.ISettings;
   let serverSettings: Git.IServerSettings;
   // Get a reference to the default file browser extension
-  const filebrowser = factory.tracker.currentWidget;
+  let filebrowser = factory.tracker.currentWidget;
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab_git');
 
@@ -137,16 +137,34 @@ async function activate(
     gitExtension.pathRepository = filebrowser.model.path;
   });
 
+  const onPathChanged = (
+    model: FileBrowserModel,
+    change: IChangedArgs<string>
+  ) => {
+    gitExtension.pathRepository = change.newValue;
+  };
+
   // Whenever the file browser path changes, sync the Git extension path
-  filebrowser.model.pathChanged.connect(
-    (model: FileBrowserModel, change: IChangedArgs<string>) => {
-      gitExtension.pathRepository = change.newValue;
-    }
-  );
+  filebrowser.model.pathChanged.connect(onPathChanged);
+
+  const refreshBrowser = () => {
+    filebrowser.model.refresh();
+  };
 
   // Whenever the `HEAD` of the Git repository changes, refresh the file browser
-  gitExtension.headChanged.connect(() => {
-    filebrowser.model.refresh();
+  gitExtension.headChanged.connect(refreshBrowser);
+
+  // Handle file browser changes
+  factory.tracker.currentChanged.connect((_, browser) => {
+    filebrowser.model.pathChanged.disconnect(onPathChanged);
+
+    filebrowser = browser;
+    gitExtension.pathRepository = filebrowser.model.path;
+    filebrowser.model.pathChanged.connect(onPathChanged);
+
+    if (settings) {
+      addCloneButton(gitExtension, filebrowser, app.commands);
+    }
   });
 
   // Whenever a user adds/renames/saves/deletes/modifies a file within the lab environment, refresh the Git status
@@ -157,14 +175,14 @@ async function activate(
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Add JupyterLab commands
-    addCommands(app, gitExtension, filebrowser.model, settings, trans);
+    addCommands(app, gitExtension, factory.tracker, settings, trans);
 
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
       gitExtension,
       settings,
       app.commands,
-      filebrowser.model,
+      factory.tracker,
       trans
     );
     gitPlugin.id = 'jp-git-sessions';
