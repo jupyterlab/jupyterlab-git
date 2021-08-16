@@ -535,7 +535,7 @@ export namespace Git {
       currentRef: string | SpecialRef;
       previousRef: string | SpecialRef;
       // Used only during merge conflict diffs
-      baseRef?: string | SpecialRef;
+      baseRef?: string;
     }
 
     /**

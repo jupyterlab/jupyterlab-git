@@ -80,7 +80,7 @@ export const CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileHistory
   ],
   unmodified: [ContextCommandIDs.gitFileHistory],
-  unmerged: [ContextCommandIDs.gitFileOpen]
+  unmerged: [ContextCommandIDs.gitFileDiff]
 };
 
 const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
@@ -109,7 +109,7 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileDelete
   ],
   unmodified: [ContextCommandIDs.gitFileHistory],
-  unmerged: [ContextCommandIDs.gitFileOpen]
+  unmerged: [ContextCommandIDs.gitFileDiff]
 };
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
@@ -364,6 +364,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       <FileItem
         trans={this.props.trans}
         actions={!file.is_binary && diffButton}
+        contextMenu={this.openContextMenu}
         file={file}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
