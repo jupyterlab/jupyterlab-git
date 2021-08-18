@@ -104,7 +104,7 @@ export function addCommands(
   settings: ISettingRegistry.ISettings,
   trans: TranslationBundle
 ): void {
-  const { commands, shell } = app;
+  const { commands, shell, serviceManager } = app;
 
   /**
    * Commit using a keystroke combination when in CommitBox.
@@ -486,10 +486,20 @@ export function addCommands(
               onClick: async () => {
                 try {
                   const resolvedFile: string = await widget.getResolvedFile();
-                  // TODO update the file without the conflicts, then close the tab
-                  console.log(resolvedFile);
+                  await serviceManager.contents.save(model.filename, {
+                    type: 'file',
+                    format: 'text',
+                    content: resolvedFile
+                  });
+                  await gitModel.add(model.filename);
+                  await gitModel.refresh();
                 } catch (reason) {
-                  console.error(reason);
+                  logger.log({
+                    message: reason.message ?? reason,
+                    level: Level.ERROR
+                  });
+                } finally {
+                  diffWidget.dispose();
                 }
               },
               tooltip: trans.__('Mark file as resolved'),
@@ -516,7 +526,7 @@ export function addCommands(
             content.addWidget(widget);
           } catch (reason) {
             console.error(reason);
-            const msg = `Load Diff Model Error (${reason.message || reason})`;
+            const msg = `Load Diff Model Error (${reason.message ?? reason})`;
             modelIsLoading.reject(msg);
           }
         }
@@ -597,8 +607,8 @@ export function addCommands(
         const diffContext: Git.Diff.IContext =
           status === 'unmerged'
             ? {
-                currentRef: 'MERGE_HEAD',
-                previousRef: 'HEAD',
+                currentRef: 'HEAD',
+                previousRef: 'MERGE_HEAD',
                 baseRef: 'ORIG_HEAD'
               }
             : context ?? {
@@ -611,7 +621,7 @@ export function addCommands(
           : { git: diffContext.currentRef };
 
         // Base props used for Diff Model
-        const props = {
+        const props: Omit<Git.Diff.IModel<string>, 'changed' | 'isConflict'> = {
           challenger: {
             content: async () => {
               return requestAPI<Git.IDiffContent>(
@@ -646,9 +656,15 @@ export function addCommands(
               diffContext.previousRef,
             source: diffContext.previousRef,
             updateAt: Date.now()
-          },
+          }
+        };
+
+        if (diffContext.baseRef) {
+          props.reference.label = trans.__('CURRENT');
+          props.challenger.label = trans.__('INCOMING');
+
           // Only add base when diff-ing merge conflicts
-          base: diffContext.baseRef && {
+          props.base = {
             content: async () => {
               return requestAPI<Git.IDiffContent>(
                 URLExt.join(repositoryPath, 'content'),
@@ -659,13 +675,11 @@ export function addCommands(
                 }
               ).then(data => data.content);
             },
-            label:
-              (Git.Diff.SpecialRef[diffContext.baseRef as any] as any) ||
-              diffContext.baseRef,
+            label: trans.__('RESULT'),
             source: diffContext.baseRef,
             updateAt: Date.now()
-          }
-        };
+          };
+        }
 
         // Create the diff widget
         const model = new DiffModel<string>(props);
