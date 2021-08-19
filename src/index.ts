@@ -26,9 +26,9 @@ import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 
+export { DiffModel } from './components/diff/model';
 export { NotebookDiff } from './components/diff/NotebookDiff';
 export { PlainTextDiff } from './components/diff/PlainTextDiff';
-export { DiffModel } from './components/diff/model';
 export { Git, IGitExtension } from './tokens';
 
 /**
@@ -74,7 +74,11 @@ async function activate(
   let settings: ISettingRegistry.ISettings;
   let serverSettings: Git.IServerSettings;
   // Get a reference to the default file browser extension
-  let filebrowser = factory.tracker.currentWidget;
+  // We don't use the current tracked browser because extension like jupyterlab-github
+  // or jupyterlab-gitlab are defining new filebrowsers that we don't support.
+  // And it is unlikely that another browser than the default will be used.
+  // Ref: https://github.com/jupyterlab/jupyterlab-git/issues/1014
+  const fileBrowser = factory.defaultBrowser;
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab_git');
 
@@ -133,8 +137,8 @@ async function activate(
   gitExtension = new GitExtension(docmanager, app.docRegistry, settings);
 
   // Whenever we restore the application, sync the Git extension path
-  Promise.all([app.restored, filebrowser.model.restored]).then(() => {
-    gitExtension.pathRepository = filebrowser.model.path;
+  Promise.all([app.restored, fileBrowser.model.restored]).then(() => {
+    gitExtension.pathRepository = fileBrowser.model.path;
   });
 
   const onPathChanged = (
@@ -145,27 +149,14 @@ async function activate(
   };
 
   // Whenever the file browser path changes, sync the Git extension path
-  filebrowser.model.pathChanged.connect(onPathChanged);
+  fileBrowser.model.pathChanged.connect(onPathChanged);
 
   const refreshBrowser = () => {
-    filebrowser.model.refresh();
+    fileBrowser.model.refresh();
   };
 
   // Whenever the `HEAD` of the Git repository changes, refresh the file browser
   gitExtension.headChanged.connect(refreshBrowser);
-
-  // Handle file browser changes
-  factory.tracker.currentChanged.connect((_, browser) => {
-    filebrowser.model.pathChanged.disconnect(onPathChanged);
-
-    filebrowser = browser;
-    gitExtension.pathRepository = filebrowser.model.path;
-    filebrowser.model.pathChanged.connect(onPathChanged);
-
-    if (settings) {
-      addCloneButton(gitExtension, filebrowser, app.commands);
-    }
-  });
 
   // Whenever a user adds/renames/saves/deletes/modifies a file within the lab environment, refresh the Git status
   app.serviceManager.contents.fileChanged.connect(() =>
@@ -175,14 +166,14 @@ async function activate(
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Add JupyterLab commands
-    addCommands(app, gitExtension, factory.tracker, settings, trans);
+    addCommands(app, gitExtension, fileBrowser.model, settings, trans);
 
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
       gitExtension,
       settings,
       app.commands,
-      factory.tracker,
+      fileBrowser.model,
       trans
     );
     gitPlugin.id = 'jp-git-sessions';
@@ -205,13 +196,13 @@ async function activate(
     }
 
     // Add a clone button to the file browser extension toolbar
-    addCloneButton(gitExtension, filebrowser, app.commands);
+    addCloneButton(gitExtension, fileBrowser, app.commands);
 
     // Add the status bar widget
     addStatusBarWidget(statusBar, gitExtension, settings, trans);
 
     // Add the context menu items for the default file browser
-    addFileBrowserContextMenu(gitExtension, factory.tracker, app.contextMenu);
+    addFileBrowserContextMenu(gitExtension, fileBrowser, app.contextMenu);
   }
 
   // Register diff providers

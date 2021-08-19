@@ -1,5 +1,5 @@
-import { ReactWidget, UseSignal, WidgetTracker } from '@jupyterlab/apputils';
-import { FileBrowser } from '@jupyterlab/filebrowser';
+import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
@@ -22,7 +22,7 @@ export class GitWidget extends ReactWidget {
     model: GitExtension,
     settings: ISettingRegistry.ISettings,
     commands: CommandRegistry,
-    browserTracker: WidgetTracker<FileBrowser>,
+    fileBrowserModel: FileBrowserModel,
     trans: TranslationBundle,
     options?: Widget.IOptions
   ) {
@@ -32,7 +32,7 @@ export class GitWidget extends ReactWidget {
 
     this._trans = trans;
     this._commands = commands;
-    this._browserTracker = browserTracker;
+    this._fileBrowserModel = fileBrowserModel;
     this._model = model;
     this._settings = settings;
 
@@ -67,21 +67,14 @@ export class GitWidget extends ReactWidget {
         <LoggerContext.Consumer>
           {logger => (
             <React.Fragment>
-              <UseSignal
-                signal={this._browserTracker.currentChanged}
-                initialArgs={this._browserTracker.currentWidget}
-              >
-                {(tracker, filebrowser) => (
-                  <GitPanel
-                    commands={this._commands}
-                    filebrowser={filebrowser.model}
-                    logger={logger}
-                    model={this._model}
-                    settings={this._settings}
-                    trans={this._trans}
-                  />
-                )}
-              </UseSignal>
+              <GitPanel
+                commands={this._commands}
+                filebrowser={this._fileBrowserModel}
+                logger={logger}
+                model={this._model}
+                settings={this._settings}
+                trans={this._trans}
+              />
               <UseSignal
                 signal={logger.signal}
                 initialArgs={{ message: '', level: Level.INFO } as ILogMessage}
@@ -104,7 +97,7 @@ export class GitWidget extends ReactWidget {
   }
 
   private _commands: CommandRegistry;
-  private _browserTracker: WidgetTracker<FileBrowser>;
+  private _fileBrowserModel: FileBrowserModel;
   private _model: GitExtension;
   private _settings: ISettingRegistry.ISettings;
   private _trans: TranslationBundle;

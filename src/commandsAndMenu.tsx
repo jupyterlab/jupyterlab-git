@@ -6,11 +6,10 @@ import {
   showDialog,
   showErrorMessage,
   Toolbar,
-  ToolbarButton,
-  WidgetTracker
+  ToolbarButton
 } from '@jupyterlab/apputils';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
-import { FileBrowser } from '@jupyterlab/filebrowser';
+import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
 import { Contents, ContentsManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
@@ -33,9 +32,9 @@ import {
   diffIcon,
   discardIcon,
   gitIcon,
+  historyIcon,
   openIcon,
-  removeIcon,
-  historyIcon
+  removeIcon
 } from './style/icons';
 import {
   CommandIDs,
@@ -101,7 +100,7 @@ function pluralizedContextLabel(singular: string, plural: string) {
 export function addCommands(
   app: JupyterFrontEnd,
   gitModel: GitExtension,
-  browserTracker: WidgetTracker<FileBrowser>,
+  fileBrowserModel: FileBrowserModel,
   settings: ISettingRegistry.ISettings,
   trans: TranslationBundle
 ): void {
@@ -178,7 +177,7 @@ export function addCommands(
       'Create an empty Git repository or reinitialize an existing one'
     ),
     execute: async () => {
-      const currentPath = browserTracker.currentWidget.model.path;
+      const currentPath = fileBrowserModel.path;
       const result = await showDialog({
         title: trans.__('Initialize a Repository'),
         body: trans.__('Do you really want to make this directory a Git Repo?'),
@@ -311,14 +310,14 @@ export function addCommands(
             gitModel,
             Operation.Clone,
             trans,
-            { path: browserTracker.currentWidget.model.path, url: result.value }
+            { path: fileBrowserModel.path, url: result.value }
           );
           logger.log({
             message: trans.__('Successfully cloned'),
             level: Level.SUCCESS,
             details
           });
-          await browserTracker.currentWidget.model.refresh();
+          await fileBrowserModel.refresh();
         } catch (error) {
           console.error(
             'Encountered an error when cloning the repository. Error: ',
@@ -1044,17 +1043,9 @@ export function addMenuItems(
  */
 export function addFileBrowserContextMenu(
   model: IGitExtension,
-  tracker: WidgetTracker<FileBrowser>,
+  filebrowser: FileBrowser,
   contextMenu: ContextMenuSvg
 ): void {
-  function getSelectedBrowserItems(): Contents.IModel[] {
-    const widget = tracker.currentWidget;
-    if (!widget) {
-      return [];
-    }
-    return toArray(widget.selectedItems());
-  }
-
   let gitMenu: Menu;
   let _commands: ContextCommandIDs[];
   let _paths: string[];
@@ -1063,7 +1054,7 @@ export function addFileBrowserContextMenu(
     const wasShown = menu.isVisible;
     const parent = menu.parentMenu;
 
-    const items = getSelectedBrowserItems();
+    const items = toArray(filebrowser.selectedItems());
     const statuses = new Set<Git.Status>(
       items
         .map(item => model.getFile(item.path)?.status)
