@@ -12,6 +12,9 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
 import { IDiffEntry } from 'nbdime/lib/diff/diffentries';
+import { IMergeDecision } from 'nbdime/lib/merge/decisions';
+import { NotebookMergeModel } from 'nbdime/lib/merge/model';
+import { NotebookMergeWidget } from 'nbdime/lib/merge/widget';
 import { NotebookDiffModel } from 'nbdime/lib/diff/model';
 import { CELLDIFF_CLASS, NotebookDiffWidget } from 'nbdime/lib/diff/widget';
 import {
@@ -48,6 +51,18 @@ interface INbdimeDiff {
    * Diff to obtain challenger from base
    */
   diff: IDiffEntry[];
+}
+
+interface INbdimeMergeDiff {
+  /**
+   * Base notebook content
+   */
+  base: INotebookContent;
+  /**
+   * Set of decisions made by comparing
+   * reference, challenger, and base notebooks
+   */
+  merge_decisions: IMergeDecision[];
 }
 
 /**
@@ -142,8 +157,13 @@ export class NotebookDiff
     return this._isReady;
   }
 
+  /**
+   * Gets the file contents of a resolved merge conflict,
+   * and rejects if unable to retrieve.
+   */
   async getResolvedFile(): Promise<string> {
-    return Promise.resolve('');
+    // TODO: Implement
+    return Promise.reject('TODO');
   }
 
   /**
@@ -159,6 +179,7 @@ export class NotebookDiff
 
       const header = Private.diffHeader(
         this._model.reference.label,
+        this._model.base?.label,
         this._model.challenger.label
       );
       this.addWidget(header);
@@ -173,10 +194,16 @@ export class NotebookDiff
       // ENH request content only if it changed
       const referenceContent = await this._model.reference.content();
       const challengerContent = await this._model.challenger.content();
+      const baseContent = await this._model.base?.content();
 
-      const nbdWidget = await this.createDiffView(
+      const createView = baseContent
+        ? this.createMergeView.bind(this)
+        : this.createDiffView.bind(this);
+
+      const nbdWidget = await createView(
         challengerContent,
-        referenceContent
+        referenceContent,
+        baseContent
       );
 
       while (this._scroller.widgets.length > 0) {
@@ -213,6 +240,24 @@ export class NotebookDiff
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return new NotebookDiffWidget(model, this._renderMime);
+  }
+
+  protected async createMergeView(
+    challengerContent: string,
+    referenceContent: string,
+    baseContent: string
+  ): Promise<NotebookMergeWidget> {
+    const data = await requestAPI<INbdimeMergeDiff>('diffnotebook', 'POST', {
+      currentContent: challengerContent,
+      previousContent: referenceContent,
+      baseContent
+    });
+
+    const model = new NotebookMergeModel(data.base, data.merge_decisions);
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return new NotebookMergeWidget(model, this._renderMime);
   }
 
   /**
@@ -258,14 +303,16 @@ namespace Private {
   /**
    * Create a header widget for the diff view.
    */
-  export function diffHeader(baseLabel: string, remoteLabel: string): Widget {
+  export function diffHeader(...labels: string[]): Widget {
     const node = document.createElement('div');
     node.className = 'jp-git-diff-header';
-    node.innerHTML = `<div class="jp-git-diff-banner">
-        <span>${baseLabel}</span>
-        <span class="jp-spacer"></span>
-        <span>${remoteLabel}</span>
-      </div>`;
+    node.innerHTML = `
+    <div class="jp-git-diff-banner">
+      ${labels
+        .filter(label => !!label)
+        .map(label => `<span>${label}</span>`)
+        .join('<span class="jp-spacer"></span>')}
+    </div>`;
 
     return new Widget({ node });
   }
