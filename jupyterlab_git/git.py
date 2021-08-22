@@ -351,6 +351,11 @@ class Git:
             else:
                 return nbformat.reads(content, as_version=4)
 
+        def remove_cell_ids(nb):
+            for cell in nb.cells:
+                del cell["id"]
+            return nb
+
         current_loop = tornado.ioloop.IOLoop.current()
         prev_nb = await current_loop.run_in_executor(None, read_notebook, prev_content)
         curr_nb = await current_loop.run_in_executor(None, read_notebook, curr_content)
@@ -358,8 +363,13 @@ class Git:
             base_nb = await current_loop.run_in_executor(
                 None, read_notebook, base_content
             )
+            # Only remove ids from merge_notebooks as a workaround
             _, merge_decisions = await current_loop.run_in_executor(
-                None, merge_notebooks, base_nb, prev_nb, curr_nb
+                None,
+                merge_notebooks,
+                remove_cell_ids(base_nb),
+                remove_cell_ids(prev_nb),
+                remove_cell_ids(curr_nb),
             )
 
             return {"base": base_nb, "merge_decisions": merge_decisions}
