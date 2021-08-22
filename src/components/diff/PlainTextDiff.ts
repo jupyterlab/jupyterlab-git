@@ -64,7 +64,7 @@ export class PlainTextDiff
   /**
    * Helper to determine if three-way diff should be shown.
    */
-  private _isConflict(): boolean {
+  private get _isConflict(): boolean {
     return this._base !== null;
   }
 
@@ -99,7 +99,7 @@ export class PlainTextDiff
           this.createDiffView(
             this._challenger,
             this._reference,
-            this._isConflict() ? this._base : undefined
+            this._isConflict ? this._base : undefined
           );
         }
       })
@@ -141,7 +141,7 @@ export class PlainTextDiff
       this.createDiffView(
         this._challenger,
         this._reference,
-        this._isConflict() ? this._base : undefined
+        this._isConflict ? this._base : undefined
       );
 
       this._challenger = null;

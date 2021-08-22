@@ -14,7 +14,8 @@ import { Panel, Widget } from '@lumino/widgets';
 import { IDiffEntry } from 'nbdime/lib/diff/diffentries';
 import { IMergeDecision } from 'nbdime/lib/merge/decisions';
 import { NotebookMergeModel } from 'nbdime/lib/merge/model';
-import { NotebookMergeWidget } from 'nbdime/lib/merge/widget';
+import { CELLMERGE_CLASS, NotebookMergeWidget } from 'nbdime/lib/merge/widget';
+import { UNCHANGED_MERGE_CLASS } from 'nbdime/lib/merge/widget/common';
 import { NotebookDiffModel } from 'nbdime/lib/diff/model';
 import { CELLDIFF_CLASS, NotebookDiffWidget } from 'nbdime/lib/diff/widget';
 import {
@@ -144,10 +145,18 @@ export class NotebookDiff
     if (this._areUnchangedCellsHidden !== v) {
       Private.toggleShowUnchanged(
         this._scroller,
+        this._isConflict,
         this._areUnchangedCellsHidden
       );
       this._areUnchangedCellsHidden = v;
     }
+  }
+
+  /**
+   * Helper to determine if a notebook merge should be shown.
+   */
+  private get _isConflict(): boolean {
+    return !!this._model.base;
   }
 
   /**
@@ -213,13 +222,13 @@ export class NotebookDiff
       try {
         await nbdWidget.init();
 
-        Private.markUnchangedRanges(this._scroller.node);
+        Private.markUnchangedRanges(this._scroller.node, this._isConflict);
       } catch (reason) {
         // FIXME there is a bug in nbdime and init got reject due to recursion limit hit
         // console.error(`Failed to init notebook diff view: ${reason}`);
         // getReady.reject(reason);
         console.debug(`Failed to init notebook diff view: ${reason}`);
-        Private.markUnchangedRanges(this._scroller.node);
+        Private.markUnchangedRanges(this._scroller.node, this._isConflict);
       }
     } catch (reason) {
       this.showError(reason);
@@ -322,7 +331,11 @@ namespace Private {
    *
    * This simply marks with a class, real work is done by CSS.
    */
-  export function toggleShowUnchanged(root: Widget, show?: boolean): void {
+  export function toggleShowUnchanged(
+    root: Widget,
+    isConflict: boolean,
+    show?: boolean
+  ): void {
     const hiding = root.hasClass(HIDE_UNCHANGED_CLASS);
     if (show === undefined) {
       show = hiding;
@@ -333,7 +346,7 @@ namespace Private {
     if (show) {
       root.removeClass(HIDE_UNCHANGED_CLASS);
     } else {
-      markUnchangedRanges(root.node);
+      markUnchangedRanges(root.node, isConflict);
       root.addClass(HIDE_UNCHANGED_CLASS);
     }
     root.update();
@@ -360,12 +373,20 @@ namespace Private {
   /**
    * Marks certain cells with
    */
-  export function markUnchangedRanges(root: HTMLElement): void {
-    const children = root.querySelectorAll(`.${CELLDIFF_CLASS}`);
+  export function markUnchangedRanges(
+    root: HTMLElement,
+    isConflict: boolean
+  ): void {
+    const CELL_CLASS = isConflict ? CELLMERGE_CLASS : CELLDIFF_CLASS;
+    const UNCHANGED_CLASS = isConflict
+      ? UNCHANGED_MERGE_CLASS
+      : UNCHANGED_DIFF_CLASS;
+
+    const children = root.querySelectorAll(`.${CELL_CLASS}`);
     let rangeStart = -1;
     for (let i = 0; i < children.length; ++i) {
       const child = children[i];
-      if (!child.classList.contains(UNCHANGED_DIFF_CLASS)) {
+      if (!child.classList.contains(UNCHANGED_CLASS)) {
         // Visible
         if (rangeStart !== -1) {
           // Previous was hidden
@@ -387,7 +408,10 @@ namespace Private {
       if (rangeStart === 0) {
         // All elements were hidden, nothing to mark
         // Add info on root instead
-        const tag = root.querySelector('.jp-Notebook-diff') || root;
+        const tag =
+          root.querySelector('.jp-Notebook-diff') ??
+          root.querySelector('.jp-Notebook-merge') ??
+          root;
         tag.setAttribute('data-nbdime-AllCellsHidden', N.toString());
         return;
       }
