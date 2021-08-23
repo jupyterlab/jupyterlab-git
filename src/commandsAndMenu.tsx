@@ -476,13 +476,24 @@ export function addCommands(
               const resolveButton = new ToolbarButton({
                 label: trans.__('Mark as resolved'),
                 onClick: async () => {
-                  try {
-                    const resolvedFile: string = await widget.getResolvedFile();
-                    await serviceManager.contents.save(model.filename, {
-                      type: 'file',
-                      format: 'text',
-                      content: resolvedFile
+                  if (!widget.isFileResolved) {
+                    const result = await showDialog({
+                      title: trans.__('Resolve with conflicts'),
+                      body: trans.__(
+                        'Are you sure you want to mark this file as resolved with merge conflicts?'
+                      )
                     });
+
+                    if (!result.button.accept) {
+                      return;
+                    }
+                  }
+
+                  try {
+                    await serviceManager.contents.save(
+                      model.filename,
+                      await widget.getResolvedFile()
+                    );
                     await gitModel.add(model.filename);
                     await gitModel.refresh();
                   } catch (reason) {

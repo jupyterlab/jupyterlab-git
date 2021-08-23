@@ -1,5 +1,6 @@
 import { Toolbar } from '@jupyterlab/apputils';
 import { Mode } from '@jupyterlab/codemirror';
+import { Contents } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { MergeView } from 'codemirror';
@@ -69,6 +70,13 @@ export class PlainTextDiff
   }
 
   /**
+   * Checks if the conflicted file has been resolved.
+   */
+  get isFileResolved(): boolean {
+    return true;
+  }
+
+  /**
    * Promise which fulfills when the widget is ready.
    */
   get ready(): Promise<void> {
@@ -79,10 +87,14 @@ export class PlainTextDiff
    * Gets the file contents of a resolved merge conflict,
    * and rejects if unable to retrieve.
    */
-  getResolvedFile(): Promise<string> {
+  getResolvedFile(): Promise<Partial<Contents.IModel>> {
     const value = this._mergeView?.editor().getValue() ?? null;
     if (value !== null) {
-      return Promise.resolve(value);
+      return Promise.resolve({
+        type: 'file',
+        format: 'text',
+        content: value
+      });
     } else {
       return Promise.reject('Failed to get a valid file value.');
     }

@@ -1,7 +1,7 @@
 import { Toolbar } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { ServerConnection } from '@jupyterlab/services';
+import { Contents, ServerConnection } from '@jupyterlab/services';
 import { JSONObject, ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
@@ -477,10 +477,14 @@ export namespace Git {
        */
       refresh(): Promise<void>;
       /**
+       * Checks if the conflicted file has been resolved.
+       */
+      isFileResolved: boolean;
+      /**
        * Gets the file contents of a resolved merge conflict,
        * and rejects if unable to retrieve
        */
-      getResolvedFile(): Promise<T>;
+      getResolvedFile(): Promise<Partial<Contents.IModel>>;
     }
 
     /**
@@ -937,6 +941,12 @@ export namespace Git {
   export class NotInRepository extends Error {
     constructor() {
       super('Not in a Git Repository');
+    }
+  }
+
+  export class ConflictedFile extends Error {
+    constructor(message: string) {
+      super(message);
     }
   }
 }

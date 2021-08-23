@@ -6,6 +6,7 @@
 /* eslint-disable no-inner-declarations */
 
 import { Toolbar } from '@jupyterlab/apputils';
+import { Contents } from '@jupyterlab/services';
 import { INotebookContent } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -96,6 +97,11 @@ export const createNotebookDiff = async (
       'Hide unchanged cells';
     toolbar.addItem('hideUnchanged', new Widget({ node: label }));
 
+    if (model.hasConflict) {
+      // FIXME: Merge view breaks when moving checkboxes to the toolbar
+      // toolbar.addItem('clear-outputs', diffWidget.nbdWidget.widgets[0])
+    }
+
     // Connect toolbar checkbox and notebook diff widget
     diffWidget.areUnchangedCellsHidden = checkbox.checked;
     checkbox.onchange = () => {
@@ -159,6 +165,10 @@ export class NotebookDiff
     return this._model.hasConflict;
   }
 
+  get nbdWidget(): NotebookDiffWidget | NotebookMergeWidget {
+    return this._nbdWidget;
+  }
+
   /**
    * Promise which fulfills when the widget is ready.
    */
@@ -167,12 +177,27 @@ export class NotebookDiff
   }
 
   /**
+   * Checks if the conflicted file has been resolved.
+   */
+  get isFileResolved(): boolean {
+    const widget = this.nbdWidget as NotebookMergeWidget;
+    this._lastSerializeModel = widget.model.serialize();
+    const validated = widget.validateMerged(this._lastSerializeModel);
+    return JSON.stringify(this._lastSerializeModel) === JSON.stringify(validated)
+  }
+
+  /**
    * Gets the file contents of a resolved merge conflict,
    * and rejects if unable to retrieve.
+   *
+   * @see https://github.com/jupyter/nbdime/blob/a74b538386d05e3e9c26753ad21faf9ff4d269d7/packages/webapp/src/app/save.ts#L20
    */
-  async getResolvedFile(): Promise<string> {
-    // TODO: Implement
-    return Promise.reject('TODO');
+  async getResolvedFile(): Promise<Partial<Contents.IModel>> {
+    return Promise.resolve({
+      format: 'json',
+      type: 'notebook',
+      content: this._lastSerializeModel ?? (this.nbdWidget as NotebookMergeWidget).model.serialize()
+    });
   }
 
   /**
@@ -209,7 +234,7 @@ export class NotebookDiff
         ? this.createMergeView.bind(this)
         : this.createDiffView.bind(this);
 
-      const nbdWidget = await createView(
+      this._nbdWidget = await createView(
         challengerContent,
         referenceContent,
         baseContent
@@ -218,9 +243,9 @@ export class NotebookDiff
       while (this._scroller.widgets.length > 0) {
         this._scroller.widgets[0].dispose();
       }
-      this._scroller.addWidget(nbdWidget);
+      this._scroller.addWidget(this._nbdWidget);
       try {
-        await nbdWidget.init();
+        await this._nbdWidget.init();
 
         Private.markUnchangedRanges(this._scroller.node, this._hasConflict);
       } catch (reason) {
@@ -306,6 +331,8 @@ export class NotebookDiff
   protected _model: Git.Diff.IModel<string>;
   protected _renderMime: IRenderMimeRegistry;
   protected _scroller: Panel;
+  protected _nbdWidget: NotebookMergeWidget | NotebookDiffWidget;
+  protected _lastSerializeModel: INotebookContent | null = null;
 }
 
 namespace Private {
@@ -389,6 +416,9 @@ namespace Private {
     const UNCHANGED_CLASS = hasConflict
       ? UNCHANGED_MERGE_CLASS
       : UNCHANGED_DIFF_CLASS;
+    const NOTEBOOK_CLASS = hasConflict
+      ? '.jp-Notebook-merge'
+      : '.jp-Notebook-diff';
 
     const children = root.querySelectorAll(`.${CELL_CLASS}`);
     let rangeStart = -1;
@@ -416,10 +446,7 @@ namespace Private {
       if (rangeStart === 0) {
         // All elements were hidden, nothing to mark
         // Add info on root instead
-        const tag =
-          root.querySelector('.jp-Notebook-diff') ??
-          root.querySelector('.jp-Notebook-merge') ??
-          root;
+        const tag = root.querySelector(NOTEBOOK_CLASS) ?? root;
         tag.setAttribute('data-nbdime-AllCellsHidden', N.toString());
         return;
       }
