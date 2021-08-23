@@ -469,7 +469,7 @@ export namespace Git {
     /**
      * Diff widget interface
      */
-    export interface IDiffWidget<T> extends Widget {
+    export interface IDiffWidget extends Widget {
       /**
        * Refresh the diff widget
        *
@@ -498,7 +498,7 @@ export namespace Git {
     export type ICallback<T> = (
       model: IModel<T>,
       toolbar?: Toolbar
-    ) => Promise<IDiffWidget<T>>;
+    ) => Promise<IDiffWidget>;
 
     /**
      * Content and its context for diff

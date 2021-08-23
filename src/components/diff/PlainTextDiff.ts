@@ -26,10 +26,7 @@ export const createPlainTextDiff: Git.Diff.ICallback<string> = async (
 /**
  * Plain Text Diff widget
  */
-export class PlainTextDiff
-  extends Widget
-  implements Git.Diff.IDiffWidget<string>
-{
+export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   constructor(model: Git.Diff.IModel<string>) {
     super({
       node: PlainTextDiff.createNode(

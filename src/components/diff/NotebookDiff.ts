@@ -115,10 +115,7 @@ export const createNotebookDiff = async (
 /**
  * NotebookDiff widget
  */
-export class NotebookDiff
-  extends Panel
-  implements Git.Diff.IDiffWidget<string>
-{
+export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
   constructor(model: Git.Diff.IModel<string>, renderMime: IRenderMimeRegistry) {
     super();
     const getReady = new PromiseDelegate<void>();
@@ -183,7 +180,9 @@ export class NotebookDiff
     const widget = this.nbdWidget as NotebookMergeWidget;
     this._lastSerializeModel = widget.model.serialize();
     const validated = widget.validateMerged(this._lastSerializeModel);
-    return JSON.stringify(this._lastSerializeModel) === JSON.stringify(validated)
+    return (
+      JSON.stringify(this._lastSerializeModel) === JSON.stringify(validated)
+    );
   }
 
   /**
@@ -196,7 +195,9 @@ export class NotebookDiff
     return Promise.resolve({
       format: 'json',
       type: 'notebook',
-      content: this._lastSerializeModel ?? (this.nbdWidget as NotebookMergeWidget).model.serialize()
+      content:
+        this._lastSerializeModel ??
+        (this.nbdWidget as NotebookMergeWidget).model.serialize()
     });
   }
 
