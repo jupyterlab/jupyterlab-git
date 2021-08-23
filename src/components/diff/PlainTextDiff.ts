@@ -64,8 +64,8 @@ export class PlainTextDiff
   /**
    * Helper to determine if three-way diff should be shown.
    */
-  private get _isConflict(): boolean {
-    return this._base !== null;
+  private get _hasConflict(): boolean {
+    return this._model.hasConflict;
   }
 
   /**
@@ -99,7 +99,7 @@ export class PlainTextDiff
           this.createDiffView(
             this._challenger,
             this._reference,
-            this._isConflict ? this._base : undefined
+            this._hasConflict ? this._base : null
           );
         }
       })
@@ -141,7 +141,7 @@ export class PlainTextDiff
       this.createDiffView(
         this._challenger,
         this._reference,
-        this._isConflict ? this._base : undefined
+        this._hasConflict ? this._base : null
       );
 
       this._challenger = null;
@@ -193,8 +193,8 @@ export class PlainTextDiff
       };
 
       // Show three-way diff on merge conflict
-      // Note: Empty base content ("") can be an edge case.
-      if (baseContent !== undefined) {
+      // Note: Empty base content ("") is an edge case.
+      if (baseContent !== null && baseContent !== undefined) {
         options = {
           ...options,
           value: baseContent,

@@ -351,6 +351,7 @@ class Git:
             else:
                 return nbformat.reads(content, as_version=4)
 
+        # TODO Fix this in nbdime
         def remove_cell_ids(nb):
             for cell in nb.cells:
                 del cell["id"]

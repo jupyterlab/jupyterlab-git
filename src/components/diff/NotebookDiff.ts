@@ -145,7 +145,7 @@ export class NotebookDiff
     if (this._areUnchangedCellsHidden !== v) {
       Private.toggleShowUnchanged(
         this._scroller,
-        this._isConflict,
+        this._hasConflict,
         this._areUnchangedCellsHidden
       );
       this._areUnchangedCellsHidden = v;
@@ -155,8 +155,8 @@ export class NotebookDiff
   /**
    * Helper to determine if a notebook merge should be shown.
    */
-  private get _isConflict(): boolean {
-    return !!this._model.base;
+  private get _hasConflict(): boolean {
+    return this._model.hasConflict;
   }
 
   /**
@@ -222,13 +222,13 @@ export class NotebookDiff
       try {
         await nbdWidget.init();
 
-        Private.markUnchangedRanges(this._scroller.node, this._isConflict);
+        Private.markUnchangedRanges(this._scroller.node, this._hasConflict);
       } catch (reason) {
         // FIXME there is a bug in nbdime and init got reject due to recursion limit hit
         // console.error(`Failed to init notebook diff view: ${reason}`);
         // getReady.reject(reason);
         console.debug(`Failed to init notebook diff view: ${reason}`);
-        Private.markUnchangedRanges(this._scroller.node, this._isConflict);
+        Private.markUnchangedRanges(this._scroller.node, this._hasConflict);
       }
     } catch (reason) {
       this.showError(reason);
@@ -333,7 +333,7 @@ namespace Private {
    */
   export function toggleShowUnchanged(
     root: Widget,
-    isConflict: boolean,
+    hasConflict: boolean,
     show?: boolean
   ): void {
     const hiding = root.hasClass(HIDE_UNCHANGED_CLASS);
@@ -346,7 +346,7 @@ namespace Private {
     if (show) {
       root.removeClass(HIDE_UNCHANGED_CLASS);
     } else {
-      markUnchangedRanges(root.node, isConflict);
+      markUnchangedRanges(root.node, hasConflict);
       root.addClass(HIDE_UNCHANGED_CLASS);
     }
     root.update();
@@ -375,10 +375,10 @@ namespace Private {
    */
   export function markUnchangedRanges(
     root: HTMLElement,
-    isConflict: boolean
+    hasConflict: boolean
   ): void {
-    const CELL_CLASS = isConflict ? CELLMERGE_CLASS : CELLDIFF_CLASS;
-    const UNCHANGED_CLASS = isConflict
+    const CELL_CLASS = hasConflict ? CELLMERGE_CLASS : CELLDIFF_CLASS;
+    const UNCHANGED_CLASS = hasConflict
       ? UNCHANGED_MERGE_CLASS
       : UNCHANGED_DIFF_CLASS;
 

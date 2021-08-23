@@ -568,9 +568,9 @@ export namespace Git {
        */
       base?: IContent<T>;
       /**
-       * Helper to check if the file is conflicted.
+       * Helper to check if the file has conflicts.
        */
-      isConflict: boolean;
+      hasConflict?: boolean;
     }
 
     /**

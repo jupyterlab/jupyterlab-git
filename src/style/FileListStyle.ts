@@ -7,3 +7,7 @@ export const fileListWrapperClass = style({
   overflow: 'hidden',
   overflowY: 'auto'
 });
+
+export const unmergedRowStyle = style({
+  color: 'var(--jp-warn-color0) !important'
+});

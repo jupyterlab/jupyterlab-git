@@ -9,7 +9,7 @@ import { ListChildComponentProps } from 'react-window';
 import { addMenuItems, CommandArguments } from '../commandsAndMenu';
 import { getDiffProvider, GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
-import { fileListWrapperClass } from '../style/FileListStyle';
+import { fileListWrapperClass, unmergedRowStyle } from '../style/FileListStyle';
 import {
   addIcon,
   diffIcon,
@@ -362,6 +362,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const diffButton = this._createDiffButton(file);
     return (
       <FileItem
+        className={unmergedRowStyle}
         trans={this.props.trans}
         actions={!file.is_binary && diffButton}
         contextMenu={this.openContextMenu}
@@ -370,7 +371,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         selected={this._isSelectedFile(file)}
         selectFile={this.updateSelectedFile}
         onDoubleClick={() => this._openDiffView(file)}
-        style={{ ...style, color: 'var(--jp-warn-color0)' }}
+        style={{ ...style }}
       />
     );
   };

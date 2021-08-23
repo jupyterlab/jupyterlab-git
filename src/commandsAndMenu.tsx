@@ -471,45 +471,45 @@ export function addCommands(
 
             diffWidget.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
-            const refreshButton = new ToolbarButton({
-              label: trans.__('Refresh'),
-              onClick: async () => {
-                await widget.refresh();
-                refreshButton.hide();
-              },
-              tooltip: trans.__('Refresh diff widget'),
-              className: 'jp-git-diff-refresh'
-            });
-
-            const resolveButton = new ToolbarButton({
-              label: trans.__('Mark as resolved'),
-              onClick: async () => {
-                try {
-                  const resolvedFile: string = await widget.getResolvedFile();
-                  await serviceManager.contents.save(model.filename, {
-                    type: 'file',
-                    format: 'text',
-                    content: resolvedFile
-                  });
-                  await gitModel.add(model.filename);
-                  await gitModel.refresh();
-                } catch (reason) {
-                  logger.log({
-                    message: reason.message ?? reason,
-                    level: Level.ERROR
-                  });
-                } finally {
-                  diffWidget.dispose();
-                }
-              },
-              tooltip: trans.__('Mark file as resolved'),
-              className: 'jp-git-diff-resolve'
-            });
-
             // Do not allow the user to refresh during merge conflicts
-            if (model.isConflict) {
+            if (model.hasConflict) {
+              const resolveButton = new ToolbarButton({
+                label: trans.__('Mark as resolved'),
+                onClick: async () => {
+                  try {
+                    const resolvedFile: string = await widget.getResolvedFile();
+                    await serviceManager.contents.save(model.filename, {
+                      type: 'file',
+                      format: 'text',
+                      content: resolvedFile
+                    });
+                    await gitModel.add(model.filename);
+                    await gitModel.refresh();
+                  } catch (reason) {
+                    logger.log({
+                      message: reason.message ?? reason,
+                      level: Level.ERROR
+                    });
+                  } finally {
+                    diffWidget.dispose();
+                  }
+                },
+                tooltip: trans.__('Mark file as resolved'),
+                className: 'jp-git-diff-resolve'
+              });
+
               diffWidget.toolbar.addItem('resolve', resolveButton);
             } else {
+              const refreshButton = new ToolbarButton({
+                label: trans.__('Refresh'),
+                onClick: async () => {
+                  await widget.refresh();
+                  refreshButton.hide();
+                },
+                tooltip: trans.__('Refresh diff widget'),
+                className: 'jp-git-diff-refresh'
+              });
+
               refreshButton.hide();
               diffWidget.toolbar.addItem('refresh', refreshButton);
 
@@ -526,7 +526,7 @@ export function addCommands(
             content.addWidget(widget);
           } catch (reason) {
             console.error(reason);
-            const msg = `Load Diff Model Error (${reason.message ?? reason})`;
+            const msg = `Load Diff Model Error (${reason.message || reason})`;
             modelIsLoading.reject(msg);
           }
         }
@@ -621,7 +621,10 @@ export function addCommands(
           : { git: diffContext.currentRef };
 
         // Base props used for Diff Model
-        const props: Omit<Git.Diff.IModel<string>, 'changed' | 'isConflict'> = {
+        const props: Omit<
+          Git.Diff.IModel<string>,
+          'changed' | 'hasConflict'
+        > = {
           challenger: {
             content: async () => {
               return requestAPI<Git.IDiffContent>(
