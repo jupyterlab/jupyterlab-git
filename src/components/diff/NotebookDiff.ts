@@ -188,8 +188,8 @@ export class NotebookDiff
 
       const header = Private.diffHeader(
         this._model.reference.label,
-        this._model.base?.label,
-        this._model.challenger.label
+        this._model.challenger.label,
+        this._hasConflict
       );
       this.addWidget(header);
 
@@ -312,16 +312,24 @@ namespace Private {
   /**
    * Create a header widget for the diff view.
    */
-  export function diffHeader(...labels: string[]): Widget {
+  export function diffHeader(
+    baseLabel: string,
+    remoteLabel: string,
+    hasConflict: boolean
+  ): Widget {
     const node = document.createElement('div');
     node.className = 'jp-git-diff-header';
-    node.innerHTML = `
-    <div class="jp-git-diff-banner">
-      ${labels
-        .filter(label => !!label)
-        .map(label => `<span>${label}</span>`)
-        .join('<span class="jp-spacer"></span>')}
-    </div>`;
+    node.innerHTML = `<div class="jp-git-diff-banner">
+        <span>${baseLabel}</span>
+        <span class="jp-spacer"></span>
+        ${
+          hasConflict
+            ? // Add extra space during notebook merge view
+              '<span>&nbsp;</span><span class="jp-spacer"></span>'
+            : ''
+        }
+        <span>${remoteLabel}</span>
+      </div>`;
 
     return new Widget({ node });
   }
