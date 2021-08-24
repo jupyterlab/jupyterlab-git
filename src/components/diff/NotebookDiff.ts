@@ -99,7 +99,7 @@ export const createNotebookDiff = async (
 
     if (model.hasConflict) {
       // FIXME: Merge view breaks when moving checkboxes to the toolbar
-      // toolbar.addItem('clear-outputs', diffWidget.nbdWidget.widgets[0])
+      // toolbar.addItem('clear-outputs', diffWidget.nbdimeWidget.widgets[0])
     }
 
     // Connect toolbar checkbox and notebook diff widget
@@ -162,7 +162,10 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
     return this._model.hasConflict;
   }
 
-  get nbdWidget(): NotebookDiffWidget | NotebookMergeWidget {
+  /**
+   * Nbdime notebook widget.
+   */
+  get nbdimeWidget(): NotebookDiffWidget | NotebookMergeWidget {
     return this._nbdWidget;
   }
 
@@ -174,10 +177,12 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
   }
 
   /**
-   * Checks if the conflicted file has been resolved.
+   * Checks if all conflicts have been resolved.
+   *
+   * @see https://github.com/jupyter/nbdime/blob/a74b538386d05e3e9c26753ad21faf9ff4d269d7/packages/webapp/src/app/save.ts#L2
    */
   get isFileResolved(): boolean {
-    const widget = this.nbdWidget as NotebookMergeWidget;
+    const widget = this.nbdimeWidget as NotebookMergeWidget;
     this._lastSerializeModel = widget.model.serialize();
     const validated = widget.validateMerged(this._lastSerializeModel);
     return (
@@ -186,10 +191,11 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
   }
 
   /**
-   * Gets the file contents of a resolved merge conflict,
+   * Gets the file model of a resolved merge conflict,
    * and rejects if unable to retrieve.
    *
-   * @see https://github.com/jupyter/nbdime/blob/a74b538386d05e3e9c26753ad21faf9ff4d269d7/packages/webapp/src/app/save.ts#L20
+   * Note: `isFileResolved` is assumed to not have been called,
+   * or to have been called just before calling this method for caching purposes.
    */
   async getResolvedFile(): Promise<Partial<Contents.IModel>> {
     return Promise.resolve({
@@ -197,7 +203,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
       type: 'notebook',
       content:
         this._lastSerializeModel ??
-        (this.nbdWidget as NotebookMergeWidget).model.serialize()
+        (this.nbdimeWidget as NotebookMergeWidget).model.serialize()
     });
   }
 

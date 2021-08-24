@@ -481,7 +481,7 @@ export namespace Git {
        */
       isFileResolved: boolean;
       /**
-       * Gets the file contents of a resolved merge conflict,
+       * Gets the file model of a resolved merge conflict,
        * and rejects if unable to retrieve
        */
       getResolvedFile(): Promise<Partial<Contents.IModel>>;
@@ -941,12 +941,6 @@ export namespace Git {
   export class NotInRepository extends Error {
     constructor() {
       super('Not in a Git Repository');
-    }
-  }
-
-  export class ConflictedFile extends Error {
-    constructor(message: string) {
-      super(message);
     }
   }
 }

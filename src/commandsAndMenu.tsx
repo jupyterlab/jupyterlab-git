@@ -484,6 +484,7 @@ export function addCommands(
                       )
                     });
 
+                    // Bail early if the user wants to finish resolving conflicts
                     if (!result.button.accept) {
                       return;
                     }

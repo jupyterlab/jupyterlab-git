@@ -81,7 +81,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   }
 
   /**
-   * Gets the file contents of a resolved merge conflict,
+   * Gets the file model of a resolved merge conflict,
    * and rejects if unable to retrieve.
    */
   getResolvedFile(): Promise<Partial<Contents.IModel>> {
