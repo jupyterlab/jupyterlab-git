@@ -14,8 +14,8 @@ import { MergeView as LocalMergeView, mergeView } from './mergeview';
  * @param toolbar MainAreaWidget toolbar
  * @returns PlainText diff widget
  */
-export const createPlainTextDiff: Git.Diff.ICallback<string> = async (
-  model: Git.Diff.IModel<string>,
+export const createPlainTextDiff: Git.Diff.ICallback = async (
+  model: Git.Diff.IModel,
   toolbar?: Toolbar
 ): Promise<PlainTextDiff> => {
   const widget = new PlainTextDiff(model);
@@ -27,7 +27,7 @@ export const createPlainTextDiff: Git.Diff.ICallback<string> = async (
  * Plain Text Diff widget
  */
 export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
-  constructor(model: Git.Diff.IModel<string>) {
+  constructor(model: Git.Diff.IModel) {
     super({
       node: PlainTextDiff.createNode(
         model.reference.label,
@@ -256,7 +256,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   protected _container: HTMLElement;
   protected _isReady: Promise<void>;
   protected _mergeView: MergeView.MergeViewEditor;
-  protected _model: Git.Diff.IModel<string>;
+  protected _model: Git.Diff.IModel;
 
   private _reference: string | null = null;
   private _challenger: string | null = null;

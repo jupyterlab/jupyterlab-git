@@ -75,7 +75,7 @@ interface INbdimeMergeDiff {
  * @returns Diff notebook widget
  */
 export const createNotebookDiff = async (
-  model: Git.Diff.IModel<string>,
+  model: Git.Diff.IModel,
   renderMime: IRenderMimeRegistry,
   toolbar?: Toolbar
 ): Promise<NotebookDiff> => {
@@ -116,7 +116,7 @@ export const createNotebookDiff = async (
  * NotebookDiff widget
  */
 export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
-  constructor(model: Git.Diff.IModel<string>, renderMime: IRenderMimeRegistry) {
+  constructor(model: Git.Diff.IModel, renderMime: IRenderMimeRegistry) {
     super();
     const getReady = new PromiseDelegate<void>();
     this._isReady = getReady.promise;
@@ -335,7 +335,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
 
   protected _areUnchangedCellsHidden = false;
   protected _isReady: Promise<void>;
-  protected _model: Git.Diff.IModel<string>;
+  protected _model: Git.Diff.IModel;
   protected _renderMime: IRenderMimeRegistry;
   protected _scroller: Panel;
   protected _nbdWidget: NotebookMergeWidget | NotebookDiffWidget;

@@ -5,14 +5,14 @@ import { Git } from '../../tokens';
 /**
  * Base DiffModel class
  */
-export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
-  constructor(props: Omit<Git.Diff.IModel<T>, 'changed' | 'hasConflict'>) {
+export class DiffModel implements IDisposable, Git.Diff.IModel {
+  constructor(props: Omit<Git.Diff.IModel, 'changed' | 'hasConflict'>) {
     this._challenger = props.challenger;
     this._filename = props.filename;
     this._reference = props.reference;
     this._base = props.base;
 
-    this._changed = new Signal<DiffModel<T>, Git.Diff.IModelChange>(this);
+    this._changed = new Signal<DiffModel, Git.Diff.IModelChange>(this);
   }
 
   /**
@@ -22,7 +22,7 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
    * on challenger change except for the content; i.e. the content
    * is not fetch to check if it changed.
    */
-  get changed(): ISignal<DiffModel<T>, Git.Diff.IModelChange> {
+  get changed(): ISignal<DiffModel, Git.Diff.IModelChange> {
     return this._changed;
   }
 
@@ -30,8 +30,8 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
    * Helper to compare diff contents.
    */
   private _didContentChange(
-    a: Git.Diff.IContent<T>,
-    b: Git.Diff.IContent<T>
+    a: Git.Diff.IContent,
+    b: Git.Diff.IContent
   ): boolean {
     return (
       a.label !== b.label || a.source !== b.source || a.updateAt !== b.updateAt
@@ -41,10 +41,10 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
   /**
    * Challenger description
    */
-  get challenger(): Git.Diff.IContent<T> {
+  get challenger(): Git.Diff.IContent {
     return this._challenger;
   }
-  set challenger(v: Git.Diff.IContent<T>) {
+  set challenger(v: Git.Diff.IContent) {
     const emitSignal = this._didContentChange(this._challenger, v);
 
     if (emitSignal) {
@@ -63,10 +63,10 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
   /**
    * Reference description
    */
-  get reference(): Git.Diff.IContent<T> {
+  get reference(): Git.Diff.IContent {
     return this._reference;
   }
-  set reference(v: Git.Diff.IContent<T>) {
+  set reference(v: Git.Diff.IContent) {
     const emitSignal = this._didContentChange(this._reference, v);
 
     if (emitSignal) {
@@ -81,7 +81,7 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
    * Note: The base diff content is only provided during
    * merge conflicts (three-way diff).
    */
-  get base(): Git.Diff.IContent<T> | undefined {
+  get base(): Git.Diff.IContent | undefined {
     return this._base;
   }
 
@@ -110,11 +110,11 @@ export class DiffModel<T> implements IDisposable, Git.Diff.IModel<T> {
     Signal.clearData(this);
   }
 
-  protected _reference: Git.Diff.IContent<T>;
-  protected _challenger: Git.Diff.IContent<T>;
-  protected _base?: Git.Diff.IContent<T>;
+  protected _reference: Git.Diff.IContent;
+  protected _challenger: Git.Diff.IContent;
+  protected _base?: Git.Diff.IContent;
 
-  private _changed: Signal<DiffModel<T>, Git.Diff.IModelChange>;
+  private _changed: Signal<DiffModel, Git.Diff.IModelChange>;
   private _isDisposed = false;
   private _filename: string;
 }

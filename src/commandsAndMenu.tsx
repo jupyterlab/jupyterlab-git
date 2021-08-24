@@ -419,7 +419,7 @@ export function addCommands(
   /**
    * Git display diff command - internal command
    *
-   * @params model {Git.Diff.IModel<string>}: The diff model to display
+   * @params model {Git.Diff.IModel: The diff model to display
    * @params isText {boolean}: Optional, whether the content is a plain text
    * @params isMerge {boolean}: Optional, whether the diff is a merge conflict
    * @returns the main area widget or null
@@ -429,7 +429,7 @@ export function addCommands(
     caption: trans.__('Display a file diff.'),
     execute: async args => {
       const { model, isText } = args as any as {
-        model: Git.Diff.IModel<string>;
+        model: Git.Diff.IModel;
         isText?: boolean;
       };
 
@@ -633,10 +633,7 @@ export function addCommands(
           : { git: diffContext.currentRef };
 
         // Base props used for Diff Model
-        const props: Omit<
-          Git.Diff.IModel<string>,
-          'changed' | 'hasConflict'
-        > = {
+        const props: Omit<Git.Diff.IModel, 'changed' | 'hasConflict'> = {
           challenger: {
             content: async () => {
               return requestAPI<Git.IDiffContent>(
@@ -697,7 +694,7 @@ export function addCommands(
         }
 
         // Create the diff widget
-        const model = new DiffModel<string>(props);
+        const model = new DiffModel(props);
 
         const widget = await commands.execute(CommandIDs.gitShowDiff, {
           model,

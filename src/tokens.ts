@@ -372,10 +372,10 @@ export interface IGitExtension extends IDisposable {
    * @param fileExtensions File extensions list
    * @param callback Callback to use for the provided file types
    */
-  registerDiffProvider<T>(
+  registerDiffProvider(
     name: string,
     fileExtensions: string[],
-    callback: Git.Diff.ICallback<T>
+    callback: Git.Diff.ICallback
   ): void;
 
   /**
@@ -490,24 +490,22 @@ export namespace Git {
     /**
      * Callback to generate a comparison widget
      *
-     * T is the content type to be compared
-     *
      * The toolbar is the one of the MainAreaWidget in which the diff widget
      * will be displayed.
      */
-    export type ICallback<T> = (
-      model: IModel<T>,
+    export type ICallback = (
+      model: IModel,
       toolbar?: Toolbar
     ) => Promise<IDiffWidget>;
 
     /**
      * Content and its context for diff
      */
-    export interface IContent<T> {
+    export interface IContent {
       /**
        * Asynchronous content getter for the source
        */
-      content: () => Promise<T>;
+      content: () => Promise<string>;
       /**
        * Content label
        *
@@ -550,15 +548,15 @@ export namespace Git {
     /**
      * DiffModel properties
      */
-    export interface IModel<T> {
+    export interface IModel {
       /**
        * Challenger data
        */
-      challenger: IContent<T>;
+      challenger: IContent;
       /**
        * Signal emitted when the reference or the challenger changes
        */
-      readonly changed: ISignal<IModel<T>, IModelChange>;
+      readonly changed: ISignal<IModel, IModelChange>;
       /**
        * File of the name being diff at reference state
        */
@@ -566,11 +564,11 @@ export namespace Git {
       /**
        * Reference data
        */
-      reference: IContent<T>;
+      reference: IContent;
       /**
        * Optional base data, used only during merge conflicts
        */
-      base?: IContent<T>;
+      base?: IContent;
       /**
        * Helper to check if the file has conflicts.
        */

@@ -4,7 +4,7 @@ import { DiffModel } from '../../src/components/diff/model';
 import { Git } from '../../src/tokens';
 
 describe('DiffModel', () => {
-  let model: DiffModel<string>;
+  let model: DiffModel;
 
   /**
    * Helper to test changed signal.
