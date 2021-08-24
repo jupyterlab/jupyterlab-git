@@ -6,12 +6,17 @@
 /* eslint-disable no-inner-declarations */
 
 import { Toolbar } from '@jupyterlab/apputils';
+import { Contents } from '@jupyterlab/services';
 import { INotebookContent } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
 import { IDiffEntry } from 'nbdime/lib/diff/diffentries';
+import { IMergeDecision } from 'nbdime/lib/merge/decisions';
+import { NotebookMergeModel } from 'nbdime/lib/merge/model';
+import { CELLMERGE_CLASS, NotebookMergeWidget } from 'nbdime/lib/merge/widget';
+import { UNCHANGED_MERGE_CLASS } from 'nbdime/lib/merge/widget/common';
 import { NotebookDiffModel } from 'nbdime/lib/diff/model';
 import { CELLDIFF_CLASS, NotebookDiffWidget } from 'nbdime/lib/diff/widget';
 import {
@@ -50,6 +55,18 @@ interface INbdimeDiff {
   diff: IDiffEntry[];
 }
 
+interface INbdimeMergeDiff {
+  /**
+   * Base notebook content
+   */
+  base: INotebookContent;
+  /**
+   * Set of decisions made by comparing
+   * reference, challenger, and base notebooks
+   */
+  merge_decisions: IMergeDecision[];
+}
+
 /**
  * Diff callback to be registered for notebook files.
  *
@@ -58,7 +75,7 @@ interface INbdimeDiff {
  * @returns Diff notebook widget
  */
 export const createNotebookDiff = async (
-  model: Git.Diff.IModel<string>,
+  model: Git.Diff.IModel,
   renderMime: IRenderMimeRegistry,
   toolbar?: Toolbar
 ): Promise<NotebookDiff> => {
@@ -80,6 +97,11 @@ export const createNotebookDiff = async (
       'Hide unchanged cells';
     toolbar.addItem('hideUnchanged', new Widget({ node: label }));
 
+    if (model.hasConflict) {
+      // FIXME: Merge view breaks when moving checkboxes to the toolbar
+      // toolbar.addItem('clear-outputs', diffWidget.nbdimeWidget.widgets[0])
+    }
+
     // Connect toolbar checkbox and notebook diff widget
     diffWidget.areUnchangedCellsHidden = checkbox.checked;
     checkbox.onchange = () => {
@@ -94,7 +116,7 @@ export const createNotebookDiff = async (
  * NotebookDiff widget
  */
 export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
-  constructor(model: Git.Diff.IModel<string>, renderMime: IRenderMimeRegistry) {
+  constructor(model: Git.Diff.IModel, renderMime: IRenderMimeRegistry) {
     super();
     const getReady = new PromiseDelegate<void>();
     this._isReady = getReady.promise;
@@ -126,6 +148,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
     if (this._areUnchangedCellsHidden !== v) {
       Private.toggleShowUnchanged(
         this._scroller,
+        this._hasConflict,
         this._areUnchangedCellsHidden
       );
       this._areUnchangedCellsHidden = v;
@@ -133,10 +156,55 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
   }
 
   /**
+   * Helper to determine if a notebook merge should be shown.
+   */
+  private get _hasConflict(): boolean {
+    return this._model.hasConflict;
+  }
+
+  /**
+   * Nbdime notebook widget.
+   */
+  get nbdimeWidget(): NotebookDiffWidget | NotebookMergeWidget {
+    return this._nbdWidget;
+  }
+
+  /**
    * Promise which fulfills when the widget is ready.
    */
   get ready(): Promise<void> {
     return this._isReady;
+  }
+
+  /**
+   * Checks if all conflicts have been resolved.
+   *
+   * @see https://github.com/jupyter/nbdime/blob/a74b538386d05e3e9c26753ad21faf9ff4d269d7/packages/webapp/src/app/save.ts#L2
+   */
+  get isFileResolved(): boolean {
+    const widget = this.nbdimeWidget as NotebookMergeWidget;
+    this._lastSerializeModel = widget.model.serialize();
+    const validated = widget.validateMerged(this._lastSerializeModel);
+    return (
+      JSON.stringify(this._lastSerializeModel) === JSON.stringify(validated)
+    );
+  }
+
+  /**
+   * Gets the file model of a resolved merge conflict,
+   * and rejects if unable to retrieve.
+   *
+   * Note: `isFileResolved` is assumed to not have been called,
+   * or to have been called just before calling this method for caching purposes.
+   */
+  async getResolvedFile(): Promise<Partial<Contents.IModel>> {
+    return Promise.resolve({
+      format: 'json',
+      type: 'notebook',
+      content:
+        this._lastSerializeModel ??
+        (this.nbdimeWidget as NotebookMergeWidget).model.serialize()
+    });
   }
 
   /**
@@ -152,7 +220,8 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
 
       const header = Private.diffHeader(
         this._model.reference.label,
-        this._model.challenger.label
+        this._model.challenger.label,
+        this._hasConflict
       );
       this.addWidget(header);
 
@@ -166,26 +235,32 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
       // ENH request content only if it changed
       const referenceContent = await this._model.reference.content();
       const challengerContent = await this._model.challenger.content();
+      const baseContent = await this._model.base?.content();
 
-      const nbdWidget = await this.createDiffView(
+      const createView = baseContent
+        ? this.createMergeView.bind(this)
+        : this.createDiffView.bind(this);
+
+      this._nbdWidget = await createView(
         challengerContent,
-        referenceContent
+        referenceContent,
+        baseContent
       );
 
       while (this._scroller.widgets.length > 0) {
         this._scroller.widgets[0].dispose();
       }
-      this._scroller.addWidget(nbdWidget);
+      this._scroller.addWidget(this._nbdWidget);
       try {
-        await nbdWidget.init();
+        await this._nbdWidget.init();
 
-        Private.markUnchangedRanges(this._scroller.node);
+        Private.markUnchangedRanges(this._scroller.node, this._hasConflict);
       } catch (reason) {
         // FIXME there is a bug in nbdime and init got reject due to recursion limit hit
         // console.error(`Failed to init notebook diff view: ${reason}`);
         // getReady.reject(reason);
         console.debug(`Failed to init notebook diff view: ${reason}`);
-        Private.markUnchangedRanges(this._scroller.node);
+        Private.markUnchangedRanges(this._scroller.node, this._hasConflict);
       }
     } catch (reason) {
       this.showError(reason);
@@ -206,6 +281,24 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return new NotebookDiffWidget(model, this._renderMime);
+  }
+
+  protected async createMergeView(
+    challengerContent: string,
+    referenceContent: string,
+    baseContent: string
+  ): Promise<NotebookMergeWidget> {
+    const data = await requestAPI<INbdimeMergeDiff>('diffnotebook', 'POST', {
+      currentContent: challengerContent,
+      previousContent: referenceContent,
+      baseContent
+    });
+
+    const model = new NotebookMergeModel(data.base, data.merge_decisions);
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return new NotebookMergeWidget(model, this._renderMime);
   }
 
   /**
@@ -242,21 +335,33 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
 
   protected _areUnchangedCellsHidden = false;
   protected _isReady: Promise<void>;
-  protected _model: Git.Diff.IModel<string>;
+  protected _model: Git.Diff.IModel;
   protected _renderMime: IRenderMimeRegistry;
   protected _scroller: Panel;
+  protected _nbdWidget: NotebookMergeWidget | NotebookDiffWidget;
+  protected _lastSerializeModel: INotebookContent | null = null;
 }
 
 namespace Private {
   /**
    * Create a header widget for the diff view.
    */
-  export function diffHeader(baseLabel: string, remoteLabel: string): Widget {
+  export function diffHeader(
+    baseLabel: string,
+    remoteLabel: string,
+    hasConflict: boolean
+  ): Widget {
     const node = document.createElement('div');
     node.className = 'jp-git-diff-header';
     node.innerHTML = `<div class="jp-git-diff-banner">
         <span>${baseLabel}</span>
         <span class="jp-spacer"></span>
+        ${
+          hasConflict
+            ? // Add extra space during notebook merge view
+              '<span>&nbsp;</span><span class="jp-spacer"></span>'
+            : ''
+        }
         <span>${remoteLabel}</span>
       </div>`;
 
@@ -268,7 +373,11 @@ namespace Private {
    *
    * This simply marks with a class, real work is done by CSS.
    */
-  export function toggleShowUnchanged(root: Widget, show?: boolean): void {
+  export function toggleShowUnchanged(
+    root: Widget,
+    hasConflict: boolean,
+    show?: boolean
+  ): void {
     const hiding = root.hasClass(HIDE_UNCHANGED_CLASS);
     if (show === undefined) {
       show = hiding;
@@ -279,7 +388,7 @@ namespace Private {
     if (show) {
       root.removeClass(HIDE_UNCHANGED_CLASS);
     } else {
-      markUnchangedRanges(root.node);
+      markUnchangedRanges(root.node, hasConflict);
       root.addClass(HIDE_UNCHANGED_CLASS);
     }
     root.update();
@@ -306,12 +415,23 @@ namespace Private {
   /**
    * Marks certain cells with
    */
-  export function markUnchangedRanges(root: HTMLElement): void {
-    const children = root.querySelectorAll(`.${CELLDIFF_CLASS}`);
+  export function markUnchangedRanges(
+    root: HTMLElement,
+    hasConflict: boolean
+  ): void {
+    const CELL_CLASS = hasConflict ? CELLMERGE_CLASS : CELLDIFF_CLASS;
+    const UNCHANGED_CLASS = hasConflict
+      ? UNCHANGED_MERGE_CLASS
+      : UNCHANGED_DIFF_CLASS;
+    const NOTEBOOK_CLASS = hasConflict
+      ? '.jp-Notebook-merge'
+      : '.jp-Notebook-diff';
+
+    const children = root.querySelectorAll(`.${CELL_CLASS}`);
     let rangeStart = -1;
     for (let i = 0; i < children.length; ++i) {
       const child = children[i];
-      if (!child.classList.contains(UNCHANGED_DIFF_CLASS)) {
+      if (!child.classList.contains(UNCHANGED_CLASS)) {
         // Visible
         if (rangeStart !== -1) {
           // Previous was hidden
@@ -333,7 +453,7 @@ namespace Private {
       if (rangeStart === 0) {
         // All elements were hidden, nothing to mark
         // Add info on root instead
-        const tag = root.querySelector('.jp-Notebook-diff') || root;
+        const tag = root.querySelector(NOTEBOOK_CLASS) ?? root;
         tag.setAttribute('data-nbdime-AllCellsHidden', N.toString());
         return;
       }

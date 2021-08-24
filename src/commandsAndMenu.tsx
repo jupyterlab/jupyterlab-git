@@ -104,7 +104,7 @@ export function addCommands(
   settings: ISettingRegistry.ISettings,
   trans: TranslationBundle
 ): void {
-  const { commands, shell } = app;
+  const { commands, shell, serviceManager } = app;
 
   /**
    * Commit using a keystroke combination when in CommitBox.
@@ -419,8 +419,9 @@ export function addCommands(
   /**
    * Git display diff command - internal command
    *
-   * @params model {Git.Diff.IModel<string>}: The diff model to display
+   * @params model {Git.Diff.IModel: The diff model to display
    * @params isText {boolean}: Optional, whether the content is a plain text
+   * @params isMerge {boolean}: Optional, whether the diff is a merge conflict
    * @returns the main area widget or null
    */
   commands.addCommand(CommandIDs.gitShowDiff, {
@@ -428,7 +429,7 @@ export function addCommands(
     caption: trans.__('Display a file diff.'),
     execute: async args => {
       const { model, isText } = args as any as {
-        model: Git.Diff.IModel<string>;
+        model: Git.Diff.IModel;
         isText?: boolean;
       };
 
@@ -470,26 +471,67 @@ export function addCommands(
 
             diffWidget.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
-            const refreshButton = new ToolbarButton({
-              label: trans.__('Refresh'),
-              onClick: async () => {
-                await widget.refresh();
-                refreshButton.hide();
-              },
-              tooltip: trans.__('Refresh diff widget'),
-              className: 'jp-git-diff-refresh'
-            });
-            refreshButton.hide();
-            diffWidget.toolbar.addItem('refresh', refreshButton);
+            // Do not allow the user to refresh during merge conflicts
+            if (model.hasConflict) {
+              const resolveButton = new ToolbarButton({
+                label: trans.__('Mark as resolved'),
+                onClick: async () => {
+                  if (!widget.isFileResolved) {
+                    const result = await showDialog({
+                      title: trans.__('Resolve with conflicts'),
+                      body: trans.__(
+                        'Are you sure you want to mark this file as resolved with merge conflicts?'
+                      )
+                    });
 
-            const refresh = () => {
-              refreshButton.show();
-            };
+                    // Bail early if the user wants to finish resolving conflicts
+                    if (!result.button.accept) {
+                      return;
+                    }
+                  }
 
-            model.changed.connect(refresh);
-            widget.disposed.connect(() => {
-              model.changed.disconnect(refresh);
-            });
+                  try {
+                    await serviceManager.contents.save(
+                      model.filename,
+                      await widget.getResolvedFile()
+                    );
+                    await gitModel.add(model.filename);
+                    await gitModel.refresh();
+                  } catch (reason) {
+                    logger.log({
+                      message: reason.message ?? reason,
+                      level: Level.ERROR
+                    });
+                  } finally {
+                    diffWidget.dispose();
+                  }
+                },
+                tooltip: trans.__('Mark file as resolved'),
+                className: 'jp-git-diff-resolve'
+              });
+
+              diffWidget.toolbar.addItem('resolve', resolveButton);
+            } else {
+              const refreshButton = new ToolbarButton({
+                label: trans.__('Refresh'),
+                onClick: async () => {
+                  await widget.refresh();
+                  refreshButton.hide();
+                },
+                tooltip: trans.__('Refresh diff widget'),
+                className: 'jp-git-diff-refresh'
+              });
+
+              refreshButton.hide();
+              diffWidget.toolbar.addItem('refresh', refreshButton);
+
+              const refresh = () => {
+                refreshButton.show();
+              };
+
+              model.changed.connect(refresh);
+              widget.disposed.connect(() => model.changed.disconnect(refresh));
+            }
 
             // Load the diff widget
             modelIsLoading.resolve();
@@ -569,25 +611,29 @@ export function addCommands(
 
         const repositoryPath = gitModel.getRelativeFilePath();
         const filename = PathExt.join(repositoryPath, filePath);
+        const specialRef =
+          status === 'staged'
+            ? Git.Diff.SpecialRef.INDEX
+            : Git.Diff.SpecialRef.WORKING;
 
-        let diffContext = context;
-        if (!diffContext) {
-          const specialRef =
-            status === 'staged'
-              ? Git.Diff.SpecialRef.INDEX
-              : Git.Diff.SpecialRef.WORKING;
-          diffContext = {
-            currentRef: specialRef,
-            previousRef: 'HEAD'
-          };
-        }
+        const diffContext: Git.Diff.IContext =
+          status === 'unmerged'
+            ? {
+                currentRef: 'HEAD',
+                previousRef: 'MERGE_HEAD',
+                baseRef: 'ORIG_HEAD'
+              }
+            : context ?? {
+                currentRef: specialRef,
+                previousRef: 'HEAD'
+              };
 
         const challengerRef = Git.Diff.SpecialRef[diffContext.currentRef as any]
           ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
           : { git: diffContext.currentRef };
 
-        // Create the diff widget
-        const model = new DiffModel<string>({
+        // Base props used for Diff Model
+        const props: Omit<Git.Diff.IModel, 'changed' | 'hasConflict'> = {
           challenger: {
             content: async () => {
               return requestAPI<Git.IDiffContent>(
@@ -623,7 +669,32 @@ export function addCommands(
             source: diffContext.previousRef,
             updateAt: Date.now()
           }
-        });
+        };
+
+        if (diffContext.baseRef) {
+          props.reference.label = trans.__('CURRENT');
+          props.challenger.label = trans.__('INCOMING');
+
+          // Only add base when diff-ing merge conflicts
+          props.base = {
+            content: async () => {
+              return requestAPI<Git.IDiffContent>(
+                URLExt.join(repositoryPath, 'content'),
+                'POST',
+                {
+                  filename: filePath,
+                  reference: { git: diffContext.baseRef }
+                }
+              ).then(data => data.content);
+            },
+            label: trans.__('RESULT'),
+            source: diffContext.baseRef,
+            updateAt: Date.now()
+          };
+        }
+
+        // Create the diff widget
+        const model = new DiffModel(props);
 
         const widget = await commands.execute(CommandIDs.gitShowDiff, {
           model,

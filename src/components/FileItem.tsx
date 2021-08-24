@@ -173,7 +173,10 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
   render(): JSX.Element {
     const { file } = this.props;
     const status_code = file.status === 'staged' ? file.x : file.y;
-    const status = this._getFileChangedLabel(status_code as any);
+    const status =
+      file.status === 'unmerged'
+        ? 'Conflicted'
+        : this._getFileChangedLabel(status_code as any);
 
     return (
       <div
@@ -205,7 +208,11 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         />
         {this.props.actions}
         <span className={this._getFileChangedLabelClass(this.props.file.y)}>
-          {this.props.file.y === '?' ? 'U' : status_code}
+          {this.props.file.status === 'unmerged'
+            ? '!'
+            : this.props.file.y === '?'
+            ? 'U'
+            : status_code}
         </span>
       </div>
     );

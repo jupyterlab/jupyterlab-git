@@ -209,7 +209,7 @@ async function activate(
   gitExtension.registerDiffProvider(
     'Nbdime',
     ['.ipynb'],
-    (model: Git.Diff.IModel<string>, toolbar?: Toolbar) =>
+    (model: Git.Diff.IModel, toolbar?: Toolbar) =>
       createNotebookDiff(model, renderMime, toolbar)
   );
 

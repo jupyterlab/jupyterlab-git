@@ -14,7 +14,7 @@ import nbformat
 import pexpect
 import tornado
 import tornado.locks
-from nbdime import diff_notebooks
+from nbdime import diff_notebooks, merge_notebooks
 from jupyter_server.utils import ensure_async
 
 from .log import get_logger
@@ -320,14 +320,20 @@ class Git:
 
         return result
 
-    async def get_nbdiff(self, prev_content: str, curr_content: str) -> dict:
+    async def get_nbdiff(
+        self, prev_content: str, curr_content: str, base_content=None
+    ) -> dict:
         """Compute the diff between two notebooks.
 
         Args:
             prev_content: Notebook previous content
             curr_content: Notebook current content
+            base_content: Notebook base content - only passed during a merge conflict
         Returns:
-            {"base": Dict, "diff": Dict}
+            if not base_content:
+                {"base": Dict, "diff": Dict}
+            else:
+                {"base": Dict, "merge_decisions": Dict}
         """
 
         def read_notebook(content):
@@ -345,14 +351,35 @@ class Git:
             else:
                 return nbformat.reads(content, as_version=4)
 
+        # TODO Fix this in nbdime
+        def remove_cell_ids(nb):
+            for cell in nb.cells:
+                del cell["id"]
+            return nb
+
         current_loop = tornado.ioloop.IOLoop.current()
         prev_nb = await current_loop.run_in_executor(None, read_notebook, prev_content)
         curr_nb = await current_loop.run_in_executor(None, read_notebook, curr_content)
-        thediff = await current_loop.run_in_executor(
-            None, diff_notebooks, prev_nb, curr_nb
-        )
+        if base_content:
+            base_nb = await current_loop.run_in_executor(
+                None, read_notebook, base_content
+            )
+            # Only remove ids from merge_notebooks as a workaround
+            _, merge_decisions = await current_loop.run_in_executor(
+                None,
+                merge_notebooks,
+                remove_cell_ids(base_nb),
+                remove_cell_ids(prev_nb),
+                remove_cell_ids(curr_nb),
+            )
 
-        return {"base": prev_nb, "diff": thediff}
+            return {"base": base_nb, "merge_decisions": merge_decisions}
+        else:
+            thediff = await current_loop.run_in_executor(
+                None, diff_notebooks, prev_nb, curr_nb
+            )
+
+            return {"base": prev_nb, "diff": thediff}
 
     async def status(self, path):
         """

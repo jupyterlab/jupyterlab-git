@@ -705,7 +705,10 @@ class GitDiffNotebookHandler(GitHandler):
                 status_code=400, reason=f"Missing POST key: {e}"
             )
         try:
-            content = await self.git.get_nbdiff(prev_content, curr_content)
+            base_content = data.get("baseContent")
+            content = await self.git.get_nbdiff(
+                prev_content, curr_content, base_content
+            )
         except Exception as e:
             get_logger().error(f"Error computing notebook diff.", exc_info=e)
             raise tornado.web.HTTPError(
