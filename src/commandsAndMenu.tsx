@@ -66,7 +66,8 @@ enum Operation {
   Clone = 'Clone',
   Pull = 'Pull',
   Push = 'Push',
-  ForcePush = 'ForcePush'
+  ForcePush = 'ForcePush',
+  DiscardPull = 'discardPull'
 }
 
 interface IFileDiffArgument {
@@ -389,10 +390,16 @@ export function addCommands(
 
   /** Add git pull command */
   commands.addCommand(CommandIDs.gitPull, {
-    label: trans.__('Pull from Remote'),
-    caption: trans.__('Pull latest code from remote repository'),
+    label: args =>
+      args.discard
+        ? trans.__('Pull from Remote (Discard all)')
+        : trans.__('Pull from Remote'),
+    caption: args =>
+      args.discard
+        ? trans.__('Discard all and pull from remote repository')
+        : trans.__('Pull latest code from remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
-    execute: async () => {
+    execute: async args => {
       logger.log({
         level: Level.RUNNING,
         message: trans.__('Pulling…')
@@ -400,7 +407,7 @@ export function addCommands(
       try {
         const details = await Private.showGitOperationDialog(
           gitModel,
-          Operation.Pull,
+          args.discard ? Operation.DiscardPull : Operation.Pull,
           trans
         );
         logger.log({
@@ -1155,10 +1162,13 @@ export function createGitMenu(
     CommandIDs.gitAddRemote,
     CommandIDs.gitTerminalCommand
   ].forEach(command => {
+    menu.addItem({ command });
     if (command === CommandIDs.gitPush) {
       menu.addItem({ command, args: { force: true } });
     }
-    menu.addItem({ command });
+    if (command === CommandIDs.gitPull) {
+      menu.addItem({ command, args: { discard: true } });
+    }
   });
 
   menu.addItem({ type: 'separator' });
@@ -1391,6 +1401,9 @@ namespace Private {
           break;
         case Operation.Pull:
           result = await model.pull(authentication);
+          break;
+        case Operation.DiscardPull:
+          result = await model.pull(authentication, true);
           break;
         case Operation.Push:
           result = await model.push(authentication);

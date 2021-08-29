@@ -786,14 +786,23 @@ export class GitExtension implements IGitExtension {
    * Fetch changes from a remote repository.
    *
    * @param auth - remote authentication information
+   * @param discard - whether or not to discard all changes
    * @returns promise which resolves upon fetching changes
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async pull(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
+  async pull(
+    auth?: Git.IAuth,
+    discard = false
+  ): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
+
+    if (discard) {
+      await this.resetToCommit('HEAD');
+    }
+
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:pull',
       async () => {
