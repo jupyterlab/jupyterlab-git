@@ -6,7 +6,8 @@ USER root
 # Upgrade JupyterLab
 RUN mamba install -c conda-forge -y git jupyterlab nbdime 
 
-# ADD --chown=1000:1000 examples /home/jovyan/work/
-ADD --chown=1000:1000 merge-repo.tar.xz /home/jovyan/work
+# Copy and unarchive merge conflict example repo
+# Cannot use symlinks, need another examples folder just for ui-tests
+ADD --chown=1000:1000 data/merge-conflict-example.tar.gz /home/jovyan/work
 
 USER 1000
