@@ -26,7 +26,7 @@ module.exports = {
     '<rootDir>/jupyter-config'
   ],
   setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
-  testPathIgnorePatterns: ['/lib/', '/node_modules/', '/jupyterlab_git/'],
+  testPathIgnorePatterns: ['/lib/', '/node_modules/', '/jupyterlab_git/', '/ui-tests/'],
   testRegex: '/tests/.*.spec.ts[x]?$',
   transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
   globals: {
