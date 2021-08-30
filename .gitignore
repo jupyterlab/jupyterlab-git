@@ -135,3 +135,7 @@ dmypy.json
 *.swp
 
 src/version.ts
+
+# Integration tests
+ui-tests/node_modules/
+ui-tests/test-results/

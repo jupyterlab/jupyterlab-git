@@ -1,0 +1,21 @@
+{
+  "name": "@jupyterlab/git-ui-tests",
+  "version": "0.1.0",
+  "description": "UI tests",
+  "repository": "https://github.com/jupyterlab/jupyterlab-git",
+  "author": "Jupyter Development Team",
+  "license": "BSD-3-Clause",
+  "private": true,
+  "scripts": {
+    "install": "playwright install chromium",
+    "start-jlab": "jupyter lab --config ./jupyter_server_config.py",
+    "start-jlab:detached": "yarn run start-jlab&",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "codegen": "playwright codegen http://localhost:8888/lab"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.14.0",
+    "typescript": "~4.1.3"
+  }
+}
