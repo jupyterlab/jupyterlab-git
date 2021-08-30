@@ -46,6 +46,7 @@ import {
   Level
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
+import { discardAllChanges } from './widgets/discardAllChanges';
 import { GitCloneForm } from './widgets/GitCloneForm';
 
 interface IGitCloneArgs {
@@ -66,8 +67,7 @@ enum Operation {
   Clone = 'Clone',
   Pull = 'Pull',
   Push = 'Push',
-  ForcePush = 'ForcePush',
-  DiscardPull = 'discardPull'
+  ForcePush = 'ForcePush'
 }
 
 interface IFileDiffArgument {
@@ -392,22 +392,27 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitPull, {
     label: args =>
       args.discard
-        ? trans.__('Pull from Remote (Discard all)')
+        ? trans.__('Pull from Remote (Force)')
         : trans.__('Pull from Remote'),
     caption: args =>
       args.discard
-        ? trans.__('Discard all and pull from remote repository')
+        ? trans.__(
+            'Discard all current changes and pull from remote repository'
+          )
         : trans.__('Pull latest code from remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
-      logger.log({
-        level: Level.RUNNING,
-        message: trans.__('Pulling…')
-      });
       try {
+        if (args.discard) {
+          await discardAllChanges(gitModel, trans);
+        }
+        logger.log({
+          level: Level.RUNNING,
+          message: trans.__('Pulling…')
+        });
         const details = await Private.showGitOperationDialog(
           gitModel,
-          args.discard ? Operation.DiscardPull : Operation.Pull,
+          Operation.Pull,
           trans
         );
         logger.log({
@@ -1401,9 +1406,6 @@ namespace Private {
           break;
         case Operation.Pull:
           result = await model.pull(authentication);
-          break;
-        case Operation.DiscardPull:
-          result = await model.pull(authentication, true);
           break;
         case Operation.Push:
           result = await model.push(authentication);
