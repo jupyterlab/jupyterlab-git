@@ -32,7 +32,7 @@
     "doubleClickDiff": {
       "type": "boolean",
       "title": "Show diff on double click",
-      "description": "If true, doubling clicking a file in the list of changed files will open a diff.",
+      "description": "If true, double clicking a file in the list of changed files will open a diff.",
       "default": false
     },
     "historyCount": {
