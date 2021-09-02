@@ -26,7 +26,7 @@ describe('IGitExtension', () => {
     };
 
     mockResponses = {
-      responses: {...defaultMockedResponses}
+      responses: { ...defaultMockedResponses }
     };
 
     mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
@@ -85,7 +85,7 @@ describe('IGitExtension', () => {
         expect(model.isReady).toBe(false);
       });
 
-      mockResponses.path = DEFAULT_REPOSITORY_PATH
+      mockResponses.path = DEFAULT_REPOSITORY_PATH;
       model.pathRepository = mockResponses.path;
       expect(model.isReady).toBe(false);
       await model.ready;
@@ -269,32 +269,57 @@ describe('IGitExtension', () => {
     });
   });
 
-  describe('#getRelativeFilePath', () => {
-    it('should return relative path correctly ', async () => {
-      const testData = [
-        [
-          'somefolder/file',
-          'dir1/dir2/repo',
-          'dir1/dir2/repo/somefolder/file'
-        ],
-        ['file', 'repo', 'repo/file'],
-        ['somefolder/file', 'repo', 'repo/somefolder/file'],
-        ['somefolder/file', '', 'somefolder/file'],
-        ['file', '', 'file'],
-        ['file', null, null]
-      ];
-
-      for (const testDatum of testData) {
+  describe('#getFile', () => {
+    it.each([
+      ['dir1/dir2/repo/somefolder/file', 'somefolder/file', 'dir1/dir2/repo'],
+      ['repo/file', 'file', 'repo'],
+      ['repo/somefolder/file', 'somefolder/file', 'repo'],
+      ['somefolder/file', 'somefolder/file', ''],
+      ['file', 'file', ''],
+      ['file', null, null],
+      ['other_repo/file', null, 'repo'],
+      ['root/other_repo/file', null, 'root/repo']
+    ])(
+      '%s should return unmodified status with path relative to the repository',
+      async (path, expected, repo) => {
         // Given
-        mockResponses.path = testDatum[1];
-        model.pathRepository = testDatum[1];
+        mockResponses.path = repo;
+        model.pathRepository = repo;
         await model.ready;
         // When
-        const relativePath = model.getRelativeFilePath(testDatum[0]);
+        const status = model.getFile(path);
         // Then
-        expect(relativePath).toEqual(testDatum[2]);
+        if (expected === null) {
+          expect(status).toBeNull();
+        } else {
+          expect(status.status).toEqual('unmodified');
+          expect(status.to).toEqual(expected);
+        }
       }
-    });
+    );
+  });
+
+  describe('#getRelativeFilePath', () => {
+    it.each([
+      ['somefolder/file', 'dir1/dir2/repo', 'dir1/dir2/repo/somefolder/file'],
+      ['file', 'repo', 'repo/file'],
+      ['somefolder/file', 'repo', 'repo/somefolder/file'],
+      ['somefolder/file', '', 'somefolder/file'],
+      ['file', '', 'file'],
+      ['file', null, null]
+    ])(
+      '%s should return relative path correctly ',
+      async (path, repo, expected) => {
+        // Given
+        mockResponses.path = repo;
+        model.pathRepository = repo;
+        await model.ready;
+        // When
+        const relativePath = model.getRelativeFilePath(path);
+        // Then
+        expect(relativePath).toEqual(expected);
+      }
+    );
   });
 
   describe('#checkout', () => {
