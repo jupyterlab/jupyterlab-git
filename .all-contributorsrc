@@ -182,6 +182,17 @@
         "code",
         "review"
       ]
+    },
+    {
+      "login": "krassowski",
+      "name": "Michał Krassowski",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5832902?v=4",
+      "profile": "http://linkedin.com/in/michal-krassowski/",
+      "contributions": [
+        "code",
+        "review",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
