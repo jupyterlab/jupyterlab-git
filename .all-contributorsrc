@@ -89,6 +89,15 @@
       ]
     },
     {
+      "login": "mlh",
+      "name": "Major League Hacking",
+      "avatar_url": "https://avatars.githubusercontent.com/u/65834464?s=200&v=4",
+      "profile": "https://fellowship.mlh.io/",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
       "login": "zzhangjii",
       "name": "Ji Zhang",
       "avatar_url": "https://avatars3.githubusercontent.com/u/11495372?v=4",
@@ -190,6 +199,26 @@
       "profile": "http://sinakhalili.com",
       "contributions": [
         "code"
+      ]
+    },
+    {  
+      "login": "navn-r",
+      "name": "Navinn Ravindaran",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59669957?v=4",
+      "profile": "https://navn.me",
+      "contributions": [
+        "code"
+      ]
+    },
+    {        
+      "login": "krassowski",
+      "name": "Michał Krassowski",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5832902?v=4",
+      "profile": "http://linkedin.com/in/michal-krassowski/",
+      "contributions": [
+        "code",
+        "review",
+        "bug"
       ]
     }
   ],

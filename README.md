@@ -241,8 +241,11 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
   </tr>
   <tr>
     <td align="center"><a href="http://sinakhalili.com"><img src="https://avatars.githubusercontent.com/u/20732540?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sina Khalili</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=SinaKhalili" title="Code">💻</a></td>
-    <td align="center"><a href="https://www.deshaw.com/"><img src="https://avatars0.githubusercontent.com/u/2298205?v=4?s=100" width="100px;" alt=""/><br /><sub><b>The D. E. Shaw Group</b></sub></a><br /><a href="#financial-deshaw" title="">🤝</a></td>
-    <td align="center"><a href="https://github.com/jupytercalpoly"><img src="https://avatars0.githubusercontent.com/u/19445175?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jupytercalpoly</b></sub></a><br /><a href="#financial-jupytercalpoly" title="">🤝</a></td>
+    <td align="center"><a href="https://navn.me"><img src="https://avatars.githubusercontent.com/u/59669957?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Navinn Ravindaran</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=navn-r" title="Code">💻</a></td>
+    <td align="center"><a href="http://linkedin.com/in/michal-krassowski/"><img src="https://avatars.githubusercontent.com/u/5832902?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Michał Krassowski</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=krassowski" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Akrassowski" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/jupyterlab/jupyterlab-git/issues?q=author%3Akrassowski" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://www.deshaw.com/"><img src="https://avatars0.githubusercontent.com/u/2298205?v=4&s=100" width="100px;" alt=""/><br /><sub><b>The D. E. Shaw Group</b></sub></a><br /><a href="#financial-deshaw" title="">🤝</a></td>
+    <td align="center"><a href="https://github.com/jupytercalpoly"><img src="https://avatars0.githubusercontent.com/u/19445175?v=4&s=100" width="100px;" alt=""/><br /><sub><b>jupytercalpoly</b></sub></a><br /><a href="#financial-jupytercalpoly" title="">🤝</a></td>
+    <td align="center"><a href="https://fellowship.mlh.io/"><img src="https://avatars.githubusercontent.com/u/65834464?v=4&s=100" width="100px;" alt=""/><br /><sub><b>Major League Hacking Fellowship</b></sub></a><br /><a href="#financial-mlh" title="">🤝</a></td>
   </tr>
 </table>
 
