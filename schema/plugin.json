@@ -99,7 +99,15 @@
             "command": "git:push"
           },
           {
+            "command": "git:push",
+            "args": { "force": true }
+          },
+          {
             "command": "git:pull"
+          },
+          {
+            "command": "git:pull",
+            "args": { "discard": true }
           },
           {
             "command": "git:add-remote"
