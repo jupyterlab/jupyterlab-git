@@ -89,6 +89,15 @@
       ]
     },
     {
+      "login": "mlh",
+      "name": "Major League Hacking",
+      "avatar_url": "https://avatars.githubusercontent.com/u/65834464?s=200&v=4",
+      "profile": "https://fellowship.mlh.io/",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
       "login": "zzhangjii",
       "name": "Ji Zhang",
       "avatar_url": "https://avatars3.githubusercontent.com/u/11495372?v=4",
@@ -184,6 +193,15 @@
       ]
     },
     {
+      "login": "SinaKhalili",
+      "name": "Sina Khalili",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20732540?v=4",
+      "profile": "http://sinakhalili.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {  
       "login": "navn-r",
       "name": "Navinn Ravindaran",
       "avatar_url": "https://avatars.githubusercontent.com/u/59669957?v=4",
