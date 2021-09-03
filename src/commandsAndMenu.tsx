@@ -1057,7 +1057,11 @@ export function addFileBrowserContextMenu(
     const items = toArray(filebrowser.selectedItems());
     const statuses = new Set<Git.Status>(
       items
-        .map(item => model.getFile(item.path)?.status)
+        .map(item =>
+          model.pathRepository === null
+            ? undefined
+            : model.getFile(item.path)?.status
+        )
         .filter(status => typeof status !== 'undefined')
     );
 
