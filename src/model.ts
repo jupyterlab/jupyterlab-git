@@ -294,24 +294,41 @@ export class GitExtension implements IGitExtension {
   /**
    * Match files status information based on a provided file path.
    *
-   * If the file is tracked and has no changes, a StatusFile of unmodified will be returned
+   * If the file is tracked and has no changes, a StatusFile of unmodified will be returned.
    *
    * @param path the file path relative to the server root
+   * @returns The file status or null if path repository is null or path not in repository
    */
-  getFile(path: string): Git.IStatusFile {
-    return (
-      this._status.files.find(status => {
-        return this.getRelativeFilePath(status.to) === path;
-      }) ?? {
-        x: '',
-        y: '',
-        to: path,
-        from: '',
-        is_binary: null,
-        status: 'unmodified',
-        type: this._resolveFileType(path)
+  getFile(path: string): Git.IStatusFile | null {
+    if (this.pathRepository === null) {
+      return null;
+    }
+    const fileStatus = this._status.files.find(status => {
+      return this.getRelativeFilePath(status.to) === path;
+    });
+
+    if (!fileStatus) {
+      const relativePath = PathExt.relative(
+        '/' + this.pathRepository,
+        '/' + path
+      );
+
+      if (relativePath.startsWith('../')) {
+        return null;
+      } else {
+        return {
+          x: '',
+          y: '',
+          to: relativePath,
+          from: '',
+          is_binary: null,
+          status: 'unmodified',
+          type: this._resolveFileType(path)
+        };
       }
-    );
+    } else {
+      return fileStatus;
+    }
   }
 
   /**
