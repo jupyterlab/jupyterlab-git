@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: master
+    branches: ['master']
   pull_request:
-    branches: '*'
+    branches: ['master']
 
 jobs:
   test-3x:
@@ -19,7 +19,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -59,7 +59,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Install dependencies
-        run: python -m pip install -U jupyter_packaging~=0.7.9 jupyterlab~=3.0 pip wheel
+        run: python -m pip install -U jupyter_packaging~=0.7.9 jupyterlab~=3.0 pip wheel build
       - name: Test the extension
         run: |
           jlpm
@@ -83,13 +83,14 @@ jobs:
           jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
           python -m jupyterlab.browser_check
 
+          python -m build -w 
+
       - uses: actions/upload-artifact@v2
         if: matrix.python-version == '3.9'
         with:
           name: extension
           path: |
-            jupyterlab_git
-            jupyter-config
+            dist
 
   ui-test:
     name: Integration tests
@@ -100,16 +101,46 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
       - uses: actions/download-artifact@v2
         with:
           name: extension
+      - name: Setup Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+          architecture: 'x64'
+
+      - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+
+      - name: pip cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-3.9-${{ hashFiles('**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-3.9-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        # Install jupyter-archive to deal with test git repository upload
+        run: |
+          python -m pip install -U pip
+          python -m pip install jupyterlab~=3.0 jupyter-archive
+          python -m pip install ./dist/*.whl
 
       - name: UI tests
         run: |
-          docker-compose -f ./docker/docker-compose.yml down || true
-          docker-compose -f ./docker/docker-compose.yml pull -q || true
-          docker-compose -f ./docker/docker-compose.yml build
-          docker-compose -f ./docker/docker-compose.yml run --rm e2e
+          jlpm
+          jlpm install:browser
+          jlpm start-jlab:detached
+          jlpm run test
         working-directory: ui-tests
 
       - name: Upload UI Test artifacts
@@ -118,12 +149,11 @@ jobs:
         with:
           name: ui-test-output
           path: |
+            ui-tests/playwright-report
             ui-tests/test-results
 
-      - name: Stop containers
+      - name: Stop JupyterLab
         if: always()
         run: |
-          # Print jupyterlab logs before removing the containers using the container name set in docker-compose file
-          docker logs jupyterlab
-          docker-compose -f ./docker/docker-compose.yml down
+          kill -s SIGTERM $(pgrep jupyter-lab)
         working-directory: ui-tests

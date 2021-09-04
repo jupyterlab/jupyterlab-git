@@ -1,24 +1,23 @@
-import { test, expect, Locator } from '@playwright/test';
+import { test } from '@jupyterlab/galata';
+import { expect } from '@playwright/test';
+import path from 'path';
+import { extractFile } from './utils';
 
-const TARGET_URL = process.env.TARGET_URL ?? 'http://localhost:8888';
+const baseRepositoryPath = 'merge-conflict-example.tar.gz';
+test.use({ autoGoto: false });
 
 test.describe('Merge conflict tests', () => {
-  test.beforeEach(async ({ page }) => {
-    // URL for merge conflict example repository
-    await page.goto(`${TARGET_URL}/lab/tree/merge-conflict-example`);
-
-    await page.waitForSelector('#jupyterlab-splash', { state: 'detached' });
-    await page.waitForSelector('div[role="main"] >> text=Launcher');
-
-    const gitTabBar = await page.waitForSelector(
-      '.lm-TabBar-tab[data-id="jp-git-sessions"]'
+  test.beforeEach(async ({ baseURL, page, tmpPath }) => {
+    await extractFile(
+      baseURL,
+      path.resolve(__dirname, 'data', baseRepositoryPath),
+      path.join(tmpPath, 'repository.tar.gz')
     );
-    const selected = await gitTabBar.getAttribute('aria-selected');
 
-    // Git panel may be already open on launch
-    if (selected === 'false') {
-      await gitTabBar.click();
-    }
+    // URL for merge conflict example repository
+    await page.goto(`tree/${tmpPath}/repository`);
+
+    await page.sidebar.openTab('jp-git-sessions');
   });
 
   test('should diff conflicted text file', async ({ page }) => {
