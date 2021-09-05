@@ -111,7 +111,7 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
   display: inline-block;
   white-space: normal;
   vertical-align: top;
-  width: 100%;
+  /* width: 100%; */
 }
 
 .jp-git-diff-root .CodeMirror-merge-pane-rightmost {

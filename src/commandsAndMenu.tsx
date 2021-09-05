@@ -619,8 +619,8 @@ export function addCommands(
         const diffContext: Git.Diff.IContext =
           status === 'unmerged'
             ? {
-                currentRef: 'HEAD',
-                previousRef: 'MERGE_HEAD',
+                currentRef: 'MERGE_HEAD',
+                previousRef: 'HEAD',
                 baseRef: 'ORIG_HEAD'
               }
             : context ?? {

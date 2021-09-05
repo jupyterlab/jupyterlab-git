@@ -206,9 +206,9 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
       if (baseContent !== null && baseContent !== undefined) {
         options = {
           ...options,
+          origLeft: referenceContent,
           value: baseContent,
-          origRight: referenceContent,
-          origLeft: challengerContent,
+          origRight: challengerContent,
           readOnly: false,
           revertButtons: true
         };

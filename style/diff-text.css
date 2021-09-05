@@ -58,3 +58,54 @@
   color: #999;
   background-color: var(--jp-git-diff-deleted-color);
 }
+
+/* Styles for horizontal scroll lock */
+.jp-git-PlainText-diff .CodeMirror-merge-scrolllock {
+  /* color: #555; */
+  color: var(--jp--inverse-layout-color2);
+}
+.jp-git-PlainText-diff .CodeMirror-merge-scrolllock:after {
+  content: '\21db\00a0\00a0\21da';
+}
+.jp-git-PlainText-diff
+  .CodeMirror-merge-scrolllock.CodeMirror-merge-scrolllock-enabled:after {
+  content: '\21db\21da';
+}
+
+/* Styles for revert buttons handling */
+
+.jp-git-PlainText-diff .CodeMirror-merge-copybuttons-left,
+.jp-git-PlainText-diff .CodeMirror-merge-copybuttons-right {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  line-height: 1;
+}
+
+.jp-git-PlainText-diff .CodeMirror-merge-copy {
+  position: absolute;
+  cursor: pointer;
+  color: var(--jp-mirror-editor-operator-color);
+  /* color: #44c; */
+  z-index: 3;
+}
+
+.jp-git-PlainText-diff .CodeMirror-merge-copy-reverse {
+  position: absolute;
+  cursor: pointer;
+  color: var(--jp-mirror-editor-operator-color);
+  /* color: #44c; */
+}
+
+.jp-git-PlainText-diff
+  .CodeMirror-merge-copybuttons-left
+  .CodeMirror-merge-copy {
+  left: 2px;
+}
+.jp-git-PlainText-diff
+  .CodeMirror-merge-copybuttons-right
+  .CodeMirror-merge-copy {
+  right: 2px;
+}
