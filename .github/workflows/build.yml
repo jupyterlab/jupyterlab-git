@@ -89,8 +89,8 @@ jobs:
         if: matrix.python-version == '3.9'
         with:
           name: extension
-          path: |
-            dist
+          path: dist/jupyterlab_git*.whl
+          if-no-files-found: error
 
   ui-test:
     name: Integration tests
@@ -132,8 +132,7 @@ jobs:
         # Install jupyter-archive to deal with test git repository upload
         run: |
           python -m pip install -U pip
-          python -m pip install jupyterlab~=3.0 jupyter-archive
-          python -m pip install ./dist/*.whl
+          python -m pip install jupyterlab~=3.0 jupyter-archive ./jupyterlab_git*.whl
 
       - name: UI tests
         run: |
