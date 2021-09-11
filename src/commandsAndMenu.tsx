@@ -425,11 +425,24 @@ export function addCommands(
           'Encountered an error when pulling changes. Error: ',
           error
         );
-        logger.log({
-          message: trans.__('Failed to pull'),
-          level: Level.ERROR,
-          error: error as Error
-        });
+
+        // Discard changes then retry pull
+        if (
+          (error as string)
+            .toLowerCase()
+            .includes(
+              'your local changes to the following files would be overwritten by merge'
+            )
+        ) {
+          await discardAllChanges(gitModel, trans, true);
+          await commands.execute(CommandIDs.gitPull, {} as any);
+        } else {
+          logger.log({
+            message: trans.__('Failed to pull'),
+            level: Level.ERROR,
+            error
+          });
+        }
       }
     }
   });

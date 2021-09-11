@@ -1074,9 +1074,7 @@ export enum CommandIDs {
   gitMerge = 'git:merge',
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
-  gitForcePush = 'git:force-push',
   gitPull = 'git:pull',
-  gitDiscardPull = 'git:discard-pull',
   gitSubmitCommand = 'git:submit-commit',
   gitShowDiff = 'git:show-diff'
 }
