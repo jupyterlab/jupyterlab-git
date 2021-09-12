@@ -426,16 +426,18 @@ export function addCommands(
           error
         );
 
+        const errorMsg = typeof error === 'string' ? error : error.message;
+
         // Discard changes then retry pull
         if (
-          (error as string)
+          errorMsg
             .toLowerCase()
             .includes(
               'your local changes to the following files would be overwritten by merge'
             )
         ) {
           await discardAllChanges(gitModel, trans, true);
-          await commands.execute(CommandIDs.gitPull, {} as any);
+          await commands.execute(CommandIDs.gitPull);
         } else {
           logger.log({
             message: trans.__('Failed to pull'),
