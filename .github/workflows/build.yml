@@ -2,7 +2,9 @@ name: Build
 
 on:
   push:
-    branches: master
+    branches: 
+      - master
+      - 0.32.x
   pull_request:
     branches: "*"
 
