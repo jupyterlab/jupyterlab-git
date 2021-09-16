@@ -110,5 +110,6 @@ export const disabledStyle = style({
   cursor: 'not-allowed !important',
   color: 'var(--jp-ui-font-color2) !important',
   backgroundColor: 'var(--jp-layout-color3) !important',
-  pointerEvents: 'auto !important'
+  // TypeScript does not know about the value with `!important` flag
+  pointerEvents: 'auto !important' as any
 });
