@@ -269,9 +269,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * Render the modified files
    */
   render(): JSX.Element {
-    console.log('rendering fileList');
     if (this.props.settings.composite['simpleStaging']) {
-      console.log('rendering simpleStaging');
       return (
         <div className={fileListWrapperClass}>
           <AutoSizer disableWidth={true}>
@@ -617,7 +615,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             disabled={files.length === 0}
             icon={addIcon}
             title={this.props.trans.__('Track all untracked files')}
-          onClick={this.addAllUntrackedFiles}
+            onClick={this.addAllUntrackedFiles}
           />
         }
         collapsible
