@@ -1,4 +1,5 @@
 import { IChangedArgs, PathExt, URLExt } from '@jupyterlab/coreutils';
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -790,6 +791,7 @@ export class GitExtension implements IGitExtension {
         this._setMarker(this.pathRepository, this._currentBranch.name);
       }
       if (headChanged) {
+        this._changeUpstreamNotified = [];
         this._headChanged.emit();
       }
 
@@ -806,6 +808,7 @@ export class GitExtension implements IGitExtension {
       this._currentBranch = null;
       this._fetchPoll.stop();
       if (headChanged) {
+        this._changeUpstreamNotified = [];
         this._headChanged.emit();
       }
 
@@ -851,22 +854,6 @@ export class GitExtension implements IGitExtension {
             type: this._resolveFileType(file.to)
           };
       });
-      // if a file is changed on remote add it to list of files with appropriate status.
-      let remoteChangedFiles: null | string[] = null;
-      if (data.remote && data.behind > 0) {
-        remoteChangedFiles = (await this._changedFiles('WORKING', data.remote)).files;
-        remoteChangedFiles?.forEach( (element) => {
-          files.push({
-            status: "remote-changed",
-            type: this._resolveFileType(element),
-            x: "?",
-            y: "B",
-            to: element,
-            from: "?",
-            is_binary: false,
-          })
-        });
-      };
       this._setStatus({
         branch: data.branch || null,
         remote: data.remote || null,
@@ -880,6 +867,62 @@ export class GitExtension implements IGitExtension {
       console.error(err);
       return;
     }
+  }
+
+  /**
+   * Collects files that have changed on the remote branch. If there is a
+   * changed file that is open, a Dialog is displayed to notify the user
+   *
+   */
+  async remoteChangedFiles(): Promise<Git.IStatusFile[]> {
+    // if a file is changed on remote add it to list of files with appropriate status.
+    let remoteChangedFiles: null | string[] = null;
+    let files: Git.IStatusFile[] = [];
+    if (this.status.remote && this.status.behind > 0) {
+      remoteChangedFiles = (await this._changedFiles('WORKING', this.status.remote)).files;
+      remoteChangedFiles?.forEach( (element) => {
+        files.push({
+          status: "remote-changed",
+          type: this._resolveFileType(element),
+          x: "?",
+          y: "B",
+          to: element,
+          from: "?",
+          is_binary: false,
+        })
+      });
+    };
+    for (var val of files) {
+      let docWidget = this._docmanager.findWidget(
+        this.getRelativeFilePath(val.to));
+      let notifiedIndex = (this._changeUpstreamNotified.findIndex(
+        notified =>
+          notified.from === val.from &&
+          notified.to === val.to &&
+          notified.x === val.x &&
+          notified.y === val.y
+      ))
+      if (docWidget !== undefined && docWidget.isAttached) {
+        // notify if the user hasn't been notified yet
+        if (notifiedIndex  === -1) {
+          showDialog({
+            title: `${val.to} is out of date with your remote branch: ${this._currentBranch.upstream}`,
+            body: `You may want to pull from ${this._currentBranch.upstream} before editing this file.`,
+            buttons: [
+              Dialog.okButton({ label: 'OK' })
+            ]
+          })
+          // add the file to the notified array
+          this._changeUpstreamNotified.push(val)
+        }
+      } else {
+        // remove from notified array if document is closed
+        if (notifiedIndex > -1) {
+          this._changeUpstreamNotified.splice(notifiedIndex, 1)
+        }
+      }
+    }
+    return files
   }
 
   /**
@@ -1378,6 +1421,7 @@ export class GitExtension implements IGitExtension {
   private _standbyCondition: () => boolean = () => false;
   private _statusPoll: Poll;
   private _taskHandler: TaskHandler<IGitExtension>;
+  private _changeUpstreamNotified: Git.IStatusFile[] = [];
 
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);

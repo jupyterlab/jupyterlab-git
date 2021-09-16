@@ -86,6 +86,8 @@ export interface IGitPanelState {
    */
   files: Git.IStatusFile[];
 
+  remoteChangedFiles: Git.IStatusFile[];
+
   /**
    * Number of commits ahead
    */
@@ -125,6 +127,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       branches: branches,
       currentBranch: currentBranch ? currentBranch.name : 'master',
       files: [],
+      remoteChangedFiles: [],
       nCommitsAhead: 0,
       nCommitsBehind: 0,
       pastCommits: [],
@@ -145,9 +148,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       });
       this.refreshView();
     }, this);
-    model.statusChanged.connect(() => {
+    model.statusChanged.connect(async () => {
+      let remotechangedFiles = await model.remoteChangedFiles();
       this.setState({
         files: model.status.files,
+        remoteChangedFiles: remotechangedFiles,
         nCommitsAhead: model.status.ahead,
         nCommitsBehind: model.status.behind
       });
@@ -564,10 +569,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * List of sorted modified files.
    */
   private get _sortedFiles(): Git.IStatusFile[] {
-    const { files } = this.state;
-
-    files.sort((a, b) => a.to.localeCompare(b.to));
-    return files;
+    const { files, remoteChangedFiles } = this.state;
+    let sfiles = files.concat(remoteChangedFiles)
+    sfiles.sort((a, b) => a.to.localeCompare(b.to));
+    return sfiles;
   }
 
   private _previousRepoPath: string = null;
