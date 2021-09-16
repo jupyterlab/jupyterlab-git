@@ -3,3 +3,4 @@ dist
 coverage
 **/*.d.ts
 tests
+ui-tests

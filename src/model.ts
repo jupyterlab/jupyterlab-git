@@ -15,7 +15,7 @@ import { decodeStage } from './utils';
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
 // Available diff providers
 const DIFF_PROVIDERS: {
-  [key: string]: { name: string; callback: Git.Diff.ICallback<any> };
+  [key: string]: { name: string; callback: Git.Diff.ICallback };
 } = {};
 
 /**
@@ -25,7 +25,7 @@ const DIFF_PROVIDERS: {
  */
 export function getDiffProvider(
   filename: string
-): Git.Diff.ICallback<any> | undefined {
+): Git.Diff.ICallback | undefined {
   return DIFF_PROVIDERS[PathExt.extname(filename)?.toLocaleLowerCase()]
     ?.callback;
 }
@@ -148,11 +148,18 @@ export class GitExtension implements IGitExtension {
     } else {
       const currentReady = this._readyPromise;
       this._pendingReadyPromise += 1;
-      this._readyPromise = Promise.all([currentReady, this.showPrefix(v)])
+      const currentFolder = v;
+      this._readyPromise = Promise.all([
+        currentReady,
+        this.showPrefix(currentFolder)
+      ])
         .then(([_, path]) => {
           if (path !== null) {
             // Remove relative path to get the Git repository root path
-            path = v.slice(0, v.length - path.length);
+            path = currentFolder.slice(
+              0,
+              Math.max(0, currentFolder.length - path.length)
+            );
           }
           change.newValue = this._pathRepository = path;
 
@@ -163,7 +170,9 @@ export class GitExtension implements IGitExtension {
         })
         .catch(reason => {
           this._pendingReadyPromise -= 1;
-          console.error(`Fail to find Git top level for path ${v}.\n${reason}`);
+          console.error(
+            `Fail to find Git top level for path ${currentFolder}.\n${reason}`
+          );
         });
     }
   }
@@ -176,6 +185,19 @@ export class GitExtension implements IGitExtension {
   }
   set refreshStandbyCondition(v: () => boolean) {
     this._standbyCondition = v;
+  }
+
+  /**
+   * Selected file for single file history
+   */
+  get selectedHistoryFile(): Git.IStatusFile | null {
+    return this._selectedHistoryFile;
+  }
+  set selectedHistoryFile(file: Git.IStatusFile | null) {
+    if (this._selectedHistoryFile !== file) {
+      this._selectedHistoryFile = file;
+      this._selectedHistoryFileChanged.emit(file);
+    }
   }
 
   /**
@@ -197,6 +219,16 @@ export class GitExtension implements IGitExtension {
    */
   get markChanged(): ISignal<IGitExtension, void> {
     return this._markChanged;
+  }
+
+  /**
+   * A signal emitted when the current file selected for history of the Git repository changes.
+   */
+  get selectedHistoryFileChanged(): ISignal<
+    IGitExtension,
+    Git.IStatusFile | null
+  > {
+    return this._selectedHistoryFileChanged;
   }
 
   /**
@@ -263,14 +295,41 @@ export class GitExtension implements IGitExtension {
   /**
    * Match files status information based on a provided file path.
    *
-   * If the file is tracked and has no changes, undefined will be returned
+   * If the file is tracked and has no changes, a StatusFile of unmodified will be returned.
    *
    * @param path the file path relative to the server root
+   * @returns The file status or null if path repository is null or path not in repository
    */
-  getFile(path: string): Git.IStatusFile {
-    return this._status.files.find(status => {
+  getFile(path: string): Git.IStatusFile | null {
+    if (this.pathRepository === null) {
+      return null;
+    }
+    const fileStatus = this._status.files.find(status => {
       return this.getRelativeFilePath(status.to) === path;
     });
+
+    if (!fileStatus) {
+      const relativePath = PathExt.relative(
+        '/' + this.pathRepository,
+        '/' + path
+      );
+
+      if (relativePath.startsWith('../')) {
+        return null;
+      } else {
+        return {
+          x: '',
+          y: '',
+          to: relativePath,
+          from: '',
+          is_binary: null,
+          status: 'unmodified',
+          type: this._resolveFileType(path)
+        };
+      }
+    } else {
+      return fileStatus;
+    }
   }
 
   /**
@@ -476,20 +535,22 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Commit all staged file changes.
+   * Commit all staged file changes. If message is None, then the commit is amended
    *
    * @param message - commit message
+   * @param amend - whether this is an amend commit
    * @returns promise which resolves upon committing file changes
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async commit(message: string): Promise<void> {
+  async commit(message?: string, amend = false): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute('git:commit:create', async () => {
       await requestAPI(URLExt.join(path, 'commit'), 'POST', {
-        commit_msg: message
+        commit_msg: message,
+        amend: amend
       });
     });
     await this.refresh();
@@ -590,6 +651,7 @@ export class GitExtension implements IGitExtension {
     this._fetchPoll.dispose();
     this._statusPoll.dispose();
     this._taskHandler.dispose();
+    this._settings.changed.disconnect(this._onSettingsChange, this);
     Signal.clearData(this);
   }
 
@@ -603,7 +665,7 @@ export class GitExtension implements IGitExtension {
   async ensureGitignore(): Promise<void> {
     const path = await this._getPathRepository();
 
-    await requestAPI(URLExt.join(path, 'ignore'), 'POST');
+    await requestAPI(URLExt.join(path, 'ignore'), 'POST', {});
     this._openGitignore();
     await this.refreshStatus();
   }
@@ -682,7 +744,8 @@ export class GitExtension implements IGitExtension {
           URLExt.join(path, 'log'),
           'POST',
           {
-            history_count: count
+            history_count: count,
+            follow_path: this.selectedHistoryFile?.to
           }
         );
       }
@@ -725,13 +788,14 @@ export class GitExtension implements IGitExtension {
    * Push local changes to a remote repository.
    *
    * @param auth - remote authentication information
+   * @param force - whether or not to force the push
    * @returns promise which resolves upon pushing changes
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async push(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
+  async push(auth?: Git.IAuth, force = false): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
@@ -740,7 +804,8 @@ export class GitExtension implements IGitExtension {
           URLExt.join(path, 'push'),
           'POST',
           {
-            auth: auth as any
+            auth: auth as any,
+            force: force
           }
         );
       }
@@ -1140,10 +1205,10 @@ export class GitExtension implements IGitExtension {
    * @param fileExtensions File type list
    * @param callback Callback to use for the provided file types
    */
-  registerDiffProvider<T>(
+  registerDiffProvider(
     name: string,
     fileExtensions: string[],
-    callback: Git.Diff.ICallback<T>
+    callback: Git.Diff.ICallback
   ): void {
     fileExtensions.forEach(fileExtension => {
       DIFF_PROVIDERS[fileExtension.toLocaleLowerCase()] = { name, callback };
@@ -1422,9 +1487,14 @@ export class GitExtension implements IGitExtension {
   private _statusPoll: Poll;
   private _taskHandler: TaskHandler<IGitExtension>;
   private _changeUpstreamNotified: Git.IStatusFile[] = [];
+  private _selectedHistoryFile: Git.IStatusFile | null = null;
 
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
+  private _selectedHistoryFileChanged = new Signal<
+    IGitExtension,
+    Git.IStatusFile | null
+  >(this);
   private _repositoryChanged = new Signal<
     IGitExtension,
     IChangedArgs<string | null>

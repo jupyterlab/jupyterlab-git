@@ -196,7 +196,7 @@ class GitStatusHandler(GitHandler):
 
 class GitLogHandler(GitHandler):
     """
-    Handler for 'git log --pretty=format:%H-%an-%ar-%s'.
+    Handler for 'git log'.
     Fetches Commit SHA, Author Name, Commit Date & Commit Message.
     """
 
@@ -208,7 +208,10 @@ class GitLogHandler(GitHandler):
         """
         body = self.get_json_body()
         history_count = body.get("history_count", 25)
-        result = await self.git.log(self.url2localpath(path), history_count)
+        follow_path = body.get("follow_path")
+        result = await self.git.log(
+            self.url2localpath(path), history_count, follow_path
+        )
 
         if result["code"] != 0:
             self.set_status(500)
@@ -463,7 +466,7 @@ class GitCheckoutHandler(GitHandler):
 
 class GitCommitHandler(GitHandler):
     """
-    Handler for 'git commit -m <message>'. Commits files.
+    Handler for 'git commit -m <message>' and 'git commit --amend'. Commits files.
     """
 
     @tornado.web.authenticated
@@ -473,7 +476,8 @@ class GitCommitHandler(GitHandler):
         """
         data = self.get_json_body()
         commit_msg = data["commit_msg"]
-        body = await self.git.commit(commit_msg, self.url2localpath(path))
+        amend = data.get("amend", False)
+        body = await self.git.commit(commit_msg, amend, self.url2localpath(path))
 
         if body["code"] != 0:
             self.set_status(500)
@@ -533,11 +537,13 @@ class GitPushHandler(GitHandler):
         Request body:
         {
             remote?: string # Remote to push to; i.e. <remote_name> or <remote_name>/<branch>
+            force: boolean # Whether or not to force the push
         }
         """
         local_path = self.url2localpath(path)
         data = self.get_json_body()
         known_remote = data.get("remote")
+        force = data.get("force", False)
 
         current_local_branch = await self.git.get_current_branch(local_path)
 
@@ -565,6 +571,7 @@ class GitPushHandler(GitHandler):
                 local_path,
                 data.get("auth", None),
                 set_upstream,
+                force,
             )
 
         else:
@@ -590,6 +597,7 @@ class GitPushHandler(GitHandler):
                     local_path,
                     data.get("auth", None),
                     set_upstream=True,
+                    force=force,
                 )
             else:
                 response = {
@@ -646,7 +654,7 @@ class GitConfigHandler(GitHandler):
         """
         POST get (if no options are passed) or set configuration options
         """
-        data = self.get_json_body()
+        data = self.get_json_body() or {}
         options = data.get("options", {})
 
         filtered_options = {k: v for k, v in options.items() if k in ALLOWED_OPTIONS}
@@ -697,7 +705,10 @@ class GitDiffNotebookHandler(GitHandler):
                 status_code=400, reason=f"Missing POST key: {e}"
             )
         try:
-            content = await self.git.get_nbdiff(prev_content, curr_content)
+            base_content = data.get("baseContent")
+            content = await self.git.get_nbdiff(
+                prev_content, curr_content, base_content
+            )
         except Exception as e:
             get_logger().error(f"Error computing notebook diff.", exc_info=e)
             raise tornado.web.HTTPError(

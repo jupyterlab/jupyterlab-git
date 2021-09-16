@@ -5,7 +5,7 @@ import { shallow } from 'enzyme';
 import { nullTranslator } from '@jupyterlab/translation';
 
 describe('FileItem', () => {
-  const trans = nullTranslator.load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab_git');
 
   const props: IFileItemProps = {
     contextMenu: () => {},
@@ -29,7 +29,7 @@ describe('FileItem', () => {
     const component = shallow(<FileItem {...props} />);
     it('should display the full path on hover', () => {
       expect(
-        component.find('[title="some/file/path/file-name ● Modified"]')
+        component.find('[title="some/file/path/file-name • Modified"]')
       ).toHaveLength(1);
     });
   });

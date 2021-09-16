@@ -1,7 +1,7 @@
 import { Toolbar } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { ServerConnection } from '@jupyterlab/services';
+import { Contents, ServerConnection } from '@jupyterlab/services';
 import { JSONObject, ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
@@ -56,6 +56,11 @@ export interface IGitExtension extends IDisposable {
   refreshStandbyCondition: () => boolean;
 
   /**
+   * Selected file for single file history
+   */
+  selectedHistoryFile: Git.IStatusFile | null;
+
+  /**
    * Git repository status.
    */
   readonly status: Git.IStatus;
@@ -69,6 +74,14 @@ export interface IGitExtension extends IDisposable {
    * A signal emitted whenever a model task event occurs.
    */
   readonly taskChanged: ISignal<IGitExtension, string>;
+
+  /**
+   * A signal emitted when the current file selected for history of the Git repository changes.
+   */
+  readonly selectedHistoryFileChanged: ISignal<
+    IGitExtension,
+    Git.IStatusFile | null
+  >;
 
   /**
    * Add one or more files to the repository staging area.
@@ -253,7 +266,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * Match files status information based on a provided file path.
    *
-   * If the file is tracked and has no changes, undefined will be returned
+   * If the file is tracked and has no changes, a StatusFile of unmodified will be returned
    *
    * @param path the file path relative to the server root
    */
@@ -365,10 +378,10 @@ export interface IGitExtension extends IDisposable {
    * @param fileExtensions File extensions list
    * @param callback Callback to use for the provided file types
    */
-  registerDiffProvider<T>(
+  registerDiffProvider(
     name: string,
     fileExtensions: string[],
-    callback: Git.Diff.ICallback<T>
+    callback: Git.Diff.ICallback
   ): void;
 
   /**
@@ -469,29 +482,36 @@ export namespace Git {
        * Note: Update the content and recompute the diff
        */
       refresh(): Promise<void>;
+      /**
+       * Checks if the conflicted file has been resolved.
+       */
+      isFileResolved: boolean;
+      /**
+       * Gets the file model of a resolved merge conflict,
+       * and rejects if unable to retrieve
+       */
+      getResolvedFile(): Promise<Partial<Contents.IModel>>;
     }
 
     /**
      * Callback to generate a comparison widget
      *
-     * T is the content type to be compared
-     *
      * The toolbar is the one of the MainAreaWidget in which the diff widget
      * will be displayed.
      */
-    export type ICallback<T> = (
-      model: IModel<T>,
+    export type ICallback = (
+      model: IModel,
       toolbar?: Toolbar
     ) => Promise<IDiffWidget>;
 
     /**
      * Content and its context for diff
      */
-    export interface IContent<T> {
+    export interface IContent {
       /**
        * Asynchronous content getter for the source
        */
-      content: () => Promise<T>;
+      content: () => Promise<string>;
       /**
        * Content label
        *
@@ -527,20 +547,22 @@ export namespace Git {
     export interface IContext {
       currentRef: string | SpecialRef;
       previousRef: string | SpecialRef;
+      // Used only during merge conflict diffs
+      baseRef?: string;
     }
 
     /**
      * DiffModel properties
      */
-    export interface IModel<T> {
+    export interface IModel {
       /**
        * Challenger data
        */
-      challenger: IContent<T>;
+      challenger: IContent;
       /**
        * Signal emitted when the reference or the challenger changes
        */
-      readonly changed: ISignal<IModel<T>, IModelChange>;
+      readonly changed: ISignal<IModel, IModelChange>;
       /**
        * File of the name being diff at reference state
        */
@@ -548,7 +570,15 @@ export namespace Git {
       /**
        * Reference data
        */
-      reference: IContent<T>;
+      reference: IContent;
+      /**
+       * Optional base data, used only during merge conflicts
+       */
+      base?: IContent;
+      /**
+       * Helper to check if the file has conflicts.
+       */
+      hasConflict?: boolean;
     }
 
     /**
@@ -558,7 +588,7 @@ export namespace Git {
       /**
        * Which content did change
        */
-      type: 'reference' | 'challenger';
+      type: 'reference' | 'challenger' | 'base';
     }
 
     export enum SpecialRef {
@@ -771,6 +801,7 @@ export namespace Git {
     date: string;
     commit_msg: string;
     pre_commit: string;
+    is_binary?: boolean; // for single file history
   }
 
   /** Interface for GitCommit request result,
@@ -870,6 +901,8 @@ export namespace Git {
     | 'unstaged'
     | 'partially-staged'
     | 'remote-changed'
+    | 'unmodified'
+    | 'unmerged'
     | null;
 
   export interface ITagResult {
@@ -957,6 +990,7 @@ export interface ILogMessage {
  * The command IDs used in the git context menus.
  */
 export enum ContextCommandIDs {
+  gitCommitAmendStaged = 'git:context-commitAmendStaged',
   gitFileAdd = 'git:context-add',
   gitFileDiff = 'git:context-diff',
   gitFileDiscard = 'git:context-discard',
@@ -965,6 +999,7 @@ export enum ContextCommandIDs {
   gitFileUnstage = 'git:context-unstage',
   gitFileStage = 'git:context-stage',
   gitFileTrack = 'git:context-track',
+  gitFileHistory = 'git:context-history',
   gitIgnore = 'git:context-ignore',
   gitIgnoreExtension = 'git:context-ignoreExtension',
   gitNoAction = 'git:no-action'
@@ -984,6 +1019,7 @@ export enum CommandIDs {
   gitClone = 'git:clone',
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
+  gitForcePush = 'git:force-push',
   gitPull = 'git:pull',
   gitSubmitCommand = 'git:submit-commit',
   gitShowDiff = 'git:show-diff'

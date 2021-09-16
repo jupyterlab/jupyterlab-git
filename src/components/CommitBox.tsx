@@ -1,14 +1,47 @@
 import { TranslationBundle } from '@jupyterlab/translation';
+import { checkIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
+import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Grow from '@material-ui/core/Grow';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+import Paper from '@material-ui/core/Paper';
+import Popper from '@material-ui/core/Popper';
 import * as React from 'react';
-import TextareaAutosize from 'react-textarea-autosize';
+import { classes } from 'typestyle';
+import { listItemIconClass } from '../style/BranchMenu';
 import {
   commitButtonClass,
-  commitDescriptionClass,
   commitFormClass,
-  commitSummaryClass
+  commitPaperClass,
+  commitRoot,
+  commitVariantSelector,
+  disabledStyle
 } from '../style/CommitBox';
+import { verticalMoreIcon } from '../style/icons';
+import {
+  listItemBoldTitleClass,
+  listItemContentClass,
+  listItemDescClass
+} from '../style/NewBranchDialog';
 import { CommandIDs } from '../tokens';
+import { CommitMessage } from './CommitMessage';
+
+/**
+ * Commit action
+ */
+interface ICommitVariant {
+  /**
+   * Action title
+   */
+  title: string;
+  /**
+   * Action description
+   */
+  description: string;
+}
 
 /**
  * Interface describing component properties.
@@ -35,19 +68,6 @@ export interface ICommitBoxProps {
   trans: TranslationBundle;
 
   /**
-   * Callback to invoke in order to commit changes.
-   *
-   * @param msg - commit message
-   * @returns a promise which commits changes
-   */
-  onCommit: (msg: string) => Promise<void>;
-}
-
-/**
- * Interface describing component state.
- */
-export interface ICommitBoxState {
-  /**
    * Commit message summary.
    */
   summary: string;
@@ -56,6 +76,49 @@ export interface ICommitBoxState {
    * Commit message description.
    */
   description: string;
+
+  /**
+   * Whether commit is amending the previous one or not
+   */
+  amend: boolean;
+
+  /**
+   * Updates the commit message summary.
+   *
+   * @param summary - commit message summary
+   */
+  setSummary: (summary: string) => void;
+
+  /**
+   * Updates the commit message description.
+   *
+   * @param description - commit message description
+   */
+  setDescription: (description: string) => void;
+
+  /**
+   * Updates the amend checkbox state
+   *
+   * @param amend - amend toggle on/off
+   */
+  setAmend: (amend: boolean) => void;
+
+  /**
+   * Callback to invoke in order to commit changes.
+   *
+   * @returns a promise which commits changes
+   */
+  onCommit: () => Promise<void>;
+}
+
+/**
+ * CommitBox state
+ */
+export interface ICommitBoxState {
+  /**
+   * Whether the commit variant menu is opened or not.
+   */
+  open: boolean;
 }
 
 /**
@@ -73,9 +136,24 @@ export class CommitBox extends React.Component<
    */
   constructor(props: ICommitBoxProps) {
     super(props);
+    this._options.push(
+      {
+        title: this.props.trans.__('Create a new commit'),
+        description: this.props.trans.__(
+          'New commit will be created and show up as a next one after the previous commit (default).'
+        )
+      },
+      {
+        title: this.props.trans.__('Amend previous commit'),
+        description: this.props.trans.__(
+          'Staged changes will be added to the previous commit and its date will be updated.'
+        )
+      }
+    );
+    this._anchorRef = React.createRef<HTMLDivElement>();
+
     this.state = {
-      summary: '',
-      description: ''
+      open: false
     };
   }
 
@@ -96,7 +174,7 @@ export class CommitBox extends React.Component<
     const disabled = !this._canCommit();
     const title = !this.props.hasFiles
       ? this.props.trans.__('Disabled: No files are staged for commit')
-      : !this.state.summary
+      : !this.props.summary
       ? this.props.trans.__('Disabled: No commit message summary')
       : this.props.label;
 
@@ -108,35 +186,92 @@ export class CommitBox extends React.Component<
       shortcutHint
     );
     return (
-      <form className={[commitFormClass, 'jp-git-CommitBox'].join(' ')}>
-        <input
-          className={commitSummaryClass}
-          type="text"
-          placeholder={summaryPlaceholder}
-          title={this.props.trans.__(
-            'Enter a commit message summary (a single line, preferably less than 50 characters)'
+      <div className={classes(commitFormClass, 'jp-git-CommitBox')}>
+        <CommitMessage
+          trans={this.props.trans}
+          summary={this.props.summary}
+          summaryPlaceholder={summaryPlaceholder}
+          description={this.props.description}
+          disabled={this.props.amend}
+          setSummary={this.props.setSummary}
+          setDescription={this.props.setDescription}
+        />
+        <ButtonGroup ref={this._anchorRef} fullWidth={true} size="small">
+          <Button
+            classes={{
+              root: commitButtonClass,
+              disabled: disabledStyle
+            }}
+            title={title}
+            disabled={disabled}
+            onClick={this.props.onCommit}
+          >
+            {this.props.label}
+          </Button>
+          <Button
+            classes={{
+              root: commitButtonClass
+            }}
+            className={commitVariantSelector}
+            size="small"
+            aria-controls={this.state.open ? 'split-button-menu' : undefined}
+            aria-expanded={this.state.open ? 'true' : undefined}
+            aria-label="select commit variant"
+            aria-haspopup="menu"
+            onClick={this._handleToggle}
+          >
+            <verticalMoreIcon.react tag="span" />
+          </Button>
+        </ButtonGroup>
+        <Popper
+          open={this.state.open}
+          anchorEl={this._anchorRef.current}
+          role={undefined}
+          transition
+          disablePortal
+        >
+          {({ TransitionProps }) => (
+            <Grow {...TransitionProps}>
+              <Paper
+                classes={{ root: commitRoot }}
+                className={commitPaperClass}
+              >
+                <ClickAwayListener onClickAway={this._handleClose}>
+                  <MenuList id="split-button-menu">
+                    {this._options.map((option, index) => (
+                      <MenuItem
+                        key={option.title}
+                        classes={{ root: commitRoot }}
+                        selected={this.props.amend ? index === 1 : index === 0}
+                        onClick={event =>
+                          this._handleMenuItemClick(event, index)
+                        }
+                      >
+                        {(this.props.amend ? index === 1 : index === 0) ? (
+                          <checkIcon.react
+                            className={listItemIconClass}
+                            tag="span"
+                          />
+                        ) : (
+                          <span className={listItemIconClass} />
+                        )}
+                        <div className={listItemContentClass}>
+                          <p className={listItemBoldTitleClass}>
+                            {option.title}
+                          </p>
+                          <p className={listItemDescClass}>
+                            {option.description}
+                          </p>
+                        </div>
+                      </MenuItem>
+                    ))}
+                  </MenuList>
+                </ClickAwayListener>
+              </Paper>
+            </Grow>
           )}
-          value={this.state.summary}
-          onChange={this._onSummaryChange}
-          onKeyPress={this._onSummaryKeyPress}
-        />
-        <TextareaAutosize
-          className={commitDescriptionClass}
-          minRows={5}
-          placeholder={this.props.trans.__('Description (optional)')}
-          title={this.props.trans.__('Enter a commit message description')}
-          value={this.state.description}
-          onChange={this._onDescriptionChange}
-        />
-        <input
-          className={commitButtonClass}
-          type="button"
-          title={title}
-          value={this.props.label}
-          disabled={disabled}
-          onClick={this._onCommitSubmit}
-        />
-      </form>
+        </Popper>
+      </div>
     );
   }
 
@@ -144,7 +279,10 @@ export class CommitBox extends React.Component<
    * Whether a commit can be performed (files are staged and summary is not empty).
    */
   private _canCommit(): boolean {
-    return !!(this.props.hasFiles && this.state.summary);
+    if (this.props.amend) {
+      return this.props.hasFiles;
+    }
+    return !!(this.props.hasFiles && this.props.summary);
   }
 
   /**
@@ -158,51 +296,39 @@ export class CommitBox extends React.Component<
   };
 
   /**
-   * Callback invoked upon clicking a commit message submit button or otherwise submitting the form.
+   * Close the commit variant menu if needed.
    */
-  private _onCommitSubmit = (): void => {
-    const msg = this.state.summary + '\n\n' + this.state.description + '\n';
-    this.props.onCommit(msg);
-
-    // NOTE: we assume here that committing changes always works and we can safely clear component state
-    this._reset();
-  };
-
-  /**
-   * Callback invoked upon updating a commit message description.
-   *
-   * @param event - event object
-   */
-  private _onDescriptionChange = (event: any): void => {
-    this.setState({
-      description: event.target.value
-    });
-  };
-
-  /**
-   * Callback invoked upon updating a commit message summary.
-   *
-   * @param event - event object
-   */
-  private _onSummaryChange = (event: any): void => {
-    this.setState({
-      summary: event.target.value
-    });
-  };
-
-  /**
-   * Callback invoked upon a `'keypress'` event when entering a commit message summary.
-   *
-   * ## Notes
-   *
-   * -   Prevents triggering a `'submit'` action when hitting the `ENTER` key while entering a commit message summary.
-   *
-   * @param event - event object
-   */
-  private _onSummaryKeyPress = (event: React.KeyboardEvent): void => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
+  private _handleClose = (
+    event: React.MouseEvent<Document, MouseEvent>
+  ): void => {
+    if (
+      this._anchorRef.current &&
+      this._anchorRef.current.contains(event.target as HTMLElement)
+    ) {
+      return;
     }
+
+    this.setState({ open: false });
+  };
+
+  /**
+   * Handle commit variant menu item click
+   */
+  private _handleMenuItemClick = (
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    index: number
+  ): void => {
+    this.setState({
+      open: false
+    });
+    this.props.setAmend(index === 1);
+  };
+
+  /**
+   * Toggle state of the commit variant menu visibility
+   */
+  private _handleToggle = (): void => {
+    this.setState({ open: !this.state.open });
   };
 
   /**
@@ -218,17 +344,10 @@ export class CommitBox extends React.Component<
     commandArgs: CommandRegistry.ICommandExecutedArgs
   ): void => {
     if (commandArgs.id === CommandIDs.gitSubmitCommand && this._canCommit()) {
-      this._onCommitSubmit();
+      this.props.onCommit();
     }
   };
 
-  /**
-   * Resets component state (e.g., in order to re-initialize the commit message input box).
-   */
-  private _reset(): void {
-    this.setState({
-      summary: '',
-      description: ''
-    });
-  }
+  private _anchorRef: React.RefObject<HTMLDivElement>;
+  private _options: ICommitVariant[] = [];
 }

@@ -18,6 +18,7 @@
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "./@jupyterlab/git/src",
+    "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": false,
     "target": "es2017",

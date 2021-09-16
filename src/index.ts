@@ -26,9 +26,9 @@ import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 
+export { DiffModel } from './components/diff/model';
 export { NotebookDiff } from './components/diff/NotebookDiff';
 export { PlainTextDiff } from './components/diff/PlainTextDiff';
-export { DiffModel } from './components/diff/model';
 export { Git, IGitExtension } from './tokens';
 
 /**
@@ -74,9 +74,13 @@ async function activate(
   let settings: ISettingRegistry.ISettings;
   let serverSettings: Git.IServerSettings;
   // Get a reference to the default file browser extension
-  const filebrowser = factory.defaultBrowser;
+  // We don't use the current tracked browser because extension like jupyterlab-github
+  // or jupyterlab-gitlab are defining new filebrowsers that we don't support.
+  // And it is unlikely that another browser than the default will be used.
+  // Ref: https://github.com/jupyterlab/jupyterlab-git/issues/1014
+  const fileBrowser = factory.defaultBrowser;
   translator = translator || nullTranslator;
-  const trans = translator.load('jupyterlab-git');
+  const trans = translator.load('jupyterlab_git');
 
   // Attempt to load application settings
   try {
@@ -133,16 +137,27 @@ async function activate(
   gitExtension = new GitExtension(docmanager, app.docRegistry, settings);
 
   // Whenever we restore the application, sync the Git extension path
-  Promise.all([app.restored, filebrowser.model.restored]).then(() => {
-    gitExtension.pathRepository = filebrowser.model.path;
+  Promise.all([app.restored, fileBrowser.model.restored]).then(() => {
+    gitExtension.pathRepository = fileBrowser.model.path;
   });
 
+  const onPathChanged = (
+    model: FileBrowserModel,
+    change: IChangedArgs<string>
+  ) => {
+    gitExtension.pathRepository = change.newValue;
+  };
+
   // Whenever the file browser path changes, sync the Git extension path
-  filebrowser.model.pathChanged.connect(
-    (model: FileBrowserModel, change: IChangedArgs<string>) => {
-      gitExtension.pathRepository = change.newValue;
-    }
-  );
+  fileBrowser.model.pathChanged.connect(onPathChanged);
+
+  const refreshBrowser = () => {
+    fileBrowser.model.refresh();
+  };
+
+  // Whenever the `HEAD` of the Git repository changes, refresh the file browser
+  gitExtension.headChanged.connect(refreshBrowser);
+
   // Whenever a user adds/renames/saves/deletes/modifies a file within the lab environment, refresh the Git status
   app.serviceManager.contents.fileChanged.connect(() =>
     gitExtension.refreshStatus()
@@ -151,14 +166,14 @@ async function activate(
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Add JupyterLab commands
-    addCommands(app, gitExtension, factory.defaultBrowser, settings, trans);
+    addCommands(app, gitExtension, fileBrowser.model, settings, trans);
 
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
       gitExtension,
       settings,
       app.commands,
-      factory.defaultBrowser.model,
+      fileBrowser.model,
       trans
     );
     gitPlugin.id = 'jp-git-sessions';
@@ -175,28 +190,26 @@ async function activate(
     app.shell.add(gitPlugin, 'left', { rank: 200 });
 
     // Add a menu for the plugin
-    mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });
+    if (app.version.split('.').slice(0, 2).join('.') < '3.1') {
+      // Support JLab 3.0
+      mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });
+    }
 
     // Add a clone button to the file browser extension toolbar
-    addCloneButton(gitExtension, factory.defaultBrowser, app.commands);
+    addCloneButton(gitExtension, fileBrowser, app.commands);
 
     // Add the status bar widget
     addStatusBarWidget(statusBar, gitExtension, settings, trans);
 
     // Add the context menu items for the default file browser
-    addFileBrowserContextMenu(
-      gitExtension,
-      factory.tracker,
-      app.commands,
-      app.contextMenu
-    );
+    addFileBrowserContextMenu(gitExtension, fileBrowser, app.contextMenu);
   }
 
   // Register diff providers
   gitExtension.registerDiffProvider(
     'Nbdime',
     ['.ipynb'],
-    (model: Git.Diff.IModel<string>, toolbar?: Toolbar) =>
+    (model: Git.Diff.IModel, toolbar?: Toolbar) =>
       createNotebookDiff(model, renderMime, toolbar)
   );
 

@@ -89,7 +89,12 @@ export function addStatusBarWidget(
     isActive: Private.isStatusWidgetActive(settings),
     activeStateChanged: settings && settings.changed
   });
-  model.taskChanged.connect(Private.createEventCallback(statusWidget));
+
+  const callback = Private.createEventCallback(statusWidget);
+  model.taskChanged.connect(callback);
+  statusWidget.disposed.connect(() => {
+    model.taskChanged.disconnect(callback);
+  });
 }
 /* eslint-disable no-inner-declarations */
 namespace Private {

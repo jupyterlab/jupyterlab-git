@@ -7,13 +7,14 @@ import pathlib
 import re
 import shlex
 import subprocess
+import traceback
 from urllib.parse import unquote
 
 import nbformat
 import pexpect
 import tornado
 import tornado.locks
-from nbdime import diff_notebooks
+from nbdime import diff_notebooks, merge_notebooks
 from jupyter_server.utils import ensure_async
 
 from .log import get_logger
@@ -152,7 +153,8 @@ async def execute(
         get_logger().debug(
             "Code: {}\nOutput: {}\nError: {}".format(code, log_output, log_error)
         )
-    except BaseException:
+    except BaseException as e:
+        code, output, error = -1, "", traceback.format_exc()
         get_logger().warning("Fail to execute {!s}".format(cmdline), exc_info=True)
     finally:
         execution_lock.release()
@@ -318,14 +320,20 @@ class Git:
 
         return result
 
-    async def get_nbdiff(self, prev_content: str, curr_content: str) -> dict:
+    async def get_nbdiff(
+        self, prev_content: str, curr_content: str, base_content=None
+    ) -> dict:
         """Compute the diff between two notebooks.
 
         Args:
             prev_content: Notebook previous content
             curr_content: Notebook current content
+            base_content: Notebook base content - only passed during a merge conflict
         Returns:
-            {"base": Dict, "diff": Dict}
+            if not base_content:
+                {"base": Dict, "diff": Dict}
+            else:
+                {"base": Dict, "merge_decisions": Dict}
         """
 
         def read_notebook(content):
@@ -343,14 +351,35 @@ class Git:
             else:
                 return nbformat.reads(content, as_version=4)
 
+        # TODO Fix this in nbdime
+        def remove_cell_ids(nb):
+            for cell in nb.cells:
+                del cell["id"]
+            return nb
+
         current_loop = tornado.ioloop.IOLoop.current()
         prev_nb = await current_loop.run_in_executor(None, read_notebook, prev_content)
         curr_nb = await current_loop.run_in_executor(None, read_notebook, curr_content)
-        thediff = await current_loop.run_in_executor(
-            None, diff_notebooks, prev_nb, curr_nb
-        )
+        if base_content:
+            base_nb = await current_loop.run_in_executor(
+                None, read_notebook, base_content
+            )
+            # Only remove ids from merge_notebooks as a workaround
+            _, merge_decisions = await current_loop.run_in_executor(
+                None,
+                merge_notebooks,
+                remove_cell_ids(base_nb),
+                remove_cell_ids(prev_nb),
+                remove_cell_ids(curr_nb),
+            )
 
-        return {"base": prev_nb, "diff": thediff}
+            return {"base": base_nb, "merge_decisions": merge_decisions}
+        else:
+            thediff = await current_loop.run_in_executor(
+                None, diff_notebooks, prev_nb, curr_nb
+            )
+
+            return {"base": prev_nb, "diff": thediff}
 
     async def status(self, path):
         """
@@ -430,16 +459,24 @@ class Git:
 
         return data
 
-    async def log(self, path, history_count=10):
+    async def log(self, path, history_count=10, follow_path=None):
         """
         Execute git log command & return the result.
         """
+        is_single_file = follow_path != None
         cmd = [
             "git",
             "log",
             "--pretty=format:%H%n%an%n%ar%n%s",
             ("-%d" % history_count),
         ]
+        if is_single_file:
+            cmd = cmd + [
+                "--numstat",
+                "--follow",
+                "--",
+                follow_path,
+            ]
         code, my_output, my_error = await execute(
             cmd,
             cwd=path,
@@ -448,30 +485,28 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
+        if is_single_file:
+            # an extra newline get outputted when --numstat is used
+            my_output = my_output.replace("\n\n", "\n")
         line_array = my_output.splitlines()
         i = 0
-        PREVIOUS_COMMIT_OFFSET = 4
+        PREVIOUS_COMMIT_OFFSET = 5 if is_single_file else 4
         while i < len(line_array):
+            commit = {
+                "commit": line_array[i],
+                "author": line_array[i + 1],
+                "date": line_array[i + 2],
+                "commit_msg": line_array[i + 3],
+                "pre_commit": "",
+            }
+
+            if is_single_file:
+                commit["is_binary"] = line_array[i + 4].startswith("-\t-\t")
+
             if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
-                result.append(
-                    {
-                        "commit": line_array[i],
-                        "author": line_array[i + 1],
-                        "date": line_array[i + 2],
-                        "commit_msg": line_array[i + 3],
-                        "pre_commit": line_array[i + PREVIOUS_COMMIT_OFFSET],
-                    }
-                )
-            else:
-                result.append(
-                    {
-                        "commit": line_array[i],
-                        "author": line_array[i + 1],
-                        "date": line_array[i + 2],
-                        "commit_msg": line_array[i + 3],
-                        "pre_commit": "",
-                    }
-                )
+                commit["pre_commit"] = line_array[i + PREVIOUS_COMMIT_OFFSET]
+
+            result.append(commit)
             i += PREVIOUS_COMMIT_OFFSET
         return {"code": code, "commits": result}
 
@@ -914,11 +949,18 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
-    async def commit(self, commit_msg, path):
+    async def commit(self, commit_msg, amend, path):
         """
         Execute git commit <filename> command & return the result.
+
+        If the amend argument is true, amend the commit instead of creating a new one.
         """
-        cmd = ["git", "commit", "-m", commit_msg]
+        cmd = ["git", "commit"]
+        if amend:
+            cmd.extend(["--amend", "--no-edit"])
+        else:
+            cmd.extend(["--m", commit_msg])
+
         code, _, error = await execute(cmd, cwd=path)
 
         if code != 0:
@@ -974,11 +1016,15 @@ class Git:
 
         return response
 
-    async def push(self, remote, branch, path, auth=None, set_upstream=False):
+    async def push(
+        self, remote, branch, path, auth=None, set_upstream=False, force=False
+    ):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
         """
         command = ["git", "push"]
+        if force:
+            command.append("--force-with-lease")
         if set_upstream:
             command.append("--set-upstream")
         command.extend([remote, branch])

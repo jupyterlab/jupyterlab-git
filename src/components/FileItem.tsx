@@ -120,9 +120,13 @@ export interface IFileItemProps {
    */
   selectFile?: (file: Git.IStatusFile | null) => void;
   /**
+   * Optional style class
+   */
+  className?: string;
+  /**
    * Inline styling for the windowing
    */
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
   /**
    * The application language translator.
    */
@@ -134,7 +138,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
     super(props);
   }
   protected _getFileChangedLabel(change: keyof typeof STATUS_CODES): string {
-    return STATUS_CODES[change];
+    return STATUS_CODES[change] || 'Unmodified';
   }
 
   protected _getFileChangedLabelClass(change: string): string {
@@ -158,15 +162,22 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
   }
 
   protected _getFileClass(): string {
-    return this.props.selected
+    const baseClass = this.props.selected
       ? classes(fileStyle, selectedFileStyle)
       : fileStyle;
+
+    return this.props.className
+      ? `${baseClass} ${this.props.className}`
+      : baseClass;
   }
 
   render(): JSX.Element {
     const { file } = this.props;
     const status_code = file.status === 'staged' ? file.x : file.y;
-    const status = this._getFileChangedLabel(status_code as any);
+    const status =
+      file.status === 'unmerged'
+        ? 'Conflicted'
+        : this._getFileChangedLabel(status_code as any);
 
     return (
       <div
@@ -183,7 +194,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         }
         onDoubleClick={this.props.onDoubleClick}
         style={this.props.style}
-        title={this.props.trans.__(`%1 ● ${status}`, this.props.file.to)}
+        title={this.props.trans.__(`%1 • ${status}`, this.props.file.to)}
       >
         {this.props.markBox && (
           <GitMarkBox
@@ -198,7 +209,11 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         />
         {this.props.actions}
         <span className={this._getFileChangedLabelClass(this.props.file.y)}>
-          {this.props.file.y === '?' ? 'U' : status_code}
+          {this.props.file.status === 'unmerged'
+            ? '!'
+            : this.props.file.y === '?'
+            ? 'U'
+            : status_code}
         </span>
       </div>
     );

@@ -9,7 +9,7 @@ import { ListChildComponentProps } from 'react-window';
 import { addMenuItems, CommandArguments } from '../commandsAndMenu';
 import { getDiffProvider, GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
-import { fileListWrapperClass } from '../style/FileListStyle';
+import { fileListWrapperClass, unmergedRowStyle } from '../style/FileListStyle';
 import {
   addIcon,
   diffIcon,
@@ -55,13 +55,15 @@ export const CONTEXT_COMMANDS: ContextCommands = {
   'partially-staged': [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileUnstage,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
   ],
   unstaged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileStage,
     ContextCommandIDs.gitFileDiscard,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
   ],
   untracked: [
     ContextCommandIDs.gitFileOpen,
@@ -73,13 +75,14 @@ export const CONTEXT_COMMANDS: ContextCommands = {
   staged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileUnstage,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitCommitAmendStaged,
+    ContextCommandIDs.gitFileHistory
   ],
+  unmodified: [ContextCommandIDs.gitFileHistory],
+  unmerged: [ContextCommandIDs.gitFileDiff],
   'remote-changed': [
     ContextCommandIDs.gitFileOpen,
-    // ContextCommandIDs.gitFileDiff // save this for later date.
-    // need to change diff to diff with upstream changes
-
   ]
 };
 
@@ -87,7 +90,8 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
   'partially-staged': [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileDiscard,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
   ],
   'remote-changed': [
     ContextCommandIDs.gitFileOpen,
@@ -96,19 +100,23 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
   staged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileDiscard,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
   ],
   unstaged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileDiscard,
-    ContextCommandIDs.gitFileDiff
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
   ],
   untracked: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitIgnore,
     ContextCommandIDs.gitIgnoreExtension,
     ContextCommandIDs.gitFileDelete
-  ]
+  ],
+  unmodified: [ContextCommandIDs.gitFileHistory],
+  unmerged: [ContextCommandIDs.gitFileDiff]
 };
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
@@ -282,6 +290,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       const unstagedFiles: Git.IStatusFile[] = [];
       const untrackedFiles: Git.IStatusFile[] = [];
       const remoteChangedFiles: Git.IStatusFile[] = [];
+      const unmergedFiles: Git.IStatusFile[] = [];
 
       this.props.files.forEach(file => {
         switch (file.status) {
@@ -304,10 +313,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               status: 'unstaged'
             });
             break;
+          case 'unmerged':
+            unmergedFiles.push(file);
+            break;
           case 'remote-changed':
             remoteChangedFiles.push(file);
-            break
-
+            break;
           default:
             break;
         }
@@ -321,6 +332,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           <AutoSizer disableWidth={true}>
             {({ height }) => (
               <>
+                {this._renderUnmerged(unmergedFiles, height)}
                 {this._renderStaged(stagedFiles, height)}
                 {this._renderChanged(unstagedFiles, height)}
                 {this._renderUntracked(untrackedFiles, height)}
@@ -349,6 +361,49 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       this.state.selectedFile.to === candidate.to &&
       this.state.selectedFile.status === candidate.status
     );
+  }
+
+  /**
+   * Render an unmerged file
+   *
+   * Note: This is actually a React.FunctionComponent but defined as
+   * a private method as it needs access to FileList properties.
+   *
+   * @param rowProps Row properties
+   */
+  private _renderUnmergedRow = (
+    rowProps: ListChildComponentProps
+  ): JSX.Element => {
+    const { data, index, style } = rowProps;
+    const file = data[index] as Git.IStatusFile;
+    const diffButton = this._createDiffButton(file);
+    return (
+      <FileItem
+        className={unmergedRowStyle}
+        trans={this.props.trans}
+        actions={!file.is_binary && diffButton}
+        contextMenu={this.openContextMenu}
+        file={file}
+        model={this.props.model}
+        selected={this._isSelectedFile(file)}
+        selectFile={this.updateSelectedFile}
+        onDoubleClick={() => this._openDiffView(file)}
+        style={{ ...style }}
+      />
+    );
+  };
+
+  private _renderUnmerged(files: Git.IStatusFile[], height: number) {
+    // Hide section if no merge conflicts are present
+    return files.length > 0 ? (
+      <GitStage
+        collapsible
+        files={files}
+        heading={this.props.trans.__('Conflicted')}
+        height={height}
+        rowRenderer={this._renderUnmergedRow}
+      />
+    ) : null;
   }
 
   /**

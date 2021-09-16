@@ -6,12 +6,11 @@ import {
   showDialog,
   showErrorMessage,
   Toolbar,
-  ToolbarButton,
-  WidgetTracker
+  ToolbarButton
 } from '@jupyterlab/apputils';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
-import { FileBrowser } from '@jupyterlab/filebrowser';
-import { Contents } from '@jupyterlab/services';
+import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
+import { Contents, ContentsManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { TranslationBundle } from '@jupyterlab/translation';
@@ -20,7 +19,7 @@ import { ArrayExt, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { Menu, Panel } from '@lumino/widgets';
+import { ContextMenu, Menu, Panel } from '@lumino/widgets';
 import * as React from 'react';
 import { DiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
@@ -33,6 +32,7 @@ import {
   diffIcon,
   discardIcon,
   gitIcon,
+  historyIcon,
   openIcon,
   removeIcon
 } from './style/icons';
@@ -63,7 +63,8 @@ interface IGitCloneArgs {
 enum Operation {
   Clone = 'Clone',
   Pull = 'Pull',
-  Push = 'Push'
+  Push = 'Push',
+  ForcePush = 'ForcePush'
 }
 
 interface IFileDiffArgument {
@@ -99,11 +100,11 @@ function pluralizedContextLabel(singular: string, plural: string) {
 export function addCommands(
   app: JupyterFrontEnd,
   gitModel: GitExtension,
-  fileBrowser: FileBrowser,
+  fileBrowserModel: FileBrowserModel,
   settings: ISettingRegistry.ISettings,
   trans: TranslationBundle
 ): void {
-  const { commands, shell } = app;
+  const { commands, shell, serviceManager } = app;
 
   /**
    * Commit using a keystroke combination when in CommitBox.
@@ -176,7 +177,7 @@ export function addCommands(
       'Create an empty Git repository or reinitialize an existing one'
     ),
     execute: async () => {
-      const currentPath = fileBrowser.model.path;
+      const currentPath = fileBrowserModel.path;
       const result = await showDialog({
         title: trans.__('Initialize a Repository'),
         body: trans.__('Do you really want to make this directory a Git Repo?'),
@@ -309,14 +310,14 @@ export function addCommands(
             gitModel,
             Operation.Clone,
             trans,
-            { path: fileBrowser.model.path, url: result.value }
+            { path: fileBrowserModel.path, url: result.value }
           );
           logger.log({
             message: trans.__('Successfully cloned'),
             level: Level.SUCCESS,
             details
           });
-          await fileBrowser.model.refresh();
+          await fileBrowserModel.refresh();
         } catch (error) {
           console.error(
             'Encountered an error when cloning the repository. Error: ',
@@ -344,10 +345,13 @@ export function addCommands(
 
   /** Add git push command */
   commands.addCommand(CommandIDs.gitPush, {
-    label: trans.__('Push to Remote'),
+    label: args =>
+      args.force
+        ? trans.__('Push to Remote (Force)')
+        : trans.__('Push to Remote'),
     caption: trans.__('Push code to remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
-    execute: async () => {
+    execute: async args => {
       logger.log({
         level: Level.RUNNING,
         message: trans.__('Pushing...')
@@ -355,7 +359,7 @@ export function addCommands(
       try {
         const details = await Private.showGitOperationDialog(
           gitModel,
-          Operation.Push,
+          args.force ? Operation.ForcePush : Operation.Push,
           trans
         );
         logger.log({
@@ -415,8 +419,9 @@ export function addCommands(
   /**
    * Git display diff command - internal command
    *
-   * @params model {Git.Diff.IModel<string>}: The diff model to display
+   * @params model {Git.Diff.IModel: The diff model to display
    * @params isText {boolean}: Optional, whether the content is a plain text
+   * @params isMerge {boolean}: Optional, whether the diff is a merge conflict
    * @returns the main area widget or null
    */
   commands.addCommand(CommandIDs.gitShowDiff, {
@@ -424,7 +429,7 @@ export function addCommands(
     caption: trans.__('Display a file diff.'),
     execute: async args => {
       const { model, isText } = args as any as {
-        model: Git.Diff.IModel<string>;
+        model: Git.Diff.IModel;
         isText?: boolean;
       };
 
@@ -466,21 +471,67 @@ export function addCommands(
 
             diffWidget.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
-            const refreshButton = new ToolbarButton({
-              label: trans.__('Refresh'),
-              onClick: async () => {
-                await widget.refresh();
-                refreshButton.hide();
-              },
-              tooltip: trans.__('Refresh diff widget'),
-              className: 'jp-git-diff-refresh'
-            });
-            refreshButton.hide();
-            diffWidget.toolbar.addItem('refresh', refreshButton);
+            // Do not allow the user to refresh during merge conflicts
+            if (model.hasConflict) {
+              const resolveButton = new ToolbarButton({
+                label: trans.__('Mark as resolved'),
+                onClick: async () => {
+                  if (!widget.isFileResolved) {
+                    const result = await showDialog({
+                      title: trans.__('Resolve with conflicts'),
+                      body: trans.__(
+                        'Are you sure you want to mark this file as resolved with merge conflicts?'
+                      )
+                    });
 
-            model.changed.connect(() => {
-              refreshButton.show();
-            });
+                    // Bail early if the user wants to finish resolving conflicts
+                    if (!result.button.accept) {
+                      return;
+                    }
+                  }
+
+                  try {
+                    await serviceManager.contents.save(
+                      model.filename,
+                      await widget.getResolvedFile()
+                    );
+                    await gitModel.add(model.filename);
+                    await gitModel.refresh();
+                  } catch (reason) {
+                    logger.log({
+                      message: reason.message ?? reason,
+                      level: Level.ERROR
+                    });
+                  } finally {
+                    diffWidget.dispose();
+                  }
+                },
+                tooltip: trans.__('Mark file as resolved'),
+                className: 'jp-git-diff-resolve'
+              });
+
+              diffWidget.toolbar.addItem('resolve', resolveButton);
+            } else {
+              const refreshButton = new ToolbarButton({
+                label: trans.__('Refresh'),
+                onClick: async () => {
+                  await widget.refresh();
+                  refreshButton.hide();
+                },
+                tooltip: trans.__('Refresh diff widget'),
+                className: 'jp-git-diff-refresh'
+              });
+
+              refreshButton.hide();
+              diffWidget.toolbar.addItem('refresh', refreshButton);
+
+              const refresh = () => {
+                refreshButton.show();
+              };
+
+              model.changed.connect(refresh);
+              widget.disposed.connect(() => model.changed.disconnect(refresh));
+            }
 
             // Load the diff widget
             modelIsLoading.resolve();
@@ -560,25 +611,29 @@ export function addCommands(
 
         const repositoryPath = gitModel.getRelativeFilePath();
         const filename = PathExt.join(repositoryPath, filePath);
+        const specialRef =
+          status === 'staged'
+            ? Git.Diff.SpecialRef.INDEX
+            : Git.Diff.SpecialRef.WORKING;
 
-        let diffContext = context;
-        if (!diffContext) {
-          const specialRef =
-            status === 'staged'
-              ? Git.Diff.SpecialRef.INDEX
-              : Git.Diff.SpecialRef.WORKING;
-          diffContext = {
-            currentRef: specialRef,
-            previousRef: 'HEAD'
-          };
-        }
+        const diffContext: Git.Diff.IContext =
+          status === 'unmerged'
+            ? {
+                currentRef: 'HEAD',
+                previousRef: 'MERGE_HEAD',
+                baseRef: 'ORIG_HEAD'
+              }
+            : context ?? {
+                currentRef: specialRef,
+                previousRef: 'HEAD'
+              };
 
         const challengerRef = Git.Diff.SpecialRef[diffContext.currentRef as any]
           ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
           : { git: diffContext.currentRef };
 
-        // Create the diff widget
-        const model = new DiffModel<string>({
+        // Base props used for Diff Model
+        const props: Omit<Git.Diff.IModel, 'changed' | 'hasConflict'> = {
           challenger: {
             content: async () => {
               return requestAPI<Git.IDiffContent>(
@@ -614,7 +669,32 @@ export function addCommands(
             source: diffContext.previousRef,
             updateAt: Date.now()
           }
-        });
+        };
+
+        if (diffContext.baseRef) {
+          props.reference.label = trans.__('CURRENT');
+          props.challenger.label = trans.__('INCOMING');
+
+          // Only add base when diff-ing merge conflicts
+          props.base = {
+            content: async () => {
+              return requestAPI<Git.IDiffContent>(
+                URLExt.join(repositoryPath, 'content'),
+                'POST',
+                {
+                  filename: filePath,
+                  reference: { git: diffContext.baseRef }
+                }
+              ).then(data => data.content);
+            },
+            label: trans.__('RESULT'),
+            source: diffContext.baseRef,
+            updateAt: Date.now()
+          };
+        }
+
+        // Create the diff widget
+        const model = new DiffModel(props);
 
         const widget = await commands.execute(CommandIDs.gitShowDiff, {
           model,
@@ -624,17 +704,26 @@ export function addCommands(
         if (widget) {
           // Trigger diff model update
           if (diffContext.previousRef === 'HEAD') {
-            gitModel.headChanged.connect(() => {
+            const updateHead = () => {
               model.reference = {
                 ...model.reference,
                 updateAt: Date.now()
               };
+            };
+
+            gitModel.headChanged.connect(updateHead);
+
+            widget.disposed.connect(() => {
+              gitModel.headChanged.disconnect(updateHead);
             });
           }
+
           // If the diff is on the current file and it is updated => diff model changed
           if (diffContext.currentRef === Git.Diff.SpecialRef.WORKING) {
-            // More robust than fileBrowser.model.fileChanged
-            app.serviceManager.contents.fileChanged.connect((_, change) => {
+            const updateCurrent = (
+              m: ContentsManager,
+              change: Contents.IChangedArgs
+            ) => {
               const updateAt = new Date(
                 change.newValue.last_modified
               ).valueOf();
@@ -647,6 +736,13 @@ export function addCommands(
                   updateAt
                 };
               }
+            };
+
+            // More robust than fileBrowser.model.fileChanged
+            app.serviceManager.contents.fileChanged.connect(updateCurrent);
+
+            widget.disposed.connect(() => {
+              app.serviceManager.contents.fileChanged.disconnect(updateCurrent);
             });
           }
         }
@@ -893,6 +989,25 @@ export function addCommands(
     }
   });
 
+  commands.addCommand(ContextCommandIDs.gitFileHistory, {
+    label: trans.__('History'),
+    caption: trans.__('View the history of this file'),
+    execute: args => {
+      const { files } = args as any as CommandArguments.IGitContextAction;
+      const file = files[0];
+      if (!file) {
+        return;
+      }
+      gitModel.selectedHistoryFile = file;
+      shell.activateById('jp-git-sessions');
+    },
+    isEnabled: args => {
+      const { files } = args as any as CommandArguments.IGitContextAction;
+      return files.length === 1;
+    },
+    icon: historyIcon.bindprops({ stylesheet: 'menuItem' })
+  });
+
   commands.addCommand(ContextCommandIDs.gitNoAction, {
     label: trans.__('No actions available'),
     isEnabled: () => false,
@@ -932,6 +1047,9 @@ export function createGitMenu(
     CommandIDs.gitAddRemote,
     CommandIDs.gitTerminalCommand
   ].forEach(command => {
+    if (command === CommandIDs.gitPush) {
+      menu.addItem({ command, args: { force: true } });
+    }
     menu.addItem({ command });
   });
 
@@ -960,9 +1078,6 @@ export function createGitMenu(
 
   return menu;
 }
-
-// matches only non-directory items
-const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
 
 export function addMenuItems(
   commands: ContextCommandIDs[],
@@ -995,135 +1110,144 @@ export function addMenuItems(
 }
 
 /**
- * Add Git context (sub)menu to the file browser context menu.
+ * Populate Git context submenu depending on the selected files.
  */
 export function addFileBrowserContextMenu(
   model: IGitExtension,
-  tracker: WidgetTracker<FileBrowser>,
-  commands: CommandRegistry,
+  filebrowser: FileBrowser,
   contextMenu: ContextMenuSvg
 ): void {
-  function getSelectedBrowserItems(): Contents.IModel[] {
-    const widget = tracker.currentWidget;
-    if (!widget) {
-      return [];
+  let gitMenu: Menu;
+  let _commands: ContextCommandIDs[];
+  let _paths: string[];
+
+  function updateItems(menu: Menu): void {
+    const wasShown = menu.isVisible;
+    const parent = menu.parentMenu;
+
+    const items = toArray(filebrowser.selectedItems());
+    const statuses = new Set<Git.Status>(
+      items
+        .map(item =>
+          model.pathRepository === null
+            ? undefined
+            : model.getFile(item.path)?.status
+        )
+        .filter(status => typeof status !== 'undefined')
+    );
+
+    // get commands and de-duplicate them
+    const allCommands = new Set<ContextCommandIDs>(
+      // flatten the list of lists of commands
+      []
+        .concat(...[...statuses].map(status => CONTEXT_COMMANDS[status]))
+        // filter out the Open and Delete commands as
+        // those are not needed in file browser
+        .filter(
+          command =>
+            command !== ContextCommandIDs.gitFileOpen &&
+            command !== ContextCommandIDs.gitFileDelete &&
+            typeof command !== 'undefined'
+        )
+        // replace stage and track with a single "add" operation
+        .map(command =>
+          command === ContextCommandIDs.gitFileStage ||
+          command === ContextCommandIDs.gitFileTrack
+            ? ContextCommandIDs.gitFileAdd
+            : command
+        )
+    );
+
+    const commandsChanged =
+      !_commands ||
+      _commands.length !== allCommands.size ||
+      !_commands.every(command => allCommands.has(command));
+
+    const paths = items.map(item => item.path);
+
+    const filesChanged = !_paths || !ArrayExt.shallowEqual(_paths, paths);
+
+    if (commandsChanged || filesChanged) {
+      const commandsList = [...allCommands];
+      menu.clearItems();
+      addMenuItems(
+        commandsList,
+        menu,
+        paths
+          .map(path => model.getFile(path))
+          // if file cannot be resolved (has no action available),
+          // omit the undefined result
+          .filter(file => typeof file !== 'undefined')
+      );
+
+      if (wasShown) {
+        // show the menu again after downtime for refresh
+        parent.triggerActiveItem();
+      }
+      _commands = commandsList;
+      _paths = paths;
     }
-    return toArray(widget.selectedItems());
   }
 
-  class GitMenu extends Menu {
-    private _commands: ContextCommandIDs[];
-    private _paths: string[];
-
-    protected onBeforeAttach(msg: Message) {
-      // Render using the most recent model (even if possibly outdated)
-      this.updateItems();
-      const renderedStatus = model.status;
-
-      // Trigger refresh before the menu is displayed
-      model
-        .refreshStatus()
-        .then(() => {
-          if (model.status !== renderedStatus) {
-            // update items if needed
-            this.updateItems();
-          }
-        })
-        .catch(error => {
-          console.error(
-            'Fail to refresh model when displaying git context menu.',
-            error
-          );
-        });
-      super.onBeforeAttach(msg);
+  function updateGitMenu(contextMenu: ContextMenu) {
+    if (!gitMenu) {
+      gitMenu =
+        contextMenu.menu.items.find(
+          item =>
+            item.type === 'submenu' && item.submenu?.id === 'jp-contextmenu-git'
+        )?.submenu ?? null;
     }
 
-    protected updateItems(): void {
-      const wasShown = this.isVisible;
-      const parent = this.parentMenu;
+    if (!gitMenu) {
+      return; // Bail early if the open with menu is not displayed
+    }
 
-      const items = getSelectedBrowserItems();
-      const statuses = new Set<Git.Status>(
-        items
-          .map(item => model.getFile(item.path)?.status)
-          .filter(status => typeof status !== 'undefined')
-      );
+    // Render using the most recent model (even if possibly outdated)
+    updateItems(gitMenu);
+    const renderedStatus = model.status;
 
-      // get commands and de-duplicate them
-      const allCommands = new Set<ContextCommandIDs>(
-        // flatten the list of lists of commands
-        []
-          .concat(...[...statuses].map(status => CONTEXT_COMMANDS[status]))
-          // filter out the Open and Delete commands as
-          // those are not needed in file browser
-          .filter(
-            command =>
-              command !== ContextCommandIDs.gitFileOpen &&
-              command !== ContextCommandIDs.gitFileDelete &&
-              typeof command !== 'undefined'
-          )
-          // replace stage and track with a single "add" operation
-          .map(command =>
-            command === ContextCommandIDs.gitFileStage ||
-            command === ContextCommandIDs.gitFileTrack
-              ? ContextCommandIDs.gitFileAdd
-              : command
-          )
-      );
-
-      // if looking at a tracked file with no changes,
-      // it has no status, nor any actions available
-      // (although `git rm` would be a valid action)
-      if (allCommands.size === 0 && statuses.size === 0) {
-        allCommands.add(ContextCommandIDs.gitNoAction);
-      }
-
-      const commandsChanged =
-        !this._commands ||
-        this._commands.length !== allCommands.size ||
-        !this._commands.every(command => allCommands.has(command));
-
-      const paths = items.map(item => item.path);
-
-      const filesChanged =
-        !this._paths || !ArrayExt.shallowEqual(this._paths, paths);
-
-      if (commandsChanged || filesChanged) {
-        const commandsList = [...allCommands];
-        this.clearItems();
-        addMenuItems(
-          commandsList,
-          this,
-          paths
-            .map(path => model.getFile(path))
-            // if file cannot be resolved (has no action available),
-            // omit the undefined result
-            .filter(file => typeof file !== 'undefined')
-        );
-        if (wasShown) {
-          // show he menu again after downtime for refresh
-          parent.triggerActiveItem();
+    // Trigger refresh before the menu is displayed
+    model
+      .refreshStatus()
+      .then(() => {
+        if (model.status !== renderedStatus) {
+          // update items if needed
+          updateItems(gitMenu);
         }
-        this._commands = commandsList;
-        this._paths = paths;
+      })
+      .catch(error => {
+        console.error(
+          'Fail to refresh model when displaying git context menu.',
+          error
+        );
+      });
+  }
+
+  // as any is to support JLab 3.1 feature
+  if ((contextMenu as any).opened) {
+    (contextMenu as any).opened.connect(updateGitMenu);
+  } else {
+    // matches only non-directory items
+
+    class GitMenu extends Menu {
+      protected onBeforeAttach(msg: Message): void {
+        updateGitMenu(contextMenu);
+        super.onBeforeAttach(msg);
       }
     }
 
-    onBeforeShow(msg: Message): void {
-      super.onBeforeShow(msg);
-    }
+    const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+    gitMenu = new GitMenu({ commands: contextMenu.menu.commands });
+    gitMenu.title.label = 'Git';
+    gitMenu.title.icon = gitIcon.bindprops({ stylesheet: 'menuItem' });
+
+    contextMenu.addItem({
+      type: 'submenu',
+      submenu: gitMenu,
+      selector: selectorNotDir,
+      rank: 5
+    });
   }
-
-  const gitMenu = new GitMenu({ commands });
-  gitMenu.title.label = 'Git';
-  gitMenu.title.icon = gitIcon.bindprops({ stylesheet: 'menuItem' });
-
-  contextMenu.addItem({
-    type: 'submenu',
-    submenu: gitMenu,
-    selector: selectorNotDir,
-    rank: 5
-  });
 }
 
 /* eslint-disable no-inner-declarations */
@@ -1162,6 +1286,9 @@ namespace Private {
           break;
         case Operation.Push:
           result = await model.push(authentication);
+          break;
+        case Operation.ForcePush:
+          result = await model.push(authentication, true);
           break;
         default:
           result = { code: -1, message: 'Unknown git command' };

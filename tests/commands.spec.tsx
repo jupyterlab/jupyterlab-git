@@ -37,7 +37,7 @@ describe('git-commands', () => {
       commands,
       shell: null as any
     };
-    const trans = nullTranslator.load('jupyterlab-git');
+    const trans = nullTranslator.load('jupyterlab_git');
     model = new GitExtension(app as any);
     addCommands(app as JupyterFrontEnd, model, null, null, trans);
   });
@@ -126,7 +126,7 @@ describe('git-commands', () => {
           model.pathRepository = DEFAULT_REPOSITORY_PATH;
           await model.ready;
 
-          await commands.execute(ContextCommandIDs.gitFileDiscard, ({
+          await commands.execute(ContextCommandIDs.gitFileDiscard, {
             files: [
               {
                 x,
@@ -137,7 +137,7 @@ describe('git-commands', () => {
                 is_binary: false
               }
             ]
-          } as CommandArguments.IGitContextAction) as any);
+          } as CommandArguments.IGitContextAction as any);
 
           if (status === 'staged' || status === 'partially-staged') {
             expect(spyReset).toHaveBeenCalledWith(path);

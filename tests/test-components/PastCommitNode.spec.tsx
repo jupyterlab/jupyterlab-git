@@ -1,14 +1,16 @@
-import * as React from 'react';
+import { nullTranslator } from '@jupyterlab/translation';
 import { shallow } from 'enzyme';
-import { SinglePastCommitInfo } from '../../src/components/SinglePastCommitInfo';
+import 'jest';
+import * as React from 'react';
 import {
-  PastCommitNode,
-  IPastCommitNodeProps
+  IPastCommitNodeProps,
+  PastCommitNode
 } from '../../src/components/PastCommitNode';
 import { Git } from '../../src/tokens';
-import 'jest';
 
 describe('PastCommitNode', () => {
+  const trans = nullTranslator.load('jupyterlab-git');
+
   const notMatchingBranches: Git.IBranch[] = [
     {
       is_current_branch: false,
@@ -57,7 +59,7 @@ describe('PastCommitNode', () => {
     },
     branches: branches,
     commands: null,
-    trans: null
+    trans
   };
 
   test('Includes commit info', () => {
@@ -76,22 +78,16 @@ describe('PastCommitNode', () => {
     expect(node.text()).not.toMatch('name2');
   });
 
-  test('Doesnt include details at first', () => {
-    const node = shallow(<PastCommitNode {...props} />);
-    expect(node.find(SinglePastCommitInfo)).toHaveLength(0);
-  });
-
-  test('includes details after click', () => {
-    const node = shallow(<PastCommitNode {...props} />);
+  test('Toggle show details', () => {
+    // simulates SinglePastCommitInfo child
+    const node = shallow(
+      <PastCommitNode {...props}>
+        <div id="singlePastCommitInfo"></div>
+      </PastCommitNode>
+    );
     node.simulate('click');
-    expect(node.find(SinglePastCommitInfo)).toHaveLength(1);
-  });
-
-  test('hides details after collapse', () => {
-    const node = shallow(<PastCommitNode {...props} />);
+    expect(node.find('div#singlePastCommitInfo')).toHaveLength(1);
     node.simulate('click');
-    expect(node.find(SinglePastCommitInfo)).toHaveLength(1);
-    node.simulate('click');
-    expect(node.find(SinglePastCommitInfo)).toHaveLength(0);
+    expect(node.find('div#singlePastCommitInfo')).toHaveLength(0);
   });
 });

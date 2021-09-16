@@ -51,7 +51,7 @@ function MockSettings(commitAndPush = true) {
 }
 
 describe('GitPanel', () => {
-  const trans = nullTranslator.load('jupyterlab-git');
+  const trans = nullTranslator.load('jupyterlab_git');
 
   const props: IGitPanelProps = {
     model: null,
@@ -78,168 +78,151 @@ describe('GitPanel', () => {
     await props.model.ready;
   });
 
-  describe('#commitStagedFiles()', () => {
-    it('should commit when commit message is provided', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
-
-      // Mock identity look up
-      const identity = jest
-        .spyOn(GitModel.prototype, 'config')
-        .mockResolvedValue({
-          options: {
-            'user.name': 'John Snow',
-            'user.email': 'john.snow@winteris.com'
-          }
-        });
-
+  describe('#constructor()', () => {
+    it('should return a new instance', () => {
       const panel = new GitPanel(props);
-      await panel.commitStagedFiles('Initial commit');
-      expect(identity).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith('Initial commit');
+      expect(panel).toBeInstanceOf(GitPanel);
+    });
+
+    it('should set the default commit message summary to an empty string', () => {
+      const panel = new GitPanel(props);
+      expect(panel.state.commitSummary).toEqual('');
+    });
+
+    it('should set the default commit message description to an empty string', () => {
+      const panel = new GitPanel(props);
+      expect(panel.state.commitDescription).toEqual('');
+    });
+  });
+
+  describe('#commitFiles()', () => {
+    let panel: GitPanel;
+    let commitSpy: jest.SpyInstance<Promise<void>>;
+    let configSpy: jest.SpyInstance<Promise<void | JSONObject>>;
+
+    const commitSummary = 'Fix really stupid bug';
+    const commitDescription = 'This will probably break everything :)';
+    const commitUser = {
+      'user.name': 'John Snow',
+      'user.email': 'john.snow@winteris.com'
+    };
+
+    const mockUtils = apputils as jest.Mocked<typeof apputils>;
+    const dialogValue: apputils.Dialog.IResult<any> = {
+      button: {
+        accept: true,
+        actions: [],
+        caption: '',
+        className: '',
+        displayType: 'default',
+        iconClass: '',
+        iconLabel: '',
+        label: ''
+      },
+      value: {
+        name: commitUser['user.name'],
+        email: commitUser['user.email']
+      }
+    };
+
+    /**
+     * Mock identity look up (GitModel.config)
+     */
+    const mockConfigImplementation = (key: 'user.email' | 'user.name') => {
+      return (options?: JSONObject): Promise<JSONObject> => {
+        const response = {
+          options: {
+            [key]: commitUser[key]
+          }
+        };
+        return Promise.resolve<JSONObject>(
+          options === undefined
+            ? response // When getting config options
+            : null // When setting config options
+        );
+      };
+    };
+
+    beforeEach(() => {
+      commitSpy = jest.spyOn(GitModel.prototype, 'commit').mockResolvedValue();
+      configSpy = jest.spyOn(GitModel.prototype, 'config');
+
+      const panelWrapper = shallow<GitPanel>(<GitPanel {...props} />);
+      panel = panelWrapper.instance();
+    });
+
+    it('should commit when commit message is provided', async () => {
+      configSpy.mockResolvedValue({ options: commitUser });
+      panel.setState({ commitSummary, commitDescription });
+      await panel.commitFiles();
+      expect(configSpy).toHaveBeenCalledTimes(1);
+      expect(commitSpy).toHaveBeenCalledTimes(1);
+      expect(commitSpy).toHaveBeenCalledWith(
+        commitSummary + '\n\n' + commitDescription + '\n'
+      );
+
+      // Only erase commit message upon success
+      expect(panel.state.commitSummary).toEqual('');
+      expect(panel.state.commitDescription).toEqual('');
     });
 
     it('should not commit without a commit message', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
-      const panel = new GitPanel(props);
-      await panel.commitStagedFiles('');
-      expect(spy).not.toHaveBeenCalled();
-      spy.mockRestore();
+      await panel.commitFiles();
+      expect(configSpy).not.toHaveBeenCalled();
+      expect(commitSpy).not.toHaveBeenCalled();
     });
 
     it('should prompt for user identity if user.name is not set', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
+      configSpy.mockImplementation(mockConfigImplementation('user.email'));
+      mockUtils.showDialog.mockResolvedValue(dialogValue);
 
-      // Mock identity look up
-      const identity = jest
-        .spyOn(GitModel.prototype, 'config')
-        .mockImplementation(options => {
-          let response: JSONObject = null;
-          if (options === undefined) {
-            response = {
-              options: {
-                'user.email': 'john.snow@winteris.com'
-              }
-            };
-          }
-          return Promise.resolve(response);
-        });
-      const mock = apputils as jest.Mocked<typeof apputils>;
-      mock.showDialog.mockResolvedValue({
-        button: {
-          accept: true,
-          actions: [],
-          caption: '',
-          className: '',
-          displayType: 'default',
-          iconClass: '',
-          iconLabel: '',
-          label: ''
-        },
-        value: {
-          name: 'John Snow',
-          email: 'john.snow@winteris.com'
-        }
-      });
-
-      const panel = new GitPanel(props);
-      await panel.commitStagedFiles('Initial commit');
-      expect(identity).toHaveBeenCalledTimes(2);
-      expect(identity.mock.calls[0]).toHaveLength(0);
-      expect(identity.mock.calls[1]).toEqual([
-        {
-          'user.name': 'John Snow',
-          'user.email': 'john.snow@winteris.com'
-        }
-      ]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith('Initial commit');
+      panel.setState({ commitSummary });
+      await panel.commitFiles();
+      expect(configSpy).toHaveBeenCalledTimes(2);
+      expect(configSpy.mock.calls[0]).toHaveLength(0);
+      expect(configSpy.mock.calls[1]).toEqual([commitUser]);
+      expect(commitSpy).toHaveBeenCalledTimes(1);
+      expect(commitSpy).toHaveBeenCalledWith(commitSummary);
     });
 
     it('should prompt for user identity if user.email is not set', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
+      configSpy.mockImplementation(mockConfigImplementation('user.name'));
+      mockUtils.showDialog.mockResolvedValue(dialogValue);
 
-      // Mock identity look up
-      const identity = jest
-        .spyOn(GitModel.prototype, 'config')
-        .mockImplementation(options => {
-          let response: JSONObject = null;
-          if (options === undefined) {
-            response = {
-              options: {
-                'user.name': 'John Snow'
-              }
-            };
-          }
-          return Promise.resolve(response);
-        });
-      const mock = apputils as jest.Mocked<typeof apputils>;
-      mock.showDialog.mockResolvedValue({
-        button: {
-          accept: true,
-          actions: [],
-          caption: '',
-          className: '',
-          displayType: 'default',
-          iconClass: '',
-          iconLabel: '',
-          label: ''
-        },
-        value: {
-          name: 'John Snow',
-          email: 'john.snow@winteris.com'
-        }
-      });
-
-      const panel = new GitPanel(props);
-      await panel.commitStagedFiles('Initial commit');
-      expect(identity).toHaveBeenCalledTimes(2);
-      expect(identity.mock.calls[0]).toHaveLength(0);
-      expect(identity.mock.calls[1]).toEqual([
-        {
-          'user.name': 'John Snow',
-          'user.email': 'john.snow@winteris.com'
-        }
-      ]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith('Initial commit');
+      panel.setState({ commitSummary });
+      await panel.commitFiles();
+      expect(configSpy).toHaveBeenCalledTimes(2);
+      expect(configSpy.mock.calls[0]).toHaveLength(0);
+      expect(configSpy.mock.calls[1]).toEqual([commitUser]);
+      expect(commitSpy).toHaveBeenCalledTimes(1);
+      expect(commitSpy).toHaveBeenCalledWith(commitSummary);
     });
 
     it('should not commit if no user identity is set and the user rejects the dialog', async () => {
-      const spy = jest.spyOn(GitModel.prototype, 'commit');
-
-      // Mock identity look up
-      const identity = jest
-        .spyOn(GitModel.prototype, 'config')
-        .mockImplementation(options => {
-          let response: JSONObject = null;
-          if (options === undefined) {
-            response = {
-              options: {}
-            };
-          }
-          return Promise.resolve(response);
-        });
-      const mock = apputils as jest.Mocked<typeof apputils>;
-      mock.showDialog.mockResolvedValue({
+      configSpy.mockResolvedValue({ options: {} });
+      mockUtils.showDialog.mockResolvedValue({
         button: {
-          accept: false,
-          actions: [],
-          caption: '',
-          className: '',
-          displayType: 'default',
-          iconClass: '',
-          iconLabel: '',
-          label: ''
+          ...dialogValue.button,
+          accept: false
         },
         value: null
       });
 
-      const panel = new GitPanel(props);
-      await panel.commitStagedFiles('Initial commit');
-      expect(identity).toHaveBeenCalledTimes(1);
-      expect(identity).toHaveBeenCalledWith();
-      expect(spy).not.toHaveBeenCalled();
+      panel.setState({ commitSummary, commitDescription });
+      try {
+        await panel.commitFiles();
+      } catch (error) {
+        expect(error.message).toEqual(
+          'Failed to set your identity. User refused to set identity.'
+        );
+      }
+      expect(configSpy).toHaveBeenCalledTimes(1);
+      expect(configSpy).toHaveBeenCalledWith();
+      expect(commitSpy).not.toHaveBeenCalled();
+
+      // Should not erase commit message
+      expect(panel.state.commitSummary).toEqual(commitSummary);
+      expect(panel.state.commitDescription).toEqual(commitDescription);
     });
   });
 
@@ -260,6 +243,9 @@ describe('GitPanel', () => {
           connect: jest.fn()
         },
         statusChanged: {
+          connect: jest.fn()
+        },
+        selectedHistoryFileChanged: {
           connect: jest.fn()
         }
       } as any;

@@ -20,7 +20,7 @@ export interface IGitStageProps {
   /**
    * Actions component to display at the far right of the stage
    */
-  actions: React.ReactElement;
+  actions?: React.ReactElement;
   /**
    * Is this group collapsible
    */
