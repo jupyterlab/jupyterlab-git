@@ -910,12 +910,12 @@ export class GitExtension implements IGitExtension {
           );
         }
       );
-      let files = data.files?.map(file => {
-          return {
-            ...file,
-            status: decodeStage(file.x, file.y),
-            type: this._resolveFileType(file.to)
-          };
+      const files = data.files?.map(file => {
+        return {
+          ...file,
+          status: decodeStage(file.x, file.y),
+          type: this._resolveFileType(file.to)
+        };
       });
       this._setStatus({
         branch: data.branch || null,
@@ -941,64 +941,63 @@ export class GitExtension implements IGitExtension {
     this._remoteChangedFiles = [];
     let remoteChangedFiles: null | string[] = null;
     if (this.status.remote && this.status.behind > 0) {
-      remoteChangedFiles = (await this._changedFiles('WORKING', this.status.remote)).files;
-      remoteChangedFiles?.forEach( (element) => {
+      remoteChangedFiles = (
+        await this._changedFiles('WORKING', this.status.remote)
+      ).files;
+      remoteChangedFiles?.forEach(element => {
         this._remoteChangedFiles.push({
-          status: "remote-changed",
+          status: 'remote-changed',
           type: this._resolveFileType(element),
-          x: "?",
-          y: "B",
+          x: '?',
+          y: 'B',
           to: element,
-          from: "?",
-          is_binary: false,
-        })
+          from: '?',
+          is_binary: false
+        });
       });
-    };
-    return this._remoteChangedFiles
+    }
+    return this._remoteChangedFiles;
   }
-
 
   /**
    * Notifies user is a file that is attached has is behind changes in the remote branch with a pop-up Dialog
    *
    */
-  async checkRemoteChangeNotified() {
+  async checkRemoteChangeNotified(): Promise<void> {
     if (this.status.remote && this.status.behind > 0) {
-      for (var val of this._remoteChangedFiles) {
-        let docWidget = this._docmanager.findWidget(
-          this.getRelativeFilePath(val.to));
-        let notifiedIndex = (this._changeUpstreamNotified.findIndex(
+      for (const val of this._remoteChangedFiles) {
+        const docWidget = this._docmanager.findWidget(
+          this.getRelativeFilePath(val.to)
+        );
+        const notifiedIndex = this._changeUpstreamNotified.findIndex(
           notified =>
             notified.from === val.from &&
             notified.to === val.to &&
             notified.x === val.x &&
             notified.y === val.y
-        ))
+        );
         if (docWidget !== undefined) {
           if (docWidget.isAttached) {
-
             // notify if the user hasn't been notified yet
-            if (notifiedIndex  === -1) {
+            if (notifiedIndex === -1) {
               showDialog({
                 title: `${val.to} is out of date with your remote branch: ${this._currentBranch.upstream}`,
                 body: `You may want to pull from ${this._currentBranch.upstream} before editing this file.`,
-                buttons: [
-                  Dialog.okButton({ label: 'OK' })
-                ]
-              })
+                buttons: [Dialog.okButton({ label: 'OK' })]
+              });
               // add the file to the notified array
-              this._changeUpstreamNotified.push(val)
+              this._changeUpstreamNotified.push(val);
             }
           }
         } else {
           // remove from notified array if document is closed
           if (notifiedIndex > -1) {
-            this._changeUpstreamNotified.splice(notifiedIndex, 1)
+            this._changeUpstreamNotified.splice(notifiedIndex, 1);
           }
         }
       }
     } else {
-        this._changeUpstreamNotified = [];
+      this._changeUpstreamNotified = [];
     }
   }
 

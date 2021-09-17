@@ -373,7 +373,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * Notifies user is a file that is attached has is behind changes in the remote branch with a pop-up Dialog
    */
-  checkRemoteChangeNotified(): void;
+  checkRemoteChangeNotified(): Promise<void>;
 
   /**
    * Register a new diff provider for specified file types

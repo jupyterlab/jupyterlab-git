@@ -58,9 +58,7 @@ export const CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileDiff,
     ContextCommandIDs.gitFileHistory
   ],
-  'remote-changed': [
-    ContextCommandIDs.gitFileOpen,
-  ],
+  'remote-changed': [ContextCommandIDs.gitFileOpen],
   unstaged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileStage,
@@ -267,7 +265,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   pullFromRemote = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
     await this.props.model.pull();
-  } 
+  };
 
   get markedFiles(): Git.IStatusFile[] {
     return this.props.files.filter(file => this.props.model.getMark(file.to));
@@ -680,8 +678,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         rowRenderer={this._renderUntrackedRow}
       />
     );
-  }  
-
+  }
 
   /**
    * Render a untracked file.
@@ -743,8 +740,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderRemoteChanged(files: Git.IStatusFile[], height: number) {
     return (
       <GitStage
-      actions={
-        <ActionButton
+        actions={
+          <ActionButton
             className={hiddenButtonStyle}
             disabled={files.length === 0}
             icon={addIcon}
