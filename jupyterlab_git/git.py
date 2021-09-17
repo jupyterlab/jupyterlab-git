@@ -471,7 +471,8 @@ class Git:
             ("-%d" % history_count),
         ]
         if is_single_file:
-            cmd = cmd + [
+            cmd += [
+                "-z",
                 "--numstat",
                 "--follow",
                 "--",
@@ -485,13 +486,22 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
-        if is_single_file:
-            # an extra newline get outputted when --numstat is used
-            my_output = my_output.replace("\n\n", "\n")
         line_array = my_output.splitlines()
-        i = 0
+
+        if is_single_file:
+            parsed_lines = []
+            for line in line_array:
+                if "\0" in line:
+                    split_line = line.replace("\0", "\t").split("\t")
+                    parsed_lines.append("\t".join(split_line[:-1]))
+                    if split_line[-1]:
+                        parsed_lines.append(split_line[-1])
+                else:
+                    parsed_lines.append(line)
+            line_array = parsed_lines
+
         PREVIOUS_COMMIT_OFFSET = 5 if is_single_file else 4
-        while i < len(line_array):
+        for i in range(0, len(line_array), PREVIOUS_COMMIT_OFFSET):
             commit = {
                 "commit": line_array[i],
                 "author": line_array[i + 1],
@@ -502,12 +512,14 @@ class Git:
 
             if is_single_file:
                 commit["is_binary"] = line_array[i + 4].startswith("-\t-\t")
+                # [insertions, deletions, original_file_path?, current_file_path]
+                commit["file_path"] = line_array[i + 4].split()[-1]
 
             if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
                 commit["pre_commit"] = line_array[i + PREVIOUS_COMMIT_OFFSET]
 
             result.append(commit)
-            i += PREVIOUS_COMMIT_OFFSET
+
         return {"code": code, "commits": result}
 
     async def detailed_log(self, selected_hash, path):

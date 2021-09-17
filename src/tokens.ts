@@ -795,7 +795,10 @@ export namespace Git {
     date: string;
     commit_msg: string;
     pre_commit: string;
-    is_binary?: boolean; // for single file history
+
+    // properties for single file history
+    is_binary?: boolean;
+    file_path?: string;
   }
 
   /** Interface for GitCommit request result,

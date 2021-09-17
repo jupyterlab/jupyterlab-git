@@ -164,7 +164,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
           const onOpenDiff =
             props.model.selectedHistoryFile && !commit.is_binary
               ? openDiff(commit)(
-                  props.model.selectedHistoryFile.to,
+                  commit.file_path ?? props.model.selectedHistoryFile.to,
                   !commit.is_binary
                 )
               : undefined;
