@@ -998,8 +998,7 @@ export class GitExtension implements IGitExtension {
         }
       }
     } else {
-      this._changeUpstreamNotified = [];
-      }
+        this._changeUpstreamNotified = [];
     }
   }
 
