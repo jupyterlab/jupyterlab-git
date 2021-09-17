@@ -366,10 +366,14 @@ export interface IGitExtension extends IDisposable {
   refreshStatus(): Promise<void>;
 
   /**
-   * gets a list of files that have changed in the remote branch, notifies
-   * the user with a Dialog if an open file has a remote changed.
+   * gets a list of files that have changed in the remote branch
    */
   remoteChangedFiles(): Promise<Git.IStatusFile[]>;
+
+  /**
+   * Notifies user is a file that is attached has is behind changes in the remote branch with a pop-up Dialog
+   */
+  checkRemoteChangeNotified(): void;
 
   /**
    * Register a new diff provider for specified file types

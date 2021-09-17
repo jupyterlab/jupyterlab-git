@@ -58,6 +58,9 @@ export const CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileDiff,
     ContextCommandIDs.gitFileHistory
   ],
+  'remote-changed': [
+    ContextCommandIDs.gitFileOpen,
+  ],
   unstaged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileStage,
@@ -80,10 +83,7 @@ export const CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileHistory
   ],
   unmodified: [ContextCommandIDs.gitFileHistory],
-  unmerged: [ContextCommandIDs.gitFileDiff],
-  'remote-changed': [
-    ContextCommandIDs.gitFileOpen,
-  ]
+  unmerged: [ContextCommandIDs.gitFileDiff]
 };
 
 const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {

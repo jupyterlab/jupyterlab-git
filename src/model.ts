@@ -856,7 +856,6 @@ export class GitExtension implements IGitExtension {
         this._setMarker(this.pathRepository, this._currentBranch.name);
       }
       if (headChanged) {
-        this._changeUpstreamNotified = [];
         this._headChanged.emit();
       }
 
@@ -873,7 +872,6 @@ export class GitExtension implements IGitExtension {
       this._currentBranch = null;
       this._fetchPoll.stop();
       if (headChanged) {
-        this._changeUpstreamNotified = [];
         this._headChanged.emit();
       }
 
@@ -935,18 +933,17 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Collects files that have changed on the remote branch. If there is a
-   * changed file that is open, a Dialog is displayed to notify the user
+   * Collects files that have changed on the remote branch.
    *
    */
   async remoteChangedFiles(): Promise<Git.IStatusFile[]> {
     // if a file is changed on remote add it to list of files with appropriate status.
+    this._remoteChangedFiles = [];
     let remoteChangedFiles: null | string[] = null;
-    let files: Git.IStatusFile[] = [];
     if (this.status.remote && this.status.behind > 0) {
       remoteChangedFiles = (await this._changedFiles('WORKING', this.status.remote)).files;
       remoteChangedFiles?.forEach( (element) => {
-        files.push({
+        this._remoteChangedFiles.push({
           status: "remote-changed",
           type: this._resolveFileType(element),
           x: "?",
@@ -957,37 +954,53 @@ export class GitExtension implements IGitExtension {
         })
       });
     };
-    for (var val of files) {
-      let docWidget = this._docmanager.findWidget(
-        this.getRelativeFilePath(val.to));
-      let notifiedIndex = (this._changeUpstreamNotified.findIndex(
-        notified =>
-          notified.from === val.from &&
-          notified.to === val.to &&
-          notified.x === val.x &&
-          notified.y === val.y
-      ))
-      if (docWidget !== undefined && docWidget.isAttached) {
-        // notify if the user hasn't been notified yet
-        if (notifiedIndex  === -1) {
-          showDialog({
-            title: `${val.to} is out of date with your remote branch: ${this._currentBranch.upstream}`,
-            body: `You may want to pull from ${this._currentBranch.upstream} before editing this file.`,
-            buttons: [
-              Dialog.okButton({ label: 'OK' })
-            ]
-          })
-          // add the file to the notified array
-          this._changeUpstreamNotified.push(val)
-        }
-      } else {
-        // remove from notified array if document is closed
-        if (notifiedIndex > -1) {
-          this._changeUpstreamNotified.splice(notifiedIndex, 1)
+    return this._remoteChangedFiles
+  }
+
+
+  /**
+   * Notifies user is a file that is attached has is behind changes in the remote branch with a pop-up Dialog
+   *
+   */
+  async checkRemoteChangeNotified() {
+    if (this.status.remote && this.status.behind > 0) {
+      for (var val of this._remoteChangedFiles) {
+        let docWidget = this._docmanager.findWidget(
+          this.getRelativeFilePath(val.to));
+        let notifiedIndex = (this._changeUpstreamNotified.findIndex(
+          notified =>
+            notified.from === val.from &&
+            notified.to === val.to &&
+            notified.x === val.x &&
+            notified.y === val.y
+        ))
+        if (docWidget !== undefined) {
+          if (docWidget.isAttached) {
+
+            // notify if the user hasn't been notified yet
+            if (notifiedIndex  === -1) {
+              showDialog({
+                title: `${val.to} is out of date with your remote branch: ${this._currentBranch.upstream}`,
+                body: `You may want to pull from ${this._currentBranch.upstream} before editing this file.`,
+                buttons: [
+                  Dialog.okButton({ label: 'OK' })
+                ]
+              })
+              // add the file to the notified array
+              this._changeUpstreamNotified.push(val)
+            }
+          }
+        } else {
+          // remove from notified array if document is closed
+          if (notifiedIndex > -1) {
+            this._changeUpstreamNotified.splice(notifiedIndex, 1)
+          }
         }
       }
+    } else {
+      this._changeUpstreamNotified = [];
+      }
     }
-    return files
   }
 
   /**
@@ -1426,6 +1439,7 @@ export class GitExtension implements IGitExtension {
       try {
         await this.refreshBranch();
         await this.refreshStatus();
+        await this.checkRemoteChangeNotified();
       } catch (error) {
         console.error('Failed to refresh git status', error);
       }
@@ -1486,6 +1500,7 @@ export class GitExtension implements IGitExtension {
   private _standbyCondition: () => boolean = () => false;
   private _statusPoll: Poll;
   private _taskHandler: TaskHandler<IGitExtension>;
+  private _remoteChangedFiles: Git.IStatusFile[] = [];
   private _changeUpstreamNotified: Git.IStatusFile[] = [];
   private _selectedHistoryFile: Git.IStatusFile | null = null;
 
