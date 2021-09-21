@@ -332,8 +332,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 {this._renderUnmerged(unmergedFiles, height)}
                 {this._renderStaged(stagedFiles, height)}
                 {this._renderChanged(unstagedFiles, height)}
-                {this._renderUntracked(untrackedFiles, height)}
                 {this._renderRemoteChanged(remoteChangedFiles, height)}
+                {this._renderUntracked(untrackedFiles, height)}
               </>
             )}
           </AutoSizer>
