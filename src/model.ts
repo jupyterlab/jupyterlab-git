@@ -960,7 +960,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Notifies user is a file that is attached has is behind changes in the remote branch with a pop-up Dialog
+   * Notifies user if an openend file is behind the remote branch with a pop-up Dialog
    *
    */
   async checkRemoteChangeNotified(): Promise<void> {
