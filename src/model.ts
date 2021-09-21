@@ -922,7 +922,7 @@ export class GitExtension implements IGitExtension {
         remote: data.remote || null,
         ahead: data.ahead || 0,
         behind: data.behind || 0,
-        files: files
+        files
       });
     } catch (err) {
       // TODO we should notify the user
