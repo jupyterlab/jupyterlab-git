@@ -694,7 +694,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       .composite as boolean;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
-    // const diffButton = this._createDiffButton(file);
     return (
       <FileItem
         trans={this.props.trans}
