@@ -93,7 +93,6 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
   ],
   'remote-changed': [
     ContextCommandIDs.gitFileOpen,
-    ContextCommandIDs.gitFileDiff
   ],
   staged: [
     ContextCommandIDs.gitFileOpen,
