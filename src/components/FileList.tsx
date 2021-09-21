@@ -700,7 +700,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         trans={this.props.trans}
         actions={
           <React.Fragment>
-            {/** diffButton */}
             <ActionButton
               className={hiddenButtonStyle}
               icon={openIcon}
