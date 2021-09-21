@@ -93,7 +93,6 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
   ],
   'remote-changed': [
     ContextCommandIDs.gitFileOpen,
-    ContextCommandIDs.gitFileDiff
   ],
   staged: [
     ContextCommandIDs.gitFileOpen,
@@ -332,8 +331,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 {this._renderUnmerged(unmergedFiles, height)}
                 {this._renderStaged(stagedFiles, height)}
                 {this._renderChanged(unstagedFiles, height)}
-                {this._renderUntracked(untrackedFiles, height)}
                 {this._renderRemoteChanged(remoteChangedFiles, height)}
+                {this._renderUntracked(untrackedFiles, height)}
               </>
             )}
           </AutoSizer>
@@ -694,13 +693,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       .composite as boolean;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
-    // const diffButton = this._createDiffButton(file);
     return (
       <FileItem
         trans={this.props.trans}
         actions={
           <React.Fragment>
-            {/** diffButton */}
             <ActionButton
               className={hiddenButtonStyle}
               icon={openIcon}

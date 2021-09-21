@@ -922,7 +922,7 @@ export class GitExtension implements IGitExtension {
         remote: data.remote || null,
         ahead: data.ahead || 0,
         behind: data.behind || 0,
-        files: files
+        files
       });
     } catch (err) {
       // TODO we should notify the user
@@ -960,7 +960,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Notifies user is a file that is attached has is behind changes in the remote branch with a pop-up Dialog
+   * Notifies user if an openend file is behind the remote branch with a pop-up Dialog
    *
    */
   async checkRemoteChangeNotified(): Promise<void> {
@@ -983,7 +983,7 @@ export class GitExtension implements IGitExtension {
               showDialog({
                 title: `${val.to} is out of date with your remote branch: ${this._currentBranch.upstream}`,
                 body: `You may want to pull from ${this._currentBranch.upstream} before editing this file.`,
-                buttons: [Dialog.okButton({ label: 'OK' })]
+                buttons: [Dialog.okButton()]
               });
               // add the file to the notified array
               this._changeUpstreamNotified.push(val);
