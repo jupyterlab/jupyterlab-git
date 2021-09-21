@@ -939,22 +939,26 @@ export class GitExtension implements IGitExtension {
   async remoteChangedFiles(): Promise<Git.IStatusFile[]> {
     // if a file is changed on remote add it to list of files with appropriate status.
     this._remoteChangedFiles = [];
-    let remoteChangedFiles: null | string[] = null;
-    if (this.status.remote && this.status.behind > 0) {
-      remoteChangedFiles = (
-        await this._changedFiles('WORKING', this.status.remote)
-      ).files;
-      remoteChangedFiles?.forEach(element => {
-        this._remoteChangedFiles.push({
-          status: 'remote-changed',
-          type: this._resolveFileType(element),
-          x: '?',
-          y: 'B',
-          to: element,
-          from: '?',
-          is_binary: false
+    try { 
+      let remoteChangedFiles: null | string[] = null;
+      if (this.status.remote && this.status.behind > 0) {
+        remoteChangedFiles = (
+          await this._changedFiles('WORKING', this.status.remote)
+        ).files;
+        remoteChangedFiles?.forEach(element => {
+          this._remoteChangedFiles.push({
+            status: 'remote-changed',
+            type: this._resolveFileType(element),
+            x: '?',
+            y: 'B',
+            to: element,
+            from: '?',
+            is_binary: false
+          });
         });
-      });
+      }
+    } catch (err) {
+      console.error(err);
     }
     return this._remoteChangedFiles;
   }
