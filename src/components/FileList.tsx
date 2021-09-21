@@ -17,7 +17,7 @@ import {
   openIcon,
   removeIcon
 } from '../style/icons';
-import { ContextCommandIDs, Git } from '../tokens';
+import { ContextCommandIDs, CommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
@@ -263,8 +263,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   pullFromRemote = async (event: React.MouseEvent): Promise<void> => {
-    event.stopPropagation();
-    await this.props.model.pull();
+    await this.props.commands.execute(CommandIDs.gitPull, {})
   };
 
   get markedFiles(): Git.IStatusFile[] {
@@ -681,7 +680,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
   /**
-   * Render a untracked file.
+   * Render the remote changed list.
    *
    * Note: This is actually a React.FunctionComponent but defined as
    * a private method as it needs access to FileList properties.
