@@ -983,7 +983,7 @@ export class GitExtension implements IGitExtension {
               showDialog({
                 title: `${val.to} is out of date with your remote branch: ${this._currentBranch.upstream}`,
                 body: `You may want to pull from ${this._currentBranch.upstream} before editing this file.`,
-                buttons: [Dialog.okButton({ label: 'OK' })]
+                buttons: [Dialog.okButton()]
               });
               // add the file to the notified array
               this._changeUpstreamNotified.push(val);
