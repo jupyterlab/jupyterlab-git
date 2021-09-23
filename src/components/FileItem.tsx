@@ -6,6 +6,7 @@ import {
   fileChangedLabelBrandStyle,
   fileChangedLabelInfoStyle,
   fileChangedLabelStyle,
+  fileChangedLabelWarnStyle,
   fileStyle,
   gitMarkBoxStyle,
   selectedFileChangedLabelStyle,
@@ -149,6 +150,14 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
             selectedFileChangedLabelStyle
           )
         : classes(fileChangedLabelStyle, fileChangedLabelBrandStyle);
+    } else if (change === '!') {
+      return this.props.selected
+        ? classes(
+            fileChangedLabelStyle,
+            fileChangedLabelWarnStyle,
+            selectedFileChangedLabelStyle
+          )
+        : classes(fileChangedLabelStyle, fileChangedLabelWarnStyle);
     } else {
       return this.props.selected
         ? classes(
@@ -207,7 +216,11 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
           filetype={this.props.file.type}
         />
         {this.props.actions}
-        <span className={this._getFileChangedLabelClass(this.props.file.y)}>
+        <span
+          className={this._getFileChangedLabelClass(
+            this.props.file.status === 'unmerged' ? '!' : this.props.file.y
+          )}
+        >
           {this.props.file.status === 'unmerged'
             ? '!'
             : this.props.file.y === '?'

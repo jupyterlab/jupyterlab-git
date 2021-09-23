@@ -58,6 +58,11 @@ export const fileChangedLabelBrandStyle = style({
   color: 'var(--jp-brand-color0)'
 });
 
+export const fileChangedLabelWarnStyle = style({
+  color: 'var(--jp-warn-color0)',
+  fontWeight: 'bold'
+});
+
 export const fileChangedLabelInfoStyle = style({
   color: 'var(--jp-info-color0)'
 });
