@@ -14,8 +14,8 @@ import nbformat
 import pexpect
 import tornado
 import tornado.locks
-from nbdime import diff_notebooks, merge_notebooks
 from jupyter_server.utils import ensure_async
+from nbdime import diff_notebooks, merge_notebooks
 
 from .log import get_logger
 
@@ -1200,11 +1200,41 @@ class Git:
                 )
             )
 
-    async def show(self, filename, ref, path):
+    async def _get_base_ref(self, path, filename):
+        """Get the object reference for an unmerged ``filename`` at base stage.
+
+        Execute git ls-files -u -z <filename>
+
+        Returns:
+            The object reference or None
         """
-        Execute git show <ref:filename> command & return the result.
+        command = ["git", "ls-files", "-u", "-z", filename]
+
+        code, output, error = await execute(command, cwd=path)
+        if code != 0:
+            raise subprocess.CalledProcessError(
+                code, " ".join(command), output=output, stderr=error
+            )
+
+        split_line = strip_and_split(output)[0].split()
+
+        return split_line[1] if len(split_line) > 1 else None
+
+    async def show(self, path, ref, filename=None):
         """
-        command = ["git", "show", "{}:{}".format(ref, filename)]
+        Execute
+            git show <ref:filename>
+          Or
+            git show <ref>
+
+        Return the file content
+        """
+        command = ["git", "show"]
+
+        if filename is None:
+            command.append(ref)
+        else:
+            command.append(f"{ref}:{filename}")
 
         code, output, error = await execute(command, cwd=path)
 
@@ -1267,7 +1297,11 @@ class Git:
                         log_message="Error occurred while executing command to retrieve plaintext content as file is not UTF-8."
                     )
 
-                content = await self.show(filename, "", path)
+                content = await self.show(path, "", filename)
+            elif reference["special"] == "BASE":
+                # Special case of file in merge conflict for which we want the base (aka common ancestor) version
+                ref = await self._get_base_ref(path, filename)
+                content = await self.show(path, ref)
             else:
                 raise tornado.web.HTTPError(
                     log_message="Error while retrieving plaintext content, unknown special ref '{}'.".format(
@@ -1281,7 +1315,7 @@ class Git:
                     log_message="Error occurred while executing command to retrieve plaintext content as file is not UTF-8."
                 )
 
-            content = await self.show(filename, reference["git"], path)
+            content = await self.show(path, reference["git"], filename)
         else:
             content = ""
 

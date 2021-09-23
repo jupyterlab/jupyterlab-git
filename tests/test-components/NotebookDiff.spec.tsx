@@ -24,7 +24,8 @@ describe('NotebookDiff', () => {
         label: '83baee',
         source: '83baee'
       },
-      filename: '/path/to/File.ipynb'
+      filename: 'to/File.ipynb',
+      repositoryPath: 'path'
     });
 
     (requestAPI as jest.Mock).mockResolvedValueOnce(diffResponse);
@@ -67,7 +68,8 @@ describe('NotebookDiff', () => {
         label: '83baee',
         source: '83baee'
       },
-      filename: '/path/to/File.ipynb'
+      filename: 'to/File.ipynb',
+      repositoryPath: 'path'
     });
 
     (requestAPI as jest.Mock).mockRejectedValueOnce(

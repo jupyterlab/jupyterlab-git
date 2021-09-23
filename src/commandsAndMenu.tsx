@@ -209,7 +209,7 @@ export function addCommands(
           logger.log({
             message: trans.__('Failed to initialize the Git repository'),
             level: Level.ERROR,
-            error
+            error: error as Error
           });
         }
       }
@@ -326,7 +326,7 @@ export function addCommands(
           logger.log({
             message: trans.__('Failed to clone'),
             level: Level.ERROR,
-            error
+            error: error as Error
           });
         }
       }
@@ -375,7 +375,7 @@ export function addCommands(
         logger.log({
           message: trans.__('Failed to push'),
           level: Level.ERROR,
-          error
+          error: error as Error
         });
       }
     }
@@ -410,7 +410,7 @@ export function addCommands(
         logger.log({
           message: trans.__('Failed to pull'),
           level: Level.ERROR,
-          error
+          error: error as Error
         });
       }
     }
@@ -433,11 +433,16 @@ export function addCommands(
         isText?: boolean;
       };
 
+      const fullPath = PathExt.join(
+        model.repositoryPath ?? '/',
+        model.filename
+      );
+
       const buildDiffWidget =
-        getDiffProvider(model.filename) ?? (isText && createPlainTextDiff);
+        getDiffProvider(fullPath) ?? (isText && createPlainTextDiff);
 
       if (buildDiffWidget) {
-        const id = `diff-${model.filename}-${model.reference.label}-${model.challenger.label}`;
+        const id = `diff-${fullPath}-${model.reference.label}-${model.challenger.label}`;
         const mainAreaItems = shell.widgets('main');
         let mainAreaItem = mainAreaItems.next();
         while (mainAreaItem) {
@@ -457,7 +462,7 @@ export function addCommands(
           }));
           diffWidget.id = id;
           diffWidget.title.label = PathExt.basename(model.filename);
-          diffWidget.title.caption = model.filename;
+          diffWidget.title.caption = fullPath;
           diffWidget.title.icon = diffIcon;
           diffWidget.title.closable = true;
           diffWidget.addClass('jp-git-diff-parent-widget');
@@ -492,14 +497,14 @@ export function addCommands(
 
                   try {
                     await serviceManager.contents.save(
-                      model.filename,
+                      fullPath,
                       await widget.getResolvedFile()
                     );
                     await gitModel.add(model.filename);
                     await gitModel.refresh();
                   } catch (reason) {
                     logger.log({
-                      message: reason.message ?? reason,
+                      message: (reason as Error).message ?? (reason as string),
                       level: Level.ERROR
                     });
                   } finally {
@@ -538,7 +543,9 @@ export function addCommands(
             content.addWidget(widget);
           } catch (reason) {
             console.error(reason);
-            const msg = `Load Diff Model Error (${reason.message || reason})`;
+            const msg = `Load Diff Model Error (${
+              (reason as Error).message || reason
+            })`;
             modelIsLoading.reject(msg);
           }
         }
@@ -609,8 +616,9 @@ export function addCommands(
           continue;
         }
 
-        const repositoryPath = gitModel.getRelativeFilePath();
-        const filename = PathExt.join(repositoryPath, filePath);
+        const repositoryPath = gitModel.pathRepository;
+        const filename = filePath;
+        const fullPath = PathExt.join(repositoryPath, filename);
         const specialRef =
           status === 'staged'
             ? Git.Diff.SpecialRef.INDEX
@@ -621,7 +629,7 @@ export function addCommands(
             ? {
                 currentRef: 'MERGE_HEAD',
                 previousRef: 'HEAD',
-                baseRef: 'ORIG_HEAD'
+                baseRef: Git.Diff.SpecialRef.BASE
               }
             : context ?? {
                 currentRef: specialRef,
@@ -640,7 +648,7 @@ export function addCommands(
                 URLExt.join(repositoryPath, 'content'),
                 'POST',
                 {
-                  filename: filePath,
+                  filename,
                   reference: challengerRef
                 }
               ).then(data => data.content);
@@ -658,7 +666,7 @@ export function addCommands(
                 URLExt.join(repositoryPath, 'content'),
                 'POST',
                 {
-                  filename: filePath,
+                  filename,
                   reference: { git: diffContext.previousRef }
                 }
               ).then(data => data.content);
@@ -668,7 +676,8 @@ export function addCommands(
               diffContext.previousRef,
             source: diffContext.previousRef,
             updateAt: Date.now()
-          }
+          },
+          repositoryPath
         };
 
         if (diffContext.baseRef) {
@@ -682,8 +691,10 @@ export function addCommands(
                 URLExt.join(repositoryPath, 'content'),
                 'POST',
                 {
-                  filename: filePath,
-                  reference: { git: diffContext.baseRef }
+                  filename,
+                  reference: {
+                    special: Git.Diff.SpecialRef[diffContext.baseRef as any]
+                  }
                 }
               ).then(data => data.content);
             },
@@ -728,7 +739,7 @@ export function addCommands(
                 change.newValue.last_modified
               ).valueOf();
               if (
-                change.newValue.path === filename &&
+                change.newValue.path === fullPath &&
                 model.challenger.updateAt !== updateAt
               ) {
                 model.challenger = {
@@ -1299,7 +1310,7 @@ namespace Private {
     } catch (error) {
       if (
         AUTH_ERROR_MESSAGES.some(
-          errorMessage => error.message.indexOf(errorMessage) > -1
+          errorMessage => (error as Error).message.indexOf(errorMessage) > -1
         )
       ) {
         // If the error is an authentication error, ask the user credentials
