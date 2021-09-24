@@ -106,8 +106,8 @@ export const createNotebookDiff = async (
     toolbar.addItem('hideUnchanged', new Widget({ node: label }));
 
     if (model.hasConflict) {
-      // FIXME: Merge view breaks when moving checkboxes to the toolbar
-      // toolbar.addItem('clear-outputs', diffWidget.nbdimeWidget.widgets[0])
+      // Move merge notebook controls in the toolbar
+      toolbar.addItem('clear-outputs', diffWidget.nbdimeWidget.widgets[0]);
     }
 
     // Connect toolbar checkbox and notebook diff widget

@@ -135,3 +135,10 @@
 .jp-git-diff-root .jp-Notebook-merge .jp-DragPanel-dragHandle {
   display: none;
 }
+
+.jp-git-diff-parent-widget .jp-Merge-notebook-controls {
+	margin-bottom: 0px;
+	padding: 0px;
+	background-color: transparent;
+	border: none;
+}
