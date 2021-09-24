@@ -142,3 +142,51 @@
 	background-color: transparent;
 	border: none;
 }
+
+/* Hiding unchanged cells if told to */
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge.jp-Merge-unchanged {
+  display: none;
+}
+
+/* Show a marker with the number of cells hidden before */
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge[data-nbdime-NCellsHiddenBefore]::before {
+  content: attr(data-nbdime-NCellsHiddenBefore) " unchanged cell(s) hidden";
+  position: absolute;
+  width: 100%;
+  top: 0;
+  background-color: #eee;
+  border-top: solid #ccc 1px;
+  border-bottom: solid #ccc 1px;
+  text-align: center;
+}
+
+/* Show a marker with the number of cells hidden after (for hidden cells at end) */
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge[data-nbdime-NCellsHiddenAfter]::after {
+  content: attr(data-nbdime-NCellsHiddenAfter) " unchanged cell(s) hidden";
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  background-color: #eee;
+  border-top: solid #ccc 1px;
+  border-bottom: solid #ccc 1px;
+  text-align: center;
+}
+
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge[data-nbdime-NCellsHiddenBefore] {
+  padding-top: 40px;
+}
+
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge[data-nbdime-NCellsHiddenAfter] {
+  padding-bottom: 40px;
+}
+
+/* Marker for when all cells are unchanged and hidden */
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Notebook-merge[data-nbdime-AllCellsHidden]::after {
+  content: "No changes, " attr(data-nbdime-AllCellsHidden) " unchanged cell(s) hidden";
+  display: block;
+  width: 100%;
+  background-color: #eee;
+  border-top: solid #ccc 1px;
+  border-bottom: solid #ccc 1px;
+  text-align: center;
+}
