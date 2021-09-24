@@ -19,7 +19,7 @@
 .jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-r-chunk-end,
 .jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-l-chunk-end,
 .jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-l-chunk-end,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-r-chunk-end, 
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-r-chunk-end,
 .jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-m-chunk-end-local,
 .jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-m-chunk-end-remote {
   border-bottom: none;
@@ -86,7 +86,10 @@
   background-color: var(--jp-git-diff-deleted-color);
 }
 
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-line .CodeMirror-merge-r-inserted {
+.jp-git-diff-root
+  .jp-Notebook-merge
+  .CodeMirror-line
+  .CodeMirror-merge-r-inserted {
   background-color: var(--jp-git-diff-deleted-color);
 }
 
@@ -126,4 +129,9 @@
   .CodeMirror-merge-r-added {
   background-color: var(--jp-git-diff-added-color);
   color: var(--jp-mirror-editor-string-color);
+}
+
+/* Hide drag handles */
+.jp-git-diff-root .jp-Notebook-merge .jp-DragPanel-dragHandle {
+  display: none;
 }
