@@ -64,7 +64,6 @@
 
 /* Styles for horizontal scroll lock */
 .jp-git-PlainText-diff .CodeMirror-merge-scrolllock {
-  /* color: #555; */
   color: var(--jp--inverse-layout-color2);
 }
 .jp-git-PlainText-diff .CodeMirror-merge-scrolllock:after {
@@ -90,16 +89,14 @@
 .jp-git-PlainText-diff .CodeMirror-merge-copy {
   position: absolute;
   cursor: pointer;
-  color: var(--jp-mirror-editor-operator-color);
-  /* color: #44c; */
+  color: var(--jp-brand-color1);
   z-index: 3;
 }
 
 .jp-git-PlainText-diff .CodeMirror-merge-copy-reverse {
   position: absolute;
   cursor: pointer;
-  color: var(--jp-mirror-editor-operator-color);
-  /* color: #44c; */
+  color: var(--jp-brand-color1);
 }
 
 .jp-git-PlainText-diff
