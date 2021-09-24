@@ -38,13 +38,13 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
   color: var(--jp-success-color1);
 }
 
-.jp-git-diff-banner {
+.jp-git-diff-banner, .jp-git-merge-banner {
   flex: 0 0 auto;
-  margin-bottom: 5px;
+  margin: 2px 0px;
   display: flex;
 }
 
-.jp-git-diff-banner span {
+.jp-git-diff-banner span{
   padding: 0px 4px;
   width: 47%;
   font-weight: bold;
@@ -60,6 +60,16 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
 
 .jp-git-diff-banner span:last-of-type {
   background-color: var(--jp-git-diff-added-color);
+}
+
+.jp-git-merge-banner span {
+  padding: 0px 4px;
+  width: 31%;
+  font-weight: bold;
+}
+
+.jp-git-merge-banner span.jp-spacer {
+  width: 3.5%;
 }
 
 .jp-git-diff-root .CodeMirror-merge {
