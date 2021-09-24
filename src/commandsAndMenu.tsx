@@ -13,7 +13,7 @@ import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
 import { Contents, ContentsManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
-import { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
 import { ArrayExt, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -102,9 +102,10 @@ export function addCommands(
   gitModel: GitExtension,
   fileBrowserModel: FileBrowserModel,
   settings: ISettingRegistry.ISettings,
-  trans: TranslationBundle
+  translator: ITranslator
 ): void {
   const { commands, shell, serviceManager } = app;
+  const trans = translator.load('jupyterlab_git');
 
   /**
    * Commit using a keystroke combination when in CommitBox.
@@ -472,7 +473,11 @@ export function addCommands(
 
           // Create the diff widget
           try {
-            const widget = await buildDiffWidget(model, diffWidget.toolbar);
+            const widget = await buildDiffWidget(
+              model,
+              diffWidget.toolbar,
+              translator
+            );
 
             diffWidget.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
