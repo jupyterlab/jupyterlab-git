@@ -35,11 +35,14 @@
   background-repeat: repeat-x;
 }
 
-.jp-git-PlainText-diff .CodeMirror-merge-left .CodeMirror-merge-l-chunk {
+.jp-git-PlainText-diff .CodeMirror-merge-left .CodeMirror-merge-l-chunk,
+.jp-git-PlainText-diff .CodeMirror-merge-right .CodeMirror-merge-r-chunk {
   background-color: var(--jp-git-diff-deleted-color);
 }
 
-.jp-git-PlainText-diff .CodeMirror-merge-l-chunk {
+.jp-git-PlainText-diff .CodeMirror-merge-l-chunk,
+.jp-git-PlainText-diff .CodeMirror-merge-editor .CodeMirror-merge-l-chunk,
+.jp-git-PlainText-diff .CodeMirror-merge-editor .CodeMirror-merge-r-chunk {
   background-color: var(--jp-git-diff-added-color);
 }
 

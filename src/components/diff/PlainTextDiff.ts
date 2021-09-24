@@ -165,10 +165,12 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
    * Create wrapper node
    */
   protected static createNode(...labels: string[]): HTMLElement {
+    const bannerClass =
+      labels[1] !== undefined ? 'jp-git-merge-banner' : 'jp-git-diff-banner';
     const head = document.createElement('div');
     head.className = 'jp-git-diff-root';
     head.innerHTML = `
-    <div class="jp-git-diff-banner">
+    <div class="${bannerClass}">
       ${labels
         .filter(label => !!label)
         .map(label => `<span>${label}</span>`)
