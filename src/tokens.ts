@@ -799,6 +799,9 @@ export namespace Git {
     // properties for single file history
     is_binary?: boolean;
     file_path?: string;
+
+    // when file has been relocated
+    previous_file_path?: string;
   }
 
   /** Interface for GitCommit request result,

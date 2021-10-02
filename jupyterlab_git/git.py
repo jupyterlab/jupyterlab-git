@@ -491,13 +491,10 @@ class Git:
         if is_single_file:
             parsed_lines = []
             for line in line_array:
-                if "\0" in line:
-                    split_line = line.replace("\0", "\t").split("\t")
-                    parsed_lines.append("\t".join(split_line[:-1]))
-                    if split_line[-1]:
-                        parsed_lines.append(split_line[-1])
-                else:
-                    parsed_lines.append(line)
+                parsed_lines.extend(
+                    re.sub(r"\t\0|\0", "\t", l)
+                    for l in line.strip("\0\t").split("\0\0", maxsplit=1)
+                )
             line_array = parsed_lines
 
         PREVIOUS_COMMIT_OFFSET = 5 if is_single_file else 4
@@ -512,8 +509,13 @@ class Git:
 
             if is_single_file:
                 commit["is_binary"] = line_array[i + 4].startswith("-\t-\t")
-                # [insertions, deletions, original_file_path?, current_file_path]
-                commit["file_path"] = line_array[i + 4].split()[-1]
+
+                # [insertions, deletions, previous_file_path?, current_file_path]
+                file_info = line_array[i + 4].split()
+
+                if len(file_info) == 4:
+                    commit["previous_file_path"] = file_info[2]
+                commit["file_path"] = file_info[-1]
 
             if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
                 commit["pre_commit"] = line_array[i + PREVIOUS_COMMIT_OFFSET]

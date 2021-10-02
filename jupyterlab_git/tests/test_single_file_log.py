@@ -54,6 +54,7 @@ async def test_single_file_log():
                     "pre_commit": "263f762e0aad329c3c01bbd9a28f66403e6cfa5f",
                     "is_binary": False,
                     "file_path": "folder/test.txt",
+                    "previous_file_path": "test.txt",
                 },
                 {
                     "commit": "263f762e0aad329c3c01bbd9a28f66403e6cfa5f",

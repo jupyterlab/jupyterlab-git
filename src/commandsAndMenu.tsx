@@ -72,6 +72,9 @@ interface IFileDiffArgument {
   filePath: string;
   isText: boolean;
   status?: Git.Status;
+
+  // when file has been relocated
+  previousFilePath?: string;
 }
 
 export namespace CommandArguments {
@@ -602,7 +605,7 @@ export function addCommands(
     execute: async args => {
       const { files } = args as any as CommandArguments.IGitFileDiff;
       for (const file of files) {
-        const { context, filePath, isText, status } = file;
+        const { context, filePath, previousFilePath, isText, status } = file;
 
         // nothing to compare to for untracked files
         if (status === 'untracked') {
@@ -658,7 +661,7 @@ export function addCommands(
                 URLExt.join(repositoryPath, 'content'),
                 'POST',
                 {
-                  filename: filePath,
+                  filename: previousFilePath ?? filePath,
                   reference: { git: diffContext.previousRef }
                 }
               ).then(data => data.content);
