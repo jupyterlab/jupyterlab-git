@@ -62,11 +62,13 @@ export interface ISinglePastCommitInfoProps {
    *
    * @param filePath file path
    * @param isText indicates whether the file supports displaying a diff
+   * @param previousFilePath when file has been relocated
    * @returns callback
    */
   onOpenDiff: (
     filePath: string,
-    isText: boolean
+    isText: boolean,
+    previousFilePath?: string
   ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
@@ -269,11 +271,12 @@ export class SinglePastCommitInfo extends React.Component<
     const { data, index, style } = props;
     const file = data[index];
     const path = file.modified_file_path;
+    const previous = file.previous_file_path;
     const flg = !!getDiffProvider(path) || !file.is_binary;
     return (
       <li
         className={commitDetailFileClass}
-        onClick={this.props.onOpenDiff(path, flg)}
+        onClick={this.props.onOpenDiff(path, flg, previous)}
         style={style}
         title={path}
       >

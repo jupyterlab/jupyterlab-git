@@ -815,6 +815,8 @@ export namespace Git {
     is_binary: boolean | null;
     // filetype as determined by app.docRegistry
     type?: DocumentRegistry.IFileType;
+    // when file has been relocated
+    previous_file_path?: string;
   }
 
   /** Interface for GitDetailedLog request result,

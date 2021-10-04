@@ -544,6 +544,7 @@ class Git:
         line_iterable = iter(strip_and_split(my_output)[1:])
         for line in line_iterable:
             is_binary = line.startswith("-\t-\t")
+            previous_file_path = ""
             insertions, deletions, file = line.split("\t")
             insertions = insertions.replace("-", "0")
             deletions = deletions.replace("-", "0")
@@ -552,21 +553,25 @@ class Git:
                 # file was renamed or moved, we need next two lines of output
                 from_path = next(line_iterable)
                 to_path = next(line_iterable)
+                previous_file_path = from_path
                 modified_file_name = from_path + " => " + to_path
                 modified_file_path = to_path
             else:
                 modified_file_name = file.split("/")[-1]
                 modified_file_path = file
 
-            result.append(
-                {
-                    "modified_file_path": modified_file_path,
-                    "modified_file_name": modified_file_name,
-                    "insertion": insertions,
-                    "deletion": deletions,
-                    "is_binary": is_binary,
-                }
-            )
+            file_info = {
+                "modified_file_path": modified_file_path,
+                "modified_file_name": modified_file_name,
+                "insertion": insertions,
+                "deletion": deletions,
+                "is_binary": is_binary,
+            }
+
+            if previous_file_path:
+                file_info["previous_file_path"] = previous_file_path
+
+            result.append(file_info)
             total_insertions += int(insertions)
             total_deletions += int(deletions)
 

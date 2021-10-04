@@ -674,6 +674,18 @@ export function addCommands(
           }
         };
 
+        // Case when file is relocated
+        if (previousFilePath) {
+          props.reference.label = `${previousFilePath} (${props.reference.label.slice(
+            0,
+            7
+          )})`;
+          props.challenger.label = `${filePath} (${props.challenger.label.slice(
+            0,
+            7
+          )})`;
+        }
+
         if (diffContext.baseRef) {
           props.reference.label = trans.__('CURRENT');
           props.challenger.label = trans.__('INCOMING');
