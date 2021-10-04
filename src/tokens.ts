@@ -84,6 +84,14 @@ export interface IGitExtension extends IDisposable {
   >;
 
   /**
+   * A signal emitted when files that are behind the remote branch are opened.
+   */
+  readonly notifyRemoteChanges: ISignal<
+    IGitExtension,
+    Git.IRemoteChangedNotification
+  >;
+
+  /**
    * Add one or more files to the repository staging area.
    *
    * ## Notes
@@ -794,6 +802,14 @@ export namespace Git {
   export interface IChangedFilesResult {
     code: number;
     files?: string[];
+  }
+
+  /** Interface for notifying users of opened files that are behind
+   * the remote branch
+   */
+  export interface IRemoteChangedNotification {
+    notNotified: IStatusFile[];
+    notified: IStatusFile[];
   }
 
   /** Interface for GitLog request result,

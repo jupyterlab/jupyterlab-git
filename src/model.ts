@@ -1,5 +1,4 @@
 import { IChangedArgs, PathExt, URLExt } from '@jupyterlab/coreutils';
-import { showDialog, Dialog } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -250,6 +249,16 @@ export class GitExtension implements IGitExtension {
    */
   get taskChanged(): ISignal<IGitExtension, string> {
     return this._taskHandler.taskChanged;
+  }
+
+  /**
+   * A signal emitted when the current Git repository changes.
+   */
+  get notifyRemoteChanges(): ISignal<
+    IGitExtension,
+    Git.IRemoteChangedNotification
+  > {
+    return this._notifyRemoteChange;
   }
 
   /**
@@ -939,7 +948,7 @@ export class GitExtension implements IGitExtension {
   async remoteChangedFiles(): Promise<Git.IStatusFile[]> {
     // if a file is changed on remote add it to list of files with appropriate status.
     this._remoteChangedFiles = [];
-    try { 
+    try {
       let remoteChangedFiles: null | string[] = null;
       if (this.status.remote && this.status.behind > 0) {
         remoteChangedFiles = (
@@ -964,11 +973,14 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Notifies user if an openend file is behind the remote branch with a pop-up Dialog
+   * Determines if opened files are behind the remote and emits a signal if one
+   * or more are behind and the user hasn't been notified of them yet.
    *
    */
   async checkRemoteChangeNotified(): Promise<void> {
     if (this.status.remote && this.status.behind > 0) {
+      const notNotified = [];
+      const notified = [];
       for (const val of this._remoteChangedFiles) {
         const docWidget = this._docmanager.findWidget(
           this.getRelativeFilePath(val.to)
@@ -984,13 +996,10 @@ export class GitExtension implements IGitExtension {
           if (docWidget.isAttached) {
             // notify if the user hasn't been notified yet
             if (notifiedIndex === -1) {
-              showDialog({
-                title: `${val.to} is out of date with your remote branch: ${this._currentBranch.upstream}`,
-                body: `You may want to pull from ${this._currentBranch.upstream} before editing this file.`,
-                buttons: [Dialog.okButton()]
-              });
-              // add the file to the notified array
               this._changeUpstreamNotified.push(val);
+              notNotified.push(val);
+            } else {
+              notified.push(val);
             }
           }
         } else {
@@ -998,6 +1007,11 @@ export class GitExtension implements IGitExtension {
           if (notifiedIndex > -1) {
             this._changeUpstreamNotified.splice(notifiedIndex, 1);
           }
+        }
+      }
+      if (this._settings.composite['openFilesBehindWarning']) {
+        if (notNotified.length > 0) {
+          this._notifyRemoteChange.emit({ notNotified, notified });
         }
       }
     } else {
@@ -1517,6 +1531,10 @@ export class GitExtension implements IGitExtension {
     IChangedArgs<string | null>
   >(this);
   private _statusChanged = new Signal<IGitExtension, Git.IStatus>(this);
+  private _notifyRemoteChange = new Signal<
+    IGitExtension,
+    Git.IRemoteChangedNotification
+  >(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {

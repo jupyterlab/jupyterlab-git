@@ -1,4 +1,4 @@
-import { showDialog } from '@jupyterlab/apputils';
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -186,6 +186,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.refreshHistory();
     }, this);
     model.markChanged.connect(() => this.forceUpdate(), this);
+    model.notifyRemoteChanges.connect((_, args) => this.warningDialog(args));
 
     settings.changed.connect(this.refreshView, this);
   }
@@ -663,4 +664,67 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   }
 
   private _previousRepoPath: string = null;
+
+  /**
+   * Show a dialog when a notifyRemoteChanges signal is emitted from the model.
+   */
+  private async warningDialog(
+    options: Git.IRemoteChangedNotification
+  ): Promise<void> {
+    const title = `One or more open files are behind ${this.props.model.status.remote}`;
+    const dialog = new Dialog({
+      title: this.props.trans.__(title),
+      body: this._renderBody(options.notNotified, options.notified),
+      buttons: [
+        Dialog.createButton({
+          label: this.props.trans.__('OK'),
+          accept: false
+        }),
+        Dialog.warnButton({
+          label: this.props.trans.__('Pull'),
+          caption: this.props.trans.__('Git Pull from Remote Branch')
+        })
+      ]
+    });
+    dialog.launch().then(async result => {
+      console.log(result);
+      if (result.button.accept) {
+        await this.props.commands.execute(CommandIDs.gitPull, {});
+      }
+    });
+  }
+
+  /**
+   * renders the body to be used in the remote changes warning dialog
+   */
+  private _renderBody(
+    notNotifiedList: Git.IStatusFile[],
+    notifiedList: Git.IStatusFile[] = []
+  ): JSX.Element {
+    const listedItems = notNotifiedList.map((item: Git.IStatusFile) => {
+      console.log(item.to);
+      const item_val = this.props.trans.__(item.to);
+      return <li key={item_val}>{item_val}</li>;
+    });
+    let elem: JSX.Element = <ul>{listedItems}</ul>;
+    if (notifiedList.length > 0) {
+      const remaining = this.props.trans.__(
+        'The following open files remain behind:'
+      );
+      const alreadyListedItems = notifiedList.map((item: Git.IStatusFile) => {
+        console.log(item.to);
+        const item_val = this.props.trans.__(item.to);
+        return <li key={item_val}>{item_val}</li>;
+      });
+      const full: JSX.Element = (
+        <div>
+          {elem}
+          {remaining}
+          <ul>{alreadyListedItems}</ul>
+        </div>
+      );
+      elem = full;
+    }
+    return <div>{elem}</div>;
+  }
 }

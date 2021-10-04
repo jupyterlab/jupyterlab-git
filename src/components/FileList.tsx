@@ -91,9 +91,7 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileDiff,
     ContextCommandIDs.gitFileHistory
   ],
-  'remote-changed': [
-    ContextCommandIDs.gitFileOpen,
-  ],
+  'remote-changed': [ContextCommandIDs.gitFileOpen],
   staged: [
     ContextCommandIDs.gitFileOpen,
     ContextCommandIDs.gitFileDiscard,
@@ -262,7 +260,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   pullFromRemote = async (event: React.MouseEvent): Promise<void> => {
-    await this.props.commands.execute(CommandIDs.gitPull, {})
+    await this.props.commands.execute(CommandIDs.gitPull, {});
   };
 
   get markedFiles(): Git.IStatusFile[] {
