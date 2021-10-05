@@ -965,11 +965,12 @@ export class GitExtension implements IGitExtension {
             is_binary: false
           });
         });
+        return this._remoteChangedFiles;
       }
     } catch (err) {
       console.error(err);
+      return this._remoteChangedFiles;
     }
-    return this._remoteChangedFiles;
   }
 
   /**
