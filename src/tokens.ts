@@ -821,7 +821,13 @@ export namespace Git {
     date: string;
     commit_msg: string;
     pre_commit: string;
-    is_binary?: boolean; // for single file history
+
+    // properties for single file history
+    is_binary?: boolean;
+    file_path?: string;
+
+    // when file has been relocated
+    previous_file_path?: string;
   }
 
   /** Interface for GitCommit request result,
@@ -835,6 +841,8 @@ export namespace Git {
     is_binary: boolean | null;
     // filetype as determined by app.docRegistry
     type?: DocumentRegistry.IFileType;
+    // when file has been relocated
+    previous_file_path?: string;
   }
 
   /** Interface for GitDetailedLog request result,
