@@ -671,9 +671,12 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   private async warningDialog(
     options: Git.IRemoteChangedNotification
   ): Promise<void> {
-    const title = `One or more open files are behind ${this.props.model.status.remote}`;
+    const title = this.props.trans.__(
+      'One or more open files are behind %1 head. Do you want to pull the latest remote version?',
+      this.props.model.status.remote
+    );
     const dialog = new Dialog({
-      title: this.props.trans.__(title),
+      title,
       body: this._renderBody(options.notNotified, options.notified),
       buttons: [
         Dialog.cancelButton({
