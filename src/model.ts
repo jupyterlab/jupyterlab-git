@@ -980,8 +980,8 @@ export class GitExtension implements IGitExtension {
    */
   async checkRemoteChangeNotified(): Promise<void> {
     if (this.status.remote && this.status.behind > 0) {
-      const notNotified = [];
-      const notified = [];
+      const notNotified: Git.IStatusFile[] = [];
+      const notified: Git.IStatusFile[] = [];
       for (const val of this._remoteChangedFiles) {
         const docWidget = this._docmanager.findWidget(
           this.getRelativeFilePath(val.to)
