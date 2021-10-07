@@ -676,9 +676,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       title: this.props.trans.__(title),
       body: this._renderBody(options.notNotified, options.notified),
       buttons: [
-        Dialog.createButton({
-          label: this.props.trans.__('OK'),
-          accept: false
+        Dialog.cancelButton({
+          label: this.props.trans.__('Continue Without Pulling')
         }),
         Dialog.warnButton({
           label: this.props.trans.__('Pull'),
