@@ -686,12 +686,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         })
       ]
     });
-    dialog.launch().then(async result => {
-      console.log(result);
-      if (result.button.accept) {
-        await this.props.commands.execute(CommandIDs.gitPull, {});
-      }
-    });
+    const result = await dialog.launch();
+    if (result.button.accept) {
+      await this.props.commands.execute(CommandIDs.gitPull, {});
+    }
   }
 
   /**
