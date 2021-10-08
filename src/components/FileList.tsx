@@ -9,7 +9,7 @@ import { ListChildComponentProps } from 'react-window';
 import { addMenuItems, CommandArguments } from '../commandsAndMenu';
 import { getDiffProvider, GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
-import { fileListWrapperClass, unmergedRowStyle } from '../style/FileListStyle';
+import { fileListWrapperClass } from '../style/FileListStyle';
 import {
   addIcon,
   diffIcon,
@@ -266,10 +266,29 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    */
   render(): JSX.Element {
     if (this.props.settings.composite['simpleStaging']) {
+      const unmergedFiles: Git.IStatusFile[] = [];
+      const otherFiles: Git.IStatusFile[] = [];
+
+      this.props.files.forEach(file => {
+        switch (file.status) {
+          case 'unmerged':
+            unmergedFiles.push(file);
+            break;
+          default:
+            otherFiles.push(file);
+            break;
+        }
+      });
+
       return (
         <div className={fileListWrapperClass}>
           <AutoSizer disableWidth={true}>
-            {({ height }) => this._renderSimpleStage(this.props.files, height)}
+            {({ height }) => (
+              <>
+                {this._renderUnmerged(unmergedFiles, height, false)}
+                {this._renderSimpleStage(otherFiles, height)}
+              </>
+            )}
           </AutoSizer>
         </div>
       );
@@ -302,8 +321,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             break;
           case 'unmerged':
             unmergedFiles.push(file);
-            break;
-          default:
             break;
         }
       });
@@ -362,7 +379,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const diffButton = this._createDiffButton(file);
     return (
       <FileItem
-        className={unmergedRowStyle}
         trans={this.props.trans}
         actions={!file.is_binary && diffButton}
         contextMenu={this.openContextMenu}
@@ -376,11 +392,15 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
   };
 
-  private _renderUnmerged(files: Git.IStatusFile[], height: number) {
+  private _renderUnmerged(
+    files: Git.IStatusFile[],
+    height: number,
+    collapsible = true
+  ) {
     // Hide section if no merge conflicts are present
     return files.length > 0 ? (
       <GitStage
-        collapsible
+        collapsible={collapsible}
         files={files}
         heading={this.props.trans.__('Conflicted')}
         height={height}

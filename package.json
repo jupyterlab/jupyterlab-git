@@ -8,9 +8,11 @@
   "license": "BSD-3-Clause",
   "author": "Jupyter Development Team",
   "keywords": [
-    "jupyter",
-    "jupyterlab",
-    "jupyterlab-extension"
+    "Jupyter",
+    "JupyterLab",
+    "JupyterLab3",
+    "jupyterlab-extension",
+    "Git"
   ],
   "scripts": {
     "build": "jlpm run build:lib && jlpm run build:labextension:dev",

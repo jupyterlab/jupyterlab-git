@@ -724,6 +724,50 @@ async def test_content_index(mock_execute, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.git.execute")
+async def test_content_base(mock_execute, jp_fetch, jp_root_dir):
+    # Given
+    local_path = jp_root_dir / "test_path"
+    filename = "my/file"
+    content = "dummy content file\nwith multiple lines"
+    obj_ref = "915bb14609daab65e5304e59d89c626283ae49fc"
+
+    mock_execute.side_effect = [
+        maybe_future(
+            (
+                0,
+                "100644 {1} 1       {0}\x00100644 285bdbc14e499b85ec407512a3bb3992fa3d4082 2 {0}\x00100644 66ac842dfb0b5c20f757111d6b3edd56d80622b4 3 {0}\x00".format(
+                    filename, obj_ref
+                ),
+                "",
+            )
+        ),
+        maybe_future((0, content, "")),
+    ]
+
+    # When
+    body = {
+        "filename": filename,
+        "reference": {"special": "BASE"},
+    }
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST"
+    )
+
+    # Then
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload["content"] == content
+    mock_execute.assert_has_calls(
+        [
+            call(
+                ["git", "show", obj_ref],
+                cwd=str(local_path),
+            ),
+        ],
+    )
+
+
+@patch("jupyterlab_git.git.execute")
 async def test_content_unknown_special(mock_execute, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"

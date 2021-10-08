@@ -19,6 +19,7 @@ describe('DiffModel', () => {
   beforeEach(() => {
     model = new DiffModel({
       filename: 'KrabbyPattySecretFormula.txt',
+      repositoryPath: '/',
       challenger: {
         content: () => Promise.resolve('content'),
         label: 'challenger',

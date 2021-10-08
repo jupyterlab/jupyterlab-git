@@ -1,6 +1,11 @@
 import { Toolbar } from '@jupyterlab/apputils';
 import { Mode } from '@jupyterlab/codemirror';
 import { Contents } from '@jupyterlab/services';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { MergeView } from 'codemirror';
@@ -16,9 +21,10 @@ import { MergeView as LocalMergeView, mergeView } from './mergeview';
  */
 export const createPlainTextDiff: Git.Diff.ICallback = async (
   model: Git.Diff.IModel,
-  toolbar?: Toolbar
+  toolbar?: Toolbar,
+  translator?: ITranslator
 ): Promise<PlainTextDiff> => {
-  const widget = new PlainTextDiff(model);
+  const widget = new PlainTextDiff(model, translator.load('jupyterlab_git'));
   await widget.ready;
   return widget;
 };
@@ -27,7 +33,7 @@ export const createPlainTextDiff: Git.Diff.ICallback = async (
  * Plain Text Diff widget
  */
 export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
-  constructor(model: Git.Diff.IModel) {
+  constructor(model: Git.Diff.IModel, translator?: TranslationBundle) {
     super({
       node: PlainTextDiff.createNode(
         model.reference.label,
@@ -39,6 +45,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     this._isReady = getReady.promise;
     this._container = this.node.lastElementChild as HTMLElement;
     this._model = model;
+    this._trans = translator ?? nullTranslator.load('jupyterlab_git');
 
     // Load file content early
     Promise.all([
@@ -93,7 +100,9 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
         content: value
       });
     } else {
-      return Promise.reject('Failed to get a valid file value.');
+      return Promise.reject(
+        this._trans.__('Failed to get a valid file value.')
+      );
     }
   }
 
@@ -157,7 +166,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
       this._reference = null;
       this._base = null;
     } catch (reason) {
-      this.showError(reason);
+      this.showError(reason as Error);
     }
   }
 
@@ -165,10 +174,12 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
    * Create wrapper node
    */
   protected static createNode(...labels: string[]): HTMLElement {
+    const bannerClass =
+      labels[1] !== undefined ? 'jp-git-merge-banner' : 'jp-git-diff-banner';
     const head = document.createElement('div');
     head.className = 'jp-git-diff-root';
     head.innerHTML = `
-    <div class="jp-git-diff-banner">
+    <div class="${bannerClass}">
       ${labels
         .filter(label => !!label)
         .map(label => `<span>${label}</span>`)
@@ -206,9 +217,9 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
       if (baseContent !== null && baseContent !== undefined) {
         options = {
           ...options,
+          origLeft: referenceContent,
           value: baseContent,
-          origRight: referenceContent,
-          origLeft: challengerContent,
+          origRight: challengerContent,
           readOnly: false,
           revertButtons: true
         };
@@ -230,13 +241,13 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
    */
   protected showError(error: Error): void {
     console.error(
-      'Failed to load file diff.',
+      this._trans.__('Failed to load file diff.'),
       error,
       (error as any)?.traceback
     );
     const msg = ((error.message || error) as string).replace('\n', '<br />');
     this.node.innerHTML = `<p class="jp-git-diff-error">
-      <span>Error Loading File Diff:</span>
+      <span>${this._trans.__('Error Loading File Diff:')}</span>
       <span class="jp-git-diff-error-message">${msg}</span>
     </p>`;
   }
@@ -257,6 +268,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   protected _isReady: Promise<void>;
   protected _mergeView: MergeView.MergeViewEditor;
   protected _model: Git.Diff.IModel;
+  protected _trans: TranslationBundle;
 
   private _reference: string | null = null;
   private _challenger: string | null = null;

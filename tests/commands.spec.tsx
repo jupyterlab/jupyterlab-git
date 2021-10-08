@@ -37,9 +37,9 @@ describe('git-commands', () => {
       commands,
       shell: null as any
     };
-    const trans = nullTranslator.load('jupyterlab_git');
+
     model = new GitExtension(app as any);
-    addCommands(app as JupyterFrontEnd, model, null, null, trans);
+    addCommands(app as JupyterFrontEnd, model, null, null, nullTranslator);
   });
 
   describe('git:add-remote', () => {

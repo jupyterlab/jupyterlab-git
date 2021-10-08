@@ -21,7 +21,8 @@ describe('PlainTextDiff', () => {
         label: '83baee',
         source: '83baee'
       },
-      filename: '/path/to/File.py'
+      filename: 'to/File.py',
+      repositoryPath: 'path'
     });
 
     const mockMergeView = mergeView as jest.Mocked<typeof mergeView>;
@@ -59,7 +60,8 @@ describe('PlainTextDiff', () => {
         label: '83baee',
         source: '83baee'
       },
-      filename: '/path/to/File.py'
+      filename: 'to/File.py',
+      repositoryPath: 'path'
     });
 
     const mockMergeView = mergeView as jest.Mocked<typeof mergeView>;

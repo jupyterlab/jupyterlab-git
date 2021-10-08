@@ -2,6 +2,7 @@ import { Toolbar } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Contents, ServerConnection } from '@jupyterlab/services';
+import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject, ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
@@ -495,7 +496,8 @@ export namespace Git {
      */
     export type ICallback = (
       model: IModel,
-      toolbar?: Toolbar
+      toolbar?: Toolbar,
+      trans?: ITranslator
     ) => Promise<IDiffWidget>;
 
     /**
@@ -539,10 +541,10 @@ export namespace Git {
      * To differentiate with the regular Git ref they are passed as number
      */
     export interface IContext {
-      currentRef: string | SpecialRef;
+      currentRef: string | SpecialRef.WORKING | SpecialRef.INDEX;
       previousRef: string | SpecialRef;
       // Used only during merge conflict diffs
-      baseRef?: string;
+      baseRef?: string | SpecialRef.BASE;
     }
 
     /**
@@ -559,6 +561,8 @@ export namespace Git {
       readonly changed: ISignal<IModel, IModelChange>;
       /**
        * File of the name being diff at reference state
+       *
+       * Note: This is the relative path
        */
       readonly filename: string;
       /**
@@ -573,6 +577,12 @@ export namespace Git {
        * Helper to check if the file has conflicts.
        */
       hasConflict?: boolean;
+      /**
+       * Git repository path
+       *
+       * Note: This is relative to the server root
+       */
+      readonly repositoryPath?: string;
     }
 
     /**
@@ -586,8 +596,12 @@ export namespace Git {
     }
 
     export enum SpecialRef {
+      // Working version
       'WORKING',
-      'INDEX'
+      // Index version
+      'INDEX',
+      // Common ancestor version (useful for unmerged files)
+      'BASE'
     }
   }
 

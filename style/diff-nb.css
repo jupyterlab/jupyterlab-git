@@ -11,21 +11,31 @@
   border: var(--codemirror-border);
 }
 
-.jp-git-diff-root .jp-Notebook-diff .jp-Metadata-diff {
+.jp-git-diff-root .jp-Notebook-diff .jp-Metadata-diff,
+.jp-git-diff-root .jp-Notebook-merge .jp-Metadata-diff {
   border: none;
 }
 
 .jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-r-chunk-end,
-.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-l-chunk-end {
+.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-l-chunk-end,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-l-chunk-end,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-r-chunk-end,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-m-chunk-end-local,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-m-chunk-end-remote {
   border-bottom: none;
 }
 
 .jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-r-chunk-start,
-.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-l-chunk-start {
+.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-l-chunk-start,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-l-chunk-start,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-r-chunk-start,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-m-chunk-start-local,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-m-chunk-start-remote {
   border-top: none;
 }
 
-.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-r-chunk {
+.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-r-chunk,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-r-chunk {
   background-color: var(--jp-git-diff-deleted-color);
 }
 
@@ -36,12 +46,14 @@
   background-color: var(--jp-git-diff-added-color);
 }
 
-.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-spacer {
-  background-color: transparent;
-}
-
+.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-spacer,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-spacer,
 .jp-git-diff-root
   .jp-Notebook-diff
+  .CodeMirror-merge-pane-remote
+  .CodeMirror-merge-spacer,
+.jp-git-diff-root
+  .jp-Notebook-merge
   .CodeMirror-merge-pane-remote
   .CodeMirror-merge-spacer {
   background-color: transparent;
@@ -59,4 +71,122 @@
 .jp-git-diff-root .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-base {
   background-color: var(--jp-git-diff-deleted-color);
   border: none;
+}
+
+/* Specific rules for the notebook merge conflict */
+.jp-git-diff-root .jp-Notebook-merge .jp-Merge-conflict,
+.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-l-chunk,
+.jp-git-diff-root
+  .jp-Notebook-merge
+  .CodeMirror-merge-l-chunk.CodeMirror-merge-r-chunk,
+.jp-git-diff-root
+  .jp-Notebook-merge
+  .jp-Cellrow-outputs.jp-conflicted-outputs
+  .jp-CollapsiblePanel-header {
+  background-color: var(--jp-git-diff-deleted-color);
+}
+
+.jp-git-diff-root
+  .jp-Notebook-merge
+  .CodeMirror-line
+  .CodeMirror-merge-r-inserted {
+  background-color: var(--jp-git-diff-deleted-color);
+}
+
+.jp-git-diff-root
+  .jp-Notebook-merge
+  .CodeMirror-merge-pane-base
+  .CodeMirror-line
+  .CodeMirror-merge-m-deleted,
+.jp-git-diff-root
+  .jp-Notebook-merge
+  .CodeMirror-merge-pane-base
+  .CodeMirror-line
+  .CodeMirror-merge-l-deleted,
+.jp-git-diff-root
+  .jp-Notebook-merge
+  .CodeMirror-merge-pane-base
+  .CodeMirror-line
+  .CodeMirror-merge-r-deleted {
+  background-color: var(--jp-git-diff-deleted-color);
+  color: var(--jp-mirror-editor-string-color);
+}
+
+.jp-git-diff-root
+  .jp-Notebook-merge
+  .CodeMirror-merge-pane-base
+  .CodeMirror-line
+  .CodeMirror-merge-m-added,
+.jp-git-diff-root
+  .jp-Notebook-merge
+  .CodeMirror-merge-pane-base
+  .CodeMirror-line
+  .CodeMirror-merge-l-added,
+.jp-git-diff-root
+  .jp-Notebook-merge
+  .CodeMirror-merge-pane-base
+  .CodeMirror-line
+  .CodeMirror-merge-r-added {
+  background-color: var(--jp-git-diff-added-color);
+  color: var(--jp-mirror-editor-string-color);
+}
+
+/* Hide drag handles */
+.jp-git-diff-root .jp-Notebook-merge .jp-DragPanel-dragHandle {
+  display: none;
+}
+
+.jp-git-diff-parent-widget .jp-Merge-notebook-controls {
+	margin-bottom: 0px;
+	padding: 0px;
+	background-color: transparent;
+	border: none;
+}
+
+/* Hiding unchanged cells if told to */
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge.jp-Merge-unchanged {
+  display: none;
+}
+
+/* Show a marker with the number of cells hidden before */
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge[data-nbdime-NCellsHiddenBefore]::before {
+  content: attr(data-nbdime-NCellsHiddenBefore) " unchanged cell(s) hidden";
+  position: absolute;
+  width: 100%;
+  top: 0;
+  background-color: #eee;
+  border-top: solid #ccc 1px;
+  border-bottom: solid #ccc 1px;
+  text-align: center;
+}
+
+/* Show a marker with the number of cells hidden after (for hidden cells at end) */
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge[data-nbdime-NCellsHiddenAfter]::after {
+  content: attr(data-nbdime-NCellsHiddenAfter) " unchanged cell(s) hidden";
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  background-color: #eee;
+  border-top: solid #ccc 1px;
+  border-bottom: solid #ccc 1px;
+  text-align: center;
+}
+
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge[data-nbdime-NCellsHiddenBefore] {
+  padding-top: 40px;
+}
+
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge[data-nbdime-NCellsHiddenAfter] {
+  padding-bottom: 40px;
+}
+
+/* Marker for when all cells are unchanged and hidden */
+.jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Notebook-merge[data-nbdime-AllCellsHidden]::after {
+  content: "No changes, " attr(data-nbdime-AllCellsHidden) " unchanged cell(s) hidden";
+  display: block;
+  width: 100%;
+  background-color: #eee;
+  border-top: solid #ccc 1px;
+  border-bottom: solid #ccc 1px;
+  text-align: center;
 }

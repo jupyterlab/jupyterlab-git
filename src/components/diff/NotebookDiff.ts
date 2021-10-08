@@ -25,6 +25,11 @@ import {
 } from 'nbdime/lib/diff/widget/common';
 import { requestAPI } from '../../git';
 import { Git } from '../../tokens';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 /**
  * Class of the outermost widget, the draggable tab
@@ -77,10 +82,12 @@ interface INbdimeMergeDiff {
 export const createNotebookDiff = async (
   model: Git.Diff.IModel,
   renderMime: IRenderMimeRegistry,
-  toolbar?: Toolbar
+  toolbar?: Toolbar,
+  translator?: ITranslator
 ): Promise<NotebookDiff> => {
   // Create the notebook diff view
-  const diffWidget = new NotebookDiff(model, renderMime);
+  const trans = translator.load('jupyterlab_git');
+  const diffWidget = new NotebookDiff(model, renderMime, trans);
   diffWidget.addClass('jp-git-diff-root');
 
   await diffWidget.ready;
@@ -93,13 +100,14 @@ export const createNotebookDiff = async (
     checkbox.type = 'checkbox';
     checkbox.checked = true;
     label.appendChild(checkbox);
-    label.appendChild(document.createElement('span')).textContent =
-      'Hide unchanged cells';
+    label.appendChild(document.createElement('span')).textContent = trans.__(
+      'Hide unchanged cells'
+    );
     toolbar.addItem('hideUnchanged', new Widget({ node: label }));
 
     if (model.hasConflict) {
-      // FIXME: Merge view breaks when moving checkboxes to the toolbar
-      // toolbar.addItem('clear-outputs', diffWidget.nbdimeWidget.widgets[0])
+      // Move merge notebook controls in the toolbar
+      toolbar.addItem('clear-outputs', diffWidget.nbdimeWidget.widgets[0]);
     }
 
     // Connect toolbar checkbox and notebook diff widget
@@ -116,12 +124,17 @@ export const createNotebookDiff = async (
  * NotebookDiff widget
  */
 export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
-  constructor(model: Git.Diff.IModel, renderMime: IRenderMimeRegistry) {
+  constructor(
+    model: Git.Diff.IModel,
+    renderMime: IRenderMimeRegistry,
+    translator?: TranslationBundle
+  ) {
     super();
     const getReady = new PromiseDelegate<void>();
     this._isReady = getReady.promise;
     this._model = model;
     this._renderMime = renderMime;
+    this._trans = translator ?? nullTranslator.load('jupyterlab_git');
 
     this.addClass(NBDIME_CLASS);
 
@@ -131,7 +144,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
       })
       .catch(reason => {
         console.error(
-          'Failed to refresh Notebook diff.',
+          this._trans.__('Failed to refresh Notebook diff.'),
           reason,
           reason?.traceback
         );
@@ -221,7 +234,8 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
       const header = Private.diffHeader(
         this._model.reference.label,
         this._model.challenger.label,
-        this._hasConflict
+        this._hasConflict,
+        this._trans.__('COMMON ANCESTOR')
       );
       this.addWidget(header);
 
@@ -259,11 +273,13 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
         // FIXME there is a bug in nbdime and init got reject due to recursion limit hit
         // console.error(`Failed to init notebook diff view: ${reason}`);
         // getReady.reject(reason);
-        console.debug(`Failed to init notebook diff view: ${reason}`);
+        console.debug(
+          this._trans.__('Failed to init notebook diff view: %1', reason)
+        );
         Private.markUnchangedRanges(this._scroller.node, this._hasConflict);
       }
     } catch (reason) {
-      this.showError(reason);
+      this.showError(reason as Error);
     }
   }
 
@@ -317,7 +333,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
    */
   protected showError(error: Error): void {
     console.error(
-      'Failed to load file diff.',
+      this._trans.__('Failed to load file diff.'),
       error,
       (error as any)?.traceback
     );
@@ -328,18 +344,19 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
 
     const msg = ((error.message || error) as string).replace('\n', '<br />');
     this.node.innerHTML = `<p class="jp-git-diff-error">
-      <span>Error Loading Notebook Diff:</span>
+      <span>${this._trans.__('Error Loading Notebook Diff:')}</span>
       <span class="jp-git-diff-error-message">${msg}</span>
     </p>`;
   }
 
   protected _areUnchangedCellsHidden = false;
   protected _isReady: Promise<void>;
+  protected _lastSerializeModel: INotebookContent | null = null;
   protected _model: Git.Diff.IModel;
+  protected _nbdWidget: NotebookMergeWidget | NotebookDiffWidget;
   protected _renderMime: IRenderMimeRegistry;
   protected _scroller: Panel;
-  protected _nbdWidget: NotebookMergeWidget | NotebookDiffWidget;
-  protected _lastSerializeModel: INotebookContent | null = null;
+  protected _trans: TranslationBundle;
 }
 
 namespace Private {
@@ -347,19 +364,23 @@ namespace Private {
    * Create a header widget for the diff view.
    */
   export function diffHeader(
-    baseLabel: string,
+    localLabel: string,
     remoteLabel: string,
-    hasConflict: boolean
+    hasConflict: boolean,
+    baseLabel?: string
   ): Widget {
+    const bannerClass = hasConflict
+      ? 'jp-git-merge-banner'
+      : 'jp-git-diff-banner';
     const node = document.createElement('div');
     node.className = 'jp-git-diff-header';
-    node.innerHTML = `<div class="jp-git-diff-banner">
-        <span>${baseLabel}</span>
+    node.innerHTML = `<div class="${bannerClass}">
+        <span>${localLabel}</span>
         <span class="jp-spacer"></span>
         ${
           hasConflict
             ? // Add extra space during notebook merge view
-              '<span>&nbsp;</span><span class="jp-spacer"></span>'
+              `<span>${baseLabel}</span><span class="jp-spacer"></span>`
             : ''
         }
         <span>${remoteLabel}</span>
