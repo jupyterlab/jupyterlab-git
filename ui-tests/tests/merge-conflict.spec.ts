@@ -30,7 +30,7 @@ test.describe('Merge conflict tests', () => {
     await page.waitForSelector('.jp-git-diff-root');
 
     // Verify 3-way merge view appears
-    const banner = page.locator('.jp-git-diff-banner');
+    const banner = page.locator('.jp-git-merge-banner');
     await expect(banner).toHaveText(/CURRENT/);
     await expect(banner).toHaveText(/RESULT/);
     await expect(banner).toHaveText(/INCOMING/);
@@ -50,7 +50,7 @@ test.describe('Merge conflict tests', () => {
     await page.waitForSelector('.jp-git-diff-root');
 
     // Verify notebook merge view appears
-    const banner = page.locator('.jp-git-diff-banner');
+    const banner = page.locator('.jp-git-merge-banner');
     await expect(banner).toHaveText(/CURRENT/);
     await expect(banner).toHaveText(/INCOMING/);
 

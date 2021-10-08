@@ -64,7 +64,7 @@ jobs:
         run: |
           jlpm
           jlpm run eslint:check
-          python -m pip install -e .[dev,tests]
+          python -m pip install -e .[tests]
 
           # Python formatting checks
           black . --check
@@ -82,8 +82,6 @@ jobs:
 
           jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
           python -m jupyterlab.browser_check
-          # Run our extension-specific browser integration test
-          # python tests/test-browser/run_browser_test.py
 
       - uses: actions/upload-artifact@v2
         if: matrix.python-version == '3.9'

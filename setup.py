@@ -19,9 +19,10 @@ HERE = Path(__file__).parent.resolve()
 # The name of the project
 name = "jupyterlab_git"
 
-# Get our version
 with (HERE / "package.json").open() as f:
-    version = str(parse(json.load(f)["version"]))
+    npm_data = json.load(f)
+# Get the version
+version = str(parse(npm_data["version"]))
 
 lab_path = HERE / name / "labextension"
 
@@ -64,61 +65,15 @@ if is_repo:
 else:
     cmdclass["jsdeps"] = skip_if_exists(jstargets, js_command)
 
-long_description = (HERE / "README.md").read_text(errors="ignore")
-
 setup_args = dict(
     name=name,
     version=version,
-    url="https://github.com/jupyterlab/jupyterlab-git.git",
-    author="Jupyter Development Team",
-    description="A JupyterLab extension for version control using git",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
+    url=npm_data["homepage"],
+    author=npm_data["author"],
+    description=npm_data["description"],
     cmdclass=cmdclass,
-    packages=setuptools.find_packages(),
-    install_requires=[
-        "jupyter_server",
-        "nbdime~=3.1",
-        "nbformat",
-        "packaging",
-        "pexpect",
-    ],
-    zip_safe=False,
-    include_package_data=True,
-    python_requires=">=3.6,<4",
-    license="BSD-3-Clause",
-    platforms="Linux, Mac OS X, Windows",
-    keywords=["Jupyter", "JupyterLab", "JupyterLab3", "Git"],
-    classifiers=[
-        "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: BSD License",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Framework :: Jupyter",
-        "Framework :: Jupyter :: JupyterLab",
-        "Framework :: Jupyter :: JupyterLab :: 3",
-        "Framework :: Jupyter :: JupyterLab :: Extensions",
-        "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
-    ],
-    extras_require={
-        "dev": [
-            "black",
-            "coverage",
-            "jupyter_packaging~=0.7.9",
-            "jupyterlab~=3.0",
-            "pre-commit",
-            "pytest",
-            "pytest-asyncio",
-            "pytest-cov",
-            "pytest-tornasync",
-        ],
-        "tests": ["hybridcontents"],
-    },
+    license=npm_data["license"],
+    keywords=npm_data["keywords"],
 )
 
 

@@ -10,6 +10,7 @@ export class DiffModel implements IDisposable, Git.Diff.IModel {
     this._challenger = props.challenger;
     this._filename = props.filename;
     this._reference = props.reference;
+    this._repositoryPath = props.repositoryPath;
     this._base = props.base;
 
     this._changed = new Signal<DiffModel, Git.Diff.IModelChange>(this);
@@ -55,6 +56,8 @@ export class DiffModel implements IDisposable, Git.Diff.IModel {
 
   /**
    * File to be compared
+   *
+   * Note: This path is relative to the repository path
    */
   get filename(): string {
     return this._filename;
@@ -73,6 +76,15 @@ export class DiffModel implements IDisposable, Git.Diff.IModel {
       this._reference = v;
       this._changed.emit({ type: 'reference' });
     }
+  }
+
+  /**
+   * Git repository path
+   *
+   * Note: This path is relative to the server root
+   */
+  get repositoryPath(): string | undefined {
+    return this._repositoryPath;
   }
 
   /**
@@ -117,4 +129,5 @@ export class DiffModel implements IDisposable, Git.Diff.IModel {
   private _changed: Signal<DiffModel, Git.Diff.IModelChange>;
   private _isDisposed = false;
   private _filename: string;
+  private _repositoryPath: string;
 }

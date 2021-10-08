@@ -86,7 +86,9 @@ async function activate(
   try {
     settings = await settingRegistry.load(plugin.id);
   } catch (error) {
-    console.error(`Failed to load settings for the Git Extension.\n${error}`);
+    console.error(
+      trans.__('Failed to load settings for the Git Extension.\n%1', error)
+    );
   }
   try {
     serverSettings = await getServerSettings(trans);
@@ -123,7 +125,7 @@ async function activate(
   } catch (error) {
     // If we fall here, nothing will be loaded in the frontend.
     console.error(
-      'Failed to load the jupyterlab-git server extension settings',
+      trans.__('Failed to load the jupyterlab-git server extension settings'),
       error
     );
     showErrorMessage(
@@ -166,7 +168,7 @@ async function activate(
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Add JupyterLab commands
-    addCommands(app, gitExtension, fileBrowser.model, settings, trans);
+    addCommands(app, gitExtension, fileBrowser.model, settings, translator);
 
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
@@ -209,8 +211,8 @@ async function activate(
   gitExtension.registerDiffProvider(
     'Nbdime',
     ['.ipynb'],
-    (model: Git.Diff.IModel, toolbar?: Toolbar) =>
-      createNotebookDiff(model, renderMime, toolbar)
+    (model: Git.Diff.IModel, toolbar?: Toolbar, translator?: ITranslator) =>
+      createNotebookDiff(model, renderMime, toolbar, translator)
   );
 
   return gitExtension;
