@@ -247,6 +247,9 @@ describe('GitPanel', () => {
         },
         selectedHistoryFileChanged: {
           connect: jest.fn()
+        },
+        notifyRemoteChanges: {
+          connect: jest.fn()
         }
       } as any;
 

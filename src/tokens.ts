@@ -89,7 +89,7 @@ export interface IGitExtension extends IDisposable {
    */
   readonly notifyRemoteChanges: ISignal<
     IGitExtension,
-    Git.IRemoteChangedNotification
+    Git.IRemoteChangedNotification | null
   >;
 
   /**

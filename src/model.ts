@@ -258,7 +258,7 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     Git.IRemoteChangedNotification
   > {
-    return this._notifyRemoteChange;
+    return this._notifyRemoteChanges;
   }
 
   /**
@@ -1011,7 +1011,7 @@ export class GitExtension implements IGitExtension {
       }
       if (this._settings.composite['openFilesBehindWarning']) {
         if (notNotified.length > 0) {
-          this._notifyRemoteChange.emit({ notNotified, notified });
+          this._notifyRemoteChanges.emit({ notNotified, notified });
         }
       }
     } else {
@@ -1531,7 +1531,7 @@ export class GitExtension implements IGitExtension {
     IChangedArgs<string | null>
   >(this);
   private _statusChanged = new Signal<IGitExtension, Git.IStatus>(this);
-  private _notifyRemoteChange = new Signal<
+  private _notifyRemoteChanges = new Signal<
     IGitExtension,
     Git.IRemoteChangedNotification | null
   >(this);
