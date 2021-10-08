@@ -167,7 +167,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.refreshView();
     }, this);
     model.statusChanged.connect(async () => {
-      const remotechangedFiles = await model.remoteChangedFiles();
+      const remotechangedFiles: Git.IStatusFile[] = await model.remoteChangedFiles();
       this.setState({
         files: model.status.files,
         remoteChangedFiles: remotechangedFiles,
@@ -660,7 +660,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   private get _sortedFiles(): Git.IStatusFile[] {
     const { files, remoteChangedFiles } = this.state;
-    const sfiles: Git.IStatusFile[] = files.concat(remoteChangedFiles);
+    let sfiles: Git.IStatusFile[] = files
+    if (remoteChangedFiles) {
+      sfiles = sfiles.concat(remoteChangedFiles);
+    }
     sfiles.sort((a, b) => a.to.localeCompare(b.to));
     return sfiles;
   }
