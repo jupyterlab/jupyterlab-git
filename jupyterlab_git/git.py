@@ -471,7 +471,8 @@ class Git:
             ("-%d" % history_count),
         ]
         if is_single_file:
-            cmd = cmd + [
+            cmd += [
+                "-z",
                 "--numstat",
                 "--follow",
                 "--",
@@ -485,13 +486,19 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
-        if is_single_file:
-            # an extra newline get outputted when --numstat is used
-            my_output = my_output.replace("\n\n", "\n")
         line_array = my_output.splitlines()
-        i = 0
+
+        if is_single_file:
+            parsed_lines = []
+            for line in line_array:
+                parsed_lines.extend(
+                    re.sub(r"\t\0|\0", "\t", l)
+                    for l in line.strip("\0\t").split("\0\0", maxsplit=1)
+                )
+            line_array = parsed_lines
+
         PREVIOUS_COMMIT_OFFSET = 5 if is_single_file else 4
-        while i < len(line_array):
+        for i in range(0, len(line_array), PREVIOUS_COMMIT_OFFSET):
             commit = {
                 "commit": line_array[i],
                 "author": line_array[i + 1],
@@ -503,11 +510,18 @@ class Git:
             if is_single_file:
                 commit["is_binary"] = line_array[i + 4].startswith("-\t-\t")
 
+                # [insertions, deletions, previous_file_path?, current_file_path]
+                file_info = line_array[i + 4].split()
+
+                if len(file_info) == 4:
+                    commit["previous_file_path"] = file_info[2]
+                commit["file_path"] = file_info[-1]
+
             if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
                 commit["pre_commit"] = line_array[i + PREVIOUS_COMMIT_OFFSET]
 
             result.append(commit)
-            i += PREVIOUS_COMMIT_OFFSET
+
         return {"code": code, "commits": result}
 
     async def detailed_log(self, selected_hash, path):
@@ -530,6 +544,7 @@ class Git:
         line_iterable = iter(strip_and_split(my_output)[1:])
         for line in line_iterable:
             is_binary = line.startswith("-\t-\t")
+            previous_file_path = ""
             insertions, deletions, file = line.split("\t")
             insertions = insertions.replace("-", "0")
             deletions = deletions.replace("-", "0")
@@ -538,21 +553,25 @@ class Git:
                 # file was renamed or moved, we need next two lines of output
                 from_path = next(line_iterable)
                 to_path = next(line_iterable)
+                previous_file_path = from_path
                 modified_file_name = from_path + " => " + to_path
                 modified_file_path = to_path
             else:
                 modified_file_name = file.split("/")[-1]
                 modified_file_path = file
 
-            result.append(
-                {
-                    "modified_file_path": modified_file_path,
-                    "modified_file_name": modified_file_name,
-                    "insertion": insertions,
-                    "deletion": deletions,
-                    "is_binary": is_binary,
-                }
-            )
+            file_info = {
+                "modified_file_path": modified_file_path,
+                "modified_file_name": modified_file_name,
+                "insertion": insertions,
+                "deletion": deletions,
+                "is_binary": is_binary,
+            }
+
+            if previous_file_path:
+                file_info["previous_file_path"] = previous_file_path
+
+            result.append(file_info)
             total_insertions += int(insertions)
             total_deletions += int(deletions)
 

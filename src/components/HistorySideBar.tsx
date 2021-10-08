@@ -74,9 +74,10 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
      *
      * @param filePath file path
      * @param isText indicates whether the file supports displaying a diff
+     * @param previousFilePath when file has been relocated
      * @returns callback
      */
-    (filePath: string, isText: boolean) =>
+    (filePath: string, isText: boolean, previousFilePath?: string) =>
     /**
      * Callback invoked upon clicking to display a file diff.
      *
@@ -92,6 +93,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
             files: [
               {
                 filePath,
+                previousFilePath,
                 isText,
                 context: {
                   previousRef: commit.pre_commit,
@@ -164,8 +166,9 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
           const onOpenDiff =
             props.model.selectedHistoryFile && !commit.is_binary
               ? openDiff(commit)(
-                  props.model.selectedHistoryFile.to,
-                  !commit.is_binary
+                  commit.file_path ?? props.model.selectedHistoryFile.to,
+                  !commit.is_binary,
+                  commit.previous_file_path
                 )
               : undefined;
 

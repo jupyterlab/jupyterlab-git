@@ -74,6 +74,7 @@ async def test_detailed_log():
                 {
                     "modified_file_path": "folder2/file with spaces.py",
                     "modified_file_name": "folder1/file with spaces and λ.py => folder2/file with spaces.py",
+                    "previous_file_path": "folder1/file with spaces and λ.py",
                     "insertion": "0",
                     "deletion": "0",
                     "is_binary": False,
