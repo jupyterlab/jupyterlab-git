@@ -1534,7 +1534,7 @@ export class GitExtension implements IGitExtension {
   private _statusChanged = new Signal<IGitExtension, Git.IStatus>(this);
   private _notifyRemoteChange = new Signal<
     IGitExtension,
-    Git.IRemoteChangedNotification
+    Git.IRemoteChangedNotification | null
   >(this);
 }
 
