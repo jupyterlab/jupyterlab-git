@@ -1,4 +1,4 @@
-import { showDialog } from '@jupyterlab/apputils';
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -86,6 +86,8 @@ export interface IGitPanelState {
    */
   files: Git.IStatusFile[];
 
+  remoteChangedFiles: Git.IStatusFile[];
+
   /**
    * Number of commits ahead
    */
@@ -140,6 +142,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       branches: branches,
       currentBranch: currentBranch ? currentBranch.name : 'master',
       files: [],
+      remoteChangedFiles: [],
       nCommitsAhead: 0,
       nCommitsBehind: 0,
       pastCommits: [],
@@ -163,9 +166,12 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       });
       this.refreshView();
     }, this);
-    model.statusChanged.connect(() => {
+    model.statusChanged.connect(async () => {
+      const remotechangedFiles: Git.IStatusFile[] =
+        await model.remoteChangedFiles();
       this.setState({
         files: model.status.files,
+        remoteChangedFiles: remotechangedFiles,
         nCommitsAhead: model.status.ahead,
         nCommitsBehind: model.status.behind
       });
@@ -181,6 +187,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.refreshHistory();
     }, this);
     model.markChanged.connect(() => this.forceUpdate(), this);
+    model.notifyRemoteChanges.connect((_, args) => {
+      this.warningDialog(args);
+    }, this);
 
     settings.changed.connect(this.refreshView, this);
   }
@@ -651,11 +660,77 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * List of sorted modified files.
    */
   private get _sortedFiles(): Git.IStatusFile[] {
-    const { files } = this.state;
-
-    files.sort((a, b) => a.to.localeCompare(b.to));
-    return files;
+    const { files, remoteChangedFiles } = this.state;
+    let sfiles: Git.IStatusFile[] = files;
+    if (remoteChangedFiles) {
+      sfiles = sfiles.concat(remoteChangedFiles);
+    }
+    sfiles.sort((a, b) => a.to.localeCompare(b.to));
+    return sfiles;
   }
 
   private _previousRepoPath: string = null;
+
+  /**
+   * Show a dialog when a notifyRemoteChanges signal is emitted from the model.
+   */
+  private async warningDialog(
+    options: Git.IRemoteChangedNotification
+  ): Promise<void> {
+    const title = this.props.trans.__(
+      'One or more open files are behind %1 head. Do you want to pull the latest remote version?',
+      this.props.model.status.remote
+    );
+    const dialog = new Dialog({
+      title,
+      body: this._renderBody(options.notNotified, options.notified),
+      buttons: [
+        Dialog.cancelButton({
+          label: this.props.trans.__('Continue Without Pulling')
+        }),
+        Dialog.warnButton({
+          label: this.props.trans.__('Pull'),
+          caption: this.props.trans.__('Git Pull from Remote Branch')
+        })
+      ]
+    });
+    const result = await dialog.launch();
+    if (result.button.accept) {
+      await this.props.commands.execute(CommandIDs.gitPull, {});
+    }
+  }
+
+  /**
+   * renders the body to be used in the remote changes warning dialog
+   */
+  private _renderBody(
+    notNotifiedList: Git.IStatusFile[],
+    notifiedList: Git.IStatusFile[] = []
+  ): JSX.Element {
+    const listedItems = notNotifiedList.map((item: Git.IStatusFile) => {
+      console.log(item.to);
+      const item_val = this.props.trans.__(item.to);
+      return <li key={item_val}>{item_val}</li>;
+    });
+    let elem: JSX.Element = <ul>{listedItems}</ul>;
+    if (notifiedList.length > 0) {
+      const remaining = this.props.trans.__(
+        'The following open files remain behind:'
+      );
+      const alreadyListedItems = notifiedList.map((item: Git.IStatusFile) => {
+        console.log(item.to);
+        const item_val = this.props.trans.__(item.to);
+        return <li key={item_val}>{item_val}</li>;
+      });
+      const full: JSX.Element = (
+        <div>
+          {elem}
+          {remaining}
+          <ul>{alreadyListedItems}</ul>
+        </div>
+      );
+      elem = full;
+    }
+    return <div>{elem}</div>;
+  }
 }

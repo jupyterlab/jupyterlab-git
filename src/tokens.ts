@@ -85,6 +85,14 @@ export interface IGitExtension extends IDisposable {
   >;
 
   /**
+   * A signal emitted when files that are behind the remote branch are opened.
+   */
+  readonly notifyRemoteChanges: ISignal<
+    IGitExtension,
+    Git.IRemoteChangedNotification | null
+  >;
+
+  /**
    * Add one or more files to the repository staging area.
    *
    * ## Notes
@@ -365,6 +373,16 @@ export interface IGitExtension extends IDisposable {
    * Request Git status refresh
    */
   refreshStatus(): Promise<void>;
+
+  /**
+   * gets a list of files that have changed in the remote branch
+   */
+  remoteChangedFiles(): Promise<Git.IStatusFile[]>;
+
+  /**
+   * Notifies user is a file that is attached has is behind changes in the remote branch with a pop-up Dialog
+   */
+  checkRemoteChangeNotified(): Promise<void>;
 
   /**
    * Register a new diff provider for specified file types
@@ -800,6 +818,14 @@ export namespace Git {
     files?: string[];
   }
 
+  /** Interface for notifying users of opened files that are behind
+   * the remote branch
+   */
+  export interface IRemoteChangedNotification {
+    notNotified: IStatusFile[];
+    notified: IStatusFile[];
+  }
+
   /** Interface for GitLog request result,
    * has the info of a single past commit
    */
@@ -916,6 +942,7 @@ export namespace Git {
     | 'staged'
     | 'unstaged'
     | 'partially-staged'
+    | 'remote-changed'
     | 'unmodified'
     | 'unmerged'
     | null;

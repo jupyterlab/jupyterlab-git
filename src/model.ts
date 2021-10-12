@@ -252,6 +252,16 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * A signal emitted when the current Git repository changes.
+   */
+  get notifyRemoteChanges(): ISignal<
+    IGitExtension,
+    Git.IRemoteChangedNotification
+  > {
+    return this._notifyRemoteChanges;
+  }
+
+  /**
    * Get the current markers
    *
    * Note: This makes sure it always returns non null value
@@ -909,25 +919,104 @@ export class GitExtension implements IGitExtension {
           );
         }
       );
-
+      const files = data.files?.map(file => {
+        return {
+          ...file,
+          status: decodeStage(file.x, file.y),
+          type: this._resolveFileType(file.to)
+        };
+      });
       this._setStatus({
         branch: data.branch || null,
         remote: data.remote || null,
         ahead: data.ahead || 0,
         behind: data.behind || 0,
-        files: data.files?.map(file => {
-          return {
-            ...file,
-            status: decodeStage(file.x, file.y),
-            type: this._resolveFileType(file.to)
-          };
-        })
+        files
       });
     } catch (err) {
       // TODO we should notify the user
       this._clearStatus();
       console.error(err);
       return;
+    }
+  }
+
+  /**
+   * Collects files that have changed on the remote branch.
+   *
+   */
+  async remoteChangedFiles(): Promise<Git.IStatusFile[]> {
+    // if a file is changed on remote add it to list of files with appropriate status.
+    this._remoteChangedFiles = [];
+    try {
+      let remoteChangedFiles: null | string[] = null;
+      if (this.status.remote && this.status.behind > 0) {
+        remoteChangedFiles = (
+          await this._changedFiles('WORKING', this.status.remote)
+        ).files;
+        remoteChangedFiles?.forEach(element => {
+          this._remoteChangedFiles.push({
+            status: 'remote-changed',
+            type: this._resolveFileType(element),
+            x: '?',
+            y: 'B',
+            to: element,
+            from: '?',
+            is_binary: false
+          });
+        });
+        return this._remoteChangedFiles;
+      }
+    } catch (err) {
+      console.error(err);
+      return this._remoteChangedFiles;
+    }
+  }
+
+  /**
+   * Determines if opened files are behind the remote and emits a signal if one
+   * or more are behind and the user hasn't been notified of them yet.
+   *
+   */
+  async checkRemoteChangeNotified(): Promise<void> {
+    if (this.status.remote && this.status.behind > 0) {
+      const notNotified: Git.IStatusFile[] = [];
+      const notified: Git.IStatusFile[] = [];
+      for (const val of this._remoteChangedFiles) {
+        const docWidget = this._docmanager.findWidget(
+          this.getRelativeFilePath(val.to)
+        );
+        const notifiedIndex = this._changeUpstreamNotified.findIndex(
+          notified =>
+            notified.from === val.from &&
+            notified.to === val.to &&
+            notified.x === val.x &&
+            notified.y === val.y
+        );
+        if (docWidget !== undefined) {
+          if (docWidget.isAttached) {
+            // notify if the user hasn't been notified yet
+            if (notifiedIndex === -1) {
+              this._changeUpstreamNotified.push(val);
+              notNotified.push(val);
+            } else {
+              notified.push(val);
+            }
+          }
+        } else {
+          // remove from notified array if document is closed
+          if (notifiedIndex > -1) {
+            this._changeUpstreamNotified.splice(notifiedIndex, 1);
+          }
+        }
+      }
+      if (this._settings.composite['openFilesBehindWarning']) {
+        if (notNotified.length > 0) {
+          this._notifyRemoteChanges.emit({ notNotified, notified });
+        }
+      }
+    } else {
+      this._changeUpstreamNotified = [];
     }
   }
 
@@ -1367,6 +1456,7 @@ export class GitExtension implements IGitExtension {
       try {
         await this.refreshBranch();
         await this.refreshStatus();
+        await this.checkRemoteChangeNotified();
       } catch (error) {
         console.error('Failed to refresh git status', error);
       }
@@ -1427,6 +1517,8 @@ export class GitExtension implements IGitExtension {
   private _standbyCondition: () => boolean = () => false;
   private _statusPoll: Poll;
   private _taskHandler: TaskHandler<IGitExtension>;
+  private _remoteChangedFiles: Git.IStatusFile[] = [];
+  private _changeUpstreamNotified: Git.IStatusFile[] = [];
   private _selectedHistoryFile: Git.IStatusFile | null = null;
 
   private _headChanged = new Signal<IGitExtension, void>(this);
@@ -1440,6 +1532,10 @@ export class GitExtension implements IGitExtension {
     IChangedArgs<string | null>
   >(this);
   private _statusChanged = new Signal<IGitExtension, Git.IStatus>(this);
+  private _notifyRemoteChanges = new Signal<
+    IGitExtension,
+    Git.IRemoteChangedNotification | null
+  >(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {
