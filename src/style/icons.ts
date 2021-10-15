@@ -11,6 +11,7 @@ import diffSvg from '../../style/icons/diff.svg';
 import discardSvg from '../../style/icons/discard.svg';
 import gitSvg from '../../style/icons/git.svg';
 import insertionsMadeSvg from '../../style/icons/insertions.svg';
+import mergeSvg from '../../style/icons/merge.svg';
 import openSvg from '../../style/icons/open-file.svg';
 import pullSvg from '../../style/icons/pull.svg';
 import pushSvg from '../../style/icons/push.svg';
@@ -56,6 +57,10 @@ export const insertionsMadeIcon = new LabIcon({
 export const historyIcon = new LabIcon({
   name: 'git:history',
   svgstr: clockSvg
+});
+export const mergeIcon = new LabIcon({
+  name: 'git:merge',
+  svgstr: mergeSvg
 });
 export const openIcon = new LabIcon({
   name: 'git:open-file',
