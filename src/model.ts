@@ -526,7 +526,7 @@ export class GitExtension implements IGitExtension {
           URLExt.join(path, 'merge'),
           'POST',
           {
-            merge_from: branch
+            branch
           }
         );
       }

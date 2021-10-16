@@ -475,8 +475,8 @@ class GitMergeHandler(GitHandler):
         POST request handler, merges branches
         """
         data = self.get_json_body()
-        merge_from = data["merge_from"]
-        body = await self.git.merge(merge_from, self.url2localpath(path))
+        branch = data["branch"]
+        body = await self.git.merge(branch, self.url2localpath(path))
 
         if body["code"] != 0:
             self.set_status(500)
