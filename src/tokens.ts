@@ -1071,6 +1071,7 @@ export enum CommandIDs {
   gitToggleDoubleClickDiff = 'git:toggle-double-click-diff',
   gitAddRemote = 'git:add-remote',
   gitClone = 'git:clone',
+  gitMerge = 'git:merge',
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
   gitForcePush = 'git:force-push',

@@ -3,6 +3,7 @@ import {
   Dialog,
   InputDialog,
   MainAreaWidget,
+  ReactWidget,
   showDialog,
   showErrorMessage,
   Toolbar,
@@ -19,11 +20,12 @@ import { ArrayExt, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { ContextMenu, Menu, Panel } from '@lumino/widgets';
+import { ContextMenu, Menu, Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { DiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
 import { CONTEXT_COMMANDS } from './components/FileList';
+import { MergeBranchDialog } from './components/MergeBranchDialog';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
 import { logger } from './logger';
 import { getDiffProvider, GitExtension } from './model';
@@ -193,7 +195,7 @@ export function addCommands(
 
       if (result.button.accept) {
         logger.log({
-          message: trans.__('Initializing...'),
+          message: trans.__('Initializing…'),
           level: Level.RUNNING
         });
         try {
@@ -307,7 +309,7 @@ export function addCommands(
       if (result.button.accept && result.value) {
         logger.log({
           level: Level.RUNNING,
-          message: trans.__('Cloning...')
+          message: trans.__('Cloning…')
         });
         try {
           const details = await Private.showGitOperationDialog<IGitCloneArgs>(
@@ -358,7 +360,7 @@ export function addCommands(
     execute: async args => {
       logger.log({
         level: Level.RUNNING,
-        message: trans.__('Pushing...')
+        message: trans.__('Pushing…')
       });
       try {
         const details = await Private.showGitOperationDialog(
@@ -393,7 +395,7 @@ export function addCommands(
     execute: async () => {
       logger.log({
         level: Level.RUNNING,
-        message: trans.__('Pulling...')
+        message: trans.__('Pulling…')
       });
       try {
         const details = await Private.showGitOperationDialog(
@@ -572,6 +574,47 @@ export function addCommands(
       }
     },
     icon: diffIcon.bindprops({ stylesheet: 'menuItem' })
+  });
+
+  commands.addCommand(CommandIDs.gitMerge, {
+    label: trans.__('Merge Branch…'),
+    caption: trans.__('Merge selected branch in the current branch'),
+    execute: async () => {
+      const localBranches = gitModel.branches.filter(
+        branch => !branch.is_current_branch && !branch.is_remote_branch
+      );
+
+      const className = 'jp-git-MergeBranchAnchor';
+      let anchor = document.querySelector<HTMLDivElement>(`.${className}`);
+      if (!anchor) {
+        anchor = document.createElement('div');
+        anchor.className = className;
+        document.body.appendChild(anchor);
+      }
+
+      const waitForDialog = new PromiseDelegate<void>();
+      const dialog = ReactWidget.create(
+        <MergeBranchDialog
+          currentBranch={gitModel.currentBranch.name}
+          branches={localBranches}
+          model={gitModel}
+          logger={logger}
+          onClose={() => {
+            dialog.dispose();
+            waitForDialog.resolve();
+          }}
+          trans={trans}
+        />
+      );
+
+      Widget.attach(dialog, anchor);
+
+      await waitForDialog.promise;
+    },
+    isEnabled: () =>
+      gitModel.branches.some(
+        branch => !branch.is_current_branch && !branch.is_remote_branch
+      )
   });
 
   /* Context menu commands */
@@ -1073,6 +1116,7 @@ export function createGitMenu(
   [
     CommandIDs.gitInit,
     CommandIDs.gitClone,
+    CommandIDs.gitMerge,
     CommandIDs.gitPush,
     CommandIDs.gitPull,
     CommandIDs.gitAddRemote,
