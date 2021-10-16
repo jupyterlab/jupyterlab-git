@@ -579,37 +579,70 @@ export function addCommands(
   commands.addCommand(CommandIDs.gitMerge, {
     label: trans.__('Merge Branch…'),
     caption: trans.__('Merge selected branch in the current branch'),
-    execute: async () => {
-      const localBranches = gitModel.branches.filter(
-        branch => !branch.is_current_branch && !branch.is_remote_branch
-      );
+    execute: async args => {
+      let { branch }: { branch?: string } = args ?? {};
 
-      const className = 'jp-git-MergeBranchAnchor';
-      let anchor = document.querySelector<HTMLDivElement>(`.${className}`);
-      if (!anchor) {
-        anchor = document.createElement('div');
-        anchor.className = className;
-        document.body.appendChild(anchor);
+      if (!branch) {
+        // Prompts user to pick a branch
+        const localBranches = gitModel.branches.filter(
+          branch => !branch.is_current_branch && !branch.is_remote_branch
+        );
+
+        const widgetId = 'git-dialog-MergeBranch';
+        let anchor = document.querySelector<HTMLDivElement>(`#${widgetId}`);
+        if (!anchor) {
+          anchor = document.createElement('div');
+          anchor.id = widgetId;
+          document.body.appendChild(anchor);
+        }
+
+        const waitForDialog = new PromiseDelegate<string | null>();
+        const dialog = ReactWidget.create(
+          <MergeBranchDialog
+            currentBranch={gitModel.currentBranch.name}
+            branches={localBranches}
+            onClose={(branch?: string) => {
+              dialog.dispose();
+              waitForDialog.resolve(branch ?? null);
+            }}
+            trans={trans}
+          />
+        );
+
+        Widget.attach(dialog, anchor);
+
+        branch = await waitForDialog.promise;
       }
 
-      const waitForDialog = new PromiseDelegate<void>();
-      const dialog = ReactWidget.create(
-        <MergeBranchDialog
-          currentBranch={gitModel.currentBranch.name}
-          branches={localBranches}
-          model={gitModel}
-          logger={logger}
-          onClose={() => {
-            dialog.dispose();
-            waitForDialog.resolve();
-          }}
-          trans={trans}
-        />
-      );
+      if (branch) {
+        logger.log({
+          level: Level.RUNNING,
+          message: trans.__("Merging branch '%1'…", branch)
+        });
+        try {
+          await gitModel.merge(branch);
+        } catch (err) {
+          logger.log({
+            level: Level.ERROR,
+            message: trans.__(
+              "Failed to merge branch '%1' into '%2'.",
+              branch,
+              gitModel.currentBranch.name
+            ),
+            error: err as Error
+          });
+          return;
+        }
 
-      Widget.attach(dialog, anchor);
-
-      await waitForDialog.promise;
+        logger.log({
+          level: Level.SUCCESS,
+          message: trans.__(
+            "Branch '%1' merged into '%2'.",
+            branch,
+            gitModel.currentBranch.name
+          )
+        });
+      }
     },
     isEnabled: () =>
       gitModel.branches.some(

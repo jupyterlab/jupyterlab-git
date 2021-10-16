@@ -1,5 +1,6 @@
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
@@ -21,7 +22,7 @@ import {
   wrapperClass
 } from '../style/BranchMenu';
 import { branchIcon, mergeIcon, trashIcon } from '../style/icons';
-import { Git, IGitExtension, Level } from '../tokens';
+import { CommandIDs, Git, IGitExtension, Level } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { NewBranchDialog } from './NewBranchDialog';
 
@@ -106,6 +107,11 @@ export interface IBranchMenuProps {
    * Boolean indicating whether branching is disabled.
    */
   branching: boolean;
+
+  /**
+   * Jupyter App commands registry
+   */
+  commands: CommandRegistry;
 
   /**
    * Extension logger
@@ -377,8 +383,8 @@ export class BranchMenu extends React.Component<
    *
    * @param branchName Branch name
    */
-  private _onMergeBranch = async (branchName: string): Promise<void> => {
-    await this.props.model.merge(branchName);
+  private _onMergeBranch = async (branch: string): Promise<void> => {
+    await this.props.commands.execute(CommandIDs.gitMerge, { branch });
   };
 
   /**

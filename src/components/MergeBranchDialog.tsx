@@ -6,7 +6,6 @@ import ClearIcon from '@material-ui/icons/Clear';
 import React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
-import { Logger } from '../logger';
 import { branchIcon } from '../style/icons';
 import {
   actionsWrapperClass,
@@ -29,7 +28,7 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
-import { Git, IGitExtension, Level } from '../tokens';
+import { Git } from '../tokens';
 
 const ITEM_HEIGHT = 27.5; // HTML element height for a single branch
 const HEIGHT = 200; // HTML element height for the branches list
@@ -49,55 +48,14 @@ export interface IMergeBranchDialogProps {
   branches: Git.IBranch[];
 
   /**
-   * Extension logger
-   */
-  logger: Logger;
-
-  /**
-   * Git extension data model.
-   */
-  model: IGitExtension;
-
-  /**
-   * Boolean indicating whether to show the dialog.
-   */
-  // open: boolean;
-
-  /**
    * Callback to invoke upon closing the dialog.
    */
-  onClose: () => void;
+  onClose(branch?: string): void;
 
   /**
    * The application language translator.
    */
   trans: TranslationBundle;
-}
-
-async function mergeBranch(
-  model: IGitExtension,
-  branch: string,
-  logger: Logger,
-  trans: TranslationBundle
-): Promise<void> {
-  logger.log({
-    level: Level.RUNNING,
-    message: trans.__('Merging branch…')
-  });
-  try {
-    await model.merge(branch);
-  } catch (err) {
-    logger.log({
-      level: Level.ERROR,
-      message: trans.__('Failed to merge branch.'),
-      error: err as Error
-    });
-  }
-
-  logger.log({
-    level: Level.SUCCESS,
-    message: trans.__('Branch created.')
-  });
 }
 
 /**
@@ -158,7 +116,9 @@ export function MergeBranchDialog(props: IMergeBranchDialogProps): JSX.Element {
           <ClearIcon
             titleAccess={trans.__('Close this dialog')}
             fontSize="small"
-            onClick={props.onClose}
+            onClick={() => {
+              props.onClose();
+            }}
           />
         </button>
       </div>
@@ -211,16 +171,18 @@ export function MergeBranchDialog(props: IMergeBranchDialogProps): JSX.Element {
           type="button"
           title={trans.__('Close this dialog without merging a branch')}
           value={trans.__('Cancel')}
-          onClick={props.onClose}
+          onClick={() => {
+            props.onClose();
+          }}
         />
         <input
           className={classes(buttonClass, createButtonClass)}
           type="button"
           title={trans.__('Merge branch')}
           value={trans.__('Merge')}
-          onClick={() =>
-            mergeBranch(props.model, selectedBranch, props.logger, trans)
-          }
+          onClick={() => {
+            props.onClose(selectedBranch);
+          }}
           disabled={selectedBranch === null}
         />
       </DialogActions>
