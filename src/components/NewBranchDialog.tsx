@@ -166,7 +166,7 @@ export class NewBranchDialog extends React.Component<
             placeholder=""
             title={this.props.trans.__('Enter a branch name')}
           />
-          <p>{this.props.trans.__('Create branch based on...')}</p>
+          <p>{this.props.trans.__('Create branch based on…')}</p>
           <div className={filterWrapperClass}>
             <div className={filterClass}>
               <input
@@ -431,7 +431,7 @@ export class NewBranchDialog extends React.Component<
 
     this.props.logger.log({
       level: Level.RUNNING,
-      message: this.props.trans.__('Creating branch...')
+      message: this.props.trans.__('Creating branch…')
     });
     try {
       await this.props.model.checkout(opts);

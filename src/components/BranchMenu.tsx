@@ -439,7 +439,7 @@ export class BranchMenu extends React.Component<
 
       self.props.logger.log({
         level: Level.RUNNING,
-        message: self.props.trans.__('Switching branch...')
+        message: self.props.trans.__('Switching branch…')
       });
 
       try {

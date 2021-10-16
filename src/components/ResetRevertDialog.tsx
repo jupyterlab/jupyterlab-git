@@ -226,7 +226,7 @@ export class ResetRevertDialog extends React.Component<
   private async _resetCommit(hash: string): Promise<void> {
     this.props.logger.log({
       level: Level.RUNNING,
-      message: this.props.trans.__('Discarding changes...')
+      message: this.props.trans.__('Discarding changes…')
     });
     try {
       await this.props.model.resetToCommit(hash);
@@ -253,7 +253,7 @@ export class ResetRevertDialog extends React.Component<
   private async _revertCommit(hash: string): Promise<void> {
     this.props.logger.log({
       level: Level.RUNNING,
-      message: this.props.trans.__('Reverting changes...')
+      message: this.props.trans.__('Reverting changes…')
     });
     try {
       await this.props.model.revertCommit(this._commitMessage(), hash);
