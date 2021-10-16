@@ -1,5 +1,6 @@
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ClearIcon from '@material-ui/icons/Clear';
@@ -20,8 +21,8 @@ import {
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
-import { branchIcon, trashIcon } from '../style/icons';
-import { Git, IGitExtension, Level } from '../tokens';
+import { branchIcon, mergeIcon, trashIcon } from '../style/icons';
+import { CommandIDs, Git, IGitExtension, Level } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { NewBranchDialog } from './NewBranchDialog';
 
@@ -106,6 +107,11 @@ export interface IBranchMenuProps {
    * Boolean indicating whether branching is disabled.
    */
   branching: boolean;
+
+  /**
+   * Jupyter App commands registry
+   */
+  commands: CommandRegistry;
 
   /**
    * Extension logger
@@ -258,7 +264,11 @@ export class BranchMenu extends React.Component<
     return (
       <ListItem
         button
-        title={this.props.trans.__('Switch to branch: %1', branch.name)}
+        title={
+          !isActive
+            ? this.props.trans.__('Switch to branch: %1', branch.name)
+            : ''
+        }
         className={classes(
           listItemClass,
           isActive ? activeListItemClass : null
@@ -269,15 +279,28 @@ export class BranchMenu extends React.Component<
         <branchIcon.react className={listItemIconClass} tag="span" />
         <span className={nameClass}>{branch.name}</span>
         {!branch.is_remote_branch && !isActive && (
-          <ActionButton
-            className={hiddenButtonStyle}
-            icon={trashIcon}
-            title={this.props.trans.__('Delete this branch locally')}
-            onClick={(event: React.MouseEvent) => {
-              event.stopPropagation();
-              this._onDeleteBranch(branch.name);
-            }}
-          />
+          <>
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={trashIcon}
+              title={this.props.trans.__('Delete this branch locally')}
+              onClick={(event: React.MouseEvent) => {
+                event.stopPropagation();
+                this._onDeleteBranch(branch.name);
+              }}
+            />
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={mergeIcon}
+              title={this.props.trans.__(
+                'Merge this branch into the current one'
+              )}
+              onClick={(event: React.MouseEvent) => {
+                event.stopPropagation();
+                this._onMergeBranch(branch.name);
+              }}
+            />
+          </>
         )}
       </ListItem>
     );
@@ -356,6 +379,15 @@ export class BranchMenu extends React.Component<
   };
 
   /**
+   * Callback on merge branch name button
+   *
+   * @param branchName Branch name
+   */
+  private _onMergeBranch = async (branch: string): Promise<void> => {
+    await this.props.commands.execute(CommandIDs.gitMerge, { branch });
+  };
+
+  /**
    * Callback invoked upon clicking a button to create a new branch.
    *
    * @param event - event object
@@ -413,7 +445,7 @@ export class BranchMenu extends React.Component<
 
       self.props.logger.log({
         level: Level.RUNNING,
-        message: self.props.trans.__('Switching branch...')
+        message: self.props.trans.__('Switching branch…')
       });
 
       try {

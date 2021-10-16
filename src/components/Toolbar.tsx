@@ -340,6 +340,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         currentBranch={this.props.currentBranch || ''}
         branches={this.props.branches}
         branching={this.props.branching}
+        commands={this.props.commands}
         logger={this.props.logger}
         model={this.props.model}
         trans={this.props.trans}
@@ -399,7 +400,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   private _onRefreshClick = async (): Promise<void> => {
     this.props.logger.log({
       level: Level.RUNNING,
-      message: this.props.trans.__('Refreshing...')
+      message: this.props.trans.__('Refreshing…')
     });
     try {
       await this.props.model.refresh();

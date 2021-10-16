@@ -464,6 +464,25 @@ class GitCheckoutHandler(GitHandler):
         self.finish(json.dumps(body))
 
 
+class GitMergeHandler(GitHandler):
+    """
+    Handler for git merge '<merge_from> <merge_into>'. Merges into current working branch
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """
+        POST request handler, merges branches
+        """
+        data = self.get_json_body()
+        branch = data["branch"]
+        body = await self.git.merge(branch, self.url2localpath(path))
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
+
+
 class GitCommitHandler(GitHandler):
     """
     Handler for 'git commit -m <message>' and 'git commit --amend'. Commits files.
@@ -831,6 +850,7 @@ def setup_handlers(web_app):
         ("/diff", GitDiffHandler),
         ("/init", GitInitHandler),
         ("/log", GitLogHandler),
+        ("/merge", GitMergeHandler),
         ("/pull", GitPullHandler),
         ("/push", GitPushHandler),
         ("/remote/add", GitRemoteAddHandler),

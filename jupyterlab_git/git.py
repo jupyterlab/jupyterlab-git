@@ -968,6 +968,17 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
+    async def merge(self, branch, path):
+        """
+        Execute git merge command & return the result.
+        """
+        cmd = ["git", "merge", branch]
+        code, output, error = await execute(cmd, cwd=path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code, "message": output.strip()}
+
     async def commit(self, commit_msg, amend, path):
         """
         Execute git commit <filename> command & return the result.

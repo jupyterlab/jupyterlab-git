@@ -513,6 +513,27 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Merge a branch into the current branch
+   *
+   * @param branch The branch to merge into the current branch
+   */
+  async merge(branch: string): Promise<Git.IResultWithMessage> {
+    const path = await this._getPathRepository();
+    return this._taskHandler.execute<Git.IResultWithMessage>(
+      'git:merge',
+      () => {
+        return requestAPI<Git.IResultWithMessage>(
+          URLExt.join(path, 'merge'),
+          'POST',
+          {
+            branch
+          }
+        );
+      }
+    );
+  }
+
+  /**
    * Clone a repository.
    *
    * @param path - local path into which the repository will be cloned

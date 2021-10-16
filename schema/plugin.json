@@ -93,6 +93,9 @@
             "command": "git:clone"
           },
           {
+            "command": "git:merge"
+          },
+          {
             "command": "git:push"
           },
           {

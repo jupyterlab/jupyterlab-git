@@ -97,6 +97,9 @@ describe('BranchMenu', () => {
       branches: BRANCHES,
       model: model,
       branching: false,
+      commands: {
+        execute: jest.fn()
+      } as any,
       logger: new Logger(),
       trans: trans,
       ...props
@@ -206,7 +209,7 @@ describe('BranchMenu', () => {
       const display = !(branch.is_current_branch || branch.is_remote_branch);
       it(`should${
         display ? ' ' : 'not '
-      }display a delete button for ${JSON.stringify(branch)}`, () => {
+      }display delete and merge buttons for ${JSON.stringify(branch)}`, () => {
         const menu = mount(
           <BranchMenu
             {...createProps({
@@ -218,7 +221,7 @@ describe('BranchMenu', () => {
 
         const item = menu.find(`.${listItemClass}`);
 
-        expect(item.find(ActionButton).length).toEqual(display ? 1 : 0);
+        expect(item.find(ActionButton).length).toEqual(display ? 2 : 0);
       });
     });
 
@@ -279,6 +282,39 @@ describe('BranchMenu', () => {
       spy.mockRestore();
     });
 
+    it('should call merge branch when clicked on the merge button', async () => {
+      const branchName = 'master';
+      const fakeExecutioner = jest.fn();
+
+      const menu = mount(
+        <BranchMenu
+          {...createProps({
+            currentBranch: 'current',
+            branches: [
+              {
+                is_current_branch: false,
+                is_remote_branch: false,
+                name: branchName,
+                upstream: '',
+                top_commit: '',
+                tag: ''
+              }
+            ],
+            commands: {
+              execute: fakeExecutioner
+            } as any
+          })}
+        />
+      );
+
+      const item = menu.find(`.${listItemClass}`);
+      const button = item.find(ActionButton);
+      button.at(1).simulate('click');
+
+      expect(fakeExecutioner).toHaveBeenCalledTimes(1);
+      expect(fakeExecutioner).toHaveBeenCalledWith('git:merge', {branch: branchName});
+    });
+
     it('should set a `title` attribute for each displayed branch', () => {
       const component = render(<BranchMenu {...createProps()} />);
       const nodes = component.find(`.${listItemClass}`);
@@ -288,7 +324,7 @@ describe('BranchMenu', () => {
 
       for (let i = 0; i < branches.length; i++) {
         // @ts-ignore
-        expect(nodes[i].attribs['title'].length).toBeGreaterThan(0);
+        expect(nodes[i].attribs['title'].length).toBeGreaterThanOrEqual(0);
       }
     });
 

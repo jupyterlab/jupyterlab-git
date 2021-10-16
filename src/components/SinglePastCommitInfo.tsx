@@ -176,7 +176,7 @@ export class SinglePastCommitInfo extends React.Component<
    */
   render(): React.ReactElement {
     if (this.state.loadingState === 'loading') {
-      return <div>...</div>;
+      return <div>…</div>;
     }
     if (this.state.loadingState === 'error') {
       return <div>{this.props.trans.__('Error loading commit data')}</div>;

@@ -304,7 +304,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
 
       self.props.logger.log({
         level: Level.RUNNING,
-        message: self.props.trans.__('Checking tag out...')
+        message: self.props.trans.__('Checking tag out…')
       });
 
       try {

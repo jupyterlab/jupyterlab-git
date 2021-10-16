@@ -124,40 +124,43 @@ namespace Private {
           status = 'idle';
           break;
         case 'git:checkout':
-          status = 'checking out...';
+          status = 'checking out…';
           break;
         case 'git:clone':
-          status = 'cloning repository...';
+          status = 'cloning repository…';
           break;
         case 'git:commit:create':
-          status = 'committing changes...';
+          status = 'committing changes…';
           break;
         case 'git:commit:revert':
-          status = 'reverting changes...';
+          status = 'reverting changes…';
           break;
         case 'git:init':
-          status = 'initializing repository...';
+          status = 'initializing repository…';
+          break;
+        case 'git:merge':
+          status = 'merging…';
           break;
         case 'git:pull':
-          status = 'pulling changes...';
+          status = 'pulling changes…';
           break;
         case 'git:pushing':
-          status = 'pushing changes...';
+          status = 'pushing changes…';
           break;
         case 'git:refresh':
-          status = 'refreshing...';
+          status = 'refreshing…';
           break;
         case 'git:reset:changes':
-          status = 'resetting changes...';
+          status = 'resetting changes…';
           break;
         case 'git:reset:hard':
-          status = 'discarding changes...';
+          status = 'discarding changes…';
           break;
         default:
           if (/git:add:files/.test(event)) {
-            status = 'adding files...';
+            status = 'adding files…';
           } else {
-            status = 'working...';
+            status = 'working…';
           }
           break;
       }
