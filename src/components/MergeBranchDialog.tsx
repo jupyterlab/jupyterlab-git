@@ -7,21 +7,20 @@ import React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
 import { Logger } from '../logger';
-import {
-  filterClass,
-  filterClearClass,
-  filterInputClass,
-  filterWrapperClass
-} from '../style/BranchMenu';
 import { branchIcon } from '../style/icons';
 import {
   actionsWrapperClass,
+  activeListItemClass,
   branchDialogClass,
   buttonClass,
   cancelButtonClass,
   closeButtonClass,
   contentWrapperClass,
   createButtonClass,
+  filterClass,
+  filterClearClass,
+  filterInputClass,
+  filterWrapperClass,
   listItemClass,
   listItemContentClass,
   listItemIconClass,
@@ -117,17 +116,21 @@ export function MergeBranchDialog(props: IMergeBranchDialogProps): JSX.Element {
     branch => !filter || branch.name.includes(filter)
   );
 
-  const trans = props.trans;
+  const { trans } = props;
 
   function renderItem(props: ListChildComponentProps): JSX.Element {
     const { data, index, style } = props;
     const branch = data[index] as Git.IBranch;
+    const isSelected = branch.name === selectedBranch;
 
     return (
       <ListItem
         button
         title={trans.__('Create a new branch based on: %1', branch.name)}
-        className={listItemClass}
+        className={classes(
+          listItemClass,
+          isSelected ? activeListItemClass : null
+        )}
         onClick={() => {
           setSelectedBranch(branch.name);
         }}
