@@ -235,7 +235,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
         this._model.reference.label,
         this._model.challenger.label,
         this._hasConflict,
-        this._trans.__('COMMON ANCESTOR')
+        this._trans.__('Common Ancestor')
       );
       this.addWidget(header);
 

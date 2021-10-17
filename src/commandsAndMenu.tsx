@@ -302,7 +302,7 @@ export function addCommands(
         focusNodeSelector: 'input',
         buttons: [
           Dialog.cancelButton({ label: trans.__('Cancel') }),
-          Dialog.okButton({ label: trans.__('CLONE') })
+          Dialog.okButton({ label: trans.__('Clone') })
         ]
       });
 
@@ -777,8 +777,8 @@ export function addCommands(
         }
 
         if (diffContext.baseRef) {
-          props.reference.label = trans.__('CURRENT');
-          props.challenger.label = trans.__('INCOMING');
+          props.reference.label = trans.__('Current');
+          props.challenger.label = trans.__('Incoming');
 
           // Only add base when diff-ing merge conflicts
           props.base = {
@@ -794,7 +794,7 @@ export function addCommands(
                 }
               ).then(data => data.content);
             },
-            label: trans.__('RESULT'),
+            label: trans.__('Result'),
             source: diffContext.baseRef,
             updateAt: Date.now()
           };
@@ -963,7 +963,7 @@ export function addCommands(
             });
           } catch (reason) {
             showErrorMessage(trans.__('Deleting %1 failed.', file.to), reason, [
-              Dialog.warnButton({ label: trans.__('DISMISS') })
+              Dialog.warnButton({ label: trans.__('Dismiss') })
             ]);
           }
         }
@@ -1018,7 +1018,7 @@ export function addCommands(
             showErrorMessage(
               trans.__('Discard changes for %1 failed.', file.to),
               reason,
-              [Dialog.warnButton({ label: trans.__('DISMISS') })]
+              [Dialog.warnButton({ label: trans.__('Dismiss') })]
             );
           }
         }

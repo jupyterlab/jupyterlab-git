@@ -107,7 +107,7 @@ export class Alert extends React.Component<IAlertProps> {
             ]);
           }}
         >
-          {this.props.trans.__('SHOW')}
+          {this.props.trans.__('Show')}
         </Button>
       );
     } else if (this.props.details) {
@@ -120,7 +120,7 @@ export class Alert extends React.Component<IAlertProps> {
               title: this.props.trans.__('Detailed message'),
               body: this.props.details,
               buttons: [
-                Dialog.okButton({ label: this.props.trans.__('DISMISS') })
+                Dialog.okButton({ label: this.props.trans.__('Dismiss') })
               ]
             });
           }}

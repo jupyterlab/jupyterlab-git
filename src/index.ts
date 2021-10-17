@@ -131,7 +131,7 @@ async function activate(
     showErrorMessage(
       trans.__('Failed to load the jupyterlab-git server extension'),
       error.message,
-      [Dialog.warnButton({ label: trans.__('DISMISS') })]
+      [Dialog.warnButton({ label: trans.__('Dismiss') })]
     );
     return null;
   }
