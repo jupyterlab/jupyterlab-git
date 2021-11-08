@@ -7477,9 +7477,9 @@ natural-compare@^1.4.0:
   integrity sha1-Sr6/7tdUHywnrPspvbvRXI1bpPc=
 
 nbdime-jupyterlab@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/nbdime-jupyterlab/-/nbdime-jupyterlab-2.1.0.tgz#3b7ebe2ce65f02038f86ceab4df9f705d315dc16"
-  integrity sha512-aZdMumdglw9S0JDVm6WVLOadGQyWOmPetpk8SGN4CEJ5mL9is1siLLkEI4diQWFFzDXzNkkh1KEfgJpmRLIemg==
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/nbdime-jupyterlab/-/nbdime-jupyterlab-2.1.1.tgz#1fc4935002837f527ca7307f8eb1af4682d84257"
+  integrity sha512-krWE/sdSgbj3COxbErVpfFhDVlH8AAw0cjtqroXYq7VgIG19pykNwpSJ0mua0FbVT4+TrHBXeqchdw0rxSnq2g==
   dependencies:
     "@jupyterlab/apputils" "^2 || ^3"
     "@jupyterlab/coreutils" "^4 || ^5"
@@ -7492,12 +7492,12 @@ nbdime-jupyterlab@^2.1.0:
     "@lumino/coreutils" "^1.3.0"
     "@lumino/disposable" "^1.1.2"
     "@lumino/widgets" "^1.6.0"
-    nbdime "^6.1.0"
+    nbdime "^6.1.2"
 
-nbdime@^6.1.0, nbdime@^6.1.1:
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/nbdime/-/nbdime-6.1.1.tgz#0390fa31df7ac472e6717c7e6f6564be53a763b7"
-  integrity sha512-Dgc26eP947Ys4nyPP98G0aL4iu8j5fxZLQMIy5bnUnStiKlWxeENUNqw1dTotpG0kYSVNVmCrL7/ZHsFpkxqig==
+nbdime@^6.1.1, nbdime@^6.1.2:
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/nbdime/-/nbdime-6.1.2.tgz#72cee89888ad784093b46812fb1418319a8493ba"
+  integrity sha512-qUXkOHmSbGHjVkU0KlA2E84n2WRgykVNS6VyUajkhvO41fUhuyrvpus3TBaIzjYO1q9/IwZFhpvb1hDecJzQkg==
   dependencies:
     "@jupyterlab/codeeditor" "^2 || ^3"
     "@jupyterlab/codemirror" "^2 || ^3"
