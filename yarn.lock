@@ -7495,9 +7495,9 @@ nbdime-jupyterlab@^2.1.0:
     nbdime "^6.1.0"
 
 nbdime@^6.1.0, nbdime@^6.1.1:
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/nbdime/-/nbdime-6.1.1.tgz#0390fa31df7ac472e6717c7e6f6564be53a763b7"
-  integrity sha512-Dgc26eP947Ys4nyPP98G0aL4iu8j5fxZLQMIy5bnUnStiKlWxeENUNqw1dTotpG0kYSVNVmCrL7/ZHsFpkxqig==
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/nbdime/-/nbdime-6.1.2.tgz#72cee89888ad784093b46812fb1418319a8493ba"
+  integrity sha512-qUXkOHmSbGHjVkU0KlA2E84n2WRgykVNS6VyUajkhvO41fUhuyrvpus3TBaIzjYO1q9/IwZFhpvb1hDecJzQkg==
   dependencies:
     "@jupyterlab/codeeditor" "^2 || ^3"
     "@jupyterlab/codemirror" "^2 || ^3"
