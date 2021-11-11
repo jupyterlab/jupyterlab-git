@@ -16,7 +16,7 @@ export async function discardAllChanges(
     title: trans.__('Discard all changes'),
     body: isFallback
       ? trans.__(
-          'Do you want to permanently discard changes to all files and pull? This action cannot be undone.'
+          'Your current changes forbid pulling the latest changes. Do you want to permanently discard those changes? This action cannot be undone.'
         )
       : trans.__(
           'Are you sure you want to permanently discard changes to all files? This action cannot be undone.'
@@ -36,5 +36,8 @@ export async function discardAllChanges(
     }
   }
 
-  return Promise.reject('The user refused to discard all changes');
+  return Promise.reject({
+    cancelled: true,
+    message: 'The user refused to discard all changes'
+  });
 }

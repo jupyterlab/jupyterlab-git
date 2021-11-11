@@ -404,7 +404,7 @@ export function addCommands(
     execute: async args => {
       try {
         if (args.discard) {
-          await discardAllChanges(gitModel, trans);
+          await discardAllChanges(gitModel, trans, args.fallback as boolean);
         }
         logger.log({
           level: Level.RUNNING,
@@ -426,7 +426,8 @@ export function addCommands(
           error
         );
 
-        const errorMsg = typeof error === 'string' ? error : error.message;
+        const errorMsg =
+          typeof error === 'string' ? error : (error as Error).message;
 
         // Discard changes then retry pull
         if (
@@ -436,14 +437,23 @@ export function addCommands(
               'your local changes to the following files would be overwritten by merge'
             )
         ) {
-          await discardAllChanges(gitModel, trans, true);
-          await commands.execute(CommandIDs.gitPull);
-        } else {
-          logger.log({
-            message: trans.__('Failed to pull'),
-            level: Level.ERROR,
-            error
+          await commands.execute(CommandIDs.gitPull, {
+            discard: true,
+            fallback: true
           });
+        } else {
+          if ((error as any).cancelled) {
+            logger.log({
+              message: trans.__('Pull cancelled'),
+              level: Level.INFO
+            });
+          } else {
+            logger.log({
+              message: trans.__('Failed to pull'),
+              level: Level.ERROR,
+              error
+            });
+          }
         }
       }
     }
