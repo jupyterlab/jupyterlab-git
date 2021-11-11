@@ -107,7 +107,7 @@
           },
           {
             "command": "git:pull",
-            "args": { "discard": true }
+            "args": { "force": true }
           },
           {
             "command": "git:add-remote"

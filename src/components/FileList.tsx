@@ -21,7 +21,7 @@ import { ContextCommandIDs, CommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
-import { discardAllChanges as _discardAllChanges } from '../widgets/discardAllChanges';
+import { discardAllChanges } from '../widgets/discardAllChanges';
 
 export interface IFileListState {
   selectedFile: Git.IStatusFile | null;
@@ -212,7 +212,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   /** Discard changes in all unstaged and staged files */
   discardAllChanges = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
-    await _discardAllChanges(this.props.model, this.props.trans);
+    await discardAllChanges(this.props.model, this.props.trans);
   };
 
   /** Add a specific unstaged file */

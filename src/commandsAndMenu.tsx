@@ -391,11 +391,11 @@ export function addCommands(
   /** Add git pull command */
   commands.addCommand(CommandIDs.gitPull, {
     label: args =>
-      args.discard
+      args.force
         ? trans.__('Pull from Remote (Force)')
         : trans.__('Pull from Remote'),
     caption: args =>
-      args.discard
+      args.force
         ? trans.__(
             'Discard all current changes and pull from remote repository'
           )
@@ -403,7 +403,7 @@ export function addCommands(
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
       try {
-        if (args.discard) {
+        if (args.force) {
           await discardAllChanges(gitModel, trans, args.fallback as boolean);
         }
         logger.log({
@@ -438,7 +438,7 @@ export function addCommands(
             )
         ) {
           await commands.execute(CommandIDs.gitPull, {
-            discard: true,
+            force: true,
             fallback: true
           });
         } else {
@@ -1197,7 +1197,7 @@ export function createGitMenu(
       menu.addItem({ command, args: { force: true } });
     }
     if (command === CommandIDs.gitPull) {
-      menu.addItem({ command, args: { discard: true } });
+      menu.addItem({ command, args: { force: true } });
     }
   });
 
