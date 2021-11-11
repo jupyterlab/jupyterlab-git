@@ -443,8 +443,9 @@ export function addCommands(
           });
         } else {
           if ((error as any).cancelled) {
+            // Empty message to hide alert
             logger.log({
-              message: trans.__('Pull cancelled'),
+              message: '',
               level: Level.INFO
             });
           } else {
