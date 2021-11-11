@@ -271,12 +271,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * Render the modified files
    */
   render(): JSX.Element {
+    const remoteChangedFiles: Git.IStatusFile[] = [];
+    const unmergedFiles: Git.IStatusFile[] = [];
+
     if (this.props.settings.composite['simpleStaging']) {
-      const unmergedFiles: Git.IStatusFile[] = [];
       const otherFiles: Git.IStatusFile[] = [];
 
       this.props.files.forEach(file => {
         switch (file.status) {
+          case 'remote-changed':
+            remoteChangedFiles.push(file);
+            break;
           case 'unmerged':
             unmergedFiles.push(file);
             break;
@@ -292,6 +297,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             {({ height }) => (
               <>
                 {this._renderUnmerged(unmergedFiles, height, false)}
+                {this._renderRemoteChanged(remoteChangedFiles, height)}
                 {this._renderSimpleStage(otherFiles, height)}
               </>
             )}
@@ -302,8 +308,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       const stagedFiles: Git.IStatusFile[] = [];
       const unstagedFiles: Git.IStatusFile[] = [];
       const untrackedFiles: Git.IStatusFile[] = [];
-      const remoteChangedFiles: Git.IStatusFile[] = [];
-      const unmergedFiles: Git.IStatusFile[] = [];
 
       this.props.files.forEach(file => {
         switch (file.status) {
@@ -346,9 +350,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             {({ height }) => (
               <>
                 {this._renderUnmerged(unmergedFiles, height)}
+                {this._renderRemoteChanged(remoteChangedFiles, height)}
                 {this._renderStaged(stagedFiles, height)}
                 {this._renderChanged(unstagedFiles, height)}
-                {this._renderRemoteChanged(remoteChangedFiles, height)}
                 {this._renderUntracked(untrackedFiles, height)}
               </>
             )}
@@ -755,22 +759,24 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    */
   private _renderRemoteChanged(files: Git.IStatusFile[], height: number) {
     return (
-      <GitStage
-        actions={
-          <ActionButton
-            className={hiddenButtonStyle}
-            disabled={files.length === 0}
-            icon={addIcon}
-            title={this.props.trans.__('Pull from remote branch')}
-            onClick={this.pullFromRemote}
-          />
-        }
-        collapsible
-        heading={this.props.trans.__('Remote Changes')}
-        height={height}
-        files={files}
-        rowRenderer={this._renderRemoteChangedRow}
-      />
+      files.length > 0 && (
+        <GitStage
+          actions={
+            <ActionButton
+              className={hiddenButtonStyle}
+              disabled={files.length === 0}
+              icon={addIcon}
+              title={this.props.trans.__('Pull from remote branch')}
+              onClick={this.pullFromRemote}
+            />
+          }
+          collapsible
+          heading={this.props.trans.__('Remote Changes')}
+          height={height}
+          files={files}
+          rowRenderer={this._renderRemoteChangedRow}
+        />
+      )
     );
   }
 

@@ -86,6 +86,9 @@ export interface IGitPanelState {
    */
   files: Git.IStatusFile[];
 
+  /**
+   * List of files changed on remote branch
+   */
   remoteChangedFiles: Git.IStatusFile[];
 
   /**
