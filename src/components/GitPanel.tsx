@@ -472,15 +472,17 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         >
           {this.props.trans.__('Initialize a Repository')}
         </button>
-        <button
-          className={repoButtonClass}
-          onClick={async () => {
-            await commands.execute(CommandIDs.gitClone);
-            await commands.execute('filebrowser:toggle-main');
-          }}
-        >
-          {this.props.trans.__('Clone a Repository')}
-        </button>
+        {commands.hasCommand(CommandIDs.gitClone) && (
+          <button
+            className={repoButtonClass}
+            onClick={async () => {
+              await commands.execute(CommandIDs.gitClone);
+              await commands.execute('filebrowser:toggle-main');
+            }}
+          >
+            {this.props.trans.__('Clone a Repository')}
+          </button>
+        )}
       </React.Fragment>
     );
   }

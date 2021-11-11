@@ -47,9 +47,8 @@ import {
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
-import { GitCloneForm } from './widgets/GitCloneForm';
 
-interface IGitCloneArgs {
+export interface IGitCloneArgs {
   /**
    * Path in which to clone the Git repository
    */
@@ -63,7 +62,7 @@ interface IGitCloneArgs {
 /**
  * Git operations requiring authentication
  */
-enum Operation {
+export enum Operation {
   Clone = 'Clone',
   Pull = 'Pull',
   Push = 'Push',
@@ -291,55 +290,6 @@ export function addCommands(
     }
   });
 
-  /** Add git clone command */
-  commands.addCommand(CommandIDs.gitClone, {
-    label: trans.__('Clone a Repository'),
-    caption: trans.__('Clone a repository from a URL'),
-    isEnabled: () => gitModel.pathRepository === null,
-    execute: async () => {
-      const result = await showDialog({
-        title: trans.__('Clone a repo'),
-        body: new GitCloneForm(trans),
-        focusNodeSelector: 'input',
-        buttons: [
-          Dialog.cancelButton({ label: trans.__('Cancel') }),
-          Dialog.okButton({ label: trans.__('Clone') })
-        ]
-      });
-
-      if (result.button.accept && result.value) {
-        logger.log({
-          level: Level.RUNNING,
-          message: trans.__('Cloning…')
-        });
-        try {
-          const details = await Private.showGitOperationDialog<IGitCloneArgs>(
-            gitModel,
-            Operation.Clone,
-            trans,
-            { path: fileBrowserModel.path, url: result.value }
-          );
-          logger.log({
-            message: trans.__('Successfully cloned'),
-            level: Level.SUCCESS,
-            details
-          });
-          await fileBrowserModel.refresh();
-        } catch (error) {
-          console.error(
-            'Encountered an error when cloning the repository. Error: ',
-            error
-          );
-          logger.log({
-            message: trans.__('Failed to clone'),
-            level: Level.ERROR,
-            error: error as Error
-          });
-        }
-      }
-    }
-  });
-
   /** Add git open gitignore command */
   commands.addCommand(CommandIDs.gitOpenGitignore, {
     label: trans.__('Open .gitignore'),
@@ -364,7 +314,7 @@ export function addCommands(
         message: trans.__('Pushing…')
       });
       try {
-        const details = await Private.showGitOperationDialog(
+        const details = await showGitOperationDialog(
           gitModel,
           args.force ? Operation.ForcePush : Operation.Push,
           trans
@@ -410,7 +360,7 @@ export function addCommands(
           level: Level.RUNNING,
           message: trans.__('Pulling…')
         });
-        const details = await Private.showGitOperationDialog(
+        const details = await showGitOperationDialog(
           gitModel,
           Operation.Pull,
           trans
@@ -1399,84 +1349,80 @@ export function addFileBrowserContextMenu(
   }
 }
 
-/* eslint-disable no-inner-declarations */
-namespace Private {
-  /**
-   * Handle Git operation that may require authentication.
-   *
-   * @private
-   * @param model - Git extension model
-   * @param operation - Git operation name
-   * @param trans - language translator
-   * @param args - Git operation arguments
-   * @param authentication - Git authentication information
-   * @param retry - Is this operation retried?
-   * @returns Promise for displaying a dialog
-   */
-  export async function showGitOperationDialog<T>(
-    model: GitExtension,
-    operation: Operation,
-    trans: TranslationBundle,
-    args?: T,
-    authentication?: Git.IAuth,
-    retry = false
-  ): Promise<string> {
-    try {
-      let result: Git.IResultWithMessage;
-      // the Git action
-      switch (operation) {
-        case Operation.Clone:
-          // eslint-disable-next-line no-case-declarations
-          const { path, url } = args as any as IGitCloneArgs;
-          result = await model.clone(path, url, authentication);
-          break;
-        case Operation.Pull:
-          result = await model.pull(authentication);
-          break;
-        case Operation.Push:
-          result = await model.push(authentication);
-          break;
-        case Operation.ForcePush:
-          result = await model.push(authentication, true);
-          break;
-        default:
-          result = { code: -1, message: 'Unknown git command' };
-          break;
-      }
-
-      return result.message;
-    } catch (error) {
-      if (
-        AUTH_ERROR_MESSAGES.some(
-          errorMessage => (error as Error).message.indexOf(errorMessage) > -1
-        )
-      ) {
-        // If the error is an authentication error, ask the user credentials
-        const credentials = await showDialog({
-          title: trans.__('Git credentials required'),
-          body: new GitCredentialsForm(
-            trans,
-            trans.__('Enter credentials for remote repository'),
-            retry ? trans.__('Incorrect username or password.') : ''
-          )
-        });
-
-        if (credentials.button.accept) {
-          // Retry the operation if the user provides its credentials
-          return await showGitOperationDialog<T>(
-            model,
-            operation,
-            trans,
-            args,
-            credentials.value,
-            true
-          );
-        }
-      }
-      // Throw the error if it cannot be handled or
-      // if the user did not accept to provide its credentials
-      throw error;
+/**
+ * Handle Git operation that may require authentication.
+ *
+ * @private
+ * @param model - Git extension model
+ * @param operation - Git operation name
+ * @param trans - language translator
+ * @param args - Git operation arguments
+ * @param authentication - Git authentication information
+ * @param retry - Is this operation retried?
+ * @returns Promise for displaying a dialog
+ */
+export async function showGitOperationDialog<T>(
+  model: GitExtension,
+  operation: Operation,
+  trans: TranslationBundle,
+  args?: T,
+  authentication?: Git.IAuth,
+  retry = false
+): Promise<string> {
+  try {
+    let result: Git.IResultWithMessage;
+    // the Git action
+    switch (operation) {
+      case Operation.Clone:
+        // eslint-disable-next-line no-case-declarations
+        const { path, url } = args as any as IGitCloneArgs;
+        result = await model.clone(path, url, authentication);
+        break;
+      case Operation.Pull:
+        result = await model.pull(authentication);
+        break;
+      case Operation.Push:
+        result = await model.push(authentication);
+        break;
+      case Operation.ForcePush:
+        result = await model.push(authentication, true);
+        break;
+      default:
+        result = { code: -1, message: 'Unknown git command' };
+        break;
     }
+
+    return result.message;
+  } catch (error) {
+    if (
+      AUTH_ERROR_MESSAGES.some(
+        errorMessage => (error as Error).message.indexOf(errorMessage) > -1
+      )
+    ) {
+      // If the error is an authentication error, ask the user credentials
+      const credentials = await showDialog({
+        title: trans.__('Git credentials required'),
+        body: new GitCredentialsForm(
+          trans,
+          trans.__('Enter credentials for remote repository'),
+          retry ? trans.__('Incorrect username or password.') : ''
+        )
+      });
+
+      if (credentials.button.accept) {
+        // Retry the operation if the user provides its credentials
+        return await showGitOperationDialog<T>(
+          model,
+          operation,
+          trans,
+          args,
+          credentials.value,
+          true
+        );
+      }
+    }
+    // Throw the error if it cannot be handled or
+    // if the user did not accept to provide its credentials
+    throw error;
   }
 }
-/* eslint-enable no-inner-declarations */
