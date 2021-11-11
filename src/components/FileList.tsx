@@ -21,6 +21,7 @@ import { ContextCommandIDs, CommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
+import { discardAllChanges } from '../widgets/discardAllChanges';
 
 export interface IFileListState {
   selectedFile: Git.IStatusFile | null;
@@ -189,7 +190,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const result = await showDialog({
       title: this.props.trans.__('Discard all changes'),
       body: this.props.trans.__(
-        'Are you sure you want to permanently discard changes to all files? This action cannot be undone.'
+        'Are you sure you want to permanently discard changes to all unstaged files? This action cannot be undone.'
       ),
       buttons: [
         Dialog.cancelButton({ label: this.props.trans.__('Cancel') }),
@@ -211,26 +212,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   /** Discard changes in all unstaged and staged files */
   discardAllChanges = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
-    const result = await showDialog({
-      title: this.props.trans.__('Discard all changes'),
-      body: this.props.trans.__(
-        'Are you sure you want to permanently discard changes to all files? This action cannot be undone.'
-      ),
-      buttons: [
-        Dialog.cancelButton({ label: this.props.trans.__('Cancel') }),
-        Dialog.warnButton({ label: this.props.trans.__('Discard') })
-      ]
-    });
-    if (result.button.accept) {
-      try {
-        await this.props.model.resetToCommit();
-      } catch (reason) {
-        showErrorMessage(
-          this.props.trans.__('Discard all changes failed.'),
-          reason
-        );
-      }
-    }
+    await discardAllChanges(this.props.model, this.props.trans);
   };
 
   /** Add a specific unstaged file */

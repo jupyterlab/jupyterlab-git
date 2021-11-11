@@ -46,6 +46,7 @@ import {
   Level
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
+import { discardAllChanges } from './widgets/discardAllChanges';
 import { GitCloneForm } from './widgets/GitCloneForm';
 
 interface IGitCloneArgs {
@@ -389,15 +390,26 @@ export function addCommands(
 
   /** Add git pull command */
   commands.addCommand(CommandIDs.gitPull, {
-    label: trans.__('Pull from Remote'),
-    caption: trans.__('Pull latest code from remote repository'),
+    label: args =>
+      args.force
+        ? trans.__('Pull from Remote (Force)')
+        : trans.__('Pull from Remote'),
+    caption: args =>
+      args.force
+        ? trans.__(
+            'Discard all current changes and pull from remote repository'
+          )
+        : trans.__('Pull latest code from remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
-    execute: async () => {
-      logger.log({
-        level: Level.RUNNING,
-        message: trans.__('Pulling…')
-      });
+    execute: async args => {
       try {
+        if (args.force) {
+          await discardAllChanges(gitModel, trans, args.fallback as boolean);
+        }
+        logger.log({
+          level: Level.RUNNING,
+          message: trans.__('Pulling…')
+        });
         const details = await Private.showGitOperationDialog(
           gitModel,
           Operation.Pull,
@@ -413,11 +425,37 @@ export function addCommands(
           'Encountered an error when pulling changes. Error: ',
           error
         );
-        logger.log({
-          message: trans.__('Failed to pull'),
-          level: Level.ERROR,
-          error: error as Error
-        });
+
+        const errorMsg =
+          typeof error === 'string' ? error : (error as Error).message;
+
+        // Discard changes then retry pull
+        if (
+          errorMsg
+            .toLowerCase()
+            .includes(
+              'your local changes to the following files would be overwritten by merge'
+            )
+        ) {
+          await commands.execute(CommandIDs.gitPull, {
+            force: true,
+            fallback: true
+          });
+        } else {
+          if ((error as any).cancelled) {
+            // Empty message to hide alert
+            logger.log({
+              message: '',
+              level: Level.INFO
+            });
+          } else {
+            logger.log({
+              message: trans.__('Failed to pull'),
+              level: Level.ERROR,
+              error
+            });
+          }
+        }
       }
     }
   });
@@ -1155,10 +1193,13 @@ export function createGitMenu(
     CommandIDs.gitAddRemote,
     CommandIDs.gitTerminalCommand
   ].forEach(command => {
+    menu.addItem({ command });
     if (command === CommandIDs.gitPush) {
       menu.addItem({ command, args: { force: true } });
     }
-    menu.addItem({ command });
+    if (command === CommandIDs.gitPull) {
+      menu.addItem({ command, args: { force: true } });
+    }
   });
 
   menu.addItem({ type: 'separator' });
