@@ -18,7 +18,7 @@ import { GitExtension } from './model';
 import { addCloneButton } from './widgets/gitClone';
 
 export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/git:command-clone:plugin',
+  id: '@jupyterlab/git:clone',
   requires: [ITranslator, IGitExtension, IFileBrowserFactory],
   activate: (
     app: JupyterFrontEnd,
