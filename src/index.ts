@@ -25,6 +25,7 @@ import { gitIcon } from './style/icons';
 import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
+import { gitCloneCommandPlugin } from './cloneCommand';
 
 export { DiffModel } from './components/diff/model';
 export { NotebookDiff } from './components/diff/NotebookDiff';
@@ -54,7 +55,7 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
 /**
  * Export the plugin as default.
  */
-export default plugin;
+export default [plugin, gitCloneCommandPlugin];
 
 /**
  * Activate the running plugin.
