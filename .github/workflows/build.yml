@@ -134,11 +134,21 @@ jobs:
           python -m pip install -U pip
           python -m pip install jupyterlab~=3.0 jupyter-archive ./jupyterlab_git*.whl
 
-      - name: UI tests
+      - name: Start server for UI tests
         run: |
           jlpm
           jlpm install:browser
           jlpm start-jlab:detached
+        working-directory: ui-tests
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 180000
+
+      - name: UI tests
+        run: |
           jlpm run test
         working-directory: ui-tests
 
