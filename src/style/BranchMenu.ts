@@ -116,7 +116,7 @@ export const newBranchButtonClass = style({
 export const listItemClass = style(
   {
     padding: '4px 11px!important',
-    userSelect: null
+    userSelect: 'none'
   },
   showButtonOnHover
 );
