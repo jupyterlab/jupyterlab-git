@@ -36,6 +36,7 @@ export const commitDetailHeaderClass = style({
 });
 
 export const commitDetailFileClass = style({
+  userSelect: 'none',
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',

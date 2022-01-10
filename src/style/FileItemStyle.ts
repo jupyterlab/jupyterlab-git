@@ -3,6 +3,7 @@ import { showButtonOnHover } from './ActionButtonStyle';
 
 export const fileStyle = style(
   {
+    userSelect: 'none',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
