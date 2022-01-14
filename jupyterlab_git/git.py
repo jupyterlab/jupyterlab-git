@@ -935,7 +935,8 @@ class Git:
             is_remote_branch = self._is_remote_branch(reference_name)
 
         if is_remote_branch:
-            cmd = ["git", "checkout", "--track", branchname]
+            local_branchname = branchname.split("/")[-1]
+            cmd = ["git", "checkout", "-B", local_branchname, branchname]
         else:
             cmd = ["git", "checkout", branchname]
 

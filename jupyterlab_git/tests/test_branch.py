@@ -120,7 +120,8 @@ async def test_checkout_branch_noref_failure():
 
 @pytest.mark.asyncio
 async def test_checkout_branch_remoteref_success():
-    branch = "test-branch"
+    branch = "origin/test-branch"
+    local_branch = "test-branch"
     curr_path = str(Path("/bin/test_curr_path"))
     stdout_message = "checkout output from git"
     stderr_message = ""
@@ -145,7 +146,7 @@ async def test_checkout_branch_remoteref_success():
             # Then
             mock__get_branch_reference.assert_has_calls([call(branch, curr_path)])
 
-            cmd = ["git", "checkout", "--track", branch]
+            cmd = ["git", "checkout", "-B", local_branch, branch]
             mock_execute.assert_called_once_with(
                 cmd,
                 cwd=str(Path("/bin") / "test_curr_path"),
@@ -229,7 +230,8 @@ async def test_checkout_branch_headsref_success():
 
 @pytest.mark.asyncio
 async def test_checkout_branch_remoteref_failure():
-    branch = "test-branch"
+    branch = "origin/test-branch"
+    local_branch = "test-branch"
     stdout_message = ""
     stderr_message = (
         "error: pathspec '{}' did not match any file(s) known to git".format(branch)
@@ -253,7 +255,7 @@ async def test_checkout_branch_remoteref_failure():
             )
 
             # Then
-            cmd = ["git", "checkout", "--track", branch]
+            cmd = ["git", "checkout", "-B", local_branch, branch]
             mock_execute.assert_called_once_with(
                 cmd,
                 cwd=str(Path("/bin") / "test_curr_path"),
