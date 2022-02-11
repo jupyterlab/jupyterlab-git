@@ -262,6 +262,24 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Boolean indicating whether the application is dirty (e.g., due to unsaved files).
+   */
+  get hasDirtyStagedFiles(): boolean {
+    return this._hasDirtyStagedFiles;
+  }
+  set hasDirtyStagedFiles(value: boolean) {
+    this._hasDirtyStagedFiles = value;
+  }
+
+  /**
+   * A signal emitted indicating whether there are dirty (e.g., unsaved) staged files.
+   * This signal is emitted when there is a dirty staged file, and when there are no dirty staged files.
+   */
+  get dirtyStagedFilesStatusChanged(): ISignal<IGitExtension, boolean> {
+    return this._dirtyStagedFilesStatusChanged;
+  }
+
+  /**
    * Get the current markers
    *
    * Note: This makes sure it always returns non null value
@@ -931,6 +949,7 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
+      await this.refreshDirtyStagedStatus();
       const data = await this._taskHandler.execute<Git.IStatusResult>(
         'git:refresh:status',
         async () => {
@@ -1038,6 +1057,38 @@ export class GitExtension implements IGitExtension {
       }
     } else {
       this._changeUpstreamNotified = [];
+    }
+  }
+
+  /**
+   * Determines whether there are unsaved changes on staged files,
+   * e.g., the user has made changes to a file that has been staged,
+   * but has not saved them.
+   * Emits a signal indicating if there are unsaved changes.
+   * @returns promise that resolves upon refreshing the dirty status of staged files
+   */
+  async refreshDirtyStagedStatus(): Promise<void> {
+    // staged files
+    const fileNames = (await this._changedFiles('INDEX', 'HEAD')).files
+
+    let result = false;
+
+    for (const fileName of fileNames) {
+      const docWidget = this._docmanager.findWidget(
+        this.getRelativeFilePath(fileName)
+      );
+      if (docWidget !== undefined) {
+        const context = this._docmanager.contextForWidget(docWidget);
+        if (context.model.dirty) {
+          result = true;
+          break;
+        }
+      }
+    }
+
+    if (result !== this._hasDirtyStagedFiles) {
+      this._hasDirtyStagedFiles = result;
+      this._dirtyStagedFilesStatusChanged.emit(result);
     }
   }
 
@@ -1541,6 +1592,7 @@ export class GitExtension implements IGitExtension {
   private _remoteChangedFiles: Git.IStatusFile[] = [];
   private _changeUpstreamNotified: Git.IStatusFile[] = [];
   private _selectedHistoryFile: Git.IStatusFile | null = null;
+  private _hasDirtyStagedFiles = false;
 
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
@@ -1557,6 +1609,7 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     Git.IRemoteChangedNotification | null
   >(this);
+  private _dirtyStagedFilesStatusChanged = new Signal<IGitExtension, boolean>(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {
