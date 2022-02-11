@@ -125,6 +125,11 @@ export interface IGitPanelState {
    * Amend option toggle
    */
   commitAmend: boolean;
+
+  /**
+   * Whether there are dirty (e.g., unsaved) staged files.
+   */
+  hasDirtyStagedFiles: boolean;
 }
 
 /**
@@ -153,7 +158,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       tab: 0,
       commitSummary: '',
       commitDescription: '',
-      commitAmend: false
+      commitAmend: false,
+      hasDirtyStagedFiles: false
     };
   }
 
@@ -195,6 +201,12 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     }, this);
 
     settings.changed.connect(this.refreshView, this);
+
+    model.dirtyStagedFilesStatusChanged.connect((_, args) => {
+      this.setState({
+        hasDirtyStagedFiles: args
+      });
+    });
   }
 
   componentWillUnmount(): void {
@@ -414,6 +426,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           setDescription={this._setCommitDescription}
           setAmend={this._setCommitAmend}
           onCommit={this.commitFiles}
+          warnDirtyStagedFiles={this.state.hasDirtyStagedFiles}
         />
       </React.Fragment>
     );
