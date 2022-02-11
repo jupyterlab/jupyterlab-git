@@ -14,6 +14,34 @@ export const commitFormClass = style({
   borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
+export const dirtyStagedFilesWarningBoxClass = style({
+  marginBottom: '1em',
+  padding: 'var(--jp-code-padding)',
+
+  outline: 'none',
+  overflowX: 'auto',
+
+  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  borderRadius: '3px'
+});
+
+export const dirtyStagedFilesWarningBoxHeaderClass = style({
+  fontWeight: 'bold',
+  marginBottom: '0.5em',
+  color: 'var(--jp-warn-color1)',
+  padding: 0
+});
+
+export const dirtyStagedFilesWarningBoxContentClass = style({
+  color: 'var(--jp-warn-color1)',
+  padding: 0,
+  $nest: {
+    '&:last-child': {
+      paddingBottom: 0
+    }
+  }
+});
+
 export const commitSummaryClass = style({
   height: '2em',
 
