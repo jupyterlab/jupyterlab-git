@@ -64,7 +64,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * Test whether the application is dirty (e.g., due to unsaved files).
    */
-   hasDirtyStagedFiles: boolean;
+  hasDirtyStagedFiles: boolean;
 
   /**
    * Git repository status.

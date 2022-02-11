@@ -192,25 +192,21 @@ export class CommitBox extends React.Component<
       'Summary (%1 to commit)',
       shortcutHint
     );
-    const dirtyStagedFilesWarningTitle = this.props.trans.__(
-      'Warning'
-    )
+    const dirtyStagedFilesWarningTitle = this.props.trans.__('Warning');
     const dirtyStagedFilesWarningContent = this.props.trans.__(
-      'Looks like you still have unsaved staged files. ' +
-      'Remember to save and stage all needed changes before committing!'
-    )
+      'Looks like you still have unsaved staged files. Remember to save and stage all needed changes before committing!'
+    );
     return (
       <div className={classes(commitFormClass, 'jp-git-CommitBox')}>
-        { this.props.warnDirtyStagedFiles ? (
+        {this.props.warnDirtyStagedFiles ? (
           <WarningBox
             headerIcon={<WarningRoundedIcon />}
             title={dirtyStagedFilesWarningTitle}
             content={dirtyStagedFilesWarningContent}
           />
         ) : (
-          <React.Fragment>
-          </React.Fragment>
-        ) }
+          <React.Fragment></React.Fragment>
+        )}
         <CommitMessage
           trans={this.props.trans}
           summary={this.props.summary}

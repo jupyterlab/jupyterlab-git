@@ -37,7 +37,7 @@ export function WarningBox(props: IWarningBoxProps): JSX.Element {
         root: commitRoot
       }}
       className={dirtyStagedFilesWarningBoxClass}
-      variant='outlined'
+      variant="outlined"
     >
       <CardHeader
         className={dirtyStagedFilesWarningBoxHeaderClass}
@@ -45,9 +45,7 @@ export function WarningBox(props: IWarningBoxProps): JSX.Element {
         title={props.title}
         disableTypography={true}
       />
-      <CardContent
-        className={dirtyStagedFilesWarningBoxContentClass}
-      >
+      <CardContent className={dirtyStagedFilesWarningBoxContentClass}>
         {props.content}
       </CardContent>
     </Card>

@@ -1069,7 +1069,7 @@ export class GitExtension implements IGitExtension {
    */
   async refreshDirtyStagedStatus(): Promise<void> {
     // staged files
-    const fileNames = (await this._changedFiles('INDEX', 'HEAD')).files
+    const fileNames = (await this._changedFiles('INDEX', 'HEAD')).files;
 
     let result = false;
 
@@ -1609,7 +1609,9 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     Git.IRemoteChangedNotification | null
   >(this);
-  private _dirtyStagedFilesStatusChanged = new Signal<IGitExtension, boolean>(this);
+  private _dirtyStagedFilesStatusChanged = new Signal<IGitExtension, boolean>(
+    this
+  );
 }
 
 export class BranchMarker implements Git.IBranchMarker {
