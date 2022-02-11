@@ -29,7 +29,8 @@ describe('CommitBox', () => {
     hasFiles: false,
     commands: defaultCommands,
     trans: trans,
-    label: 'Commit'
+    label: 'Commit',
+    warnDirtyStagedFiles: false
   };
 
   describe('#constructor()', () => {
