@@ -20,12 +20,20 @@ test.describe('Merge conflict tests', () => {
     await page.sidebar.openTab('jp-git-sessions');
 
     await page.locator('button:has-text("Current Branchmaster")').click();
-  
+
     // Click on a-branch merge button
     await page.locator('text=a-branch').hover();
     await page.locator('text=a-branchmaster >> button').nth(1).click();
 
+    // Hide branch panel
     await page.locator('button:has-text("Current Branchmaster")').click();
+
+    // Force refresh
+    await page
+      .locator(
+        'button[title="Refresh the repository to detect local and remote changes"]'
+      )
+      .click();
   });
 
   test('should diff conflicted text file', async ({ page }) => {

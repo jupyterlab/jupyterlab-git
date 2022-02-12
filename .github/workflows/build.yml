@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.6', '3.7', '3.8', '3.9']
+        python-version: ['3.7', '3.8', '3.9', '3.10']
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -137,7 +137,7 @@ jobs:
       - name: Start server for UI tests
         run: |
           jlpm
-          jupyter lab --config jupyter_server_test_config.py 2>&1 > /tmp/jupyterlab_server.log &
+          (jupyter lab --config jupyter_server_test_config.py > /tmp/jupyterlab_server.log 2>&1) &
           jlpm run playwright install chromium
 
       - name: Wait for JupyterLab
