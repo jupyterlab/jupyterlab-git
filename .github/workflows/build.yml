@@ -83,7 +83,7 @@ jobs:
           jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
           python -m jupyterlab.browser_check
 
-          python -m build -w 
+          python -m build -w
 
       - uses: actions/upload-artifact@v2
         if: matrix.python-version == '3.9'
@@ -137,9 +137,8 @@ jobs:
       - name: Start server for UI tests
         run: |
           jlpm
-          jlpm install:browser
-          jlpm start-jlab:detached
-        working-directory: ui-tests
+          jupyter lab --config jupyter_server_test_config.py 2>&1 > /tmp/jupyterlab_server.log &
+          jlpm run playwright install chromium
 
       - name: Wait for JupyterLab
         uses: ifaxity/wait-on-action@v1
@@ -149,8 +148,7 @@ jobs:
 
       - name: UI tests
         run: |
-          jlpm run test
-        working-directory: ui-tests
+          jlpm run playwright test ./ui-tests
 
       - name: Upload UI Test artifacts
         if: always()
@@ -158,11 +156,15 @@ jobs:
         with:
           name: ui-test-output
           path: |
-            ui-tests/playwright-report
-            ui-tests/test-results
+            playwright-report
+            test-results
 
       - name: Stop JupyterLab
         if: always()
         run: |
           kill -s SIGTERM $(pgrep jupyter-lab)
-        working-directory: ui-tests
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log
