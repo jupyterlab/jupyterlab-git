@@ -250,6 +250,9 @@ describe('GitPanel', () => {
         },
         notifyRemoteChanges: {
           connect: jest.fn()
+        },
+        dirtyStagedFilesStatusChanged: {
+          connect: jest.fn()
         }
       } as any;
 
