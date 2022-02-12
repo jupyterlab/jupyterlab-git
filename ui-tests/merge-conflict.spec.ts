@@ -15,9 +15,17 @@ test.describe('Merge conflict tests', () => {
     );
 
     // URL for merge conflict example repository
-    await page.goto(`tree/${tmpPath}/test-repository`);
+    await page.goto(`tree/${tmpPath}/repository`);
 
     await page.sidebar.openTab('jp-git-sessions');
+
+    await page.locator('button:has-text("Current Branchmaster")').click();
+  
+    // Click on a-branch merge button
+    await page.locator('text=a-branch').hover();
+    await page.locator('text=a-branchmaster >> button').nth(1).click();
+
+    await page.locator('button:has-text("Current Branchmaster")').click();
   });
 
   test('should diff conflicted text file', async ({ page }) => {
@@ -39,7 +47,7 @@ test.describe('Merge conflict tests', () => {
   });
 
   test('should diff conflicted notebook file', async ({ page }) => {
-    await page.click('[title="Untitled.ipynb • Conflicted"]', {
+    await page.click('[title="example.ipynb • Conflicted"]', {
       clickCount: 2
     });
     await page.waitForSelector(
