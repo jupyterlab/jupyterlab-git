@@ -137,6 +137,5 @@ dmypy.json
 src/version.ts
 
 # Integration tests
-ui-tests/node_modules/
-ui-tests/test-results/
-ui-tests/playwright-report/
+test-results/
+playwright-report/
