@@ -37,7 +37,7 @@ export const defaultMockedResponses: {
       return {
         code: 0,
         files: []
-      }
+      };
     }
   },
   show_prefix: {
