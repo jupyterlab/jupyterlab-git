@@ -136,8 +136,8 @@ jobs:
 
       - name: Set up git
         run: |
-          git config user.name 'Test Bot'
-          git config user.email 'test-bot@example.com'
+          git config --global user.name 'Test Bot'
+          git config --global user.email 'test-bot@example.com'
 
       - name: Start server for UI tests
         working-directory: ui-tests
