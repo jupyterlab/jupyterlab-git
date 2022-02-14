@@ -140,6 +140,7 @@ jobs:
           git config user.email 'test-bot@example.com'
 
       - name: Start server for UI tests
+        working-directory: ui-tests
         run: |
           jlpm
           (jupyter lab --config jupyter_server_test_config.py > /tmp/jupyterlab_server.log 2>&1) &
@@ -152,8 +153,9 @@ jobs:
           timeout: 180000
 
       - name: UI tests
+        working-directory: ui-tests
         run: |
-          jlpm run playwright test ./ui-tests
+          jlpm run playwright test
 
       - name: Upload UI Test artifacts
         if: always()
@@ -161,8 +163,8 @@ jobs:
         with:
           name: ui-test-output
           path: |
-            playwright-report
-            test-results
+            ui-tests/playwright-report
+            ui-tests/test-results
 
       - name: Stop JupyterLab
         if: always()
