@@ -134,6 +134,11 @@ jobs:
           python -m pip install -U pip
           python -m pip install jupyterlab~=3.0 jupyter-archive ./jupyterlab_git*.whl
 
+      - name: Set up git
+        run: |
+          git config user.name 'Test Bot'
+          git config user.email 'test-bot@example.com'
+
       - name: Start server for UI tests
         run: |
           jlpm
