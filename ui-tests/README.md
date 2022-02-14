@@ -1,29 +1,6 @@
 # Test
 
-The test will produce a video to help debugging and check what happened.
-
-To execute integration tests, you have two options:
-
-- use docker-compose (cons: needs to know and use docker) - this is a more reliable solution.
-- run tests locally (cons: will interact with your JupyterLab user settings)
-
-## Test on docker
-
-1. Compile the extension:
-
-```
-jlpm install
-```
-
-2. Execute the docker stack in the ui-tests folder:
-
-```
-docker-compose -f ./docker/docker-compose.yml build --no-cache
-docker-compose -f ./docker/docker-compose.yml run --rm e2e
-docker-compose -f ./docker/docker-compose.yml down
-```
-
-## Test locally
+The test will produce a video to help debugging in case of failures and check what happened.
 
 1. Compile the extension:
 
@@ -35,7 +12,7 @@ jlpm run build:prod
 2. Start JupyterLab _with the extension installed_ without any token or password
 
 ```
-jupyter lab --ServerApp.token= --ServerApp.password=
+jupyter lab --config ./ui-tests/jupyter_server_config.py
 ```
 
 3. Execute in another console the [Playwright](https://playwright.dev/docs/intro) tests:
@@ -43,8 +20,8 @@ jupyter lab --ServerApp.token= --ServerApp.password=
 ```
 cd ui-tests
 jlpm install
-npx playwright install
-npx playwright test
+jlpm playwright install
+jlpm playwright test
 ```
 
 # Create tests
@@ -60,16 +37,8 @@ jlpm run build:prod
 
 2. Start JupyterLab _with the extension installed_ without any token or password:
 
-**Using docker**
-
 ```
-docker-compose -f ./docker/docker-compose.yml run --rm -p 8888:8888 lab
-```
-
-**Using local installation**
-
-```
-jupyter lab --ServerApp.token= --ServerApp.password=
+jupyter lab --config ./ui-tests/jupyter_server_config.py
 ```
 
 3. Launch the code generator tool:
@@ -77,8 +46,8 @@ jupyter lab --ServerApp.token= --ServerApp.password=
 ```
 cd ui-tests
 jlpm install
-npx playwright install
-npx playwright codegen localhost:8888
+jlpm playwright install
+jlpm playwright codegen localhost:8888
 ```
 
 # Debug tests
@@ -94,16 +63,8 @@ jlpm run build:prod
 
 2. Start JupyterLab _with the extension installed_ without any token or password:
 
-**Using docker**
-
 ```
-docker-compose -f ./docker/docker-compose.yml run --rm -p 8888:8888 lab
-```
-
-**Using local installation**
-
-```
-jupyter lab --ServerApp.token= --ServerApp.password=
+jupyter lab --config ./ui-tests/jupyter_server_config.py
 ```
 
 3. Launch the debug tool:
@@ -111,6 +72,6 @@ jupyter lab --ServerApp.token= --ServerApp.password=
 ```
 cd ui-tests
 jlpm install
-npx playwright install
-PWDEBUG=1 npx playwright test
+jlpm playwright install
+PWDEBUG=1 jlpm playwright test
 ```

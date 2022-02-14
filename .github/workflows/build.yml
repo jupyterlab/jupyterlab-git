@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: master
+    branches: ['master']
   pull_request:
-    branches: '*'
+    branches: ['master']
 
 jobs:
   test-3x:
@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.6', '3.7', '3.8', '3.9']
+        python-version: ['3.7', '3.8', '3.9', '3.10']
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Install node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -59,7 +59,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Install dependencies
-        run: python -m pip install -U jupyter_packaging~=0.7.9 jupyterlab~=3.0 pip wheel
+        run: python -m pip install -U jupyter_packaging~=0.7.9 jupyterlab~=3.0 pip wheel build
       - name: Test the extension
         run: |
           jlpm
@@ -83,13 +83,14 @@ jobs:
           jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
           python -m jupyterlab.browser_check
 
+          python -m build -w
+
       - uses: actions/upload-artifact@v2
         if: matrix.python-version == '3.9'
         with:
           name: extension
-          path: |
-            jupyterlab_git
-            jupyter-config
+          path: dist/jupyterlab_git*.whl
+          if-no-files-found: error
 
   ui-test:
     name: Integration tests
@@ -100,17 +101,61 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
       - uses: actions/download-artifact@v2
         with:
           name: extension
+      - name: Setup Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+          architecture: 'x64'
+
+      - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+
+      - name: pip cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-3.9-${{ hashFiles('**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-3.9-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        # Install jupyter-archive to deal with test git repository upload
+        run: |
+          python -m pip install -U pip
+          python -m pip install jupyterlab~=3.0 jupyter-archive ./jupyterlab_git*.whl
+
+      - name: Set up git
+        run: |
+          git config --global user.name 'Test Bot'
+          git config --global user.email 'test-bot@example.com'
+
+      - name: Start server for UI tests
+        working-directory: ui-tests
+        run: |
+          jlpm
+          (jupyter lab --config jupyter_server_test_config.py > /tmp/jupyterlab_server.log 2>&1) &
+          jlpm run playwright install chromium
+
+      - name: Wait for JupyterLab
+        uses: ifaxity/wait-on-action@v1
+        with:
+          resource: http-get://localhost:8888/lab
+          timeout: 180000
 
       - name: UI tests
-        run: |
-          docker-compose -f ./docker/docker-compose.yml down || true
-          docker-compose -f ./docker/docker-compose.yml pull -q || true
-          docker-compose -f ./docker/docker-compose.yml build
-          docker-compose -f ./docker/docker-compose.yml run --rm e2e
         working-directory: ui-tests
+        run: |
+          jlpm run playwright test
 
       - name: Upload UI Test artifacts
         if: always()
@@ -118,12 +163,15 @@ jobs:
         with:
           name: ui-test-output
           path: |
+            ui-tests/playwright-report
             ui-tests/test-results
 
-      - name: Stop containers
+      - name: Stop JupyterLab
         if: always()
         run: |
-          # Print jupyterlab logs before removing the containers using the container name set in docker-compose file
-          docker logs jupyterlab
-          docker-compose -f ./docker/docker-compose.yml down
-        working-directory: ui-tests
+          kill -s SIGTERM $(pgrep jupyter-lab)
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log
