@@ -144,7 +144,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   constructor(props: IGitPanelProps) {
     super(props);
-    const { branches, currentBranch, pathRepository } = props.model;
+    const { branches, currentBranch, pathRepository, hasDirtyStagedFiles } =
+      props.model;
 
     this.state = {
       branches: branches,
@@ -159,7 +160,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       commitSummary: '',
       commitDescription: '',
       commitAmend: false,
-      hasDirtyStagedFiles: false
+      hasDirtyStagedFiles: hasDirtyStagedFiles
     };
   }
 
