@@ -268,7 +268,10 @@ export class GitExtension implements IGitExtension {
     return this._hasDirtyStagedFiles;
   }
   set hasDirtyStagedFiles(value: boolean) {
-    this._hasDirtyStagedFiles = value;
+    if (this._hasDirtyStagedFiles !== value) {
+      this._hasDirtyStagedFiles = value;
+      this._dirtyStagedFilesStatusChanged.emit(value);
+    }
   }
 
   /**
@@ -1086,10 +1089,7 @@ export class GitExtension implements IGitExtension {
       }
     }
 
-    if (result !== this._hasDirtyStagedFiles) {
-      this._hasDirtyStagedFiles = result;
-      this._dirtyStagedFilesStatusChanged.emit(result);
-    }
+    this.hasDirtyStagedFiles = result;
   }
 
   /**
