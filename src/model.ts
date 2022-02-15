@@ -961,7 +961,6 @@ export class GitExtension implements IGitExtension {
     }
 
     try {
-      await this.refreshDirtyStagedStatus();
       const data = await this._taskHandler.execute<Git.IStatusResult>(
         'git:refresh:status',
         async () => {
@@ -985,6 +984,7 @@ export class GitExtension implements IGitExtension {
         behind: data.behind || 0,
         files
       });
+      await this.refreshDirtyStagedStatus();
     } catch (err) {
       // TODO we should notify the user
       this._clearStatus();
@@ -1079,8 +1079,13 @@ export class GitExtension implements IGitExtension {
    * @returns promise that resolves upon refreshing the dirty status of staged files
    */
   async refreshDirtyStagedStatus(): Promise<void> {
-    // staged files
-    const fileNames = (await this._changedFiles('INDEX', 'HEAD')).files;
+    // we assume the repository status has been refreshed prior to this
+
+    // get staged files
+    const stagedFiles = this.status.files.filter(
+      file => file.status === 'staged' || file.status === 'partially-staged'
+    );
+    const fileNames = stagedFiles.map(file => file.to);
 
     let result = false;
 
