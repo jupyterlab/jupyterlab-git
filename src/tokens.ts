@@ -62,7 +62,8 @@ export interface IGitExtension extends IDisposable {
   selectedHistoryFile: Git.IStatusFile | null;
 
   /**
-   * Test whether the application is dirty (e.g., due to unsaved files).
+   * Boolean indicating whether there are dirty staged files
+   * (e.g., due to unsaved changes on files that have been previously staged).
    */
   hasDirtyStagedFiles: boolean;
 
@@ -99,7 +100,8 @@ export interface IGitExtension extends IDisposable {
 
   /**
    * A signal emitted indicating whether there are dirty (e.g., unsaved) staged files.
-   * This signal is emitted when there is a dirty staged file, and when there are no dirty staged files.
+   * This signal is emitted when there is a dirty staged file but none in prior,
+   * and vice versa, when there are no dirty staged files but there were previously.
    */
   readonly dirtyStagedFilesStatusChanged: ISignal<IGitExtension, boolean>;
 
