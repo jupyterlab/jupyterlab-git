@@ -262,11 +262,19 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Boolean indicating whether the application is dirty (e.g., due to unsaved files).
+   * Boolean indicating whether there are dirty staged files
+   * (e.g., due to unsaved changes on files that have been previously staged).
    */
   get hasDirtyStagedFiles(): boolean {
     return this._hasDirtyStagedFiles;
   }
+  /**
+   * Updates the value of the boolean indicating whether there are dirty staged files
+   * (e.g., due to unsaved changes on files that have been previously staged).
+   * Emits a signal indicating if necessary.
+   * This signal is emitted when there is a dirty staged file but none previously,
+   * and vice versa, when there are no dirty staged files but there were some previously.
+   */
   set hasDirtyStagedFiles(value: boolean) {
     if (this._hasDirtyStagedFiles !== value) {
       this._hasDirtyStagedFiles = value;
@@ -276,7 +284,8 @@ export class GitExtension implements IGitExtension {
 
   /**
    * A signal emitted indicating whether there are dirty (e.g., unsaved) staged files.
-   * This signal is emitted when there is a dirty staged file, and when there are no dirty staged files.
+   * This signal is emitted when there is a dirty staged file but none previously,
+   * and vice versa, when there are no dirty staged files but there were some previously.
    */
   get dirtyStagedFilesStatusChanged(): ISignal<IGitExtension, boolean> {
     return this._dirtyStagedFilesStatusChanged;
@@ -1067,7 +1076,6 @@ export class GitExtension implements IGitExtension {
    * Determines whether there are unsaved changes on staged files,
    * e.g., the user has made changes to a file that has been staged,
    * but has not saved them.
-   * Emits a signal indicating if there are unsaved changes.
    * @returns promise that resolves upon refreshing the dirty status of staged files
    */
   async refreshDirtyStagedStatus(): Promise<void> {
