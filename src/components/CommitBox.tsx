@@ -198,14 +198,12 @@ export class CommitBox extends React.Component<
     );
     return (
       <div className={classes(commitFormClass, 'jp-git-CommitBox')}>
-        {this.props.warnDirtyStagedFiles ? (
+        {this.props.warnDirtyStagedFiles && (
           <WarningBox
             headerIcon={<WarningRoundedIcon />}
             title={dirtyStagedFilesWarningTitle}
             content={dirtyStagedFilesWarningContent}
           />
-        ) : (
-          <React.Fragment></React.Fragment>
         )}
         <CommitMessage
           trans={this.props.trans}
