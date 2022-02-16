@@ -262,6 +262,36 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Boolean indicating whether there are dirty staged files
+   * (e.g., due to unsaved changes on files that have been previously staged).
+   */
+  get hasDirtyStagedFiles(): boolean {
+    return this._hasDirtyStagedFiles;
+  }
+  /**
+   * Updates the value of the boolean indicating whether there are dirty staged files
+   * (e.g., due to unsaved changes on files that have been previously staged).
+   * Emits a signal indicating if necessary.
+   * This signal is emitted when there is a dirty staged file but none previously,
+   * and vice versa, when there are no dirty staged files but there were some previously.
+   */
+  set hasDirtyStagedFiles(value: boolean) {
+    if (this._hasDirtyStagedFiles !== value) {
+      this._hasDirtyStagedFiles = value;
+      this._dirtyStagedFilesStatusChanged.emit(value);
+    }
+  }
+
+  /**
+   * A signal emitted indicating whether there are dirty (e.g., unsaved) staged files.
+   * This signal is emitted when there is a dirty staged file but none previously,
+   * and vice versa, when there are no dirty staged files but there were some previously.
+   */
+  get dirtyStagedFilesStatusChanged(): ISignal<IGitExtension, boolean> {
+    return this._dirtyStagedFilesStatusChanged;
+  }
+
+  /**
    * Get the current markers
    *
    * Note: This makes sure it always returns non null value
@@ -954,6 +984,7 @@ export class GitExtension implements IGitExtension {
         behind: data.behind || 0,
         files
       });
+      await this.refreshDirtyStagedStatus();
     } catch (err) {
       // TODO we should notify the user
       this._clearStatus();
@@ -1039,6 +1070,39 @@ export class GitExtension implements IGitExtension {
     } else {
       this._changeUpstreamNotified = [];
     }
+  }
+
+  /**
+   * Determines whether there are unsaved changes on staged files,
+   * e.g., the user has made changes to a file that has been staged,
+   * but has not saved them.
+   * @returns promise that resolves upon refreshing the dirty status of staged files
+   */
+  async refreshDirtyStagedStatus(): Promise<void> {
+    // we assume the repository status has been refreshed prior to this
+
+    // get staged files
+    const stagedFiles = this.status.files.filter(
+      file => file.status === 'staged' || file.status === 'partially-staged'
+    );
+    const fileNames = stagedFiles.map(file => file.to);
+
+    let result = false;
+
+    for (const fileName of fileNames) {
+      const docWidget = this._docmanager.findWidget(
+        this.getRelativeFilePath(fileName)
+      );
+      if (docWidget !== undefined) {
+        const context = this._docmanager.contextForWidget(docWidget);
+        if (context.model.dirty) {
+          result = true;
+          break;
+        }
+      }
+    }
+
+    this.hasDirtyStagedFiles = result;
   }
 
   /**
@@ -1541,6 +1605,7 @@ export class GitExtension implements IGitExtension {
   private _remoteChangedFiles: Git.IStatusFile[] = [];
   private _changeUpstreamNotified: Git.IStatusFile[] = [];
   private _selectedHistoryFile: Git.IStatusFile | null = null;
+  private _hasDirtyStagedFiles = false;
 
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
@@ -1557,6 +1622,9 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     Git.IRemoteChangedNotification | null
   >(this);
+  private _dirtyStagedFilesStatusChanged = new Signal<IGitExtension, boolean>(
+    this
+  );
 }
 
 export class BranchMarker implements Git.IBranchMarker {
