@@ -1039,7 +1039,8 @@ export function addCommands(
       const { files } = args as any as CommandArguments.IGitContextAction;
       const extensions = files
         .map(file => PathExt.extname(file.to))
-        .filter(extension => extension.length > 0);
+        .filter(extension => extension.length > 0)
+        .filter((item, index, arr) => arr.indexOf(item) === index);
       return trans._n(
         'Ignore %2 extension (add to .gitignore)',
         'Ignore %2 extensions (add to .gitignore)',
