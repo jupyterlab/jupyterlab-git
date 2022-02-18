@@ -6,6 +6,7 @@ import 'jest';
 import * as React from 'react';
 import { CommitBox, ICommitBoxProps } from '../../src/components/CommitBox';
 import { CommitMessage } from '../../src/components/CommitMessage';
+import { WarningBox } from '../../src/components/WarningBox';
 import { CommandIDs } from '../../src/tokens';
 
 describe('CommitBox', () => {
@@ -29,7 +30,8 @@ describe('CommitBox', () => {
     hasFiles: false,
     commands: defaultCommands,
     trans: trans,
-    label: 'Commit'
+    label: 'Commit',
+    warnDirtyStagedFiles: false
   };
 
   describe('#constructor()', () => {
@@ -134,6 +136,15 @@ describe('CommitBox', () => {
       const node = component.find(Button).first();
       const prop = node.prop('disabled');
       expect(prop).toEqual(false);
+    });
+
+    it('should render a warning box when there are dirty staged files', () => {
+      const props = {
+        ...defaultProps,
+        warnDirtyStagedFiles: true
+      };
+      const component = shallow(<CommitBox {...props} />);
+      expect(component.find(WarningBox).length).toEqual(1);
     });
   });
 });

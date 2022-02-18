@@ -28,6 +28,8 @@ import {
 } from '../style/NewBranchDialog';
 import { CommandIDs } from '../tokens';
 import { CommitMessage } from './CommitMessage';
+import { WarningBox } from './WarningBox';
+import { WarningRounded as WarningRoundedIcon } from '@material-ui/icons';
 
 /**
  * Commit action
@@ -81,6 +83,11 @@ export interface ICommitBoxProps {
    * Whether commit is amending the previous one or not
    */
   amend: boolean;
+
+  /**
+   * Whether the warning box for dirty (e.g., unsaved) staged files is shown.
+   */
+  warnDirtyStagedFiles: boolean;
 
   /**
    * Updates the commit message summary.
@@ -185,8 +192,19 @@ export class CommitBox extends React.Component<
       'Summary (%1 to commit)',
       shortcutHint
     );
+    const dirtyStagedFilesWarningTitle = this.props.trans.__('Warning');
+    const dirtyStagedFilesWarningContent = this.props.trans.__(
+      'Looks like you still have unsaved staged files. Remember to save and stage all needed changes before committing!'
+    );
     return (
       <div className={classes(commitFormClass, 'jp-git-CommitBox')}>
+        {this.props.warnDirtyStagedFiles && (
+          <WarningBox
+            headerIcon={<WarningRoundedIcon />}
+            title={dirtyStagedFilesWarningTitle}
+            content={dirtyStagedFilesWarningContent}
+          />
+        )}
         <CommitMessage
           trans={this.props.trans}
           summary={this.props.summary}

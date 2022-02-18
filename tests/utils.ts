@@ -32,6 +32,14 @@ export const defaultMockedResponses: {
       };
     }
   },
+  changed_files: {
+    body: () => {
+      return {
+        code: 0,
+        files: []
+      };
+    }
+  },
   show_prefix: {
     body: () => {
       return {
