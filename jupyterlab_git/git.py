@@ -261,7 +261,7 @@ class Git:
 
         return response
 
-    async def clone(self, path, repo_url, auth=None):
+    async def clone(self, path, repo_url, auth=None, cache_credentials=None):
         """
         Execute `git clone`.
         When no auth is provided, disables prompts for the password to avoid the terminal hanging.
@@ -273,6 +273,8 @@ class Git:
         """
         env = os.environ.copy()
         if auth:
+            if cache_credentials:
+                await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
                 ["git", "clone", unquote(repo_url), "-q"],
@@ -296,7 +298,7 @@ class Git:
 
         return response
 
-    async def fetch(self, path):
+    async def fetch(self, path, auth=None, cache_credentials=False):
         """
         Execute git fetch command
         """
@@ -308,8 +310,21 @@ class Git:
             "--all",
             "--prune",
         ]  # Run prune by default to help beginners
-
-        code, _, fetch_error = await execute(cmd, cwd=cwd)
+        env = os.environ.copy()
+        if auth:
+            if cache_credentials:
+                await self.ensure_credential_helper(path)
+            env["GIT_TERMINAL_PROMPT"] = "1"
+            code, _, fetch_error = await execute(
+                cmd,
+                cwd=cwd,
+                username=auth["username"],
+                password=auth["password"],
+                env=env,
+            )
+        else:
+            env["GIT_TERMINAL_PROMPT"] = "0"
+            code, _, fetch_error = await execute(cmd, cwd=cwd, env=env)
 
         result = {
             "code": code,
@@ -998,13 +1013,17 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
-    async def pull(self, path, auth=None, cancel_on_conflict=False):
+    async def pull(
+        self, path, auth=None, cancel_on_conflict=False, cache_credentials=False
+    ):
         """
         Execute git pull --no-commit.  Disables prompts for the password to avoid the terminal hanging while waiting
         for auth.
         """
         env = os.environ.copy()
         if auth:
+            if cache_credentials:
+                await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
                 ["git", "pull", "--no-commit"],
@@ -1048,7 +1067,14 @@ class Git:
         return response
 
     async def push(
-        self, remote, branch, path, auth=None, set_upstream=False, force=False
+        self,
+        remote,
+        branch,
+        path,
+        auth=None,
+        set_upstream=False,
+        force=False,
+        cache_credentials=False,
     ):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
@@ -1062,6 +1088,8 @@ class Git:
 
         env = os.environ.copy()
         if auth:
+            if cache_credentials:
+                await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
                 command,
