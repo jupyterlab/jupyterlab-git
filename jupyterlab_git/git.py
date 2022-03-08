@@ -1540,3 +1540,34 @@ class Git:
                 "command": " ".join(command),
                 "message": error,
             }
+
+    async def check_credential_helper(self, path):
+        git_config_response = await self.config(path)
+        if git_config_response["code"] != 0:
+            return git_config_response
+
+        git_config_kv_pairs = git_config_response["options"]
+        has_credential_helper = "credential.helper" in git_config_kv_pairs
+
+        return {"code": 0, "result": has_credential_helper}
+
+    async def ensure_credential_helper(self, path):
+        """
+        Check whether `git config --list` contains `credential.helper`.
+        If it is not set, then it will be set to the value string for `credential.helper`
+        defined in the server settings.
+        """
+
+        check_credential_helper = await self.check_credential_helper(path)
+
+        if check_credential_helper["code"] != 0:
+            return check_credential_helper
+        has_credential_helper = check_credential_helper["result"]
+
+        if not has_credential_helper:
+            config_response = await self.config(
+                path, **{"credential.helper": self._config.credential_helper}
+            )
+            return config_response
+        else:
+            return {"code": 0}
