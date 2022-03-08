@@ -23,7 +23,7 @@ from .git import DEFAULT_REMOTE_NAME, Git
 from .log import get_logger
 
 # Git configuration options exposed through the REST API
-ALLOWED_OPTIONS = ["user.name", "user.email"]
+ALLOWED_OPTIONS = ["user.name", "user.email", "credential.helper"]
 # REST API namespace
 NAMESPACE = "/git"
 
@@ -73,7 +73,10 @@ class GitCloneHandler(GitHandler):
         """
         data = self.get_json_body()
         response = await self.git.clone(
-            self.url2localpath(path), data["clone_url"], data.get("auth", None)
+            self.url2localpath(path),
+            data["clone_url"],
+            data.get("auth", None),
+            data.get("cache_credentials", False),
         )
 
         if response["code"] != 0:
@@ -170,7 +173,12 @@ class GitFetchHandler(GitHandler):
         """
         POST request handler, fetch from remotes.
         """
-        result = await self.git.fetch(self.url2localpath(path))
+        data = self.get_json_body()
+        result = await self.git.fetch(
+            self.url2localpath(path),
+            data.get("auth", None),
+            data.get("cache_credentials", False),
+        )
 
         if result["code"] != 0:
             self.set_status(500)
@@ -533,6 +541,7 @@ class GitPullHandler(GitHandler):
             self.url2localpath(path),
             data.get("auth", None),
             data.get("cancel_on_conflict", False),
+            data.get("cache_credentials", False),
         )
 
         if response["code"] != 0:
@@ -563,6 +572,7 @@ class GitPushHandler(GitHandler):
         data = self.get_json_body()
         known_remote = data.get("remote")
         force = data.get("force", False)
+        cache_credentials = data.get("cache_credentials", False)
 
         current_local_branch = await self.git.get_current_branch(local_path)
 
@@ -591,6 +601,7 @@ class GitPushHandler(GitHandler):
                 data.get("auth", None),
                 set_upstream,
                 force,
+                cache_credentials,
             )
 
         else:
@@ -617,6 +628,7 @@ class GitPushHandler(GitHandler):
                     data.get("auth", None),
                     set_upstream=True,
                     force=force,
+                    cache_credentials=cache_credentials,
                 )
             else:
                 response = {
