@@ -1141,6 +1141,7 @@ export function createGitMenu(
     CommandIDs.gitMerge,
     CommandIDs.gitPush,
     CommandIDs.gitPull,
+    CommandIDs.gitResetToRemote,
     CommandIDs.gitAddRemote,
     CommandIDs.gitTerminalCommand
   ].forEach(command => {
