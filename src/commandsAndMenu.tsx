@@ -1405,12 +1405,12 @@ export async function showGitOperationDialog<T>(
         title: trans.__('Git credentials required'),
         body: new GitCredentialsForm(
           trans,
-          trans.__('Hello my name is Zeshan'),
+          trans.__('March 11th 11:45AM'),
           retry ? trans.__('Incorrect username or password.') : ''
-        ),
-      buttons: [
-        Dialog.cacheCredentials({label: trans.__('Cache Credentials?')})
-      ]
+        )//,
+      //buttons: [
+      //  Dialog.cacheCredentials({label: trans.__('Cache Credentials?')})
+      //]
       });
 
       if (credentials.button.accept) {
