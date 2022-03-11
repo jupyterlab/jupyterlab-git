@@ -443,8 +443,10 @@ export function addCommands(
           logger.log({
             message: trans.__('Successfully reset'),
             level: Level.SUCCESS,
-            details: trans.__('Successfully reset the current branch to its remote state')
-          })
+            details: trans.__(
+              'Successfully reset the current branch to its remote state'
+            )
+          });
         } catch (error) {
           console.error(
             'Encountered an error when resetting the current branch to its remote state. Error: ',
