@@ -25,7 +25,7 @@ export class GitCredentialsForm
     const label = document.createElement('label');
     this._user = document.createElement('input');
     this._password = document.createElement('input');
-    this.cacheCredentials = document.createElement('input');
+    this._cacheCredentials = document.createElement('input');
     this._password.type = 'password';
 
     const text = document.createElement('span');
