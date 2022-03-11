@@ -25,7 +25,7 @@ export class GitCredentialsForm
     const label = document.createElement('label');
     this._user = document.createElement('input');
     this._password = document.createElement('input');
-    this.cacheCredentials = document.createElement('input');
+    //this.cacheCredentials = document.createElement('input');
     this._password.type = 'password';
 
     const text = document.createElement('span');
@@ -36,7 +36,7 @@ export class GitCredentialsForm
     text.textContent = textContent;
     warning.textContent = warningContent;
     this._user.placeholder = this._trans.__('username');
-    this.cacheCredentials.placeholder = this._trans.__('Cache credentials?');
+    //this.cacheCredentials.placeholder = this._trans.__('Cache credentials?');
     this._password.placeholder = this._trans.__(
       'password / personal access token'
       
@@ -45,7 +45,7 @@ export class GitCredentialsForm
     label.appendChild(text);
     label.appendChild(this._user);
     label.appendChild(this._password);
-    label.appendChild(this._cacheCredentials);
+    //label.appendChild(this._cacheCredentials);
     node.appendChild(label);
     node.appendChild(warning);
     return node;
@@ -59,10 +59,10 @@ export class GitCredentialsForm
       username: this._user.value,
       password: this._password.value
     };
-    return this._cacheCredentials;
+    //return this._cacheCredentials;
   }
   protected _trans: TranslationBundle;
   private _user: HTMLInputElement;
   private _password: HTMLInputElement;
-  private _cacheCredentials: HTMLInputElement;
+  //private _cacheCredentials: HTMLInputElement;
 }
