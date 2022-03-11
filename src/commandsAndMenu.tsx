@@ -1405,7 +1405,7 @@ export async function showGitOperationDialog<T>(
         title: trans.__('Git credentials required'),
         body: new GitCredentialsForm(
           trans,
-          trans.__('Enter credentials for remote repository'),
+          trans.__('Hello my name is Zeshan'),
           retry ? trans.__('Incorrect username or password.') : ''
         )
       });
