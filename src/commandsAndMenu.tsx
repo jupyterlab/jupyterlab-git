@@ -1407,7 +1407,10 @@ export async function showGitOperationDialog<T>(
           trans,
           trans.__('Hello my name is Zeshan'),
           retry ? trans.__('Incorrect username or password.') : ''
-        )
+        ),
+      buttons: [
+        Dialog.cacheCredentials({label: trans.__('Cache Credentials?')})
+      ]
       });
 
       if (credentials.button.accept) {
