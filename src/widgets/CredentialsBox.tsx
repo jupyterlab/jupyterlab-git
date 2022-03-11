@@ -36,7 +36,7 @@ export class GitCredentialsForm
     text.textContent = textContent;
     warning.textContent = warningContent;
     this._user.placeholder = this._trans.__('username');
-    this.cacheCredentials.placeholder = this._trans.__('Cache credentials?');
+    this._cacheCredentials.placeholder = this._trans.__('Cache credentials?');
     this._password.placeholder = this._trans.__(
       'password / personal access token'
       
