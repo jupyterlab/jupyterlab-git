@@ -415,7 +415,7 @@ export function addCommands(
     label: trans.__('Reset to Remote'),
     caption: trans.__('Reset Current Branch to Remote State'),
     isEnabled: () => gitModel.pathRepository !== null,
-    execute: async _ => {
+    execute: async () => {
       const result = await showDialog({
         title: trans.__('Reset to Remote'),
         body: (
