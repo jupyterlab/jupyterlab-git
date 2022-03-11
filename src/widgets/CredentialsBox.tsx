@@ -59,7 +59,7 @@ export class GitCredentialsForm
       username: this._user.value,
       password: this._password.value
     };
-    return this._cacheCredentials;
+  //  return this._cacheCredentials;
   }
   protected _trans: TranslationBundle;
   private _user: HTMLInputElement;
