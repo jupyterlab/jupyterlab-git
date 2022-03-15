@@ -44,10 +44,9 @@ export class GitResetToRemoteForm
     this._chkCloseAllOpenedFiles = document.createElement('input');
     this._chkCloseAllOpenedFiles.type = 'checkbox';
     this._chkCloseAllOpenedFiles.checked = true;
-    
+
     const textWarnCloseAllOpenedFiles = document.createElement('span');
-    textWarnCloseAllOpenedFiles.textContent =
-      warningCloseAllOpenedFilesContent;
+    textWarnCloseAllOpenedFiles.textContent = warningCloseAllOpenedFilesContent;
 
     labelWarnCloseAllOpenedFiles.appendChild(this._chkCloseAllOpenedFiles);
     labelWarnCloseAllOpenedFiles.appendChild(textWarnCloseAllOpenedFiles);

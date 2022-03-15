@@ -27,7 +27,9 @@ describe('git-commands', () => {
 
   const mockedFileBrowserModel = {
     manager: {
-      closeAll: jest.fn<Promise<void>, any[]>().mockImplementation(() => Promise.resolve()),
+      closeAll: jest
+        .fn<Promise<void>, any[]>()
+        .mockImplementation(() => Promise.resolve())
     }
   } as any as FileBrowserModel;
 
