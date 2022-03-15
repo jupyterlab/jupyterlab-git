@@ -840,6 +840,11 @@ export class GitExtension implements IGitExtension {
         );
       }
     );
+    const changes = await this._changedFiles(
+      this._currentBranch.top_commit,
+      'HEAD'
+    );
+    changes?.files?.forEach(file => this._revertFile(file));
     this.refreshBranch(); // Will emit headChanged if required
     return data;
   }
