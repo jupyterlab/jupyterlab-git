@@ -1024,6 +1024,10 @@ export namespace Git {
       super('Not in a Git Repository');
     }
   }
+
+  export interface IGitResetToRemoteFormValue {
+    doCloseAllOpenedFiles: boolean;
+  }
 }
 
 /**
