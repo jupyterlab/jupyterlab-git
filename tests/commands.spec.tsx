@@ -198,8 +198,8 @@ describe('git-commands', () => {
               label: ''
             },
             value: {
-              doCloseAllOpenedFiles: checked
-            } as Git.IGitResetToRemoteFormValue
+              checked
+            } as Git.ICheckboxFormValue
           });
 
           const spyCloseAll = jest.spyOn(
@@ -207,8 +207,6 @@ describe('git-commands', () => {
             'closeAll'
           );
           spyCloseAll.mockResolvedValueOnce(undefined);
-
-          const path = DEFAULT_REPOSITORY_PATH;
 
           mockGit.requestAPI.mockImplementation(
             mockedRequestAPI({
@@ -221,6 +219,7 @@ describe('git-commands', () => {
             })
           );
 
+          const path = DEFAULT_REPOSITORY_PATH;
           model.pathRepository = path;
           await model.ready;
 
