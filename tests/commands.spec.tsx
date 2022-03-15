@@ -1,5 +1,6 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { showDialog } from '@jupyterlab/apputils';
+import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import 'jest';
@@ -16,12 +17,19 @@ import {
 
 jest.mock('../src/git');
 jest.mock('@jupyterlab/apputils');
+jest.mock('@jupyterlab/filebrowser');
 
 describe('git-commands', () => {
   const mockGit = git as jest.Mocked<typeof git>;
   let commands: CommandRegistry;
   let model: GitExtension;
   let mockResponses: IMockedResponses;
+
+  const mockedFileBrowserModel = {
+    manager: {
+      closeAll: jest.fn<Promise<void>, any[]>().mockImplementation(() => Promise.resolve()),
+    }
+  } as any as FileBrowserModel;
 
   beforeEach(async () => {
     jest.restoreAllMocks();
@@ -39,7 +47,13 @@ describe('git-commands', () => {
     };
 
     model = new GitExtension(app as any);
-    addCommands(app as JupyterFrontEnd, model, null, null, nullTranslator);
+    addCommands(
+      app as JupyterFrontEnd,
+      model,
+      mockedFileBrowserModel,
+      null,
+      nullTranslator
+    );
   });
 
   describe('git:add-remote', () => {
@@ -157,6 +171,68 @@ describe('git-commands', () => {
           spyCheckout.mockRestore();
         });
       });
+    });
+  });
+
+  describe('git:reset-to-remote', () => {
+    [true, false].forEach(checked => {
+      it(
+        checked
+          ? 'should close all opened files when the checkbox is checked'
+          : 'should not close all opened files when the checkbox is not checked',
+        async () => {
+          const mockDialog = showDialog as jest.MockedFunction<
+            typeof showDialog
+          >;
+          mockDialog.mockResolvedValue({
+            button: {
+              accept: true,
+              actions: [],
+              caption: '',
+              className: '',
+              displayType: 'default',
+              iconClass: '',
+              iconLabel: '',
+              label: ''
+            },
+            value: {
+              doCloseAllOpenedFiles: checked
+            } as Git.IGitResetToRemoteFormValue
+          });
+
+          const spyCloseAll = jest.spyOn(
+            mockedFileBrowserModel.manager,
+            'closeAll'
+          );
+          spyCloseAll.mockResolvedValueOnce(undefined);
+
+          const path = DEFAULT_REPOSITORY_PATH;
+
+          mockGit.requestAPI.mockImplementation(
+            mockedRequestAPI({
+              ...mockResponses,
+              reset_to_commit: {
+                body: () => {
+                  return { code: 0 };
+                }
+              }
+            })
+          );
+
+          model.pathRepository = path;
+          await model.ready;
+
+          await commands.execute(CommandIDs.gitResetToRemote);
+
+          if (checked) {
+            expect(spyCloseAll).toHaveBeenCalled();
+          } else {
+            expect(spyCloseAll).not.toHaveBeenCalled();
+          }
+
+          spyCloseAll.mockRestore();
+        }
+      );
     });
   });
 });
