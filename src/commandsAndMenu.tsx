@@ -47,7 +47,7 @@ import {
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
-import { GitResetToRemoteForm } from './widgets/GitResetToRemoteForm';
+import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 
 export interface IGitCloneArgs {
   /**
@@ -419,7 +419,15 @@ export function addCommands(
     execute: async () => {
       const result = await showDialog({
         title: trans.__('Reset to Remote'),
-        body: new GitResetToRemoteForm(trans),
+        body: new CheckboxForm(
+          trans.__(
+            'To bring the current branch to the state of its corresponding remote tracking branch, \
+            a hard reset will be performed, which may result in some files being permanently deleted \
+            and some changes being permanently discarded. Are you sure you want to proceed? \
+            This action cannot be undone.'
+          ),
+          trans.__('Also close all opened files to avoid conflicts')
+        ),
         buttons: [
           Dialog.cancelButton({ label: trans.__('Cancel') }),
           Dialog.warnButton({ label: trans.__('Proceed') })
@@ -427,7 +435,7 @@ export function addCommands(
       });
       if (result.button.accept) {
         try {
-          if (result.value.doCloseAllOpenedFiles) {
+          if (result.value.checked) {
             logger.log({
               message: trans.__('Closing all opened files...'),
               level: Level.RUNNING

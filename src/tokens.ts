@@ -1025,8 +1025,8 @@ export namespace Git {
     }
   }
 
-  export interface IGitResetToRemoteFormValue {
-    doCloseAllOpenedFiles: boolean;
+  export interface ICheckboxFormValue {
+    checked: boolean;
   }
 }
 

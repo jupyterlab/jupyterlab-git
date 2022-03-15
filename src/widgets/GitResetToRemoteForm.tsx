@@ -1,68 +1,49 @@
 import { Dialog } from '@jupyterlab/apputils';
-import { TranslationBundle } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import { Git } from '../tokens';
 
 /**
- * The UI used for the Reset to Remote Form,
- * used as the body for Reset to Remote Dialog.
+ * A widget form containing a text block and a checkbox,
+ * can be used as a Dialog body.
  */
-export class GitResetToRemoteForm
+export class CheckboxForm
   extends Widget
-  implements Dialog.IBodyWidget<Git.IGitResetToRemoteFormValue>
+  implements Dialog.IBodyWidget<Git.ICheckboxFormValue>
 {
-  constructor(
-    trans: TranslationBundle,
-    promptContent = trans.__(
-      'To bring the current branch to the state of its corresponding remote tracking branch, \
-      a hard reset will be performed, which may result in some files being permanently deleted \
-      and some changes being permanently discarded. Are you sure you want to proceed? \
-      This action cannot be undone.'
-    ),
-    warningCloseAllOpenedFilesContent = trans.__(
-      'Also close all opened files to avoid conflicts'
-    )
-  ) {
+  constructor(textBody: string, checkboxLabel: string) {
     super();
-    this._trans = trans;
-    this.node.appendChild(
-      this.createBody(promptContent, warningCloseAllOpenedFilesContent)
-    );
+    this.node.appendChild(this.createBody(textBody, checkboxLabel));
   }
 
-  private createBody(
-    promptContent: string,
-    warningCloseAllOpenedFilesContent: string
-  ): HTMLElement {
+  private createBody(textBody: string, checkboxLabel: string): HTMLElement {
     const mainNode = document.createElement('div');
 
-    const warning = document.createElement('div');
-    warning.textContent = promptContent;
+    const text = document.createElement('div');
+    text.textContent = textBody;
 
-    const labelWarnCloseAllOpenedFiles = document.createElement('label');
+    const checkboxContainer = document.createElement('label');
 
-    this._chkCloseAllOpenedFiles = document.createElement('input');
-    this._chkCloseAllOpenedFiles.type = 'checkbox';
-    this._chkCloseAllOpenedFiles.checked = true;
+    this._checkbox = document.createElement('input');
+    this._checkbox.type = 'checkbox';
+    this._checkbox.checked = true;
 
-    const textWarnCloseAllOpenedFiles = document.createElement('span');
-    textWarnCloseAllOpenedFiles.textContent = warningCloseAllOpenedFilesContent;
+    const label = document.createElement('span');
+    label.textContent = checkboxLabel;
 
-    labelWarnCloseAllOpenedFiles.appendChild(this._chkCloseAllOpenedFiles);
-    labelWarnCloseAllOpenedFiles.appendChild(textWarnCloseAllOpenedFiles);
+    checkboxContainer.appendChild(this._checkbox);
+    checkboxContainer.appendChild(label);
 
-    mainNode.appendChild(warning);
-    mainNode.appendChild(labelWarnCloseAllOpenedFiles);
+    mainNode.appendChild(text);
+    mainNode.appendChild(checkboxContainer);
 
     return mainNode;
   }
 
-  getValue(): Git.IGitResetToRemoteFormValue {
+  getValue(): Git.ICheckboxFormValue {
     return {
-      doCloseAllOpenedFiles: this._chkCloseAllOpenedFiles.checked
+      checked: this._checkbox.checked
     };
   }
 
-  protected _trans: TranslationBundle;
-  private _chkCloseAllOpenedFiles: HTMLInputElement;
+  private _checkbox: HTMLInputElement;
 }
