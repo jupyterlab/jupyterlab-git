@@ -577,7 +577,7 @@ export class GitExtension implements IGitExtension {
   async clone(
     path: string,
     url: string,
-    auth?: Git.IAuth
+    auth?: Git.IAuth, cacheCredentials = true
   ): Promise<Git.IResultWithMessage> {
     return await this._taskHandler.execute<Git.IResultWithMessage>(
       'git:clone',
@@ -822,7 +822,7 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async pull(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
+  async pull(auth?: Git.IAuth, cacheCredentials = true): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:pull',
@@ -855,7 +855,7 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async push(auth?: Git.IAuth, force = false): Promise<Git.IResultWithMessage> {
+  async push(auth?: Git.IAuth, cacheCredentials = true, force = false): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
@@ -1494,7 +1494,22 @@ export class GitExtension implements IGitExtension {
   private _fetchRemotes = async (): Promise<void> => {
     try {
       const path = await this._getPathRepository();
-      await requestAPI(URLExt.join(path, 'remote', 'fetch'), 'POST');
+
+      const credentials = await showDialog({
+        title: trans.__('Git credentials required'),
+        body: new GitCredentialsForm(
+          trans,
+          trans.__('Enter credentials for remote repository'),
+          retry ? trans.__('Incorrect username or password.') : ''
+        )//,
+      //buttons: [
+      //  Dialog.cacheCredentials({label: trans.__('Cache Credentials?')})
+      //]
+      });
+
+      await requestAPI(URLExt.join(path, 'remote', 'fetch'), 'POST', {
+        auth?: Git.IAuth, cacheCredentials = true
+      });
     } catch (error) {
       console.error('Failed to fetch remotes', error);
     }

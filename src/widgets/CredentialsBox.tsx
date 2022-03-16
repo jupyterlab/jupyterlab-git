@@ -23,10 +23,13 @@ export class GitCredentialsForm
   private createBody(textContent: string, warningContent: string): HTMLElement {
     const node = document.createElement('div');
     const label = document.createElement('label');
+    const checkBoxLabel = document.createElement('label');
+    const checkBox = document.createElement('input');
     this._user = document.createElement('input');
     this._password = document.createElement('input');
-    this._cacheCredentials = document.createElement('input');
+    //this._cacheCredentials = document.createElement('input');
     this._password.type = 'password';
+
 
     const text = document.createElement('span');
     const warning = document.createElement('div');
@@ -36,7 +39,8 @@ export class GitCredentialsForm
     text.textContent = textContent;
     warning.textContent = warningContent;
     this._user.placeholder = this._trans.__('username');
-    this._cacheCredentials.placeholder = this._trans.__('Cache credentials?');
+    checkBox.type = 'checkbox';
+    //this._cacheCredentials.placeholder = this._trans.__('Cache credentials?');
     this._password.placeholder = this._trans.__(
       'password / personal access token'
       
@@ -45,7 +49,9 @@ export class GitCredentialsForm
     label.appendChild(text);
     label.appendChild(this._user);
     label.appendChild(this._password);
-    label.appendChild(this._cacheCredentials);
+    checkBoxLabel.appendChild(checkbox);
+    node.appendChild(checkBoxLabel);
+    //label.appendChild(this._cacheCredentials);
     node.appendChild(label);
     node.appendChild(warning);
     return node;
@@ -64,5 +70,5 @@ export class GitCredentialsForm
   protected _trans: TranslationBundle;
   private _user: HTMLInputElement;
   private _password: HTMLInputElement;
-  private _cacheCredentials: HTMLInputElement;
+  //private _cacheCredentials: HTMLInputElement;
 }

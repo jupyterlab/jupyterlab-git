@@ -1368,7 +1368,8 @@ export async function showGitOperationDialog<T>(
   trans: TranslationBundle,
   args?: T,
   authentication?: Git.IAuth,
-  retry = false
+  retry = false,
+  cache = false
 ): Promise<string> {
   try {
     let result: Git.IResultWithMessage;
@@ -1405,7 +1406,7 @@ export async function showGitOperationDialog<T>(
         title: trans.__('Git credentials required'),
         body: new GitCredentialsForm(
           trans,
-          trans.__('March 11th 11:45AM'),
+          trans.__('Enter credentials for remote repository'),
           retry ? trans.__('Incorrect username or password.') : ''
         )//,
       //buttons: [
@@ -1421,6 +1422,7 @@ export async function showGitOperationDialog<T>(
           trans,
           args,
           credentials.value,
+          true,
           true
         );
       }
