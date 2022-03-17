@@ -577,7 +577,8 @@ export class GitExtension implements IGitExtension {
   async clone(
     path: string,
     url: string,
-    auth?: Git.IAuth, cacheCredentials = true
+    auth?: Git.IAuth,
+    cacheCredentials = false
   ): Promise<Git.IResultWithMessage> {
     return await this._taskHandler.execute<Git.IResultWithMessage>(
       'git:clone',
@@ -587,7 +588,8 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             clone_url: url,
-            auth: auth as any
+            auth: auth as any,
+            cache_credentials: cacheCredentials
           }
         );
       }
@@ -822,7 +824,7 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async pull(auth?: Git.IAuth, cacheCredentials = true): Promise<Git.IResultWithMessage> {
+  async pull(auth?: Git.IAuth, cache_credentials: true): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:pull',
@@ -855,7 +857,7 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async push(auth?: Git.IAuth, cacheCredentials = true, force = false): Promise<Git.IResultWithMessage> {
+  async push(auth?: Git.IAuth, cache_credentials: true, force = false, cacheCredentials = false): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
@@ -865,7 +867,8 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             auth: auth as any,
-            force: force
+            force: force,
+            cache_credentials: cacheCredentials
           }
         );
       }
@@ -1508,7 +1511,7 @@ export class GitExtension implements IGitExtension {
       });
 
       await requestAPI(URLExt.join(path, 'remote', 'fetch'), 'POST', {
-        auth?: Git.IAuth, cacheCredentials = true
+        auth?: Git.IAuth, cache_credentials: true
       });
     } catch (error) {
       console.error('Failed to fetch remotes', error);

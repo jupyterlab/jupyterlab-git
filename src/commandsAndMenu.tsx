@@ -1367,27 +1367,35 @@ export async function showGitOperationDialog<T>(
   operation: Operation,
   trans: TranslationBundle,
   args?: T,
-  authentication?: Git.IAuth,
+  authentication?: Git.IAuthWithCacheCredentials,
   retry = false,
   cache = false
 ): Promise<string> {
   try {
+    const auth = authentication ? {
+      username: authentication.username,
+      password: authentication.password
+    } as Git.IAuth : undefined;
     let result: Git.IResultWithMessage;
     // the Git action
     switch (operation) {
       case Operation.Clone:
         // eslint-disable-next-line no-case-declarations
         const { path, url } = args as any as IGitCloneArgs;
-        result = await model.clone(path, url, authentication);
+        result = await model.clone(path, 
+          url, 
+          auth,
+          authentication ? authentication.cacheCredentials : false
+          );
         break;
       case Operation.Pull:
         result = await model.pull(authentication);
         break;
       case Operation.Push:
-        result = await model.push(authentication);
+        result = await model.push(authentication, false, authentication.cacheCredentials);
         break;
       case Operation.ForcePush:
-        result = await model.push(authentication, true);
+        result = await model.push(authentication, true, authentication.cacheCredentials);
         break;
       default:
         result = { code: -1, message: 'Unknown git command' };
@@ -1422,7 +1430,6 @@ export async function showGitOperationDialog<T>(
           trans,
           args,
           credentials.value,
-          true,
           true
         );
       }

@@ -24,7 +24,7 @@ export class GitCredentialsForm
     const node = document.createElement('div');
     const label = document.createElement('label');
     const checkBoxLabel = document.createElement('label');
-    const checkBox = document.createElement('input');
+    this._checkboxCacheCredentials = document.createElement('input');
     this._user = document.createElement('input');
     this._password = document.createElement('input');
     //this._cacheCredentials = document.createElement('input');
@@ -39,7 +39,8 @@ export class GitCredentialsForm
     text.textContent = textContent;
     warning.textContent = warningContent;
     this._user.placeholder = this._trans.__('username');
-    checkBox.type = 'checkbox';
+    this._checkboxCacheCredentials.type = 'checkbox';
+    this._checkboxCacheCredentials.textContent = this._trans.__("Save my login temporarily");
     //this._cacheCredentials.placeholder = this._trans.__('Cache credentials?');
     this._password.placeholder = this._trans.__(
       'password / personal access token'
@@ -49,7 +50,7 @@ export class GitCredentialsForm
     label.appendChild(text);
     label.appendChild(this._user);
     label.appendChild(this._password);
-    checkBoxLabel.appendChild(checkbox);
+    checkBoxLabel.appendChild(this._checkboxCacheCredentials);
     node.appendChild(checkBoxLabel);
     //label.appendChild(this._cacheCredentials);
     node.appendChild(label);
@@ -60,15 +61,17 @@ export class GitCredentialsForm
   /**
    * Returns the input value.
    */
-  getValue(): Git.IAuth {
+  getValue(): Git.IAuthWithCacheCredentials {
     return {
       username: this._user.value,
-      password: this._password.value
+      password: this._password.value,
+      cacheCredentials: this._checkboxCacheCredentials.checked
     };
   //  return this._cacheCredentials;
   }
   protected _trans: TranslationBundle;
   private _user: HTMLInputElement;
   private _password: HTMLInputElement;
+  private _checkboxCacheCredentials: HTMLInputElement;
   //private _cacheCredentials: HTMLInputElement;
 }

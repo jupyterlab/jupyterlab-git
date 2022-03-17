@@ -926,6 +926,13 @@ export namespace Git {
     password: string;
   }
 
+    /**
+   * Interface for the Git Auth request with credentials caching option
+   */
+  export interface IAuthWithCacheCredentials extends IAuth {
+    cacheCredentials: boolean;
+  }
+
   /**
    * Structure for the request to the Git Clone API.
    */
