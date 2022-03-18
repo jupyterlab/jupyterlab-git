@@ -824,7 +824,8 @@ export class GitExtension implements IGitExtension {
    */
   async pull(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
-    const data = this._taskHandler.execute<Git.IResultWithMessage>(
+    const previousHead = this._currentBranch?.top_commit;
+    const data = await this._taskHandler.execute<Git.IResultWithMessage>(
       'git:pull',
       async () => {
         return await requestAPI<Git.IResultWithMessage>(
@@ -840,12 +841,9 @@ export class GitExtension implements IGitExtension {
         );
       }
     );
-    const changes = await this._changedFiles(
-      this._currentBranch.top_commit,
-      'HEAD'
-    );
+    const changes = await this._changedFiles(previousHead, 'HEAD');
     changes?.files?.forEach(file => this._revertFile(file));
-    this.refreshBranch(); // Will emit headChanged if required
+    await this.refreshBranch(); // Will emit headChanged if required
     return data;
   }
 
