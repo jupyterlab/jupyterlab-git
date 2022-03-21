@@ -426,7 +426,7 @@ export function addCommands(
             and some changes being permanently discarded. Are you sure you want to proceed? \
             This action cannot be undone.'
           ),
-          trans.__('Also close all opened files to avoid conflicts')
+          trans.__('Close all opened files to avoid conflicts')
         ),
         buttons: [
           Dialog.cancelButton({ label: trans.__('Cancel') }),

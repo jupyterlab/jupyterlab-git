@@ -1025,7 +1025,13 @@ export namespace Git {
     }
   }
 
+  /**
+   * Interface for dialog with one checkbox.
+   */
   export interface ICheckboxFormValue {
+    /**
+     * Checkbox value
+     */
     checked: boolean;
   }
 }
