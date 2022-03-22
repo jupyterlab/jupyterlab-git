@@ -47,6 +47,7 @@ import {
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
+import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 
 export interface IGitCloneArgs {
   /**
@@ -405,6 +406,64 @@ export function addCommands(
               error
             });
           }
+        }
+      }
+    }
+  });
+
+  /** Add git reset --hard <remote-tracking-branch> command */
+  commands.addCommand(CommandIDs.gitResetToRemote, {
+    label: trans.__('Reset to Remote'),
+    caption: trans.__('Reset Current Branch to Remote State'),
+    isEnabled: () => gitModel.pathRepository !== null,
+    execute: async () => {
+      const result = await showDialog({
+        title: trans.__('Reset to Remote'),
+        body: new CheckboxForm(
+          trans.__(
+            'To bring the current branch to the state of its corresponding remote tracking branch, \
+            a hard reset will be performed, which may result in some files being permanently deleted \
+            and some changes being permanently discarded. Are you sure you want to proceed? \
+            This action cannot be undone.'
+          ),
+          trans.__('Close all opened files to avoid conflicts')
+        ),
+        buttons: [
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
+          Dialog.warnButton({ label: trans.__('Proceed') })
+        ]
+      });
+      if (result.button.accept) {
+        try {
+          if (result.value.checked) {
+            logger.log({
+              message: trans.__('Closing all opened files...'),
+              level: Level.RUNNING
+            });
+            await fileBrowserModel.manager.closeAll();
+          }
+          logger.log({
+            message: trans.__('Resetting...'),
+            level: Level.RUNNING
+          });
+          await gitModel.resetToCommit(gitModel.status.remote);
+          logger.log({
+            message: trans.__('Successfully reset'),
+            level: Level.SUCCESS,
+            details: trans.__(
+              'Successfully reset the current branch to its remote state'
+            )
+          });
+        } catch (error) {
+          console.error(
+            'Encountered an error when resetting the current branch to its remote state. Error: ',
+            error
+          );
+          logger.log({
+            message: trans.__('Reset failed'),
+            level: Level.ERROR,
+            error
+          });
         }
       }
     }
@@ -1141,6 +1200,7 @@ export function createGitMenu(
     CommandIDs.gitMerge,
     CommandIDs.gitPush,
     CommandIDs.gitPull,
+    CommandIDs.gitResetToRemote,
     CommandIDs.gitAddRemote,
     CommandIDs.gitTerminalCommand
   ].forEach(command => {

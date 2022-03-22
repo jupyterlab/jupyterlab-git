@@ -110,6 +110,9 @@
             "args": { "force": true }
           },
           {
+            "command": "git:reset-to-remote"
+          },
+          {
             "command": "git:add-remote"
           },
           {

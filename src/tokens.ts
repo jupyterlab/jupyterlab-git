@@ -1024,6 +1024,16 @@ export namespace Git {
       super('Not in a Git Repository');
     }
   }
+
+  /**
+   * Interface for dialog with one checkbox.
+   */
+  export interface ICheckboxFormValue {
+    /**
+     * Checkbox value
+     */
+    checked: boolean;
+  }
 }
 
 /**
@@ -1097,6 +1107,7 @@ export enum CommandIDs {
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
   gitPull = 'git:pull',
+  gitResetToRemote = 'git:reset-to-remote',
   gitSubmitCommand = 'git:submit-commit',
   gitShowDiff = 'git:show-diff'
 }
