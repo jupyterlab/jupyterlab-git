@@ -107,12 +107,12 @@ export interface ISinglePastCommitInfoState {
   loadingState: 'loading' | 'error' | 'success';
 
   /**
-   * Boolean indicating whether to display a dialog for reseting or reverting a commit.
+   * Boolean indicating whether to display a dialog for resetting or reverting a commit.
    */
   resetRevertDialog: boolean;
 
   /**
-   * Reset/revert dialog mode (i.e., whether the dialog should be for reseting to or reverting an individual commit).
+   * Reset/revert dialog mode (i.e., whether the dialog should be for resetting to or reverting an individual commit).
    */
   resetRevertAction: 'reset' | 'revert';
 }
