@@ -207,7 +207,9 @@ export class NewBranchDialog extends React.Component<
             type="button"
             title={this.props.trans.__('Create a new branch')}
             value={this.props.trans.__('Create Branch')}
-            onClick={this._onCreate}
+            onClick={() => {
+              this._createBranch();
+            }}
             disabled={this.state.name === '' || this.state.error !== ''}
           />
         </DialogActions>
@@ -408,25 +410,16 @@ export class NewBranchDialog extends React.Component<
   };
 
   /**
-   * Callback invoked upon clicking a button to create a new branch.
-   *
-   * @param event - event object
-   */
-  private _onCreate = (): void => {
-    // Create the branch:
-    this._createBranch(this.state.name);
-  };
-
-  /**
    * Creates a new branch.
    *
    * @param branch - branch name
    * @returns promise which resolves upon attempting to create a new branch
    */
-  private async _createBranch(branch: string): Promise<void> {
+  private async _createBranch(): Promise<void> {
     const opts = {
       newBranch: true,
-      branchname: branch
+      branchname: this.state.name,
+      startpoint: this.state.base
     };
 
     this.props.logger.log({
