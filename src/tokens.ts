@@ -78,11 +78,6 @@ export interface IGitExtension extends IDisposable {
   readonly credentialsRequiredSignal: ISignal<IGitExtension, boolean>;
 
   /**
-   * Boolean indicating whether the fetch poll is blocked.
-   */
-  fetchBlocked: boolean;
-
-  /**
    * Git repository status.
    */
   readonly status: Git.IStatus;
