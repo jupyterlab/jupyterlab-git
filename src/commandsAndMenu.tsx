@@ -66,7 +66,8 @@ export enum Operation {
   Clone = 'Clone',
   Pull = 'Pull',
   Push = 'Push',
-  ForcePush = 'ForcePush'
+  ForcePush = 'ForcePush',
+  Fetch = 'Fetch'
 }
 
 interface IFileDiffArgument {
@@ -1387,6 +1388,10 @@ export async function showGitOperationDialog<T>(
         break;
       case Operation.ForcePush:
         result = await model.push(authentication, true);
+        break;
+      case Operation.Fetch:
+        result = await model.fetch(authentication);
+        model.credentialsRequired = false;
         break;
       default:
         result = { code: -1, message: 'Unknown git command' };
