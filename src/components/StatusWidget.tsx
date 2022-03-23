@@ -2,15 +2,20 @@ import { ReactWidget } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { TranslationBundle } from '@jupyterlab/translation';
+import { Badge } from '@material-ui/core';
 import React from 'react';
+import { classes } from 'typestyle';
 import { Operation, showGitOperationDialog } from '../commandsAndMenu';
 import { gitIcon } from '../style/icons';
 import {
+  badgeClass,
   statusAnimatedIconClass,
   statusIconClass
 } from '../style/StatusWidget';
+import { toolbarButtonClass } from '../style/Toolbar';
 import { IGitExtension } from '../tokens';
 import { sleep } from '../utils';
+import { ActionButton } from './ActionButton';
 
 export class StatusWidget extends ReactWidget {
   /**
@@ -50,16 +55,30 @@ export class StatusWidget extends ReactWidget {
 
   render(): JSX.Element {
     return (
-      <div title={`Git: ${this._trans.__(this._status)}`}>
-        <gitIcon.react
-          className={
+      <Badge
+        className={badgeClass}
+        variant="dot"
+        invisible={!this._waitingForCredentials}
+        data-test-id="git-credential-badge"
+      >
+        <ActionButton
+          className={classes(
+            toolbarButtonClass,
             this._status !== 'idle' ? statusAnimatedIconClass : statusIconClass
+          )}
+          icon={gitIcon}
+          onClick={
+            this._waitingForCredentials
+              ? async () => this._showGitOperationDialog()
+              : undefined
           }
-          left={'1px'}
-          top={'3px'}
-          stylesheet={'statusBar'}
+          title={
+            this._waitingForCredentials
+              ? `Git: ${this._trans.__('credentials required')}`
+              : `Git: ${this._trans.__(this._status)}`
+          }
         />
-      </div>
+      </Badge>
     );
   }
 

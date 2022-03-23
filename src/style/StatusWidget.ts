@@ -28,3 +28,13 @@ export const statusAnimatedIconClass = style({
     }
   }
 });
+
+export const badgeClass = style({
+  $nest: {
+    '& > .MuiBadge-badge': {
+      top: 6,
+      right: 15,
+      backgroundColor: 'var(--jp-warn-color1)'
+    }
+  }
+});
