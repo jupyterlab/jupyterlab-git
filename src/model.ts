@@ -1545,7 +1545,9 @@ export class GitExtension implements IGitExtension {
    * This is blocked if Git credentials are required.
    */
   private _fetchRemotes = async (): Promise<void> => {
-    if (this.credentialsRequired) return;
+    if (this.credentialsRequired) {
+      return;
+    }
     try {
       await this.fetch();
     } catch (error) {
