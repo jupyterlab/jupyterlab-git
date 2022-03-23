@@ -176,7 +176,7 @@ async def test_git_clone_with_cache_credentials():
         )
 
         # Then
-        mock_execute.assert_called_once_with(
+        mock_execute.assert_awaited_once_with(
             ["git", "clone", "ghjkhjkl"],
             cwd=test_path,
             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
@@ -186,50 +186,66 @@ async def test_git_clone_with_cache_credentials():
 
 @pytest.mark.asyncio
 async def test_git_clone_with_auth_and_cache_credentials():
-    with patch("jupyterlab_git.git.execute") as mock_authentication:
-        # Given
-        default_config = JupyterLabGit()
-        credential_helper = default_config.credential_helper
-        test_path = str(Path("/bin") / "test_curr_path")
-        mock_authentication.side_effect = [
-            maybe_future((0, "", "")),
-            maybe_future((0, "", "")),
-            maybe_future((0, "", "")),
-        ]
-        # When
-        auth = {"username": "asdf", "password": "qwerty"}
-        actual_response = await Git(config=default_config).clone(
-            path=test_path, repo_url="ghjkhjkl", auth=auth, cache_credentials=True
-        )
+    with patch("sys.platform", "linux"):
+        with patch(
+            "jupyterlab_git.git.Git.ensure_git_credential_cache_daemon"
+        ) as mock_ensure_daemon:
+            mock_ensure_daemon.return_value = 0
+            with patch("jupyterlab_git.git.execute") as mock_execute:
+                # Given
+                default_config = JupyterLabGit()
+                default_config.credential_helper = "cache"
+                credential_helper = default_config.credential_helper
+                test_path = "test_curr_path"
+                mock_execute.side_effect = [
+                    maybe_future((0, "", "")),
+                    maybe_future((0, "", "")),
+                    maybe_future((0, "", "")),
+                ]
+                # When
+                auth = {"username": "asdf", "password": "qwerty"}
+                actual_response = await Git(config=default_config).clone(
+                    path=test_path,
+                    repo_url="ghjkhjkl",
+                    auth=auth,
+                    cache_credentials=True,
+                )
 
-        # Then
-        assert mock_authentication.call_count == 3
-        mock_authentication.assert_has_calls(
-            [
-                call(["git", "config", "--list"], cwd=test_path),
-                call(
-                    ["git", "config", "--add", "credential.helper", credential_helper],
-                    cwd=test_path,
-                ),
-                call(
-                    ["git", "clone", "ghjkhjkl", "-q"],
-                    username="asdf",
-                    password="qwerty",
-                    cwd=test_path,
-                    env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
-                ),
-            ]
-        )
-        assert {"code": 0, "message": ""} == actual_response
+                # Then
+                assert mock_execute.await_count == 3
+                mock_execute.assert_has_awaits(
+                    [
+                        call(["git", "config", "--list"], cwd=test_path),
+                        call(
+                            [
+                                "git",
+                                "config",
+                                "--add",
+                                "credential.helper",
+                                credential_helper,
+                            ],
+                            cwd=test_path,
+                        ),
+                        call(
+                            ["git", "clone", "ghjkhjkl", "-q"],
+                            username="asdf",
+                            password="qwerty",
+                            cwd=test_path,
+                            env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
+                        ),
+                    ]
+                )
+                mock_ensure_daemon.assert_called_once_with(cwd=test_path, env=None)
+                assert {"code": 0, "message": ""} == actual_response
 
 
 @pytest.mark.asyncio
 async def test_git_clone_with_auth_and_cache_credentials_and_existing_credential_helper():
-    with patch("jupyterlab_git.git.execute") as mock_authentication:
+    with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         default_config = JupyterLabGit()
         test_path = str(Path("/bin") / "test_curr_path")
-        mock_authentication.side_effect = [
+        mock_execute.side_effect = [
             maybe_future((0, "credential.helper=something", "")),
             maybe_future((0, "", "")),
         ]
@@ -240,8 +256,8 @@ async def test_git_clone_with_auth_and_cache_credentials_and_existing_credential
         )
 
         # Then
-        assert mock_authentication.call_count == 2
-        mock_authentication.assert_has_calls(
+        assert mock_execute.await_count == 2
+        mock_execute.assert_has_awaits(
             [
                 call(["git", "config", "--list"], cwd=test_path),
                 call(
