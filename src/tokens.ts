@@ -25,6 +25,11 @@ export interface IGitExtension extends IDisposable {
   currentBranch: Git.IBranch;
 
   /**
+   * A signal emitted when the branches of the Git repository changes.
+   */
+  readonly branchesChanged: ISignal<IGitExtension, void>;
+
+  /**
    * A signal emitted when the `HEAD` of the Git repository changes.
    */
   readonly headChanged: ISignal<IGitExtension, void>;
