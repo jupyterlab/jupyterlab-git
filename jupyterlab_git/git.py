@@ -7,6 +7,7 @@ import pathlib
 import re
 import shlex
 import subprocess
+import sys
 import traceback
 from typing import Any, Dict, List, Optional
 from urllib.parse import unquote
@@ -38,6 +39,8 @@ GIT_VERSION_REGEX = re.compile(r"^git\sversion\s(?P<version>\d+(.\d+)*)")
 GIT_BRANCH_STATUS = re.compile(
     r"^## (?P<branch>([\w\-/]+|HEAD \(no branch\)|No commits yet on \w+))(\.\.\.(?P<remote>[\w\-/]+)( \[(ahead (?P<ahead>\d+))?(, )?(behind (?P<behind>\d+))?\])?)?$"
 )
+# Git cache as a credential helper
+GIT_CREDENTIAL_HELPER_CACHE = re.compile(r"cache\b")
 
 execution_lock = tornado.locks.Lock()
 
@@ -1572,36 +1575,75 @@ class Git:
                 "message": error,
             }
 
-    async def check_credential_helper(self, path):
-        git_config_response = await self.config(path)
+    async def check_credential_helper(self, path: str) -> Dict[str, Any]:
+        git_config_response: Dict[str, str] = await self.config(path)
         if git_config_response["code"] != 0:
             return git_config_response
 
         git_config_kv_pairs = git_config_response["options"]
         has_credential_helper = "credential.helper" in git_config_kv_pairs
 
-        return {"code": 0, "result": has_credential_helper}
+        response = {
+            "code": 0,
+            "result": has_credential_helper,
+        }
 
-    async def ensure_credential_helper(self, path):
+        if has_credential_helper and GIT_CREDENTIAL_HELPER_CACHE.match(
+            git_config_kv_pairs["credential.helper"].strip()
+        ):
+            response["cache_daemon_required"] = True
+
+        return response
+
+    async def ensure_credential_helper(
+        self, path: str, env: Dict[str, str] = None
+    ) -> Dict[str, Any]:
         """
         Check whether `git config --list` contains `credential.helper`.
         If it is not set, then it will be set to the value string for `credential.helper`
         defined in the server settings.
+
+        path: str
+            Git path repository
+        env: Dict[str, str]
+            Environment variables
         """
 
-        check_credential_helper = await self.check_credential_helper(path)
+        check_credential_helper_response = await self.check_credential_helper(path)
 
-        if check_credential_helper["code"] != 0:
-            return check_credential_helper
-        has_credential_helper = check_credential_helper["result"]
+        if check_credential_helper_response["code"] != 0:
+            return check_credential_helper_response
+        has_credential_helper = check_credential_helper_response["result"]
+
+        cache_daemon_required = check_credential_helper_response.get(
+            "cache_daemon_required", False
+        )
+
+        response = {"code": -1}
 
         if not has_credential_helper:
-            config_response = await self.config(
-                path, **{"credential.helper": self._config.credential_helper}
+            credential_helper: str = self._config.credential_helper
+            response.update(
+                await self.config(path, **{"credential.helper": credential_helper})
             )
-            return config_response
+            if GIT_CREDENTIAL_HELPER_CACHE.match(credential_helper.strip()):
+                cache_daemon_required = True
         else:
-            return {"code": 0}
+            response["code"] = 0
+
+        # special case: Git credential cache
+        if cache_daemon_required:
+            if not sys.platform.startswith("win32"):
+                try:
+                    self.ensure_git_credential_cache_daemon(cwd=path, env=env)
+                except Exception as e:
+                    response["code"] = 2
+                    response["error"] = f"Unhandled error: {str(e)}"
+            else:
+                response["code"] = 1
+                response["error"] = "Git credential cache cannot operate on Windows!"
+
+        return response
 
     def ensure_git_credential_cache_daemon(
         self,
