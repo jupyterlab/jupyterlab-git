@@ -8,6 +8,7 @@ import re
 import shlex
 import subprocess
 import traceback
+from typing import Any, Dict, List, Optional
 from urllib.parse import unquote
 
 import nbformat
@@ -173,6 +174,8 @@ class Git:
     """
     A single parent class containing all of the individual git methods in it.
     """
+
+    _GIT_CREDENTIAL_CACHE_DAEMON_PROCESS: subprocess.Popen = None
 
     def __init__(self, config=None):
         self._config = config
@@ -1599,3 +1602,72 @@ class Git:
             return config_response
         else:
             return {"code": 0}
+
+    def ensure_git_credential_cache_daemon(
+        self,
+        socket: Optional[str] = None,
+        debug: bool = False,
+        new: bool = False,
+        cwd: Optional[str] = None,
+        env: Dict[str, str] = None,
+    ) -> int:
+        """
+        Spawn a Git credential cache daemon with the socket file being `socket` if it does not exist.
+        If `debug` is `True`, the daemon will be spawned with `--debug` flag.
+        If `socket` is empty, it is set to `~/.git-credential-cache-daemon`.
+        If `new` is `True`, a daemon will be spawned, and if the daemon process is accessible,
+        the existing daemon process will be terminated before spawning a new one.
+        Otherwise, if `new` is `False`, the PID of the existing daemon process is returned.
+        If the daemon process is not accessible, `-1` is returned.
+        `cwd` and `env` are passed to the process that spawns the daemon.
+        """
+
+        if not socket:
+            socket = os.path.join(
+                os.path.expanduser("~"), ".git-credential-cache", "socket"
+            )
+
+        if socket and os.path.exists(socket):
+            return -1
+
+        if self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS is None or new is True:
+
+            if new is True and self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS:
+                self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.terminate()
+
+            if not socket:
+                raise ValueError()
+
+            socket_dir = os.path.split(socket)[0]
+            if socket_dir and len(socket_dir) > 0 and not os.path.isdir(socket_dir):
+                os.makedirs(socket_dir)
+                os.chmod(socket_dir, 0o700)
+
+            args: List[str] = ["git", "credential-cache--daemon"]
+
+            if debug:
+                args.append("--debug")
+
+            args.append(socket)
+
+            self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS = subprocess.Popen(
+                args,
+                cwd=cwd,
+                env=env,
+            )
+
+            get_logger().debug(
+                "A credential cache daemon has been spawned with PID %s",
+                str(self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.pid),
+            )
+
+        elif self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.poll():
+            return self.ensure_git_credential_cache_daemon(
+                socket, debug, True, cwd, env
+            )
+
+        return self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.pid
+
+    def __del__(self):
+        if self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS:
+            self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.terminate()
