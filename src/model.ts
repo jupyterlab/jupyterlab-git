@@ -587,7 +587,8 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             clone_url: url,
-            auth: auth as any
+            auth: auth as any,
+            cache_credentials: auth?.cacheCredentials
           }
         );
       }
@@ -835,7 +836,8 @@ export class GitExtension implements IGitExtension {
             cancel_on_conflict:
               (this._settings?.composite[
                 'cancelPullMergeConflict'
-              ] as boolean) || false
+              ] as boolean) || false,
+            cache_credentials: auth?.cacheCredentials
           }
         );
       }
@@ -865,7 +867,8 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             auth: auth as any,
-            force: force
+            force: force,
+            cache_credentials: auth?.cacheCredentials
           }
         );
       }
