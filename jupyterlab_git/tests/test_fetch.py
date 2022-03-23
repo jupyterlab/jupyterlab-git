@@ -19,7 +19,7 @@ async def test_git_fetch_success():
         actual_response = await Git().fetch(path="test_path")
 
         # Then
-        mock_execute.assert_awaited_once_with(
+        mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             cwd="test_path",
             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
@@ -37,7 +37,7 @@ async def test_git_fetch_fail():
         actual_response = await Git().fetch(path="test_path")
 
         # Then
-        mock_execute.assert_awaited_once_with(
+        mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             cwd="test_path",
             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
@@ -62,7 +62,7 @@ async def test_git_fetch_with_auth_success():
         )
 
         # Then
-        mock_execute.assert_awaited_once_with(
+        mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             username="test_user",
             password="test_pass",
@@ -91,7 +91,7 @@ async def test_git_fetch_with_auth_fail():
         )
 
         # Then
-        mock_execute.assert_awaited_once_with(
+        mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             username="test_user",
             password="test_pass",
@@ -116,7 +116,7 @@ async def test_git_fetch_with_cache_credentials():
         actual_response = await Git().fetch(path="test_path", cache_credentials=True)
 
         # Then
-        mock_execute.assert_awaited_once_with(
+        mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             cwd="test_path",
             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
@@ -149,8 +149,8 @@ async def test_git_fetch_with_auth_and_cache_credentials():
                 )
 
                 # Then
-                assert mock_execute.await_count == 3
-                mock_execute.assert_has_awaits(
+                assert mock_execute.call_count == 3
+                mock_execute.assert_has_calls(
                     [
                         call(["git", "config", "--list"], cwd=test_path),
                         call(
@@ -194,8 +194,8 @@ async def test_git_fetch_with_auth_and_cache_credentials_and_existing_credential
         )
 
         # Then
-        assert mock_execute.await_count == 2
-        mock_execute.assert_has_awaits(
+        assert mock_execute.call_count == 2
+        mock_execute.assert_has_calls(
             [
                 call(["git", "config", "--list"], cwd=test_path),
                 call(
