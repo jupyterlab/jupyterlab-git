@@ -46,6 +46,7 @@ async def test_git_fetch_fail():
             "code": 1,
             "command": "git fetch --all --prune",
             "error": "error",
+            "message": "error",
         } == actual_response
 
 
@@ -101,6 +102,7 @@ async def test_git_fetch_with_auth_fail():
             "code": 128,
             "command": "git fetch --all --prune",
             "error": error_message,
+            "message": error_message,
         } == actual_response
 
 

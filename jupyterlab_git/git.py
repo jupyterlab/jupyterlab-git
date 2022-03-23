@@ -348,6 +348,7 @@ class Git:
         if code != 0:
             result["command"] = " ".join(cmd)
             result["error"] = fetch_error
+            result["message"] = fetch_error
 
         return result
 
