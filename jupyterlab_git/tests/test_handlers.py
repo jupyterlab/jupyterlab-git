@@ -327,7 +327,7 @@ async def test_push_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     mock_git.get_current_branch.assert_called_with(str(local_path))
     mock_git.get_upstream_branch.assert_called_with(str(local_path), "localbranch")
     mock_git.push.assert_called_with(
-        ".", "HEAD:localbranch", str(local_path), None, False, False
+        ".", "HEAD:localbranch", str(local_path), None, False, False, False
     )
 
     assert response.code == 200
@@ -361,6 +361,7 @@ async def test_push_handler_remotebranch(mock_git, jp_fetch, jp_root_dir):
         "HEAD:remote-branch-name",
         str(local_path),
         None,
+        False,
         False,
         False,
     )
@@ -463,7 +464,13 @@ async def test_push_handler_noupstream_unique_remote(mock_git, jp_fetch, jp_root
     mock_git.config.assert_called_with(str(local_path))
     mock_git.remote_show.assert_called_with(str(local_path))
     mock_git.push.assert_called_with(
-        remote, "foo", str(local_path), None, set_upstream=True, force=False
+        remote,
+        "foo",
+        str(local_path),
+        None,
+        set_upstream=True,
+        force=False,
+        cache_credentials=False,
     )
 
     assert response.code == 200
@@ -496,7 +503,13 @@ async def test_push_handler_noupstream_pushdefault(mock_git, jp_fetch, jp_root_d
     mock_git.config.assert_called_with(str(local_path))
     mock_git.remote_show.assert_called_with(str(local_path))
     mock_git.push.assert_called_with(
-        remote, "foo", str(local_path), None, set_upstream=True, force=False
+        remote,
+        "foo",
+        str(local_path),
+        None,
+        set_upstream=True,
+        force=False,
+        cache_credentials=False,
     )
 
     assert response.code == 200
@@ -531,7 +544,7 @@ async def test_push_handler_noupstream_pass_remote_nobranch(
     mock_git.config.assert_not_called()
     mock_git.remote_show.assert_not_called()
     mock_git.push.assert_called_with(
-        remote, "HEAD:foo", str(local_path), None, True, False
+        remote, "HEAD:foo", str(local_path), None, True, False, False
     )
 
     assert response.code == 200
@@ -567,7 +580,7 @@ async def test_push_handler_noupstream_pass_remote_branch(
     mock_git.config.assert_not_called()
     mock_git.remote_show.assert_not_called()
     mock_git.push.assert_called_with(
-        remote, "HEAD:" + remote_branch, str(local_path), None, True, False
+        remote, "HEAD:" + remote_branch, str(local_path), None, True, False, False
     )
 
     assert response.code == 200
