@@ -301,6 +301,18 @@ export interface IGitExtension extends IDisposable {
   ensureGitignore(): Promise<void>;
 
   /**
+   * Fetch to get ahead/behind status
+   *
+   * @param auth - remote authentication information
+   * @returns promise which resolves upon fetching
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  fetch(auth?: Git.IAuth): Promise<Git.IResultWithMessage>;
+
+  /**
    * Match files status information based on a provided file path.
    *
    * If the file is tracked and has no changes, a StatusFile of unmodified will be returned

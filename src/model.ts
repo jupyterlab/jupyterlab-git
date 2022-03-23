@@ -5,7 +5,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-import { requestAPI } from './git';
+import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
 import { TaskHandler } from './taskhandler';
 import { Git, IGitExtension } from './tokens';
 import { decodeStage } from './utils';
@@ -761,6 +761,34 @@ export class GitExtension implements IGitExtension {
     await requestAPI(URLExt.join(path, 'ignore'), 'POST', {});
     this._openGitignore();
     await this.refreshStatus();
+  }
+
+  /**
+   * Fetch to get ahead/behind status
+   *
+   * @param auth - remote authentication information
+   * @returns promise which resolves upon fetching
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async fetch(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
+    const path = await this._getPathRepository();
+    const data = this._taskHandler.execute<Git.IResultWithMessage>(
+      'git:fetch:remote',
+      async () => {
+        return await requestAPI<Git.IResultWithMessage>(
+          URLExt.join(path, 'remote', 'fetch'),
+          'POST',
+          {
+            auth: auth as any,
+            cache_credentials: auth?.cacheCredentials
+          }
+        );
+      }
+    );
+    return data;
   }
 
   /**
@@ -1525,13 +1553,21 @@ export class GitExtension implements IGitExtension {
 
   /**
    * Fetch poll action.
+   * This is blocked if Git credentials are required.
    */
   private _fetchRemotes = async (): Promise<void> => {
+    if (this.credentialsRequired) return;
     try {
-      const path = await this._getPathRepository();
-      await requestAPI(URLExt.join(path, 'remote', 'fetch'), 'POST');
+      await this.fetch();
     } catch (error) {
       console.error('Failed to fetch remotes', error);
+      if (
+        AUTH_ERROR_MESSAGES.some(
+          errorMessage => (error as Error).message.indexOf(errorMessage) > -1
+        )
+      ) {
+        this.credentialsRequired = true;
+      }
     }
   };
 
