@@ -1364,7 +1364,7 @@ export function addFileBrowserContextMenu(
  * @returns Promise for displaying a dialog
  */
 export async function showGitOperationDialog<T>(
-  model: GitExtension,
+  model: IGitExtension,
   operation: Operation,
   trans: TranslationBundle,
   args?: T,
