@@ -3,6 +3,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { TranslationBundle } from '@jupyterlab/translation';
 import React from 'react';
+import { Operation, showGitOperationDialog } from '../commandsAndMenu';
 import { gitIcon } from '../style/icons';
 import {
   statusAnimatedIconClass,
@@ -17,8 +18,9 @@ export class StatusWidget extends ReactWidget {
    * @param trans - The language translator
    * @returns widget
    */
-  constructor(trans: TranslationBundle) {
+  constructor(model: IGitExtension, trans: TranslationBundle) {
     super();
+    this._model = model;
     this._trans = trans;
   }
 
@@ -61,6 +63,14 @@ export class StatusWidget extends ReactWidget {
     );
   }
 
+  async _showGitOperationDialog(): Promise<void> {
+    try {
+      await showGitOperationDialog(this._model, Operation.Fetch, this._trans);
+    } catch (error) {
+      console.error('Encountered an error when fetching. Error:', error);
+    }
+  }
+
   /**
    * Locks the status widget to prevent updates.
    *
@@ -91,6 +101,7 @@ export class StatusWidget extends ReactWidget {
    */
   private _waitingForCredentials: boolean;
 
+  private _model: IGitExtension;
   private _trans: TranslationBundle;
 }
 
@@ -101,7 +112,7 @@ export function addStatusBarWidget(
   trans: TranslationBundle
 ): void {
   // Add a status bar widget to provide Git status updates:
-  const statusWidget = new StatusWidget(trans);
+  const statusWidget = new StatusWidget(model, trans);
   statusBar.registerStatusItem('git-status', {
     align: 'left',
     item: statusWidget,
