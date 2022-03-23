@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import url('credentials-box.css');
 @import url('diff-common.css');
 @import url('diff-nb.css');
 @import url('diff-text.css');

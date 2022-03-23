@@ -919,11 +919,12 @@ export namespace Git {
   }
 
   /**
-   * Interface for the Git Auth request.
+   * Interface for the Git Auth request with credentials caching option.
    */
   export interface IAuth {
     username: string;
     password: string;
+    cacheCredentials?: boolean;
   }
 
   /**

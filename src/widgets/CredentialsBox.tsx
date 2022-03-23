@@ -23,15 +23,21 @@ export class GitCredentialsForm
   private createBody(textContent: string, warningContent: string): HTMLElement {
     const node = document.createElement('div');
     const label = document.createElement('label');
+
+    const checkboxLabel = document.createElement('label');
+    this._checkboxCacheCredentials = document.createElement('input');
+    const checkboxText = document.createElement('span');
+
     this._user = document.createElement('input');
+    this._user.type = 'text';
     this._password = document.createElement('input');
     this._password.type = 'password';
 
     const text = document.createElement('span');
     const warning = document.createElement('div');
 
-    node.className = 'jp-RedirectForm';
-    warning.className = 'jp-RedirectForm-warning';
+    node.className = 'jp-CredentialsBox';
+    warning.className = 'jp-CredentialsBox-warning';
     text.textContent = textContent;
     warning.textContent = warningContent;
     this._user.placeholder = this._trans.__('username');
@@ -39,11 +45,20 @@ export class GitCredentialsForm
       'password / personal access token'
     );
 
+    checkboxLabel.className = 'jp-CredentialsBox-label-checkbox';
+    this._checkboxCacheCredentials.type = 'checkbox';
+    checkboxText.textContent = this._trans.__('Save my login temporarily');
+
     label.appendChild(text);
     label.appendChild(this._user);
     label.appendChild(this._password);
     node.appendChild(label);
     node.appendChild(warning);
+
+    checkboxLabel.appendChild(this._checkboxCacheCredentials);
+    checkboxLabel.appendChild(checkboxText);
+    node.appendChild(checkboxLabel);
+
     return node;
   }
 
@@ -53,10 +68,12 @@ export class GitCredentialsForm
   getValue(): Git.IAuth {
     return {
       username: this._user.value,
-      password: this._password.value
+      password: this._password.value,
+      cacheCredentials: this._checkboxCacheCredentials.checked
     };
   }
   protected _trans: TranslationBundle;
   private _user: HTMLInputElement;
   private _password: HTMLInputElement;
+  private _checkboxCacheCredentials: HTMLInputElement;
 }
