@@ -280,7 +280,12 @@ class Git:
         env = os.environ.copy()
         if auth:
             if cache_credentials:
-                await self.ensure_credential_helper(path)
+                ensured_response = await self.ensure_credential_helper(path)
+                if ensured_response["code"] != 0:
+                    return {
+                        "code": ensured_response["code"],
+                        "message": ensured_response.get("error", "Unknown error!"),
+                    }
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
                 ["git", "clone", unquote(repo_url), "-q"],
@@ -319,7 +324,12 @@ class Git:
         env = os.environ.copy()
         if auth:
             if cache_credentials:
-                await self.ensure_credential_helper(path)
+                ensured_response = await self.ensure_credential_helper(path)
+                if ensured_response["code"] != 0:
+                    return {
+                        "code": ensured_response["code"],
+                        "message": ensured_response.get("error", "Unknown error!"),
+                    }
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, _, fetch_error = await execute(
                 cmd,
@@ -1029,7 +1039,12 @@ class Git:
         env = os.environ.copy()
         if auth:
             if cache_credentials:
-                await self.ensure_credential_helper(path)
+                ensured_response = await self.ensure_credential_helper(path)
+                if ensured_response["code"] != 0:
+                    return {
+                        "code": ensured_response["code"],
+                        "message": ensured_response.get("error", "Unknown error!"),
+                    }
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
                 ["git", "pull", "--no-commit"],
@@ -1095,7 +1110,12 @@ class Git:
         env = os.environ.copy()
         if auth:
             if cache_credentials:
-                await self.ensure_credential_helper(path)
+                ensured_response = await self.ensure_credential_helper(path)
+                if ensured_response["code"] != 0:
+                    return {
+                        "code": ensured_response["code"],
+                        "message": ensured_response.get("error", "Unknown error!"),
+                    }
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
                 command,
