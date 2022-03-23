@@ -32,6 +32,20 @@ export class StatusWidget extends ReactWidget {
     }
   }
 
+  /**
+   * Boolean indicating whether credentials are required.
+   */
+  get waitingForCredentials(): boolean {
+    return this._waitingForCredentials;
+  }
+
+  /**
+   * Sets the boolean indicating whether credentials are required.
+   */
+  set waitingForCredentials(value: boolean) {
+    this._waitingForCredentials = value;
+  }
+
   render(): JSX.Element {
     return (
       <div title={`Git: ${this._trans.__(this._status)}`}>
@@ -72,6 +86,11 @@ export class StatusWidget extends ReactWidget {
    */
   private _status = '';
 
+  /**
+   * Boolean indicating whether credentials are required.
+   */
+  private _waitingForCredentials: boolean;
+
   private _trans: TranslationBundle;
 }
 
@@ -92,8 +111,14 @@ export function addStatusBarWidget(
 
   const callback = Private.createEventCallback(statusWidget);
   model.taskChanged.connect(callback);
+
+  const credentialsRequiredCallback =
+    Private.createCredentialsRequiredCallback(statusWidget);
+  model.credentialsRequiredSignal.connect(credentialsRequiredCallback);
+
   statusWidget.disposed.connect(() => {
     model.taskChanged.disconnect(callback);
+    model.credentialsRequiredSignal.disconnect(credentialsRequiredCallback);
   });
 }
 /* eslint-disable no-inner-declarations */
@@ -199,6 +224,33 @@ namespace Private {
     function isActive(): boolean {
       return settings.composite.displayStatus as boolean;
     }
+  }
+
+  /**
+   * Returns a callback invoked when credentials are required.
+   *
+   * @private
+   * @param widget - status widget
+   * @returns callback
+   */
+  export function createCredentialsRequiredCallback(
+    widget: StatusWidget
+  ): (model: IGitExtension, value: boolean) => void {
+    /**
+     * Callback invoked when credentials are required.
+     *
+     * @private
+     * @param model - extension model
+     * @param value - boolean indicating whether credentials are required
+     * @returns void
+     */
+    function callbackCredentialsRequired(
+      model: IGitExtension,
+      value: boolean
+    ): void {
+      widget.waitingForCredentials = value;
+    }
+    return callbackCredentialsRequired;
   }
 }
 /* eslint-enable no-inner-declarations */
