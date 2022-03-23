@@ -233,6 +233,9 @@ describe('GitPanel', () => {
       } as any;
       props.model = {
         branches: [],
+        branchesChanged: {
+          connect: jest.fn()
+        },        
         headChanged: {
           connect: jest.fn()
         },

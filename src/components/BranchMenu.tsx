@@ -284,9 +284,9 @@ export class BranchMenu extends React.Component<
               className={hiddenButtonStyle}
               icon={trashIcon}
               title={this.props.trans.__('Delete this branch locally')}
-              onClick={(event: React.MouseEvent) => {
+              onClick={async (event: React.MouseEvent) => {
                 event.stopPropagation();
-                this._onDeleteBranch(branch.name);
+                await this._onDeleteBranch(branch.name);
               }}
             />
             <ActionButton
