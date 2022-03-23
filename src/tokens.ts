@@ -68,6 +68,21 @@ export interface IGitExtension extends IDisposable {
   hasDirtyStagedFiles: boolean;
 
   /**
+   * Boolean indicating whether credentials are required from the user.
+   */
+  credentialsRequired: boolean;
+
+  /**
+   * A signal emitted whenever credentials are required, or are not required anymore.
+   */
+  readonly credentialsRequiredSignal: ISignal<IGitExtension, boolean>;
+
+  /**
+   * Boolean indicating whether the fetch poll is blocked.
+   */
+  fetchBlocked: boolean;
+
+  /**
    * Git repository status.
    */
   readonly status: Git.IStatus;

@@ -292,6 +292,38 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Boolean indicating whether credentials are required from the user.
+   */
+  get credentialsRequired(): boolean {
+    return this._credentialsRequired;
+  }
+
+  set credentialsRequired(value: boolean) {
+    if (this._credentialsRequired !== value) {
+      this._credentialsRequired = value;
+      this._credentialsRequiredSignal.emit(value);
+    }
+  }
+
+  /**
+   * A signal emitted whenever credentials are required, or are not required anymore.
+   */
+  get credentialsRequiredSignal(): ISignal<IGitExtension, boolean> {
+    return this._credentialsRequiredSignal;
+  }
+
+  /**
+   * Boolean indicating whether the fetch poll is blocked.
+   */
+  get fetchBlocked(): boolean {
+    return this._fetchBlocked;
+  }
+
+  set fetchBlocked(value: boolean) {
+    this._fetchBlocked = value;
+  }
+
+  /**
    * Get the current markers
    *
    * Note: This makes sure it always returns non null value
@@ -1609,6 +1641,8 @@ export class GitExtension implements IGitExtension {
   private _changeUpstreamNotified: Git.IStatusFile[] = [];
   private _selectedHistoryFile: Git.IStatusFile | null = null;
   private _hasDirtyStagedFiles = false;
+  private _credentialsRequired = false;
+  private _fetchBlocked = false;
 
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
@@ -1628,6 +1662,7 @@ export class GitExtension implements IGitExtension {
   private _dirtyStagedFilesStatusChanged = new Signal<IGitExtension, boolean>(
     this
   );
+  private _credentialsRequiredSignal = new Signal<IGitExtension, boolean>(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {
