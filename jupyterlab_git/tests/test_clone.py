@@ -161,30 +161,6 @@ async def test_git_clone_with_auth_auth_failure_from_git():
 
 
 @pytest.mark.asyncio
-async def test_git_clone_with_cache_credentials():
-    with patch("jupyterlab_git.git.execute") as mock_execute:
-        # Given
-        test_path = str(Path("/bin") / "test_curr_path")
-        mock_execute.side_effect = [
-            maybe_future((0, "", "")),
-            maybe_future((0, "", "")),
-        ]
-
-        # When
-        actual_response = await Git().clone(
-            path=test_path, repo_url="ghjkhjkl", cache_credentials=True
-        )
-
-        # Then
-        mock_execute.assert_called_once_with(
-            ["git", "clone", "ghjkhjkl"],
-            cwd=test_path,
-            env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
-        )
-        assert {"code": 0, "message": ""} == actual_response
-
-
-@pytest.mark.asyncio
 async def test_git_clone_with_auth_and_cache_credentials():
     with patch("sys.platform", "linux"):
         with patch(
@@ -203,12 +179,15 @@ async def test_git_clone_with_auth_and_cache_credentials():
                     maybe_future((0, "", "")),
                 ]
                 # When
-                auth = {"username": "asdf", "password": "qwerty"}
+                auth = {
+                    "username": "asdf",
+                    "password": "qwerty",
+                    "cache_credentials": True,
+                }
                 actual_response = await Git(config=default_config).clone(
                     path=test_path,
                     repo_url="ghjkhjkl",
                     auth=auth,
-                    cache_credentials=True,
                 )
 
                 # Then
@@ -250,9 +229,9 @@ async def test_git_clone_with_auth_and_cache_credentials_and_existing_credential
             maybe_future((0, "", "")),
         ]
         # When
-        auth = {"username": "asdf", "password": "qwerty"}
+        auth = {"username": "asdf", "password": "qwerty", "cache_credentials": True}
         actual_response = await Git(config=default_config).clone(
-            path=test_path, repo_url="ghjkhjkl", auth=auth, cache_credentials=True
+            path=test_path, repo_url="ghjkhjkl", auth=auth
         )
 
         # Then

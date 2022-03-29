@@ -107,24 +107,6 @@ async def test_git_fetch_with_auth_fail():
 
 
 @pytest.mark.asyncio
-async def test_git_fetch_with_cache_credentials():
-    with patch("jupyterlab_git.git.execute") as mock_execute:
-        # Given
-        mock_execute.return_value = maybe_future((0, "", ""))
-
-        # When
-        actual_response = await Git().fetch(path="test_path", cache_credentials=True)
-
-        # Then
-        mock_execute.assert_called_once_with(
-            ["git", "fetch", "--all", "--prune"],
-            cwd="test_path",
-            env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
-        )
-        assert {"code": 0} == actual_response
-
-
-@pytest.mark.asyncio
 async def test_git_fetch_with_auth_and_cache_credentials():
     with patch("sys.platform", "linux"):
         with patch(
@@ -144,8 +126,11 @@ async def test_git_fetch_with_auth_and_cache_credentials():
                 # When
                 actual_response = await Git(config=default_config).fetch(
                     path=test_path,
-                    auth={"username": "test_user", "password": "test_pass"},
-                    cache_credentials=True,
+                    auth={
+                        "username": "test_user",
+                        "password": "test_pass",
+                        "cache_credentials": True,
+                    },
                 )
 
                 # Then

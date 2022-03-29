@@ -69,7 +69,7 @@ export class GitCredentialsForm
     return {
       username: this._user.value,
       password: this._password.value,
-      cacheCredentials: this._checkboxCacheCredentials.checked
+      cache_credentials: this._checkboxCacheCredentials.checked
     };
   }
   protected _trans: TranslationBundle;

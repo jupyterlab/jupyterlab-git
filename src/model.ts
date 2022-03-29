@@ -301,15 +301,15 @@ export class GitExtension implements IGitExtension {
   set credentialsRequired(value: boolean) {
     if (this._credentialsRequired !== value) {
       this._credentialsRequired = value;
-      this._credentialsRequiredSignal.emit(value);
+      this._credentialsRequiredChanged.emit(value);
     }
   }
 
   /**
    * A signal emitted whenever credentials are required, or are not required anymore.
    */
-  get credentialsRequiredSignal(): ISignal<IGitExtension, boolean> {
-    return this._credentialsRequiredSignal;
+  get credentialsRequiredChanged(): ISignal<IGitExtension, boolean> {
+    return this._credentialsRequiredChanged;
   }
 
   /**
@@ -609,7 +609,6 @@ export class GitExtension implements IGitExtension {
           {
             clone_url: url,
             auth: auth as any,
-            cache_credentials: auth?.cacheCredentials
           }
         );
       }
@@ -772,7 +771,6 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             auth: auth as any,
-            cache_credentials: auth?.cacheCredentials
           }
         );
       }
@@ -886,7 +884,6 @@ export class GitExtension implements IGitExtension {
               (this._settings?.composite[
                 'cancelPullMergeConflict'
               ] as boolean) || false,
-            cache_credentials: auth?.cacheCredentials
           }
         );
       }
@@ -917,7 +914,6 @@ export class GitExtension implements IGitExtension {
           {
             auth: auth as any,
             force: force,
-            cache_credentials: auth?.cacheCredentials
           }
         );
       }
@@ -1688,7 +1684,7 @@ export class GitExtension implements IGitExtension {
   private _dirtyStagedFilesStatusChanged = new Signal<IGitExtension, boolean>(
     this
   );
-  private _credentialsRequiredSignal = new Signal<IGitExtension, boolean>(this);
+  private _credentialsRequiredChanged = new Signal<IGitExtension, boolean>(this);
 }
 
 export class BranchMarker implements Git.IBranchMarker {

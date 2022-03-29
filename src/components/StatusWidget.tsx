@@ -1,4 +1,4 @@
-import { ReactWidget } from '@jupyterlab/apputils';
+import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { TranslationBundle } from '@jupyterlab/translation';
@@ -39,46 +39,41 @@ export class StatusWidget extends ReactWidget {
     }
   }
 
-  /**
-   * Boolean indicating whether credentials are required.
-   */
-  get waitingForCredentials(): boolean {
-    return this._waitingForCredentials;
-  }
-
-  /**
-   * Sets the boolean indicating whether credentials are required.
-   */
-  set waitingForCredentials(value: boolean) {
-    this._waitingForCredentials = value;
-  }
-
   render(): JSX.Element {
     return (
-      <Badge
-        className={badgeClass}
-        variant="dot"
-        invisible={!this._waitingForCredentials}
-        data-test-id="git-credential-badge"
+      <UseSignal
+        signal={this._model.credentialsRequiredChanged}
+        initialArgs={false}
       >
-        <ActionButton
-          className={classes(
-            toolbarButtonClass,
-            this._status !== 'idle' ? statusAnimatedIconClass : statusIconClass
-          )}
-          icon={gitIcon}
-          onClick={
-            this._waitingForCredentials
-              ? async () => this._showGitOperationDialog()
-              : undefined
-          }
-          title={
-            this._waitingForCredentials
-              ? `Git: ${this._trans.__('credentials required')}`
-              : `Git: ${this._trans.__(this._status)}`
-          }
-        />
-      </Badge>
+        {(_, needsCredentials) => (
+          <Badge
+            className={badgeClass}
+            variant="dot"
+            invisible={!needsCredentials}
+            data-test-id="git-credential-badge"
+          >
+            <ActionButton
+              className={classes(
+                toolbarButtonClass,
+                this._status !== 'idle'
+                  ? statusAnimatedIconClass
+                  : statusIconClass
+              )}
+              icon={gitIcon}
+              onClick={
+                needsCredentials
+                  ? async () => this._showGitOperationDialog()
+                  : undefined
+              }
+              title={
+                needsCredentials
+                  ? `Git: ${this._trans.__('credentials required')}`
+                  : `Git: ${this._trans.__(this._status)}`
+              }
+            />
+          </Badge>
+        )}
+      </UseSignal>
     );
   }
 
@@ -115,11 +110,6 @@ export class StatusWidget extends ReactWidget {
    */
   private _status = '';
 
-  /**
-   * Boolean indicating whether credentials are required.
-   */
-  private _waitingForCredentials: boolean;
-
   private _model: IGitExtension;
   private _trans: TranslationBundle;
 }
@@ -142,13 +132,8 @@ export function addStatusBarWidget(
   const callback = Private.createEventCallback(statusWidget);
   model.taskChanged.connect(callback);
 
-  const credentialsRequiredCallback =
-    Private.createCredentialsRequiredCallback(statusWidget);
-  model.credentialsRequiredSignal.connect(credentialsRequiredCallback);
-
   statusWidget.disposed.connect(() => {
     model.taskChanged.disconnect(callback);
-    model.credentialsRequiredSignal.disconnect(credentialsRequiredCallback);
   });
 }
 /* eslint-disable no-inner-declarations */
@@ -254,33 +239,6 @@ namespace Private {
     function isActive(): boolean {
       return settings.composite.displayStatus as boolean;
     }
-  }
-
-  /**
-   * Returns a callback invoked when credentials are required.
-   *
-   * @private
-   * @param widget - status widget
-   * @returns callback
-   */
-  export function createCredentialsRequiredCallback(
-    widget: StatusWidget
-  ): (model: IGitExtension, value: boolean) => void {
-    /**
-     * Callback invoked when credentials are required.
-     *
-     * @private
-     * @param model - extension model
-     * @param value - boolean indicating whether credentials are required
-     * @returns void
-     */
-    function callbackCredentialsRequired(
-      model: IGitExtension,
-      value: boolean
-    ): void {
-      widget.waitingForCredentials = value;
-    }
-    return callbackCredentialsRequired;
   }
 }
 /* eslint-enable no-inner-declarations */

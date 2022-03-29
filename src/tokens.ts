@@ -75,7 +75,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * A signal emitted whenever credentials are required, or are not required anymore.
    */
-  readonly credentialsRequiredSignal: ISignal<IGitExtension, boolean>;
+  readonly credentialsRequiredChanged: ISignal<IGitExtension, boolean>;
 
   /**
    * Git repository status.
@@ -947,7 +947,7 @@ export namespace Git {
   export interface IAuth {
     username: string;
     password: string;
-    cacheCredentials?: boolean;
+    cache_credentials?: boolean;
   }
 
   /**
