@@ -68,7 +68,7 @@ class GitCloneHandler(GitHandler):
               'repo_url': 'https://github.com/path/to/myrepo',
               OPTIONAL 'auth': '{ 'username': '<username>',
                                   'password': '<password>',
-                                  'cacheCredentials': true/false
+                                  'cache_credentials': true/false
                                 }'
             }
         """

@@ -283,7 +283,7 @@ class Git:
         """
         env = os.environ.copy()
         if auth:
-            if auth.get("cache_credentials", None):
+            if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
@@ -322,7 +322,7 @@ class Git:
         ]  # Run prune by default to help beginners
         env = os.environ.copy()
         if auth:
-            if auth.get("cache_credentials", None):
+            if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, _, fetch_error = await execute(
@@ -1031,7 +1031,7 @@ class Git:
         """
         env = os.environ.copy()
         if auth:
-            if auth.get("cache_credentials", None):
+            if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
@@ -1096,7 +1096,7 @@ class Git:
 
         env = os.environ.copy()
         if auth:
-            if auth.get("cache_credentials", None):
+            if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
@@ -1631,8 +1631,9 @@ class Git:
 
         cache_daemon_required = has_credential_helper == True
 
-        if not has_credential_helper:
+        if has_credential_helper is None:
             credential_helper: str = self._config.credential_helper
+            await self.config(path, **{"credential.helper": credential_helper})
             if GIT_CREDENTIAL_HELPER_CACHE.match(credential_helper.strip()):
                 cache_daemon_required = True
 
