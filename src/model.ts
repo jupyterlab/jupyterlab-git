@@ -608,7 +608,7 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             clone_url: url,
-            auth: auth as any,
+            auth: auth as any
           }
         );
       }
@@ -770,7 +770,7 @@ export class GitExtension implements IGitExtension {
           URLExt.join(path, 'remote', 'fetch'),
           'POST',
           {
-            auth: auth as any,
+            auth: auth as any
           }
         );
       }
@@ -883,7 +883,7 @@ export class GitExtension implements IGitExtension {
             cancel_on_conflict:
               (this._settings?.composite[
                 'cancelPullMergeConflict'
-              ] as boolean) || false,
+              ] as boolean) || false
           }
         );
       }
@@ -913,7 +913,7 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             auth: auth as any,
-            force: force,
+            force: force
           }
         );
       }
@@ -1684,7 +1684,9 @@ export class GitExtension implements IGitExtension {
   private _dirtyStagedFilesStatusChanged = new Signal<IGitExtension, boolean>(
     this
   );
-  private _credentialsRequiredChanged = new Signal<IGitExtension, boolean>(this);
+  private _credentialsRequiredChanged = new Signal<IGitExtension, boolean>(
+    this
+  );
 }
 
 export class BranchMarker implements Git.IBranchMarker {

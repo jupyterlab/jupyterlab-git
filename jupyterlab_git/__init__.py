@@ -40,7 +40,7 @@ class JupyterLabGit(Configurable):
     credential_helper = Unicode(
         help="""
             The value of Git credential helper will be set to this value when the Git credential caching mechanism is activated by this extension.
-            By default it is a in-memory cache of 3600 seconds (1 hour); `cache --timeout=3600`.
+            By default it is an in-memory cache of 3600 seconds (1 hour); `cache --timeout=3600`.
         """,
         config=True,
     )
