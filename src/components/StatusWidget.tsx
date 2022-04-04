@@ -1,15 +1,21 @@
-import { ReactWidget } from '@jupyterlab/apputils';
+import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { TranslationBundle } from '@jupyterlab/translation';
+import { Badge } from '@material-ui/core';
 import React from 'react';
+import { classes } from 'typestyle';
+import { Operation, showGitOperationDialog } from '../commandsAndMenu';
 import { gitIcon } from '../style/icons';
 import {
+  badgeClass,
   statusAnimatedIconClass,
   statusIconClass
 } from '../style/StatusWidget';
+import { toolbarButtonClass } from '../style/Toolbar';
 import { IGitExtension } from '../tokens';
 import { sleep } from '../utils';
+import { ActionButton } from './ActionButton';
 
 export class StatusWidget extends ReactWidget {
   /**
@@ -17,8 +23,9 @@ export class StatusWidget extends ReactWidget {
    * @param trans - The language translator
    * @returns widget
    */
-  constructor(trans: TranslationBundle) {
+  constructor(model: IGitExtension, trans: TranslationBundle) {
     super();
+    this._model = model;
     this._trans = trans;
   }
 
@@ -34,17 +41,48 @@ export class StatusWidget extends ReactWidget {
 
   render(): JSX.Element {
     return (
-      <div title={`Git: ${this._trans.__(this._status)}`}>
-        <gitIcon.react
-          className={
-            this._status !== 'idle' ? statusAnimatedIconClass : statusIconClass
-          }
-          left={'1px'}
-          top={'3px'}
-          stylesheet={'statusBar'}
-        />
-      </div>
+      <UseSignal
+        signal={this._model.credentialsRequiredChanged}
+        initialArgs={false}
+      >
+        {(_, needsCredentials) => (
+          <Badge
+            className={badgeClass}
+            variant="dot"
+            invisible={!needsCredentials}
+            data-test-id="git-credential-badge"
+          >
+            <ActionButton
+              className={classes(
+                toolbarButtonClass,
+                this._status !== 'idle'
+                  ? statusAnimatedIconClass
+                  : statusIconClass
+              )}
+              icon={gitIcon}
+              onClick={
+                needsCredentials
+                  ? async () => this._showGitOperationDialog()
+                  : undefined
+              }
+              title={
+                needsCredentials
+                  ? `Git: ${this._trans.__('credentials required')}`
+                  : `Git: ${this._trans.__(this._status)}`
+              }
+            />
+          </Badge>
+        )}
+      </UseSignal>
     );
+  }
+
+  async _showGitOperationDialog(): Promise<void> {
+    try {
+      await showGitOperationDialog(this._model, Operation.Fetch, this._trans);
+    } catch (error) {
+      console.error('Encountered an error when fetching. Error:', error);
+    }
   }
 
   /**
@@ -72,6 +110,7 @@ export class StatusWidget extends ReactWidget {
    */
   private _status = '';
 
+  private _model: IGitExtension;
   private _trans: TranslationBundle;
 }
 
@@ -82,7 +121,7 @@ export function addStatusBarWidget(
   trans: TranslationBundle
 ): void {
   // Add a status bar widget to provide Git status updates:
-  const statusWidget = new StatusWidget(trans);
+  const statusWidget = new StatusWidget(model, trans);
   statusBar.registerStatusItem('git-status', {
     align: 'left',
     item: statusWidget,
@@ -92,6 +131,7 @@ export function addStatusBarWidget(
 
   const callback = Private.createEventCallback(statusWidget);
   model.taskChanged.connect(callback);
+
   statusWidget.disposed.connect(() => {
     model.taskChanged.disconnect(callback);
   });

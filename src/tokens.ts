@@ -73,6 +73,16 @@ export interface IGitExtension extends IDisposable {
   hasDirtyStagedFiles: boolean;
 
   /**
+   * Boolean indicating whether credentials are required from the user.
+   */
+  credentialsRequired: boolean;
+
+  /**
+   * A signal emitted whenever credentials are required, or are not required anymore.
+   */
+  readonly credentialsRequiredChanged: ISignal<IGitExtension, boolean>;
+
+  /**
    * Git repository status.
    */
   readonly status: Git.IStatus;
@@ -291,6 +301,18 @@ export interface IGitExtension extends IDisposable {
   ensureGitignore(): Promise<void>;
 
   /**
+   * Fetch to get ahead/behind status
+   *
+   * @param auth - remote authentication information
+   * @returns promise which resolves upon fetching
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  fetch(auth?: Git.IAuth): Promise<Git.IResultWithMessage>;
+
+  /**
    * Match files status information based on a provided file path.
    *
    * If the file is tracked and has no changes, a StatusFile of unmodified will be returned
@@ -381,13 +403,14 @@ export interface IGitExtension extends IDisposable {
    * Push local changes to a remote repository.
    *
    * @param auth - remote authentication information
+   * @param force - whether or not to force the push
    * @returns promise which resolves upon pushing changes
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  push(auth?: Git.IAuth): Promise<Git.IResultWithMessage>;
+  push(auth?: Git.IAuth, force?: boolean): Promise<Git.IResultWithMessage>;
 
   /**
    * General Git refresh
@@ -924,11 +947,12 @@ export namespace Git {
   }
 
   /**
-   * Interface for the Git Auth request.
+   * Interface for the Git Auth request with credentials caching option.
    */
   export interface IAuth {
     username: string;
     password: string;
+    cache_credentials?: boolean;
   }
 
   /**

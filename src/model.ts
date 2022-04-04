@@ -5,7 +5,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-import { requestAPI } from './git';
+import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
 import { TaskHandler } from './taskhandler';
 import { Git, IGitExtension } from './tokens';
 import { decodeStage } from './utils';
@@ -296,6 +296,27 @@ export class GitExtension implements IGitExtension {
    */
   get dirtyStagedFilesStatusChanged(): ISignal<IGitExtension, boolean> {
     return this._dirtyStagedFilesStatusChanged;
+  }
+
+  /**
+   * Boolean indicating whether credentials are required from the user.
+   */
+  get credentialsRequired(): boolean {
+    return this._credentialsRequired;
+  }
+
+  set credentialsRequired(value: boolean) {
+    if (this._credentialsRequired !== value) {
+      this._credentialsRequired = value;
+      this._credentialsRequiredChanged.emit(value);
+    }
+  }
+
+  /**
+   * A signal emitted whenever credentials are required, or are not required anymore.
+   */
+  get credentialsRequiredChanged(): ISignal<IGitExtension, boolean> {
+    return this._credentialsRequiredChanged;
   }
 
   /**
@@ -735,6 +756,33 @@ export class GitExtension implements IGitExtension {
     await requestAPI(URLExt.join(path, 'ignore'), 'POST', {});
     this._openGitignore();
     await this.refreshStatus();
+  }
+
+  /**
+   * Fetch to get ahead/behind status
+   *
+   * @param auth - remote authentication information
+   * @returns promise which resolves upon fetching
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async fetch(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
+    const path = await this._getPathRepository();
+    const data = this._taskHandler.execute<Git.IResultWithMessage>(
+      'git:fetch:remote',
+      async () => {
+        return await requestAPI<Git.IResultWithMessage>(
+          URLExt.join(path, 'remote', 'fetch'),
+          'POST',
+          {
+            auth: auth as any
+          }
+        );
+      }
+    );
+    return data;
   }
 
   /**
@@ -1512,13 +1560,23 @@ export class GitExtension implements IGitExtension {
 
   /**
    * Fetch poll action.
+   * This is blocked if Git credentials are required.
    */
   private _fetchRemotes = async (): Promise<void> => {
+    if (this.credentialsRequired) {
+      return;
+    }
     try {
-      const path = await this._getPathRepository();
-      await requestAPI(URLExt.join(path, 'remote', 'fetch'), 'POST');
+      await this.fetch();
     } catch (error) {
       console.error('Failed to fetch remotes', error);
+      if (
+        AUTH_ERROR_MESSAGES.some(
+          errorMessage => (error as Error).message.indexOf(errorMessage) > -1
+        )
+      ) {
+        this.credentialsRequired = true;
+      }
     }
   };
 
@@ -1628,6 +1686,7 @@ export class GitExtension implements IGitExtension {
   private _changeUpstreamNotified: Git.IStatusFile[] = [];
   private _selectedHistoryFile: Git.IStatusFile | null = null;
   private _hasDirtyStagedFiles = false;
+  private _credentialsRequired = false;
 
   private _branchesChanged = new Signal<IGitExtension, void>(this);
   private _headChanged = new Signal<IGitExtension, void>(this);
@@ -1646,6 +1705,9 @@ export class GitExtension implements IGitExtension {
     Git.IRemoteChangedNotification | null
   >(this);
   private _dirtyStagedFilesStatusChanged = new Signal<IGitExtension, boolean>(
+    this
+  );
+  private _credentialsRequiredChanged = new Signal<IGitExtension, boolean>(
     this
   );
 }

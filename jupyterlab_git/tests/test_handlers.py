@@ -463,7 +463,12 @@ async def test_push_handler_noupstream_unique_remote(mock_git, jp_fetch, jp_root
     mock_git.config.assert_called_with(str(local_path))
     mock_git.remote_show.assert_called_with(str(local_path))
     mock_git.push.assert_called_with(
-        remote, "foo", str(local_path), None, set_upstream=True, force=False
+        remote,
+        "foo",
+        str(local_path),
+        None,
+        set_upstream=True,
+        force=False,
     )
 
     assert response.code == 200
@@ -496,7 +501,12 @@ async def test_push_handler_noupstream_pushdefault(mock_git, jp_fetch, jp_root_d
     mock_git.config.assert_called_with(str(local_path))
     mock_git.remote_show.assert_called_with(str(local_path))
     mock_git.push.assert_called_with(
-        remote, "foo", str(local_path), None, set_upstream=True, force=False
+        remote,
+        "foo",
+        str(local_path),
+        None,
+        set_upstream=True,
+        force=False,
     )
 
     assert response.code == 200

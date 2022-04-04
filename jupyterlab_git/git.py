@@ -8,6 +8,8 @@ import re
 import shlex
 import subprocess
 import traceback
+from typing import Dict, List, Optional
+from unittest.mock import NonCallableMock
 from urllib.parse import unquote
 
 import nbformat
@@ -37,6 +39,8 @@ GIT_VERSION_REGEX = re.compile(r"^git\sversion\s(?P<version>\d+(.\d+)*)")
 GIT_BRANCH_STATUS = re.compile(
     r"^## (?P<branch>([\w\-/]+|HEAD \(no branch\)|No commits yet on \w+))(\.\.\.(?P<remote>[\w\-/]+)( \[(ahead (?P<ahead>\d+))?(, )?(behind (?P<behind>\d+))?\])?)?$"
 )
+# Git cache as a credential helper
+GIT_CREDENTIAL_HELPER_CACHE = re.compile(r"cache\b")
 
 execution_lock = tornado.locks.Lock()
 
@@ -174,8 +178,14 @@ class Git:
     A single parent class containing all of the individual git methods in it.
     """
 
+    _GIT_CREDENTIAL_CACHE_DAEMON_PROCESS: subprocess.Popen = None
+
     def __init__(self, config=None):
         self._config = config
+
+    def __del__(self):
+        if self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS:
+            self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.terminate()
 
     async def config(self, path, **kwargs):
         """Get or set Git options.
@@ -273,6 +283,8 @@ class Git:
         """
         env = os.environ.copy()
         if auth:
+            if auth.get("cache_credentials"):
+                await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
                 ["git", "clone", unquote(repo_url), "-q"],
@@ -296,7 +308,7 @@ class Git:
 
         return response
 
-    async def fetch(self, path):
+    async def fetch(self, path, auth=None):
         """
         Execute git fetch command
         """
@@ -308,8 +320,21 @@ class Git:
             "--all",
             "--prune",
         ]  # Run prune by default to help beginners
-
-        code, _, fetch_error = await execute(cmd, cwd=cwd)
+        env = os.environ.copy()
+        if auth:
+            if auth.get("cache_credentials"):
+                await self.ensure_credential_helper(path)
+            env["GIT_TERMINAL_PROMPT"] = "1"
+            code, _, fetch_error = await execute(
+                cmd,
+                cwd=cwd,
+                username=auth["username"],
+                password=auth["password"],
+                env=env,
+            )
+        else:
+            env["GIT_TERMINAL_PROMPT"] = "0"
+            code, _, fetch_error = await execute(cmd, cwd=cwd, env=env)
 
         result = {
             "code": code,
@@ -317,6 +342,7 @@ class Git:
         if code != 0:
             result["command"] = " ".join(cmd)
             result["error"] = fetch_error
+            result["message"] = fetch_error
 
         return result
 
@@ -1005,6 +1031,8 @@ class Git:
         """
         env = os.environ.copy()
         if auth:
+            if auth.get("cache_credentials"):
+                await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
                 ["git", "pull", "--no-commit"],
@@ -1048,7 +1076,13 @@ class Git:
         return response
 
     async def push(
-        self, remote, branch, path, auth=None, set_upstream=False, force=False
+        self,
+        remote,
+        branch,
+        path,
+        auth=None,
+        set_upstream=False,
+        force=False,
     ):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
@@ -1062,6 +1096,8 @@ class Git:
 
         env = os.environ.copy()
         if auth:
+            if auth.get("cache_credentials"):
+                await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
                 command,
@@ -1543,3 +1579,127 @@ class Git:
                 "command": " ".join(command),
                 "message": error,
             }
+
+    async def check_credential_helper(self, path: str) -> Optional[bool]:
+        """
+        Check if the credential helper exists, and whether we need to setup a Git credential cache daemon in case the credential helper is Git credential cache.
+
+        path: str
+            Git path repository
+
+        Return None if the credential helper is not set.
+        Otherwise, return True if we need to setup a Git credential cache daemon, else False.
+
+        Raise an exception if `git config` errored.
+        """
+
+        git_config_response: Dict[str, str] = await self.config(path)
+        if git_config_response["code"] != 0:
+            raise RuntimeError(git_config_response["message"])
+
+        git_config_kv_pairs = git_config_response["options"]
+        has_credential_helper = "credential.helper" in git_config_kv_pairs
+
+        if not has_credential_helper:
+            return None
+
+        if has_credential_helper and GIT_CREDENTIAL_HELPER_CACHE.match(
+            git_config_kv_pairs["credential.helper"].strip()
+        ):
+            return True
+
+        return False
+
+    async def ensure_credential_helper(
+        self, path: str, env: Dict[str, str] = None
+    ) -> None:
+        """
+        Check whether `git config --list` contains `credential.helper`.
+        If it is not set, then it will be set to the value string for `credential.helper`
+        defined in the server settings.
+
+        path: str
+            Git path repository
+        env: Dict[str, str]
+            Environment variables
+        """
+
+        try:
+            has_credential_helper = await self.check_credential_helper(path)
+            if has_credential_helper == False:
+                return
+        except RuntimeError as e:
+            get_logger().error("Error checking credential helper: %s", e, exc_info=True)
+            return
+
+        cache_daemon_required = has_credential_helper == True
+
+        if has_credential_helper is None:
+            credential_helper: str = self._config.credential_helper
+            await self.config(path, **{"credential.helper": credential_helper})
+            if GIT_CREDENTIAL_HELPER_CACHE.match(credential_helper.strip()):
+                cache_daemon_required = True
+
+        # special case: Git credential cache
+        if cache_daemon_required:
+            try:
+                self.ensure_git_credential_cache_daemon(cwd=path, env=env)
+            except Exception as e:
+                get_logger().error(
+                    "Error setting up Git credential cache daemon: %s", e, exc_info=True
+                )
+
+    def ensure_git_credential_cache_daemon(
+        self,
+        socket: Optional[pathlib.Path] = None,
+        debug: bool = False,
+        force: bool = False,
+        cwd: Optional[str] = None,
+        env: Dict[str, str] = None,
+    ) -> None:
+        """
+        Spawn a Git credential cache daemon with the socket file being `socket` if it does not exist.
+        If `debug` is `True`, the daemon will be spawned with `--debug` flag.
+        If `socket` is empty, it is set to `~/.git-credential-cache-daemon`.
+        If `force` is `True`, a daemon will be spawned, and if the daemon process is accessible,
+        the existing daemon process will be terminated before spawning a new one.
+        Otherwise, if `force` is `False`, the PID of the existing daemon process is returned.
+        If the daemon process is not accessible, `-1` is returned.
+        `cwd` and `env` are passed to the process that spawns the daemon.
+        """
+
+        if not socket:
+            socket = pathlib.Path.home() / ".git-credential-cache" / "socket"
+
+        if socket.exists():
+            return
+
+        if self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS is None or force:
+
+            if force and self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS:
+                self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.terminate()
+
+            if not socket.parent.exists():
+                socket.parent.mkdir(parents=True, exist_ok=True)
+                socket.parent.chmod(0o700)
+
+            args: List[str] = ["git", "credential-cache--daemon"]
+
+            if debug:
+                args.append("--debug")
+
+            args.append(socket)
+
+            self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS = subprocess.Popen(
+                args,
+                cwd=cwd,
+                env=env,
+            )
+
+            get_logger().debug(
+                "A credential cache daemon has been spawned with PID %d",
+                self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.pid,
+            )
+
+        elif self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.poll():
+            self.ensure_git_credential_cache_daemon(socket, debug, True, cwd, env)

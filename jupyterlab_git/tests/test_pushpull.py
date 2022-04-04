@@ -1,7 +1,9 @@
+import os
 from unittest.mock import call, patch
 
 import pytest
 
+from jupyterlab_git import JupyterLabGit
 from jupyterlab_git.git import Git
 
 from .testutils import maybe_future
@@ -174,6 +176,93 @@ async def test_git_pull_with_auth_success_and_conflict_fail():
 
 
 @pytest.mark.asyncio
+async def test_git_pull_with_auth_and_cache_credentials():
+    with patch(
+        "jupyterlab_git.git.Git.ensure_git_credential_cache_daemon"
+    ) as mock_ensure_daemon:
+        mock_ensure_daemon.return_value = 0
+        with patch("jupyterlab_git.git.execute") as mock_execute:
+            # Given
+            default_config = JupyterLabGit()
+            credential_helper = default_config.credential_helper
+            test_path = "test_path"
+            mock_execute.side_effect = [
+                maybe_future((0, "", "")),
+                maybe_future((0, "", "")),
+                maybe_future((0, "", "")),
+            ]
+
+            # When
+            auth = {"username": "user", "password": "pass", "cache_credentials": True}
+            actual_response = await Git(config=default_config).pull(test_path, auth)
+
+            # Then
+            assert mock_execute.call_count == 3
+            mock_execute.assert_has_calls(
+                [
+                    call(
+                        ["git", "config", "--list"],
+                        cwd=test_path,
+                    ),
+                    call(
+                        [
+                            "git",
+                            "config",
+                            "--add",
+                            "credential.helper",
+                            credential_helper,
+                        ],
+                        cwd=test_path,
+                    ),
+                    call(
+                        ["git", "pull", "--no-commit"],
+                        username="user",
+                        password="pass",
+                        cwd=test_path,
+                        env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
+                    ),
+                ]
+            )
+            mock_ensure_daemon.assert_called_once_with(cwd=test_path, env=None)
+            assert {"code": 0, "message": ""} == actual_response
+
+
+@pytest.mark.asyncio
+async def test_git_pull_with_auth_and_cache_credentials_and_existing_credential_helper():
+    with patch("jupyterlab_git.git.execute") as mock_execute:
+        # Given
+        default_config = JupyterLabGit()
+        test_path = "test_path"
+        mock_execute.side_effect = [
+            maybe_future((0, "credential.helper=something", "")),
+            maybe_future((0, "", "")),
+        ]
+
+        # When
+        auth = {"username": "user", "password": "pass", "cache_credentials": True}
+        actual_response = await Git(config=default_config).pull(test_path, auth)
+
+        # Then
+        assert mock_execute.call_count == 2
+        mock_execute.assert_has_calls(
+            [
+                call(
+                    ["git", "config", "--list"],
+                    cwd=test_path,
+                ),
+                call(
+                    ["git", "pull", "--no-commit"],
+                    username="user",
+                    password="pass",
+                    cwd=test_path,
+                    env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
+                ),
+            ]
+        )
+        assert {"code": 0, "message": ""} == actual_response
+
+
+@pytest.mark.asyncio
 async def test_git_push_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
@@ -279,3 +368,94 @@ async def test_git_push_with_auth_success():
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
             )
             assert {"code": 0, "message": output} == actual_response
+
+
+@pytest.mark.asyncio
+async def test_git_push_with_auth_and_cache_credentials():
+    with patch(
+        "jupyterlab_git.git.Git.ensure_git_credential_cache_daemon"
+    ) as mock_ensure_daemon:
+        mock_ensure_daemon.return_value = 0
+        with patch("jupyterlab_git.git.execute") as mock_execute:
+            # Given
+            default_config = JupyterLabGit()
+            credential_helper = default_config.credential_helper
+            test_path = "test_path"
+            mock_execute.side_effect = [
+                maybe_future((0, "", "")),
+                maybe_future((0, "", "")),
+                maybe_future((0, "", "")),
+            ]
+
+            # When
+            auth = {"username": "user", "password": "pass", "cache_credentials": True}
+            actual_response = await Git(config=default_config).push(
+                ".", "HEAD:test_master", test_path, auth
+            )
+
+            # Then
+            assert mock_execute.call_count == 3
+            mock_execute.assert_has_calls(
+                [
+                    call(
+                        ["git", "config", "--list"],
+                        cwd=test_path,
+                    ),
+                    call(
+                        [
+                            "git",
+                            "config",
+                            "--add",
+                            "credential.helper",
+                            credential_helper,
+                        ],
+                        cwd=test_path,
+                    ),
+                    call(
+                        ["git", "push", ".", "HEAD:test_master"],
+                        username="user",
+                        password="pass",
+                        cwd=test_path,
+                        env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
+                    ),
+                ]
+            )
+            mock_ensure_daemon.assert_called_once_with(cwd=test_path, env=None)
+            assert {"code": 0, "message": ""} == actual_response
+
+
+@pytest.mark.asyncio
+async def test_git_push_with_auth_and_cache_credentials_and_existing_credential_helper():
+    with patch("jupyterlab_git.git.execute") as mock_execute:
+        # Given
+        default_config = JupyterLabGit()
+        test_path = "test_path"
+        mock_execute.side_effect = [
+            maybe_future((0, "credential.helper=something", "")),
+            maybe_future((0, "", "")),
+        ]
+
+        # When
+        auth = {"username": "user", "password": "pass", "cache_credentials": True}
+        actual_response = await Git(config=default_config).push(
+            ".", "HEAD:test_master", test_path, auth
+        )
+
+        # Then
+        assert mock_execute.call_count == 2
+        mock_execute.assert_has_calls(
+            [
+                call(
+                    ["git", "config", "--list"],
+                    cwd=test_path,
+                ),
+                call(
+                    ["git", "push", ".", "HEAD:test_master"],
+                    username="user",
+                    password="pass",
+                    cwd=test_path,
+                    env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
+                ),
+            ]
+        )
+        assert {"code": 0, "message": ""} == actual_response

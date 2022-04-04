@@ -4,7 +4,7 @@
 import json
 from pathlib import Path
 
-from traitlets import List, Dict, Unicode
+from traitlets import List, Dict, Unicode, default
 from traitlets.config import Configurable
 
 from ._version import __version__
@@ -36,6 +36,18 @@ class JupyterLabGit(Configurable):
         )
         # TODO Validate
     )
+
+    credential_helper = Unicode(
+        help="""
+            The value of Git credential helper will be set to this value when the Git credential caching mechanism is activated by this extension.
+            By default it is an in-memory cache of 3600 seconds (1 hour); `cache --timeout=3600`.
+        """,
+        config=True,
+    )
+
+    @default("credential_helper")
+    def _credential_helper_default(self):
+        return "cache --timeout=3600"
 
 
 def _jupyter_server_extension_points():

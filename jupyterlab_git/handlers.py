@@ -67,13 +67,16 @@ class GitCloneHandler(GitHandler):
             {
               'repo_url': 'https://github.com/path/to/myrepo',
               OPTIONAL 'auth': '{ 'username': '<username>',
-                                  'password': '<password>'
+                                  'password': '<password>',
+                                  'cache_credentials': true/false
                                 }'
             }
         """
         data = self.get_json_body()
         response = await self.git.clone(
-            self.url2localpath(path), data["clone_url"], data.get("auth", None)
+            self.url2localpath(path),
+            data["clone_url"],
+            data.get("auth", None),
         )
 
         if response["code"] != 0:
@@ -170,7 +173,11 @@ class GitFetchHandler(GitHandler):
         """
         POST request handler, fetch from remotes.
         """
-        result = await self.git.fetch(self.url2localpath(path))
+        data = self.get_json_body()
+        result = await self.git.fetch(
+            self.url2localpath(path),
+            data.get("auth", None),
+        )
 
         if result["code"] != 0:
             self.set_status(500)
