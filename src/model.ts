@@ -2,7 +2,7 @@ import { IChangedArgs, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { JSONObject } from '@lumino/coreutils';
+import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
@@ -204,6 +204,13 @@ export class GitExtension implements IGitExtension {
    */
   get status(): Git.IStatus {
     return this._status;
+  }
+
+  /**
+   * A signal emitted when the branches of the Git repository changes.
+   */
+  get branchesChanged(): ISignal<IGitExtension, void> {
+    return this._branchesChanged;
   }
 
   /**
@@ -908,7 +915,8 @@ export class GitExtension implements IGitExtension {
    */
   async pull(auth?: Git.IAuth): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
-    const data = this._taskHandler.execute<Git.IResultWithMessage>(
+    const previousHead = this._currentBranch?.top_commit;
+    const data = await this._taskHandler.execute<Git.IResultWithMessage>(
       'git:pull',
       async () => {
         return await requestAPI<Git.IResultWithMessage>(
@@ -924,7 +932,9 @@ export class GitExtension implements IGitExtension {
         );
       }
     );
-    this.refreshBranch(); // Will emit headChanged if required
+    const changes = await this._changedFiles(previousHead, 'HEAD');
+    changes?.files?.forEach(file => this._revertFile(file));
+    await this.refreshBranch(); // Will emit headChanged if required
     return data;
   }
 
@@ -993,7 +1003,12 @@ export class GitExtension implements IGitExtension {
           this._currentBranch.top_commit !== data.current_branch.top_commit;
       }
 
-      this._branches = data.branches;
+      const branchesChanged = !JSONExt.deepEqual(
+        this._branches as any,
+        (data.branches ?? []) as any
+      );
+
+      this._branches = data.branches ?? [];
       this._currentBranch = data.current_branch;
       if (this._currentBranch) {
         // Set up the marker obj for the current (valid) repo/branch combination
@@ -1001,6 +1016,9 @@ export class GitExtension implements IGitExtension {
       }
       if (headChanged) {
         this._headChanged.emit();
+      }
+      if (branchesChanged) {
+        this._branchesChanged.emit();
       }
 
       // Start fetch remotes if the repository has remote branches
@@ -1011,12 +1029,16 @@ export class GitExtension implements IGitExtension {
         this._fetchPoll.stop();
       }
     } catch (error) {
+      const branchesChanged = this._branches.length > 0;
       const headChanged = this._currentBranch !== null;
       this._branches = [];
       this._currentBranch = null;
       this._fetchPoll.stop();
       if (headChanged) {
         this._headChanged.emit();
+      }
+      if (branchesChanged) {
+        this._branchesChanged.emit();
       }
 
       if (!(error instanceof Git.NotInRepository)) {
@@ -1702,6 +1724,7 @@ export class GitExtension implements IGitExtension {
   private _hasDirtyStagedFiles = false;
   private _credentialsRequired = false;
 
+  private _branchesChanged = new Signal<IGitExtension, void>(this);
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _selectedHistoryFileChanged = new Signal<

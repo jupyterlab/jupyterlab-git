@@ -1343,8 +1343,11 @@ class Git:
         """
         relative_repo = os.path.relpath(path, contents_manager.root_dir)
         try:
+            # Never request notebook model - see https://github.com/jupyterlab/jupyterlab-git/issues/970
             model = await ensure_async(
-                contents_manager.get(path=os.path.join(relative_repo, filename))
+                contents_manager.get(
+                    path=os.path.join(relative_repo, filename), type="file"
+                )
             )
         except tornado.web.HTTPError as error:
             # Handle versioned file being deleted case

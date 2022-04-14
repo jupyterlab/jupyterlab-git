@@ -25,6 +25,11 @@ export interface IGitExtension extends IDisposable {
   currentBranch: Git.IBranch;
 
   /**
+   * A signal emitted when the branches of the Git repository changes.
+   */
+  readonly branchesChanged: ISignal<IGitExtension, void>;
+
+  /**
    * A signal emitted when the `HEAD` of the Git repository changes.
    */
   readonly headChanged: ISignal<IGitExtension, void>;
@@ -1098,6 +1103,16 @@ export namespace Git {
       super('Not in a Git Repository');
     }
   }
+
+  /**
+   * Interface for dialog with one checkbox.
+   */
+  export interface ICheckboxFormValue {
+    /**
+     * Checkbox value
+     */
+    checked: boolean;
+  }
 }
 
 /**
@@ -1171,6 +1186,7 @@ export enum CommandIDs {
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
   gitPull = 'git:pull',
+  gitResetToRemote = 'git:reset-to-remote',
   gitSubmitCommand = 'git:submit-commit',
   gitShowDiff = 'git:show-diff'
 }

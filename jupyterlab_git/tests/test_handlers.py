@@ -668,16 +668,52 @@ async def test_content(mock_execute, jp_fetch, jp_root_dir):
     )
 
 
-@patch("jupyterlab_git.git.execute")
-async def test_content_working(mock_execute, jp_fetch, jp_root_dir):
+async def test_content_working(jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     filename = "my/file"
     content = "dummy content file\nwith multiple lines"
 
-    mock_execute.side_effect = [
-        maybe_future((0, content, "")),
-    ]
+    dummy_file = local_path / filename
+    dummy_file.parent.mkdir(parents=True)
+    dummy_file.write_text(content)
+
+    # When
+    body = {
+        "filename": filename,
+        "reference": {"special": "WORKING"},
+    }
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST"
+    )
+
+    # Then
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload["content"] == content
+
+
+async def test_content_notebook_working(jp_fetch, jp_root_dir):
+    # Given
+    local_path = jp_root_dir / "test_path"
+    filename = "my/notebook.ipynb"
+    content = """{
+ "cells": [],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "mimetype": "text/x-python",
+   "name": "python"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
+"""
 
     dummy_file = local_path / filename
     dummy_file.parent.mkdir(parents=True)

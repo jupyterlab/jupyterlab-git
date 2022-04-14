@@ -206,8 +206,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         nCommitsBehind: model.status.behind
       });
     }, this);
+    model.branchesChanged.connect(async () => {
+      await this.refreshBranches();
+    }, this);
     model.headChanged.connect(async () => {
-      await this.refreshBranch();
+      await this.refreshCurrentBranch();
       if (this.state.tab === 1) {
         this.refreshHistory();
       }
@@ -259,11 +262,16 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     Signal.clearData(this);
   }
 
-  refreshBranch = async (): Promise<void> => {
+  refreshBranches = async (): Promise<void> => {
+    this.setState({
+      branches: this.props.model.branches
+    });
+  };
+
+  refreshCurrentBranch = async (): Promise<void> => {
     const { currentBranch } = this.props.model;
 
     this.setState({
-      branches: this.props.model.branches,
       currentBranch: currentBranch ? currentBranch.name : 'master',
       commitCompareLhs: null,
       commitCompareRhs: null,
@@ -293,7 +301,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   refreshView = async (): Promise<void> => {
     if (this.props.model.pathRepository !== null) {
-      await this.refreshBranch();
+      await this.refreshBranches();
       await this.refreshHistory();
     }
   };
