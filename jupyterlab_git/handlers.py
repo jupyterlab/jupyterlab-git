@@ -258,7 +258,16 @@ class GitDiffHandler(GitHandler):
         POST request handler, fetches differences between commits & current working
         tree.
         """
-        my_output = await self.git.diff(self.url2localpath(path))
+        data = self.get_json_body()
+
+        if data:
+            my_output = await self.git.diff(
+                self.url2localpath(path),
+                data.get("previous"),
+                data.get("current"),
+            )
+        else:
+            my_output = await self.git.diff(self.url2localpath(path))
 
         if my_output["code"] != 0:
             self.set_status(500)

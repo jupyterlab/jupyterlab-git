@@ -616,11 +616,17 @@ class Git:
             "modified_files": result,
         }
 
-    async def diff(self, path):
+    async def diff(self, path, previous=None, current=None):
         """
         Execute git diff command & return the result.
         """
         cmd = ["git", "diff", "--numstat", "-z"]
+
+        if previous:
+            cmd.append(previous)
+            if current:
+                cmd.append(current)
+
         code, my_output, my_error = await execute(cmd, cwd=path)
 
         if code != 0:
@@ -630,13 +636,14 @@ class Git:
         line_array = strip_and_split(my_output)
         for line in line_array:
             linesplit = line.split()
-            result.append(
-                {
-                    "insertions": linesplit[0],
-                    "deletions": linesplit[1],
-                    "filename": linesplit[2],
-                }
-            )
+            if len(linesplit) == 3:
+                result.append(
+                    {
+                        "insertions": linesplit[0],
+                        "deletions": linesplit[1],
+                        "filename": linesplit[2],
+                    }
+                )
         return {"code": code, "result": result}
 
     async def branch(self, path):
