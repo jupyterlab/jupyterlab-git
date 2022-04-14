@@ -239,8 +239,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       commitCompareLhs: prevCommitCompareLhs,
       commitCompareRhs: prevCommitCompareRhs,
       commitComparison: prevCommitComparison
-    }: Readonly<IGitPanelState>,
-    __?: any
+    }: Readonly<IGitPanelState>
   ): Promise<void> {
     const {
       commitCompareLhs: currCommitCompareLhs,
@@ -887,7 +886,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         this.state.commitCompareLhs.commit,
         this.state.commitCompareRhs.commit
       );
-      if (diffResult.code !== 0) throw new Error(diffResult.message);
+      if (diffResult.code !== 0) {
+        throw new Error(diffResult.message);
+      }
     } catch (err) {
       console.error(
         `Error while getting the diff for commit ${this.state.commitCompareLhs} and commit ${this.state.commitCompareRhs}!`,

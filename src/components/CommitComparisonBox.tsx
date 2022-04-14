@@ -48,28 +48,25 @@ interface ICommitComparisonBoxHeaderProps {
   onClickCancel?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 }
 
-const CommitComparisonBoxHeader: React.VFC<ICommitComparisonBoxHeaderProps> =
-  props => {
-    return (
-      <div className={sectionAreaStyle} onClick={props.onCollapseExpand}>
-        {props.collapsible && (
-          <button className={changeStageButtonStyle}>
-            {props.collapsed ? (
-              <caretRightIcon.react />
-            ) : (
-              <caretDownIcon.react />
-            )}
-          </button>
-        )}
-        <span className={sectionHeaderLabelStyle}>{props.label}</span>
-        {props.onClickCancel && (
-          <span className={clickableSpanStyle} onClick={props.onClickCancel}>
-            Cancel
-          </span>
-        )}
-      </div>
-    );
-  };
+const CommitComparisonBoxHeader: React.VFC<ICommitComparisonBoxHeaderProps> = (
+  props: ICommitComparisonBoxHeaderProps
+) => {
+  return (
+    <div className={sectionAreaStyle} onClick={props.onCollapseExpand}>
+      {props.collapsible && (
+        <button className={changeStageButtonStyle}>
+          {props.collapsed ? <caretRightIcon.react /> : <caretDownIcon.react />}
+        </button>
+      )}
+      <span className={sectionHeaderLabelStyle}>{props.label}</span>
+      {props.onClickCancel && (
+        <span className={clickableSpanStyle} onClick={props.onClickCancel}>
+          Cancel
+        </span>
+      )}
+    </div>
+  );
+};
 
 interface ICommitComparisonBoxOverviewProps {
   totalFiles: number;
@@ -79,7 +76,7 @@ interface ICommitComparisonBoxOverviewProps {
 }
 
 const CommitComparisonBoxOverview: React.VFC<ICommitComparisonBoxOverviewProps> =
-  props => {
+  (props: ICommitComparisonBoxOverviewProps) => {
     return (
       <div className={commitClass}>
         <div className={commitOverviewNumbersClass}>
@@ -188,32 +185,33 @@ interface ICommitComparisonBoxBodyProps {
   ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
-const CommitComparisonBoxBody: React.VFC<ICommitComparisonBoxBodyProps> =
-  props => {
-    const totalInsertions = props.files.reduce((acc, file) => {
-      const insertions = Number.parseInt(file.insertion, 10);
-      return acc + (Number.isNaN(insertions) ? 0 : insertions);
-    }, 0);
-    const totalDeletions = props.files.reduce((acc, file) => {
-      const deletions = Number.parseInt(file.deletion, 10);
-      return acc + (Number.isNaN(deletions) ? 0 : deletions);
-    }, 0);
-    return (
-      <React.Fragment>
-        <CommitComparisonBoxOverview
-          totalDeletions={totalDeletions}
-          totalFiles={props.files.length}
-          totalInsertions={totalInsertions}
-          trans={props.trans}
-        />
-        <CommitComparisonBoxChangedFileList
-          files={props.files}
-          onOpenDiff={props.onOpenDiff}
-          trans={props.trans}
-        />
-      </React.Fragment>
-    );
-  };
+const CommitComparisonBoxBody: React.VFC<ICommitComparisonBoxBodyProps> = (
+  props: ICommitComparisonBoxBodyProps
+) => {
+  const totalInsertions = props.files.reduce((acc, file) => {
+    const insertions = Number.parseInt(file.insertion, 10);
+    return acc + (Number.isNaN(insertions) ? 0 : insertions);
+  }, 0);
+  const totalDeletions = props.files.reduce((acc, file) => {
+    const deletions = Number.parseInt(file.deletion, 10);
+    return acc + (Number.isNaN(deletions) ? 0 : deletions);
+  }, 0);
+  return (
+    <React.Fragment>
+      <CommitComparisonBoxOverview
+        totalDeletions={totalDeletions}
+        totalFiles={props.files.length}
+        totalInsertions={totalInsertions}
+        trans={props.trans}
+      />
+      <CommitComparisonBoxChangedFileList
+        files={props.files}
+        onOpenDiff={props.onOpenDiff}
+        trans={props.trans}
+      />
+    </React.Fragment>
+  );
+};
 
 export interface ICommitComparisonBoxProps {
   collapsible: boolean;
@@ -233,26 +231,27 @@ export interface ICommitComparisonBoxProps {
 /**
  * A component which displays a comparison between two commits.
  */
-export const CommitComparisonBox: React.VFC<ICommitComparisonBoxProps> =
-  props => {
-    const [collapsed, setCollapsed] = React.useState<boolean>(false);
-    return (
-      <React.Fragment>
-        <CommitComparisonBoxHeader
-          collapsible={props.collapsible}
-          collapsed={collapsed}
-          label={props.header}
-          onCollapseExpand={() => setCollapsed(!collapsed)}
-          onClickCancel={props.onCancel}
+export const CommitComparisonBox: React.VFC<ICommitComparisonBoxProps> = (
+  props: ICommitComparisonBoxProps
+) => {
+  const [collapsed, setCollapsed] = React.useState<boolean>(false);
+  return (
+    <React.Fragment>
+      <CommitComparisonBoxHeader
+        collapsible={props.collapsible}
+        collapsed={collapsed}
+        label={props.header}
+        onCollapseExpand={() => setCollapsed(!collapsed)}
+        onClickCancel={props.onCancel}
+      />
+      {!collapsed && props.comparison?.changedFiles && (
+        <CommitComparisonBoxBody
+          files={props.comparison.changedFiles}
+          onOpenDiff={props.onOpenDiff}
+          show={!collapsed}
+          trans={props.trans}
         />
-        {!collapsed && props.comparison?.changedFiles && (
-          <CommitComparisonBoxBody
-            files={props.comparison.changedFiles}
-            onOpenDiff={props.onOpenDiff}
-            show={!collapsed}
-            trans={props.trans}
-          />
-        )}
-      </React.Fragment>
-    );
-  };
+      )}
+    </React.Fragment>
+  );
+};

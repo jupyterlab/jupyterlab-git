@@ -85,7 +85,7 @@ export const openFileDiff =
    *
    * @param event - event object
    */
-  async (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
+  async (event: React.MouseEvent<HTMLLIElement, MouseEvent>): Promise<void> => {
     // Prevent the commit component from being collapsed:
     event.stopPropagation();
 
