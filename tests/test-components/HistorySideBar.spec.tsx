@@ -23,7 +23,7 @@ describe('HistorySideBar', () => {
         author: null,
         date: null,
         commit_msg: null,
-        pre_commit: null
+        pre_commit: null,
       }
     ],
     branches: [],
@@ -31,7 +31,11 @@ describe('HistorySideBar', () => {
       selectedHistoryFile: null
     } as GitExtension,
     commands: null,
-    trans
+    trans,
+    commitCompareLhs: null,
+    commitCompareRhs: null,
+    onSelectForCompare: _ => async _ => null,
+    onCompareWithSelected: _ => async _ => null
   };
 
   it('renders the commit nodes', () => {
