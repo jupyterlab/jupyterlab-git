@@ -1026,6 +1026,25 @@ export namespace Git {
     toggle(fname: string): void;
   }
 
+  /**
+   * Interface for the result of comparing two commits
+   */
+  export interface ICommitComparison {
+    /**
+     * The commit to compare against
+     */
+    lhs: ISingleCommitInfo;
+    /**
+     * The commit to compare
+     */
+    rhs: ISingleCommitInfo;
+    /**
+     * The list of files that have been modified
+     * in the compared commits
+     */
+    changedFiles: ICommitModifiedFile[];
+  }
+
   export type Status =
     | 'untracked'
     | 'staged'
