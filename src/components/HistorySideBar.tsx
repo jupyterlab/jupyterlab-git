@@ -44,6 +44,32 @@ export interface IHistorySideBarProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * The commit to compare against.
+   */
+  commitCompareLhs?: Git.ISingleCommitInfo;
+
+  /**
+   * The commit to compare.
+   */
+  commitCompareRhs?: Git.ISingleCommitInfo;
+
+  /**
+   * Callback invoked upon clicking to select a commit for comparison.
+   * @param event - event object
+   */
+  onSelectForCompare?: (
+    commit: Git.ISingleCommitInfo
+  ) => (event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>;
+
+  /**
+   * Callback invoked upon clicking to compare a commit against the selected.
+   * @param event - event object
+   */
+  onCompareWithSelected?: (
+    commit: Git.ISingleCommitInfo
+  ) => (event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>;
 }
 
 /**
@@ -130,7 +156,15 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
             <PastCommitNode
               key={commit.commit}
               {...commonProps}
+              isCommitCompareLhs={
+                commit.commit === props.commitCompareLhs?.commit
+              }
+              isCommitCompareRhs={
+                commit.commit === props.commitCompareRhs?.commit
+              }
               onOpenDiff={onOpenDiff}
+              onSelectForCompare={props.onSelectForCompare(commit)}
+              onCompareWithSelected={props.onCompareWithSelected(commit)}
             >
               {!props.model.selectedHistoryFile && (
                 <SinglePastCommitInfo
