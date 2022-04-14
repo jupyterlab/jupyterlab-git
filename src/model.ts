@@ -722,6 +722,42 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Get the diff of two commits.
+   * If no commit is provided, the diff of HEAD and INDEX is returned.
+   * If the current commit (the commit to compare) is not provided,
+   * the diff of the previous commit and INDEX is returned.
+   *
+   * @param previous - the commit to compare against
+   * @param current - the commit to compare
+   * @returns promise which resolves upon retrieving the diff
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async diff(previous?: string, current?: string): Promise<Git.IDiffResult> {
+    const path = await this._getPathRepository();
+    const data = await this._taskHandler.execute<Git.IDiffResult>(
+      'git:diff',
+      async () => {
+        return await requestAPI<Git.IDiffResult>(
+          URLExt.join(path, 'diff'),
+          'POST',
+          {
+            previous,
+            current
+          }
+        );
+      }
+    );
+    data.result = data.result.map(f => {
+      f.filetype = this._resolveFileType(f.filename);
+      return f;
+    });
+    return data;
+  }
+
+  /**
    * Dispose of model resources.
    */
   dispose(): void {

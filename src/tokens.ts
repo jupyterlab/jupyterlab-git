@@ -287,6 +287,22 @@ export interface IGitExtension extends IDisposable {
   detailedLog(hash: string): Promise<Git.ISingleCommitFilePathInfo>;
 
   /**
+   * Get the diff of two commits.
+   * If no commit is provided, the diff of HEAD and INDEX is returned.
+   * If the current commit (the commit to compare) is not provided,
+   * the diff of the previous commit and INDEX is returned.
+   *
+   * @param previous - the commit to compare against
+   * @param current - the commit to compare
+   * @returns promise which resolves upon retrieving the diff
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  diff(previous?: string, current?: string): Promise<Git.IDiffResult>;
+
+  /**
    * Ensure a .gitignore file exists
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
@@ -806,6 +822,21 @@ export namespace Git {
      * File content
      */
     content: string;
+  }
+
+  /**
+   * Interface for GitDiff request result
+   */
+  export interface IDiffResult {
+    code: number;
+    command?: string;
+    message?: string;
+    result?: {
+      insertions: string;
+      deletions: string;
+      filename: string;
+      filetype?: DocumentRegistry.IFileType;
+    }[];
   }
 
   /**
