@@ -21,8 +21,10 @@ import {
   warningTextClass
 } from '../style/GitPanel';
 import { CommandIDs, Git, ILogMessage, Level } from '../tokens';
+import { openFileDiff } from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import { CommitBox } from './CommitBox';
+import { CommitComparisonBox } from './CommitComparisonBox';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
@@ -130,6 +132,21 @@ export interface IGitPanelState {
    * Whether there are dirty (e.g., unsaved) staged files.
    */
   hasDirtyStagedFiles: boolean;
+
+  /**
+   * The commit to compare against
+   */
+  commitCompareLhs: Git.ISingleCommitInfo | null;
+
+  /**
+   * The commit to compare
+   */
+  commitCompareRhs: Git.ISingleCommitInfo | null;
+
+  /**
+   * The commit comparison result
+   */
+  commitComparison: Git.ICommitComparison | null;
 }
 
 /**
@@ -160,7 +177,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       commitSummary: '',
       commitDescription: '',
       commitAmend: false,
-      hasDirtyStagedFiles: hasDirtyStagedFiles
+      hasDirtyStagedFiles: hasDirtyStagedFiles,
+      commitCompareLhs: null,
+      commitCompareRhs: null,
+      commitComparison: null
     };
   }
 
@@ -210,6 +230,30 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     });
   }
 
+  async componentDidUpdate(
+    _: Readonly<IGitPanelProps>,
+    {
+      commitCompareLhs: prevCommitCompareLhs,
+      commitCompareRhs: prevCommitCompareRhs,
+      commitComparison: prevCommitComparison
+    }: Readonly<IGitPanelState>,
+    __?: any
+  ): Promise<void> {
+    const {
+      commitCompareLhs: currCommitCompareLhs,
+      commitCompareRhs: currCommitCompareRhs
+    } = this.state;
+
+    const commitsReady = currCommitCompareLhs && currCommitCompareRhs;
+    const commitChanged =
+      prevCommitCompareLhs !== currCommitCompareLhs ||
+      prevCommitCompareRhs !== currCommitCompareRhs;
+
+    if (commitsReady && (!!prevCommitComparison || commitChanged)) {
+      await this._doCommitComparsion();
+    }
+  }
+
   componentWillUnmount(): void {
     // Clear all signal connections
     Signal.clearData(this);
@@ -220,7 +264,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
     this.setState({
       branches: this.props.model.branches,
-      currentBranch: currentBranch ? currentBranch.name : 'master'
+      currentBranch: currentBranch ? currentBranch.name : 'master',
+      commitCompareLhs: null,
+      commitCompareRhs: null,
+      commitComparison: null
     });
   };
 
@@ -440,13 +487,64 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   private _renderHistory(): React.ReactElement {
     return (
-      <HistorySideBar
-        branches={this.state.branches}
-        commits={this.state.pastCommits}
-        model={this.props.model}
-        commands={this.props.commands}
-        trans={this.props.trans}
-      />
+      <React.Fragment>
+        <HistorySideBar
+          branches={this.state.branches}
+          commits={this.state.pastCommits}
+          model={this.props.model}
+          commands={this.props.commands}
+          trans={this.props.trans}
+          commitCompareLhs={this.state.commitCompareLhs}
+          commitCompareRhs={this.state.commitCompareRhs}
+          onSelectForCompare={commit => async event => {
+            event.stopPropagation();
+            this._setCommitComparisonState({ lhs: commit });
+          }}
+          onCompareWithSelected={commit => async event => {
+            event.stopPropagation();
+            this._setCommitComparisonState({ rhs: commit });
+          }}
+        />
+        {(this.state.commitCompareLhs || this.state.commitCompareRhs) && (
+          <CommitComparisonBox
+            model={this.props.model}
+            collapsible={true}
+            comparison={this.state.commitComparison}
+            commands={this.props.commands}
+            header={`
+              Compare
+              ${
+                this.state.commitCompareLhs
+                  ? this.state.commitCompareLhs.commit.substring(0, 7)
+                  : '...'
+              }
+              and
+              ${
+                this.state.commitCompareRhs
+                  ? this.state.commitCompareRhs.commit.substring(0, 7)
+                  : '...'
+              }
+            `}
+            trans={this.props.trans}
+            onCancel={event => {
+              event.stopPropagation();
+              this._setCommitComparisonState({
+                lhs: null,
+                rhs: null,
+                res: null
+              });
+            }}
+            onOpenDiff={
+              this.state.commitComparison
+                ? openFileDiff(this.props.commands)(
+                    this.state.commitComparison.rhs,
+                    this.state.commitComparison.lhs
+                  )
+                : undefined
+            }
+          />
+        )}
+      </React.Fragment>
     );
   }
 
@@ -751,5 +849,79 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       elem = full;
     }
     return <div>{elem}</div>;
+  }
+
+  private _setCommitComparisonState(state: {
+    lhs?: Git.ISingleCommitInfo;
+    rhs?: Git.ISingleCommitInfo;
+    res?: Git.ICommitComparison;
+  }): void {
+    this.setState(currentState => ({
+      commitCompareLhs:
+        typeof state.lhs !== 'undefined'
+          ? state.lhs
+          : currentState.commitCompareLhs,
+      commitCompareRhs:
+        typeof state.rhs !== 'undefined'
+          ? state.rhs
+          : currentState.commitCompareRhs,
+      commitComparison:
+        typeof state.res !== 'undefined'
+          ? state.res
+          : currentState.commitComparison
+    }));
+  }
+
+  private async _doCommitComparsion(): Promise<void> {
+    let diffResult: Git.IDiffResult = null;
+    try {
+      diffResult = await this.props.model.diff(
+        this.state.commitCompareLhs.commit,
+        this.state.commitCompareRhs.commit
+      );
+      if (diffResult.code !== 0) throw new Error(diffResult.message);
+    } catch (err) {
+      console.error(
+        `Error while getting the diff for commit ${this.state.commitCompareLhs} and commit ${this.state.commitCompareRhs}!`,
+        err
+      );
+      this.props.logger.log({
+        level: Level.ERROR,
+        message: `Error while getting the diff for commit ${this.state.commitCompareLhs} and commit ${this.state.commitCompareRhs}!`,
+        error: err
+      });
+      return;
+    }
+    if (diffResult) {
+      this.setState(state => {
+        return {
+          commitComparison: {
+            lhs: state.commitCompareLhs,
+            rhs: state.commitCompareRhs,
+            changedFiles: diffResult.result.map(changedFile => {
+              const pathParts = changedFile.filename.split('/');
+              const fileName = pathParts[pathParts.length - 1];
+              const filePath = changedFile.filename;
+              return {
+                deletion: changedFile.deletions,
+                insertion: changedFile.insertions,
+                is_binary:
+                  changedFile.deletions === '-' ||
+                  changedFile.insertions === '-',
+                modified_file_name: fileName,
+                modified_file_path: filePath,
+                type: changedFile.filetype
+              } as Git.ICommitModifiedFile;
+            })
+          } as Git.ICommitComparison
+        };
+      });
+    } else {
+      this.setState({
+        commitCompareLhs: null,
+        commitCompareRhs: null,
+        commitComparison: null
+      });
+    }
   }
 }
