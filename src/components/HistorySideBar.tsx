@@ -2,7 +2,6 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
-import { CommandArguments } from '../commandsAndMenu';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
@@ -10,7 +9,8 @@ import {
   noHistoryFoundStyle,
   selectedHistoryFileStyle
 } from '../style/HistorySideBarStyle';
-import { ContextCommandIDs, Git } from '../tokens';
+import { Git } from '../tokens';
+import { openFileDiff } from '../utils';
 import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
 import { PastCommitNode } from './PastCommitNode';
@@ -61,52 +61,6 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
   const removeSelectedFile = () => {
     props.model.selectedHistoryFile = null;
   };
-
-  /**
-   * Curried callback function to display a file diff.
-   *
-   * @param commit Commit data.
-   */
-  const openDiff =
-    (commit: Git.ISingleCommitInfo) =>
-    /**
-     * Returns a callback to be invoked on click to display a file diff.
-     *
-     * @param filePath file path
-     * @param isText indicates whether the file supports displaying a diff
-     * @param previousFilePath when file has been relocated
-     * @returns callback
-     */
-    (filePath: string, isText: boolean, previousFilePath?: string) =>
-    /**
-     * Callback invoked upon clicking to display a file diff.
-     *
-     * @param event - event object
-     */
-    async (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
-      // Prevent the commit component from being collapsed:
-      event.stopPropagation();
-
-      if (isText) {
-        try {
-          props.commands.execute(ContextCommandIDs.gitFileDiff, {
-            files: [
-              {
-                filePath,
-                previousFilePath,
-                isText,
-                context: {
-                  previousRef: commit.pre_commit,
-                  currentRef: commit.commit
-                }
-              }
-            ]
-          } as CommandArguments.IGitFileDiff as any);
-        } catch (err) {
-          console.error(`Failed to open diff view for ${filePath}.\n${err}`);
-        }
-      }
-    };
 
   /**
    * Commit info for 'Uncommitted Changes' history.
@@ -165,7 +119,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
           // and its diff is viewable
           const onOpenDiff =
             props.model.selectedHistoryFile && !commit.is_binary
-              ? openDiff(commit)(
+              ? openFileDiff(props.commands)(commit)(
                   commit.file_path ?? props.model.selectedHistoryFile.to,
                   !commit.is_binary,
                   commit.previous_file_path
@@ -181,7 +135,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
               {!props.model.selectedHistoryFile && (
                 <SinglePastCommitInfo
                   {...commonProps}
-                  onOpenDiff={openDiff(commit)}
+                  onOpenDiff={openFileDiff(props.commands)(commit)}
                 />
               )}
             </PastCommitNode>
