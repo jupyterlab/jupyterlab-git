@@ -83,3 +83,11 @@ export const singleFileCommitClass = style({
     }
   }
 });
+
+export const commitCompareLhsNodeClass = style({
+  borderLeft: '3px solid darkred'
+});
+
+export const commitCompareRhsNodeClass = style({
+  borderLeft: '3px solid darkgreen'
+});
