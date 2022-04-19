@@ -13,8 +13,8 @@ import {
   branchClass,
   branchWrapperClass,
   commitBodyClass,
-  commitCompareLhsNodeClass,
-  commitCompareRhsNodeClass,
+  referenceCommitNodeClass,
+  challengerCommitNodeClass,
   commitExpandedClass,
   commitHeaderClass,
   commitHeaderItemClass,
@@ -60,12 +60,12 @@ export interface IPastCommitNodeProps {
   /**
    * The commit to compare against.
    */
-  isCommitCompareLhs?: boolean;
+  isReferenceCommit?: boolean;
 
   /**
    * The commit to compare.
    */
-  isCommitCompareRhs?: boolean;
+  isChallengerCommit?: boolean;
 
   /**
    * Callback invoked upon clicking to display a file diff.
@@ -138,8 +138,8 @@ export class PastCommitNode extends React.Component<
             : this.state.expanded
             ? commitExpandedClass
             : null,
-          this.props.isCommitCompareLhs && commitCompareLhsNodeClass,
-          this.props.isCommitCompareRhs && commitCompareRhsNodeClass
+          this.props.isReferenceCommit && referenceCommitNodeClass,
+          this.props.isChallengerCommit && challengerCommitNodeClass
         )}
         title={
           this.props.children
