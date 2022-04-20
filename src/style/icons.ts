@@ -5,6 +5,7 @@ import addSvg from '../../style/icons/add.svg';
 import branchSvg from '../../style/icons/branch.svg';
 import clockSvg from '../../style/icons/clock.svg';
 import cloneSvg from '../../style/icons/clone.svg';
+import compareWithSelectedSvg from '../../style/icons/compare-with-selected.svg';
 import deletionsMadeSvg from '../../style/icons/deletions.svg';
 import desktopSvg from '../../style/icons/desktop.svg';
 import diffSvg from '../../style/icons/diff.svg';
@@ -17,6 +18,7 @@ import pullSvg from '../../style/icons/pull.svg';
 import pushSvg from '../../style/icons/push.svg';
 import removeSvg from '../../style/icons/remove.svg';
 import rewindSvg from '../../style/icons/rewind.svg';
+import selectForCompareSvg from '../../style/icons/select-for-compare.svg';
 import tagSvg from '../../style/icons/tag.svg';
 import trashSvg from '../../style/icons/trash.svg';
 import verticalMoreSvg from '../../style/icons/vertical-more.svg';
@@ -33,6 +35,10 @@ export const branchIcon = new LabIcon({
 export const cloneIcon = new LabIcon({
   name: 'git:clone',
   svgstr: cloneSvg
+});
+export const compareWithSelectedIcon = new LabIcon({
+  name: 'git:compare-with-selected',
+  svgstr: compareWithSelectedSvg
 });
 export const deletionsMadeIcon = new LabIcon({
   name: 'git:deletions',
@@ -81,6 +87,10 @@ export const removeIcon = new LabIcon({
 export const rewindIcon = new LabIcon({
   name: 'git:rewind',
   svgstr: rewindSvg
+});
+export const selectForCompareIcon = new LabIcon({
+  name: 'git:select-for-compare',
+  svgstr: selectForCompareSvg
 });
 export const tagIcon = new LabIcon({
   name: 'git:tag',

@@ -255,10 +255,19 @@ class GitDiffHandler(GitHandler):
     @tornado.web.authenticated
     async def post(self, path: str = ""):
         """
-        POST request handler, fetches differences between commits & current working
+        POST request handler, fetches differences between two states
         tree.
         """
-        my_output = await self.git.diff(self.url2localpath(path))
+        data = self.get_json_body()
+
+        if data:
+            my_output = await self.git.diff(
+                self.url2localpath(path),
+                data.get("previous"),
+                data.get("current"),
+            )
+        else:
+            my_output = await self.git.diff(self.url2localpath(path))
 
         if my_output["code"] != 0:
             self.set_status(500)

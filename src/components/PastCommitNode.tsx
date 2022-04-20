@@ -4,11 +4,17 @@ import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
-import { diffIcon } from '../style/icons';
+import {
+  compareWithSelectedIcon,
+  diffIcon,
+  selectForCompareIcon
+} from '../style/icons';
 import {
   branchClass,
   branchWrapperClass,
   commitBodyClass,
+  referenceCommitNodeClass,
+  challengerCommitNodeClass,
   commitExpandedClass,
   commitHeaderClass,
   commitHeaderItemClass,
@@ -20,6 +26,7 @@ import {
   workingBranchClass
 } from '../style/PastCommitNode';
 import { Git } from '../tokens';
+import { ActionButton } from './ActionButton';
 
 /**
  * Interface describing component properties.
@@ -51,12 +58,38 @@ export interface IPastCommitNodeProps {
   trans: TranslationBundle;
 
   /**
+   * The commit to compare against.
+   */
+  isReferenceCommit?: boolean;
+
+  /**
+   * The commit to compare.
+   */
+  isChallengerCommit?: boolean;
+
+  /**
    * Callback invoked upon clicking to display a file diff.
    *
    * @param event - event object
    */
   onOpenDiff?: (
     event: React.MouseEvent<HTMLLIElement, MouseEvent>
+  ) => Promise<void>;
+
+  /**
+   * Callback invoked upon clicking to select a commit for comparison.
+   * @param event - event object
+   */
+  onSelectForCompare?: (
+    event: React.MouseEvent<HTMLElement, MouseEvent>
+  ) => Promise<void>;
+
+  /**
+   * Callback invoked upon clicking to compare a commit against the selected.
+   * @param event - event object
+   */
+  onCompareWithSelected?: (
+    event: React.MouseEvent<HTMLElement, MouseEvent>
   ) => Promise<void>;
 }
 
@@ -104,7 +137,9 @@ export class PastCommitNode extends React.Component<
             ? singleFileCommitClass
             : this.state.expanded
             ? commitExpandedClass
-            : null
+            : null,
+          this.props.isReferenceCommit && referenceCommitNodeClass,
+          this.props.isChallengerCommit && challengerCommitNodeClass
         )}
         title={
           this.props.children
@@ -125,6 +160,22 @@ export class PastCommitNode extends React.Component<
           <span className={commitHeaderItemClass}>
             {this.props.commit.date}
           </span>
+          {!this.props.commit.is_binary && (
+            <React.Fragment>
+              <ActionButton
+                className={iconButtonClass}
+                icon={selectForCompareIcon}
+                title={this.props.trans.__('Select for compare')}
+                onClick={this.props.onSelectForCompare}
+              />
+              <ActionButton
+                className={iconButtonClass}
+                icon={compareWithSelectedIcon}
+                title={this.props.trans.__('Compare with selected')}
+                onClick={this.props.onCompareWithSelected}
+              />
+            </React.Fragment>
+          )}
           {this.props.children ? (
             this.state.expanded ? (
               <caretUpIcon.react className={iconButtonClass} tag="span" />
