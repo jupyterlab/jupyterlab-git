@@ -255,7 +255,7 @@ class GitDiffHandler(GitHandler):
     @tornado.web.authenticated
     async def post(self, path: str = ""):
         """
-        POST request handler, fetches differences between commits & current working
+        POST request handler, fetches differences between two states
         tree.
         """
         data = self.get_json_body()
