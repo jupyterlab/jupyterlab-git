@@ -224,17 +224,27 @@ export interface ICommitComparisonBoxProps {
   collapsible: boolean;
 
   /**
-   * Jupyter App commands registry
+   * Jupyter App commands registry.
    */
   commands: CommandRegistry;
 
   /**
-   * Commit comparison result
+   * The commit to compare against.
    */
-  comparison: Git.ICommitComparison | null;
+  referenceCommit: Git.ISingleCommitInfo | null;
 
   /**
-   * Header text
+   * The commit to compare.
+   */
+  challengerCommit: Git.ISingleCommitInfo | null;
+
+  /**
+   * The commit comparison result.
+   */
+  changedFiles: Git.ICommitModifiedFile[] | null;
+
+  /**
+   * Header text.
    */
   header: string;
 
@@ -285,9 +295,9 @@ export const CommitComparisonBox: React.VFC<ICommitComparisonBoxProps> = (
         onClickCancel={props.onCancel}
         trans={props.trans}
       />
-      {!collapsed && props.comparison?.changedFiles && (
+      {!collapsed && props.changedFiles && (
         <CommitComparisonBoxBody
-          files={props.comparison.changedFiles}
+          files={props.changedFiles}
           onOpenDiff={props.onOpenDiff}
           show={!collapsed}
           trans={props.trans}
