@@ -44,6 +44,7 @@ interface ICommitComparisonBoxHeaderProps {
   collapsible: boolean;
   collapsed?: boolean;
   label?: string;
+  trans: TranslationBundle;
   onCollapseExpand?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   onClickCancel?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 }
@@ -61,7 +62,7 @@ const CommitComparisonBoxHeader: React.VFC<ICommitComparisonBoxHeaderProps> = (
       <span className={sectionHeaderLabelStyle}>{props.label}</span>
       {props.onClickCancel && (
         <span className={clickableSpanStyle} onClick={props.onClickCancel}>
-          Cancel
+          {props.trans.__('Cancel')}
         </span>
       )}
     </div>
@@ -213,6 +214,9 @@ const CommitComparisonBoxBody: React.VFC<ICommitComparisonBoxBodyProps> = (
   );
 };
 
+/**
+ * Interface describing ComparisonBox component properties.
+ */
 export interface ICommitComparisonBoxProps {
   collapsible: boolean;
   commands: CommandRegistry;

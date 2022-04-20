@@ -48,12 +48,12 @@ export interface IHistorySideBarProps {
   /**
    * The commit to compare against.
    */
-  commitCompareLhs?: Git.ISingleCommitInfo;
+  referenceCommit?: Git.ISingleCommitInfo;
 
   /**
    * The commit to compare.
    */
-  commitCompareRhs?: Git.ISingleCommitInfo;
+  challengerCommit?: Git.ISingleCommitInfo;
 
   /**
    * Callback invoked upon clicking to select a commit for comparison.
@@ -156,11 +156,11 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
             <PastCommitNode
               key={commit.commit}
               {...commonProps}
-              isCommitCompareLhs={
-                commit.commit === props.commitCompareLhs?.commit
+              isReferenceCommit={
+                commit.commit === props.referenceCommit?.commit
               }
-              isCommitCompareRhs={
-                commit.commit === props.commitCompareRhs?.commit
+              isChallengerCommit={
+                commit.commit === props.challengerCommit?.commit
               }
               onOpenDiff={onOpenDiff}
               onSelectForCompare={props.onSelectForCompare(commit)}

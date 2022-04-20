@@ -84,10 +84,10 @@ export const singleFileCommitClass = style({
   }
 });
 
-export const commitCompareLhsNodeClass = style({
-  borderLeft: '3px solid darkred'
+export const referenceCommitNodeClass = style({
+  borderLeft: '3px solid var(--jp-git-diff-deleted-color)'
 });
 
-export const commitCompareRhsNodeClass = style({
-  borderLeft: '3px solid darkgreen'
+export const challengerCommitNodeClass = style({
+  borderLeft: '3px solid var(--jp-git-diff-added-color)'
 });

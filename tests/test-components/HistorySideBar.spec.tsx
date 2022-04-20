@@ -32,8 +32,8 @@ describe('HistorySideBar', () => {
     } as GitExtension,
     commands: null,
     trans,
-    commitCompareLhs: null,
-    commitCompareRhs: null,
+    referenceCommit: null,
+    challengerCommit: null,
     onSelectForCompare: _ => async _ => null,
     onCompareWithSelected: _ => async _ => null
   };

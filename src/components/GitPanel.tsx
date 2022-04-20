@@ -136,12 +136,12 @@ export interface IGitPanelState {
   /**
    * The commit to compare against
    */
-  commitCompareLhs: Git.ISingleCommitInfo | null;
+  referenceCommit: Git.ISingleCommitInfo | null;
 
   /**
    * The commit to compare
    */
-  commitCompareRhs: Git.ISingleCommitInfo | null;
+  challengerCommit: Git.ISingleCommitInfo | null;
 
   /**
    * The commit comparison result
@@ -178,8 +178,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       commitDescription: '',
       commitAmend: false,
       hasDirtyStagedFiles: hasDirtyStagedFiles,
-      commitCompareLhs: null,
-      commitCompareRhs: null,
+      referenceCommit: null,
+      challengerCommit: null,
       commitComparison: null
     };
   }
@@ -236,20 +236,20 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   async componentDidUpdate(
     _: Readonly<IGitPanelProps>,
     {
-      commitCompareLhs: prevCommitCompareLhs,
-      commitCompareRhs: prevCommitCompareRhs,
+      referenceCommit: prevReferenceCommit,
+      challengerCommit: prevChallengerCommit,
       commitComparison: prevCommitComparison
     }: Readonly<IGitPanelState>
   ): Promise<void> {
     const {
-      commitCompareLhs: currCommitCompareLhs,
-      commitCompareRhs: currCommitCompareRhs
+      referenceCommit: currReferenceCommit,
+      challengerCommit: currChallengerCommit
     } = this.state;
 
-    const commitsReady = currCommitCompareLhs && currCommitCompareRhs;
+    const commitsReady = currReferenceCommit && currChallengerCommit;
     const commitChanged =
-      prevCommitCompareLhs !== currCommitCompareLhs ||
-      prevCommitCompareRhs !== currCommitCompareRhs;
+      prevReferenceCommit !== currReferenceCommit ||
+      prevChallengerCommit !== currChallengerCommit;
 
     if (commitsReady && (!!prevCommitComparison || commitChanged)) {
       await this._doCommitComparsion();
@@ -272,8 +272,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
     this.setState({
       currentBranch: currentBranch ? currentBranch.name : 'master',
-      commitCompareLhs: null,
-      commitCompareRhs: null,
+      referenceCommit: null,
+      challengerCommit: null,
       commitComparison: null
     });
   };
@@ -501,18 +501,18 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           model={this.props.model}
           commands={this.props.commands}
           trans={this.props.trans}
-          commitCompareLhs={this.state.commitCompareLhs}
-          commitCompareRhs={this.state.commitCompareRhs}
+          referenceCommit={this.state.referenceCommit}
+          challengerCommit={this.state.challengerCommit}
           onSelectForCompare={commit => async event => {
             event.stopPropagation();
-            this._setCommitComparisonState({ lhs: commit });
+            this._setCommitComparisonState({ reference: commit });
           }}
           onCompareWithSelected={commit => async event => {
             event.stopPropagation();
-            this._setCommitComparisonState({ rhs: commit });
+            this._setCommitComparisonState({ challenger: commit });
           }}
         />
-        {(this.state.commitCompareLhs || this.state.commitCompareRhs) && (
+        {(this.state.referenceCommit || this.state.challengerCommit) && (
           <CommitComparisonBox
             model={this.props.model}
             collapsible={true}
@@ -521,14 +521,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             header={`
               Compare
               ${
-                this.state.commitCompareLhs
-                  ? this.state.commitCompareLhs.commit.substring(0, 7)
+                this.state.referenceCommit
+                  ? this.state.referenceCommit.commit.substring(0, 7)
                   : '...'
               }
               and
               ${
-                this.state.commitCompareRhs
-                  ? this.state.commitCompareRhs.commit.substring(0, 7)
+                this.state.challengerCommit
+                  ? this.state.challengerCommit.commit.substring(0, 7)
                   : '...'
               }
             `}
@@ -536,16 +536,16 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             onCancel={event => {
               event.stopPropagation();
               this._setCommitComparisonState({
-                lhs: null,
-                rhs: null,
-                res: null
+                reference: null,
+                challenger: null,
+                comparison: null
               });
             }}
             onOpenDiff={
               this.state.commitComparison
                 ? openFileDiff(this.props.commands)(
-                    this.state.commitComparison.rhs,
-                    this.state.commitComparison.lhs
+                    this.state.commitComparison.challenger,
+                    this.state.commitComparison.reference
                   )
                 : undefined
             }
@@ -859,22 +859,22 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   }
 
   private _setCommitComparisonState(state: {
-    lhs?: Git.ISingleCommitInfo;
-    rhs?: Git.ISingleCommitInfo;
-    res?: Git.ICommitComparison;
+    reference?: Git.ISingleCommitInfo;
+    challenger?: Git.ISingleCommitInfo;
+    comparison?: Git.ICommitComparison;
   }): void {
     this.setState(currentState => ({
-      commitCompareLhs:
-        typeof state.lhs !== 'undefined'
-          ? state.lhs
-          : currentState.commitCompareLhs,
-      commitCompareRhs:
-        typeof state.rhs !== 'undefined'
-          ? state.rhs
-          : currentState.commitCompareRhs,
+      referenceCommit:
+        typeof state.reference !== 'undefined'
+          ? state.reference
+          : currentState.referenceCommit,
+      challengerCommit:
+        typeof state.challenger !== 'undefined'
+          ? state.challenger
+          : currentState.challengerCommit,
       commitComparison:
-        typeof state.res !== 'undefined'
-          ? state.res
+        typeof state.comparison !== 'undefined'
+          ? state.comparison
           : currentState.commitComparison
     }));
   }
@@ -883,20 +883,20 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     let diffResult: Git.IDiffResult = null;
     try {
       diffResult = await this.props.model.diff(
-        this.state.commitCompareLhs.commit,
-        this.state.commitCompareRhs.commit
+        this.state.referenceCommit.commit,
+        this.state.challengerCommit.commit
       );
       if (diffResult.code !== 0) {
         throw new Error(diffResult.message);
       }
     } catch (err) {
       console.error(
-        `Error while getting the diff for commit ${this.state.commitCompareLhs} and commit ${this.state.commitCompareRhs}!`,
+        `Error while getting the diff for commit ${this.state.referenceCommit} and commit ${this.state.challengerCommit}!`,
         err
       );
       this.props.logger.log({
         level: Level.ERROR,
-        message: `Error while getting the diff for commit ${this.state.commitCompareLhs} and commit ${this.state.commitCompareRhs}!`,
+        message: `Error while getting the diff for commit ${this.state.referenceCommit} and commit ${this.state.challengerCommit}!`,
         error: err
       });
       return;
@@ -905,8 +905,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.setState(state => {
         return {
           commitComparison: {
-            lhs: state.commitCompareLhs,
-            rhs: state.commitCompareRhs,
+            reference: state.referenceCommit,
+            challenger: state.challengerCommit,
             changedFiles: diffResult.result.map(changedFile => {
               const pathParts = changedFile.filename.split('/');
               const fileName = pathParts[pathParts.length - 1];
@@ -927,8 +927,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       });
     } else {
       this.setState({
-        commitCompareLhs: null,
-        commitCompareRhs: null,
+        referenceCommit: null,
+        challengerCommit: null,
         commitComparison: null
       });
     }

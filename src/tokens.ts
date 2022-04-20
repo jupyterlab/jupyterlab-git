@@ -1038,11 +1038,11 @@ export namespace Git {
     /**
      * The commit to compare against
      */
-    lhs: ISingleCommitInfo;
+    reference: ISingleCommitInfo;
     /**
      * The commit to compare
      */
-    rhs: ISingleCommitInfo;
+    challenger: ISingleCommitInfo;
     /**
      * The list of files that have been modified
      * in the compared commits
