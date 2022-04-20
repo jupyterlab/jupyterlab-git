@@ -636,14 +636,13 @@ class Git:
         line_array = strip_and_split(my_output)
         for line in line_array:
             linesplit = line.split()
-            if len(linesplit) == 3:
-                result.append(
-                    {
-                        "insertions": linesplit[0],
-                        "deletions": linesplit[1],
-                        "filename": linesplit[2],
-                    }
-                )
+            result.append(
+                {
+                    "insertions": linesplit[0],
+                    "deletions": linesplit[1],
+                    "filename": linesplit[2],
+                }
+            )
         return {"code": code, "result": result}
 
     async def branch(self, path):
