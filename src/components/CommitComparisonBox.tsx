@@ -283,6 +283,7 @@ export const CommitComparisonBox: React.VFC<ICommitComparisonBoxProps> = (
         label={props.header}
         onCollapseExpand={() => setCollapsed(!collapsed)}
         onClickCancel={props.onCancel}
+        trans={props.trans}
       />
       {!collapsed && props.comparison?.changedFiles && (
         <CommitComparisonBoxBody
