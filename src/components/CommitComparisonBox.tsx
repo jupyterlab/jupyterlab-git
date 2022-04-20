@@ -218,13 +218,49 @@ const CommitComparisonBoxBody: React.VFC<ICommitComparisonBoxBodyProps> = (
  * Interface describing ComparisonBox component properties.
  */
 export interface ICommitComparisonBoxProps {
+  /**
+   * Is this collapsible?
+   */
   collapsible: boolean;
+
+  /**
+   * Jupyter App commands registry
+   */
   commands: CommandRegistry;
+
+  /**
+   * Commit comparison result
+   */
   comparison: Git.ICommitComparison | null;
+
+  /**
+   * Header text
+   */
   header: string;
+
+  /**
+   * Extension data model.
+   */
   model: IGitExtension;
+
+  /**
+   * The application language translator.
+   */
   trans: TranslationBundle;
+
+  /**
+   * Returns a callback to be invoked on clicking cancel.
+   */
   onCancel?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+
+  /**
+   * Returns a callback to be invoked on click to display a file diff.
+   *
+   * @param filePath file path
+   * @param isText indicates whether the file supports displaying a diff
+   * @param previousFilePath when file has been relocated
+   * @returns callback
+   */
   onOpenDiff?: (
     filePath: string,
     isText: boolean,
