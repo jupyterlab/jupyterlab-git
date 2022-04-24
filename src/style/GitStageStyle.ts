@@ -1,11 +1,6 @@
 import { style } from 'typestyle';
-import { showButtonOnHover } from './ActionButtonStyle';
-
-export const sectionFileContainerStyle = style({
-  margin: '0',
-  padding: '0',
-  overflow: 'auto'
-});
+import { NestedCSSProperties } from 'typestyle/lib/types';
+import { hiddenButtonStyle, showButtonOnHover } from './ActionButtonStyle';
 
 export const sectionAreaStyle = style(
   {
@@ -26,6 +21,27 @@ export const sectionAreaStyle = style(
     }
   },
   showButtonOnHover
+);
+
+export const sectionFileContainerStyle = style(
+  (() => {
+    const styled: NestedCSSProperties = {
+      margin: '0',
+      padding: '0',
+      overflow: 'auto',
+      $nest: {}
+    };
+
+    const focus = `&:focus-within .${sectionAreaStyle} .${hiddenButtonStyle}`;
+    styled.$nest[focus] = {
+      display: 'block'
+    };
+    const hoverSelector = `&:hover .${sectionAreaStyle} .${hiddenButtonStyle}`;
+    styled.$nest[hoverSelector] = {
+      display: 'block'
+    };
+    return styled;
+  })()
 );
 
 export const sectionHeaderLabelStyle = style({
