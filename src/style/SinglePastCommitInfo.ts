@@ -81,8 +81,6 @@ export const deletionsIconClass = style({
 });
 
 export const fileListClass = style({
-  maxHeight: 120,
-
   $nest: {
     ul: {
       paddingLeft: 0,

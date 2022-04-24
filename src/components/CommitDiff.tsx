@@ -24,14 +24,28 @@ import { Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { FilePath } from './FilePath';
 
-const ITEM_HEIGHT = 24; // File list item height
-const MAX_VISIBLE_FILES = 20; // Maximal number of file display at once
+/**
+ * File list item height
+ */
+const ITEM_HEIGHT = 24;
+/**
+ * Maximal number of file display at once
+ */
+const MAX_VISIBLE_FILES = 5;
 
+/**
+ * CommitDiff component properties
+ */
 export interface ICommitDiffProps {
   /**
    * Global actions on the commit diff
    */
   actions?: JSX.Element;
+
+  /**
+   * Class name
+   */
+  className?: string;
 
   /**
    * Number of modified files.
@@ -73,10 +87,13 @@ export interface ICommitDiffProps {
   ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
+/**
+ * Display differences between two commits
+ */
 export class CommitDiff extends React.PureComponent<ICommitDiffProps> {
   render(): JSX.Element {
     return (
-      <div>
+      <div className={this.props.className}>
         <div className={commitClass}>
           <div className={commitOverviewNumbersClass}>
             <span title={this.props.trans.__('# Files Changed')}>

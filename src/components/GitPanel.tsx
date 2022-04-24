@@ -142,11 +142,6 @@ export interface IGitPanelState {
    * The commit to compare
    */
   challengerCommit: Git.ISingleCommitInfo | null;
-
-  /**
-   * The commit comparison result
-   */
-  comparedFiles: Git.ICommitModifiedFile[] | null;
 }
 
 /**
@@ -179,8 +174,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       commitAmend: false,
       hasDirtyStagedFiles: hasDirtyStagedFiles,
       referenceCommit: null,
-      challengerCommit: null,
-      comparedFiles: null
+      challengerCommit: null
     };
   }
 
@@ -194,8 +188,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.setState({
         repository: args.newValue,
         referenceCommit: null,
-        challengerCommit: null,
-        comparedFiles: null
+        challengerCommit: null
       });
       this.refreshView();
     }, this);
@@ -236,29 +229,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     });
   }
 
-  async componentDidUpdate(
-    _: Readonly<IGitPanelProps>,
-    {
-      referenceCommit: prevReferenceCommit,
-      challengerCommit: prevChallengerCommit,
-      comparedFiles: prevComparedFiles
-    }: Readonly<IGitPanelState>
-  ): Promise<void> {
-    const {
-      referenceCommit: currReferenceCommit,
-      challengerCommit: currChallengerCommit
-    } = this.state;
-
-    const commitsReady = currReferenceCommit && currChallengerCommit;
-    const commitChanged =
-      prevReferenceCommit !== currReferenceCommit ||
-      prevChallengerCommit !== currChallengerCommit;
-
-    if (commitsReady && (!!prevComparedFiles || commitChanged)) {
-      await this._doCommitComparison();
-    }
-  }
-
   componentWillUnmount(): void {
     // Clear all signal connections
     Signal.clearData(this);
@@ -276,8 +246,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     this.setState({
       currentBranch: currentBranch ? currentBranch.name : 'master',
       referenceCommit: null,
-      challengerCommit: null,
-      comparedFiles: null
+      challengerCommit: null
     });
   };
 
@@ -508,20 +477,15 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           challengerCommit={this.state.challengerCommit}
           onSelectForCompare={commit => async event => {
             event.stopPropagation();
-            this._setCommitComparisonState({ reference: commit });
+            this.setState({ referenceCommit: commit });
           }}
           onCompareWithSelected={commit => async event => {
             event.stopPropagation();
-            this._setCommitComparisonState({ challenger: commit });
+            this.setState({ challengerCommit: commit });
           }}
         />
         {(this.state.referenceCommit || this.state.challengerCommit) && (
           <CommitComparisonBox
-            referenceCommit={this.state.referenceCommit}
-            challengerCommit={this.state.challengerCommit}
-            changedFiles={this.state.comparedFiles}
-            model={this.props.model}
-            commands={this.props.commands}
             header={this.props.trans.__(
               'Compare %1 and %2',
               this.state.referenceCommit
@@ -531,13 +495,17 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
                 ? this.state.challengerCommit.commit.substring(0, 7)
                 : '...'
             )}
+            referenceCommit={this.state.referenceCommit}
+            challengerCommit={this.state.challengerCommit}
+            commands={this.props.commands}
+            model={this.props.model}
+            logger={this.props.logger}
             trans={this.props.trans}
             onClose={event => {
               event.stopPropagation();
-              this._setCommitComparisonState({
-                reference: null,
-                challenger: null,
-                comparedFiles: null
+              this.setState({
+                referenceCommit: null,
+                challengerCommit: null
               });
             }}
             onOpenDiff={
@@ -855,72 +823,5 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       elem = full;
     }
     return <div>{elem}</div>;
-  }
-
-  private _setCommitComparisonState(state: {
-    reference?: Git.ISingleCommitInfo;
-    challenger?: Git.ISingleCommitInfo;
-    comparedFiles?: Git.ICommitModifiedFile[];
-  }): void {
-    this.setState(currentState => ({
-      referenceCommit:
-        typeof state.reference !== 'undefined'
-          ? state.reference
-          : currentState.referenceCommit,
-      challengerCommit:
-        typeof state.challenger !== 'undefined'
-          ? state.challenger
-          : currentState.challengerCommit,
-      comparedFiles:
-        typeof state.comparedFiles !== 'undefined'
-          ? state.comparedFiles
-          : currentState.comparedFiles
-    }));
-  }
-
-  private async _doCommitComparison(): Promise<void> {
-    let diffResult: Git.IDiffResult = null;
-    try {
-      diffResult = await this.props.model.diff(
-        this.state.referenceCommit.commit,
-        this.state.challengerCommit.commit
-      );
-      if (diffResult.code !== 0) {
-        throw new Error(diffResult.message);
-      }
-    } catch (err) {
-      const msg = `Failed to get the diff for ${this.state.referenceCommit.commit} and ${this.state.challengerCommit.commit}.`;
-      console.error(msg, err);
-      this.props.logger.log({
-        level: Level.ERROR,
-        message: msg,
-        error: err
-      });
-      return;
-    }
-    if (diffResult) {
-      this.setState({
-        comparedFiles: diffResult.result.map(changedFile => {
-          const pathParts = changedFile.filename.split('/');
-          const fileName = pathParts[pathParts.length - 1];
-          const filePath = changedFile.filename;
-          return {
-            deletion: changedFile.deletions,
-            insertion: changedFile.insertions,
-            is_binary:
-              changedFile.deletions === '-' || changedFile.insertions === '-',
-            modified_file_name: fileName,
-            modified_file_path: filePath,
-            type: changedFile.filetype
-          } as Git.ICommitModifiedFile;
-        })
-      });
-    } else {
-      this.setState({
-        referenceCommit: null,
-        challengerCommit: null,
-        comparedFiles: null
-      });
-    }
   }
 }

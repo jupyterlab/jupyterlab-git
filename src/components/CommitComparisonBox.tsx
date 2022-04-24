@@ -6,13 +6,17 @@ import {
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
-import { commitComparisonBoxStyle } from '../style/CommitComparisonBox';
+import { Logger } from '../logger';
+import {
+  commitComparisonBoxStyle,
+  commitComparisonDiffStyle
+} from '../style/CommitComparisonBox';
 import {
   changeStageButtonStyle,
   sectionAreaStyle,
   sectionHeaderLabelStyle
 } from '../style/GitStageStyle';
-import { Git, IGitExtension } from '../tokens';
+import { Git, IGitExtension, Level } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { CommitDiff } from './CommitDiff';
 
@@ -36,14 +40,14 @@ export interface ICommitComparisonBoxProps {
   challengerCommit: Git.ISingleCommitInfo | null;
 
   /**
-   * The commit comparison result.
-   */
-  changedFiles: Git.ICommitModifiedFile[] | null;
-
-  /**
    * Header text.
    */
   header: string;
+
+  /**
+   * Extension logger
+   */
+  logger: Logger;
 
   /**
    * Extension data model.
@@ -82,17 +86,67 @@ export function CommitComparisonBox(
   props: ICommitComparisonBoxProps
 ): JSX.Element {
   const [collapsed, setCollapsed] = React.useState<boolean>(false);
+  const [files, setFiles] = React.useState<Git.ICommitModifiedFile[]>([]);
 
-  const { changedFiles, referenceCommit, challengerCommit } = props;
+  const { referenceCommit, challengerCommit, model } = props;
   const hasDiff = referenceCommit !== null && challengerCommit !== null;
-  const totalInsertions = (changedFiles ?? []).reduce((acc, file) => {
+  const totalInsertions = files.reduce((acc, file) => {
     const insertions = Number.parseInt(file.insertion, 10);
     return acc + (Number.isNaN(insertions) ? 0 : insertions);
   }, 0);
-  const totalDeletions = (changedFiles ?? []).reduce((acc, file) => {
+  const totalDeletions = files.reduce((acc, file) => {
     const deletions = Number.parseInt(file.deletion, 10);
     return acc + (Number.isNaN(deletions) ? 0 : deletions);
   }, 0);
+
+  React.useEffect(() => {
+    (async () => {
+      if (referenceCommit === null || challengerCommit === null) {
+        setFiles([]);
+        return;
+      }
+
+      let diffResult: Git.IDiffResult = null;
+      try {
+        diffResult = await model.diff(
+          referenceCommit.commit,
+          challengerCommit.commit
+        );
+        if (diffResult.code !== 0) {
+          throw new Error(diffResult.message);
+        }
+      } catch (err) {
+        const msg = `Failed to get the diff for ${referenceCommit.commit} and ${challengerCommit.commit}.`;
+        console.error(msg, err);
+        props.logger.log({
+          level: Level.ERROR,
+          message: msg,
+          error: err
+        });
+        return;
+      }
+      if (diffResult) {
+        setFiles(
+          diffResult.result.map(changedFile => {
+            const pathParts = changedFile.filename.split('/');
+            const fileName = pathParts[pathParts.length - 1];
+            const filePath = changedFile.filename;
+            return {
+              deletion: changedFile.deletions,
+              insertion: changedFile.insertions,
+              is_binary:
+                changedFile.deletions === '-' || changedFile.insertions === '-',
+              modified_file_name: fileName,
+              modified_file_path: filePath,
+              type: changedFile.filetype
+            } as Git.ICommitModifiedFile;
+          })
+        );
+      } else {
+        setFiles([]);
+      }
+    })();
+  }, [referenceCommit, challengerCommit]);
 
   return (
     <div className={commitComparisonBoxStyle}>
@@ -114,12 +168,13 @@ export function CommitComparisonBox(
         ></ActionButton>
       </div>
       {!collapsed &&
-        (changedFiles ? (
+        (files.length ? (
           <CommitDiff
+            className={commitComparisonDiffStyle}
             deletions={`${totalDeletions}`}
-            files={props.changedFiles}
+            files={files}
             insertions={`${totalInsertions}`}
-            numFiles={`${changedFiles.length}`}
+            numFiles={`${files.length}`}
             onOpenDiff={props.onOpenDiff}
             trans={props.trans}
           ></CommitDiff>

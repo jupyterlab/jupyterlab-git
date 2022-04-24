@@ -13,3 +13,7 @@ export const commitComparisonBoxStyle = style({
 
   borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
+
+export const commitComparisonDiffStyle = style({
+  paddingLeft: 10
+});
