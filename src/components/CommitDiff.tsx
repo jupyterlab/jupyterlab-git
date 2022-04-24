@@ -73,81 +73,81 @@ export interface ICommitDiffProps {
   ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
-export function CommitDiff(props: ICommitDiffProps): JSX.Element {
-  const renderFile = React.useCallback(() => {
-    const renderer = (subProps: ListChildComponentProps): JSX.Element => {
-      const { data, index, style } = subProps;
-      const file = data[index];
-      const path = file.modified_file_path;
-      const previous = file.previous_file_path;
-      const flg = !!getDiffProvider(path) || !file.is_binary;
-      return (
-        <li
-          className={commitDetailFileClass}
-          onClick={props.onOpenDiff(path, flg, previous)}
-          style={style}
-          title={path}
-        >
-          <FilePath filepath={path} filetype={file.type} />
-          {flg ? (
-            <ActionButton
-              icon={diffIcon}
-              title={props.trans.__('View file changes')}
-            />
-          ) : null}
-        </li>
-      );
-    };
-    return renderer;
-  }, [props.trans]);
+export class CommitDiff extends React.PureComponent<ICommitDiffProps> {
+  render(): JSX.Element {
+    return (
+      <div>
+        <div className={commitClass}>
+          <div className={commitOverviewNumbersClass}>
+            <span title={this.props.trans.__('# Files Changed')}>
+              <fileIcon.react className={iconClass} tag="span" />
+              {this.props.numFiles}
+            </span>
+            <span title={this.props.trans.__('# Insertions')}>
+              <insertionsMadeIcon.react
+                className={classes(iconClass, insertionsIconClass)}
+                tag="span"
+              />
+              {this.props.insertions}
+            </span>
+            <span title={this.props.trans.__('# Deletions')}>
+              <deletionsMadeIcon.react
+                className={classes(iconClass, deletionsIconClass)}
+                tag="span"
+              />
+              {this.props.deletions}
+            </span>
+          </div>
+        </div>
+        <div className={commitDetailClass}>
+          <div className={commitDetailHeaderClass}>
+            {this.props.trans.__('Changed')}
+            {this.props.actions ?? null}
+          </div>
+          {this.props.files.length > 0 && (
+            <FixedSizeList
+              className={fileListClass}
+              height={
+                Math.min(MAX_VISIBLE_FILES, this.props.files.length) *
+                ITEM_HEIGHT
+              }
+              innerElementType="ul"
+              itemCount={this.props.files.length}
+              itemData={this.props.files}
+              itemKey={(index, data) => data[index].modified_file_path}
+              itemSize={ITEM_HEIGHT}
+              style={{ overflowX: 'hidden' }}
+              width={'auto'}
+            >
+              {this._renderFile}
+            </FixedSizeList>
+          )}
+        </div>
+      </div>
+    );
+  }
 
-  return (
-    <div>
-      <div className={commitClass}>
-        <div className={commitOverviewNumbersClass}>
-          <span title={props.trans.__('# Files Changed')}>
-            <fileIcon.react className={iconClass} tag="span" />
-            {props.numFiles}
-          </span>
-          <span title={props.trans.__('# Insertions')}>
-            <insertionsMadeIcon.react
-              className={classes(iconClass, insertionsIconClass)}
-              tag="span"
-            />
-            {props.insertions}
-          </span>
-          <span title={props.trans.__('# Deletions')}>
-            <deletionsMadeIcon.react
-              className={classes(iconClass, deletionsIconClass)}
-              tag="span"
-            />
-            {props.deletions}
-          </span>
-        </div>
-      </div>
-      <div className={commitDetailClass}>
-        <div className={commitDetailHeaderClass}>
-          {props.trans.__('Changed')}
-          {props.actions ?? null}
-        </div>
-        {props.files.length > 0 && (
-          <FixedSizeList
-            className={fileListClass}
-            height={
-              Math.min(MAX_VISIBLE_FILES, props.files.length) * ITEM_HEIGHT
-            }
-            innerElementType="ul"
-            itemCount={props.files.length}
-            itemData={props.files}
-            itemKey={(index, data) => data[index].modified_file_path}
-            itemSize={ITEM_HEIGHT}
-            style={{ overflowX: 'hidden' }}
-            width={'auto'}
-          >
-            {renderFile()}
-          </FixedSizeList>
-        )}
-      </div>
-    </div>
-  );
+  private _renderFile = (props: ListChildComponentProps): JSX.Element => {
+    const { data, index, style } = props;
+    const file = data[index];
+    const path = file.modified_file_path;
+    const previous = file.previous_file_path;
+    const flg = !!getDiffProvider(path) || !file.is_binary;
+    return (
+      <li
+        className={commitDetailFileClass}
+        onClick={this.props.onOpenDiff(path, flg, previous)}
+        style={style}
+        title={path}
+      >
+        <FilePath filepath={path} filetype={file.type} />
+        {flg ? (
+          <ActionButton
+            icon={diffIcon}
+            title={this.props.trans.__('View file changes')}
+          />
+        ) : null}
+      </li>
+    );
+  };
 }
