@@ -426,7 +426,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     const commitAndPush =
       (this.props.settings.composite['commitAndPush'] as boolean) && hasRemote;
     const buttonLabel = commitAndPush
-      ? this.props.trans.__('Commit and Push')
+      ? this.state.commitAmend
+        ? this.props.trans.__('Commit (Amend) and Push')
+        : this.props.trans.__('Commit and Push')
+      : this.state.commitAmend
+      ? this.props.trans.__('Commit (Amend)')
       : this.props.trans.__('Commit');
     return (
       <React.Fragment>

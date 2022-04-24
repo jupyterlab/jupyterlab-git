@@ -181,7 +181,7 @@ export class CommitBox extends React.Component<
     const disabled = !this._canCommit();
     const title = !this.props.hasFiles
       ? this.props.trans.__('Disabled: No files are staged for commit')
-      : !this.props.summary
+      : !this.props.summary && !this.props.amend
       ? this.props.trans.__('Disabled: No commit message summary')
       : this.props.label;
 
@@ -192,28 +192,34 @@ export class CommitBox extends React.Component<
       'Summary (%1 to commit)',
       shortcutHint
     );
-    const dirtyStagedFilesWarningTitle = this.props.trans.__('Warning');
-    const dirtyStagedFilesWarningContent = this.props.trans.__(
-      'Looks like you still have unsaved staged files. Remember to save and stage all needed changes before committing!'
+    const warningTitle = this.props.trans.__('Warning');
+    const warningContent = this.props.trans.__(
+      'You have unsaved staged files. You probably want to save and stage all needed changes before committing.'
     );
     return (
       <div className={classes(commitFormClass, 'jp-git-CommitBox')}>
         {this.props.warnDirtyStagedFiles && (
           <WarningBox
             headerIcon={<WarningRoundedIcon />}
-            title={dirtyStagedFilesWarningTitle}
-            content={dirtyStagedFilesWarningContent}
+            title={warningTitle}
+            content={warningContent}
           />
         )}
-        <CommitMessage
-          trans={this.props.trans}
-          summary={this.props.summary}
-          summaryPlaceholder={summaryPlaceholder}
-          description={this.props.description}
-          disabled={this.props.amend}
-          setSummary={this.props.setSummary}
-          setDescription={this.props.setDescription}
-        />
+        {!this.props.amend && (
+          <CommitMessage
+            error={
+              this.props.hasFiles &&
+              !this.props.amend &&
+              this.props.summary.length === 0
+            }
+            trans={this.props.trans}
+            summary={this.props.summary}
+            summaryPlaceholder={summaryPlaceholder}
+            description={this.props.description}
+            setSummary={this.props.setSummary}
+            setDescription={this.props.setDescription}
+          />
+        )}
         <ButtonGroup ref={this._anchorRef} fullWidth={true} size="small">
           <Button
             classes={{
