@@ -28,6 +28,9 @@ const ITEM_HEIGHT = 24; // File list item height
 const MAX_VISIBLE_FILES = 20; // Maximal number of file display at once
 
 export interface ICommitDiffProps {
+  /**
+   * Global actions on the commit diff
+   */
   actions?: JSX.Element;
 
   /**
@@ -48,7 +51,7 @@ export interface ICommitDiffProps {
   /**
    * A list of modified files.
    */
-  modifiedFiles: Git.ICommitModifiedFile[];
+  files: Git.ICommitModifiedFile[];
 
   /**
    * The application language translator.
@@ -71,29 +74,32 @@ export interface ICommitDiffProps {
 }
 
 export function CommitDiff(props: ICommitDiffProps): JSX.Element {
-  const renderFile = (subProps: ListChildComponentProps): JSX.Element => {
-    const { data, index, style } = subProps;
-    const file = data[index];
-    const path = file.modified_file_path;
-    const previous = file.previous_file_path;
-    const flg = !!getDiffProvider(path) || !file.is_binary;
-    return (
-      <li
-        className={commitDetailFileClass}
-        onClick={props.onOpenDiff(path, flg, previous)}
-        style={style}
-        title={path}
-      >
-        <FilePath filepath={path} filetype={file.type} />
-        {flg ? (
-          <ActionButton
-            icon={diffIcon}
-            title={props.trans.__('View file changes')}
-          />
-        ) : null}
-      </li>
-    );
-  };
+  const renderFile = React.useCallback(() => {
+    const renderer = (subProps: ListChildComponentProps): JSX.Element => {
+      const { data, index, style } = subProps;
+      const file = data[index];
+      const path = file.modified_file_path;
+      const previous = file.previous_file_path;
+      const flg = !!getDiffProvider(path) || !file.is_binary;
+      return (
+        <li
+          className={commitDetailFileClass}
+          onClick={props.onOpenDiff(path, flg, previous)}
+          style={style}
+          title={path}
+        >
+          <FilePath filepath={path} filetype={file.type} />
+          {flg ? (
+            <ActionButton
+              icon={diffIcon}
+              title={props.trans.__('View file changes')}
+            />
+          ) : null}
+        </li>
+      );
+    };
+    return renderer;
+  }, [props.trans]);
 
   return (
     <div>
@@ -124,22 +130,21 @@ export function CommitDiff(props: ICommitDiffProps): JSX.Element {
           {props.trans.__('Changed')}
           {props.actions ?? null}
         </div>
-        {props.modifiedFiles.length > 0 && (
+        {props.files.length > 0 && (
           <FixedSizeList
             className={fileListClass}
             height={
-              Math.min(MAX_VISIBLE_FILES, props.modifiedFiles.length) *
-              ITEM_HEIGHT
+              Math.min(MAX_VISIBLE_FILES, props.files.length) * ITEM_HEIGHT
             }
             innerElementType="ul"
-            itemCount={props.modifiedFiles.length}
-            itemData={props.modifiedFiles}
+            itemCount={props.files.length}
+            itemData={props.files}
             itemKey={(index, data) => data[index].modified_file_path}
             itemSize={ITEM_HEIGHT}
             style={{ overflowX: 'hidden' }}
             width={'auto'}
           >
-            {renderFile}
+            {renderFile()}
           </FixedSizeList>
         )}
       </div>

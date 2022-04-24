@@ -196,7 +196,7 @@ export class SinglePastCommitInfo extends React.Component<
         numFiles={this.state.numFiles}
         insertions={this.state.insertions}
         deletions={this.state.deletions}
-        modifiedFiles={this.state.modifiedFiles}
+        files={this.state.modifiedFiles}
         onOpenDiff={this.props.onOpenDiff}
         trans={this.props.trans}
       ></CommitDiff>
