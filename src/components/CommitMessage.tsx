@@ -29,6 +29,11 @@ export interface ICommitMessageProps {
   disabled?: boolean;
 
   /**
+   * Mark summary input as erroneous
+   */
+  error?: boolean;
+
+  /**
    * Updates the commit message summary.
    *
    * @param summary - commit message summary
@@ -107,6 +112,7 @@ export function CommitMessage(props: ICommitMessageProps): JSX.Element {
           focused: activeStyle,
           disabled: disabledStyle
         }}
+        error={props.error}
         type="text"
         placeholder={summaryPlaceholder}
         title={

@@ -52,7 +52,13 @@ export const commitSummaryClass = style({
   overflowX: 'auto',
 
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  borderRadius: '3px'
+  borderRadius: '3px',
+
+  $nest: {
+    '&.Mui-error': {
+      border: 'calc(2 * var(--jp-border-width)) solid var(--jp-error-color1)'
+    }
+  }
 });
 
 export const commitDescriptionClass = style({

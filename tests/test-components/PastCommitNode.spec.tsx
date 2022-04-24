@@ -59,7 +59,9 @@ describe('PastCommitNode', () => {
     },
     branches: branches,
     commands: null,
-    trans
+    trans,
+    onCompareWithSelected: null,
+    onSelectForCompare: null
   };
 
   test('Includes commit info', () => {

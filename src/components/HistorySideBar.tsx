@@ -48,12 +48,12 @@ export interface IHistorySideBarProps {
   /**
    * The commit to compare against.
    */
-  referenceCommit?: Git.ISingleCommitInfo;
+  referenceCommit: Git.ISingleCommitInfo | null;
 
   /**
    * The commit to compare.
    */
-  challengerCommit?: Git.ISingleCommitInfo;
+  challengerCommit: Git.ISingleCommitInfo | null;
 
   /**
    * Callback invoked upon clicking to select a commit for comparison.
@@ -152,19 +152,26 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
                 )
               : undefined;
 
+          const isReferenceCommit =
+            commit.commit === props.referenceCommit?.commit;
+          const isChallengerCommit =
+            commit.commit === props.challengerCommit?.commit;
+
           return (
             <PastCommitNode
               key={commit.commit}
               {...commonProps}
-              isReferenceCommit={
-                commit.commit === props.referenceCommit?.commit
-              }
-              isChallengerCommit={
-                commit.commit === props.challengerCommit?.commit
-              }
+              isReferenceCommit={isReferenceCommit}
+              isChallengerCommit={isChallengerCommit}
               onOpenDiff={onOpenDiff}
-              onSelectForCompare={props.onSelectForCompare(commit)}
-              onCompareWithSelected={props.onCompareWithSelected(commit)}
+              onSelectForCompare={
+                isChallengerCommit ? null : props.onSelectForCompare(commit)
+              }
+              onCompareWithSelected={
+                isReferenceCommit || props.referenceCommit === null
+                  ? null
+                  : props.onCompareWithSelected(commit)
+              }
             >
               {!props.model.selectedHistoryFile && (
                 <SinglePastCommitInfo

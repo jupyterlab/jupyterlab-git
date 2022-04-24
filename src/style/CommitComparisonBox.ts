@@ -1,14 +1,9 @@
 import { style } from 'typestyle';
 
-export const clickableSpanStyle = style({
-  cursor: 'pointer'
-});
-
 export const commitComparisonBoxStyle = style({
+  flex: '0 0 auto',
   display: 'flex',
   flexDirection: 'column',
-
-  minHeight: '200px',
 
   marginBlockStart: 0,
   marginBlockEnd: 0,
@@ -16,18 +11,9 @@ export const commitComparisonBoxStyle = style({
 
   overflowY: 'auto',
 
-  $nest: {
-    '& button:disabled': {
-      opacity: 0.5
-    }
-  }
+  borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
-export const commitComparisonBoxDetailStyle = style({
-  maxHeight: '25%',
-  overflowY: 'hidden'
-});
-
-export const commitComparisonBoxChangedFileListStyle = style({
-  maxHeight: '100%'
+export const commitComparisonDiffStyle = style({
+  paddingLeft: 10
 });

@@ -1,5 +1,6 @@
 import { style } from 'typestyle';
-import { showButtonOnHover } from './ActionButtonStyle';
+import { NestedCSSProperties } from 'typestyle/lib/types';
+import { actionButtonStyle, showButtonOnHover } from './ActionButtonStyle';
 
 export const fileStyle = style(
   {
@@ -22,29 +23,43 @@ export const fileStyle = style(
   showButtonOnHover
 );
 
-export const selectedFileStyle = style({
-  color: 'white',
-  background: 'var(--jp-brand-color1)',
-
-  $nest: {
-    '&:hover': {
+export const selectedFileStyle = style(
+  (() => {
+    const styled: NestedCSSProperties = {
       color: 'white',
-      background: 'var(--jp-brand-color1) !important'
-    },
-    '&:hover .jp-icon-selectable[fill]': {
-      fill: 'white'
-    },
-    '&:hover .jp-icon-selectable[stroke]': {
-      stroke: 'white'
-    },
-    '& .jp-icon-selectable[fill]': {
-      fill: 'white'
-    },
-    '& .jp-icon-selectable-inverse[fill]': {
-      fill: 'var(--jp-brand-color1)'
-    }
-  }
-});
+      background: 'var(--jp-brand-color1)',
+
+      $nest: {
+        '&:hover': {
+          color: 'white',
+          background: 'var(--jp-brand-color1) !important'
+        },
+        '&:hover .jp-icon-selectable[fill]': {
+          fill: 'white'
+        },
+        '&:hover .jp-icon-selectable[stroke]': {
+          stroke: 'white'
+        },
+        '& .jp-icon-selectable[fill]': {
+          fill: 'white'
+        },
+        '& .jp-icon-selectable-inverse[fill]': {
+          fill: 'var(--jp-brand-color1)'
+        }
+      }
+    };
+
+    styled.$nest[`& .${actionButtonStyle}:active`] = {
+      backgroundColor: 'var(--jp-brand-color1)'
+    };
+
+    styled.$nest[`& .${actionButtonStyle}:hover`] = {
+      backgroundColor: 'var(--jp-brand-color1)'
+    };
+
+    return styled;
+  })()
+);
 
 export const fileChangedLabelStyle = style({
   fontSize: '10px',

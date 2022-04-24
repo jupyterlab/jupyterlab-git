@@ -5,7 +5,9 @@
 
 :root {
   --jp-git-diff-added-color: rgba(155, 185, 85, 0.2);
+  --jp-git-diff-added-color1: rgba(155, 185, 85, 0.4);
   --jp-git-diff-deleted-color: rgba(255, 0, 0, 0.2);
+  --jp-git-diff-deleted-color1: rgba(255, 0, 0, 0.4);
   --jp-git-diff-output-border-color: rgba(0, 141, 255, 0.7);
   --jp-git-diff-output-color: rgba(0, 141, 255, 0.3);
 }

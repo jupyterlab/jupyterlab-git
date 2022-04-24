@@ -93,23 +93,7 @@ export const toolbarButtonClass = style({
   margin: 'auto 0 auto 0',
   padding: '0px 6px !important',
 
-  border: 'none',
-  outline: 'none',
-
   $nest: {
-    '&:disabled': {
-      opacity: 0.4,
-      background: 'none',
-      cursor: 'not-allowed'
-    },
-
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    '&:active': {
-      backgroundColor: 'var(--jp-layout-color3)'
-    },
-
     '& span': {
       // Set icon width and centers it
       margin: 'auto',

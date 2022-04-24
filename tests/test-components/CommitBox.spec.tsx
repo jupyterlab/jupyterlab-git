@@ -121,9 +121,7 @@ describe('CommitBox', () => {
         amend: true
       };
       const component = shallow(<CommitBox {...props} />);
-      const node = component.find(CommitMessage).first();
-      const prop = node.prop('disabled');
-      expect(prop).toEqual(true);
+      expect(component.find(CommitMessage).length).toEqual(0);
     });
 
     it('should not apply a class to disable the commit button in amend mode', () => {

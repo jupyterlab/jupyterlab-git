@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "JupyterLab Git Integration Tests",
   "private": true,
+  "scripts": {
+    "test": "playwright test"
+  },
   "devDependencies": {
     "@jupyterlab/galata": "^4.1.0",
     "@playwright/test": "^1.17.0"
