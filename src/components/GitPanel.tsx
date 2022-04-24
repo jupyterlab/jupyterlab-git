@@ -28,6 +28,8 @@ import { CommitComparisonBox } from './CommitComparisonBox';
 import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
+import { WarningBox } from './WarningBox';
+import { WarningRounded as WarningRoundedIcon } from '@material-ui/icons';
 
 /**
  * Interface describing component properties.
@@ -131,7 +133,7 @@ export interface IGitPanelState {
   /**
    * Whether there are dirty (e.g., unsaved) staged files.
    */
-  hasDirtyStagedFiles: boolean;
+  hasDirtyFiles: boolean;
 
   /**
    * The commit to compare against
@@ -156,8 +158,12 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   constructor(props: IGitPanelProps) {
     super(props);
-    const { branches, currentBranch, pathRepository, hasDirtyStagedFiles } =
-      props.model;
+    const {
+      branches,
+      currentBranch,
+      pathRepository,
+      hasDirtyFiles: hasDirtyStagedFiles
+    } = props.model;
 
     this.state = {
       branches: branches,
@@ -172,7 +178,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       commitSummary: '',
       commitDescription: '',
       commitAmend: false,
-      hasDirtyStagedFiles: hasDirtyStagedFiles,
+      hasDirtyFiles: hasDirtyStagedFiles,
       referenceCommit: null,
       challengerCommit: null
     };
@@ -222,9 +228,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
     settings.changed.connect(this.refreshView, this);
 
-    model.dirtyStagedFilesStatusChanged.connect((_, args) => {
+    model.dirtyFilesStatusChanged.connect((_, args) => {
       this.setState({
-        hasDirtyStagedFiles: args
+        hasDirtyFiles: args
       });
     });
   }
@@ -432,6 +438,17 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       : this.state.commitAmend
       ? this.props.trans.__('Commit (Amend)')
       : this.props.trans.__('Commit');
+    const warningTitle = this.props.trans.__('Warning');
+    const inSimpleMode = this.props.settings.composite[
+      'simpleStaging'
+    ] as boolean;
+    const warningContent = inSimpleMode
+      ? this.props.trans.__(
+          'You have unsaved tracked files. You probably want to save all changes before committing.'
+        )
+      : this.props.trans.__(
+          'You have unsaved staged files. You probably want to save and stage all needed changes before committing.'
+        );
     return (
       <React.Fragment>
         <FileList
@@ -444,9 +461,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         <CommitBox
           commands={this.props.commands}
           hasFiles={
-            this.props.settings.composite['simpleStaging']
-              ? this._markedFiles.length > 0
-              : this._hasStagedFile()
+            inSimpleMode ? this._markedFiles.length > 0 : this._hasStagedFile()
           }
           trans={this.props.trans}
           label={buttonLabel}
@@ -457,7 +472,15 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           setDescription={this._setCommitDescription}
           setAmend={this._setCommitAmend}
           onCommit={this.commitFiles}
-          warnDirtyStagedFiles={this.state.hasDirtyStagedFiles}
+          warning={
+            this.state.hasDirtyFiles && (
+              <WarningBox
+                headerIcon={<WarningRoundedIcon />}
+                title={warningTitle}
+                content={warningContent}
+              />
+            )
+          }
         />
       </React.Fragment>
     );
