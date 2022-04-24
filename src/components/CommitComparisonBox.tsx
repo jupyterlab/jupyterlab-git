@@ -2,6 +2,7 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import {
   caretDownIcon,
   caretRightIcon,
+  closeIcon,
   fileIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
@@ -10,7 +11,7 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
 import { getDiffProvider } from '../model';
 import {
-  clickableSpanStyle,
+  commitComparisonBoxStyle,
   commitComparisonBoxChangedFileListStyle,
   commitComparisonBoxDetailStyle
 } from '../style/CommitComparisonBox';
@@ -39,35 +40,6 @@ import { ActionButton } from './ActionButton';
 import { FilePath } from './FilePath';
 
 const ITEM_HEIGHT = 24; // File list item height
-
-interface ICommitComparisonBoxHeaderProps {
-  collapsible: boolean;
-  collapsed?: boolean;
-  label?: string;
-  trans: TranslationBundle;
-  onCollapseExpand?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
-  onClickCancel?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
-}
-
-const CommitComparisonBoxHeader: React.VFC<ICommitComparisonBoxHeaderProps> = (
-  props: ICommitComparisonBoxHeaderProps
-) => {
-  return (
-    <div className={sectionAreaStyle} onClick={props.onCollapseExpand}>
-      {props.collapsible && (
-        <button className={changeStageButtonStyle}>
-          {props.collapsed ? <caretRightIcon.react /> : <caretDownIcon.react />}
-        </button>
-      )}
-      <span className={sectionHeaderLabelStyle}>{props.label}</span>
-      {props.onClickCancel && (
-        <span className={clickableSpanStyle} onClick={props.onClickCancel}>
-          {props.trans.__('Cancel')}
-        </span>
-      )}
-    </div>
-  );
-};
 
 interface ICommitComparisonBoxOverviewProps {
   totalFiles: number;
@@ -219,11 +191,6 @@ const CommitComparisonBoxBody: React.VFC<ICommitComparisonBoxBodyProps> = (
  */
 export interface ICommitComparisonBoxProps {
   /**
-   * Is this collapsible?
-   */
-  collapsible: boolean;
-
-  /**
    * Jupyter App commands registry.
    */
   commands: CommandRegistry;
@@ -259,9 +226,9 @@ export interface ICommitComparisonBoxProps {
   trans: TranslationBundle;
 
   /**
-   * Returns a callback to be invoked on clicking cancel.
+   * Returns a callback to be invoked on close.
    */
-  onCancel?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  onClose: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 
   /**
    * Returns a callback to be invoked on click to display a file diff.
@@ -286,15 +253,24 @@ export const CommitComparisonBox: React.VFC<ICommitComparisonBoxProps> = (
 ) => {
   const [collapsed, setCollapsed] = React.useState<boolean>(false);
   return (
-    <React.Fragment>
-      <CommitComparisonBoxHeader
-        collapsible={props.collapsible}
-        collapsed={collapsed}
-        label={props.header}
-        onCollapseExpand={() => setCollapsed(!collapsed)}
-        onClickCancel={props.onCancel}
-        trans={props.trans}
-      />
+    <div className={commitComparisonBoxStyle}>
+      <div
+        className={sectionAreaStyle}
+        onClick={() => setCollapsed(!collapsed)}
+      >
+        <button className={changeStageButtonStyle}>
+          {collapsed ? <caretRightIcon.react /> : <caretDownIcon.react />}
+        </button>
+
+        <span className={sectionHeaderLabelStyle}>{props.header}</span>
+        <ActionButton
+          title={props.trans.__('Close')}
+          icon={closeIcon}
+          onClick={(event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+            props.onClose(event);
+          }}
+        ></ActionButton>
+      </div>
       {!collapsed && props.changedFiles && (
         <CommitComparisonBoxBody
           files={props.changedFiles}
@@ -303,6 +279,6 @@ export const CommitComparisonBox: React.VFC<ICommitComparisonBoxProps> = (
           trans={props.trans}
         />
       )}
-    </React.Fragment>
+    </div>
   );
 };

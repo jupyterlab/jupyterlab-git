@@ -18,8 +18,8 @@ export const repoButtonClass = style({
   alignSelf: 'center',
   boxSizing: 'border-box',
 
-  height: '2em',
-  width: '12em',
+  height: '28px',
+  width: '200px',
   marginTop: '5px',
   border: '0',
   borderRadius: '3px',

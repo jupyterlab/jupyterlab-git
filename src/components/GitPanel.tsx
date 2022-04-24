@@ -518,24 +518,18 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             challengerCommit={this.state.challengerCommit}
             changedFiles={this.state.comparedFiles}
             model={this.props.model}
-            collapsible={true}
             commands={this.props.commands}
-            header={`
-              Compare
-              ${
-                this.state.referenceCommit
-                  ? this.state.referenceCommit.commit.substring(0, 7)
-                  : '...'
-              }
-              and
-              ${
-                this.state.challengerCommit
-                  ? this.state.challengerCommit.commit.substring(0, 7)
-                  : '...'
-              }
-            `}
+            header={this.props.trans.__(
+              'Compare %1 and %2',
+              this.state.referenceCommit
+                ? this.state.referenceCommit.commit.substring(0, 7)
+                : '...',
+              this.state.challengerCommit
+                ? this.state.challengerCommit.commit.substring(0, 7)
+                : '...'
+            )}
             trans={this.props.trans}
-            onCancel={event => {
+            onClose={event => {
               event.stopPropagation();
               this._setCommitComparisonState({
                 reference: null,

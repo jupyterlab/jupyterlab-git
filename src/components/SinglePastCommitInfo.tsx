@@ -1,37 +1,14 @@
 import { TranslationBundle } from '@jupyterlab/translation';
-import { fileIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
-import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import { classes } from 'typestyle';
 import { LoggerContext } from '../logger';
-import { getDiffProvider, GitExtension } from '../model';
-import {
-  deletionsMadeIcon,
-  diffIcon,
-  discardIcon,
-  insertionsMadeIcon,
-  rewindIcon
-} from '../style/icons';
-import {
-  actionButtonClass,
-  commitClass,
-  commitDetailClass,
-  commitDetailFileClass,
-  commitDetailHeaderClass,
-  commitOverviewNumbersClass,
-  deletionsIconClass,
-  fileListClass,
-  iconClass,
-  insertionsIconClass
-} from '../style/SinglePastCommitInfo';
+import { GitExtension } from '../model';
+import { discardIcon, rewindIcon } from '../style/icons';
+import { actionButtonClass } from '../style/SinglePastCommitInfo';
 import { Git } from '../tokens';
 import { ActionButton } from './ActionButton';
-import { FilePath } from './FilePath';
+import { CommitDiff } from './CommitDiff';
 import { ResetRevertDialog } from './ResetRevertDialog';
-
-const ITEM_HEIGHT = 24; // File list item height
-const MAX_VISIBLE_FILES = 20; // Maximal number of file display at once
 
 /**
  * Interface describing component properties.
@@ -182,32 +159,9 @@ export class SinglePastCommitInfo extends React.Component<
       return <div>{this.props.trans.__('Error loading commit data')}</div>;
     }
     return (
-      <div>
-        <div className={commitClass}>
-          <div className={commitOverviewNumbersClass}>
-            <span title={this.props.trans.__('# Files Changed')}>
-              <fileIcon.react className={iconClass} tag="span" />
-              {this.state.numFiles}
-            </span>
-            <span title={this.props.trans.__('# Insertions')}>
-              <insertionsMadeIcon.react
-                className={classes(iconClass, insertionsIconClass)}
-                tag="span"
-              />
-              {this.state.insertions}
-            </span>
-            <span title={this.props.trans.__('# Deletions')}>
-              <deletionsMadeIcon.react
-                className={classes(iconClass, deletionsIconClass)}
-                tag="span"
-              />
-              {this.state.deletions}
-            </span>
-          </div>
-        </div>
-        <div className={commitDetailClass}>
-          <div className={commitDetailHeaderClass}>
-            {this.props.trans.__('Changed')}
+      <CommitDiff
+        actions={
+          <>
             <ActionButton
               className={actionButtonClass}
               icon={discardIcon}
@@ -237,59 +191,17 @@ export class SinglePastCommitInfo extends React.Component<
                 />
               )}
             </LoggerContext.Consumer>
-          </div>
-          {this.state.modifiedFiles.length > 0 && (
-            <FixedSizeList
-              className={fileListClass}
-              height={
-                Math.min(MAX_VISIBLE_FILES, this.state.modifiedFiles.length) *
-                ITEM_HEIGHT
-              }
-              innerElementType="ul"
-              itemCount={this.state.modifiedFiles.length}
-              itemData={this.state.modifiedFiles}
-              itemKey={(index, data) => data[index].modified_file_path}
-              itemSize={ITEM_HEIGHT}
-              style={{ overflowX: 'hidden' }}
-              width={'auto'}
-            >
-              {this._renderFile}
-            </FixedSizeList>
-          )}
-        </div>
-      </div>
+          </>
+        }
+        numFiles={this.state.numFiles}
+        insertions={this.state.insertions}
+        deletions={this.state.deletions}
+        modifiedFiles={this.state.modifiedFiles}
+        onOpenDiff={this.props.onOpenDiff}
+        trans={this.props.trans}
+      ></CommitDiff>
     );
   }
-
-  /**
-   * Renders a modified file.
-   *
-   * @param props Row properties
-   * @returns React element
-   */
-  private _renderFile = (props: ListChildComponentProps): JSX.Element => {
-    const { data, index, style } = props;
-    const file = data[index];
-    const path = file.modified_file_path;
-    const previous = file.previous_file_path;
-    const flg = !!getDiffProvider(path) || !file.is_binary;
-    return (
-      <li
-        className={commitDetailFileClass}
-        onClick={this.props.onOpenDiff(path, flg, previous)}
-        style={style}
-        title={path}
-      >
-        <FilePath filepath={path} filetype={file.type} />
-        {flg ? (
-          <ActionButton
-            icon={diffIcon}
-            title={this.props.trans.__('View file changes')}
-          />
-        ) : null}
-      </li>
-    );
-  };
 
   /**
    * Callback invoked upon a clicking a button to revert changes.

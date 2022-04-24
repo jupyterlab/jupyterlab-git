@@ -1,9 +1,5 @@
 import { style } from 'typestyle';
 
-export const clickableSpanStyle = style({
-  cursor: 'pointer'
-});
-
 export const commitComparisonBoxStyle = style({
   display: 'flex',
   flexDirection: 'column',
@@ -15,6 +11,8 @@ export const commitComparisonBoxStyle = style({
   paddingLeft: 0,
 
   overflowY: 'auto',
+
+  borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)',
 
   $nest: {
     '& button:disabled': {

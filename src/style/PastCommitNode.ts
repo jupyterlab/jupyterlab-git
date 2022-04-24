@@ -85,9 +85,9 @@ export const singleFileCommitClass = style({
 });
 
 export const referenceCommitNodeClass = style({
-  borderLeft: '6px solid var(--jp-git-diff-deleted-color)'
+  borderLeft: '6px solid var(--jp-git-diff-deleted-color1)'
 });
 
 export const challengerCommitNodeClass = style({
-  borderLeft: '6px solid var(--jp-git-diff-added-color)'
+  borderLeft: '6px solid var(--jp-git-diff-added-color1)'
 });
