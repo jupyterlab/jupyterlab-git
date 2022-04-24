@@ -48,12 +48,12 @@ export interface IHistorySideBarProps {
   /**
    * The commit to compare against.
    */
-  referenceCommit?: Git.ISingleCommitInfo;
+  referenceCommit: Git.ISingleCommitInfo | null;
 
   /**
    * The commit to compare.
    */
-  challengerCommit?: Git.ISingleCommitInfo;
+  challengerCommit: Git.ISingleCommitInfo | null;
 
   /**
    * Callback invoked upon clicking to select a commit for comparison.
@@ -168,7 +168,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
                 isChallengerCommit ? null : props.onSelectForCompare(commit)
               }
               onCompareWithSelected={
-                isReferenceCommit || props.referenceCommit === undefined
+                isReferenceCommit || props.referenceCommit === null
                   ? null
                   : props.onCompareWithSelected(commit)
               }
