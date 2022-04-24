@@ -24,10 +24,11 @@ export const noHistoryFoundStyle = style({
 });
 
 export const historySideBarStyle = style({
+  flex: '1 1 auto',
   display: 'flex',
   flexDirection: 'column',
 
-  minHeight: '400px',
+  minHeight: '200px',
 
   marginBlockStart: 0,
   marginBlockEnd: 0,

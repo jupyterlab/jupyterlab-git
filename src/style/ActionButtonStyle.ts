@@ -14,11 +14,18 @@ export const actionButtonStyle = style({
   $nest: {
     '&:active': {
       transform: 'scale(1.272019649)',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      backgroundColor: 'var(--jp-layout-color3)'
     },
 
     '&:disabled': {
-      cursor: 'default'
+      opacity: 0.4,
+      background: 'none',
+      cursor: 'not-allowed'
+    },
+
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2)'
     }
   }
 });

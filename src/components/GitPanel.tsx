@@ -192,7 +192,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
     model.repositoryChanged.connect((_, args) => {
       this.setState({
-        repository: args.newValue
+        repository: args.newValue,
+        referenceCommit: null,
+        challengerCommit: null,
+        comparedFiles: null
       });
       this.refreshView();
     }, this);
@@ -252,7 +255,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       prevChallengerCommit !== currChallengerCommit;
 
     if (commitsReady && (!!prevComparedFiles || commitChanged)) {
-      await this._doCommitComparsion();
+      await this._doCommitComparison();
     }
   }
 
@@ -875,7 +878,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     }));
   }
 
-  private async _doCommitComparsion(): Promise<void> {
+  private async _doCommitComparison(): Promise<void> {
     let diffResult: Git.IDiffResult = null;
     try {
       diffResult = await this.props.model.diff(
@@ -886,13 +889,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         throw new Error(diffResult.message);
       }
     } catch (err) {
-      console.error(
-        `Error while getting the diff for commit ${this.state.referenceCommit} and commit ${this.state.challengerCommit}!`,
-        err
-      );
+      const msg = `Failed to get the diff for ${this.state.referenceCommit.commit} and ${this.state.challengerCommit.commit}.`;
+      console.error(msg, err);
       this.props.logger.log({
         level: Level.ERROR,
-        message: `Error while getting the diff for commit ${this.state.referenceCommit} and commit ${this.state.challengerCommit}!`,
+        message: msg,
         error: err
       });
       return;

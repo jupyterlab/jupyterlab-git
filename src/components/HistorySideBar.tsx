@@ -152,19 +152,26 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
                 )
               : undefined;
 
+          const isReferenceCommit =
+            commit.commit === props.referenceCommit?.commit;
+          const isChallengerCommit =
+            commit.commit === props.challengerCommit?.commit;
+
           return (
             <PastCommitNode
               key={commit.commit}
               {...commonProps}
-              isReferenceCommit={
-                commit.commit === props.referenceCommit?.commit
-              }
-              isChallengerCommit={
-                commit.commit === props.challengerCommit?.commit
-              }
+              isReferenceCommit={isReferenceCommit}
+              isChallengerCommit={isChallengerCommit}
               onOpenDiff={onOpenDiff}
-              onSelectForCompare={props.onSelectForCompare(commit)}
-              onCompareWithSelected={props.onCompareWithSelected(commit)}
+              onSelectForCompare={
+                isChallengerCommit ? null : props.onSelectForCompare(commit)
+              }
+              onCompareWithSelected={
+                isReferenceCommit || props.referenceCommit === undefined
+                  ? null
+                  : props.onCompareWithSelected(commit)
+              }
             >
               {!props.model.selectedHistoryFile && (
                 <SinglePastCommitInfo

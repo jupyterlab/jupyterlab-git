@@ -4,13 +4,7 @@ import { showButtonOnHover } from './ActionButtonStyle';
 export const sectionFileContainerStyle = style({
   margin: '0',
   padding: '0',
-  overflow: 'auto',
-
-  $nest: {
-    '& button:disabled': {
-      opacity: 0.5
-    }
-  }
+  overflow: 'auto'
 });
 
 export const sectionAreaStyle = style(

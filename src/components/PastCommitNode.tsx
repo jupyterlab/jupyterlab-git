@@ -78,19 +78,25 @@ export interface IPastCommitNodeProps {
 
   /**
    * Callback invoked upon clicking to select a commit for comparison.
+   *
+   * If the callback is null, the button will be disabled.
+   *
    * @param event - event object
    */
-  onSelectForCompare?: (
-    event: React.MouseEvent<HTMLElement, MouseEvent>
-  ) => Promise<void>;
+  onSelectForCompare:
+    | ((event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>)
+    | null;
 
   /**
    * Callback invoked upon clicking to compare a commit against the selected.
+   *
+   * If the callback is null, the button will be disabled.
+   *
    * @param event - event object
    */
-  onCompareWithSelected?: (
-    event: React.MouseEvent<HTMLElement, MouseEvent>
-  ) => Promise<void>;
+  onCompareWithSelected:
+    | ((event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>)
+    | null;
 }
 
 /**
@@ -164,12 +170,14 @@ export class PastCommitNode extends React.Component<
             <React.Fragment>
               <ActionButton
                 className={iconButtonClass}
+                disabled={this.props.onSelectForCompare === null}
                 icon={selectForCompareIcon}
                 title={this.props.trans.__('Select for compare')}
                 onClick={this.props.onSelectForCompare}
               />
               <ActionButton
                 className={iconButtonClass}
+                disabled={this.props.onCompareWithSelected === null}
                 icon={compareWithSelectedIcon}
                 title={this.props.trans.__('Compare with selected')}
                 onClick={this.props.onCompareWithSelected}
