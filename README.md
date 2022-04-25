@@ -62,11 +62,24 @@ jupyter labextension uninstall @jupyterlab/git
 
 ### Authentication to remote repository hosts
 
-This extensions does not handle credentials or authentication details. In order to connect to a remote host, it is recommended to use SSH.
+If you are seeing errors similar to `[E yyyy-mm-dd hh:mm:ss ServerApp] 500 POST /git/<clone|push|pull|status>` on the console which is running the JupyterLab server, you probably need to set up a credentials store for your local Git repository.
 
-If you are seeing errors similar to `[E yyyy-mm-dd hh:mm:ss ServerApp] 500 POST /git/<clone|push|pull|status>` on the console which is running the JupyterLab server, you probably need to set up a credentials store for your local Git repository. One of the possibility is to use SSH.
+This extension tries to handle credentials for HTTP(S) connections (if you don't have set up a credential manager). But not for other SSH connections.
 
-Here are the steps to follow (skip any that is already accomplished for your project):
+> For Windows users, it is recommended to install [git for windows](https://gitforwindows.org/). It will automatically set up a credential manager.
+> In order to connect to a remote host, it is recommended to use SSH.
+
+#### HTTP(S) protocol
+
+The extension can cache temporarily (by default for an hour) credentials. To use the caching, you will need to 
+check the option _Save my login temporarily_ in the dialog asking your credentials.
+
+> You can set a longer cache timeout; see [Server Settings](#server-settings).
+
+> This is a new feature since v0.37.0
+#### SSH protocol
+
+Here are the steps to follow to set up SSH authentication (skip any that is already accomplished for your project):
 
 1. [Create a SSH key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 2. Register the public part of it to your Git server:  
@@ -94,25 +107,35 @@ Once installed, extension behavior can be modified via the following settings wh
 
 ### Server Settings
 
-- Post _git init_ actions: It is possible to provide a list of commands to be executed in a folder after it is initialized as Git repository.
 
-In `~/.jupyter/jupyter_notebook_config.py`:
+- `JupyterLabGit.actions.post_init`: Set post _git init_ actions.
+  It is possible to provide a list of commands to be executed in a folder after it is initialized as Git repository.
+- `JupyterLabGit.credential_helper`: Git credential helper to set to cache the credentials.
+  The default value is `cache --timeout=3600` to cache the credentials for an hour. If you want to cache them for 10 hours, set `cache --timeout=36000`.
+
+<details>
+<summary><b>How to set server settings?</b></summary>
+
+In `$HOME/.jupyter/jupyter_notebook_config.py` (on Windows `%USERPROFILE%/.jupyter/jupyter_notebook_config.py`):
 
 ```python
 c.JupyterLabGit.actions = {"post_init": ["touch dummy_init.dat"]}
+c.JupyterLabGit.credential_helper = 'cache --timeout=3600'
 ```
 
-Or equivalently in `jupyter_notebook_config.json`:
+Or equivalently in `$HOME/.jupyter/jupyter_notebook_config.json` (on Windows `%USERPROFILE%/.jupyter/jupyter_notebook_config.json`):
 
 ```json
 {
   "JupyterLabGit": {
     "actions": {
       "post_init": ["touch dummy_init.dat"]
-    }
+    },
+    "credential_helper": "cache --timeout=3600"
   }
 }
 ```
+</details>
 
 ## Troubleshoot
 
@@ -125,7 +148,7 @@ jupyter labextension list
 
 If they do not match or one is missing, please [reinstall the package](README.md#Install).
 
-- **Issue**: the Git panel does not recognize that you are in a Git repository.
+<details><summary>the Git panel does not recognize that you are in a Git repository.</summary>
 
   Possible fixes:
 
@@ -141,8 +164,10 @@ If they do not match or one is missing, please [reinstall the package](README.md
     ```
 
   - If you are using JupyterHub or some other technologies requiring an initialization script which includes the jupyterlab-git extension, be sure to install both the frontend and the server extension **before** launching JupyterLab.
+</details>
 
-- **Issue**: the Git panel is not visible.
+<details>
+<summary>the Git panel is not visible.</summary>
 
   Possible fixes:
 
@@ -160,6 +185,7 @@ If they do not match or one is missing, please [reinstall the package](README.md
 
     If you see `@jupyterlab/git` under `Uninstalled core extensions: `, your installation may have been corrupted. You can run `jupyter lab clean --all` and
     reinstall all your extensions.
+</details>
 
 ## Contributing
 
