@@ -16,11 +16,10 @@ test.describe('Commits diff', () => {
 
     // URL for merge conflict example repository
     await page.goto(`tree/${tmpPath}/repository`);
-
-    await page.sidebar.openTab('jp-git-sessions');
   });
 
   test('should display commits diff from history', async ({ page }) => {
+    await page.sidebar.openTab('jp-git-sessions');
     await page.click('button:has-text("History")');
     const commits = page.locator('li[title="View commit details"]');
 
@@ -37,5 +36,33 @@ test.describe('Commits diff', () => {
       .click();
 
     expect(await page.waitForSelector('text=Changed')).toBeTruthy();
+  });
+
+  test('should display diff from single file history', async ({ page }) => {
+    await page.sidebar.openTab('filebrowser');
+    await page.pause();
+    await page.click('#filebrowser >> text=example.ipynb', {
+      button: 'right'
+    });
+    await page.hover('ul[role="menu"] >> text=Git');
+    await page.click('#jp-contextmenu-git >> text=History');
+
+    await page.waitForSelector('#jp-git-sessions >> ol >> text=example.ipynb');
+
+    const commits = page.locator('li[title="View file changes"]');
+
+    expect(await commits.count()).toBeGreaterThanOrEqual(2);
+
+    await commits.last().locator('button[title="Select for compare"]').click();
+    await commits
+      .first()
+      .locator('button[title="Compare with selected"]')
+      .click();
+
+    await expect(
+      page.locator('.nbdime-Widget >> .jp-git-diff-banner')
+    ).toHaveText(
+      /2c87684a46d49989211d666daf05ab92951ba7c4[\n\s]+b6ece342cf6eefaff3232d43345191abda10727/
+    );
   });
 });

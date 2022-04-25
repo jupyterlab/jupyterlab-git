@@ -504,47 +504,56 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           challengerCommit={this.state.challengerCommit}
           onSelectForCompare={commit => async event => {
             event.stopPropagation();
-            this.setState({ referenceCommit: commit });
+            this.setState({ referenceCommit: commit }, () => {
+              this._openSingleFileComparison(
+                event as React.MouseEvent<HTMLLIElement, MouseEvent>
+              );
+            });
           }}
           onCompareWithSelected={commit => async event => {
             event.stopPropagation();
-            this.setState({ challengerCommit: commit });
+            this.setState({ challengerCommit: commit }, () => {
+              this._openSingleFileComparison(
+                event as React.MouseEvent<HTMLLIElement, MouseEvent>
+              );
+            });
           }}
         />
-        {(this.state.referenceCommit || this.state.challengerCommit) && (
-          <CommitComparisonBox
-            header={this.props.trans.__(
-              'Compare %1 and %2',
-              this.state.referenceCommit
-                ? this.state.referenceCommit.commit.substring(0, 7)
-                : '...',
-              this.state.challengerCommit
-                ? this.state.challengerCommit.commit.substring(0, 7)
-                : '...'
-            )}
-            referenceCommit={this.state.referenceCommit}
-            challengerCommit={this.state.challengerCommit}
-            commands={this.props.commands}
-            model={this.props.model}
-            logger={this.props.logger}
-            trans={this.props.trans}
-            onClose={event => {
-              event.stopPropagation();
-              this.setState({
-                referenceCommit: null,
-                challengerCommit: null
-              });
-            }}
-            onOpenDiff={
-              this.state.referenceCommit && this.state.challengerCommit
-                ? openFileDiff(this.props.commands)(
-                    this.state.challengerCommit,
-                    this.state.referenceCommit
-                  )
-                : undefined
-            }
-          />
-        )}
+        {this.props.model.selectedHistoryFile === null &&
+          (this.state.referenceCommit || this.state.challengerCommit) && (
+            <CommitComparisonBox
+              header={this.props.trans.__(
+                'Compare %1 and %2',
+                this.state.referenceCommit
+                  ? this.state.referenceCommit.commit.substring(0, 7)
+                  : '...',
+                this.state.challengerCommit
+                  ? this.state.challengerCommit.commit.substring(0, 7)
+                  : '...'
+              )}
+              referenceCommit={this.state.referenceCommit}
+              challengerCommit={this.state.challengerCommit}
+              commands={this.props.commands}
+              model={this.props.model}
+              logger={this.props.logger}
+              trans={this.props.trans}
+              onClose={event => {
+                event.stopPropagation();
+                this.setState({
+                  referenceCommit: null,
+                  challengerCommit: null
+                });
+              }}
+              onOpenDiff={
+                this.state.referenceCommit && this.state.challengerCommit
+                  ? openFileDiff(this.props.commands)(
+                      this.state.challengerCommit,
+                      this.state.referenceCommit
+                    )
+                  : undefined
+              }
+            />
+          )}
       </React.Fragment>
     );
   }
@@ -850,5 +859,26 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       elem = full;
     }
     return <div>{elem}</div>;
+  }
+
+  /**
+   *
+   */
+  private _openSingleFileComparison(
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>
+  ): void {
+    if (
+      this.props.model.selectedHistoryFile &&
+      this.state.referenceCommit &&
+      this.state.challengerCommit
+    ) {
+      openFileDiff(this.props.commands)(
+        this.state.challengerCommit,
+        this.state.referenceCommit
+      )(
+        this.props.model.selectedHistoryFile.to,
+        !this.props.model.selectedHistoryFile.is_binary
+      )(event);
+    }
   }
 }
