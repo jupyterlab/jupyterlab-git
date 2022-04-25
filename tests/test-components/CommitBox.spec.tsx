@@ -30,8 +30,7 @@ describe('CommitBox', () => {
     hasFiles: false,
     commands: defaultCommands,
     trans: trans,
-    label: 'Commit',
-    warnDirtyStagedFiles: false
+    label: 'Commit'
   };
 
   describe('#constructor()', () => {
@@ -139,7 +138,7 @@ describe('CommitBox', () => {
     it('should render a warning box when there are dirty staged files', () => {
       const props = {
         ...defaultProps,
-        warnDirtyStagedFiles: true
+        warning: <WarningBox title="Warning" content="Warning content."></WarningBox>
       };
       const component = shallow(<CommitBox {...props} />);
       expect(component.find(WarningBox).length).toEqual(1);

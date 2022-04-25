@@ -70,7 +70,7 @@ export interface IGitExtension extends IDisposable {
    * Boolean indicating whether there are dirty staged files
    * (e.g., due to unsaved changes on files that have been previously staged).
    */
-  hasDirtyStagedFiles: boolean;
+  hasDirtyFiles: boolean;
 
   /**
    * Boolean indicating whether credentials are required from the user.
@@ -118,7 +118,7 @@ export interface IGitExtension extends IDisposable {
    * This signal is emitted when there is a dirty staged file but none in prior,
    * and vice versa, when there are no dirty staged files but there were previously.
    */
-  readonly dirtyStagedFilesStatusChanged: ISignal<IGitExtension, boolean>;
+  readonly dirtyFilesStatusChanged: ISignal<IGitExtension, boolean>;
 
   /**
    * Add one or more files to the repository staging area.
@@ -445,7 +445,7 @@ export interface IGitExtension extends IDisposable {
    * Emits a signal indicating if there are unsaved changes.
    * @returns promise that resolves upon refreshing the dirty status of staged files
    */
-  refreshDirtyStagedStatus(): Promise<void>;
+  refreshDirtyStatus(): Promise<void>;
 
   /**
    * Request Git status refresh
