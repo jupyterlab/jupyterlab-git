@@ -17,7 +17,7 @@ export class GitCloneForm extends Widget {
    * Returns the input value.
    */
   getValue(): string {
-    return encodeURIComponent(this.node.querySelector('input').value);
+    return encodeURIComponent(this.node.querySelector('input').value.trim());
   }
 
   private static createFormNode(trans: TranslationBundle): HTMLElement {
