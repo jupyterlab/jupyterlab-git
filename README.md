@@ -207,7 +207,7 @@ git clone https://github.com/jupyterlab/jupyterlab-git.git
 # Change directory to the jupyterlab-git directory
 cd jupyterlab-git
 # Install package in development mode
-pip install -e .[dev]
+pip install -e ".[dev]"
 pre-commit install
 # Link your development version of the extension with JupyterLab
 jupyter labextension develop . --overwrite
