@@ -10,7 +10,8 @@ import { gitIcon } from '../style/icons';
 import {
   badgeClass,
   statusAnimatedIconClass,
-  statusIconClass
+  statusIconClass,
+  currentBranchClass
 } from '../style/StatusWidget';
 import { toolbarButtonClass } from '../style/Toolbar';
 import { IGitExtension } from '../tokens';
@@ -46,32 +47,39 @@ export class StatusWidget extends ReactWidget {
         initialArgs={false}
       >
         {(_, needsCredentials) => (
-          <Badge
-            className={badgeClass}
-            variant="dot"
-            invisible={!needsCredentials}
-            data-test-id="git-credential-badge"
-          >
-            <ActionButton
-              className={classes(
-                toolbarButtonClass,
-                this._status !== 'idle'
-                  ? statusAnimatedIconClass
-                  : statusIconClass
-              )}
-              icon={gitIcon}
-              onClick={
-                needsCredentials
-                  ? async () => this._showGitOperationDialog()
-                  : undefined
-              }
-              title={
-                needsCredentials
-                  ? `Git: ${this._trans.__('credentials required')}`
-                  : `Git: ${this._trans.__(this._status)}`
-              }
-            />
-          </Badge>
+          <>
+            <Badge
+              className={badgeClass}
+              variant="dot"
+              invisible={!needsCredentials}
+              data-test-id="git-credential-badge"
+            >
+              <ActionButton
+                className={classes(
+                  toolbarButtonClass,
+                  this._status !== 'idle'
+                    ? statusAnimatedIconClass
+                    : statusIconClass
+                )}
+                icon={gitIcon}
+                onClick={
+                  needsCredentials
+                    ? async () => this._showGitOperationDialog()
+                    : undefined
+                }
+                title={
+                  needsCredentials
+                    ? `Git: ${this._trans.__('credentials required')}`
+                    : `Git: ${this._trans.__(this._status)}`
+                }
+              />
+            </Badge>
+            {this._model.currentBranch && (
+              <span className={currentBranchClass}>
+                {this._model.currentBranch.name}*
+              </span>
+            )}
+          </>
         )}
       </UseSignal>
     );

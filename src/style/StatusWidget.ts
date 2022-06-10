@@ -38,3 +38,7 @@ export const badgeClass = style({
     }
   }
 });
+
+export const currentBranchClass = style({
+  fontSize: 'var(--jp-ui-font-size1)'
+});
