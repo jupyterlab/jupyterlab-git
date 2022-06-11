@@ -1062,6 +1062,45 @@ export function addCommands(
               // resetting an added file moves it to untracked category => checkout will fail
               await gitModel.checkout({ filename: file.to });
             }
+
+            // close diff tab
+            const status = file.status;
+            const specialRef =
+              status === 'staged'
+                ? Git.Diff.SpecialRef.INDEX
+                : Git.Diff.SpecialRef.WORKING;
+
+            const diffContext: Git.Diff.IContext =
+              status === 'unmerged'
+                ? {
+                    currentRef: 'MERGE_HEAD',
+                    previousRef: 'HEAD',
+                    baseRef: Git.Diff.SpecialRef.BASE
+                  }
+                : {
+                    currentRef: specialRef,
+                    previousRef: 'HEAD'
+                  };
+            const fullPath = PathExt.join(
+              gitModel.pathRepository ?? '/',
+              file.to
+            );
+            const diffChallengerLabgel =
+              (Git.Diff.SpecialRef[diffContext.currentRef as any] as any) ||
+              diffContext.currentRef;
+            const diffReferenceLabel =
+              (Git.Diff.SpecialRef[diffContext.previousRef as any] as any) ||
+              diffContext.previousRef;
+            const id = `diff-${fullPath}-${diffReferenceLabel}-${diffChallengerLabgel}`;
+            const mainAreaItems = shell.widgets('main');
+            let mainAreaItem = mainAreaItems.next();
+            while (mainAreaItem) {
+              if (mainAreaItem.id === id) {
+                mainAreaItem.close();
+                break;
+              }
+              mainAreaItem = mainAreaItems.next();
+            }
           } catch (reason) {
             showErrorMessage(
               trans.__('Discard changes for %1 failed.', file.to),
