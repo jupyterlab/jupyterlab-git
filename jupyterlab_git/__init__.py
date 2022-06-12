@@ -31,7 +31,7 @@ class JupyterLabGit(Configurable):
     actions = Dict(
         help="Actions to be taken after a git command. Each action takes a list of commands to execute (strings). Supported actions: post_init",
         config=True,
-        trait=List(
+        value_trait=List(
             trait=Unicode(), help='List of commands to run. E.g. ["touch baz.py"]'
         )
         # TODO Validate
