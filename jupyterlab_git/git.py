@@ -1350,8 +1350,9 @@ class Git:
             )
         except tornado.web.HTTPError as error:
             # Handle versioned file being deleted case
-            if error.status_code == 404 and error.log_message.startswith(
-                "No such file or directory: "
+            if error.status_code == 404 and (
+                error.log_message.startswith("No such file or directory: ")
+                or error.log_message.startswith("file or directory does not exist:")
             ):
                 return ""
             raise error
