@@ -31,6 +31,7 @@ async def test_detailed_log():
 
         expected_response = {
             "code": 0,
+            "commit_body": "Commit message",
             "modified_file_note": "7 files changed, 60 insertions(+), 19 deletions(-)",
             "modified_files_count": "7",
             "number_of_insertions": "60",
