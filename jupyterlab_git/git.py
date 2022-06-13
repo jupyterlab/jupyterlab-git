@@ -611,7 +611,7 @@ class Git:
 
         return {
             "code": code,
-            "commit_body": commit_body_message,
+            "commit_body_message": commit_body_message,
             "modified_file_note": modified_file_note,
             "modified_files_count": str(len(result)),
             "number_of_insertions": str(total_insertions),
