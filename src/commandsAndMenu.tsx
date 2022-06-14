@@ -607,7 +607,7 @@ export function addCommands(
             modelIsLoading.reject(msg);
           }
 
-          const slotRegistered = gitModel.statusChanged.connect((_, status) => {
+          gitModel.statusChanged.connect((_, status) => {
             const targetFile = status.files.find(
               fileStatus => model.filename === fileStatus.from
             );
@@ -615,7 +615,6 @@ export function addCommands(
               mainAreaItem.dispose();
             }
           });
-          console.log(slotRegistered);
         }
 
         return mainAreaItem;
