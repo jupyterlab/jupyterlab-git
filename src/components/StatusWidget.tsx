@@ -11,7 +11,7 @@ import {
   badgeClass,
   statusAnimatedIconClass,
   statusIconClass,
-  currentBranchClass
+  currentBranchNameClass
 } from '../style/StatusWidget';
 import { toolbarButtonClass } from '../style/Toolbar';
 import { IGitExtension } from '../tokens';
@@ -42,12 +42,12 @@ export class StatusWidget extends ReactWidget {
 
   render(): JSX.Element {
     return (
-      <UseSignal
-        signal={this._model.credentialsRequiredChanged}
-        initialArgs={false}
-      >
-        {(_, needsCredentials) => (
-          <>
+      <>
+        <UseSignal
+          signal={this._model.credentialsRequiredChanged}
+          initialArgs={false}
+        >
+          {(_, needsCredentials) => (
             <Badge
               className={badgeClass}
               variant="dot"
@@ -74,14 +74,19 @@ export class StatusWidget extends ReactWidget {
                 }
               />
             </Badge>
-            {this._model.currentBranch && (
-              <span className={currentBranchClass}>
+          )}
+        </UseSignal>
+
+        <UseSignal signal={this._model.headChanged}>
+          {() =>
+            this._model.currentBranch && (
+              <span className={currentBranchNameClass}>
                 {this._model.currentBranch.name}*
               </span>
-            )}
-          </>
-        )}
-      </UseSignal>
+            )
+          }
+        </UseSignal>
+      </>
     );
   }
 

@@ -149,6 +149,7 @@ async function activate(
     change: IChangedArgs<string>
   ) => {
     gitExtension.pathRepository = change.newValue;
+    gitExtension.refreshBranch();
   };
 
   // Whenever the file browser path changes, sync the Git extension path
