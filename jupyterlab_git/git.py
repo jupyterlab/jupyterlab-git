@@ -174,7 +174,8 @@ def strip_and_split(s):
     return s.strip("\x00").split("\x00")
 
 
-async def execute_command(cmd, path):
+async def execute_log_command(cmd, path):
+    """execute git log command and checks the type of pretty format requested."""
     code, my_output, my_error = await execute(
         cmd,
         cwd=path,
@@ -587,8 +588,8 @@ class Git:
             selected_hash,
         ]
 
-        code, my_output = await execute_command(cmd, path)
-        my_commit_output = await execute_command(commit_cmd, path)
+        code, my_output = await execute_log_command(cmd, path)
+        my_commit_output = await execute_log_command(commit_cmd, path)
 
         total_insertions = 0
         total_deletions = 0

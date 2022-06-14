@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pytest
 
@@ -13,7 +13,7 @@ async def test_detailed_log():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         process_output = [
-            "Test Summary\nTest Description\n26\t0\tjupyterlab_git/tests/Test.ipynb",
+            "f29660a (HEAD, origin/feature) Commit message",
             "10\t3\tnotebook_without_spaces.ipynb",
             "11\t4\tNotebook with spaces.ipynb",
             "12\t5\tpath/notebook_without_spaces.ipynb",
@@ -31,7 +31,6 @@ async def test_detailed_log():
 
         expected_response = {
             "code": 0,
-            "commit_body_description": "Test Summary\nTest Description",
             "modified_file_note": "7 files changed, 60 insertions(+), 19 deletions(-)",
             "modified_files_count": "7",
             "number_of_insertions": "60",
@@ -97,17 +96,32 @@ async def test_detailed_log():
         )
 
         # Then
-        mock_execute.assert_called_once_with(
+        mock_execute.assert_has_calls(
             [
-                "git",
-                "log",
-                "-1",
-                "--numstat",
-                "--pretty=format:%B",
-                "-z",
-                "f29660a2472e24164906af8653babeb48e4bf2ab",
+                call(
+                    [
+                        "git",
+                        "log",
+                        "-1",
+                        "--numstat",
+                        "--oneline",
+                        "-z",
+                        "f29660a2472e24164906af8653babeb48e4bf2ab",
+                    ],
+                    cwd=str(Path("/bin") / "test_curr_path"),
+                ),
+                call(
+                    [
+                        "git",
+                        "log",
+                        "-1",
+                        "--pretty=format:%B",
+                        "f29660a2472e24164906af8653babeb48e4bf2ab",
+                    ],
+                    cwd=str(Path("/bin") / "test_curr_path"),
+                ),
             ],
-            cwd=str(Path("/bin") / "test_curr_path"),
+            any_order=False,
         )
 
         assert expected_response == actual_response
