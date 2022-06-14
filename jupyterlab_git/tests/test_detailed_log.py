@@ -13,7 +13,7 @@ async def test_detailed_log():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         process_output = [
-            "f29660a (HEAD, origin/feature) Commit message",
+            "Test Summary\nTest Description\n26\t0\tjupyterlab_git/tests/Test.ipynb",
             "10\t3\tnotebook_without_spaces.ipynb",
             "11\t4\tNotebook with spaces.ipynb",
             "12\t5\tpath/notebook_without_spaces.ipynb",
@@ -31,7 +31,7 @@ async def test_detailed_log():
 
         expected_response = {
             "code": 0,
-            "commit_body": "Commit message",
+            "commit_body_description": "Test Summary\nTest Description",
             "modified_file_note": "7 files changed, 60 insertions(+), 19 deletions(-)",
             "modified_files_count": "7",
             "number_of_insertions": "60",
@@ -103,7 +103,7 @@ async def test_detailed_log():
                 "log",
                 "-1",
                 "--numstat",
-                "--oneline",
+                "--pretty=format:%B",
                 "-z",
                 "f29660a2472e24164906af8653babeb48e4bf2ab",
             ],

@@ -555,7 +555,15 @@ class Git:
         Execute git log -1 --numstat --oneline -z command (used to get
         insertions & deletions per file) & return the result.
         """
-        cmd = ["git", "log", "-1", "--numstat", "--oneline", "-z", selected_hash]
+        cmd = [
+            "git",
+            "log",
+            "-1",
+            "--numstat",
+            "--pretty=format:%B",
+            "-z",
+            selected_hash,
+        ]
         code, my_output, my_error = await execute(
             cmd,
             cwd=path,
@@ -568,8 +576,8 @@ class Git:
         total_deletions = 0
         result = []
         line_iterable = iter(strip_and_split(my_output)[0:])
-        commit_line = next(line_iterable)
-        commit_body_message = commit_line.split(") ", 1)[1]
+        commit_body_description = "\n".join(next(line_iterable).split("\n")[:-1])
+        print(commit_body_description)
         for line in line_iterable:
             is_binary = line.startswith("-\t-\t")
             previous_file_path = ""
@@ -611,7 +619,7 @@ class Git:
 
         return {
             "code": code,
-            "commit_body_message": commit_body_message,
+            "commit_body_description": commit_body_description,
             "modified_file_note": modified_file_note,
             "modified_files_count": str(len(result)),
             "number_of_insertions": str(total_insertions),
