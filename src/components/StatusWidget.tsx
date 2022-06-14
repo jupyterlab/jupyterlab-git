@@ -28,6 +28,8 @@ export class StatusWidget extends ReactWidget {
     super();
     this._model = model;
     this._trans = trans;
+
+    this.addClass('jp-git-StatusWidget');
   }
 
   /**
