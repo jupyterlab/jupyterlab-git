@@ -94,6 +94,6 @@ export const actionButtonClass = style({
 });
 
 export const commitBodyClass = style({
-  paddingTop: '5px',
-  paddingBottom: '5px'
+  paddingBottom: '5px',
+  whiteSpace: 'pre-wrap'
 });

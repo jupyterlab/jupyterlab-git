@@ -4,7 +4,10 @@ import * as React from 'react';
 import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
 import { discardIcon, rewindIcon } from '../style/icons';
-import { actionButtonClass, commitBodyClass } from '../style/SinglePastCommitInfo';
+import {
+  actionButtonClass,
+  commitBodyClass
+} from '../style/SinglePastCommitInfo';
 import { Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { CommitDiff } from './CommitDiff';
