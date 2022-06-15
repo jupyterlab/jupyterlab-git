@@ -1149,7 +1149,8 @@ export enum ContextCommandIDs {
   gitFileHistory = 'git:context-history',
   gitIgnore = 'git:context-ignore',
   gitIgnoreExtension = 'git:context-ignoreExtension',
-  gitNoAction = 'git:no-action'
+  gitNoAction = 'git:no-action',
+  openFileFromDiff = 'git:open-file-from-diff'
 }
 
 /**

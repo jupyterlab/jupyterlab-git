@@ -750,6 +750,26 @@ export function addCommands(
     icon: openIcon.bindprops({ stylesheet: 'menuItem' })
   });
 
+  commands.addCommand(ContextCommandIDs.openFileFromDiff, {
+    label: trans.__('Open File'),
+    execute: async args => {
+      const widget = app.contextMenuHitTest(
+        (node: HTMLElement) => {
+          const nodeId = node.dataset.id;
+          return nodeId && nodeId.substring(0,4) === 'diff';
+        }
+      );
+      console.log(widget);
+      if (widget) {
+        const filename = widget.dataset.id.split("-")[1];
+        //   await commands.execute(ContextCommandIDs.gitFileOpen, {
+        //     files: [filename]  
+        //   })
+      }
+
+    }
+  });
+
   commands.addCommand(ContextCommandIDs.gitFileDiff, {
     label: trans.__('Diff'),
     caption: pluralizedContextLabel(

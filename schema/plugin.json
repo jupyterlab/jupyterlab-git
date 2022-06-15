@@ -172,6 +172,11 @@
           "label": "Git",
           "icon": "git"
         }
+      },
+      {
+        "command": "git:open-file-from-diff",
+        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab",
+        "rank": 4
       }
     ]
   }
