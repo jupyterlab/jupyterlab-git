@@ -92,3 +92,8 @@ export const fileListClass = style({
 export const actionButtonClass = style({
   float: 'right'
 });
+
+export const commitBodyClass = style({
+  paddingTop: '5px',
+  paddingBottom: '5px'
+});

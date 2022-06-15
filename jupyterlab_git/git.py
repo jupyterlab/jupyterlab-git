@@ -595,7 +595,6 @@ class Git:
         total_deletions = 0
         result = []
         line_iterable = iter(strip_and_split(my_output)[1:])
-        print("body" + my_commit_output.strip())
         for line in line_iterable:
             is_binary = line.startswith("-\t-\t")
             previous_file_path = ""
@@ -637,7 +636,7 @@ class Git:
 
         return {
             "code": code,
-            "commit_body": my_commit_output,
+            "commit_body": strip_and_split(my_commit_output.split("\n", 1)[-1]),
             "modified_file_note": modified_file_note,
             "modified_files_count": str(len(result)),
             "number_of_insertions": str(total_insertions),
