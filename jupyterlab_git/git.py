@@ -2,7 +2,6 @@
 Module for executing git commands, sending results back to the handlers
 """
 import datetime
-from dis import code_info
 import os
 import pathlib
 import re
