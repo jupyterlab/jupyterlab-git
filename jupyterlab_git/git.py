@@ -577,7 +577,7 @@ class Git:
         result = []
         line_iterable = iter(strip_and_split(my_output)[1:])
 
-        commit_body = my_output.strip().split("\x00", 1)[0]
+        commit_body = my_output.split("\x00", 1)[0].strip()
 
         for line in line_iterable:
             is_binary = line.startswith("-\t-\t")

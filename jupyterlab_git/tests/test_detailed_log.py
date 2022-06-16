@@ -13,7 +13,7 @@ async def test_detailed_log():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         process_output = [
-            "Test Description",
+            "    Test Description with leading and trailing spaces    ",
             "10\t3\tnotebook_without_spaces.ipynb",
             "11\t4\tNotebook with spaces.ipynb",
             "12\t5\tpath/notebook_without_spaces.ipynb",
@@ -31,7 +31,7 @@ async def test_detailed_log():
 
         expected_response = {
             "code": 0,
-            "commit_body": "Test Description",
+            "commit_body": "Test Description with leading and trailing spaces",
             "modified_file_note": "7 files changed, 60 insertions(+), 19 deletions(-)",
             "modified_files_count": "7",
             "number_of_insertions": "60",
