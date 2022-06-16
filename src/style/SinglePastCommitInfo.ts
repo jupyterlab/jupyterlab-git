@@ -5,7 +5,8 @@ export const commitClass = style({
   width: '100%',
   fontSize: '12px',
   marginBottom: '10px',
-  marginTop: '5px'
+  marginTop: '5px',
+  paddingTop: '5px'
 });
 
 export const commitOverviewNumbersClass = style({
@@ -94,6 +95,7 @@ export const actionButtonClass = style({
 });
 
 export const commitBodyClass = style({
-  paddingBottom: '5px',
-  whiteSpace: 'pre-wrap'
+  paddingTop: '5px',
+  whiteSpace: 'pre-wrap',
+  wordWrap: 'break-word'
 });

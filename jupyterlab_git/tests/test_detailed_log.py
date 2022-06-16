@@ -96,32 +96,17 @@ async def test_detailed_log():
         )
 
         # Then
-        mock_execute.assert_has_calls(
+        mock_execute.assert_called_once_with(
             [
-                call(
-                    [
-                        "git",
-                        "log",
-                        "-1",
-                        "--numstat",
-                        "--oneline",
-                        "-z",
-                        "f29660a2472e24164906af8653babeb48e4bf2ab",
-                    ],
-                    cwd=str(Path("/bin") / "test_curr_path"),
-                ),
-                call(
-                    [
-                        "git",
-                        "log",
-                        "-1",
-                        "--pretty=format:%B",
-                        "f29660a2472e24164906af8653babeb48e4bf2ab",
-                    ],
-                    cwd=str(Path("/bin") / "test_curr_path"),
-                ),
+                "git",
+                "log",
+                "-1",
+                "--numstat",
+                "--oneline",
+                "-z",
+                "f29660a2472e24164906af8653babeb48e4bf2ab",
             ],
-            any_order=False,
+            cwd=str(Path("/bin") / "test_curr_path"),
         )
 
         assert expected_response == actual_response

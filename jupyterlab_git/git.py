@@ -173,20 +173,6 @@ def strip_and_split(s):
     return s.strip("\x00").split("\x00")
 
 
-async def execute_log_command(cmd, path):
-    """execute git log command and checks the type of pretty format requested."""
-    code, my_output, my_error = await execute(
-        cmd,
-        cwd=path,
-    )
-    if code != 0:
-        return {"code": code, "command": " ".join(cmd), "message": my_error}
-    elif "--oneline" in cmd:
-        return code, my_output
-    else:
-        return my_output
-
-
 class Git:
     """
     A single parent class containing all of the individual git methods in it.
@@ -574,26 +560,25 @@ class Git:
             "log",
             "-1",
             "--numstat",
-            "--oneline",
+            "--pretty=format:%b%x00",
             "-z",
             selected_hash,
         ]
 
-        commit_cmd = [
-            "git",
-            "log",
-            "-1",
-            "--pretty=format:%B",
-            selected_hash,
-        ]
-
-        code, my_output = await execute_log_command(cmd, path)
-        my_commit_output = await execute_log_command(commit_cmd, path)
+        code, my_output, my_error = await execute(
+            cmd,
+            cwd=path,
+        )
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         total_insertions = 0
         total_deletions = 0
         result = []
         line_iterable = iter(strip_and_split(my_output)[1:])
+
+        commit_body = my_output.strip().split("\x00", 1)[0]
+
         for line in line_iterable:
             is_binary = line.startswith("-\t-\t")
             previous_file_path = ""
@@ -635,7 +620,7 @@ class Git:
 
         return {
             "code": code,
-            "commit_body": strip_and_split(my_commit_output.split("\n", 1)[-1]),
+            "commit_body": commit_body,
             "modified_file_note": modified_file_note,
             "modified_files_count": str(len(result)),
             "number_of_insertions": str(total_insertions),
