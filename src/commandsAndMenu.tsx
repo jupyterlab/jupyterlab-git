@@ -606,6 +606,15 @@ export function addCommands(
             })`;
             modelIsLoading.reject(msg);
           }
+
+          gitModel.statusChanged.connect((_, status) => {
+            const targetFile = status.files.find(
+              fileStatus => model.filename === fileStatus.from
+            );
+            if (!targetFile || targetFile.status === 'unmodified') {
+              mainAreaItem.dispose();
+            }
+          });
         }
 
         return mainAreaItem;
