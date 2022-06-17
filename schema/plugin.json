@@ -174,9 +174,10 @@
         }
       },
       {
+        "type": "command",
         "command": "git:open-file-from-diff",
-        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab",
-        "rank": 4
+        "selector": ".lm-TabBar-tab.p-TabBar-tab",
+        "rank": 1
       }
     ]
   }

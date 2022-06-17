@@ -753,20 +753,25 @@ export function addCommands(
   commands.addCommand(ContextCommandIDs.openFileFromDiff, {
     label: trans.__('Open File'),
     execute: async args => {
-      const widget = app.contextMenuHitTest(
-        (node: HTMLElement) => {
-          const nodeId = node.dataset.id;
-          return nodeId && nodeId.substring(0,4) === 'diff';
-        }
-      );
-      console.log(widget);
-      if (widget) {
-        const filename = widget.dataset.id.split("-")[1];
-        //   await commands.execute(ContextCommandIDs.gitFileOpen, {
-        //     files: [filename]  
-        //   })
+      const widget = app.contextMenuHitTest((node: HTMLElement) => {
+        const nodeId = node.dataset.id;
+        return nodeId && nodeId.substring(0, 4) === 'diff';
+      });
+      if (!widget) {
+        return;
       }
 
+      const filename = widget.dataset.id.split('-')[1];
+      const file = gitModel.status.files.find(
+        fileStatus => `${gitModel.pathRepository}/${fileStatus.to}` === filename
+      );
+      if (!file) {
+        return;
+      }
+
+      commands.execute(ContextCommandIDs.gitFileOpen, {
+        files: [file]
+      } as CommandArguments.IGitContextAction as any);
     }
   });
 
