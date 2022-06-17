@@ -83,7 +83,7 @@ export class StatusWidget extends ReactWidget {
           {() =>
             this._model.currentBranch && (
               <span className={currentBranchNameClass}>
-                {this._model.currentBranch.name}*
+                {this._model.currentBranch.name}
               </span>
             )
           }
