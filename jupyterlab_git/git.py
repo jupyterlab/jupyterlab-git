@@ -575,11 +575,11 @@ class Git:
         total_insertions = 0
         total_deletions = 0
         result = []
-        line_iterable = iter(strip_and_split(my_output)[1:])
+        line_iterable = strip_and_split(my_output)
 
-        commit_body = my_output.split("\x00", 1)[0].strip()
+        commit_body = line_iterable[0]
 
-        for line in line_iterable:
+        for line in line_iterable[1:]:
             is_binary = line.startswith("-\t-\t")
             previous_file_path = ""
             insertions, deletions, file = line.split("\t")
