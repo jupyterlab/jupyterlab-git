@@ -170,7 +170,7 @@ def strip_and_split(s):
     """strip trailing \x00 and split on \x00
     Useful for parsing output of git commands with -z flag.
     """
-    return s.strip("\x00").split("\x00")
+    return s.strip("\x00").strip("\n").split("\x00")
 
 
 class Git:
@@ -575,11 +575,10 @@ class Git:
         total_insertions = 0
         total_deletions = 0
         result = []
-        line_iterable = strip_and_split(my_output)
-
-        commit_body = line_iterable[0]
-
-        for line in line_iterable[1:]:
+        first_split = my_output.split("\x00", 1)
+        commit_body = first_split[0].strip()
+        line_iterable = iter(strip_and_split(first_split[1].strip()))
+        for line in line_iterable:
             is_binary = line.startswith("-\t-\t")
             previous_file_path = ""
             insertions, deletions, file = line.split("\t")

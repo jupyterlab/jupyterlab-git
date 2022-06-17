@@ -14,7 +14,7 @@ async def test_detailed_log():
         # Given
         process_output = [
             "    Test Description with leading and trailing spaces    ",
-            "10\t3\tnotebook_without_spaces.ipynb",
+            "\n10\t3\tnotebook_without_spaces.ipynb",
             "11\t4\tNotebook with spaces.ipynb",
             "12\t5\tpath/notebook_without_spaces.ipynb",
             "13\t6\tpath/Notebook with spaces.ipynb",
