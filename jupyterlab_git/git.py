@@ -170,7 +170,7 @@ def strip_and_split(s):
     """strip trailing \x00 and split on \x00
     Useful for parsing output of git commands with -z flag.
     """
-    return s.strip("\x00").split("\x00")
+    return s.strip("\x00").strip("\n").split("\x00")
 
 
 class Git:
@@ -555,19 +555,29 @@ class Git:
         Execute git log -1 --numstat --oneline -z command (used to get
         insertions & deletions per file) & return the result.
         """
-        cmd = ["git", "log", "-1", "--numstat", "--oneline", "-z", selected_hash]
+        cmd = [
+            "git",
+            "log",
+            "-1",
+            "--numstat",
+            "--pretty=format:%b%x00",
+            "-z",
+            selected_hash,
+        ]
+
         code, my_output, my_error = await execute(
             cmd,
             cwd=path,
         )
-
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         total_insertions = 0
         total_deletions = 0
         result = []
-        line_iterable = iter(strip_and_split(my_output)[1:])
+        first_split = my_output.split("\x00", 1)
+        commit_body = first_split[0].strip()
+        line_iterable = iter(strip_and_split(first_split[1].strip()))
         for line in line_iterable:
             is_binary = line.startswith("-\t-\t")
             previous_file_path = ""
@@ -609,6 +619,7 @@ class Git:
 
         return {
             "code": code,
+            "commit_body": commit_body,
             "modified_file_note": modified_file_note,
             "modified_files_count": str(len(result)),
             "number_of_insertions": str(total_insertions),

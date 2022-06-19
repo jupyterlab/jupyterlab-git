@@ -957,6 +957,7 @@ export namespace Git {
    */
   export interface ISingleCommitFilePathInfo {
     code: number;
+    commit_body?: string;
     modified_file_note?: string;
     modified_files_count?: string;
     number_of_insertions?: string;

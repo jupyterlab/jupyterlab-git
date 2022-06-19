@@ -4,7 +4,10 @@ import * as React from 'react';
 import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
 import { discardIcon, rewindIcon } from '../style/icons';
-import { actionButtonClass } from '../style/SinglePastCommitInfo';
+import {
+  actionButtonClass,
+  commitBodyClass
+} from '../style/SinglePastCommitInfo';
 import { Git } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { CommitDiff } from './CommitDiff';
@@ -59,6 +62,11 @@ export interface ISinglePastCommitInfoState {
   info: string;
 
   /**
+   * Commit information.
+   */
+  commitBody: string;
+
+  /**
    * Number of modified files.
    */
   numFiles: string;
@@ -111,6 +119,7 @@ export class SinglePastCommitInfo extends React.Component<
     super(props);
     this.state = {
       info: '',
+      commitBody: '',
       numFiles: '',
       insertions: '',
       deletions: '',
@@ -130,6 +139,7 @@ export class SinglePastCommitInfo extends React.Component<
 
       this.setState({
         info: log.modified_file_note,
+        commitBody: log.commit_body,
         numFiles: log.modified_files_count,
         insertions: log.number_of_insertions,
         deletions: log.number_of_deletions,
@@ -159,47 +169,50 @@ export class SinglePastCommitInfo extends React.Component<
       return <div>{this.props.trans.__('Error loading commit data')}</div>;
     }
     return (
-      <CommitDiff
-        actions={
-          <>
-            <ActionButton
-              className={actionButtonClass}
-              icon={discardIcon}
-              title={this.props.trans.__(
-                'Revert changes introduced by this commit'
-              )}
-              onClick={this._onRevertClick}
-            />
-            <ActionButton
-              className={actionButtonClass}
-              icon={rewindIcon}
-              title={this.props.trans.__(
-                'Discard changes introduced *after* this commit (hard reset)'
-              )}
-              onClick={this._onResetClick}
-            />
-            <LoggerContext.Consumer>
-              {logger => (
-                <ResetRevertDialog
-                  open={this.state.resetRevertDialog}
-                  action={this.state.resetRevertAction}
-                  model={this.props.model}
-                  logger={logger}
-                  commit={this.props.commit}
-                  onClose={this._onResetRevertDialogClose}
-                  trans={this.props.trans}
-                />
-              )}
-            </LoggerContext.Consumer>
-          </>
-        }
-        numFiles={this.state.numFiles}
-        insertions={this.state.insertions}
-        deletions={this.state.deletions}
-        files={this.state.modifiedFiles}
-        onOpenDiff={this.props.onOpenDiff}
-        trans={this.props.trans}
-      ></CommitDiff>
+      <div>
+        <p className={commitBodyClass}>{this.state.commitBody}</p>
+        <CommitDiff
+          actions={
+            <>
+              <ActionButton
+                className={actionButtonClass}
+                icon={discardIcon}
+                title={this.props.trans.__(
+                  'Revert changes introduced by this commit'
+                )}
+                onClick={this._onRevertClick}
+              />
+              <ActionButton
+                className={actionButtonClass}
+                icon={rewindIcon}
+                title={this.props.trans.__(
+                  'Discard changes introduced *after* this commit (hard reset)'
+                )}
+                onClick={this._onResetClick}
+              />
+              <LoggerContext.Consumer>
+                {logger => (
+                  <ResetRevertDialog
+                    open={this.state.resetRevertDialog}
+                    action={this.state.resetRevertAction}
+                    model={this.props.model}
+                    logger={logger}
+                    commit={this.props.commit}
+                    onClose={this._onResetRevertDialogClose}
+                    trans={this.props.trans}
+                  />
+                )}
+              </LoggerContext.Consumer>
+            </>
+          }
+          numFiles={this.state.numFiles}
+          insertions={this.state.insertions}
+          deletions={this.state.deletions}
+          files={this.state.modifiedFiles}
+          onOpenDiff={this.props.onOpenDiff}
+          trans={this.props.trans}
+        ></CommitDiff>
+      </div>
     );
   }
 

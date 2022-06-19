@@ -5,7 +5,8 @@ export const commitClass = style({
   width: '100%',
   fontSize: '12px',
   marginBottom: '10px',
-  marginTop: '5px'
+  marginTop: '5px',
+  paddingTop: '5px'
 });
 
 export const commitOverviewNumbersClass = style({
@@ -91,4 +92,10 @@ export const fileListClass = style({
 
 export const actionButtonClass = style({
   float: 'right'
+});
+
+export const commitBodyClass = style({
+  paddingTop: '5px',
+  whiteSpace: 'pre-wrap',
+  wordWrap: 'break-word'
 });
