@@ -176,7 +176,7 @@
       {
         "type": "command",
         "command": "git:open-file-from-diff",
-        "selector": ".lm-TabBar-tab.p-TabBar-tab",
+        "selector": ".jp-git-diff-title",
         "rank": 1
       }
     ]

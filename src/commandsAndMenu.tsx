@@ -519,6 +519,7 @@ export function addCommands(
           diffWidget.title.caption = fullPath;
           diffWidget.title.icon = diffIcon;
           diffWidget.title.closable = true;
+          diffWidget.title.className = 'jp-git-diff-title';
           diffWidget.addClass('jp-git-diff-parent-widget');
 
           shell.add(diffWidget, 'main');
@@ -752,7 +753,7 @@ export function addCommands(
 
   commands.addCommand(ContextCommandIDs.openFileFromDiff, {
     label: trans.__('Open File'),
-    execute: async args => {
+    execute: async _ => {
       const widget = app.contextMenuHitTest((node: HTMLElement) => {
         const nodeId = node.dataset.id;
         return nodeId && nodeId.substring(0, 4) === 'diff';
@@ -761,7 +762,7 @@ export function addCommands(
         return;
       }
 
-      const filename = widget.dataset.id.split('-')[1];
+      const filename = widget.title;
       const file = gitModel.status.files.find(
         fileStatus => `${gitModel.pathRepository}/${fileStatus.to}` === filename
       );
