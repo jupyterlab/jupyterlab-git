@@ -24,7 +24,7 @@ import { GitStage } from './GitStage';
 import { discardAllChanges } from '../widgets/discardAllChanges';
 
 export interface IFileListState {
-  selectedFile: Git.IStatusFile | null;
+  selectedFiles: Git.IStatusFile[] | null;
 }
 
 export interface IFileListProps {
@@ -120,7 +120,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     super(props);
 
     this.state = {
-      selectedFile: null
+      selectedFiles: null
     };
   }
 
@@ -137,7 +137,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event.preventDefault();
 
     this.setState({
-      selectedFile
+      selectedFiles: [selectedFile]
     });
 
     const contextMenu = new Menu({ commands: this.props.commands });
@@ -237,8 +237,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
-  updateSelectedFile = (file: Git.IStatusFile | null): void => {
-    this.setState({ selectedFile: file });
+  replaceSelectedFiles = (files: Git.IStatusFile[] | null): void => {
+    if (files) {
+      this.setState({ selectedFiles: files });
+    } else {
+      this.setState({ selectedFiles: null });
+    }
+  };
+
+  selectFile = (file: Git.IStatusFile): void => {
+    this.setState({ selectedFiles: [...this.state.selectedFiles, file] });
   };
 
   pullFromRemote = async (event: React.MouseEvent): Promise<void> => {
@@ -349,16 +357,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param candidate file to test
    */
   private _isSelectedFile(candidate: Git.IStatusFile): boolean {
-    if (this.state.selectedFile === null) {
+    if (this.state.selectedFiles === null) {
       return false;
     }
 
-    return (
-      this.state.selectedFile.x === candidate.x &&
-      this.state.selectedFile.y === candidate.y &&
-      this.state.selectedFile.from === candidate.from &&
-      this.state.selectedFile.to === candidate.to &&
-      this.state.selectedFile.status === candidate.status
+    return this.state.selectedFiles.some(
+      file =>
+        file.x === candidate.x &&
+        file.y === candidate.y &&
+        file.from === candidate.from &&
+        file.to === candidate.to &&
+        file.status === candidate.status
     );
   }
 
@@ -384,7 +393,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         file={file}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        selectFile={this.updateSelectedFile}
+        selectFile={this.selectFile}
+        replaceSelectedFiles={this.replaceSelectedFiles}
         onDoubleClick={() => this._openDiffView(file)}
         style={{ ...style }}
       />
@@ -455,7 +465,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         contextMenu={this.openContextMenu}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        selectFile={this.updateSelectedFile}
+        selectFile={this.selectFile}
+        replaceSelectedFiles={this.replaceSelectedFiles}
         onDoubleClick={
           doubleClickDiff
             ? diffButton
@@ -550,7 +561,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         contextMenu={this.openContextMenu}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        selectFile={this.updateSelectedFile}
+        selectFile={this.selectFile}
+        replaceSelectedFiles={this.replaceSelectedFiles}
         onDoubleClick={
           doubleClickDiff
             ? diffButton
@@ -651,7 +663,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           }
         }}
         selected={this._isSelectedFile(file)}
-        selectFile={this.updateSelectedFile}
+        selectFile={this.selectFile}
+        replaceSelectedFiles={this.replaceSelectedFiles}
         style={style}
       />
     );
@@ -727,7 +740,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           }
         }}
         selected={this._isSelectedFile(file)}
-        selectFile={this.updateSelectedFile}
+        selectFile={this.selectFile}
+        replaceSelectedFiles={this.replaceSelectedFiles}
         style={style}
       />
     );
@@ -856,7 +870,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         onDoubleClick={onDoubleClick}
         contextMenu={this.openSimpleContextMenu}
-        selectFile={this.updateSelectedFile}
+        selectFile={this.selectFile}
+        replaceSelectedFiles={this.replaceSelectedFiles}
         style={style}
       />
     );

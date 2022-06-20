@@ -119,7 +119,11 @@ export interface IFileItemProps {
   /**
    * Callback to select the file
    */
-  selectFile?: (file: Git.IStatusFile | null) => void;
+  selectFile?: (file: Git.IStatusFile) => void;
+  /**
+   * Callback to replace the selected files
+   */
+  replaceSelectedFiles?: (file: Git.IStatusFile[] | null) => void;
   /**
    * Optional style class
    */
@@ -191,10 +195,15 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
     return (
       <div
         className={this._getFileClass()}
-        onClick={
-          this.props.selectFile &&
-          (() => this.props.selectFile(this.props.file))
-        }
+        onClick={event => {
+          if (event.ctrlKey || event.metaKey) {
+            this.props.selectFile(this.props.file);
+          } else if (event.shiftKey) {
+            console.log('shift click');
+          } else {
+            this.props.replaceSelectedFiles([this.props.file]);
+          }
+        }}
         onContextMenu={
           this.props.contextMenu &&
           (event => {
