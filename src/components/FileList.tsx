@@ -24,7 +24,7 @@ import { GitStage } from './GitStage';
 import { discardAllChanges } from '../widgets/discardAllChanges';
 
 export interface IFileListState {
-  selectedFiles: Git.IStatusFile[] | null;
+  selectedFiles: Git.IStatusFile[];
 }
 
 export interface IFileListProps {
@@ -120,7 +120,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     super(props);
 
     this.state = {
-      selectedFiles: null
+      selectedFiles: []
     };
   }
 
@@ -135,14 +135,61 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event: React.MouseEvent
   ): void => {
     event.preventDefault();
-
-    this.setState({
-      selectedFiles: [selectedFile]
-    });
-
+    let selectedFiles: Git.IStatusFile[];
+    if (
+      !this.state.selectedFiles.some(
+        file => file.from === selectedFile.from && file.to === selectedFile.to
+      )
+    ) {
+      this.setState({
+        selectedFiles: [selectedFile]
+      });
+      selectedFiles = [selectedFile];
+    } else {
+      selectedFiles = this.state.selectedFiles;
+    }
+    const selectedFileStatuses: Git.Status[] = selectedFiles.reduce(
+      (statuses, file) => {
+        if (!statuses.includes(file.status)) {
+          statuses.push(file.status);
+        }
+        return statuses;
+      },
+      []
+    );
     const contextMenu = new Menu({ commands: this.props.commands });
-    const commands = CONTEXT_COMMANDS[selectedFile.status];
-    addMenuItems(commands, contextMenu, [selectedFile]);
+
+    const contextCommandsForEachFileType: ContextCommandIDs[][] =
+      selectedFileStatuses.map(status => CONTEXT_COMMANDS[status]);
+
+    const intersect = (...sets: ContextCommandIDs[][]) => {
+      if (sets.length === 0) {
+        return [];
+      }
+      if (sets.length === 1) {
+        return sets[0];
+      }
+      const res: ContextCommandIDs[] = [];
+      const smallestSetIdx = sets.reduce(
+        (smallestIdx, set, currentIdx, sets) => {
+          if (set.length < sets[smallestIdx].length) {
+            return currentIdx;
+          }
+          return smallestIdx;
+        },
+        0
+      );
+      const smallestSet = sets[smallestSetIdx];
+      for (const command of smallestSet) {
+        if (sets.every(set => set.includes(command))) {
+          res.push(command);
+        }
+      }
+      return res;
+    };
+    const commands = intersect(...contextCommandsForEachFileType);
+    console.log(commands);
+    addMenuItems(commands, contextMenu, selectedFiles);
 
     contextMenu.open(event.clientX, event.clientY);
   };
@@ -237,16 +284,20 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
-  replaceSelectedFiles = (files: Git.IStatusFile[] | null): void => {
-    if (files) {
-      this.setState({ selectedFiles: files });
-    } else {
-      this.setState({ selectedFiles: null });
-    }
+  replaceSelectedFiles = (files: Git.IStatusFile[]): void => {
+    this.setState({ selectedFiles: files });
   };
 
   selectFile = (file: Git.IStatusFile): void => {
-    this.setState({ selectedFiles: [...this.state.selectedFiles, file] });
+    if (!this.state.selectedFiles) {
+      this.setState({ selectedFiles: [file] });
+    } else if (
+      !this.state.selectedFiles.find(
+        fileState => fileState.from === file.from && fileState.to === file.to
+      )
+    ) {
+      this.setState({ selectedFiles: [...this.state.selectedFiles, file] });
+    }
   };
 
   pullFromRemote = async (event: React.MouseEvent): Promise<void> => {
@@ -263,7 +314,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   render(): JSX.Element {
     const remoteChangedFiles: Git.IStatusFile[] = [];
     const unmergedFiles: Git.IStatusFile[] = [];
-
+    console.log('selectedFiles: ', this.state.selectedFiles);
+    // console.log('markedFiles: ', this.markedFiles);
     if (this.props.settings.composite['simpleStaging']) {
       const otherFiles: Git.IStatusFile[] = [];
 
