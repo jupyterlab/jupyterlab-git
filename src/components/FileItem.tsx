@@ -117,9 +117,9 @@ export interface IFileItemProps {
    */
   selected?: boolean;
   /**
-   * Callback to select the file
+   * Callback to toggle select/deselect the file
    */
-  selectFile?: (file: Git.IStatusFile) => void;
+  toggleFile?: (file: Git.IStatusFile) => void;
   /**
    * Callback to replace the selected files
    */
@@ -197,7 +197,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         className={this._getFileClass()}
         onClick={event => {
           if (event.ctrlKey || event.metaKey) {
-            this.props.selectFile(this.props.file);
+            this.props.toggleFile(this.props.file);
           } else if (event.shiftKey) {
             console.log('shift click');
           } else {

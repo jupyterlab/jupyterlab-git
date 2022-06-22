@@ -188,7 +188,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       return res;
     };
     const commands = intersect(...contextCommandsForEachFileType);
-    console.log(commands);
     addMenuItems(commands, contextMenu, selectedFiles);
 
     contextMenu.open(event.clientX, event.clientY);
@@ -288,13 +287,19 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this.setState({ selectedFiles: files });
   };
 
-  selectFile = (file: Git.IStatusFile): void => {
-    if (
-      !this.state.selectedFiles.find(
-        fileState => fileState.from === file.from && fileState.to === file.to
-      )
-    ) {
+  toggleFile = (file: Git.IStatusFile): void => {
+    const fileStatus = this.state.selectedFiles.find(
+      fileStatus => fileStatus.from === file.from && fileStatus.to === file.to
+    );
+    if (!fileStatus) {
       this.setState({ selectedFiles: [...this.state.selectedFiles, file] });
+    } else {
+      this.setState({
+        selectedFiles: this.state.selectedFiles.filter(
+          fileStatus =>
+            fileStatus.from !== file.from && fileStatus.to !== file.to
+        )
+      });
     }
   };
 
@@ -312,8 +317,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   render(): JSX.Element {
     const remoteChangedFiles: Git.IStatusFile[] = [];
     const unmergedFiles: Git.IStatusFile[] = [];
-    console.log('selectedFiles: ', this.state.selectedFiles);
-    // console.log('markedFiles: ', this.markedFiles);
+
     if (this.props.settings.composite['simpleStaging']) {
       const otherFiles: Git.IStatusFile[] = [];
 
@@ -443,7 +447,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         file={file}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        selectFile={this.selectFile}
+        toggleFile={this.toggleFile}
         replaceSelectedFiles={this.replaceSelectedFiles}
         onDoubleClick={() => this._openDiffView(file)}
         style={{ ...style }}
@@ -515,7 +519,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         contextMenu={this.openContextMenu}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        selectFile={this.selectFile}
+        toggleFile={this.toggleFile}
         replaceSelectedFiles={this.replaceSelectedFiles}
         onDoubleClick={
           doubleClickDiff
@@ -611,7 +615,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         contextMenu={this.openContextMenu}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        selectFile={this.selectFile}
+        toggleFile={this.toggleFile}
         replaceSelectedFiles={this.replaceSelectedFiles}
         onDoubleClick={
           doubleClickDiff
@@ -713,7 +717,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           }
         }}
         selected={this._isSelectedFile(file)}
-        selectFile={this.selectFile}
+        toggleFile={this.toggleFile}
         replaceSelectedFiles={this.replaceSelectedFiles}
         style={style}
       />
@@ -790,7 +794,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           }
         }}
         selected={this._isSelectedFile(file)}
-        selectFile={this.selectFile}
+        toggleFile={this.toggleFile}
         replaceSelectedFiles={this.replaceSelectedFiles}
         style={style}
       />
@@ -920,7 +924,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         onDoubleClick={onDoubleClick}
         contextMenu={this.openSimpleContextMenu}
-        selectFile={this.selectFile}
+        toggleFile={this.toggleFile}
         replaceSelectedFiles={this.replaceSelectedFiles}
         style={style}
       />
