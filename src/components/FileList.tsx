@@ -289,9 +289,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   selectFile = (file: Git.IStatusFile): void => {
-    if (!this.state.selectedFiles) {
-      this.setState({ selectedFiles: [file] });
-    } else if (
+    if (
       !this.state.selectedFiles.find(
         fileState => fileState.from === file.from && fileState.to === file.to
       )
