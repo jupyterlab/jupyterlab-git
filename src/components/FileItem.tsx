@@ -121,6 +121,10 @@ export interface IFileItemProps {
    */
   toggleFile?: (file: Git.IStatusFile) => void;
   /**
+   * Callback to handle shift-click on the file
+   */
+  handleShiftClick?: (file: Git.IStatusFile) => void;
+  /**
    * Callback to replace the selected files
    */
   replaceSelectedFiles?: (file: Git.IStatusFile[] | null) => void;
@@ -199,7 +203,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
           if (event.ctrlKey || event.metaKey) {
             this.props.toggleFile(this.props.file);
           } else if (event.shiftKey) {
-            console.log('shift click');
+            this.props.handleShiftClick(this.props.file);
           } else {
             this.props.replaceSelectedFiles([this.props.file]);
           }

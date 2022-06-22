@@ -25,6 +25,7 @@ import { discardAllChanges } from '../widgets/discardAllChanges';
 
 export interface IFileListState {
   selectedFiles: Git.IStatusFile[];
+  lastClickedFile: Git.IStatusFile | null;
 }
 
 export interface IFileListProps {
@@ -120,7 +121,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     super(props);
 
     this.state = {
-      selectedFiles: []
+      selectedFiles: [],
+      lastClickedFile: null
     };
   }
 
@@ -284,7 +286,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   replaceSelectedFiles = (files: Git.IStatusFile[]): void => {
-    this.setState({ selectedFiles: files });
+    this.setState({
+      selectedFiles: files,
+      lastClickedFile: files.length > 0 ? files[0] : null
+    });
   };
 
   toggleFile = (file: Git.IStatusFile): void => {
@@ -292,13 +297,74 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       fileStatus => fileStatus.from === file.from && fileStatus.to === file.to
     );
     if (!fileStatus) {
-      this.setState({ selectedFiles: [...this.state.selectedFiles, file] });
+      this.setState({
+        selectedFiles: [...this.state.selectedFiles, file],
+        lastClickedFile: file
+      });
     } else {
       this.setState({
         selectedFiles: this.state.selectedFiles.filter(
           fileStatus =>
             fileStatus.from !== file.from && fileStatus.to !== file.to
-        )
+        ),
+        lastClickedFile: file
+      });
+    }
+  };
+
+  handleShiftClick = (file: Git.IStatusFile): void => {
+    if (!this.state.lastClickedFile) {
+      this.setState({ selectedFiles: [file], lastClickedFile: file });
+      return;
+    }
+    const statusesInOrder = [
+      'unmerged',
+      'remote-changed',
+      'staged',
+      'unstaged',
+      'untracked'
+    ];
+    const filesSortedByStatus = [...this.props.files].sort((a, b) => {
+      if (a.status !== b.status) {
+        return (
+          statusesInOrder.indexOf(a.status) - statusesInOrder.indexOf(b.status)
+        );
+      } else {
+        return a.to.localeCompare(b.to);
+      }
+    });
+    const lastClickedFileIndex = filesSortedByStatus.findIndex(
+      fileStatus =>
+        fileStatus.from === this.state.lastClickedFile.from &&
+        fileStatus.to === this.state.lastClickedFile.to
+    );
+    const currentFileIndex = filesSortedByStatus.findIndex(
+      fileStatus => fileStatus.from === file.from && fileStatus.to === file.to
+    );
+    console.log(lastClickedFileIndex, currentFileIndex);
+    if (currentFileIndex > lastClickedFileIndex) {
+      this.setState({
+        selectedFiles: [
+          ...new Set([
+            ...this.state.selectedFiles,
+            ...filesSortedByStatus.slice(
+              lastClickedFileIndex,
+              currentFileIndex + 1
+            )
+          ])
+        ]
+      });
+    } else {
+      this.setState({
+        selectedFiles: [
+          ...new Set([
+            ...this.state.selectedFiles,
+            ...filesSortedByStatus.slice(
+              currentFileIndex,
+              lastClickedFileIndex + 1
+            )
+          ])
+        ]
       });
     }
   };
@@ -317,7 +383,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   render(): JSX.Element {
     const remoteChangedFiles: Git.IStatusFile[] = [];
     const unmergedFiles: Git.IStatusFile[] = [];
-
+    console.log(this.state);
     if (this.props.settings.composite['simpleStaging']) {
       const otherFiles: Git.IStatusFile[] = [];
 
@@ -448,6 +514,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         selected={this._isSelectedFile(file)}
         toggleFile={this.toggleFile}
+        handleShiftClick={this.handleShiftClick}
         replaceSelectedFiles={this.replaceSelectedFiles}
         onDoubleClick={() => this._openDiffView(file)}
         style={{ ...style }}
@@ -520,6 +587,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         selected={this._isSelectedFile(file)}
         toggleFile={this.toggleFile}
+        handleShiftClick={this.handleShiftClick}
         replaceSelectedFiles={this.replaceSelectedFiles}
         onDoubleClick={
           doubleClickDiff
@@ -616,6 +684,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         selected={this._isSelectedFile(file)}
         toggleFile={this.toggleFile}
+        handleShiftClick={this.handleShiftClick}
         replaceSelectedFiles={this.replaceSelectedFiles}
         onDoubleClick={
           doubleClickDiff
@@ -718,6 +787,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         }}
         selected={this._isSelectedFile(file)}
         toggleFile={this.toggleFile}
+        handleShiftClick={this.handleShiftClick}
         replaceSelectedFiles={this.replaceSelectedFiles}
         style={style}
       />
@@ -795,6 +865,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         }}
         selected={this._isSelectedFile(file)}
         toggleFile={this.toggleFile}
+        handleShiftClick={this.handleShiftClick}
         replaceSelectedFiles={this.replaceSelectedFiles}
         style={style}
       />
@@ -925,6 +996,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         onDoubleClick={onDoubleClick}
         contextMenu={this.openSimpleContextMenu}
         toggleFile={this.toggleFile}
+        handleShiftClick={this.handleShiftClick}
         replaceSelectedFiles={this.replaceSelectedFiles}
         style={style}
       />
