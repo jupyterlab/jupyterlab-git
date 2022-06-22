@@ -116,6 +116,22 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
   unmerged: [ContextCommandIDs.gitFileDiff]
 };
 
+/**
+ * Compare fileA and fileB.
+ * @param fileA
+ * @param fileB
+ * @returns true if fileA and fileB are equal, otherwise, false.
+ */
+const filesAreEqual = (fileA: Git.IStatusFile, fileB: Git.IStatusFile) => {
+  return (
+    fileA.x === fileB.x &&
+    fileA.y === fileB.y &&
+    fileA.from === fileB.from &&
+    fileA.to === fileB.to &&
+    fileA.status === fileB.status
+  );
+};
+
 export class FileList extends React.Component<IFileListProps, IFileListState> {
   constructor(props: IFileListProps) {
     super(props);
@@ -139,9 +155,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event.preventDefault();
     let selectedFiles: Git.IStatusFile[];
     if (
-      !this.state.selectedFiles.some(
-        file => file.from === selectedFile.from && file.to === selectedFile.to
-      )
+      !this.state.selectedFiles.some(file => filesAreEqual(file, selectedFile))
     ) {
       this.setState({
         selectedFiles: [selectedFile]
@@ -293,8 +307,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   toggleFile = (file: Git.IStatusFile): void => {
-    const fileStatus = this.state.selectedFiles.find(
-      fileStatus => fileStatus.from === file.from && fileStatus.to === file.to
+    const fileStatus = this.state.selectedFiles.find(fileStatus =>
+      filesAreEqual(fileStatus, file)
     );
     if (!fileStatus) {
       this.setState({
@@ -304,12 +318,28 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     } else {
       this.setState({
         selectedFiles: this.state.selectedFiles.filter(
-          fileStatus =>
-            fileStatus.from !== file.from && fileStatus.to !== file.to
+          fileStatus => !filesAreEqual(fileStatus, file)
         ),
         lastClickedFile: file
       });
     }
+  };
+
+  removeDuplicateSelectedFiles = (): void => {
+    const selectedFiles = this.state.selectedFiles.filter(
+      (file, index, arr) => index === arr.findIndex(f => filesAreEqual(f, file))
+    );
+    console.log(selectedFiles);
+    this.setState({ selectedFiles });
+  };
+
+  selectFiles = (files: Git.IStatusFile[]): void => {
+    this.setState(
+      {
+        selectedFiles: [...this.state.selectedFiles, ...files]
+      },
+      () => this.removeDuplicateSelectedFiles()
+    );
   };
 
   handleShiftClick = (file: Git.IStatusFile): void => {
@@ -333,39 +363,21 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         return a.to.localeCompare(b.to);
       }
     });
-    const lastClickedFileIndex = filesSortedByStatus.findIndex(
-      fileStatus =>
-        fileStatus.from === this.state.lastClickedFile.from &&
-        fileStatus.to === this.state.lastClickedFile.to
+    const lastClickedFileIndex = filesSortedByStatus.findIndex(fileStatus =>
+      filesAreEqual(fileStatus, this.state.lastClickedFile)
     );
-    const currentFileIndex = filesSortedByStatus.findIndex(
-      fileStatus => fileStatus.from === file.from && fileStatus.to === file.to
+    const currentFileIndex = filesSortedByStatus.findIndex(fileStatus =>
+      filesAreEqual(fileStatus, file)
     );
     console.log(lastClickedFileIndex, currentFileIndex);
     if (currentFileIndex > lastClickedFileIndex) {
-      this.setState({
-        selectedFiles: [
-          ...new Set([
-            ...this.state.selectedFiles,
-            ...filesSortedByStatus.slice(
-              lastClickedFileIndex,
-              currentFileIndex + 1
-            )
-          ])
-        ]
-      });
+      this.selectFiles(
+        filesSortedByStatus.slice(lastClickedFileIndex, currentFileIndex + 1)
+      );
     } else {
-      this.setState({
-        selectedFiles: [
-          ...new Set([
-            ...this.state.selectedFiles,
-            ...filesSortedByStatus.slice(
-              currentFileIndex,
-              lastClickedFileIndex + 1
-            )
-          ])
-        ]
-      });
+      this.selectFiles(
+        filesSortedByStatus.slice(currentFileIndex, lastClickedFileIndex + 1)
+      );
     }
   };
 
