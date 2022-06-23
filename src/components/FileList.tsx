@@ -233,9 +233,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.props.model.reset();
   };
 
-  /** Reset a specific staged file */
-  resetStagedFile = async (file: string): Promise<void> => {
-    await this.props.model.reset(file);
+  /** Reset staged selected files */
+  resetSelectedFiles = (): void => {
+    this.state.selectedFiles.forEach(file => this.props.model.reset(file.to));
+  };
+
+  /** Open selected files */
+  openSelectedFiles = (): void => {
+    this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+      files: this.state.selectedFiles
+    } as CommandArguments.IGitContextAction as any);
   };
 
   /** Add all unstaged files */
@@ -558,7 +565,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         toggleFile={this.toggleFile}
         handleShiftClick={this.handleShiftClick}
         selectOnlyOneFile={this.selectOnlyOneFile}
-        onDoubleClick={() => this._openDiffView(file)}
+        onDoubleClick={() => this._openDiffViews([file])}
         style={{ ...style }}
       />
     );
@@ -596,11 +603,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       .composite as boolean;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
-    const openFile = () => {
-      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-        files: [file]
-      } as CommandArguments.IGitContextAction as any);
-    };
     const diffButton = this._createDiffButton(file);
     return (
       <FileItem
@@ -611,7 +613,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={openFile}
+              onClick={this.openSelectedFiles}
             />
             {diffButton}
             <ActionButton
@@ -619,7 +621,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={removeIcon}
               title={this.props.trans.__('Unstage this change')}
               onClick={() => {
-                this.resetStagedFile(file.to);
+                this.resetSelectedFiles();
               }}
             />
           </React.Fragment>
@@ -634,9 +636,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         onDoubleClick={
           doubleClickDiff
             ? diffButton
-              ? () => this._openDiffView(file)
+              ? () => this._openDiffViews([file])
               : () => undefined
-            : openFile
+            : this.openSelectedFiles
         }
         style={style}
       />
@@ -685,11 +687,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       .composite as boolean;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
-    const openFile = () => {
-      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-        files: [file]
-      } as CommandArguments.IGitContextAction as any);
-    };
     const diffButton = this._createDiffButton(file);
     return (
       <FileItem
@@ -700,7 +697,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={openFile}
+              onClick={this.openSelectedFiles}
             />
             {diffButton}
             <ActionButton
@@ -731,9 +728,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         onDoubleClick={
           doubleClickDiff
             ? diffButton
-              ? () => this._openDiffView(file)
+              ? () => this._openDiffViews([file])
               : () => undefined
-            : openFile
+            : this.openSelectedFiles
         }
         style={style}
       />
@@ -801,11 +798,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={() => {
-                this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-                  files: [file]
-                } as CommandArguments.IGitContextAction as any);
-              }}
+              onClick={this.openSelectedFiles}
             />
             <ActionButton
               className={hiddenButtonStyle}
@@ -887,11 +880,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={() => {
-                this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-                  files: [file]
-                } as CommandArguments.IGitContextAction as any);
-              }}
+              onClick={this.openSelectedFiles}
             />
           </React.Fragment>
         }
@@ -997,7 +986,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       );
       onDoubleClick = doubleClickDiff
         ? diffButton
-          ? () => this._openDiffView(file)
+          ? () => this._openDiffViews([file])
           : () => undefined
         : openFile;
     } else if (file.status === 'staged') {
@@ -1023,7 +1012,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       );
       onDoubleClick = doubleClickDiff
         ? diffButton
-          ? () => this._openDiffView(file)
+          ? () => this._openDiffViews([file])
           : () => undefined
         : openFile;
     }
@@ -1085,7 +1074,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           className={hiddenButtonStyle}
           icon={diffIcon}
           title={this.props.trans.__('Diff this file')}
-          onClick={() => this._openDiffView(file)}
+          onClick={() => this._openDiffViews(this.state.selectedFiles)}
         />
       )
     );
@@ -1097,19 +1086,21 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param file File to open diff for
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
-  private async _openDiffView(file: Git.IStatusFile): Promise<void> {
-    try {
-      await this.props.commands.execute(ContextCommandIDs.gitFileDiff, {
-        files: [
-          {
-            filePath: file.to,
-            isText: !file.is_binary,
-            status: file.status
-          }
-        ]
-      } as CommandArguments.IGitFileDiff as any);
-    } catch (reason) {
-      console.error(`Failed to open diff view for ${file.to}.\n${reason}`);
-    }
+  private _openDiffViews(files: Git.IStatusFile[]): void {
+    files.forEach(async file => {
+      try {
+        await this.props.commands.execute(ContextCommandIDs.gitFileDiff, {
+          files: [
+            {
+              filePath: file.to,
+              isText: !file.is_binary,
+              status: file.status
+            }
+          ]
+        } as CommandArguments.IGitFileDiff as any);
+      } catch (reason) {
+        console.error(`Failed to open diff view for ${file.to}.\n${reason}`);
+      }
+    });
   }
 }
