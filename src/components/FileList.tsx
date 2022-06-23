@@ -348,7 +348,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   handleShiftClick = (file: Git.IStatusFile): void => {
-    if (!this.state.lastClickedFile) {
+    if (
+      !this.state.lastClickedFile ||
+      file.status !== this.state.selectedFileStatus
+    ) {
       this.selectOnlyOneFile(file);
       return;
     }
@@ -359,7 +362,28 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       'unstaged',
       'untracked'
     ];
-    const filesSortedByStatus = [...this.props.files].sort((a, b) => {
+    const partiallyStagedFiles = this.props.files.filter(
+      file => file.status === 'partially-staged'
+    );
+
+    // files that are not partially staged
+    const filesSortedByStatus: Git.IStatusFile[] = this.props.files.filter(
+      file => file.status !== 'partially-staged'
+    );
+    // add partially staged files to the array as two item (staged and unstaged)
+    partiallyStagedFiles.forEach(partiallyStagedFile => {
+      filesSortedByStatus.push({
+        ...partiallyStagedFile,
+        status: 'staged'
+      });
+      filesSortedByStatus.push({
+        ...partiallyStagedFile,
+        status: 'unstaged'
+      });
+    });
+
+    // sort the array by file status then by filename
+    filesSortedByStatus.sort((a, b) => {
       if (a.status !== b.status) {
         return (
           statusesInOrder.indexOf(a.status) - statusesInOrder.indexOf(b.status)
@@ -368,13 +392,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         return a.to.localeCompare(b.to);
       }
     });
+
     const lastClickedFileIndex = filesSortedByStatus.findIndex(fileStatus =>
       filesAreEqual(fileStatus, this.state.lastClickedFile)
     );
     const currentFileIndex = filesSortedByStatus.findIndex(fileStatus =>
       filesAreEqual(fileStatus, file)
     );
-    console.log(lastClickedFileIndex, currentFileIndex);
+
     if (currentFileIndex > lastClickedFileIndex) {
       this.selectFiles(
         filesSortedByStatus.slice(lastClickedFileIndex, currentFileIndex + 1)
