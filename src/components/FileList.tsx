@@ -26,6 +26,7 @@ import { discardAllChanges } from '../widgets/discardAllChanges';
 export interface IFileListState {
   selectedFiles: Git.IStatusFile[];
   lastClickedFile: Git.IStatusFile | null;
+  selectedFileStatus: Git.Status | null;
 }
 
 export interface IFileListProps {
@@ -138,7 +139,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
     this.state = {
       selectedFiles: [],
-      lastClickedFile: null
+      lastClickedFile: null,
+      selectedFileStatus: null
     };
   }
 
@@ -302,11 +304,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   replaceSelectedFiles = (files: Git.IStatusFile[]): void => {
     this.setState({
       selectedFiles: files,
-      lastClickedFile: files.length > 0 ? files[0] : null
+      lastClickedFile: files.length > 0 ? files[0] : null,
+      selectedFileStatus: files[0].status
     });
   };
 
   toggleFile = (file: Git.IStatusFile): void => {
+    if (file.status !== this.state.selectedFileStatus) {
+      this.replaceSelectedFiles([file]);
+      return;
+    }
+
     const fileStatus = this.state.selectedFiles.find(fileStatus =>
       filesAreEqual(fileStatus, file)
     );
@@ -329,7 +337,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const selectedFiles = this.state.selectedFiles.filter(
       (file, index, arr) => index === arr.findIndex(f => filesAreEqual(f, file))
     );
-    console.log(selectedFiles);
     this.setState({ selectedFiles });
   };
 
