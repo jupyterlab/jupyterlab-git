@@ -159,9 +159,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     if (
       !this.state.selectedFiles.some(file => filesAreEqual(file, selectedFile))
     ) {
-      this.setState({
-        selectedFiles: [selectedFile]
-      });
+      this.selectOnlyOneFile(selectedFile);
       selectedFiles = [selectedFile];
     } else {
       selectedFiles = this.state.selectedFiles;
@@ -301,17 +299,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
-  replaceSelectedFiles = (files: Git.IStatusFile[]): void => {
+  selectOnlyOneFile = (file: Git.IStatusFile): void => {
     this.setState({
-      selectedFiles: files,
-      lastClickedFile: files.length > 0 ? files[0] : null,
-      selectedFileStatus: files[0].status
+      selectedFiles: [file],
+      lastClickedFile: file,
+      selectedFileStatus: file.status
     });
   };
 
   toggleFile = (file: Git.IStatusFile): void => {
     if (file.status !== this.state.selectedFileStatus) {
-      this.replaceSelectedFiles([file]);
+      this.selectOnlyOneFile(file);
       return;
     }
 
@@ -351,10 +349,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   handleShiftClick = (file: Git.IStatusFile): void => {
     if (!this.state.lastClickedFile) {
-      this.setState({ selectedFiles: [file], lastClickedFile: file });
+      this.selectOnlyOneFile(file);
       return;
     }
-    const statusesInOrder = [
+    const statusesInOrder: Git.Status[] = [
       'unmerged',
       'remote-changed',
       'staged',
@@ -534,7 +532,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         selected={this._isSelectedFile(file)}
         toggleFile={this.toggleFile}
         handleShiftClick={this.handleShiftClick}
-        replaceSelectedFiles={this.replaceSelectedFiles}
+        selectOnlyOneFile={this.selectOnlyOneFile}
         onDoubleClick={() => this._openDiffView(file)}
         style={{ ...style }}
       />
@@ -607,7 +605,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         selected={this._isSelectedFile(file)}
         toggleFile={this.toggleFile}
         handleShiftClick={this.handleShiftClick}
-        replaceSelectedFiles={this.replaceSelectedFiles}
+        selectOnlyOneFile={this.selectOnlyOneFile}
         onDoubleClick={
           doubleClickDiff
             ? diffButton
@@ -704,7 +702,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         selected={this._isSelectedFile(file)}
         toggleFile={this.toggleFile}
         handleShiftClick={this.handleShiftClick}
-        replaceSelectedFiles={this.replaceSelectedFiles}
+        selectOnlyOneFile={this.selectOnlyOneFile}
         onDoubleClick={
           doubleClickDiff
             ? diffButton
@@ -807,7 +805,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         selected={this._isSelectedFile(file)}
         toggleFile={this.toggleFile}
         handleShiftClick={this.handleShiftClick}
-        replaceSelectedFiles={this.replaceSelectedFiles}
+        selectOnlyOneFile={this.selectOnlyOneFile}
         style={style}
       />
     );
@@ -885,7 +883,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         selected={this._isSelectedFile(file)}
         toggleFile={this.toggleFile}
         handleShiftClick={this.handleShiftClick}
-        replaceSelectedFiles={this.replaceSelectedFiles}
+        selectOnlyOneFile={this.selectOnlyOneFile}
         style={style}
       />
     );
@@ -1016,7 +1014,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         contextMenu={this.openSimpleContextMenu}
         toggleFile={this.toggleFile}
         handleShiftClick={this.handleShiftClick}
-        replaceSelectedFiles={this.replaceSelectedFiles}
+        selectOnlyOneFile={this.selectOnlyOneFile}
         style={style}
       />
     );

@@ -127,7 +127,7 @@ export interface IFileItemProps {
   /**
    * Callback to replace the selected files
    */
-  replaceSelectedFiles?: (file: Git.IStatusFile[] | null) => void;
+  selectOnlyOneFile?: (file: Git.IStatusFile) => void;
   /**
    * Optional style class
    */
@@ -205,7 +205,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
           } else if (event.shiftKey) {
             this.props.handleShiftClick(this.props.file);
           } else {
-            this.props.replaceSelectedFiles([this.props.file]);
+            this.props.selectOnlyOneFile(this.props.file);
           }
         }}
         onContextMenu={
