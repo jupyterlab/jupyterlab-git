@@ -1082,13 +1082,29 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
   private _createDiffButton(file: Git.IStatusFile): JSX.Element {
+    let handleClick: () => void;
+    if (this.props.settings.composite['simpleStaging']) {
+      handleClick = () => this._openDiffViews([file]);
+    } else {
+      handleClick = () => {
+        if (
+          this.state.selectedFiles.some(fileStatus =>
+            filesAreEqual(fileStatus, file)
+          )
+        ) {
+          this._openDiffViews(this.state.selectedFiles);
+        } else {
+          this._openDiffViews([file]);
+        }
+      };
+    }
     return (
       (getDiffProvider(file.to) || !file.is_binary) && (
         <ActionButton
           className={hiddenButtonStyle}
           icon={diffIcon}
           title={this.props.trans.__('Diff this file')}
-          onClick={() => this._openDiffViews(this.state.selectedFiles)} // created bug for simple staging
+          onClick={handleClick} // created bug for simple staging
         />
       )
     );
@@ -1101,9 +1117,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
   private _openDiffViews(files: Git.IStatusFile[]): void {
-    files.forEach(async file => {
+    files.forEach(file => {
       try {
-        await this.props.commands.execute(ContextCommandIDs.gitFileDiff, {
+        this.props.commands.execute(ContextCommandIDs.gitFileDiff, {
           files: [
             {
               filePath: file.to,
