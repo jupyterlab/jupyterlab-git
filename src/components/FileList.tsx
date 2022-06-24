@@ -290,10 +290,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Discard changes in a specific unstaged or staged file */
-  discardChanges = async (file: Git.IStatusFile): Promise<void> => {
-    await this.props.commands.execute(ContextCommandIDs.gitFileDiscard, {
-      files: [file]
-    } as CommandArguments.IGitContextAction as any);
+  discardChanges = (files: Git.IStatusFile[]): void => {
+    files.forEach(async file => {
+      await this.props.commands.execute(ContextCommandIDs.gitFileDiscard, {
+        files: [file]
+      } as CommandArguments.IGitContextAction as any);
+    });
   };
 
   /** Add all untracked files */
@@ -705,7 +707,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={discardIcon}
               title={this.props.trans.__('Discard changes')}
               onClick={() => {
-                this.discardChanges(file);
+                this.discardChanges(this.state.selectedFiles);
               }}
             />
             <ActionButton
@@ -713,7 +715,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={addIcon}
               title={this.props.trans.__('Stage this change')}
               onClick={() => {
-                this.addFile(file.to);
+                this.addFile(...this.state.selectedFiles.map(file => file.to));
               }}
             />
           </React.Fragment>
@@ -805,7 +807,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={addIcon}
               title={this.props.trans.__('Track this file')}
               onClick={() => {
-                this.addFile(file.to);
+                this.addFile(...this.state.selectedFiles.map(file => file.to));
               }}
             />
           </React.Fragment>
@@ -979,7 +981,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             icon={discardIcon}
             title={this.props.trans.__('Discard changes')}
             onClick={() => {
-              this.discardChanges(file);
+              this.discardChanges([file]);
             }}
           />
         </React.Fragment>
@@ -1005,7 +1007,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             icon={discardIcon}
             title={this.props.trans.__('Discard changes')}
             onClick={() => {
-              this.discardChanges(file);
+              this.discardChanges([file]);
             }}
           />
         </React.Fragment>
@@ -1074,7 +1076,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           className={hiddenButtonStyle}
           icon={diffIcon}
           title={this.props.trans.__('Diff this file')}
-          onClick={() => this._openDiffViews(this.state.selectedFiles)}
+          onClick={() => this._openDiffViews(this.state.selectedFiles)} // created bug for simple staging
         />
       )
     );
