@@ -310,12 +310,20 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Discard changes in a specific unstaged or staged file */
-  discardChanges = (files: Git.IStatusFile[]): void => {
-    files.forEach(async file => {
-      await this.props.commands.execute(ContextCommandIDs.gitFileDiscard, {
+  discardChanges = (file: Git.IStatusFile): void => {
+    if (
+      this.state.selectedFiles.some(fileStatus =>
+        filesAreEqual(fileStatus, file)
+      )
+    ) {
+      this.props.commands.execute(ContextCommandIDs.gitFileDiscard, {
+        files: this.state.selectedFiles
+      } as CommandArguments.IGitContextAction as any);
+    } else {
+      this.props.commands.execute(ContextCommandIDs.gitFileDiscard, {
         files: [file]
       } as CommandArguments.IGitContextAction as any);
-    });
+    }
   };
 
   /** Add all untracked files */
@@ -727,7 +735,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={discardIcon}
               title={this.props.trans.__('Discard changes')}
               onClick={() => {
-                this.discardChanges(this.state.selectedFiles);
+                this.discardChanges(file);
               }}
             />
             <ActionButton
@@ -1025,7 +1033,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             icon={discardIcon}
             title={this.props.trans.__('Discard changes')}
             onClick={() => {
-              this.discardChanges([file]);
+              this.discardChanges(file);
             }}
           />
         </React.Fragment>
@@ -1051,7 +1059,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             icon={discardIcon}
             title={this.props.trans.__('Discard changes')}
             onClick={() => {
-              this.discardChanges([file]);
+              this.discardChanges(file);
             }}
           />
         </React.Fragment>
