@@ -735,7 +735,19 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={addIcon}
               title={this.props.trans.__('Stage this change')}
               onClick={() => {
-                this.addFile(...this.state.selectedFiles.map(file => file.to));
+                if (
+                  this.state.selectedFiles.some(fileStatus =>
+                    filesAreEqual(fileStatus, file)
+                  )
+                ) {
+                  this.addFile(
+                    ...this.state.selectedFiles.map(
+                      selectedFile => selectedFile.to
+                    )
+                  );
+                } else {
+                  this.addFile(file.to);
+                }
               }}
             />
           </React.Fragment>
@@ -827,7 +839,19 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={addIcon}
               title={this.props.trans.__('Track this file')}
               onClick={() => {
-                this.addFile(...this.state.selectedFiles.map(file => file.to));
+                if (
+                  this.state.selectedFiles.some(fileStatus =>
+                    filesAreEqual(fileStatus, file)
+                  )
+                ) {
+                  this.addFile(
+                    ...this.state.selectedFiles.map(
+                      selectedFile => selectedFile.to
+                    )
+                  );
+                } else {
+                  this.addFile(file.to);
+                }
               }}
             />
           </React.Fragment>
