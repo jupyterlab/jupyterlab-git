@@ -238,11 +238,23 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this.state.selectedFiles.forEach(file => this.props.model.reset(file.to));
   };
 
-  /** Open selected files */
-  openSelectedFiles = (): void => {
-    this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-      files: this.state.selectedFiles
-    } as CommandArguments.IGitContextAction as any);
+  /** If the clicked file is selected, open all selected files.
+   * If the clicked file is not selected, open the clicked file only.
+   */
+  openSelectedFiles = (clikedFile: Git.IStatusFile): void => {
+    if (
+      this.state.selectedFiles.some(fileStatus =>
+        filesAreEqual(fileStatus, clikedFile)
+      )
+    ) {
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+        files: this.state.selectedFiles
+      } as CommandArguments.IGitContextAction as any);
+    } else {
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+        files: [clikedFile]
+      } as CommandArguments.IGitContextAction as any);
+    }
   };
 
   /** Add all unstaged files */
@@ -615,7 +627,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={this.openSelectedFiles}
+              onClick={() => this.openSelectedFiles(file)}
             />
             {diffButton}
             <ActionButton
@@ -640,7 +652,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             ? diffButton
               ? () => this._openDiffViews([file])
               : () => undefined
-            : this.openSelectedFiles
+            : () => this.openSelectedFiles(file)
         }
         style={style}
       />
@@ -699,7 +711,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={this.openSelectedFiles}
+              onClick={() => this.openSelectedFiles(file)}
             />
             {diffButton}
             <ActionButton
@@ -732,7 +744,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             ? diffButton
               ? () => this._openDiffViews([file])
               : () => undefined
-            : this.openSelectedFiles
+            : () => this.openSelectedFiles(file)
         }
         style={style}
       />
@@ -800,7 +812,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={this.openSelectedFiles}
+              onClick={() => this.openSelectedFiles(file)}
             />
             <ActionButton
               className={hiddenButtonStyle}
@@ -882,7 +894,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={this.openSelectedFiles}
+              onClick={() => this.openSelectedFiles(file)}
             />
           </React.Fragment>
         }
