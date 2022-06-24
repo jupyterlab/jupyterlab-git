@@ -234,8 +234,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Reset staged selected files */
-  resetSelectedFiles = (): void => {
-    this.state.selectedFiles.forEach(file => this.props.model.reset(file.to));
+  resetSelectedFiles = (file: Git.IStatusFile): void => {
+    if (
+      this.state.selectedFiles.some(fileStatus =>
+        filesAreEqual(fileStatus, file)
+      )
+    ) {
+      this.state.selectedFiles.forEach(file => this.props.model.reset(file.to));
+    } else {
+      this.props.model.reset(file.to);
+    }
   };
 
   /** If the clicked file is selected, open all selected files.
@@ -635,7 +643,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={removeIcon}
               title={this.props.trans.__('Unstage this change')}
               onClick={() => {
-                this.resetSelectedFiles();
+                this.resetSelectedFiles(file);
               }}
             />
           </React.Fragment>
