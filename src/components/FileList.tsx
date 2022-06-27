@@ -1118,21 +1118,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param file File to open diff for
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
-  private _openDiffViews(files: Git.IStatusFile[]): void {
-    files.forEach(file => {
-      try {
-        this.props.commands.execute(ContextCommandIDs.gitFileDiff, {
-          files: [
-            {
-              filePath: file.to,
-              isText: !file.is_binary,
-              status: file.status
-            }
-          ]
-        } as CommandArguments.IGitFileDiff as any);
-      } catch (reason) {
-        console.error(`Failed to open diff view for ${file.to}.\n${reason}`);
-      }
-    });
+  private async _openDiffViews(files: Git.IStatusFile[]): Promise<void> {
+    try {
+      await this.props.commands.execute(ContextCommandIDs.gitFileDiff, {
+        files: files.map(file => ({
+          filePath: file.to,
+          isText: !file.is_binary,
+          status: file.status
+        }))
+      } as CommandArguments.IGitFileDiff as any);
+    } catch (reason) {
+      console.error(`Failed to open diff views.\n${reason}`);
+    }
   }
 }
