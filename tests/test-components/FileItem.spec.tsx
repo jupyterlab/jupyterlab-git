@@ -20,9 +20,7 @@ describe('FileItem', () => {
     model: null,
     onDoubleClick: () => {},
     selected: false,
-    toggleFile: (file) => {},
-    handleShiftClick: (file) => {},
-    selectOnlyOneFile: (file) => {},
+    setSelection: (file) => {},
     style: {},
     trans
   };
