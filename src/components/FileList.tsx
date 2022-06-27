@@ -26,7 +26,6 @@ import { discardAllChanges } from '../widgets/discardAllChanges';
 export interface IFileListState {
   selectedFiles: Git.IStatusFile[];
   lastClickedFile: Git.IStatusFile | null;
-  selectedFileStatus: Git.Status | null;
 }
 
 export interface IFileListProps {
@@ -139,8 +138,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
     this.state = {
       selectedFiles: [],
-      lastClickedFile: null,
-      selectedFileStatus: null
+      lastClickedFile: null
     };
   }
 
@@ -325,13 +323,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   selectOnlyOneFile = (file: Git.IStatusFile): void => {
     this.setState({
       selectedFiles: [file],
-      lastClickedFile: file,
-      selectedFileStatus: file.status
+      lastClickedFile: file
     });
   };
 
   toggleFile = (file: Git.IStatusFile): void => {
-    if (file.status !== this.state.selectedFileStatus) {
+    if (file.status !== this.state.lastClickedFile.status) {
       this.selectOnlyOneFile(file);
       return;
     }
@@ -373,7 +370,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   handleShiftClick = (file: Git.IStatusFile): void => {
     if (
       !this.state.lastClickedFile ||
-      file.status !== this.state.selectedFileStatus
+      file.status !== this.state.lastClickedFile.status
     ) {
       this.selectOnlyOneFile(file);
       return;
