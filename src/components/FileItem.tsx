@@ -117,17 +117,12 @@ export interface IFileItemProps {
    */
   selected?: boolean;
   /**
-   * Callback to toggle select/deselect the file
+   * Callback to select file(s)
    */
-  toggleFile?: (file: Git.IStatusFile) => void;
-  /**
-   * Callback to handle shift-click on the file
-   */
-  handleShiftClick?: (file: Git.IStatusFile) => void;
-  /**
-   * Callback to replace the selected files
-   */
-  selectOnlyOneFile?: (file: Git.IStatusFile) => void;
+  setSelection?: (
+    file: Git.IStatusFile,
+    options?: { singleton?: boolean; group?: boolean }
+  ) => void;
   /**
    * Optional style class
    */
@@ -201,11 +196,11 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         className={this._getFileClass()}
         onClick={event => {
           if (event.ctrlKey || event.metaKey) {
-            this.props.toggleFile(this.props.file);
+            this.props.setSelection(this.props.file);
           } else if (event.shiftKey) {
-            this.props.handleShiftClick(this.props.file);
+            this.props.setSelection(this.props.file, { group: true });
           } else {
-            this.props.selectOnlyOneFile(this.props.file);
+            this.props.setSelection(this.props.file, { singleton: true });
           }
         }}
         onContextMenu={

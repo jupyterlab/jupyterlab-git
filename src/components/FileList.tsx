@@ -155,7 +155,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event.preventDefault();
     let selectedFiles: Git.IStatusFile[];
     if (!this._isSelectedFile(selectedFile)) {
-      this.selectOnlyOneFile(selectedFile);
+      this._selectOnlyOneFile(selectedFile);
       selectedFiles = [selectedFile];
     } else {
       selectedFiles = this.state.selectedFiles;
@@ -283,16 +283,31 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
-  selectOnlyOneFile = (file: Git.IStatusFile): void => {
+  setSelection = (
+    file: Git.IStatusFile,
+    options?: { singleton?: boolean; group?: boolean }
+  ): void => {
+    if (options && options.singleton) {
+      this._selectOnlyOneFile(file);
+    }
+    if (options && options.group) {
+      this._selectUntilFile(file);
+    }
+    if (!options) {
+      this._toggleFile(file);
+    }
+  };
+
+  private _selectOnlyOneFile = (file: Git.IStatusFile): void => {
     this.setState({
       selectedFiles: [file],
       lastClickedFile: file
     });
   };
 
-  toggleFile = (file: Git.IStatusFile): void => {
+  private _toggleFile = (file: Git.IStatusFile): void => {
     if (file.status !== this.state.lastClickedFile.status) {
-      this.selectOnlyOneFile(file);
+      this._selectOnlyOneFile(file);
       return;
     }
 
@@ -314,7 +329,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
-  selectFiles = (files: Git.IStatusFile[]): void => {
+  private _selectFiles = (files: Git.IStatusFile[]): void => {
     this.setState(prevState => {
       return {
         selectedFiles: [
@@ -327,12 +342,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
   };
 
-  handleShiftClick = (file: Git.IStatusFile): void => {
+  private _selectUntilFile = (file: Git.IStatusFile): void => {
     if (
       !this.state.lastClickedFile ||
       file.status !== this.state.lastClickedFile.status
     ) {
-      this.selectOnlyOneFile(file);
+      this._selectOnlyOneFile(file);
       return;
     }
     const statusesInOrder: Git.Status[] = [
@@ -381,11 +396,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
 
     if (currentFileIndex > lastClickedFileIndex) {
-      this.selectFiles(
+      this._selectFiles(
         filesSortedByStatus.slice(lastClickedFileIndex, currentFileIndex + 1)
       );
     } else {
-      this.selectFiles(
+      this._selectFiles(
         filesSortedByStatus.slice(currentFileIndex, lastClickedFileIndex + 1)
       );
     }
@@ -526,9 +541,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         file={file}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        toggleFile={this.toggleFile}
-        handleShiftClick={this.handleShiftClick}
-        selectOnlyOneFile={this.selectOnlyOneFile}
+        setSelection={this.setSelection}
         onDoubleClick={() => this._openDiffViews([file])}
         style={{ ...style }}
       />
@@ -594,9 +607,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         contextMenu={this.openContextMenu}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        toggleFile={this.toggleFile}
-        handleShiftClick={this.handleShiftClick}
-        selectOnlyOneFile={this.selectOnlyOneFile}
+        setSelection={this.setSelection}
         onDoubleClick={
           doubleClickDiff
             ? diffButton
@@ -694,9 +705,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         contextMenu={this.openContextMenu}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        toggleFile={this.toggleFile}
-        handleShiftClick={this.handleShiftClick}
-        selectOnlyOneFile={this.selectOnlyOneFile}
+        setSelection={this.setSelection}
         onDoubleClick={
           doubleClickDiff
             ? diffButton
@@ -801,9 +810,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           }
         }}
         selected={this._isSelectedFile(file)}
-        toggleFile={this.toggleFile}
-        handleShiftClick={this.handleShiftClick}
-        selectOnlyOneFile={this.selectOnlyOneFile}
+        setSelection={this.setSelection}
         style={style}
       />
     );
@@ -875,9 +882,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           }
         }}
         selected={this._isSelectedFile(file)}
-        toggleFile={this.toggleFile}
-        handleShiftClick={this.handleShiftClick}
-        selectOnlyOneFile={this.selectOnlyOneFile}
+        setSelection={this.setSelection}
         style={style}
       />
     );
@@ -1006,9 +1011,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         onDoubleClick={onDoubleClick}
         contextMenu={this.openSimpleContextMenu}
-        toggleFile={this.toggleFile}
-        handleShiftClick={this.handleShiftClick}
-        selectOnlyOneFile={this.selectOnlyOneFile}
+        setSelection={this.setSelection}
         style={style}
       />
     );
