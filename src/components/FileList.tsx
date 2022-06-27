@@ -123,7 +123,7 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
  * @param fileB
  * @returns true if fileA and fileB are equal, otherwise, false.
  */
-const filesAreEqual = (fileA: Git.IStatusFile, fileB: Git.IStatusFile) => {
+const areFilesEqual = (fileA: Git.IStatusFile, fileB: Git.IStatusFile) => {
   return (
     fileA.x === fileB.x &&
     fileA.y === fileB.y &&
@@ -156,9 +156,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   ): void => {
     event.preventDefault();
     let selectedFiles: Git.IStatusFile[];
-    if (
-      !this.state.selectedFiles.some(file => filesAreEqual(file, selectedFile))
-    ) {
+    if (!this._isSelectedFile(selectedFile)) {
       this.selectOnlyOneFile(selectedFile);
       selectedFiles = [selectedFile];
     } else {
@@ -235,11 +233,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Reset staged selected files */
   resetSelectedFiles = (file: Git.IStatusFile): void => {
-    if (
-      this.state.selectedFiles.some(fileStatus =>
-        filesAreEqual(fileStatus, file)
-      )
-    ) {
+    if (this._isSelectedFile(file)) {
       this.state.selectedFiles.forEach(file => this.props.model.reset(file.to));
     } else {
       this.props.model.reset(file.to);
@@ -249,18 +243,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   /** If the clicked file is selected, open all selected files.
    * If the clicked file is not selected, open the clicked file only.
    */
-  openSelectedFiles = (clikedFile: Git.IStatusFile): void => {
-    if (
-      this.state.selectedFiles.some(fileStatus =>
-        filesAreEqual(fileStatus, clikedFile)
-      )
-    ) {
+  openSelectedFiles = (clickedFile: Git.IStatusFile): void => {
+    if (this._isSelectedFile(clickedFile)) {
       this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
         files: this.state.selectedFiles
       } as CommandArguments.IGitContextAction as any);
     } else {
       this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-        files: [clikedFile]
+        files: [clickedFile]
       } as CommandArguments.IGitContextAction as any);
     }
   };
@@ -311,11 +301,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /** Discard changes in a specific unstaged or staged file */
   discardChanges = (file: Git.IStatusFile): void => {
-    if (
-      this.state.selectedFiles.some(fileStatus =>
-        filesAreEqual(fileStatus, file)
-      )
-    ) {
+    if (this._isSelectedFile(file)) {
       this.props.commands.execute(ContextCommandIDs.gitFileDiscard, {
         files: this.state.selectedFiles
       } as CommandArguments.IGitContextAction as any);
@@ -351,7 +337,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
 
     const fileStatus = this.state.selectedFiles.find(fileStatus =>
-      filesAreEqual(fileStatus, file)
+      areFilesEqual(fileStatus, file)
     );
     if (!fileStatus) {
       this.setState({
@@ -361,7 +347,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     } else {
       this.setState({
         selectedFiles: this.state.selectedFiles.filter(
-          fileStatus => !filesAreEqual(fileStatus, file)
+          fileStatus => !areFilesEqual(fileStatus, file)
         ),
         lastClickedFile: file
       });
@@ -370,7 +356,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   removeDuplicateSelectedFiles = (): void => {
     const selectedFiles = this.state.selectedFiles.filter(
-      (file, index, arr) => index === arr.findIndex(f => filesAreEqual(f, file))
+      (file, index, arr) => index === arr.findIndex(f => areFilesEqual(f, file))
     );
     this.setState({ selectedFiles });
   };
@@ -431,10 +417,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
 
     const lastClickedFileIndex = filesSortedByStatus.findIndex(fileStatus =>
-      filesAreEqual(fileStatus, this.state.lastClickedFile)
+      areFilesEqual(fileStatus, this.state.lastClickedFile)
     );
     const currentFileIndex = filesSortedByStatus.findIndex(fileStatus =>
-      filesAreEqual(fileStatus, file)
+      areFilesEqual(fileStatus, file)
     );
 
     if (currentFileIndex > lastClickedFileIndex) {
@@ -462,7 +448,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   render(): JSX.Element {
     const remoteChangedFiles: Git.IStatusFile[] = [];
     const unmergedFiles: Git.IStatusFile[] = [];
-    console.log(this.state);
+
     if (this.props.settings.composite['simpleStaging']) {
       const otherFiles: Git.IStatusFile[] = [];
 
@@ -556,17 +542,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param candidate file to test
    */
   private _isSelectedFile(candidate: Git.IStatusFile): boolean {
-    if (this.state.selectedFiles === null) {
-      return false;
-    }
-
-    return this.state.selectedFiles.some(
-      file =>
-        file.x === candidate.x &&
-        file.y === candidate.y &&
-        file.from === candidate.from &&
-        file.to === candidate.to &&
-        file.status === candidate.status
+    return this.state.selectedFiles.some(file =>
+      areFilesEqual(file, candidate)
     );
   }
 
@@ -743,11 +720,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={addIcon}
               title={this.props.trans.__('Stage this change')}
               onClick={() => {
-                if (
-                  this.state.selectedFiles.some(fileStatus =>
-                    filesAreEqual(fileStatus, file)
-                  )
-                ) {
+                if (this._isSelectedFile(file)) {
                   this.addFile(
                     ...this.state.selectedFiles.map(
                       selectedFile => selectedFile.to
@@ -847,11 +820,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               icon={addIcon}
               title={this.props.trans.__('Track this file')}
               onClick={() => {
-                if (
-                  this.state.selectedFiles.some(fileStatus =>
-                    filesAreEqual(fileStatus, file)
-                  )
-                ) {
+                if (this._isSelectedFile(file)) {
                   this.addFile(
                     ...this.state.selectedFiles.map(
                       selectedFile => selectedFile.to
@@ -1127,11 +1096,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       handleClick = () => this._openDiffViews([file]);
     } else {
       handleClick = () => {
-        if (
-          this.state.selectedFiles.some(fileStatus =>
-            filesAreEqual(fileStatus, file)
-          )
-        ) {
+        if (this._isSelectedFile(file)) {
           this._openDiffViews(this.state.selectedFiles);
         } else {
           this._openDiffViews([file]);
