@@ -160,46 +160,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     } else {
       selectedFiles = this.state.selectedFiles;
     }
-    const selectedFileStatuses: Git.Status[] = selectedFiles.reduce(
-      (statuses, file) => {
-        if (!statuses.includes(file.status)) {
-          statuses.push(file.status);
-        }
-        return statuses;
-      },
-      []
-    );
+
     const contextMenu = new Menu({ commands: this.props.commands });
-
-    const contextCommandsForEachFileType: ContextCommandIDs[][] =
-      selectedFileStatuses.map(status => CONTEXT_COMMANDS[status]);
-
-    const intersect = (...sets: ContextCommandIDs[][]) => {
-      if (sets.length === 0) {
-        return [];
-      }
-      if (sets.length === 1) {
-        return sets[0];
-      }
-      const res: ContextCommandIDs[] = [];
-      const smallestSetIdx = sets.reduce(
-        (smallestIdx, set, currentIdx, sets) => {
-          if (set.length < sets[smallestIdx].length) {
-            return currentIdx;
-          }
-          return smallestIdx;
-        },
-        0
-      );
-      const smallestSet = sets[smallestSetIdx];
-      for (const command of smallestSet) {
-        if (sets.every(set => set.includes(command))) {
-          res.push(command);
-        }
-      }
-      return res;
-    };
-    const commands = intersect(...contextCommandsForEachFileType);
+    const commands = CONTEXT_COMMANDS[selectedFiles[0].status];
     addMenuItems(commands, contextMenu, selectedFiles);
 
     contextMenu.open(event.clientX, event.clientY);
