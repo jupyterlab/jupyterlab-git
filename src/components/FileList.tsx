@@ -314,20 +314,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
-  removeDuplicateSelectedFiles = (): void => {
-    const selectedFiles = this.state.selectedFiles.filter(
-      (file, index, arr) => index === arr.findIndex(f => areFilesEqual(f, file))
-    );
-    this.setState({ selectedFiles });
-  };
-
   selectFiles = (files: Git.IStatusFile[]): void => {
-    this.setState(
-      {
-        selectedFiles: [...this.state.selectedFiles, ...files]
-      },
-      () => this.removeDuplicateSelectedFiles()
-    );
+    this.setState(prevState => {
+      return {
+        selectedFiles: [
+          ...prevState.selectedFiles,
+          ...files.filter(
+            file => !prevState.selectedFiles.some(f => areFilesEqual(f, file))
+          )
+        ]
+      };
+    });
   };
 
   handleShiftClick = (file: Git.IStatusFile): void => {
