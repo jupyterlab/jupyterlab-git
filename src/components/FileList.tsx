@@ -350,58 +350,64 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       this._selectOnlyOneFile(file);
       return;
     }
-    const statusesInOrder: Git.Status[] = [
-      'unmerged',
-      'remote-changed',
-      'staged',
-      'unstaged',
-      'untracked'
-    ];
-    const partiallyStagedFiles = this.props.files.filter(
-      file => file.status === 'partially-staged'
+
+    const selectedFileStatus = this.state.lastClickedFile.status;
+    const allFilesWithSelectedStatus = this.props.files.filter(
+      fileStatus => fileStatus.status === selectedFileStatus
     );
 
-    // files that are not partially staged
-    const filesSortedByStatus: Git.IStatusFile[] = this.props.files.filter(
-      file => file.status !== 'partially-staged'
+    const partiallyStagedFiles = this.props.files.filter(
+      fileStatus => fileStatus.status === 'partially-staged'
     );
-    // add partially staged files to the array as two item (staged and unstaged)
-    partiallyStagedFiles.forEach(partiallyStagedFile => {
-      filesSortedByStatus.push({
-        ...partiallyStagedFile,
-        status: 'staged'
-      });
-      filesSortedByStatus.push({
-        ...partiallyStagedFile,
-        status: 'unstaged'
-      });
-    });
+
+    switch (selectedFileStatus) {
+      case 'staged':
+        allFilesWithSelectedStatus.push(
+          ...partiallyStagedFiles.map(
+            fileStatus =>
+              ({
+                ...fileStatus,
+                status: 'staged'
+              } as Git.IStatusFile)
+          )
+        );
+        break;
+      case 'unstaged':
+        allFilesWithSelectedStatus.push(
+          ...partiallyStagedFiles.map(
+            fileStatus =>
+              ({
+                ...fileStatus,
+                status: 'unstaged'
+              } as Git.IStatusFile)
+          )
+        );
+        break;
+    }
 
     // sort the array by file status then by filename
-    filesSortedByStatus.sort((a, b) => {
-      if (a.status !== b.status) {
-        return (
-          statusesInOrder.indexOf(a.status) - statusesInOrder.indexOf(b.status)
-        );
-      } else {
-        return a.to.localeCompare(b.to);
-      }
-    });
+    allFilesWithSelectedStatus.sort((a, b) => a.to.localeCompare(b.to));
 
-    const lastClickedFileIndex = filesSortedByStatus.findIndex(fileStatus =>
-      areFilesEqual(fileStatus, this.state.lastClickedFile)
+    const lastClickedFileIndex = allFilesWithSelectedStatus.findIndex(
+      fileStatus => areFilesEqual(fileStatus, this.state.lastClickedFile)
     );
-    const currentFileIndex = filesSortedByStatus.findIndex(fileStatus =>
+    const currentFileIndex = allFilesWithSelectedStatus.findIndex(fileStatus =>
       areFilesEqual(fileStatus, file)
     );
 
     if (currentFileIndex > lastClickedFileIndex) {
       this._selectFiles(
-        filesSortedByStatus.slice(lastClickedFileIndex, currentFileIndex + 1)
+        allFilesWithSelectedStatus.slice(
+          lastClickedFileIndex,
+          currentFileIndex + 1
+        )
       );
     } else {
       this._selectFiles(
-        filesSortedByStatus.slice(currentFileIndex, lastClickedFileIndex + 1)
+        allFilesWithSelectedStatus.slice(
+          currentFileIndex,
+          lastClickedFileIndex + 1
+        )
       );
     }
   };
