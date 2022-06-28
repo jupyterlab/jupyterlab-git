@@ -753,6 +753,7 @@ export function addCommands(
 
   commands.addCommand(ContextCommandIDs.openFileFromDiff, {
     label: trans.__('Open File'),
+    caption: trans.__('Open file from its diff view'),
     execute: async _ => {
       const widget = app.contextMenuHitTest((node: HTMLElement) => {
         const nodeId = node.dataset.id;
