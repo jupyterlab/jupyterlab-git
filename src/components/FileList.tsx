@@ -342,6 +342,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
   };
 
+  private _deselectFiles = (files: Git.IStatusFile[]): void => {
+    this.setState(prevState => {
+      return {
+        selectedFiles: prevState.selectedFiles.filter(
+          selectedFile => !files.some(file => areFilesEqual(selectedFile, file))
+        )
+      };
+    });
+  };
+
   private _selectUntilFile = (file: Git.IStatusFile): void => {
     if (
       !this.state.lastClickedFile ||
@@ -385,7 +395,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         break;
     }
 
-    // sort the array by file status then by filename
     allFilesWithSelectedStatus.sort((a, b) => a.to.localeCompare(b.to));
 
     const lastClickedFileIndex = allFilesWithSelectedStatus.findIndex(
@@ -396,19 +405,58 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     );
 
     if (currentFileIndex > lastClickedFileIndex) {
-      this._selectFiles(
-        allFilesWithSelectedStatus.slice(
-          lastClickedFileIndex,
-          currentFileIndex + 1
-        )
+      const highestSelectedIndex = allFilesWithSelectedStatus.findIndex(
+        (file, index) =>
+          index > lastClickedFileIndex && !this._isSelectedFile(file)
       );
+      if (highestSelectedIndex === -1) {
+        this._deselectFiles(
+          allFilesWithSelectedStatus.slice(currentFileIndex + 1)
+        );
+      } else if (currentFileIndex < highestSelectedIndex) {
+        this._deselectFiles(
+          allFilesWithSelectedStatus.slice(
+            currentFileIndex + 1,
+            highestSelectedIndex
+          )
+        );
+      } else {
+        this._selectFiles(
+          allFilesWithSelectedStatus.slice(
+            highestSelectedIndex,
+            currentFileIndex + 1
+          )
+        );
+      }
+    } else if (currentFileIndex < lastClickedFileIndex) {
+      const lowestSelectedIndex = allFilesWithSelectedStatus.findIndex(
+        (file, index) =>
+          index < lastClickedFileIndex && this._isSelectedFile(file)
+      );
+      if (lowestSelectedIndex === -1) {
+        this._selectFiles(
+          allFilesWithSelectedStatus.slice(
+            currentFileIndex,
+            lastClickedFileIndex
+          )
+        );
+      } else if (currentFileIndex < lowestSelectedIndex) {
+        this._selectFiles(
+          allFilesWithSelectedStatus.slice(
+            currentFileIndex,
+            lowestSelectedIndex
+          )
+        );
+      } else {
+        this._deselectFiles(
+          allFilesWithSelectedStatus.slice(
+            lowestSelectedIndex,
+            currentFileIndex
+          )
+        );
+      }
     } else {
-      this._selectFiles(
-        allFilesWithSelectedStatus.slice(
-          currentFileIndex,
-          lastClickedFileIndex + 1
-        )
-      );
+      this._selectOnlyOneFile(file);
     }
   };
 
