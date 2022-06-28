@@ -3,6 +3,8 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import {
+  checkboxLabelContainerStyle,
+  checkboxLabelStyle,
   fileChangedLabelBrandStyle,
   fileChangedLabelInfoStyle,
   fileChangedLabelStyle,
@@ -192,39 +194,41 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         : this._getFileChangedLabel(status_code as any);
 
     return (
-      <label>
-        <div
-          className={this._getFileClass()}
-          onClick={event => {
-            if (event.ctrlKey || event.metaKey) {
-              this.props.setSelection(this.props.file);
-            } else if (event.shiftKey) {
-              this.props.setSelection(this.props.file, { group: true });
-            } else {
-              this.props.setSelection(this.props.file, { singleton: true });
-            }
-          }}
-          onContextMenu={
-            this.props.contextMenu &&
-            (event => {
-              this.props.contextMenu(this.props.file, event);
-            })
+      <div
+        className={this._getFileClass()}
+        onClick={event => {
+          if (event.ctrlKey || event.metaKey) {
+            this.props.setSelection(this.props.file);
+          } else if (event.shiftKey) {
+            this.props.setSelection(this.props.file, { group: true });
+          } else {
+            this.props.setSelection(this.props.file, { singleton: true });
           }
-          onDoubleClick={this.props.onDoubleClick}
-          style={this.props.style}
-          title={this.props.trans.__(`%1 • ${status}`, this.props.file.to)}
-        >
-          {this.props.markBox && (
-            <GitMarkBox
-              fname={this.props.file.to}
-              stage={this.props.file.status}
-              model={this.props.model}
+        }}
+        onContextMenu={
+          this.props.contextMenu &&
+          (event => {
+            this.props.contextMenu(this.props.file, event);
+          })
+        }
+        onDoubleClick={this.props.onDoubleClick}
+        style={this.props.style}
+        title={this.props.trans.__(`%1 • ${status}`, this.props.file.to)}
+      >
+        <div className={checkboxLabelContainerStyle}>
+          <label className={checkboxLabelStyle}>
+            {this.props.markBox && (
+              <GitMarkBox
+                fname={this.props.file.to}
+                stage={this.props.file.status}
+                model={this.props.model}
+              />
+            )}
+            <FilePath
+              filepath={this.props.file.to}
+              filetype={this.props.file.type}
             />
-          )}
-          <FilePath
-            filepath={this.props.file.to}
-            filetype={this.props.file.type}
-          />
+          </label>
           {this.props.actions}
           <span
             className={this._getFileChangedLabelClass(
@@ -238,7 +242,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
               : status_code}
           </span>
         </div>
-      </label>
+      </div>
     );
   }
 }
