@@ -139,6 +139,8 @@ export interface IFileItemProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  markUntilFile?: (file: Git.IStatusFile) => void;
 }
 
 export class FileItem extends React.PureComponent<IFileItemProps> {
@@ -203,6 +205,9 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
             this.props.setSelection(this.props.file);
           } else if (event.shiftKey) {
             this.props.setSelection(this.props.file, { group: true });
+            if (this.props.markUntilFile) {
+              this.props.markUntilFile(this.props.file);
+            }
           } else {
             this.props.setSelection(this.props.file, { singleton: true });
           }

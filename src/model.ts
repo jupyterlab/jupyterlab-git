@@ -1394,6 +1394,16 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Set a file in the current marker object.
+   *
+   * @param fname - filename
+   * @param mark - mark to set
+   */
+   setMark(fname: string, mark: boolean): void {
+    this._currentMarker.set(fname, mark);
+  }
+
+  /**
    * Return the current mark associated with a specified filename.
    *
    * @param fname - filename

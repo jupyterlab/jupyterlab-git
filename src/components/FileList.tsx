@@ -298,6 +298,40 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
+  markUntilFile = (file: Git.IStatusFile): void => {
+    if (!this.state.lastClickedFile) {
+      this.props.model.setMark(file.to, true);
+      return;
+    }
+    const filesWithMarkBox = this.props.files.filter(
+      fileStatus => !['unmerged', 'remote-changed'].includes(fileStatus.status)
+    );
+
+    const lastClickedFileIndex = filesWithMarkBox.findIndex(fileStatus =>
+      areFilesEqual(fileStatus, this.state.lastClickedFile)
+    );
+    const currentFileIndex = filesWithMarkBox.findIndex(fileStatus =>
+      areFilesEqual(fileStatus, file)
+    );
+    console.log(currentFileIndex, lastClickedFileIndex);
+    if (currentFileIndex > lastClickedFileIndex) {
+      const filesToAdd = filesWithMarkBox.slice(
+        lastClickedFileIndex,
+        currentFileIndex + 1
+      );
+      console.log(filesToAdd);
+      filesToAdd.forEach(f => this.props.model.setMark(f.to, true));
+    } else {
+      const filesToAdd = filesWithMarkBox.slice(
+        currentFileIndex,
+        lastClickedFileIndex
+      );
+      filesToAdd.forEach(f => this.props.model.setMark(f.to, true));
+    }
+    console.log(this.props.model);
+    this.forceUpdate();
+  };
+
   private _selectOnlyOneFile = (file: Git.IStatusFile): void => {
     this.setState({
       selectedFiles: [file],
@@ -472,6 +506,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * Render the modified files
    */
   render(): JSX.Element {
+    console.log(this.markedFiles);
     const remoteChangedFiles: Git.IStatusFile[] = [];
     const unmergedFiles: Git.IStatusFile[] = [];
 
@@ -1067,6 +1102,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         contextMenu={this.openSimpleContextMenu}
         setSelection={this.setSelection}
         style={style}
+        markUntilFile={this.markUntilFile}
       />
     );
   };
@@ -1123,7 +1159,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           className={hiddenButtonStyle}
           icon={diffIcon}
           title={this.props.trans.__('Diff this file')}
-          onClick={handleClick} // created bug for simple staging
+          onClick={handleClick}
         />
       )
     );
