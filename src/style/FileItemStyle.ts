@@ -97,7 +97,7 @@ export const gitMarkBoxStyle = style({
 
 export const checkboxLabelStyle = style({
   display: 'flex',
-  alignItems: 'center'
+  alignItems: 'center',
 });
 
 export const checkboxLabelContainerStyle = style({

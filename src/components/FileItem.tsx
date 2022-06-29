@@ -15,6 +15,7 @@ import {
   selectedFileChangedLabelStyle,
   selectedFileStyle
 } from '../style/FileItemStyle';
+import { fileLabelStyle } from '../style/FilePathStyle';
 import { Git } from '../tokens';
 import { FilePath } from './FilePath';
 
@@ -217,7 +218,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         title={this.props.trans.__(`%1 • ${status}`, this.props.file.to)}
       >
         <div className={checkboxLabelContainerStyle}>
-          <label className={checkboxLabelStyle}>
+          <label className={checkboxLabelStyle + ' ' + fileLabelStyle}>
             {this.props.markBox && (
               <GitMarkBox
                 fname={this.props.file.to}
