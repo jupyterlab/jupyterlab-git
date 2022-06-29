@@ -496,7 +496,7 @@ export function addCommands(
         getDiffProvider(fullPath) ?? (isText && createPlainTextDiff);
 
       if (buildDiffWidget) {
-        const id = `diff-${fullPath}-${model.reference.label}-${model.challenger.label}`;
+        const id = `git-diff-${fullPath}-${model.reference.label}-${model.challenger.label}`;
         const mainAreaItems = shell.widgets('main');
         let mainAreaItem = mainAreaItems.next();
         while (mainAreaItem) {
@@ -757,7 +757,7 @@ export function addCommands(
     execute: async _ => {
       const widget = app.contextMenuHitTest((node: HTMLElement) => {
         const nodeId = node.dataset.id;
-        return nodeId && nodeId.substring(0, 4) === 'diff';
+        return nodeId && nodeId.substring(0, 8) === 'git-diff';
       });
       if (!widget) {
         return;
