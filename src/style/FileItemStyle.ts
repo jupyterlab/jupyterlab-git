@@ -95,12 +95,17 @@ export const gitMarkBoxStyle = style({
   flex: '0 0 auto'
 });
 
-export const checkboxLabelContainerStyle = style({
-  display: 'flex'
-});
-
 export const checkboxLabelStyle = style({
   display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between'
+  alignItems: 'center'
 });
+
+export const checkboxLabelContainerStyle = style({
+  display: 'flex',
+  width: '100%'
+});
+
+export const checkboxLabelLastContainerStyle = style({
+  display: 'flex',
+  marginLeft: 'auto'
+})

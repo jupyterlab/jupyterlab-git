@@ -4,6 +4,7 @@ import { classes } from 'typestyle';
 import { GitExtension } from '../model';
 import {
   checkboxLabelContainerStyle,
+  checkboxLabelLastContainerStyle,
   checkboxLabelStyle,
   fileChangedLabelBrandStyle,
   fileChangedLabelInfoStyle,
@@ -229,18 +230,20 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
               filetype={this.props.file.type}
             />
           </label>
-          {this.props.actions}
-          <span
-            className={this._getFileChangedLabelClass(
-              this.props.file.status === 'unmerged' ? '!' : this.props.file.y
-            )}
-          >
-            {this.props.file.status === 'unmerged'
-              ? '!'
-              : this.props.file.y === '?'
-              ? 'U'
-              : status_code}
-          </span>
+          <div className={checkboxLabelLastContainerStyle}>
+            {this.props.actions}
+            <span
+              className={this._getFileChangedLabelClass(
+                this.props.file.status === 'unmerged' ? '!' : this.props.file.y
+              )}
+            >
+              {this.props.file.status === 'unmerged'
+                ? '!'
+                : this.props.file.y === '?'
+                ? 'U'
+                : status_code}
+            </span>
+          </div>
         </div>
       </div>
     );
