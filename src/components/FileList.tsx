@@ -319,17 +319,18 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         lastClickedFileIndex,
         currentFileIndex + 1
       );
-      console.log(filesToAdd);
       filesToAdd.forEach(f => this.props.model.setMark(f.to, true));
+      // Object.keys(filesToAdd).map(f =>
+      //   console.log('Files to add:' + Object.values(filesToAdd[parseInt(f)]))
+      // );
     } else {
       const filesToAdd = filesWithMarkBox.slice(
         currentFileIndex,
-        lastClickedFileIndex
+        lastClickedFileIndex + 1
       );
       filesToAdd.forEach(f => this.props.model.setMark(f.to, true));
     }
-    console.log(this.props.model);
-    this.forceUpdate();
+    // this.forceUpdate()
   };
 
   private _selectOnlyOneFile = (file: Git.IStatusFile): void => {
