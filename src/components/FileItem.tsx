@@ -48,6 +48,10 @@ interface IGitMarkBoxProps {
    * File status
    */
   stage: Git.Status;
+  /**
+   * Whether the checkbox is checked
+   */
+  checked: boolean;
 }
 
 /**
@@ -80,7 +84,7 @@ class GitMarkBox extends React.PureComponent<IGitMarkBoxProps> {
         name="gitMark"
         className={gitMarkBoxStyle}
         type="checkbox"
-        checked={this.props.model.getMark(this.props.fname)}
+        checked={this.props.checked}
         onChange={this._onClick}
         onDoubleClick={this._onDoubleClick}
       />
@@ -141,6 +145,8 @@ export interface IFileItemProps {
   trans: TranslationBundle;
 
   markUntilFile?: (file: Git.IStatusFile) => void;
+
+  checked?: boolean;
 }
 
 export class FileItem extends React.PureComponent<IFileItemProps> {
@@ -229,6 +235,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
                 fname={this.props.file.to}
                 stage={this.props.file.status}
                 model={this.props.model}
+                checked={this.props.checked}
               />
             )}
             <FilePath

@@ -221,7 +221,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.setState({ tab: 1 });
       this.refreshHistory();
     }, this);
-    model.markChanged.connect(() => this.forceUpdate(), this);
+    // model.markChanged.connect(() => this.forceUpdate(), this);
     model.notifyRemoteChanges.connect((_, args) => {
       this.warningDialog(args);
     }, this);

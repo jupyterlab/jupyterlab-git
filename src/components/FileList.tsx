@@ -26,6 +26,7 @@ import { discardAllChanges } from '../widgets/discardAllChanges';
 export interface IFileListState {
   selectedFiles: Git.IStatusFile[];
   lastClickedFile: Git.IStatusFile | null;
+  markedFiles: Git.IStatusFile[];
 }
 
 export interface IFileListProps {
@@ -138,8 +139,19 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
     this.state = {
       selectedFiles: [],
-      lastClickedFile: null
+      lastClickedFile: null,
+      markedFiles: props.model.markedFiles
     };
+  }
+
+  componentDidMount(): void {
+    const { model } = this.props;
+    model.markChanged.connect(() => {
+      this.setState({ markedFiles: model.markedFiles });
+    }, this);
+    model.repositoryChanged.connect(() => {
+      this.setState({ markedFiles: model.markedFiles });
+    }, this);
   }
 
   /**
@@ -299,6 +311,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   markUntilFile = (file: Git.IStatusFile): void => {
+    console.log('markuntilfile');
     if (!this.state.lastClickedFile) {
       this.props.model.setMark(file.to, true);
       return;
@@ -320,9 +333,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         currentFileIndex + 1
       );
       filesToAdd.forEach(f => this.props.model.setMark(f.to, true));
-      // Object.keys(filesToAdd).map(f =>
-      //   console.log('Files to add:' + Object.values(filesToAdd[parseInt(f)]))
-      // );
     } else {
       const filesToAdd = filesWithMarkBox.slice(
         currentFileIndex,
@@ -330,7 +340,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       );
       filesToAdd.forEach(f => this.props.model.setMark(f.to, true));
     }
-    // this.forceUpdate()
   };
 
   private _selectOnlyOneFile = (file: Git.IStatusFile): void => {
@@ -500,14 +509,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   get markedFiles(): Git.IStatusFile[] {
-    return this.props.files.filter(file => this.props.model.getMark(file.to));
+    return this.props.model.markedFiles;
   }
 
   /**
    * Render the modified files
    */
   render(): JSX.Element {
-    console.log(this.markedFiles);
+    console.log(this.state);
     const remoteChangedFiles: Git.IStatusFile[] = [];
     const unmergedFiles: Git.IStatusFile[] = [];
 
@@ -1092,6 +1101,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         : openFile;
     }
 
+    const checked = this.markedFiles.some(fileStatus =>
+      areFilesEqual(fileStatus, file)
+    );
     return (
       <FileItem
         trans={this.props.trans}
@@ -1104,6 +1116,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         setSelection={this.setSelection}
         style={style}
         markUntilFile={this.markUntilFile}
+        checked={checked}
       />
     );
   };
