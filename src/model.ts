@@ -1399,7 +1399,7 @@ export class GitExtension implements IGitExtension {
    * @param fname - filename
    * @param mark - mark to set
    */
-   setMark(fname: string, mark: boolean): void {
+  setMark(fname: string, mark: boolean): void {
     this._currentMarker.set(fname, mark);
   }
 
@@ -1420,6 +1420,14 @@ export class GitExtension implements IGitExtension {
    */
   toggleMark(fname: string): void {
     this._currentMarker.toggle(fname);
+  }
+
+  get markedFiles(): Git.IStatusFile[] {
+    return this._currentMarker.markedFilePaths
+      .filter(path => this.status.files.some(file => file.to === path))
+      .map(path =>
+        this.status.files.find(fileStatus => fileStatus.to === path)
+      );
   }
 
   /**
@@ -1776,6 +1784,16 @@ export class BranchMarker implements Git.IBranchMarker {
 
   toggle(fname: string): void {
     this.set(fname, !this._marks[fname]);
+  }
+
+  get markedFilePaths(): string[] {
+    const markedFiles: string[] = [];
+    for (const key in this._marks) {
+      if (this._marks[key]) {
+        markedFiles.push(key);
+      }
+    }
+    return markedFiles;
   }
 
   private _marks: { [key: string]: boolean } = {};
