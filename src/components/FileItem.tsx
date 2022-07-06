@@ -77,7 +77,7 @@ class GitMarkBox extends React.PureComponent<IGitMarkBoxProps> {
         className={gitMarkBoxStyle}
         type="checkbox"
         checked={this.props.checked}
-        // onDoubleClick={this._onDoubleClick}
+        onDoubleClick={this._onDoubleClick}
       />
     );
   }
@@ -151,6 +151,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         this.props.markUntilFile(this.props.file);
       } else {
         this.props.model.toggleMark(this.props.file.to);
+        this.props.setSelection(this.props.file, { singleton: true });
       }
     } else {
       if (event.ctrlKey || event.metaKey) {
