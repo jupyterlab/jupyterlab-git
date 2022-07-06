@@ -330,7 +330,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const currentFileIndex = filesWithMarkBox.findIndex(fileStatus =>
       areFilesEqual(fileStatus, file)
     );
-    console.log(currentFileIndex, lastClickedFileIndex);
+
     if (currentFileIndex > lastClickedFileIndex) {
       const filesToAdd = filesWithMarkBox.slice(
         lastClickedFileIndex,
@@ -520,7 +520,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * Render the modified files
    */
   render(): JSX.Element {
-    console.log(this.state);
     const remoteChangedFiles: Git.IStatusFile[] = [];
     const unmergedFiles: Git.IStatusFile[] = [];
 

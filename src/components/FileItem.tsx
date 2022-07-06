@@ -134,9 +134,13 @@ export interface IFileItemProps {
    * The application language translator.
    */
   trans: TranslationBundle;
-
+  /**
+   * Callback to implement shift-click for simple staging
+   */
   markUntilFile?: (file: Git.IStatusFile) => void;
-
+  /**
+   * whether the GitMarkBox is checked
+   */
   checked?: boolean;
 }
 
