@@ -58,14 +58,6 @@ interface IGitMarkBoxProps {
  * Render the selection box in simple mode
  */
 class GitMarkBox extends React.PureComponent<IGitMarkBoxProps> {
-  protected _onClick = (): void => {
-    // toggle will emit a markChanged signal
-    this.props.model.toggleMark(this.props.fname);
-
-    // needed if markChanged doesn't force an update of a parent
-    this.forceUpdate();
-  };
-
   protected _onDoubleClick = (
     event: React.MouseEvent<HTMLInputElement>
   ): void => {
@@ -85,8 +77,7 @@ class GitMarkBox extends React.PureComponent<IGitMarkBoxProps> {
         className={gitMarkBoxStyle}
         type="checkbox"
         checked={this.props.checked}
-        onChange={this._onClick}
-        onDoubleClick={this._onDoubleClick}
+        // onDoubleClick={this._onDoubleClick}
       />
     );
   }
@@ -153,6 +144,25 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
   constructor(props: IFileItemProps) {
     super(props);
   }
+
+  protected _onClick = (event: React.MouseEvent<HTMLInputElement>): void => {
+    if (this.props.markBox) {
+      if (event.shiftKey) {
+        this.props.markUntilFile(this.props.file);
+      } else {
+        this.props.model.toggleMark(this.props.file.to);
+      }
+    } else {
+      if (event.ctrlKey || event.metaKey) {
+        this.props.setSelection(this.props.file);
+      } else if (event.shiftKey) {
+        this.props.setSelection(this.props.file, { group: true });
+      } else {
+        this.props.setSelection(this.props.file, { singleton: true });
+      }
+    }
+  };
+
   protected _getFileChangedLabel(change: keyof typeof STATUS_CODES): string {
     return STATUS_CODES[change] || 'Unmodified';
   }
@@ -206,18 +216,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
     return (
       <div
         className={this._getFileClass()}
-        onClick={event => {
-          if (event.ctrlKey || event.metaKey) {
-            this.props.setSelection(this.props.file);
-          } else if (event.shiftKey) {
-            this.props.setSelection(this.props.file, { group: true });
-            if (this.props.markUntilFile) {
-              this.props.markUntilFile(this.props.file);
-            }
-          } else {
-            this.props.setSelection(this.props.file, { singleton: true });
-          }
-        }}
+        onClick={this._onClick}
         onContextMenu={
           this.props.contextMenu &&
           (event => {
@@ -229,7 +228,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         title={this.props.trans.__(`%1 • ${status}`, this.props.file.to)}
       >
         <div className={checkboxLabelContainerStyle}>
-          <label className={checkboxLabelStyle + ' ' + fileLabelStyle}>
+          <div className={checkboxLabelStyle + ' ' + fileLabelStyle}>
             {this.props.markBox && (
               <GitMarkBox
                 fname={this.props.file.to}
@@ -242,7 +241,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
               filepath={this.props.file.to}
               filetype={this.props.file.type}
             />
-          </label>
+          </div>
           <div className={checkboxLabelLastContainerStyle}>
             {this.props.actions}
             <span

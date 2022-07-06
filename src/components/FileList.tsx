@@ -295,6 +295,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
+  /**
+   * Select files into state.selectedFiles
+   * @param file
+   * @param options
+   */
   setSelection = (
     file: Git.IStatusFile,
     options?: { singleton?: boolean; group?: boolean }
@@ -311,7 +316,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   markUntilFile = (file: Git.IStatusFile): void => {
-    console.log('markuntilfile');
     if (!this.state.lastClickedFile) {
       this.props.model.setMark(file.to, true);
       return;
