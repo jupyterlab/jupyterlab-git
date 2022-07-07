@@ -607,14 +607,23 @@ export function addCommands(
             modelIsLoading.reject(msg);
           }
 
-          gitModel.statusChanged.connect((_, status) => {
-            const targetFile = status.files.find(
-              fileStatus => model.filename === fileStatus.from
-            );
-            if (!targetFile || targetFile.status === 'unmodified') {
-              mainAreaItem.dispose();
-            }
-          });
+          if (
+            model.challenger.source === Git.Diff.SpecialRef.INDEX ||
+            model.challenger.source === Git.Diff.SpecialRef.WORKING ||
+            model.reference.source === Git.Diff.SpecialRef.INDEX ||
+            model.reference.source === Git.Diff.SpecialRef.WORKING
+          ) {
+            const maybeClose = (_: IGitExtension, status: Git.IStatus) => {
+              const targetFile = status.files.find(
+                fileStatus => model.filename === fileStatus.from
+              );
+              if (!targetFile || targetFile.status === 'unmodified') {
+                gitModel.statusChanged.disconnect(maybeClose);
+                mainAreaItem.dispose();
+              }
+            };
+            gitModel.statusChanged.connect(maybeClose);
+          }
         }
 
         return mainAreaItem;
