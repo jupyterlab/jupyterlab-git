@@ -1,7 +1,6 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Dialog,
-  InputDialog,
   MainAreaWidget,
   ReactWidget,
   showDialog,
@@ -47,6 +46,7 @@ import {
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
+import { GitAddRemoteForm } from './widgets/GitAddRemoteForm';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 
 export interface IGitCloneArgs {
@@ -265,16 +265,22 @@ export function addCommands(
         return;
       }
       let url = args['url'] as string;
-      const name = args['name'] as string;
+      let name = args['name'] as string;
 
       if (!url) {
-        const result = await InputDialog.getText({
+        const remoteRepo = await showDialog({
           title: trans.__('Add a remote repository'),
-          placeholder: trans.__('Remote Git repository URL')
+          body: new GitAddRemoteForm(
+            trans,
+            'Enter remote repository name and url',
+            '',
+            gitModel
+          )
         });
 
-        if (result.button.accept) {
-          url = result.value;
+        if (remoteRepo.button.accept) {
+          name = remoteRepo.value.name;
+          url = remoteRepo.value.url;
         }
       }
 
