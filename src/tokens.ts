@@ -988,6 +988,14 @@ export namespace Git {
   }
 
   /**
+   * Structure for the request to the Git Remote Add API.
+   */
+  export interface IGitRemote {
+    url: string;
+    name: string;
+  }
+
+  /**
    * Structure for the request to the Git Clone API.
    */
   export interface IGitClone {
