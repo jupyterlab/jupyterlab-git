@@ -176,6 +176,13 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
   }
 
   /**
+   * Diff model
+   */
+  get model(): Git.Diff.IModel {
+    return this._model;
+  }
+
+  /**
    * Nbdime notebook widget.
    */
   get nbdimeWidget(): NotebookDiffWidget | NotebookMergeWidget {

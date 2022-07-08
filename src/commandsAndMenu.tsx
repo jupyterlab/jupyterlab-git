@@ -755,25 +755,48 @@ export function addCommands(
     label: trans.__('Open File'),
     caption: trans.__('Open file from its diff view'),
     execute: async _ => {
-      const widget = app.contextMenuHitTest((node: HTMLElement) => {
+      const domNode = app.contextMenuHitTest((node: HTMLElement) => {
         const nodeId = node.dataset.id;
         return nodeId && nodeId.substring(0, 8) === 'git-diff';
       });
-      if (!widget) {
+      if (!domNode) {
         return;
       }
 
-      const filename = widget.title;
-      const file = gitModel.status.files.find(
-        fileStatus => `${gitModel.pathRepository}/${fileStatus.to}` === filename
+      const matches = toArray(shell.widgets('main')).filter(
+        widget => widget.id === domNode.dataset.id
       );
-      if (!file) {
+
+      if (matches.length === 0) {
         return;
       }
 
-      commands.execute(ContextCommandIDs.gitFileOpen, {
-        files: [file]
-      } as CommandArguments.IGitContextAction as any);
+      const diffModel = (
+        ((matches[0] as MainAreaWidget).content as Panel)
+          .widgets[0] as Git.Diff.IDiffWidget
+      ).model;
+
+      const filename = diffModel.filename;
+
+      if (
+        diffModel.reference.source === Git.Diff.SpecialRef.INDEX ||
+        diffModel.reference.source === Git.Diff.SpecialRef.WORKING ||
+        diffModel.challenger.source === Git.Diff.SpecialRef.INDEX ||
+        diffModel.challenger.source === Git.Diff.SpecialRef.WORKING
+      ) {
+        const file = gitModel.status.files.find(
+          fileStatus => fileStatus.from === filename
+        );
+        if (file) {
+          commands.execute(ContextCommandIDs.gitFileOpen, {
+            files: [file]
+          } as any);
+        }
+      } else {
+        commands.execute('docmanager:open', {
+          path: gitModel.getRelativeFilePath(filename)
+        });
+      }
     }
   });
 
