@@ -81,6 +81,13 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   }
 
   /**
+   * Diff model
+   */
+  get model(): Git.Diff.IModel {
+    return this._model;
+  }
+
+  /**
    * Promise which fulfills when the widget is ready.
    */
   get ready(): Promise<void> {

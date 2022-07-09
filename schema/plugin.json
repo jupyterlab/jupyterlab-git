@@ -172,6 +172,12 @@
           "label": "Git",
           "icon": "git"
         }
+      },
+      {
+        "type": "command",
+        "command": "git:open-file-from-diff",
+        "selector": ".jp-git-diff-title",
+        "rank": 1
       }
     ]
   }
