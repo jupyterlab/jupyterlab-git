@@ -22,6 +22,7 @@ import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
 import { discardAllChanges } from '../widgets/discardAllChanges';
+import { SelectAllButton } from './SelectAllButton';
 
 export interface IFileListState {
   selectedFiles: Git.IStatusFile[];
@@ -1133,6 +1134,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderSimpleStage(files: Git.IStatusFile[], height: number) {
     return (
       <GitStage
+        selectAllButton={
+          <SelectAllButton
+            onClick={() => console.log('select all is clicked')}
+          />
+        }
         actions={
           <ActionButton
             className={hiddenButtonStyle}
