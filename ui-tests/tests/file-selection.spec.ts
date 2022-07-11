@@ -3,7 +3,7 @@ import { expect } from '@playwright/test';
 import path from 'path';
 import { extractFile } from './utils';
 
-const baseRepositoryPath = 'test-repository.tar.gz';
+const baseRepositoryPath = 'test-repository-dirty.tar.gz';
 test.use({ autoGoto: false });
 
 test.describe('File selection for normal staging', () => {
@@ -15,13 +15,13 @@ test.describe('File selection for normal staging', () => {
     );
 
     // URL for merge conflict example repository
-    await page.goto(`tree/${tmpPath}/repository`);
+    await page.goto(`tree/${tmpPath}/test-repository`);
   });
 
   test('should select two files with ctlr-click', async ({ page }) => {
+    await page.pause();
     await page.sidebar.openTab('jp-git-sessions');
     await page.click('button:has-text("Changes")');
-    page.pause();
 
     // Click another_file.txt
     await page.locator('#jp-git-sessions >> text=another_file.txt').click();
@@ -29,15 +29,13 @@ test.describe('File selection for normal staging', () => {
     await page.locator('#jp-git-sessions >> text=master_file.ts').click({
       modifiers: ['Control', 'Meta']
     });
-    const selectedFiles = page.locator('.f3z92wx');
-    expect(await selectedFiles.count()).toBeGreaterThanOrEqual(2);
-
+    const selectedFileCount = await page.locator('_react=FileItem').count();
+    expect(selectedFileCount).toBeGreaterThanOrEqual(2);
   });
 
   test('should select four files with shift-click', async ({ page }) => {
     await page.sidebar.openTab('jp-git-sessions');
     await page.click('button:has-text("Changes")');
-    page.pause();
 
     // Click another_file.txt
     await page.locator('#jp-git-sessions >> text=another_file.txt').click();
@@ -46,7 +44,7 @@ test.describe('File selection for normal staging', () => {
       modifiers: ['Shift']
     });
 
-    const selectedFiles = page.locator('.f3z92wx');
+    const selectedFiles = page.locator('_react=FileItem');
     expect(await selectedFiles.count()).toBeGreaterThanOrEqual(4);
   });
 });
