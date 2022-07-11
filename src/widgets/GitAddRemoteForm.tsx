@@ -34,7 +34,7 @@ export class GitAddRemoteForm
     text.textContent = textContent;
     this._name = document.createElement('input');
     this._name.type = 'text';
-    this._name.placeholder = this._trans.__('namename');
+    this._name.placeholder = this._trans.__('name');
     this._url = document.createElement('input');
     this._url.type = 'text';
     this._url.placeholder = this._trans.__('Remote GIt repository URL');

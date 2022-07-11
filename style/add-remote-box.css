@@ -1,0 +1,10 @@
+.jp-AddRemoteBox input {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+jp-AddRemoteBox-warning {
+  color: var(--jp-warn-color0);
+}
