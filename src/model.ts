@@ -453,6 +453,21 @@ export class GitExtension implements IGitExtension {
     });
   }
 
+  async getRemotes(): Promise<Git.IGitRemote[]> {
+    //const path = await this._getPathRepository();
+    const remotes: Git.IGitRemote[] = [
+      {
+        name: 'origin',
+        url: 'https://github.com/BoscoCHW/test_private_repo_2.git'
+      },
+      {
+        name: 'git',
+        url: 'git@github.com:jupyterlab/jupyterlab-git.git'
+      }
+    ];
+    return remotes;
+  }
+
   /**
    * Retrieve the repository commit log.
    *

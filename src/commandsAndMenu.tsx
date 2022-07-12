@@ -46,7 +46,7 @@ import {
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
-import { GitAddRemoteForm } from './widgets/GitAddRemoteForm';
+import { AddRemoteForm } from './widgets/AddRemoteForm';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 
 export interface IGitCloneArgs {
@@ -270,7 +270,7 @@ export function addCommands(
       if (!url) {
         const remoteRepo = await showDialog({
           title: trans.__('Add a remote repository'),
-          body: new GitAddRemoteForm(
+          body: new AddRemoteForm(
             trans,
             'Enter remote repository name and url',
             '',

@@ -7,7 +7,7 @@ import { GitExtension } from '../model';
 /**
  * The UI for the add remote repository form
  */
-export class GitAddRemoteForm
+export class AddRemoteForm
   extends Widget
   implements Dialog.IBodyWidget<Git.IGitRemote>
 {
@@ -20,11 +20,12 @@ export class GitAddRemoteForm
     super();
     this._trans = trans;
     this._model = model;
-    this.node.appendChild(this.createBody(textContent, warningContent));
+    this._addRemoteFormContainer = this.createBody(textContent, warningContent);
+    this.node.appendChild(this._addRemoteFormContainer);
+    this._showRemotes();
   }
 
   private createBody(textContent: string, warningContent: string): HTMLElement {
-    console.log(this._model);
     const node = document.createElement('div');
     node.className = 'jp-AddRemoteBox';
 
@@ -53,6 +54,31 @@ export class GitAddRemoteForm
     return node;
   }
 
+  private async _showRemotes(): Promise<void> {
+    const remotes: Git.IGitRemote[] = await this._model.getRemotes();
+
+    const existingRemotesWrapper = document.createElement('div');
+    existingRemotesWrapper.className = 'jp-existing-remotes-wrapper';
+    const existingRemotesHeader = document.createElement('div');
+    existingRemotesHeader.textContent = 'Existing remotes:';
+    existingRemotesWrapper.appendChild(existingRemotesHeader);
+
+    const remoteList = document.createElement('ul');
+    remoteList.className = 'jp-remote-list';
+    remotes.forEach(remote => {
+      const { name, url } = remote;
+      const container = document.createElement('li');
+      container.innerHTML = `
+        <div>${name}</div>
+        <div>${url}</div>
+      `;
+      remoteList.appendChild(container);
+    });
+
+    existingRemotesWrapper.appendChild(remoteList);
+    this._addRemoteFormContainer.appendChild(existingRemotesWrapper);
+  }
+
   /**
    * Returns the input value.
    */
@@ -63,6 +89,7 @@ export class GitAddRemoteForm
     };
   }
   protected _trans: TranslationBundle;
+  private _addRemoteFormContainer: HTMLElement;
   private _model: GitExtension;
   private _url: HTMLInputElement;
   private _name: HTMLInputElement;

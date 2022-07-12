@@ -5,6 +5,24 @@
   margin-bottom: 10px;
 }
 
+.jp-existing-remotes-wrapper {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.jp-remote-list {
+  list-style: none;
+  margin-top: 5px;
+  padding: 0px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 3px;
+}
+
+.jp-remote-item {
+
+}
+
 jp-AddRemoteBox-warning {
   color: var(--jp-warn-color0);
 }
