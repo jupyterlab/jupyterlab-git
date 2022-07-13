@@ -19,9 +19,6 @@
   row-gap: 3px;
 }
 
-.jp-remote-item {
-
-}
 
 jp-AddRemoteBox-warning {
   color: var(--jp-warn-color0);

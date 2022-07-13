@@ -1512,6 +1512,27 @@ class Git:
 
         return response
 
+    async def remote_show_details(self, path):
+        """Handle call to `git remote -v show` command.
+        Args:
+            path (str): Git repository path
+
+        Returns:
+            List[Tuple(str, str)]: Known remotes (name and url)
+        """
+        command = ["git", "remote", "-v", "show"]
+        code, output, error = await execute(command, cwd=path)
+        response = {"code": code, "command": " ".join(command)}
+        if code == 0:
+            response["remotes"] = [
+                {"name": r.split("\t")[0], "url": r.split("\t")[1]}
+                for r in output.splitlines()
+            ]
+        else:
+            response["message"] = error
+
+        return response
+
     async def ensure_gitignore(self, path):
         """Handle call to ensure .gitignore file exists and the
         next append will be on a new line (this means an empty file

@@ -454,18 +454,17 @@ export class GitExtension implements IGitExtension {
   }
 
   async getRemotes(): Promise<Git.IGitRemote[]> {
-    //const path = await this._getPathRepository();
-    const remotes: Git.IGitRemote[] = [
-      {
-        name: 'origin',
-        url: 'https://github.com/BoscoCHW/test_private_repo_2.git'
-      },
-      {
-        name: 'git',
-        url: 'git@github.com:jupyterlab/jupyterlab-git.git'
+    const path = await this._getPathRepository();
+    const result = await this._taskHandler.execute<Git.IGitRemoteResult>(
+      'git:show:remote',
+      async () => {
+        return await requestAPI<Git.IGitRemoteResult>(
+          URLExt.join(path, 'remote', 'show'),
+          'GET'
+        );
       }
-    ];
-    return remotes;
+    );
+    return result.remotes;
   }
 
   /**

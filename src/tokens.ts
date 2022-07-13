@@ -1000,6 +1000,16 @@ export namespace Git {
   }
 
   /**
+   * Interface for GitRemoteShowDetails request result,
+   * has the name and urls of all remotes
+   */
+  export interface IGitRemoteResult {
+    code: number;
+    command: string;
+    remotes: Git.IGitRemote[];
+  }
+
+  /**
    * Structure for the request to the Git Clone API.
    */
   export interface IGitClone {
