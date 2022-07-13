@@ -347,6 +347,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
+  markAllFile = (file: Git.IStatusFile[]): void => {
+    const firstFileIndex = 0;
+    const lastFileIndex = file.length;
+    const filesWithMarkBox = this.props.files.filter(
+      fileStatus => !['unmerged', 'remote-changed'].includes(fileStatus.status)
+    );
+    const filesToAdd = filesWithMarkBox.slice(firstFileIndex, lastFileIndex);
+    filesToAdd.forEach(f => this.props.model.setMark(f.to, true));
+  }
+
   private _selectOnlyOneFile = (file: Git.IStatusFile): void => {
     this.setState({
       selectedFiles: [file],
@@ -1136,7 +1146,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       <GitStage
         selectAllButton={
           <SelectAllButton
-            onClick={() => console.log('select all is clicked')}
+            onClick={() => {this.markAllFile(files)}}
           />
         }
         actions={
