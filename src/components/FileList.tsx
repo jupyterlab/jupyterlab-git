@@ -28,6 +28,7 @@ export interface IFileListState {
   selectedFiles: Git.IStatusFile[];
   lastClickedFile: Git.IStatusFile | null;
   markedFiles: Git.IStatusFile[];
+  toggleFiles: boolean;
 }
 
 export interface IFileListProps {
@@ -141,7 +142,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this.state = {
       selectedFiles: [],
       lastClickedFile: null,
-      markedFiles: props.model.markedFiles
+      markedFiles: props.model.markedFiles,
+      toggleFiles: true
     };
   }
 
@@ -347,25 +349,20 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
-  toggleAllFiles = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    file: Git.IStatusFile[]
-  ): void => {
+  toggleAllFiles = (file: Git.IStatusFile[]): void => {
     const firstFileIndex = 0;
     const lastFileIndex = file.length;
     const allFilesToToggle = this.props.files.filter(
       fileStatus => !['unmerged', 'remote-changed'].includes(fileStatus.status)
     );
     const filesToToggle = allFilesToToggle.slice(firstFileIndex, lastFileIndex);
-
-    if (event.target.value === 'on') {
-      event.target.value = 'off';
-      filesToToggle.forEach(f => this.props.model.setMark(f.to, true));
-    } else {
-      event.target.value = 'on';
-      filesToToggle.forEach(f => this.props.model.setMark(f.to, false));
-    }
-  }
+    this.setState({
+      toggleFiles: !this.state.toggleFiles
+    });
+    filesToToggle.forEach(f =>
+      this.props.model.setMark(f.to, this.state.toggleFiles)
+    );
+  };
 
   private _selectOnlyOneFile = (file: Git.IStatusFile): void => {
     this.setState({
@@ -1156,7 +1153,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       <GitStage
         selectAllButton={
           <SelectAllButton
-            onChange={(e) => {this.toggleAllFiles(e, files)}}
+            onChange={() => {
+              this.toggleAllFiles(files);
+            }}
           />
         }
         actions={
