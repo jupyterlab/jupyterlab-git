@@ -46,7 +46,7 @@ import {
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
-import { AddRemoteForm } from './widgets/AddRemoteForm';
+import { AddRemoteDialogue } from './components/AddRemoteDialogue';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 
 export interface IGitCloneArgs {
@@ -268,19 +268,33 @@ export function addCommands(
       let name = args['name'] as string;
 
       if (!url) {
-        const remoteRepo = await showDialog({
-          title: trans.__('Add a remote repository'),
-          body: new AddRemoteForm(
-            trans,
-            'Enter remote repository name and url',
-            '',
-            gitModel
-          )
-        });
+        const widgetId = 'git-dialog-AddRemote';
+        let anchor = document.querySelector<HTMLDivElement>(`#${widgetId}`);
+        if (!anchor) {
+          anchor = document.createElement('div');
+          anchor.id = widgetId;
+          document.body.appendChild(anchor);
+        }
 
-        if (remoteRepo.button.accept) {
-          name = remoteRepo.value.name;
-          url = remoteRepo.value.url;
+        const waitForDialog = new PromiseDelegate<Git.IGitRemote | null>();
+        const dialog = ReactWidget.create(
+          <AddRemoteDialogue
+            trans={trans}
+            model={gitModel}
+            onClose={(remote?: Git.IGitRemote) => {
+              dialog.dispose();
+              waitForDialog.resolve(remote ?? null);
+            }}
+          />
+        );
+
+        Widget.attach(dialog, anchor);
+
+        const remote = await waitForDialog.promise;
+
+        if (remote) {
+          name = remote.name;
+          url = remote.url;
         }
       }
 
