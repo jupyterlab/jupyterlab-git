@@ -13,7 +13,7 @@ export interface ISelectAllButtonProps {
   /**
    * On-click event handler
    */
-  onClick?: (event?: React.MouseEvent<HTMLButtonElement>) => void;
+  onChange?: (event?: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 /**
@@ -24,12 +24,12 @@ export interface ISelectAllButtonProps {
 export const SelectAllButton: React.FunctionComponent<ISelectAllButtonProps> = (
   props: ISelectAllButtonProps
 ) => {
-  const { className, onClick } = props;
+  const { className, onChange } = props;
   return (
     <input
       type="checkbox"
       className={className}
-      onClick={onClick}
+      onChange={onChange}
       style={{ marginRight: '10px' }}
     ></input>
   );
