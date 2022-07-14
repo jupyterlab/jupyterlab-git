@@ -4,7 +4,12 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import { Git } from '../tokens';
 import { GitExtension } from '../model';
-import { remoteDialogClass } from '../style/AddRemoteDialog';
+import {
+  remoteDialogClass,
+  remoteDialogInputClass,
+  existingRemoteListClass,
+  existingRemoteItemClass
+} from '../style/AddRemoteDialog';
 import { TranslationBundle } from '@jupyterlab/translation';
 
 import { classes } from 'typestyle';
@@ -76,10 +81,10 @@ export class AddRemoteDialogue extends React.Component<
           </button>
         </div>
         <div className={contentWrapperClass}>
-          <label>
+          <label className={remoteDialogInputClass}>
             <span>
               {this.props.trans.__(
-                'Enter a name and a url for the remote repo'
+                'Enter a new remote repository name and url'
               )}
             </span>
             <input
@@ -115,10 +120,10 @@ export class AddRemoteDialogue extends React.Component<
           )}
 
           {this.state.existingRemotes.length > 0 && (
-            <ul>
+            <ul className={existingRemoteListClass}>
               <p>Existing Remotes:</p>
               {this.state.existingRemotes.map((remote, index) => (
-                <li key={`remote-${index}`}>
+                <li key={`remote-${index}`} className={existingRemoteItemClass}>
                   <span>{remote.name}</span>
                   <span>{remote.url}</span>
                 </li>
@@ -131,7 +136,7 @@ export class AddRemoteDialogue extends React.Component<
             className={classes(buttonClass, cancelButtonClass)}
             type="button"
             title={this.props.trans.__(
-              'Close this dialog without adding a remote'
+              'Close this dialog without adding a remote repo'
             )}
             value={this.props.trans.__('Cancel')}
             onClick={() => {
