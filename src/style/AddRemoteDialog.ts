@@ -26,10 +26,7 @@ export const existingRemoteListClass = style({
 });
 
 export const existingRemoteItemClass = style({
-  marginTop: '5px',
-  $nest: {
-    '&>*': {
-      marginRight: '1rem'
-    }
-  }
+  marginTop: '2px',
+  display: 'flex',
+  columnGap: '5px'
 });

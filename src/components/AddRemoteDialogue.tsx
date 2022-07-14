@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { ActionButton } from './ActionButton';
 import ClearIcon from '@material-ui/icons/Clear';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -23,6 +24,8 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
+
+import { deletionsMadeIcon } from '../style/icons';
 
 export interface IAddRemoteDialogueProps {
   /**
@@ -126,6 +129,14 @@ export class AddRemoteDialogue extends React.Component<
                 <li key={`remote-${index}`} className={existingRemoteItemClass}>
                   <span>{remote.name}</span>
                   <span>{remote.url}</span>
+                  <ActionButton
+                    // className={hiddenButtonStyle}
+                    icon={deletionsMadeIcon}
+                    title={this.props.trans.__('Remove this remote')}
+                    onClick={() => {
+                      console.log('I am clicked');
+                    }}
+                  />
                 </li>
               ))}
             </ul>
