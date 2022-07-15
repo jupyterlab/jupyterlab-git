@@ -1500,7 +1500,8 @@ class Git:
             path (str): Git repository path
             verbose (bool): true if details are needed, otherwise, false
         Returns:
-            List[str]: Known remotes
+            if not verbose: List[str]: Known remotes
+            if verbose: List[ { name: str, url: str } ]: Known remotes
         """
         command = ["git", "remote"]
         if verbose:
@@ -1528,9 +1529,7 @@ class Git:
         """Handle call to `git remote remove <name>` command.
         Args:
             path (str): Git repository path
-            verbose (bool): true if details are needed, otherwise, false
-        Returns:
-            List[str]: Known remotes
+            name (str): Remote name
         """
         command = ["git", "remote", "remove", name]
 

@@ -471,6 +471,10 @@ export class GitExtension implements IGitExtension {
     return result.remotes;
   }
 
+  /**
+   * Remove a remote repository by name
+   * @param name name of remote to remove
+   */
   async removeRemote(name: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:remove:remote', async () => {

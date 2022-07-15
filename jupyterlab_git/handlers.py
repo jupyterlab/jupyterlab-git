@@ -407,11 +407,11 @@ class GitRemoteDetailsShowHandler(GitHandler):
 
 
 class GitRemoteRemoveHandler(GitHandler):
-    """Handler for 'git remote -v'."""
+    """Handler for 'git remote remote <name>'."""
 
     @tornado.web.authenticated
     async def post(self, path: str = ""):
-        """GET request handler to retrieve existing remotes."""
+        """GET request handler to remove a remote."""
         local_path = self.url2localpath(path)
         data = self.get_json_body()
         name = data.get("name", None)

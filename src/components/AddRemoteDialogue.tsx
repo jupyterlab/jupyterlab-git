@@ -32,13 +32,28 @@ export interface IAddRemoteDialogueProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+  /**
+   * Warning content.
+   */
   warningContent?: string;
+  /**
+   * Git extension model
+   */
   model: GitExtension;
+  /**
+   * Callback to handle the closing of dialogue
+   */
   onClose: (remote?: Git.IGitRemote) => void;
 }
 
 export interface IAddRemoteDialogueState {
+  /**
+   * New remote name and url pair
+   */
   newRemote: Git.IGitRemote;
+  /**
+   * List of known remotes
+   */
   existingRemotes: Git.IGitRemote[];
 }
 
