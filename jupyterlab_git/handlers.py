@@ -406,6 +406,24 @@ class GitRemoteDetailsShowHandler(GitHandler):
         self.finish(json.dumps(output))
 
 
+class GitRemoteRemoveHandler(GitHandler):
+    """Handler for 'git remote -v'."""
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """GET request handler to retrieve existing remotes."""
+        local_path = self.url2localpath(path)
+        data = self.get_json_body()
+        name = data.get("name", None)
+
+        output = await self.git.remote_remove(local_path, name)
+        if output["code"] == 0:
+            self.set_status(201)
+        else:
+            self.set_status(500)
+        self.finish(json.dumps(output))
+
+
 class GitResetHandler(GitHandler):
     """
     Handler for 'git reset <filename>'.
@@ -887,6 +905,7 @@ def setup_handlers(web_app):
         ("/remote/add", GitRemoteAddHandler),
         ("/remote/fetch", GitFetchHandler),
         ("/remote/show", GitRemoteDetailsShowHandler),
+        ("/remote/remove", GitRemoteRemoveHandler),
         ("/reset", GitResetHandler),
         ("/reset_to_commit", GitResetToCommitHandler),
         ("/show_prefix", GitShowPrefixHandler),

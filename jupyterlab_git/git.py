@@ -1524,6 +1524,24 @@ class Git:
 
         return response
 
+    async def remote_remove(self, path, name):
+        """Handle call to `git remote remove <name>` command.
+        Args:
+            path (str): Git repository path
+            verbose (bool): true if details are needed, otherwise, false
+        Returns:
+            List[str]: Known remotes
+        """
+        command = ["git", "remote", "remove", name]
+
+        code, _, error = await execute(command, cwd=path)
+        response = {"code": code, "command": " ".join(command)}
+
+        if code != 0:
+            response["message"] = error
+
+        return response
+
     async def ensure_gitignore(self, path):
         """Handle call to ensure .gitignore file exists and the
         next append will be on a new line (this means an empty file

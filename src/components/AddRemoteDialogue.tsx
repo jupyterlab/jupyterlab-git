@@ -133,8 +133,13 @@ export class AddRemoteDialogue extends React.Component<
                     // className={hiddenButtonStyle}
                     icon={deletionsMadeIcon}
                     title={this.props.trans.__('Remove this remote')}
-                    onClick={() => {
-                      console.log('I am clicked');
+                    onClick={async () => {
+                      await this.props.model.removeRemote(remote.name);
+                      this.setState({
+                        existingRemotes: this.state.existingRemotes.filter(
+                          r => r.name !== remote.name
+                        )
+                      });
                     }}
                   />
                 </li>

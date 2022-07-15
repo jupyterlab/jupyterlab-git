@@ -453,6 +453,10 @@ export class GitExtension implements IGitExtension {
     });
   }
 
+  /**
+   * Show remote repository for the current repository
+   * @returns promise which resolves to a list of remote repositories
+   */
   async getRemotes(): Promise<Git.IGitRemote[]> {
     const path = await this._getPathRepository();
     const result = await this._taskHandler.execute<Git.IGitRemoteResult>(
@@ -465,6 +469,15 @@ export class GitExtension implements IGitExtension {
       }
     );
     return result.remotes;
+  }
+
+  async removeRemote(name: string): Promise<void> {
+    const path = await this._getPathRepository();
+    await this._taskHandler.execute<void>('git:remove:remote', async () => {
+      await requestAPI<void>(URLExt.join(path, 'remote', 'remove'), 'POST', {
+        name
+      });
+    });
   }
 
   /**
