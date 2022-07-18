@@ -973,7 +973,11 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async push(auth?: Git.IAuth, force = false): Promise<Git.IResultWithMessage> {
+  async push(
+    auth?: Git.IAuth,
+    force = false,
+    remote?: string
+  ): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
@@ -983,7 +987,8 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             auth: auth as any,
-            force: force
+            force: force,
+            remote
           }
         );
       }

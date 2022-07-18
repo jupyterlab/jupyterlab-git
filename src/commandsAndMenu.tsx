@@ -48,6 +48,7 @@ import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
 import { AddRemoteDialogue } from './components/AddRemoteDialogue';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
+import { SingleSelectionForm } from './widgets/SelectRemoteForm';
 
 export interface IGitCloneArgs {
   /**
@@ -331,16 +332,40 @@ export function addCommands(
     caption: trans.__('Push code to remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
-      logger.log({
-        level: Level.RUNNING,
-        message: trans.__('Pushing…')
-      });
       try {
+        const remotes = await gitModel.getRemotes();
+
+        let remote;
+        if (remotes.length > 1) {
+          const result = await showDialog({
+            title: trans.__('Pick a remote repository to push.'),
+            body: new SingleSelectionForm(
+              trans.__(''),
+              remotes.map(remote => remote.name)
+            ),
+            buttons: [
+              Dialog.cancelButton({ label: trans.__('Cancel') }),
+              Dialog.okButton({ label: trans.__('Proceed') })
+            ]
+          });
+          if (result.button.accept) {
+            remote = result.value.selection;
+          } else {
+            return;
+          }
+        }
+
+        logger.log({
+          level: Level.RUNNING,
+          message: trans.__('Pushing…')
+        });
         const details = await showGitOperationDialog(
           gitModel,
           args.force ? Operation.ForcePush : Operation.Push,
-          trans
+          trans,
+          (args = { remote })
         );
+
         logger.log({
           message: trans.__('Successfully pushed'),
           level: Level.SUCCESS,
@@ -1532,10 +1557,18 @@ export async function showGitOperationDialog<T>(
         result = await model.pull(authentication);
         break;
       case Operation.Push:
-        result = await model.push(authentication);
+        result = await model.push(
+          authentication,
+          false,
+          (args as unknown as { remote: string })['remote']
+        );
         break;
       case Operation.ForcePush:
-        result = await model.push(authentication, true);
+        result = await model.push(
+          authentication,
+          true,
+          (args as unknown as { remote: string })['remote']
+        );
         break;
       case Operation.Fetch:
         result = await model.fetch(authentication);

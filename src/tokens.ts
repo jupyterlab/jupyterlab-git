@@ -426,7 +426,11 @@ export interface IGitExtension extends IDisposable {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  push(auth?: Git.IAuth, force?: boolean): Promise<Git.IResultWithMessage>;
+  push(
+    auth?: Git.IAuth,
+    force?: boolean,
+    remote?: string
+  ): Promise<Git.IResultWithMessage>;
 
   /**
    * General Git refresh

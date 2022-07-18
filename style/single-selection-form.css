@@ -1,0 +1,19 @@
+.jp-options-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  row-gap: 5px;
+}
+
+.jp-button-wrapper {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.jp-option {
+  height: fit-content !important;
+  appearance: auto !important;
+  margin: 0px;
+  padding: 0px;
+}
