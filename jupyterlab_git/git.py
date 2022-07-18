@@ -1515,8 +1515,9 @@ class Git:
         if code == 0:
             if verbose:
                 response["remotes"] = [
-                    {"name": r.split("\t")[0], "url": r.split("\t")[1]}
+                    {"name": r.split("\t")[0], "url": r.split("\t")[1][:-7]}
                     for r in output.splitlines()
+                    if "(push)" in r
                 ]
             else:
                 response["remotes"] = [r.strip() for r in output.splitlines()]
