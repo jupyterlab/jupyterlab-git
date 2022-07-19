@@ -28,7 +28,6 @@ export interface IFileListState {
   selectedFiles: Git.IStatusFile[];
   lastClickedFile: Git.IStatusFile | null;
   markedFiles: Git.IStatusFile[];
-  toggleFiles: boolean;
 }
 
 export interface IFileListProps {
@@ -142,8 +141,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     this.state = {
       selectedFiles: [],
       lastClickedFile: null,
-      markedFiles: props.model.markedFiles,
-      toggleFiles: true
+      markedFiles: props.model.markedFiles
     };
   }
 
@@ -349,19 +347,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
-  toggleAllFiles = (file: Git.IStatusFile[]): void => {
-    const firstFileIndex = 0;
-    const lastFileIndex = file.length;
-    const allFilesToToggle = this.props.files.filter(
-      fileStatus => !['unmerged', 'remote-changed'].includes(fileStatus.status)
-    );
-    const filesToToggle = allFilesToToggle.slice(firstFileIndex, lastFileIndex);
-    this.setState({
-      toggleFiles: !this.state.toggleFiles
-    });
-    filesToToggle.forEach(f =>
-      this.props.model.setMark(f.to, this.state.toggleFiles)
-    );
+  toggleAllFiles = (files: Git.IStatusFile[]): void => {
+    const areFilesAllMarked = this._areFilesAllMarked();
+    files.forEach(f => this.props.model.setMark(f.to, !areFilesAllMarked));
   };
 
   private _selectOnlyOneFile = (file: Git.IStatusFile): void => {
@@ -1156,6 +1144,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             onChange={() => {
               this.toggleAllFiles(files);
             }}
+            checked={this._areFilesAllMarked()}
           />
         }
         actions={
@@ -1225,5 +1214,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     } catch (reason) {
       console.error(`Failed to open diff views.\n${reason}`);
     }
+  }
+
+  private _areFilesAllMarked(): boolean {
+    const filesForSimpleStaging = this.props.files.filter(
+      file => !['unmerged', 'remote-changed'].includes(file.status)
+    );
+    return (
+      filesForSimpleStaging.length !== 0 &&
+      filesForSimpleStaging.every(file =>
+        this.state.markedFiles.some(mf => areFilesEqual(file, mf))
+      )
+    );
   }
 }

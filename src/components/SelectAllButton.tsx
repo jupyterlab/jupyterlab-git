@@ -14,6 +14,11 @@ export interface ISelectAllButtonProps {
    * On-click event handler
    */
   onChange?: (event?: React.ChangeEvent<HTMLInputElement>) => void;
+
+  /**
+   * Whether the checkbox is checked
+   */
+  checked: boolean;
 }
 
 /**
@@ -24,13 +29,14 @@ export interface ISelectAllButtonProps {
 export const SelectAllButton: React.FunctionComponent<ISelectAllButtonProps> = (
   props: ISelectAllButtonProps
 ) => {
-  const { className, onChange } = props;
+  const { className, onChange, checked } = props;
   return (
     <input
       type="checkbox"
       className={className}
       onChange={onChange}
       style={{ marginRight: '10px' }}
+      checked={checked}
     ></input>
   );
 };
