@@ -37,6 +37,7 @@ export const SelectAllButton: React.FunctionComponent<ISelectAllButtonProps> = (
       onChange={onChange}
       style={{ marginRight: '10px' }}
       checked={checked}
+      data-test-id="SelectAllButton"
     ></input>
   );
 };

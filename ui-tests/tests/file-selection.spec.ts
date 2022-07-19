@@ -48,3 +48,53 @@ test.describe('File selection for normal staging', () => {
     expect(await selectedFiles.count()).toBeGreaterThanOrEqual(4);
   });
 });
+
+
+
+test.describe('File selection for simple staging', () => {
+  test.beforeEach(async ({ baseURL, page, tmpPath }) => {
+    await extractFile(
+      baseURL,
+      path.resolve(__dirname, 'data', baseRepositoryPath),
+      path.join(tmpPath, 'repository.tar.gz')
+    );
+
+    // URL for merge conflict example repository
+    await page.goto(`tree/${tmpPath}/test-repository`);
+
+    // Click [aria-label="main"] >> text=Git
+    await page.locator('[aria-label="main"] >> text=Git').click();
+    // Click text=Simple staging
+    await page.locator('text=Simple staging').click();
+  });
+
+  test('should mark four files with shift-click', async ({ page }) => {
+    await page.sidebar.openTab('jp-git-sessions');
+    await page.click('button:has-text("Changes")');
+
+    // Click another_file.txt
+    await page.locator('#jp-git-sessions >> text=another_file.txt').click();
+    // Shift-click master_file.ts
+    await page.locator('#jp-git-sessions >> text=master_file.ts').click({
+      modifiers: ['Shift']
+    });
+
+    const markedFiles = page.locator('[data-test-checked=true]');
+    expect(await markedFiles.count()).toBeGreaterThanOrEqual(4);
+  });
+
+  test('should unmark all files by clicking de/select all button', async ({ page }) => {
+    await page.sidebar.openTab('jp-git-sessions');
+    await page.click('button:has-text("Changes")');
+
+    let markedFiles = page.locator('[data-test-checked=true]');
+    expect(await markedFiles.count()).toBeGreaterThanOrEqual(4);
+
+    await page.locator('[data-test-id=SelectAllButton]').click();
+
+    markedFiles = page.locator('[data-test-checked=true]');
+    expect(await markedFiles.count()).toBeLessThanOrEqual(0);
+
+    
+  });
+});
