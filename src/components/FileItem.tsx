@@ -220,6 +220,8 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
 
     return (
       <div
+        data-test-selected={this.props.selected}
+        data-test-component="FileItem"
         className={this._getFileClass()}
         onClick={this._onClick}
         onContextMenu={

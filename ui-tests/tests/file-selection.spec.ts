@@ -19,7 +19,6 @@ test.describe('File selection for normal staging', () => {
   });
 
   test('should select two files with ctlr-click', async ({ page }) => {
-    await page.pause();
     await page.sidebar.openTab('jp-git-sessions');
     await page.click('button:has-text("Changes")');
 
@@ -29,7 +28,8 @@ test.describe('File selection for normal staging', () => {
     await page.locator('#jp-git-sessions >> text=master_file.ts').click({
       modifiers: ['Control', 'Meta']
     });
-    const selectedFileCount = await page.locator('_react=FileItem').count();
+
+    const selectedFileCount = await page.locator('[data-test-selected=true]').count();
     expect(selectedFileCount).toBeGreaterThanOrEqual(2);
   });
 
@@ -44,7 +44,7 @@ test.describe('File selection for normal staging', () => {
       modifiers: ['Shift']
     });
 
-    const selectedFiles = page.locator('_react=FileItem');
+    const selectedFiles = page.locator('[data-test-selected=true]');
     expect(await selectedFiles.count()).toBeGreaterThanOrEqual(4);
   });
 });
