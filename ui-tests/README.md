@@ -38,7 +38,7 @@ jlpm run build:prod
 2. Start JupyterLab _with the extension installed_ without any token or password:
 
 ```
-jupyter lab --config ./ui-tests/jupyter_server_config.py
+jupyter lab --config ./ui-tests/jupyter_server_test_config.py
 ```
 
 3. Launch the code generator tool:
@@ -64,7 +64,7 @@ jlpm run build:prod
 2. Start JupyterLab _with the extension installed_ without any token or password:
 
 ```
-jupyter lab --config ./ui-tests/jupyter_server_config.py
+jupyter lab --config ./ui-tests/jupyter_server_test_config.py
 ```
 
 3. Launch the debug tool:
