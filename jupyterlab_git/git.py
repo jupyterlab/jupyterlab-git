@@ -380,7 +380,7 @@ class Git:
         # TODO Fix this in nbdime
         def remove_cell_ids(nb):
             for cell in nb.cells:
-                del cell["id"]
+                cell.pop("id", None)
             return nb
 
         current_loop = tornado.ioloop.IOLoop.current()
