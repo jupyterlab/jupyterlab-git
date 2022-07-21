@@ -400,7 +400,7 @@ class GitRemoteDetailsShowHandler(GitHandler):
         local_path = self.url2localpath(path)
         output = await self.git.remote_show(local_path, verbose=True)
         if output["code"] == 0:
-            self.set_status(201)
+            self.set_status(200)
         else:
             self.set_status(500)
         self.finish(json.dumps(output))
