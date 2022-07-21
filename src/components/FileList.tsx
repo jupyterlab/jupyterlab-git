@@ -155,6 +155,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }, this);
   }
 
+  componentWillUnmount(): void {
+    Signal.clearData(this);
+  }
   /**
    * Open the context menu on the advanced view
    *
