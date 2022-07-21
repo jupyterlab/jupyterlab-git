@@ -30,7 +30,7 @@ test.describe('File selection for normal staging', () => {
     });
 
     const selectedFileCount = await page.locator('[data-test-selected=true]').count();
-    expect(selectedFileCount).toBeGreaterThanOrEqual(2);
+    expect(selectedFileCount).toEqual(2);
   });
 
   test('should select four files with shift-click', async ({ page }) => {
