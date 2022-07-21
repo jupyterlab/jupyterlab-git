@@ -478,9 +478,7 @@ export class GitExtension implements IGitExtension {
   async removeRemote(name: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:remove:remote', async () => {
-      await requestAPI<void>(URLExt.join(path, 'remote', 'remove'), 'POST', {
-        name
-      });
+      await requestAPI<void>(URLExt.join(path, 'remote', name), 'DELETE');
     });
   }
 
