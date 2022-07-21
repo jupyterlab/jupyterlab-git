@@ -42,7 +42,6 @@ export interface IGitStageProps {
    */
   rowRenderer: (props: ListChildComponentProps) => JSX.Element;
 
-  simpleStaging?: boolean;
   selectAllButton?: React.ReactElement;
 }
 
