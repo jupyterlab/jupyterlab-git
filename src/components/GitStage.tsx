@@ -61,7 +61,7 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
           }
         }}
       >
-        {!props.collapsible && <div>{props.selectAllButton}</div>}
+        {props.selectAllButton && props.selectAllButton}
         {props.collapsible && (
           <button className={changeStageButtonStyle}>
             {showFiles && nFiles > 0 ? (

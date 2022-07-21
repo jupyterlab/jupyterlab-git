@@ -2,6 +2,7 @@ import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
+import { Signal } from '@lumino/signaling';
 import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
