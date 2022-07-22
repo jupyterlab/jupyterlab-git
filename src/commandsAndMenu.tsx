@@ -243,6 +243,15 @@ export function addCommands(
     }
   });
 
+  /** add toggle for histogram */
+  commands.addCommand(CommandIDs.gitToggleHistoryGraph, {
+    label: trans.__('History Graph'),
+    isToggled: () => !!settings.composite['simpleStaging'],
+    execute: args => {
+      settings.set('historyGraph', !settings.composite['simpleStaging']);
+    }
+  });
+
   /** add toggle for double click opens diffs */
   commands.addCommand(CommandIDs.gitToggleDoubleClickDiff, {
     label: trans.__('Double click opens diff'),
@@ -1285,6 +1294,8 @@ export function createGitMenu(
   menu.addItem({ type: 'separator' });
 
   menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
+
+  menu.addItem({ command: CommandIDs.gitToggleHistoryGraph });
 
   menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
 

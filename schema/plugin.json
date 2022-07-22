@@ -59,6 +59,12 @@
       "description": "If true, use a simplified concept of staging. Only files with changes are shown (instead of showing staged/changed/untracked), and all files with changes will be automatically staged",
       "default": false
     },
+    "historyGraph": {
+      "type": "boolean",
+      "title": "History graph flag",
+      "description": "If true, display a graph overview of the current commits.",
+      "default": false
+    },
     "commitAndPush": {
       "type": "boolean",
       "title": "Trigger push on commit",

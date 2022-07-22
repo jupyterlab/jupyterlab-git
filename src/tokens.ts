@@ -1166,6 +1166,7 @@ export enum CommandIDs {
   gitInit = 'git:init',
   gitOpenUrl = 'git:open-url',
   gitToggleSimpleStaging = 'git:toggle-simple-staging',
+  gitToggleHistoryGraph = 'git:toggle-history-graph',
   gitToggleDoubleClickDiff = 'git:toggle-double-click-diff',
   gitAddRemote = 'git:add-remote',
   gitClone = 'git:clone',
