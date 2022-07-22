@@ -246,9 +246,9 @@ export function addCommands(
   /** add toggle for histogram */
   commands.addCommand(CommandIDs.gitToggleHistoryGraph, {
     label: trans.__('History Graph'),
-    isToggled: () => !!settings.composite['simpleStaging'],
+    isToggled: () => !!settings.composite['historyGraph'],
     execute: args => {
-      settings.set('historyGraph', !settings.composite['simpleStaging']);
+      settings.set('historyGraph', !settings.composite['historyGraph']);
     }
   });
 
