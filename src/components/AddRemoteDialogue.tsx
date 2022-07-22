@@ -8,8 +8,8 @@ import { GitExtension } from '../model';
 import {
   remoteDialogClass,
   remoteDialogInputClass,
-  existingRemoteListClass,
-  existingRemoteItemClass
+  existingRemoteWrapperClass,
+  existingRemoteGridClass
 } from '../style/AddRemoteDialog';
 import { TranslationBundle } from '@jupyterlab/translation';
 
@@ -25,7 +25,7 @@ import {
   titleWrapperClass
 } from '../style/NewBranchDialog';
 
-import { deletionsMadeIcon } from '../style/icons';
+import { trashIcon } from '../style/icons';
 
 export interface IAddRemoteDialogueProps {
   /**
@@ -107,7 +107,7 @@ export class AddRemoteDialogue extends React.Component<
             </span>
             <input
               type="text"
-              placeholder="name"
+              placeholder={this.props.trans.__('name')}
               onChange={event =>
                 this.setState({
                   newRemote: {
@@ -119,7 +119,7 @@ export class AddRemoteDialogue extends React.Component<
             />
             <input
               type="text"
-              placeholder="Remote Git repository URL"
+              placeholder={this.props.trans.__('Remote Git repository URL')}
               onChange={event =>
                 this.setState({
                   newRemote: {
@@ -138,28 +138,29 @@ export class AddRemoteDialogue extends React.Component<
           )}
 
           {this.state.existingRemotes.length > 0 && (
-            <ul className={existingRemoteListClass}>
-              <p>Existing Remotes:</p>
-              {this.state.existingRemotes.map((remote, index) => (
-                <li key={`remote-${index}`} className={existingRemoteItemClass}>
-                  <span>{remote.name}</span>
-                  <span>{remote.url}</span>
-                  <ActionButton
-                    // className={hiddenButtonStyle}
-                    icon={deletionsMadeIcon}
-                    title={this.props.trans.__('Remove this remote')}
-                    onClick={async () => {
-                      await this.props.model.removeRemote(remote.name);
-                      this.setState({
-                        existingRemotes: this.state.existingRemotes.filter(
-                          r => r.name !== remote.name
-                        )
-                      });
-                    }}
-                  />
-                </li>
-              ))}
-            </ul>
+            <div className={existingRemoteWrapperClass}>
+              <p>{this.props.trans.__('Existing Remotes:')}</p>
+              <div className={existingRemoteGridClass}>
+                {this.state.existingRemotes.map((remote, index) => (
+                  <>
+                    <span>{remote.name}</span>
+                    <span>{remote.url}</span>
+                    <ActionButton
+                      icon={trashIcon}
+                      title={this.props.trans.__('Remove this remote')}
+                      onClick={async () => {
+                        await this.props.model.removeRemote(remote.name);
+                        this.setState({
+                          existingRemotes: this.state.existingRemotes.filter(
+                            r => r.name !== remote.name
+                          )
+                        });
+                      }}
+                    />
+                  </>
+                ))}
+              </div>
+            </div>
           )}
         </div>
         <DialogActions className={actionsWrapperClass}>

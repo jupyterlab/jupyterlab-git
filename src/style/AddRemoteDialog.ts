@@ -19,14 +19,15 @@ export const remoteDialogInputClass = style({
   }
 });
 
-export const existingRemoteListClass = style({
+export const existingRemoteWrapperClass = style({
   marginTop: '1.5rem',
-  listStyle: 'none',
   padding: '0px'
 });
 
-export const existingRemoteItemClass = style({
+export const existingRemoteGridClass = style({
   marginTop: '2px',
-  display: 'flex',
-  columnGap: '5px'
+  display: 'grid',
+  rowGap: '5px',
+  columnGap: '10px',
+  gridTemplateColumns: 'auto auto auto'
 });
