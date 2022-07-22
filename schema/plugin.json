@@ -100,7 +100,7 @@
           },
           {
             "command": "git:push",
-            "args": { "force": true }
+            "args": { "advanced": true }
           },
           {
             "command": "git:pull"

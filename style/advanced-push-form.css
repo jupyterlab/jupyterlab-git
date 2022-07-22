@@ -1,4 +1,5 @@
-.jp-options-wrapper {
+.jp-remote-options-wrapper {
+  margin: 4px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -15,5 +16,11 @@
   height: fit-content !important;
   appearance: auto !important;
   margin: 0px;
-  padding: 0px;
+}
+
+.jp-force-box-container {
+  margin-top: 1rem;
+  display: flex;
+  align-items: flex-end;
+  column-gap: 5px;
 }

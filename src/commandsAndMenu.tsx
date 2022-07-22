@@ -48,7 +48,7 @@ import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
 import { AddRemoteDialogue } from './components/AddRemoteDialogue';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
-import { SingleSelectionForm } from './widgets/SelectRemoteForm';
+import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 
 export interface IGitCloneArgs {
   /**
@@ -326,30 +326,28 @@ export function addCommands(
   /** Add git push command */
   commands.addCommand(CommandIDs.gitPush, {
     label: args =>
-      args.force
-        ? trans.__('Push to Remote (Force)')
+      (args['advanced'] as boolean)
+        ? trans.__('Push to Remote (Advanced)')
         : trans.__('Push to Remote'),
     caption: trans.__('Push code to remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
       try {
-        const remotes = await gitModel.getRemotes();
-
         let remote;
-        if (remotes.length > 1) {
+        let force;
+
+        if (args['advanced'] as boolean) {
           const result = await showDialog({
-            title: trans.__('Pick a remote repository to push.'),
-            body: new SingleSelectionForm(
-              trans.__(''),
-              remotes.map(remote => remote.name)
-            ),
+            title: trans.__('Please select push options.'),
+            body: new AdvancedPushForm(trans, gitModel),
             buttons: [
               Dialog.cancelButton({ label: trans.__('Cancel') }),
               Dialog.okButton({ label: trans.__('Proceed') })
             ]
           });
           if (result.button.accept) {
-            remote = result.value.selection;
+            remote = result.value.remoteName;
+            force = result.value.force;
           } else {
             return;
           }
@@ -361,7 +359,7 @@ export function addCommands(
         });
         const details = await showGitOperationDialog(
           gitModel,
-          args.force ? Operation.ForcePush : Operation.Push,
+          force ? Operation.ForcePush : Operation.Push,
           trans,
           (args = { remote })
         );
@@ -1320,7 +1318,7 @@ export function createGitMenu(
   ].forEach(command => {
     menu.addItem({ command });
     if (command === CommandIDs.gitPush) {
-      menu.addItem({ command, args: { force: true } });
+      menu.addItem({ command, args: { advanced: true } });
     }
     if (command === CommandIDs.gitPull) {
       menu.addItem({ command, args: { force: true } });
