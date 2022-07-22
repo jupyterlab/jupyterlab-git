@@ -33,6 +33,7 @@ export class AdvancedPushForm
 
     // Instructional text
     const text = document.createElement('div');
+    text.className = 'jp-remote-text';
     text.textContent = this._trans.__('Choose a remote to push to.');
 
     // List of remotes
@@ -80,7 +81,7 @@ export class AdvancedPushForm
 
       const label = document.createElement('label');
       label.htmlFor = remote.name;
-      label.textContent = remote.name;
+      label.textContent = `${remote.name}: ${remote.url}`;
 
       buttonWrapper.appendChild(radioButton);
       buttonWrapper.appendChild(label);

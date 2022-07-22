@@ -1,3 +1,7 @@
+.jp-remote-text {
+  font-size: 1rem;
+}
+
 .jp-remote-options-wrapper {
   margin: 4px;
   display: flex;
