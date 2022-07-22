@@ -410,17 +410,16 @@ class GitRemoteRemoveHandler(GitHandler):
     """Handler for 'git remote remove <name>'."""
 
     @tornado.web.authenticated
-    async def delete(self, path: str = ""):
+    async def delete(self, path: str = "", name: str = ""):
         """DELETE request handler to remove a remote."""
         local_path = self.url2localpath(path)
-        name = self.path_kwargs.get("name", "")
 
         output = await self.git.remote_remove(local_path, name)
         if output["code"] == 0:
             self.set_status(204)
         else:
             self.set_status(500)
-        self.finish(json.dumps(output))
+            self.finish(json.dumps(output))
 
 
 class GitResetHandler(GitHandler):
