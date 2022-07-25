@@ -41,7 +41,9 @@ export interface IGitStageProps {
    * Row renderer
    */
   rowRenderer: (props: ListChildComponentProps) => JSX.Element;
-
+  /**
+   * Optional select all element
+   */
   selectAllButton?: React.ReactElement;
 }
 

@@ -311,8 +311,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
 
   /**
    * Select files into state.selectedFiles
-   * @param file
-   * @param options
+   * @param file The current cliced-on file
+   * @param options Selection options
    */
   setSelection = (
     file: Git.IStatusFile,
@@ -329,6 +329,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
+  /**
+   * Mark files from the latest selected to this one
+   *
+   * @param file The current clicked-on file
+   */
   markUntilFile = (file: Git.IStatusFile): void => {
     if (!this.state.lastClickedFile) {
       this.props.model.setMark(file.to, true);
@@ -360,6 +365,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
+  /**
+   * Set mark status from select-all button
+   *
+   * @param files Files to toggle
+   */
   toggleAllFiles = (files: Git.IStatusFile[]): void => {
     const areFilesAllMarked = this._areFilesAllMarked();
     files.forEach(f => this.props.model.setMark(f.to, !areFilesAllMarked));
