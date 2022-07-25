@@ -135,6 +135,11 @@ const areFilesEqual = (fileA: Git.IStatusFile, fileB: Git.IStatusFile) => {
   );
 };
 
+/**
+ * Wrap mouse event handler to stop event propagation
+ * @param fn Mouse event handler
+ * @returns Mouse event handler that stops event from propagating
+ */
 const stopPropagationWrapper =
   (
     fn: React.EventHandler<React.MouseEvent>
@@ -382,6 +387,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
   };
 
+  /**
+   * Toggle selection status of a file
+   * @param file The clicked file
+   */
   private _toggleFile = (file: Git.IStatusFile): void => {
     if (file.status !== this.state.lastClickedFile.status) {
       this._selectOnlyOneFile(file);
@@ -406,6 +415,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
+  /**
+   * Select a list of files
+   * @param files List of files to select
+   */
   private _selectFiles = (files: Git.IStatusFile[]): void => {
     this.setState(prevState => {
       return {
@@ -419,6 +432,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
   };
 
+  /**
+   * Deselect a list of file
+   * @param files List of file to deselect
+   */
   private _deselectFiles = (files: Git.IStatusFile[]): void => {
     this.setState(prevState => {
       return {
@@ -429,6 +446,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     });
   };
 
+  /**
+   * Handle shift-click behaviour for file selection
+   * @param file The shift-clicked file
+   */
   private _selectUntilFile = (file: Git.IStatusFile): void => {
     if (
       !this.state.lastClickedFile ||
@@ -1247,6 +1268,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   }
 
+  /**
+   * Determine if files in simple staging are all marked
+   * @returns True if files are all marked
+   */
   private _areFilesAllMarked(): boolean {
     const filesForSimpleStaging = this.props.files.filter(
       file => !['unmerged', 'remote-changed'].includes(file.status)
