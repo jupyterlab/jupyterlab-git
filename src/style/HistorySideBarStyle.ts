@@ -36,3 +36,7 @@ export const historySideBarStyle = style({
 
   overflowY: 'auto'
 });
+
+export const historySideBarWrapperStyle = style({
+  display: 'flex'
+});

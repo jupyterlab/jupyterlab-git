@@ -7,7 +7,8 @@ import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
   historySideBarStyle,
   noHistoryFoundStyle,
-  selectedHistoryFileStyle
+  selectedHistoryFileStyle,
+  historySideBarWrapperStyle
 } from '../style/HistorySideBarStyle';
 import { Git } from '../tokens';
 import { openFileDiff } from '../utils';
@@ -15,6 +16,7 @@ import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
 import { PastCommitNode } from './PastCommitNode';
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
+import { GitCommitGraph } from './GitCommitGraph';
 
 /**
  * Interface describing component properties.
@@ -99,7 +101,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
           ? Git.Diff.SpecialRef.INDEX
           : Git.Diff.SpecialRef.WORKING
       }`,
-      pre_commit: 'HEAD',
+      pre_commits: ['HEAD'],
       is_binary: props.commits[0]?.is_binary ?? false,
       commit_msg: props.trans.__('Uncommitted Changes'),
       date: props.trans.__('now')
@@ -113,80 +115,94 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
       : props.commits;
 
   return (
-    <ol className={historySideBarStyle}>
-      {!!props.model.selectedHistoryFile && (
-        <FileItem
-          className={selectedHistoryFileStyle}
-          model={props.model}
-          trans={props.trans}
-          actions={
-            <ActionButton
-              className={hiddenButtonStyle}
-              icon={closeIcon}
-              title={props.trans.__('Discard file history')}
-              onClick={removeSelectedFile}
-            />
-          }
-          file={props.model.selectedHistoryFile}
-          onDoubleClick={removeSelectedFile}
-        />
-      )}
-      {commits.length ? (
-        commits.map((commit: Git.ISingleCommitInfo) => {
-          const commonProps = {
-            commit,
-            branches: props.branches,
-            model: props.model,
-            commands: props.commands,
-            trans: props.trans
-          };
+    <div className={historySideBarWrapperStyle}>
+      <GitCommitGraph
+        commits={commits.map(commit => ({
+          sha: commit.commit,
+          parents: commit.pre_commits
+        }))}
+        y_step={20}
+        x_step={20}
+        dotRadius={3}
+        lineWidth={2}
+        width={60}
+      />
 
-          // Only pass down callback when single file history is open
-          // and its diff is viewable
-          const onOpenDiff =
-            props.model.selectedHistoryFile && !commit.is_binary
-              ? openFileDiff(props.commands)(commit)(
-                  commit.file_path ?? props.model.selectedHistoryFile.to,
-                  !commit.is_binary,
-                  commit.previous_file_path
-                )
-              : undefined;
+      <ol className={historySideBarStyle}>
+        {!!props.model.selectedHistoryFile && (
+          <FileItem
+            className={selectedHistoryFileStyle}
+            model={props.model}
+            trans={props.trans}
+            actions={
+              <ActionButton
+                className={hiddenButtonStyle}
+                icon={closeIcon}
+                title={props.trans.__('Discard file history')}
+                onClick={removeSelectedFile}
+              />
+            }
+            file={props.model.selectedHistoryFile}
+            onDoubleClick={removeSelectedFile}
+          />
+        )}
+        {commits.length ? (
+          commits.map((commit: Git.ISingleCommitInfo) => {
+            const commonProps = {
+              commit,
+              branches: props.branches,
+              model: props.model,
+              commands: props.commands,
+              trans: props.trans
+            };
 
-          const isReferenceCommit =
-            commit.commit === props.referenceCommit?.commit;
-          const isChallengerCommit =
-            commit.commit === props.challengerCommit?.commit;
+            // Only pass down callback when single file history is open
+            // and its diff is viewable
+            const onOpenDiff =
+              props.model.selectedHistoryFile && !commit.is_binary
+                ? openFileDiff(props.commands)(commit)(
+                    commit.file_path ?? props.model.selectedHistoryFile.to,
+                    !commit.is_binary,
+                    commit.previous_file_path
+                  )
+                : undefined;
 
-          return (
-            <PastCommitNode
-              key={commit.commit}
-              {...commonProps}
-              isReferenceCommit={isReferenceCommit}
-              isChallengerCommit={isChallengerCommit}
-              onOpenDiff={onOpenDiff}
-              onSelectForCompare={
-                isChallengerCommit ? null : props.onSelectForCompare(commit)
-              }
-              onCompareWithSelected={
-                isReferenceCommit || props.referenceCommit === null
-                  ? null
-                  : props.onCompareWithSelected(commit)
-              }
-            >
-              {!props.model.selectedHistoryFile && (
-                <SinglePastCommitInfo
-                  {...commonProps}
-                  onOpenDiff={openFileDiff(props.commands)(commit)}
-                />
-              )}
-            </PastCommitNode>
-          );
-        })
-      ) : (
-        <li className={noHistoryFoundStyle}>
-          {props.trans.__('No history found.')}
-        </li>
-      )}
-    </ol>
+            const isReferenceCommit =
+              commit.commit === props.referenceCommit?.commit;
+            const isChallengerCommit =
+              commit.commit === props.challengerCommit?.commit;
+
+            return (
+              <PastCommitNode
+                key={commit.commit}
+                {...commonProps}
+                isReferenceCommit={isReferenceCommit}
+                isChallengerCommit={isChallengerCommit}
+                onOpenDiff={onOpenDiff}
+                onSelectForCompare={
+                  isChallengerCommit ? null : props.onSelectForCompare(commit)
+                }
+                onCompareWithSelected={
+                  isReferenceCommit || props.referenceCommit === null
+                    ? null
+                    : props.onCompareWithSelected(commit)
+                }
+              >
+                {!props.model.selectedHistoryFile && (
+                  <SinglePastCommitInfo
+                    {...commonProps}
+                    onOpenDiff={openFileDiff(props.commands)(commit)}
+                  />
+                )}
+              </PastCommitNode>
+            );
+          })
+        ) : (
+          <li className={noHistoryFoundStyle}>
+            {props.trans.__('No history found.')}
+          </li>
+        )}
+      </ol>
+    </div>
   );
 };
