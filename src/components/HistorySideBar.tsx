@@ -17,6 +17,7 @@ import { FileItem } from './FileItem';
 import { PastCommitNode } from './PastCommitNode';
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 import { GitCommitGraph } from './GitCommitGraph';
+import { ICommit } from '../generateGraphData';
 
 /**
  * Interface describing component properties.
@@ -114,18 +115,37 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
       ? [uncommitted, ...props.commits]
       : props.commits;
 
+  const [commitNodes, setCommitNodes] = React.useState<ICommit[]>(
+    commits.map(commit => ({
+      sha: commit.commit,
+      parents: commit.pre_commits,
+      height: 55
+    }))
+  );
+  const [expandedCommits, setExpandedCommits] = React.useState<string[]>([]);
+  const nodes = React.useRef<{ [sha: string]: HTMLLIElement }>({});
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      setCommitNodes(
+        commitNodes.map(node => ({
+          ...node,
+          height: nodes.current[node.sha].clientHeight
+        }))
+      );
+      // console.log(nodes.current);
+    }, 500);
+  }, [expandedCommits]);
+  console.log(expandedCommits, commitNodes);
   return (
     <div className={historySideBarWrapperStyle}>
       <GitCommitGraph
-        commits={commits.map(commit => ({
-          sha: commit.commit,
-          parents: commit.pre_commits
-        }))}
-        y_step={20}
-        x_step={20}
+        commits={commitNodes}
+        y_step={55}
+        x_step={10}
         dotRadius={3}
         lineWidth={2}
-        width={60}
+        // width={100}
       />
 
       <ol className={historySideBarStyle}>
@@ -175,6 +195,9 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
             return (
               <PastCommitNode
                 key={commit.commit}
+                setRef={node => {
+                  nodes.current[commit.commit] = node;
+                }}
                 {...commonProps}
                 isReferenceCommit={isReferenceCommit}
                 isChallengerCommit={isChallengerCommit}
@@ -186,6 +209,18 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
                   isReferenceCommit || props.referenceCommit === null
                     ? null
                     : props.onCompareWithSelected(commit)
+                }
+                expanded={expandedCommits.includes(commit.commit)}
+                toggleCommitExpansion={sha =>
+                  setExpandedCommits(prevExpandedCommits => {
+                    if (prevExpandedCommits.includes(sha)) {
+                      return prevExpandedCommits.filter(
+                        commit => commit !== sha
+                      );
+                    } else {
+                      return [...prevExpandedCommits, sha];
+                    }
+                  })
                 }
               >
                 {!props.model.selectedHistoryFile && (

@@ -1,6 +1,7 @@
 export interface ICommit {
   sha: string;
   parents: string[];
+  height: number;
 }
 export interface INode {
   sha: string;

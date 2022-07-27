@@ -97,24 +97,27 @@ export interface IPastCommitNodeProps {
   onCompareWithSelected:
     | ((event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>)
     | null;
+
+  expanded: boolean;
+  toggleCommitExpansion: (sha: string) => void;
+  setRef: (el: HTMLLIElement) => void;
 }
 
 /**
  * Interface describing component state.
  */
-export interface IPastCommitNodeState {
-  /**
-   * Boolean indicating whether additional commit information should be displayed.
-   */
-  expanded: boolean;
-}
+// export interface IPastCommitNodeState {
+//   /**
+//    * Boolean indicating whether additional commit information should be displayed.
+//    */
+//   expanded: boolean;
+// }
 
 /**
  * React component for rendering an individual commit.
  */
 export class PastCommitNode extends React.Component<
-  React.PropsWithChildren<IPastCommitNodeProps>,
-  IPastCommitNodeState
+  React.PropsWithChildren<IPastCommitNodeProps>
 > {
   /**
    * Returns a React component for rendering an individual commit.
@@ -124,9 +127,9 @@ export class PastCommitNode extends React.Component<
    */
   constructor(props: React.PropsWithChildren<IPastCommitNodeProps>) {
     super(props);
-    this.state = {
-      expanded: false
-    };
+    // this.state = {
+    //   expanded: false
+    // };
   }
 
   /**
@@ -137,11 +140,12 @@ export class PastCommitNode extends React.Component<
   render(): React.ReactElement {
     return (
       <li
+        ref={el => this.props.setRef(el)}
         className={classes(
           commitWrapperClass,
           !this.props.children && !!this.props.onOpenDiff
             ? singleFileCommitClass
-            : this.state.expanded
+            : this.props.expanded
             ? commitExpandedClass
             : null,
           this.props.isReferenceCommit && referenceCommitNodeClass,
@@ -152,7 +156,7 @@ export class PastCommitNode extends React.Component<
             ? this.props.trans.__('View commit details')
             : this.props.trans.__('View file changes')
         }
-        onClick={this._onCommitClick}
+        onClick={event => this._onCommitClick(event, this.props.commit.commit)}
       >
         <div className={commitHeaderClass}>
           <span className={commitHeaderItemClass}>
@@ -185,7 +189,7 @@ export class PastCommitNode extends React.Component<
             </React.Fragment>
           )}
           {this.props.children ? (
-            this.state.expanded ? (
+            this.props.expanded ? (
               <caretUpIcon.react className={iconButtonClass} tag="span" />
             ) : (
               <caretDownIcon.react className={iconButtonClass} tag="span" />
@@ -197,7 +201,7 @@ export class PastCommitNode extends React.Component<
         <div className={branchWrapperClass}>{this._renderBranches()}</div>
         <div className={commitBodyClass}>
           {this.props.commit.commit_msg}
-          {this.state.expanded && this.props.children}
+          {this.props.expanded && this.props.children}
         </div>
       </li>
     );
@@ -252,12 +256,11 @@ export class PastCommitNode extends React.Component<
    * @param event - event object
    */
   private _onCommitClick = (
-    event: React.MouseEvent<HTMLLIElement, MouseEvent>
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    sha: string
   ): void => {
     if (this.props.children) {
-      this.setState({
-        expanded: !this.state.expanded
-      });
+      this.props.toggleCommitExpansion(sha);
     } else {
       this.props.onOpenDiff?.call(this, event);
     }
