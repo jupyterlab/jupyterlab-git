@@ -25,50 +25,22 @@ const COLOURS = [
   '#cc317c'
 ];
 
-const classSet = (...classes: string[]): string =>
-  classes.filter(Boolean).join(' ');
-
 const getColour = function (branch: number) {
   const n = COLOURS.length;
   return COLOURS[branch % n];
 };
 
-const branchCount = function (data: INode[]): number {
+const branchCount = (commitNodes: INode[]): number => {
   let maxBranch = -1;
-  let i = 0;
 
-  while (i < data.length) {
-    let j = 0;
+  commitNodes.forEach(node => {
+    maxBranch = node.routes.reduce((max, route) => {
+      return Math.max(max, route[0], route[1]);
+    }, maxBranch);
+  });
 
-    while (j < data[i].routes.length) {
-      if (
-        maxBranch < data[i].routes[j][0] ||
-        maxBranch < data[i].routes[j][1]
-      ) {
-        maxBranch = Math.max.apply(Math, [
-          data[i].routes[j][0],
-          data[i].routes[j][1]
-        ]);
-      }
-      j++;
-    }
-    i++;
-  }
   return maxBranch + 1;
 };
-
-// const distance = function (
-//   point1: { x: number; y: number },
-//   point2: { x: number; y: number }
-// ) {
-//   let xs = 0;
-//   let ys = 0;
-//   xs = point2.x - point1.x;
-//   xs = xs * xs;
-//   ys = point2.y - point1.y;
-//   ys = ys * ys;
-//   return Math.sqrt(xs + ys);
-// };
 
 export interface IGitCommitGraphProps {
   commits: ICommit[];
@@ -86,32 +58,6 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
     super(props);
   }
 
-  // cursorPoint(e) {
-  //   const svg = this.getDOMNode();
-  //   const svgPoint = svg.createSVGPoint();
-  //   svgPoint.x = e.clientX;
-  //   svgPoint.y = e.clientY;
-  //   return svgPoint.matrixTransform(svg.getScreenCTM().inverse());
-  // }
-
-  // handleClick(e) {
-  //   const cursorLoc = this.cursorPoint(e);
-
-  //   let smallestDistance = Infinity;
-  //   let closestCommit = null;
-  //   for (let commit of Array.from(this.renderedCommitsPositions)) {
-  //     const commitDistance = distance(cursorLoc, commit);
-  //     if (commitDistance < smallestDistance) {
-  //       smallestDistance = commitDistance;
-  //       closestCommit = commit;
-  //     }
-  //   }
-
-  //   return typeof this.props.onClick === 'function'
-  //     ? this.props.onClick(closestCommit.sha)
-  //     : undefined;
-  // }
-
   getGraphData(): INode[] {
     return (
       this.graphData || (this.graphData = generateGraphData(this.props.commits))
@@ -125,7 +71,7 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   }
 
   getWidth(): number {
-    if (this.props.width !== null) {
+    if (this.props.width) {
       return this.props.width;
     }
     return this.getContentWidth();
@@ -136,7 +82,7 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   }
 
   getHeight(): number {
-    if (this.props.height !== null) {
+    if (this.props.height) {
       return this.props.height;
     }
     return this.getContentHeight();
@@ -233,10 +179,7 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
     // if (this.props.selected) {
     //   selectedClass = 'selected';
     // }
-    const classes = classSet(
-      `commits-graph-branch-${dot_branch}`
-      // selectedClass
-    );
+    const classes = `commits-graph-branch-${dot_branch}`;
 
     return (
       <circle
@@ -247,7 +190,9 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
         //onClick: this.handleClick,
         data-sha={sha}
         className={classes}
-      ></circle>
+      >
+        <title>{sha.slice(0, 6)}</title>
+      </circle>
     );
   }
 
