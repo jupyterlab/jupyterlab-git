@@ -17,7 +17,6 @@ import { FileItem } from './FileItem';
 import { PastCommitNode } from './PastCommitNode';
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 import { GitCommitGraph } from './GitCommitGraph';
-import { ICommit } from '../generateGraphData';
 
 /**
  * Interface describing component properties.
@@ -115,38 +114,22 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
       ? [uncommitted, ...props.commits]
       : props.commits;
 
-  const [commitNodes, setCommitNodes] = React.useState<ICommit[]>(
-    commits.map(commit => ({
-      sha: commit.commit,
-      parents: commit.pre_commits,
-      height: 55
-    }))
-  );
   const [expandedCommits, setExpandedCommits] = React.useState<string[]>([]);
   const nodes = React.useRef<{ [sha: string]: HTMLLIElement }>({});
 
-  React.useEffect(() => {
-    setTimeout(() => {
-      setCommitNodes(
-        commitNodes.map(node => ({
-          ...node,
-          height: nodes.current[node.sha].clientHeight
-        }))
-      );
-      // console.log(nodes.current);
-    }, 500);
-  }, [expandedCommits]);
-  console.log(expandedCommits, commitNodes);
   return (
     <div className={historySideBarWrapperStyle}>
-      <GitCommitGraph
-        commits={commitNodes}
-        y_step={55}
-        x_step={10}
-        dotRadius={3}
-        lineWidth={2}
-        // width={100}
-      />
+      {!props.model.selectedHistoryFile && (
+        <GitCommitGraph
+          commits={props.commits.map(commit => ({
+            sha: commit.commit,
+            parents: commit.pre_commits,
+            height: nodes.current[commit.commit]?.clientHeight ?? 60
+          }))}
+          dotRadius={3}
+          lineWidth={2}
+        />
+      )}
 
       <ol className={historySideBarStyle}>
         {!!props.model.selectedHistoryFile && (
