@@ -124,7 +124,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
           commits={props.commits.map(commit => ({
             sha: commit.commit,
             parents: commit.pre_commits,
-            height: nodes.current[commit.commit]?.clientHeight ?? 60
+            height: nodes.current[commit.commit]?.offsetHeight ?? 55
           }))}
           dotRadius={3}
           lineWidth={2}

@@ -35,7 +35,7 @@ const branchCount = (commitNodes: INode[]): number => {
 
   commitNodes.forEach(node => {
     maxBranch = node.routes.reduce((max, route) => {
-      return Math.max(max, route[0], route[1]);
+      return Math.max(max, route.from, route.to);
     }, maxBranch);
   });
 
@@ -44,30 +44,25 @@ const branchCount = (commitNodes: INode[]): number => {
 
 export interface IGitCommitGraphProps {
   commits: ICommit[];
-  x_step: number;
-  y_step: number;
   height?: number;
   width?: number;
   dotRadius: number;
   lineWidth: number;
-  mirror?: boolean;
 }
 
 export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   constructor(props: IGitCommitGraphProps) {
     super(props);
+    this.x_step = 10;
+    this.y_step = 60;
   }
 
   getGraphData(): INode[] {
-    return (
-      this.graphData || (this.graphData = generateGraphData(this.props.commits))
-    );
+    return generateGraphData(this.props.commits);
   }
 
   getBranchCount(): number {
-    return (
-      this.branchCount || (this.branchCount = branchCount(this.getGraphData()))
-    );
+    return branchCount(this.getGraphData());
   }
 
   getWidth(): number {
@@ -78,7 +73,7 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   }
 
   getContentWidth(): number {
-    return (this.getBranchCount() + 0.5) * this.props.x_step;
+    return (this.getBranchCount() + 0.5) * this.x_step;
   }
 
   getHeight(): number {
@@ -89,19 +84,9 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   }
 
   getContentHeight(): number {
-    return (this.getGraphData().length + 2) * this.props.y_step;
-  }
-
-  getInvert(): number {
-    if (this.props.mirror) {
-      return 0 - this.props.width;
-    } else {
-      return 0;
-    }
-  }
-
-  getOffset(): number {
-    return 0; //this.getWidth() / 2 - this.getContentWidth() / 2;
+    return this.props.commits.reduce((acc, commit) => {
+      return acc + commit.height;
+    }, 0);
   }
 
   renderRouteNode(svgPathDataAttribute: string, branch: number): JSX.Element {
@@ -120,20 +105,19 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   }
 
   renderRoute(
-    commit_idx: number,
-    route: [number, number, number]
+    yOffset: number,
+    route: [number, number, number],
+    height: number
   ): JSX.Element {
     const [from, to, branch] = route;
-    const { x_step, y_step } = this.props;
-    const offset = this.getOffset();
-    const invert = this.getInvert();
+    const { x_step } = this;
 
     const svgPath = new SVGPathData();
 
-    const from_x = offset + invert + (from + 1) * x_step;
-    const from_y = (commit_idx + 0.5) * y_step;
-    const to_x = offset + invert + (to + 1) * x_step;
-    const to_y = (commit_idx + 0.5 + 1) * y_step;
+    const from_x = (from + 1) * x_step;
+    const from_y = yOffset;
+    const to_x = (to + 1) * x_step;
+    const to_y = yOffset + height;
 
     svgPath.moveTo(from_x, from_y);
     if (from_x === to_x) {
@@ -141,9 +125,9 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
     } else {
       svgPath.bezierCurveTo(
         from_x - x_step / 4,
-        from_y + (y_step / 3) * 2,
+        from_y + height / 2,
         to_x + x_step / 4,
-        to_y - (y_step / 3) * 2,
+        to_y - height / 2,
         to_x,
         to_y
       );
@@ -191,27 +175,29 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
         data-sha={sha}
         className={classes}
       >
-        <title>{sha.slice(0, 6)}</title>
+        <title>{sha.slice(0, 7)}</title>
       </circle>
     );
   }
 
   renderCommit(idx: number, commit: INode): [JSX.Element, JSX.Element[]] {
     const { sha, dot, routes } = commit;
-    const [dot_offset, dot_branch] = Array.from(dot);
+    const { lateralOffset, branch } = dot;
 
     // draw dot
-    const { x_step, y_step } = this.props;
-    const offset = this.getOffset();
-    const invert = this.getInvert();
+    const { x_step } = this;
 
-    const x = offset + invert + (dot_offset + 1) * x_step;
-    const y = (idx + 0.5) * y_step;
+    const x = (lateralOffset + 1) * x_step;
+    const y = commit.yOffset;
 
-    const commitNode = this.renderCommitNode(x, y, sha, dot_branch);
+    const commitNode = this.renderCommitNode(x, y, sha, branch);
 
-    const routeNodes = routes.map((route, index) =>
-      this.renderRoute(idx, route)
+    const routeNodes = routes.map(route =>
+      this.renderRoute(
+        commit.yOffset,
+        [route.from, route.to, route.branch],
+        this.props.commits[idx].height
+      )
     );
 
     this.renderedCommitsPositions.push({ x, y, sha });
@@ -221,13 +207,13 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
 
   render(): JSX.Element {
     // reset lookup table of commit node locations
-
     this.renderedCommitsPositions = [];
 
     const allCommitNodes: JSX.Element[] = [];
     let allRouteNodes: JSX.Element[] = [];
-
-    this.getGraphData().forEach((node, index) => {
+    const commitNodes = this.getGraphData();
+    console.log(commitNodes);
+    commitNodes.forEach((node, index) => {
       const commit = node;
       const [commitNode, routeNodes] = this.renderCommit(index, commit);
       allCommitNodes.push(commitNode);
@@ -239,7 +225,7 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
     const height = this.getHeight();
     const width = this.getWidth();
 
-    const style = { height, width };
+    const style = { height, width, 'flex-shrink': 0 };
     //const svgProps = { height, width, style, children };
 
     return (
@@ -257,4 +243,6 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   renderedCommitsPositions: { x: number; y: number; sha: string }[];
   graphData: INode[];
   branchCount: number;
+  x_step: number;
+  y_step: number;
 }

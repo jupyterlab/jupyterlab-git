@@ -5,19 +5,27 @@ export interface ICommit {
 }
 export interface INode {
   sha: string;
-  dot: [number, number];
-  routes: [number, number, number][];
+  dot: { lateralOffset: number; branch: number };
+  routes: IRoute[];
+  yOffset: number;
+}
+export interface IRoute {
+  from: number;
+  to: number;
+  branch: number;
 }
 
 const Node = (
   sha: string,
   offset: number,
   branch: number,
-  routes: [number, number, number][]
+  routes: IRoute[],
+  yOffset: number
 ): INode => ({
   sha,
-  dot: [offset, branch],
-  routes
+  dot: { lateralOffset: offset, branch },
+  routes,
+  yOffset
 });
 
 const remove = function (list: number[], item: number) {
@@ -59,13 +67,13 @@ export const generateGraphData = function (commits: ICommit[]): INode[] {
     }
     return branches[sha];
   };
-
-  for (const commit of commits) {
+  let currentYOffset = 25;
+  commits.forEach((commit, index) => {
     let b, i;
     const branch = getBranch(commit.sha);
     const numParents = commit.parents.length;
     const offset = reserve.indexOf(branch);
-    const routes: [number, number, number][] = [];
+    const routes: IRoute[] = [];
 
     if (numParents === 1) {
       if (branches[commit.parents[0]] || branches[commit.parents[0]] === 0) {
@@ -73,24 +81,28 @@ export const generateGraphData = function (commits: ICommit[]): INode[] {
         const iterable = reserve.slice(offset + 1);
         for (i = 0; i < iterable.length; i++) {
           b = iterable[i];
-          routes.push([i + offset + 1, i + offset + 1 - 1, b]);
+          routes.push({
+            from: i + offset + 1,
+            to: i + offset + 1 - 1,
+            branch: b
+          });
         }
         const iterable1 = reserve.slice(0, offset);
         for (i = 0; i < iterable1.length; i++) {
           b = iterable1[i];
-          routes.push([i, i, b]);
+          routes.push({ from: i, to: i, branch: b });
         }
         remove(reserve, branch);
-        routes.push([
-          offset,
-          reserve.indexOf(branches[commit.parents[0]]),
+        routes.push({
+          from: offset,
+          to: reserve.indexOf(branches[commit.parents[0]]),
           branch
-        ]);
+        });
       } else {
         // straight
         for (i = 0; i < reserve.length; i++) {
           b = reserve[i];
-          routes.push([i, i, b]);
+          routes.push({ from: i, to: i, branch: b });
         }
         branches[commit.parents[0]] = branch;
       }
@@ -99,15 +111,21 @@ export const generateGraphData = function (commits: ICommit[]): INode[] {
       branches[commit.parents[0]] = branch;
       for (i = 0; i < reserve.length; i++) {
         b = reserve[i];
-        routes.push([i, i, b]);
+        routes.push({ from: i, to: i, branch: b });
       }
       const otherBranch = getBranch(commit.parents[1]);
-      routes.push([offset, reserve.indexOf(otherBranch), otherBranch]);
+      routes.push({
+        from: offset,
+        to: reserve.indexOf(otherBranch),
+        branch: otherBranch
+      });
     }
-
-    const node = Node(commit.sha, offset, branch, routes);
+    if (index - 1 >= 0) {
+      currentYOffset += commits[index - 1].height;
+    }
+    const node = Node(commit.sha, offset, branch, routes, currentYOffset);
     nodes.push(node);
-  }
+  });
 
   return nodes;
 };
