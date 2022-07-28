@@ -2,6 +2,7 @@ import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
+import { Signal } from '@lumino/signaling';
 import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -22,9 +23,12 @@ import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
 import { discardAllChanges } from '../widgets/discardAllChanges';
+import { SelectAllButton } from './SelectAllButton';
 
 export interface IFileListState {
-  selectedFile: Git.IStatusFile | null;
+  selectedFiles: Git.IStatusFile[];
+  lastClickedFile: Git.IStatusFile | null;
+  markedFiles: Git.IStatusFile[];
 }
 
 export interface IFileListProps {
@@ -115,15 +119,60 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
   unmerged: [ContextCommandIDs.gitFileDiff]
 };
 
+/**
+ * Compare fileA and fileB.
+ * @param fileA
+ * @param fileB
+ * @returns true if fileA and fileB are equal, otherwise, false.
+ */
+const areFilesEqual = (fileA: Git.IStatusFile, fileB: Git.IStatusFile) => {
+  return (
+    fileA.x === fileB.x &&
+    fileA.y === fileB.y &&
+    fileA.from === fileB.from &&
+    fileA.to === fileB.to &&
+    fileA.status === fileB.status
+  );
+};
+
+/**
+ * Wrap mouse event handler to stop event propagation
+ * @param fn Mouse event handler
+ * @returns Mouse event handler that stops event from propagating
+ */
+const stopPropagationWrapper =
+  (
+    fn: React.EventHandler<React.MouseEvent>
+  ): React.EventHandler<React.MouseEvent> =>
+  (event: React.MouseEvent) => {
+    event.stopPropagation();
+    fn(event);
+  };
+
 export class FileList extends React.Component<IFileListProps, IFileListState> {
   constructor(props: IFileListProps) {
     super(props);
 
     this.state = {
-      selectedFile: null
+      selectedFiles: [],
+      lastClickedFile: null,
+      markedFiles: props.model.markedFiles
     };
   }
 
+  componentDidMount(): void {
+    const { model } = this.props;
+    model.markChanged.connect(() => {
+      this.setState({ markedFiles: model.markedFiles });
+    }, this);
+    model.repositoryChanged.connect(() => {
+      this.setState({ markedFiles: model.markedFiles });
+    }, this);
+  }
+
+  componentWillUnmount(): void {
+    Signal.clearData(this);
+  }
   /**
    * Open the context menu on the advanced view
    *
@@ -135,14 +184,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event: React.MouseEvent
   ): void => {
     event.preventDefault();
-
-    this.setState({
-      selectedFile
-    });
+    let selectedFiles: Git.IStatusFile[];
+    if (!this._isSelectedFile(selectedFile)) {
+      this._selectOnlyOneFile(selectedFile);
+      selectedFiles = [selectedFile];
+    } else {
+      selectedFiles = this.state.selectedFiles;
+    }
 
     const contextMenu = new Menu({ commands: this.props.commands });
-    const commands = CONTEXT_COMMANDS[selectedFile.status];
-    addMenuItems(commands, contextMenu, [selectedFile]);
+    const commands = CONTEXT_COMMANDS[selectedFiles[0].status];
+    addMenuItems(commands, contextMenu, selectedFiles);
 
     contextMenu.open(event.clientX, event.clientY);
   };
@@ -171,9 +223,28 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.props.model.reset();
   };
 
-  /** Reset a specific staged file */
-  resetStagedFile = async (file: string): Promise<void> => {
-    await this.props.model.reset(file);
+  /** Reset staged selected files */
+  resetSelectedFiles = (file: Git.IStatusFile): void => {
+    if (this._isSelectedFile(file)) {
+      this.state.selectedFiles.forEach(file => this.props.model.reset(file.to));
+    } else {
+      this.props.model.reset(file.to);
+    }
+  };
+
+  /** If the clicked file is selected, open all selected files.
+   * If the clicked file is not selected, open the clicked file only.
+   */
+  openSelectedFiles = (clickedFile: Git.IStatusFile): void => {
+    if (this._isSelectedFile(clickedFile)) {
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+        files: this.state.selectedFiles
+      } as CommandArguments.IGitContextAction as any);
+    } else {
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+        files: [clickedFile]
+      } as CommandArguments.IGitContextAction as any);
+    }
   };
 
   /** Add all unstaged files */
@@ -221,10 +292,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Discard changes in a specific unstaged or staged file */
-  discardChanges = async (file: Git.IStatusFile): Promise<void> => {
-    await this.props.commands.execute(ContextCommandIDs.gitFileDiscard, {
-      files: [file]
-    } as CommandArguments.IGitContextAction as any);
+  discardChanges = (file: Git.IStatusFile): void => {
+    if (this._isSelectedFile(file)) {
+      this.props.commands.execute(ContextCommandIDs.gitFileDiscard, {
+        files: this.state.selectedFiles
+      } as CommandArguments.IGitContextAction as any);
+    } else {
+      this.props.commands.execute(ContextCommandIDs.gitFileDiscard, {
+        files: [file]
+      } as CommandArguments.IGitContextAction as any);
+    }
   };
 
   /** Add all untracked files */
@@ -237,8 +314,248 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     await this.addFile(...this.markedFiles.map(file => file.to));
   };
 
-  updateSelectedFile = (file: Git.IStatusFile | null): void => {
-    this.setState({ selectedFile: file });
+  /**
+   * Select files into state.selectedFiles
+   * @param file The current cliced-on file
+   * @param options Selection options
+   */
+  setSelection = (
+    file: Git.IStatusFile,
+    options?: { singleton?: boolean; group?: boolean }
+  ): void => {
+    if (options && options.singleton) {
+      this._selectOnlyOneFile(file);
+    }
+    if (options && options.group) {
+      this._selectUntilFile(file);
+    }
+    if (!options) {
+      this._toggleFile(file);
+    }
+  };
+
+  /**
+   * Mark files from the latest selected to this one
+   *
+   * @param file The current clicked-on file
+   */
+  markUntilFile = (file: Git.IStatusFile): void => {
+    if (!this.state.lastClickedFile) {
+      this.props.model.setMark(file.to, true);
+      return;
+    }
+    const filesWithMarkBox = this.props.files.filter(
+      fileStatus => !['unmerged', 'remote-changed'].includes(fileStatus.status)
+    );
+
+    const lastClickedFileIndex = filesWithMarkBox.findIndex(fileStatus =>
+      areFilesEqual(fileStatus, this.state.lastClickedFile)
+    );
+    const currentFileIndex = filesWithMarkBox.findIndex(fileStatus =>
+      areFilesEqual(fileStatus, file)
+    );
+
+    if (currentFileIndex > lastClickedFileIndex) {
+      const filesToAdd = filesWithMarkBox.slice(
+        lastClickedFileIndex,
+        currentFileIndex + 1
+      );
+      filesToAdd.forEach(f => this.props.model.setMark(f.to, true));
+    } else {
+      const filesToAdd = filesWithMarkBox.slice(
+        currentFileIndex,
+        lastClickedFileIndex + 1
+      );
+      filesToAdd.forEach(f => this.props.model.setMark(f.to, true));
+    }
+  };
+
+  /**
+   * Set mark status from select-all button
+   *
+   * @param files Files to toggle
+   */
+  toggleAllFiles = (files: Git.IStatusFile[]): void => {
+    const areFilesAllMarked = this._areFilesAllMarked();
+    files.forEach(f => this.props.model.setMark(f.to, !areFilesAllMarked));
+  };
+
+  private _selectOnlyOneFile = (file: Git.IStatusFile): void => {
+    this.setState({
+      selectedFiles: [file],
+      lastClickedFile: file
+    });
+  };
+
+  /**
+   * Toggle selection status of a file
+   * @param file The clicked file
+   */
+  private _toggleFile = (file: Git.IStatusFile): void => {
+    if (file.status !== this.state.lastClickedFile.status) {
+      this._selectOnlyOneFile(file);
+      return;
+    }
+
+    const fileStatus = this.state.selectedFiles.find(fileStatus =>
+      areFilesEqual(fileStatus, file)
+    );
+    if (!fileStatus) {
+      this.setState({
+        selectedFiles: [...this.state.selectedFiles, file],
+        lastClickedFile: file
+      });
+    } else {
+      this.setState({
+        selectedFiles: this.state.selectedFiles.filter(
+          fileStatus => !areFilesEqual(fileStatus, file)
+        ),
+        lastClickedFile: file
+      });
+    }
+  };
+
+  /**
+   * Select a list of files
+   * @param files List of files to select
+   */
+  private _selectFiles = (files: Git.IStatusFile[]): void => {
+    this.setState(prevState => {
+      return {
+        selectedFiles: [
+          ...prevState.selectedFiles,
+          ...files.filter(
+            file => !prevState.selectedFiles.some(f => areFilesEqual(f, file))
+          )
+        ]
+      };
+    });
+  };
+
+  /**
+   * Deselect a list of file
+   * @param files List of file to deselect
+   */
+  private _deselectFiles = (files: Git.IStatusFile[]): void => {
+    this.setState(prevState => {
+      return {
+        selectedFiles: prevState.selectedFiles.filter(
+          selectedFile => !files.some(file => areFilesEqual(selectedFile, file))
+        )
+      };
+    });
+  };
+
+  /**
+   * Handle shift-click behaviour for file selection
+   * @param file The shift-clicked file
+   */
+  private _selectUntilFile = (file: Git.IStatusFile): void => {
+    if (
+      !this.state.lastClickedFile ||
+      file.status !== this.state.lastClickedFile.status
+    ) {
+      this._selectOnlyOneFile(file);
+      return;
+    }
+
+    const selectedFileStatus = this.state.lastClickedFile.status;
+    const allFilesWithSelectedStatus = this.props.files.filter(
+      fileStatus => fileStatus.status === selectedFileStatus
+    );
+
+    const partiallyStagedFiles = this.props.files.filter(
+      fileStatus => fileStatus.status === 'partially-staged'
+    );
+
+    switch (selectedFileStatus) {
+      case 'staged':
+        allFilesWithSelectedStatus.push(
+          ...partiallyStagedFiles.map(
+            fileStatus =>
+              ({
+                ...fileStatus,
+                status: 'staged'
+              } as Git.IStatusFile)
+          )
+        );
+        break;
+      case 'unstaged':
+        allFilesWithSelectedStatus.push(
+          ...partiallyStagedFiles.map(
+            fileStatus =>
+              ({
+                ...fileStatus,
+                status: 'unstaged'
+              } as Git.IStatusFile)
+          )
+        );
+        break;
+    }
+
+    allFilesWithSelectedStatus.sort((a, b) => a.to.localeCompare(b.to));
+
+    const lastClickedFileIndex = allFilesWithSelectedStatus.findIndex(
+      fileStatus => areFilesEqual(fileStatus, this.state.lastClickedFile)
+    );
+    const currentFileIndex = allFilesWithSelectedStatus.findIndex(fileStatus =>
+      areFilesEqual(fileStatus, file)
+    );
+
+    if (currentFileIndex > lastClickedFileIndex) {
+      const highestSelectedIndex = allFilesWithSelectedStatus.findIndex(
+        (file, index) =>
+          index > lastClickedFileIndex && !this._isSelectedFile(file)
+      );
+      if (highestSelectedIndex === -1) {
+        this._deselectFiles(
+          allFilesWithSelectedStatus.slice(currentFileIndex + 1)
+        );
+      } else if (currentFileIndex < highestSelectedIndex) {
+        this._deselectFiles(
+          allFilesWithSelectedStatus.slice(
+            currentFileIndex + 1,
+            highestSelectedIndex
+          )
+        );
+      } else {
+        this._selectFiles(
+          allFilesWithSelectedStatus.slice(
+            highestSelectedIndex,
+            currentFileIndex + 1
+          )
+        );
+      }
+    } else if (currentFileIndex < lastClickedFileIndex) {
+      const lowestSelectedIndex = allFilesWithSelectedStatus.findIndex(
+        (file, index) =>
+          index < lastClickedFileIndex && this._isSelectedFile(file)
+      );
+      if (lowestSelectedIndex === -1) {
+        this._selectFiles(
+          allFilesWithSelectedStatus.slice(
+            currentFileIndex,
+            lastClickedFileIndex
+          )
+        );
+      } else if (currentFileIndex < lowestSelectedIndex) {
+        this._selectFiles(
+          allFilesWithSelectedStatus.slice(
+            currentFileIndex,
+            lowestSelectedIndex
+          )
+        );
+      } else {
+        this._deselectFiles(
+          allFilesWithSelectedStatus.slice(
+            lowestSelectedIndex,
+            currentFileIndex
+          )
+        );
+      }
+    } else {
+      this._selectOnlyOneFile(file);
+    }
   };
 
   pullFromRemote = async (event: React.MouseEvent): Promise<void> => {
@@ -246,7 +563,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   get markedFiles(): Git.IStatusFile[] {
-    return this.props.files.filter(file => this.props.model.getMark(file.to));
+    return this.props.model.markedFiles;
   }
 
   /**
@@ -349,16 +666,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param candidate file to test
    */
   private _isSelectedFile(candidate: Git.IStatusFile): boolean {
-    if (this.state.selectedFile === null) {
-      return false;
-    }
-
-    return (
-      this.state.selectedFile.x === candidate.x &&
-      this.state.selectedFile.y === candidate.y &&
-      this.state.selectedFile.from === candidate.from &&
-      this.state.selectedFile.to === candidate.to &&
-      this.state.selectedFile.status === candidate.status
+    return this.state.selectedFiles.some(file =>
+      areFilesEqual(file, candidate)
     );
   }
 
@@ -384,8 +693,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         file={file}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        selectFile={this.updateSelectedFile}
-        onDoubleClick={() => this._openDiffView(file)}
+        setSelection={this.setSelection}
+        onDoubleClick={() => this._openDiffViews([file])}
         style={{ ...style }}
       />
     );
@@ -423,11 +732,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       .composite as boolean;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
-    const openFile = () => {
-      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-        files: [file]
-      } as CommandArguments.IGitContextAction as any);
-    };
     const diffButton = this._createDiffButton(file);
     return (
       <FileItem
@@ -438,16 +742,18 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={openFile}
+              onClick={stopPropagationWrapper(() =>
+                this.openSelectedFiles(file)
+              )}
             />
             {diffButton}
             <ActionButton
               className={hiddenButtonStyle}
               icon={removeIcon}
               title={this.props.trans.__('Unstage this change')}
-              onClick={() => {
-                this.resetStagedFile(file.to);
-              }}
+              onClick={stopPropagationWrapper(() => {
+                this.resetSelectedFiles(file);
+              })}
             />
           </React.Fragment>
         }
@@ -455,13 +761,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         contextMenu={this.openContextMenu}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        selectFile={this.updateSelectedFile}
+        setSelection={this.setSelection}
         onDoubleClick={
           doubleClickDiff
             ? diffButton
-              ? () => this._openDiffView(file)
+              ? () => this._openDiffViews([file])
               : () => undefined
-            : openFile
+            : () => this.openSelectedFiles(file)
         }
         style={style}
       />
@@ -510,11 +816,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       .composite as boolean;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
-    const openFile = () => {
-      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-        files: [file]
-      } as CommandArguments.IGitContextAction as any);
-    };
     const diffButton = this._createDiffButton(file);
     return (
       <FileItem
@@ -525,24 +826,34 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={openFile}
+              onClick={stopPropagationWrapper(() =>
+                this.openSelectedFiles(file)
+              )}
             />
             {diffButton}
             <ActionButton
               className={hiddenButtonStyle}
               icon={discardIcon}
               title={this.props.trans.__('Discard changes')}
-              onClick={() => {
+              onClick={stopPropagationWrapper(() => {
                 this.discardChanges(file);
-              }}
+              })}
             />
             <ActionButton
               className={hiddenButtonStyle}
               icon={addIcon}
               title={this.props.trans.__('Stage this change')}
-              onClick={() => {
-                this.addFile(file.to);
-              }}
+              onClick={stopPropagationWrapper(() => {
+                if (this._isSelectedFile(file)) {
+                  this.addFile(
+                    ...this.state.selectedFiles.map(
+                      selectedFile => selectedFile.to
+                    )
+                  );
+                } else {
+                  this.addFile(file.to);
+                }
+              })}
             />
           </React.Fragment>
         }
@@ -550,13 +861,13 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         contextMenu={this.openContextMenu}
         model={this.props.model}
         selected={this._isSelectedFile(file)}
-        selectFile={this.updateSelectedFile}
+        setSelection={this.setSelection}
         onDoubleClick={
           doubleClickDiff
             ? diffButton
-              ? () => this._openDiffView(file)
+              ? () => this._openDiffViews([file])
               : () => undefined
-            : openFile
+            : () => this.openSelectedFiles(file)
         }
         style={style}
       />
@@ -624,19 +935,25 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={() => {
-                this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-                  files: [file]
-                } as CommandArguments.IGitContextAction as any);
-              }}
+              onClick={stopPropagationWrapper(() =>
+                this.openSelectedFiles(file)
+              )}
             />
             <ActionButton
               className={hiddenButtonStyle}
               icon={addIcon}
               title={this.props.trans.__('Track this file')}
-              onClick={() => {
-                this.addFile(file.to);
-              }}
+              onClick={stopPropagationWrapper(() => {
+                if (this._isSelectedFile(file)) {
+                  this.addFile(
+                    ...this.state.selectedFiles.map(
+                      selectedFile => selectedFile.to
+                    )
+                  );
+                } else {
+                  this.addFile(file.to);
+                }
+              })}
             />
           </React.Fragment>
         }
@@ -651,7 +968,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           }
         }}
         selected={this._isSelectedFile(file)}
-        selectFile={this.updateSelectedFile}
+        setSelection={this.setSelection}
         style={style}
       />
     );
@@ -708,11 +1025,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={() => {
-                this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-                  files: [file]
-                } as CommandArguments.IGitContextAction as any);
-              }}
+              onClick={stopPropagationWrapper(() =>
+                this.openSelectedFiles(file)
+              )}
             />
           </React.Fragment>
         }
@@ -727,7 +1042,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           }
         }}
         selected={this._isSelectedFile(file)}
-        selectFile={this.updateSelectedFile}
+        setSelection={this.setSelection}
         style={style}
       />
     );
@@ -776,7 +1091,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     const doubleClickDiff = this.props.settings.get('doubleClickDiff')
       .composite as boolean;
 
-    const openFile = () => {
+    const openFile = (): void => {
       this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
         files: [file]
       } as CommandArguments.IGitContextAction as any);
@@ -788,7 +1103,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         className={hiddenButtonStyle}
         icon={openIcon}
         title={this.props.trans.__('Open this file')}
-        onClick={openFile}
+        onClick={stopPropagationWrapper(openFile)}
       />
     );
     let onDoubleClick = doubleClickDiff ? (): void => undefined : openFile;
@@ -801,22 +1116,22 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             className={hiddenButtonStyle}
             icon={openIcon}
             title={this.props.trans.__('Open this file')}
-            onClick={openFile}
+            onClick={stopPropagationWrapper(openFile)}
           />
           {diffButton}
           <ActionButton
             className={hiddenButtonStyle}
             icon={discardIcon}
             title={this.props.trans.__('Discard changes')}
-            onClick={() => {
+            onClick={stopPropagationWrapper(() => {
               this.discardChanges(file);
-            }}
+            })}
           />
         </React.Fragment>
       );
       onDoubleClick = doubleClickDiff
         ? diffButton
-          ? () => this._openDiffView(file)
+          ? () => this._openDiffViews([file])
           : () => undefined
         : openFile;
     } else if (file.status === 'staged') {
@@ -827,26 +1142,29 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             className={hiddenButtonStyle}
             icon={openIcon}
             title={this.props.trans.__('Open this file')}
-            onClick={openFile}
+            onClick={stopPropagationWrapper(openFile)}
           />
           {diffButton}
           <ActionButton
             className={hiddenButtonStyle}
             icon={discardIcon}
             title={this.props.trans.__('Discard changes')}
-            onClick={() => {
+            onClick={stopPropagationWrapper(() => {
               this.discardChanges(file);
-            }}
+            })}
           />
         </React.Fragment>
       );
       onDoubleClick = doubleClickDiff
         ? diffButton
-          ? () => this._openDiffView(file)
+          ? () => this._openDiffViews([file])
           : () => undefined
         : openFile;
     }
 
+    const checked = this.markedFiles.some(fileStatus =>
+      areFilesEqual(fileStatus, file)
+    );
     return (
       <FileItem
         trans={this.props.trans}
@@ -856,8 +1174,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         onDoubleClick={onDoubleClick}
         contextMenu={this.openSimpleContextMenu}
-        selectFile={this.updateSelectedFile}
+        setSelection={this.setSelection}
         style={style}
+        markUntilFile={this.markUntilFile}
+        checked={checked}
       />
     );
   };
@@ -871,6 +1191,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderSimpleStage(files: Git.IStatusFile[], height: number) {
     return (
       <GitStage
+        selectAllButton={
+          <SelectAllButton
+            onChange={() => {
+              this.toggleAllFiles(files);
+            }}
+            checked={this._areFilesAllMarked()}
+          />
+        }
         actions={
           <ActionButton
             className={hiddenButtonStyle}
@@ -896,13 +1224,25 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
   private _createDiffButton(file: Git.IStatusFile): JSX.Element {
+    let handleClick: () => void;
+    if (this.props.settings.composite['simpleStaging']) {
+      handleClick = () => this._openDiffViews([file]);
+    } else {
+      handleClick = () => {
+        if (this._isSelectedFile(file)) {
+          this._openDiffViews(this.state.selectedFiles);
+        } else {
+          this._openDiffViews([file]);
+        }
+      };
+    }
     return (
       (getDiffProvider(file.to) || !file.is_binary) && (
         <ActionButton
           className={hiddenButtonStyle}
           icon={diffIcon}
           title={this.props.trans.__('Diff this file')}
-          onClick={() => this._openDiffView(file)}
+          onClick={stopPropagationWrapper(handleClick)}
         />
       )
     );
@@ -914,19 +1254,33 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param file File to open diff for
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
-  private async _openDiffView(file: Git.IStatusFile): Promise<void> {
+  private async _openDiffViews(files: Git.IStatusFile[]): Promise<void> {
     try {
       await this.props.commands.execute(ContextCommandIDs.gitFileDiff, {
-        files: [
-          {
-            filePath: file.to,
-            isText: !file.is_binary,
-            status: file.status
-          }
-        ]
+        files: files.map(file => ({
+          filePath: file.to,
+          isText: !file.is_binary,
+          status: file.status
+        }))
       } as CommandArguments.IGitFileDiff as any);
     } catch (reason) {
-      console.error(`Failed to open diff view for ${file.to}.\n${reason}`);
+      console.error(`Failed to open diff views.\n${reason}`);
     }
+  }
+
+  /**
+   * Determine if files in simple staging are all marked
+   * @returns True if files are all marked
+   */
+  private _areFilesAllMarked(): boolean {
+    const filesForSimpleStaging = this.props.files.filter(
+      file => !['unmerged', 'remote-changed'].includes(file.status)
+    );
+    return (
+      filesForSimpleStaging.length !== 0 &&
+      filesForSimpleStaging.every(file =>
+        this.state.markedFiles.some(mf => areFilesEqual(file, mf))
+      )
+    );
   }
 }

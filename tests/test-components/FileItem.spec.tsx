@@ -20,7 +20,7 @@ describe('FileItem', () => {
     model: null,
     onDoubleClick: () => {},
     selected: false,
-    selectFile: () => {},
+    setSelection: (file) => {},
     style: {},
     trans
   };

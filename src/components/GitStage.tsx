@@ -41,6 +41,10 @@ export interface IGitStageProps {
    * Row renderer
    */
   rowRenderer: (props: ListChildComponentProps) => JSX.Element;
+  /**
+   * Optional select all element
+   */
+  selectAllButton?: React.ReactElement;
 }
 
 export const GitStage: React.FunctionComponent<IGitStageProps> = (
@@ -59,6 +63,7 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
           }
         }}
       >
+        {props.selectAllButton && props.selectAllButton}
         {props.collapsible && (
           <button className={changeStageButtonStyle}>
             {showFiles && nFiles > 0 ? (

@@ -94,3 +94,18 @@ export const fileButtonStyle = style({
 export const gitMarkBoxStyle = style({
   flex: '0 0 auto'
 });
+
+export const checkboxLabelStyle = style({
+  display: 'flex',
+  alignItems: 'center'
+});
+
+export const checkboxLabelContainerStyle = style({
+  display: 'flex',
+  width: '100%'
+});
+
+export const checkboxLabelLastContainerStyle = style({
+  display: 'flex',
+  marginLeft: 'auto'
+});
