@@ -7,7 +7,13 @@ import { TranslationBundle } from '@jupyterlab/translation';
  * Interface for returned value from dialog box
  */
 export interface IAdvancedPushFormValue {
+  /**
+   * The name of the remote repository to push to.
+   */
   remoteName: string;
+  /**
+   * Whether to use force push.
+   */
   force: boolean;
 }
 
@@ -39,6 +45,11 @@ export class AdvancedPushForm
     // List of remotes
     const remoteOptionsContainer = document.createElement('div');
     remoteOptionsContainer.className = 'jp-remote-options-wrapper';
+    const loadingMessage = document.createElement('div');
+    loadingMessage.textContent = this._trans.__(
+      'Loading remote repositories...'
+    );
+    remoteOptionsContainer.appendChild(loadingMessage);
     this._remoteOptionsContainer = remoteOptionsContainer;
 
     // Force option
@@ -64,34 +75,42 @@ export class AdvancedPushForm
 
   private async addRemoteOptions(): Promise<void> {
     const remotes = await this._model.getRemotes();
+    this._remoteOptionsContainer.innerHTML = '';
+    if (remotes.length > 0) {
+      remotes.forEach(remote => {
+        const buttonWrapper = document.createElement('div');
+        buttonWrapper.className = 'jp-button-wrapper';
+        const radioButton = document.createElement('input');
+        radioButton.type = 'radio';
+        radioButton.id = remote.name;
+        radioButton.value = remote.name;
+        radioButton.name = 'option';
+        radioButton.className = 'jp-option';
+        if (remote.name === 'origin') {
+          radioButton.checked = true;
+        }
+        this._radioButtons.push(radioButton);
 
-    remotes.forEach(remote => {
-      const buttonWrapper = document.createElement('div');
-      buttonWrapper.className = 'jp-button-wrapper';
-      const radioButton = document.createElement('input');
-      radioButton.type = 'radio';
-      radioButton.id = remote.name;
-      radioButton.value = remote.name;
-      radioButton.name = 'option';
-      radioButton.className = 'jp-option';
-      if (remote.name === 'origin') {
-        radioButton.checked = true;
-      }
-      this._radioButtons.push(radioButton);
+        const label = document.createElement('label');
+        label.htmlFor = remote.name;
+        label.textContent = `${remote.name}: ${remote.url}`;
 
-      const label = document.createElement('label');
-      label.htmlFor = remote.name;
-      label.textContent = `${remote.name}: ${remote.url}`;
-
-      buttonWrapper.appendChild(radioButton);
-      buttonWrapper.appendChild(label);
-      this._remoteOptionsContainer.appendChild(buttonWrapper);
-    });
+        buttonWrapper.appendChild(radioButton);
+        buttonWrapper.appendChild(label);
+        this._remoteOptionsContainer.appendChild(buttonWrapper);
+      });
+    } else {
+      const noRemoteMsg = document.createElement('div');
+      noRemoteMsg.textContent = this._trans.__(
+        'This repository has no known remotes.'
+      );
+      this._remoteOptionsContainer.appendChild(noRemoteMsg);
+    }
   }
 
   getValue(): IAdvancedPushFormValue {
     return {
-      remoteName: this._radioButtons.find(rb => rb.checked).value,
+      remoteName: this._radioButtons.find(rb => rb.checked)?.value,
       force: this._forceCheckbox.checked
     };
   }
