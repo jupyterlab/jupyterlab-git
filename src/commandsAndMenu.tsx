@@ -255,8 +255,8 @@ export function addCommands(
 
   /** Command to add a remote Git repository */
   commands.addCommand(CommandIDs.gitAddRemote, {
-    label: trans.__('Add Remote Repository'),
-    caption: trans.__('Add a Git remote repository'),
+    label: trans.__('Manage Remote Repositories'),
+    caption: trans.__('Manage Remote Repositories'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
       if (gitModel.pathRepository === null) {

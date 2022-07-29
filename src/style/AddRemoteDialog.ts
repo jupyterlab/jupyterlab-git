@@ -19,8 +19,13 @@ export const remoteDialogInputClass = style({
   }
 });
 
+export const actionsWrapperClass = style({
+  padding: '15px 0px !important',
+  justifyContent: 'space-around !important'
+});
+
 export const existingRemoteWrapperClass = style({
-  marginTop: '1.5rem',
+  margin: '1.5rem 0rem 1rem',
   padding: '0px'
 });
 

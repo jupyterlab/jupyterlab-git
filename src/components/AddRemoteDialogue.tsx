@@ -9,13 +9,13 @@ import {
   remoteDialogClass,
   remoteDialogInputClass,
   existingRemoteWrapperClass,
-  existingRemoteGridClass
+  existingRemoteGridClass,
+  actionsWrapperClass
 } from '../style/AddRemoteDialog';
 import { TranslationBundle } from '@jupyterlab/translation';
 
 import { classes } from 'typestyle';
 import {
-  actionsWrapperClass,
   buttonClass,
   cancelButtonClass,
   closeButtonClass,
@@ -54,7 +54,7 @@ export interface IAddRemoteDialogueState {
   /**
    * List of known remotes
    */
-  existingRemotes: Git.IGitRemote[];
+  existingRemotes: Git.IGitRemote[] | null;
 }
 
 export class AddRemoteDialogue extends React.Component<
@@ -68,7 +68,7 @@ export class AddRemoteDialogue extends React.Component<
         name: '',
         url: ''
       },
-      existingRemotes: []
+      existingRemotes: null
     };
   }
 
@@ -137,9 +137,36 @@ export class AddRemoteDialogue extends React.Component<
             </div>
           )}
 
-          {this.state.existingRemotes.length > 0 && (
-            <div className={existingRemoteWrapperClass}>
-              <p>{this.props.trans.__('Existing Remotes:')}</p>
+          <DialogActions className={actionsWrapperClass}>
+            <input
+              className={classes(buttonClass, cancelButtonClass)}
+              type="button"
+              title={this.props.trans.__(
+                'Close this dialog without adding a remote repo'
+              )}
+              value={this.props.trans.__('Cancel')}
+              onClick={() => {
+                this.props.onClose();
+              }}
+            />
+            <input
+              className={classes(buttonClass, createButtonClass)}
+              type="button"
+              title={this.props.trans.__('Add Remote')}
+              value={this.props.trans.__('Add')}
+              onClick={() => {
+                this.props.onClose(this.state.newRemote);
+              }}
+              disabled={!this.state.newRemote.name || !this.state.newRemote.url}
+            />
+          </DialogActions>
+
+          <div className={existingRemoteWrapperClass}>
+            <p>{this.props.trans.__('Existing Remotes:')}</p>
+
+            {this.state.existingRemotes === null ? (
+              <p>Loading remote repositories...</p>
+            ) : this.state.existingRemotes.length > 0 ? (
               <div className={existingRemoteGridClass}>
                 {this.state.existingRemotes.map((remote, index) => (
                   <>
@@ -160,32 +187,11 @@ export class AddRemoteDialogue extends React.Component<
                   </>
                 ))}
               </div>
-            </div>
-          )}
-        </div>
-        <DialogActions className={actionsWrapperClass}>
-          <input
-            className={classes(buttonClass, cancelButtonClass)}
-            type="button"
-            title={this.props.trans.__(
-              'Close this dialog without adding a remote repo'
+            ) : (
+              <p> This repository does not have any remote. </p>
             )}
-            value={this.props.trans.__('Cancel')}
-            onClick={() => {
-              this.props.onClose();
-            }}
-          />
-          <input
-            className={classes(buttonClass, createButtonClass)}
-            type="button"
-            title={this.props.trans.__('Add Remote')}
-            value={this.props.trans.__('Add')}
-            onClick={() => {
-              this.props.onClose(this.state.newRemote);
-            }}
-            disabled={!this.state.newRemote.name || !this.state.newRemote.url}
-          />
-        </DialogActions>
+          </div>
+        </div>
       </Dialog>
     );
   }
