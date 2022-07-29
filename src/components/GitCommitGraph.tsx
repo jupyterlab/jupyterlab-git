@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { generateGraphData, ICommit, INode } from '../generateGraphData';
+import {
+  generateGraphData,
+  ICommit,
+  INode,
+  IRoute
+} from '../generateGraphData';
 import { SVGPathData } from '../svgPathData';
 
 const COLOURS = [
@@ -44,21 +49,24 @@ const branchCount = (commitNodes: INode[]): number => {
 
 export interface IGitCommitGraphProps {
   commits: ICommit[];
-  height?: number;
-  width?: number;
   dotRadius: number;
   lineWidth: number;
+  getNodeHeight: (sha: string) => number;
 }
 
 export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   constructor(props: IGitCommitGraphProps) {
     super(props);
     this.x_step = 10;
-    this.y_step = 60;
+    this.graphData = [];
   }
 
   getGraphData(): INode[] {
-    return generateGraphData(this.props.commits);
+    this.graphData = generateGraphData(
+      this.props.commits,
+      this.props.getNodeHeight
+    );
+    return this.graphData;
   }
 
   getBranchCount(): number {
@@ -66,27 +74,16 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   }
 
   getWidth(): number {
-    if (this.props.width) {
-      return this.props.width;
-    }
-    return this.getContentWidth();
-  }
-
-  getContentWidth(): number {
     return (this.getBranchCount() + 0.5) * this.x_step;
   }
 
   getHeight(): number {
-    if (this.props.height) {
-      return this.props.height;
-    }
-    return this.getContentHeight();
-  }
-
-  getContentHeight(): number {
-    return this.props.commits.reduce((acc, commit) => {
-      return acc + commit.height;
-    }, 0);
+    return (
+      this.graphData[this.graphData.length - 1].yOffset +
+      this.props.getNodeHeight(
+        this.props.commits[this.props.commits.length - 1].sha
+      )
+    );
   }
 
   renderRouteNode(svgPathDataAttribute: string, branch: number): JSX.Element {
@@ -104,12 +101,8 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
     );
   }
 
-  renderRoute(
-    yOffset: number,
-    route: [number, number, number],
-    height: number
-  ): JSX.Element {
-    const [from, to, branch] = route;
+  renderRoute(yOffset: number, route: IRoute, height: number): JSX.Element {
+    const { from, to, branch } = route;
     const { x_step } = this;
 
     const svgPath = new SVGPathData();
@@ -195,8 +188,8 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
     const routeNodes = routes.map(route =>
       this.renderRoute(
         commit.yOffset,
-        [route.from, route.to, route.branch],
-        this.props.commits[idx].height
+        route,
+        this.props.getNodeHeight(commit.sha)
       )
     );
 
@@ -212,7 +205,6 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
     const allCommitNodes: JSX.Element[] = [];
     let allRouteNodes: JSX.Element[] = [];
     const commitNodes = this.getGraphData();
-    console.log(commitNodes);
     commitNodes.forEach((node, index) => {
       const commit = node;
       const [commitNode, routeNodes] = this.renderCommit(index, commit);
@@ -242,7 +234,5 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
 
   renderedCommitsPositions: { x: number; y: number; sha: string }[];
   graphData: INode[];
-  branchCount: number;
   x_step: number;
-  y_step: number;
 }

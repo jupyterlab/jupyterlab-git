@@ -1,7 +1,7 @@
 export interface ICommit {
   sha: string;
   parents: string[];
-  height: number;
+  // height: number;
 }
 export interface INode {
   sha: string;
@@ -36,7 +36,10 @@ const remove = function (list: number[], item: number) {
 /*
   Generate preformatted data of commits graph.
 */
-export const generateGraphData = function (commits: ICommit[]): INode[] {
+export const generateGraphData = function (
+  commits: ICommit[],
+  getNodeHeight: (sha: string) => number
+): INode[] {
   /*
   Generate graph data.
 
@@ -121,7 +124,7 @@ export const generateGraphData = function (commits: ICommit[]): INode[] {
       });
     }
     if (index - 1 >= 0) {
-      currentYOffset += commits[index - 1].height;
+      currentYOffset += getNodeHeight(commits[index - 1].sha);
     }
     const node = Node(commit.sha, offset, branch, routes, currentYOffset);
     nodes.push(node);

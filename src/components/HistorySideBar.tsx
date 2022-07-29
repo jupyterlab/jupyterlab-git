@@ -17,6 +17,7 @@ import { FileItem } from './FileItem';
 import { PastCommitNode } from './PastCommitNode';
 import { SinglePastCommitInfo } from './SinglePastCommitInfo';
 import { GitCommitGraph } from './GitCommitGraph';
+import ResizeObserver from 'resize-observer-polyfill';
 
 /**
  * Interface describing component properties.
@@ -116,16 +117,36 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
 
   const [expandedCommits, setExpandedCommits] = React.useState<string[]>([]);
   const nodes = React.useRef<{ [sha: string]: HTMLLIElement }>({});
+  const nodeHeights = React.useRef<{ [sha: string]: number }>({});
+  const commitGraph = React.useRef<GitCommitGraph>(null);
 
+  const resizeObserver = new ResizeObserver(entries => {
+    for (const entry of entries) {
+      const { height, top } = entry.contentRect;
+      const offsetHeight = height + top * 2 + 1;
+      nodeHeights.current[entry.target.id] = offsetHeight;
+      commitGraph.current.forceUpdate();
+      console.log('height changed;');
+    }
+  });
+  React.useEffect(() => {
+    props.commits.forEach(commit =>
+      resizeObserver.observe(nodes.current[commit.commit])
+    );
+    return () => resizeObserver.disconnect();
+  }, []);
+  console.log(nodeHeights.current);
   return (
     <div className={historySideBarWrapperStyle}>
       {!props.model.selectedHistoryFile && (
         <GitCommitGraph
+          ref={commitGraph}
           commits={props.commits.map(commit => ({
             sha: commit.commit,
-            parents: commit.pre_commits,
-            height: nodes.current[commit.commit]?.offsetHeight ?? 55
+            parents: commit.pre_commits
+            //height: nodes.current[commit.commit]?.offsetHeight ?? 55
           }))}
+          getNodeHeight={(sha: string) => nodeHeights.current[sha] ?? 55}
           dotRadius={3}
           lineWidth={2}
         />

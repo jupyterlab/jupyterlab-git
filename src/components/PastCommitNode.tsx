@@ -140,6 +140,7 @@ export class PastCommitNode extends React.Component<
   render(): React.ReactElement {
     return (
       <li
+        id={this.props.commit.commit}
         ref={el => this.props.setRef(el)}
         className={classes(
           commitWrapperClass,
