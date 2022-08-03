@@ -254,7 +254,7 @@ export function addCommands(
   });
 
   /** Command to add a remote Git repository */
-  commands.addCommand(CommandIDs.gitAddRemote, {
+  commands.addCommand(CommandIDs.gitManageRemote, {
     label: trans.__('Manage Remote Repositories'),
     caption: trans.__('Manage Remote Repositories'),
     isEnabled: () => gitModel.pathRepository !== null,
@@ -265,38 +265,35 @@ export function addCommands(
         );
         return;
       }
-      let url = args['url'] as string;
-      let name = args['name'] as string;
 
-      if (!url) {
-        const widgetId = 'git-dialog-AddRemote';
-        let anchor = document.querySelector<HTMLDivElement>(`#${widgetId}`);
-        if (!anchor) {
-          anchor = document.createElement('div');
-          anchor.id = widgetId;
-          document.body.appendChild(anchor);
-        }
+      const widgetId = 'git-dialog-AddRemote';
+      let anchor = document.querySelector<HTMLDivElement>(`#${widgetId}`);
+      if (!anchor) {
+        anchor = document.createElement('div');
+        anchor.id = widgetId;
+        document.body.appendChild(anchor);
+      }
 
-        const waitForDialog = new PromiseDelegate<Git.IGitRemote | null>();
-        const dialog = ReactWidget.create(
-          <AddRemoteDialogue
-            trans={trans}
-            model={gitModel}
-            onClose={(remote?: Git.IGitRemote) => {
-              dialog.dispose();
-              waitForDialog.resolve(remote ?? null);
-            }}
-          />
-        );
+      const waitForDialog = new PromiseDelegate<Git.IGitRemote | null>();
+      const dialog = ReactWidget.create(
+        <AddRemoteDialogue
+          trans={trans}
+          model={gitModel}
+          onClose={(remote?: Git.IGitRemote) => {
+            dialog.dispose();
+            waitForDialog.resolve(remote ?? null);
+          }}
+        />
+      );
 
-        Widget.attach(dialog, anchor);
+      Widget.attach(dialog, anchor);
 
-        const remote = await waitForDialog.promise;
+      const remote = await waitForDialog.promise;
 
-        if (remote) {
-          name = remote.name;
-          url = remote.url;
-        }
+      let name, url;
+      if (remote) {
+        name = remote.name;
+        url = remote.url;
       }
 
       if (url) {
@@ -1313,7 +1310,7 @@ export function createGitMenu(
     CommandIDs.gitPush,
     CommandIDs.gitPull,
     CommandIDs.gitResetToRemote,
-    CommandIDs.gitAddRemote,
+    CommandIDs.gitManageRemote,
     CommandIDs.gitTerminalCommand
   ].forEach(command => {
     menu.addItem({ command });

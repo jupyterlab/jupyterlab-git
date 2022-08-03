@@ -1189,7 +1189,7 @@ export enum CommandIDs {
   gitOpenUrl = 'git:open-url',
   gitToggleSimpleStaging = 'git:toggle-simple-staging',
   gitToggleDoubleClickDiff = 'git:toggle-double-click-diff',
-  gitAddRemote = 'git:add-remote',
+  gitManageRemote = 'git:manage-remote',
   gitClone = 'git:clone',
   gitMerge = 'git:merge',
   gitOpenGitignore = 'git:open-gitignore',
