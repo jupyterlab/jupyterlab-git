@@ -58,60 +58,60 @@ describe('git-commands', () => {
     );
   });
 
-  describe('git:add-remote', () => {
-    it('should admit user and name arguments', async () => {
-      const name = 'ref';
-      const url = 'https://www.mygitserver.com/me/myrepo.git';
-      const path = DEFAULT_REPOSITORY_PATH;
+  // describe('git:manage-remote', () => {
+  //   it('should admit user and name arguments', async () => {
+  //     const name = 'ref';
+  //     const url = 'https://www.mygitserver.com/me/myrepo.git';
+  //     const path = DEFAULT_REPOSITORY_PATH;
 
-      mockGit.requestAPI.mockImplementation(
-        mockedRequestAPI({
-          ...mockResponses,
-          'remote/add': {
-            body: () => {
-              return { code: 0, command: `git remote add ${name} ${url}` };
-            }
-          }
-        })
-      );
+  //     mockGit.requestAPI.mockImplementation(
+  //       mockedRequestAPI({
+  //         ...mockResponses,
+  //         'remote/add': {
+  //           body: () => {
+  //             return { code: 0, command: `git remote add ${name} ${url}` };
+  //           }
+  //         }
+  //       })
+  //     );
 
-      model.pathRepository = path;
-      await model.ready;
+  //     model.pathRepository = path;
+  //     await model.ready;
 
-      await commands.execute(CommandIDs.gitAddRemote, { url, name });
+  //     await commands.execute(CommandIDs.gitManageRemote, { url, name });
 
-      expect(mockGit.requestAPI).toBeCalledWith(`${path}/remote/add`, 'POST', {
-        url,
-        name
-      });
-    });
+  //     expect(mockGit.requestAPI).toBeCalledWith(`${path}/remote/add`, 'POST', {
+  //       url,
+  //       name
+  //     });
+  //   });
 
-    it('has optional argument name', async () => {
-      const name = 'origin';
-      const url = 'https://www.mygitserver.com/me/myrepo.git';
-      const path = DEFAULT_REPOSITORY_PATH;
+  //   it('has optional argument name', async () => {
+  //     const name = 'origin';
+  //     const url = 'https://www.mygitserver.com/me/myrepo.git';
+  //     const path = DEFAULT_REPOSITORY_PATH;
 
-      mockGit.requestAPI.mockImplementation(
-        mockedRequestAPI({
-          ...mockResponses,
-          'remote/add': {
-            body: () => {
-              return { code: 0, command: `git remote add ${name} ${url}` };
-            }
-          }
-        })
-      );
+  //     mockGit.requestAPI.mockImplementation(
+  //       mockedRequestAPI({
+  //         ...mockResponses,
+  //         'remote/add': {
+  //           body: () => {
+  //             return { code: 0, command: `git remote add ${name} ${url}` };
+  //           }
+  //         }
+  //       })
+  //     );
 
-      model.pathRepository = path;
-      await model.ready;
+  //     model.pathRepository = path;
+  //     await model.ready;
 
-      await commands.execute(CommandIDs.gitAddRemote, { url });
+  //     await commands.execute(CommandIDs.gitManageRemote);
 
-      expect(mockGit.requestAPI).toBeCalledWith(`${path}/remote/add`, 'POST', {
-        url
-      });
-    });
-  });
+  //     expect(mockGit.requestAPI).toBeCalledWith(`${path}/remote/add`, 'POST', {
+  //       url
+  //     });
+  //   });
+  // });
 
   describe('git:context-discard', () => {
     ['staged', 'partially-staged', 'unstaged', 'untracked'].forEach(status => {
