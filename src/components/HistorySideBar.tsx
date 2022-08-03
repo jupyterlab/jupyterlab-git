@@ -128,7 +128,6 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
       const offsetHeight = borderBoxSize.blockSize;
       const sha = entry.target.id;
       setNodeHeights(prev => ({ ...prev, [sha]: offsetHeight }));
-      console.log('height changed;');
     }
   });
   React.useEffect(() => {
@@ -138,7 +137,8 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
       })
     );
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [props.commits]);
+
   return (
     <div className={historySideBarWrapperStyle}>
       {!props.model.selectedHistoryFile && (
