@@ -1,10 +1,13 @@
 import * as React from 'react';
-import { ActionButton } from './ActionButton';
 import ClearIcon from '@material-ui/icons/Clear';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
+import { TranslationBundle } from '@jupyterlab/translation';
+import { showErrorMessage } from '@jupyterlab/apputils';
+import { ActionButton } from './ActionButton';
 import { Git } from '../tokens';
 import { GitExtension } from '../model';
+import { classes } from 'typestyle';
 import {
   remoteDialogClass,
   remoteDialogInputClass,
@@ -12,9 +15,6 @@ import {
   existingRemoteGridClass,
   actionsWrapperClass
 } from '../style/ManageRemoteDialog';
-import { TranslationBundle } from '@jupyterlab/translation';
-
-import { classes } from 'typestyle';
 import {
   buttonClass,
   closeButtonClass,
@@ -23,7 +23,6 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
-
 import { trashIcon } from '../style/icons';
 
 export interface IManageRemoteDialogueProps {
@@ -42,7 +41,7 @@ export interface IManageRemoteDialogueProps {
   /**
    * Callback to handle the closing of dialogue
    */
-  onClose: (remote?: Git.IGitRemote) => void;
+  onClose: () => void;
 }
 
 export interface IManageRemoteDialogueState {
@@ -91,9 +90,7 @@ export class ManageRemoteDialogue extends React.Component<
             <ClearIcon
               titleAccess={this.props.trans.__('Close this dialog')}
               fontSize="small"
-              onClick={() => {
-                this.props.onClose();
-              }}
+              onClick={() => this.props.onClose()}
             />
           </button>
         </div>
@@ -105,6 +102,9 @@ export class ManageRemoteDialogue extends React.Component<
               )}
             </span>
             <input
+              ref={node => {
+                this._nameInput = node;
+              }}
               type="text"
               placeholder={this.props.trans.__('name')}
               onChange={event =>
@@ -117,6 +117,9 @@ export class ManageRemoteDialogue extends React.Component<
               }
             />
             <input
+              ref={node => {
+                this._urlInput = node;
+              }}
               type="text"
               placeholder={this.props.trans.__('Remote Git repository URL')}
               onChange={event =>
@@ -127,6 +130,11 @@ export class ManageRemoteDialogue extends React.Component<
                   }
                 })
               }
+              onKeyPress={e => {
+                if (e.key === 'Enter') {
+                  this._addRemoteButton.click();
+                }
+              }}
             />
           </label>
 
@@ -138,12 +146,33 @@ export class ManageRemoteDialogue extends React.Component<
 
           <DialogActions className={actionsWrapperClass}>
             <input
+              ref={btn => {
+                this._addRemoteButton = btn;
+              }}
               className={classes(buttonClass, createButtonClass)}
               type="button"
               title={this.props.trans.__('Add Remote')}
               value={this.props.trans.__('Add')}
-              onClick={() => {
-                this.props.onClose(this.state.newRemote);
+              onClick={async () => {
+                const { name, url } = this.state.newRemote;
+                try {
+                  await this.props.model.addRemote(url, name);
+                  this._nameInput.value = '';
+                  this._urlInput.value = '';
+                  this.setState(prevState => ({
+                    existingRemotes: [
+                      ...prevState.existingRemotes,
+                      prevState.newRemote
+                    ],
+                    newRemote: { name: '', url: '' }
+                  }));
+                } catch (error) {
+                  console.error(error);
+                  showErrorMessage(
+                    this.props.trans.__('Error when adding remote repository'),
+                    error
+                  );
+                }
               }}
               disabled={!this.state.newRemote.name || !this.state.newRemote.url}
             />
@@ -183,4 +212,8 @@ export class ManageRemoteDialogue extends React.Component<
       </Dialog>
     );
   }
+
+  private _nameInput: HTMLInputElement;
+  private _urlInput: HTMLInputElement;
+  private _addRemoteButton: HTMLInputElement;
 }

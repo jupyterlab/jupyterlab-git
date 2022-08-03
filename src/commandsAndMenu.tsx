@@ -258,7 +258,7 @@ export function addCommands(
     label: trans.__('Manage Remote Repositories'),
     caption: trans.__('Manage Remote Repositories'),
     isEnabled: () => gitModel.pathRepository !== null,
-    execute: async args => {
+    execute: () => {
       if (gitModel.pathRepository === null) {
         console.warn(
           trans.__('Not in a Git repository. Unable to add a remote.')
@@ -274,39 +274,15 @@ export function addCommands(
         document.body.appendChild(anchor);
       }
 
-      const waitForDialog = new PromiseDelegate<Git.IGitRemote | null>();
       const dialog = ReactWidget.create(
         <ManageRemoteDialogue
           trans={trans}
           model={gitModel}
-          onClose={(remote?: Git.IGitRemote) => {
-            dialog.dispose();
-            waitForDialog.resolve(remote ?? null);
-          }}
+          onClose={() => dialog.dispose()}
         />
       );
 
       Widget.attach(dialog, anchor);
-
-      const remote = await waitForDialog.promise;
-
-      let name, url;
-      if (remote) {
-        name = remote.name;
-        url = remote.url;
-      }
-
-      if (url) {
-        try {
-          await gitModel.addRemote(url, name);
-        } catch (error) {
-          console.error(error);
-          showErrorMessage(
-            trans.__('Error when adding remote repository'),
-            error
-          );
-        }
-      }
     }
   });
 
