@@ -46,7 +46,7 @@ import {
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
-import { AddRemoteDialogue } from './components/AddRemoteDialogue';
+import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 
@@ -266,7 +266,7 @@ export function addCommands(
         return;
       }
 
-      const widgetId = 'git-dialog-AddRemote';
+      const widgetId = 'git-dialog-ManageRemote';
       let anchor = document.querySelector<HTMLDivElement>(`#${widgetId}`);
       if (!anchor) {
         anchor = document.createElement('div');
@@ -276,7 +276,7 @@ export function addCommands(
 
       const waitForDialog = new PromiseDelegate<Git.IGitRemote | null>();
       const dialog = ReactWidget.create(
-        <AddRemoteDialogue
+        <ManageRemoteDialogue
           trans={trans}
           model={gitModel}
           onClose={(remote?: Git.IGitRemote) => {

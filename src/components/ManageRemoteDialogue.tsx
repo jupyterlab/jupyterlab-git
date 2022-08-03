@@ -11,7 +11,7 @@ import {
   existingRemoteWrapperClass,
   existingRemoteGridClass,
   actionsWrapperClass
-} from '../style/AddRemoteDialog';
+} from '../style/ManageRemoteDialog';
 import { TranslationBundle } from '@jupyterlab/translation';
 
 import { classes } from 'typestyle';
@@ -26,7 +26,7 @@ import {
 
 import { trashIcon } from '../style/icons';
 
-export interface IAddRemoteDialogueProps {
+export interface IManageRemoteDialogueProps {
   /**
    * The application language translator.
    */
@@ -45,7 +45,7 @@ export interface IAddRemoteDialogueProps {
   onClose: (remote?: Git.IGitRemote) => void;
 }
 
-export interface IAddRemoteDialogueState {
+export interface IManageRemoteDialogueState {
   /**
    * New remote name and url pair
    */
@@ -56,11 +56,11 @@ export interface IAddRemoteDialogueState {
   existingRemotes: Git.IGitRemote[] | null;
 }
 
-export class AddRemoteDialogue extends React.Component<
-  IAddRemoteDialogueProps,
-  IAddRemoteDialogueState
+export class ManageRemoteDialogue extends React.Component<
+  IManageRemoteDialogueProps,
+  IManageRemoteDialogueState
 > {
-  constructor(props: IAddRemoteDialogueProps) {
+  constructor(props: IManageRemoteDialogueProps) {
     super(props);
     this.state = {
       newRemote: {
