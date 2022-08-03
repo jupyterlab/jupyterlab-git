@@ -17,7 +17,6 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import { classes } from 'typestyle';
 import {
   buttonClass,
-  cancelButtonClass,
   closeButtonClass,
   contentWrapperClass,
   createButtonClass,
@@ -138,17 +137,6 @@ export class AddRemoteDialogue extends React.Component<
           )}
 
           <DialogActions className={actionsWrapperClass}>
-            <input
-              className={classes(buttonClass, cancelButtonClass)}
-              type="button"
-              title={this.props.trans.__(
-                'Close this dialog without adding a remote repo'
-              )}
-              value={this.props.trans.__('Cancel')}
-              onClick={() => {
-                this.props.onClose();
-              }}
-            />
             <input
               className={classes(buttonClass, createButtonClass)}
               type="button"
