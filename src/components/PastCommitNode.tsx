@@ -97,21 +97,23 @@ export interface IPastCommitNodeProps {
   onCompareWithSelected:
     | ((event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>)
     | null;
-
+  /**
+   * Whether the PastCommitNode is expanded
+   */
   expanded: boolean;
+  /**
+   * Callback to toggle expansion of the PastCommitNode
+   *
+   * @param sha the sha of the commit
+   */
   toggleCommitExpansion: (sha: string) => void;
+  /**
+   * Callback to store a reference of the rendered <li> element in HistorySideBar
+   *
+   * @param el the <li> element representing a past commit
+   */
   setRef: (el: HTMLLIElement) => void;
 }
-
-/**
- * Interface describing component state.
- */
-// export interface IPastCommitNodeState {
-//   /**
-//    * Boolean indicating whether additional commit information should be displayed.
-//    */
-//   expanded: boolean;
-// }
 
 /**
  * React component for rendering an individual commit.
@@ -127,9 +129,6 @@ export class PastCommitNode extends React.Component<
    */
   constructor(props: React.PropsWithChildren<IPastCommitNodeProps>) {
     super(props);
-    // this.state = {
-    //   expanded: false
-    // };
   }
 
   /**
