@@ -148,8 +148,6 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
             parents: commit.pre_commits
           }))}
           getNodeHeight={(sha: string) => nodeHeights[sha] ?? 55}
-          dotRadius={3}
-          lineWidth={2}
         />
       )}
 
