@@ -19,6 +19,12 @@ async def test_single_file_log():
             "Something",
             "e6d4eed300811e886cadffb16eeed19588eb5eec\x00\x00e6d4eed300811e886cadffb16eeed19588eb5eec"
             "\x00folder/test.txt\x00",
+            "d19001d71bb928ec9ed6ae3fe1bfc474e1b771d0",
+            "Lazy Junior Developer",
+            "5 hours ago",
+            "Something More",
+            "263f762e0aad329c3c01bbd9a28f66403e6cfa5f\x00\x00263f762e0aad329c3c01bbd9a28f66403e6cfa5f"
+            "\x00folder/test.txt\x00",
         ]
 
         mock_execute.return_value = maybe_future((0, "\n".join(process_output), ""))
@@ -32,6 +38,15 @@ async def test_single_file_log():
                     "date": "2 hours ago",
                     "commit_msg": "Something",
                     "pre_commits": ["e6d4eed300811e886cadffb16eeed19588eb5eec"],
+                    "is_binary": False,
+                    "file_path": "folder/test.txt",
+                },
+                {
+                    "commit": "d19001d71bb928ec9ed6ae3fe1bfc474e1b771d0",
+                    "author": "Lazy Junior Developer",
+                    "date": "5 hours ago",
+                    "commit_msg": "Something More",
+                    "pre_commits": ["263f762e0aad329c3c01bbd9a28f66403e6cfa5f"],
                     "is_binary": False,
                     "file_path": "folder/test.txt",
                 },
