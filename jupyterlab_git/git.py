@@ -545,9 +545,6 @@ class Git:
                     commit["previous_file_path"] = file_info[2]
                 commit["file_path"] = file_info[-1]
 
-            # if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
-            #     commit["pre_commits"] = line_array[i + PREVIOUS_COMMIT_OFFSET]
-
             result.append(commit)
 
         return {"code": code, "commits": result}
@@ -628,29 +625,6 @@ class Git:
             "number_of_deletions": str(total_deletions),
             "modified_files": result,
         }
-
-    async def graph_log(self, path):
-        """
-        Execute git log --all --decorate --graph command (used to get
-        history of all current commits) & return the result.
-        """
-        cmd = [
-            "git",
-            "log",
-            "--all",
-            "--decorate",
-            "--oneline",
-            "--graph",
-        ]
-
-        code, my_output, my_error = await execute(
-            cmd,
-            cwd=path,
-        )
-        if code != 0:
-            return {"code": code, "command": " ".join(cmd), "message": my_error}
-
-        return {"result": my_output}
 
     async def diff(self, path, previous=None, current=None):
         """
