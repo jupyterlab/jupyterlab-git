@@ -71,8 +71,12 @@ export class ManageRemoteDialogue extends React.Component<
   }
 
   async componentDidMount(): Promise<void> {
-    const remotes = await this.props.model.getRemotes();
-    this.setState({ existingRemotes: remotes });
+    try {
+      const remotes = await this.props.model.getRemotes();
+      this.setState({ existingRemotes: remotes });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   render(): JSX.Element {
@@ -186,7 +190,7 @@ export class ManageRemoteDialogue extends React.Component<
             ) : this.state.existingRemotes.length > 0 ? (
               <div className={existingRemoteGridClass}>
                 {this.state.existingRemotes.map((remote, index) => (
-                  <>
+                  <React.Fragment key={`remote-${index}`}>
                     <span>{remote.name}</span>
                     <span>{remote.url}</span>
                     <ActionButton
@@ -201,7 +205,7 @@ export class ManageRemoteDialogue extends React.Component<
                         });
                       }}
                     />
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
             ) : (
