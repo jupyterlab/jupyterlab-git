@@ -1494,20 +1494,50 @@ class Git:
 
         return response
 
-    async def remote_show(self, path):
+    async def remote_show(self, path, verbose=False):
         """Handle call to `git remote show` command.
         Args:
             path (str): Git repository path
-
+            verbose (bool): true if details are needed, otherwise, false
         Returns:
-            List[str]: Known remotes
+            if not verbose: List[str]: Known remotes
+            if verbose: List[ { name: str, url: str } ]: Known remotes
         """
-        command = ["git", "remote", "show"]
+        command = ["git", "remote"]
+        if verbose:
+            command.extend(["-v", "show"])
+        else:
+            command.append("show")
+
         code, output, error = await execute(command, cwd=path)
         response = {"code": code, "command": " ".join(command)}
+
         if code == 0:
-            response["remotes"] = [r.strip() for r in output.splitlines()]
+            if verbose:
+                response["remotes"] = [
+                    {"name": r.split("\t")[0], "url": r.split("\t")[1][:-7]}
+                    for r in output.splitlines()
+                    if "(push)" in r
+                ]
+            else:
+                response["remotes"] = [r.strip() for r in output.splitlines()]
         else:
+            response["message"] = error
+
+        return response
+
+    async def remote_remove(self, path, name):
+        """Handle call to `git remote remove <name>` command.
+        Args:
+            path (str): Git repository path
+            name (str): Remote name
+        """
+        command = ["git", "remote", "remove", name]
+
+        code, _, error = await execute(command, cwd=path)
+        response = {"code": code, "command": " ".join(command)}
+
+        if code != 0:
             response["message"] = error
 
         return response

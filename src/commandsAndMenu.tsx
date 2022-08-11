@@ -1,7 +1,6 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Dialog,
-  InputDialog,
   MainAreaWidget,
   ReactWidget,
   showDialog,
@@ -47,7 +46,9 @@ import {
 } from './tokens';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
+import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
+import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 
 export interface IGitCloneArgs {
   /**
@@ -253,42 +254,35 @@ export function addCommands(
   });
 
   /** Command to add a remote Git repository */
-  commands.addCommand(CommandIDs.gitAddRemote, {
-    label: trans.__('Add Remote Repository'),
-    caption: trans.__('Add a Git remote repository'),
+  commands.addCommand(CommandIDs.gitManageRemote, {
+    label: trans.__('Manage Remote Repositories'),
+    caption: trans.__('Manage Remote Repositories'),
     isEnabled: () => gitModel.pathRepository !== null,
-    execute: async args => {
+    execute: () => {
       if (gitModel.pathRepository === null) {
         console.warn(
           trans.__('Not in a Git repository. Unable to add a remote.')
         );
         return;
       }
-      let url = args['url'] as string;
-      const name = args['name'] as string;
 
-      if (!url) {
-        const result = await InputDialog.getText({
-          title: trans.__('Add a remote repository'),
-          placeholder: trans.__('Remote Git repository URL')
-        });
-
-        if (result.button.accept) {
-          url = result.value;
-        }
+      const widgetId = 'git-dialog-ManageRemote';
+      let anchor = document.querySelector<HTMLDivElement>(`#${widgetId}`);
+      if (!anchor) {
+        anchor = document.createElement('div');
+        anchor.id = widgetId;
+        document.body.appendChild(anchor);
       }
 
-      if (url) {
-        try {
-          await gitModel.addRemote(url, name);
-        } catch (error) {
-          console.error(error);
-          showErrorMessage(
-            trans.__('Error when adding remote repository'),
-            error
-          );
-        }
-      }
+      const dialog = ReactWidget.create(
+        <ManageRemoteDialogue
+          trans={trans}
+          model={gitModel}
+          onClose={() => dialog.dispose()}
+        />
+      );
+
+      Widget.attach(dialog, anchor);
     }
   });
 
@@ -305,22 +299,44 @@ export function addCommands(
   /** Add git push command */
   commands.addCommand(CommandIDs.gitPush, {
     label: args =>
-      args.force
-        ? trans.__('Push to Remote (Force)')
+      (args['advanced'] as boolean)
+        ? trans.__('Push to Remote (Advanced)')
         : trans.__('Push to Remote'),
     caption: trans.__('Push code to remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
-      logger.log({
-        level: Level.RUNNING,
-        message: trans.__('Pushing…')
-      });
       try {
+        let remote;
+        let force;
+
+        if (args['advanced'] as boolean) {
+          const result = await showDialog({
+            title: trans.__('Please select push options.'),
+            body: new AdvancedPushForm(trans, gitModel),
+            buttons: [
+              Dialog.cancelButton({ label: trans.__('Cancel') }),
+              Dialog.okButton({ label: trans.__('Proceed') })
+            ]
+          });
+          if (result.button.accept) {
+            remote = result.value.remoteName;
+            force = result.value.force;
+          } else {
+            return;
+          }
+        }
+
+        logger.log({
+          level: Level.RUNNING,
+          message: trans.__('Pushing…')
+        });
         const details = await showGitOperationDialog(
           gitModel,
-          args.force ? Operation.ForcePush : Operation.Push,
-          trans
+          force ? Operation.ForcePush : Operation.Push,
+          trans,
+          (args = { remote })
         );
+
         logger.log({
           message: trans.__('Successfully pushed'),
           level: Level.SUCCESS,
@@ -1270,12 +1286,12 @@ export function createGitMenu(
     CommandIDs.gitPush,
     CommandIDs.gitPull,
     CommandIDs.gitResetToRemote,
-    CommandIDs.gitAddRemote,
+    CommandIDs.gitManageRemote,
     CommandIDs.gitTerminalCommand
   ].forEach(command => {
     menu.addItem({ command });
     if (command === CommandIDs.gitPush) {
-      menu.addItem({ command, args: { force: true } });
+      menu.addItem({ command, args: { advanced: true } });
     }
     if (command === CommandIDs.gitPull) {
       menu.addItem({ command, args: { force: true } });
@@ -1512,10 +1528,18 @@ export async function showGitOperationDialog<T>(
         result = await model.pull(authentication);
         break;
       case Operation.Push:
-        result = await model.push(authentication);
+        result = await model.push(
+          authentication,
+          false,
+          (args as unknown as { remote: string })['remote']
+        );
         break;
       case Operation.ForcePush:
-        result = await model.push(authentication, true);
+        result = await model.push(
+          authentication,
+          true,
+          (args as unknown as { remote: string })['remote']
+        );
         break;
       case Operation.Fetch:
         result = await model.fetch(authentication);

@@ -1,11 +1,11 @@
 import json
 from unittest.mock import patch
-
+import os
 import pytest
 import tornado
 
+from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import NAMESPACE
-
 from .testutils import assert_http_error, maybe_future
 
 
@@ -101,3 +101,81 @@ async def test_git_add_remote_failure(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         ["git", "remote", "add", "origin", url], cwd=str(local_path)
     )
+
+
+@patch("jupyterlab_git.git.execute")
+async def test_git_remote_show(mock_execute, jp_root_dir):
+    # Given
+    local_path = jp_root_dir / "test_path"
+    mock_execute.return_value = maybe_future(
+        (0, os.linesep.join(["origin", "test"]), "")
+    )
+
+    # When
+    output = await Git().remote_show(str(local_path), False)
+
+    # Then
+    command = ["git", "remote", "show"]
+    mock_execute.assert_called_once_with(command, cwd=str(local_path))
+    assert output == {
+        "code": 0,
+        "command": " ".join(command),
+        "remotes": ["origin", "test"],
+    }
+
+
+@patch("jupyterlab_git.git.execute")
+async def test_git_remote_show_verbose(mock_execute, jp_fetch, jp_root_dir):
+    # Given
+    local_path = jp_root_dir / "test_path"
+    url = "http://github.com/myid/myrepository.git"
+    process_output = os.linesep.join(
+        [f"origin\t{url} (fetch)", f"origin\t{url} (push)"]
+    )
+    mock_execute.return_value = maybe_future((0, process_output, ""))
+
+    # When
+    response = await jp_fetch(
+        NAMESPACE,
+        local_path.name,
+        "remote",
+        "show",
+        method="GET",
+    )
+
+    # Then
+    command = ["git", "remote", "-v", "show"]
+    mock_execute.assert_called_once_with(command, cwd=str(local_path))
+
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload == {
+        "code": 0,
+        "command": " ".join(command),
+        "remotes": [
+            {"name": "origin", "url": "http://github.com/myid/myrepository.git"}
+        ],
+    }
+
+
+@patch("jupyterlab_git.git.execute")
+async def test_git_remote_remove(mock_execute, jp_fetch, jp_root_dir):
+    # Given
+    local_path = jp_root_dir / "test_path"
+    mock_execute.return_value = maybe_future((0, "", ""))
+
+    # When
+    name = "origin"
+    response = await jp_fetch(
+        NAMESPACE,
+        local_path.name,
+        "remote",
+        name,
+        method="DELETE",
+    )
+
+    # Then
+    command = ["git", "remote", "remove", name]
+    mock_execute.assert_called_once_with(command, cwd=str(local_path))
+
+    assert response.code == 204

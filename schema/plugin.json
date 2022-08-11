@@ -100,7 +100,7 @@
           },
           {
             "command": "git:push",
-            "args": { "force": true }
+            "args": { "advanced": true }
           },
           {
             "command": "git:pull"
@@ -113,7 +113,7 @@
             "command": "git:reset-to-remote"
           },
           {
-            "command": "git:add-remote"
+            "command": "git:manage-remote"
           },
           {
             "command": "git:terminal-command"

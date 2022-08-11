@@ -454,6 +454,35 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Show remote repository for the current repository
+   * @returns promise which resolves to a list of remote repositories
+   */
+  async getRemotes(): Promise<Git.IGitRemote[]> {
+    const path = await this._getPathRepository();
+    const result = await this._taskHandler.execute<Git.IGitRemoteResult>(
+      'git:show:remote',
+      async () => {
+        return await requestAPI<Git.IGitRemoteResult>(
+          URLExt.join(path, 'remote', 'show'),
+          'GET'
+        );
+      }
+    );
+    return result.remotes;
+  }
+
+  /**
+   * Remove a remote repository by name
+   * @param name name of remote to remove
+   */
+  async removeRemote(name: string): Promise<void> {
+    const path = await this._getPathRepository();
+    await this._taskHandler.execute<void>('git:remove:remote', async () => {
+      await requestAPI<void>(URLExt.join(path, 'remote', name), 'DELETE');
+    });
+  }
+
+  /**
    * Retrieve the repository commit log.
    *
    * ## Notes
@@ -942,7 +971,11 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async push(auth?: Git.IAuth, force = false): Promise<Git.IResultWithMessage> {
+  async push(
+    auth?: Git.IAuth,
+    force = false,
+    remote?: string
+  ): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
     const data = this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
@@ -952,7 +985,8 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             auth: auth as any,
-            force: force
+            force: force,
+            remote
           }
         );
       }

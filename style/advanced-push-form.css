@@ -1,0 +1,30 @@
+.jp-remote-text {
+  font-size: 1rem;
+}
+
+.jp-remote-options-wrapper {
+  margin: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  row-gap: 5px;
+}
+
+.jp-button-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.jp-option {
+  height: fit-content !important;
+  appearance: auto !important;
+  margin: 0px;
+}
+
+.jp-force-box-container {
+  margin-top: 1rem;
+  display: flex;
+  align-items: flex-end;
+  column-gap: 5px;
+}

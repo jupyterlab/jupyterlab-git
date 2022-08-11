@@ -426,7 +426,11 @@ export interface IGitExtension extends IDisposable {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  push(auth?: Git.IAuth, force?: boolean): Promise<Git.IResultWithMessage>;
+  push(
+    auth?: Git.IAuth,
+    force?: boolean,
+    remote?: string
+  ): Promise<Git.IResultWithMessage>;
 
   /**
    * General Git refresh
@@ -992,6 +996,24 @@ export namespace Git {
   }
 
   /**
+   * Structure for the request to the Git Remote Add API.
+   */
+  export interface IGitRemote {
+    url: string;
+    name: string;
+  }
+
+  /**
+   * Interface for GitRemoteShowDetails request result,
+   * has the name and urls of all remotes
+   */
+  export interface IGitRemoteResult {
+    code: number;
+    command: string;
+    remotes: Git.IGitRemote[];
+  }
+
+  /**
    * Structure for the request to the Git Clone API.
    */
   export interface IGitClone {
@@ -1167,7 +1189,7 @@ export enum CommandIDs {
   gitOpenUrl = 'git:open-url',
   gitToggleSimpleStaging = 'git:toggle-simple-staging',
   gitToggleDoubleClickDiff = 'git:toggle-double-click-diff',
-  gitAddRemote = 'git:add-remote',
+  gitManageRemote = 'git:manage-remote',
   gitClone = 'git:clone',
   gitMerge = 'git:merge',
   gitOpenGitignore = 'git:open-gitignore',

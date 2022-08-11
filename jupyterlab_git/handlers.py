@@ -391,6 +391,37 @@ class GitRemoteAddHandler(GitHandler):
         self.finish(json.dumps(output))
 
 
+class GitRemoteDetailsShowHandler(GitHandler):
+    """Handler for 'git remote -v'."""
+
+    @tornado.web.authenticated
+    async def get(self, path: str = ""):
+        """GET request handler to retrieve existing remotes."""
+        local_path = self.url2localpath(path)
+        output = await self.git.remote_show(local_path, verbose=True)
+        if output["code"] == 0:
+            self.set_status(200)
+        else:
+            self.set_status(500)
+        self.finish(json.dumps(output))
+
+
+class GitRemoteRemoveHandler(GitHandler):
+    """Handler for 'git remote remove <name>'."""
+
+    @tornado.web.authenticated
+    async def delete(self, path: str = "", name: str = ""):
+        """DELETE request handler to remove a remote."""
+        local_path = self.url2localpath(path)
+
+        output = await self.git.remote_remove(local_path, name)
+        if output["code"] == 0:
+            self.set_status(204)
+        else:
+            self.set_status(500)
+            self.finish(json.dumps(output))
+
+
 class GitResetHandler(GitHandler):
     """
     Handler for 'git reset <filename>'.
@@ -871,6 +902,7 @@ def setup_handlers(web_app):
         ("/push", GitPushHandler),
         ("/remote/add", GitRemoteAddHandler),
         ("/remote/fetch", GitFetchHandler),
+        ("/remote/show", GitRemoteDetailsShowHandler),
         ("/reset", GitResetHandler),
         ("/reset_to_commit", GitResetToCommitHandler),
         ("/show_prefix", GitShowPrefixHandler),
@@ -890,12 +922,23 @@ def setup_handlers(web_app):
 
     # add the baseurl to our paths
     base_url = web_app.settings["base_url"]
-    git_handlers = [
-        (url_path_join(base_url, NAMESPACE + path_regex + endpoint), handler)
-        for endpoint, handler in handlers_with_path
-    ] + [
-        (url_path_join(base_url, NAMESPACE + endpoint), handler)
-        for endpoint, handler in handlers
-    ]
+    git_handlers = (
+        [
+            (url_path_join(base_url, NAMESPACE + path_regex + endpoint), handler)
+            for endpoint, handler in handlers_with_path
+        ]
+        + [
+            (url_path_join(base_url, NAMESPACE + endpoint), handler)
+            for endpoint, handler in handlers
+        ]
+        + [
+            (
+                url_path_join(
+                    base_url, NAMESPACE + path_regex + r"/remote/(?P<name>\w+)"
+                ),
+                GitRemoteRemoveHandler,
+            )
+        ]
+    )
 
     web_app.add_handlers(".*", git_handlers)
