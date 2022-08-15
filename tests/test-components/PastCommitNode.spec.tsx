@@ -48,6 +48,7 @@ describe('PastCommitNode', () => {
     }
   ];
   const branches: Git.IBranch[] = notMatchingBranches.concat(matchingBranches);
+  const toggleCommitExpansion = jest.fn();
   const props: IPastCommitNodeProps = {
     model: null,
     commit: {
@@ -55,13 +56,16 @@ describe('PastCommitNode', () => {
       author: 'author',
       date: 'date',
       commit_msg: 'message',
-      pre_commit: 'pre_commit'
+      pre_commits: ['pre_commit']
     },
     branches: branches,
     commands: null,
     trans,
     onCompareWithSelected: null,
-    onSelectForCompare: null
+    onSelectForCompare: null,
+    expanded: false,
+    toggleCommitExpansion,
+    setRef: () => null
   };
 
   test('Includes commit info', () => {
@@ -88,8 +92,7 @@ describe('PastCommitNode', () => {
       </PastCommitNode>
     );
     node.simulate('click');
-    expect(node.find('div#singlePastCommitInfo')).toHaveLength(1);
-    node.simulate('click');
-    expect(node.find('div#singlePastCommitInfo')).toHaveLength(0);
+    expect(toggleCommitExpansion).toBeCalledTimes(1);
+    expect(toggleCommitExpansion).toHaveBeenCalledWith(props.commit.commit);
   });
 });

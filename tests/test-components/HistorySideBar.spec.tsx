@@ -23,7 +23,7 @@ describe('HistorySideBar', () => {
         author: null,
         date: null,
         commit_msg: null,
-        pre_commit: null,
+        pre_commits: [null]
       }
     ],
     branches: [],
@@ -37,6 +37,17 @@ describe('HistorySideBar', () => {
     onSelectForCompare: _ => async _ => null,
     onCompareWithSelected: _ => async _ => null
   };
+
+  beforeEach(() => {
+    Object.defineProperty(global, 'ResizeObserver', {
+      writable: true,
+      value: jest.fn().mockImplementation(() => ({
+        observe: jest.fn(() => 'Mocking works'),
+        unobserve: jest.fn(),
+        disconnect: jest.fn()
+      }))
+    });
+  });
 
   it('renders the commit nodes', () => {
     const historySideBar = shallow(<HistorySideBar {...props} />);
