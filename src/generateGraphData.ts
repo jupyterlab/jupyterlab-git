@@ -1,16 +1,52 @@
+/**
+ * Represent a commit to be rendered in the GitCommitGraph.
+ */
 export interface ICommit {
+  /**
+   * The hash of the commit.
+   */
   sha: string;
+  /**
+   * A list of parents' hashes.
+   */
   parents: string[];
 }
+/**
+ * Represents a commit node in the GitCommitGraph.
+ */
 export interface INode {
+  /**
+   * The hash of the commit.
+   */
   sha: string;
+  /**
+   * The commit dot in GitCommitGraph.
+   */
   dot: { lateralOffset: number; branch: number };
+  /**
+   * A list of routes that should be rendered together with the dot.
+   */
   routes: IRoute[];
+  /**
+   * Vertical offset of the dot and the start of the route(s) with respect to the top of the svg image.
+   */
   yOffset: number;
 }
+/**
+ * Represent a route that should be rendered with a commit dot.
+ */
 export interface IRoute {
+  /**
+   * lateral offset of the start of the route
+   */
   from: number;
+  /**
+   * lateral offset of the end of the route
+   */
   to: number;
+  /**
+   * The route's branch number.
+   */
   branch: number;
 }
 
@@ -27,35 +63,32 @@ const Node = (
   yOffset
 });
 
-const remove = function (list: number[], item: number) {
+function remove(list: number[], item: number): number[] {
   list.splice(list.indexOf(item), 1);
   return list;
-};
+}
 
-/*
-  Generate preformatted data of commits graph.
-*/
-export const generateGraphData = function (
+/**
+ * Generate graph data.
+ * @param commits a list of commit, which should have `sha`, `parents` properties.
+ * @param getNodeHeight a callback to retrieve the height of the history node
+ * @returns data nodes, a json list of
+      [ 
+        {
+          sha,
+          {offset, branch}, //dot
+          [
+            {from, to, branch},  // route 1
+            {from, to, branch},  // route 2
+            {from, to, branch},
+          ] // routes
+        } // node
+      ],  
+ */
+export function generateGraphData(
   commits: ICommit[],
   getNodeHeight: (sha: string) => number
 ): INode[] {
-  /*
-  Generate graph data.
-
-  :param commits: a list of commit, which should have
-      `sha`, `parents` properties.
-  :returns: data nodes, a json list of
-      [
-      sha,
-      [offset, branch], //dot
-      [
-      [from, to, branch],  // route 1
-      [from, to, branch],  // route 2
-      [from, to, branch],
-      ]  // routes
-      ],  // node
-  */
-
   const nodes: INode[] = [];
   const branchIndex = [0];
   const reserve: number[] = [];
@@ -130,4 +163,4 @@ export const generateGraphData = function (
   });
 
   return nodes;
-};
+}

@@ -26,7 +26,6 @@ const COLOURS = [
   '#cccccc',
   '#84b6eb',
   '#e6e6e6',
-  '#ffffff',
   '#cc317c'
 ];
 
@@ -52,9 +51,21 @@ const branchCount = (commitNodes: INode[]): number => {
 };
 
 export interface IGitCommitGraphProps {
+  /**
+   * A list of commits with its own hash and its parents' hashes.
+   */
   commits: ICommit[];
+  /**
+   * Callback to inquire the height of a specific SinglePastCommitInfo component.
+   */
   getNodeHeight: (sha: string) => number;
+  /**
+   * Radius of the commit dot.
+   */
   dotRadius?: number;
+  /**
+   * Width of the lines connecting the commit dots.
+   */
   lineWidth?: number;
 }
 
