@@ -531,7 +531,7 @@ class Git:
                 "date": line_array[i + 2],
                 "commit_msg": line_array[i + 3],
                 "pre_commits": line_array[i + 4].split(" ")
-                if i + 4 < len(line_array)
+                if i + 4 < len(line_array) and line_array[i + 4]
                 else [],
             }
 
