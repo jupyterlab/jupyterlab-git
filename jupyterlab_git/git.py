@@ -629,29 +629,6 @@ class Git:
             "modified_files": result,
         }
 
-    async def graph_log(self, path):
-        """
-        Execute git log --all --decorate --graph command (used to get
-        history of all current commits) & return the result.
-        """
-        cmd = [
-            "git",
-            "log",
-            "--all",
-            "--decorate",
-            "--oneline",
-            "--graph",
-        ]
-
-        code, my_output, my_error = await execute(
-            cmd,
-            cwd=path,
-        )
-        if code != 0:
-            return {"code": code, "command": " ".join(cmd), "message": my_error}
-
-        return {"result": my_output}
-
     async def diff(self, path, previous=None, current=None):
         """
         Execute git diff command & return the result.
