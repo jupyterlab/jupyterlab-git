@@ -13,18 +13,24 @@ async def test_single_file_log():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         process_output = [
+            # "74baf6e1d18dfa004d9b9105ff86746ab78084eb",
+            # "Lazy Senior Developer",
+            # "1 hours ago",
+            # "Nothing",
             "8852729159bef63d7197f8aa26355b387283cb58",
             "Lazy Senior Developer",
             "2 hours ago",
             "Something",
-            "e6d4eed300811e886cadffb16eeed19588eb5eec\x00\x00e6d4eed300811e886cadffb16eeed19588eb5eec"
+            "e6d4eed300811e886cadffb16eeed19588eb5eec",
+            "e6d4eed300811e886cadffb16eeed19588eb5eec",
             "\x00folder/test.txt\x00",
-            "d19001d71bb928ec9ed6ae3fe1bfc474e1b771d0",
-            "Lazy Junior Developer",
-            "5 hours ago",
-            "Something More",
-            "263f762e0aad329c3c01bbd9a28f66403e6cfa5f\x00\x00263f762e0aad329c3c01bbd9a28f66403e6cfa5f"
-            "\x00folder/test.txt\x00",
+            # "d19001d71bb928ec9ed6ae3fe1bfc474e1b771d0",
+            # "Lazy Junior Developer",
+            # "5 hours ago",
+            # "Something More",
+            # "263f762e0aad329c3c01bbd9a28f66403e6cfa5f e6d4eed300811e886cadffb16eeed19588eb5eec"
+            # "263f762e0aad329c3c01bbd9a28f66403e6cfa5f",
+            # "\x00folder/test.txt\x00",
         ]
 
         mock_execute.return_value = maybe_future((0, "\n".join(process_output), ""))
@@ -32,6 +38,14 @@ async def test_single_file_log():
         expected_response = {
             "code": 0,
             "commits": [
+                # {
+                #     "commit": "74baf6e1d18dfa004d9b9105ff86746ab78084eb",
+                #     "author": "Lazy Senior Developer",
+                #     "date": "1 hours ago",
+                #     "commit_msg": "Nothing",
+                #     "pre_commits": [],
+                #     "is_binary": False,
+                # },
                 {
                     "commit": "8852729159bef63d7197f8aa26355b387283cb58",
                     "author": "Lazy Senior Developer",
@@ -41,15 +55,14 @@ async def test_single_file_log():
                     "is_binary": False,
                     "file_path": "folder/test.txt",
                 },
-                {
-                    "commit": "d19001d71bb928ec9ed6ae3fe1bfc474e1b771d0",
-                    "author": "Lazy Junior Developer",
-                    "date": "5 hours ago",
-                    "commit_msg": "Something More",
-                    "pre_commits": ["263f762e0aad329c3c01bbd9a28f66403e6cfa5f"],
-                    "is_binary": False,
-                    "file_path": "folder/test.txt",
-                },
+                # {
+                #     "commit": "d19001d71bb928ec9ed6ae3fe1bfc474e1b771d0",
+                #     "author": "Lazy Junior Developer",
+                #     "date": "5 hours ago",
+                #     "commit_msg": "Something More",
+                #     "pre_commits": ["263f762e0aad329c3c01bbd9a28f66403e6cfa5f", "e6d4eed300811e886cadffb16eeed19588eb5eec"],
+                #     "is_binary": False,
+                # },
             ],
         }
 
