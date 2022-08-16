@@ -1,19 +1,19 @@
 // a canvas like api for building an svg path data attribute
 export class SVGPathData {
   constructor() {
-    this.commands = [];
+    this._SVGPath = [];
   }
   toString(): string {
-    return this.commands.join(' ');
+    return this._SVGPath.join(' ');
   }
   moveTo(x: number, y: number): void {
-    this.commands.push(`M ${x},${y}`);
+    this._SVGPath.push(`M ${x},${y}`);
   }
   lineTo(x: number, y: number): void {
-    this.commands.push(`L ${x},${y}`);
+    this._SVGPath.push(`L ${x},${y}`);
   }
   closePath(): void {
-    this.commands.push('Z');
+    this._SVGPath.push('Z');
   }
   bezierCurveTo(
     cp1x: number,
@@ -23,8 +23,8 @@ export class SVGPathData {
     x: number,
     y: number
   ): void {
-    this.commands.push(`C ${cp1x}, ${cp1y}, ${cp2x}, ${cp2y}, ${x}, ${y}`);
+    this._SVGPath.push(`C ${cp1x}, ${cp1y}, ${cp2x}, ${cp2y}, ${x}, ${y}`);
   }
 
-  commands: string[];
+  private _SVGPath: string[];
 }
