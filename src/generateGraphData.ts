@@ -94,14 +94,14 @@ export function generateGraphData(
   const reserve: number[] = [];
   const branches: { [sha: string]: number } = {};
 
-  const getBranch = function (sha: string) {
+  function getBranch(sha: string) {
     if (branches[sha] === null || branches[sha] === undefined) {
       branches[sha] = branchIndex[0];
       reserve.push(branchIndex[0]);
       branchIndex[0]++;
     }
     return branches[sha];
-  };
+  }
   let currentYOffset = 25;
   commits.forEach((commit, index) => {
     let b, i;
