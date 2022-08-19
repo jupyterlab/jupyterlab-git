@@ -98,7 +98,7 @@ export const openFileDiff =
               previousFilePath,
               isText,
               context: {
-                previousRef: previousCommit?.commit ?? commit.pre_commit,
+                previousRef: previousCommit?.commit ?? commit.pre_commits[0], // not sure
                 currentRef: commit.commit
               }
             }

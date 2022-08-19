@@ -493,7 +493,7 @@ class Git:
         cmd = [
             "git",
             "log",
-            "--pretty=format:%H%n%an%n%ar%n%s",
+            "--pretty=format:%H%n%an%n%ar%n%s%n%P",
             ("-%d" % history_count),
         ]
         if is_single_file:
@@ -523,28 +523,27 @@ class Git:
                 )
             line_array = parsed_lines
 
-        PREVIOUS_COMMIT_OFFSET = 5 if is_single_file else 4
+        PREVIOUS_COMMIT_OFFSET = 6 if is_single_file else 5
         for i in range(0, len(line_array), PREVIOUS_COMMIT_OFFSET):
             commit = {
                 "commit": line_array[i],
                 "author": line_array[i + 1],
                 "date": line_array[i + 2],
                 "commit_msg": line_array[i + 3],
-                "pre_commit": "",
+                "pre_commits": line_array[i + 4].split(" ")
+                if i + 4 < len(line_array) and line_array[i + 4]
+                else [],
             }
 
             if is_single_file:
-                commit["is_binary"] = line_array[i + 4].startswith("-\t-\t")
+                commit["is_binary"] = line_array[i + 5].startswith("-\t-\t")
 
                 # [insertions, deletions, previous_file_path?, current_file_path]
-                file_info = line_array[i + 4].split()
+                file_info = line_array[i + 5].split()
 
                 if len(file_info) == 4:
                     commit["previous_file_path"] = file_info[2]
                 commit["file_path"] = file_info[-1]
-
-            if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
-                commit["pre_commit"] = line_array[i + PREVIOUS_COMMIT_OFFSET]
 
             result.append(commit)
 

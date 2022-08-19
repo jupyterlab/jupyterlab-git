@@ -22,7 +22,7 @@
     "strict": true,
     "strictNullChecks": false,
     "target": "es2017",
-    "types": ["jest"]
+    "types": ["jest", "resize-observer-browser"]
   },
   "include": ["src/**/*"]
 }

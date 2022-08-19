@@ -935,7 +935,7 @@ export namespace Git {
     author: string;
     date: string;
     commit_msg: string;
-    pre_commit: string;
+    pre_commits: string[];
 
     // properties for single file history
     is_binary?: boolean;
