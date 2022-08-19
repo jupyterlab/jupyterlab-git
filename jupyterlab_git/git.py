@@ -545,7 +545,6 @@ class Git:
                     commit["previous_file_path"] = file_info[2]
                 commit["file_path"] = file_info[-1]
 
-
             result.append(commit)
 
         return {"code": code, "commits": result}
