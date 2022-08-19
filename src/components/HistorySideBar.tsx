@@ -120,17 +120,18 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
   }>({});
   const nodes = React.useRef<{ [sha: string]: HTMLLIElement }>({});
 
-  const resizeObserver = new ResizeObserver(entries => {
-    for (const entry of entries) {
-      const borderBoxSize = Array.isArray(entry.borderBoxSize)
-        ? entry.borderBoxSize[0]
-        : entry.borderBoxSize;
-      const offsetHeight = borderBoxSize.blockSize;
-      const sha = entry.target.id;
-      setNodeHeights(prev => ({ ...prev, [sha]: offsetHeight }));
-    }
-  });
   React.useEffect(() => {
+      const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const borderBoxSize = Array.isArray(entry.borderBoxSize)
+          ? entry.borderBoxSize[0]
+          : entry.borderBoxSize;
+        const offsetHeight = borderBoxSize.blockSize;
+        const sha = entry.target.id;
+        setNodeHeights(prev => ({ ...prev, [sha]: offsetHeight }));
+      }
+    });
+  
     props.commits.forEach(commit =>
       resizeObserver.observe(nodes.current[commit.commit], {
         box: 'border-box'

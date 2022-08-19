@@ -545,8 +545,6 @@ class Git:
                     commit["previous_file_path"] = file_info[2]
                 commit["file_path"] = file_info[-1]
 
-            # if i + PREVIOUS_COMMIT_OFFSET < len(line_array):
-            #     commit["pre_commits"] = line_array[i + PREVIOUS_COMMIT_OFFSET]
 
             result.append(commit)
 
