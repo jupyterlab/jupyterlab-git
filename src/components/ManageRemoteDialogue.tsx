@@ -102,7 +102,7 @@ export class ManageRemoteDialogue extends React.Component<
           <label className={remoteDialogInputClass}>
             <span>
               {this.props.trans.__(
-                'Enter a new remote repository name and url'
+                'Enter a new remote repository name and URL'
               )}
             </span>
             <input
