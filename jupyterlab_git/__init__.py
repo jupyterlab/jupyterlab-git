@@ -37,9 +37,7 @@ class JupyterLabGit(Configurable):
         # TODO Validate
     )
 
-    excluded_paths = List(
-        help="Paths to be excluded checking for origin", config=True, trait=Unicode()
-    )
+    excluded_paths = List(help="Paths to be excluded", config=True, trait=Unicode())
 
     credential_helper = Unicode(
         help="""
