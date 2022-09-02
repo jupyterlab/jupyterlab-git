@@ -43,7 +43,7 @@ class GitHandler(APIHandler):
         super().prepare()
         path = self.path_kwargs.get("path")
         if path is not None:
-            excluded_paths = self.git._config.excluded_paths
+            excluded_paths = self.git.excluded_paths
             for excluded_path in excluded_paths:
                 if re.match(excluded_path, path):
                     self.set_status(404)
