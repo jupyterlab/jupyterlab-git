@@ -12,7 +12,7 @@ from jupyter_server.base.handlers import APIHandler, path_regex
 from jupyter_server.services.contents.manager import ContentsManager
 from jupyter_server.utils import url2path, url_path_join
 from packaging.version import parse
-import re
+import fnmatch
 
 try:
     import hybridcontents
