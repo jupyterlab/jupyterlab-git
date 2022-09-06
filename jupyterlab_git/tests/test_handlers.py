@@ -110,7 +110,7 @@ async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
 async def test_git_show_prefix_for_excluded_path(
     jp_fetch, jp_server_config, jp_root_dir
 ):
-    local_path = jp_root_dir / "test-path"
+    local_path = jp_root_dir / "ignored-path"
 
     try:
         response = await jp_fetch(
