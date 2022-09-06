@@ -112,6 +112,7 @@ Once installed, extension behavior can be modified via the following settings wh
   It is possible to provide a list of commands to be executed in a folder after it is initialized as Git repository.
 - `JupyterLabGit.credential_helper`: Git credential helper to set to cache the credentials.
   The default value is `cache --timeout=3600` to cache the credentials for an hour. If you want to cache them for 10 hours, set `cache --timeout=36000`.
+- `JupyterLabGit.excluded_paths`: Set paths to exclude from this extension.
 
 <details>
 <summary><b>How to set server settings?</b></summary>
