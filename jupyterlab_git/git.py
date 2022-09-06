@@ -1752,5 +1752,9 @@ class Git:
             self.ensure_git_credential_cache_daemon(socket, debug, True, cwd, env)
 
     @property
-    def excluded_paths(self):
+    def excluded_paths(self) -> List[str]:
+        """Wildcard-style path patterns that do not support git commands.
+        
+        You can use ``*`` to match everything or ``?`` to match any single character.
+        """
         return self._config.excluded_paths
