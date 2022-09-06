@@ -45,9 +45,10 @@ class GitHandler(APIHandler):
         if path is not None:
             excluded_paths = self.git.excluded_paths
             for excluded_path in excluded_paths:
-                if re.match(excluded_path, path):
+                if fnmatch.fnmatchcase(path, excluded_path):
                     self.set_status(404)
                     self.finish()
+                    break
 
     @functools.lru_cache()
     def url2localpath(
