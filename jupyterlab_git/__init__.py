@@ -37,6 +37,8 @@ class JupyterLabGit(Configurable):
         # TODO Validate
     )
 
+    excluded_paths = List(help="Paths to be excluded", config=True, trait=Unicode())
+
     credential_helper = Unicode(
         help="""
             The value of Git credential helper will be set to this value when the Git credential caching mechanism is activated by this extension.

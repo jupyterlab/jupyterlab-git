@@ -12,6 +12,7 @@ from jupyter_server.base.handlers import APIHandler, path_regex
 from jupyter_server.services.contents.manager import ContentsManager
 from jupyter_server.utils import url2path, url_path_join
 from packaging.version import parse
+import fnmatch
 
 try:
     import hybridcontents
@@ -36,6 +37,18 @@ class GitHandler(APIHandler):
     @property
     def git(self) -> Git:
         return self.settings["git"]
+
+    def prepare(self):
+        """Check if the path should be skipped"""
+        super().prepare()
+        path = self.path_kwargs.get("path")
+        if path is not None:
+            excluded_paths = self.git.excluded_paths
+            for excluded_path in excluded_paths:
+                if fnmatch.fnmatchcase(path, excluded_path):
+                    self.set_status(404)
+                    self.finish()
+                    break
 
     @functools.lru_cache()
     def url2localpath(

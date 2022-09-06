@@ -8,6 +8,7 @@ from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import NAMESPACE, setup_handlers, GitHandler
 
 from .testutils import assert_http_error, maybe_future
+from tornado.httpclient import HTTPClientError
 
 
 def test_mapping_added():
@@ -104,6 +105,23 @@ async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
             ),
         ]
     )
+
+
+async def test_git_show_prefix_for_excluded_path(
+    jp_fetch, jp_server_config, jp_root_dir
+):
+    local_path = jp_root_dir / "ignored-path"
+
+    try:
+        response = await jp_fetch(
+            NAMESPACE,
+            local_path.name + "/subdir",
+            "show_prefix",
+            body="{}",
+            method="POST",
+        )
+    except HTTPClientError as e:
+        assert e.code == 404
 
 
 @patch("jupyterlab_git.git.execute")
