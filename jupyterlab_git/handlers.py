@@ -46,9 +46,7 @@ class GitHandler(APIHandler):
             excluded_paths = self.git.excluded_paths
             for excluded_path in excluded_paths:
                 if fnmatch.fnmatchcase(path, excluded_path):
-                    self.set_status(404)
-                    self.finish()
-                    break
+                    raise tornado.web.HTTPError(404)
 
     @functools.lru_cache()
     def url2localpath(
