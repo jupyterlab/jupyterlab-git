@@ -91,6 +91,9 @@ export namespace CommandArguments {
   }
 }
 
+const errorMessageOnCancel =
+  /fatal: could not read Username for 'https:\/\/github.com': terminal prompts disabled/;
+
 function pluralizedContextLabel(singular: string, plural: string) {
   return (args: any) => {
     const { files } = args as any as CommandArguments.IGitContextAction;
@@ -342,7 +345,14 @@ export function addCommands(
           level: Level.SUCCESS,
           details
         });
-      } catch (error) {
+      } catch (error: any) {
+        if (errorMessageOnCancel.test(error.message)) {
+          return logger.log({
+            //Empty logger to supress the message
+            message: '',
+            level: Level.INFO
+          });
+        }
         console.error(
           trans.__('Encountered an error when pushing changes. Error: '),
           error
@@ -388,7 +398,7 @@ export function addCommands(
           level: Level.SUCCESS,
           details
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error(
           'Encountered an error when pulling changes. Error: ',
           error
@@ -413,6 +423,12 @@ export function addCommands(
           if ((error as any).cancelled) {
             // Empty message to hide alert
             logger.log({
+              message: '',
+              level: Level.INFO
+            });
+          } else if (errorMessageOnCancel.test(error.message)) {
+            return logger.log({
+              //Empty logger to supress the message
               message: '',
               level: Level.INFO
             });
