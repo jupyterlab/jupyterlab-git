@@ -31,7 +31,7 @@ export { DiffModel } from './components/diff/model';
 export { NotebookDiff } from './components/diff/NotebookDiff';
 export { PlainTextDiff } from './components/diff/PlainTextDiff';
 export { Git, IGitExtension } from './tokens';
-export { logger, LoggerContext } from './logger'
+export { logger, LoggerContext } from './logger';
 
 /**
  * The default running sessions extension.
