@@ -27,6 +27,7 @@ import { CONTEXT_COMMANDS } from './components/FileList';
 import { MergeBranchDialog } from './components/MergeBranchDialog';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
 import { logger } from './logger';
+import { CancelledError } from './cancelledError';
 import { getDiffProvider, GitExtension } from './model';
 import {
   addIcon,
@@ -342,16 +343,24 @@ export function addCommands(
           level: Level.SUCCESS,
           details
         });
-      } catch (error) {
-        console.error(
-          trans.__('Encountered an error when pushing changes. Error: '),
-          error
-        );
-        logger.log({
-          message: trans.__('Failed to push'),
-          level: Level.ERROR,
-          error: error as Error
-        });
+      } catch (error: any) {
+        if (error.name !== 'CancelledError') {
+          console.error(
+            trans.__('Encountered an error when pushing changes. Error: '),
+            error
+          );
+          logger.log({
+            message: trans.__('Failed to push'),
+            level: Level.ERROR,
+            error: error as Error
+          });
+        } else {
+          return logger.log({
+            //Empty logger to supress the message
+            message: '',
+            level: Level.INFO
+          });
+        }
       }
     }
   });
@@ -388,41 +397,49 @@ export function addCommands(
           level: Level.SUCCESS,
           details
         });
-      } catch (error) {
-        console.error(
-          'Encountered an error when pulling changes. Error: ',
-          error
-        );
+      } catch (error: any) {
+        if (error.name !== 'CancelledError') {
+          console.error(
+            'Encountered an error when pulling changes. Error: ',
+            error
+          );
 
-        const errorMsg =
-          typeof error === 'string' ? error : (error as Error).message;
+          const errorMsg =
+            typeof error === 'string' ? error : (error as Error).message;
 
-        // Discard changes then retry pull
-        if (
-          errorMsg
-            .toLowerCase()
-            .includes(
-              'your local changes to the following files would be overwritten by merge'
-            )
-        ) {
-          await commands.execute(CommandIDs.gitPull, {
-            force: true,
-            fallback: true
-          });
-        } else {
-          if ((error as any).cancelled) {
-            // Empty message to hide alert
-            logger.log({
-              message: '',
-              level: Level.INFO
+          // Discard changes then retry pull
+          if (
+            errorMsg
+              .toLowerCase()
+              .includes(
+                'your local changes to the following files would be overwritten by merge'
+              )
+          ) {
+            await commands.execute(CommandIDs.gitPull, {
+              force: true,
+              fallback: true
             });
           } else {
-            logger.log({
-              message: trans.__('Failed to pull'),
-              level: Level.ERROR,
-              error
-            });
+            if ((error as any).cancelled) {
+              // Empty message to hide alert
+              logger.log({
+                message: '',
+                level: Level.INFO
+              });
+            } else {
+              logger.log({
+                message: trans.__('Failed to pull'),
+                level: Level.ERROR,
+                error
+              });
+            }
           }
+        } else {
+          return logger.log({
+            //Empty logger to supress the message
+            message: '',
+            level: Level.INFO
+          });
         }
       }
     }
@@ -1577,6 +1594,8 @@ export async function showGitOperationDialog<T>(
           credentials.value,
           true
         );
+      } else {
+        throw new CancelledError();
       }
     }
     // Throw the error if it cannot be handled or
