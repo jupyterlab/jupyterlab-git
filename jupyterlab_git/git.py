@@ -287,12 +287,16 @@ class Git:
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             code, output, error = await execute(
-                ["git", "clone", unquote(repo_url), "-q"],
+                ["git", "clone", "--depth=1", unquote(repo_url), "-q"],
                 username=auth["username"],
                 password=auth["password"],
                 cwd=path,
                 env=env,
             )
+
+            # if cloned successfully
+            # rm -rf ./dirformynewrepo/.git
+
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             code, output, error = await execute(
