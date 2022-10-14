@@ -272,7 +272,7 @@ class Git:
 
         return response
 
-    async def clone(self, path, repo_url, auth=None):
+    async def clone(self, path, repo_url, meta_data_checked=False, auth=None):
         """
         Execute `git clone`.
         When no auth is provided, disables prompts for the password to avoid the terminal hanging.
@@ -295,10 +295,12 @@ class Git:
                 cwd=path,
                 env=env,
             )
-            new_content = set(os.listdir(path))
-            directory = (new_content - current_content).pop()
-            # Check that the directory contains a '.git' folder.
-            shutil.rmtree(f"{directory}/.git")
+
+            if meta_data_checked:
+                new_content = set(os.listdir(path))
+                directory = (new_content - current_content).pop()
+                # Check that the directory contains a '.git' folder.
+                shutil.rmtree(f"{directory}/.git")
 
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
