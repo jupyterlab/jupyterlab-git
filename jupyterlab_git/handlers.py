@@ -87,6 +87,7 @@ class GitCloneHandler(GitHandler):
         response = await self.git.clone(
             self.url2localpath(path),
             data["clone_url"],
+            data["metaDataChecked"],
             data.get("auth", None),
         )
 

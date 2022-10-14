@@ -16,23 +16,48 @@ export class GitCloneForm extends Widget {
   /**
    * Returns the input value.
    */
-  getValue(): string {
-    return encodeURIComponent(this.node.querySelector('input').value.trim());
+  getValue(): { url: string; metaDataChecked: boolean } {
+    return {
+      url: encodeURIComponent(
+        (
+          this.node.querySelector('#input-link') as HTMLInputElement
+        ).value.trim()
+      ),
+      metaDataChecked: Boolean(
+        encodeURIComponent(
+          (this.node.querySelector('#checkbox') as HTMLInputElement).checked
+        )
+      )
+    };
   }
 
   private static createFormNode(trans: TranslationBundle): HTMLElement {
     const node = document.createElement('div');
-    const label = document.createElement('label');
-    const input = document.createElement('input');
-    const text = document.createElement('span');
+    const inputLinkLabel = document.createElement('label');
+    const inputLink = document.createElement('input');
+    const linkText = document.createElement('span');
+    const checkboxLabel = document.createElement('label');
+    const checkboxText = document.createElement('span');
+    const checkbox = document.createElement('input');
 
     node.className = 'jp-RedirectForm';
-    text.textContent = trans.__('Enter the Clone URI of the repository');
-    input.placeholder = 'https://host.com/org/repo.git';
+    checkbox.id = 'checkbox';
+    inputLink.id = 'input-link';
 
-    label.appendChild(text);
-    label.appendChild(input);
-    node.appendChild(label);
+    linkText.textContent = trans.__('Enter the Clone URI of the repository');
+    inputLink.placeholder = 'https://host.com/org/repo.git';
+    checkboxText.textContent = 'Clone without metadata';
+    checkbox.setAttribute('type', 'checkbox');
+
+    inputLinkLabel.appendChild(linkText);
+    inputLinkLabel.appendChild(inputLink);
+
+    checkboxLabel.appendChild(checkboxText);
+    checkboxLabel.appendChild(checkbox);
+
+    node.appendChild(inputLinkLabel);
+    node.appendChild(checkboxLabel);
+
     return node;
   }
 }

@@ -60,6 +60,10 @@ export interface IGitCloneArgs {
    * Git repository url
    */
   url: string;
+  /**
+   * Git metadata checked
+   */
+  metaDataChecked: boolean;
 }
 
 /**
@@ -1538,8 +1542,8 @@ export async function showGitOperationDialog<T>(
     switch (operation) {
       case Operation.Clone:
         // eslint-disable-next-line no-case-declarations
-        const { path, url } = args as any as IGitCloneArgs;
-        result = await model.clone(path, url, authentication);
+        const { path, url, metaDataChecked } = args as any as IGitCloneArgs;
+        result = await model.clone(path, url, metaDataChecked, authentication);
         break;
       case Operation.Pull:
         result = await model.pull(authentication);

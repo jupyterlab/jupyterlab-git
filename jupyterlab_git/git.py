@@ -6,6 +6,7 @@ import os
 import pathlib
 import re
 import shlex
+import shutil
 import subprocess
 import traceback
 from typing import Dict, List, Optional
@@ -286,6 +287,7 @@ class Git:
             if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
+            current_content = set(os.listdir(path))
             code, output, error = await execute(
                 ["git", "clone", "--depth=1", unquote(repo_url), "-q"],
                 username=auth["username"],
@@ -293,9 +295,10 @@ class Git:
                 cwd=path,
                 env=env,
             )
-
-            # if cloned successfully
-            # rm -rf ./dirformynewrepo/.git
+            new_content = set(os.listdir(path))
+            directory = (new_content - current_content).pop()
+            # Check that the directory contains a '.git' folder.
+            shutil.rmtree(f"{directory}/.git")
 
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
