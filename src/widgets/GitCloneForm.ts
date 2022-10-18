@@ -33,6 +33,7 @@ export class GitCloneForm extends Widget {
 
   private static createFormNode(trans: TranslationBundle): HTMLElement {
     const node = document.createElement('div');
+    const inputWrapper = document.createElement('div');
     const inputLinkLabel = document.createElement('label');
     const inputLink = document.createElement('input');
     const linkText = document.createElement('span');
@@ -40,8 +41,10 @@ export class GitCloneForm extends Widget {
     const checkboxLabel = document.createElement('label');
     const checkbox = document.createElement('input');
 
-    node.className = 'jp-RedirectForm';
+    node.className = 'jp-CredentialsBox';
+    inputWrapper.className = 'jp-RedirectForm';
     checkboxWrapper.className = 'jp-CredentialsBox-wrapper';
+    checkboxLabel.className = 'jp-CredentialsBox-label-checkbox';
     checkbox.id = 'checkbox';
     inputLink.id = 'input-link';
 
@@ -53,10 +56,12 @@ export class GitCloneForm extends Widget {
     inputLinkLabel.appendChild(linkText);
     inputLinkLabel.appendChild(inputLink);
 
-    checkboxWrapper.appendChild(checkbox);
+    inputWrapper.append(inputLinkLabel);
+
+    checkboxLabel.prepend(checkbox);
     checkboxWrapper.appendChild(checkboxLabel);
 
-    node.appendChild(inputLinkLabel);
+    node.appendChild(inputWrapper);
     node.appendChild(checkboxWrapper);
 
     return node;

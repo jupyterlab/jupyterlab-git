@@ -283,27 +283,19 @@ class Git:
         :return: response with status code and error message.
         """
         env = os.environ.copy()
+        cmd = ["git", "clone"]
+        if versioning:
+            cmd.append("--depth=1")
+        cmd.append(unquote(repo_url))
+
         if auth:
             if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
-
-            if versioning:
-                current_content = set(os.listdir(path))
-                code, output, error = await execute(
-                    ["git", "clone", "--depth=1", unquote(repo_url), "-q"],
-                    username=auth["username"],
-                    password=auth["password"],
-                    cwd=path,
-                    env=env,
-                )
-                new_content = set(os.listdir(path))
-                directory = (new_content - current_content).pop()
-                # Check that the directory contains a '.git' folder.
-                shutil.rmtree(f"{directory}/.git")
-
+            cmd.append("-q")
+            current_content = set(os.listdir(path))
             code, output, error = await execute(
-                ["git", "clone", unquote(repo_url), "-q"],
+                cmd,
                 username=auth["username"],
                 password=auth["password"],
                 cwd=path,
@@ -312,10 +304,15 @@ class Git:
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             code, output, error = await execute(
-                ["git", "clone", unquote(repo_url)],
+                cmd,
                 cwd=path,
                 env=env,
             )
+
+        if versioning:
+            new_content = set(os.listdir(path))
+            directory = (new_content - current_content).pop()
+            shutil.rmtree(f"{directory}/.git")
 
         response = {"code": code, "message": output.strip()}
 
