@@ -16,14 +16,14 @@ export class GitCloneForm extends Widget {
   /**
    * Returns the input value.
    */
-  getValue(): { url: string; metaDataChecked: boolean } {
+  getValue(): { url: string; versioning: boolean } {
     return {
       url: encodeURIComponent(
         (
           this.node.querySelector('#input-link') as HTMLInputElement
         ).value.trim()
       ),
-      metaDataChecked: Boolean(
+      versioning: Boolean(
         encodeURIComponent(
           (this.node.querySelector('#checkbox') as HTMLInputElement).checked
         )
@@ -36,27 +36,28 @@ export class GitCloneForm extends Widget {
     const inputLinkLabel = document.createElement('label');
     const inputLink = document.createElement('input');
     const linkText = document.createElement('span');
+    const checkboxWrapper = document.createElement('div');
     const checkboxLabel = document.createElement('label');
-    const checkboxText = document.createElement('span');
     const checkbox = document.createElement('input');
 
     node.className = 'jp-RedirectForm';
+    checkboxWrapper.className = 'jp-CredentialsBox-wrapper';
     checkbox.id = 'checkbox';
     inputLink.id = 'input-link';
 
     linkText.textContent = trans.__('Enter the Clone URI of the repository');
     inputLink.placeholder = 'https://host.com/org/repo.git';
-    checkboxText.textContent = 'Clone without metadata';
+    checkboxLabel.textContent = 'Clone without metadata';
     checkbox.setAttribute('type', 'checkbox');
 
     inputLinkLabel.appendChild(linkText);
     inputLinkLabel.appendChild(inputLink);
 
-    checkboxLabel.appendChild(checkboxText);
-    checkboxLabel.appendChild(checkbox);
+    checkboxWrapper.appendChild(checkbox);
+    checkboxWrapper.appendChild(checkboxLabel);
 
     node.appendChild(inputLinkLabel);
-    node.appendChild(checkboxLabel);
+    node.appendChild(checkboxWrapper);
 
     return node;
   }

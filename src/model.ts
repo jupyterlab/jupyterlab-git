@@ -618,7 +618,7 @@ export class GitExtension implements IGitExtension {
    *
    * @param path - local path into which the repository will be cloned
    * @param url - Git repository URL
-   * @param metaDataChecked - boolean flag of Git metadata
+   * @param versioning - boolean flag of Git metadata
    * @param auth - remote repository authentication information
    * @returns promise which resolves upon cloning a repository
    *
@@ -628,7 +628,7 @@ export class GitExtension implements IGitExtension {
   async clone(
     path: string,
     url: string,
-    metaDataChecked: boolean,
+    versioning: boolean,
     auth?: Git.IAuth
   ): Promise<Git.IResultWithMessage> {
     return await this._taskHandler.execute<Git.IResultWithMessage>(
@@ -639,7 +639,7 @@ export class GitExtension implements IGitExtension {
           'POST',
           {
             clone_url: url,
-            metaDataChecked: metaDataChecked,
+            versioning: versioning,
             auth: auth as any
           }
         );

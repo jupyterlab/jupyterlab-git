@@ -272,7 +272,7 @@ class Git:
 
         return response
 
-    async def clone(self, path, repo_url, meta_data_checked=False, auth=None):
+    async def clone(self, path, repo_url, versioning=False, auth=None):
         """
         Execute `git clone`.
         When no auth is provided, disables prompts for the password to avoid the terminal hanging.
@@ -288,7 +288,7 @@ class Git:
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
 
-            if meta_data_checked:
+            if versioning:
                 current_content = set(os.listdir(path))
                 code, output, error = await execute(
                     ["git", "clone", "--depth=1", unquote(repo_url), "-q"],
