@@ -50,7 +50,7 @@ export class GitCloneForm extends Widget {
 
     linkText.textContent = trans.__('Enter the Clone URI of the repository');
     inputLink.placeholder = 'https://host.com/org/repo.git';
-    checkboxLabel.textContent = 'Clone without metadata';
+    checkboxLabel.textContent = trans.__('Clone without metadata');
     checkbox.setAttribute('type', 'checkbox');
 
     inputLinkLabel.appendChild(linkText);

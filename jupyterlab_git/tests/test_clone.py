@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from unittest.mock import call, patch
 
-import pytest
+from pytest import fixture, pytest
 
 from jupyterlab_git import JupyterLabGit
 from jupyterlab_git.git import Git
@@ -29,6 +29,41 @@ async def test_git_clone_success():
                 cwd=str(Path("/bin") / "test_curr_path"),
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
             )
+            assert {"code": 0, "message": output} == actual_response
+
+
+@pytest.mark.asyncio
+@pytest.fixture
+async def test_git_clone_success():
+    with patch("os.environ", {"TEST": "test"}):
+        with patch("jupyterlab_git.git.execute") as mock_execute:
+            # Given
+            output = "output"
+            mock_execute.return_value = maybe_future((0, output, "error"))
+
+            # Create a temporary directory and fake the content of it to be a directory containing a `.git` folder (that should be removed)
+            # I advice you to use the pytest fixture tmp_path; see https://docs.pytest.org/en/6.2.x/reference.html#std-fixture-tmp_path
+            path = tmp_path_factory.mktemp("check-symlinks")
+            tmpdir = tempfile.mkdtemp()
+            temppath = tmp_path()
+
+            # When
+            actual_response = await Git().clone(
+                path=path,  # Here set the path to the temporary directory
+                repo_url="ghjkhjkl",
+                flag=True,
+            )
+
+            # Then
+            mock_execute.assert_called_once_with(
+                ["git", "clone", "ghjkhjkl"],  # to be update
+                cwd=str(Path("/bin") / "test_curr_path"),  # to be udpated
+                env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+            )
+
+            # Check the `.git` folder has been removed.
+            os.path.isdir(str(Path("/git")))
+
             assert {"code": 0, "message": output} == actual_response
 
 
