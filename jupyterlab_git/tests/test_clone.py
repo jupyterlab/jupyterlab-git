@@ -32,26 +32,19 @@ async def test_git_clone_success():
             assert {"code": 0, "message": output} == actual_response
 
 
+# Create a temporary directory and fake the content of it to be a directory containing a `.git` folder (that should be removed)
 @pytest.mark.asyncio
 @pytest.fixture
-async def test_git_clone_success():
+async def test_git_clone_success(tmp_path):
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
             output = "output"
             mock_execute.return_value = maybe_future((0, output, "error"))
 
-            # Create a temporary directory and fake the content of it to be a directory containing a `.git` folder (that should be removed)
-            # I advice you to use the pytest fixture tmp_path; see https://docs.pytest.org/en/6.2.x/reference.html#std-fixture-tmp_path
-            path = tmp_path_factory.mktemp("check-symlinks")
-            tmpdir = tempfile.mkdtemp()
-            temppath = tmp_path()
-
             # When
-            actual_response = await Git().clone(
-                path=path,  # Here set the path to the temporary directory
-                repo_url="ghjkhjkl",
-                flag=True,
+            await Git().clone(
+                path=str(Path("/bin/test_curr_path")), repo_url="ghjkhjkl"
             )
 
             # Then
@@ -62,9 +55,7 @@ async def test_git_clone_success():
             )
 
             # Check the `.git` folder has been removed.
-            os.path.isdir(str(Path("/git")))
-
-            assert {"code": 0, "message": output} == actual_response
+            assert (str(tmp_path) / ".git").exists()
 
 
 @pytest.mark.asyncio
