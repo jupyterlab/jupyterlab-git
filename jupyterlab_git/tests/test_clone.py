@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from unittest.mock import call, patch
 
-from pytest import fixture, pytest
+import pytest
 
 from jupyterlab_git import JupyterLabGit
 from jupyterlab_git.git import Git
