@@ -285,9 +285,9 @@ class Git:
         env = os.environ.copy()
         cmd = ["git", "clone"]
         if versioning:
-            cmd.append("--depth=1")
             cmd.append("-q")
             current_content = set(os.listdir(path))
+            cmd.append("--depth=1")
         cmd.append(unquote(repo_url))
 
         if auth:
