@@ -286,14 +286,14 @@ class Git:
         cmd = ["git", "clone"]
         if versioning:
             cmd.append("--depth=1")
+            cmd.append("-q")
+            current_content = set(os.listdir(path))
         cmd.append(unquote(repo_url))
 
         if auth:
             if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
-            cmd.append("-q")
-            current_content = set(os.listdir(path))
             code, output, error = await execute(
                 cmd,
                 username=auth["username"],
