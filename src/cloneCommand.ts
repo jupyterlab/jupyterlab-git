@@ -59,7 +59,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
               {
                 path: fileBrowserModel.path,
                 url: result.value.url,
-                versioning: result.value.versioning
+                not_versioning: result.value.not_versioning
               }
             );
             logger.log({

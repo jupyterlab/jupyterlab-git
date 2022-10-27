@@ -16,14 +16,14 @@ export class GitCloneForm extends Widget {
   /**
    * Returns the input value.
    */
-  getValue(): { url: string; versioning: boolean } {
+  getValue(): { url: string; not_versioning: boolean } {
     return {
       url: encodeURIComponent(
         (
           this.node.querySelector('#input-link') as HTMLInputElement
         ).value.trim()
       ),
-      versioning: Boolean(
+      not_versioning: Boolean(
         encodeURIComponent(
           (this.node.querySelector('#checkbox') as HTMLInputElement).checked
         )

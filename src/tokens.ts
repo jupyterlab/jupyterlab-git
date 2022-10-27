@@ -241,7 +241,7 @@ export interface IGitExtension extends IDisposable {
   clone(
     path: string,
     url: string,
-    versioning: boolean,
+    not_versioning: boolean,
     auth?: Git.IAuth
   ): Promise<Git.IResultWithMessage>;
 
