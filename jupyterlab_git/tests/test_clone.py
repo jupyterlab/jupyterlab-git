@@ -32,9 +32,7 @@ async def test_git_clone_success():
             assert {"code": 0, "message": output} == actual_response
 
 
-# Create a temporary directory and fake the content of it to be a directory containing a `.git` folder (that should be removed)
 @pytest.mark.asyncio
-@pytest.fixture
 async def test_git_clone_success(tmp_path):
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
@@ -55,7 +53,7 @@ async def test_git_clone_success(tmp_path):
             )
 
             # Check the `.git` folder has been removed.
-            assert (str(tmp_path) / ".git").exists()
+            assert not (str(tmp_path) / ".git").exists()
 
 
 @pytest.mark.asyncio

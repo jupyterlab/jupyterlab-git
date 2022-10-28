@@ -272,7 +272,7 @@ class Git:
 
         return response
 
-    async def clone(self, path, repo_url, not_versioning=False, auth=None):
+    async def clone(self, path, repo_url, versioning=True, auth=None):
         """
         Execute `git clone`.
         When no auth is provided, disables prompts for the password to avoid the terminal hanging.
@@ -284,7 +284,7 @@ class Git:
         """
         env = os.environ.copy()
         cmd = ["git", "clone"]
-        if not_versioning:
+        if not versioning:
             cmd.append("--depth=1")
             current_content = set(os.listdir(path))
         cmd.append(unquote(repo_url))
@@ -309,7 +309,7 @@ class Git:
                 env=env,
             )
 
-        if not_versioning:
+        if not versioning:
             new_content = set(os.listdir(path))
             directory = (new_content - current_content).pop()
             shutil.rmtree(f"{directory}/.git")

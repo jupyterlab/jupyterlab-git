@@ -16,14 +16,14 @@ export class GitCloneForm extends Widget {
   /**
    * Returns the input value.
    */
-  getValue(): { url: string; not_versioning: boolean } {
+  getValue(): { url: string; versioning: boolean } {
     return {
       url: encodeURIComponent(
         (
           this.node.querySelector('#input-link') as HTMLInputElement
         ).value.trim()
       ),
-      not_versioning: Boolean(
+      versioning: Boolean(
         encodeURIComponent(
           (this.node.querySelector('#checkbox') as HTMLInputElement).checked
         )
@@ -48,9 +48,14 @@ export class GitCloneForm extends Widget {
     checkbox.id = 'checkbox';
     inputLink.id = 'input-link';
 
-    linkText.textContent = trans.__('Enter the Clone URI of the repository');
+    linkText.textContent = trans.__(
+      'Enter the URI of the remote Git repository'
+    );
     inputLink.placeholder = 'https://host.com/org/repo.git';
-    checkboxLabel.textContent = trans.__('Clone without metadata');
+    checkboxLabel.textContent = trans.__('Download the repository');
+    checkboxLabel.title = trans.__(
+      'If checked, the remote repository default branch will be downloaded instead of cloned'
+    );
     checkbox.setAttribute('type', 'checkbox');
 
     inputLinkLabel.appendChild(linkText);
