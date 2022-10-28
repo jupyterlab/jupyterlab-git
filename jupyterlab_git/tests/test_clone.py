@@ -53,7 +53,7 @@ async def test_git_clone_success(tmp_path):
             )
 
             # Check the `.git` folder has been removed.
-            assert not (str(tmp_path) / ".git").exists()
+            assert (str(tmp_path) / ".git").exists()
 
 
 @pytest.mark.asyncio

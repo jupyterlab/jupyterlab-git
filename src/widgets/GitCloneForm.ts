@@ -24,7 +24,7 @@ export class GitCloneForm extends Widget {
         ).value.trim()
       ),
       versioning: Boolean(
-        !encodeURIComponent(
+        encodeURIComponent(
           (this.node.querySelector('#checkbox') as HTMLInputElement).checked
         )
       )
