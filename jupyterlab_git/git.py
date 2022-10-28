@@ -272,7 +272,7 @@ class Git:
 
         return response
 
-    async def clone(self, path, repo_url, versioning=True, auth=None):
+    async def clone(self, path, repo_url, versioning=False, auth=None):
         """
         Execute `git clone`.
         When no auth is provided, disables prompts for the password to avoid the terminal hanging.
