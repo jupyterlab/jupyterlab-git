@@ -242,7 +242,7 @@ export interface IGitExtension extends IDisposable {
     path: string,
     url: string,
     auth?: Git.IAuth,
-    versioning?: boolean,
+    versioning?: boolean
   ): Promise<Git.IResultWithMessage>;
 
   /**

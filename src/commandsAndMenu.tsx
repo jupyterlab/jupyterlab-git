@@ -1544,7 +1544,12 @@ export async function showGitOperationDialog<T>(
       case Operation.Clone:
         // eslint-disable-next-line no-case-declarations
         const { path, url, versioning } = args as any as IGitCloneArgs;
-        result = await model.clone(path, url, authentication, versioning ?? true);
+        result = await model.clone(
+          path,
+          url,
+          authentication,
+          versioning ?? true
+        );
         break;
       case Operation.Pull:
         result = await model.pull(authentication);
