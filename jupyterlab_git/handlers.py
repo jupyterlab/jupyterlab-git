@@ -87,8 +87,8 @@ class GitCloneHandler(GitHandler):
         response = await self.git.clone(
             self.url2localpath(path),
             data["clone_url"],
-            data["versioning"],
             data.get("auth", None),
+            data["versioning"],
         )
 
         if response["code"] != 0:
