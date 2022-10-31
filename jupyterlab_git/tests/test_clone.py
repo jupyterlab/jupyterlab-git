@@ -33,7 +33,7 @@ async def test_git_clone_success():
 
 
 @pytest.mark.asyncio
-async def test_git_clone_success(tmp_path):
+async def test_git_download_success(tmp_path):
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given

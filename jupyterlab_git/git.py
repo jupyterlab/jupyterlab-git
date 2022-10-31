@@ -280,6 +280,7 @@ class Git:
         :param path: the directory where the clone will be performed.
         :param repo_url: the URL of the repository to be cloned.
         :param auth: OPTIONAL dictionary with 'username' and 'password' fields
+        :param versioning: OPTIONAL whether to clone or download a snapshot of the remote repository; default clone
         :return: response with status code and error message.
         """
         env = os.environ.copy()

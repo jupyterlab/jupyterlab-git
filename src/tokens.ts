@@ -231,8 +231,8 @@ export interface IGitExtension extends IDisposable {
    *
    * @param path - local path into which the repository will be cloned
    * @param url - Git repository URL
-   * @param versioning - boolean flag of Git metadata
    * @param auth - remote repository authentication information
+   * @param versioning - Whether to clone or download the Git repository
    * @returns promise which resolves upon cloning a repository
    *
    * @throws {Git.GitResponseError} If the server response is not ok
@@ -241,8 +241,8 @@ export interface IGitExtension extends IDisposable {
   clone(
     path: string,
     url: string,
-    versioning: boolean,
-    auth?: Git.IAuth
+    auth?: Git.IAuth,
+    versioning?: boolean,
   ): Promise<Git.IResultWithMessage>;
 
   /**
