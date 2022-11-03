@@ -44,7 +44,7 @@ async def test_git_download_success(tmp_path):
                 git_folder.mkdir(parents=True)
                 return maybe_future((0, output, "error"))
 
-            mock_execute.side_effect = create_fake_git_repo
+            mock_execute.side_effect = create_fake_git_repo()
 
             # When
             await Git().clone(
@@ -59,7 +59,7 @@ async def test_git_download_success(tmp_path):
             )
 
             # Check the repository folder has been created
-            # assert git_folder.parent.exists()
+            assert git_folder.parent.exists()
             # Check the `.git` folder has been removed.
             assert not git_folder.exists()
 
