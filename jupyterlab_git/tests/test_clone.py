@@ -44,7 +44,7 @@ async def test_git_download_success(tmp_path):
                 git_folder.mkdir(parents=True)
                 return maybe_future((0, output, "error"))
 
-            mock_execute.side_effect = create_fake_git_repo()
+            mock_execute.side_effect = create_fake_git_repo
 
             # When
             await Git().clone(
