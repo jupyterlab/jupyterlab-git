@@ -38,22 +38,28 @@ async def test_git_download_success(tmp_path):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
             output = "output"
-            mock_execute.return_value = maybe_future((0, output, "error"))
+            git_folder = tmp_path / "dummy-repo" / ".git"
+            def create_fake_git_repo(*args, **kwargs):
+                git_folder.mkdir(parents=True)
+                return maybe_future((0, output, "error"))
+            mock_execute.side_effect = create_fake_git_repo
 
             # When
             await Git().clone(
-                path=str(Path("/bin/test_curr_path")), repo_url="ghjkhjkl"
+                path=str(tmp_path), repo_url="ghjkhjkl", None, False)
             )
 
             # Then
             mock_execute.assert_called_once_with(
-                ["git", "clone", "ghjkhjkl"],  # to be update
-                cwd=str(Path("/bin") / "test_curr_path"),  # to be udpated
+                ["git", "clone", "--depth=1", "ghjkhjkl"],  # to be update
+                cwd=str(tmp_path),  # to be udpated
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
             )
 
+            # Check the repository folder has been created
+            assert git_folder.parent.exists()
             # Check the `.git` folder has been removed.
-            assert not (str(tmp_path) / ".git").exists()
+            assert not git_folder.exists()
 
 
 @pytest.mark.asyncio
