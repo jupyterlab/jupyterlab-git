@@ -313,7 +313,7 @@ class Git:
         if not versioning:
             new_content = set(os.listdir(path))
             directory = (new_content - current_content).pop()
-            shutil.rmtree(f"{directory}/.git")
+            shutil.rmtree(f"{path}/{directory}/.git")
 
         response = {"code": code, "message": output.strip()}
 
