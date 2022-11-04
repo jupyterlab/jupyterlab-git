@@ -60,6 +60,11 @@ export interface IGitCloneArgs {
    * Git repository url
    */
   url: string;
+  /**
+   * Whether to activate git versioning in the clone or not.
+   * If false, this will remove the .git folder after cloning.
+   */
+  versioning?: boolean;
 }
 
 /**
@@ -1538,8 +1543,13 @@ export async function showGitOperationDialog<T>(
     switch (operation) {
       case Operation.Clone:
         // eslint-disable-next-line no-case-declarations
-        const { path, url } = args as any as IGitCloneArgs;
-        result = await model.clone(path, url, authentication);
+        const { path, url, versioning } = args as any as IGitCloneArgs;
+        result = await model.clone(
+          path,
+          url,
+          authentication,
+          versioning ?? true
+        );
         break;
       case Operation.Pull:
         result = await model.pull(authentication);

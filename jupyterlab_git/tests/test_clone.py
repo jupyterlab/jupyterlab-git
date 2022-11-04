@@ -33,6 +33,38 @@ async def test_git_clone_success():
 
 
 @pytest.mark.asyncio
+async def test_git_download_success(tmp_path):
+    with patch("os.environ", {"TEST": "test"}):
+        with patch("jupyterlab_git.git.execute") as mock_execute:
+            # Given
+            output = "output"
+            git_folder = tmp_path / "dummy-repo" / ".git"
+
+            def create_fake_git_repo(*args, **kwargs):
+                git_folder.mkdir(parents=True)
+                return maybe_future((0, output, "error"))
+
+            mock_execute.side_effect = create_fake_git_repo
+
+            # When
+            await Git().clone(
+                path=str(tmp_path), repo_url="ghjkhjkl", auth=None, versioning=False
+            )
+
+            # Then
+            mock_execute.assert_called_once_with(
+                ["git", "clone", "--depth=1", "ghjkhjkl"],  # to be update
+                cwd=str(tmp_path),  # to be udpated
+                env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+            )
+
+            # Check the repository folder has been created
+            assert git_folder.parent.exists()
+            # Check the `.git` folder has been removed.
+            assert not git_folder.exists()
+
+
+@pytest.mark.asyncio
 async def test_git_clone_failure_from_git():
     """
     Git internally will throw an error if it is an invalid URL, or if there is a permissions issue. We want to just

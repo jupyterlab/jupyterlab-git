@@ -6,6 +6,7 @@ import os
 import pathlib
 import re
 import shlex
+import shutil
 import subprocess
 import traceback
 from typing import Dict, List, Optional
@@ -271,7 +272,7 @@ class Git:
 
         return response
 
-    async def clone(self, path, repo_url, auth=None):
+    async def clone(self, path, repo_url, auth=None, versioning=True):
         """
         Execute `git clone`.
         When no auth is provided, disables prompts for the password to avoid the terminal hanging.
@@ -279,15 +280,23 @@ class Git:
         :param path: the directory where the clone will be performed.
         :param repo_url: the URL of the repository to be cloned.
         :param auth: OPTIONAL dictionary with 'username' and 'password' fields
+        :param versioning: OPTIONAL whether to clone or download a snapshot of the remote repository; default clone
         :return: response with status code and error message.
         """
         env = os.environ.copy()
+        cmd = ["git", "clone"]
+        if not versioning:
+            cmd.append("--depth=1")
+            current_content = set(os.listdir(path))
+        cmd.append(unquote(repo_url))
+
         if auth:
             if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
+            cmd.append("-q")
             code, output, error = await execute(
-                ["git", "clone", unquote(repo_url), "-q"],
+                cmd,
                 username=auth["username"],
                 password=auth["password"],
                 cwd=path,
@@ -296,10 +305,15 @@ class Git:
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
             code, output, error = await execute(
-                ["git", "clone", unquote(repo_url)],
+                cmd,
                 cwd=path,
                 env=env,
             )
+
+        if not versioning:
+            new_content = set(os.listdir(path))
+            directory = (new_content - current_content).pop()
+            shutil.rmtree(f"{path}/{directory}/.git")
 
         response = {"code": code, "message": output.strip()}
 

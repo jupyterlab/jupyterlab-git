@@ -46,7 +46,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
           ]
         });
 
-        if (result.button.accept && result.value) {
+        if (result.button.accept && result.value.url) {
           logger.log({
             level: Level.RUNNING,
             message: trans.__('Cloning…')
@@ -56,7 +56,11 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
               gitModel as GitExtension,
               Operation.Clone,
               trans,
-              { path: fileBrowserModel.path, url: result.value }
+              {
+                path: fileBrowserModel.path,
+                url: result.value.url,
+                versioning: result.value.versioning
+              }
             );
             logger.log({
               message: trans.__('Successfully cloned'),

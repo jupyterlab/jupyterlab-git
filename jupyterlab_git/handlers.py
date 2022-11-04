@@ -88,6 +88,7 @@ class GitCloneHandler(GitHandler):
             self.url2localpath(path),
             data["clone_url"],
             data.get("auth", None),
+            data["versioning"],
         )
 
         if response["code"] != 0:
