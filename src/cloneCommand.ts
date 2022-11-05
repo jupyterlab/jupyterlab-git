@@ -83,7 +83,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
     // Add a clone button to the file browser extension toolbar
-    addCloneButton(gitModel, fileBrowser, app.commands);
+    addCloneButton(gitModel, fileBrowser, app.commands, trans);
 
     // Add the context menu items for the default file browser
     addFileBrowserContextMenu(gitModel, fileBrowser, app.contextMenu);

@@ -201,7 +201,7 @@ async function activate(
     }
 
     // Add a clone button to the file browser extension toolbar
-    addCloneButton(gitExtension, fileBrowser, app.commands);
+    addCloneButton(gitExtension, fileBrowser, app.commands, trans);
 
     // Add the status bar widget
     addStatusBarWidget(statusBar, gitExtension, settings, trans);
