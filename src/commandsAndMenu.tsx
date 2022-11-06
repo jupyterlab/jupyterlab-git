@@ -1300,7 +1300,7 @@ export function createGitMenu(
   ];
 
   const menu = new Menu({ commands });
-  menu.title.label = 'Git';
+  menu.title.label = trans.__('Git');
   [
     CommandIDs.gitInit,
     CommandIDs.gitClone,
@@ -1382,7 +1382,8 @@ export function addMenuItems(
 export function addFileBrowserContextMenu(
   model: IGitExtension,
   filebrowser: FileBrowser,
-  contextMenu: ContextMenuSvg
+  contextMenu: ContextMenuSvg,
+  trans: TranslationBundle
 ): void {
   let gitMenu: Menu;
   let _commands: ContextCommandIDs[];
@@ -1505,7 +1506,7 @@ export function addFileBrowserContextMenu(
 
     const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
     gitMenu = new GitMenu({ commands: contextMenu.menu.commands });
-    gitMenu.title.label = 'Git';
+    gitMenu.title.label = trans.__('Git');
     gitMenu.title.icon = gitIcon.bindprops({ stylesheet: 'menuItem' });
 
     contextMenu.addItem({

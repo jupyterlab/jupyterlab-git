@@ -86,7 +86,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
     addCloneButton(gitModel, fileBrowser, app.commands, trans);
 
     // Add the context menu items for the default file browser
-    addFileBrowserContextMenu(gitModel, fileBrowser, app.contextMenu);
+    addFileBrowserContextMenu(gitModel, fileBrowser, app.contextMenu, trans);
   },
   autoStart: true
 };

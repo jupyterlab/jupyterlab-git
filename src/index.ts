@@ -207,7 +207,12 @@ async function activate(
     addStatusBarWidget(statusBar, gitExtension, settings, trans);
 
     // Add the context menu items for the default file browser
-    addFileBrowserContextMenu(gitExtension, fileBrowser, app.contextMenu);
+    addFileBrowserContextMenu(
+      gitExtension,
+      fileBrowser,
+      app.contextMenu,
+      trans
+    );
   }
 
   // Register diff providers
