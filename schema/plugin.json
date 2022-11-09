@@ -180,5 +180,11 @@
         "rank": 1
       }
     ]
-  }
+  },
+  "jupyter.lab.internationalization": {
+    "selectors": [
+        "jupyter.lab.menus/.*/args/text"
+    ],
+    "domain": "jupyterlab_git"
+}
 }

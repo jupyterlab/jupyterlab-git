@@ -234,7 +234,7 @@ export function addCommands(
 
   /** Open URL externally */
   commands.addCommand(CommandIDs.gitOpenUrl, {
-    label: args => args['text'] as string,
+    label: args => trans.__(args['text'] as string),
     execute: args => {
       const url = args['url'] as string;
       window.open(url);
