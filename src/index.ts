@@ -26,6 +26,7 @@ import { Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 import { gitCloneCommandPlugin } from './cloneCommand';
+import { createImageDiff } from './components/diff/ImageDiff';
 
 export { DiffModel } from './components/diff/model';
 export { NotebookDiff } from './components/diff/NotebookDiff';
@@ -216,6 +217,13 @@ async function activate(
     ['.ipynb'],
     (model: Git.Diff.IModel, toolbar?: Toolbar, translator?: ITranslator) =>
       createNotebookDiff(model, renderMime, toolbar, translator)
+  );
+
+  gitExtension.registerDiffProvider(
+    'ImageDiff',
+    ['.jpg'],
+    (model: Git.Diff.IModel, toolbar?: Toolbar, translator?: ITranslator) =>
+      createImageDiff(model, toolbar, translator)
   );
 
   return gitExtension;

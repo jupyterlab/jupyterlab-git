@@ -1,26 +1,33 @@
 import { Contents } from '@jupyterlab/services';
-import { INotebookContent } from '@jupyterlab/nbformat';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel } from '@lumino/widgets';
-import { NotebookMergeWidget } from 'nbdime/lib/merge/widget';
-import { NotebookDiffWidget } from 'nbdime/lib/diff/widget';
 
 import { Git } from '../../tokens';
-import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import { Toolbar } from '@jupyterlab/apputils';
+import { GitWidget } from '../../widgets/GitWidget';
+
+export const createImageDiff: Git.Diff.ICallback = async (
+  model: Git.Diff.IModel,
+  toolbar?: Toolbar,
+  translator?: ITranslator
+): Promise<ImageDiff> => {
+  const widget = new ImageDiff(model, translator.load('jupyterlab_git'));
+  await widget.ready;
+  return widget;
+};
 
 export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
   [x: string]: any;
-  constructor(
-    model: Git.Diff.IModel,
-    renderMime: IRenderMimeRegistry,
-    translator?: TranslationBundle
-  ) {
+  constructor(model: Git.Diff.IModel, translator?: TranslationBundle) {
     super();
     const getReady = new PromiseDelegate<void>();
     this._isReady = getReady.promise;
     this._model = model;
-    this._renderMime = renderMime;
     this._trans = translator ?? nullTranslator.load('jupyterlab_git');
 
     this.refresh()
@@ -74,7 +81,7 @@ export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
           ? this.createMergeView.bind(this)
           : this.createDiffView.bind(this);
 
-        this._nbdWidget = await createView(
+        this._imgWidget = await createView(
           challengerContent,
           referenceContent,
           baseContent
@@ -83,7 +90,7 @@ export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
         while (this._scroller.widgets.length > 0) {
           this._scroller.widgets[0].dispose();
         }
-        this._scroller.addWidget(this._nbdWidget);
+        this._scroller.addWidget(this._imgWidget);
       } catch (reason) {
         this.showError(reason as Error);
       }
@@ -91,15 +98,13 @@ export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return new NotebookDiffWidget(model, this._renderMime);
+    return new GitWidget(model, this._renderMime);
   }
 
   protected _areUnchangedCellsHidden = false;
   protected _isReady: Promise<void>;
-  protected _lastSerializeModel: INotebookContent | null = null;
   protected _model: Git.Diff.IModel;
-  protected _nbdWidget: NotebookMergeWidget | NotebookDiffWidget;
-  protected _renderMime: IRenderMimeRegistry;
+  protected _imgWidget: GitWidget;
   protected _scroller: Panel;
   protected _trans: TranslationBundle;
 }
