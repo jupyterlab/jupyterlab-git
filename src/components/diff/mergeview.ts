@@ -90,6 +90,8 @@ export namespace MergeView {
      */
     showDifferences?: boolean;
 
+    phrases: any;
+
     revertChunk?: (
       mergeView: IMergeViewEditor,
       from: CodeMirror.Editor,

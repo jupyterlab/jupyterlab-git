@@ -47,6 +47,48 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     this._model = model;
     this._trans = translator ?? nullTranslator.load('jupyterlab_git');
 
+    // The list of internal strings is available at https://codemirror.net/examples/translate/
+    this._translations = {
+      // @codemirror/view
+      'Control character': this._trans.__('Control character'),
+      // @codemirror/commands
+      'Selection deleted': this._trans.__('Selection deleted'),
+      // @codemirror/language
+      'Folded lines': this._trans.__('Folded lines'),
+      'Unfolded lines': this._trans.__('Unfolded lines'),
+      to: this._trans.__('to'),
+      'folded code': this._trans.__('folded code'),
+      unfold: this._trans.__('unfold'),
+      'Fold line': this._trans.__('Fold line'),
+      'Unfold line': this._trans.__('Unfold line'),
+      // @codemirror/search
+      'Go to line': this._trans.__('Go to line'),
+      go: this._trans.__('go'),
+      Find: this._trans.__('Find'),
+      Replace: this._trans.__('Replace'),
+      next: this._trans.__('next'),
+      previous: this._trans.__('previous'),
+      all: this._trans.__('all'),
+      'match case': this._trans.__('match case'),
+      replace: this._trans.__('replace'),
+      'replace all': this._trans.__('replace all'),
+      close: this._trans.__('close'),
+      'current match': this._trans.__('current match'),
+      'replaced $ matches': this._trans.__('replaced $ matches'),
+      'replaced match on line $': this._trans.__('replaced match on line $'),
+      'on line': this._trans.__('on line'),
+      // @codemirror/autocomplete
+      Completions: this._trans.__('Completions'),
+      // @codemirror/lint
+      Diagnostics: this._trans.__('Diagnostics'),
+      'No diagnostics': this._trans.__('No diagnostics'),
+
+      'Identical text collapsed. Click to expand.': this._trans.__(
+        'Identical text collapsed. Click to expand.'
+      ),
+      'Toggle locked scrolling': this._trans.__('Toggle locked scrolling')
+    };
+
     // Load file content early
     Promise.all([
       this._model.reference.content(),
@@ -124,6 +166,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
           this.createDiffView(
             this._challenger,
             this._reference,
+            this._translations,
             this._hasConflict ? this._base : null
           );
         }
@@ -166,6 +209,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
       this.createDiffView(
         this._challenger,
         this._reference,
+        this._translations,
         this._hasConflict ? this._base : null
       );
 
@@ -205,6 +249,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   protected async createDiffView(
     challengerContent: string,
     referenceContent: string,
+    translations: any,
     baseContent?: string
   ): Promise<void> {
     if (!this._mergeView) {
@@ -216,6 +261,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
         value: challengerContent,
         orig: referenceContent,
         mode: mode.mime,
+        phrases: translations,
         ...this.getDefaultOptions()
       };
 
@@ -276,6 +322,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   protected _mergeView: MergeView.MergeViewEditor;
   protected _model: Git.Diff.IModel;
   protected _trans: TranslationBundle;
+  protected _translations: any;
 
   private _reference: string | null = null;
   private _challenger: string | null = null;
