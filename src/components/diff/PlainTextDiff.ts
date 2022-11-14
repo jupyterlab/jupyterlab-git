@@ -319,7 +319,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   protected _mergeView: MergeView.MergeViewEditor;
   protected _model: Git.Diff.IModel;
   protected _trans: TranslationBundle;
-  protected _translations: any;
+  protected _translations: Record<string, string>;
 
   private _reference: string | null = null;
   private _challenger: string | null = null;
