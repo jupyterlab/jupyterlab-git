@@ -186,5 +186,5 @@
         "jupyter.lab.menus/.*/args/text"
     ],
     "domain": "jupyterlab_git"
-}
+  }
 }
