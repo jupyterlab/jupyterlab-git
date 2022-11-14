@@ -77,16 +77,13 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
       'replaced $ matches': this._trans.__('replaced $ matches'),
       'replaced match on line $': this._trans.__('replaced match on line $'),
       'on line': this._trans.__('on line'),
-      // @codemirror/autocomplete
-      Completions: this._trans.__('Completions'),
-      // @codemirror/lint
-      Diagnostics: this._trans.__('Diagnostics'),
-      'No diagnostics': this._trans.__('No diagnostics'),
-
+      // From https://codemirror.net/5/addon/merge/merge.js
       'Identical text collapsed. Click to expand.': this._trans.__(
         'Identical text collapsed. Click to expand.'
       ),
-      'Toggle locked scrolling': this._trans.__('Toggle locked scrolling')
+      'Toggle locked scrolling': this._trans.__('Toggle locked scrolling'),
+      'Push to left': this._trans.__('Push to left'),
+      'Revert chunk': this._trans.__('Revert chunk')
     };
 
     // Load file content early
