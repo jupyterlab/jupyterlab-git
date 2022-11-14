@@ -90,7 +90,10 @@ export namespace MergeView {
      */
     showDifferences?: boolean;
 
-    phrases: any;
+    /**
+     * Mapping of displayed string with their translation.
+     */
+    phrases?: Record<string, string>;
 
     revertChunk?: (
       mergeView: IMergeViewEditor,
