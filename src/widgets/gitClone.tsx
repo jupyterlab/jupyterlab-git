@@ -5,6 +5,7 @@ import {
 } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { FileBrowser } from '@jupyterlab/filebrowser';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { cloneIcon } from '../style/icons';
@@ -13,7 +14,8 @@ import { CommandIDs, IGitExtension } from '../tokens';
 export function addCloneButton(
   model: IGitExtension,
   filebrowser: FileBrowser,
-  commands: CommandRegistry
+  commands: CommandRegistry,
+  trans: TranslationBundle
 ): void {
   filebrowser.toolbar.addItem(
     'gitClone',
@@ -33,7 +35,7 @@ export function addCloneButton(
             onClick={() => {
               commands.execute(CommandIDs.gitClone);
             }}
-            tooltip={'Git Clone'}
+            tooltip={trans.__('Git Clone')}
           />
         )}
       </UseSignal>

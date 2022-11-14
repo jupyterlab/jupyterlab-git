@@ -201,13 +201,18 @@ async function activate(
     }
 
     // Add a clone button to the file browser extension toolbar
-    addCloneButton(gitExtension, fileBrowser, app.commands);
+    addCloneButton(gitExtension, fileBrowser, app.commands, trans);
 
     // Add the status bar widget
     addStatusBarWidget(statusBar, gitExtension, settings, trans);
 
     // Add the context menu items for the default file browser
-    addFileBrowserContextMenu(gitExtension, fileBrowser, app.contextMenu);
+    addFileBrowserContextMenu(
+      gitExtension,
+      fileBrowser,
+      app.contextMenu,
+      trans
+    );
   }
 
   // Register diff providers
