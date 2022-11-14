@@ -246,7 +246,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   protected async createDiffView(
     challengerContent: string,
     referenceContent: string,
-    translations: any,
+    translations: Record<string, string>,
     baseContent?: string
   ): Promise<void> {
     if (!this._mergeView) {
