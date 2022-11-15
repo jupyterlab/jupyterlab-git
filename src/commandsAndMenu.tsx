@@ -505,7 +505,7 @@ export function addCommands(
   });
 
   /**
-   * Git display diff command - internal commandx
+   * Git display diff command - internal command
    *
    * @params model {Git.Diff.IModel: The diff model to display
    * @params isText {boolean}: Optional, whether the content is a plain text
