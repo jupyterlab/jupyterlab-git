@@ -50,6 +50,7 @@ import { discardAllChanges } from './widgets/discardAllChanges';
 import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 import { AdvancedPushForm } from './widgets/AdvancedPushForm';
+import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
 
 export interface IGitCloneArgs {
   /**
@@ -504,7 +505,7 @@ export function addCommands(
   });
 
   /**
-   * Git display diff command - internal command
+   * Git display diff command - internal commandx
    *
    * @params model {Git.Diff.IModel: The diff model to display
    * @params isText {boolean}: Optional, whether the content is a plain text
@@ -543,7 +544,7 @@ export function addCommands(
         if (!mainAreaItem) {
           const content = new Panel();
           const modelIsLoading = new PromiseDelegate<void>();
-          const diffWidget = (mainAreaItem = new MainAreaWidget<Panel>({
+          const diffWidget = (mainAreaItem = new PreviewMainAreaWidget<Panel>({
             content,
             reveal: modelIsLoading.promise
           }));
