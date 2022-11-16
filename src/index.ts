@@ -221,7 +221,7 @@ async function activate(
 
   gitExtension.registerDiffProvider(
     'ImageDiff',
-    ['.jpg'],
+    ['.jpeg', 'jpg', 'png'],
     (model: Git.Diff.IModel, toolbar?: Toolbar, translator?: ITranslator) =>
       createImageDiff(model, toolbar, translator)
   );

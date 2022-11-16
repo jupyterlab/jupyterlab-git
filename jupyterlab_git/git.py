@@ -1380,10 +1380,7 @@ class Git:
             elif reference["special"] == "INDEX":
                 is_binary = await self._is_binary(filename, "INDEX", path)
                 if is_binary:
-                    raise tornado.web.HTTPError(
-                        log_message="Error occurred while executing command to retrieve plaintext content as file is not UTF-8."
-                    )
-
+                    content = await self.show(path, reference["git"], filename)
                 content = await self.show(path, "", filename)
             elif reference["special"] == "BASE":
                 # Special case of file in merge conflict for which we want the base (aka common ancestor) version
@@ -1398,10 +1395,7 @@ class Git:
         elif reference["git"]:
             is_binary = await self._is_binary(filename, reference["git"], path)
             if is_binary:
-                raise tornado.web.HTTPError(
-                    log_message="Error occurred while executing command to retrieve plaintext content as file is not UTF-8."
-                )
-
+                content = await self.show(path, reference["git"], filename)
             content = await self.show(path, reference["git"], filename)
         else:
             content = ""
