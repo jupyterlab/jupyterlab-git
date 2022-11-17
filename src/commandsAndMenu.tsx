@@ -19,7 +19,7 @@ import { ArrayExt, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { ContextMenu, Menu, Panel, Widget } from '@lumino/widgets';
+import { ContextMenu, Menu, Panel, Title, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { DiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
@@ -558,6 +558,25 @@ export function addCommands(
 
           shell.add(diffWidget, 'main');
           shell.activateById(diffWidget.id);
+          console.log('hi1');
+
+          // Search for the tab
+          const dockPanel = (app.shell as any)._dockPanel;
+
+          let tabPosition = -1;
+          const tabBar = dockPanel
+            .tabBars()
+            .find((bar: { titles: Title<Widget>[] }) => {
+              tabPosition = bar.titles.indexOf(diffWidget.title);
+              return tabPosition !== -1;
+            });
+
+          // Get the tab
+          const tab =
+            tabPosition >= 0 ? toArray(tabBar.children())[tabPosition] : null;
+
+          console.log('hello', tab);
+          console.log('hi2');
 
           // Create the diff widget
           try {

@@ -1,7 +1,6 @@
 import { MainAreaWidget } from '@jupyterlab/apputils/lib/mainareawidget';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-// import { Widget } from '@lumino/widgets';
 
 export class PreviewMainAreaWidget<
   T extends Widget = Widget
