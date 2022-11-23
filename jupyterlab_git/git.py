@@ -51,6 +51,7 @@ async def execute(
     env: "Optional[Dict[str, str]]" = None,
     username: "Optional[str]" = None,
     password: "Optional[str]" = None,
+    is_binary=False,
 ) -> "Tuple[int, str, str]":
     """Asynchronously execute a command.
 
@@ -110,12 +111,16 @@ async def execute(
         cmdline: "List[str]",
         cwd: "Optional[str]" = None,
         env: "Optional[Dict[str, str]]" = None,
+        is_binary=is_binary,
     ) -> "Tuple[int, str, str]":
         process = subprocess.Popen(
             cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env
         )
         output, error = process.communicate()
-        return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
+        if is_binary == False:
+            return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
+        else:
+            return (process.returncode, output.decode("base64"), error.decode("base64"))
 
     try:
         await execution_lock.acquire(
@@ -1303,7 +1308,7 @@ class Git:
 
         return split_line[1] if len(split_line) > 1 else None
 
-    async def show(self, path, ref, filename=None):
+    async def show(self, path, ref, filename=None, is_binary=False):
         """
         Execute
             git show <ref:filename>
@@ -1319,7 +1324,7 @@ class Git:
         else:
             command.append(f"{ref}:{filename}")
 
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await execute(command, cwd=path, is_binary=is_binary)
 
         error_messages = map(
             lambda n: n.lower(),
@@ -1380,7 +1385,9 @@ class Git:
             elif reference["special"] == "INDEX":
                 is_binary = await self._is_binary(filename, "INDEX", path)
                 if is_binary:
-                    content = await self.show(path, reference["git"], filename)
+                    content = await self.show(
+                        path, reference["git"], filename, is_binary=True
+                    )
                 content = await self.show(path, "", filename)
             elif reference["special"] == "BASE":
                 # Special case of file in merge conflict for which we want the base (aka common ancestor) version
@@ -1395,7 +1402,9 @@ class Git:
         elif reference["git"]:
             is_binary = await self._is_binary(filename, reference["git"], path)
             if is_binary:
-                content = await self.show(path, reference["git"], filename)
+                content = await self.show(
+                    path, reference["git"], filename, is_binary=True
+                )
             content = await self.show(path, reference["git"], filename)
         else:
             content = ""
