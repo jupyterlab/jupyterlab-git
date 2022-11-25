@@ -16,6 +16,7 @@ export class PreviewMainAreaWidget<
       PreviewMainAreaWidget.previewWidget.dispose();
     }
     PreviewMainAreaWidget.previewWidget = this;
+    console.log('hello from preview!', this.node);
   }
 
   /**

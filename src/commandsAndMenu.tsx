@@ -15,11 +15,11 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
-import { ArrayExt, toArray } from '@lumino/algorithm';
+import { ArrayExt, toArray, find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { ContextMenu, Menu, Panel, Title, Widget } from '@lumino/widgets';
+import { ContextMenu, DockPanel, Menu, Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { DiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
@@ -561,22 +561,46 @@ export function addCommands(
           console.log('hi1');
 
           // Search for the tab
-          const dockPanel = (app.shell as any)._dockPanel;
+          const dockPanel = (app.shell as any)._dockPanel as DockPanel;
 
           let tabPosition = -1;
-          const tabBar = dockPanel
-            .tabBars()
-            .find((bar: { titles: Title<Widget>[] }) => {
-              tabPosition = bar.titles.indexOf(diffWidget.title);
-              return tabPosition !== -1;
-            });
+          // console.log('1', tabPosition);
+          const tabBar = find(dockPanel.tabBars(), bar => {
+            tabPosition = bar.titles.indexOf(diffWidget.title);
+            console.log('2', tabPosition);
+            return tabPosition !== -1;
+          });
+
+          // console.log(tabBar.contentNode);
+          // console.log(tabBar.contentNode.children);
+          // console.log(tabBar.contentNode.children[tabPosition]);
+          // console.log(tabBar.contentNode.children[1]);
 
           // Get the tab
-          const tab =
-            tabPosition >= 0 ? toArray(tabBar.children())[tabPosition] : null;
+          setTimeout(() => {
+            const tab =
+              tabPosition >= 0
+                ? tabBar.contentNode.children[tabPosition]
+                : null;
+            console.log('inside settimeout', tab, tabPosition);
+            const tabTitle = tab.querySelector<HTMLElement>(
+              '.lm-TabBar-tabLabel'
+            );
+            console.log('tabtitle', tabTitle);
+            tabTitle.style.fontStyle = 'italic';
+            tabTitle.addEventListener(
+              'click',
+              () => (tabTitle.style.fontStyle = 'normal')
+            );
+          }, 0);
+          // console.log('3', tabPosition, tabBar.contentNode.children);
 
-          console.log('hello', tab);
-          console.log('hi2');
+          // console.log(
+          //   '4: t, tb',
+          //   tabPosition,
+          //   tabBar.contentNode.children,
+          //   tab
+          // );
 
           // Create the diff widget
           try {
