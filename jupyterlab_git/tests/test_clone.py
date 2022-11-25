@@ -63,6 +63,7 @@ async def test_git_download_success(tmp_path):
             # Check the `.git` folder has been removed.
             assert not git_folder.exists()
 
+
 @pytest.mark.asyncio
 async def test_git_submodules_success(tmp_path):
     with patch("os.environ", {"TEST": "test"}):
@@ -73,7 +74,9 @@ async def test_git_submodules_success(tmp_path):
 
             # When
             actual_response = await Git().clone(
-                path=str(Path("/bin/test_curr_path")), repo_url="ghjkhjkl", submodules=True
+                path=str(Path("/bin/test_curr_path")),
+                repo_url="ghjkhjkl",
+                submodules=True,
             )
 
             # Then
