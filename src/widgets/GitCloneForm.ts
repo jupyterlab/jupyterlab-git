@@ -16,7 +16,7 @@ export class GitCloneForm extends Widget {
   /**
    * Returns the input value.
    */
-  getValue(): { url: string; submodules: boolean; versioning: boolean } {
+  getValue(): { url: string; versioning: boolean; submodules: boolean } {
     return {
       url: encodeURIComponent(
         (
