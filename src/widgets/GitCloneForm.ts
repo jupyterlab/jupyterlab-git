@@ -16,7 +16,7 @@ export class GitCloneForm extends Widget {
   /**
    * Returns the input value.
    */
-  getValue(): { url: string; versioning: boolean } {
+  getValue(): { url: string; submodules: boolean; versioning: boolean } {
     return {
       url: encodeURIComponent(
         (
@@ -25,7 +25,12 @@ export class GitCloneForm extends Widget {
       ),
       versioning: Boolean(
         encodeURIComponent(
-          (this.node.querySelector('#checkbox') as HTMLInputElement).checked
+          (this.node.querySelector('#download') as HTMLInputElement).checked
+        )
+      ),
+      submodules: Boolean(
+        encodeURIComponent(
+          (this.node.querySelector('#submodules') as HTMLInputElement).checked
         )
       )
     };
@@ -38,33 +43,48 @@ export class GitCloneForm extends Widget {
     const inputLink = document.createElement('input');
     const linkText = document.createElement('span');
     const checkboxWrapper = document.createElement('div');
-    const checkboxLabel = document.createElement('label');
-    const checkbox = document.createElement('input');
+    const subModulesLabel = document.createElement('label');
+    const subModules = document.createElement('input');
+    const downloadLabel = document.createElement('label');
+    const download = document.createElement('input');
 
     node.className = 'jp-CredentialsBox';
     inputWrapper.className = 'jp-RedirectForm';
     checkboxWrapper.className = 'jp-CredentialsBox-wrapper';
-    checkboxLabel.className = 'jp-CredentialsBox-label-checkbox';
-    checkbox.id = 'checkbox';
+    subModulesLabel.className = 'jp-CredentialsBox-label-checkbox';
+    downloadLabel.className = 'jp-CredentialsBox-label-checkbox';
+    subModules.id = 'submodules';
+    download.id = 'download';
     inputLink.id = 'input-link';
 
     linkText.textContent = trans.__(
       'Enter the URI of the remote Git repository'
     );
     inputLink.placeholder = 'https://host.com/org/repo.git';
-    checkboxLabel.textContent = trans.__('Download the repository');
-    checkboxLabel.title = trans.__(
+
+    subModulesLabel.textContent = trans.__('Include submodules');
+    subModulesLabel.title = trans.__(
+      'If checked, the remote submodules in the repository will be cloned recursively'
+    );
+    subModules.setAttribute('type', 'checkbox');
+    subModules.setAttribute('checked', 'checked');
+
+    downloadLabel.textContent = trans.__('Download the repository');
+    downloadLabel.title = trans.__(
       'If checked, the remote repository default branch will be downloaded instead of cloned'
     );
-    checkbox.setAttribute('type', 'checkbox');
+    download.setAttribute('type', 'checkbox');
 
     inputLinkLabel.appendChild(linkText);
     inputLinkLabel.appendChild(inputLink);
 
     inputWrapper.append(inputLinkLabel);
 
-    checkboxLabel.prepend(checkbox);
-    checkboxWrapper.appendChild(checkboxLabel);
+    subModulesLabel.prepend(subModules);
+    checkboxWrapper.appendChild(subModulesLabel);
+
+    downloadLabel.prepend(download);
+    checkboxWrapper.appendChild(downloadLabel);
 
     node.appendChild(inputWrapper);
     node.appendChild(checkboxWrapper);

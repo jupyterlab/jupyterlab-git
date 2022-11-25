@@ -63,6 +63,27 @@ async def test_git_download_success(tmp_path):
             # Check the `.git` folder has been removed.
             assert not git_folder.exists()
 
+@pytest.mark.asyncio
+async def test_git_submodules_success(tmp_path):
+    with patch("os.environ", {"TEST": "test"}):
+        with patch("jupyterlab_git.git.execute") as mock_execute:
+            # Given
+            output = "output"
+            mock_execute.return_value = maybe_future((0, output, "error"))
+
+            # When
+            actual_response = await Git().clone(
+                path=str(Path("/bin/test_curr_path")), repo_url="ghjkhjkl", submodules=True
+            )
+
+            # Then
+            mock_execute.assert_called_once_with(
+                ["git", "clone", "--recurse-submodules", "ghjkhjkl"],
+                cwd=str(Path("/bin") / "test_curr_path"),
+                env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+            )
+            assert {"code": 0, "message": output} == actual_response
+
 
 @pytest.mark.asyncio
 async def test_git_clone_failure_from_git():

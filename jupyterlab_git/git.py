@@ -272,7 +272,7 @@ class Git:
 
         return response
 
-    async def clone(self, path, repo_url, auth=None, versioning=True):
+    async def clone(self, path, repo_url, auth=None, versioning=True, submodules=False):
         """
         Execute `git clone`.
         When no auth is provided, disables prompts for the password to avoid the terminal hanging.
@@ -281,6 +281,7 @@ class Git:
         :param repo_url: the URL of the repository to be cloned.
         :param auth: OPTIONAL dictionary with 'username' and 'password' fields
         :param versioning: OPTIONAL whether to clone or download a snapshot of the remote repository; default clone
+        :param submodules: OPTIONAL whether to clone submodules content; default False
         :return: response with status code and error message.
         """
         env = os.environ.copy()
@@ -288,6 +289,8 @@ class Git:
         if not versioning:
             cmd.append("--depth=1")
             current_content = set(os.listdir(path))
+        if submodules:
+            cmd.append("--recurse-submodules")
         cmd.append(unquote(repo_url))
 
         if auth:
