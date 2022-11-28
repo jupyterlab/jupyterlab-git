@@ -65,6 +65,9 @@ export interface IGitCloneArgs {
    * If false, this will remove the .git folder after cloning.
    */
   versioning?: boolean;
+  /**
+   * Whether to activate git recurse submodules clone or not.
+   */
   submodules?: boolean;
 }
 
@@ -1552,7 +1555,7 @@ export async function showGitOperationDialog<T>(
           url,
           authentication,
           versioning ?? true,
-          submodules ?? true
+          submodules ?? false
         );
         break;
       case Operation.Pull:
