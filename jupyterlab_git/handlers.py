@@ -89,6 +89,7 @@ class GitCloneHandler(GitHandler):
             data["clone_url"],
             data.get("auth", None),
             data["versioning"],
+            data["submodules"],
         )
 
         if response["code"] != 0:
