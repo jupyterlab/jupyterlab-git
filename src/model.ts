@@ -620,6 +620,7 @@ export class GitExtension implements IGitExtension {
    * @param url - Git repository URL
    * @param auth - remote repository authentication information
    * @param versioning - boolean flag of Git metadata (default true)
+   * @param submodules - boolean flag of Git submodules (default false)
    * @returns promise which resolves upon cloning a repository
    *
    * @throws {Git.GitResponseError} If the server response is not ok
@@ -629,7 +630,8 @@ export class GitExtension implements IGitExtension {
     path: string,
     url: string,
     auth?: Git.IAuth,
-    versioning = true
+    versioning = true,
+    submodules = false
   ): Promise<Git.IResultWithMessage> {
     return await this._taskHandler.execute<Git.IResultWithMessage>(
       'git:clone',
@@ -640,6 +642,7 @@ export class GitExtension implements IGitExtension {
           {
             clone_url: url,
             versioning: versioning,
+            submodules: submodules,
             auth: auth as any
           }
         );

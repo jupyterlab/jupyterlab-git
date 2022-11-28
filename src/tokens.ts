@@ -233,6 +233,7 @@ export interface IGitExtension extends IDisposable {
    * @param url - Git repository URL
    * @param auth - remote repository authentication information
    * @param versioning - Whether to clone or download the Git repository
+   * @param submodules - Whether to clone recursively the Git submodules
    * @returns promise which resolves upon cloning a repository
    *
    * @throws {Git.GitResponseError} If the server response is not ok
@@ -242,7 +243,8 @@ export interface IGitExtension extends IDisposable {
     path: string,
     url: string,
     auth?: Git.IAuth,
-    versioning?: boolean
+    versioning?: boolean,
+    submodules?: boolean
   ): Promise<Git.IResultWithMessage>;
 
   /**

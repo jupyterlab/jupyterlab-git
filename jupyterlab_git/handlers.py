@@ -77,10 +77,15 @@ class GitCloneHandler(GitHandler):
         Input format:
             {
               'repo_url': 'https://github.com/path/to/myrepo',
-              OPTIONAL 'auth': '{ 'username': '<username>',
-                                  'password': '<password>',
-                                  'cache_credentials': true/false
-                                }'
+              OPTIONAL 'auth': {
+                'username': '<username>',
+                'password': '<password>',
+                'cache_credentials': true/false
+              },
+              # Whether to version the clone (True) or copy (False) it.
+              OPTIONAL 'versioning': True,
+              # Whether to clone the submodules or not.
+              OPTIONAL 'submodules': False
             }
         """
         data = self.get_json_body()
@@ -88,8 +93,8 @@ class GitCloneHandler(GitHandler):
             self.url2localpath(path),
             data["clone_url"],
             data.get("auth", None),
-            data["versioning"],
-            data["submodules"],
+            data.get("versioning", True),
+            data.get("submodules", False),
         )
 
         if response["code"] != 0:
