@@ -10,13 +10,15 @@ export class PreviewMainAreaWidget<
    */
   static previewWidget: PreviewMainAreaWidget | null = null;
 
-  constructor(options: MainAreaWidget.IOptions<T>) {
+  constructor(options: MainAreaWidget.IOptions<T> & { isPreview?: boolean }) {
     super(options);
-    if (PreviewMainAreaWidget.previewWidget) {
-      PreviewMainAreaWidget.previewWidget.dispose();
+
+    if (options.isPreview ?? true) {
+      if (PreviewMainAreaWidget.previewWidget) {
+        PreviewMainAreaWidget.previewWidget.dispose();
+      }
+      PreviewMainAreaWidget.previewWidget = this;
     }
-    PreviewMainAreaWidget.previewWidget = this;
-    console.log('hello from preview!', this.node);
   }
 
   /**

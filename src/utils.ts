@@ -79,7 +79,12 @@ export const openFileDiff =
    * @param previousFilePath when file has been relocated.
    * @returns callback.
    */
-  (filePath: string, isText: boolean, previousFilePath?: string) =>
+  (
+    filePath: string,
+    isText: boolean,
+    previousFilePath?: string,
+    isPreview = false
+  ) =>
   /**
    * Callback invoked upon clicking to display a file diff.
    *
@@ -100,7 +105,8 @@ export const openFileDiff =
               context: {
                 previousRef: previousCommit?.commit ?? commit.pre_commits[0], // not sure
                 currentRef: commit.commit
-              }
+              },
+              isPreview
             }
           ]
         } as CommandArguments.IGitFileDiff as any);

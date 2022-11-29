@@ -48,7 +48,8 @@ export interface ISinglePastCommitInfoProps {
   onOpenDiff: (
     filePath: string,
     isText: boolean,
-    previousFilePath?: string
+    previousFilePath?: string,
+    isPreview?: boolean
   ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 

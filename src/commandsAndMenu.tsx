@@ -79,6 +79,7 @@ interface IFileDiffArgument {
   filePath: string;
   isText: boolean;
   status?: Git.Status;
+  isPreview?: boolean;
 
   // when file has been relocated
   previousFilePath?: string;
@@ -516,9 +517,10 @@ export function addCommands(
     label: trans.__('Show Diff'),
     caption: trans.__('Display a file diff.'),
     execute: async args => {
-      const { model, isText } = args as any as {
+      const { model, isText, isPreview } = args as any as {
         model: Git.Diff.IModel;
         isText?: boolean;
+        isPreview?: boolean;
       };
 
       const fullPath = PathExt.join(
@@ -546,7 +548,8 @@ export function addCommands(
           const modelIsLoading = new PromiseDelegate<void>();
           const diffWidget = (mainAreaItem = new PreviewMainAreaWidget<Panel>({
             content,
-            reveal: modelIsLoading.promise
+            reveal: modelIsLoading.promise,
+            isPreview
           }));
           diffWidget.id = id;
           diffWidget.title.label = PathExt.basename(model.filename);
@@ -558,23 +561,16 @@ export function addCommands(
 
           shell.add(diffWidget, 'main');
           shell.activateById(diffWidget.id);
-          console.log('hi1');
 
           // Search for the tab
           const dockPanel = (app.shell as any)._dockPanel as DockPanel;
 
           let tabPosition = -1;
-          // console.log('1', tabPosition);
           const tabBar = find(dockPanel.tabBars(), bar => {
             tabPosition = bar.titles.indexOf(diffWidget.title);
             console.log('2', tabPosition);
             return tabPosition !== -1;
           });
-
-          // console.log(tabBar.contentNode);
-          // console.log(tabBar.contentNode.children);
-          // console.log(tabBar.contentNode.children[tabPosition]);
-          // console.log(tabBar.contentNode.children[1]);
 
           // Get the tab
           setTimeout(() => {
@@ -582,25 +578,17 @@ export function addCommands(
               tabPosition >= 0
                 ? tabBar.contentNode.children[tabPosition]
                 : null;
-            console.log('inside settimeout', tab, tabPosition);
             const tabTitle = tab.querySelector<HTMLElement>(
               '.lm-TabBar-tabLabel'
             );
-            console.log('tabtitle', tabTitle);
             tabTitle.style.fontStyle = 'italic';
-            tabTitle.addEventListener(
-              'click',
-              () => (tabTitle.style.fontStyle = 'normal')
-            );
+            tabTitle.addEventListener('mouseup', () => {
+              tabTitle.style.fontStyle = 'normal';
+              if (PreviewMainAreaWidget.previewWidget === diffWidget) {
+                PreviewMainAreaWidget.previewWidget = null;
+              }
+            });
           }, 0);
-          // console.log('3', tabPosition, tabBar.contentNode.children);
-
-          // console.log(
-          //   '4: t, tb',
-          //   tabPosition,
-          //   tabBar.contentNode.children,
-          //   tab
-          // );
 
           // Create the diff widget
           try {
@@ -886,7 +874,14 @@ export function addCommands(
     execute: async args => {
       const { files } = args as any as CommandArguments.IGitFileDiff;
       for (const file of files) {
-        const { context, filePath, previousFilePath, isText, status } = file;
+        const {
+          context,
+          filePath,
+          previousFilePath,
+          isText,
+          status,
+          isPreview
+        } = file;
 
         // nothing to compare to for untracked files
         if (status === 'untracked') {
@@ -998,7 +993,8 @@ export function addCommands(
 
         const widget = await commands.execute(CommandIDs.gitShowDiff, {
           model,
-          isText
+          isText,
+          isPreview
         } as any);
 
         if (widget) {

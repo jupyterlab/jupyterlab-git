@@ -83,7 +83,8 @@ export interface ICommitDiffProps {
   onOpenDiff: (
     filePath: string,
     isText: boolean,
-    previousFilePath?: string
+    previousFilePath?: string,
+    isPreview?: boolean
   ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
@@ -154,6 +155,7 @@ export class CommitDiff extends React.PureComponent<ICommitDiffProps> {
       <li
         className={commitDetailFileClass}
         onClick={this.props.onOpenDiff(path, flg, previous)}
+        onDoubleClick={this.props.onOpenDiff(path, flg, previous, true)}
         style={style}
         title={path}
       >
