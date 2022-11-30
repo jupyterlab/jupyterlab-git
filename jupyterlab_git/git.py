@@ -1388,6 +1388,7 @@ class Git:
                     content = await self.show(
                         path, reference["git"], filename, is_binary=True
                     )
+                    return content
                 content = await self.show(path, "", filename)
             elif reference["special"] == "BASE":
                 # Special case of file in merge conflict for which we want the base (aka common ancestor) version
@@ -1405,6 +1406,7 @@ class Git:
                 content = await self.show(
                     path, reference["git"], filename, is_binary=True
                 )
+                return content
             content = await self.show(path, reference["git"], filename)
         else:
             content = ""
