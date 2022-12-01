@@ -143,6 +143,10 @@
 	border: none;
 }
 
+.jp-git-tab-mod-preview {
+  font-style: italic;
+}
+
 /* Hiding unchanged cells if told to */
 .jp-git-diff-root .nbdime-root.jp-mod-hideUnchanged .jp-Cell-merge.jp-Merge-unchanged {
   display: none;

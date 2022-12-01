@@ -568,13 +568,12 @@ export function addCommands(
           let tabPosition = -1;
           const tabBar = find(dockPanel.tabBars(), bar => {
             tabPosition = bar.titles.indexOf(diffWidget.title);
-            console.log('2', tabPosition);
             return tabPosition !== -1;
           });
 
-          // Get the tab
+          // We need to wait for the tab node to be inserted in the DOM
           setTimeout(() => {
-            // We need to wait for the tab node to be inserted in the DOM
+            // Get the most recent tab opened
             const tab =
               tabPosition >= 0
                 ? tabBar.contentNode.children[tabPosition]
@@ -582,13 +581,14 @@ export function addCommands(
             const tabTitle = tab.querySelector<HTMLElement>(
               '.lm-TabBar-tabLabel'
             );
+
             tabTitle.classList.add('jp-git-tab-mod-preview');
-            tabTitle.addEventListener('mouseup', () => {
+            tabTitle.onclick = () => {
               tabTitle.classList.remove('jp-git-tab-mod-preview');
               if (PreviewMainAreaWidget.previewWidget === diffWidget) {
                 PreviewMainAreaWidget.previewWidget = null;
               }
-            });
+            };
           }, 0);
 
           // Create the diff widget

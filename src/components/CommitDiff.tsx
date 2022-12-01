@@ -151,7 +151,12 @@ export class CommitDiff extends React.PureComponent<ICommitDiffProps> {
     const previous = file.previous_file_path;
     const flg = !!getDiffProvider(path) || !file.is_binary;
     return (
-      <li className={commitDetailFileClass} style={style} title={path}>
+      <li
+        className={commitDetailFileClass}
+        onClick={this.props.onOpenDiff(path, flg, previous)}
+        style={style}
+        title={path}
+      >
         <FilePath filepath={path} filetype={file.type} />
         {flg ? (
           <ActionButton
