@@ -83,8 +83,7 @@ export interface ICommitDiffProps {
   onOpenDiff: (
     filePath: string,
     isText: boolean,
-    previousFilePath?: string,
-    isPreview?: boolean
+    previousFilePath?: string
   ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
@@ -152,13 +151,7 @@ export class CommitDiff extends React.PureComponent<ICommitDiffProps> {
     const previous = file.previous_file_path;
     const flg = !!getDiffProvider(path) || !file.is_binary;
     return (
-      <li
-        className={commitDetailFileClass}
-        onClick={this.props.onOpenDiff(path, flg, previous)}
-        onDoubleClick={this.props.onOpenDiff(path, flg, previous, true)}
-        style={style}
-        title={path}
-      >
+      <li className={commitDetailFileClass} style={style} title={path}>
         <FilePath filepath={path} filetype={file.type} />
         {flg ? (
           <ActionButton

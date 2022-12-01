@@ -14,11 +14,18 @@ export class PreviewMainAreaWidget<
     super(options);
 
     if (options.isPreview ?? true) {
-      if (PreviewMainAreaWidget.previewWidget) {
-        PreviewMainAreaWidget.previewWidget.dispose();
-      }
+      PreviewMainAreaWidget.disposePreviewWidget(
+        PreviewMainAreaWidget.previewWidget
+      );
       PreviewMainAreaWidget.previewWidget = this;
     }
+  }
+
+  /**
+   * Dispose screen as a preview screen
+   */
+  static disposePreviewWidget(isPreview: PreviewMainAreaWidget<Widget>): void {
+    return isPreview && PreviewMainAreaWidget.previewWidget.dispose();
   }
 
   /**

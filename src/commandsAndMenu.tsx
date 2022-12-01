@@ -574,6 +574,7 @@ export function addCommands(
 
           // Get the tab
           setTimeout(() => {
+            // We need to wait for the tab node to be inserted in the DOM
             const tab =
               tabPosition >= 0
                 ? tabBar.contentNode.children[tabPosition]
@@ -581,9 +582,9 @@ export function addCommands(
             const tabTitle = tab.querySelector<HTMLElement>(
               '.lm-TabBar-tabLabel'
             );
-            tabTitle.style.fontStyle = 'italic';
+            tabTitle.classList.add('jp-git-tab-mod-preview');
             tabTitle.addEventListener('mouseup', () => {
-              tabTitle.style.fontStyle = 'normal';
+              tabTitle.classList.remove('jp-git-tab-mod-preview');
               if (PreviewMainAreaWidget.previewWidget === diffWidget) {
                 PreviewMainAreaWidget.previewWidget = null;
               }
