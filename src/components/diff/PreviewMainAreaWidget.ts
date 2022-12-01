@@ -1,6 +1,6 @@
 import { MainAreaWidget } from '@jupyterlab/apputils/lib/mainareawidget';
 import { Message } from '@lumino/messaging';
-import { Widget } from '@lumino/widgets';
+import { Panel, TabBar, Widget } from '@lumino/widgets';
 
 export class PreviewMainAreaWidget<
   T extends Widget = Widget
@@ -8,7 +8,7 @@ export class PreviewMainAreaWidget<
   /**
    * Handle on the preview widget
    */
-  static previewWidget: PreviewMainAreaWidget | null = null;
+  protected static previewWidget: PreviewMainAreaWidget | null = null;
 
   constructor(options: MainAreaWidget.IOptions<T> & { isPreview?: boolean }) {
     super(options);
@@ -26,6 +26,31 @@ export class PreviewMainAreaWidget<
    */
   static disposePreviewWidget(isPreview: PreviewMainAreaWidget<Widget>): void {
     return isPreview && PreviewMainAreaWidget.previewWidget.dispose();
+  }
+
+  /**
+   * Pin the preview screen if user clicks on tab title
+   */
+  static pinWidget(
+    tabPosition: number,
+    tabBar: TabBar<Widget>,
+    diffWidget: PreviewMainAreaWidget<Panel>
+  ): void {
+    // We need to wait for the tab node to be inserted in the DOM
+    setTimeout(() => {
+      // Get the most recent tab opened
+      const tab =
+        tabPosition >= 0 ? tabBar.contentNode.children[tabPosition] : null;
+      const tabTitle = tab.querySelector<HTMLElement>('.lm-TabBar-tabLabel');
+
+      tabTitle.classList.add('jp-git-tab-mod-preview');
+      tabTitle.onclick = () => {
+        tabTitle.classList.remove('jp-git-tab-mod-preview');
+        if (PreviewMainAreaWidget.previewWidget === diffWidget) {
+          PreviewMainAreaWidget.previewWidget = null;
+        }
+      };
+    }, 0);
   }
 
   /**

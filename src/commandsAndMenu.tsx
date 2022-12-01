@@ -565,31 +565,15 @@ export function addCommands(
           // Search for the tab
           const dockPanel = (app.shell as any)._dockPanel as DockPanel;
 
+          // Get the index of the most recent tab opened
           let tabPosition = -1;
           const tabBar = find(dockPanel.tabBars(), bar => {
             tabPosition = bar.titles.indexOf(diffWidget.title);
             return tabPosition !== -1;
           });
 
-          // We need to wait for the tab node to be inserted in the DOM
-          setTimeout(() => {
-            // Get the most recent tab opened
-            const tab =
-              tabPosition >= 0
-                ? tabBar.contentNode.children[tabPosition]
-                : null;
-            const tabTitle = tab.querySelector<HTMLElement>(
-              '.lm-TabBar-tabLabel'
-            );
-
-            tabTitle.classList.add('jp-git-tab-mod-preview');
-            tabTitle.onclick = () => {
-              tabTitle.classList.remove('jp-git-tab-mod-preview');
-              if (PreviewMainAreaWidget.previewWidget === diffWidget) {
-                PreviewMainAreaWidget.previewWidget = null;
-              }
-            };
-          }, 0);
+          // Pin the preview screen if applicable
+          PreviewMainAreaWidget.pinWidget(tabPosition, tabBar, diffWidget);
 
           // Create the diff widget
           try {
