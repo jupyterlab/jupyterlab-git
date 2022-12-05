@@ -152,7 +152,8 @@ export function addCommands(
               `cd "${gitModel.pathRepository
                 .split('"')
                 .join('\\"')
-                .replace(/`/g, '\\`')}"\n`
+                .split('`')
+                .join('\\`')}"\n`
             ]
           });
         }
