@@ -1,6 +1,7 @@
 """
 Module for executing git commands, sending results back to the handlers
 """
+import base64
 import datetime
 import os
 import pathlib
@@ -120,7 +121,7 @@ async def execute(
         if is_binary == False:
             return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
         else:
-            return (process.returncode, output.decode("base64"), error.decode("base64"))
+            return (process.returncode, base64.encodebytes(output).decode("ascii"), error.decode("utf-8"))
 
     try:
         await execution_lock.acquire(
@@ -1388,8 +1389,8 @@ class Git:
                     content = await self.show(
                         path, reference["git"], filename, is_binary=True
                     )
-                    return content
-                content = await self.show(path, "", filename)
+                else:
+                    content = await self.show(path, "", filename)
             elif reference["special"] == "BASE":
                 # Special case of file in merge conflict for which we want the base (aka common ancestor) version
                 ref = await self._get_base_ref(path, filename)
@@ -1406,8 +1407,8 @@ class Git:
                 content = await self.show(
                     path, reference["git"], filename, is_binary=True
                 )
-                return content
-            content = await self.show(path, reference["git"], filename)
+            else:
+                content = await self.show(path, reference["git"], filename)
         else:
             content = ""
 
