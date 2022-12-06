@@ -822,6 +822,10 @@ class GitIgnoreHandler(GitHandler):
             self.set_status(500)
         self.finish(json.dumps(body))
 
+    @tornado.web.authenticated
+    def check_ignore(self, path):
+        self.git.check_ignore(self, path)
+
 
 class GitSettingsHandler(GitHandler):
     @tornado.web.authenticated

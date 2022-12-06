@@ -222,6 +222,10 @@ class Git:
 
         return response
 
+    def check_ignore(self, path):
+        # in git.py Git, add a new method check_ignore that execute git check-ignore -z <path> and parse the result to return the list of ignored files; changed_files method is a good example of a similar method.
+        return
+
     async def changed_files(self, path, base=None, remote=None, single_commit=None):
         """Gets the list of changed files between two Git refs, or the files changed in a single commit
 
