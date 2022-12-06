@@ -44,12 +44,19 @@ export class PreviewMainAreaWidget<
       const tabTitle = tab.querySelector<HTMLElement>('.lm-TabBar-tabLabel');
 
       tabTitle.classList.add('jp-git-tab-mod-preview');
-      tabTitle.onclick = () => {
+
+      const onClick = () => {
         tabTitle.classList.remove('jp-git-tab-mod-preview');
+        tabTitle.removeEventListener('click', onClick, true);
         if (PreviewMainAreaWidget.previewWidget === diffWidget) {
           PreviewMainAreaWidget.previewWidget = null;
         }
       };
+
+      tabTitle.addEventListener('click', onClick, true);
+      diffWidget.disposed.connect(() => {
+        tabTitle.removeEventListener('click', onClick, true);
+      });
     }, 0);
   }
 
