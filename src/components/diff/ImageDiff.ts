@@ -9,7 +9,6 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { Toolbar } from '@jupyterlab/apputils';
-import { GitWidget } from '../../widgets/GitWidget';
 
 export const createImageDiff: Git.Diff.ICallback = async (
   model: Git.Diff.IModel,
@@ -22,10 +21,10 @@ export const createImageDiff: Git.Diff.ICallback = async (
 };
 
 export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
-  [x: string]: any;
   constructor(model: Git.Diff.IModel, translator?: TranslationBundle) {
     super();
     const getReady = new PromiseDelegate<void>();
+    this._container = this.node as HTMLElement;
     this._isReady = getReady.promise;
     this._model = model;
     this._trans = translator ?? nullTranslator.load('jupyterlab_git');
@@ -66,45 +65,49 @@ export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
   }
 
   async refresh(): Promise<void> {
-    if (!this._scroller?.parent) {
-      while (this.widgets.length > 0) {
-        this.widgets[0].dispose();
-      }
+    this._container.innerHTML = '';
+    // await this.ready;
+    try {
+      const [reference, challenger] = await Promise.all([
+        this._model.reference.content(),
+        this._model.challenger.content()
+        // this._model.base?.content() ?? Promise.resolve(null)
+      ]);
 
-      try {
-        // ENH request content only if it changed
-        const referenceContent = await this._model.reference.content();
-        const challengerContent = await this._model.challenger.content();
-        const baseContent = await this._model.base?.content();
+      this._container.insertAdjacentHTML(
+        'beforeend',
+        `<img src="data:image/png;base64,${reference}" alt="Reference"/>`
+      );
 
-        const createView = baseContent
-          ? this.createMergeView.bind(this)
-          : this.createDiffView.bind(this);
-
-        this._imgWidget = await createView(
-          challengerContent,
-          referenceContent,
-          baseContent
-        );
-
-        while (this._scroller.widgets.length > 0) {
-          this._scroller.widgets[0].dispose();
-        }
-        this._scroller.addWidget(this._imgWidget);
-      } catch (reason) {
-        this.showError(reason as Error);
-      }
+      this._container.insertAdjacentHTML(
+        'beforeend',
+        `<img src="data:image/png;base64,${challenger}" alt="Challenger"/>`
+      );
+    } catch (reason) {
+      this.showError(reason as Error);
     }
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return new GitWidget(model, this._renderMime);
   }
 
-  protected _areUnchangedCellsHidden = false;
+  /**
+   * Display an error instead of the file diff
+   *
+   * @param error Error object
+   */
+  protected showError(error: Error): void {
+    console.error(
+      this._trans.__('Failed to load file diff.'),
+      error,
+      (error as any)?.traceback
+    );
+    const msg = ((error.message || error) as string).replace('\n', '<br />');
+    this.node.innerHTML = `<p class="jp-git-diff-error">
+      <span>${this._trans.__('Error Loading File Diff:')}</span>
+      <span class="jp-git-diff-error-message">${msg}</span>
+    </p>`;
+  }
+
+  protected _container: HTMLElement;
   protected _isReady: Promise<void>;
   protected _model: Git.Diff.IModel;
-  protected _imgWidget: GitWidget;
-  protected _scroller: Panel;
   protected _trans: TranslationBundle;
 }
