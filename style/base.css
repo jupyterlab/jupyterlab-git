@@ -10,3 +10,7 @@
 @import url('variables.css');
 @import url('status-widget.css');
 @import url('advanced-push-form.css');
+
+.jp-git-tab-mod-preview {
+  font-style: italic;
+}
