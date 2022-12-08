@@ -1,7 +1,7 @@
 # jupyterlab-git
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab/tree/examples/demo.ipynb) [![Github Actions Status](https://github.com/jupyterlab/jupyterlab-git/workflows/Test/badge.svg)](https://github.com/jupyterlab/jupyterlab-git/actions?query=workflow%3ATest) [![Version](https://img.shields.io/npm/v/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/pypi/v/jupyterlab-git.svg)](https://pypi.org/project/jupyterlab-git/) [![Downloads](https://img.shields.io/npm/dm/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git) [![Downloads](https://img.shields.io/conda/dn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git)<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-25-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-26-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 A JupyterLab extension for version control using Git
@@ -279,6 +279,7 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
       <td align="center"><a href="https://www.saulshanabrook.com/"><img src="https://avatars1.githubusercontent.com/u/1186124?v=4?s=100" width="100px;" alt="Saul Shanabrook"/><br /><sub><b>Saul Shanabrook</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=saulshanabrook" title="Code">💻</a> <a href="#projectManagement-saulshanabrook" title="Project Management">📆</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Asaulshanabrook" title="Reviewed Pull Requests">👀</a> <a href="#infra-saulshanabrook" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     </tr>
     <tr>
+      <td align="center"><a href="http://sheezaaziz.com"><img src="https://avatars.githubusercontent.com/u/47278108?v=4?s=100" width="100px;" alt="Sheeza Aziz"/><br /><sub><b>Sheeza Aziz</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=sheezaaziz" title="Code">💻</a></td>
       <td align="center"><a href="http://sinakhalili.com"><img src="https://avatars.githubusercontent.com/u/20732540?v=4?s=100" width="100px;" alt="Sina Khalili"/><br /><sub><b>Sina Khalili</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=SinaKhalili" title="Code">💻</a></td>
       <td align="center"><a href="https://www.deshaw.com/"><img src="https://avatars0.githubusercontent.com/u/2298205?v=4?s=100" width="100px;" alt="The D. E. Shaw Group"/><br /><sub><b>The D. E. Shaw Group</b></sub></a><br /><a href="#financial-deshaw" title="">🤝</a></td>
       <td align="center"><a href="https://github.com/ZeshanFayyaz"><img src="https://avatars.githubusercontent.com/u/43391249?v=4?s=100" width="100px;" alt="Zeshan Fayyaz"/><br /><sub><b>Zeshan Fayyaz</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=ZeshanFayyaz" title="Code">💻</a></td>
