@@ -10,7 +10,7 @@ from typing import Tuple, Union
 import tornado
 from jupyter_server.base.handlers import APIHandler, path_regex
 from jupyter_server.services.contents.manager import ContentsManager
-from jupyter_server.utils import url2path, url_path_join
+from jupyter_server.utils import url2path, url_path_join, ensure_async
 from packaging.version import parse
 import fnmatch
 
@@ -38,9 +38,9 @@ class GitHandler(APIHandler):
     def git(self) -> Git:
         return self.settings["git"]
 
-    def prepare(self):
+    async def prepare(self):
         """Check if the path should be skipped"""
-        super().prepare()
+        await ensure_async(super().prepare())
         path = self.path_kwargs.get("path")
         if path is not None:
             excluded_paths = self.git.excluded_paths

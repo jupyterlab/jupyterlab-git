@@ -78,8 +78,9 @@ jobs:
 
           # Integration test
           python -m pip install .
+          jupyter server extension list
           jupyter server extension list 2>&1 | grep -ie "jupyterlab_git.*OK"
-
+          jupyter labextension list
           jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
           python -m jupyterlab.browser_check
 

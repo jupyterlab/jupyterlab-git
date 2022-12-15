@@ -9,6 +9,10 @@ from jupyterlab_git.handlers import GitHandler
 
 
 pytest.importorskip("hybridcontents")
+# FIXME requires hybridcontents update to Jupyter Server 2
+pytestmark = pytest.mark.skipif(
+    True, reason="hybridcontents is not compatible with Jupyter Server 2"
+)
 
 
 @pytest.fixture
