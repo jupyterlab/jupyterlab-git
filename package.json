@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/git",
-  "version": "0.40.1",
+  "version": "0.41.0",
   "description": "A JupyterLab extension for version control using git",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
