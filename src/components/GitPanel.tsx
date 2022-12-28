@@ -713,7 +713,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         await this.props.commands.execute(CommandIDs.gitPush);
       }
     } catch (error) {
-      this.props.logger.log({ ...errorLog, error });
+      this.props.logger.log({ ...errorLog, error: error as Error });
       throw error;
     }
   };
@@ -757,7 +757,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         }
 
         throw new Error(
-          this.props.trans.__('Failed to set your identity. %1', error.message)
+          this.props.trans.__(
+            'Failed to set your identity. %1',
+            (error as Error).message
+          )
         );
       }
     }

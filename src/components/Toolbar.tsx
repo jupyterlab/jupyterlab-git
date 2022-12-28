@@ -414,7 +414,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       this.props.logger.log({
         level: Level.ERROR,
         message: this.props.trans.__('Failed to refresh.'),
-        error
+        error: error as Error
       });
     }
   };

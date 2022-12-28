@@ -511,7 +511,7 @@ export function addCommands(
           logger.log({
             message: trans.__('Reset failed'),
             level: Level.ERROR,
-            error
+            error: error as Error
           });
         }
       }

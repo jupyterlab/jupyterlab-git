@@ -430,7 +430,7 @@ export class NewBranchDialog extends React.Component<
       await this.props.model.checkout(opts);
     } catch (err) {
       this.setState({
-        error: err.message.replace(/^fatal:/, '')
+        error: (err as Error).message.replace(/^fatal:/, '')
       });
       this.props.logger.log({
         level: Level.ERROR,

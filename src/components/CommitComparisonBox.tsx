@@ -121,7 +121,7 @@ export function CommitComparisonBox(
         props.logger.log({
           level: Level.ERROR,
           message: msg,
-          error: err
+          error: err as Error
         });
         return;
       }
