@@ -198,7 +198,7 @@ class GitFetchHandler(GitHandler):
         )
 
         if result["code"] != 0:
-            self.set_status(500)
+            self.set_status(401)
         self.finish(json.dumps(result))
 
 
@@ -601,7 +601,7 @@ class GitPullHandler(GitHandler):
         )
 
         if response["code"] != 0:
-            self.set_status(500)
+            self.set_status(401)
 
         self.finish(json.dumps(response))
 
