@@ -98,7 +98,7 @@ class GitCloneHandler(GitHandler):
         )
 
         if response["code"] != 0:
-            self.set_status(500)
+            self.set_status(401)
         self.finish(json.dumps(response))
 
 
