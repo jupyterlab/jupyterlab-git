@@ -683,6 +683,8 @@ class GitPushHandler(GitHandler):
                     set_upstream=True,
                     force=force,
                 )
+                if response["code"] != 0:
+                    self.set_status(401)
             else:
                 response = {
                     "code": 128,
@@ -691,9 +693,8 @@ class GitPushHandler(GitHandler):
                     ),
                     "remotes": remotes,  # Returns the list of known remotes
                 }
-
-        if response["code"] != 0:
-            self.set_status(500)
+                if response["code"] != 0:
+                    self.set_status(404)
 
         self.finish(json.dumps(response))
 
