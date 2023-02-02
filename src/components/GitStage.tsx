@@ -87,7 +87,7 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
           itemData={props.files}
           itemKey={(index, data) => data[index].to}
           itemSize={ITEM_HEIGHT}
-          style={{ overflowX: 'hidden' }}
+          style={{ overflow: 'hidden' }}
           width={'auto'}
         >
           {props.rowRenderer}
