@@ -1738,7 +1738,6 @@ class Git:
             return
 
         if self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS is None or force:
-
             if force and self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS:
                 self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.terminate()
 

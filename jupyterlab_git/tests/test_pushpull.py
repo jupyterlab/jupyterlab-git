@@ -95,7 +95,6 @@ async def test_git_pull_with_auth_fail():
 
 @pytest.mark.asyncio
 async def test_git_pull_success():
-
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
@@ -116,7 +115,6 @@ async def test_git_pull_success():
 
 @pytest.mark.asyncio
 async def test_git_pull_with_auth_success():
-
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
@@ -287,7 +285,6 @@ async def test_git_push_fail():
 
 @pytest.mark.asyncio
 async def test_git_push_with_auth_fail():
-
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
@@ -321,7 +318,6 @@ async def test_git_push_with_auth_fail():
 
 @pytest.mark.asyncio
 async def test_git_push_success():
-
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
@@ -344,7 +340,6 @@ async def test_git_push_success():
 
 @pytest.mark.asyncio
 async def test_git_push_with_auth_success():
-
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given

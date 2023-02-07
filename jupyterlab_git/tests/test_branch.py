@@ -27,14 +27,13 @@ def test_is_remote_branch(branch, expected):
 
 @pytest.mark.asyncio
 async def test_get_current_branch_success():
-
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.return_value = maybe_future((0, "feature-foo", ""))
 
         # When
-        actual_response = await (
-            Git().get_current_branch(path=str(Path("/bin/test_curr_path")))
+        actual_response = await Git().get_current_branch(
+            path=str(Path("/bin/test_curr_path"))
         )
 
         # Then
@@ -269,7 +268,6 @@ async def test_checkout_branch_remoteref_failure():
 
 @pytest.mark.asyncio
 async def test_get_branch_reference_success():
-
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         actual_response = 0
