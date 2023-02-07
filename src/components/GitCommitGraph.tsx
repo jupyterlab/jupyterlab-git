@@ -95,12 +95,19 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   }
 
   getHeight(): number {
-    return (
-      this._graphData[this._graphData.length - 1].yOffset +
-      this.props.getNodeHeight(
-        this.props.commits[this.props.commits.length - 1].sha
-      )
-    );
+    // if this.props.commits.length = 0, just pass 0
+    const numCommits = this.props.commits.length;
+    const lastNodeHeight =
+      numCommits === 0
+        ? 0
+        : this.props.getNodeHeight(this.props.commits[numCommits - 1].sha);
+
+    const numGraphNodes = this._graphData.length;
+    const lastYOffset =
+      numGraphNodes === 0
+        ? 0
+        : this._graphData[this._graphData.length - 1].yOffset;
+    return lastYOffset + lastNodeHeight;
   }
 
   renderRouteNode(svgPathDataAttribute: string, branch: number): JSX.Element {
