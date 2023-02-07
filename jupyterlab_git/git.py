@@ -10,7 +10,6 @@ import shutil
 import subprocess
 import traceback
 from typing import Dict, List, Optional
-from unittest.mock import NonCallableMock
 from urllib.parse import unquote
 
 import nbformat
