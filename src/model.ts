@@ -562,6 +562,13 @@ export class GitExtension implements IGitExtension {
         let changes;
         if (!body.new_check) {
           if (body.checkout_branch && !body.new_check) {
+            const detachedHeadRegex = /\(HEAD detached at (.+)\)/;
+            let result = this._currentBranch.name.match(detachedHeadRegex);
+
+            if (result && result.length > 1) {
+              this._currentBranch.name = result[1];
+            }
+
             changes = await this._changedFiles(
               this._currentBranch.name,
               body.branchname
