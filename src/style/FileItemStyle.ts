@@ -107,5 +107,6 @@ export const checkboxLabelContainerStyle = style({
 
 export const checkboxLabelLastContainerStyle = style({
   display: 'flex',
-  marginLeft: 'auto'
+  marginLeft: 'auto',
+  overflow: 'hidden'
 });

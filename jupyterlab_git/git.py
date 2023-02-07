@@ -10,7 +10,6 @@ import shutil
 import subprocess
 import traceback
 from typing import Dict, List, Optional
-from unittest.mock import NonCallableMock
 from urllib.parse import quote, unquote
 
 import nbformat
@@ -1745,7 +1744,6 @@ class Git:
             return
 
         if self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS is None or force:
-
             if force and self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS:
                 self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.terminate()
 
