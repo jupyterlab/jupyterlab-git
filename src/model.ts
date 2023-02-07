@@ -563,7 +563,7 @@ export class GitExtension implements IGitExtension {
         if (!body.new_check) {
           if (body.checkout_branch && !body.new_check) {
             const detachedHeadRegex = /\(HEAD detached at (.+)\)/;
-            let result = this._currentBranch.name.match(detachedHeadRegex);
+            const result = this._currentBranch.name.match(detachedHeadRegex);
 
             if (result && result.length > 1) {
               this._currentBranch.name = result[1];
