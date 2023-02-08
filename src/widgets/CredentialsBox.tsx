@@ -41,9 +41,7 @@ export class GitCredentialsForm
     text.textContent = textContent;
     warning.textContent = warningContent;
     this._user.placeholder = this._trans.__('username');
-    this._password.placeholder = this._trans.__(
-      'password / personal access token'
-    );
+    this._password.placeholder = this._trans.__('personal access token');
 
     checkboxLabel.className = 'jp-CredentialsBox-label-checkbox';
     this._checkboxCacheCredentials.type = 'checkbox';
