@@ -562,13 +562,6 @@ export class GitExtension implements IGitExtension {
         let changes;
         if (!body.new_check) {
           if (body.checkout_branch && !body.new_check) {
-            const detachedHeadRegex = /\(HEAD detached at (.+)\)/;
-            const result = this._currentBranch.name.match(detachedHeadRegex);
-
-            if (result && result.length > 1) {
-              this._currentBranch.name = result[1];
-            }
-
             changes = await this._changedFiles(
               this._currentBranch.name,
               body.branchname
@@ -1049,6 +1042,15 @@ export class GitExtension implements IGitExtension {
       );
 
       this._branches = data.branches ?? [];
+
+      const detachedHeadRegex = /\(HEAD detached at (.+)\)/;
+      const result = data.current_branch.name.match(detachedHeadRegex);
+
+      if (result && result.length > 1) {
+        data.current_branch.tag = result[1];
+        data.current_branch.name = result[1];
+      }
+      
       this._currentBranch = data.current_branch;
       if (this._currentBranch) {
         // Set up the marker obj for the current (valid) repo/branch combination
