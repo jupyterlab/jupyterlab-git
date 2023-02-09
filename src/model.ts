@@ -1050,7 +1050,7 @@ export class GitExtension implements IGitExtension {
         data.current_branch.tag = result[1];
         data.current_branch.name = result[1];
       }
-      
+
       this._currentBranch = data.current_branch;
       if (this._currentBranch) {
         // Set up the marker obj for the current (valid) repo/branch combination
