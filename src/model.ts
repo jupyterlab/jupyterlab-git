@@ -1047,7 +1047,6 @@ export class GitExtension implements IGitExtension {
       const result = data.current_branch.name.match(detachedHeadRegex);
 
       if (result && result.length > 1) {
-        data.current_branch.tag = result[1];
         data.current_branch.name = result[1];
       }
 
