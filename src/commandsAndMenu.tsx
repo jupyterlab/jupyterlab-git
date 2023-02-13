@@ -15,11 +15,11 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
-import { ArrayExt, toArray } from '@lumino/algorithm';
+import { ArrayExt, toArray, find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { ContextMenu, Menu, Panel, Widget } from '@lumino/widgets';
+import { ContextMenu, DockPanel, Menu, Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { DiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
@@ -50,6 +50,7 @@ import { discardAllChanges } from './widgets/discardAllChanges';
 import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 import { AdvancedPushForm } from './widgets/AdvancedPushForm';
+import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
 
 export interface IGitCloneArgs {
   /**
@@ -60,6 +61,15 @@ export interface IGitCloneArgs {
    * Git repository url
    */
   url: string;
+  /**
+   * Whether to activate git versioning in the clone or not.
+   * If false, this will remove the .git folder after cloning.
+   */
+  versioning?: boolean;
+  /**
+   * Whether to activate git recurse submodules clone or not.
+   */
+  submodules?: boolean;
 }
 
 /**
@@ -78,6 +88,7 @@ interface IFileDiffArgument {
   filePath: string;
   isText: boolean;
   status?: Git.Status;
+  isPreview?: boolean;
 
   // when file has been relocated
   previousFilePath?: string;
@@ -151,7 +162,11 @@ export function addCommands(
           terminal.session.send({
             type: 'stdin',
             content: [
-              `cd "${gitModel.pathRepository.split('"').join('\\"')}"\n`
+              `cd "${gitModel.pathRepository
+                .split('"')
+                .join('\\"')
+                .split('`')
+                .join('\\`')}"\n`
             ]
           });
         }
@@ -229,7 +244,7 @@ export function addCommands(
 
   /** Open URL externally */
   commands.addCommand(CommandIDs.gitOpenUrl, {
-    label: args => args['text'] as string,
+    label: args => trans.__(args['text'] as string),
     execute: args => {
       const url = args['url'] as string;
       window.open(url);
@@ -515,9 +530,10 @@ export function addCommands(
     label: trans.__('Show Diff'),
     caption: trans.__('Display a file diff.'),
     execute: async args => {
-      const { model, isText } = args as any as {
+      const { model, isText, isPreview } = args as any as {
         model: Git.Diff.IModel;
         isText?: boolean;
+        isPreview?: boolean;
       };
 
       const fullPath = PathExt.join(
@@ -543,9 +559,10 @@ export function addCommands(
         if (!mainAreaItem) {
           const content = new Panel();
           const modelIsLoading = new PromiseDelegate<void>();
-          const diffWidget = (mainAreaItem = new MainAreaWidget<Panel>({
+          const diffWidget = (mainAreaItem = new PreviewMainAreaWidget<Panel>({
             content,
-            reveal: modelIsLoading.promise
+            reveal: modelIsLoading.promise,
+            isPreview
           }));
           diffWidget.id = id;
           diffWidget.title.label = PathExt.basename(model.filename);
@@ -557,6 +574,19 @@ export function addCommands(
 
           shell.add(diffWidget, 'main');
           shell.activateById(diffWidget.id);
+
+          // Search for the tab
+          const dockPanel = (app.shell as any)._dockPanel as DockPanel;
+
+          // Get the index of the most recent tab opened
+          let tabPosition = -1;
+          const tabBar = find(dockPanel.tabBars(), bar => {
+            tabPosition = bar.titles.indexOf(diffWidget.title);
+            return tabPosition !== -1;
+          });
+
+          // Pin the preview screen if applicable
+          PreviewMainAreaWidget.pinWidget(tabPosition, tabBar, diffWidget);
 
           // Create the diff widget
           try {
@@ -842,7 +872,14 @@ export function addCommands(
     execute: async args => {
       const { files } = args as any as CommandArguments.IGitFileDiff;
       for (const file of files) {
-        const { context, filePath, previousFilePath, isText, status } = file;
+        const {
+          context,
+          filePath,
+          previousFilePath,
+          isText,
+          status,
+          isPreview
+        } = file;
 
         // nothing to compare to for untracked files
         if (status === 'untracked') {
@@ -954,7 +991,8 @@ export function addCommands(
 
         const widget = await commands.execute(CommandIDs.gitShowDiff, {
           model,
-          isText
+          isText,
+          isPreview
         } as any);
 
         if (widget) {
@@ -1295,7 +1333,7 @@ export function createGitMenu(
   ];
 
   const menu = new Menu({ commands });
-  menu.title.label = 'Git';
+  menu.title.label = trans.__('Git');
   [
     CommandIDs.gitInit,
     CommandIDs.gitClone,
@@ -1377,7 +1415,8 @@ export function addMenuItems(
 export function addFileBrowserContextMenu(
   model: IGitExtension,
   filebrowser: FileBrowser,
-  contextMenu: ContextMenuSvg
+  contextMenu: ContextMenuSvg,
+  trans: TranslationBundle
 ): void {
   let gitMenu: Menu;
   let _commands: ContextCommandIDs[];
@@ -1500,7 +1539,7 @@ export function addFileBrowserContextMenu(
 
     const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
     gitMenu = new GitMenu({ commands: contextMenu.menu.commands });
-    gitMenu.title.label = 'Git';
+    gitMenu.title.label = trans.__('Git');
     gitMenu.title.icon = gitIcon.bindprops({ stylesheet: 'menuItem' });
 
     contextMenu.addItem({
@@ -1538,8 +1577,15 @@ export async function showGitOperationDialog<T>(
     switch (operation) {
       case Operation.Clone:
         // eslint-disable-next-line no-case-declarations
-        const { path, url } = args as any as IGitCloneArgs;
-        result = await model.clone(path, url, authentication);
+        const { path, url, versioning, submodules } =
+          args as any as IGitCloneArgs;
+        result = await model.clone(
+          path,
+          url,
+          authentication,
+          versioning ?? true,
+          submodules ?? false
+        );
         break;
       case Operation.Pull:
         result = await model.pull(authentication);

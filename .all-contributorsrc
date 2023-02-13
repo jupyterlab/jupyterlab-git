@@ -256,6 +256,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "kostyafarber",
+      "name": "Kostya Farber",
+      "avatar_url": "https://avatars.githubusercontent.com/u/73378227?v=4",
+      "profile": "https://kostyafarber.github.io/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "sheezaaziz",
+      "name": "Sheeza Aziz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47278108?v=4",
+      "profile": "http://sheezaaziz.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Damans227",
+      "name": "Daman Arora",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61474540?v=4",
+      "profile": "https://github.com/Damans227",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

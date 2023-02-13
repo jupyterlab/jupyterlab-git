@@ -46,7 +46,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
           ]
         });
 
-        if (result.button.accept && result.value) {
+        if (result.button.accept && result.value.url) {
           logger.log({
             level: Level.RUNNING,
             message: trans.__('Cloning…')
@@ -56,7 +56,12 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
               gitModel as GitExtension,
               Operation.Clone,
               trans,
-              { path: fileBrowserModel.path, url: result.value }
+              {
+                path: fileBrowserModel.path,
+                url: result.value.url,
+                versioning: result.value.versioning,
+                submodules: result.value.submodules
+              }
             );
             logger.log({
               message: trans.__('Successfully cloned'),
@@ -79,10 +84,10 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
     // Add a clone button to the file browser extension toolbar
-    addCloneButton(gitModel, fileBrowser, app.commands);
+    addCloneButton(gitModel, fileBrowser, app.commands, trans);
 
     // Add the context menu items for the default file browser
-    addFileBrowserContextMenu(gitModel, fileBrowser, app.contextMenu);
+    addFileBrowserContextMenu(gitModel, fileBrowser, app.contextMenu, trans);
   },
   autoStart: true
 };
