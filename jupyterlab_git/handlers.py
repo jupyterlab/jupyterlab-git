@@ -98,7 +98,11 @@ class GitCloneHandler(GitHandler):
         )
 
         if response["code"] != 0:
-            self.set_status(401)
+            if response["code"] == 128:
+                self.set_status(401)
+            else:
+                self.set_status(404)
+
         self.finish(json.dumps(response))
 
 
@@ -198,7 +202,8 @@ class GitFetchHandler(GitHandler):
         )
 
         if result["code"] != 0:
-            self.set_status(401)
+            self.set_status(404)
+
         self.finish(json.dumps(result))
 
 
@@ -601,7 +606,7 @@ class GitPullHandler(GitHandler):
         )
 
         if response["code"] != 0:
-            self.set_status(401)
+            self.set_status(404)
 
         self.finish(json.dumps(response))
 
