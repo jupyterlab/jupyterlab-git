@@ -85,7 +85,6 @@ export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
   }
 
   async refresh(): Promise<void> {
-    // this._container.innerHTML = '';
     // await this.ready;
     try {
       const [reference, challenger] = await Promise.all([
@@ -93,16 +92,6 @@ export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
         this._model.challenger.content()
         // this._model.base?.content() ?? Promise.resolve(null)
       ]);
-
-      // this._container.insertAdjacentHTML(
-      //   'beforeend',
-      //   `<img src="data:image/png;base64,${reference}" alt="Reference"/>`
-      // );
-
-      // this._container.insertAdjacentHTML(
-      //   'beforeend',
-      //   `<img src="data:image/png;base64,${challenger}" alt="Challenger"/>`
-      // );
 
       const compareImageWidget = ReactWidget.create(
         <CompareImage reference={reference} challenger={challenger} />
