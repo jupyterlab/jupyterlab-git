@@ -8629,6 +8629,11 @@ rc@1.2.8, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-compare-image@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/react-compare-image/-/react-compare-image-3.3.0.tgz#5666205f80ddbfeab56b1ae49d67e145482a4649"
+  integrity sha512-RNua/cBqosKFvMfI+GLdraUaTunhstsQoPi3DWvrAmCBoJRDVoLskxFsLDV4JNfFJMiRlcLyAAPKZoAA4f8Upw==
+
 react-dom@^17.0.1:
   version "17.0.2"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-17.0.2.tgz#ecffb6845e3ad8dbfcdc498f0d0a939736502c23"

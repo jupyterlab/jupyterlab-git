@@ -1,6 +1,10 @@
 import { Contents } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel } from '@lumino/widgets';
+import { ReactWidget } from '@jupyterlab/apputils';
+
+import * as React from 'react';
+import ReactCompareImage from 'react-compare-image';
 
 import { Git } from '../../tokens';
 import {
@@ -19,6 +23,22 @@ export const createImageDiff: Git.Diff.ICallback = async (
   await widget.ready;
   return widget;
 };
+
+type CompareImageProps = {
+  reference: string;
+  challenger: string;
+}
+
+const CompareImage = ({ reference, challenger }: CompareImageProps) => {
+  return (
+    <ReactCompareImage
+      leftImage={`data:image/png;base64,${reference}`}
+      rightImage={`data:image/png;base64,${challenger}`}
+      leftImageLabel="Reference"
+      rightImageLabel="Challenger"
+    />
+  )
+}
 
 export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
   constructor(model: Git.Diff.IModel, translator?: TranslationBundle) {
@@ -65,7 +85,7 @@ export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
   }
 
   async refresh(): Promise<void> {
-    this._container.innerHTML = '';
+    // this._container.innerHTML = '';
     // await this.ready;
     try {
       const [reference, challenger] = await Promise.all([
@@ -74,15 +94,21 @@ export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
         // this._model.base?.content() ?? Promise.resolve(null)
       ]);
 
-      this._container.insertAdjacentHTML(
-        'beforeend',
-        `<img src="data:image/png;base64,${reference}" alt="Reference"/>`
+      // this._container.insertAdjacentHTML(
+      //   'beforeend',
+      //   `<img src="data:image/png;base64,${reference}" alt="Reference"/>`
+      // );
+
+      // this._container.insertAdjacentHTML(
+      //   'beforeend',
+      //   `<img src="data:image/png;base64,${challenger}" alt="Challenger"/>`
+      // );
+
+      const compareImageWidget = ReactWidget.create(
+        <CompareImage reference={reference} challenger={challenger} />
       );
 
-      this._container.insertAdjacentHTML(
-        'beforeend',
-        `<img src="data:image/png;base64,${challenger}" alt="Challenger"/>`
-      );
+      this.addWidget(compareImageWidget);
     } catch (reason) {
       this.showError(reason as Error);
     }
