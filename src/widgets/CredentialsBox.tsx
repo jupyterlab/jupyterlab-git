@@ -10,13 +10,16 @@ export class GitCredentialsForm
   extends Widget
   implements Dialog.IBodyWidget<Git.IAuth>
 {
+  passwordPlaceholder: string;
   constructor(
     trans: TranslationBundle,
     textContent = trans.__('Enter credentials for remote repository'),
-    warningContent = ''
+    warningContent = '',
+    passwordPlaceholder: string = 'password / personal access token'
   ) {
     super();
     this._trans = trans;
+    this.passwordPlaceholder = passwordPlaceholder;
     this.node.appendChild(this.createBody(textContent, warningContent));
   }
 
@@ -41,7 +44,7 @@ export class GitCredentialsForm
     text.textContent = textContent;
     warning.textContent = warningContent;
     this._user.placeholder = this._trans.__('username');
-    this._password.placeholder = this._trans.__('personal access token');
+    this._password.placeholder = this._trans.__(this.passwordPlaceholder);
 
     checkboxLabel.className = 'jp-CredentialsBox-label-checkbox';
     this._checkboxCacheCredentials.type = 'checkbox';

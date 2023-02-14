@@ -1620,13 +1620,28 @@ export async function showGitOperationDialog<T>(
         errorMessage => (error as Error).message.indexOf(errorMessage) > -1
       )
     ) {
+      const remoteURI = await model.getRemotes().then(remote => {
+        return remote;
+      });
+
+      // Determine the Git Provider
+      const re = /https:\/\/(.+)\.com/;
+      const result = remoteURI[0]?.url.match(re);
+      const gitProvider = result[1];
+
+      // Change the placeholder message for GitHub
+      let message = 'password / personal access token';
+      if (gitProvider === 'github') {
+        message = 'personal access token';
+      }
       // If the error is an authentication error, ask the user credentials
       const credentials = await showDialog({
         title: trans.__('Git credentials required'),
         body: new GitCredentialsForm(
           trans,
           trans.__('Enter credentials for remote repository'),
-          retry ? trans.__('Incorrect username or password.') : ''
+          retry ? trans.__('Incorrect username or password.') : '',
+          trans.__(message)
         )
       });
 
