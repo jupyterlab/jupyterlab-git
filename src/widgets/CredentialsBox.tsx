@@ -15,7 +15,7 @@ export class GitCredentialsForm
     trans: TranslationBundle,
     textContent = trans.__('Enter credentials for remote repository'),
     warningContent = '',
-    passwordPlaceholder: string = 'password / personal access token'
+    passwordPlaceholder = 'password / personal access token'
   ) {
     super();
     this._trans = trans;
