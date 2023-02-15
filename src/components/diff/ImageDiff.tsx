@@ -27,7 +27,7 @@ export const createImageDiff: Git.Diff.ICallback = async (
 type CompareImageProps = {
   reference: string;
   challenger: string;
-}
+};
 
 const CompareImage = ({ reference, challenger }: CompareImageProps) => {
   return (
@@ -37,8 +37,8 @@ const CompareImage = ({ reference, challenger }: CompareImageProps) => {
       leftImageLabel="Reference"
       rightImageLabel="Challenger"
     />
-  )
-}
+  );
+};
 
 export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
   constructor(model: Git.Diff.IModel, translator?: TranslationBundle) {
