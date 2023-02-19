@@ -72,6 +72,13 @@ export interface IGitCloneArgs {
   submodules?: boolean;
 }
 
+// interface IGitPullArgs {
+//   remote?: string;
+//   name?: string;
+// }
+
+// interface IGitCloneOrPullArgs extends IGitCloneArgs, IGitPullArgs {}
+
 /**
  * Git operations requiring authentication
  */
@@ -395,6 +402,19 @@ export function addCommands(
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
       try {
+        // copy how gitPush grabs remote - this needs to be fixed as it creates a Git Push UI
+        // is there a better way to grab the remoteName?
+        let remote;
+        const result = await showDialog({
+          title: trans.__('Please select push options.'),
+          body: new AdvancedPushForm(trans, gitModel),
+          buttons: [
+            Dialog.cancelButton({ label: trans.__('Cancel') }),
+            Dialog.okButton({ label: trans.__('Proceed') })
+          ]
+        });
+        remote = result.value.remoteName;
+
         if (args.force) {
           await discardAllChanges(gitModel, trans, args.fallback as boolean);
         }
@@ -405,7 +425,8 @@ export function addCommands(
         const details = await showGitOperationDialog(
           gitModel,
           Operation.Pull,
-          trans
+          trans,
+          (args = { remote })
         );
         logger.log({
           message: trans.__('Successfully pulled'),
@@ -1571,11 +1592,49 @@ export async function showGitOperationDialog<T>(
   authentication?: Git.IAuth,
   retry = false
 ): Promise<string> {
+  console.log('model', model);
+  console.log('operation', operation);
+  console.log('args', args);
+  console.log('authentication', authentication);
+
+  // Takes the remote URI and checks it against the list of git remotes
+  async function getCurrentRemote(remote: string): Promise<string> {
+    const remoteList = await model.getRemotes().then(remoteList => {
+      return remoteList;
+    });
+
+    const currentRemote = remoteList.find(
+      remoteURI => remoteURI.name === remote
+    );
+
+    if (currentRemote) {
+      console.log(currentRemote?.url);
+      return currentRemote?.url;
+    } else {
+      // if the current remote isn't inside, what is best to return? Could maybe throw an error?
+      return '';
+    }
+  }
+
+  // Changes placeholder text dependent on the Git Provider
+  function checkRemoteIsGithub(remoteUrl: string): boolean {
+    // String matching
+    const re = /https:\/\/(.+)\.com/;
+    const result = remoteUrl.match(re) ?? [];
+    const gitProvider = result[1];
+
+    if (gitProvider === 'github') {
+      return true;
+    }
+  }
+
   try {
     let result: Git.IResultWithMessage;
     // the Git action
+    console.log('Running the Try Block');
     switch (operation) {
       case Operation.Clone:
+        console.log('Try/Switch/Case:Clone', authentication);
         // eslint-disable-next-line no-case-declarations
         const { path, url, versioning, submodules } =
           args as any as IGitCloneArgs;
@@ -1588,16 +1647,21 @@ export async function showGitOperationDialog<T>(
         );
         break;
       case Operation.Pull:
+        console.log('Try/Switch/Case:Pull', authentication);
+
         result = await model.pull(authentication);
         break;
       case Operation.Push:
+        console.log('Try/Switch/Case: Push', authentication);
         result = await model.push(
           authentication,
           false,
           (args as unknown as { remote: string })['remote']
         );
+        console.log(result);
         break;
       case Operation.ForcePush:
+        console.log('Try/Switch/Case: Force Push', authentication);
         result = await model.push(
           authentication,
           true,
@@ -1605,6 +1669,7 @@ export async function showGitOperationDialog<T>(
         );
         break;
       case Operation.Fetch:
+        console.log('Try/Switch/Case: Fetch', authentication);
         result = await model.fetch(authentication);
         model.credentialsRequired = false;
         break;
@@ -1620,20 +1685,51 @@ export async function showGitOperationDialog<T>(
         errorMessage => (error as Error).message.indexOf(errorMessage) > -1
       )
     ) {
-      const remoteURI = await model.getRemotes().then(remote => {
-        return remote;
-      });
-
-      // Determine the Git Provider
-      const re = /https:\/\/(.+)\.com/;
-      const result = remoteURI[0]?.url.match(re);
-      const gitProvider = result[1];
-
       // Change the placeholder message for GitHub
       let message = 'password / personal access token';
-      if (gitProvider === 'github') {
-        message = 'personal access token';
+
+      switch (operation) {
+        case Operation.Clone:
+          console.log('Catch/Switch/Case:Clone', authentication);
+          break;
+        case Operation.Pull:
+          // Get the remote from the args
+          const remote = (
+            args as unknown as {
+              remote: string;
+            }
+          )['remote'];
+
+          let isItGithub;
+          // If the remote is defined, check it against the remote URI list
+          if (remote) {
+            // Compare the remote against the URI list
+            const currentRemoteUrl = await getCurrentRemote(remote);
+            isItGithub = checkRemoteIsGithub(currentRemoteUrl);
+            console.log({ isItGithub });
+          } else {
+          }
+
+          if (checkRemoteIsGithub(currentRemoteUrl)) {
+            message = 'personal access token';
+          } else {
+          }
+          break;
+        case Operation.Push:
+          console.log('Catch/Switch/Case: Push', authentication);
+
+          break;
+        case Operation.ForcePush:
+          console.log('Catch/Switch/Case: Force Push', authentication);
+          break;
+        case Operation.Fetch:
+          console.log('Catch/Switch/Case: Fetch', authentication);
+          break;
+        default:
+          console.log('default');
+          break;
       }
+
       // If the error is an authentication error, ask the user credentials
       const credentials = await showDialog({
         title: trans.__('Git credentials required'),
