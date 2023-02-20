@@ -1713,7 +1713,6 @@ export async function showGitOperationDialog<T>(
           });
           remoteGitProvider = checkUrlGitProvider(remoteList[0]?.url);
           break;
-        // executed if none of the cases were matched
         default:
           break;
       }
