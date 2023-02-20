@@ -1669,13 +1669,16 @@ export async function showGitOperationDialog<T>(
 
       switch (operation) {
         case Operation.Clone:
+          // eslint-disable-next-line no-case-declarations
           const { url: encodedArgsUrl } = args as any as IGitCloneArgs;
-          const argsUrl = decodeURIComponent(encodedArgsUrl);
-          remoteGitProvider = checkUrlGitProvider(argsUrl);
+          remoteGitProvider = checkUrlGitProvider(
+            decodeURIComponent(encodedArgsUrl)
+          );
           break;
         case Operation.Push:
         case Operation.ForcePush:
         case Operation.Pull:
+          // eslint-disable-next-line no-case-declarations
           const remote = (
             args as unknown as {
               remote: string;
@@ -1699,10 +1702,9 @@ export async function showGitOperationDialog<T>(
           break;
 
         case Operation.Fetch:
-          const remoteList = await model.getRemotes().then(remoteList => {
-            return remoteList;
-          });
-          remoteGitProvider = checkUrlGitProvider(remoteList[0]?.url);
+          remoteGitProvider = await model
+            .getRemotes()
+            .then(remoteList => remoteList[0]?.url);
           break;
         default:
           break;
