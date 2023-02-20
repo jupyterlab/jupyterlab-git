@@ -1665,7 +1665,7 @@ export async function showGitOperationDialog<T>(
     ) {
       // Change the placeholder message for GitHub
       let gitPasswordPlaceholder = 'password / personal access token';
-      let remoteGitProvider: string = '';
+      let remoteGitProvider = '';
 
       switch (operation) {
         case Operation.Clone:
