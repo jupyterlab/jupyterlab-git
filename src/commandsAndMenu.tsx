@@ -397,7 +397,6 @@ export function addCommands(
       try {
         // copy how gitPush grabs remote - this needs to be fixed as it creates a Git Push UI
         // is there a better way to grab the remoteName?
-        let remote;
         const result = await showDialog({
           title: trans.__('Please select push options.'),
           body: new AdvancedPushForm(trans, gitModel),
@@ -406,7 +405,7 @@ export function addCommands(
             Dialog.okButton({ label: trans.__('Proceed') })
           ]
         });
-        remote = result.value.remoteName;
+        const remote = result.value.remoteName;
 
         if (args.force) {
           await discardAllChanges(gitModel, trans, args.fallback as boolean);
@@ -1610,7 +1609,7 @@ export async function showGitOperationDialog<T>(
    */
   function checkUrlGitProvider(remoteUrl: string): string {
     // Regex returns the word between "https" and "."
-    const re = /https:\/\/([^\.]+)\./;
+    const re = /https:\/\/([^.]+)\./;
     const result = remoteUrl.match(re) ?? [];
     const gitProvider = result[1];
     return gitProvider;
@@ -1666,7 +1665,7 @@ export async function showGitOperationDialog<T>(
     ) {
       // Change the placeholder message for GitHub
       let gitPasswordPlaceholder = 'password / personal access token';
-      let remoteGitProvider: string;
+      let remoteGitProvider: string = '';
 
       switch (operation) {
         case Operation.Clone:
