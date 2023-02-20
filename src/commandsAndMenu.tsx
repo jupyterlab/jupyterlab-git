@@ -72,13 +72,6 @@ export interface IGitCloneArgs {
   submodules?: boolean;
 }
 
-// interface IGitPullArgs {
-//   remote?: string;
-//   name?: string;
-// }
-
-// interface IGitCloneOrPullArgs extends IGitCloneArgs, IGitPullArgs {}
-
 /**
  * Git operations requiring authentication
  */
@@ -1684,7 +1677,6 @@ export async function showGitOperationDialog<T>(
         case Operation.Push:
         case Operation.ForcePush:
         case Operation.Pull:
-          // Get the remote from the args
           const remote = (
             args as unknown as {
               remote: string;
