@@ -1592,23 +1592,19 @@ export async function showGitOperationDialog<T>(
   authentication?: Git.IAuth,
   retry = false
 ): Promise<string> {
-  console.log('model', model);
-  console.log('operation', operation);
-  console.log('args', args);
-  console.log('authentication', authentication);
-
-  // Takes the remote URI and checks it against the list of git remotes
-  async function getCurrentRemote(remote: string): Promise<string> {
+  /**
+   * Returns the current remote's URL based on the current remote name and all the remotes
+   */
+  async function getCurrentRemote(currentRemoteName: string): Promise<string> {
     const remoteList = await model.getRemotes().then(remoteList => {
       return remoteList;
     });
 
     const currentRemote = remoteList.find(
-      remoteURI => remoteURI.name === remote
+      remoteURI => remoteURI.name === currentRemoteName
     );
 
     if (currentRemote) {
-      console.log(currentRemote?.url);
       return currentRemote?.url;
     } else {
       // if the current remote isn't inside, what is best to return? Could maybe throw an error?
@@ -1616,25 +1612,22 @@ export async function showGitOperationDialog<T>(
     }
   }
 
-  // Changes placeholder text dependent on the Git Provider
-  function checkRemoteIsGithub(remoteUrl: string): boolean {
-    // String matching
-    const re = /https:\/\/(.+)\.com/;
+  /**
+   * Returns the Git provider based on the domain name of the url
+   */
+  function checkUrlGitProvider(remoteUrl: string): string {
+    // Regex returns the word between "https" and "."
+    const re = /https:\/\/([^\.]+)\./;
     const result = remoteUrl.match(re) ?? [];
     const gitProvider = result[1];
-
-    if (gitProvider === 'github') {
-      return true;
-    }
+    return gitProvider;
   }
 
   try {
     let result: Git.IResultWithMessage;
     // the Git action
-    console.log('Running the Try Block');
     switch (operation) {
       case Operation.Clone:
-        console.log('Try/Switch/Case:Clone', authentication);
         // eslint-disable-next-line no-case-declarations
         const { path, url, versioning, submodules } =
           args as any as IGitCloneArgs;
@@ -1647,21 +1640,16 @@ export async function showGitOperationDialog<T>(
         );
         break;
       case Operation.Pull:
-        console.log('Try/Switch/Case:Pull', authentication);
-
         result = await model.pull(authentication);
         break;
       case Operation.Push:
-        console.log('Try/Switch/Case: Push', authentication);
         result = await model.push(
           authentication,
           false,
           (args as unknown as { remote: string })['remote']
         );
-        console.log(result);
         break;
       case Operation.ForcePush:
-        console.log('Try/Switch/Case: Force Push', authentication);
         result = await model.push(
           authentication,
           true,
@@ -1669,7 +1657,6 @@ export async function showGitOperationDialog<T>(
         );
         break;
       case Operation.Fetch:
-        console.log('Try/Switch/Case: Fetch', authentication);
         result = await model.fetch(authentication);
         model.credentialsRequired = false;
         break;
@@ -1677,7 +1664,6 @@ export async function showGitOperationDialog<T>(
         result = { code: -1, message: 'Unknown git command' };
         break;
     }
-
     return result.message;
   } catch (error) {
     if (
@@ -1686,12 +1672,17 @@ export async function showGitOperationDialog<T>(
       )
     ) {
       // Change the placeholder message for GitHub
-      let message = 'password / personal access token';
+      let gitPasswordPlaceholder = 'password / personal access token';
+      let remoteGitProvider: string;
 
       switch (operation) {
         case Operation.Clone:
-          console.log('Catch/Switch/Case:Clone', authentication);
+          const { url: encodedArgsUrl } = args as any as IGitCloneArgs;
+          const argsUrl = decodeURIComponent(encodedArgsUrl);
+          remoteGitProvider = checkUrlGitProvider(argsUrl);
           break;
+        case Operation.Push:
+        case Operation.ForcePush:
         case Operation.Pull:
           // Get the remote from the args
           const remote = (
@@ -1700,36 +1691,36 @@ export async function showGitOperationDialog<T>(
             }
           )['remote'];
 
-          let isItGithub;
           // If the remote is defined, check it against the remote URI list
           if (remote) {
             // Compare the remote against the URI list
             const currentRemoteUrl = await getCurrentRemote(remote);
-            isItGithub = checkRemoteIsGithub(currentRemoteUrl);
-            console.log({ isItGithub });
+            remoteGitProvider = currentRemoteUrl
+              ? checkUrlGitProvider(currentRemoteUrl)
+              : '';
           } else {
+            // if the remote is undefined, use first remote URI
+            const remoteList = await model.getRemotes().then(remoteList => {
+              return remoteList;
+            });
+            remoteGitProvider = checkUrlGitProvider(remoteList[0]?.url);
           }
+          break;
 
-          if (checkRemoteIsGithub(currentRemoteUrl)) {
-            message = 'personal access token';
-          } else {
-          }
-          break;
-        case Operation.Push:
-          console.log('Catch/Switch/Case: Push', authentication);
-
-          break;
-        case Operation.ForcePush:
-          console.log('Catch/Switch/Case: Force Push', authentication);
-          break;
         case Operation.Fetch:
-          console.log('Catch/Switch/Case: Fetch', authentication);
+          const remoteList = await model.getRemotes().then(remoteList => {
+            return remoteList;
+          });
+          remoteGitProvider = checkUrlGitProvider(remoteList[0]?.url);
           break;
+        // executed if none of the cases were matched
         default:
-          console.log('default');
           break;
       }
-
+      // GitHub only verifies with personal access tokens
+      if (remoteGitProvider && remoteGitProvider.toLowerCase() === 'github') {
+        gitPasswordPlaceholder = 'personal access token';
+      }
       // If the error is an authentication error, ask the user credentials
       const credentials = await showDialog({
         title: trans.__('Git credentials required'),
@@ -1737,7 +1728,7 @@ export async function showGitOperationDialog<T>(
           trans,
           trans.__('Enter credentials for remote repository'),
           retry ? trans.__('Incorrect username or password.') : '',
-          trans.__(message)
+          trans.__(gitPasswordPlaceholder)
         )
       });
 
