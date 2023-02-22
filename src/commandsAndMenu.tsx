@@ -1607,7 +1607,7 @@ export async function showGitOperationDialog<T>(
   /**
    * Returns the Git provider based on the domain name of the url
    */
-  function checkUrlGitProvider(remoteUrl: string): string {
+  function getGitProviderHost(remoteUrl: string): string {
     // Regex returns the word between "https" and "."
     const re = /https:\/\/([^.]+)\./;
     const result = remoteUrl.match(re) ?? [];
