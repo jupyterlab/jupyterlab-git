@@ -15,7 +15,7 @@ export class GitCredentialsForm
     trans: TranslationBundle,
     textContent = trans.__('Enter credentials for remote repository'),
     warningContent = '',
-    passwordPlaceholder = 'password / personal access token'
+    passwordPlaceholder = trans.__('password / personal access token')
   ) {
     super();
     this._trans = trans;
@@ -44,7 +44,7 @@ export class GitCredentialsForm
     text.textContent = textContent;
     warning.textContent = warningContent;
     this._user.placeholder = this._trans.__('username');
-    this._password.placeholder = this._trans.__(this._passwordPlaceholder);
+    this._password.placeholder = this._passwordPlaceholder;
 
     checkboxLabel.className = 'jp-CredentialsBox-label-checkbox';
     this._checkboxCacheCredentials.type = 'checkbox';

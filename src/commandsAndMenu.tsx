@@ -395,18 +395,6 @@ export function addCommands(
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
       try {
-        // copy how gitPush grabs remote - this needs to be fixed as it creates a Git Push UI
-        // is there a better way to grab the remoteName?
-        const result = await showDialog({
-          title: trans.__('Please select push options.'),
-          body: new AdvancedPushForm(trans, gitModel),
-          buttons: [
-            Dialog.cancelButton({ label: trans.__('Cancel') }),
-            Dialog.okButton({ label: trans.__('Proceed') })
-          ]
-        });
-        const remote = result.value.remoteName;
-
         if (args.force) {
           await discardAllChanges(gitModel, trans, args.fallback as boolean);
         }
@@ -417,8 +405,7 @@ export function addCommands(
         const details = await showGitOperationDialog(
           gitModel,
           Operation.Pull,
-          trans,
-          (args = { remote })
+          trans
         );
         logger.log({
           message: trans.__('Successfully pulled'),
@@ -1607,7 +1594,7 @@ export async function showGitOperationDialog<T>(
   /**
    * Returns the Git provider based on the domain name of the url
    */
-  function checkUrlGitProvider(remoteUrl: string): string {
+  function getGitProviderHost(remoteUrl: string): string {
     // Regex returns the word between "https" and "."
     const re = /https:\/\/([^.]+)\./;
     const result = remoteUrl.match(re) ?? [];
@@ -1664,40 +1651,34 @@ export async function showGitOperationDialog<T>(
       )
     ) {
       // Change the placeholder message for GitHub
-      let gitPasswordPlaceholder = 'password / personal access token';
+      let gitPasswordPlaceholder = trans.__('password / personal access token');
       let remoteGitProvider = '';
 
       switch (operation) {
         case Operation.Clone:
           // eslint-disable-next-line no-case-declarations
           const { url: encodedArgsUrl } = args as any as IGitCloneArgs;
-          remoteGitProvider = checkUrlGitProvider(
+          remoteGitProvider = getGitProviderHost(
             decodeURIComponent(encodedArgsUrl)
           );
           break;
         case Operation.Push:
         case Operation.ForcePush:
         case Operation.Pull:
-          // eslint-disable-next-line no-case-declarations
-          const remote = (
-            args as unknown as {
-              remote: string;
-            }
-          )['remote'];
-
           // If the remote is defined, check it against the remote URI list
-          if (remote) {
+          if (model.currentBranch.upstream) {
             // Compare the remote against the URI list
+            const remote = model.currentBranch.upstream.split('/')[0];
             const currentRemoteUrl = await getCurrentRemote(remote);
             remoteGitProvider = currentRemoteUrl
-              ? checkUrlGitProvider(currentRemoteUrl)
+              ? getGitProviderHost(currentRemoteUrl)
               : '';
           } else {
             // if the remote is undefined, use first remote URI
             const remoteList = await model.getRemotes().then(remoteList => {
               return remoteList;
             });
-            remoteGitProvider = checkUrlGitProvider(remoteList[0]?.url);
+            remoteGitProvider = getGitProviderHost(remoteList[0]?.url);
           }
           break;
 
@@ -1711,7 +1692,7 @@ export async function showGitOperationDialog<T>(
       }
       // GitHub only verifies with personal access tokens
       if (remoteGitProvider && remoteGitProvider.toLowerCase() === 'github') {
-        gitPasswordPlaceholder = 'personal access token';
+        gitPasswordPlaceholder = trans.__('personal access token');
       }
       // If the error is an authentication error, ask the user credentials
       const credentials = await showDialog({
@@ -1720,7 +1701,7 @@ export async function showGitOperationDialog<T>(
           trans,
           trans.__('Enter credentials for remote repository'),
           retry ? trans.__('Incorrect username or password.') : '',
-          trans.__(gitPasswordPlaceholder)
+          gitPasswordPlaceholder
         )
       });
 
