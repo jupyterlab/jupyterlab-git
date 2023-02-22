@@ -1048,6 +1048,7 @@ export class GitExtension implements IGitExtension {
 
       if (result && result.length > 1) {
         data.current_branch.name = result[1];
+        data.current_branch.detached = true;
       }
 
       this._currentBranch = data.current_branch;
