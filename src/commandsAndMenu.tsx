@@ -1586,7 +1586,6 @@ export async function showGitOperationDialog<T>(
     if (currentRemote) {
       return currentRemote?.url;
     } else {
-      // if the current remote isn't inside, what is best to return? Could maybe throw an error?
       return '';
     }
   }
@@ -1668,8 +1667,8 @@ export async function showGitOperationDialog<T>(
           // If the remote is defined, check it against the remote URI list
           if (model.currentBranch.upstream) {
             // Compare the remote against the URI list
-            const remote = model.currentBranch.upstream.split('/')[0];
-            const currentRemoteUrl = await getCurrentRemote(remote);
+            const remoteName = model.currentBranch.upstream.split('/')[0];
+            const currentRemoteUrl = await getCurrentRemote(remoteName);
             remoteGitProvider = currentRemoteUrl
               ? getGitProviderHost(currentRemoteUrl)
               : '';
