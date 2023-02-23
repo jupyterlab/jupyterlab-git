@@ -264,7 +264,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     if (this.props.model.pathRepository === null) {
       return null;
     }
-    if (this.props.model.currentBranch.detached) {
+    if (this.props.model.currentBranch?.detached) {
       branchTitle = 'Detached Head at';
     }
 
