@@ -260,12 +260,12 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderBranchMenu(): React.ReactElement | null {
-    let branchTitle = 'Current Branch';
+    let branchTitle = this.props.trans.__('Current Branch');
     if (this.props.model.pathRepository === null) {
       return null;
     }
     if (this.props.model.currentBranch?.detached) {
-      branchTitle = 'Detached Head at';
+      branchTitle = this.props.trans.__('Detached Head at');
     }
 
     return (
@@ -280,9 +280,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         >
           <branchIcon.react className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
-            <p className={toolbarMenuButtonTitleClass}>
-              {this.props.trans.__(branchTitle)}
-            </p>
+            <p className={toolbarMenuButtonTitleClass}>{branchTitle}</p>
             <p className={toolbarMenuButtonSubtitleClass}>
               {this.props.currentBranch || ''}
             </p>
