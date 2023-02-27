@@ -245,7 +245,7 @@ class GitLogHandler(GitHandler):
 
 class GitDetailedLogHandler(GitHandler):
     """
-    Handler for 'git log -1 --stat --numstat --oneline' command.
+    Handler for 'git log -m -1 --stat --numstat --oneline' command.
     Fetches file names of committed files, Number of insertions &
     deletions in that commit.
     """
