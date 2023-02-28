@@ -892,6 +892,27 @@ class GitTagCheckoutHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+class GitStashHandler(GitHandler):
+    """
+    Handler for 'git stash'. Stores the changes in the current branch
+    """
+
+    @tornado.web.authenticated
+    async def post(self):
+        """
+        POST request handler for 'git stash'
+        """
+
+        response = await self.git.stash()
+        if response["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(response))
+
+        # Grab all the changes
+
+        # Store them in a new tab 'stash'
+
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -931,6 +952,7 @@ def setup_handlers(web_app):
         ("/tags", GitTagHandler),
         ("/tag_checkout", GitTagCheckoutHandler),
         ("/add", GitAddHandler),
+        ("/stash", GitStashHandler),
     ]
 
     handlers = [

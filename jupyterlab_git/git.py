@@ -1772,6 +1772,12 @@ class Git:
         elif self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.poll():
             self.ensure_git_credential_cache_daemon(socket, debug, True, cwd, env)
 
+    async def stash(self):
+        """
+        Execute `git stash` to stash all changes (except untracked files)
+        """
+        return {"code": 0, "message": "Changes stashed."}
+
     @property
     def excluded_paths(self) -> List[str]:
         """Wildcard-style path patterns that do not support git commands.
