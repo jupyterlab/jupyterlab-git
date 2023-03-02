@@ -23,7 +23,7 @@ async def test_git_stash(mock_execute, jp_fetch, jp_root_dir):
     # Given
     # Creates a temporary directory created by pytest's tmp_path fixture and concatenates the string "test_path" to it.
     local_path = jp_root_dir / "test_path"
-    # Replaces the real execute function with a mock function
+    # 0 = success code, "" = no output, "" = no error
     mock_execute.return_value = maybe_future((0, "", ""))
     # When
     #
@@ -34,7 +34,7 @@ async def test_git_stash(mock_execute, jp_fetch, jp_root_dir):
         NAMESPACE, # NAMESPACE is the prefix of the url
         local_path.name, # local_path.name is the name of the folder
         "stash", # stash is the name of the handler
-        body, # 
+        body, empty because git stash doesn't take any arguments
         method="POST", # method is the http method
     )
     """
@@ -47,11 +47,20 @@ async def test_git_stash(mock_execute, jp_fetch, jp_root_dir):
     )
     # Then
     command = ["git", "stash"]
+    # Checks that the mock function was called with the correct arguments
+    mock_execute.assert_called_once_with(command, cwd=str(local_path))
 
     assert response.code == 201
-    # json.loads is a function that returns a json encoded string
+    # json.loads turns a string into a dictionary
     payload = json.loads(response.body)
     assert payload == {
         "code": 0,
         "command": " ".join(command),
     }
+
+
+# git stash when there are no changes
+
+# git stash when there are changes
+
+# git stash when there are changes and a message

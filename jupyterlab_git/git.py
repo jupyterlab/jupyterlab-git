@@ -1786,7 +1786,7 @@ class Git:
         # code 0: no changes to stash
         if code != 0:
             return {"code": code, "command": " ".join(command), "message": error}
-        return {"code": code, "message": output}
+        return {"code": code, "message": output, "command": " ".join(command)}
 
     @property
     def excluded_paths(self) -> List[str]:

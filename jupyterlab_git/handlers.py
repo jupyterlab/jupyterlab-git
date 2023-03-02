@@ -898,12 +898,13 @@ class GitStashHandler(GitHandler):
     """
 
     @tornado.web.authenticated
-    async def post(self, *args):
+    async def post(self, path: str = ""):
         """
         POST request handler for 'git stash'
         """
+        # pass the path to the git stash so it knows where to stash
+        local_path = self.url2localpath(path)
         data = self.get_json_body()
-        local_path = self.url2localpath(data["current_path"])
         response = await self.git.stash(local_path)
 
         if response["code"] != 0:
