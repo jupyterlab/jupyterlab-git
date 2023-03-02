@@ -1772,11 +1772,21 @@ class Git:
         elif self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.poll():
             self.ensure_git_credential_cache_daemon(socket, debug, True, cwd, env)
 
-    async def stash(self):
+    # git stash - stash changes in a dirty working directory away
+    async def stash(self, path):
         """
-        Execute `git stash` to stash all changes (except untracked files)
+        path: str
+            Git path repository
         """
-        return {"code": 0, "message": "Changes stashed."}
+        command = ["git", "stash"]
+        env = os.environ.copy()
+        # if the git command is run in a non-interactive terminal, it will not prompt for user input
+        env["GIT_TERMINAL_PROMPT"] = "0"
+        code, output, error = await execute(command, cwd=path, env=env)
+        # code 0: no changes to stash
+        if code != 0:
+            return {"code": code, "command": " ".join(command), "message": error}
+        return {"code": code, "message": output}
 
     @property
     def excluded_paths(self) -> List[str]:
