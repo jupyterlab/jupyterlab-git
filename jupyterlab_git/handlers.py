@@ -898,19 +898,17 @@ class GitStashHandler(GitHandler):
     """
 
     @tornado.web.authenticated
-    async def post(self):
+    async def post(self, *args):
         """
         POST request handler for 'git stash'
         """
+        data = self.get_json_body()
+        local_path = self.url2localpath(data["current_path"])
+        response = await self.git.stash(local_path)
 
-        response = await self.git.stash()
         if response["code"] != 0:
             self.set_status(500)
         self.finish(json.dumps(response))
-
-        # Grab all the changes
-
-        # Store them in a new tab 'stash'
 
 
 def setup_handlers(web_app):
