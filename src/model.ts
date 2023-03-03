@@ -1046,6 +1046,15 @@ export class GitExtension implements IGitExtension {
       );
 
       this._branches = data.branches ?? [];
+
+      const detachedHeadRegex = /\(HEAD detached at (.+)\)/;
+      const result = data.current_branch.name.match(detachedHeadRegex);
+
+      if (result && result.length > 1) {
+        data.current_branch.name = result[1];
+        data.current_branch.detached = true;
+      }
+
       this._currentBranch = data.current_branch;
       if (this._currentBranch) {
         // Set up the marker obj for the current (valid) repo/branch combination

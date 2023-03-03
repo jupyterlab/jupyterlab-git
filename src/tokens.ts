@@ -820,6 +820,7 @@ export namespace Git {
     upstream: string | null;
     top_commit: string;
     tag: string | null;
+    detached?: boolean;
   }
 
   /** Interface for GitBranch request result,
