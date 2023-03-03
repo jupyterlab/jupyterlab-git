@@ -1,18 +1,15 @@
 # Create a simple test that checks that GitStashHandler can call git.stash
-
 import json
-
 
 # Create a simple test that checks that GitStashHandler can call git.stash
 # with the correct arguments and that the response is correct.
 #
 # The test should be similar to the one in test_remote.py
-
 from unittest.mock import AsyncMock
 from unittest.mock import patch
 import pytest
 import tornado
-
+import os
 from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import NAMESPACE
 from .testutils import assert_http_error, maybe_future
@@ -22,6 +19,9 @@ from .testutils import assert_http_error, maybe_future
 async def test_git_stash(mock_execute, jp_fetch, jp_root_dir):
     # Given
     # Creates a temporary directory created by pytest's tmp_path fixture and concatenates the string "test_path" to it.
+    env = os.environ.copy()
+    env["GIT_TERMINAL_PROMPT"] = "0"
+
     local_path = jp_root_dir / "test_path"
     # 0 = success code, "" = no output, "" = no error
     mock_execute.return_value = maybe_future((0, "", ""))
@@ -48,13 +48,14 @@ async def test_git_stash(mock_execute, jp_fetch, jp_root_dir):
     # Then
     command = ["git", "stash"]
     # Checks that the mock function was called with the correct arguments
-    mock_execute.assert_called_once_with(command, cwd=str(local_path))
+    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
 
-    assert response.code == 201
+    assert response.code == 200
     # json.loads turns a string into a dictionary
     payload = json.loads(response.body)
     assert payload == {
         "code": 0,
+        "message": "",
         "command": " ".join(command),
     }
 
