@@ -79,6 +79,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
               level: Level.ERROR,
               error: error as Error
             });
+            throw error;
           }
         }
       }

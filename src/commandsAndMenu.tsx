@@ -1571,6 +1571,36 @@ export async function showGitOperationDialog<T>(
   authentication?: Git.IAuth,
   retry = false
 ): Promise<string> {
+  /**
+   * Returns the current remote's URL based on the current remote name and all the remotes
+   */
+  async function getCurrentRemote(currentRemoteName: string): Promise<string> {
+    const remoteList = await model.getRemotes().then(remoteList => {
+      return remoteList;
+    });
+
+    const currentRemote = remoteList.find(
+      remoteURI => remoteURI.name === currentRemoteName
+    );
+
+    if (currentRemote) {
+      return currentRemote?.url;
+    } else {
+      return '';
+    }
+  }
+
+  /**
+   * Returns the Git provider based on the domain name of the url
+   */
+  function getGitProviderHost(remoteUrl: string): string {
+    // Regex returns the word between "https" and "."
+    const re = /https:\/\/([^.]+)\./;
+    const result = remoteUrl.match(re) ?? [];
+    const gitProvider = result[1];
+    return gitProvider;
+  }
+
   try {
     let result: Git.IResultWithMessage;
     // the Git action
@@ -1612,7 +1642,6 @@ export async function showGitOperationDialog<T>(
         result = { code: -1, message: 'Unknown git command' };
         break;
     }
-
     return result.message;
   } catch (error) {
     if (
@@ -1620,13 +1649,58 @@ export async function showGitOperationDialog<T>(
         errorMessage => (error as Error).message.indexOf(errorMessage) > -1
       )
     ) {
+      // Change the placeholder message for GitHub
+      let gitPasswordPlaceholder = trans.__('password / personal access token');
+      let remoteGitProvider = '';
+
+      switch (operation) {
+        case Operation.Clone:
+          // eslint-disable-next-line no-case-declarations
+          const { url: encodedArgsUrl } = args as any as IGitCloneArgs;
+          remoteGitProvider = getGitProviderHost(
+            decodeURIComponent(encodedArgsUrl)
+          );
+          break;
+        case Operation.Push:
+        case Operation.ForcePush:
+        case Operation.Pull:
+          // If the remote is defined, check it against the remote URI list
+          if (model.currentBranch.upstream) {
+            // Compare the remote against the URI list
+            const remoteName = model.currentBranch.upstream.split('/')[0];
+            const currentRemoteUrl = await getCurrentRemote(remoteName);
+            remoteGitProvider = currentRemoteUrl
+              ? getGitProviderHost(currentRemoteUrl)
+              : '';
+          } else {
+            // if the remote is undefined, use first remote URI
+            const remoteList = await model.getRemotes().then(remoteList => {
+              return remoteList;
+            });
+            remoteGitProvider = getGitProviderHost(remoteList[0]?.url);
+          }
+          break;
+
+        case Operation.Fetch:
+          remoteGitProvider = await model
+            .getRemotes()
+            .then(remoteList => remoteList[0]?.url);
+          break;
+        default:
+          break;
+      }
+      // GitHub only verifies with personal access tokens
+      if (remoteGitProvider && remoteGitProvider.toLowerCase() === 'github') {
+        gitPasswordPlaceholder = trans.__('personal access token');
+      }
       // If the error is an authentication error, ask the user credentials
       const credentials = await showDialog({
         title: trans.__('Git credentials required'),
         body: new GitCredentialsForm(
           trans,
           trans.__('Enter credentials for remote repository'),
-          retry ? trans.__('Incorrect username or password.') : ''
+          retry ? trans.__('Incorrect username or password.') : '',
+          gitPasswordPlaceholder
         )
       });
 

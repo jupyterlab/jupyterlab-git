@@ -361,6 +361,12 @@ export interface IGitExtension extends IDisposable {
   getRelativeFilePath(path?: string): string | null;
 
   /**
+   * Show remote repository for the current repository
+   * @returns promise which resolves to a list of remote repositories
+   */
+  getRemotes(): Promise<Git.IGitRemote[]>;
+
+  /**
    * Add an entry in .gitignore file
    *
    * @param filename The name of the entry to ignore
