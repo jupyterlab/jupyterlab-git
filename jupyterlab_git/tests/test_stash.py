@@ -95,10 +95,3 @@ async def test_git_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     # Then
     command = ["git", "stash"]
     mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
-
-
-# git stash when there are no changes
-
-# git stash when there are changes
-
-# git stash when there are changes and a message

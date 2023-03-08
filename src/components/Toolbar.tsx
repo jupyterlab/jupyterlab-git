@@ -157,6 +157,31 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarNavClass}>
         <span className={spacer} />
+        {/* Test Git Stash */}
+        <Badge
+          className={badgeClass}
+          variant="dot"
+          invisible={!hasRemote || this.props.nCommitsBehind === 0}
+          data-test-id="pull-badge"
+        >
+          <ActionButton
+            className={toolbarButtonClass}
+            disabled={!hasRemote}
+            icon={pullIcon}
+            onClick={hasRemote ? this._onStashClick : undefined}
+            title={
+              hasRemote
+                ? this.props.trans.__('Stash latest changes') +
+                  (this.props.nCommitsBehind > 0
+                    ? this.props.trans.__(
+                        ' (behind by %1 commits)',
+                        this.props.nCommitsBehind
+                      )
+                    : '')
+                : this.props.trans.__('No remote repository defined')
+            }
+          />
+        </Badge>
         <Badge
           className={badgeClass}
           variant="dot"
@@ -368,8 +393,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param event - event object
    * @returns a promise which resolves upon pulling the latest changes
    */
+  // REMOVE THIS - switched from onPullClick method to gitStash
   private _onPullClick = async (): Promise<void> => {
-    await this.props.commands.execute(CommandIDs.gitPull);
+    await this.props.commands.execute(CommandIDs.gitStash);
   };
 
   /**
@@ -421,4 +447,14 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       });
     }
   };
+
+    /**
+   * Callback invoked upon clicking a button to stash the dirty files.
+   *
+   * @param event - event object
+   * @returns a promise which resolves upon stashing the latest changes
+   */
+    private _onStashClick = async (): Promise<void> => {
+      await this.props.commands.execute(CommandIDs.gitStash);
+    };
 }

@@ -1389,6 +1389,21 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Stash the current changes in a dirty repository.
+   * @param path - path at which the stashes will be saved in
+   * @returns promise which resolves upon stashing changes
+   * * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   * 
+   */
+  async stash(path: string): Promise<void>{
+    await this._taskHandler.execute<void>('git:stash', async() => {
+      await requestAPI(URLExt.join(path, 'stash'), 'POST');
+    })
+  }
+
+  /**
    * Retrieve the list of tags in the repository.
    *
    * @returns promise which resolves upon retrieving the tag list

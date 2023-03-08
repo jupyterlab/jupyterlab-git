@@ -80,7 +80,7 @@ export enum Operation {
   Pull = 'Pull',
   Push = 'Push',
   ForcePush = 'ForcePush',
-  Fetch = 'Fetch'
+  Fetch = 'Fetch',
 }
 
 interface IFileDiffArgument {
@@ -389,8 +389,8 @@ export function addCommands(
     caption: args =>
       args.force
         ? trans.__(
-            'Discard all current changes and pull from remote repository'
-          )
+          'Discard all current changes and pull from remote repository'
+        )
         : trans.__('Pull latest code from remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
@@ -665,9 +665,8 @@ export function addCommands(
             content.addWidget(widget);
           } catch (reason) {
             console.error(reason);
-            const msg = `Load Diff Model Error (${
-              (reason as Error).message || reason
-            })`;
+            const msg = `Load Diff Model Error (${(reason as Error).message || reason
+              })`;
             modelIsLoading.reject(msg);
           }
 
@@ -778,6 +777,100 @@ export function addCommands(
       gitModel.branches.some(
         branch => !branch.is_current_branch && !branch.is_remote_branch
       )
+  });
+
+  /** Add Git Stash command */
+  commands.addCommand(CommandIDs.gitStash, {
+    label: trans.__('Stash Changes'),
+    caption: trans.__(
+      'Stash all current changes'
+    ),
+    // Check if we are in a git repository 
+    isEnabled: () => gitModel.pathRepository !== null,
+    // ADD GIT STASH HERE!!!!!
+    execute: async args => {
+ 
+        // Ask the user if they want to stash
+        const result = await showDialog({
+          title: trans.__('Stash changes'),
+          body: trans.__('Do you want to stash your changes?'),
+          buttons: [
+            Dialog.cancelButton({
+              label: trans.__('Cancel'),
+            }),
+            Dialog.warnButton({
+              label: trans.__('Yes')
+            })
+          ]
+        })
+
+        // If They Accept
+        if (result.button.accept){
+          logger.log({
+            level: Level.RUNNING,
+            message: trans.__('Shawn is Stashing')
+          });
+          try {
+          // --------ADD CODE HERE FOR GIT STASH-----------
+          const currentPath = fileBrowserModel.path;
+          await gitModel.stash(currentPath);
+          // Success
+          logger.log({
+            message: trans.__('Shawn Successfully Stashed'),
+            level: Level.SUCCESS,
+          });
+
+          // ------------ FIX THIS LATER ----------------
+        } catch (error: any) {
+          if (error.name !== 'CancelledError') {
+            console.error(
+              'Encountered an error when pulling changes. Error: ',
+              error
+            );
+  
+            const errorMsg =
+              typeof error === 'string' ? error : (error as Error).message;
+  
+            // Discard changes then retry pull
+            if (
+              errorMsg
+                .toLowerCase()
+                .includes(
+                  'your local changes to the following files would be overwritten by merge'
+                )
+            ) {
+              await commands.execute(CommandIDs.gitPull, {
+                force: true,
+                fallback: true
+              });
+            } else {
+              if ((error as any).cancelled) {
+                // Empty message to hide alert
+                logger.log({
+                  message: '',
+                  level: Level.INFO
+                });
+              } else {
+                logger.log({
+                  message: trans.__('Failed to pull'),
+                  level: Level.ERROR,
+                  error
+                });
+              }
+            }
+          } else {
+            return logger.log({
+              //Empty logger to supress the message
+              message: '',
+              level: Level.INFO
+            });
+          }
+        }
+        }
+
+      
+  
+    }
   });
 
   /* Context menu commands */
@@ -897,14 +990,14 @@ export function addCommands(
         const diffContext: Git.Diff.IContext =
           status === 'unmerged'
             ? {
-                currentRef: 'MERGE_HEAD',
-                previousRef: 'HEAD',
-                baseRef: Git.Diff.SpecialRef.BASE
-              }
+              currentRef: 'MERGE_HEAD',
+              previousRef: 'HEAD',
+              baseRef: Git.Diff.SpecialRef.BASE
+            }
             : context ?? {
-                currentRef: specialRef,
-                previousRef: 'HEAD'
-              };
+              currentRef: specialRef,
+              previousRef: 'HEAD'
+            };
 
         const challengerRef = Git.Diff.SpecialRef[diffContext.currentRef as any]
           ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
@@ -1348,7 +1441,8 @@ export function createGitMenu(
     if (command === CommandIDs.gitPush) {
       menu.addItem({ command, args: { advanced: true } });
     }
-    if (command === CommandIDs.gitPull) {
+    // REMOVE THIS
+    if (command === CommandIDs.gitPull || command === CommandIDs.gitStash) {
       menu.addItem({ command, args: { force: true } });
     }
   });
@@ -1453,7 +1547,7 @@ export function addFileBrowserContextMenu(
         // replace stage and track with a single "add" operation
         .map(command =>
           command === ContextCommandIDs.gitFileStage ||
-          command === ContextCommandIDs.gitFileTrack
+            command === ContextCommandIDs.gitFileTrack
             ? ContextCommandIDs.gitFileAdd
             : command
         )
