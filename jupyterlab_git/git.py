@@ -936,7 +936,7 @@ class Git:
         """
         Delete a specified commit from the repository.
         """
-        cmd = ["git", "revert", "--no-commit", commit_id]
+        cmd = ["git", "revert", "-m", "1", "--no-commit", commit_id]
         code, _, error = await execute(cmd, cwd=path)
 
         if code != 0:
