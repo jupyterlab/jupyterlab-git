@@ -1089,6 +1089,7 @@ export namespace Git {
     | 'remote-changed'
     | 'unmodified'
     | 'unmerged'
+    | 'stashed'
     | null;
 
   export interface ITagResult {
@@ -1199,7 +1200,8 @@ export enum ContextCommandIDs {
   gitIgnore = 'git:context-ignore',
   gitIgnoreExtension = 'git:context-ignoreExtension',
   gitNoAction = 'git:no-action',
-  openFileFromDiff = 'git:open-file-from-diff'
+  openFileFromDiff = 'git:open-file-from-diff',
+  gitFileStashPop = 'git:context-stash-pop',
 }
 
 /**
@@ -1222,4 +1224,5 @@ export enum CommandIDs {
   gitSubmitCommand = 'git:submit-commit',
   gitShowDiff = 'git:show-diff',
   gitStash = 'git:stash'
+  // gitStashPop = 'git:stash-pop'
 }

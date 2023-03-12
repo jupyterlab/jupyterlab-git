@@ -14,6 +14,8 @@ from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import NAMESPACE
 from .testutils import assert_http_error, maybe_future
 
+# Define a fixture to stash some random changes
+
 
 @patch("jupyterlab_git.git.execute")
 async def test_git_stash(mock_execute, jp_fetch, jp_root_dir):
@@ -95,3 +97,21 @@ async def test_git_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     # Then
     command = ["git", "stash"]
     mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+
+
+# I should make a fixture for git stash
+
+# Test Git Stash List (Applies changes without removing) [git stash] then [git, stash, list]
+
+# Test Git Stash -u (Include untracked files) [git, stash, -u]
+
+# Test Git Stash Pop  [git, stash] then [git, stash, pop]
+
+# Test Git Stash List (stash 3 changes, then apply a specific change) [git, stash, list]
+
+# Test Git Stash Clear [git, stash, clear]
+
+
+# Test that the nth stash item is popped -- Git Stash POp @{n} [git, stash, @{n}]
+
+# Test git stash -p stash@{n} -- shows the diffs
