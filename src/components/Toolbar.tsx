@@ -157,6 +157,31 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarNavClass}>
         <span className={spacer} />
+      {/* Test Git Stash List */}
+      <Badge
+          className={badgeClass}
+          variant="dot"
+          invisible={!hasRemote || this.props.nCommitsBehind === 0}
+          data-test-id="pull-badge"
+        >
+          <ActionButton
+            className={toolbarButtonClass}
+            disabled={!hasRemote}
+            icon={pullIcon}
+            onClick={hasRemote ? this._onStashListClick : undefined}
+            title={
+              hasRemote
+                ? this.props.trans.__('See the stash list') +
+                  (this.props.nCommitsBehind > 0
+                    ? this.props.trans.__(
+                        ' (behind by %1 commits)',
+                        this.props.nCommitsBehind
+                      )
+                    : '')
+                : this.props.trans.__('No remote repository defined')
+            }
+          />
+        </Badge>
         {/* Test Git Stash */}
         <Badge
           className={badgeClass}
@@ -456,5 +481,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    */
     private _onStashClick = async (): Promise<void> => {
       await this.props.commands.execute(CommandIDs.gitStash);
+    };
+
+
+    private _onStashListClick = async (): Promise<void> => {
+      await this.props.commands.execute(CommandIDs.gitStashList);
     };
 }

@@ -1404,6 +1404,86 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Get a list of stashes 
+   * @returns promise which resolves to an array of stashes
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+
+  // Refresh the stash
+  // Set the Status
+  async refreshStash(): Promise<void> {
+    let path: string;
+    // copy this from refreshStatus()
+
+    // GET THE PATH
+    try {
+      path = await this._getPathRepository();
+    } catch (error) {
+      this._clearStatus();
+      if (!(error instanceof Git.NotInRepository)) {
+        throw error;
+      }
+      return;
+    }
+
+    // Request the Stash List
+    try {
+      const stashListData = await this._taskHandler.execute<Git.IStashListResult>(
+        'git:refresh:stash',
+        async () => {
+          return await requestAPI<Git.IStashListResult>(
+            URLExt.join(path, 'stash_list'),
+            'POST'
+          );
+        }
+      );
+      
+      const stashMsgList = stashListData.message.split('\n')
+      stashMsgList.pop()
+      const stashList = []
+      for (let index in stashMsgList) {
+          const stashInfo = stashMsgList[index].split(':')
+          const branchName = stashInfo[1].match(/WIP on (.*)/) ? stashInfo[1].match(/WIP on (.*)/)[1] : stashInfo[1].split(" ")[2];
+          stashList.push({
+              index: parseInt(index),
+              branch: branchName,
+              message: stashInfo[2].replace(/^\s+/, ''),
+              files: []
+          })
+      }
+
+      // for each stash in the list of stashes,
+        // call `git stash show -p stash@{N} --name-only`
+      for (let index in stashList) {
+        const fileData = await this._taskHandler.execute<Git.IStashListResult>(
+          'git:refresh:stash',
+          async () => {
+            return await requestAPI<Git.IStashListResult>(
+              URLExt.join(path, 'stash_show'),
+              'POST',
+              {
+                index
+              }
+            );
+          }
+        );
+
+        stashList[index].files.push(fileData.message)
+      }
+
+      console.log('fileData', stashList);
+
+      this._setStash(stashList);
+
+    } catch (err) {
+      console.error(err);
+      return;
+    }
+  }
+
+  /**
    * Retrieve the list of tags in the repository.
    *
    * @returns promise which resolves upon retrieving the tag list
@@ -1639,6 +1719,15 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Set the repository stash
+   * 
+   * @param s - repository stash
+   */
+  protected _setStash(s: Git.IStash): void {
+    this._stash = s;
+  }
+
+  /**
    * Set the repository status.
    *
    * @param v - repository status
@@ -1740,6 +1829,7 @@ export class GitExtension implements IGitExtension {
       try {
         await this.refreshBranch();
         await this.refreshStatus();
+        await this.refreshStash();
         await this.checkRemoteChangeNotified();
       } catch (error) {
         console.error('Failed to refresh git status', error);
@@ -1786,6 +1876,7 @@ export class GitExtension implements IGitExtension {
   }
 
   private _status: Git.IStatus;
+  _stash: Git.IStash;
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];
   private _currentBranch: Git.IBranch | null = null;

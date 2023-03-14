@@ -1778,15 +1778,48 @@ class Git:
         path: str
             Git path repository
         """
-        command = ["git", "stash"]
+        cmd = ["git", "stash"]
         env = os.environ.copy()
         # if the git command is run in a non-interactive terminal, it will not prompt for user input
         env["GIT_TERMINAL_PROMPT"] = "0"
-        code, output, error = await execute(command, cwd=path, env=env)
+        code, output, error = await execute(cmd, cwd=path, env=env)
         # code 0: no changes to stash
         if code != 0:
-            return {"code": code, "command": " ".join(command), "message": error}
-        return {"code": code, "message": output, "command": " ".join(command)}
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
+    async def stash_list(self, path):
+        """
+        Execute git stash list command
+        """
+        cmd = ["git", "stash", "list"]
+
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
+    async def stash_show(self, path, index):
+        """
+        Execute git stash show command
+        """
+        stash_index = "stash@{" + str(index) + "}"
+        cmd = ["git", "stash", "show", "-p", stash_index, "--name-only"]
+
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output, "command": " ".join(cmd)}
 
     @property
     def excluded_paths(self) -> List[str]:

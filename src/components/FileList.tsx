@@ -658,7 +658,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
                 {this._renderStaged(stagedFiles, height)}
                 {this._renderChanged(unstagedFiles, height)}
                 {this._renderUntracked(untrackedFiles, height)}
-                {this._renderStashed(stashedFiles, height)}
               </>
             )}
           </AutoSizer>
@@ -808,81 +807,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   }
 
 
-  /**
-   * Render stashed changes
-   * 
-   * 
-   */
-  private _renderStashed(files: Git.IStatusFile[], height: number){
-    return (
-      <GitStage
-        actions={
-          <ActionButton
-            className={hiddenButtonStyle}
-            disabled={files.length === 0}
-            icon={removeIcon}
-            title={this.props.trans.__('Clear all stashed changes')}
-            // onClick={this.resetAllStagedFiles}
-            // onClick={this.resetAllStashedFiles}
-          />
-        }
-        collapsible
-        files={files}
-        heading={this.props.trans.__('Stashed')}
-        height={height}
-        rowRenderer={this._renderStashedRow}
-      />
-    )
-  }
 
-
-
-/**
-   * Render a stashed file
-   *
-   * Note: This is actually a React.FunctionComponent but defined as
-   * a private method as it needs access to FileList properties.
-   *
-   * @param rowProps Row properties
-   */
-  private _renderStashedRow = (
-    rowProps: ListChildComponentProps
-  ): JSX.Element => {
-    const { data, index, style } = rowProps;
-    const file = data[index] as Git.IStatusFile;
-    return (
-      <FileItem
-        trans={this.props.trans}
-        actions={
-          <React.Fragment>
-            <ActionButton
-              className={hiddenButtonStyle}
-              icon={openIcon}
-              title={this.props.trans.__('Pop This File')}
-              onClick={stopPropagationWrapper(() => {
-                console.log('Pop that File');
-                return this.openSelectedFiles(file)
-              } 
-              )}
-            />
-            {/* Button to Apply file */}
-            {/* Button to Clear this file */}
-          </React.Fragment>
-        }
-        file={file}
-        contextMenu={this.openContextMenu}
-        model={this.props.model}
-        selected={this._isSelectedFile(file)}
-        setSelection={this.setSelection}
-        onDoubleClick={
-          () => {
-            console.log('hello world');
-          }
-        }
-        style={style}
-      />
-    );
-  };
 
 
 

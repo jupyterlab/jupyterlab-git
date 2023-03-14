@@ -912,6 +912,45 @@ class GitStashHandler(GitHandler):
         self.finish(json.dumps(response))
 
 
+class GitStashListHandler(GitHandler):
+    """
+    Handler for 'git stash list'.
+    Returns all the stash files.
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """
+        POST request handler for 'git stash'
+        """
+        # pass the path to the git stash so it knows where to stash
+        local_path = self.url2localpath(path)
+        data = self.get_json_body()
+        response = await self.git.stash_list(local_path)
+        if response["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(response))
+
+
+class GitStashShowHandler(GitHandler):
+    """
+    Grab all the files affected by each git stash
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """POST request handler to get files for each stash"""
+        local_path = self.url2localpath(path)
+        data = self.get_json_body()
+        response = await self.git.stash_show(local_path, data["index"])
+
+        if response["code"] == 0:
+            self.set_status(200)
+        else:
+            self.set_status(500)
+        self.finish(json.dumps(response))
+
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -952,6 +991,8 @@ def setup_handlers(web_app):
         ("/tag_checkout", GitTagCheckoutHandler),
         ("/add", GitAddHandler),
         ("/stash", GitStashHandler),
+        ("/stash_list", GitStashListHandler),
+        ("/stash_show", GitStashShowHandler),
     ]
 
     handlers = [

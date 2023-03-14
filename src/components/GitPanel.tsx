@@ -30,6 +30,7 @@ import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
 import { WarningRounded as WarningRoundedIcon } from '@material-ui/icons';
+import { GitStash } from './GitStash';
 
 /**
  * Interface describing component properties.
@@ -144,6 +145,12 @@ export interface IGitPanelState {
    * The commit to compare
    */
   challengerCommit: Git.ISingleCommitInfo | null;
+
+  /**
+   * Stashed files
+   * 
+   */
+  stash: Git.IStash;
 }
 
 /**
@@ -162,7 +169,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       branches,
       currentBranch,
       pathRepository,
-      hasDirtyFiles: hasDirtyStagedFiles
+      hasDirtyFiles: hasDirtyStagedFiles,
     } = props.model;
 
     this.state = {
@@ -180,7 +187,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       commitAmend: false,
       hasDirtyFiles: hasDirtyStagedFiles,
       referenceCommit: null,
-      challengerCommit: null
+      challengerCommit: null,
+      stash: [],
     };
   }
 
@@ -207,6 +215,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         nCommitsAhead: model.status.ahead,
         nCommitsBehind: model.status.behind
       });
+      // this._checkGitStash();
     }, this);
     model.branchesChanged.connect(async () => {
       await this.refreshBranches();
@@ -232,6 +241,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         hasDirtyFiles: args
       });
     });
+
+    // Check git Stash
   }
 
   componentWillUnmount(): void {
@@ -448,6 +459,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       : this.props.trans.__(
           'You have unsaved staged files. You probably want to save and stage all needed changes before committing.'
         );
+
     return (
       <React.Fragment>
         <FileList
@@ -457,6 +469,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           settings={this.props.settings}
           trans={this.props.trans}
         />
+        <GitStash
+          stash={this.props.model._stash}
+          height={100}
+        />
+
         <CommitBox
           commands={this.props.commands}
           hasFiles={
@@ -790,9 +807,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     let sfiles: Git.IStatusFile[] = files;
     if (remoteChangedFiles) {
       sfiles = sfiles.concat(remoteChangedFiles);
-    }
+    } else {
     sfiles.sort((a, b) => a.to.localeCompare(b.to));
     return sfiles;
+    }
   }
 
   private _previousRepoPath: string = null;
@@ -880,4 +898,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       )(event);
     }
   }
+
+
+
 }

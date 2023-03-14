@@ -933,6 +933,24 @@ export namespace Git {
     files?: IStatusFileResult[];
   }
 
+  /** Interface for Git Stash List request result
+   * 
+   */
+  export interface IStashListResult { 
+    message: string;
+    command: string;
+    code: number;
+  }
+
+  export interface IStashEntry {
+    index: number;
+    branch: string;
+    message: string;
+    files: string[]; // TODO, make this an actual list of files
+  }
+
+  export type IStash = IStashEntry[];
+
   /** Interface for changed_files request result
    * lists the names of files that have differences between two commits
    * or between two branches, or that were changed by a single commit
@@ -1223,6 +1241,7 @@ export enum CommandIDs {
   gitResetToRemote = 'git:reset-to-remote',
   gitSubmitCommand = 'git:submit-commit',
   gitShowDiff = 'git:show-diff',
-  gitStash = 'git:stash'
-  // gitStashPop = 'git:stash-pop'
+  gitStash = 'git:stash',
+  gitStashPop = 'git:stash-pop',
+  gitStashList = 'git:stash-list',
 }

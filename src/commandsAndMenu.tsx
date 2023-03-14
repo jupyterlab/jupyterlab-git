@@ -868,10 +868,39 @@ export function addCommands(
         }
         }
 
-      
-  
     }
   });
+
+  /**
+   *  Git Stash List
+   * 
+   */
+    /** Add Git Stash command */
+  commands.addCommand(CommandIDs.gitStashList, {
+      label: trans.__('Stash List'),
+      caption: trans.__(
+        'Get all the stashed changes'
+      ),
+      // Check if we are in a git repository 
+      isEnabled: () => gitModel.pathRepository !== null,
+      execute: async args => {
+        try {
+          const data = await gitModel.refreshStash();
+          console.log('execute: data', data);
+          logger.log({
+            message: trans.__('Got the stash list'),
+            level: Level.INFO,
+          });
+        } catch (err) {
+          logger.log({
+            message: trans.__('Failed to get the stash'),
+            level: Level.ERROR,
+            error: err as Error
+          });
+        }      
+      }
+  });  
+
 
   /* Context menu commands */
   commands.addCommand(ContextCommandIDs.gitFileOpen, {
