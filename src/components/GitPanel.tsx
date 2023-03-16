@@ -215,7 +215,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         nCommitsAhead: model.status.ahead,
         nCommitsBehind: model.status.behind
       });
-      // this._checkGitStash();
     }, this);
     model.branchesChanged.connect(async () => {
       await this.refreshBranches();
@@ -472,6 +471,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         <GitStash
           stash={this.props.model._stash}
           height={100}
+          collapsible={true}
+          trans={this.props.trans}
         />
 
         <CommitBox

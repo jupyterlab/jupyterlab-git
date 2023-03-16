@@ -10,6 +10,7 @@ import { TaskHandler } from './taskhandler';
 import { Git, IGitExtension } from './tokens';
 import { decodeStage } from './utils';
 
+
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
 // Available diff providers
@@ -1442,7 +1443,7 @@ export class GitExtension implements IGitExtension {
       
       const stashMsgList = stashListData.message.split('\n')
       stashMsgList.pop()
-      const stashList = []
+      const stashList: Git.IStashEntry[] = []
       for (let index in stashMsgList) {
           const stashInfo = stashMsgList[index].split(':')
           const branchName = stashInfo[1].match(/WIP on (.*)/) ? stashInfo[1].match(/WIP on (.*)/)[1] : stashInfo[1].split(" ")[2];
@@ -1470,13 +1471,20 @@ export class GitExtension implements IGitExtension {
           }
         );
 
-        stashList[index].files.push(fileData.message)
+        const stashFilesList = fileData.message.split('\n');
+        stashFilesList.pop();
+        // only one file modified
+        if (stashFilesList.length === 1) {
+          stashList[index].files.push(stashFilesList[0]);
+        } else {
+          stashFilesList.forEach(fileName => {
+            stashList[index].files.push(fileName);
+          })
+        }
       }
-
-      console.log('fileData', stashList);
-
       this._setStash(stashList);
 
+      console.log('fileData', stashList);
     } catch (err) {
       console.error(err);
       return;

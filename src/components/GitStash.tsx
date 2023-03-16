@@ -6,10 +6,19 @@ import {
   sectionAreaStyle,
   sectionFileContainerStyle,
   sectionHeaderLabelStyle,
-  sectionHeaderSizeStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
+import { useEffect } from 'react';
 
+// import { hiddenButtonStyle } from '../style/ActionButtonStyle';
+// import { fileListWrapperClass } from '../style/FileListStyle';
+import { ActionButton } from './ActionButton';
+import {
+  addIcon,
+  discardIcon,
+  removeIcon
+} from '../style/icons';
+import { TranslationBundle } from '@jupyterlab/translation';
 // const HEADER_HEIGHT = 34;
 // const ITEM_HEIGHT = 25;
 
@@ -29,7 +38,12 @@ export interface IGitStashProps {
     /**
      * Optional select all element
      */
-    // selectAllButton?: React.ReactElement; 
+    selectAllButton?: React.ReactElement; 
+
+     /**
+     * The application language translator.
+     */
+    trans: TranslationBundle;
 }
 
 interface IGitStashEntryProps {
@@ -38,11 +52,11 @@ interface IGitStashEntryProps {
      */
     collapsible?: boolean;
     /**
-     * Files in the group
+     * Files correspodning to the stash
      */
     files: string[];
     /**
-     * Group title
+     * Index within the stash
      */
     index: number;
     /**
@@ -52,7 +66,7 @@ interface IGitStashEntryProps {
     /**
      * Optional select all element
      */
-    // selectAllButton?: React.ReactElement;
+    selectAllButton?: React.ReactElement;
 }
 
 /**
@@ -63,14 +77,57 @@ const GitStashEntry: React.FunctionComponent<
 > = (
   props: IGitStashEntryProps
 ) => {
+  const [showStashFiles, setShowStashFiles] = React.useState(false);
+
   return (
     <div>
-      <div>{props.index}</div>
-      <ul>
+        <div
+          className={sectionAreaStyle}
+          onClick={() => {
+            if (props.collapsible && props.files.length > 0) {
+              setShowStashFiles(!showStashFiles);
+            }
+          }}
+        >
+          <p>{props.index}</p>
+          <ActionButton
+            icon={addIcon}
+            title={'Test'}
+            onClick={()=>{
+              console.log('hi');
+            }}
+          />
+          <ActionButton
+            icon={discardIcon}
+            title={'Test'}
+            onClick={()=>{
+              console.log('hi');
+            }}
+          />
+          <ActionButton
+            icon={removeIcon}
+            title={'Test'}
+            onClick={()=>{
+              console.log('hi');
+            }}
+          />
+          {props.collapsible && (
+            <button className={changeStageButtonStyle}>
+              {showStashFiles && props.files.length > 0 ? (
+                <caretDownIcon.react />
+              ) : (
+                <caretRightIcon.react />
+              )}
+            </button>
+          )}
+        </div>
+      {showStashFiles && (<ul>
         {props.files.map((name) => (
-          <li>{name}</li>
+          <li>{name}
+          
+          </li>
         ))}
-      </ul>
+      </ul>)}
     </div>
   )
 }
@@ -80,7 +137,9 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
 ) => {
   const [showStash, setShowStash] = React.useState(true);
   const nStash = props.stash.length;
-
+  useEffect(()=>{
+    console.log(props.collapsible);
+  })
 
   return (
     <div className={sectionFileContainerStyle}>
@@ -92,7 +151,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
           }
         }}
       >
-        {/* {props.selectAllButton && props.selectAllButton} */}
+        {props.selectAllButton && props.selectAllButton}
         {props.collapsible && (
           <button className={changeStageButtonStyle}>
             {showStash && nStash > 0 ? (
@@ -102,9 +161,16 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
             )}
           </button>
         )}
-        <span className={sectionHeaderLabelStyle}>Stash</span>
-        {/* {props.actions} */}
-        <span className={sectionHeaderSizeStyle}>({nStash})</span>
+        <span className={sectionHeaderLabelStyle}>Stash ({nStash})
+        <ActionButton
+            icon={discardIcon}
+            title={'Clear'}
+            onClick={()=>{
+              console.log('hi');
+            }}
+          />
+        
+        </span>
       </div>
       
       {showStash && nStash > 0 && (
@@ -114,6 +180,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
             files={entry.files}
             index={entry.index}
             height={100}
+            collapsible={true}
           />
         ))
       )}

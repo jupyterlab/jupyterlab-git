@@ -609,7 +609,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       const stagedFiles: Git.IStatusFile[] = [];
       const unstagedFiles: Git.IStatusFile[] = [];
       const untrackedFiles: Git.IStatusFile[] = [];
-      const stashedFiles: Git.IStatusFile[] = [];
     
       this.props.files.forEach(file => {
         switch (file.status) {
@@ -638,8 +637,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           case 'remote-changed':
             remoteChangedFiles.push(file);
             break;
-          case 'stashed':
-            stashedFiles.push(file);
           default:
             break;
         }
