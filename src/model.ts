@@ -1402,6 +1402,8 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>('git:stash', async() => {
       await requestAPI(URLExt.join(path, 'stash'), 'POST');
     })
+
+    await this.refreshStash();
   }
 
 
@@ -1421,6 +1423,9 @@ export class GitExtension implements IGitExtension {
       await requestAPI(URLExt.join(path, 'stash_pop'), 'POST', {index}
       );
     })
+
+    await this.refreshStash();
+
   }
 
   /**
