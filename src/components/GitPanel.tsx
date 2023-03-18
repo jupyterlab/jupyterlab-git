@@ -154,6 +154,21 @@ export interface IGitPanelState {
 }
 
 /**
+ * Wrap mouse event handler to stop event propagation
+ * @param fn Mouse event handler
+ * @returns Mouse event handler that stops event from propagating
+ */
+const stopPropagationWrapper =
+  (
+    fn: React.EventHandler<React.MouseEvent>
+  ): React.EventHandler<React.MouseEvent> =>
+  (event: React.MouseEvent) => {
+    event.stopPropagation();
+    fn(event);
+  };
+
+
+/**
  * React component for rendering a panel for performing Git operations.
  */
 export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
@@ -349,6 +364,20 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       </div>
     );
   }
+  
+  /**
+   * Wrap mouse event handler to stop event propagation
+   * @param fn Mouse event handler
+   * @returns Mouse event handler that stops event from propagating
+   */
+  stopPropagationWrapper =
+  (
+    fn: React.EventHandler<React.MouseEvent>
+  ): React.EventHandler<React.MouseEvent> =>
+  (event: React.MouseEvent) => {
+    event.stopPropagation();
+    fn(event);
+  };
 
   /**
    * Renders a toolbar.
@@ -375,6 +404,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       />
     );
   }
+
 
   /**
    * Renders the main panel.
@@ -467,12 +497,15 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           commands={this.props.commands}
           settings={this.props.settings}
           trans={this.props.trans}
+          stopPropagationWrapper={stopPropagationWrapper}
         />
         <GitStash
           stash={this.props.model._stash}
+          model = {this.props.model}
           height={100}
           collapsible={true}
           trans={this.props.trans}
+          stopPropagationWrapper={stopPropagationWrapper}
         />
 
         <CommitBox

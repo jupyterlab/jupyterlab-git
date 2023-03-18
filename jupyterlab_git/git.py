@@ -1821,6 +1821,32 @@ class Git:
 
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
+    async def stash_pop(self, path, stash_index=None):
+        """
+        Execute git stash pop for a certain index of the stash list. If no index is provided, it will
+
+        path: str
+            Git path repository
+        stash_index: number
+            Index of the stash list is first applied to the current branch, then removed from the stash.
+            If the index is not provided, the most recent stash (index=0) will be removed from the stash.
+
+        """
+        cmd = ["git", "stash", "drop"]
+
+        if stash_index:
+            cmd.append(stash_index)
+
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
     @property
     def excluded_paths(self) -> List[str]:
         """Wildcard-style path patterns that do not support git commands.

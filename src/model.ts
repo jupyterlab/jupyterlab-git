@@ -1404,21 +1404,36 @@ export class GitExtension implements IGitExtension {
     })
   }
 
+
   /**
-   * Get a list of stashes 
+   * Pop a stash
+   * @param path - path at which the stashes will be saved in
+   * @returns promise which resolves upon stashing changes
+   * * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   * 
+   */
+  async stash_pop(index: number): Promise<void>{
+    const path = await this._getPathRepository();
+
+    await this._taskHandler.execute<void>('git:stash', async() => {
+      await requestAPI(URLExt.join(path, 'stash_pop'), 'POST', {index}
+      );
+    })
+  }
+
+  /**
+   * Checks the stash list, and sets the stash property.
+   * 
    * @returns promise which resolves to an array of stashes
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-
-  // Refresh the stash
-  // Set the Status
   async refreshStash(): Promise<void> {
     let path: string;
-    // copy this from refreshStatus()
 
-    // GET THE PATH
     try {
       path = await this._getPathRepository();
     } catch (error) {
@@ -1429,7 +1444,7 @@ export class GitExtension implements IGitExtension {
       return;
     }
 
-    // Request the Stash List
+    // Get the entire stash list
     try {
       const stashListData = await this._taskHandler.execute<Git.IStashListResult>(
         'git:refresh:stash',
@@ -1441,9 +1456,10 @@ export class GitExtension implements IGitExtension {
         }
       );
       
-      const stashMsgList = stashListData.message.split('\n')
-      stashMsgList.pop()
+      const stashMsgList = stashListData.message.split('\n').slice(0,-1)
+
       const stashList: Git.IStashEntry[] = []
+
       for (let index in stashMsgList) {
           const stashInfo = stashMsgList[index].split(':')
           const branchName = stashInfo[1].match(/WIP on (.*)/) ? stashInfo[1].match(/WIP on (.*)/)[1] : stashInfo[1].split(" ")[2];
@@ -1455,8 +1471,7 @@ export class GitExtension implements IGitExtension {
           })
       }
 
-      // for each stash in the list of stashes,
-        // call `git stash show -p stash@{N} --name-only`
+      // grab all files modified in each stash entry
       for (let index in stashList) {
         const fileData = await this._taskHandler.execute<Git.IStashListResult>(
           'git:refresh:stash',
@@ -1471,8 +1486,8 @@ export class GitExtension implements IGitExtension {
           }
         );
 
-        const stashFilesList = fileData.message.split('\n');
-        stashFilesList.pop();
+        const stashFilesList = fileData.message.split('\n').slice(0,-1);
+
         // only one file modified
         if (stashFilesList.length === 1) {
           stashList[index].files.push(stashFilesList[0]);
@@ -1482,14 +1497,17 @@ export class GitExtension implements IGitExtension {
           })
         }
       }
+
       this._setStash(stashList);
 
-      console.log('fileData', stashList);
     } catch (err) {
       console.error(err);
       return;
     }
   }
+
+
+
 
   /**
    * Retrieve the list of tags in the repository.

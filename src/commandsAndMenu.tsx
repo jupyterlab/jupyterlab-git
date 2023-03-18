@@ -779,7 +779,6 @@ export function addCommands(
       )
   });
 
-  /** Add Git Stash command */
   commands.addCommand(CommandIDs.gitStash, {
     label: trans.__('Stash Changes'),
     caption: trans.__(
@@ -804,19 +803,17 @@ export function addCommands(
           ]
         })
 
-        // If They Accept
         if (result.button.accept){
           logger.log({
             level: Level.RUNNING,
-            message: trans.__('Shawn is Stashing')
+            message: trans.__('Stashing changes')
           });
           try {
-          // --------ADD CODE HERE FOR GIT STASH-----------
           const currentPath = fileBrowserModel.path;
           await gitModel.stash(currentPath);
           // Success
           logger.log({
-            message: trans.__('Shawn Successfully Stashed'),
+            message: trans.__('Successfully stashed'),
             level: Level.SUCCESS,
           });
 
@@ -872,10 +869,9 @@ export function addCommands(
   });
 
   /**
-   *  Git Stash List
+   *  Calls refreshStash
    * 
    */
-    /** Add Git Stash command */
   commands.addCommand(CommandIDs.gitStashList, {
       label: trans.__('Stash List'),
       caption: trans.__(
@@ -900,6 +896,7 @@ export function addCommands(
         }      
       }
   });  
+
 
 
   /* Context menu commands */

@@ -52,6 +52,17 @@ export interface IFileListProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Wraps mouse event handler to stop event propagation
+   */
+
+  /**
+   * Wrap mouse event handler to stop event propagation
+   * @param fn Mouse event handler
+   * @returns Mouse event handler that stops event from propagating
+   */
+  stopPropagationWrapper: (fn: React.EventHandler<React.MouseEvent>) => React.EventHandler<React.MouseEvent>;
 }
 
 export type ContextCommands = Record<Git.Status, ContextCommandIDs[]>;
@@ -137,19 +148,7 @@ const areFilesEqual = (fileA: Git.IStatusFile, fileB: Git.IStatusFile) => {
   );
 };
 
-/**
- * Wrap mouse event handler to stop event propagation
- * @param fn Mouse event handler
- * @returns Mouse event handler that stops event from propagating
- */
-const stopPropagationWrapper =
-  (
-    fn: React.EventHandler<React.MouseEvent>
-  ): React.EventHandler<React.MouseEvent> =>
-  (event: React.MouseEvent) => {
-    event.stopPropagation();
-    fn(event);
-  };
+
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
   constructor(props: IFileListProps) {
@@ -744,7 +743,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={stopPropagationWrapper(() =>
+              onClick={this.props.stopPropagationWrapper(() =>
                 this.openSelectedFiles(file)
               )}
             />
@@ -753,7 +752,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={removeIcon}
               title={this.props.trans.__('Unstage this change')}
-              onClick={stopPropagationWrapper(() => {
+              onClick={this.props.stopPropagationWrapper(() => {
                 this.resetSelectedFiles(file);
               })}
             />
@@ -833,7 +832,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={stopPropagationWrapper(() =>
+              onClick={this.props.stopPropagationWrapper(() =>
                 this.openSelectedFiles(file)
               )}
             />
@@ -842,7 +841,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={discardIcon}
               title={this.props.trans.__('Discard changes')}
-              onClick={stopPropagationWrapper(() => {
+              onClick={this.props.stopPropagationWrapper(() => {
                 this.discardChanges(file);
               })}
             />
@@ -850,7 +849,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={addIcon}
               title={this.props.trans.__('Stage this change')}
-              onClick={stopPropagationWrapper(() => {
+              onClick={this.props.stopPropagationWrapper(() => {
                 if (this._isSelectedFile(file)) {
                   this.addFile(
                     ...this.state.selectedFiles.map(
@@ -942,7 +941,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={stopPropagationWrapper(() =>
+              onClick={this.props.stopPropagationWrapper(() =>
                 this.openSelectedFiles(file)
               )}
             />
@@ -950,7 +949,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={addIcon}
               title={this.props.trans.__('Track this file')}
-              onClick={stopPropagationWrapper(() => {
+              onClick={this.props.stopPropagationWrapper(() => {
                 if (this._isSelectedFile(file)) {
                   this.addFile(
                     ...this.state.selectedFiles.map(
@@ -1032,7 +1031,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={stopPropagationWrapper(() =>
+              onClick={this.props.stopPropagationWrapper(() =>
                 this.openSelectedFiles(file)
               )}
             />
@@ -1110,7 +1109,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         className={hiddenButtonStyle}
         icon={openIcon}
         title={this.props.trans.__('Open this file')}
-        onClick={stopPropagationWrapper(openFile)}
+        onClick={this.props.stopPropagationWrapper(openFile)}
       />
     );
     let onDoubleClick = doubleClickDiff ? (): void => undefined : openFile;
@@ -1123,14 +1122,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             className={hiddenButtonStyle}
             icon={openIcon}
             title={this.props.trans.__('Open this file')}
-            onClick={stopPropagationWrapper(openFile)}
+            onClick={this.props.stopPropagationWrapper(openFile)}
           />
           {diffButton}
           <ActionButton
             className={hiddenButtonStyle}
             icon={discardIcon}
             title={this.props.trans.__('Discard changes')}
-            onClick={stopPropagationWrapper(() => {
+            onClick={this.props.stopPropagationWrapper(() => {
               this.discardChanges(file);
             })}
           />
@@ -1149,14 +1148,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             className={hiddenButtonStyle}
             icon={openIcon}
             title={this.props.trans.__('Open this file')}
-            onClick={stopPropagationWrapper(openFile)}
+            onClick={this.props.stopPropagationWrapper(openFile)}
           />
           {diffButton}
           <ActionButton
             className={hiddenButtonStyle}
             icon={discardIcon}
             title={this.props.trans.__('Discard changes')}
-            onClick={stopPropagationWrapper(() => {
+            onClick={this.props.stopPropagationWrapper(() => {
               this.discardChanges(file);
             })}
           />
@@ -1249,7 +1248,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           className={hiddenButtonStyle}
           icon={diffIcon}
           title={this.props.trans.__('Diff this file')}
-          onClick={stopPropagationWrapper(handleClick)}
+          onClick={this.props.stopPropagationWrapper(handleClick)}
         />
       )
     );

@@ -8,8 +8,7 @@ import {
   sectionHeaderLabelStyle,
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
-import { useEffect } from 'react';
-
+import { GitExtension } from '../model';
 // import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 // import { fileListWrapperClass } from '../style/FileListStyle';
 import { ActionButton } from './ActionButton';
@@ -19,54 +18,90 @@ import {
   removeIcon
 } from '../style/icons';
 import { TranslationBundle } from '@jupyterlab/translation';
+// import { CellDiffWidget } from 'nbdime/lib/diff/widget';
 // const HEADER_HEIGHT = 34;
 // const ITEM_HEIGHT = 25;
 
 export interface IGitStashProps {
-    /**
-     * Is this group collapsible
-     */
-    collapsible?: boolean;
-    /**
-     * Files in the group
-     */
-    stash: Git.IStash;
-    /**
-     * HTML element height
-     */
-    height: number;
-    /**
-     * Optional select all element
-     */
-    selectAllButton?: React.ReactElement; 
+  /**
+   * Is this group collapsible
+   */
+  collapsible?: boolean;
 
-     /**
-     * The application language translator.
-     */
-    trans: TranslationBundle;
+  /**
+   * Git extension model
+   */
+  model: GitExtension;
+
+  /**
+   * Files in the group
+   */
+  stash: Git.IStash;
+  /**
+   * HTML element height
+   */
+  height: number;
+  /**
+   * Optional select all element
+   */
+  selectAllButton?: React.ReactElement; 
+
+    /**
+   * The application language translator.
+   */
+  trans: TranslationBundle;
+
+  /**
+   * Wrap mouse event handler to stop event propagation
+   * @param fn Mouse event handler
+   * @returns Mouse event handler that stops event from propagating
+   */
+  stopPropagationWrapper: (fn: React.EventHandler<React.MouseEvent>) => React.EventHandler<React.MouseEvent>;
 }
 
 interface IGitStashEntryProps {
-    /**
-     * Is this group collapsible
-     */
-    collapsible?: boolean;
-    /**
-     * Files correspodning to the stash
-     */
-    files: string[];
-    /**
-     * Index within the stash
-     */
-    index: number;
-    /**
-     * HTML element height
-     */
-    height: number;
-    /**
-     * Optional select all element
-     */
-    selectAllButton?: React.ReactElement;
+
+  /**
+   * Git extension model
+   */
+  model: GitExtension;
+  /**
+   * Is this group collapsible
+   */
+  collapsible?: boolean;
+  /**
+   * Files corresponding to the stash
+   */
+  files: string[];
+  /**
+   * Index within the stash
+   */
+  index: number;
+  /**
+   * HTML element height
+   */
+  height: number;
+  /**
+   * Optional select all element
+   */
+  selectAllButton?: React.ReactElement;
+
+  /**
+   * Branch corresponding to the stash
+   */
+  branch: string;
+
+  /**
+   * message corresponding to the stash
+   */
+  message: string;
+
+  /**
+   * Wrap mouse event handler to stop event propagation
+   * @param fn Mouse event handler
+   * @returns Mouse event handler that stops event from propagating
+   */
+  stopPropagationWrapper: (fn: React.EventHandler<React.MouseEvent>) => React.EventHandler<React.MouseEvent>;
 }
 
 /**
@@ -78,24 +113,34 @@ const GitStashEntry: React.FunctionComponent<
   props: IGitStashEntryProps
 ) => {
   const [showStashFiles, setShowStashFiles] = React.useState(false);
+  /** Git Stash Pop */
+  // Define git stash pop
+  // Async function that calls 
+  const callGitStashPop = async (index:number): Promise<void> => {
+    console.log('Call Git Stash Pop', index);
+    
+    await props.model.stash_pop(index);
+  }
 
   return (
     <div>
         <div
           className={sectionAreaStyle}
           onClick={() => {
-            if (props.collapsible && props.files.length > 0) {
+            if (props.collapsible && props?.files.length > 0) {
               setShowStashFiles(!showStashFiles);
+              console.log('toggle setShowStashFiles')
             }
           }}
         >
-          <p>{props.index}</p>
+          <p>{props.message.split(' ')[1]} (on {props.branch})</p>
           <ActionButton
             icon={addIcon}
-            title={'Test'}
-            onClick={()=>{
-              console.log('hi');
-            }}
+            title={'Pop'}
+            onClick={props.stopPropagationWrapper(() => {
+                callGitStashPop(props.index)
+            }
+            )}
           />
           <ActionButton
             icon={discardIcon}
@@ -137,9 +182,6 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
 ) => {
   const [showStash, setShowStash] = React.useState(true);
   const nStash = props.stash.length;
-  useEffect(()=>{
-    console.log(props.collapsible);
-  })
 
   return (
     <div className={sectionFileContainerStyle}>
@@ -178,9 +220,13 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
           // each entry should have a dropdown
           <GitStashEntry
             files={entry.files}
+            model={props.model}
             index={entry.index}
+            branch={entry.branch}
+            message={entry.message}
             height={100}
             collapsible={true}
+            stopPropagationWrapper={props.stopPropagationWrapper}
           />
         ))
       )}
