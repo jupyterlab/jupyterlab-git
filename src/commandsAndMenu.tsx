@@ -784,12 +784,12 @@ export function addCommands(
     caption: trans.__(
       'Stash all current changes'
     ),
-    // Check if we are in a git repository 
     isEnabled: () => gitModel.pathRepository !== null,
-    // ADD GIT STASH HERE!!!!!
     execute: async args => {
  
         // Ask the user if they want to stash
+
+        // TO DO: Ask the user if they would like to add a stash message
         const result = await showDialog({
           title: trans.__('Stash changes'),
           body: trans.__('Do you want to stash your changes?'),
@@ -802,6 +802,7 @@ export function addCommands(
             })
           ]
         })
+        
 
         if (result.button.accept){
           logger.log({

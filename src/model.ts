@@ -1404,6 +1404,11 @@ export class GitExtension implements IGitExtension {
     })
 
     await this.refreshStash();
+
+    // for each file in the stash revert it back to the original state.
+    this._revertFile('');
+ 
+
   }
 
 
@@ -1416,16 +1421,16 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    * 
    */
-  async stash_pop(index: number): Promise<void>{
+  async stash_pop(index?: number): Promise<void>{
     const path = await this._getPathRepository();
 
     await this._taskHandler.execute<void>('git:stash', async() => {
-      await requestAPI(URLExt.join(path, 'stash_pop'), 'POST', {index}
+      await requestAPI(URLExt.join(path, 'stash_pop'), 'POST', 
+        index !== undefined ? {index} : undefined
       );
     })
 
     await this.refreshStash();
-
   }
 
   /**
@@ -1504,7 +1509,7 @@ export class GitExtension implements IGitExtension {
       }
 
       this._setStash(stashList);
-
+      console.log(stashList);
     } catch (err) {
       console.error(err);
       return;
@@ -1512,7 +1517,41 @@ export class GitExtension implements IGitExtension {
   }
 
 
+  /**
+   * Drop a stash entry, or clear the entire stash.
+   * 
+   * @param stash_index The index of the stash to be deleleted. If no index is provided, the entire stash will be cleared.
+   * 
+   * @returns promise which resolves to an array of stashes
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async stash_drop(stash_index?: number | string): Promise<void> {
+    let path: string;
+    try {
+      path = await this._getPathRepository();
+    } catch (error) {
+      this._clearStatus();
+      if (!(error instanceof Git.NotInRepository)) {
+        throw error;
+      }
+      return;
+    }
+    console.log('model.stash_drop', stash_index);
 
+
+    // Change this to
+    
+
+    await this._taskHandler.execute<void>('git:stash:drop', async() => {
+      await requestAPI(URLExt.join(path, 'stash'), 'DELETE', 
+        stash_index !== 'clear' ? {stash_index} : {stash_index: 'clear'}
+      );
+    })
+
+    await this.refreshStash();
+  } 
 
   /**
    * Retrieve the list of tags in the repository.

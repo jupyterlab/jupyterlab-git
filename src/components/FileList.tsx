@@ -577,7 +577,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     if (this.props.settings.composite['simpleStaging']) {
       const otherFiles: Git.IStatusFile[] = [];
 
-      this.props.files.forEach(file => {
+      this.props?.files?.forEach(file => {
         switch (file.status) {
           case 'remote-changed':
             remoteChangedFiles.push(file);
@@ -609,7 +609,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       const unstagedFiles: Git.IStatusFile[] = [];
       const untrackedFiles: Git.IStatusFile[] = [];
     
-      this.props.files.forEach(file => {
+      this.props?.files?.forEach(file => {
         switch (file.status) {
           case 'staged':
             stagedFiles.push(file);

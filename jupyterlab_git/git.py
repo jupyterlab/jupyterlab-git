@@ -1847,6 +1847,39 @@ class Git:
 
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
+    async def stash_drop(self, path, stash_index):
+        """
+        Execute git stash drop to delete a single stash entry.
+        If not stash_index is provided, delete the entire stash.
+
+        path: str
+            Git path repository
+        stash_index: number
+            Index of the stash list is first applied to the current branch, then removed from the stash.
+
+        """
+        print("git.py: stash_drop", stash_index)
+        # Clear
+        cmd = ["git", "stash"]
+
+        if stash_index == "clear":
+            cmd.append("clear")
+        # Delete a single stash entry
+        else:
+            cmd.extend(["drop", str(stash_index)])
+
+        print(stash_index)
+
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
     @property
     def excluded_paths(self) -> List[str]:
         """Wildcard-style path patterns that do not support git commands.

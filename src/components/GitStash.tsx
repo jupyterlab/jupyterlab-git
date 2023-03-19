@@ -114,13 +114,24 @@ const GitStashEntry: React.FunctionComponent<
 ) => {
   const [showStashFiles, setShowStashFiles] = React.useState(false);
   /** Git Stash Pop */
-  // Define git stash pop
-  // Async function that calls 
   const callGitStashPop = async (index:number): Promise<void> => {
     console.log('Call Git Stash Pop', index);
     
     await props.model.stash_pop(index);
   }
+  /** Git Stash Drop */
+  const callGitStashDrop = async (index:number): Promise<void> => {
+    console.log('Call Git Stash Drop', index);
+    
+    const response = await props.model.stash_drop(index);
+    console.log({response});
+  }
+  /** Git Stash Apply */
+  // const callGitStashApply = async (index:number): Promise<void> => {
+  //   console.log('Call Git Stash Apply', index);
+    
+  //   await props.model.stash_apply(index);
+  // }
 
   return (
     <div>
@@ -138,27 +149,33 @@ const GitStashEntry: React.FunctionComponent<
             icon={addIcon}
             title={'Pop'}
             onClick={props.stopPropagationWrapper(() => {
+                console.log('Pop It ');
                 callGitStashPop(props.index)
             }
             )}
           />
           <ActionButton
             icon={discardIcon}
-            title={'Test'}
-            onClick={()=>{
-              console.log('hi');
-            }}
+            title={'Drop'}
+            onClick={props.stopPropagationWrapper(() => {
+              console.log('Drop it');
+              callGitStashDrop(props.index)
+          }
+          )}
           />
           <ActionButton
             icon={removeIcon}
-            title={'Test'}
-            onClick={()=>{
-              console.log('hi');
-            }}
+            title={'Apply'}
+            onClick={props.stopPropagationWrapper(() => {
+              console.log('Apply it');
+              // callGitStashApply(props.index)
+          }
+          )}
           />
+
           {props.collapsible && (
             <button className={changeStageButtonStyle}>
-              {showStashFiles && props.files.length > 0 ? (
+              {showStashFiles && props?.files.length > 0 ? (
                 <caretDownIcon.react />
               ) : (
                 <caretRightIcon.react />
@@ -167,7 +184,7 @@ const GitStashEntry: React.FunctionComponent<
           )}
         </div>
       {showStashFiles && (<ul>
-        {props.files.map((name) => (
+        {props?.files.map((name) => (
           <li>{name}
           
           </li>
@@ -181,7 +198,8 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   props: IGitStashProps
 ) => {
   const [showStash, setShowStash] = React.useState(true);
-  const nStash = props.stash.length;
+  const nStash = props && props.stash ? props.stash.length : 0;
+
 
   return (
     <div className={sectionFileContainerStyle}>

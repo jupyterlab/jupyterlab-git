@@ -157,7 +157,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarNavClass}>
         <span className={spacer} />
-      {/* Test Git Stash List */}
       <Badge
           className={badgeClass}
           variant="dot"
@@ -182,7 +181,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             }
           />
         </Badge>
-        {/* Test Git Stash */}
         <Badge
           className={badgeClass}
           variant="dot"
