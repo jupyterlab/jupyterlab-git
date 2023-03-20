@@ -1398,7 +1398,9 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    * 
    */
-  async stash(path: string): Promise<void>{
+  async stash(path?: string): Promise<void>{
+    path = await this._getPathRepository();
+
     await this._taskHandler.execute<void>('git:stash', async() => {
       await requestAPI(URLExt.join(path, 'stash'), 'POST');
     })
@@ -1407,8 +1409,6 @@ export class GitExtension implements IGitExtension {
 
     // for each file in the stash revert it back to the original state.
     this._revertFile('');
- 
-
   }
 
 
@@ -1424,11 +1424,30 @@ export class GitExtension implements IGitExtension {
   async stash_pop(index?: number): Promise<void>{
     const path = await this._getPathRepository();
 
-    await this._taskHandler.execute<void>('git:stash', async() => {
+    await this._taskHandler.execute<void>('git:stash:pop', async() => {
       await requestAPI(URLExt.join(path, 'stash_pop'), 'POST', 
         index !== undefined ? {index} : undefined
       );
     })
+
+    await this.refreshStash();
+  }
+  
+  async stash_apply(index?: number): Promise<void> {
+    const path = await this._getPathRepository();
+    try {
+
+      await this._taskHandler.execute<void>('git:stash:apply', async() => {
+        await requestAPI(URLExt.join(path, 'stash_apply'), 'POST', 
+          index !== undefined ? {index} : {index:0}
+        );
+      })
+
+    } catch (error) {
+      console.error('Failed to refresh apply stash', error);
+
+      // should i spin dialog box?
+    }
 
     await this.refreshStash();
   }

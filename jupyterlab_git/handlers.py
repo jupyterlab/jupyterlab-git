@@ -1007,6 +1007,35 @@ class GitStashPopHandler(GitHandler):
         self.finish(json.dumps(response))
 
 
+class GitStashApplyHandler(GitHandler):
+    """
+    Apply the latest stash to the repository.
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """
+        POST request handler to pop the latest stash unless an index was provided
+        """
+        local_path = self.url2localpath(path)
+        data = self.get_json_body()
+
+        print("calling GitStashApplyHandler")
+
+        # specific stash
+        if "index" in data:
+            response = await self.git.stash_apply(local_path, data["index"])
+        # latest stash
+        else:
+            response = await self.git.stash_apply(local_path)
+
+        if response["code"] == 0:
+            self.set_status(200)
+        else:
+            self.set_status(500)
+        self.finish(json.dumps(response))
+
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -1050,7 +1079,7 @@ def setup_handlers(web_app):
         ("/stash_list", GitStashListHandler),
         ("/stash_show", GitStashShowHandler),
         ("/stash_pop", GitStashPopHandler),
-        ("/stash_clear", GitStashPopHandler),
+        ("/stash_apply", GitStashApplyHandler),
     ]
 
     handlers = [

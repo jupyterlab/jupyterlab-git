@@ -1880,6 +1880,43 @@ class Git:
 
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
+    async def stash_apply(self, path, stash_index=None):
+        """
+        Execute git stash apply to apply a single stash entry to the repository.
+        If not stash_index is provided, apply the latest stash.
+
+        path: str
+            Git path repository
+        stash_index: number
+            Index of the stash list is applied to the repository.
+
+        """
+        print("git.py: stash_apply", stash_index)
+
+        # Clear
+        cmd = ["git", "stash", "apply"]
+
+        if stash_index is not None:
+            cmd.append("stash@{" + str(stash_index) + "}")
+
+        print(cmd)
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        print("code", code)
+        print("output:", output)
+        print("error:", error)
+        # code: 1 On branch main
+        # output: Your branch is up to date with 'origin/main'.
+        # error:
+        if code != 0:
+            print("there was an error")
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
     @property
     def excluded_paths(self) -> List[str]:
         """Wildcard-style path patterns that do not support git commands.
