@@ -237,6 +237,18 @@ export class GitExtension implements IGitExtension {
     return this._selectedHistoryFileChanged;
   }
 
+  // Shawn -- add get/set stashchanged? -- something that emits a signal when stashChanged 
+
+
+
+  /**
+   *  A signal emitted when the stash changes.
+   * 
+   */
+  get stashChanged(): ISignal <IGitExtension, IChangedArgs <string | null>> {
+    return this._stashChanged;
+  }
+
   /**
    * A signal emitted when the current Git repository changes.
    */
@@ -1998,6 +2010,10 @@ export class GitExtension implements IGitExtension {
     Git.IStatusFile | null
   >(this);
   private _repositoryChanged = new Signal<
+    IGitExtension,
+    IChangedArgs<string | null>
+  >(this);
+  private _stashChanged = new Signal<
     IGitExtension,
     IChangedArgs<string | null>
   >(this);

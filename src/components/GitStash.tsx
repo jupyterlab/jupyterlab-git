@@ -21,6 +21,8 @@ import { TranslationBundle } from '@jupyterlab/translation';
 // import { CellDiffWidget } from 'nbdime/lib/diff/widget';
 // const HEADER_HEIGHT = 34;
 // const ITEM_HEIGHT = 25;
+import { UseSignal } from '@jupyterlab/apputils';
+
 
 export interface IGitStashProps {
   /**
@@ -135,6 +137,7 @@ const GitStashEntry: React.FunctionComponent<
 
   return (
     <div>
+
         <div
           className={sectionAreaStyle}
           onClick={() => {
@@ -249,6 +252,17 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
           )}/>
         </span>
       </div>
+
+      <UseSignal signal={props.model.stashChanged} initialArgs={{
+        name: '',
+        oldValue: undefined,
+        newValue: undefined
+      }}>
+      {(sender, args) => {
+        console.log('Stash changed:', sender, args);
+        return <div>Yo Momma</div>;
+      }}
+      </UseSignal>
       
       {showStash && nStash > 0 && (
         props.stash?.map((entry) => (

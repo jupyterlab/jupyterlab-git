@@ -255,8 +255,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         hasDirtyFiles: args
       });
     });
-
-    // Check git Stash
   }
 
   componentWillUnmount(): void {
