@@ -4,7 +4,8 @@ import { Panel } from '@lumino/widgets';
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
-import ReactCompareImage from 'react-compare-image';
+// import ReactCompareImage from 'react-compare-image';
+import ReactImageDiff from 'react-image-diff';
 
 import { Git } from '../../tokens';
 import {
@@ -31,11 +32,11 @@ type CompareImageProps = {
 
 const CompareImage = ({ reference, challenger }: CompareImageProps) => {
   return (
-    <ReactCompareImage
-      leftImage={`data:image/png;base64,${reference}`}
-      rightImage={`data:image/png;base64,${challenger}`}
-      leftImageLabel="Reference"
-      rightImageLabel="Challenger"
+    <ReactImageDiff
+      before={`data:image/png;base64,${reference}`}
+      after={`data:image/png;base64,${challenger}`}
+      type="swipe"
+      value={0.5}
     />
   );
 };
