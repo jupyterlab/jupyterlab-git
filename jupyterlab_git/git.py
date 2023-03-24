@@ -1773,16 +1773,26 @@ class Git:
             self.ensure_git_credential_cache_daemon(socket, debug, True, cwd, env)
 
     # git stash - stash changes in a dirty working directory away
-    async def stash(self, path):
+    async def stash(self, path, stashMsg=""):
         """
         path: str
             Git path repository
+        stashMsg (optional): str
+            A message that describes the stash entry
         """
         cmd = ["git", "stash"]
+
+        if len(stashMsg) > 0:
+            cmd.extend(["save", "-m", stashMsg])
+            print(cmd)
+
         env = os.environ.copy()
         # if the git command is run in a non-interactive terminal, it will not prompt for user input
         env["GIT_TERMINAL_PROMPT"] = "0"
         code, output, error = await execute(cmd, cwd=path, env=env)
+
+        print(output)
+
         # code 0: no changes to stash
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}

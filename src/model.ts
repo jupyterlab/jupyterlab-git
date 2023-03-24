@@ -237,12 +237,8 @@ export class GitExtension implements IGitExtension {
     return this._selectedHistoryFileChanged;
   }
 
-  // Shawn -- add get/set stashchanged? -- something that emits a signal when stashChanged 
-
-
-
   /**
-   *  A signal emitted when the stash changes.
+   *  A signal emitted when the Git stash changes.
    * 
    */
   get stashChanged(): ISignal <IGitExtension, IChangedArgs <string | null>> {
@@ -1410,11 +1406,13 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    * 
    */
-  async stash(path?: string): Promise<void>{
+  async stash(path?: string, stashMsg?: string): Promise<void>{
     path = await this._getPathRepository();
 
     await this._taskHandler.execute<void>('git:stash', async() => {
-      await requestAPI(URLExt.join(path, 'stash'), 'POST');
+      await requestAPI(URLExt.join(path, 'stash'), 'POST', 
+        stashMsg !== undefined ? {stashMsg} : undefined
+      );
     })
 
     await this.refreshStash();
@@ -1500,6 +1498,9 @@ export class GitExtension implements IGitExtension {
       const stashMsgList = stashListData.message.split('\n').slice(0,-1)
 
       const stashList: Git.IStashEntry[] = []
+
+      console.log({stashListData});
+      console.log({stashMsgList});
 
       for (let index in stashMsgList) {
           const stashInfo = stashMsgList[index].split(':')

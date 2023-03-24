@@ -51,6 +51,7 @@ import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
+import { InputDialog } from '@jupyterlab/apputils';
 
 export interface IGitCloneArgs {
   /**
@@ -789,6 +790,10 @@ export function addCommands(
  
         // Ask the user if they want to stash
 
+        const stashDialog = await InputDialog.getText({
+          title: 'Enter a stash message (optional):'
+        }) 
+        const stashMsg = stashDialog.value ? stashDialog.value : ""
         // TO DO: Ask the user if they would like to add a stash message
         const result = await showDialog({
           title: trans.__('Stash changes'),
@@ -811,7 +816,7 @@ export function addCommands(
           });
           try {
           const currentPath = fileBrowserModel.path;
-          await gitModel.stash(currentPath);
+          await gitModel.stash(currentPath, stashMsg);
           // Success
           logger.log({
             message: trans.__('Successfully stashed'),

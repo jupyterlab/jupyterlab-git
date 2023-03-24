@@ -253,15 +253,10 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
         </span>
       </div>
 
-      <UseSignal signal={props.model.stashChanged} initialArgs={{
-        name: '',
-        oldValue: undefined,
-        newValue: undefined
-      }}>
-      {(sender, args) => {
-        console.log('Stash changed:', sender, args);
-        return <div>Yo Momma</div>;
-      }}
+      <UseSignal signal={props.model.stashChanged}>
+      {() => 
+        props.model.stashChanged && (<div>Hello Chicken</div>)
+      }
       </UseSignal>
       
       {showStash && nStash > 0 && (
