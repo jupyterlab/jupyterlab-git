@@ -58,7 +58,22 @@ test.describe('Merge commit tests', () => {
     expect(page.getByRole('listitem', { name: 'new-file.txt' })).toBeTruthy();
   });
 
-  test('should diff correctly after clicking file', async ({ page }) => {});
+  test('should diff file after clicking', async ({ page }) => {
+    const mergeCommit = page.locator(
+      '#8d6c5d068c9bb63ba67712d61ae7be49eae9d887'
+    );
+
+    await mergeCommit.click();
+
+    const file = page.getByRole('listitem', { name: 'hello-world.py' });
+    await file.click();
+
+    await page
+      .getByRole('tab', { name: 'hello-world.py' })
+      .waitFor({ state: 'visible' });
+
+    expect(page.waitForSelector('.jp-git-diff-root')).toBeTruthy();
+  });
 
   test('should revert merge commit', async ({ page }) => {});
 });
