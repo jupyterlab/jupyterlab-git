@@ -75,5 +75,30 @@ test.describe('Merge commit tests', () => {
     expect(page.waitForSelector('.jp-git-diff-root')).toBeTruthy();
   });
 
-  test('should revert merge commit', async ({ page }) => {});
+  test('should revert merge commit', async ({ page }) => {
+    const mergeCommit = page.locator(
+      '#8d6c5d068c9bb63ba67712d61ae7be49eae9d887'
+    );
+
+    await mergeCommit.click();
+    await page
+      .getByRole('button', { name: 'Revert changes introduced by this commit' })
+      .click();
+
+    const dialog = page.getByRole('dialog');
+    dialog.waitFor({ state: 'visible' });
+
+    expect(dialog).toBeTruthy();
+
+    await dialog.getByRole('button', { name: 'Submit' }).click();
+    dialog.waitFor({ state: 'detached' });
+
+    const revertMergeCommit = page
+      .locator('#jp-git-sessions')
+      .locator("div:contains('Revert 'Merge branch 'sort-names''')");
+
+    await revertMergeCommit.waitFor({ state: 'visible' });
+
+    expect(revertMergeCommit).toBeTruthy();
+  });
 });
