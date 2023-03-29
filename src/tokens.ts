@@ -565,7 +565,7 @@ export interface IGitExtension extends IDisposable {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    * 
    */
-  stash(path: string): Promise<void>;
+  stashChanges(path: string): Promise<void>;
 
 
   /**
@@ -946,7 +946,7 @@ export namespace Git {
     index: number;
     branch: string;
     message: string;
-    files: string[]; // TODO, make this an actual list of files
+    files: string[];
   }
 
   export type IStash = IStashEntry[];

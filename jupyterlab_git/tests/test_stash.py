@@ -99,7 +99,39 @@ async def test_git_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
 
 
-# I should make a fixture for git stash
+@patch("jupyterlab_git.git.execute")
+async def test_git_stash_save_with_message(mock_execute, jp_fetch, jp_root_dir):
+    # Given
+    env = os.environ.copy()
+    env["GIT_TERMINAL_PROMPT"] = "0"
+
+    local_path = jp_root_dir / "test_path"
+    stash_message = "Custom stash message"
+
+    # 0 = success code, "" = no output, "" = no error
+    mock_execute.return_value = maybe_future((0, "", ""))
+
+    # When
+    response = await jp_fetch(
+        NAMESPACE,
+        local_path.name,
+        "stash",
+        body=json.dumps({"command": "save", "message": stash_message}),
+        method="POST",
+    )
+
+    # Then
+    command = ["git", "stash", "save", "-m", stash_message]
+    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload == {
+        "code": 0,
+        "message": "",
+        "command": " ".join(command),
+    }
+
 
 # Test Git Stash List (Applies changes without removing) [git stash] then [git, stash, list]
 

@@ -246,6 +246,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Return the stash
+   */
+  get stash (): Git.IStash  {
+    return this._stash;
+  }
+
+  /**
    * A signal emitted when the current Git repository changes.
    */
   get repositoryChanged(): ISignal<IGitExtension, IChangedArgs<string | null>> {
@@ -1406,19 +1413,27 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    * 
    */
-  async stash(path?: string, stashMsg?: string): Promise<void>{
-    path = await this._getPathRepository();
+  async stashChanges(path?: string, stashMsg?: string): Promise<void>{
+    try {
+      path = await this._getPathRepository();
+  
+      await this._taskHandler.execute<void>('git:stash', async() => {
+        await requestAPI(URLExt.join(path, 'stash'), 'POST', 
+          stashMsg !== undefined ? {stashMsg} : undefined
+        );
+      })
+  
+      if (this._stash.length > 0) {
+        this._stash[0].files.forEach(file => {
+          this._revertFile(file);
+        });
+      } else {
+        console.error('Failed to retrieve stashed files.');
+      }
 
-    await this._taskHandler.execute<void>('git:stash', async() => {
-      await requestAPI(URLExt.join(path, 'stash'), 'POST', 
-        stashMsg !== undefined ? {stashMsg} : undefined
-      );
-    })
-
-    await this.refreshStash();
-
-    // for each file in the stash revert it back to the original state.
-    this._revertFile('');
+    } catch (error) {
+      console.error('Error stashing changes:', error);
+    }
   }
 
 
@@ -1495,12 +1510,12 @@ export class GitExtension implements IGitExtension {
         }
       );
       
+      // Contains the raw message
+      console.log(stashListData);
+
       const stashMsgList = stashListData.message.split('\n').slice(0,-1)
-
+      console.log(stashMsgList);
       const stashList: Git.IStashEntry[] = []
-
-      console.log({stashListData});
-      console.log({stashMsgList});
 
       for (let index in stashMsgList) {
           const stashInfo = stashMsgList[index].split(':')
@@ -1541,7 +1556,6 @@ export class GitExtension implements IGitExtension {
       }
 
       this._setStash(stashList);
-      console.log(stashList);
     } catch (err) {
       console.error(err);
       return;

@@ -206,10 +206,6 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
     await props.model.stash_drop('clear');
   }
   
-  // const gitStash = async (): Promise<void> => {
-  //   await props.model.stash();
-  // }
-
 
   const gitStashApplyLatest = async (): Promise<void> => {
     await props.model.stash_apply(0);
@@ -254,8 +250,13 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
       </div>
 
       <UseSignal signal={props.model.stashChanged}>
-      {() => 
-        props.model.stashChanged && (<div>Hello Chicken</div>)
+      {() => {
+
+        console.log('stashChanged', props.model.stashChanged);
+        return (
+             props.model.stashChanged && (<div>Hello Chicken</div>)
+        )
+      }
       }
       </UseSignal>
       

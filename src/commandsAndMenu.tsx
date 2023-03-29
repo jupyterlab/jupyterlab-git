@@ -816,14 +816,22 @@ export function addCommands(
           });
           try {
           const currentPath = fileBrowserModel.path;
-          await gitModel.stash(currentPath, stashMsg);
+          await gitModel.stashChanges(currentPath, stashMsg);
           // Success
           logger.log({
             message: trans.__('Successfully stashed'),
             level: Level.SUCCESS,
           });
+          
+          // Revert each file
+          // const path = await gitModel._getPathRepository();
+          // gitModel.stash[0].files.forEach(file=>{
+          //   console.log('file changed:', gitModel.pathRepository, "/", file);
 
-          // ------------ FIX THIS LATER ----------------
+            
+          // })
+
+          // ------------ Shawn: Fix error handling ----------------
         } catch (error: any) {
           if (error.name !== 'CancelledError') {
             console.error(
