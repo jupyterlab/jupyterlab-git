@@ -52,6 +52,10 @@ test.describe('Merge commit tests', () => {
     );
 
     await mergeCommit.click();
+
+    expect(page.getByRole('listitem', { name: 'hello-world.py' })).toBeTruthy();
+    expect(page.getByRole('listitem', { name: 'names.txt' })).toBeTruthy();
+    expect(page.getByRole('listitem', { name: 'new-file.txt' })).toBeTruthy();
   });
 
   test('should diff correctly after clicking file', async ({ page }) => {});
