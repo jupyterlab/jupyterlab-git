@@ -2,3 +2,59 @@ import { test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import path from 'path';
 import { extractFile } from './utils';
+
+const baseRepositoryPath = 'test-repository-merge-commits.tar.gz';
+test.use({ autoGoto: false });
+
+test.describe('Merge commit tests', () => {
+  test.beforeEach(async ({ baseURL, page, tmpPath }) => {
+    await extractFile(
+      baseURL ? baseURL : '',
+      path.resolve(__dirname, 'data', baseRepositoryPath),
+      path.join(tmpPath, 'repository-merge-commits.tar.gz')
+    );
+
+    // URL for merge commit example repository
+    await page.goto(`tree/${tmpPath}/repository-merge-commits`);
+
+    await page.sidebar.openTab('jp-git-sessions');
+
+    await page.getByRole('tab', { name: 'History' }).click();
+  });
+
+  test('should correctly display num files changed, insertions, and deletions', async ({
+    page
+  }) => {
+    const mergeCommit = page.locator(
+      '#8d6c5d068c9bb63ba67712d61ae7be49eae9d887'
+    );
+
+    await mergeCommit.click();
+
+    const filesChanged = mergeCommit.locator("span[title='# Files Changed']");
+    const insertions = mergeCommit.locator("span[title='# Insertions']");
+    const deletions = mergeCommit.locator("span[title='# Deletions']");
+
+    await Promise.all([
+      filesChanged.waitFor(),
+      insertions.waitFor(),
+      deletions.waitFor()
+    ]);
+
+    expect(filesChanged.innerText()).toBe('3');
+    expect(insertions.innerText()).toBe('18240');
+    expect(deletions.innerText()).toBe('18239');
+  });
+
+  test('should correctly display files changed', async ({ page }) => {
+    const mergeCommit = page.locator(
+      '#8d6c5d068c9bb63ba67712d61ae7be49eae9d887'
+    );
+
+    await mergeCommit.click();
+  });
+
+  test('should diff correctly after clicking file', async ({ page }) => {});
+
+  test('should revert merge commit', async ({ page }) => {});
+});
