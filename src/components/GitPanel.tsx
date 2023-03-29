@@ -148,7 +148,7 @@ export interface IGitPanelState {
 
   /**
    * Stashed files
-   * 
+   *
    */
   stash: Git.IStash;
 }
@@ -167,7 +167,6 @@ const stopPropagationWrapper =
     fn(event);
   };
 
-
 /**
  * React component for rendering a panel for performing Git operations.
  */
@@ -184,7 +183,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       branches,
       currentBranch,
       pathRepository,
-      hasDirtyFiles: hasDirtyStagedFiles,
+      hasDirtyFiles: hasDirtyStagedFiles
     } = props.model;
 
     this.state = {
@@ -203,7 +202,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       hasDirtyFiles: hasDirtyStagedFiles,
       referenceCommit: null,
       challengerCommit: null,
-      stash: [],
+      stash: []
     };
   }
 
@@ -212,7 +211,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   componentDidMount(): void {
     const { model, settings } = this.props;
-
+    model.stashChanged.connect(async (_, args) => {
+      this.setState({
+        stash: args.newValue as any
+      });
+    });
     model.repositoryChanged.connect((_, args) => {
       this.setState({
         repository: args.newValue,
@@ -362,20 +365,20 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       </div>
     );
   }
-  
+
   /**
    * Wrap mouse event handler to stop event propagation
    * @param fn Mouse event handler
    * @returns Mouse event handler that stops event from propagating
    */
   stopPropagationWrapper =
-  (
-    fn: React.EventHandler<React.MouseEvent>
-  ): React.EventHandler<React.MouseEvent> =>
-  (event: React.MouseEvent) => {
-    event.stopPropagation();
-    fn(event);
-  };
+    (
+      fn: React.EventHandler<React.MouseEvent>
+    ): React.EventHandler<React.MouseEvent> =>
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      fn(event);
+    };
 
   /**
    * Renders a toolbar.
@@ -402,7 +405,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       />
     );
   }
-
 
   /**
    * Renders the main panel.
@@ -499,7 +501,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         />
         <GitStash
           stash={this.props.model._stash}
-          model = {this.props.model}
+          model={this.props.model}
           height={100}
           collapsible={true}
           trans={this.props.trans}
@@ -840,8 +842,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     if (remoteChangedFiles) {
       sfiles = sfiles.concat(remoteChangedFiles);
     } else {
-    sfiles.sort((a, b) => a.to.localeCompare(b.to));
-    return sfiles;
+      sfiles.sort((a, b) => a.to.localeCompare(b.to));
+      return sfiles;
     }
   }
 
@@ -930,7 +932,4 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       )(event);
     }
   }
-
-
-
 }

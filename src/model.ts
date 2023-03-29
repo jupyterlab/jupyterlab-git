@@ -252,6 +252,26 @@ export class GitExtension implements IGitExtension {
     return this._stash;
   }
 
+  set stash(v: Git.IStash) {
+    // Shawn: Ask Frederic - Is this OK?
+    const change: IChangedArgs<string> = {
+      name: 'stash',
+      newValue: v as unknown as string,
+      oldValue: this._stash as unknown as string,
+    };
+  
+    this._stash = v;
+  
+    if (change.oldValue !== change.newValue) {
+      this.refresh().then(() => this._stashChanged.emit({
+        name: change.name,
+        oldValue: change.oldValue as string,
+        newValue: change.newValue as string,
+      }));
+    }
+  }
+  
+
   /**
    * A signal emitted when the current Git repository changes.
    */
@@ -1424,6 +1444,7 @@ export class GitExtension implements IGitExtension {
       })
   
       await this.refreshStash();
+
       if (this._stash.length > 0) {
       this._stash[0].files.forEach(file => {
         this._revertFile(file);
@@ -1509,19 +1530,24 @@ export class GitExtension implements IGitExtension {
           );
         }
       );
+
       
       // Contains the raw message
       const stashMsgList = stashListData.message.split('\n').slice(0,-1)
       
       const stashList: Git.IStashEntry[] = []
-
       for (let index in stashMsgList) {
+          
           const stashInfo = stashMsgList[index].split(':')
+
           const branchName = stashInfo[1].match(/WIP on (.*)/) ? stashInfo[1].match(/WIP on (.*)/)[1] : stashInfo[1].split(" ")[2];
+
+          const stashMsg = stashInfo[2].replace(/^\s+/, '');
+
           stashList.push({
               index: parseInt(index),
               branch: branchName,
-              message: stashInfo[2].replace(/^\s+/, ''),
+              message: stashMsg,
               files: []
           })
       }
@@ -1553,7 +1579,12 @@ export class GitExtension implements IGitExtension {
         }
       }
 
+      // Check if the stash is different from the old stash
+      // if it's different, set the new stash
+      // 
       this._setStash(stashList);
+
+      
     } catch (err) {
       console.error(err);
       return;
@@ -1575,6 +1606,15 @@ export class GitExtension implements IGitExtension {
     let path: string;
     try {
       path = await this._getPathRepository();
+
+      await this._taskHandler.execute<void>('git:stash:drop', async() => {
+        await requestAPI(URLExt.join(path, 'stash'), 'DELETE', 
+          stash_index !== 'clear' ? {stash_index} : {stash_index: 'clear'}
+        );
+      })
+
+      await this.refreshStash();
+      await this._refreshModel();
     } catch (error) {
       this._clearStatus();
       if (!(error instanceof Git.NotInRepository)) {
@@ -1582,19 +1622,6 @@ export class GitExtension implements IGitExtension {
       }
       return;
     }
-    console.log('model.stash_drop', stash_index);
-
-
-    // Change this to
-    
-
-    await this._taskHandler.execute<void>('git:stash:drop', async() => {
-      await requestAPI(URLExt.join(path, 'stash'), 'DELETE', 
-        stash_index !== 'clear' ? {stash_index} : {stash_index: 'clear'}
-      );
-    })
-
-    await this.refreshStash();
   } 
 
   /**

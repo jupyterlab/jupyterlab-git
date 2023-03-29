@@ -904,11 +904,12 @@ class GitStashHandler(GitHandler):
         """
         local_path = self.url2localpath(path)
         data = self.get_json_body()
-        response = await self.git.stash(local_path)
+        response = ""
 
         if "stashMsg" in data:
-            print(stashMsg)
             response = await self.git.stash(local_path, data["stashMsg"])
+        else:
+            response = await self.git.stash(local_path)
 
         if response["code"] != 0:
             self.set_status(500)
@@ -921,26 +922,21 @@ class GitStashHandler(GitHandler):
         """
         local_path = self.url2localpath(path)
         data = self.get_json_body()
-
-        print("calling GitStashClearHandler", data["stash_index"])
-
-        data = self.get_json_body()
         response = {"code": 42}
 
-        # Clear a single entry
-
+        # Choose what to erase
         if data["stash_index"] == "clear":
             response = await self.git.stash_drop(local_path, "clear")
         elif "stash_index" in data:
             response = await self.git.stash_drop(local_path, data["stash_index"])
         else:
-            print("No  stash index was given")
+            print("No stash index was given")
 
         if response["code"] == 0:
             self.set_status(200)
         else:
             self.set_status(500)
-        self.finish()
+        self.finish(json.dumps(response))
 
 
 class GitStashListHandler(GitHandler):

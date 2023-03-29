@@ -1781,7 +1781,6 @@ class Git:
             A message that describes the stash entry
         """
         cmd = ["git", "stash"]
-
         if len(stashMsg) > 0:
             cmd.extend(["save", "-m", stashMsg])
             print(cmd)
@@ -1789,9 +1788,8 @@ class Git:
         env = os.environ.copy()
         # if the git command is run in a non-interactive terminal, it will not prompt for user input
         env["GIT_TERMINAL_PROMPT"] = "0"
-        code, output, error = await execute(cmd, cwd=path, env=env)
 
-        print(output)
+        code, output, error = await execute(cmd, cwd=path, env=env)
 
         # code 0: no changes to stash
         if code != 0:
@@ -1864,12 +1862,11 @@ class Git:
 
         path: str
             Git path repository
-        stash_index: number
+        stash_index: number or string
             Index of the stash list is first applied to the current branch, then removed from the stash.
-
+            If the string = "clear", the entire stash is removed.
         """
         print("git.py: stash_drop", stash_index)
-        # Clear
         cmd = ["git", "stash"]
 
         if stash_index == "clear":
@@ -1878,12 +1875,16 @@ class Git:
         else:
             cmd.extend(["drop", str(stash_index)])
 
-        print(stash_index)
+        print(cmd)
 
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
 
         code, output, error = await execute(cmd, cwd=path, env=env)
+
+        print("code:", code)
+        print("output:", output)
+        print("error:", error)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
