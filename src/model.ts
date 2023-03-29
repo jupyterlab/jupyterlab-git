@@ -1423,17 +1423,17 @@ export class GitExtension implements IGitExtension {
         );
       })
   
+      await this.refreshStash();
       if (this._stash.length > 0) {
-        this._stash[0].files.forEach(file => {
-          this._revertFile(file);
-        });
-      } else {
-        console.error('Failed to retrieve stashed files.');
-      }
-
-    } catch (error) {
-      console.error('Error stashing changes:', error);
+      this._stash[0].files.forEach(file => {
+        this._revertFile(file);
+      });
+    } else {
+      console.error('Failed to retrieve stashed files.');
     }
+  } catch (error) {
+    console.error('Error stashing changes:', error);
+  }
   }
 
 
@@ -1511,10 +1511,8 @@ export class GitExtension implements IGitExtension {
       );
       
       // Contains the raw message
-      console.log(stashListData);
-
       const stashMsgList = stashListData.message.split('\n').slice(0,-1)
-      console.log(stashMsgList);
+      
       const stashList: Git.IStashEntry[] = []
 
       for (let index in stashMsgList) {
