@@ -9,13 +9,13 @@ test.use({ autoGoto: false });
 test.describe('Merge commit tests', () => {
   test.beforeEach(async ({ baseURL, page, tmpPath }) => {
     await extractFile(
-      baseURL ? baseURL : '',
+      baseURL,
       path.resolve(__dirname, 'data', baseRepositoryPath),
-      path.join(tmpPath, 'repository-merge-commits.tar.gz')
+      path.join(tmpPath, 'repository.tar.gz')
     );
 
     // URL for merge commit example repository
-    await page.goto(`tree/${tmpPath}/repository-merge-commits`);
+    await page.goto(`tree/${tmpPath}/repository`);
 
     await page.sidebar.openTab('jp-git-sessions');
 
@@ -35,15 +35,11 @@ test.describe('Merge commit tests', () => {
     const insertions = mergeCommit.locator("span[title='# Insertions']");
     const deletions = mergeCommit.locator("span[title='# Deletions']");
 
-    await Promise.all([
-      filesChanged.waitFor(),
-      insertions.waitFor(),
-      deletions.waitFor()
-    ]);
+    filesChanged.waitFor();
 
-    expect(filesChanged.innerText()).toBe('3');
-    expect(insertions.innerText()).toBe('18240');
-    expect(deletions.innerText()).toBe('18239');
+    await expect(filesChanged.innerText()).toBe('3');
+    await expect(insertions.innerText()).toBe('18240');
+    await expect(deletions.innerText()).toBe('18239');
   });
 
   test('should correctly display files changed', async ({ page }) => {
@@ -53,9 +49,15 @@ test.describe('Merge commit tests', () => {
 
     await mergeCommit.click();
 
-    expect(page.getByRole('listitem', { name: 'hello-world.py' })).toBeTruthy();
-    expect(page.getByRole('listitem', { name: 'names.txt' })).toBeTruthy();
-    expect(page.getByRole('listitem', { name: 'new-file.txt' })).toBeTruthy();
+    const helloWorldFile = page.getByRole('listitem', {
+      name: 'hello-world.py'
+    });
+    const namesFile = page.getByRole('listitem', { name: 'names.txt' });
+    const newFile = page.getByRole('listitem', { name: 'new-file.txt' });
+
+    expect(helloWorldFile).toBeTruthy();
+    expect(namesFile).toBeTruthy();
+    expect(newFile).toBeTruthy();
   });
 
   test('should diff file after clicking', async ({ page }) => {
