@@ -25,26 +25,28 @@ test.describe('Merge commit tests', () => {
   test('should correctly display num files changed, insertions, and deletions', async ({
     page
   }) => {
-    const mergeCommit = page.locator(
-      '#8d6c5d068c9bb63ba67712d61ae7be49eae9d887'
+    const mergeCommit = await page.getByText(
+      "basokant8d6c5d09 days agoworkingmainMerge branch 'sort-names'"
     );
 
     await mergeCommit.click();
 
-    const filesChanged = mergeCommit.locator("span[title='# Files Changed']");
-    const insertions = mergeCommit.locator("span[title='# Insertions']");
-    const deletions = mergeCommit.locator("span[title='# Deletions']");
+    const filesChanged = await mergeCommit.getByTitle('# Files Changed');
+    const insertions = await mergeCommit.getByTitle('# Insertions');
+    const deletions = await mergeCommit.getByTitle('# Deletions');
 
-    filesChanged.waitFor();
+    await filesChanged.waitFor();
 
-    await expect(filesChanged.innerText()).toBe('3');
-    await expect(insertions.innerText()).toBe('18240');
-    await expect(deletions.innerText()).toBe('18239');
+    console.log(await filesChanged.innerHTML());
+
+    await expect(await filesChanged.innerText()).toBe('3');
+    await expect(await insertions.innerText()).toBe('18240');
+    await expect(await deletions.innerText()).toBe('18239');
   });
 
   test('should correctly display files changed', async ({ page }) => {
-    const mergeCommit = page.locator(
-      '#8d6c5d068c9bb63ba67712d61ae7be49eae9d887'
+    const mergeCommit = await page.getByText(
+      "basokant8d6c5d09 days agoworkingmainMerge branch 'sort-names'"
     );
 
     await mergeCommit.click();
@@ -61,8 +63,8 @@ test.describe('Merge commit tests', () => {
   });
 
   test('should diff file after clicking', async ({ page }) => {
-    const mergeCommit = page.locator(
-      '#8d6c5d068c9bb63ba67712d61ae7be49eae9d887'
+    const mergeCommit = await page.getByText(
+      "basokant8d6c5d09 days agoworkingmainMerge branch 'sort-names'"
     );
 
     await mergeCommit.click();
@@ -78,8 +80,8 @@ test.describe('Merge commit tests', () => {
   });
 
   test('should revert merge commit', async ({ page }) => {
-    const mergeCommit = page.locator(
-      '#8d6c5d068c9bb63ba67712d61ae7be49eae9d887'
+    const mergeCommit = await page.getByText(
+      "basokant8d6c5d09 days agoworkingmainMerge branch 'sort-names'"
     );
 
     await mergeCommit.click();
@@ -87,17 +89,17 @@ test.describe('Merge commit tests', () => {
       .getByRole('button', { name: 'Revert changes introduced by this commit' })
       .click();
 
-    const dialog = page.getByRole('dialog');
-    dialog.waitFor({ state: 'visible' });
+    const dialog = await page.getByRole('dialog');
+    await dialog.waitFor({ state: 'visible' });
 
-    expect(dialog).toBeTruthy();
+    await expect(dialog).toBeTruthy();
 
     await dialog.getByRole('button', { name: 'Submit' }).click();
-    dialog.waitFor({ state: 'detached' });
+    await dialog.waitFor({ state: 'detached' });
 
-    const revertMergeCommit = page
+    const revertMergeCommit = await page
       .locator('#jp-git-sessions')
-      .locator("div:contains('Revert 'Merge branch 'sort-names''')");
+      .getByText("Revert 'Merge branch 'sort-names''");
 
     await revertMergeCommit.waitFor({ state: 'visible' });
 
