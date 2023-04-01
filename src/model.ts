@@ -30,6 +30,11 @@ export function getDiffProvider(
     ?.callback;
 }
 
+// export interface IStashChangedArgs extends IChangedArgs<Git.IStash, Git.IStash> {
+//   name: 'stash';
+// }
+
+
 /**
  * Class for creating a model for retrieving info from, and interacting with, a remote Git repository.
  */
@@ -241,7 +246,7 @@ export class GitExtension implements IGitExtension {
    *  A signal emitted when the Git stash changes.
    * 
    */
-  get stashChanged(): ISignal <IGitExtension, IChangedArgs <string | null>> {
+  get stashChanged(): ISignal <IGitExtension, IChangedArgs <Git.IStash>> {
     return this._stashChanged;
   }
 
@@ -253,21 +258,17 @@ export class GitExtension implements IGitExtension {
   }
 
   set stash(v: Git.IStash) {
-    // Shawn: Ask Frederic - Is this OK?
-    const change: IChangedArgs<string> = {
+    // Shawn: Weird type casting issue 'as unknown as string'
+    const change: IChangedArgs<Git.IStash> = {
       name: 'stash',
-      newValue: v as unknown as string,
-      oldValue: this._stash as unknown as string,
+      newValue: v,
+      oldValue: this._stash 
     };
-  
+
     this._stash = v;
   
     if (change.oldValue !== change.newValue) {
-      this.refresh().then(() => this._stashChanged.emit({
-        name: change.name,
-        oldValue: change.oldValue as string,
-        newValue: change.newValue as string,
-      }));
+      this.refresh().then(() => this._stashChanged.emit(change));
     }
   }
   
@@ -1445,7 +1446,7 @@ export class GitExtension implements IGitExtension {
   
       await this.refreshStash();
 
-      if (this._stash.length > 0) {
+      if (this._stash?.length > 0) {
       this._stash[0].files.forEach(file => {
         this._revertFile(file);
       });
@@ -1582,8 +1583,8 @@ export class GitExtension implements IGitExtension {
       // Check if the stash is different from the old stash
       // if it's different, set the new stash
       // 
-      this._setStash(stashList);
-
+      // this._setStash(stashList);
+      this.stash = stashList;
       
     } catch (err) {
       console.error(err);
@@ -1614,7 +1615,10 @@ export class GitExtension implements IGitExtension {
       })
 
       await this.refreshStash();
+      
       await this._refreshModel();
+
+      
     } catch (error) {
       this._clearStatus();
       if (!(error instanceof Git.NotInRepository)) {
@@ -1864,9 +1868,9 @@ export class GitExtension implements IGitExtension {
    * 
    * @param s - repository stash
    */
-  protected _setStash(s: Git.IStash): void {
-    this._stash = s;
-  }
+  // protected _setStash(s: Git.IStash): void {
+  //   this._stash = s;
+  // }
 
   /**
    * Set the repository status.
@@ -2055,7 +2059,7 @@ export class GitExtension implements IGitExtension {
   >(this);
   private _stashChanged = new Signal<
     IGitExtension,
-    IChangedArgs<string | null>
+    IChangedArgs<Git.IStash>
   >(this);
   private _statusChanged = new Signal<IGitExtension, Git.IStatus>(this);
   private _notifyRemoteChanges = new Signal<

@@ -229,6 +229,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
             icon={discardIcon}
             title={'Clear the entire stash'}
             onClick={props.stopPropagationWrapper(() => {
+              console.log('Clearing the stash');
               gitStashClear();
             })}
           />
