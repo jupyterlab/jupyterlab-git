@@ -258,18 +258,22 @@ export class GitExtension implements IGitExtension {
   }
 
   set stash(v: Git.IStash) {
-    // Shawn: Weird type casting issue 'as unknown as string'
     const change: IChangedArgs<Git.IStash> = {
       name: 'stash',
       newValue: v,
       oldValue: this._stash 
     };
 
-    this._stash = v;
-  
-    if (change.oldValue !== change.newValue) {
-      this.refresh().then(() => this._stashChanged.emit(change));
-    }
+    this._pendingReadyPromise += 1;
+
+    this._readyPromise.then(() => {
+      this._stash = v;
+      this._pendingReadyPromise -= 1;
+
+      if (change.oldValue !== change.newValue) {
+        this.refresh().then(() => this._stashChanged.emit(change));
+      }
+    });
   }
   
 
@@ -1469,20 +1473,40 @@ export class GitExtension implements IGitExtension {
    * 
    */
   async stash_pop(index?: number): Promise<void>{
-    const path = await this._getPathRepository();
 
-    await this._taskHandler.execute<void>('git:stash:pop', async() => {
-      await requestAPI(URLExt.join(path, 'stash_pop'), 'POST', 
-        index !== undefined ? {index} : undefined
-      );
-    })
+    try{ 
+      const path = await this._getPathRepository();
+      const stashFiles = this._stash[index].files;
+  
+      await this._taskHandler.execute<void>('git:stash:pop', async() => {
+        await requestAPI(URLExt.join(path, 'stash_pop'), 'POST', 
+          index !== undefined ? {index} : undefined
+        );
+      })
+  
+  
+      await this.refresh();
+  
+      stashFiles.forEach(file=>{
+        this._refreshAffectedFile(file)
+      })
+  
+    } catch (error) {
+      console.error('Failed to pop stash', error);
 
+    }
+ 
     await this.refreshStash();
+
   }
   
   async stash_apply(index?: number): Promise<void> {
     const path = await this._getPathRepository();
     try {
+
+      // Grab the list 
+      const stashFiles = this._stash[index].files;
+      // if stashFiles is empty, throw an error
 
       await this._taskHandler.execute<void>('git:stash:apply', async() => {
         await requestAPI(URLExt.join(path, 'stash_apply'), 'POST', 
@@ -1490,10 +1514,16 @@ export class GitExtension implements IGitExtension {
         );
       })
 
-    } catch (error) {
-      console.error('Failed to refresh apply stash', error);
+      await this.refresh();
 
-      // should i spin dialog box?
+      stashFiles.forEach(file=>{
+        this._refreshAffectedFile(file)
+      })
+
+    } catch (error) {
+      console.error('Failed to apply stash', error);
+
+      // should i spin dialog box? 
     }
 
     await this.refreshStash();
@@ -1580,10 +1610,6 @@ export class GitExtension implements IGitExtension {
         }
       }
 
-      // Check if the stash is different from the old stash
-      // if it's different, set the new stash
-      // 
-      // this._setStash(stashList);
       this.stash = stashList;
       
     } catch (err) {
@@ -2013,6 +2039,17 @@ export class GitExtension implements IGitExtension {
     }
   }
 
+  
+
+
+  private _refreshAffectedFile(path: string): void {
+    const widget = this._docmanager.findWidget(this.getRelativeFilePath(path));
+    if (widget) {
+      widget.context.revert();
+    }
+  }
+
+  
   /**
    * Set the marker object for a repository path and branch.
    */

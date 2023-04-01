@@ -1019,12 +1019,9 @@ class GitStashApplyHandler(GitHandler):
         local_path = self.url2localpath(path)
         data = self.get_json_body()
 
-        print("calling GitStashApplyHandler")
-
-        # specific stash
+        # Apply a specific stash or the latest
         if "index" in data:
             response = await self.git.stash_apply(local_path, data["index"])
-        # latest stash
         else:
             response = await self.git.stash_apply(local_path)
 
@@ -1032,6 +1029,7 @@ class GitStashApplyHandler(GitHandler):
             self.set_status(200)
         else:
             self.set_status(500)
+
         self.finish(json.dumps(response))
 
 
