@@ -1476,6 +1476,7 @@ export class GitExtension implements IGitExtension {
 
     try{ 
       const path = await this._getPathRepository();
+      
       const stashFiles = this._stash[index].files;
   
       await this._taskHandler.execute<void>('git:stash:pop', async() => {
@@ -1493,7 +1494,6 @@ export class GitExtension implements IGitExtension {
   
     } catch (error) {
       console.error('Failed to pop stash', error);
-
     }
  
     await this.refreshStash();

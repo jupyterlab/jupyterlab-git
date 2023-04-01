@@ -1840,7 +1840,7 @@ class Git:
             If the index is not provided, the most recent stash (index=0) will be removed from the stash.
 
         """
-        cmd = ["git", "stash", "drop"]
+        cmd = ["git", "stash", "pop"]
 
         if stash_index:
             cmd.append(stash_index)
