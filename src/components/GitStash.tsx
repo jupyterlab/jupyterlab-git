@@ -15,9 +15,17 @@ import { ActionButton } from './ActionButton';
 import { addIcon, discardIcon, removeIcon } from '../style/icons';
 import { TranslationBundle } from '@jupyterlab/translation';
 // import { CellDiffWidget } from 'nbdime/lib/diff/widget';
-// const HEADER_HEIGHT = 34;
-// const ITEM_HEIGHT = 25;
 import { UseSignal } from '@jupyterlab/apputils';
+import { FixedSizeList } from 'react-window';
+import {
+  fileIconStyle,
+  fileLabelStyle
+  // folderLabelStyle
+} from '../style/FilePathStyle';
+import { fileIcon } from '@jupyterlab/ui-components';
+
+const HEADER_HEIGHT = 34;
+const ITEM_HEIGHT = 25;
 
 export interface IGitStashProps {
   /**
@@ -111,6 +119,9 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
   props: IGitStashEntryProps
 ) => {
   const [showStashFiles, setShowStashFiles] = React.useState(false);
+
+  const nFiles = props?.files?.length;
+
   /** Git Stash Pop */
   const gitStashPop = async (index: number): Promise<void> => {
     console.log('Call Git Stash Pop', index);
@@ -141,6 +152,15 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
           }
         }}
       >
+        {props.collapsible && (
+          <button className={changeStageButtonStyle}>
+            {showStashFiles && props?.files.length > 0 ? (
+              <caretDownIcon.react />
+            ) : (
+              <caretRightIcon.react />
+            )}
+          </button>
+        )}
         <p>
           {props.message} (on {props.branch})
         </p>
@@ -167,23 +187,42 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
             gitStashApply(props.index);
           })}
         />
-
-        {props.collapsible && (
-          <button className={changeStageButtonStyle}>
-            {showStashFiles && props?.files.length > 0 ? (
-              <caretDownIcon.react />
-            ) : (
-              <caretRightIcon.react />
-            )}
-          </button>
-        )}
       </div>
       {showStashFiles && (
-        <ul>
-          {props?.files.map(name => (
-            <li>{name}</li>
-          ))}
-        </ul>
+        <FixedSizeList
+          height={Math.max(
+            Math.min(props.height - HEADER_HEIGHT, nFiles * ITEM_HEIGHT),
+            ITEM_HEIGHT
+          )}
+          itemCount={nFiles}
+          itemData={props?.files}
+          itemKey={(index, data) => data[index]}
+          itemSize={ITEM_HEIGHT}
+          style={{ overflowX: 'hidden' }}
+          width={'auto'}
+        >
+          {({ index, style }) => {
+            const file = props.files[index];
+            return (
+              <React.Fragment>
+                <fileIcon.react
+                  className={fileIconStyle}
+                  elementPosition="center"
+                  tag="span"
+                />
+                <span className={fileLabelStyle}>
+                  {file}
+                  {/* <span className={folderLabelStyle}>{folder}</span> */}
+                </span>
+              </React.Fragment>
+            );
+          }}
+        </FixedSizeList>
+        // <ul>
+        //   {props?.files.map(name => (
+        //     <li>{name}</li>
+        //   ))}
+        // </ul>
       )}
     </div>
   );
@@ -192,7 +231,7 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
 export const GitStash: React.FunctionComponent<IGitStashProps> = (
   props: IGitStashProps
 ) => {
-  const [showStash, setShowStash] = React.useState(true);
+  const [showStash, setShowStash] = React.useState(false);
   const nStash = props && props.stash ? props.stash.length : 0;
 
   const gitStashClear = async (): Promise<void> => {
@@ -251,7 +290,6 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
             return null;
           }
 
-          const showStash = true; // Replace with actual condition
           const nStash = props.stash.length;
 
           return (
@@ -277,23 +315,6 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
           );
         }}
       </UseSignal>
-
-      {/* {showStash && nStash > 0 && (
-        props.stash?.map((entry) => (
-          // each entry should have a dropdown
-          <GitStashEntry
-            files={entry.files}
-            model={props.model}
-            index={entry.index}
-            branch={entry.branch}
-            message={entry.message}
-            height={100}
-            collapsible={true}
-            stopPropagationWrapper={props.stopPropagationWrapper}
-          />
-        ))
-      )}
-       */}
     </div>
   );
 };
