@@ -31,6 +31,16 @@ import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
 import { WarningRounded as WarningRoundedIcon } from '@material-ui/icons';
 import { GitStash } from './GitStash';
+import { ActionButton } from './ActionButton';
+import {
+  addIcon,
+  discardIcon
+  // diffIcon,
+  // discardIcon,
+  // openIcon,
+  // removeIcon
+} from '../style/icons';
+import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 
 /**
  * Interface describing component properties.
@@ -380,6 +390,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       fn(event);
     };
 
+  private _gitStashClear = async (): Promise<void> => {
+    await this.props.model.stash_drop('clear');
+  };
+
+  private _gitStashApplyLatest = async (): Promise<void> => {
+    await this.props.model.stash_apply(0);
+  };
+
   /**
    * Renders a toolbar.
    *
@@ -500,6 +518,29 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           stopPropagationWrapper={stopPropagationWrapper}
         />
         <GitStash
+          actions={
+            <React.Fragment>
+              <ActionButton
+                className={hiddenButtonStyle}
+                icon={discardIcon}
+                title={'Clear the entire stash'}
+                disabled={this.props.model._stash.length === 0}
+                onClick={this.stopPropagationWrapper(() => {
+                  console.log('Clearing the stash');
+                  this._gitStashClear();
+                })}
+              />
+              <ActionButton
+                icon={addIcon}
+                className={hiddenButtonStyle}
+                disabled={this.props.model._stash.length === 0}
+                title={'Apply the latest stash'}
+                onClick={this.stopPropagationWrapper(() => {
+                  this._gitStashApplyLatest();
+                })}
+              />
+            </React.Fragment>
+          }
           stash={this.props.model._stash}
           model={this.props.model}
           height={100}

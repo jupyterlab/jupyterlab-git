@@ -29,6 +29,11 @@ const ITEM_HEIGHT = 25;
 
 export interface IGitStashProps {
   /**
+   * Actions component to display at the far right of the stage
+   */
+  actions?: React.ReactElement;
+
+  /**
    * Is this group collapsible
    */
   collapsible?: boolean;
@@ -270,15 +275,8 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   props: IGitStashProps
 ) => {
   const [showStash, setShowStash] = React.useState(false);
+
   const nStash = props && props.stash ? props.stash.length : 0;
-
-  const gitStashClear = async (): Promise<void> => {
-    await props.model.stash_drop('clear');
-  };
-
-  const gitStashApplyLatest = async (): Promise<void> => {
-    await props.model.stash_apply(0);
-  };
 
   return (
     <div className={sectionFileContainerStyle}>
@@ -305,22 +303,8 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
           style={{ display: 'flex', justifyContent: 'space-between' }}
         >
           <p>Stash</p>
-          <span>
-            <ActionButton
-              icon={discardIcon}
-              title={'Clear the entire stash'}
-              onClick={props.stopPropagationWrapper(() => {
-                console.log('Clearing the stash');
-                gitStashClear();
-              })}
-            />
-            <ActionButton
-              icon={discardIcon}
-              title={'Apply the latest stash'}
-              onClick={props.stopPropagationWrapper(() => {
-                gitStashApplyLatest();
-              })}
-            />
+          <span style={{ display: 'flex' }}>
+            {props.actions}
             <span>({nStash})</span>
           </span>
         </span>
