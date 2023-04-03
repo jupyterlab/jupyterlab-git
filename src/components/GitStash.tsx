@@ -19,8 +19,8 @@ import { UseSignal } from '@jupyterlab/apputils';
 import { FixedSizeList } from 'react-window';
 import {
   fileIconStyle,
-  fileLabelStyle
-  // folderLabelStyle
+  fileLabelStyle,
+  folderLabelStyle
 } from '../style/FilePathStyle';
 import { fileIcon } from '@jupyterlab/ui-components';
 
@@ -122,24 +122,54 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
 
   const nFiles = props?.files?.length;
 
-  /** Git Stash Pop */
   const gitStashPop = async (index: number): Promise<void> => {
-    console.log('Call Git Stash Pop', index);
-
-    await props.model.stash_pop(index);
+    try {
+      await props.model.stash_pop(index);
+    } catch (err) {
+      console.error(err);
+    }
   };
-  /** Git Stash Drop */
+
   const gitStashDrop = async (index: number): Promise<void> => {
     console.log('Call Git Stash Drop', index);
-
-    const response = await props.model.stash_drop(index);
-    console.log({ response });
+    try {
+      await props.model.stash_drop(index);
+    } catch (err) {
+      console.error(err);
+    }
   };
-  /** Git Stash Apply */
-  const gitStashApply = async (index: number): Promise<void> => {
-    console.log('Call Git Stash Apply', index);
 
-    await props.model.stash_apply(index);
+  const gitStashApply = async (index: number): Promise<void> => {
+    try {
+      await props.model.stash_apply(index);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const getFilePath = (file: string) => {
+    // Root directory
+    if (!file.includes('/')) {
+      return {
+        name: file,
+        path: ''
+      };
+    } else {
+      // One folder
+      const fileSplit = file.split('/');
+      if (fileSplit.length == 2) {
+        return {
+          path: fileSplit[0],
+          name: fileSplit[1]
+        };
+        // More than one nested folder
+      } else {
+        return {
+          name: fileSplit.pop(),
+          path: fileSplit.join('/')
+        };
+      }
+    }
   };
 
   return (
@@ -203,26 +233,34 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
         >
           {({ index, style }) => {
             const file = props.files[index];
+            const { name, path } = getFilePath(file);
+
             return (
-              <React.Fragment>
+              <div style={{ display: 'flex', padding: '0 4px' }}>
                 <fileIcon.react
                   className={fileIconStyle}
                   elementPosition="center"
                   tag="span"
                 />
                 <span className={fileLabelStyle}>
-                  {file}
+                  {name}
+                  <span
+                    // style={{
+                    //   fontSize: 'var(--jp-ui-font-size0)',
+                    //   margin: '0 4px',
+                    //   color: 'var(--jp-ui-font-color2)'
+                    // }}
+                    className={folderLabelStyle}
+                  >
+                    {' '}
+                    <span>{path}</span>
+                  </span>
                   {/* <span className={folderLabelStyle}>{folder}</span> */}
                 </span>
-              </React.Fragment>
+              </div>
             );
           }}
         </FixedSizeList>
-        // <ul>
-        //   {props?.files.map(name => (
-        //     <li>{name}</li>
-        //   ))}
-        // </ul>
       )}
     </div>
   );
@@ -262,30 +300,34 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
             )}
           </button>
         )}
-        <span className={sectionHeaderLabelStyle}>
-          Stash ({nStash})
-          <ActionButton
-            icon={discardIcon}
-            title={'Clear the entire stash'}
-            onClick={props.stopPropagationWrapper(() => {
-              console.log('Clearing the stash');
-              gitStashClear();
-            })}
-          />
-          <ActionButton
-            icon={discardIcon}
-            title={'Apply the latest stash'}
-            onClick={props.stopPropagationWrapper(() => {
-              gitStashApplyLatest();
-            })}
-          />
+        <span
+          className={sectionHeaderLabelStyle}
+          style={{ display: 'flex', justifyContent: 'space-between' }}
+        >
+          <p>Stash</p>
+          <span>
+            <ActionButton
+              icon={discardIcon}
+              title={'Clear the entire stash'}
+              onClick={props.stopPropagationWrapper(() => {
+                console.log('Clearing the stash');
+                gitStashClear();
+              })}
+            />
+            <ActionButton
+              icon={discardIcon}
+              title={'Apply the latest stash'}
+              onClick={props.stopPropagationWrapper(() => {
+                gitStashApplyLatest();
+              })}
+            />
+            <span>({nStash})</span>
+          </span>
         </span>
       </div>
 
       <UseSignal signal={props.model.stashChanged}>
         {() => {
-          console.log('props.model.stashChanged', props.model.stashChanged);
-
           if (!props.stash || !Array.isArray(props.stash)) {
             return null;
           }
