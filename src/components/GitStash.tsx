@@ -1,6 +1,5 @@
 import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
-// import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import {
   changeStageButtonStyle,
   sectionAreaStyle,
@@ -9,12 +8,11 @@ import {
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
 import { GitExtension } from '../model';
-// import { hiddenButtonStyle } from '../style/ActionButtonStyle';
+import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 // import { fileListWrapperClass } from '../style/FileListStyle';
 import { ActionButton } from './ActionButton';
 import { addIcon, discardIcon, removeIcon } from '../style/icons';
 import { TranslationBundle } from '@jupyterlab/translation';
-// import { CellDiffWidget } from 'nbdime/lib/diff/widget';
 import { UseSignal } from '@jupyterlab/apputils';
 import { FixedSizeList } from 'react-window';
 import {
@@ -73,6 +71,11 @@ export interface IGitStashProps {
 
 interface IGitStashEntryProps {
   /**
+   * Actions component to display at the far right of the stage
+   */
+  actions?: React.ReactElement;
+
+  /**
    * Git extension model
    */
   model: GitExtension;
@@ -127,30 +130,30 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
 
   const nFiles = props?.files?.length;
 
-  const gitStashPop = async (index: number): Promise<void> => {
-    try {
-      await props.model.stash_pop(index);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // const gitStashPop = async (index: number): Promise<void> => {
+  //   try {
+  //     await props.model.stash_pop(index);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
-  const gitStashDrop = async (index: number): Promise<void> => {
-    console.log('Call Git Stash Drop', index);
-    try {
-      await props.model.stash_drop(index);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // const gitStashDrop = async (index: number): Promise<void> => {
+  //   console.log('Call Git Stash Drop', index);
+  //   try {
+  //     await props.model.stash_drop(index);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
-  const gitStashApply = async (index: number): Promise<void> => {
-    try {
-      await props.model.stash_apply(index);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // const gitStashApply = async (index: number): Promise<void> => {
+  //   try {
+  //     await props.model.stash_apply(index);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
   const getFilePath = (file: string) => {
     // Root directory
@@ -178,7 +181,7 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
   };
 
   return (
-    <div>
+    <div className={sectionFileContainerStyle}>
       <div
         className={sectionAreaStyle}
         onClick={() => {
@@ -196,32 +199,15 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
             )}
           </button>
         )}
-        <p>
-          {props.message} (on {props.branch})
-        </p>
-        <ActionButton
-          icon={addIcon}
-          title={'Pop'}
-          onClick={props.stopPropagationWrapper(() => {
-            console.log('Pop It!');
-            gitStashPop(props.index);
-          })}
-        />
-        <ActionButton
-          icon={discardIcon}
-          title={'Drop'}
-          onClick={props.stopPropagationWrapper(() => {
-            console.log('Drop it');
-            gitStashDrop(props.index);
-          })}
-        />
-        <ActionButton
-          icon={removeIcon}
-          title={'Apply'}
-          onClick={props.stopPropagationWrapper(() => {
-            gitStashApply(props.index);
-          })}
-        />
+        <span
+          className={sectionHeaderLabelStyle}
+          style={{ display: 'flex', justifyContent: 'space-between' }}
+        >
+          <p>
+            {props.message} (on {props.branch})
+          </p>
+          <span style={{ display: 'flex' }}>{props.actions}</span>
+        </span>
       </div>
       {showStashFiles && (
         <FixedSizeList
@@ -277,6 +263,31 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   const [showStash, setShowStash] = React.useState(false);
 
   const nStash = props && props.stash ? props.stash.length : 0;
+
+  const gitStashPop = async (index: number): Promise<void> => {
+    try {
+      await props.model.stash_pop(index);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const gitStashDrop = async (index: number): Promise<void> => {
+    console.log('Call Git Stash Drop', index);
+    try {
+      await props.model.stash_drop(index);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const gitStashApply = async (index: number): Promise<void> => {
+    try {
+      await props.model.stash_apply(index);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className={sectionFileContainerStyle}>
@@ -334,6 +345,35 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
                     height={100}
                     collapsible={true}
                     stopPropagationWrapper={props.stopPropagationWrapper}
+                    actions={
+                      <React.Fragment>
+                        <ActionButton
+                          className={hiddenButtonStyle}
+                          icon={addIcon}
+                          title={'Pop stash entry'}
+                          onClick={props.stopPropagationWrapper(() => {
+                            console.log('Pop It!');
+                            gitStashPop(entry.index);
+                          })}
+                        />
+                        <ActionButton
+                          className={hiddenButtonStyle}
+                          icon={discardIcon}
+                          title={'Drop stash entry'}
+                          onClick={props.stopPropagationWrapper(() => {
+                            gitStashDrop(entry.index);
+                          })}
+                        />
+                        <ActionButton
+                          className={hiddenButtonStyle}
+                          icon={removeIcon}
+                          title={'Apply stash entry'}
+                          onClick={props.stopPropagationWrapper(() => {
+                            gitStashApply(entry.index);
+                          })}
+                        />
+                      </React.Fragment>
+                    }
                   />
                 ))}
               </>

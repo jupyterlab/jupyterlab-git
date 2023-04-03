@@ -526,7 +526,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
                 title={'Clear the entire stash'}
                 disabled={this.props.model._stash.length === 0}
                 onClick={this.stopPropagationWrapper(() => {
-                  console.log('Clearing the stash');
                   this._gitStashClear();
                 })}
               />
