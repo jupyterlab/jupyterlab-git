@@ -81,7 +81,7 @@ export enum Operation {
   Pull = 'Pull',
   Push = 'Push',
   ForcePush = 'ForcePush',
-  Fetch = 'Fetch',
+  Fetch = 'Fetch'
 }
 
 interface IFileDiffArgument {
@@ -390,8 +390,8 @@ export function addCommands(
     caption: args =>
       args.force
         ? trans.__(
-          'Discard all current changes and pull from remote repository'
-        )
+            'Discard all current changes and pull from remote repository'
+          )
         : trans.__('Pull latest code from remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
@@ -666,8 +666,9 @@ export function addCommands(
             content.addWidget(widget);
           } catch (reason) {
             console.error(reason);
-            const msg = `Load Diff Model Error (${(reason as Error).message || reason
-              })`;
+            const msg = `Load Diff Model Error (${
+              (reason as Error).message || reason
+            })`;
             modelIsLoading.reject(msg);
           }
 
@@ -782,53 +783,48 @@ export function addCommands(
 
   commands.addCommand(CommandIDs.gitStash, {
     label: trans.__('Stash Changes'),
-    caption: trans.__(
-      'Stash all current changes'
-    ),
+    caption: trans.__('Stash all current changes'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
- 
-        // Ask the user if they want to stash
+      // Ask the user if they want to stash
 
-        const stashDialog = await InputDialog.getText({
-          title: 'Enter a stash message (optional):'
-        }) 
-        const stashMsg = stashDialog.value ? stashDialog.value : ""
-        // TO DO: Ask the user if they would like to add a stash message
-        const result = await showDialog({
-          title: trans.__('Stash changes'),
-          body: trans.__('Do you want to stash your changes?'),
-          buttons: [
-            Dialog.cancelButton({
-              label: trans.__('Cancel'),
-            }),
-            Dialog.warnButton({
-              label: trans.__('Yes')
-            })
-          ]
-        })
-        
+      const stashDialog = await InputDialog.getText({
+        title: trans.__('Enter a stash message (optional):')
+      });
+      const stashMsg = stashDialog.value ? stashDialog.value : '';
+      // TO DO: Ask the user if they would like to add a stash message
+      const result = await showDialog({
+        title: trans.__('Stash changes'),
+        body: trans.__('Do you want to stash your changes?'),
+        buttons: [
+          Dialog.cancelButton({
+            label: trans.__('Cancel')
+          }),
+          Dialog.warnButton({
+            label: trans.__('Yes')
+          })
+        ]
+      });
 
-        if (result.button.accept){
-          logger.log({
-            level: Level.RUNNING,
-            message: trans.__('Stashing changes')
-          });
-          try {
+      if (result.button.accept) {
+        logger.log({
+          level: Level.RUNNING,
+          message: trans.__('Stashing changes')
+        });
+        try {
           const currentPath = fileBrowserModel.path;
           await gitModel.stashChanges(currentPath, stashMsg);
           // Success
           logger.log({
             message: trans.__('Successfully stashed'),
-            level: Level.SUCCESS,
+            level: Level.SUCCESS
           });
-          
+
           // Revert each file
           // const path = await gitModel._getPathRepository();
           // gitModel.stash[0].files.forEach(file=>{
           //   console.log('file changed:', gitModel.pathRepository, "/", file);
 
-            
           // })
 
           // ------------ Shawn: Fix error handling ----------------
@@ -838,10 +834,10 @@ export function addCommands(
               'Encountered an error when pulling changes. Error: ',
               error
             );
-  
+
             const errorMsg =
               typeof error === 'string' ? error : (error as Error).message;
-  
+
             // Discard changes then retry pull
             if (
               errorMsg
@@ -877,41 +873,35 @@ export function addCommands(
             });
           }
         }
-        }
-
+      }
     }
   });
 
   /**
    *  Calls refreshStash
-   * 
+   *
    */
   commands.addCommand(CommandIDs.gitStashList, {
-      label: trans.__('Stash List'),
-      caption: trans.__(
-        'Get all the stashed changes'
-      ),
-      // Check if we are in a git repository 
-      isEnabled: () => gitModel.pathRepository !== null,
-      execute: async args => {
-        try {
-          const data = await gitModel.refreshStash();
-          console.log('execute: data', data);
-          logger.log({
-            message: trans.__('Got the stash list'),
-            level: Level.INFO,
-          });
-        } catch (err) {
-          logger.log({
-            message: trans.__('Failed to get the stash'),
-            level: Level.ERROR,
-            error: err as Error
-          });
-        }      
+    label: trans.__('Stash List'),
+    caption: trans.__('Get all the stashed changes'),
+    // Check if we are in a git repository
+    isEnabled: () => gitModel.pathRepository !== null,
+    execute: async args => {
+      try {
+        await gitModel.refreshStash();
+        logger.log({
+          message: trans.__('Got the stash list'),
+          level: Level.INFO
+        });
+      } catch (err) {
+        logger.log({
+          message: trans.__('Failed to get the stash'),
+          level: Level.ERROR,
+          error: err as Error
+        });
       }
-  });  
-
-
+    }
+  });
 
   /* Context menu commands */
   commands.addCommand(ContextCommandIDs.gitFileOpen, {
@@ -1030,14 +1020,14 @@ export function addCommands(
         const diffContext: Git.Diff.IContext =
           status === 'unmerged'
             ? {
-              currentRef: 'MERGE_HEAD',
-              previousRef: 'HEAD',
-              baseRef: Git.Diff.SpecialRef.BASE
-            }
+                currentRef: 'MERGE_HEAD',
+                previousRef: 'HEAD',
+                baseRef: Git.Diff.SpecialRef.BASE
+              }
             : context ?? {
-              currentRef: specialRef,
-              previousRef: 'HEAD'
-            };
+                currentRef: specialRef,
+                previousRef: 'HEAD'
+              };
 
         const challengerRef = Git.Diff.SpecialRef[diffContext.currentRef as any]
           ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
@@ -1475,14 +1465,14 @@ export function createGitMenu(
     CommandIDs.gitPull,
     CommandIDs.gitResetToRemote,
     CommandIDs.gitManageRemote,
-    CommandIDs.gitTerminalCommand
+    CommandIDs.gitTerminalCommand,
+    CommandIDs.gitStash
   ].forEach(command => {
     menu.addItem({ command });
     if (command === CommandIDs.gitPush) {
       menu.addItem({ command, args: { advanced: true } });
     }
-    // REMOVE THIS
-    if (command === CommandIDs.gitPull || command === CommandIDs.gitStash) {
+    if (command === CommandIDs.gitPull) {
       menu.addItem({ command, args: { force: true } });
     }
   });
@@ -1587,7 +1577,7 @@ export function addFileBrowserContextMenu(
         // replace stage and track with a single "add" operation
         .map(command =>
           command === ContextCommandIDs.gitFileStage ||
-            command === ContextCommandIDs.gitFileTrack
+          command === ContextCommandIDs.gitFileTrack
             ? ContextCommandIDs.gitFileAdd
             : command
         )

@@ -906,13 +906,12 @@ class GitStashHandler(GitHandler):
         data = self.get_json_body()
         response = ""
 
-        if "stashMsg" in data:
-            response = await self.git.stash(local_path, data["stashMsg"])
+        response = await self.git.stash(local_path, data.get("stashMsg"))
+        if response["code"] == 0:
+            self.set_status(201)
         else:
-            response = await self.git.stash(local_path)
-
-        if response["code"] != 0:
             self.set_status(500)
+
         self.finish(json.dumps(response))
 
     @tornado.web.authenticated
@@ -921,55 +920,31 @@ class GitStashHandler(GitHandler):
         DELETE request handler to clear a single stash or the entire stash list in a Git repository
         """
         local_path = self.url2localpath(path)
-        data = self.get_json_body()
-        response = {"code": 42}
-
+        index = self.get_query_argument("index", None)
         # Choose what to erase
-        if data["stash_index"] == "clear":
+        if index is None:
             response = await self.git.stash_drop(local_path, "clear")
-        elif "stash_index" in data:
-            response = await self.git.stash_drop(local_path, data["stash_index"])
         else:
-            print("No stash index was given")
+            response = await self.git.stash_drop(local_path, index)
 
         if response["code"] == 0:
-            self.set_status(200)
+            self.set_status(204)
         else:
             self.set_status(500)
         self.finish(json.dumps(response))
 
-
-class GitStashListHandler(GitHandler):
-    """
-    Handler for 'git stash list'.
-    Returns all the stash files.
-    """
-
     @tornado.web.authenticated
-    async def post(self, path: str = ""):
+    async def get(self, path: str = ""):
         """
-        POST request handler for 'git stash'
+        GET request handler for 'git stash list'
         """
         # pass the path to the git stash so it knows where to stash
         local_path = self.url2localpath(path)
-        data = self.get_json_body()
-        response = await self.git.stash_list(local_path)
-        if response["code"] != 0:
-            self.set_status(500)
-        self.finish(json.dumps(response))
-
-
-class GitStashShowHandler(GitHandler):
-    """
-    Grab all the files affected by each git stash
-    """
-
-    @tornado.web.authenticated
-    async def post(self, path: str = ""):
-        """POST request handler to get files for each stash"""
-        local_path = self.url2localpath(path)
-        data = self.get_json_body()
-        response = await self.git.stash_show(local_path, data["index"])
+        index = self.get_query_argument("index", None)
+        if index is None:
+            response = await self.git.stash_list(local_path)
+        else:
+            response = await self.git.stash_list(local_path, index)
 
         if response["code"] == 0:
             self.set_status(200)
@@ -991,16 +966,10 @@ class GitStashPopHandler(GitHandler):
         local_path = self.url2localpath(path)
         data = self.get_json_body()
 
-        print("calling GitStashPopHandler")
-
-        # if they want to
-        if "index" in data:
-            response = await self.git.stash_pop(local_path, data["index"])
-        else:
-            response = await self.git.stash_pop(local_path)
+        response = await self.git.stash_pop(local_path, data.get("index"))
 
         if response["code"] == 0:
-            self.set_status(200)
+            self.set_status(204)
         else:
             self.set_status(500)
         self.finish(json.dumps(response))
@@ -1014,16 +983,11 @@ class GitStashApplyHandler(GitHandler):
     @tornado.web.authenticated
     async def post(self, path: str = ""):
         """
-        POST request handler to pop the latest stash unless an index was provided
+        POST request handler to apply the latest stash unless an index was provided
         """
         local_path = self.url2localpath(path)
         data = self.get_json_body()
-
-        # Apply a specific stash or the latest
-        if "index" in data:
-            response = await self.git.stash_apply(local_path, data["index"])
-        else:
-            response = await self.git.stash_apply(local_path)
+        response = await self.git.stash_apply(local_path, data.get("index"))
 
         if response["code"] == 0:
             self.set_status(200)

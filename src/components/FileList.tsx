@@ -62,7 +62,9 @@ export interface IFileListProps {
    * @param fn Mouse event handler
    * @returns Mouse event handler that stops event from propagating
    */
-  stopPropagationWrapper: (fn: React.EventHandler<React.MouseEvent>) => React.EventHandler<React.MouseEvent>;
+  stopPropagationWrapper: (
+    fn: React.EventHandler<React.MouseEvent>
+  ) => React.EventHandler<React.MouseEvent>;
 }
 
 export type ContextCommands = Record<Git.Status, ContextCommandIDs[]>;
@@ -98,7 +100,7 @@ export const CONTEXT_COMMANDS: ContextCommands = {
   ],
   unmodified: [ContextCommandIDs.gitFileHistory],
   unmerged: [ContextCommandIDs.gitFileDiff],
-  'stashed': [ContextCommandIDs.gitFileStashPop],
+  stashed: [ContextCommandIDs.gitFileStashPop]
 };
 
 const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
@@ -129,7 +131,7 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
   ],
   unmodified: [ContextCommandIDs.gitFileHistory],
   unmerged: [ContextCommandIDs.gitFileDiff],
-  'stashed': [ContextCommandIDs.gitFileStashPop]
+  stashed: [ContextCommandIDs.gitFileStashPop]
 };
 
 /**
@@ -147,8 +149,6 @@ const areFilesEqual = (fileA: Git.IStatusFile, fileB: Git.IStatusFile) => {
     fileA.status === fileB.status
   );
 };
-
-
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
   constructor(props: IFileListProps) {
@@ -608,7 +608,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       const stagedFiles: Git.IStatusFile[] = [];
       const unstagedFiles: Git.IStatusFile[] = [];
       const untrackedFiles: Git.IStatusFile[] = [];
-    
+
       this.props?.files?.forEach(file => {
         switch (file.status) {
           case 'staged':
@@ -801,11 +801,6 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       />
     );
   }
-
-
-
-
-
 
   /**
    * Render a changed file

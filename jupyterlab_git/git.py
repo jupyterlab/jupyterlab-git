@@ -1772,18 +1772,16 @@ class Git:
         elif self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.poll():
             self.ensure_git_credential_cache_daemon(socket, debug, True, cwd, env)
 
-    # git stash - stash changes in a dirty working directory away
-    async def stash(self, path, stashMsg=""):
+    async def stash(self, path: str, stashMsg: str = "") -> dict:
         """
-        path: str
-            Git path repository
+        Stash changes in a dirty working directory away
+        path: str            Git path repository
         stashMsg (optional): str
             A message that describes the stash entry
         """
         cmd = ["git", "stash"]
         if len(stashMsg) > 0:
             cmd.extend(["save", "-m", stashMsg])
-            print(cmd)
 
         env = os.environ.copy()
         # if the git command is run in a non-interactive terminal, it will not prompt for user input
@@ -1796,7 +1794,7 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
-    async def stash_list(self, path):
+    async def stash_list(self, path: str, stash_index: Optional[int] = None) -> dict:
         """
         Execute git stash list command
         """
@@ -1812,11 +1810,13 @@ class Git:
 
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
-    async def stash_show(self, path, index):
+    async def stash_show(self, path: str, index: int) -> dict:
         """
         Execute git stash show command
         """
         stash_index = "stash@{" + str(index) + "}"
+        # stash_index = f"stash@{{{index!s}}}"
+
         cmd = ["git", "stash", "show", "-p", stash_index, "--name-only"]
 
         env = os.environ.copy()
@@ -1829,7 +1829,7 @@ class Git:
 
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
-    async def stash_pop(self, path, stash_index=None):
+    async def stash_pop(self, path: str, stash_index: Optional[int] = None) -> dict:
         """
         Execute git stash pop for a certain index of the stash list. If no index is provided, it will
 
@@ -1855,43 +1855,35 @@ class Git:
 
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
-    async def stash_drop(self, path, stash_index):
+    async def stash_drop(self, path, stash_index: Optional[int] = None) -> dict:
         """
         Execute git stash drop to delete a single stash entry.
         If not stash_index is provided, delete the entire stash.
 
-        path: str
-            Git path repository
-        stash_index: number or string
-            Index of the stash list is first applied to the current branch, then removed from the stash.
-            If the string = "clear", the entire stash is removed.
+        path: Git path repository
+        stash_index: number or None
+            Index of the stash list to remove from the stash.
+            If None, the entire stash is removed.
         """
-        print("git.py: stash_drop", stash_index)
         cmd = ["git", "stash"]
 
-        if stash_index == "clear":
+        if stash_index is None:
             cmd.append("clear")
         # Delete a single stash entry
         else:
             cmd.extend(["drop", str(stash_index)])
-
-        print(cmd)
 
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
 
         code, output, error = await execute(cmd, cwd=path, env=env)
 
-        print("code:", code)
-        print("output:", output)
-        print("error:", error)
-
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
-    async def stash_apply(self, path, stash_index=None):
+    async def stash_apply(self, path: str, stash_index: Optional[int] = None) -> dict:
         """
         Execute git stash apply to apply a single stash entry to the repository.
         If not stash_index is provided, apply the latest stash.
@@ -1902,28 +1894,19 @@ class Git:
             Index of the stash list is applied to the repository.
 
         """
-        print("git.py: stash_apply", stash_index)
-
         # Clear
         cmd = ["git", "stash", "apply"]
 
         if stash_index is not None:
             cmd.append("stash@{" + str(stash_index) + "}")
 
-        print(cmd)
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
 
         code, output, error = await execute(cmd, cwd=path, env=env)
 
-        print("code", code)
-        print("output:", output)
-        print("error:", error)
-        # code: 1 On branch main
-        # output: Your branch is up to date with 'origin/main'.
         # error:
         if code != 0:
-            print("there was an error")
             return {"code": code, "command": " ".join(cmd), "message": error}
 
         return {"code": code, "message": output, "command": " ".join(cmd)}

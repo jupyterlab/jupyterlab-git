@@ -32,14 +32,7 @@ import { WarningBox } from './WarningBox';
 import { WarningRounded as WarningRoundedIcon } from '@material-ui/icons';
 import { GitStash } from './GitStash';
 import { ActionButton } from './ActionButton';
-import {
-  addIcon,
-  discardIcon
-  // diffIcon,
-  // discardIcon,
-  // openIcon,
-  // removeIcon
-} from '../style/icons';
+import { addIcon, discardIcon } from '../style/icons';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 
 /**
@@ -524,7 +517,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
                 className={hiddenButtonStyle}
                 icon={discardIcon}
                 title={'Clear the entire stash'}
-                disabled={this.props.model._stash.length === 0}
+                disabled={this.props.model._stash?.length === 0}
                 onClick={this.stopPropagationWrapper(() => {
                   this._gitStashClear();
                 })}
@@ -532,7 +525,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
               <ActionButton
                 icon={addIcon}
                 className={hiddenButtonStyle}
-                disabled={this.props.model._stash.length === 0}
+                disabled={this.props.model._stash?.length === 0}
                 title={'Apply the latest stash'}
                 onClick={this.stopPropagationWrapper(() => {
                   this._gitStashApplyLatest();

@@ -1467,7 +1467,7 @@ export class GitExtension implements IGitExtension {
    * Pop a stash
    * @param path - path at which the stashes will be saved in
    * @returns promise which resolves upon stashing changes
-   * * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.NotInRepository} If the current path is not a Git repository   
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    * 
@@ -1576,7 +1576,7 @@ export class GitExtension implements IGitExtension {
           const stashMsg = stashInfo[2].replace(/^\s+/, '');
 
           stashList.push({
-              index: parseInt(index),
+              index: parseInt(index,10),
               branch: branchName,
               message: stashMsg,
               files: []
@@ -1600,14 +1600,7 @@ export class GitExtension implements IGitExtension {
 
         const stashFilesList = fileData.message.split('\n').slice(0,-1);
 
-        // only one file modified
-        if (stashFilesList.length === 1) {
-          stashList[index].files.push(stashFilesList[0]);
-        } else {
-          stashFilesList.forEach(fileName => {
-            stashList[index].files.push(fileName);
-          })
-        }
+        stashList[index].files.push(...stashFilesList);
       }
 
       this.stash = stashList;
@@ -1888,15 +1881,6 @@ export class GitExtension implements IGitExtension {
       DocumentRegistry.getDefaultTextFileType()
     );
   }
-
-  /**
-   * Set the repository stash
-   * 
-   * @param s - repository stash
-   */
-  // protected _setStash(s: Git.IStash): void {
-  //   this._stash = s;
-  // }
 
   /**
    * Set the repository status.

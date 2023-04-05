@@ -9,7 +9,6 @@ import {
 import { Git } from '../tokens';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
-// import { fileListWrapperClass } from '../style/FileListStyle';
 import { ActionButton } from './ActionButton';
 import { addIcon, discardIcon, removeIcon } from '../style/icons';
 import { TranslationBundle } from '@jupyterlab/translation';
@@ -129,31 +128,6 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
   const [showStashFiles, setShowStashFiles] = React.useState(false);
 
   const nFiles = props?.files?.length;
-
-  // const gitStashPop = async (index: number): Promise<void> => {
-  //   try {
-  //     await props.model.stash_pop(index);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
-
-  // const gitStashDrop = async (index: number): Promise<void> => {
-  //   console.log('Call Git Stash Drop', index);
-  //   try {
-  //     await props.model.stash_drop(index);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
-
-  // const gitStashApply = async (index: number): Promise<void> => {
-  //   try {
-  //     await props.model.stash_apply(index);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
 
   const getFilePath = (file: string) => {
     // Root directory
