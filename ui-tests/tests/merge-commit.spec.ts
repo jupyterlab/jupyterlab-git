@@ -25,9 +25,7 @@ test.describe('Merge commit tests', () => {
   test('should correctly display num files changed, insertions, and deletions', async ({
     page
   }) => {
-    const mergeCommit = await page.getByText(
-      "basokant8d6c5d09 days agoworkingmainMerge branch 'sort-names'"
-    );
+    const mergeCommit = await page.getByText("Merge branch 'sort-names'");
 
     await mergeCommit.click();
 
@@ -37,17 +35,13 @@ test.describe('Merge commit tests', () => {
 
     await filesChanged.waitFor();
 
-    console.log(await filesChanged.innerHTML());
-
     await expect(await filesChanged.innerText()).toBe('3');
     await expect(await insertions.innerText()).toBe('18240');
     await expect(await deletions.innerText()).toBe('18239');
   });
 
   test('should correctly display files changed', async ({ page }) => {
-    const mergeCommit = await page.getByText(
-      "basokant8d6c5d09 days agoworkingmainMerge branch 'sort-names'"
-    );
+    const mergeCommit = await page.getByText("Merge branch 'sort-names'");
 
     await mergeCommit.click();
 
@@ -63,9 +57,7 @@ test.describe('Merge commit tests', () => {
   });
 
   test('should diff file after clicking', async ({ page }) => {
-    const mergeCommit = await page.getByText(
-      "basokant8d6c5d09 days agoworkingmainMerge branch 'sort-names'"
-    );
+    const mergeCommit = await page.getByText("Merge branch 'sort-names'");
 
     await mergeCommit.click();
 
@@ -80,9 +72,7 @@ test.describe('Merge commit tests', () => {
   });
 
   test('should revert merge commit', async ({ page }) => {
-    const mergeCommit = await page.getByText(
-      "basokant8d6c5d09 days agoworkingmainMerge branch 'sort-names'"
-    );
+    const mergeCommit = await page.getByText("Merge branch 'sort-names'");
 
     await mergeCommit.click();
     await page
