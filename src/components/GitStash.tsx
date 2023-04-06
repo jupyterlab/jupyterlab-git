@@ -247,7 +247,6 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   };
 
   const gitStashDrop = async (index: number): Promise<void> => {
-    console.log('Call Git Stash Drop', index);
     try {
       await props.model.stash_drop(index);
     } catch (err) {

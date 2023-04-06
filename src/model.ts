@@ -1454,9 +1454,9 @@ export class GitExtension implements IGitExtension {
       this._stash[0].files.forEach(file => {
         this._revertFile(file);
       });
-    } else {
-      console.error('Failed to retrieve stashed files.');
-    }
+      } else {
+        console.error('Failed to retrieve stashed files');
+      }
   } catch (error) {
     console.error('Error stashing changes:', error);
   }
@@ -1556,8 +1556,8 @@ export class GitExtension implements IGitExtension {
         'git:refresh:stash',
         async () => {
           return await requestAPI<Git.IStashListResult>(
-            URLExt.join(path, 'stash_list'),
-            'POST'
+            URLExt.join(path, 'stash'),
+            'GET'
           );
         }
       );
@@ -1589,11 +1589,8 @@ export class GitExtension implements IGitExtension {
           'git:refresh:stash',
           async () => {
             return await requestAPI<Git.IStashListResult>(
-              URLExt.join(path, 'stash_show'),
-              'POST',
-              {
-                index
-              }
+              URLExt.join(path, 'stash') + `?index=${index}`,
+              'GET'
             );
           }
         );
@@ -1615,22 +1612,21 @@ export class GitExtension implements IGitExtension {
   /**
    * Drop a stash entry, or clear the entire stash.
    * 
-   * @param stash_index The index of the stash to be deleleted. If no index is provided, the entire stash will be cleared.
+   * @param stash_index The index of the stash to be deleleted. If the stash_index is 'clear', the entire stash will be cleared.
    * 
    * @returns promise which resolves to an array of stashes
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async stash_drop(stash_index?: number | string): Promise<void> {
+  async stash_drop(stash_index?: number): Promise<void> {
     let path: string;
     try {
       path = await this._getPathRepository();
 
       await this._taskHandler.execute<void>('git:stash:drop', async() => {
-        await requestAPI(URLExt.join(path, 'stash'), 'DELETE', 
-          stash_index !== 'clear' ? {stash_index} : {stash_index: 'clear'}
-        );
+        const url = stash_index ? URLExt.join(path, `stash?stash_index=${stash_index}`) : URLExt.join(path, 'stash');
+        await requestAPI(url, 'DELETE');
       })
 
       await this.refreshStash();

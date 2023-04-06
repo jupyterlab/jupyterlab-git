@@ -560,8 +560,7 @@ export interface IGitExtension extends IDisposable {
    * Stash the current changes in a dirty repository.
    * @param path - path at which the stashes will be saved in
    * @returns promise which resolves upon stashing changes
-   * * @throws {Git.NotInRepository} If the current path is not a Git repository
-   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {Git.NotInRepository} If the current path is not a Git repository   * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    * 
    */

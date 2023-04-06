@@ -1814,8 +1814,8 @@ class Git:
         """
         Execute git stash show command
         """
-        stash_index = "stash@{" + str(index) + "}"
-        # stash_index = f"stash@{{{index!s}}}"
+        # stash_index = "stash@{" + str(index) + "}"
+        stash_index = f"stash@{{{index!s}}}"
 
         cmd = ["git", "stash", "show", "-p", stash_index, "--name-only"]
 
@@ -1869,7 +1869,6 @@ class Git:
 
         if stash_index is None:
             cmd.append("clear")
-        # Delete a single stash entry
         else:
             cmd.extend(["drop", str(stash_index)])
 

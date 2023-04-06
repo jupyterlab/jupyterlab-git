@@ -904,7 +904,6 @@ class GitStashHandler(GitHandler):
         """
         local_path = self.url2localpath(path)
         data = self.get_json_body()
-        response = ""
 
         response = await self.git.stash(local_path, data.get("stashMsg"))
         if response["code"] == 0:
@@ -920,18 +919,18 @@ class GitStashHandler(GitHandler):
         DELETE request handler to clear a single stash or the entire stash list in a Git repository
         """
         local_path = self.url2localpath(path)
-        index = self.get_query_argument("index", None)
+        stash_index = self.get_query_argument("stash_index", None)
         # Choose what to erase
-        if index is None:
-            response = await self.git.stash_drop(local_path, "clear")
+        if stash_index is None:
+            response = await self.git.stash_drop(local_path)
         else:
-            response = await self.git.stash_drop(local_path, index)
+            response = await self.git.stash_drop(local_path, stash_index)
 
         if response["code"] == 0:
             self.set_status(204)
         else:
             self.set_status(500)
-        self.finish(json.dumps(response))
+        self.finish()
 
     @tornado.web.authenticated
     async def get(self, path: str = ""):
@@ -944,7 +943,7 @@ class GitStashHandler(GitHandler):
         if index is None:
             response = await self.git.stash_list(local_path)
         else:
-            response = await self.git.stash_list(local_path, index)
+            response = await self.git.stash_show(local_path, int(index))
 
         if response["code"] == 0:
             self.set_status(200)
@@ -1037,8 +1036,6 @@ def setup_handlers(web_app):
         ("/tag_checkout", GitTagCheckoutHandler),
         ("/add", GitAddHandler),
         ("/stash", GitStashHandler),
-        ("/stash_list", GitStashListHandler),
-        ("/stash_show", GitStashShowHandler),
         ("/stash_pop", GitStashPopHandler),
         ("/stash_apply", GitStashApplyHandler),
     ]
