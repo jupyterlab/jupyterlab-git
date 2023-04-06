@@ -7,6 +7,7 @@ tsOptions['inlineSourceMap'] = true;
 
 const esModules = [
   '.*@jupyterlab/',
+  '@jupyter/ydoc',
   'lib0',
   'y\\-protocols',
   'y\\-websocket',
