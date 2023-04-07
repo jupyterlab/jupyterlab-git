@@ -157,7 +157,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarNavClass}>
         <span className={spacer} />
-      <Badge
+        <Badge
           className={badgeClass}
           variant="dot"
           invisible={!hasRemote || this.props.nCommitsBehind === 0}
@@ -471,18 +471,17 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     }
   };
 
-    /**
+  /**
    * Callback invoked upon clicking a button to stash the dirty files.
    *
    * @param event - event object
    * @returns a promise which resolves upon stashing the latest changes
    */
-    private _onStashClick = async (): Promise<void> => {
-      await this.props.commands.execute(CommandIDs.gitStash);
-    };
+  private _onStashClick = async (): Promise<void> => {
+    await this.props.commands.execute(CommandIDs.gitStash);
+  };
 
-
-    private _onStashListClick = async (): Promise<void> => {
-      await this.props.commands.execute(CommandIDs.gitStashList);
-    };
+  private _onStashListClick = async (): Promise<void> => {
+    await this.props.commands.execute(CommandIDs.gitStashList);
+  };
 }

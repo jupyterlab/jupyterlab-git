@@ -555,17 +555,16 @@ export interface IGitExtension extends IDisposable {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   showTopLevel(path: string): Promise<string | null>;
-  
+
   /**
    * Stash the current changes in a dirty repository.
    * @param path - path at which the stashes will be saved in
    * @returns promise which resolves upon stashing changes
    * @throws {Git.NotInRepository} If the current path is not a Git repository   * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
-   * 
+   *
    */
   stashChanges(path: string): Promise<void>;
-
 
   /**
    * Make request to list all the tags present in the remote repo
@@ -933,9 +932,9 @@ export namespace Git {
   }
 
   /** Interface for Git Stash List request result
-   * 
+   *
    */
-  export interface IStashListResult { 
+  export interface IStashListResult {
     message: string;
     command: string;
     code: number;
@@ -1218,7 +1217,7 @@ export enum ContextCommandIDs {
   gitIgnoreExtension = 'git:context-ignoreExtension',
   gitNoAction = 'git:no-action',
   openFileFromDiff = 'git:open-file-from-diff',
-  gitFileStashPop = 'git:context-stash-pop',
+  gitFileStashPop = 'git:context-stash-pop'
 }
 
 /**
@@ -1242,5 +1241,5 @@ export enum CommandIDs {
   gitShowDiff = 'git:show-diff',
   gitStash = 'git:stash',
   gitStashPop = 'git:stash-pop',
-  gitStashList = 'git:stash-list',
+  gitStashList = 'git:stash-list'
 }

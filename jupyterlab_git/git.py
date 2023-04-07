@@ -1780,6 +1780,7 @@ class Git:
             A message that describes the stash entry
         """
         cmd = ["git", "stash"]
+
         if len(stashMsg) > 0:
             cmd.extend(["save", "-m", stashMsg])
 
@@ -1794,7 +1795,7 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
-    async def stash_list(self, path: str, stash_index: Optional[int] = None) -> dict:
+    async def stash_list(self, path: str) -> dict:
         """
         Execute git stash list command
         """
@@ -1843,13 +1844,14 @@ class Git:
         cmd = ["git", "stash", "pop"]
 
         if stash_index:
-            cmd.append(stash_index)
+            cmd.append(str(stash_index))
 
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
 
         code, output, error = await execute(cmd, cwd=path, env=env)
 
+        print(type(cmd[len(cmd) - 1]))
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 

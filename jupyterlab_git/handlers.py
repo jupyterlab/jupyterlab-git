@@ -905,7 +905,7 @@ class GitStashHandler(GitHandler):
         local_path = self.url2localpath(path)
         data = self.get_json_body()
 
-        response = await self.git.stash(local_path, data.get("stashMsg"))
+        response = await self.git.stash(local_path, data.get("stashMsg", ""))
         if response["code"] == 0:
             self.set_status(201)
         else:
@@ -969,9 +969,10 @@ class GitStashPopHandler(GitHandler):
 
         if response["code"] == 0:
             self.set_status(204)
+            self.finish()
         else:
             self.set_status(500)
-        self.finish(json.dumps(response))
+            self.finish(json.dumps(response))
 
 
 class GitStashApplyHandler(GitHandler):
@@ -989,7 +990,7 @@ class GitStashApplyHandler(GitHandler):
         response = await self.git.stash_apply(local_path, data.get("index"))
 
         if response["code"] == 0:
-            self.set_status(200)
+            self.set_status(201)
         else:
             self.set_status(500)
 

@@ -789,6 +789,7 @@ export function addCommands(
       // Ask the user if they want to stash
 
       const stashDialog = await InputDialog.getText({
+        // Default stash message is the last commit hash and message
         title: trans.__('Enter a stash message (optional):')
       });
       const stashMsg = stashDialog.value ? stashDialog.value : '';

@@ -10,7 +10,6 @@ import { TaskHandler } from './taskhandler';
 import { Git, IGitExtension } from './tokens';
 import { decodeStage } from './utils';
 
-
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
 // Available diff providers
@@ -33,7 +32,6 @@ export function getDiffProvider(
 // export interface IStashChangedArgs extends IChangedArgs<Git.IStash, Git.IStash> {
 //   name: 'stash';
 // }
-
 
 /**
  * Class for creating a model for retrieving info from, and interacting with, a remote Git repository.
@@ -244,16 +242,16 @@ export class GitExtension implements IGitExtension {
 
   /**
    *  A signal emitted when the Git stash changes.
-   * 
+   *
    */
-  get stashChanged(): ISignal <IGitExtension, IChangedArgs <Git.IStash>> {
+  get stashChanged(): ISignal<IGitExtension, IChangedArgs<Git.IStash>> {
     return this._stashChanged;
   }
 
   /**
    * Return the stash
    */
-  get stash (): Git.IStash  {
+  get stash(): Git.IStash {
     return this._stash;
   }
 
@@ -261,16 +259,15 @@ export class GitExtension implements IGitExtension {
     const change: IChangedArgs<Git.IStash> = {
       name: 'stash',
       newValue: v,
-      oldValue: this._stash 
+      oldValue: this._stash
     };
 
     this._stash = v;
 
     if (change.oldValue !== change.newValue) {
-      this._stashChanged.emit(change)
+      this._stashChanged.emit(change);
     }
   }
-  
 
   /**
    * A signal emitted when the current Git repository changes.
@@ -1431,87 +1428,89 @@ export class GitExtension implements IGitExtension {
    * * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
-   * 
+   *
    */
-  async stashChanges(path?: string, stashMsg?: string): Promise<void>{
+  async stashChanges(path?: string, stashMsg?: string): Promise<void> {
     try {
       path = await this._getPathRepository();
-      
-      await this._taskHandler.execute<void>('git:stash', async() => {
-        await requestAPI(URLExt.join(path, 'stash'), 'POST', 
-          stashMsg !== undefined ? {stashMsg} : undefined
+
+      await this._taskHandler.execute<void>('git:stash', async () => {
+        await requestAPI(
+          URLExt.join(path, 'stash'),
+          'POST',
+          stashMsg !== undefined ? { stashMsg } : undefined
         );
-      })
-  
+      });
+
       await this.refreshStash();
       // Assume the latest stash is accurate
       if (this._stash?.length > 0) {
-      this._stash[0].files.forEach(file => {
-        this._revertFile(file);
-      });
+        this._stash[0].files.forEach(file => {
+          this._revertFile(file);
+        });
       } else {
         console.error('Failed to retrieve stashed files');
       }
-  } catch (error) {
-    console.error('Error stashing changes:', error);
+    } catch (error) {
+      console.error('Error stashing changes:', error);
+    }
   }
-  }
-
 
   /**
    * Pop a stash
    * @param path - path at which the stashes will be saved in
    * @returns promise which resolves upon stashing changes
-   * @throws {Git.NotInRepository} If the current path is not a Git repository   
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
-   * 
+   *
    */
-  async stash_pop(index?: number): Promise<void>{
-
-    try{ 
+  async stash_pop(index?: number): Promise<void> {
+    try {
       const path = await this._getPathRepository();
-      
+
       const stashFiles = this._stash[index].files;
-  
-      await this._taskHandler.execute<void>('git:stash:pop', async() => {
-        await requestAPI(URLExt.join(path, 'stash_pop'), 'POST', 
-          index !== undefined ? {index} : undefined
+
+      await this._taskHandler.execute<void>('git:stash:pop', async () => {
+        await requestAPI(
+          URLExt.join(path, 'stash_pop'),
+          'POST',
+          index !== undefined ? { index } : undefined
         );
-      })
-  
-  
+      });
+
       await this.refresh();
-  
-      stashFiles.forEach(file=>{
-        this._refreshAffectedFile(file)
-      })
-  
+
+      stashFiles.forEach(file => {
+        this._refreshAffectedFile(file);
+      });
     } catch (error) {
       console.error('Failed to pop stash', error);
     }
- 
-    await this.refreshStash();
 
+    await this.refreshStash();
   }
-  
+
   async stash_apply(index: number): Promise<void> {
     const path = await this._getPathRepository();
     try {
-      const stashFiles = index ? this._stash[index].files : this._stash[0].files;
+      const stashFiles = index
+        ? this._stash[index].files
+        : this._stash[0].files;
 
-      await this._taskHandler.execute<void>('git:stash:apply', async() => {
-        await requestAPI(URLExt.join(path, 'stash_apply'), 'POST', 
-          index !== undefined ? {index} : {index:0}
+      await this._taskHandler.execute<void>('git:stash:apply', async () => {
+        await requestAPI(
+          URLExt.join(path, 'stash_apply'),
+          'POST',
+          index !== undefined ? { index } : { index: 0 }
         );
-      })
+      });
 
       await this.refresh();
 
-      stashFiles.forEach(file=>{
-        this._refreshAffectedFile(file)
-      })
-
+      stashFiles.forEach(file => {
+        this._refreshAffectedFile(file);
+      });
     } catch (error) {
       console.error('Failed to apply stash', error);
     }
@@ -1520,7 +1519,7 @@ export class GitExtension implements IGitExtension {
 
   /**
    * Checks the stash list, and sets the stash property.
-   * 
+   *
    * @returns promise which resolves to an array of stashes
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
@@ -1541,39 +1540,40 @@ export class GitExtension implements IGitExtension {
 
     // Get the entire stash list
     try {
-      const stashListData = await this._taskHandler.execute<Git.IStashListResult>(
-        'git:refresh:stash',
-        async () => {
-          return await requestAPI<Git.IStashListResult>(
-            URLExt.join(path, 'stash'),
-            'GET'
-          );
-        }
-      );
+      const stashListData =
+        await this._taskHandler.execute<Git.IStashListResult>(
+          'git:refresh:stash',
+          async () => {
+            return await requestAPI<Git.IStashListResult>(
+              URLExt.join(path, 'stash'),
+              'GET'
+            );
+          }
+        );
 
-      
       // Contains the raw message
-      const stashMsgList = stashListData.message.split('\n').slice(0,-1)
-      
-      const stashList: Git.IStashEntry[] = []
-      for (let index in stashMsgList) {
-          
-          const stashInfo = stashMsgList[index].split(':')
+      const stashMsgList = stashListData.message.split('\n').slice(0, -1);
 
-          const branchName = stashInfo[1].match(/WIP on (.*)/) ? stashInfo[1].match(/WIP on (.*)/)[1] : stashInfo[1].split(" ")[2];
+      const stashList: Git.IStashEntry[] = [];
+      for (const index in stashMsgList) {
+        const stashInfo = stashMsgList[index].split(':');
 
-          const stashMsg = stashInfo[2].replace(/^\s+/, '');
+        const branchName = stashInfo[1].match(/WIP on (.*)/)
+          ? stashInfo[1].match(/WIP on (.*)/)[1]
+          : stashInfo[1].split(' ')[2];
 
-          stashList.push({
-              index: parseInt(index,10),
-              branch: branchName,
-              message: stashMsg,
-              files: []
-          })
+        const stashMsg = stashInfo[2].replace(/^\s+/, '');
+
+        stashList.push({
+          index: parseInt(index, 10),
+          branch: branchName,
+          message: stashMsg,
+          files: []
+        });
       }
 
       // grab all files modified in each stash entry
-      for (let index in stashList) {
+      for (const index in stashList) {
         const fileData = await this._taskHandler.execute<Git.IStashListResult>(
           'git:refresh:stash',
           async () => {
@@ -1584,25 +1584,23 @@ export class GitExtension implements IGitExtension {
           }
         );
 
-        const stashFilesList = fileData.message.split('\n').slice(0,-1);
+        const stashFilesList = fileData.message.split('\n').slice(0, -1);
 
         stashList[index].files.push(...stashFilesList);
       }
 
       this.stash = stashList;
-      
     } catch (err) {
       console.error(err);
       return;
     }
   }
 
-
   /**
    * Drop a stash entry, or clear the entire stash.
-   * 
+   *
    * @param stash_index The index of the stash to be deleleted. If the stash_index is 'clear', the entire stash will be cleared.
-   * 
+   *
    * @returns promise which resolves to an array of stashes
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
@@ -1613,16 +1611,16 @@ export class GitExtension implements IGitExtension {
     try {
       path = await this._getPathRepository();
 
-      await this._taskHandler.execute<void>('git:stash:drop', async() => {
-        const url = stash_index ? URLExt.join(path, `stash?stash_index=${stash_index}`) : URLExt.join(path, 'stash');
+      await this._taskHandler.execute<void>('git:stash:drop', async () => {
+        const url = stash_index
+          ? URLExt.join(path, `stash?stash_index=${stash_index}`)
+          : URLExt.join(path, 'stash');
         await requestAPI(url, 'DELETE');
-      })
+      });
 
       await this.refreshStash();
-      
-      await this._refreshModel();
 
-      
+      await this._refreshModel();
     } catch (error) {
       this._clearStatus();
       if (!(error instanceof Git.NotInRepository)) {
@@ -1630,7 +1628,7 @@ export class GitExtension implements IGitExtension {
       }
       return;
     }
-  } 
+  }
 
   /**
    * Retrieve the list of tags in the repository.
@@ -2008,9 +2006,6 @@ export class GitExtension implements IGitExtension {
     }
   }
 
-  
-
-
   private _refreshAffectedFile(path: string): void {
     const widget = this._docmanager.findWidget(this.getRelativeFilePath(path));
     if (widget) {
@@ -2018,7 +2013,6 @@ export class GitExtension implements IGitExtension {
     }
   }
 
-  
   /**
    * Set the marker object for a repository path and branch.
    */
@@ -2063,10 +2057,9 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     IChangedArgs<string | null>
   >(this);
-  private _stashChanged = new Signal<
-    IGitExtension,
-    IChangedArgs<Git.IStash>
-  >(this);
+  private _stashChanged = new Signal<IGitExtension, IChangedArgs<Git.IStash>>(
+    this
+  );
   private _statusChanged = new Signal<IGitExtension, Git.IStatus>(this);
   private _notifyRemoteChanges = new Signal<
     IGitExtension,
