@@ -264,16 +264,11 @@ export class GitExtension implements IGitExtension {
       oldValue: this._stash 
     };
 
-    this._pendingReadyPromise += 1;
+    this._stash = v;
 
-    this._readyPromise.then(() => {
-      this._stash = v;
-      this._pendingReadyPromise -= 1;
-
-      if (change.oldValue !== change.newValue) {
-        this.refresh().then(() => this._stashChanged.emit(change));
-      }
-    });
+    if (change.oldValue !== change.newValue) {
+      this._stashChanged.emit(change)
+    }
   }
   
 
@@ -1441,7 +1436,7 @@ export class GitExtension implements IGitExtension {
   async stashChanges(path?: string, stashMsg?: string): Promise<void>{
     try {
       path = await this._getPathRepository();
-  
+      
       await this._taskHandler.execute<void>('git:stash', async() => {
         await requestAPI(URLExt.join(path, 'stash'), 'POST', 
           stashMsg !== undefined ? {stashMsg} : undefined
@@ -1449,7 +1444,7 @@ export class GitExtension implements IGitExtension {
       })
   
       await this.refreshStash();
-
+      // Assume the latest stash is accurate
       if (this._stash?.length > 0) {
       this._stash[0].files.forEach(file => {
         this._revertFile(file);
@@ -1500,13 +1495,10 @@ export class GitExtension implements IGitExtension {
 
   }
   
-  async stash_apply(index?: number): Promise<void> {
+  async stash_apply(index: number): Promise<void> {
     const path = await this._getPathRepository();
     try {
-
-      // Grab the list 
-      const stashFiles = this._stash[index].files;
-      // if stashFiles is empty, throw an error
+      const stashFiles = index ? this._stash[index].files : this._stash[0].files;
 
       await this._taskHandler.execute<void>('git:stash:apply', async() => {
         await requestAPI(URLExt.join(path, 'stash_apply'), 'POST', 
@@ -1522,10 +1514,7 @@ export class GitExtension implements IGitExtension {
 
     } catch (error) {
       console.error('Failed to apply stash', error);
-
-      // should i spin dialog box? 
     }
-
     await this.refreshStash();
   }
 
@@ -2038,7 +2027,7 @@ export class GitExtension implements IGitExtension {
   }
 
   private _status: Git.IStatus;
-  _stash: Git.IStash;
+  private _stash: Git.IStash;
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];
   private _currentBranch: Git.IBranch | null = null;

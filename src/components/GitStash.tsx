@@ -3,8 +3,7 @@ import * as React from 'react';
 import {
   changeStageButtonStyle,
   sectionAreaStyle,
-  sectionFileContainerStyle,
-  sectionHeaderLabelStyle
+  sectionFileContainerStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
 import { GitExtension } from '../model';
@@ -15,11 +14,12 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import { UseSignal } from '@jupyterlab/apputils';
 import { FixedSizeList } from 'react-window';
 import {
-  fileIconStyle,
-  fileLabelStyle,
-  folderLabelStyle
-} from '../style/FilePathStyle';
-import { fileIcon } from '@jupyterlab/ui-components';
+  listStyle,
+  sectionButtonContainerStyle,
+  sectionHeaderLabelStyle,
+  stashFileStyle
+} from '../style/GitStashStyle';
+import { FilePath } from './FilePath';
 
 const HEADER_HEIGHT = 34;
 const ITEM_HEIGHT = 25;
@@ -100,6 +100,11 @@ interface IGitStashEntryProps {
   selectAllButton?: React.ReactElement;
 
   /**
+   * The application language translator.
+   */
+  trans: TranslationBundle;
+
+  /**
    * Branch corresponding to the stash
    */
   branch: string;
@@ -129,31 +134,6 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
 
   const nFiles = props?.files?.length;
 
-  const getFilePath = (file: string) => {
-    // Root directory
-    if (!file.includes('/')) {
-      return {
-        name: file,
-        path: ''
-      };
-    } else {
-      // One folder
-      const fileSplit = file.split('/');
-      if (fileSplit.length == 2) {
-        return {
-          path: fileSplit[0],
-          name: fileSplit[1]
-        };
-        // More than one nested folder
-      } else {
-        return {
-          name: fileSplit.pop(),
-          path: fileSplit.join('/')
-        };
-      }
-    }
-  };
-
   return (
     <div className={sectionFileContainerStyle}>
       <div
@@ -173,56 +153,32 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
             )}
           </button>
         )}
-        <span
-          className={sectionHeaderLabelStyle}
-          style={{ display: 'flex', justifyContent: 'space-between' }}
-        >
-          <p>
-            {props.message} (on {props.branch})
-          </p>
-          <span style={{ display: 'flex' }}>{props.actions}</span>
+        <span className={sectionHeaderLabelStyle}>
+          <p>{props.trans.__('%1 (on %2)', props.message, props.branch)}</p>
+          <span className={sectionButtonContainerStyle}>{props.actions}</span>
         </span>
       </div>
       {showStashFiles && (
         <FixedSizeList
+          className={listStyle}
           height={Math.max(
             Math.min(props.height - HEADER_HEIGHT, nFiles * ITEM_HEIGHT),
             ITEM_HEIGHT
           )}
           itemCount={nFiles}
+          innerElementType="ul"
           itemData={props?.files}
           itemKey={(index, data) => data[index]}
           itemSize={ITEM_HEIGHT}
-          style={{ overflowX: 'hidden' }}
           width={'auto'}
+          style={{ margin: 0, paddingLeft: 0 }}
         >
-          {({ index, style }) => {
+          {({ index }) => {
             const file = props.files[index];
-            const { name, path } = getFilePath(file);
-
             return (
-              <div style={{ display: 'flex', padding: '0 4px' }}>
-                <fileIcon.react
-                  className={fileIconStyle}
-                  elementPosition="center"
-                  tag="span"
-                />
-                <span className={fileLabelStyle}>
-                  {name}
-                  <span
-                    // style={{
-                    //   fontSize: 'var(--jp-ui-font-size0)',
-                    //   margin: '0 4px',
-                    //   color: 'var(--jp-ui-font-color2)'
-                    // }}
-                    className={folderLabelStyle}
-                  >
-                    {' '}
-                    <span>{path}</span>
-                  </span>
-                  {/* <span className={folderLabelStyle}>{folder}</span> */}
-                </span>
-              </div>
+              <li className={stashFileStyle}>
+                <FilePath filepath={file} filetype={null} />
+              </li>
             );
           }}
         </FixedSizeList>
@@ -282,12 +238,9 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
             )}
           </button>
         )}
-        <span
-          className={sectionHeaderLabelStyle}
-          style={{ display: 'flex', justifyContent: 'space-between' }}
-        >
-          <p>Stash</p>
-          <span style={{ display: 'flex' }}>
+        <span className={sectionHeaderLabelStyle}>
+          <p>{props.trans.__('Stash')}</p>
+          <span className={sectionButtonContainerStyle}>
             {props.actions}
             <span>({nStash})</span>
           </span>
@@ -309,11 +262,12 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
               <>
                 {props.stash.map(entry => (
                   <GitStashEntry
-                    key={entry.index} // Add key prop
+                    key={entry.index}
                     files={entry.files}
                     model={props.model}
                     index={entry.index}
                     branch={entry.branch}
+                    trans={props.trans}
                     message={entry.message}
                     height={100}
                     collapsible={true}
@@ -323,16 +277,15 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
                         <ActionButton
                           className={hiddenButtonStyle}
                           icon={addIcon}
-                          title={'Pop stash entry'}
+                          title={props.trans.__('Pop stash entry')}
                           onClick={props.stopPropagationWrapper(() => {
-                            console.log('Pop It!');
                             gitStashPop(entry.index);
                           })}
                         />
                         <ActionButton
                           className={hiddenButtonStyle}
                           icon={discardIcon}
-                          title={'Drop stash entry'}
+                          title={props.trans.__('Drop stash entry')}
                           onClick={props.stopPropagationWrapper(() => {
                             gitStashDrop(entry.index);
                           })}
@@ -340,7 +293,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
                         <ActionButton
                           className={hiddenButtonStyle}
                           icon={removeIcon}
-                          title={'Apply stash entry'}
+                          title={props.trans.__('Apply stash entry')}
                           onClick={props.stopPropagationWrapper(() => {
                             gitStashApply(entry.index);
                           })}

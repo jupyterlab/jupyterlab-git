@@ -516,8 +516,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
               <ActionButton
                 className={hiddenButtonStyle}
                 icon={discardIcon}
-                title={'Clear the entire stash'}
-                disabled={this.props.model._stash?.length === 0}
+                title={this.props.trans.__('Clear the entire stash')}
+                disabled={this.props.model.stash?.length === 0}
                 onClick={this.stopPropagationWrapper(() => {
                   this._gitStashClear();
                 })}
@@ -525,15 +525,15 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
               <ActionButton
                 icon={addIcon}
                 className={hiddenButtonStyle}
-                disabled={this.props.model._stash?.length === 0}
-                title={'Apply the latest stash'}
+                disabled={this.props.model.stash?.length === 0}
+                title={this.props.trans.__('Apply the latest stash')}
                 onClick={this.stopPropagationWrapper(() => {
                   this._gitStashApplyLatest();
                 })}
               />
             </React.Fragment>
           }
-          stash={this.props.model._stash}
+          stash={this.props.model.stash}
           model={this.props.model}
           height={100}
           collapsible={true}
