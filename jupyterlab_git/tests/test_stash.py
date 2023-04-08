@@ -1,5 +1,4 @@
 import json
-from unittest.mock import AsyncMock
 from unittest.mock import patch
 import pytest
 import tornado
@@ -7,10 +6,6 @@ import os
 from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import NAMESPACE
 from .testutils import assert_http_error, maybe_future
-import tempfile
-import shutil
-import os
-import subprocess
 
 # Git Stash - POST
 
@@ -63,7 +58,6 @@ async def test_git_stash_without_message(mock_execute, jp_fetch, jp_root_dir):
 @patch("jupyterlab_git.git.execute")
 async def test_git_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     # Given
-    # Creates a temporary directory created by pytest's tmp_path fixture and concatenates the string "test_path" to it.
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
 
@@ -194,7 +188,6 @@ async def test_git_stash_show_without_index(mock_execute, jp_fetch, jp_root_dir)
 @patch("jupyterlab_git.git.execute")
 async def test_git_stash_show_failure(mock_execute, jp_fetch, jp_root_dir):
     # Given
-    # Creates a temporary directory created by pytest's tmp_path fixture and concatenates the string "test_path" to it.
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
     stash_index = 1
@@ -415,7 +408,6 @@ async def test_git_stash_pop_with_index(mock_execute, jp_fetch, jp_root_dir):
     )
     # Then
     command = ["git", "stash", "pop", str(stash_index)]
-    # Checks that the mock function was called with the correct arguments
     mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
 
     assert response.code == 204
@@ -440,7 +432,6 @@ async def test_git_stash_pop_without_index(mock_execute, jp_fetch, jp_root_dir):
     )
     # Then
     command = ["git", "stash", "pop"]
-    # Checks that the mock function was called with the correct arguments
     mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
 
     assert response.code == 204
