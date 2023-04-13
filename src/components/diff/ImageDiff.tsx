@@ -4,7 +4,7 @@ import { Panel } from '@lumino/widgets';
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 
@@ -17,11 +17,17 @@ import {
 import { Toolbar } from '@jupyterlab/apputils';
 
 import {
+  challengerImageClass,
+  challengerLabelClass,
+  labelsClass,
+  referenceImageClass,
+  referenceLabelClass,
   selectedTabClass,
   tabClass,
-  tabsClass
+  tabIndicatorClass,
+  tabsClass,
+  twoUpView
 } from '../../style/ImageDiffStyle';
-import { tabIndicatorClass } from '../../style/GitPanel';
 
 export const createImageDiff: Git.Diff.ICallback = async (
   model: Git.Diff.IModel,
@@ -35,7 +41,9 @@ export const createImageDiff: Git.Diff.ICallback = async (
 
 const modes = ['2-up', 'Swipe', 'Onion Skin'];
 type ImageDiffProps = {
+  referenceLabel: string;
   reference: string;
+  challengerLabel: string;
   challenger: string;
   mode?: typeof modes[number];
   trans: TranslationBundle;
@@ -46,30 +54,45 @@ type ImageDiffViewProps = {
   challenger: string;
 };
 
-const ImageDiff = ({ reference, challenger, mode, trans }: ImageDiffProps) => {
+const whichViewMode = (mode: typeof modes[number]) => {
+  const elements = {
+    '2-up': TwoUp,
+    Swipe,
+    'Onion Skin': OnionSkin
+  } as Record<string, typeof TwoUp>;
+  return elements[mode];
+};
+
+const ImageDiff = ({
+  reference,
+  referenceLabel,
+  challenger,
+  challengerLabel,
+  mode,
+  trans
+}: ImageDiffProps) => {
   const [modeSelect, setModeSelect] = useState<string>(mode ? mode : '2-up');
 
-  const onTabChange = (event: any, tab: number) => {
-    setModeSelect(modes[tab]);
-  };
-
-  const whichViewMode = (mode: string) => {
-    return {
-      '2-up': TwoUp,
-      Swipe,
-      'Onion Skin': OnionSkin
-    }[mode];
-  };
+  const onTabChange = useCallback(
+    (event: any, tab: number) => {
+      setModeSelect(modes[tab]);
+    },
+    [modeSelect]
+  );
 
   const ImageDiffView = whichViewMode(modeSelect);
 
   return (
     <div>
+      <div className={labelsClass}>
+        <span className={referenceLabelClass}>{referenceLabel}</span>
+        <span className={challengerLabelClass}>{challengerLabel}</span>
+      </div>
       <Tabs
         classes={{ root: tabsClass, indicator: tabIndicatorClass }}
         value={modes.indexOf(modeSelect)}
         onChange={onTabChange}
-        centered
+        variant="fullWidth"
       >
         <Tab
           classes={{
@@ -109,9 +132,17 @@ const ImageDiff = ({ reference, challenger, mode, trans }: ImageDiffProps) => {
 
 const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
   return (
-    <div>
-      <img src="data:image/;base64" alt="reference" />
-      <img src="data:image/;base64" alt="" />
+    <div className={twoUpView}>
+      <img
+        className={referenceImageClass}
+        src={`data:image/png;base64,${reference}`}
+        alt="reference"
+      />
+      <img
+        className={challengerImageClass}
+        src={`data:image/png;base64,${challenger}`}
+        alt="challenger"
+      />
     </div>
   );
 };
@@ -171,16 +202,22 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
   async refresh(): Promise<void> {
     // await this.ready;
     try {
+      const referenceLabel = this._model.reference.label;
+      const challengerLabel = this._model.challenger.label;
       const [reference, challenger] = await Promise.all([
         this._model.reference.content(),
         this._model.challenger.content()
         // this._model.base?.content() ?? Promise.resolve(null)
       ]);
 
+      console.log(reference, challenger);
+
       const reactImageDiffWidget = ReactWidget.create(
         <ImageDiff
           reference={reference}
+          referenceLabel={referenceLabel}
           challenger={challenger}
+          challengerLabel={challengerLabel}
           mode="2-up"
           trans={this._trans}
         />

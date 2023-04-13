@@ -1,16 +1,38 @@
 import { style } from 'typestyle';
 
+export const labelsClass = style({
+  display: 'flex',
+  alignItems: 'center'
+});
+
+export const referenceLabelClass = style({
+  color: 'var(--jp-ui-font-color1)',
+  fontWeight: 'bold',
+  backgroundColor: 'var(--jp-git-diff-deleted-color)',
+  padding: '3px',
+  paddingRight: '7px',
+  flexGrow: 1,
+  maxWidth: '50%',
+  overflow: 'hidden'
+});
+
+export const challengerLabelClass = style({
+  color: 'var(--jp-ui-font-color1)',
+  fontWeight: 'bold',
+  backgroundColor: 'var(--jp-git-diff-added-color)',
+  padding: '3px',
+  paddingRight: '7px',
+  flexGrow: 1,
+  maxWidth: '50%',
+  overflow: 'hidden'
+});
+
 export const tabsClass = style({
-  $nest: {
-    'button:last-of-type': {
-      borderRight: 'none'
-    }
-  }
+  borderTop: '1px solid var(--jp-border-color2)'
 });
 
 export const tabClass = style({
   minHeight: '15px',
-  flexGrow: 1,
 
   backgroundColor: 'var(--jp-layout-color2)!important',
 
@@ -30,8 +52,30 @@ export const selectedTabClass = style({
 });
 
 export const tabIndicatorClass = style({
-  height: '3px!important',
-
+  height: '2px!important',
+  top: '0!important',
+  bottom: 'unset!important',
   backgroundColor: 'var(--jp-brand-color1)!important',
   transition: 'none!important'
+});
+
+export const twoUpView = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-evenly',
+  padding: '0px 8px!important'
+});
+
+export const referenceImageClass = style({
+  width: 'auto',
+  maxHeight: '500px',
+  border: '3px solid var(--jp-git-diff-deleted-color1)',
+  overflow: 'scroll'
+});
+
+export const challengerImageClass = style({
+  width: 'auto',
+  maxHeight: '500px',
+  border: '3px solid var(--jp-git-diff-added-color1)',
+  overflow: 'scroll'
 });
