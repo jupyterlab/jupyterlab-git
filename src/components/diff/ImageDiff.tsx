@@ -53,6 +53,16 @@ const ImageDiff = ({ reference, challenger, mode, trans }: ImageDiffProps) => {
     setModeSelect(modes[tab]);
   };
 
+  const whichViewMode = (mode: string) => {
+    return {
+      '2-up': TwoUp,
+      Swipe,
+      'Onion Skin': OnionSkin
+    }[mode];
+  };
+
+  const ImageDiffView = whichViewMode(modeSelect);
+
   return (
     <div>
       <Tabs
@@ -92,15 +102,7 @@ const ImageDiff = ({ reference, challenger, mode, trans }: ImageDiffProps) => {
           disableRipple
         />
       </Tabs>
-      {modeSelect === '2-up' && (
-        <TwoUp reference={reference} challenger={challenger} />
-      )}
-      {modeSelect === 'Swipe' && (
-        <Swipe reference={reference} challenger={challenger} />
-      )}
-      {modeSelect === 'Onion Skin' && (
-        <OnionSkin reference={reference} challenger={challenger} />
-      )}
+      <ImageDiffView reference={reference} challenger={challenger} />
     </div>
   );
 };
