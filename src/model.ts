@@ -255,19 +255,7 @@ export class GitExtension implements IGitExtension {
     return this._stash;
   }
 
-  set stash(v: Git.IStash) {
-    const change: IChangedArgs<Git.IStash> = {
-      name: 'stash',
-      newValue: v,
-      oldValue: this._stash
-    };
-
-    this._stash = v;
-
-    if (change.oldValue !== change.newValue) {
-      this._stashChanged.emit(change);
-    }
-  }
+  
 
   /**
    * A signal emitted when the current Git repository changes.
@@ -1589,7 +1577,31 @@ export class GitExtension implements IGitExtension {
         stashList[index].files.push(...stashFilesList);
       }
 
-      this.stash = stashList;
+
+      const change: IChangedArgs<Git.IStash> = {
+        name: 'stash',
+        newValue: stashList,
+        oldValue: this._stash
+      };
+  
+      const isStashDeepEqual = (a: Git.IStashEntry[], b: Git.IStashEntry[]): boolean => {
+        if (a?.length !== b?.length) return false;
+  
+        return a.every((stashA, i) => {
+          const stashB = b[i];
+          return (
+            stashA.index === stashB.index &&
+            stashA.branch === stashB.branch &&
+            stashA.message === stashB.message &&
+            JSON.stringify(stashA.files) === JSON.stringify(stashB.files)
+          );
+        });
+      };
+  
+      if (!isStashDeepEqual(stashList, this._stash)) {
+        this._stash = stashList;
+        this._stashChanged.emit(change);
+      }
     } catch (err) {
       console.error(err);
       return;

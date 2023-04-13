@@ -21,12 +21,10 @@ export const stashFileStyle = style({
 
 export const listStyle = style({
   overflowX: 'hidden',
-  margin: 0,
-  padding: 0,
-  listStyle: 'none',
-  display: 'block',
-
-  marginBlockStart: '0',
-  marginBlockEnd: '0',
-  paddingInlineStart: '0px'
+  $nest: {
+    '&>*': {
+      margin: 0,
+      padding: 0
+    },
+  }
 });

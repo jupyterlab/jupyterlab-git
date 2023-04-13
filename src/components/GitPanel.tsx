@@ -32,7 +32,7 @@ import { WarningBox } from './WarningBox';
 import { WarningRounded as WarningRoundedIcon } from '@material-ui/icons';
 import { GitStash } from './GitStash';
 import { ActionButton } from './ActionButton';
-import { addIcon, discardIcon } from '../style/icons';
+import { addIcon, desktopIcon, discardIcon } from '../style/icons';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 
 /**
@@ -182,11 +182,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   constructor(props: IGitPanelProps) {
     super(props);
+    // console.log('GitPanel constructor, model:', props.model);
     const {
       branches,
       currentBranch,
       pathRepository,
-      hasDirtyFiles: hasDirtyStagedFiles
+      hasDirtyFiles: hasDirtyStagedFiles,
+      stash
     } = props.model;
 
     this.state = {
@@ -205,7 +207,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       hasDirtyFiles: hasDirtyStagedFiles,
       referenceCommit: null,
       challengerCommit: null,
-      stash: []
+      stash: stash
     };
   }
 
@@ -214,11 +216,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   componentDidMount(): void {
     const { model, settings } = this.props;
-    model.stashChanged.connect(async (_, args) => {
+    // console.log('GitPanel componentDidMount, model:', this.props.model);
+
+    model.stashChanged?.connect((_, args) => {
+      console.log('signal connected:', args);
       this.setState({
         stash: args.newValue as any
       });
-    });
+    }, this);
     model.repositoryChanged.connect((_, args) => {
       this.setState({
         repository: args.newValue,
@@ -392,6 +397,16 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   };
 
   /**
+   * Callback invoked upon clicking a button to stash the dirty files.
+   *
+   * @param event - event object
+   * @returns a promise which resolves upon stashing the latest changes
+   */
+  private _onStashClick = async (): Promise<void> => {
+    await this.props.commands.execute(CommandIDs.gitStash);
+  };
+
+  /**
    * Renders a toolbar.
    *
    * @returns React element
@@ -513,6 +528,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         <GitStash
           actions={
             <React.Fragment>
+              <ActionButton
+                className={hiddenButtonStyle}
+                icon={desktopIcon}
+                onClick={hasRemote ? this._onStashClick : undefined}
+                title={this.props.trans.__('Stash latest changes')}
+              />
+
               <ActionButton
                 className={hiddenButtonStyle}
                 icon={discardIcon}

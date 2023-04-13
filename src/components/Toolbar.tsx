@@ -167,54 +167,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             className={toolbarButtonClass}
             disabled={!hasRemote}
             icon={pullIcon}
-            onClick={hasRemote ? this._onStashListClick : undefined}
-            title={
-              hasRemote
-                ? this.props.trans.__('See the stash list') +
-                  (this.props.nCommitsBehind > 0
-                    ? this.props.trans.__(
-                        ' (behind by %1 commits)',
-                        this.props.nCommitsBehind
-                      )
-                    : '')
-                : this.props.trans.__('No remote repository defined')
-            }
-          />
-        </Badge>
-        <Badge
-          className={badgeClass}
-          variant="dot"
-          invisible={!hasRemote || this.props.nCommitsBehind === 0}
-          data-test-id="pull-badge"
-        >
-          <ActionButton
-            className={toolbarButtonClass}
-            disabled={!hasRemote}
-            icon={pullIcon}
-            onClick={hasRemote ? this._onStashClick : undefined}
-            title={
-              hasRemote
-                ? this.props.trans.__('Stash latest changes') +
-                  (this.props.nCommitsBehind > 0
-                    ? this.props.trans.__(
-                        ' (behind by %1 commits)',
-                        this.props.nCommitsBehind
-                      )
-                    : '')
-                : this.props.trans.__('No remote repository defined')
-            }
-          />
-        </Badge>
-        <Badge
-          className={badgeClass}
-          variant="dot"
-          invisible={!hasRemote || this.props.nCommitsBehind === 0}
-          data-test-id="pull-badge"
-        >
-          <ActionButton
-            className={toolbarButtonClass}
-            disabled={!hasRemote}
-            icon={pullIcon}
             onClick={hasRemote ? this._onPullClick : undefined}
             title={
               hasRemote
@@ -469,19 +421,5 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         error
       });
     }
-  };
-
-  /**
-   * Callback invoked upon clicking a button to stash the dirty files.
-   *
-   * @param event - event object
-   * @returns a promise which resolves upon stashing the latest changes
-   */
-  private _onStashClick = async (): Promise<void> => {
-    await this.props.commands.execute(CommandIDs.gitStash);
-  };
-
-  private _onStashListClick = async (): Promise<void> => {
-    await this.props.commands.execute(CommandIDs.gitStashList);
   };
 }
