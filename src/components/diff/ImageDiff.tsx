@@ -4,8 +4,6 @@ import { Panel } from '@lumino/widgets';
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
-// import ReactCompareImage from 'react-compare-image';
-import ReactImageDiff from 'react-image-diff';
 
 import { Git } from '../../tokens';
 import {
@@ -14,34 +12,67 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { Toolbar } from '@jupyterlab/apputils';
+import { useState } from 'react';
+import { Mode as ModeTypes } from '@jupyterlab/codemirror';
 
 export const createImageDiff: Git.Diff.ICallback = async (
   model: Git.Diff.IModel,
   toolbar?: Toolbar,
   translator?: ITranslator
-): Promise<ImageDiff> => {
-  const widget = new ImageDiff(model, translator.load('jupyterlab_git'));
+): Promise<ImageDiffWidget> => {
+  const widget = new ImageDiffWidget(model, translator.load('jupyterlab_git'));
   await widget.ready;
   return widget;
 };
 
-type CompareImageProps = {
+type ModeTypes = '2-up' | 'Swipe' | 'Onion Skin';
+type ImageDiffProps = {
+  reference: string;
+  challenger: string;
+  mode?: ModeTypes;
+};
+
+type ImageDiffViewProps = {
   reference: string;
   challenger: string;
 };
 
-const CompareImage = ({ reference, challenger }: CompareImageProps) => {
+const ImageDiff = ({ reference, challenger, mode }: ImageDiffProps) => {
+  const [modeSelect, setModeSelect] = useState<ModeTypes>(mode ? mode : '2-up');
+
   return (
-    <ReactImageDiff
-      before={`data:image/png;base64,${reference}`}
-      after={`data:image/png;base64,${challenger}`}
-      type="swipe"
-      value={0.5}
-    />
+    <>
+      <div>
+        <button onClick={() => setModeSelect('2-up')}>2-up</button>
+        <button onClick={() => setModeSelect('Swipe')}>Swipe</button>
+        <button onClick={() => setModeSelect('Onion Skin')}>Onion Skin</button>
+      </div>
+      {modeSelect === '2-up' && (
+        <TwoUp reference={reference} challenger={challenger} />
+      )}
+      {modeSelect === 'Swipe' && (
+        <Swipe reference={reference} challenger={challenger} />
+      )}
+      {modeSelect === 'Onion Skin' && (
+        <OnionSkin reference={reference} challenger={challenger} />
+      )}
+    </>
   );
 };
 
-export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
+const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
+  return <div>2-up</div>;
+};
+
+const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
+  return <>Swipe</>;
+};
+
+const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
+  return <>Onion Skin</>;
+};
+
+export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
   constructor(model: Git.Diff.IModel, translator?: TranslationBundle) {
     super();
     const getReady = new PromiseDelegate<void>();
@@ -94,11 +125,11 @@ export class ImageDiff extends Panel implements Git.Diff.IDiffWidget {
         // this._model.base?.content() ?? Promise.resolve(null)
       ]);
 
-      const compareImageWidget = ReactWidget.create(
-        <CompareImage reference={reference} challenger={challenger} />
+      const reactImageDiffWidget = ReactWidget.create(
+        <ImageDiff reference={reference} challenger={challenger} mode="2-up" />
       );
 
-      this.addWidget(compareImageWidget);
+      this.addWidget(reactImageDiffWidget);
     } catch (reason) {
       this.showError(reason as Error);
     }
