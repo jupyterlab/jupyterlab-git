@@ -4,6 +4,9 @@ import { Panel } from '@lumino/widgets';
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
+import { useState } from 'react';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
 
 import { Git } from '../../tokens';
 import {
@@ -12,8 +15,13 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { Toolbar } from '@jupyterlab/apputils';
-import { useState } from 'react';
-import { Mode as ModeTypes } from '@jupyterlab/codemirror';
+
+import {
+  selectedTabClass,
+  tabClass,
+  tabsClass
+} from '../../style/ImageDiffStyle';
+import { tabIndicatorClass } from '../../style/GitPanel';
 
 export const createImageDiff: Git.Diff.ICallback = async (
   model: Git.Diff.IModel,
@@ -25,11 +33,12 @@ export const createImageDiff: Git.Diff.ICallback = async (
   return widget;
 };
 
-type ModeTypes = '2-up' | 'Swipe' | 'Onion Skin';
+const modes = ['2-up', 'Swipe', 'Onion Skin'];
 type ImageDiffProps = {
   reference: string;
   challenger: string;
-  mode?: ModeTypes;
+  mode?: typeof modes[number];
+  trans: TranslationBundle;
 };
 
 type ImageDiffViewProps = {
@@ -37,16 +46,52 @@ type ImageDiffViewProps = {
   challenger: string;
 };
 
-const ImageDiff = ({ reference, challenger, mode }: ImageDiffProps) => {
-  const [modeSelect, setModeSelect] = useState<ModeTypes>(mode ? mode : '2-up');
+const ImageDiff = ({ reference, challenger, mode, trans }: ImageDiffProps) => {
+  const [modeSelect, setModeSelect] = useState<string>(mode ? mode : '2-up');
+
+  const onTabChange = (event: any, tab: number) => {
+    setModeSelect(modes[tab]);
+  };
 
   return (
-    <>
-      <div>
-        <button onClick={() => setModeSelect('2-up')}>2-up</button>
-        <button onClick={() => setModeSelect('Swipe')}>Swipe</button>
-        <button onClick={() => setModeSelect('Onion Skin')}>Onion Skin</button>
-      </div>
+    <div>
+      <Tabs
+        classes={{ root: tabsClass, indicator: tabIndicatorClass }}
+        value={modes.indexOf(modeSelect)}
+        onChange={onTabChange}
+        centered
+      >
+        <Tab
+          classes={{
+            root: tabClass,
+            selected: selectedTabClass
+          }}
+          title={trans.__('View Image Diff in 2-up Mode')}
+          label={trans.__('2-up')}
+          disableFocusRipple
+          disableRipple
+        />
+        <Tab
+          classes={{
+            root: tabClass,
+            selected: selectedTabClass
+          }}
+          title={trans.__('View Image Diff in Swipe Mode')}
+          label={trans.__('Swipe')}
+          disableFocusRipple
+          disableRipple
+        />
+        <Tab
+          classes={{
+            root: tabClass,
+            selected: selectedTabClass
+          }}
+          title={trans.__('View Image Diff in Onion Skin Mode')}
+          label={trans.__('Onion Skin')}
+          disableFocusRipple
+          disableRipple
+        />
+      </Tabs>
       {modeSelect === '2-up' && (
         <TwoUp reference={reference} challenger={challenger} />
       )}
@@ -56,20 +101,25 @@ const ImageDiff = ({ reference, challenger, mode }: ImageDiffProps) => {
       {modeSelect === 'Onion Skin' && (
         <OnionSkin reference={reference} challenger={challenger} />
       )}
-    </>
+    </div>
   );
 };
 
 const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
-  return <div>2-up</div>;
+  return (
+    <div>
+      <img src="data:image/;base64" alt="reference" />
+      <img src="data:image/;base64" alt="" />
+    </div>
+  );
 };
 
 const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
-  return <>Swipe</>;
+  return <div>Swipe</div>;
 };
 
 const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
-  return <>Onion Skin</>;
+  return <div>Onion Skin</div>;
 };
 
 export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
@@ -126,7 +176,12 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
       ]);
 
       const reactImageDiffWidget = ReactWidget.create(
-        <ImageDiff reference={reference} challenger={challenger} mode="2-up" />
+        <ImageDiff
+          reference={reference}
+          challenger={challenger}
+          mode="2-up"
+          trans={this._trans}
+        />
       );
 
       this.addWidget(reactImageDiffWidget);
