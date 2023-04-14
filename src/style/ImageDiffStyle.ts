@@ -12,7 +12,7 @@ export const labelsClass = style({
 export const referenceLabelClass = style({
   color: 'var(--jp-ui-font-color1)',
   fontWeight: 'bold',
-  backgroundColor: 'var(--jp-git-diff-deleted-color)',
+  backgroundColor: 'var(--jp-diff-deleted-color1)',
   padding: '3px',
   paddingRight: '7px',
   flexGrow: 1,
@@ -23,7 +23,7 @@ export const referenceLabelClass = style({
 export const challengerLabelClass = style({
   color: 'var(--jp-ui-font-color1)',
   fontWeight: 'bold',
-  backgroundColor: 'var(--jp-git-diff-added-color)',
+  backgroundColor: 'var(--jp-diff-added-color1)',
   padding: '3px',
   paddingRight: '7px',
   flexGrow: 1,
@@ -82,14 +82,14 @@ export const imageCol = style({
 export const referenceImageClass = style({
   width: 'auto',
   maxHeight: '500px',
-  border: '3px solid var(--jp-git-diff-deleted-color1)',
+  border: '3px solid var(--jp-diff-deleted-color0)',
   overflow: 'scroll'
 });
 
 export const challengerImageClass = style({
   width: 'auto',
   maxHeight: '500px',
-  border: '3px solid var(--jp-git-diff-added-color1)',
+  border: '3px solid var(--jp-diff-added-color0)',
   overflow: 'scroll'
 });
 
@@ -120,11 +120,13 @@ export const onionSkinImage = style({
 });
 
 export const onionSkinReferenceImage = style({
-  opacity: 1
+  opacity: 1,
+  border: '3px solid var(--jp-diff-deleted-color0)'
 });
 
 export const onionSkinChallengerImage = style({
-  opacity: 0
+  opacity: 0,
+  border: '3px solid var(--jp-diff-added-color0)'
 });
 
 export const onionSkinSlider = style({
