@@ -70,6 +70,15 @@ export const twoUpView = style({
   padding: '0px 8px!important'
 });
 
+export const imageCol = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '5px',
+  color: 'var(--jp-ui-font-color2)'
+});
+
 export const referenceImageClass = style({
   width: 'auto',
   maxHeight: '500px',
@@ -119,6 +128,7 @@ export const onionSkinChallengerImage = style({
 });
 
 export const onionSkinSlider = style({
-  padding: '10px 0',
-  margin: '0 20px'
+  padding: '5px 0',
+  margin: '0px 20px',
+  opacity: 1
 });

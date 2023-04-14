@@ -20,6 +20,7 @@ import { Toolbar } from '@jupyterlab/apputils';
 import {
   challengerImageClass,
   challengerLabelClass,
+  imageCol,
   imageDiffWidgetClass,
   labelsClass,
   onionSkinChallengerImage,
@@ -139,18 +140,49 @@ const ImageDiff = ({
 };
 
 const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
+  const [referDimensions, setReferDimensions] = useState<number[]>([0, 0]);
+  const [challDimensions, setChallDimensions] = useState<number[]>([0, 0]);
+
+  const handleReferLoad = (
+    event: React.SyntheticEvent<HTMLImageElement, Event>
+  ) => {
+    const width = event.currentTarget.naturalWidth;
+    const height = event.currentTarget.naturalHeight;
+    setReferDimensions([width, height]);
+  };
+
+  const handleChallLoad = (
+    event: React.SyntheticEvent<HTMLImageElement, Event>
+  ) => {
+    const width = event.currentTarget.naturalWidth;
+    const height = event.currentTarget.naturalHeight;
+    setChallDimensions([width, height]);
+  };
+
   return (
     <div className={twoUpView}>
-      <img
-        className={referenceImageClass}
-        src={`data:image/png;base64,${reference}`}
-        alt="reference"
-      />
-      <img
-        className={challengerImageClass}
-        src={`data:image/png;base64,${challenger}`}
-        alt="challenger"
-      />
+      <div className={imageCol}>
+        <img
+          className={referenceImageClass}
+          src={`data:image/png;base64,${reference}`}
+          alt="reference"
+          onLoad={handleReferLoad}
+        />
+        <label
+          htmlFor={referenceImageClass}
+        >{`W: ${referDimensions[0]}px | H: ${referDimensions[1]}px`}</label>
+      </div>
+      <div className={imageCol}>
+        <img
+          className={challengerImageClass}
+          src={`data:image/png;base64,${challenger}`}
+          alt="challenger"
+          onLoad={handleChallLoad}
+        />
+        <label
+          htmlFor={challengerImageClass}
+        >{`W: ${challDimensions[0]}px | H: ${challDimensions[1]}px`}</label>
+      </div>
     </div>
   );
 };
