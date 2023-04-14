@@ -1,5 +1,9 @@
 import { style } from 'typestyle';
 
+export const imageDiffWidgetClass = style({
+  overflow: 'visible'
+});
+
 export const labelsClass = style({
   display: 'flex',
   alignItems: 'center'
@@ -78,4 +82,43 @@ export const challengerImageClass = style({
   maxHeight: '500px',
   border: '3px solid var(--jp-git-diff-added-color1)',
   overflow: 'scroll'
+});
+
+export const onionSkinContainer = style({
+  width: '100%'
+});
+
+export const onionSkinImageContainer = style({
+  position: 'relative',
+  width: '100%',
+  height: '500px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+});
+
+export const onionSkinImage = style({
+  width: 'auto',
+  height: '500px',
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  left: 0,
+  right: 0,
+  opacity: 1,
+  margin: 'auto',
+  overflow: 'scroll'
+});
+
+export const onionSkinReferenceImage = style({
+  opacity: 1
+});
+
+export const onionSkinChallengerImage = style({
+  opacity: 0
+});
+
+export const onionSkinSlider = style({
+  padding: '10px 0',
+  margin: '0 20px'
 });

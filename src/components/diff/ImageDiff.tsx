@@ -5,8 +5,9 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 import { useState, useCallback } from 'react';
-import Tab from '@material-ui/core/Tab';
+import { Slider } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 
 import { Git } from '../../tokens';
 import {
@@ -19,7 +20,14 @@ import { Toolbar } from '@jupyterlab/apputils';
 import {
   challengerImageClass,
   challengerLabelClass,
+  imageDiffWidgetClass,
   labelsClass,
+  onionSkinChallengerImage,
+  onionSkinContainer,
+  onionSkinImage,
+  onionSkinImageContainer,
+  onionSkinReferenceImage,
+  onionSkinSlider,
   referenceImageClass,
   referenceLabelClass,
   selectedTabClass,
@@ -152,7 +160,47 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
 };
 
 const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
-  return <div>Onion Skin</div>;
+  const [sliderValue, setSliderValue] = useState(0);
+
+  const handleSliderChange = (
+    event: React.ChangeEvent<unknown>,
+    newValue: number | number[]
+  ) => {
+    if (typeof newValue === 'number') {
+      setSliderValue(newValue);
+    }
+  };
+
+  return (
+    <>
+      <div className={onionSkinSlider}>
+        <Slider
+          value={sliderValue}
+          onChange={handleSliderChange}
+          aria-labelledby="onion-skin-slider"
+          step={1}
+          marks
+          min={0}
+          max={100}
+        />
+      </div>
+      <div className={onionSkinContainer}>
+        <div className={onionSkinImageContainer}>
+          <img
+            src={`data:image/png;base64,${reference}`}
+            alt="Reference"
+            className={`${onionSkinImage} ${onionSkinReferenceImage}`}
+          />
+          <img
+            src={`data:image/png;base64,${challenger}`}
+            alt="Challenger"
+            className={`${onionSkinImage} ${onionSkinChallengerImage}`}
+            style={{ opacity: sliderValue / 100 }}
+          />
+        </div>
+      </div>
+    </>
+  );
 };
 
 export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
@@ -222,6 +270,9 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
           trans={this._trans}
         />
       );
+
+      reactImageDiffWidget.addClass(imageDiffWidgetClass);
+      this.addClass(imageDiffWidgetClass);
 
       this.addWidget(reactImageDiffWidget);
     } catch (reason) {
