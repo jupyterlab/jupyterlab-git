@@ -37,6 +37,7 @@ import {
   tabsClass,
   twoUpView
 } from '../../style/ImageDiffStyle';
+import { filesize } from 'filesize';
 
 export const createImageDiff: Git.Diff.ICallback = async (
   model: Git.Diff.IModel,
@@ -70,6 +71,11 @@ const whichViewMode = (mode: typeof modes[number]) => {
     'Onion Skin': OnionSkin
   } as Record<string, typeof TwoUp>;
   return elements[mode];
+};
+
+const base64FileSize = (base64str: string) => {
+  const n = 0.75 * base64str.length;
+  return filesize(n);
 };
 
 const ImageDiff = ({
@@ -168,9 +174,11 @@ const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
           alt="reference"
           onLoad={handleReferLoad}
         />
-        <label
-          htmlFor={referenceImageClass}
-        >{`W: ${referDimensions[0]}px | H: ${referDimensions[1]}px`}</label>
+        <label htmlFor={referenceImageClass}>{`W: ${
+          referDimensions[0]
+        }px | H: ${referDimensions[1]}px | ${base64FileSize(
+          reference
+        )}`}</label>
       </div>
       <div className={imageCol}>
         <img
@@ -179,9 +187,11 @@ const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
           alt="challenger"
           onLoad={handleChallLoad}
         />
-        <label
-          htmlFor={challengerImageClass}
-        >{`W: ${challDimensions[0]}px | H: ${challDimensions[1]}px`}</label>
+        <label htmlFor={challengerImageClass}>{`W: ${
+          challDimensions[0]
+        }px | H: ${challDimensions[1]}px | ${base64FileSize(
+          challenger
+        )}`}</label>
       </div>
     </div>
   );

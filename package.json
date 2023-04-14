@@ -75,6 +75,7 @@
     "@material-ui/icons": "^4.5.1",
     "@material-ui/lab": "^4.0.0-alpha.54",
     "diff-match-patch": "^1.0.4",
+    "filesize": "^10.0.7",
     "nbdime": "^6.1.1",
     "nbdime-jupyterlab": "^2.1.0",
     "react": "^17.0.1",
