@@ -32,6 +32,11 @@ import {
   referenceImageClass,
   referenceLabelClass,
   selectedTabClass,
+  swipeBackground,
+  swipeChallengerImage,
+  swipeContainer,
+  swipeReferenceImage,
+  swipeSlider,
   tabClass,
   tabIndicatorClass,
   tabsClass,
@@ -198,7 +203,44 @@ const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
 };
 
 const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
-  return <div>Swipe</div>;
+  const [sliderValue, setSliderValue] = useState(50);
+
+  const handleSliderChange = (
+    event: React.ChangeEvent<unknown>,
+    newValue: number | number[]
+  ) => {
+    if (typeof newValue === 'number') {
+      setSliderValue(newValue);
+    }
+  };
+
+  return (
+    <>
+      <div className={swipeSlider}>
+        <Slider value={sliderValue} onChange={handleSliderChange} />
+      </div>
+      <div className={swipeContainer}>
+        <div className={swipeBackground}>
+          <img
+            src={`data:image/png;base64,${reference}`}
+            className={swipeReferenceImage}
+            style={{
+              clipPath: `polygon(0 0, ${sliderValue}% 0, ${sliderValue}% 100%, 0% 100%)`
+            }}
+            alt="Reference"
+          />
+          <img
+            src={`data:image/png;base64,${challenger}`}
+            className={swipeChallengerImage}
+            style={{
+              clipPath: `polygon(${sliderValue}% 0, 100% 0, 100% 100%, ${sliderValue}% 100%)`
+            }}
+            alt="Challenger"
+          />
+        </div>
+      </div>
+    </>
+  );
 };
 
 const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
@@ -220,10 +262,6 @@ const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
           value={sliderValue}
           onChange={handleSliderChange}
           aria-labelledby="onion-skin-slider"
-          step={1}
-          marks
-          min={0}
-          max={100}
         />
       </div>
       <div className={onionSkinContainer}>

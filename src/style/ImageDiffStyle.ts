@@ -93,6 +93,56 @@ export const challengerImageClass = style({
   overflow: 'scroll'
 });
 
+export const swipeContainer = style({
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+});
+
+export const swipeBackground = style({
+  position: 'relative',
+  width: '100%',
+  height: '500px',
+  overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+});
+
+export const swipeReferenceImage = style({
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  left: 0,
+  right: 0,
+  opacity: 1,
+  margin: 'auto',
+  height: '500px',
+  width: 'auto',
+  objectFit: 'cover',
+  border: '3px solid var(--jp-diff-deleted-color0)'
+});
+
+export const swipeChallengerImage = style({
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  left: 0,
+  right: 0,
+  opacity: 1,
+  margin: 'auto',
+  height: '500px',
+  width: 'auto',
+  objectFit: 'cover',
+  border: '3px solid var(--jp-diff-added-color0)'
+});
+
+export const swipeSlider = style({
+  padding: '5px 0',
+  margin: '0px 20px'
+});
+
 export const onionSkinContainer = style({
   width: '100%'
 });
