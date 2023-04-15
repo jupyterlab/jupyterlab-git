@@ -283,6 +283,24 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "basokant",
+      "name": "Ben Asokanthan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70033855?v=4",
+      "profile": "https://basokant.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "shawnesquivel",
+      "name": "Shawn Esquivel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/94336773?v=4",
+      "profile": "https://github.com/shawnesquivel",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

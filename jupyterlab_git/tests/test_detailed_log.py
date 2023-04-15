@@ -101,7 +101,10 @@ async def test_detailed_log():
             [
                 "git",
                 "log",
+                "--cc",
+                "-m",
                 "-1",
+                "--oneline",
                 "--numstat",
                 "--pretty=format:%b%x00",
                 "-z",

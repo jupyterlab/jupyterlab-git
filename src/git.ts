@@ -9,7 +9,8 @@ import { Git } from './tokens';
 export const AUTH_ERROR_MESSAGES = [
   'Invalid username or password',
   'could not read Username',
-  'could not read Password'
+  'could not read Password',
+  'Authentication error'
 ];
 
 /**

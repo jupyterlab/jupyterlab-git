@@ -573,13 +573,16 @@ class Git:
 
     async def detailed_log(self, selected_hash, path):
         """
-        Execute git log -1 --numstat --oneline -z command (used to get
+        Execute git log -m --cc -1 --numstat --oneline -z command (used to get
         insertions & deletions per file) & return the result.
         """
         cmd = [
             "git",
             "log",
+            "--cc",
+            "-m",
             "-1",
+            "--oneline",
             "--numstat",
             "--pretty=format:%b%x00",
             "-z",
@@ -602,35 +605,38 @@ class Git:
         for line in line_iterable:
             is_binary = line.startswith("-\t-\t")
             previous_file_path = ""
-            insertions, deletions, file = line.split("\t")
-            insertions = insertions.replace("-", "0")
-            deletions = deletions.replace("-", "0")
+            tokens = line.split("\t")
 
-            if file == "":
-                # file was renamed or moved, we need next two lines of output
-                from_path = next(line_iterable)
-                to_path = next(line_iterable)
-                previous_file_path = from_path
-                modified_file_name = from_path + " => " + to_path
-                modified_file_path = to_path
-            else:
-                modified_file_name = file.split("/")[-1]
-                modified_file_path = file
+            if len(tokens) == 3:
+                insertions, deletions, file = line.split("\t")
+                insertions = insertions.replace("-", "0")
+                deletions = deletions.replace("-", "0")
 
-            file_info = {
-                "modified_file_path": modified_file_path,
-                "modified_file_name": modified_file_name,
-                "insertion": insertions,
-                "deletion": deletions,
-                "is_binary": is_binary,
-            }
+                if file == "":
+                    # file was renamed or moved, we need next two lines of output
+                    from_path = next(line_iterable)
+                    to_path = next(line_iterable)
+                    previous_file_path = from_path
+                    modified_file_name = from_path + " => " + to_path
+                    modified_file_path = to_path
+                else:
+                    modified_file_name = file.split("/")[-1]
+                    modified_file_path = file
 
-            if previous_file_path:
-                file_info["previous_file_path"] = previous_file_path
+                file_info = {
+                    "modified_file_path": modified_file_path,
+                    "modified_file_name": modified_file_name,
+                    "insertion": insertions,
+                    "deletion": deletions,
+                    "is_binary": is_binary,
+                }
 
-            result.append(file_info)
-            total_insertions += int(insertions)
-            total_deletions += int(deletions)
+                if previous_file_path:
+                    file_info["previous_file_path"] = previous_file_path
+
+                result.append(file_info)
+                total_insertions += int(insertions)
+                total_deletions += int(deletions)
 
         modified_file_note = "{num_files} files changed, {insertions} insertions(+), {deletions} deletions(-)".format(
             num_files=len(result),
@@ -936,7 +942,7 @@ class Git:
         """
         Delete a specified commit from the repository.
         """
-        cmd = ["git", "revert", "--no-commit", commit_id]
+        cmd = ["git", "revert", "-m", "1", "--no-commit", commit_id]
         code, _, error = await execute(cmd, cwd=path)
 
         if code != 0:
