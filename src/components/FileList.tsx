@@ -16,7 +16,8 @@ import {
   diffIcon,
   discardIcon,
   openIcon,
-  removeIcon
+  removeIcon,
+  rewindIcon
 } from '../style/icons';
 import { ContextCommandIDs, CommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
@@ -24,6 +25,7 @@ import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
 import { discardAllChanges } from '../widgets/discardAllChanges';
 import { SelectAllButton } from './SelectAllButton';
+import { stopPropagationWrapper } from '../utils';
 
 export interface IFileListState {
   selectedFiles: Git.IStatusFile[];
@@ -52,19 +54,6 @@ export interface IFileListProps {
    * The application language translator.
    */
   trans: TranslationBundle;
-
-  /**
-   * Wraps mouse event handler to stop event propagation
-   */
-
-  /**
-   * Wrap mouse event handler to stop event propagation
-   * @param fn Mouse event handler
-   * @returns Mouse event handler that stops event from propagating
-   */
-  stopPropagationWrapper: (
-    fn: React.EventHandler<React.MouseEvent>
-  ) => React.EventHandler<React.MouseEvent>;
 }
 
 export type ContextCommands = Record<Git.Status, ContextCommandIDs[]>;
@@ -577,7 +566,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     if (this.props.settings.composite['simpleStaging']) {
       const otherFiles: Git.IStatusFile[] = [];
 
-      this.props?.files?.forEach(file => {
+      this.props.files.forEach(file => {
         switch (file.status) {
           case 'remote-changed':
             remoteChangedFiles.push(file);
@@ -609,7 +598,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       const unstagedFiles: Git.IStatusFile[] = [];
       const untrackedFiles: Git.IStatusFile[] = [];
 
-      this.props?.files?.forEach(file => {
+      this.props.files.forEach(file => {
         switch (file.status) {
           case 'staged':
             stagedFiles.push(file);
@@ -743,7 +732,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={this.props.stopPropagationWrapper(() =>
+              onClick={stopPropagationWrapper(() =>
                 this.openSelectedFiles(file)
               )}
             />
@@ -752,7 +741,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={removeIcon}
               title={this.props.trans.__('Unstage this change')}
-              onClick={this.props.stopPropagationWrapper(() => {
+              onClick={stopPropagationWrapper(() => {
                 this.resetSelectedFiles(file);
               })}
             />
@@ -785,13 +774,21 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     return (
       <GitStage
         actions={
-          <ActionButton
-            className={hiddenButtonStyle}
-            disabled={files.length === 0}
-            icon={removeIcon}
-            title={this.props.trans.__('Unstage all changes')}
-            onClick={this.resetAllStagedFiles}
-          />
+          <React.Fragment>
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={rewindIcon}
+              onClick={this._onStashClick}
+              title={this.props.trans.__('Stash latest changes')}
+            />
+            <ActionButton
+              className={hiddenButtonStyle}
+              disabled={files.length === 0}
+              icon={removeIcon}
+              title={this.props.trans.__('Unstage all changes')}
+              onClick={this.resetAllStagedFiles}
+            />
+          </React.Fragment>
         }
         collapsible
         files={files}
@@ -827,7 +824,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={this.props.stopPropagationWrapper(() =>
+              onClick={stopPropagationWrapper(() =>
                 this.openSelectedFiles(file)
               )}
             />
@@ -836,7 +833,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={discardIcon}
               title={this.props.trans.__('Discard changes')}
-              onClick={this.props.stopPropagationWrapper(() => {
+              onClick={stopPropagationWrapper(() => {
                 this.discardChanges(file);
               })}
             />
@@ -844,7 +841,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={addIcon}
               title={this.props.trans.__('Stage this change')}
-              onClick={this.props.stopPropagationWrapper(() => {
+              onClick={stopPropagationWrapper(() => {
                 if (this._isSelectedFile(file)) {
                   this.addFile(
                     ...this.state.selectedFiles.map(
@@ -887,6 +884,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       <GitStage
         actions={
           <React.Fragment>
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={rewindIcon}
+              onClick={this._onStashClick}
+              title={this.props.trans.__('Stash latest changes')}
+            />
             <ActionButton
               className={hiddenButtonStyle}
               disabled={disabled}
@@ -936,7 +939,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={this.props.stopPropagationWrapper(() =>
+              onClick={stopPropagationWrapper(() =>
                 this.openSelectedFiles(file)
               )}
             />
@@ -944,7 +947,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={addIcon}
               title={this.props.trans.__('Track this file')}
-              onClick={this.props.stopPropagationWrapper(() => {
+              onClick={stopPropagationWrapper(() => {
                 if (this._isSelectedFile(file)) {
                   this.addFile(
                     ...this.state.selectedFiles.map(
@@ -1026,7 +1029,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               className={hiddenButtonStyle}
               icon={openIcon}
               title={this.props.trans.__('Open this file')}
-              onClick={this.props.stopPropagationWrapper(() =>
+              onClick={stopPropagationWrapper(() =>
                 this.openSelectedFiles(file)
               )}
             />
@@ -1104,7 +1107,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         className={hiddenButtonStyle}
         icon={openIcon}
         title={this.props.trans.__('Open this file')}
-        onClick={this.props.stopPropagationWrapper(openFile)}
+        onClick={stopPropagationWrapper(openFile)}
       />
     );
     let onDoubleClick = doubleClickDiff ? (): void => undefined : openFile;
@@ -1117,14 +1120,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             className={hiddenButtonStyle}
             icon={openIcon}
             title={this.props.trans.__('Open this file')}
-            onClick={this.props.stopPropagationWrapper(openFile)}
+            onClick={stopPropagationWrapper(openFile)}
           />
           {diffButton}
           <ActionButton
             className={hiddenButtonStyle}
             icon={discardIcon}
             title={this.props.trans.__('Discard changes')}
-            onClick={this.props.stopPropagationWrapper(() => {
+            onClick={stopPropagationWrapper(() => {
               this.discardChanges(file);
             })}
           />
@@ -1143,14 +1146,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
             className={hiddenButtonStyle}
             icon={openIcon}
             title={this.props.trans.__('Open this file')}
-            onClick={this.props.stopPropagationWrapper(openFile)}
+            onClick={stopPropagationWrapper(openFile)}
           />
           {diffButton}
           <ActionButton
             className={hiddenButtonStyle}
             icon={discardIcon}
             title={this.props.trans.__('Discard changes')}
-            onClick={this.props.stopPropagationWrapper(() => {
+            onClick={stopPropagationWrapper(() => {
               this.discardChanges(file);
             })}
           />
@@ -1243,7 +1246,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           className={hiddenButtonStyle}
           icon={diffIcon}
           title={this.props.trans.__('Diff this file')}
-          onClick={this.props.stopPropagationWrapper(handleClick)}
+          onClick={stopPropagationWrapper(handleClick)}
         />
       )
     );
@@ -1284,4 +1287,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       )
     );
   }
+
+  /**
+   * Callback invoked upon clicking a button to stash the dirty files.
+   *
+   * @param event - event object
+   * @returns a promise which resolves upon stashing the latest changes
+   */
+  private _onStashClick = async (): Promise<void> => {
+    await this.props.commands.execute(CommandIDs.gitStash);
+  };
 }

@@ -9,7 +9,7 @@ import { Git } from '../tokens';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { ActionButton } from './ActionButton';
-import { addIcon, discardIcon, removeIcon } from '../style/icons';
+import { addIcon, trashIcon, discardIcon } from '../style/icons';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { UseSignal } from '@jupyterlab/apputils';
 import { FixedSizeList } from 'react-window';
@@ -20,6 +20,7 @@ import {
   stashFileStyle
 } from '../style/GitStashStyle';
 import { FilePath } from './FilePath';
+import { stopPropagationWrapper } from '../utils';
 
 const HEADER_HEIGHT = 34;
 const ITEM_HEIGHT = 25;
@@ -57,15 +58,6 @@ export interface IGitStashProps {
    * The application language translator.
    */
   trans: TranslationBundle;
-
-  /**
-   * Wrap mouse event handler to stop event propagation
-   * @param fn Mouse event handler
-   * @returns Mouse event handler that stops event from propagating
-   */
-  stopPropagationWrapper: (
-    fn: React.EventHandler<React.MouseEvent>
-  ) => React.EventHandler<React.MouseEvent>;
 }
 
 interface IGitStashEntryProps {
@@ -113,15 +105,6 @@ interface IGitStashEntryProps {
    * message corresponding to the stash
    */
   message: string;
-
-  /**
-   * Wrap mouse event handler to stop event propagation
-   * @param fn Mouse event handler
-   * @returns Mouse event handler that stops event from propagating
-   */
-  stopPropagationWrapper: (
-    fn: React.EventHandler<React.MouseEvent>
-  ) => React.EventHandler<React.MouseEvent>;
 }
 
 /**
@@ -132,7 +115,7 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
 ) => {
   const [showStashFiles, setShowStashFiles] = React.useState(false);
 
-  const nFiles = props?.files?.length;
+  const nFiles = props.files.length;
 
   return (
     <div className={sectionFileContainerStyle}>
@@ -177,7 +160,7 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
             const file = props.files[index];
             return (
               <li className={stashFileStyle}>
-                <FilePath filepath={file} filetype={null} />
+                <FilePath filepath={file} />
               </li>
             );
           }}
@@ -192,31 +175,40 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
 ) => {
   const [showStash, setShowStash] = React.useState(false);
 
-  const nStash = props && props.stash ? props.stash.length : 0;
+  const nStash = props.stash?.length ?? 0;
 
-  const gitStashPop = async (index: number): Promise<void> => {
-    try {
-      await props.model.stash_pop(index);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const gitStashPop = React.useCallback(
+    async (index: number): Promise<void> => {
+      try {
+        await props.model.stash_pop(index);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [props.model]
+  );
 
-  const gitStashDrop = async (index: number): Promise<void> => {
-    try {
-      await props.model.stash_drop(index);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const gitStashDrop = React.useCallback(
+    async (index: number): Promise<void> => {
+      try {
+        await props.model.stash_drop(index);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [props.model]
+  );
 
-  const gitStashApply = async (index: number): Promise<void> => {
-    try {
-      await props.model.stash_apply(index);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const gitStashApply = React.useCallback(
+    async (index: number): Promise<void> => {
+      try {
+        await props.model.stash_apply(index);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [props.model]
+  );
 
   return (
     <div className={sectionFileContainerStyle}>
@@ -271,31 +263,30 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
                     message={entry.message}
                     height={100}
                     collapsible={true}
-                    stopPropagationWrapper={props.stopPropagationWrapper}
                     actions={
                       <React.Fragment>
                         <ActionButton
                           className={hiddenButtonStyle}
-                          icon={addIcon}
+                          icon={discardIcon}
                           title={props.trans.__('Pop stash entry')}
-                          onClick={props.stopPropagationWrapper(() => {
+                          onClick={stopPropagationWrapper(() => {
                             gitStashPop(entry.index);
                           })}
                         />
                         <ActionButton
                           className={hiddenButtonStyle}
-                          icon={discardIcon}
-                          title={props.trans.__('Drop stash entry')}
-                          onClick={props.stopPropagationWrapper(() => {
-                            gitStashDrop(entry.index);
+                          icon={addIcon}
+                          title={props.trans.__('Apply stash entry')}
+                          onClick={stopPropagationWrapper(() => {
+                            gitStashApply(entry.index);
                           })}
                         />
                         <ActionButton
                           className={hiddenButtonStyle}
-                          icon={removeIcon}
-                          title={props.trans.__('Apply stash entry')}
-                          onClick={props.stopPropagationWrapper(() => {
-                            gitStashApply(entry.index);
+                          icon={trashIcon}
+                          title={props.trans.__('Drop stash entry')}
+                          onClick={stopPropagationWrapper(() => {
+                            gitStashDrop(entry.index);
                           })}
                         />
                       </React.Fragment>

@@ -368,9 +368,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @param event - event object
    * @returns a promise which resolves upon pulling the latest changes
    */
-  // REMOVE THIS - switched from onPullClick method to gitStash
   private _onPullClick = async (): Promise<void> => {
-    await this.props.commands.execute(CommandIDs.gitStash);
+    await this.props.commands.execute(CommandIDs.gitPull);
   };
 
   /**

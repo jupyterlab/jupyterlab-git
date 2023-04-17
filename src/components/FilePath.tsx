@@ -19,7 +19,7 @@ export interface IFilePathProps {
   /**
    * File type
    */
-  filetype: DocumentRegistry.IFileType;
+  filetype?: DocumentRegistry.IFileType;
 }
 
 export const FilePath: React.FunctionComponent<IFilePathProps> = (

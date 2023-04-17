@@ -18,21 +18,9 @@ async def test_git_stash_without_message(mock_execute, jp_fetch, jp_root_dir):
     env["GIT_TERMINAL_PROMPT"] = "0"
 
     local_path = jp_root_dir / "test_path"
-    # 0 = success code, "" = no output, "" = no error
+
     mock_execute.return_value = maybe_future((0, "", ""))
     # When
-    #
-
-    # jp_fetch is a fixture that returns a function that can be used to make HTTP requests to the Jupyter server.
-    """
-    jp_fetch(
-        NAMESPACE, # NAMESPACE is the prefix of the url
-        local_path.name, # local_path.name is the name of the folder
-        "stash", # stash is the name of the handler
-        body, empty because git stash doesn't take any arguments
-        method="POST", # method is the http method
-    )
-    """
     response = await jp_fetch(
         NAMESPACE,
         local_path.name,
@@ -65,7 +53,6 @@ async def test_git_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     error_msg = "Fake failure"
     error_code = 128
 
-    # 0 = success code, "" = no output, "" = no error
     mock_execute.return_value = maybe_future((error_code, "", error_msg))
 
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
@@ -88,12 +75,9 @@ async def test_git_stash_with_message(mock_execute, jp_fetch, jp_root_dir):
     local_path = jp_root_dir / "test_path"
     stash_message = "Custom stash message"
 
-    # 0 = success code, "" = no output, "" = no error
     mock_execute.return_value = maybe_future((0, "", ""))
 
     # When
-    print(f"stash_message: {stash_message}, type: {type(stash_message)}")
-
     response = await jp_fetch(
         NAMESPACE,
         local_path.name,
@@ -126,7 +110,6 @@ async def test_git_stash_show_with_index(mock_execute, jp_fetch, jp_root_dir):
     local_path = jp_root_dir / "test_path"
     stash_index = 1
 
-    # 0 = success code, "" = no output, "" = no error
     mock_execute.return_value = maybe_future((0, "", ""))
 
     # When
@@ -161,7 +144,6 @@ async def test_git_stash_show_without_index(mock_execute, jp_fetch, jp_root_dir)
     env["GIT_TERMINAL_PROMPT"] = "0"
     local_path = jp_root_dir / "test_path"
 
-    # 0 = success code, "" = no output, "" = no error
     mock_execute.return_value = maybe_future((0, "", ""))
 
     # When
@@ -195,7 +177,6 @@ async def test_git_stash_show_failure(mock_execute, jp_fetch, jp_root_dir):
     error_msg = "Fake failure"
     error_code = 128
 
-    # 0 = success code, "" = no output, "" = no error
     mock_execute.return_value = maybe_future((error_code, "", error_msg))
 
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
@@ -231,7 +212,7 @@ async def test_git_stash_drop_single_success(mock_execute, jp_fetch, jp_root_dir
     env["GIT_TERMINAL_PROMPT"] = "0"
     local_path = jp_root_dir / "test_path"
     stash_index = 1
-    # 0 = success code, "" = no output, "" = no error
+
     mock_execute.return_value = maybe_future((0, "", ""))
 
     # When
@@ -287,7 +268,6 @@ async def test_git_stash_drop_all_success(mock_execute, jp_fetch, jp_root_dir):
 
     local_path = jp_root_dir / "test_path"
 
-    # 0 = success code, "" = no output, "" = no error
     mock_execute.return_value = maybe_future((0, "", ""))
 
     # When
@@ -341,7 +321,6 @@ async def test_git_stash_apply_without_index(mock_execute, jp_fetch, jp_root_dir
 
     local_path = jp_root_dir / "test_path"
 
-    # 0 = success code, "" = no output, "" = no error
     mock_execute.return_value = maybe_future((0, "", ""))
 
     # When
@@ -387,8 +366,6 @@ async def test_git_stash_apply_failure(mock_execute, jp_fetch, jp_root_dir):
 
 
 # Git Stash Pop
-
-
 @patch("jupyterlab_git.git.execute")
 async def test_git_stash_pop_with_index(mock_execute, jp_fetch, jp_root_dir):
     # Given
@@ -396,7 +373,7 @@ async def test_git_stash_pop_with_index(mock_execute, jp_fetch, jp_root_dir):
     env["GIT_TERMINAL_PROMPT"] = "0"
     local_path = jp_root_dir / "test_path"
     stash_index = 1
-    # 0 = success code, "" = no output, "" = no error
+
     mock_execute.return_value = maybe_future((0, "", ""))
     # When
     response = await jp_fetch(
@@ -420,7 +397,7 @@ async def test_git_stash_pop_without_index(mock_execute, jp_fetch, jp_root_dir):
     env["GIT_TERMINAL_PROMPT"] = "0"
     local_path = jp_root_dir / "test_path"
     stash_index = None
-    # 0 = success code, "" = no output, "" = no error
+
     mock_execute.return_value = maybe_future((0, "", ""))
     # When
     response = await jp_fetch(

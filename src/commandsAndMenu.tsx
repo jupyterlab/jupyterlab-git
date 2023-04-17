@@ -790,24 +790,13 @@ export function addCommands(
 
       const stashDialog = await InputDialog.getText({
         // Default stash message is the last commit hash and message
-        title: trans.__('Enter a stash message (optional):')
+        title: trans.__('Do you want to stash your changes? '),
+        placeholder: trans.__('Stash message (optional)'),
+        okLabel: trans.__('Stash')
       });
-      const stashMsg = stashDialog.value ? stashDialog.value : '';
-      // TO DO: Ask the user if they would like to add a stash message
-      const result = await showDialog({
-        title: trans.__('Stash changes'),
-        body: trans.__('Do you want to stash your changes?'),
-        buttons: [
-          Dialog.cancelButton({
-            label: trans.__('Cancel')
-          }),
-          Dialog.warnButton({
-            label: trans.__('Yes')
-          })
-        ]
-      });
+      const stashMsg = stashDialog.value ?? '';
 
-      if (result.button.accept) {
+      if (stashDialog.button.accept) {
         logger.log({
           level: Level.RUNNING,
           message: trans.__('Stashing changes')
@@ -820,59 +809,12 @@ export function addCommands(
             message: trans.__('Successfully stashed'),
             level: Level.SUCCESS
           });
-
-          // Revert each file
-          // const path = await gitModel._getPathRepository();
-          // gitModel.stash[0].files.forEach(file=>{
-          //   console.log('file changed:', gitModel.pathRepository, "/", file);
-
-          // })
-
-          // ------------ Shawn: Fix error handling ----------------
         } catch (error: any) {
-          if (error.name !== 'CancelledError') {
-            console.error(
-              'Encountered an error when pulling changes. Error: ',
-              error
-            );
-
-            const errorMsg =
-              typeof error === 'string' ? error : (error as Error).message;
-
-            // Discard changes then retry pull
-            if (
-              errorMsg
-                .toLowerCase()
-                .includes(
-                  'your local changes to the following files would be overwritten by merge'
-                )
-            ) {
-              await commands.execute(CommandIDs.gitPull, {
-                force: true,
-                fallback: true
-              });
-            } else {
-              if ((error as any).cancelled) {
-                // Empty message to hide alert
-                logger.log({
-                  message: '',
-                  level: Level.INFO
-                });
-              } else {
-                logger.log({
-                  message: trans.__('Failed to pull'),
-                  level: Level.ERROR,
-                  error
-                });
-              }
-            }
-          } else {
-            return logger.log({
-              //Empty logger to supress the message
-              message: '',
-              level: Level.INFO
-            });
-          }
+          console.log('816 error:', error);
+          console.error(
+            'Encountered an error when pulling changes. Error: ',
+            error
+          );
         }
       }
     }

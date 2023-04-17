@@ -21,7 +21,7 @@ import {
   warningTextClass
 } from '../style/GitPanel';
 import { CommandIDs, Git, ILogMessage, Level } from '../tokens';
-import { openFileDiff } from '../utils';
+import { openFileDiff, stopPropagationWrapper } from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import { CommitBox } from './CommitBox';
 import { CommitComparisonBox } from './CommitComparisonBox';
@@ -32,7 +32,7 @@ import { WarningBox } from './WarningBox';
 import { WarningRounded as WarningRoundedIcon } from '@material-ui/icons';
 import { GitStash } from './GitStash';
 import { ActionButton } from './ActionButton';
-import { addIcon, desktopIcon, discardIcon } from '../style/icons';
+import { addIcon, rewindIcon, trashIcon } from '../style/icons';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 
 /**
@@ -157,20 +157,6 @@ export interface IGitPanelState {
 }
 
 /**
- * Wrap mouse event handler to stop event propagation
- * @param fn Mouse event handler
- * @returns Mouse event handler that stops event from propagating
- */
-const stopPropagationWrapper =
-  (
-    fn: React.EventHandler<React.MouseEvent>
-  ): React.EventHandler<React.MouseEvent> =>
-  (event: React.MouseEvent) => {
-    event.stopPropagation();
-    fn(event);
-  };
-
-/**
  * React component for rendering a panel for performing Git operations.
  */
 export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
@@ -218,8 +204,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     const { model, settings } = this.props;
     // console.log('GitPanel componentDidMount, model:', this.props.model);
 
-    model.stashChanged?.connect((_, args) => {
-      console.log('signal connected:', args);
+    model.stashChanged.connect((_, args) => {
       this.setState({
         stash: args.newValue as any
       });
@@ -374,20 +359,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     );
   }
 
-  /**
-   * Wrap mouse event handler to stop event propagation
-   * @param fn Mouse event handler
-   * @returns Mouse event handler that stops event from propagating
-   */
-  stopPropagationWrapper =
-    (
-      fn: React.EventHandler<React.MouseEvent>
-    ): React.EventHandler<React.MouseEvent> =>
-    (event: React.MouseEvent) => {
-      event.stopPropagation();
-      fn(event);
-    };
-
   private _gitStashClear = async (): Promise<void> => {
     await this.props.model.stash_drop();
   };
@@ -523,34 +494,32 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           commands={this.props.commands}
           settings={this.props.settings}
           trans={this.props.trans}
-          stopPropagationWrapper={stopPropagationWrapper}
         />
         <GitStash
           actions={
             <React.Fragment>
               <ActionButton
                 className={hiddenButtonStyle}
-                icon={desktopIcon}
+                icon={rewindIcon}
                 onClick={hasRemote ? this._onStashClick : undefined}
                 title={this.props.trans.__('Stash latest changes')}
-              />
-
-              <ActionButton
-                className={hiddenButtonStyle}
-                icon={discardIcon}
-                title={this.props.trans.__('Clear the entire stash')}
-                disabled={this.props.model.stash?.length === 0}
-                onClick={this.stopPropagationWrapper(() => {
-                  this._gitStashClear();
-                })}
               />
               <ActionButton
                 icon={addIcon}
                 className={hiddenButtonStyle}
                 disabled={this.props.model.stash?.length === 0}
                 title={this.props.trans.__('Apply the latest stash')}
-                onClick={this.stopPropagationWrapper(() => {
+                onClick={stopPropagationWrapper(() => {
                   this._gitStashApplyLatest();
+                })}
+              />
+              <ActionButton
+                className={hiddenButtonStyle}
+                icon={trashIcon}
+                title={this.props.trans.__('Clear the entire stash')}
+                disabled={this.props.model.stash?.length === 0}
+                onClick={stopPropagationWrapper(() => {
+                  this._gitStashClear();
                 })}
               />
             </React.Fragment>
@@ -560,7 +529,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           height={100}
           collapsible={true}
           trans={this.props.trans}
-          stopPropagationWrapper={stopPropagationWrapper}
         />
 
         <CommitBox
@@ -896,10 +864,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     let sfiles: Git.IStatusFile[] = files;
     if (remoteChangedFiles) {
       sfiles = sfiles.concat(remoteChangedFiles);
-    } else {
-      sfiles.sort((a, b) => a.to.localeCompare(b.to));
-      return sfiles;
     }
+    sfiles.sort((a, b) => a.to.localeCompare(b.to));
+    return sfiles;
   }
 
   private _previousRepoPath: string = null;
