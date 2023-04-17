@@ -251,8 +251,6 @@ export class GitExtension implements IGitExtension {
     return this._stash;
   }
 
-  
-
   /**
    * A signal emitted when the current Git repository changes.
    */
@@ -1555,20 +1553,32 @@ export class GitExtension implements IGitExtension {
           files: []
         });
       }
-    
-      const fileData = await this._taskHandler.execute<Git.IStashListResult>('git:refresh:stash', async () => {
-        const results = await Promise.all(
-          stashList.map(
-            ({ index }) => requestAPI<Git.IStashListResult>(URLExt.join(path, 'stash') + `?index=${index}`, 'GET')
-          )
-        );
-        return { message: 'Stash list result', command: 'git:refresh:stash', code: 0, results };
-      });
+      const fileData = await this._taskHandler.execute<Git.IStashListResult>(
+        'git:refresh:stash',
+        async () => {
+          const results = await Promise.all(
+            stashList.map(({ index }) =>
+              requestAPI<Git.IStashListResult>(
+                URLExt.join(path, 'stash') + `?index=${index}`,
+                'GET'
+              )
+            )
+          );
+          return {
+            message: 'Stash list result',
+            command: 'git:refresh:stash',
+            code: 0,
+            results
+          };
+        }
+      );
 
       stashList.forEach((stash, index) => {
-        stash.files.push(...fileData.results[index].message.split('\n').slice(0, -1));
+        stash.files.push(
+          ...fileData.results[index].message.split('\n').slice(0, -1)
+        );
       });
-  
+
       if (!this.isStashDeepEqual(stashList, this._stash)) {
         const change: IChangedArgs<Git.IStash> = {
           name: 'stash',
@@ -1624,14 +1634,16 @@ export class GitExtension implements IGitExtension {
    * @param a The first array of stash entries to be compared.
    * @param b The second array of stash entries to be compared.
    * @returns boolean value indicating if both arrays of stash entries are deeply equal.
-   * 
+   *
    * @returns promise which resolves to an array of stashes
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  isStashDeepEqual (a: Git.IStashEntry[], b: Git.IStashEntry[]): boolean {
-    if (a?.length !== b?.length) return false;
+  isStashDeepEqual(a: Git.IStashEntry[], b: Git.IStashEntry[]): boolean {
+    if (a?.length !== b?.length) {
+      return false;
+    }
 
     return a.every((stashA, i) => {
       const stashB = b[i];
@@ -1642,7 +1654,7 @@ export class GitExtension implements IGitExtension {
         JSON.stringify(stashA.files) === JSON.stringify(stashB.files)
       );
     });
-  };
+  }
 
   /**
    * Retrieve the list of tags in the repository.

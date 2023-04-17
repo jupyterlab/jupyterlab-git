@@ -25,6 +25,6 @@ export const listStyle = style({
     '&>*': {
       margin: 0,
       padding: 0
-    },
+    }
   }
 });

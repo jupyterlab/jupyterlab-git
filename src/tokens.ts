@@ -938,7 +938,7 @@ export namespace Git {
     message: string;
     command: string;
     code: number;
-    results?: IStashListResult[]; 
+    results?: IStashListResult[];
   }
 
   export interface IStashEntry {
