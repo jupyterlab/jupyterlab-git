@@ -1619,10 +1619,12 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Checks if two stash entries are deep equalities before emitting a signal.
+   * Compares two arrays of stash entries for deep equality.
    *
-   * @param stash_index The index of the stash to be deleleted. If the stash_index is 'clear', the entire stash will be cleared.
-   *
+   * @param a The first array of stash entries to be compared.
+   * @param b The second array of stash entries to be compared.
+   * @returns boolean value indicating if both arrays of stash entries are deeply equal.
+   * 
    * @returns promise which resolves to an array of stashes
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok

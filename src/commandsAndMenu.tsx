@@ -786,8 +786,6 @@ export function addCommands(
     caption: trans.__('Stash all current changes'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
-      // Ask the user if they want to stash
-
       const stashDialog = await InputDialog.getText({
         // Default stash message is the last commit hash and message
         title: trans.__('Do you want to stash your changes? '),
