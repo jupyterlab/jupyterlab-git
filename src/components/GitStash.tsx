@@ -174,6 +174,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   props: IGitStashProps
 ) => {
   const [showStash, setShowStash] = React.useState(false);
+  const [stashIsLoading, setStashIsLoading] = React.useState(true);
 
   const nStash = props.stash?.length ?? 0;
 
@@ -234,7 +235,12 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
           <p>{props.trans.__('Stash')}</p>
           <span className={sectionButtonContainerStyle}>
             {props.actions}
-            <span>({nStash})</span>
+            <span
+              data-test-id="num-stashes"
+              data-loading={stashIsLoading ? 'true' : 'false'}
+            >
+              ({nStash})
+            </span>
           </span>
         </span>
       </div>
@@ -246,7 +252,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
           }
 
           const nStash = props.stash.length;
-
+          setStashIsLoading(false);
           return (
             props.model.stashChanged &&
             showStash &&
