@@ -1,0 +1,8 @@
+{
+  "jupyter.lab.shortcuts": [],
+  "title": "@jupyterlab/git",
+  "description": "@jupyterlab/git settings.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

@@ -816,7 +816,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       if (this.props.settings.composite['commitAndPush'] && hasRemote) {
         await this.props.commands.execute(CommandIDs.gitPush);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.props.logger.log({ ...errorLog, error });
       throw error;
     }

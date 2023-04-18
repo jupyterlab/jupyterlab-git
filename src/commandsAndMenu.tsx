@@ -516,8 +516,8 @@ export function addCommands(
           );
           logger.log({
             message: trans.__('Reset failed'),
-            level: Level.ERROR,
-            error
+            level: Level.ERROR
+            /*error*/
           });
         }
       }
@@ -553,7 +553,7 @@ export function addCommands(
       if (buildDiffWidget) {
         const id = `git-diff-${fullPath}-${model.reference.label}-${model.challenger.label}`;
         const mainAreaItems = shell.widgets('main');
-        let mainAreaItem = mainAreaItems.next();
+        let mainAreaItem = mainAreaItems.next().value;
         while (mainAreaItem) {
           if (mainAreaItem.id === id) {
             shell.activateById(id);
@@ -1055,7 +1055,7 @@ export function addCommands(
         return;
       }
 
-      const matches = toArray(shell.widgets('main')).filter(
+      const matches = Array.from(shell.widgets('main')).filter(
         widget => widget.id === domNode.dataset.id
       );
 
@@ -1382,7 +1382,7 @@ export function addCommands(
             await app.commands.execute('docmanager:delete-file', {
               path: gitModel.getRelativeFilePath(file.to)
             });
-          } catch (reason) {
+          } catch (reason: any) {
             showErrorMessage(trans.__('Deleting %1 failed.', file.to), reason, [
               Dialog.warnButton({ label: trans.__('Dismiss') })
             ]);
@@ -1435,7 +1435,7 @@ export function addCommands(
               // resetting an added file moves it to untracked category => checkout will fail
               await gitModel.checkout({ filename: file.to });
             }
-          } catch (reason) {
+          } catch (reason: any) {
             showErrorMessage(
               trans.__('Discard changes for %1 failed.', file.to),
               reason,
@@ -1749,7 +1749,7 @@ export function addFileBrowserContextMenu(
     const wasShown = menu.isVisible;
     const parent = menu.parentMenu;
 
-    const items = toArray(filebrowser.selectedItems());
+    const items = toArray(filebrowser.selectedItems().next().value);
     const statuses = new Set<Git.Status>(
       items
         .map(item =>

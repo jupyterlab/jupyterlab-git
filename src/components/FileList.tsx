@@ -261,7 +261,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     if (result.button.accept) {
       try {
         await this.props.model.checkout();
-      } catch (reason) {
+      } catch (reason: any) {
         showErrorMessage(
           this.props.trans.__('Discard all unstaged changes failed.'),
           reason

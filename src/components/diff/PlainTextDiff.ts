@@ -1,5 +1,5 @@
 import { Toolbar } from '@jupyterlab/apputils';
-import { Mode } from '@jupyterlab/codemirror';
+import { EditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { Contents } from '@jupyterlab/services';
 import {
   ITranslator,
@@ -164,6 +164,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
             this._challenger,
             this._reference,
             this._translations,
+            this._languageRegistry,
             this._hasConflict ? this._base : null
           );
         }
@@ -207,6 +208,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
         this._challenger,
         this._reference,
         this._translations,
+        this._languageRegistry,
         this._hasConflict ? this._base : null
       );
 
@@ -247,12 +249,13 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     challengerContent: string,
     referenceContent: string,
     translations: Record<string, string>,
+    languageRegistry: EditorLanguageRegistry,
     baseContent?: string
   ): Promise<void> {
     if (!this._mergeView) {
       const mode =
-        Mode.findByFileName(this._model.filename) ||
-        Mode.findBest(this._model.filename);
+        languageRegistry.findByFileName(this._model.filename) ||
+        languageRegistry.findBest(this._model.filename);
 
       let options: LocalMergeView.IMergeViewEditorConfiguration = {
         value: challengerContent,
@@ -323,5 +326,6 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
 
   private _reference: string | null = null;
   private _challenger: string | null = null;
+  private _languageRegistry: EditorLanguageRegistry | null = null;
   private _base: string | null = null;
 }

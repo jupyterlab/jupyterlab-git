@@ -428,7 +428,7 @@ export class NewBranchDialog extends React.Component<
     });
     try {
       await this.props.model.checkout(opts);
-    } catch (err) {
+    } catch (err: any) {
       this.setState({
         error: err.message.replace(/^fatal:/, '')
       });

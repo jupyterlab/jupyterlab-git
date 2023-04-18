@@ -38,14 +38,6 @@ _(
     sys.executable,
     "-m",
     "jupyter",
-    "serverextension",
-    "enable",
-    "jupyterlab_git",
-)
-_(
-    sys.executable,
-    "-m",
-    "jupyter",
     "server",
     "extension",
     "enable",

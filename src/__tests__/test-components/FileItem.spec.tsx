@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-import { FileItem, IFileItemProps } from '../../components/FileItem';
+import { FileItem, IFileItemProps } from '../../src/components/FileItem';
 import * as React from 'react';
 import 'jest';
 import { shallow } from 'enzyme';

@@ -30,7 +30,7 @@ export async function discardAllChanges(
   if (result.button.accept) {
     try {
       return model.resetToCommit('HEAD');
-    } catch (reason) {
+    } catch (reason: any) {
       showErrorMessage(trans.__('Discard all changes failed.'), reason);
       return Promise.reject(reason);
     }

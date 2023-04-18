@@ -170,7 +170,7 @@ export class ManageRemoteDialogue extends React.Component<
                     ],
                     newRemote: { name: '', url: '' }
                   }));
-                } catch (error) {
+                } catch (error: any) {
                   console.error(error);
                   showErrorMessage(
                     this.props.trans.__('Error when adding remote repository'),

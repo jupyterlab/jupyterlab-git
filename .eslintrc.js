@@ -3,11 +3,12 @@ module.exports = {
     'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
     'plugin:react/recommended'
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: 'tsconfig.test.json',
+    project: 'tsconfig.json',
     sourceType: 'module'
   },
   plugins: ['@typescript-eslint'],

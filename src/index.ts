@@ -85,7 +85,7 @@ async function activate(
   // or jupyterlab-gitlab are defining new filebrowsers that we don't support.
   // And it is unlikely that another browser than the default will be used.
   // Ref: https://github.com/jupyterlab/jupyterlab-git/issues/1014
-  const fileBrowser = factory.defaultBrowser;
+  const fileBrowser = factory.createFileBrowser('id');
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab_git');
 
@@ -129,7 +129,7 @@ async function activate(
         )
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     // If we fall here, nothing will be loaded in the frontend.
     console.error(
       trans.__('Failed to load the jupyterlab-git server extension settings'),
@@ -220,7 +220,8 @@ async function activate(
     // Add a menu for the plugin
     if (mainMenu && app.version.split('.').slice(0, 2).join('.') < '3.1') {
       // Support JLab 3.0
-      mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });
+      /*mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });*/
+      mainMenu.addMenu(createGitMenu(app.commands, trans));
     }
 
     // Add a clone button to the file browser extension toolbar

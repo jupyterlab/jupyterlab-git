@@ -30,7 +30,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
   ) => {
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab_git');
-    const fileBrowser = fileBrowserFactory.defaultBrowser;
+    const fileBrowser = fileBrowserFactory.createFileBrowser('id');
     const fileBrowserModel = fileBrowser.model;
     /** Add git clone command */
     app.commands.addCommand(CommandIDs.gitClone, {

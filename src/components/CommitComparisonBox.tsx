@@ -115,7 +115,7 @@ export function CommitComparisonBox(
         if (diffResult.code !== 0) {
           throw new Error(diffResult.message);
         }
-      } catch (err) {
+      } catch (err: any) {
         const msg = `Failed to get the diff for ${referenceCommit.commit} and ${challengerCommit.commit}.`;
         console.error(msg, err);
         props.logger.log({

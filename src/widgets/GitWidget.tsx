@@ -26,7 +26,7 @@ export class GitWidget extends ReactWidget {
     trans: TranslationBundle,
     options?: Widget.IOptions
   ) {
-    super(options);
+    super();
     this.node.id = 'GitSession-root';
     this.addClass(gitWidgetStyle);
 
