@@ -5,7 +5,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 import { useState, useCallback } from 'react';
-import { Slider } from '@material-ui/core';
+import { Slider as MUISlider, withStyles } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
@@ -28,15 +28,15 @@ import {
   onionSkinImage,
   onionSkinImageContainer,
   onionSkinReferenceImage,
-  onionSkinSlider,
   referenceImageClass,
   referenceLabelClass,
-  selectedTabClass,
+  sliderChallengerCircle,
+  sliderReferenceCircle,
   swipeBackground,
   swipeChallengerImage,
   swipeContainer,
   swipeReferenceImage,
-  swipeSlider,
+  slider,
   tabClass,
   tabIndicatorClass,
   tabsClass,
@@ -116,8 +116,7 @@ const ImageDiff = ({
       >
         <Tab
           classes={{
-            root: tabClass,
-            selected: selectedTabClass
+            root: tabClass
           }}
           title={trans.__('View Image Diff in 2-up Mode')}
           label={trans.__('2-up')}
@@ -126,8 +125,7 @@ const ImageDiff = ({
         />
         <Tab
           classes={{
-            root: tabClass,
-            selected: selectedTabClass
+            root: tabClass
           }}
           title={trans.__('View Image Diff in Swipe Mode')}
           label={trans.__('Swipe')}
@@ -136,8 +134,7 @@ const ImageDiff = ({
         />
         <Tab
           classes={{
-            root: tabClass,
-            selected: selectedTabClass
+            root: tabClass
           }}
           title={trans.__('View Image Diff in Onion Skin Mode')}
           label={trans.__('Onion Skin')}
@@ -202,6 +199,33 @@ const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
   );
 };
 
+type SliderProps = {
+  value: number;
+  onChange: (
+    event: React.ChangeEvent<unknown>,
+    newValue: number | number[]
+  ) => void;
+};
+
+const CustomMUISlider = withStyles({
+  root: {
+    color: 'var(--jp-brand-color1)'
+  },
+  thumb: {
+    backgroundColor: 'var(--jp-brand-color1)'
+  }
+})(MUISlider);
+
+const Slider = ({ value, onChange }: SliderProps) => {
+  return (
+    <div className={slider}>
+      <span className={sliderReferenceCircle}>&#x25CF;</span>
+      <CustomMUISlider value={value} onChange={onChange} />
+      <span className={sliderChallengerCircle}>&#x25CF;</span>
+    </div>
+  );
+};
+
 const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
   const [sliderValue, setSliderValue] = useState(50);
 
@@ -216,16 +240,16 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
 
   return (
     <>
-      <div className={swipeSlider}>
-        <Slider value={sliderValue} onChange={handleSliderChange} />
-      </div>
+      <Slider value={sliderValue} onChange={handleSliderChange} />
       <div className={swipeContainer}>
         <div className={swipeBackground}>
           <img
             src={`data:image/png;base64,${reference}`}
             className={swipeReferenceImage}
             style={{
-              clipPath: `polygon(0 0, ${sliderValue}% 0, ${sliderValue}% 100%, 0% 100%)`
+              clipPath: `polygon(0 0, ${sliderValue - 0.25}% 0, ${
+                sliderValue - 0.25
+              }% 100%, 0% 100%)`
             }}
             alt="Reference"
           />
@@ -233,7 +257,9 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
             src={`data:image/png;base64,${challenger}`}
             className={swipeChallengerImage}
             style={{
-              clipPath: `polygon(${sliderValue}% 0, 100% 0, 100% 100%, ${sliderValue}% 100%)`
+              clipPath: `polygon(${sliderValue + 0.25}% 0, 100% 0, 100% 100%, ${
+                sliderValue + 0.25
+              }% 100%)`
             }}
             alt="Challenger"
           />
@@ -244,7 +270,7 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
 };
 
 const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
-  const [sliderValue, setSliderValue] = useState(0);
+  const [sliderValue, setSliderValue] = useState(50);
 
   const handleSliderChange = (
     event: React.ChangeEvent<unknown>,
@@ -256,30 +282,22 @@ const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
   };
 
   return (
-    <>
-      <div className={onionSkinSlider}>
-        <Slider
-          value={sliderValue}
-          onChange={handleSliderChange}
-          aria-labelledby="onion-skin-slider"
+    <div className={onionSkinContainer}>
+      <Slider value={sliderValue} onChange={handleSliderChange} />
+      <div className={onionSkinImageContainer}>
+        <img
+          src={`data:image/png;base64,${reference}`}
+          alt="Reference"
+          className={`${onionSkinImage} ${onionSkinReferenceImage}`}
+        />
+        <img
+          src={`data:image/png;base64,${challenger}`}
+          alt="Challenger"
+          className={`${onionSkinImage} ${onionSkinChallengerImage}`}
+          style={{ opacity: sliderValue / 100 }}
         />
       </div>
-      <div className={onionSkinContainer}>
-        <div className={onionSkinImageContainer}>
-          <img
-            src={`data:image/png;base64,${reference}`}
-            alt="Reference"
-            className={`${onionSkinImage} ${onionSkinReferenceImage}`}
-          />
-          <img
-            src={`data:image/png;base64,${challenger}`}
-            alt="Challenger"
-            className={`${onionSkinImage} ${onionSkinChallengerImage}`}
-            style={{ opacity: sliderValue / 100 }}
-          />
-        </div>
-      </div>
-    </>
+    </div>
   );
 };
 
@@ -351,7 +369,6 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
         />
       );
 
-      reactImageDiffWidget.addClass(imageDiffWidgetClass);
       this.addClass(imageDiffWidgetClass);
 
       this.addWidget(reactImageDiffWidget);

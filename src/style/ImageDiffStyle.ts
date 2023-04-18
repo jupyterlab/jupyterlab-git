@@ -12,7 +12,7 @@ export const labelsClass = style({
 export const referenceLabelClass = style({
   color: 'var(--jp-ui-font-color1)',
   fontWeight: 'bold',
-  backgroundColor: 'var(--jp-diff-deleted-color1)',
+  backgroundColor: 'var(--jp-diff-deleted-color0)',
   padding: '3px',
   paddingRight: '7px',
   flexGrow: 1,
@@ -23,7 +23,7 @@ export const referenceLabelClass = style({
 export const challengerLabelClass = style({
   color: 'var(--jp-ui-font-color1)',
   fontWeight: 'bold',
-  backgroundColor: 'var(--jp-diff-added-color1)',
+  backgroundColor: 'var(--jp-diff-added-color0)',
   padding: '3px',
   paddingRight: '7px',
   flexGrow: 1,
@@ -32,27 +32,22 @@ export const challengerLabelClass = style({
 });
 
 export const tabsClass = style({
-  borderTop: '1px solid var(--jp-border-color2)'
+  borderTop: '1px solid var(--jp-border-color2)',
+  color: 'var(--jp-ui-font-color1)'
 });
 
 export const tabClass = style({
   minHeight: '15px',
 
-  backgroundColor: 'var(--jp-layout-color2)!important',
-
   borderBottom:
-    'var(--jp-border-width) solid var(--jp-border-color2)!important',
-  borderRight: 'var(--jp-border-width) solid var(--jp-border-color2)!important',
+    'var(--jp-border-width) solid var(--jp-border-color3)!important',
+  borderRight: 'var(--jp-border-width) solid var(--jp-border-color3)!important',
 
   $nest: {
     span: {
       textTransform: 'none'
     }
   }
-});
-
-export const selectedTabClass = style({
-  backgroundColor: 'var(--jp-layout-color1)!important'
 });
 
 export const tabIndicatorClass = style({
@@ -67,6 +62,7 @@ export const twoUpView = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-evenly',
+  gap: '5px',
   padding: '0px 8px!important'
 });
 
@@ -82,15 +78,33 @@ export const imageCol = style({
 export const referenceImageClass = style({
   width: 'auto',
   maxHeight: '500px',
-  border: '3px solid var(--jp-diff-deleted-color0)',
+  border: '5px solid var(--jp-diff-deleted-color0)',
   overflow: 'scroll'
 });
 
 export const challengerImageClass = style({
   width: 'auto',
   maxHeight: '500px',
-  border: '3px solid var(--jp-diff-added-color0)',
+  border: '5px solid var(--jp-diff-added-color0)',
   overflow: 'scroll'
+});
+
+export const slider = style({
+  padding: '5px 0',
+  margin: '0px 20px',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center'
+});
+
+export const sliderReferenceCircle = style({
+  color: 'var(--jp-diff-deleted-color0)',
+  margin: '0 8px'
+});
+
+export const sliderChallengerCircle = style({
+  color: 'var(--jp-diff-added-color0)',
+  margin: '0 8px'
 });
 
 export const swipeContainer = style({
@@ -103,8 +117,7 @@ export const swipeContainer = style({
 export const swipeBackground = style({
   position: 'relative',
   width: '100%',
-  height: '500px',
-  overflow: 'hidden',
+  height: '510px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center'
@@ -121,7 +134,7 @@ export const swipeReferenceImage = style({
   height: '500px',
   width: 'auto',
   objectFit: 'cover',
-  border: '3px solid var(--jp-diff-deleted-color0)'
+  border: '5px solid var(--jp-diff-deleted-color0)'
 });
 
 export const swipeChallengerImage = style({
@@ -135,25 +148,19 @@ export const swipeChallengerImage = style({
   height: '500px',
   width: 'auto',
   objectFit: 'cover',
-  border: '3px solid var(--jp-diff-added-color0)'
+  border: '5px solid var(--jp-diff-added-color0)'
 });
 
-export const swipeSlider = style({
-  padding: '5px 0',
-  margin: '0px 20px'
-});
-
-export const onionSkinContainer = style({
-  width: '100%'
-});
+export const onionSkinContainer = style({});
 
 export const onionSkinImageContainer = style({
   position: 'relative',
   width: '100%',
-  height: '500px',
+  height: '510px',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'center',
+  objectFit: 'cover'
 });
 
 export const onionSkinImage = style({
@@ -164,23 +171,15 @@ export const onionSkinImage = style({
   bottom: 0,
   left: 0,
   right: 0,
-  opacity: 1,
-  margin: 'auto',
-  overflow: 'scroll'
+  margin: 'auto'
 });
 
 export const onionSkinReferenceImage = style({
   opacity: 1,
-  border: '3px solid var(--jp-diff-deleted-color0)'
+  border: '5px solid var(--jp-diff-deleted-color0)'
 });
 
 export const onionSkinChallengerImage = style({
   opacity: 0,
-  border: '3px solid var(--jp-diff-added-color0)'
-});
-
-export const onionSkinSlider = style({
-  padding: '5px 0',
-  margin: '0px 20px',
-  opacity: 1
+  border: '5px solid var(--jp-diff-added-color0)'
 });
