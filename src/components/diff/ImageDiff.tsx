@@ -206,6 +206,7 @@ type SliderProps = {
     newValue: number | number[]
   ) => void;
   width: number;
+  reversed?: boolean;
 };
 
 const CustomMUISlider = withStyles({
@@ -217,16 +218,20 @@ const CustomMUISlider = withStyles({
   }
 })(MUISlider);
 
-const Slider = ({ value, onChange, width }: SliderProps) => {
+const Slider = ({ value, onChange, width, reversed }: SliderProps) => {
+  const circleClasses = reversed
+    ? [sliderChallengerCircle, sliderReferenceCircle]
+    : [sliderReferenceCircle, sliderChallengerCircle];
+
   return (
     <div className={slider}>
-      <span className={sliderReferenceCircle}>&#x25CF;</span>
+      <span className={circleClasses[0]}>&#x25CF;</span>
       <CustomMUISlider
-        style={{ width: `${width}px` }}
+        style={{ width: `${width + 10}px` }}
         value={value}
         onChange={onChange}
       />
-      <span className={sliderChallengerCircle}>&#x25CF;</span>
+      <span className={circleClasses[1]}>&#x25CF;</span>
     </div>
   );
 };
@@ -257,6 +262,7 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
         value={sliderValue}
         onChange={handleSliderChange}
         width={sliderWidth}
+        reversed
       />
       <div className={swipeBackground}>
         <img
