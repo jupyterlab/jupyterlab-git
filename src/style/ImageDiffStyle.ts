@@ -63,7 +63,8 @@ export const twoUpView = style({
   alignItems: 'center',
   justifyContent: 'space-evenly',
   gap: '5px',
-  padding: '0px 8px!important'
+  padding: '0px 8px!important',
+  overflow: 'scroll'
 });
 
 export const imageCol = style({
@@ -79,14 +80,14 @@ export const referenceImageClass = style({
   width: 'auto',
   maxHeight: '500px',
   border: '5px solid var(--jp-diff-deleted-color0)',
-  overflow: 'scroll'
+  maxWidth: '400px'
 });
 
 export const challengerImageClass = style({
   width: 'auto',
   maxHeight: '500px',
   border: '5px solid var(--jp-diff-added-color0)',
-  overflow: 'scroll'
+  maxWidth: '400px'
 });
 
 export const slider = style({
@@ -110,7 +111,9 @@ export const swipeContainer = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  flexDirection: 'column'
+  flexDirection: 'column',
+  overflowX: 'scroll',
+  padding: '0px 40px'
 });
 
 export const swipeBackground = style({
@@ -122,7 +125,7 @@ export const swipeBackground = style({
   justifyContent: 'center'
 });
 
-export const swipeReferenceImage = style({
+export const swipeImage = style({
   position: 'absolute',
   top: 0,
   bottom: 0,
@@ -132,21 +135,15 @@ export const swipeReferenceImage = style({
   margin: 'auto',
   height: '500px',
   width: 'auto',
-  objectFit: 'cover',
+  maxWidth: '800px',
+  objectFit: 'scale-down'
+});
+
+export const swipeReferenceImage = style({
   border: '5px solid var(--jp-diff-deleted-color0)'
 });
 
 export const swipeChallengerImage = style({
-  position: 'absolute',
-  top: 0,
-  bottom: 0,
-  left: 0,
-  right: 0,
-  opacity: 1,
-  margin: 'auto',
-  height: '500px',
-  width: 'auto',
-  objectFit: 'cover',
   border: '5px solid var(--jp-diff-added-color0)'
 });
 
@@ -154,14 +151,15 @@ export const onionSkinContainer = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  flexDirection: 'column'
+  flexDirection: 'column',
+  overflow: 'scroll',
+  padding: '0px 10px'
 });
 
 export const onionSkinImageContainer = style({
   position: 'relative',
   height: '510px',
-  width: '100%',
-  objectFit: 'cover'
+  width: '100%'
 });
 
 export const onionSkinImage = style({
@@ -172,7 +170,10 @@ export const onionSkinImage = style({
   bottom: 0,
   left: 0,
   right: 0,
-  margin: 'auto'
+  margin: 'auto',
+  maxWidth: '800px',
+  objectFit: 'scale-down',
+  backgroundColor: 'var(--jp-layout-color0)'
 });
 
 export const onionSkinReferenceImage = style({

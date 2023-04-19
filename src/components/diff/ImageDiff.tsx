@@ -4,7 +4,7 @@ import { Panel } from '@lumino/widgets';
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useLayoutEffect } from 'react';
 import { Slider as MUISlider, withStyles } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -40,7 +40,8 @@ import {
   tabClass,
   tabIndicatorClass,
   tabsClass,
-  twoUpView
+  twoUpView,
+  swipeImage
 } from '../../style/ImageDiffStyle';
 import { filesize } from 'filesize';
 
@@ -238,7 +239,10 @@ const Slider = ({ value, onChange, width, reversed }: SliderProps) => {
 
 const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
   const [sliderValue, setSliderValue] = useState(50);
-  const [sliderWidth, setSliderWidth] = useState(300);
+  const [sliderWidth, setSliderWidth] = useState(0);
+
+  const referenceImageRef = useRef(null);
+  const challengerImageRef = useRef(null);
 
   const handleSliderChange = (
     event: React.ChangeEvent<unknown>,
@@ -249,12 +253,11 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
     }
   };
 
-  const handleLoad = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const width = event.currentTarget.clientWidth;
-    if (width > sliderWidth) {
-      setSliderWidth(width);
-    }
-  };
+  useLayoutEffect(() => {
+    const refWidth = referenceImageRef.current.offsetWidth;
+    const challWidth = challengerImageRef.current.offsetWidth;
+    setSliderWidth(Math.max(refWidth, challWidth) - 10);
+  }, []);
 
   return (
     <div className={swipeContainer}>
@@ -267,25 +270,27 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
       <div className={swipeBackground}>
         <img
           src={`data:image/png;base64,${reference}`}
-          className={swipeReferenceImage}
+          className={`${swipeImage} ${swipeReferenceImage}`}
           style={{
-            clipPath: `polygon(0 0, ${sliderValue - 0.25}% 0, ${
-              sliderValue - 0.25
-            }% 100%, 0% 100%)`
+            clipPath: `polygon(0 0, ${sliderValue - 0.1}% 0, ${
+              sliderValue - 0.1
+            }% 100%, 0% 100%)`,
+            width: sliderWidth ? `${sliderWidth}px` : ''
           }}
           alt="Reference"
-          onLoad={handleLoad}
+          ref={referenceImageRef}
         />
         <img
           src={`data:image/png;base64,${challenger}`}
-          className={swipeChallengerImage}
+          className={`${swipeImage} ${swipeChallengerImage}`}
           style={{
-            clipPath: `polygon(${sliderValue + 0.25}% 0, 100% 0, 100% 100%, ${
-              sliderValue + 0.25
-            }% 100%)`
+            clipPath: `polygon(${sliderValue + 0.1}% 0, 100% 0, 100% 100%, ${
+              sliderValue + 0.1
+            }% 100%)`,
+            width: sliderWidth ? `${sliderWidth}px` : ''
           }}
           alt="Challenger"
-          onLoad={handleLoad}
+          ref={challengerImageRef}
         />
       </div>
     </div>
@@ -294,7 +299,10 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
 
 const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
   const [sliderValue, setSliderValue] = useState(50);
-  const [sliderWidth, setSliderWidth] = useState(300);
+  const [sliderWidth, setSliderWidth] = useState(0);
+
+  const referenceImageRef = useRef(null);
+  const challengerImageRef = useRef(null);
 
   const handleSliderChange = (
     event: React.ChangeEvent<unknown>,
@@ -305,12 +313,12 @@ const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
     }
   };
 
-  const handleLoad = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const width = event.currentTarget.clientWidth;
-    if (width > sliderWidth) {
-      setSliderWidth(width);
-    }
-  };
+  useLayoutEffect(() => {
+    const refWidth = referenceImageRef.current.offsetWidth;
+    const challWidth = challengerImageRef.current.offsetWidth;
+
+    setSliderWidth(Math.max(refWidth, challWidth) - 10);
+  }, []);
 
   return (
     <div className={onionSkinContainer}>
@@ -324,14 +332,14 @@ const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
           src={`data:image/png;base64,${reference}`}
           alt="Reference"
           className={`${onionSkinImage} ${onionSkinReferenceImage}`}
-          onLoad={handleLoad}
+          ref={referenceImageRef}
         />
         <img
           src={`data:image/png;base64,${challenger}`}
           alt="Challenger"
           className={`${onionSkinImage} ${onionSkinChallengerImage}`}
           style={{ opacity: sliderValue / 100 }}
-          onLoad={handleLoad}
+          ref={challengerImageRef}
         />
       </div>
     </div>
