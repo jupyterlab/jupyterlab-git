@@ -205,6 +205,7 @@ type SliderProps = {
     event: React.ChangeEvent<unknown>,
     newValue: number | number[]
   ) => void;
+  width: number;
 };
 
 const CustomMUISlider = withStyles({
@@ -216,11 +217,15 @@ const CustomMUISlider = withStyles({
   }
 })(MUISlider);
 
-const Slider = ({ value, onChange }: SliderProps) => {
+const Slider = ({ value, onChange, width }: SliderProps) => {
   return (
     <div className={slider}>
       <span className={sliderReferenceCircle}>&#x25CF;</span>
-      <CustomMUISlider value={value} onChange={onChange} />
+      <CustomMUISlider
+        style={{ width: `${width}px` }}
+        value={value}
+        onChange={onChange}
+      />
       <span className={sliderChallengerCircle}>&#x25CF;</span>
     </div>
   );
@@ -228,6 +233,7 @@ const Slider = ({ value, onChange }: SliderProps) => {
 
 const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
   const [sliderValue, setSliderValue] = useState(50);
+  const [sliderWidth, setSliderWidth] = useState(300);
 
   const handleSliderChange = (
     event: React.ChangeEvent<unknown>,
@@ -238,39 +244,51 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
     }
   };
 
+  const handleLoad = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const width = event.currentTarget.clientWidth;
+    if (width > sliderWidth) {
+      setSliderWidth(width);
+    }
+  };
+
   return (
-    <>
-      <Slider value={sliderValue} onChange={handleSliderChange} />
-      <div className={swipeContainer}>
-        <div className={swipeBackground}>
-          <img
-            src={`data:image/png;base64,${reference}`}
-            className={swipeReferenceImage}
-            style={{
-              clipPath: `polygon(0 0, ${sliderValue - 0.25}% 0, ${
-                sliderValue - 0.25
-              }% 100%, 0% 100%)`
-            }}
-            alt="Reference"
-          />
-          <img
-            src={`data:image/png;base64,${challenger}`}
-            className={swipeChallengerImage}
-            style={{
-              clipPath: `polygon(${sliderValue + 0.25}% 0, 100% 0, 100% 100%, ${
-                sliderValue + 0.25
-              }% 100%)`
-            }}
-            alt="Challenger"
-          />
-        </div>
+    <div className={swipeContainer}>
+      <Slider
+        value={sliderValue}
+        onChange={handleSliderChange}
+        width={sliderWidth}
+      />
+      <div className={swipeBackground}>
+        <img
+          src={`data:image/png;base64,${reference}`}
+          className={swipeReferenceImage}
+          style={{
+            clipPath: `polygon(0 0, ${sliderValue - 0.25}% 0, ${
+              sliderValue - 0.25
+            }% 100%, 0% 100%)`
+          }}
+          alt="Reference"
+          onLoad={handleLoad}
+        />
+        <img
+          src={`data:image/png;base64,${challenger}`}
+          className={swipeChallengerImage}
+          style={{
+            clipPath: `polygon(${sliderValue + 0.25}% 0, 100% 0, 100% 100%, ${
+              sliderValue + 0.25
+            }% 100%)`
+          }}
+          alt="Challenger"
+          onLoad={handleLoad}
+        />
       </div>
-    </>
+    </div>
   );
 };
 
 const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
   const [sliderValue, setSliderValue] = useState(50);
+  const [sliderWidth, setSliderWidth] = useState(300);
 
   const handleSliderChange = (
     event: React.ChangeEvent<unknown>,
@@ -281,20 +299,33 @@ const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
     }
   };
 
+  const handleLoad = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const width = event.currentTarget.clientWidth;
+    if (width > sliderWidth) {
+      setSliderWidth(width);
+    }
+  };
+
   return (
     <div className={onionSkinContainer}>
-      <Slider value={sliderValue} onChange={handleSliderChange} />
+      <Slider
+        value={sliderValue}
+        onChange={handleSliderChange}
+        width={sliderWidth}
+      />
       <div className={onionSkinImageContainer}>
         <img
           src={`data:image/png;base64,${reference}`}
           alt="Reference"
           className={`${onionSkinImage} ${onionSkinReferenceImage}`}
+          onLoad={handleLoad}
         />
         <img
           src={`data:image/png;base64,${challenger}`}
           alt="Challenger"
           className={`${onionSkinImage} ${onionSkinChallengerImage}`}
           style={{ opacity: sliderValue / 100 }}
+          onLoad={handleLoad}
         />
       </div>
     </div>
@@ -389,7 +420,7 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
       (error as any)?.traceback
     );
     const msg = ((error.message || error) as string).replace('\n', '<br />');
-    this.node.innerHTML = `<p class="jp-git-diff-error">
+    this.node.innerHTML = `<p style="color: unset" class="jp-git-diff-error">
       <span>${this._trans.__('Error Loading File Diff:')}</span>
       <span class="jp-git-diff-error-message">${msg}</span>
     </p>`;

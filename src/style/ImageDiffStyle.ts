@@ -94,24 +94,23 @@ export const slider = style({
   margin: '0px 20px',
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'center'
+  alignItems: 'center',
+  gap: '8px'
 });
 
 export const sliderReferenceCircle = style({
-  color: 'var(--jp-diff-deleted-color0)',
-  margin: '0 8px'
+  color: 'var(--jp-diff-deleted-color0)'
 });
 
 export const sliderChallengerCircle = style({
-  color: 'var(--jp-diff-added-color0)',
-  margin: '0 8px'
+  color: 'var(--jp-diff-added-color0)'
 });
 
 export const swipeContainer = style({
-  width: '100%',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center'
+  justifyContent: 'center',
+  flexDirection: 'column'
 });
 
 export const swipeBackground = style({
@@ -151,15 +150,17 @@ export const swipeChallengerImage = style({
   border: '5px solid var(--jp-diff-added-color0)'
 });
 
-export const onionSkinContainer = style({});
-
-export const onionSkinImageContainer = style({
-  position: 'relative',
-  width: '100%',
-  height: '510px',
+export const onionSkinContainer = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  flexDirection: 'column'
+});
+
+export const onionSkinImageContainer = style({
+  position: 'relative',
+  height: '510px',
+  width: '100%',
   objectFit: 'cover'
 });
 
