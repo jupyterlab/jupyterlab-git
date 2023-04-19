@@ -63,11 +63,13 @@ type ImageDiffProps = {
   challenger: string;
   mode?: typeof modes[number];
   trans: TranslationBundle;
+  fileType: string;
 };
 
 type ImageDiffViewProps = {
   reference: string;
   challenger: string;
+  fileType: string;
 };
 
 const whichViewMode = (mode: typeof modes[number]) => {
@@ -84,13 +86,21 @@ const base64FileSize = (base64str: string) => {
   return filesize(n);
 };
 
+const getFileType = (filename: string) => {
+  return (
+    filename.substring(filename.lastIndexOf('.') + 1, filename.length) ||
+    filename
+  );
+};
+
 const ImageDiff = ({
   reference,
   referenceLabel,
   challenger,
   challengerLabel,
   mode,
-  trans
+  trans,
+  fileType
 }: ImageDiffProps) => {
   const [modeSelect, setModeSelect] = useState<string>(mode ? mode : '2-up');
 
@@ -143,12 +153,16 @@ const ImageDiff = ({
           disableRipple
         />
       </Tabs>
-      <ImageDiffView reference={reference} challenger={challenger} />
+      <ImageDiffView
+        reference={reference}
+        challenger={challenger}
+        fileType={fileType}
+      />
     </div>
   );
 };
 
-const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
+const TwoUp = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
   const [referDimensions, setReferDimensions] = useState<number[]>([0, 0]);
   const [challDimensions, setChallDimensions] = useState<number[]>([0, 0]);
 
@@ -173,7 +187,7 @@ const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
       <div className={imageCol}>
         <img
           className={referenceImageClass}
-          src={`data:image/png;base64,${reference}`}
+          src={`data:image/${fileType};base64,${reference}`}
           alt="reference"
           onLoad={handleReferLoad}
         />
@@ -186,7 +200,7 @@ const TwoUp = ({ reference, challenger }: ImageDiffViewProps) => {
       <div className={imageCol}>
         <img
           className={challengerImageClass}
-          src={`data:image/png;base64,${challenger}`}
+          src={`data:image/${fileType};base64,${challenger}`}
           alt="challenger"
           onLoad={handleChallLoad}
         />
@@ -237,7 +251,7 @@ const Slider = ({ value, onChange, width, reversed }: SliderProps) => {
   );
 };
 
-const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
+const Swipe = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
   const [sliderValue, setSliderValue] = useState(50);
   const [sliderWidth, setSliderWidth] = useState(0);
 
@@ -269,7 +283,7 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
       />
       <div className={swipeBackground}>
         <img
-          src={`data:image/png;base64,${reference}`}
+          src={`data:image/${fileType};base64,${reference}`}
           className={`${swipeImage} ${swipeReferenceImage}`}
           style={{
             clipPath: `polygon(0 0, ${sliderValue - 0.1}% 0, ${
@@ -281,7 +295,7 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
           ref={referenceImageRef}
         />
         <img
-          src={`data:image/png;base64,${challenger}`}
+          src={`data:image/${fileType};base64,${challenger}`}
           className={`${swipeImage} ${swipeChallengerImage}`}
           style={{
             clipPath: `polygon(${sliderValue + 0.1}% 0, 100% 0, 100% 100%, ${
@@ -297,7 +311,7 @@ const Swipe = ({ reference, challenger }: ImageDiffViewProps) => {
   );
 };
 
-const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
+const OnionSkin = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
   const [sliderValue, setSliderValue] = useState(50);
   const [sliderWidth, setSliderWidth] = useState(0);
 
@@ -329,13 +343,13 @@ const OnionSkin = ({ reference, challenger }: ImageDiffViewProps) => {
       />
       <div className={onionSkinImageContainer}>
         <img
-          src={`data:image/png;base64,${reference}`}
+          src={`data:image/${fileType};base64,${reference}`}
           alt="Reference"
           className={`${onionSkinImage} ${onionSkinReferenceImage}`}
           ref={referenceImageRef}
         />
         <img
-          src={`data:image/png;base64,${challenger}`}
+          src={`data:image/${fileType};base64,${challenger}`}
           alt="Challenger"
           className={`${onionSkinImage} ${onionSkinChallengerImage}`}
           style={{ opacity: sliderValue / 100 }}
@@ -401,8 +415,6 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
         // this._model.base?.content() ?? Promise.resolve(null)
       ]);
 
-      console.log(reference, challenger);
-
       const reactImageDiffWidget = ReactWidget.create(
         <ImageDiff
           reference={reference}
@@ -411,6 +423,7 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
           challengerLabel={challengerLabel}
           mode="2-up"
           trans={this._trans}
+          fileType={getFileType(this._model.filename)}
         />
       );
 
