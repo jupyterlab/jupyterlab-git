@@ -121,7 +121,11 @@ async def execute(
         if is_binary == False:
             return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
         else:
-            return (process.returncode, base64.encodebytes(output).decode("ascii"), error.decode("utf-8"))
+            return (
+                process.returncode,
+                base64.encodebytes(output).decode("ascii"),
+                error.decode("utf-8"),
+            )
 
     try:
         await execution_lock.acquire(
