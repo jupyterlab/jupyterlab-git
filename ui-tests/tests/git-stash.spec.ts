@@ -141,7 +141,7 @@ test.describe('Git Stash Commands', () => {
     await expect
       .soft(await page.getByText('some stash message (on master)'))
       .toBeTruthy();
-
+    await page.waitForTimeout(100);
     // Check that the stash removed the old text disappears
     await expect(await oldText.count()).toBe(0);
   });
