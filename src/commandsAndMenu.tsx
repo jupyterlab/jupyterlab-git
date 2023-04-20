@@ -11,12 +11,12 @@ import {
 } from '@jupyterlab/apputils';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
-import { Contents, ContentsManager } from '@jupyterlab/services';
+import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
-import { ArrayExt, find, toArray } from '@lumino/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
@@ -586,7 +586,7 @@ export function addCommands(
 
           // Get the index of the most recent tab opened
           let tabPosition = -1;
-          const tabBar = find(dockPanel.tabBars(), bar => {
+          const tabBar = Array.from(dockPanel.tabBars()).find(bar => {
             tabPosition = bar.titles.indexOf(diffWidget.title);
             return tabPosition !== -1;
           });
@@ -1249,7 +1249,7 @@ export function addCommands(
           // If the diff is on the current file and it is updated => diff model changed
           if (diffContext.currentRef === Git.Diff.SpecialRef.WORKING) {
             const updateCurrent = (
-              m: ContentsManager,
+              m: Contents.IManager,
               change: Contents.IChangedArgs
             ) => {
               const updateAt = new Date(
@@ -1749,7 +1749,7 @@ export function addFileBrowserContextMenu(
     const wasShown = menu.isVisible;
     const parent = menu.parentMenu;
 
-    const items = toArray(filebrowser.selectedItems().next().value);
+    const items = Array.from(filebrowser.selectedItems());
     const statuses = new Set<Git.Status>(
       items
         .map(item =>

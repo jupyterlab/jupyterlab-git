@@ -1,8 +1,8 @@
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ClearIcon from '@material-ui/icons/Clear';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ClearIcon from '@mui/icons-material/Clear';
 import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { Logger } from '../logger';

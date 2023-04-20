@@ -1,6 +1,6 @@
 import * as React from 'react';
-import Modal from '@material-ui/core/Modal';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import Modal from '@mui/material/Modal';
+import CircularProgress from '@mui/material/CircularProgress';
 import { fullscreenProgressClass } from '../style/SuspendModal';
 
 /**

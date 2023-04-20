@@ -5,7 +5,7 @@ import {
   refreshIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import { Badge, Tab, Tabs } from '@material-ui/core';
+import { Badge, Tab, Tabs } from '@mui/material';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { Logger } from '../logger';

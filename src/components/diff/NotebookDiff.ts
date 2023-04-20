@@ -107,7 +107,10 @@ export const createNotebookDiff = async (
 
     if (model.hasConflict) {
       // Move merge notebook controls in the toolbar
-      toolbar.addItem('clear-outputs', diffWidget.nbdimeWidget.widgets[0]);
+      toolbar.addItem(
+        'clear-outputs',
+        diffWidget.nbdimeWidget.widgets[0] as any
+      );
     }
 
     // Connect toolbar checkbox and notebook diff widget
@@ -271,7 +274,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
       while (this._scroller.widgets.length > 0) {
         this._scroller.widgets[0].dispose();
       }
-      this._scroller.addWidget(this._nbdWidget);
+      this._scroller.addWidget(this._nbdWidget as any);
       try {
         await this._nbdWidget.init();
 

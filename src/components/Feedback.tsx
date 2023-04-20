@@ -1,12 +1,11 @@
 import { TranslationBundle } from '@jupyterlab/translation';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { Color } from '@material-ui/lab/Alert';
 import * as React from 'react';
 import { ILogMessage, Level } from '../tokens';
 import { Alert } from './Alert';
 import { SuspendModal } from './SuspendModal';
 
-const LEVEL_TO_SEVERITY: Map<Level, Color> = new Map([
+const LEVEL_TO_SEVERITY: Map<Level, string> = new Map([
   [Level.ERROR, 'error'],
   [Level.WARNING, 'warning'],
   [Level.SUCCESS, 'success'],

@@ -1,7 +1,7 @@
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import ListItem from '@material-ui/core/ListItem';
-import ClearIcon from '@material-ui/icons/Clear';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import ListItem from '@mui/material/ListItem';
+import ClearIcon from '@mui/icons-material/Clear';
 import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';

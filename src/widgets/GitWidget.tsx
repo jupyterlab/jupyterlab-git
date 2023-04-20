@@ -5,7 +5,7 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import { StylesProvider } from '@material-ui/core/styles';
+import { StylesProvider } from '@mui/styles';
 import * as React from 'react';
 import { Feedback } from '../components/Feedback';
 import { GitPanel } from '../components/GitPanel';

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import { shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';

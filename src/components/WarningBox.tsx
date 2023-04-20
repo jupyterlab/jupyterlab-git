@@ -1,6 +1,6 @@
-import { CardContent } from '@material-ui/core';
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
+import { CardContent } from '@mui/material';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
 import * as React from 'react';
 import {
   commitRoot,

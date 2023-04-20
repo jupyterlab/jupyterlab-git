@@ -1,7 +1,7 @@
 import { TranslationBundle } from '@jupyterlab/translation';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import ClearIcon from '@material-ui/icons/Clear';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import ClearIcon from '@mui/icons-material/Clear';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { Logger } from '../logger';

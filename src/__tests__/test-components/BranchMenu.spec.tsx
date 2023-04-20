@@ -13,7 +13,7 @@ import {
   defaultMockedResponses,
   DEFAULT_REPOSITORY_PATH
 } from '../utils';
-import ClearIcon from '@material-ui/icons/Clear';
+import ClearIcon from '@mui/icons-material/Clear';
 import { nullTranslator } from '@jupyterlab/translation';
 
 jest.mock('../../git');

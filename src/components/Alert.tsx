@@ -1,10 +1,7 @@
 import { TranslationBundle } from '@jupyterlab/translation';
-import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-import { Button } from '@material-ui/core';
-import Portal from '@material-ui/core/Portal';
-import Slide from '@material-ui/core/Slide';
-import Snackbar from '@material-ui/core/Snackbar';
-import { Color, default as MuiAlert } from '@material-ui/lab/Alert';
+import Portal from '@mui/material/Portal';
+import Slide from '@mui/material/Slide';
+import Snackbar from '@mui/material/Snackbar';
 import * as React from 'react';
 
 /**
@@ -60,7 +57,7 @@ export interface IAlertProps {
   /**
    * Alert severity.
    */
-  severity?: Color;
+  severity?: string;
 
   /**
    * The application language translator.
@@ -95,7 +92,7 @@ export class Alert extends React.Component<IAlertProps> {
       duration = this.props.duration || 5000; // milliseconds
     }
 
-    let action: React.ReactNode;
+    /* let action: React.ReactNode;
     if (this.props.error) {
       action = (
         <Button
@@ -128,7 +125,7 @@ export class Alert extends React.Component<IAlertProps> {
           {this.props.trans.__('Details')}
         </Button>
       );
-    }
+    }*/
 
     return (
       <Portal>
@@ -144,9 +141,12 @@ export class Alert extends React.Component<IAlertProps> {
           onClick={this._onClick}
           onClose={this._onClose}
         >
-          <MuiAlert action={action} variant="filled" severity={severity}>
+          {/*           <MuiAlert action={action} variant="filled" severity={severity}>
             {this.props.message || this.props.trans.__('(missing message)')}
-          </MuiAlert>
+          </MuiAlert> */}
+          <p>
+            {this.props.message || this.props.trans.__('(missing message)')}
+          </p>
         </Snackbar>
       </Portal>
     );

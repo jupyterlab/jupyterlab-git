@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { nullTranslator } from '@jupyterlab/translation';
-import Input from '@material-ui/core/Input';
+import Input from '@mui/material/Input';
 import { shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
