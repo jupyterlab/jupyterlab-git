@@ -236,7 +236,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
           </button>
         )}
         <span className={sectionHeaderLabelStyle}>
-          <p aria-label="Stash">{props.trans.__('Stash')}</p>
+          <p>{props.trans.__('Stash')}</p>
           <span className={sectionButtonContainerStyle}>
             {props.actions}
             <span
