@@ -4,7 +4,13 @@ import { Panel } from '@lumino/widgets';
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
-import { useState, useCallback, useRef, useLayoutEffect } from 'react';
+import {
+  useState,
+  useCallback,
+  useRef,
+  useLayoutEffect,
+  useEffect
+} from 'react';
 import { Slider as MUISlider, withStyles } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -41,7 +47,9 @@ import {
   tabIndicatorClass,
   tabsClass,
   twoUpView,
-  swipeImage
+  swipeImage,
+  emptyRefImage,
+  emptyChallImage
 } from '../../style/ImageDiffStyle';
 import { filesize } from 'filesize';
 
@@ -55,15 +63,17 @@ export const createImageDiff: Git.Diff.ICallback = async (
   return widget;
 };
 
-const modes = ['2-up', 'Swipe', 'Onion Skin'];
+const MODES = ['2-up', 'Swipe', 'Onion Skin'];
+const IMAGE_FILE_TYPES = ['png', 'jpeg', 'jpg'];
+
 type ImageDiffProps = {
   referenceLabel: string;
   reference: string;
   challengerLabel: string;
   challenger: string;
-  mode?: typeof modes[number];
+  mode?: typeof MODES[number];
   trans: TranslationBundle;
-  fileType: string;
+  fileType: typeof IMAGE_FILE_TYPES[number];
 };
 
 type ImageDiffViewProps = {
@@ -106,7 +116,7 @@ const ImageDiff = ({
 
   const onTabChange = useCallback(
     (event: any, tab: number) => {
-      setModeSelect(modes[tab]);
+      setModeSelect(MODES[tab]);
     },
     [modeSelect]
   );
@@ -121,7 +131,7 @@ const ImageDiff = ({
       </div>
       <Tabs
         classes={{ root: tabsClass, indicator: tabIndicatorClass }}
-        value={modes.indexOf(modeSelect)}
+        value={MODES.indexOf(modeSelect)}
         onChange={onTabChange}
         variant="fullWidth"
       >
@@ -163,33 +173,69 @@ const ImageDiff = ({
 };
 
 const TwoUp = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
-  const [referDimensions, setReferDimensions] = useState<number[]>([0, 0]);
-  const [challDimensions, setChallDimensions] = useState<number[]>([0, 0]);
+  const [referDimensions, setReferDimensions] = useState<number[]>([100, 100]);
+  const [challDimensions, setChallDimensions] = useState<number[]>([100, 100]);
+
+  const [imageDimensions, setImageDimensions] = useState<number[]>([100, 100]);
 
   const handleReferLoad = (
     event: React.SyntheticEvent<HTMLImageElement, Event>
   ) => {
-    const width = event.currentTarget.naturalWidth;
-    const height = event.currentTarget.naturalHeight;
+    let width = event.currentTarget.naturalWidth;
+    let height = event.currentTarget.naturalHeight;
     setReferDimensions([width, height]);
+
+    width = Math.min(event.currentTarget.width, 400);
+    height = Math.min(event.currentTarget.height, 400);
+    setImageDimensions([width, height]);
   };
 
   const handleChallLoad = (
     event: React.SyntheticEvent<HTMLImageElement, Event>
   ) => {
-    const width = event.currentTarget.naturalWidth;
-    const height = event.currentTarget.naturalHeight;
+    let width = event.currentTarget.naturalWidth;
+    let height = event.currentTarget.naturalHeight;
     setChallDimensions([width, height]);
+
+    width = Math.min(event.currentTarget.width, 400);
+    height = Math.min(event.currentTarget.height, 400);
+    setImageDimensions([width, height]);
   };
+
+  useEffect(() => {
+    if (!reference) {
+      setReferDimensions([...challDimensions]);
+    }
+
+    console.log('effect');
+  }, [challDimensions]);
+
+  useEffect(() => {
+    if (!challenger) {
+      setChallDimensions([...referDimensions]);
+    }
+
+    console.log('effect');
+  }, [referDimensions]);
 
   return (
     <div className={twoUpView}>
       <div className={imageCol}>
         <img
-          className={referenceImageClass}
+          className={`${referenceImageClass} ${
+            !reference ? emptyRefImage : ''
+          }`}
           src={`data:image/${fileType};base64,${reference}`}
-          alt="reference"
+          alt={'Reference'}
           onLoad={handleReferLoad}
+          style={
+            !reference
+              ? {
+                  width: `${imageDimensions[0]}px`,
+                  height: `${imageDimensions[1]}px`
+                }
+              : {}
+          }
         />
         <label htmlFor={referenceImageClass}>{`W: ${
           referDimensions[0]
@@ -199,10 +245,20 @@ const TwoUp = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
       </div>
       <div className={imageCol}>
         <img
-          className={challengerImageClass}
+          className={`${challengerImageClass} ${
+            !challenger ? emptyChallImage : ''
+          }`}
           src={`data:image/${fileType};base64,${challenger}`}
-          alt="challenger"
+          alt={'challenger'}
           onLoad={handleChallLoad}
+          style={
+            !challenger
+              ? {
+                  width: `${imageDimensions[0]}px`,
+                  height: `${imageDimensions[1]}px`
+                }
+              : {}
+          }
         />
         <label htmlFor={challengerImageClass}>{`W: ${
           challDimensions[0]
@@ -268,8 +324,9 @@ const Swipe = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
   };
 
   useLayoutEffect(() => {
-    const refWidth = referenceImageRef.current.offsetWidth;
-    const challWidth = challengerImageRef.current.offsetWidth;
+    const refWidth = reference ? referenceImageRef.current.offsetWidth : 0;
+    const challWidth = challenger ? challengerImageRef.current.offsetWidth : 0;
+
     setSliderWidth(Math.max(refWidth, challWidth) - 10);
   }, []);
 
@@ -284,7 +341,9 @@ const Swipe = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
       <div className={swipeBackground}>
         <img
           src={`data:image/${fileType};base64,${reference}`}
-          className={`${swipeImage} ${swipeReferenceImage}`}
+          className={`${swipeImage} ${swipeReferenceImage} ${
+            !reference ? emptyRefImage : ''
+          }`}
           style={{
             clipPath: `polygon(0 0, ${sliderValue - 0.1}% 0, ${
               sliderValue - 0.1
@@ -296,7 +355,9 @@ const Swipe = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
         />
         <img
           src={`data:image/${fileType};base64,${challenger}`}
-          className={`${swipeImage} ${swipeChallengerImage}`}
+          className={`${swipeImage} ${swipeChallengerImage} ${
+            !challenger ? emptyChallImage : ''
+          }`}
           style={{
             clipPath: `polygon(${sliderValue + 0.1}% 0, 100% 0, 100% 100%, ${
               sliderValue + 0.1
@@ -313,7 +374,7 @@ const Swipe = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
 
 const OnionSkin = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
   const [sliderValue, setSliderValue] = useState(50);
-  const [sliderWidth, setSliderWidth] = useState(0);
+  const [sliderWidth, setSliderWidth] = useState(40);
 
   const referenceImageRef = useRef(null);
   const challengerImageRef = useRef(null);
@@ -328,8 +389,8 @@ const OnionSkin = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
   };
 
   useLayoutEffect(() => {
-    const refWidth = referenceImageRef.current.offsetWidth;
-    const challWidth = challengerImageRef.current.offsetWidth;
+    const refWidth = reference ? referenceImageRef.current.offsetWidth : 40;
+    const challWidth = challenger ? challengerImageRef.current.offsetWidth : 40;
 
     setSliderWidth(Math.max(refWidth, challWidth) - 10);
   }, []);
@@ -345,13 +406,18 @@ const OnionSkin = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
         <img
           src={`data:image/${fileType};base64,${reference}`}
           alt="Reference"
-          className={`${onionSkinImage} ${onionSkinReferenceImage}`}
+          className={`${onionSkinImage} ${onionSkinReferenceImage} ${
+            !reference ? emptyRefImage : ''
+          }`}
+          style={!reference ? { width: `${sliderWidth}px` } : {}}
           ref={referenceImageRef}
         />
         <img
           src={`data:image/${fileType};base64,${challenger}`}
           alt="Challenger"
-          className={`${onionSkinImage} ${onionSkinChallengerImage}`}
+          className={`${onionSkinImage} ${onionSkinChallengerImage} ${
+            !challenger ? emptyChallImage : ''
+          }`}
           style={{ opacity: sliderValue / 100 }}
           ref={challengerImageRef}
         />
@@ -415,10 +481,18 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
         // this._model.base?.content() ?? Promise.resolve(null)
       ]);
 
-      if (!reference) {
-        throw Error('Image missing from reference');
-      } else if (!challenger) {
-        throw Error('Image missing from challenger');
+      // if (!reference) {
+      //   throw Error('Image missing from reference');
+      // } else if (!challenger) {
+      //   throw Error('Image missing from challenger');
+      // }
+
+      const fileType = getFileType(this._model.filename);
+
+      if (!IMAGE_FILE_TYPES.includes(fileType)) {
+        throw Error(
+          `Image file format ${fileType} not supported. Only ${IMAGE_FILE_TYPES} file extensions are supported' by the image diff view.`
+        );
       }
 
       const reactImageDiffWidget = ReactWidget.create(
@@ -429,7 +503,7 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
           challengerLabel={challengerLabel}
           mode="2-up"
           trans={this._trans}
-          fileType={getFileType(this._model.filename)}
+          fileType={fileType}
         />
       );
 

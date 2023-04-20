@@ -76,11 +76,21 @@ export const imageCol = style({
   color: 'var(--jp-ui-font-color2)'
 });
 
+export const emptyRefImage = style({
+  backgroundImage:
+    'repeating-linear-gradient(-45deg, var(--jp-diff-deleted-color1), var(--jp-diff-deleted-color1) 3px, transparent 3px, transparent 10px)'
+});
+
+export const emptyChallImage = style({
+  backgroundImage:
+    'repeating-linear-gradient(-45deg, var(--jp-diff-added-color1), var(--jp-diff-added-color1) 3px, transparent 3px, transparent 10px)'
+});
+
 export const referenceImageClass = style({
   width: 'auto',
-  maxHeight: '500px',
+  maxHeight: '500px!important',
   border: '5px solid var(--jp-diff-deleted-color0)',
-  maxWidth: '400px'
+  maxWidth: '400px!important'
 });
 
 export const challengerImageClass = style({
