@@ -1868,7 +1868,7 @@ class Git:
             If None, the entire stash is removed.
         """
         cmd = ["git", "stash"]
-
+        print(stash_index, type(stash_index))
         if stash_index is None:
             cmd.append("clear")
         else:

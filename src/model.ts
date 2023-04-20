@@ -1608,11 +1608,12 @@ export class GitExtension implements IGitExtension {
     let path: string;
     try {
       path = await this._getPathRepository();
-
+      console.log(stash_index);
       await this._taskHandler.execute<void>('git:stash:drop', async () => {
-        const url = stash_index
-          ? URLExt.join(path, `stash?stash_index=${stash_index}`)
-          : URLExt.join(path, 'stash');
+        const url =
+          stash_index >= 0
+            ? URLExt.join(path, `stash?stash_index=${stash_index}`)
+            : URLExt.join(path, 'stash');
         await requestAPI(url, 'DELETE');
       });
 

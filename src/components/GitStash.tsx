@@ -17,7 +17,8 @@ import {
   listStyle,
   sectionButtonContainerStyle,
   sectionHeaderLabelStyle,
-  stashFileStyle
+  stashFileStyle,
+  stashEntryMessageStyle
 } from '../style/GitStashStyle';
 import { FilePath } from './FilePath';
 import { stopPropagationWrapper } from '../utils';
@@ -137,7 +138,9 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
           </button>
         )}
         <span className={sectionHeaderLabelStyle}>
-          <p>{props.trans.__('%1 (on %2)', props.message, props.branch)}</p>
+          <p className={stashEntryMessageStyle}>
+            {props.trans.__('%1 (on %2)', props.message, props.branch)}
+          </p>
           <span className={sectionButtonContainerStyle}>{props.actions}</span>
         </span>
       </div>
@@ -193,6 +196,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
     async (index: number): Promise<void> => {
       try {
         await props.model.stash_drop(index);
+        console.log(index);
       } catch (err) {
         console.error(err);
       }
@@ -232,7 +236,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
           </button>
         )}
         <span className={sectionHeaderLabelStyle}>
-          <p>{props.trans.__('Stash')}</p>
+          <p aria-label="Stash">{props.trans.__('Stash')}</p>
           <span className={sectionButtonContainerStyle}>
             {props.actions}
             <span
