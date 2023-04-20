@@ -97,7 +97,7 @@ test.describe('Git Stash Commands', () => {
     page
   }) => {
     // open the first affected file in the stash entry
-    await page.getByRole('tab', { name: 'File Browser (⇧ ⌘ F)' }).click();
+    await page.getByRole('tab', { name: 'File Browser ' }).click();
 
     await page
       .getByRole('region', { name: 'File Browser Section' })
@@ -150,7 +150,7 @@ test.describe('Git Stash Commands', () => {
     page
   }) => {
     // open the first affected file in hte stash entry
-    await page.getByRole('tab', { name: 'File Browser (⇧ ⌘ F)' }).click();
+    await page.getByRole('tab', { name: 'File Browser' }).click();
 
     await page
       .getByRole('region', { name: 'File Browser Section' })
@@ -180,7 +180,7 @@ test.describe('Git Stash Commands', () => {
     ).toBeTruthy();
 
     // open the second file has changes applied
-    await page.getByRole('tab', { name: 'File Browser (⇧ ⌘ F)' }).click();
+    await page.getByRole('tab', { name: 'File Browser' }).click();
 
     await page
       .getByRole('region', { name: 'File Browser Section' })
@@ -200,7 +200,7 @@ test.describe('Git Stash Commands', () => {
     page
   }) => {
     // open the first affected file in hte stash entry
-    await page.getByRole('tab', { name: 'File Browser (⇧ ⌘ F)' }).click();
+    await page.getByRole('tab', { name: 'File Browser' }).click();
 
     await page
       .getByRole('region', { name: 'File Browser Section' })
@@ -236,7 +236,7 @@ test.describe('Git Stash Commands', () => {
       const element = document.querySelector('[data-test-id="num-stashes"]');
       return element && !(element.textContent ?? '').includes('(2)');
     });
-
+    await page.waitForTimeout(100);
     // Check that the stash applies
     const firstStashFileText = await page
       .locator('pre')
@@ -245,7 +245,7 @@ test.describe('Git Stash Commands', () => {
     await expect(await firstStashFileText.count()).toBe(1);
 
     // open the second file has changes applied
-    await page.getByRole('tab', { name: 'File Browser (⇧ ⌘ F)' }).click();
+    await page.getByRole('tab', { name: 'File Browser' }).click();
 
     await page
       .getByRole('region', { name: 'File Browser Section' })
