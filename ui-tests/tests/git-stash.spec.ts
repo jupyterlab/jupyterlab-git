@@ -30,9 +30,9 @@ test.describe('Git Stash Commands', () => {
     });
     const numberOfStashes = await page.locator('[data-test-id="num-stashes"]');
 
-    await page.locator('div:nth-child(4) > .fkumj3x > .fp5mvxw').click();
+    await page.getByText('Stash', { exact: true }).click();
 
-    expect(stashButton).toBeTruthy();
+    expect.soft(stashButton).toBeTruthy();
     await expect(await numberOfStashes.innerText()).toBe('(2)');
   });
 
@@ -40,7 +40,7 @@ test.describe('Git Stash Commands', () => {
     page
   }) => {
     // Open the stash list
-    await page.locator('div:nth-child(4) > .fkumj3x > .fp5mvxw').click();
+    await page.getByText('Stash', { exact: true }).click();
     // Hover on the stash list
     const stashSection = await page.getByText('Stash(2)');
     await stashSection.hover();
@@ -69,7 +69,7 @@ test.describe('Git Stash Commands', () => {
     page
   }) => {
     // Open the stash list
-    await page.locator('div:nth-child(4) > .fkumj3x > .fp5mvxw').click();
+    await page.getByText('Stash', { exact: true }).click();
     // Hover on the stash list
     const stashSection = await page.getByText('Stash(2)');
     await stashSection.hover();
@@ -114,7 +114,7 @@ test.describe('Git Stash Commands', () => {
     // Should have the old tetx
 
     const oldText = await page.locator('text="This is some dirty changes"');
-    await expect(await oldText.count()).toBe(1);
+    await expect.soft(await oldText.count()).toBe(1);
     const stashButton = await page.getByRole('button', {
       name: 'Stash latest changes'
     });
@@ -136,11 +136,11 @@ test.describe('Git Stash Commands', () => {
     // See if the nStashes becomes (3)
     const numberOfStashes = await page.locator('[data-test-id="num-stashes"]');
 
-    await expect(await numberOfStashes.innerText()).toBe('(3)');
+    await expect.soft(await numberOfStashes.innerText()).toBe('(3)');
     // check that our stash message showed up properly
-    await expect(
-      await page.getByText('some stash message (on master)')
-    ).toBeTruthy();
+    await expect
+      .soft(await page.getByText('some stash message (on master)'))
+      .toBeTruthy();
 
     // Check that the stash removed the old text disappears
     await expect(await oldText.count()).toBe(0);
@@ -175,9 +175,9 @@ test.describe('Git Stash Commands', () => {
     await applyStashBtn.click();
 
     // Check that the stash applies
-    await expect(
-      await page.getByText('console.log("dirty changes");')
-    ).toBeTruthy();
+    await expect
+      .soft(await page.getByText('console.log("dirty changes");'))
+      .toBeTruthy();
 
     // open the second file has changes applied
     await page.getByRole('tab', { name: 'File Browser' }).click();
@@ -187,9 +187,9 @@ test.describe('Git Stash Commands', () => {
       .getByText('another_file.txt')
       .dblclick();
 
-    await expect(
-      await page.getByText('This is some dirty changes')
-    ).toBeTruthy();
+    await expect
+      .soft(await page.getByText('This is some dirty changes'))
+      .toBeTruthy();
 
     // See if the nStashes remains the same
     const numberOfStashes = await page.locator('[data-test-id="num-stashes"]');
@@ -217,7 +217,7 @@ test.describe('Git Stash Commands', () => {
 
     // Show the stash entries and hover on the stash entry
     // await page.getByText('Stash(2)').hover();
-    await page.locator('div:nth-child(4) > .fkumj3x > .fp5mvxw').click();
+    await page.getByText('Stash', { exact: true }).click();
 
     await page
       .locator('span')
@@ -242,7 +242,7 @@ test.describe('Git Stash Commands', () => {
       .locator('pre')
       .filter({ hasText: 'console.log("dirty changes");' });
 
-    await expect(await firstStashFileText.count()).toBe(1);
+    await expect.soft(await firstStashFileText.count()).toBe(1);
 
     // open the second file has changes applied
     await page.getByRole('tab', { name: 'File Browser' }).click();
@@ -259,7 +259,7 @@ test.describe('Git Stash Commands', () => {
       .locator('pre')
       .filter({ hasText: 'This is some dirty changes' });
 
-    await expect(await secondStashFileText.count()).toBe(1);
+    await expect.soft(await secondStashFileText.count()).toBe(1);
 
     // See if the nStashes remains the same
 
