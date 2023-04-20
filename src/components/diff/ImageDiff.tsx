@@ -72,7 +72,7 @@ type ImageDiffViewProps = {
   fileType: string;
 };
 
-const whichViewMode = (mode: typeof modes[number]) => {
+const whichViewMode = (mode: string) => {
   const elements = {
     '2-up': TwoUp,
     Swipe,
@@ -415,6 +415,12 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
         // this._model.base?.content() ?? Promise.resolve(null)
       ]);
 
+      if (!reference) {
+        throw Error('Image missing from reference');
+      } else if (!challenger) {
+        throw Error('Image missing from challenger');
+      }
+
       const reactImageDiffWidget = ReactWidget.create(
         <ImageDiff
           reference={reference}
@@ -446,9 +452,14 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
       error,
       (error as any)?.traceback
     );
+
+    while (this.widgets.length > 0) {
+      this.widgets[0].dispose();
+    }
+
     const msg = ((error.message || error) as string).replace('\n', '<br />');
     this.node.innerHTML = `<p style="color: unset" class="jp-git-diff-error">
-      <span>${this._trans.__('Error Loading File Diff:')}</span>
+      <span>${this._trans.__('Error Loading Image Diff:')}</span>
       <span class="jp-git-diff-error-message">${msg}</span>
     </p>`;
   }

@@ -679,10 +679,23 @@ async def test_content(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_has_calls(
         [
             call(
-                ["git", "show", "{}:{}".format("previous", filename)],
+                [
+                    "git",
+                    "diff",
+                    "--numstat",
+                    "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+                    "previous",
+                    "--",
+                    filename,
+                ],
                 cwd=str(local_path),
             ),
-        ],
+            call(
+                ["git", "show", "{}:{}".format("previous", filename)],
+                cwd=str(local_path),
+                is_binary=False,
+            ),
+        ]
     )
 
 
@@ -780,8 +793,21 @@ async def test_content_index(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_has_calls(
         [
             call(
+                [
+                    "git",
+                    "diff",
+                    "--numstat",
+                    "--cached",
+                    "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+                    "--",
+                    filename,
+                ],
+                cwd=str(local_path),
+            ),
+            call(
                 ["git", "show", "{}:{}".format("", filename)],
                 cwd=str(local_path),
+                is_binary=False,
             ),
         ],
     )
@@ -824,10 +850,15 @@ async def test_content_base(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_has_calls(
         [
             call(
-                ["git", "show", obj_ref],
+                ["git", "ls-files", "-u", "-z", filename],
                 cwd=str(local_path),
             ),
-        ],
+            call(
+                ["git", "show", "915bb14609daab65e5304e59d89c626283ae49fc"],
+                cwd=str(local_path),
+                is_binary=False,
+            ),
+        ]
     )
 
 
@@ -902,11 +933,23 @@ async def test_content_binary(mock_execute, jp_fetch, jp_root_dir):
     }
 
     # Then
-    with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(
-            NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST"
-        )
-    assert_http_error(e, 500, expected_message="file is not UTF-8")
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST"
+    )
+
+    mock_execute.assert_has_calls(
+        [
+            call(
+                ["git", "ls-files", "-u", "-z", filename],
+                cwd=str(local_path),
+            ),
+            call(
+                ["git", "show", "915bb14609daab65e5304e59d89c626283ae49fc"],
+                cwd=str(local_path),
+                is_binary=False,
+            ),
+        ]
+    )
 
 
 @patch("jupyterlab_git.git.execute")
