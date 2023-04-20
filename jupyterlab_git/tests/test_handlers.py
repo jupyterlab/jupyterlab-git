@@ -940,13 +940,21 @@ async def test_content_binary(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_has_calls(
         [
             call(
-                ["git", "ls-files", "-u", "-z", filename],
+                [
+                    "git",
+                    "diff",
+                    "--numstat",
+                    "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+                    "current",
+                    "--",
+                    filename,
+                ],
                 cwd=str(local_path),
             ),
             call(
-                ["git", "show", "915bb14609daab65e5304e59d89c626283ae49fc"],
+                ["git", "show", "{}:{}".format("current", filename)],
                 cwd=str(local_path),
-                is_binary=False,
+                is_binary=True,
             ),
         ]
     )
