@@ -1427,7 +1427,7 @@ class Git:
                         reference["special"]
                     )
                 )
-        elif reference["git"]:
+        elif "git" in reference:
             is_binary = await self._is_binary(filename, reference["git"], path)
             if is_binary:
                 content = await self.show(
