@@ -9836,11 +9836,6 @@ rc@1.2.8, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-compare-image@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/react-compare-image/-/react-compare-image-3.3.0.tgz#5666205f80ddbfeab56b1ae49d67e145482a4649"
-  integrity sha512-RNua/cBqosKFvMfI+GLdraUaTunhstsQoPi3DWvrAmCBoJRDVoLskxFsLDV4JNfFJMiRlcLyAAPKZoAA4f8Upw==
-
 react-dom@^17.0.1:
   version "17.0.2"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-17.0.2.tgz#ecffb6845e3ad8dbfcdc498f0d0a939736502c23"
@@ -9849,11 +9844,6 @@ react-dom@^17.0.1:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     scheduler "^0.20.2"
-
-react-image-diff@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/react-image-diff/-/react-image-diff-0.1.0.tgz#5f09216029006d9925514ff48d3c84b0f7505da1"
-  integrity sha512-mI3BzqAhoSU2mtxuWgnL0RoAJj/hWHdyg8j/RYlHLAEzkG1sLCEHaSpm/48UDhA7p3EFBaBnf0uIp1dnxg9uUg==
 
 "react-is@^16.12.0 || ^17.0.0 || ^18.0.0":
   version "18.2.0"

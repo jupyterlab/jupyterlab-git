@@ -81,9 +81,7 @@
     "nbdime": "^6.1.1",
     "nbdime-jupyterlab": "^2.1.0",
     "react": "^17.0.1",
-    "react-compare-image": "^3.3.0",
     "react-dom": "^17.0.1",
-    "react-image-diff": "^0.1.0",
     "react-virtualized-auto-sizer": "^1.0.2",
     "react-window": "^1.8.5",
     "typestyle": "^2.0.1"
