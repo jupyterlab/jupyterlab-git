@@ -931,8 +931,8 @@ export namespace Git {
     files?: IStatusFileResult[];
   }
 
-  /** Interface for Git Stash List request result
-   *
+  /**
+   * Interface for Git Stash List request result
    */
   export interface IStashListResult {
     message: string;

@@ -808,7 +808,6 @@ export function addCommands(
             level: Level.SUCCESS
           });
         } catch (error: any) {
-          console.log('816 error:', error);
           console.error(
             'Encountered an error when pulling changes. Error: ',
             error

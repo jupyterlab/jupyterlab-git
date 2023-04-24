@@ -921,7 +921,6 @@ class GitStashHandler(GitHandler):
         local_path = self.url2localpath(path)
         stash_index = self.get_query_argument("stash_index", None)
 
-        print(stash_index, type(stash_index))
         # Choose what to erase
         if (stash_index is None) and (stash_index != 0):
             response = await self.git.stash_drop(local_path)

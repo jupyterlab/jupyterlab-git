@@ -168,7 +168,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   constructor(props: IGitPanelProps) {
     super(props);
-    // console.log('GitPanel constructor, model:', props.model);
     const {
       branches,
       currentBranch,
@@ -202,8 +201,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   componentDidMount(): void {
     const { model, settings } = this.props;
-    // console.log('GitPanel componentDidMount, model:', this.props.model);
-
     model.stashChanged.connect((_, args) => {
       this.setState({
         stash: args.newValue as any
