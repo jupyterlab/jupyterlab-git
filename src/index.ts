@@ -3,7 +3,12 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { Dialog, showErrorMessage, Toolbar, ICommandPalette } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  showErrorMessage,
+  Toolbar,
+  ICommandPalette
+} from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
@@ -47,6 +52,7 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     ISettingRegistry,
     IDocumentManager,
     IStatusBar,
+    ICommandPalette,
     ITranslator
   ],
   provides: IGitExtension,
@@ -85,7 +91,6 @@ async function activate(
   const fileBrowser = factory.defaultBrowser;
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab_git');
-  const { commands } = app
 
   // Attempt to load application settings
   try {
@@ -119,9 +124,9 @@ async function activate(
       throw new Error(
         trans.__(
           'The versions of the JupyterLab Git server frontend and backend do not match. ' +
-          'The @jupyterlab/git frontend extension has version: %1 ' +
-          'while the python package has version %2. ' +
-          'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git',
+            'The @jupyterlab/git frontend extension has version: %1 ' +
+            'while the python package has version %2. ' +
+            'Please install identical version of jupyterlab-git Python package and the @jupyterlab/git extension. Try running: pip install --upgrade jupyterlab-git',
           frontendVersion,
           serverVersion
         )
@@ -140,22 +145,7 @@ async function activate(
     );
     return null;
   }
-  // Add commands to the pallette
-  const command = CommandIDs.gitClone;
 
-  commands.addCommand(command, {
-    label: `Execute ${CommandIDs.gitClone} Command`,
-    caption: `Execute ${CommandIDs.gitClone} Command`,
-    execute: () => {
-      console.log(
-        `${CommandIDs.gitClone} has been called`
-      );
-    },
-  });
-  // Add the command to the command palette
-  const category = 'Git Example';
-  palette.addItem({ command, category });
-  
   // Create the Git model
   gitExtension = new GitExtension(docmanager, app.docRegistry, settings);
 
@@ -203,6 +193,13 @@ async function activate(
     gitPlugin.id = 'jp-git-sessions';
     gitPlugin.title.icon = gitIcon;
     gitPlugin.title.caption = 'Git';
+
+    // Add the commands to the command palette
+    const category = 'Git Operations';
+    [
+      // TODO: More commands to be added here
+      CommandIDs.gitMerge
+    ].forEach(command => palette.addItem({ command, category }));
 
     // Let the application restorer track the running panel for restoration of
     // application state (e.g. setting the running panel as the current side bar
