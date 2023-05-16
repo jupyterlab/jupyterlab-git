@@ -197,8 +197,18 @@ async function activate(
     // Add the commands to the command palette
     const category = 'Git Operations';
     [
-      // TODO: More commands to be added here
-      CommandIDs.gitMerge
+      CommandIDs.gitToggleSimpleStaging,
+      CommandIDs.gitToggleDoubleClickDiff,
+      CommandIDs.gitOpenGitignore,
+      CommandIDs.gitShowDiff,
+      CommandIDs.gitInit,
+      CommandIDs.gitClone,
+      CommandIDs.gitMerge,
+      CommandIDs.gitPush,
+      CommandIDs.gitPull,
+      CommandIDs.gitResetToRemote,
+      CommandIDs.gitManageRemote,
+      CommandIDs.gitTerminalCommand
     ].forEach(command => palette.addItem({ command, category }));
 
     // Let the application restorer track the running panel for restoration of
