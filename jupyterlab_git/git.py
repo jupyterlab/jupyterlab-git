@@ -1830,7 +1830,7 @@ class Git:
 
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
-    async def stash_pop(self, path: str, stash_index: Optional[int] = None) -> dict:
+    async def pop_stash(self, path: str, stash_index: Optional[int] = None) -> dict:
         """
         Execute git stash pop for a certain index of the stash list. If no index is provided, it will
 
@@ -1855,7 +1855,7 @@ class Git:
 
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
-    async def stash_drop(self, path, stash_index: Optional[int] = None) -> dict:
+    async def drop_stash(self, path, stash_index: Optional[int] = None) -> dict:
         """
         Execute git stash drop to delete a single stash entry.
         If not stash_index is provided, delete the entire stash.
@@ -1881,7 +1881,7 @@ class Git:
 
         return {"code": code, "message": output, "command": " ".join(cmd)}
 
-    async def stash_apply(self, path: str, stash_index: Optional[int] = None) -> dict:
+    async def apply_stash(self, path: str, stash_index: Optional[int] = None) -> dict:
         """
         Execute git stash apply to apply a single stash entry to the repository.
         If not stash_index is provided, apply the latest stash.

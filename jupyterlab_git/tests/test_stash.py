@@ -206,7 +206,7 @@ async def test_git_stash_show_failure(mock_execute, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_stash_drop_single_success(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_drop_stash_single_success(mock_execute, jp_fetch, jp_root_dir):
     # Given
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
@@ -232,7 +232,7 @@ async def test_git_stash_drop_single_success(mock_execute, jp_fetch, jp_root_dir
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_stash_drop_single_failure(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_drop_stash_single_failure(mock_execute, jp_fetch, jp_root_dir):
     # Given
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
@@ -261,7 +261,7 @@ async def test_git_stash_drop_single_failure(mock_execute, jp_fetch, jp_root_dir
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_stash_drop_all_success(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_drop_stash_all_success(mock_execute, jp_fetch, jp_root_dir):
     # Given
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
@@ -289,7 +289,7 @@ async def test_git_stash_drop_all_success(mock_execute, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_stash_apply_with_index(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_apply_stash_with_index(mock_execute, jp_fetch, jp_root_dir):
     # Given
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
@@ -314,7 +314,7 @@ async def test_git_stash_apply_with_index(mock_execute, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_stash_apply_without_index(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_apply_stash_without_index(mock_execute, jp_fetch, jp_root_dir):
     # Given
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
@@ -336,7 +336,7 @@ async def test_git_stash_apply_without_index(mock_execute, jp_fetch, jp_root_dir
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_stash_apply_failure(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_apply_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     # Given
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
@@ -367,7 +367,7 @@ async def test_git_stash_apply_failure(mock_execute, jp_fetch, jp_root_dir):
 
 # Git Stash Pop
 @patch("jupyterlab_git.git.execute")
-async def test_git_stash_pop_with_index(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_pop_stash_with_index(mock_execute, jp_fetch, jp_root_dir):
     # Given
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
@@ -391,7 +391,7 @@ async def test_git_stash_pop_with_index(mock_execute, jp_fetch, jp_root_dir):
 
 
 @patch("jupyterlab_git.git.execute")
-async def test_git_stash_pop_without_index(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_pop_stash_without_index(mock_execute, jp_fetch, jp_root_dir):
     # Given
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
@@ -414,9 +414,9 @@ async def test_git_stash_pop_without_index(mock_execute, jp_fetch, jp_root_dir):
     assert response.code == 204
 
 
-# test_git_stash_pop_failure
+# test_git_pop_stash_failure
 @patch("jupyterlab_git.git.execute")
-async def test_git_stash_pop_failure(mock_execute, jp_fetch, jp_root_dir):
+async def test_git_pop_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     # Given
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"

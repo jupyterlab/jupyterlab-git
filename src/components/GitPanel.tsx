@@ -357,11 +357,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   }
 
   private _gitStashClear = async (): Promise<void> => {
-    await this.props.model.stash_drop();
+    await this.props.model.dropStash();
   };
 
   private _gitStashApplyLatest = async (): Promise<void> => {
-    await this.props.model.stash_apply(0);
+    await this.props.model.applyStash(0);
   };
 
   /**

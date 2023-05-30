@@ -184,7 +184,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   const gitStashPop = React.useCallback(
     async (index: number): Promise<void> => {
       try {
-        await props.model.stash_pop(index);
+        await props.model.popStash(index);
       } catch (err) {
         console.error(err);
       }
@@ -195,7 +195,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   const gitStashDrop = React.useCallback(
     async (index: number): Promise<void> => {
       try {
-        await props.model.stash_drop(index);
+        await props.model.dropStash(index);
       } catch (err) {
         console.error(err);
       }
@@ -206,7 +206,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   const gitStashApply = React.useCallback(
     async (index: number): Promise<void> => {
       try {
-        await props.model.stash_apply(index);
+        await props.model.applyStash(index);
       } catch (err) {
         console.error(err);
       }

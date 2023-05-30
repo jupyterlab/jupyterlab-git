@@ -800,8 +800,7 @@ export function addCommands(
           message: trans.__('Stashing changes')
         });
         try {
-          const currentPath = fileBrowserModel.path;
-          await gitModel.stashChanges(currentPath, stashMsg);
+          await gitModel.stashChanges(stashMsg);
           // Success
           logger.log({
             message: trans.__('Successfully stashed'),

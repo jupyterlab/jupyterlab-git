@@ -923,9 +923,9 @@ class GitStashHandler(GitHandler):
 
         # Choose what to erase
         if (stash_index is None) and (stash_index != 0):
-            response = await self.git.stash_drop(local_path)
+            response = await self.git.drop_stash(local_path)
         else:
-            response = await self.git.stash_drop(local_path, stash_index)
+            response = await self.git.drop_stash(local_path, stash_index)
 
         if response["code"] == 0:
             self.set_status(204)
@@ -966,7 +966,7 @@ class GitStashPopHandler(GitHandler):
         local_path = self.url2localpath(path)
         data = self.get_json_body()
 
-        response = await self.git.stash_pop(local_path, data.get("index"))
+        response = await self.git.pop_stash(local_path, data.get("index"))
 
         if response["code"] == 0:
             self.set_status(204)
@@ -988,7 +988,7 @@ class GitStashApplyHandler(GitHandler):
         """
         local_path = self.url2localpath(path)
         data = self.get_json_body()
-        response = await self.git.stash_apply(local_path, data.get("index"))
+        response = await self.git.apply_stash(local_path, data.get("index"))
 
         if response["code"] == 0:
             self.set_status(201)
