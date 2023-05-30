@@ -500,7 +500,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
                 icon={rewindIcon}
                 onClick={this._onStashClick}
                 title={this.props.trans.__('Stash latest changes')}
-                aria-label="Stash Changes"
               />
               <ActionButton
                 icon={addIcon}
@@ -510,7 +509,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
                 onClick={stopPropagationWrapper(() => {
                   this._gitStashApplyLatest();
                 })}
-                aria-label="Apply Stash"
               />
               <ActionButton
                 className={hiddenButtonStyle}
@@ -520,7 +518,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
                 onClick={stopPropagationWrapper(() => {
                   this._gitStashClear();
                 })}
-                aria-label="Clear Stash"
               />
             </React.Fragment>
           }

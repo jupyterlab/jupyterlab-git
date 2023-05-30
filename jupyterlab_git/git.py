@@ -1839,7 +1839,6 @@ class Git:
         stash_index: number
             Index of the stash list is first applied to the current branch, then removed from the stash.
             If the index is not provided, the most recent stash (index=0) will be removed from the stash.
-
         """
         cmd = ["git", "stash", "pop"]
 
@@ -1851,7 +1850,6 @@ class Git:
 
         code, output, error = await execute(cmd, cwd=path, env=env)
 
-        print(type(cmd[len(cmd) - 1]))
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
@@ -1868,7 +1866,6 @@ class Git:
             If None, the entire stash is removed.
         """
         cmd = ["git", "stash"]
-        print(stash_index, type(stash_index))
         if stash_index is None:
             cmd.append("clear")
         else:
@@ -1893,7 +1890,6 @@ class Git:
             Git path repository
         stash_index: number
             Index of the stash list is applied to the repository.
-
         """
         # Clear
         cmd = ["git", "stash", "apply"]

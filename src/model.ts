@@ -1405,14 +1405,13 @@ export class GitExtension implements IGitExtension {
 
   /**
    * Stash the current changes in a dirty repository.
-   * @param path - path at which the stashes will be saved in
+   * @param stashMsg - Stash message
    * @returns promise which resolves upon stashing changes
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
-   *
    */
-  async stashChanges(path?: string, stashMsg?: string): Promise<void> {
+  async stashChanges(stashMsg?: string): Promise<void> {
     try {
       path = await this._getPathRepository();
 
@@ -1440,14 +1439,14 @@ export class GitExtension implements IGitExtension {
 
   /**
    * Pop a stash
-   * @param path - path at which the stashes will be saved in
-   * @returns promise which resolves upon stashing changes
+   * @param index - Index of the stash to pop; pop the latest if not provided.
+   * @returns promise which resolves upon task completion
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    *
    */
-  async stash_pop(index?: number): Promise<void> {
+  async popStash(index?: number): Promise<void> {
     try {
       const path = await this._getPathRepository();
 
@@ -1473,7 +1472,16 @@ export class GitExtension implements IGitExtension {
     await this.refreshStash();
   }
 
-  async stash_apply(index: number): Promise<void> {
+  /**
+   * Apply a given stash
+   *
+   * @param index - Index of the stash to apply.
+   * @returns promise which resolves upon task completion
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async applyStash(index: number): Promise<void> {
     const path = await this._getPathRepository();
     try {
       const stashFiles = index
@@ -1502,7 +1510,7 @@ export class GitExtension implements IGitExtension {
   /**
    * Checks the stash list, and sets the stash property.
    *
-   * @returns promise which resolves to an array of stashes
+   * @returns promise which resolves when the task is done.
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
@@ -1597,14 +1605,14 @@ export class GitExtension implements IGitExtension {
   /**
    * Drop a stash entry, or clear the entire stash.
    *
-   * @param stash_index The index of the stash to be deleleted. If the stash_index is 'clear', the entire stash will be cleared.
+   * @param index The index of the stash to be deleted. If no index is provided, the entire stash will be cleared.
    *
-   * @returns promise which resolves to an array of stashes
+   * @returns promise which resolves when the task is done
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async stash_drop(stash_index?: number): Promise<void> {
+  async dropStash(index?: number): Promise<void> {
     let path: string;
     try {
       path = await this._getPathRepository();
