@@ -425,6 +425,7 @@ const OnionSkin = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
 export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
   constructor(model: Git.Diff.IModel, translator?: TranslationBundle) {
     super();
+    this.addClass('jp-git-image-diff')
     const getReady = new PromiseDelegate<void>();
     this._container = this.node as HTMLElement;
     this._isReady = getReady.promise;
