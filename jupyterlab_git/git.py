@@ -118,14 +118,14 @@ async def execute(
             cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env
         )
         output, error = process.communicate()
-        if is_binary == False:
-            return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
-        else:
+        if is_binary:
             return (
                 process.returncode,
                 base64.encodebytes(output).decode("ascii"),
                 error.decode("utf-8"),
             )
+        else:
+            return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
 
     try:
         await execution_lock.acquire(

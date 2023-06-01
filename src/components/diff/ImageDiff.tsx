@@ -206,16 +206,12 @@ const TwoUp = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
     if (!reference) {
       setReferDimensions([...challDimensions]);
     }
-
-    console.log('effect');
   }, [challDimensions]);
 
   useEffect(() => {
     if (!challenger) {
       setChallDimensions([...referDimensions]);
     }
-
-    console.log('effect');
   }, [referDimensions]);
 
   return (
@@ -471,21 +467,13 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
   }
 
   async refresh(): Promise<void> {
-    // await this.ready;
     try {
       const referenceLabel = this._model.reference.label;
       const challengerLabel = this._model.challenger.label;
       const [reference, challenger] = await Promise.all([
         this._model.reference.content(),
         this._model.challenger.content()
-        // this._model.base?.content() ?? Promise.resolve(null)
       ]);
-
-      // if (!reference) {
-      //   throw Error('Image missing from reference');
-      // } else if (!challenger) {
-      //   throw Error('Image missing from challenger');
-      // }
 
       const fileType = getFileType(this._model.filename);
 
