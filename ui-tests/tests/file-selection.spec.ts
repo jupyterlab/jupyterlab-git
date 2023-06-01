@@ -65,7 +65,7 @@ test.describe('File selection for simple staging', () => {
     // Click [aria-label="main"] >> text=Git
     await page.locator('[aria-label="main"] >> text=Git').click();
     // Click text=Simple staging
-    await page.locator('text=Simple staging').click();
+    await page.getByRole('menuitem', { name: 'Simple staging' }).click();
   });
 
   test('should mark four files with shift-click', async ({ page }) => {
