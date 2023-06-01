@@ -1454,8 +1454,8 @@ export class GitExtension implements IGitExtension {
       path = await this._getPathRepository();
       await this._taskHandler.execute<void>('git:stash:drop', async () => {
         const url =
-          stash_index >= 0
-            ? URLExt.join(path, `stash?stash_index=${stash_index}`)
+          index >= 0
+            ? URLExt.join(path, `stash?stash_index=${index}`)
             : URLExt.join(path, 'stash');
         await requestAPI(url, 'DELETE');
       });
@@ -1612,7 +1612,7 @@ export class GitExtension implements IGitExtension {
    */
   async stashChanges(stashMsg?: string): Promise<void> {
     try {
-      path = await this._getPathRepository();
+      const path = await this._getPathRepository();
 
       await this._taskHandler.execute<void>('git:stash', async () => {
         await requestAPI(
