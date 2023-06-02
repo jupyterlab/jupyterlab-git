@@ -437,14 +437,14 @@ export interface IGitExtension extends IDisposable {
   merge(branch: string): Promise<Git.IResultWithMessage>;
 
   /**
-     * Pop a stash
-     * @param index - Index of the stash to pop; pop the latest if not provided.
-     * @returns promise which resolves upon task completion
-     * @throws {Git.NotInRepository} If the current path is not a Git repository
-     * @throws {Git.GitResponseError} If the server response is not ok
-     * @throws {ServerConnection.NetworkError} If the request cannot be made
-     *
-     */
+   * Pop a stash
+   * @param index - Index of the stash to pop; pop the latest if not provided.
+   * @returns promise which resolves upon task completion
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   *
+   */
   popStash(index?: number): Promise<void>;
 
   /**

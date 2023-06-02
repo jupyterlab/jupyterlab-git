@@ -1648,7 +1648,10 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  protected isStashDeepEqual(a: Git.IStashEntry[], b: Git.IStashEntry[]): boolean {
+  protected isStashDeepEqual(
+    a: Git.IStashEntry[],
+    b: Git.IStashEntry[]
+  ): boolean {
     if (a?.length !== b?.length) {
       return false;
     }
