@@ -51,6 +51,7 @@ import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
+import { InputDialog } from '@jupyterlab/apputils';
 
 export interface IGitCloneArgs {
   /**
@@ -780,6 +781,67 @@ export function addCommands(
       )
   });
 
+  commands.addCommand(CommandIDs.gitStash, {
+    label: trans.__('Stash Changes'),
+    caption: trans.__('Stash all current changes'),
+    isEnabled: () => gitModel.pathRepository !== null,
+    execute: async args => {
+      const stashDialog = await InputDialog.getText({
+        // Default stash message is the last commit hash and message
+        title: trans.__('Do you want to stash your changes? '),
+        placeholder: trans.__('Stash message (optional)'),
+        okLabel: trans.__('Stash')
+      });
+      const stashMsg = stashDialog.value ?? '';
+
+      if (stashDialog.button.accept) {
+        logger.log({
+          level: Level.RUNNING,
+          message: trans.__('Stashing changes')
+        });
+        try {
+          await gitModel.stashChanges(stashMsg);
+          // Success
+          logger.log({
+            message: trans.__('Successfully stashed'),
+            level: Level.SUCCESS
+          });
+        } catch (error: any) {
+          console.error(
+            'Encountered an error when pulling changes. Error: ',
+            error
+          );
+        }
+      }
+    }
+  });
+
+  /**
+   *  Calls refreshStash
+   *
+   */
+  commands.addCommand(CommandIDs.gitStashList, {
+    label: trans.__('Stash List'),
+    caption: trans.__('Get all the stashed changes'),
+    // Check if we are in a git repository
+    isEnabled: () => gitModel.pathRepository !== null,
+    execute: async args => {
+      try {
+        await gitModel.refreshStash();
+        logger.log({
+          message: trans.__('Got the stash list'),
+          level: Level.INFO
+        });
+      } catch (err) {
+        logger.log({
+          message: trans.__('Failed to get the stash'),
+          level: Level.ERROR,
+          error: err as Error
+        });
+      }
+    }
+  });
+
   /* Context menu commands */
   commands.addCommand(ContextCommandIDs.gitFileOpen, {
     label: trans.__('Open'),
@@ -1342,7 +1404,8 @@ export function createGitMenu(
     CommandIDs.gitPull,
     CommandIDs.gitResetToRemote,
     CommandIDs.gitManageRemote,
-    CommandIDs.gitTerminalCommand
+    CommandIDs.gitTerminalCommand,
+    CommandIDs.gitStash
   ].forEach(command => {
     menu.addItem({ command });
     if (command === CommandIDs.gitPush) {

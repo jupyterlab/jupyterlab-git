@@ -19,7 +19,7 @@ export interface IFilePathProps {
   /**
    * File type
    */
-  filetype: DocumentRegistry.IFileType;
+  filetype?: DocumentRegistry.IFileType;
 }
 
 export const FilePath: React.FunctionComponent<IFilePathProps> = (
@@ -30,7 +30,7 @@ export const FilePath: React.FunctionComponent<IFilePathProps> = (
     .slice(0, props.filepath.length - filename.length)
     .replace(/^\/|\/$/g, ''); // Remove leading and trailing '/'
 
-  const icon = props.filetype.icon || fileIcon;
+  const icon = props.filetype?.icon || fileIcon;
 
   return (
     <React.Fragment>

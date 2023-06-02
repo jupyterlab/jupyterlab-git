@@ -12,6 +12,20 @@ export function extractFilename(path: string): string {
   }
 }
 
+/**
+ * Wrap mouse event handler to stop event propagation
+ * @param fn Mouse event handler
+ * @returns Mouse event handler that stops event from propagating
+ */
+export function stopPropagationWrapper(
+  fn: React.EventHandler<React.MouseEvent>
+): React.EventHandler<React.MouseEvent> {
+  return (event: React.MouseEvent) => {
+    event.stopPropagation();
+    fn(event);
+  };
+}
+
 export function decodeStage(x: string, y: string): Git.Status {
   /**
    * All combinations of statuses for merge conflicts

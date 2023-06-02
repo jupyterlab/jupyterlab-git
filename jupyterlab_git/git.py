@@ -1772,6 +1772,142 @@ class Git:
         elif self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.poll():
             self.ensure_git_credential_cache_daemon(socket, debug, True, cwd, env)
 
+    async def stash(self, path: str, stashMsg: str = "") -> dict:
+        """
+        Stash changes in a dirty working directory away
+        path: str            Git path repository
+        stashMsg (optional): str
+            A message that describes the stash entry
+        """
+        cmd = ["git", "stash"]
+
+        if len(stashMsg) > 0:
+            cmd.extend(["save", "-m", stashMsg])
+
+        env = os.environ.copy()
+        # if the git command is run in a non-interactive terminal, it will not prompt for user input
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        # code 0: no changes to stash
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
+    async def stash_list(self, path: str) -> dict:
+        """
+        Execute git stash list command
+        """
+        cmd = ["git", "stash", "list"]
+
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
+    async def stash_show(self, path: str, index: int) -> dict:
+        """
+        Execute git stash show command
+        """
+        # stash_index = "stash@{" + str(index) + "}"
+        stash_index = f"stash@{{{index!s}}}"
+
+        cmd = ["git", "stash", "show", "-p", stash_index, "--name-only"]
+
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
+    async def pop_stash(self, path: str, stash_index: Optional[int] = None) -> dict:
+        """
+        Execute git stash pop for a certain index of the stash list. If no index is provided, it will
+
+        path: str
+            Git path repository
+        stash_index: number
+            Index of the stash list is first applied to the current branch, then removed from the stash.
+            If the index is not provided, the most recent stash (index=0) will be removed from the stash.
+        """
+        cmd = ["git", "stash", "pop"]
+
+        if stash_index:
+            cmd.append(str(stash_index))
+
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
+    async def drop_stash(self, path, stash_index: Optional[int] = None) -> dict:
+        """
+        Execute git stash drop to delete a single stash entry.
+        If not stash_index is provided, delete the entire stash.
+
+        path: Git path repository
+        stash_index: number or None
+            Index of the stash list to remove from the stash.
+            If None, the entire stash is removed.
+        """
+        cmd = ["git", "stash"]
+        if stash_index is None:
+            cmd.append("clear")
+        else:
+            cmd.extend(["drop", str(stash_index)])
+
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
+    async def apply_stash(self, path: str, stash_index: Optional[int] = None) -> dict:
+        """
+        Execute git stash apply to apply a single stash entry to the repository.
+        If not stash_index is provided, apply the latest stash.
+
+        path: str
+            Git path repository
+        stash_index: number
+            Index of the stash list is applied to the repository.
+        """
+        # Clear
+        cmd = ["git", "stash", "apply"]
+
+        if stash_index is not None:
+            cmd.append("stash@{" + str(stash_index) + "}")
+
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        # error:
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output, "command": " ".join(cmd)}
+
     @property
     def excluded_paths(self) -> List[str]:
         """Wildcard-style path patterns that do not support git commands.

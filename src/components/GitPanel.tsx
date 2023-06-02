@@ -21,7 +21,7 @@ import {
   warningTextClass
 } from '../style/GitPanel';
 import { CommandIDs, Git, ILogMessage, Level } from '../tokens';
-import { openFileDiff } from '../utils';
+import { openFileDiff, stopPropagationWrapper } from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import { CommitBox } from './CommitBox';
 import { CommitComparisonBox } from './CommitComparisonBox';
@@ -30,6 +30,10 @@ import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
 import { WarningRounded as WarningRoundedIcon } from '@material-ui/icons';
+import { GitStash } from './GitStash';
+import { ActionButton } from './ActionButton';
+import { addIcon, rewindIcon, trashIcon } from '../style/icons';
+import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 
 /**
  * Interface describing component properties.
@@ -144,6 +148,12 @@ export interface IGitPanelState {
    * The commit to compare
    */
   challengerCommit: Git.ISingleCommitInfo | null;
+
+  /**
+   * Stashed files
+   *
+   */
+  stash: Git.IStash;
 }
 
 /**
@@ -162,7 +172,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       branches,
       currentBranch,
       pathRepository,
-      hasDirtyFiles: hasDirtyStagedFiles
+      hasDirtyFiles: hasDirtyStagedFiles,
+      stash
     } = props.model;
 
     this.state = {
@@ -180,7 +191,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       commitAmend: false,
       hasDirtyFiles: hasDirtyStagedFiles,
       referenceCommit: null,
-      challengerCommit: null
+      challengerCommit: null,
+      stash: stash
     };
   }
 
@@ -189,7 +201,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   componentDidMount(): void {
     const { model, settings } = this.props;
-
+    model.stashChanged.connect((_, args) => {
+      this.setState({
+        stash: args.newValue as any
+      });
+    }, this);
     model.repositoryChanged.connect((_, args) => {
       this.setState({
         repository: args.newValue,
@@ -340,6 +356,24 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     );
   }
 
+  private _gitStashClear = async (): Promise<void> => {
+    await this.props.model.dropStash();
+  };
+
+  private _gitStashApplyLatest = async (): Promise<void> => {
+    await this.props.model.applyStash(0);
+  };
+
+  /**
+   * Callback invoked upon clicking a button to stash the dirty files.
+   *
+   * @param event - event object
+   * @returns a promise which resolves upon stashing the latest changes
+   */
+  private _onStashClick = async (): Promise<void> => {
+    await this.props.commands.execute(CommandIDs.gitStash);
+  };
+
   /**
    * Renders a toolbar.
    *
@@ -448,6 +482,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       : this.props.trans.__(
           'You have unsaved staged files. You probably want to save and stage all needed changes before committing.'
         );
+
     return (
       <React.Fragment>
         <FileList
@@ -457,6 +492,42 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           settings={this.props.settings}
           trans={this.props.trans}
         />
+        <GitStash
+          actions={
+            <React.Fragment>
+              <ActionButton
+                className={hiddenButtonStyle}
+                icon={rewindIcon}
+                onClick={this._onStashClick}
+                title={this.props.trans.__('Stash latest changes')}
+              />
+              <ActionButton
+                icon={addIcon}
+                className={hiddenButtonStyle}
+                disabled={this.props.model.stash?.length === 0}
+                title={this.props.trans.__('Apply the latest stash')}
+                onClick={stopPropagationWrapper(() => {
+                  this._gitStashApplyLatest();
+                })}
+              />
+              <ActionButton
+                className={hiddenButtonStyle}
+                icon={trashIcon}
+                title={this.props.trans.__('Clear the entire stash')}
+                disabled={this.props.model.stash?.length === 0}
+                onClick={stopPropagationWrapper(() => {
+                  this._gitStashClear();
+                })}
+              />
+            </React.Fragment>
+          }
+          stash={this.props.model.stash}
+          model={this.props.model}
+          height={100}
+          collapsible={true}
+          trans={this.props.trans}
+        />
+
         <CommitBox
           commands={this.props.commands}
           hasFiles={

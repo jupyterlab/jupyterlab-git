@@ -196,6 +196,17 @@ export interface IGitExtension extends IDisposable {
   allHistory(historyCount?: number): Promise<Git.IAllHistory>;
 
   /**
+   * Apply a given stash
+   *
+   * @param index - Index of the stash to apply.
+   * @returns promise which resolves upon task completion
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  applyStash(index: number): Promise<void>;
+
+  /**
    * Checkout a branch.
    *
    * ## Notes
@@ -312,6 +323,18 @@ export interface IGitExtension extends IDisposable {
   diff(previous?: string, current?: string): Promise<Git.IDiffResult>;
 
   /**
+   * Drop a stash entry, or clear the entire stash.
+   *
+   * @param index The index of the stash to be deleted. If no index is provided, the entire stash will be cleared.
+   *
+   * @returns promise which resolves when the task is done
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  dropStash(index?: number): Promise<void>;
+
+  /**
    * Ensure a .gitignore file exists
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
@@ -412,6 +435,17 @@ export interface IGitExtension extends IDisposable {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   merge(branch: string): Promise<Git.IResultWithMessage>;
+
+  /**
+   * Pop a stash
+   * @param index - Index of the stash to pop; pop the latest if not provided.
+   * @returns promise which resolves upon task completion
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   *
+   */
+  popStash(index?: number): Promise<void>;
 
   /**
    * Fetch changes from a remote repository.
@@ -555,6 +589,16 @@ export interface IGitExtension extends IDisposable {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   showTopLevel(path: string): Promise<string | null>;
+
+  /**
+   * Stash the current changes in a dirty repository.
+   * @param stashMsg - Stash message
+   * @returns promise which resolves upon stashing changes
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  stashChanges(stashMsg?: string): Promise<void>;
 
   /**
    * Make request to list all the tags present in the remote repo
@@ -921,6 +965,55 @@ export namespace Git {
     files?: IStatusFileResult[];
   }
 
+  /**
+   * Interface for Git Stash List request result
+   */
+  export interface IStashListResult {
+    /**
+     * Command error message
+     */
+    message: string;
+    /**
+     * Executed command
+     */
+    command: string;
+    /**
+     * Command result code
+     */
+    code: number;
+    /**
+     * Command results
+     */
+    results?: IStashListResult[];
+  }
+
+  /**
+   * Git Stash interface
+   */
+  export interface IStashEntry {
+    /**
+     * Stash index
+     */
+    index: number;
+    /**
+     * Stash branch
+     */
+    branch: string;
+    /**
+     * Stash message
+     */
+    message: string;
+    /**
+     * Stashed files
+     */
+    files: string[];
+  }
+
+  /**
+   * List of stashes
+   */
+  export type IStash = IStashEntry[];
+
   /** Interface for changed_files request result
    * lists the names of files that have differences between two commits
    * or between two branches, or that were changed by a single commit
@@ -1077,6 +1170,7 @@ export namespace Git {
     | 'remote-changed'
     | 'unmodified'
     | 'unmerged'
+    | 'stashed'
     | null;
 
   export interface ITagResult {
@@ -1187,7 +1281,8 @@ export enum ContextCommandIDs {
   gitIgnore = 'git:context-ignore',
   gitIgnoreExtension = 'git:context-ignoreExtension',
   gitNoAction = 'git:no-action',
-  openFileFromDiff = 'git:open-file-from-diff'
+  openFileFromDiff = 'git:open-file-from-diff',
+  gitFileStashPop = 'git:context-stash-pop'
 }
 
 /**
@@ -1208,5 +1303,8 @@ export enum CommandIDs {
   gitPull = 'git:pull',
   gitResetToRemote = 'git:reset-to-remote',
   gitSubmitCommand = 'git:submit-commit',
-  gitShowDiff = 'git:show-diff'
+  gitShowDiff = 'git:show-diff',
+  gitStash = 'git:stash',
+  gitStashPop = 'git:stash-pop',
+  gitStashList = 'git:stash-list'
 }

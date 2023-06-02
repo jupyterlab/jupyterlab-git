@@ -16,7 +16,8 @@ import {
   diffIcon,
   discardIcon,
   openIcon,
-  removeIcon
+  removeIcon,
+  rewindIcon
 } from '../style/icons';
 import { ContextCommandIDs, CommandIDs, Git } from '../tokens';
 import { ActionButton } from './ActionButton';
@@ -24,6 +25,7 @@ import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
 import { discardAllChanges } from '../widgets/discardAllChanges';
 import { SelectAllButton } from './SelectAllButton';
+import { stopPropagationWrapper } from '../utils';
 
 export interface IFileListState {
   selectedFiles: Git.IStatusFile[];
@@ -86,7 +88,8 @@ export const CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileHistory
   ],
   unmodified: [ContextCommandIDs.gitFileHistory],
-  unmerged: [ContextCommandIDs.gitFileDiff]
+  unmerged: [ContextCommandIDs.gitFileDiff],
+  stashed: [ContextCommandIDs.gitFileStashPop]
 };
 
 const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
@@ -116,7 +119,8 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileDelete
   ],
   unmodified: [ContextCommandIDs.gitFileHistory],
-  unmerged: [ContextCommandIDs.gitFileDiff]
+  unmerged: [ContextCommandIDs.gitFileDiff],
+  stashed: [ContextCommandIDs.gitFileStashPop]
 };
 
 /**
@@ -134,20 +138,6 @@ const areFilesEqual = (fileA: Git.IStatusFile, fileB: Git.IStatusFile) => {
     fileA.status === fileB.status
   );
 };
-
-/**
- * Wrap mouse event handler to stop event propagation
- * @param fn Mouse event handler
- * @returns Mouse event handler that stops event from propagating
- */
-const stopPropagationWrapper =
-  (
-    fn: React.EventHandler<React.MouseEvent>
-  ): React.EventHandler<React.MouseEvent> =>
-  (event: React.MouseEvent) => {
-    event.stopPropagation();
-    fn(event);
-  };
 
 export class FileList extends React.Component<IFileListProps, IFileListState> {
   constructor(props: IFileListProps) {
@@ -784,13 +774,21 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     return (
       <GitStage
         actions={
-          <ActionButton
-            className={hiddenButtonStyle}
-            disabled={files.length === 0}
-            icon={removeIcon}
-            title={this.props.trans.__('Unstage all changes')}
-            onClick={this.resetAllStagedFiles}
-          />
+          <React.Fragment>
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={rewindIcon}
+              onClick={this._onStashClick}
+              title={this.props.trans.__('Stash latest changes')}
+            />
+            <ActionButton
+              className={hiddenButtonStyle}
+              disabled={files.length === 0}
+              icon={removeIcon}
+              title={this.props.trans.__('Unstage all changes')}
+              onClick={this.resetAllStagedFiles}
+            />
+          </React.Fragment>
         }
         collapsible
         files={files}
@@ -886,6 +884,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       <GitStage
         actions={
           <React.Fragment>
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={rewindIcon}
+              onClick={this._onStashClick}
+              title={this.props.trans.__('Stash latest changes')}
+            />
             <ActionButton
               className={hiddenButtonStyle}
               disabled={disabled}
@@ -1283,4 +1287,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       )
     );
   }
+
+  /**
+   * Callback invoked upon clicking a button to stash the dirty files.
+   *
+   * @param event - event object
+   * @returns a promise which resolves upon stashing the latest changes
+   */
+  private _onStashClick = async (): Promise<void> => {
+    await this.props.commands.execute(CommandIDs.gitStash);
+  };
 }

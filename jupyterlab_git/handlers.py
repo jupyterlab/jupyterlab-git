@@ -892,6 +892,112 @@ class GitTagCheckoutHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+class GitStashHandler(GitHandler):
+    """
+    Handler for 'git stash'. Stores the changes in the current branch
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = "", stashMsg: str = ""):
+        """
+        POST request handler for 'git stash'
+        """
+        local_path = self.url2localpath(path)
+        data = self.get_json_body()
+
+        response = await self.git.stash(local_path, data.get("stashMsg", ""))
+        if response["code"] == 0:
+            self.set_status(201)
+        else:
+            self.set_status(500)
+
+        self.finish(json.dumps(response))
+
+    @tornado.web.authenticated
+    async def delete(self, path: str = ""):
+        """
+        DELETE request handler to clear a single stash or the entire stash list in a Git repository
+        """
+        local_path = self.url2localpath(path)
+        stash_index = self.get_query_argument("stash_index", None)
+
+        # Choose what to erase
+        if (stash_index is None) and (stash_index != 0):
+            response = await self.git.drop_stash(local_path)
+        else:
+            response = await self.git.drop_stash(local_path, stash_index)
+
+        if response["code"] == 0:
+            self.set_status(204)
+        else:
+            self.set_status(500)
+        self.finish()
+
+    @tornado.web.authenticated
+    async def get(self, path: str = ""):
+        """
+        GET request handler for 'git stash list'
+        """
+        # pass the path to the git stash so it knows where to stash
+        local_path = self.url2localpath(path)
+        index = self.get_query_argument("index", None)
+        if index is None:
+            response = await self.git.stash_list(local_path)
+        else:
+            response = await self.git.stash_show(local_path, int(index))
+
+        if response["code"] == 0:
+            self.set_status(200)
+        else:
+            self.set_status(500)
+        self.finish(json.dumps(response))
+
+
+class GitStashPopHandler(GitHandler):
+    """
+    Grab all the files affected by each git stash
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """
+        POST request handler to pop the latest stash unless an index was provided
+        """
+        local_path = self.url2localpath(path)
+        data = self.get_json_body()
+
+        response = await self.git.pop_stash(local_path, data.get("index"))
+
+        if response["code"] == 0:
+            self.set_status(204)
+            self.finish()
+        else:
+            self.set_status(500)
+            self.finish(json.dumps(response))
+
+
+class GitStashApplyHandler(GitHandler):
+    """
+    Apply the latest stash to the repository.
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """
+        POST request handler to apply the latest stash unless an index was provided
+        """
+        local_path = self.url2localpath(path)
+        data = self.get_json_body()
+        response = await self.git.apply_stash(local_path, data.get("index"))
+
+        if response["code"] == 0:
+            self.set_status(201)
+        else:
+            self.set_status(500)
+
+        self.finish(json.dumps(response))
+
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -931,6 +1037,9 @@ def setup_handlers(web_app):
         ("/tags", GitTagHandler),
         ("/tag_checkout", GitTagCheckoutHandler),
         ("/add", GitAddHandler),
+        ("/stash", GitStashHandler),
+        ("/stash_pop", GitStashPopHandler),
+        ("/stash_apply", GitStashApplyHandler),
     ]
 
     handlers = [
