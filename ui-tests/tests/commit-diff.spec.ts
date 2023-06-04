@@ -62,7 +62,7 @@ test.describe('Commits diff', () => {
     await expect(
       page.locator('.nbdime-Widget >> .jp-git-diff-banner')
     ).toHaveText(
-      /2c87684a46d49989211d666daf05ab92951ba7c4[\n\s]+b6ece342cf6eefaff3232d43345191abda10727/
+      /79fe96219f6eaec1ae607c7c8d21d5b269a6dd29[\n\s]+51fe1f8995113884e943201341a5d5b7a1393e24/
     );
   });
 });

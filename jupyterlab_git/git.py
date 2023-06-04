@@ -1,6 +1,7 @@
 """
 Module for executing git commands, sending results back to the handlers
 """
+import base64
 import datetime
 import os
 import pathlib
@@ -51,6 +52,7 @@ async def execute(
     env: "Optional[Dict[str, str]]" = None,
     username: "Optional[str]" = None,
     password: "Optional[str]" = None,
+    is_binary=False,
 ) -> "Tuple[int, str, str]":
     """Asynchronously execute a command.
 
@@ -110,12 +112,20 @@ async def execute(
         cmdline: "List[str]",
         cwd: "Optional[str]" = None,
         env: "Optional[Dict[str, str]]" = None,
+        is_binary=is_binary,
     ) -> "Tuple[int, str, str]":
         process = subprocess.Popen(
             cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env
         )
         output, error = process.communicate()
-        return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
+        if is_binary:
+            return (
+                process.returncode,
+                base64.encodebytes(output).decode("ascii"),
+                error.decode("utf-8"),
+            )
+        else:
+            return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
 
     try:
         await execution_lock.acquire(
@@ -1325,7 +1335,7 @@ class Git:
 
         return split_line[1] if len(split_line) > 1 else None
 
-    async def show(self, path, ref, filename=None):
+    async def show(self, path, ref, filename=None, is_binary=False):
         """
         Execute
             git show <ref:filename>
@@ -1341,7 +1351,7 @@ class Git:
         else:
             command.append(f"{ref}:{filename}")
 
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await execute(command, cwd=path, is_binary=is_binary)
 
         error_messages = map(
             lambda n: n.lower(),
@@ -1402,11 +1412,11 @@ class Git:
             elif reference["special"] == "INDEX":
                 is_binary = await self._is_binary(filename, "INDEX", path)
                 if is_binary:
-                    raise tornado.web.HTTPError(
-                        log_message="Error occurred while executing command to retrieve plaintext content as file is not UTF-8."
+                    content = await self.show(
+                        path, reference["git"], filename, is_binary=True
                     )
-
-                content = await self.show(path, "", filename)
+                else:
+                    content = await self.show(path, "", filename)
             elif reference["special"] == "BASE":
                 # Special case of file in merge conflict for which we want the base (aka common ancestor) version
                 ref = await self._get_base_ref(path, filename)
@@ -1417,14 +1427,14 @@ class Git:
                         reference["special"]
                     )
                 )
-        elif reference["git"]:
+        elif "git" in reference:
             is_binary = await self._is_binary(filename, reference["git"], path)
             if is_binary:
-                raise tornado.web.HTTPError(
-                    log_message="Error occurred while executing command to retrieve plaintext content as file is not UTF-8."
+                content = await self.show(
+                    path, reference["git"], filename, is_binary=True
                 )
-
-            content = await self.show(path, reference["git"], filename)
+            else:
+                content = await self.show(path, reference["git"], filename)
         else:
             content = ""
 
