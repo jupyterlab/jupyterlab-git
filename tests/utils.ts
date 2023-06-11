@@ -28,7 +28,7 @@ export const defaultMockedResponses: {
       return {
         code: 0,
         branches: [],
-        current_branch: { name: "" }
+        current_branch: { name: '' }
       };
     }
   },

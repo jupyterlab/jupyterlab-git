@@ -2,6 +2,7 @@
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab/tree/examples/demo.ipynb) [![Github Actions Status](https://github.com/jupyterlab/jupyterlab-git/workflows/Test/badge.svg)](https://github.com/jupyterlab/jupyterlab-git/actions?query=workflow%3ATest) [![Version](https://img.shields.io/npm/v/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/pypi/v/jupyterlab-git.svg)](https://pypi.org/project/jupyterlab-git/) [![Downloads](https://img.shields.io/npm/dm/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git) [![Downloads](https://img.shields.io/conda/dn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git)<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-29-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 A JupyterLab extension for version control using Git
@@ -71,20 +72,21 @@ This extension tries to handle credentials for HTTP(S) connections (if you don't
 
 #### HTTP(S) protocol
 
-The extension can cache temporarily (by default for an hour) credentials. To use the caching, you will need to 
+The extension can cache temporarily (by default for an hour) credentials. To use the caching, you will need to
 check the option _Save my login temporarily_ in the dialog asking your credentials.
 
 > You can set a longer cache timeout; see [Server Settings](#server-settings).
 
 > This is a new feature since v0.37.0
+
 #### SSH protocol
 
 Here are the steps to follow to set up SSH authentication (skip any that is already accomplished for your project):
 
 1. [Create a SSH key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
-2. Register the public part of it to your Git server:  
-   * [GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
-   * [GitLab](https://docs.gitlab.com/ee/ssh/index.html#add-an-ssh-key-to-your-gitlab-account)
+2. Register the public part of it to your Git server:
+   - [GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+   - [GitLab](https://docs.gitlab.com/ee/ssh/index.html#add-an-ssh-key-to-your-gitlab-account)
 3. Optionally, if you have more than one key managed by your ssh agent: [Create a config file for the ssh-agent](https://stackoverflow.com/a/21938804)
 4. Tell your local Git repository to [connect to remote via ssh](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-https-to-ssh)
 
@@ -106,7 +108,6 @@ Once installed, extension behavior can be modified via the following settings wh
 - **simpleStaging**: enable a simplified concept of staging. When this setting is `true`, all files with changes are automatically staged. When we develop in JupyterLab, we often only care about what files have changed (in the broadest sense) and don't need to distinguish between "tracked" and "untracked" files. Accordingly, this setting allows us to simplify the visual presentation of changes, which is especially useful for those less acquainted with Git.
 
 ### Server Settings
-
 
 - `JupyterLabGit.actions.post_init`: Set post _git init_ actions.
   It is possible to provide a list of commands to be executed in a folder after it is initialized as Git repository.
@@ -136,6 +137,7 @@ Or equivalently in `$HOME/.jupyter/jupyter_notebook_config.json` (on Windows `%U
   }
 }
 ```
+
 </details>
 
 ## Troubleshoot
@@ -151,42 +153,43 @@ If they do not match or one is missing, please [reinstall the package](README.md
 
 <details><summary>the Git panel does not recognize that you are in a Git repository.</summary>
 
-  Possible fixes:
+Possible fixes:
 
-  - Be sure to be in a Git repository in the filebrowser tab
+- Be sure to be in a Git repository in the filebrowser tab
 
-  - Check the server log. If you see a warning with a 404 code similar to:
-    `[W 00:27:41.800 LabApp] 404 GET /git/settings?version=0.20.0`
+- Check the server log. If you see a warning with a 404 code similar to:
+  `[W 00:27:41.800 LabApp] 404 GET /git/settings?version=0.20.0`
 
-    Explicitly enable the server extension by running:
+  Explicitly enable the server extension by running:
 
-    ```bash
-    jupyter server extension enable --py jupyterlab_git
-    ```
+  ```bash
+  jupyter server extension enable --py jupyterlab_git
+  ```
 
-  - If you are using JupyterHub or some other technologies requiring an initialization script which includes the jupyterlab-git extension, be sure to install both the frontend and the server extension **before** launching JupyterLab.
+- If you are using JupyterHub or some other technologies requiring an initialization script which includes the jupyterlab-git extension, be sure to install both the frontend and the server extension **before** launching JupyterLab.
 </details>
 
 <details>
 <summary>the Git panel is not visible.</summary>
 
-  Possible fixes:
+Possible fixes:
 
-  - Check that the JupyterLab extension is installed:
+- Check that the JupyterLab extension is installed:
 
-    ```bash
-    jupyter labextension list
-    ```
+      ```bash
+      jupyter labextension list
+      ```
 
-    If you don't see `@jupyterlab/git v... enabled OK` in the list, explicitly install the jupyter labextension by running:
+      If you don't see `@jupyterlab/git v... enabled OK` in the list, explicitly install the jupyter labextension by running:
 
-    ```bash
-    jupyter labextension install @jupyterlab/git
-    ```
+      ```bash
+      jupyter labextension install @jupyterlab/git
+      ```
 
-    If you see `@jupyterlab/git` under `Uninstalled core extensions: `, your installation may have been corrupted. You can run `jupyter lab clean --all` and
-    reinstall all your extensions.
-</details>
+      If you see `@jupyterlab/git` under `Uninstalled core extensions: `, your installation may have been corrupted. You can run `jupyter lab clean --all` and
+      reinstall all your extensions.
+
+  </details>
 
 ## Contributing
 

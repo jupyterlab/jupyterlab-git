@@ -66,10 +66,10 @@
       "default": false
     },
     "openFilesBehindWarning": {
-        "type": "boolean",
-        "title": "Open files behind warning",
-        "description": "If true, a popup dialog will be displayed if a user opens a file that is behind its remote branch version, or if an opened file has updates on the remote branch.",
-        "default": true
+      "type": "boolean",
+      "title": "Open files behind warning",
+      "description": "If true, a popup dialog will be displayed if a user opens a file that is behind its remote branch version, or if an opened file has updates on the remote branch.",
+      "default": true
     }
   },
   "jupyter.lab.shortcuts": [
@@ -182,9 +182,7 @@
     ]
   },
   "jupyter.lab.internationalization": {
-    "selectors": [
-        "jupyter.lab.menus/.*/args/text"
-    ],
+    "selectors": ["jupyter.lab.menus/.*/args/text"],
     "domain": "jupyterlab_git"
   }
 }

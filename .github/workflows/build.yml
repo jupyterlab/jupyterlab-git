@@ -4,7 +4,7 @@ on:
   push:
     branches: ['master']
   pull_request:
-    branches: ['master']
+    branches: '*'
 
 jobs:
   test-3x:
@@ -14,165 +14,152 @@ jobs:
       matrix:
         python-version: ['3.7', '3.8', '3.9', '3.10']
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Install node
-        uses: actions/setup-node@v1
-        with:
-          node-version: '18.x'
-      - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: 'x64'
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Get pip cache dir
-        id: pip-cache
-        run: |
-          echo "::set-output name=dir::$(pip cache dir)"
+    - name: Base Setup
+      uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      with:
+        python-version: ${{ matrix.python-version }}
 
-      - name: pip cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/setup.py') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python-version }}-
-            ${{ runner.os }}-pip-
+    - name: Install dependencies
+      run: python -m pip install -U jupyterlab~=3.0
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Setup yarn cache
-        uses: actions/cache@v2
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        env:
-          # Increase this value to reset cache
-          CACHE_NUMBER: 0
-        with:
-          path: |
-            ${{ steps.yarn-cache-dir-path.outputs.dir }}
-            **/node_modules
-          key: ${{ runner.os }}-yarn-${{ env.CACHE_NUMBER }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-${{ env.CACHE_NUMBER }}
-            ${{ runner.os }}-yarn-
+    - name: Lint the extension
+      run: |
+        set -eux
+        jlpm
+        jlpm run lint:check
+    
+    - name: Test the extension
+      run: |
+        set -eux
+        jlpm run test
 
-      - name: Install dependencies
-        run: python -m pip install -U jupyter_packaging~=0.7.9 jupyterlab~=3.0 pip wheel build
-      - name: Test the extension
-        run: |
-          jlpm
-          jlpm run eslint:check
-          python -m pip install -e .[tests]
+    - name: Build the extension
+      run: |
+        set -eux
+        python -m pip install .[test]
 
-          # Python formatting checks
-          black . --check
+        # Python formatting checks
+        black . --check
 
-          # Run the Python tests
-          pytest jupyterlab_git -r ap
-          # Run the TS/JS tests
-          jlpm run test
+        pytest -vv -r ap --cov jupyterlab_git
+        jupyter server extension list
+        jupyter server extension list 2>&1 | grep -ie "jupyterlab_git.*OK"
 
-          python -m pip uninstall -y jupyterlab-git
+        jupyter labextension list
+        jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
+        python -m jupyterlab.browser_check
 
-          # Integration test
-          python -m pip install .
-          jupyter server extension list
-          jupyter server extension list 2>&1 | grep -ie "jupyterlab_git.*OK"
-          jupyter labextension list
-          jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
-          python -m jupyterlab.browser_check
+    - name: Package the extension
+      run: |
+        set -eux
 
-          python -m build -w
+        pip install build
+        python -m build
+        pip uninstall -y "jupyterlab_git" jupyterlab
 
-      - uses: actions/upload-artifact@v2
-        if: matrix.python-version == '3.9'
-        with:
-          name: extension
-          path: dist/jupyterlab_git*.whl
-          if-no-files-found: error
+    - name: Upload extension packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: extension-artifacts
+        path: dist/jupyterlab_git*
+        if-no-files-found: error
 
-  ui-test:
-    name: Integration tests
+  test_isolated:
+    needs: build
     runs-on: ubuntu-latest
 
-    needs: test-3x
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        architecture: 'x64'
+    - uses: actions/download-artifact@v3
+      with:
+        name: extension-artifacts
+    - name: Install and Test
+      run: |
+        set -eux
+        # Remove NodeJS, twice to take care of system and locally installed node versions.
+        sudo rm -rf $(which node)
+        sudo rm -rf $(which node)
+
+        pip install "jupyterlab~=3.0" jupyterlab_git*.whl
+
+
+        jupyter server extension list
+        jupyter server extension list 2>&1 | grep -ie "jupyterlab_git.*OK"
+
+        jupyter labextension list
+        jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
+        python -m jupyterlab.browser_check --no-chrome-test
+
+  integration-tests:
+    name: Integration tests
+    needs: build
+    runs-on: ubuntu-latest
+
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Install node
-        uses: actions/setup-node@v1
-        with:
-          node-version: '18.x'
-      - uses: actions/download-artifact@v2
-        with:
-          name: extension
-      - name: Setup Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-          architecture: 'x64'
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Get pip cache dir
-        id: pip-cache
-        run: |
-          echo "::set-output name=dir::$(pip cache dir)"
+    - name: Base Setup
+      uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
-      - name: pip cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: ${{ runner.os }}-pip-3.9-${{ hashFiles('**/setup.py') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-3.9-
-            ${{ runner.os }}-pip-
+    - name: Download extension package
+      uses: actions/download-artifact@v3
+      with:
+        name: extension-artifacts
+        
+    - name: Install the extension
+      run: |
+        set -eux
+        python -m pip install "jupyterlab~=3.0" jupyter-archive jupyterlab_git*.whl
 
-      - name: Install dependencies
-        # Install jupyter-archive to deal with test git repository upload
-        run: |
-          python -m pip install -U pip
-          python -m pip install jupyterlab~=3.0 jupyter-archive ./jupyterlab_git*.whl
+    - name: Install dependencies
+      working-directory: ui-tests
+      env:
+        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+      run: jlpm install
 
-      - name: Set up git
-        run: |
-          git config --global user.name 'Test Bot'
-          git config --global user.email 'test-bot@example.com'
+    - name: Set up browser cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ github.workspace }}/pw-browsers
+        key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
-      - name: Start server for UI tests
-        working-directory: ui-tests
-        run: |
-          jlpm
-          (jupyter lab --config jupyter_server_test_config.py > /tmp/jupyterlab_server.log 2>&1) &
-          jlpm run playwright install chromium
+    - name: Install browser
+      run: jlpm playwright install chromium
+      working-directory: ui-tests
 
-      - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 180000
+    - name: Execute integration tests
+      working-directory: ui-tests
+      run: |
+        jlpm playwright test
 
-      - name: UI tests
-        working-directory: ui-tests
-        run: |
-          jlpm run playwright test
+    - name: Upload Playwright Test report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: jupyterlab_git-playwright-tests
+        path: |
+          ui-tests/test-results
+          ui-tests/playwright-report
 
-      - name: Upload UI Test artifacts
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: ui-test-output
-          path: |
-            ui-tests/playwright-report
-            ui-tests/test-results
-
-      - name: Stop JupyterLab
-        if: always()
-        run: |
-          kill -s SIGTERM $(pgrep jupyter-lab)
-
-      - name: Print JupyterLab logs
-        if: always()
-        run: |
-          cat /tmp/jupyterlab_server.log
+  check_links:
+    name: Check Links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v3
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1

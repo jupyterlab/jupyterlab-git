@@ -71,9 +71,9 @@ type ImageDiffProps = {
   reference: string;
   challengerLabel: string;
   challenger: string;
-  mode?: typeof MODES[number];
+  mode?: (typeof MODES)[number];
   trans: TranslationBundle;
-  fileType: typeof IMAGE_FILE_TYPES[number];
+  fileType: (typeof IMAGE_FILE_TYPES)[number];
 };
 
 type ImageDiffViewProps = {

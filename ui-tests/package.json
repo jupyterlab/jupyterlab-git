@@ -4,7 +4,9 @@
   "description": "JupyterLab Git Integration Tests",
   "private": true,
   "scripts": {
-    "test": "playwright test"
+    "start": "jupyter lab --config jupyter_server_test_config.py",
+    "test": "jlpm playwright test",
+    "test:update": "jlpm playwright test --update-snapshots"
   },
   "devDependencies": {
     "@jupyterlab/galata": "^4.5.3"

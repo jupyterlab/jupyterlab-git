@@ -19,7 +19,7 @@
 .jp-option {
   height: fit-content !important;
   appearance: auto !important;
-  margin: 0px;
+  margin: 0;
 }
 
 .jp-force-box-container {

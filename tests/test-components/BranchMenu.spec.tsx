@@ -312,7 +312,9 @@ describe('BranchMenu', () => {
       button.at(1).simulate('click');
 
       expect(fakeExecutioner).toHaveBeenCalledTimes(1);
-      expect(fakeExecutioner).toHaveBeenCalledWith('git:merge', {branch: branchName});
+      expect(fakeExecutioner).toHaveBeenCalledWith('git:merge', {
+        branch: branchName
+      });
     });
 
     it('should set a `title` attribute for each displayed branch', () => {

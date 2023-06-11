@@ -1,9 +1,4 @@
-var tsConfig = require('./tsconfig.json');
-
-var tsOptions = tsConfig['compilerOptions'];
-// Need as the test folder is not visible from the src folder
-tsOptions['rootDir'] = null;
-tsOptions['inlineSourceMap'] = true;
+const jestJupyterLab = require('@jupyterlab/testutils/lib/jest-config');
 
 const esModules = [
   '.*@jupyterlab/',
@@ -14,31 +9,39 @@ const esModules = [
   'yjs'
 ].join('|');
 
+const jlabConfig = jestJupyterLab(__dirname);
+
+const {
+  moduleFileExtensions,
+  moduleNameMapper,
+  preset,
+  setupFilesAfterEnv,
+  setupFiles,
+  testPathIgnorePatterns,
+  transform
+} = jlabConfig;
+
 module.exports = {
+  moduleFileExtensions,
+  moduleNameMapper,
+  preset,
+  setupFilesAfterEnv,
+  setupFiles,
+  testPathIgnorePatterns,
+  transform,
   automock: false,
-  moduleNameMapper: {
-    '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
-    '\\.(svg)$': '<rootDir>/testutils/jest-file-mock.js'
-  },
-  preset: 'ts-jest/presets/js-with-babel',
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  modulePathIgnorePatterns: [
-    '<rootDir>/build',
-    '<rootDir>/jupyterlab_git',
-    '<rootDir>/jupyter-config'
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/**/.ipynb_checkpoints/*'
   ],
-  setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
-  testPathIgnorePatterns: [
-    '/lib/',
-    '/node_modules/',
-    '/jupyterlab_git/',
-    '/ui-tests/'
-  ],
-  testRegex: '/tests/.*.spec.ts[x]?$',
-  transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['lcov', 'text'],
   globals: {
     'ts-jest': {
-      tsconfig: tsOptions
+      tsconfig: 'tsconfig.json'
     }
-  }
+  },
+  testRegex: 'src/.*/.*.spec.ts[x]?$',
+  transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
 };
