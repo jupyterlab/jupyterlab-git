@@ -6,7 +6,9 @@
   "types": "lib/index.d.ts",
   "style": "style/index.css",
   "license": "BSD-3-Clause",
-  "author": "Jupyter Development Team",
+  "author": {
+    "name": "Jupyter Development Team"
+  },
   "keywords": [
     "Jupyter",
     "JupyterLab",
