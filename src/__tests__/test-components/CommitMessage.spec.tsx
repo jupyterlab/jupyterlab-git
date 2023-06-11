@@ -6,7 +6,7 @@ import * as React from 'react';
 import {
   CommitMessage,
   ICommitMessageProps
-} from '../../src/components/CommitMessage';
+} from '../../components/CommitMessage';
 
 describe('CommitMessage', () => {
   const trans = nullTranslator.load('jupyterlab_git');

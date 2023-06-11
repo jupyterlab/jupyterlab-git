@@ -4,11 +4,11 @@ import { JSONObject } from '@lumino/coreutils';
 import { shallow } from 'enzyme';
 import 'jest';
 import React from 'react';
-import { CommitBox } from '../../src/components/CommitBox';
-import { GitPanel, IGitPanelProps } from '../../src/components/GitPanel';
-import * as git from '../../src/git';
-import { Logger } from '../../src/logger';
-import { GitExtension as GitModel } from '../../src/model';
+import { CommitBox } from '../../components/CommitBox';
+import { GitPanel, IGitPanelProps } from '../../components/GitPanel';
+import * as git from '../../git';
+import { Logger } from '../../logger';
+import { GitExtension as GitModel } from '../../model';
 import {
   defaultMockedResponses,
   DEFAULT_REPOSITORY_PATH,
@@ -16,7 +16,7 @@ import {
   mockedRequestAPI
 } from '../utils';
 
-jest.mock('../../src/git');
+jest.mock('../../git');
 jest.mock('@jupyterlab/apputils');
 
 const mockedResponses: IMockedResponses = {

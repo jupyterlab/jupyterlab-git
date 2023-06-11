@@ -2,14 +2,14 @@
 import { shallow, mount } from 'enzyme';
 import 'jest';
 import * as React from 'react';
-import { ActionButton } from '../../src/components/ActionButton';
+import { ActionButton } from '../../components/ActionButton';
 import {
   ManageRemoteDialogue,
   IManageRemoteDialogueProps
-} from '../../src/components/ManageRemoteDialogue';
-import * as git from '../../src/git';
-import { GitExtension } from '../../src/model';
-import { createButtonClass } from '../../src/style/NewBranchDialog';
+} from '../../components/ManageRemoteDialogue';
+import * as git from '../../git';
+import { GitExtension } from '../../model';
+import { createButtonClass } from '../../style/NewBranchDialog';
 import {
   mockedRequestAPI,
   defaultMockedResponses,
@@ -18,7 +18,7 @@ import {
 import ClearIcon from '@material-ui/icons/Clear';
 import { nullTranslator } from '@jupyterlab/translation';
 
-jest.mock('../../src/git');
+jest.mock('../../git');
 jest.mock('@jupyterlab/apputils');
 
 const REMOTES = [

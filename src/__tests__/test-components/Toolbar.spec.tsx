@@ -3,17 +3,17 @@ import { refreshIcon } from '@jupyterlab/ui-components';
 import { shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
-import { ActionButton } from '../../src/components/ActionButton';
-import { IToolbarProps, Toolbar } from '../../src/components/Toolbar';
-import * as git from '../../src/git';
-import { Logger } from '../../src/logger';
-import { GitExtension } from '../../src/model';
-import { pullIcon, pushIcon } from '../../src/style/icons';
-import { toolbarMenuButtonClass } from '../../src/style/Toolbar';
+import { ActionButton } from '../../components/ActionButton';
+import { IToolbarProps, Toolbar } from '../../components/Toolbar';
+import * as git from '../../git';
+import { Logger } from '../../logger';
+import { GitExtension } from '../../model';
+import { pullIcon, pushIcon } from '../../style/icons';
+import { toolbarMenuButtonClass } from '../../style/Toolbar';
 import { DEFAULT_REPOSITORY_PATH, mockedRequestAPI } from '../utils';
-import { CommandIDs } from '../../src/tokens';
+import { CommandIDs } from '../../tokens';
 
-jest.mock('../../src/git');
+jest.mock('../../git');
 
 async function createModel() {
   const model = new GitExtension();

@@ -16,7 +16,6 @@ const {
   moduleNameMapper,
   preset,
   setupFilesAfterEnv,
-  setupFiles,
   testPathIgnorePatterns,
   transform
 } = jlabConfig;
@@ -24,9 +23,15 @@ const {
 module.exports = {
   moduleFileExtensions,
   moduleNameMapper,
+  modulePathIgnorePatterns: [
+    '<rootDir>/build',
+    '<rootDir>/jupyterlab_git',
+    '<rootDir>/jupyter-config',
+    '<rootDir>/ui-tests'
+  ],  
   preset,
   setupFilesAfterEnv,
-  setupFiles,
+  setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
   testPathIgnorePatterns,
   transform,
   automock: false,

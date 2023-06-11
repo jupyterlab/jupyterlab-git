@@ -1,5 +1,5 @@
 import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { Git } from '../src/tokens';
+import { Git } from '../tokens';
 
 export interface IMockedResponse {
   // Response body

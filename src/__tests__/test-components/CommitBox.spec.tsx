@@ -4,10 +4,10 @@ import Button from '@material-ui/core/Button';
 import { shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
-import { CommitBox, ICommitBoxProps } from '../../src/components/CommitBox';
-import { CommitMessage } from '../../src/components/CommitMessage';
-import { WarningBox } from '../../src/components/WarningBox';
-import { CommandIDs } from '../../src/tokens';
+import { CommitBox, ICommitBoxProps } from '../../components/CommitBox';
+import { CommitMessage } from '../../components/CommitMessage';
+import { WarningBox } from '../../components/WarningBox';
+import { CommandIDs } from '../../tokens';
 
 describe('CommitBox', () => {
   const defaultCommands = new CommandRegistry();

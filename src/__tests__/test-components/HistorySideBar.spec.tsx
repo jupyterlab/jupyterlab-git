@@ -3,15 +3,15 @@ import { shallow } from 'enzyme';
 import {
   HistorySideBar,
   IHistorySideBarProps
-} from '../../src/components/HistorySideBar';
+} from '../../components/HistorySideBar';
 import 'jest';
 
-import { PastCommitNode } from '../../src/components/PastCommitNode';
-import { GitExtension } from '../../src/model';
+import { PastCommitNode } from '../../components/PastCommitNode';
+import { GitExtension } from '../../model';
 import { nullTranslator } from '@jupyterlab/translation';
-import { FileItem } from '../../src/components/FileItem';
+import { FileItem } from '../../components/FileItem';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { SinglePastCommitInfo } from '../../src/components/SinglePastCommitInfo';
+import { SinglePastCommitInfo } from '../../components/SinglePastCommitInfo';
 
 describe('HistorySideBar', () => {
   const trans = nullTranslator.load('jupyterlab-git');

@@ -2,12 +2,12 @@ import { mount, render, shallow } from 'enzyme';
 import { showDialog } from '@jupyterlab/apputils';
 import 'jest';
 import * as React from 'react';
-import { ActionButton } from '../../src/components/ActionButton';
-import { BranchMenu, IBranchMenuProps } from '../../src/components/BranchMenu';
-import * as git from '../../src/git';
-import { Logger } from '../../src/logger';
-import { GitExtension } from '../../src/model';
-import { listItemClass, nameClass } from '../../src/style/BranchMenu';
+import { ActionButton } from '../../components/ActionButton';
+import { BranchMenu, IBranchMenuProps } from '../../components/BranchMenu';
+import * as git from '../../git';
+import { Logger } from '../../logger';
+import { GitExtension } from '../../model';
+import { listItemClass, nameClass } from '../../style/BranchMenu';
 import {
   mockedRequestAPI,
   defaultMockedResponses,
@@ -16,7 +16,7 @@ import {
 import ClearIcon from '@material-ui/icons/Clear';
 import { nullTranslator } from '@jupyterlab/translation';
 
-jest.mock('../../src/git');
+jest.mock('../../git');
 jest.mock('@jupyterlab/apputils');
 
 const BRANCHES = [

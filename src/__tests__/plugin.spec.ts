@@ -1,7 +1,7 @@
 import 'jest';
-import * as git from '../src/git';
-import plugins from '../src/index';
-import { version } from '../src/version';
+import * as git from '../git';
+import plugins from '../index';
+import { version } from '../version';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { JupyterLab } from '@jupyterlab/application';
 import { showErrorMessage } from '@jupyterlab/apputils';
@@ -12,7 +12,7 @@ import {
   mockedRequestAPI
 } from './utils';
 
-jest.mock('../src/git');
+jest.mock('../git');
 jest.mock('@jupyterlab/application');
 jest.mock('@jupyterlab/apputils');
 jest.mock('@jupyterlab/settingregistry');

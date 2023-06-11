@@ -1,14 +1,14 @@
 import 'jest';
-import { DiffModel } from '../../src/components/diff/model';
+import { DiffModel } from '../../components/diff/model';
 import {
   NotebookDiff,
   ROOT_CLASS
-} from '../../src/components/diff/NotebookDiff';
-import { requestAPI } from '../../src/git';
-import { Git } from '../../src/tokens';
+} from '../../components/diff/NotebookDiff';
+import { requestAPI } from '../../git';
+import { Git } from '../../tokens';
 import * as diffResponse from './data/nbDiffResponse.json';
 
-jest.mock('../../src/git');
+jest.mock('../../git');
 
 describe('NotebookDiff', () => {
   it('should render notebook diff in success case', async () => {

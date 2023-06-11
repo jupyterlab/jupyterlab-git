@@ -1,7 +1,7 @@
 import { testEmission } from '@jupyterlab/testutils';
 import 'jest';
-import { DiffModel } from '../../src/components/diff/model';
-import { Git } from '../../src/tokens';
+import { DiffModel } from '../../components/diff/model';
+import { Git } from '../../tokens';
 
 describe('DiffModel', () => {
   let model: DiffModel;

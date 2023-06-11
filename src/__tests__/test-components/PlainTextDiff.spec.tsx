@@ -1,11 +1,11 @@
 import 'jest';
-import { mergeView } from '../../src/components/diff/mergeview';
-import { DiffModel } from '../../src/components/diff/model';
-import { PlainTextDiff } from '../../src/components/diff/PlainTextDiff';
-import { Git } from '../../src/tokens';
+import { mergeView } from '../../components/diff/mergeview';
+import { DiffModel } from '../../components/diff/model';
+import { PlainTextDiff } from '../../components/diff/PlainTextDiff';
+import { Git } from '../../tokens';
 
-jest.mock('../../src/git');
-jest.mock('../../src/components/diff/mergeview');
+jest.mock('../../git');
+jest.mock('../../components/diff/mergeview');
 
 describe('PlainTextDiff', () => {
   it('should render file diff', async () => {

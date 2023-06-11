@@ -4,10 +4,10 @@ import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import 'jest';
-import { CommandArguments, addCommands } from '../src/commandsAndMenu';
-import * as git from '../src/git';
-import { GitExtension } from '../src/model';
-import { ContextCommandIDs, CommandIDs, Git } from '../src/tokens';
+import { CommandArguments, addCommands } from '../commandsAndMenu';
+import * as git from '../git';
+import { GitExtension } from '../model';
+import { ContextCommandIDs, CommandIDs, Git } from '../tokens';
 import {
   defaultMockedResponses,
   DEFAULT_REPOSITORY_PATH,
@@ -15,7 +15,7 @@ import {
   mockedRequestAPI
 } from './utils';
 
-jest.mock('../src/git');
+jest.mock('../git');
 jest.mock('@jupyterlab/apputils');
 jest.mock('@jupyterlab/filebrowser');
 
