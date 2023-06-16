@@ -1,9 +1,6 @@
 import 'jest';
 import { DiffModel } from '../../components/diff/model';
-import {
-  NotebookDiff,
-  ROOT_CLASS
-} from '../../components/diff/NotebookDiff';
+import { NotebookDiff, ROOT_CLASS } from '../../components/diff/NotebookDiff';
 import { requestAPI } from '../../git';
 import { Git } from '../../tokens';
 import * as diffResponse from './data/nbDiffResponse.json';

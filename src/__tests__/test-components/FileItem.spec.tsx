@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { FileItem, IFileItemProps } from '../../components/FileItem';
 import * as React from 'react';
 import 'jest';

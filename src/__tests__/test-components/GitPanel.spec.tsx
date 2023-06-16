@@ -12,14 +12,16 @@ import { GitExtension as GitModel } from '../../model';
 import {
   defaultMockedResponses,
   DEFAULT_REPOSITORY_PATH,
-  IMockedResponses,
+  IMockedResponse,
   mockedRequestAPI
 } from '../utils';
 
 jest.mock('../../git');
 jest.mock('@jupyterlab/apputils');
 
-const mockedResponses: IMockedResponses = {
+const mockedResponses: {
+  [endpoint: string]: IMockedResponse;
+} = {
   ...defaultMockedResponses,
   commit: { body: () => null },
   log: {

@@ -1,11 +1,11 @@
-// @ts-nocheck
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
 import { ActionButton } from '../../components/ActionButton';
 import {
   ManageRemoteDialogue,
-  IManageRemoteDialogueProps
+  IManageRemoteDialogueProps,
+  IManageRemoteDialogueState
 } from '../../components/ManageRemoteDialogue';
 import * as git from '../../git';
 import { GitExtension } from '../../model';
@@ -86,7 +86,7 @@ describe('ManageRemoteDialogue', () => {
         <ManageRemoteDialogue {...createProps()} />
       );
       expect(remoteDialogue.instance()).toBeInstanceOf(ManageRemoteDialogue);
-      const initialState = {
+      const initialState: IManageRemoteDialogueState = {
         newRemote: {
           name: '',
           url: ''

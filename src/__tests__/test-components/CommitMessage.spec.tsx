@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { nullTranslator } from '@jupyterlab/translation';
 import Input from '@material-ui/core/Input';
 import { shallow } from 'enzyme';

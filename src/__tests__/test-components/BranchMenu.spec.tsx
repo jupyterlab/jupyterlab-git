@@ -72,17 +72,19 @@ describe('BranchMenu', () => {
     const mock = git as jest.Mocked<typeof git>;
     mock.requestAPI.mockImplementation(
       mockedRequestAPI({
-        ...defaultMockedResponses,
-        'branch/delete': {
-          body: () => {
-            return { code: 0 };
-          }
-        },
-        checkout: {
-          body: () => {
-            return {
-              code: 0
-            };
+        responses: {
+          ...defaultMockedResponses,
+          'branch/delete': {
+            body: () => {
+              return { code: 0 };
+            }
+          },
+          checkout: {
+            body: () => {
+              return {
+                code: 0
+              };
+            }
           }
         }
       })
@@ -175,7 +177,7 @@ describe('BranchMenu', () => {
 
       // Should contain the branch names...
       for (let i = 0; i < branches.length; i++) {
-        // @ts-ignore
+        // @ts-expect-error lastChild not always defined
         expect(nodes[i].lastChild.data).toEqual(branches[i].name);
       }
     });
@@ -325,7 +327,7 @@ describe('BranchMenu', () => {
       expect(nodes.length).toEqual(branches.length);
 
       for (let i = 0; i < branches.length; i++) {
-        // @ts-ignore
+        // @ts-expect-error attribs not always defined
         expect(nodes[i].attribs['title'].length).toBeGreaterThanOrEqual(0);
       }
     });

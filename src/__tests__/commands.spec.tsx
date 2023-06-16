@@ -11,7 +11,7 @@ import { ContextCommandIDs, CommandIDs, Git } from '../tokens';
 import {
   defaultMockedResponses,
   DEFAULT_REPOSITORY_PATH,
-  IMockedResponses,
+  IMockedResponse,
   mockedRequestAPI
 } from './utils';
 
@@ -23,7 +23,9 @@ describe('git-commands', () => {
   const mockGit = git as jest.Mocked<typeof git>;
   let commands: CommandRegistry;
   let model: GitExtension;
-  let mockResponses: IMockedResponses;
+  let mockResponses: {
+    [endpoint: string]: IMockedResponse;
+  };
 
   const mockedFileBrowserModel = {
     manager: {
@@ -40,7 +42,9 @@ describe('git-commands', () => {
       ...defaultMockedResponses
     };
 
-    mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
+    mockGit.requestAPI.mockImplementation(
+      mockedRequestAPI({ responses: mockResponses })
+    );
 
     commands = new CommandRegistry();
     const app = {
@@ -100,7 +104,7 @@ describe('git-commands', () => {
             ]
           } as CommandArguments.IGitContextAction as any);
 
-          if (status === 'staged' || status === 'partially-staged') {
+          if (status === 'staged') {
             expect(spyReset).toHaveBeenCalledWith(path);
           } else if (status === 'unstaged') {
             expect(spyReset).not.toHaveBeenCalled();
@@ -155,10 +159,12 @@ describe('git-commands', () => {
 
           mockGit.requestAPI.mockImplementation(
             mockedRequestAPI({
-              ...mockResponses,
-              reset_to_commit: {
-                body: () => {
-                  return { code: 0 };
+              responses: {
+                ...mockResponses,
+                reset_to_commit: {
+                  body: () => {
+                    return { code: 0 };
+                  }
                 }
               }
             })

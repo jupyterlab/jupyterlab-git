@@ -28,7 +28,7 @@ module.exports = {
     '<rootDir>/jupyterlab_git',
     '<rootDir>/jupyter-config',
     '<rootDir>/ui-tests'
-  ],  
+  ],
   preset,
   setupFilesAfterEnv,
   setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
@@ -44,7 +44,7 @@ module.exports = {
   coverageReporters: ['lcov', 'text'],
   globals: {
     'ts-jest': {
-      tsconfig: 'tsconfig.json'
+      tsconfig: 'tsconfig.test.json'
     }
   },
   testRegex: 'src/.*/.*.spec.ts[x]?$',

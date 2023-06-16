@@ -21,5 +21,6 @@
     "target": "ES2018",
     "types": ["jest", "resize-observer-browser"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/__tests__"]
 }
