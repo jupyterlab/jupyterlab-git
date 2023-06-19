@@ -1,24 +1,20 @@
 """Initialize the backend server extension
 """
-
-import json
-from pathlib import Path
-
 from traitlets import List, Dict, Unicode, default
 from traitlets.config import Configurable
 
-from ._version import __version__
+try:
+    from ._version import __version__
+except:
+    import warnings
+    warnings.warn("Did you forget to install the extension in editable mode `pip install -e .`?")
+    __version__ = "dev"
 from .handlers import setup_handlers
 from .git import Git
 
-HERE = Path(__file__).parent.resolve()
-
-with (HERE / "labextension" / "package.json").open() as fid:
-    data = json.load(fid)
-
 
 def _jupyter_labextension_paths():
-    return [{"src": "labextension", "dest": data["name"]}]
+    return [{"src": "labextension", "dest": "@jupyerlab/git"}]
 
 
 class JupyterLabGit(Configurable):
