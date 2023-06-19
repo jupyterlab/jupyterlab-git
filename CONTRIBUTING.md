@@ -15,9 +15,9 @@ If you have suggestions on how these processes can be improved, please suggest t
 If you are using this software and encounter some behavior that is unexpected, then you may have come across a bug!
 To get this fixed, first creation an issue that should have, ideally:
 
-* The behavior you expected
-* The actual behavior (screenshots can be helpful here)
-* How someone else could reproduce it (version of the software, as well as your browser and OS can help)
+- The behavior you expected
+- The actual behavior (screenshots can be helpful here)
+- How someone else could reproduce it (version of the software, as well as your browser and OS can help)
 
 Once you create this issue, someone with commit rights should come by and try to reproduce the issue locally and comment if they are able to. If they are able to, then they will add the `type:Bug` label. If they are not able to, then they will add the `status: Needs info` label and wait for information from you.
 
@@ -25,7 +25,7 @@ Hopefully, then some nice person will come by to fix your bug! This will likely 
 but it could be anyone.
 
 They will fix the bug locally, then push those changes to their fork. Then they will make a pull request, and in the description
-say "This fixes bug #xxx". 
+say "This fixes bug #xxx".
 
 Someone who maintains the repo will review this change, and this can lead to some more back and forth about the implementation.
 
@@ -38,7 +38,7 @@ Maybe the current behavior isn't wrong, but you still have an idea on how it cou
 
 The flow will be similar to opening a bug, but the process could be longer, as we all work together to agree on what
 behavior should be added. So when you open an issue, it's helpful to give some context around what you are trying to achieve,
-why that is important, where the current functionality falls short, and any ideas you have on how it could be improved. 
+why that is important, where the current functionality falls short, and any ideas you have on how it could be improved.
 
 These issues should get a `type:Enhancement` label. If the solution seems obvious enough and you think others will agree,
 then anyone is welcome to implement the solution and propose it in a pull request.

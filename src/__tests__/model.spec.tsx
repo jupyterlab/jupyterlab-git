@@ -1,8 +1,8 @@
 import { testEmission } from '@jupyterlab/testutils';
 import 'jest';
-import * as git from '../src/git';
-import { GitExtension } from '../src/model';
-import { Git, IGitExtension } from '../src/tokens';
+import * as git from '../git';
+import { GitExtension } from '../model';
+import { Git, IGitExtension } from '../tokens';
 import {
   defaultMockedResponses,
   DEFAULT_REPOSITORY_PATH,
@@ -10,7 +10,7 @@ import {
   mockedRequestAPI
 } from './utils';
 
-jest.mock('../src/git');
+jest.mock('../git');
 
 describe('IGitExtension', () => {
   const mockGit = git as jest.Mocked<typeof git>;

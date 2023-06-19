@@ -35,15 +35,15 @@
   background-repeat: repeat-x;
 }
 
-.jp-git-PlainText-diff .CodeMirror-merge-left .CodeMirror-merge-l-chunk,
-.jp-git-PlainText-diff .CodeMirror-merge-right .CodeMirror-merge-r-chunk {
-  background-color: var(--jp-git-diff-deleted-color);
-}
-
 .jp-git-PlainText-diff .CodeMirror-merge-l-chunk,
 .jp-git-PlainText-diff .CodeMirror-merge-editor .CodeMirror-merge-l-chunk,
 .jp-git-PlainText-diff .CodeMirror-merge-editor .CodeMirror-merge-r-chunk {
   background-color: var(--jp-git-diff-added-color);
+}
+
+.jp-git-PlainText-diff .CodeMirror-merge-left .CodeMirror-merge-l-chunk,
+.jp-git-PlainText-diff .CodeMirror-merge-right .CodeMirror-merge-r-chunk {
+  background-color: var(--jp-git-diff-deleted-color);
 }
 
 .CodeMirror-patchgutter {
@@ -64,13 +64,15 @@
 
 /* Styles for horizontal scroll lock */
 .jp-git-PlainText-diff .CodeMirror-merge-scrolllock {
-  color: var(--jp--inverse-layout-color2);
+  color: var(--jp-inverse-layout-color2);
 }
-.jp-git-PlainText-diff .CodeMirror-merge-scrolllock:after {
+
+.jp-git-PlainText-diff .CodeMirror-merge-scrolllock::after {
   content: '\21db\00a0\00a0\21da';
 }
+
 .jp-git-PlainText-diff
-  .CodeMirror-merge-scrolllock.CodeMirror-merge-scrolllock-enabled:after {
+  .CodeMirror-merge-scrolllock.CodeMirror-merge-scrolllock-enabled::after {
   content: '\21db\21da';
 }
 
@@ -104,6 +106,7 @@
   .CodeMirror-merge-copy {
   left: 2px;
 }
+
 .jp-git-PlainText-diff
   .CodeMirror-merge-copybuttons-right
   .CodeMirror-merge-copy {

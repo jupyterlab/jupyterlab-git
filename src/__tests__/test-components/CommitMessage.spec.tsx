@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { nullTranslator } from '@jupyterlab/translation';
 import Input from '@material-ui/core/Input';
 import { shallow } from 'enzyme';
@@ -6,7 +7,7 @@ import * as React from 'react';
 import {
   CommitMessage,
   ICommitMessageProps
-} from '../../src/components/CommitMessage';
+} from '../../components/CommitMessage';
 
 describe('CommitMessage', () => {
   const trans = nullTranslator.load('jupyterlab_git');

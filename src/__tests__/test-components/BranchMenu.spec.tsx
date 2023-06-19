@@ -2,12 +2,12 @@ import { mount, render, shallow } from 'enzyme';
 import { showDialog } from '@jupyterlab/apputils';
 import 'jest';
 import * as React from 'react';
-import { ActionButton } from '../../src/components/ActionButton';
-import { BranchMenu, IBranchMenuProps } from '../../src/components/BranchMenu';
-import * as git from '../../src/git';
-import { Logger } from '../../src/logger';
-import { GitExtension } from '../../src/model';
-import { listItemClass, nameClass } from '../../src/style/BranchMenu';
+import { ActionButton } from '../../components/ActionButton';
+import { BranchMenu, IBranchMenuProps } from '../../components/BranchMenu';
+import * as git from '../../git';
+import { Logger } from '../../logger';
+import { GitExtension } from '../../model';
+import { listItemClass, nameClass } from '../../style/BranchMenu';
 import {
   mockedRequestAPI,
   defaultMockedResponses,
@@ -16,7 +16,7 @@ import {
 import ClearIcon from '@material-ui/icons/Clear';
 import { nullTranslator } from '@jupyterlab/translation';
 
-jest.mock('../../src/git');
+jest.mock('../../git');
 jest.mock('@jupyterlab/apputils');
 
 const BRANCHES = [
@@ -72,17 +72,19 @@ describe('BranchMenu', () => {
     const mock = git as jest.Mocked<typeof git>;
     mock.requestAPI.mockImplementation(
       mockedRequestAPI({
-        ...defaultMockedResponses,
-        'branch/delete': {
-          body: () => {
-            return { code: 0 };
-          }
-        },
-        checkout: {
-          body: () => {
-            return {
-              code: 0
-            };
+        responses: {
+          ...defaultMockedResponses,
+          'branch/delete': {
+            body: () => {
+              return { code: 0 };
+            }
+          },
+          checkout: {
+            body: () => {
+              return {
+                code: 0
+              };
+            }
           }
         }
       })
@@ -175,7 +177,7 @@ describe('BranchMenu', () => {
 
       // Should contain the branch names...
       for (let i = 0; i < branches.length; i++) {
-        // @ts-ignore
+        // @ts-expect-error lastChild not always defined
         expect(nodes[i].lastChild.data).toEqual(branches[i].name);
       }
     });
@@ -312,7 +314,9 @@ describe('BranchMenu', () => {
       button.at(1).simulate('click');
 
       expect(fakeExecutioner).toHaveBeenCalledTimes(1);
-      expect(fakeExecutioner).toHaveBeenCalledWith('git:merge', {branch: branchName});
+      expect(fakeExecutioner).toHaveBeenCalledWith('git:merge', {
+        branch: branchName
+      });
     });
 
     it('should set a `title` attribute for each displayed branch', () => {
@@ -323,7 +327,7 @@ describe('BranchMenu', () => {
       expect(nodes.length).toEqual(branches.length);
 
       for (let i = 0; i < branches.length; i++) {
-        // @ts-ignore
+        // @ts-expect-error attribs not always defined
         expect(nodes[i].attribs['title'].length).toBeGreaterThanOrEqual(0);
       }
     });

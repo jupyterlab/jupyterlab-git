@@ -1,15 +1,14 @@
 import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { Git } from '../src/tokens';
+import { Git } from '../tokens';
 
 export interface IMockedResponse {
   // Response body
-  body?: (body: Object) => ReadonlyJSONObject;
+  body?: (body: any) => ReadonlyJSONObject | null;
   // Response status code
   status?: number;
 }
 
-export interface IMockedResponses
-  extends Record<string, string | IMockedResponse> {
+export interface IMockedResponses {
   // Folder path in URI; default = DEFAULT_REPOSITORY_PATH
   path?: string;
   // Endpoint
@@ -28,7 +27,7 @@ export const defaultMockedResponses: {
       return {
         code: 0,
         branches: [],
-        current_branch: { name: "" }
+        current_branch: { name: '' }
       };
     }
   },
@@ -58,9 +57,16 @@ export const defaultMockedResponses: {
   }
 };
 
-export function mockedRequestAPI(mockedResponses?: IMockedResponses) {
+export function mockedRequestAPI(
+  mockedResponses?: IMockedResponses
+): (
+  endPoint?: string,
+  method?: string,
+  body?: ReadonlyJSONObject | null,
+  namespace?: string
+) => Promise<any> {
   const mockedImplementation = (
-    url: string,
+    url?: string,
     method?: string,
     body?: ReadonlyJSONObject | null,
     namespace?: string
@@ -68,7 +74,7 @@ export function mockedRequestAPI(mockedResponses?: IMockedResponses) {
     mockedResponses = mockedResponses ?? {};
     const path = mockedResponses.path ?? DEFAULT_REPOSITORY_PATH;
     const responses = mockedResponses.responses ?? defaultMockedResponses;
-    url = url.replace(new RegExp(`^${path}/`), ''); // Remove path + '/'
+    url = (url ?? '').replace(new RegExp(`^${path}/`), ''); // Remove path + '/'
     const reply = responses[url + method] ?? responses[url];
     if (reply) {
       if (reply.status) {
@@ -81,7 +87,7 @@ export function mockedRequestAPI(mockedResponses?: IMockedResponses) {
           reply.body ? reply.body(body) : {}
         );
       } else {
-        return Promise.resolve(reply.body(body));
+        return Promise.resolve(reply.body?.(body));
       }
     } else {
       throw new Git.GitResponseError(

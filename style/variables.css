@@ -1,13 +1,13 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+|---------------------------------------------------------------------------- */
 
 :root {
-  --jp-git-diff-added-color: rgba(155, 185, 85, 0.2);
-  --jp-git-diff-added-color1: rgba(155, 185, 85, 0.4);
-  --jp-git-diff-deleted-color: rgba(255, 0, 0, 0.2);
-  --jp-git-diff-deleted-color1: rgba(255, 0, 0, 0.4);
-  --jp-git-diff-output-border-color: rgba(0, 141, 255, 0.7);
-  --jp-git-diff-output-color: rgba(0, 141, 255, 0.3);
+  --jp-git-diff-added-color: rgb(155 185 85 / 20%);
+  --jp-git-diff-added-color1: rgb(155 185 85 / 40%);
+  --jp-git-diff-deleted-color: rgb(255 0 0 / 20%);
+  --jp-git-diff-deleted-color1: rgb(255 0 0 / 40%);
+  --jp-git-diff-output-border-color: rgb(0 141 255 / 70%);
+  --jp-git-diff-output-color: rgb(0 141 255 / 30%);
 }

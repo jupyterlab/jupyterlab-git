@@ -38,20 +38,27 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
   color: var(--jp-success-color1);
 }
 
-.jp-git-diff-banner, .jp-git-merge-banner {
+.jp-git-diff-banner,
+.jp-git-merge-banner {
   flex: 0 0 auto;
-  margin: 2px 0px;
+  margin: 2px 0;
   display: flex;
 }
 
-.jp-git-diff-banner span{
-  padding: 0px 4px;
+.jp-git-diff-banner span {
+  padding: 0 4px;
   width: 47%;
   font-weight: bold;
 }
 
 .jp-git-diff-banner span.jp-spacer {
   width: 6%;
+}
+
+.jp-git-merge-banner span {
+  padding: 0 4px;
+  width: 31%;
+  font-weight: bold;
 }
 
 .jp-git-diff-banner span:first-of-type {
@@ -62,12 +69,6 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
   background-color: var(--jp-git-diff-added-color);
 }
 
-.jp-git-merge-banner span {
-  padding: 0px 4px;
-  width: 31%;
-  font-weight: bold;
-}
-
 .jp-git-merge-banner span.jp-spacer {
   width: 3.5%;
 }
@@ -76,7 +77,7 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
   position: relative;
   white-space: pre;
   border: var(--codemirror-border);
-  border-radius: 0px;
+  border-radius: 0;
   background: var(--jp-cell-editor-background);
 }
 
@@ -95,6 +96,12 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
 
 .jp-git-diff-root .CodeMirror-merge-pane-unchanged {
   width: 100%;
+}
+
+.jp-git-diff-root .CodeMirror-merge-pane {
+  display: inline-block;
+  white-space: normal;
+  vertical-align: top;
 }
 
 .jp-git-diff-root .CodeMirror-merge-1pane .CodeMirror-merge-gap {
@@ -117,15 +124,9 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
   width: 3.5%;
 }
 
-.jp-git-diff-root .CodeMirror-merge-pane {
-  display: inline-block;
-  white-space: normal;
-  vertical-align: top;
-}
-
 .jp-git-diff-root .CodeMirror-merge-pane-rightmost {
   position: absolute;
-  right: 0px;
+  right: 0;
   z-index: 1;
 }
 
@@ -152,7 +153,7 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
   background-color: var(--jp-git-diff-deleted-color);
 }
 
-.jp-git-diff-root .CodeMirror-merge-collapsed-widget:before {
+.jp-git-diff-root .CodeMirror-merge-collapsed-widget::before {
   content: '(...)';
 }
 

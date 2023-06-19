@@ -4,7 +4,6 @@ about: Create a report to help us improve
 title: ''
 labels: bug
 assignees: ''
-
 ---
 
 <!--
@@ -57,7 +56,7 @@ Paste the output from your browser web console here.
 </pre>
 </details>
 
-<!-- 
+<!--
 To open the browser, please refer to the documentation:
 Chrome: https://developers.google.com/web/tools/chrome-devtools/open#console
 Firefox: https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Opening_the_Web_Console

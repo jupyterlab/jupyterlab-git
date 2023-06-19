@@ -5,8 +5,8 @@ import * as React from 'react';
 import {
   IPastCommitNodeProps,
   PastCommitNode
-} from '../../src/components/PastCommitNode';
-import { Git } from '../../src/tokens';
+} from '../../components/PastCommitNode';
+import { Git } from '../../tokens';
 
 describe('PastCommitNode', () => {
   const trans = nullTranslator.load('jupyterlab-git');

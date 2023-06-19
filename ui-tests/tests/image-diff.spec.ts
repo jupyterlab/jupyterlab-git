@@ -24,13 +24,23 @@ test.describe('Image diff', () => {
     const commits = page.getByTitle('View commit details');
 
     await commits.first().click();
-    
-    await page.getByTitle("git_workflow.jpg").getByRole("button", {name: "View file changes"}).click();
 
-    expect.soft(await page.locator('.jp-git-image-diff').screenshot()).toMatchSnapshot('jpeg_diff.png')
-    
-    await page.getByTitle("jupyter.png").getByRole("button", {name: "View file changes"}).click();
+    await page
+      .getByTitle('git_workflow.jpg')
+      .getByRole('button', { name: 'View file changes' })
+      .click();
 
-    expect(await page.locator('.jp-git-image-diff').last().screenshot()).toMatchSnapshot('png_diff.png')
+    expect
+      .soft(await page.locator('.jp-git-image-diff').screenshot())
+      .toMatchSnapshot('jpeg_diff.png');
+
+    await page
+      .getByTitle('jupyter.png')
+      .getByRole('button', { name: 'View file changes' })
+      .click();
+
+    expect(
+      await page.locator('.jp-git-image-diff').last().screenshot()
+    ).toMatchSnapshot('png_diff.png');
   });
 });

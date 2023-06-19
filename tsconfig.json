@@ -5,24 +5,22 @@
     "declaration": true,
     "esModuleInterop": true,
     "incremental": true,
-    "inlineSources": true,
     "jsx": "react",
     "module": "esnext",
     "moduleResolution": "node",
     "noEmitOnError": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
-    "outDir": "lib",
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
+    "outDir": "lib",
     "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "./@jupyterlab/git/src",
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": false,
-    "target": "es2017",
+    "target": "ES2018",
     "types": ["jest", "resize-observer-browser"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/__tests__"]
 }

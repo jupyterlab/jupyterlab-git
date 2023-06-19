@@ -29,7 +29,9 @@ test.describe('File selection for normal staging', () => {
       modifiers: ['Control', 'Meta']
     });
 
-    const selectedFileCount = await page.locator('[data-test-selected=true]').count();
+    const selectedFileCount = await page
+      .locator('[data-test-selected=true]')
+      .count();
     expect(selectedFileCount).toEqual(2);
   });
 
@@ -48,8 +50,6 @@ test.describe('File selection for normal staging', () => {
     expect(await selectedFiles.count()).toBeGreaterThanOrEqual(4);
   });
 });
-
-
 
 test.describe('File selection for simple staging', () => {
   test.beforeEach(async ({ baseURL, page, tmpPath }) => {
@@ -83,7 +83,9 @@ test.describe('File selection for simple staging', () => {
     expect(await markedFiles.count()).toBeGreaterThanOrEqual(4);
   });
 
-  test('should unmark all files by clicking de/select all button', async ({ page }) => {
+  test('should unmark all files by clicking de/select all button', async ({
+    page
+  }) => {
     await page.sidebar.openTab('jp-git-sessions');
     await page.click('button:has-text("Changes")');
 
@@ -94,7 +96,5 @@ test.describe('File selection for simple staging', () => {
 
     markedFiles = page.locator('[data-test-checked=true]');
     expect(await markedFiles.count()).toBeLessThanOrEqual(0);
-
-    
   });
 });

@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import Button from '@material-ui/core/Button';
 import { shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
-import { CommitBox, ICommitBoxProps } from '../../src/components/CommitBox';
-import { CommitMessage } from '../../src/components/CommitMessage';
-import { WarningBox } from '../../src/components/WarningBox';
-import { CommandIDs } from '../../src/tokens';
+import { CommitBox, ICommitBoxProps } from '../../components/CommitBox';
+import { CommitMessage } from '../../components/CommitMessage';
+import { WarningBox } from '../../components/WarningBox';
+import { CommandIDs } from '../../tokens';
 
 describe('CommitBox', () => {
   const defaultCommands = new CommandRegistry();
@@ -138,7 +139,9 @@ describe('CommitBox', () => {
     it('should render a warning box when there are dirty staged files', () => {
       const props = {
         ...defaultProps,
-        warning: <WarningBox title="Warning" content="Warning content."></WarningBox>
+        warning: (
+          <WarningBox title="Warning" content="Warning content."></WarningBox>
+        )
       };
       const component = shallow(<CommitBox {...props} />);
       expect(component.find(WarningBox).length).toEqual(1);

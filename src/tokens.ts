@@ -1190,11 +1190,11 @@ export namespace Git {
       response: Response,
       message = `Invalid response: ${response.status} ${response.statusText}`,
       traceback = '',
-      json: ReadonlyJSONObject = {}
+      json: ReadonlyJSONObject | null = {}
     ) {
       super(response, message);
       this.traceback = traceback; // traceback added in mother class in 2.2.x
-      this._json = json;
+      this._json = json ?? {};
     }
 
     /**

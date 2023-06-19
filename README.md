@@ -1,7 +1,8 @@
 # jupyterlab-git
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab/tree/examples/demo.ipynb) [![Github Actions Status](https://github.com/jupyterlab/jupyterlab-git/workflows/Test/badge.svg)](https://github.com/jupyterlab/jupyterlab-git/actions?query=workflow%3ATest) [![Version](https://img.shields.io/npm/v/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/pypi/v/jupyterlab-git.svg)](https://pypi.org/project/jupyterlab-git/) [![Downloads](https://img.shields.io/npm/dm/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git) [![Downloads](https://img.shields.io/conda/dn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git)<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/master?urlpath=lab/tree/examples/demo.ipynb) [![Github Actions Status](https://github.com/jupyterlab/jupyterlab-git/actions/workflows/build.yml/badge.svg)](https://github.com/jupyterlab/jupyterlab-git/actions/workflows/build.yml) [![Version](https://img.shields.io/npm/v/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/pypi/v/jupyterlab-git.svg)](https://pypi.org/project/jupyterlab-git/) [![Downloads](https://img.shields.io/npm/dm/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git) [![Downloads](https://img.shields.io/conda/dn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git)<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-29-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 A JupyterLab extension for version control using Git
@@ -71,20 +72,21 @@ This extension tries to handle credentials for HTTP(S) connections (if you don't
 
 #### HTTP(S) protocol
 
-The extension can cache temporarily (by default for an hour) credentials. To use the caching, you will need to 
+The extension can cache temporarily (by default for an hour) credentials. To use the caching, you will need to
 check the option _Save my login temporarily_ in the dialog asking your credentials.
 
 > You can set a longer cache timeout; see [Server Settings](#server-settings).
 
 > This is a new feature since v0.37.0
+
 #### SSH protocol
 
 Here are the steps to follow to set up SSH authentication (skip any that is already accomplished for your project):
 
 1. [Create a SSH key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
-2. Register the public part of it to your Git server:  
-   * [GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
-   * [GitLab](https://docs.gitlab.com/ee/ssh/index.html#add-an-ssh-key-to-your-gitlab-account)
+2. Register the public part of it to your Git server:
+   - [GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
+   - [GitLab](https://docs.gitlab.com/ee/ssh/index.html#add-an-ssh-key-to-your-gitlab-account)
 3. Optionally, if you have more than one key managed by your ssh agent: [Create a config file for the ssh-agent](https://stackoverflow.com/a/21938804)
 4. Tell your local Git repository to [connect to remote via ssh](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-https-to-ssh)
 
@@ -106,7 +108,6 @@ Once installed, extension behavior can be modified via the following settings wh
 - **simpleStaging**: enable a simplified concept of staging. When this setting is `true`, all files with changes are automatically staged. When we develop in JupyterLab, we often only care about what files have changed (in the broadest sense) and don't need to distinguish between "tracked" and "untracked" files. Accordingly, this setting allows us to simplify the visual presentation of changes, which is especially useful for those less acquainted with Git.
 
 ### Server Settings
-
 
 - `JupyterLabGit.actions.post_init`: Set post _git init_ actions.
   It is possible to provide a list of commands to be executed in a folder after it is initialized as Git repository.
@@ -136,6 +137,7 @@ Or equivalently in `$HOME/.jupyter/jupyter_notebook_config.json` (on Windows `%U
   }
 }
 ```
+
 </details>
 
 ## Troubleshoot
@@ -151,42 +153,43 @@ If they do not match or one is missing, please [reinstall the package](README.md
 
 <details><summary>the Git panel does not recognize that you are in a Git repository.</summary>
 
-  Possible fixes:
+Possible fixes:
 
-  - Be sure to be in a Git repository in the filebrowser tab
+- Be sure to be in a Git repository in the filebrowser tab
 
-  - Check the server log. If you see a warning with a 404 code similar to:
-    `[W 00:27:41.800 LabApp] 404 GET /git/settings?version=0.20.0`
+- Check the server log. If you see a warning with a 404 code similar to:
+  `[W 00:27:41.800 LabApp] 404 GET /git/settings?version=0.20.0`
 
-    Explicitly enable the server extension by running:
+  Explicitly enable the server extension by running:
 
-    ```bash
-    jupyter server extension enable --py jupyterlab_git
-    ```
+  ```bash
+  jupyter server extension enable --py jupyterlab_git
+  ```
 
-  - If you are using JupyterHub or some other technologies requiring an initialization script which includes the jupyterlab-git extension, be sure to install both the frontend and the server extension **before** launching JupyterLab.
+- If you are using JupyterHub or some other technologies requiring an initialization script which includes the jupyterlab-git extension, be sure to install both the frontend and the server extension **before** launching JupyterLab.
 </details>
 
 <details>
 <summary>the Git panel is not visible.</summary>
 
-  Possible fixes:
+Possible fixes:
 
-  - Check that the JupyterLab extension is installed:
+- Check that the JupyterLab extension is installed:
 
-    ```bash
-    jupyter labextension list
-    ```
+      ```bash
+      jupyter labextension list
+      ```
 
-    If you don't see `@jupyterlab/git v... enabled OK` in the list, explicitly install the jupyter labextension by running:
+      If you don't see `@jupyterlab/git v... enabled OK` in the list, explicitly install the jupyter labextension by running:
 
-    ```bash
-    jupyter labextension install @jupyterlab/git
-    ```
+      ```bash
+      jupyter labextension install @jupyterlab/git
+      ```
 
-    If you see `@jupyterlab/git` under `Uninstalled core extensions: `, your installation may have been corrupted. You can run `jupyter lab clean --all` and
-    reinstall all your extensions.
-</details>
+      If you see `@jupyterlab/git` under `Uninstalled core extensions: `, your installation may have been corrupted. You can run `jupyter lab clean --all` and
+      reinstall all your extensions.
+
+  </details>
 
 ## Contributing
 
@@ -263,7 +266,7 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://dquach.dev"><img src="https://avatars.githubusercontent.com/u/6735818?v=4?s=100" width="100px;" alt="Dat Quach"/><br /><sub><b>Dat Quach</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=quachtridat" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/fcollonval"><img src="https://avatars1.githubusercontent.com/u/8435071?v=4?s=100" width="100px;" alt="Frédéric Collonval"/><br /><sub><b>Frédéric Collonval</b></sub></a><br /><a href="#maintenance-fcollonval" title="Maintenance">🚧</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hzarea"><img src="https://avatars1.githubusercontent.com/u/27518229?v=4?s=100" width="100px;" alt="Hana Zarea"/><br /><sub><b>Hana Zarea</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=hzarea" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Ahzarea" title="Reviewed Pull Requests">👀</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com"><img src="https://avatars1.githubusercontent.com/u/27518229?v=4?s=100" width="100px;" alt="Hana Zarea"/><br /><sub><b>Hana Zarea</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=hzarea" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Ahzarea" title="Reviewed Pull Requests">👀</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://ianhi.github.io"><img src="https://avatars0.githubusercontent.com/u/10111092?v=4?s=100" width="100px;" alt="Ian Hunt-Isaak"/><br /><sub><b>Ian Hunt-Isaak</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=ianhi" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Aianhi" title="Reviewed Pull Requests">👀</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jaipreet-s"><img src="https://avatars1.githubusercontent.com/u/43826141?v=4?s=100" width="100px;" alt="Jaipreet Singh"/><br /><sub><b>Jaipreet Singh</b></sub></a><br /><a href="#projectManagement-jaipreet-s" title="Project Management">📆</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Ajaipreet-s" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=jaipreet-s" title="Code">💻</a> <a href="#design-jaipreet-s" title="Design">🎨</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/zzhangjii"><img src="https://avatars3.githubusercontent.com/u/11495372?v=4?s=100" width="100px;" alt="Ji Zhang"/><br /><sub><b>Ji Zhang</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=zzhangjii" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Azzhangjii" title="Reviewed Pull Requests">👀</a></td>
@@ -273,8 +276,8 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
       <td align="center" valign="top" width="14.28%"><a href="https://kostyafarber.github.io/"><img src="https://avatars.githubusercontent.com/u/73378227?v=4?s=100" width="100px;" alt="Kostya Farber"/><br /><sub><b>Kostya Farber</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=kostyafarber" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.lindaful.com"><img src="https://avatars.githubusercontent.com/u/68607795?v=4?s=100" width="100px;" alt="Linda Ngoc Nguyen"/><br /><sub><b>Linda Ngoc Nguyen</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=iflinda" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://fellowship.mlh.io/"><img src="https://avatars.githubusercontent.com/u/65834464?s=200&v=4?s=100" width="100px;" alt="Major League Hacking"/><br /><sub><b>Major League Hacking</b></sub></a><br /><a href="#financial-mlh" title="">🤝</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/max-klein-b514419"><img src="https://avatars2.githubusercontent.com/u/2263641?v=4?s=100" width="100px;" alt="Max Klein"/><br /><sub><b>Max Klein</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=telamonian" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Atelamonian" title="Reviewed Pull Requests">👀</a> <a href="#projectManagement-telamonian" title="Project Management">📆</a> <a href="#design-telamonian" title="Design">🎨</a> <a href="#infra-telamonian" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://linkedin.com/in/michal-krassowski/"><img src="https://avatars.githubusercontent.com/u/5832902?v=4?s=100" width="100px;" alt="Michał Krassowski"/><br /><sub><b>Michał Krassowski</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=krassowski" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Akrassowski" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/jupyterlab/jupyterlab-git/issues?q=author%3Akrassowski" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/telamonian/"><img src="https://avatars2.githubusercontent.com/u/2263641?v=4?s=100" width="100px;" alt="Max Klein"/><br /><sub><b>Max Klein</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=telamonian" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Atelamonian" title="Reviewed Pull Requests">👀</a> <a href="#projectManagement-telamonian" title="Project Management">📆</a> <a href="#design-telamonian" title="Design">🎨</a> <a href="#infra-telamonian" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/krassowski/"><img src="https://avatars.githubusercontent.com/u/5832902?v=4?s=100" width="100px;" alt="Michał Krassowski"/><br /><sub><b>Michał Krassowski</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=krassowski" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Akrassowski" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/jupyterlab/jupyterlab-git/issues?q=author%3Akrassowski" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://navn.me"><img src="https://avatars.githubusercontent.com/u/59669957?v=4?s=100" width="100px;" alt="Navinn Ravindaran"/><br /><sub><b>Navinn Ravindaran</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=navn-r" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/neelamgehlot"><img src="https://avatars2.githubusercontent.com/u/15882916?v=4?s=100" width="100px;" alt="Neelam Gehlot"/><br /><sub><b>Neelam Gehlot</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=neelamgehlot" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Aneelamgehlot" title="Reviewed Pull Requests">👀</a></td>
     </tr>

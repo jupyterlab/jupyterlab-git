@@ -1,17 +1,14 @@
 import 'jest';
-import { DiffModel } from '../../src/components/diff/model';
-import {
-  NotebookDiff,
-  ROOT_CLASS
-} from '../../src/components/diff/NotebookDiff';
-import { requestAPI } from '../../src/git';
-import { Git } from '../../src/tokens';
-import * as diffResponse from './data/nbDiffResponse.json';
+import { mergeView } from '../../components/diff/mergeview';
+import { DiffModel } from '../../components/diff/model';
+import { PlainTextDiff } from '../../components/diff/PlainTextDiff';
+import { Git } from '../../tokens';
 
-jest.mock('../../src/git');
+jest.mock('../../git');
+jest.mock('../../components/diff/mergeview');
 
-describe('NotebookDiff', () => {
-  it('should render notebook diff in success case', async () => {
+describe('PlainTextDiff', () => {
+  it('should render file diff', async () => {
     // Given
     const model = new DiffModel({
       challenger: {
@@ -24,14 +21,14 @@ describe('NotebookDiff', () => {
         label: '83baee',
         source: '83baee'
       },
-      filename: 'to/File.ipynb',
+      filename: 'to/File.py',
       repositoryPath: 'path'
     });
 
-    (requestAPI as jest.Mock).mockResolvedValueOnce(diffResponse);
+    const mockMergeView = mergeView as jest.Mocked<typeof mergeView>;
 
     // When
-    const widget = new NotebookDiff(model, null);
+    const widget = new PlainTextDiff(model);
     await widget.ready;
 
     // Then
@@ -40,16 +37,11 @@ describe('NotebookDiff', () => {
       resolveTest = resolve;
     });
     setImmediate(() => {
-      expect(requestAPI).toHaveBeenCalled();
-      expect(requestAPI).toBeCalledWith('diffnotebook', 'POST', {
-        currentContent: 'challenger',
-        previousContent: 'reference'
-      });
       expect(widget.node.querySelectorAll('.jp-git-diff-error')).toHaveLength(
         0
       );
-      expect(widget.node.querySelectorAll(`.${ROOT_CLASS}`)).toHaveLength(1);
-      expect(widget.node.querySelectorAll('.jp-Notebook-diff')).toHaveLength(1);
+      // merge view was not called as it happens when the widget got attach
+      expect(mockMergeView).not.toHaveBeenCalled();
       resolveTest();
     });
     await terminateTest;
@@ -59,7 +51,7 @@ describe('NotebookDiff', () => {
     // Given
     const model = new DiffModel({
       challenger: {
-        content: () => Promise.resolve('challenger'),
+        content: () => Promise.reject('TEST_ERROR_MESSAGE'),
         label: 'WORKING',
         source: Git.Diff.SpecialRef.WORKING
       },
@@ -68,19 +60,14 @@ describe('NotebookDiff', () => {
         label: '83baee',
         source: '83baee'
       },
-      filename: 'to/File.ipynb',
+      filename: 'to/File.py',
       repositoryPath: 'path'
     });
 
-    (requestAPI as jest.Mock).mockRejectedValueOnce(
-      new Git.GitResponseError(
-        new Response('', { status: 401 }),
-        'TEST_ERROR_MESSAGE'
-      )
-    );
+    const mockMergeView = mergeView as jest.Mocked<typeof mergeView>;
 
     // When
-    const widget = new NotebookDiff(model, null);
+    const widget = new PlainTextDiff(model);
     await widget.ready;
 
     // Then
@@ -89,14 +76,10 @@ describe('NotebookDiff', () => {
       resolveTest = resolve;
     });
     setImmediate(() => {
-      expect(requestAPI).toHaveBeenCalled();
-      expect(requestAPI).toBeCalledWith('diffnotebook', 'POST', {
-        currentContent: 'challenger',
-        previousContent: 'reference'
-      });
       expect(
         widget.node.querySelector('.jp-git-diff-error').innerHTML
       ).toContain('TEST_ERROR_MESSAGE');
+      expect(mockMergeView).not.toHaveBeenCalled();
       resolveTest();
     });
     await terminateTest;

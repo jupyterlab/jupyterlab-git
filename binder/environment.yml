@@ -2,9 +2,9 @@
 # this environment may also be used locally on Linux/MacOS/Windows, e.g.
 #
 #   conda env update --file binder/environment.yml
-#   conda activate jupyterlab_git-demo
+#   conda activate jupyterlab-git-demo
 #
-name: jupyterlab_git-demo
+name: jupyterlab-git-demo
 
 channels:
   - conda-forge
@@ -14,7 +14,7 @@ dependencies:
   - python >=3.8,<3.9.0a0
   - jupyterlab >=3,<4.0.0a0
   # labextension build dependencies
-  - nodejs >=16,<17
+  - nodejs >=18,<19
   - pip
   - wheel
   # additional packages for demos
