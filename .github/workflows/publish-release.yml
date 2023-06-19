@@ -15,6 +15,8 @@ on:
 jobs:
   publish_release:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
@@ -30,11 +32,8 @@ jobs:
       - name: Finalize Release
         id: finalize-release
         env:
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-          PYPI_TOKEN_MAP: ${{ secrets.PYPI_TOKEN_MAP }}
-          TWINE_USERNAME: __token__
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        uses: fcollonval/jupyter-releaser/.github/actions/finalize-release@c0f5ce7a443c9de9268803adf71c812370cd034a
+        uses: fcollonval/jupyter_releaser/.github/actions/finalize-release@c0f5ce7a443c9de9268803adf71c812370cd034a
         with:
           token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
           release_url: ${{ steps.populate-release.outputs.release_url }}
