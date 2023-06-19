@@ -27,7 +27,7 @@ jobs:
 
       - name: Prep Release
         id: prep-release
-        uses: fcollonval/jupyter_releaser/.github/actions/prep-release@c0f5ce7a443c9de9268803adf71c812370cd034a
+        uses: fcollonval/jupyter_releaser/.github/actions/prep-release@ft/trusted-publish
         with:
           token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
           version_spec: ${{ github.event.inputs.version_spec }}
