@@ -7,7 +7,10 @@ try:
     from ._version import __version__
 except:
     import warnings
-    warnings.warn("Did you forget to install the extension in editable mode `pip install -e .`?")
+
+    warnings.warn(
+        "Did you forget to install the extension in editable mode `pip install -e .`?"
+    )
     __version__ = "dev"
 from .handlers import setup_handlers
 from .git import Git
