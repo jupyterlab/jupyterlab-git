@@ -21,7 +21,13 @@ async def test_git_get_config_success(mock_execute, jp_fetch, jp_root_dir):
 
     # Then
     mock_execute.assert_called_once_with(
-        ["git", "config", "--list"], cwd=str(local_path)
+        ["git", "config", "--list"],
+        cwd=str(local_path),
+        timeout_s=20,
+        env=None,
+        username=None,
+        password=None,
+        is_binary=False,
     )
 
     assert response.code == 201
@@ -60,7 +66,13 @@ async def test_git_get_config_multiline(mock_execute, jp_fetch, jp_root_dir):
 
     # Then
     mock_execute.assert_called_once_with(
-        ["git", "config", "--list"], cwd=str(local_path)
+        ["git", "config", "--list"],
+        cwd=str(local_path),
+        timeout_s=20,
+        env=None,
+        username=None,
+        password=None,
+        is_binary=False,
     )
 
     assert response.code == 201
@@ -103,7 +115,13 @@ async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch, jp_root
 
     # Then
     mock_execute.assert_called_once_with(
-        ["git", "config", "--list"], cwd=str(local_path)
+        ["git", "config", "--list"],
+        cwd=str(local_path),
+        timeout_s=20,
+        env=None,
+        username=None,
+        password=None,
+        is_binary=False,
     )
 
     assert response.code == 201
@@ -145,10 +163,20 @@ async def test_git_set_config_success(mock_execute, jp_fetch, jp_root_dir):
             call(
                 ["git", "config", "--add", "user.email", "john.snow@iscoming.com"],
                 cwd=str(local_path),
+                timeout_s=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
             ),
             call(
                 ["git", "config", "--add", "user.name", "John Snow"],
                 cwd=str(local_path),
+                timeout_s=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
             ),
         ],
         any_order=True,

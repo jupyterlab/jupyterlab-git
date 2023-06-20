@@ -42,6 +42,11 @@ async def test_changed_files_single_commit():
                 "-z",
             ],
             cwd="test-path",
+            timeout_s=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -61,6 +66,11 @@ async def test_changed_files_working_tree():
         mock_execute.assert_called_once_with(
             ["git", "diff", "HEAD", "--name-only", "-z"],
             cwd="test-path",
+            timeout_s=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -80,6 +90,11 @@ async def test_changed_files_index():
         mock_execute.assert_called_once_with(
             ["git", "diff", "--staged", "HEAD", "--name-only", "-z"],
             cwd="test-path",
+            timeout_s=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -99,6 +114,11 @@ async def test_changed_files_two_commits():
         mock_execute.assert_called_once_with(
             ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"],
             cwd="test-path",
+            timeout_s=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
         )
         assert {"code": 0, "files": ["file1.ipynb", "file2.py"]} == actual_response
 
@@ -118,6 +138,11 @@ async def test_changed_files_git_diff_error():
         mock_execute.assert_called_once_with(
             ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"],
             cwd="test-path",
+            timeout_s=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
         )
         assert {"code": 128, "message": "error message"} == actual_response
 
@@ -229,7 +254,15 @@ async def test_is_binary_file(args, cli_result, cmd, expected):
             actual_response = await Git()._is_binary(*args)
 
             # Then
-            mock_execute.assert_called_once_with(cmd, cwd="/bin")
+            mock_execute.assert_called_once_with(
+                cmd,
+                cwd="/bin",
+                timeout_s=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
+            )
 
             assert actual_response == expected
 

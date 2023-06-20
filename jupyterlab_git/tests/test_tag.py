@@ -21,6 +21,11 @@ async def test_git_tag_success():
         mock_execute.assert_called_once_with(
             ["git", "tag", "--list"],
             cwd="test_curr_path",
+            timeout_s=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
         )
 
         assert {"code": 0, "tags": [tag]} == actual_response
@@ -41,6 +46,11 @@ async def test_git_tag_checkout_success():
             mock_execute.assert_called_once_with(
                 ["git", "checkout", "tags/{}".format(tag)],
                 cwd="test_curr_path",
+                timeout_s=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
             )
 
             assert {

@@ -111,6 +111,11 @@ async def test_detailed_log():
                 "f29660a2472e24164906af8653babeb48e4bf2ab",
             ],
             cwd=str(Path("/bin") / "test_curr_path"),
+            timeout_s=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
         )
 
         assert expected_response == actual_response

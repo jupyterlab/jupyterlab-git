@@ -42,13 +42,16 @@ async def test_git_show_prefix_symlink(
     assert (jp_root_dir / local_repo).exists()
 
     # When
-    response = await jp_fetch(
-        "git",
-        local_repo,
-        "show_prefix",
-        body="{}",
-        method="POST",
-    )
+    try:
+        response = await jp_fetch(
+            "git",
+            local_repo,
+            "show_prefix",
+            body="{}",
+            method="POST",
+        )
+    except Exception as e:
+        print(str(e))
 
     # Then
     assert response.code == 200

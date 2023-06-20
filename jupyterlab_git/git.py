@@ -28,8 +28,6 @@ CONFIG_PATTERN = re.compile(r"(?:^|\n)([\w\-\.]+)\=")
 DEFAULT_REMOTE_NAME = "origin"
 # Maximum number of character of command output to print in debug log
 MAX_LOG_OUTPUT = 500  # type: int
-# How long to wait to be executed or finished your execution before timing out
-MAX_WAIT_FOR_EXECUTE_S = 20
 # Ensure on NFS or similar, that we give the .git/index.lock time to be removed
 MAX_WAIT_FOR_LOCK_S = 5
 # How often should we check for the lock above to be free? This comes up more on things like NFS
@@ -49,6 +47,7 @@ execution_lock = tornado.locks.Lock()
 async def execute(
     cmdline: "List[str]",
     cwd: "str",
+    timeout_s: "int",
     env: "Optional[Dict[str, str]]" = None,
     username: "Optional[str]" = None,
     password: "Optional[str]" = None,
@@ -128,9 +127,7 @@ async def execute(
             return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
 
     try:
-        await execution_lock.acquire(
-            timeout=datetime.timedelta(seconds=MAX_WAIT_FOR_EXECUTE_S)
-        )
+        await execution_lock.acquire(timeout=datetime.timedelta(seconds=timeout_s))
     except tornado.util.TimeoutError:
         return (1, "", "Unable to get the lock on the directory")
 
@@ -192,10 +189,32 @@ class Git:
 
     def __init__(self, config=None):
         self._config = config
+        self._execute_timeout_s = (
+            20 if self._config is None else self._config.git_command_timeout_s
+        )
 
     def __del__(self):
         if self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS:
             self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.terminate()
+
+    async def execute(
+        self,
+        cmdline: "List[str]",
+        cwd: "str",
+        env: "Optional[Dict[str, str]]" = None,
+        username: "Optional[str]" = None,
+        password: "Optional[str]" = None,
+        is_binary=False,
+    ) -> "Tuple[int, str, str]":
+        return await execute(
+            cmdline,
+            cwd=cwd,
+            timeout_s=self._execute_timeout_s,
+            env=env,
+            username=username,
+            password=password,
+            is_binary=is_binary,
+        )
 
     async def config(self, path, **kwargs):
         """Get or set Git options.
@@ -208,7 +227,7 @@ class Git:
             output = []
             for k, v in kwargs.items():
                 cmd = ["git", "config", "--add", k, v]
-                code, out, err = await execute(cmd, cwd=path)
+                code, out, err = await self.execute(cmd, cwd=path)
                 output.append(out.strip())
                 response["code"] = code
                 if code != 0:
@@ -219,7 +238,7 @@ class Git:
             response["message"] = "\n".join(output).strip()
         else:
             cmd = ["git", "config", "--list"]
-            code, output, error = await execute(cmd, cwd=path)
+            code, output, error = await self.execute(cmd, cwd=path)
             response = {"code": code}
 
             if code != 0:
@@ -267,7 +286,7 @@ class Git:
 
         response = {}
         try:
-            code, output, error = await execute(cmd, cwd=path)
+            code, output, error = await self.execute(cmd, cwd=path)
         except subprocess.CalledProcessError as e:
             response["code"] = e.returncode
             response["message"] = e.output.decode("utf-8")
@@ -307,7 +326,7 @@ class Git:
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
             cmd.append("-q")
-            code, output, error = await execute(
+            code, output, error = await self.execute(
                 cmd,
                 username=auth["username"],
                 password=auth["password"],
@@ -316,7 +335,7 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, output, error = await execute(
+            code, output, error = await self.execute(
                 cmd,
                 cwd=path,
                 env=env,
@@ -351,7 +370,7 @@ class Git:
             if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, _, fetch_error = await execute(
+            code, _, fetch_error = await self.execute(
                 cmd,
                 cwd=cwd,
                 username=auth["username"],
@@ -360,7 +379,7 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, _, fetch_error = await execute(cmd, cwd=cwd, env=env)
+            code, _, fetch_error = await self.execute(cmd, cwd=cwd, env=env)
 
         result = {
             "code": code,
@@ -438,7 +457,7 @@ class Git:
         Execute git status command & return the result.
         """
         cmd = ["git", "status", "--porcelain", "-b", "-u", "-z"]
-        code, status, my_error = await execute(cmd, cwd=path)
+        code, status, my_error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {
@@ -456,7 +475,7 @@ class Git:
             "--cached",
             "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
         ]
-        text_code, text_output, _ = await execute(command, cwd=path)
+        text_code, text_output, _ = await self.execute(command, cwd=path)
 
         are_binary = dict()
         if text_code == 0:
@@ -530,7 +549,7 @@ class Git:
                 "--",
                 follow_path,
             ]
-        code, my_output, my_error = await execute(
+        code, my_output, my_error = await self.execute(
             cmd,
             cwd=path,
         )
@@ -593,7 +612,7 @@ class Git:
             selected_hash,
         ]
 
-        code, my_output, my_error = await execute(
+        code, my_output, my_error = await self.execute(
             cmd,
             cwd=path,
         )
@@ -669,7 +688,7 @@ class Git:
             if current:
                 cmd.append(current)
 
-        code, my_output, my_error = await execute(cmd, cwd=path)
+        code, my_output, my_error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
@@ -711,7 +730,7 @@ class Git:
     async def branch_delete(self, path, branch):
         """Execute 'git branch -D <branchname>'"""
         cmd = ["git", "branch", "-D", branch]
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
         else:
@@ -730,7 +749,7 @@ class Git:
             "refs/heads/",
         ]
 
-        code, output, error = await execute(cmd, cwd=path)
+        code, output, error = await self.execute(cmd, cwd=path)
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
@@ -796,7 +815,7 @@ class Git:
             "refs/remotes/",
         ]
 
-        code, output, error = await execute(cmd, cwd=path)
+        code, output, error = await self.execute(cmd, cwd=path)
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
@@ -826,7 +845,7 @@ class Git:
         Execute git --show-toplevel command & return the result.
         """
         cmd = ["git", "rev-parse", "--show-toplevel"]
-        code, my_output, my_error = await execute(
+        code, my_output, my_error = await self.execute(
             cmd,
             cwd=path,
         )
@@ -849,7 +868,7 @@ class Git:
         Execute git --show-prefix command & return the result.
         """
         cmd = ["git", "rev-parse", "--show-prefix"]
-        code, my_output, my_error = await execute(
+        code, my_output, my_error = await self.execute(
             cmd,
             cwd=path,
         )
@@ -877,7 +896,7 @@ class Git:
             cmd = ["git", "add"] + list(filename)
         else:
             cmd = ["git", "add", filename]
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -888,7 +907,7 @@ class Git:
         Execute git add all command & return the result.
         """
         cmd = ["git", "add", "-A"]
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -899,7 +918,7 @@ class Git:
         Execute git add all unstaged command & return the result.
         """
         cmd = ["git", "add", "-u"]
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -925,7 +944,7 @@ class Git:
         Execute git reset <filename> command & return the result.
         """
         cmd = ["git", "reset", "--", filename]
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -936,7 +955,7 @@ class Git:
         Execute git reset command & return the result.
         """
         cmd = ["git", "reset"]
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -947,7 +966,7 @@ class Git:
         Delete a specified commit from the repository.
         """
         cmd = ["git", "revert", "-m", "1", "--no-commit", commit_id]
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -960,7 +979,7 @@ class Git:
         cmd = ["git", "reset", "--hard"]
         if commit_id:
             cmd.append(commit_id)
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -971,7 +990,7 @@ class Git:
         Execute git checkout <make-branch> command & return the result.
         """
         cmd = ["git", "checkout", "-b", branchname, startpoint]
-        code, my_output, my_error = await execute(
+        code, my_output, my_error = await self.execute(
             cmd,
             cwd=path,
         )
@@ -988,7 +1007,7 @@ class Git:
         """
         Execute git rev-parse --symbolic-full-name <branch-name> and return the result (or None).
         """
-        code, my_output, _ = await execute(
+        code, my_output, _ = await self.execute(
             ["git", "rev-parse", "--symbolic-full-name", branchname],
             cwd=path,
         )
@@ -1014,7 +1033,7 @@ class Git:
         else:
             cmd = ["git", "checkout", branchname]
 
-        code, my_output, my_error = await execute(cmd, cwd=path)
+        code, my_output, my_error = await self.execute(cmd, cwd=path)
 
         if code == 0:
             return {"code": 0, "message": my_output}
@@ -1026,7 +1045,7 @@ class Git:
         Execute git checkout command for the filename & return the result.
         """
         cmd = ["git", "checkout", "--", filename]
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -1037,7 +1056,7 @@ class Git:
         Execute git checkout command & return the result.
         """
         cmd = ["git", "checkout", "--", "."]
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -1048,7 +1067,7 @@ class Git:
         Execute git merge command & return the result.
         """
         cmd = ["git", "merge", branch]
-        code, output, error = await execute(cmd, cwd=path)
+        code, output, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -1066,7 +1085,7 @@ class Git:
         else:
             cmd.extend(["--m", commit_msg])
 
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -1082,7 +1101,7 @@ class Git:
             if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, output, error = await execute(
+            code, output, error = await self.execute(
                 ["git", "pull", "--no-commit"],
                 username=auth["username"],
                 password=auth["password"],
@@ -1091,7 +1110,7 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, output, error = await execute(
+            code, output, error = await self.execute(
                 ["git", "pull", "--no-commit"],
                 env=env,
                 cwd=path,
@@ -1106,7 +1125,7 @@ class Git:
                 in output.lower()
             )
             if cancel_on_conflict and has_conflict:
-                code, _, error = await execute(
+                code, _, error = await self.execute(
                     ["git", "merge", "--abort"],
                     cwd=path,
                 )
@@ -1147,7 +1166,7 @@ class Git:
             if auth.get("cache_credentials"):
                 await self.ensure_credential_helper(path)
             env["GIT_TERMINAL_PROMPT"] = "1"
-            code, output, error = await execute(
+            code, output, error = await self.execute(
                 command,
                 username=auth["username"],
                 password=auth["password"],
@@ -1156,7 +1175,7 @@ class Git:
             )
         else:
             env["GIT_TERMINAL_PROMPT"] = "0"
-            code, output, error = await execute(
+            code, output, error = await self.execute(
                 command,
                 env=env,
                 cwd=path,
@@ -1175,7 +1194,7 @@ class Git:
         """
         cmd = ["git", "init"]
         cwd = path
-        code, _, error = await execute(cmd, cwd=cwd)
+        code, _, error = await self.execute(cmd, cwd=cwd)
 
         actions = None
         if code == 0:
@@ -1199,7 +1218,9 @@ class Git:
             for action in actions_list:
                 try:
                     # We trust the actions as they were passed via a config and not the UI
-                    code, stdout, stderr = await execute(shlex.split(action), cwd=cwd)
+                    code, stdout, stderr = await self.execute(
+                        shlex.split(action), cwd=cwd
+                    )
                     actions.append(
                         {
                             "cmd": action,
@@ -1237,7 +1258,7 @@ class Git:
         See https://git-blame.blogspot.com/2013/06/checking-current-branch-programatically.html
         """
         command = ["git", "symbolic-ref", "--short", "HEAD"]
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await self.execute(command, cwd=path)
         if code == 0:
             return output.strip()
         elif "not a symbolic ref" in error.lower():
@@ -1253,7 +1274,7 @@ class Git:
     async def _get_current_branch_detached(self, path):
         """Execute 'git branch -a' to get current branch details in case of detached HEAD"""
         command = ["git", "branch", "-a"]
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await self.execute(command, cwd=path)
         if code == 0:
             for branch in output.splitlines():
                 branch = branch.strip()
@@ -1277,13 +1298,13 @@ class Git:
             "--abbrev-ref",
             "{}@{{upstream}}".format(branch_name),
         ]
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await self.execute(command, cwd=path)
         if code != 0:
             return {"code": code, "command": " ".join(command), "message": error}
         rev_parse_output = output.strip()
 
         command = ["git", "config", "--local", "branch.{}.remote".format(branch_name)]
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await self.execute(command, cwd=path)
         if code != 0:
             return {"code": code, "command": " ".join(command), "message": error}
 
@@ -1301,7 +1322,7 @@ class Git:
         Reference : https://git-scm.com/docs/git-describe#git-describe-ltcommit-ishgt82308203
         """
         command = ["git", "describe", "--tags", commit_sha]
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await self.execute(command, cwd=path)
         if code == 0:
             return output.strip()
         elif "fatal: no tags can describe '{}'.".format(commit_sha) in error.lower():
@@ -1325,7 +1346,7 @@ class Git:
         """
         command = ["git", "ls-files", "-u", "-z", filename]
 
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await self.execute(command, cwd=path)
         if code != 0:
             raise subprocess.CalledProcessError(
                 code, " ".join(command), output=output, stderr=error
@@ -1351,7 +1372,7 @@ class Git:
         else:
             command.append(f"{ref}:{filename}")
 
-        code, output, error = await execute(command, cwd=path, is_binary=is_binary)
+        code, output, error = await self.execute(command, cwd=path, is_binary=is_binary)
 
         error_messages = map(
             lambda n: n.lower(),
@@ -1481,7 +1502,7 @@ class Git:
                 "--",
                 filename,
             ]  # where 4b825... is a magic SHA which represents the empty tree
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await self.execute(command, cwd=path)
 
         if code != 0:
             error_messages = map(
@@ -1517,7 +1538,7 @@ class Git:
             Remote name; default "origin"
         """
         cmd = ["git", "remote", "add", name, url]
-        code, _, error = await execute(cmd, cwd=path)
+        code, _, error = await self.execute(cmd, cwd=path)
         response = {"code": code, "command": " ".join(cmd)}
 
         if code != 0:
@@ -1540,7 +1561,7 @@ class Git:
         else:
             command.append("show")
 
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await self.execute(command, cwd=path)
         response = {"code": code, "command": " ".join(command)}
 
         if code == 0:
@@ -1565,7 +1586,7 @@ class Git:
         """
         command = ["git", "remote", "remove", name]
 
-        code, _, error = await execute(command, cwd=path)
+        code, _, error = await self.execute(command, cwd=path)
         response = {"code": code, "command": " ".join(command)}
 
         if code != 0:
@@ -1619,7 +1640,7 @@ class Git:
         If an error occurs, return None.
         """
         command = ["git", "--version"]
-        code, output, _ = await execute(command, cwd=os.curdir)
+        code, output, _ = await self.execute(command, cwd=os.curdir)
         if code == 0:
             version = GIT_VERSION_REGEX.match(output)
             if version is not None:
@@ -1634,7 +1655,7 @@ class Git:
             Git path repository
         """
         command = ["git", "tag", "--list"]
-        code, output, error = await execute(command, cwd=path)
+        code, output, error = await self.execute(command, cwd=path)
         if code != 0:
             return {"code": code, "command": " ".join(command), "message": error}
         tags = [tag for tag in output.split("\n") if len(tag) > 0]
@@ -1649,7 +1670,7 @@ class Git:
             Tag to checkout
         """
         command = ["git", "checkout", "tags/" + tag]
-        code, _, error = await execute(command, cwd=path)
+        code, _, error = await self.execute(command, cwd=path)
         if code == 0:
             return {"code": code, "message": "Tag {} checked out".format(tag)}
         else:
@@ -1798,7 +1819,7 @@ class Git:
         # if the git command is run in a non-interactive terminal, it will not prompt for user input
         env["GIT_TERMINAL_PROMPT"] = "0"
 
-        code, output, error = await execute(cmd, cwd=path, env=env)
+        code, output, error = await self.execute(cmd, cwd=path, env=env)
 
         # code 0: no changes to stash
         if code != 0:
@@ -1814,7 +1835,7 @@ class Git:
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
 
-        code, output, error = await execute(cmd, cwd=path, env=env)
+        code, output, error = await self.execute(cmd, cwd=path, env=env)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -1833,7 +1854,7 @@ class Git:
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
 
-        code, output, error = await execute(cmd, cwd=path, env=env)
+        code, output, error = await self.execute(cmd, cwd=path, env=env)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -1858,7 +1879,7 @@ class Git:
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
 
-        code, output, error = await execute(cmd, cwd=path, env=env)
+        code, output, error = await self.execute(cmd, cwd=path, env=env)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -1884,7 +1905,7 @@ class Git:
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
 
-        code, output, error = await execute(cmd, cwd=path, env=env)
+        code, output, error = await self.execute(cmd, cwd=path, env=env)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
@@ -1910,7 +1931,7 @@ class Git:
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
 
-        code, output, error = await execute(cmd, cwd=path, env=env)
+        code, output, error = await self.execute(cmd, cwd=path, env=env)
 
         # error:
         if code != 0:

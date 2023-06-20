@@ -90,6 +90,11 @@ async def test_single_file_log():
                 "folder/test.txt",
             ],
             cwd=str(Path("/bin") / "test_curr_path"),
+            timeout_s=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
         )
 
         assert expected_response == actual_response

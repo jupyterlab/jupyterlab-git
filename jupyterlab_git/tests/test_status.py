@@ -183,6 +183,11 @@ async def test_status(output, diff_output, expected):
                 call(
                     ["git", "status", "--porcelain", "-b", "-u", "-z"],
                     cwd=repository,
+                    timeout_s=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
                 ),
                 call(
                     [
@@ -194,6 +199,11 @@ async def test_status(output, diff_output, expected):
                         "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
                     ],
                     cwd=repository,
+                    timeout_s=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
                 ),
             ]
         )

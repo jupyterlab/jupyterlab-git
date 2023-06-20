@@ -22,7 +22,11 @@ async def test_git_fetch_success():
         mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             cwd="test_path",
+            timeout_s=20,
             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+            username=None,
+            password=None,
+            is_binary=False,
         )
         assert {"code": 0} == actual_response
 
@@ -40,7 +44,11 @@ async def test_git_fetch_fail():
         mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             cwd="test_path",
+            timeout_s=20,
             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+            username=None,
+            password=None,
+            is_binary=False,
         )
         assert {
             "code": 1,
@@ -64,10 +72,12 @@ async def test_git_fetch_with_auth_success():
         # Then
         mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
+            cwd="test_path",
+            timeout_s=20,
+            env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
             username="test_user",
             password="test_pass",
-            cwd="test_path",
-            env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
+            is_binary=False,
         )
         assert {"code": 0} == actual_response
 
@@ -93,10 +103,12 @@ async def test_git_fetch_with_auth_fail():
         # Then
         mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
+            cwd="test_path",
+            timeout_s=20,
+            env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
             username="test_user",
             password="test_pass",
-            cwd="test_path",
-            env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
+            is_binary=False,
         )
         assert {
             "code": 128,
@@ -136,7 +148,15 @@ async def test_git_fetch_with_auth_and_cache_credentials():
             assert mock_execute.call_count == 3
             mock_execute.assert_has_calls(
                 [
-                    call(["git", "config", "--list"], cwd=test_path),
+                    call(
+                        ["git", "config", "--list"],
+                        cwd=test_path,
+                        timeout_s=20,
+                        env=None,
+                        username=None,
+                        password=None,
+                        is_binary=False,
+                    ),
                     call(
                         [
                             "git",
@@ -146,13 +166,20 @@ async def test_git_fetch_with_auth_and_cache_credentials():
                             credential_helper,
                         ],
                         cwd=test_path,
+                        timeout_s=20,
+                        env=None,
+                        username=None,
+                        password=None,
+                        is_binary=False,
                     ),
                     call(
                         ["git", "fetch", "--all", "--prune"],
+                        cwd=test_path,
+                        timeout_s=20,
+                        env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
                         username="test_user",
                         password="test_pass",
-                        cwd=test_path,
-                        env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
+                        is_binary=False,
                     ),
                 ]
             )
@@ -184,13 +211,23 @@ async def test_git_fetch_with_auth_and_cache_credentials_and_existing_credential
         assert mock_execute.call_count == 2
         mock_execute.assert_has_calls(
             [
-                call(["git", "config", "--list"], cwd=test_path),
+                call(
+                    ["git", "config", "--list"],
+                    cwd=test_path,
+                    timeout_s=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                ),
                 call(
                     ["git", "fetch", "--all", "--prune"],
+                    cwd=test_path,
+                    timeout_s=20,
+                    env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
                     username="test_user",
                     password="test_pass",
-                    cwd=test_path,
-                    env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
+                    is_binary=False,
                 ),
             ]
         )
