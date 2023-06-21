@@ -770,7 +770,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     };
 
     try {
-      await this._hasIdentity(this.props.model.pathRepository);
+      const author = await this._hasIdentity(this.props.model.pathRepository);
 
       this.props.logger.log({
         level: Level.RUNNING,
@@ -778,9 +778,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       });
 
       if (this.state.commitAmend) {
-        await this.props.model.commit(null, true);
+        await this.props.model.commit(null, true, author);
       } else {
-        await this.props.model.commit(message);
+        await this.props.model.commit(message, false, author);
       }
 
       this.props.logger.log({
@@ -807,7 +807,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    *
    * @param path - repository path
    */
-  private async _hasIdentity(path: string): Promise<void> {
+  private async _hasIdentity(path: string): Promise<string> {
     // If the repository path changes or explicitly configured, check the user identity
     if (
       path !== this._previousRepoPath ||
@@ -817,6 +817,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         const data: JSONObject = (await this.props.model.config()) as any;
         const options: JSONObject = data['options'] as JSONObject;
         const keys = Object.keys(options);
+        let author: string = null;
 
         // If explicitly configured or the user name or e-mail is unknown, ask the user to set it
         if (
@@ -826,7 +827,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         ) {
           const result = await showDialog({
             title: this.props.trans.__('Who is committing?'),
-            // TODO: pass current name and email if set
             body: new GitAuthorForm(
               (options['user.name'] as string) || '',
               (options['user.email'] as string) || ''
@@ -840,12 +840,17 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           }
 
           const { name, email } = result.value;
-          await this.props.model.config({
-            'user.name': name,
-            'user.email': email
-          });
+          if (this.props.settings.composite['promptUserIdentity']) {
+            author = `${name} <${email}>`;
+          } else {
+            await this.props.model.config({
+              'user.name': name,
+              'user.email': email
+            });
+          }
         }
         this._previousRepoPath = path;
+        return author;
       } catch (error) {
         if (error instanceof Git.GitResponseError) {
           throw error;

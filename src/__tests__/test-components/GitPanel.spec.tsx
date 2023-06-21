@@ -162,7 +162,9 @@ describe('GitPanel', () => {
       expect(configSpy).toHaveBeenCalledTimes(1);
       expect(commitSpy).toHaveBeenCalledTimes(1);
       expect(commitSpy).toHaveBeenCalledWith(
-        commitSummary + '\n\n' + commitDescription + '\n'
+        commitSummary + '\n\n' + commitDescription + '\n',
+        false,
+        null
       );
 
       // Only erase commit message upon success
@@ -177,16 +179,23 @@ describe('GitPanel', () => {
     });
 
     it('should prompt for user identity if explicitly configured', async () => {
+      configSpy.mockResolvedValue({ options: commitUser });
+
       props.settings = MockSettings(false, true) as any;
+      const panelWrapper = shallow<GitPanel>(<GitPanel {...props} />);
+      panel = panelWrapper.instance();
+
       mockUtils.showDialog.mockResolvedValue(dialogValue);
 
       panel.setState({ commitSummary });
+
       await panel.commitFiles();
-      expect(configSpy).toHaveBeenCalledTimes(2);
+      expect(configSpy).toHaveBeenCalledTimes(1);
       expect(configSpy.mock.calls[0]).toHaveLength(0);
-      expect(configSpy.mock.calls[1]).toEqual([commitUser]);
       expect(commitSpy).toHaveBeenCalledTimes(1);
-      expect(commitSpy).toHaveBeenCalledWith(commitSummary);
+
+      const author = `${commitUser['user.name']} <${commitUser['user.email']}>`;
+      expect(commitSpy).toHaveBeenCalledWith(commitSummary, false, author);
     });
 
     it('should prompt for user identity if user.name is not set', async () => {
@@ -194,12 +203,13 @@ describe('GitPanel', () => {
       mockUtils.showDialog.mockResolvedValue(dialogValue);
 
       panel.setState({ commitSummary });
+
       await panel.commitFiles();
       expect(configSpy).toHaveBeenCalledTimes(2);
       expect(configSpy.mock.calls[0]).toHaveLength(0);
       expect(configSpy.mock.calls[1]).toEqual([commitUser]);
       expect(commitSpy).toHaveBeenCalledTimes(1);
-      expect(commitSpy).toHaveBeenCalledWith(commitSummary);
+      expect(commitSpy).toHaveBeenCalledWith(commitSummary, false, null);
     });
 
     it('should prompt for user identity if user.email is not set', async () => {
@@ -212,7 +222,7 @@ describe('GitPanel', () => {
       expect(configSpy.mock.calls[0]).toHaveLength(0);
       expect(configSpy.mock.calls[1]).toEqual([commitUser]);
       expect(commitSpy).toHaveBeenCalledTimes(1);
-      expect(commitSpy).toHaveBeenCalledWith(commitSummary);
+      expect(commitSpy).toHaveBeenCalledWith(commitSummary, false, null);
     });
 
     it('should not commit if no user identity is set and the user rejects the dialog', async () => {
