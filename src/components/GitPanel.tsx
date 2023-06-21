@@ -808,18 +808,29 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @param path - repository path
    */
   private async _hasIdentity(path: string): Promise<void> {
-    // If the repository path changes, check the user identity
-    if (path !== this._previousRepoPath) {
+    // If the repository path changes or explicitly configured, check the user identity
+    if (
+      path !== this._previousRepoPath ||
+      this.props.settings.composite['promptUserIdentity']
+    ) {
       try {
         const data: JSONObject = (await this.props.model.config()) as any;
         const options: JSONObject = data['options'] as JSONObject;
         const keys = Object.keys(options);
 
-        // If the user name or e-mail is unknown, ask the user to set it
-        if (keys.indexOf('user.name') < 0 || keys.indexOf('user.email') < 0) {
+        // If explicitly configured or the user name or e-mail is unknown, ask the user to set it
+        if (
+          this.props.settings.composite['promptUserIdentity'] ||
+          keys.indexOf('user.name') < 0 ||
+          keys.indexOf('user.email') < 0
+        ) {
           const result = await showDialog({
             title: this.props.trans.__('Who is committing?'),
-            body: new GitAuthorForm()
+            // TODO: pass current name and email if set
+            body: new GitAuthorForm(
+              (options['user.name'] as string) || '',
+              (options['user.email'] as string) || ''
+            )
           });
 
           if (!result.button.accept) {

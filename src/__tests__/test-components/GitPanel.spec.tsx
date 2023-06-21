@@ -40,14 +40,15 @@ const mockedResponses: {
  * @private
  * @returns mock settings
  */
-function MockSettings(commitAndPush = true) {
+function MockSettings(commitAndPush = true, promptUserIdentity = false) {
   return {
     changed: {
       connect: () => true,
       disconnect: () => true
     },
     composite: {
-      commitAndPush
+      commitAndPush,
+      promptUserIdentity
     }
   };
 }
@@ -173,6 +174,19 @@ describe('GitPanel', () => {
       await panel.commitFiles();
       expect(configSpy).not.toHaveBeenCalled();
       expect(commitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should prompt for user identity if explicitly configured', async () => {
+      props.settings = MockSettings(false, true) as any;
+      mockUtils.showDialog.mockResolvedValue(dialogValue);
+
+      panel.setState({ commitSummary });
+      await panel.commitFiles();
+      expect(configSpy).toHaveBeenCalledTimes(2);
+      expect(configSpy.mock.calls[0]).toHaveLength(0);
+      expect(configSpy.mock.calls[1]).toEqual([commitUser]);
+      expect(commitSpy).toHaveBeenCalledTimes(1);
+      expect(commitSpy).toHaveBeenCalledWith(commitSummary);
     });
 
     it('should prompt for user identity if user.name is not set', async () => {
