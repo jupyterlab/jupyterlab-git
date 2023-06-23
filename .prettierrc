@@ -1,5 +1,13 @@
 {
   "singleQuote": true,
   "trailingComma": "none",
-  "arrowParens": "avoid"
+  "arrowParens": "avoid",
+  "overrides": [
+    {
+      "files": "package.json",
+      "options": {
+        "tabWidth": 4
+      }
+    }
+  ]
 }
