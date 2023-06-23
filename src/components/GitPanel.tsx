@@ -809,28 +809,32 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   private async _hasIdentity(path: string): Promise<string | null> {
     // If the repository path changes or explicitly configured, check the user identity
-    let authorOverride: string | null = null;
     if (
       path !== this._previousRepoPath ||
       this.props.settings.composite['promptUserIdentity']
     ) {
       try {
-        const data: JSONObject = (await this.props.model.config()) as any;
-        const options: JSONObject = data['options'] as JSONObject;
-        const keys = Object.keys(options);
+        let userOrEmailNotSet: boolean = false;
+        let author: Git.IIdentity;
+        let authorOverride: string | null = null;
+
+        if (this.props.model.lastAuthor === null) {
+          const data: JSONObject = (await this.props.model.config()) as any;
+          const options: JSONObject = data['options'] as JSONObject;
+
+          author = {name: options['user.name'] as string || '', email: options['user.email'] as string || ''};
+          userOrEmailNotSet = !author.name || !author.email;
+        } else {
+          author = this.props.model.lastAuthor;
+        }
 
         // If explicitly configured or the user name or e-mail is unknown, ask the user to set it
         if (
-          this.props.settings.composite['promptUserIdentity'] ||
-          keys.indexOf('user.name') < 0 ||
-          keys.indexOf('user.email') < 0
+          this.props.settings.composite['promptUserIdentity'] || userOrEmailNotSet
         ) {
           const result = await showDialog({
             title: this.props.trans.__('Who is committing?'),
-            body: new GitAuthorForm(
-              (options['user.name'] as string) || '',
-              (options['user.email'] as string) || ''
-            )
+            body: new GitAuthorForm(author)
           });
 
           if (!result.button.accept) {
@@ -839,21 +843,18 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             );
           }
 
-          const { name, email } = result.value;
-          if (
-            keys.indexOf('user.name') < 0 ||
-            keys.indexOf('user.email') < 0
-          ) {
+          author = result.value;
+          if (userOrEmailNotSet) {
             await this.props.model.config({
-              'user.name': name,
-              'user.email': email
+              'user.name': author.name,
+              'user.email': author.email
             });
           }
+          this.props.model.lastAuthor = author;
 
           if (this.props.settings.composite['promptUserIdentity']) {
-            authorOverride = `${name} <${email}>`;
+            authorOverride = `${author.name} <${author.email}>`;
           }
-
         }
         this._previousRepoPath = path;
         return authorOverride;

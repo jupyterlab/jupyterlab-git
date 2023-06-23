@@ -9,10 +9,9 @@ export class GitAuthorForm
   extends Widget
   implements Dialog.IBodyWidget<Git.IIdentity>
 {
-  constructor(userName = '', userEmail = '') {
+  constructor(lastAuthor: Git.IIdentity) {
     super();
-    this._userNameInitialValue = userName;
-    this._userEmailInitialValue = userEmail;
+    this._lastAuthor = lastAuthor;
     this.node.appendChild(this.createBody());
   }
 
@@ -26,8 +25,8 @@ export class GitAuthorForm
     text.textContent = 'Enter your name and email for commit';
     this._name.placeholder = 'Name';
     this._email.placeholder = 'Email';
-    this._name.value = this._userNameInitialValue;
-    this._email.value = this._userEmailInitialValue;
+    this._name.value = this._lastAuthor.name;
+    this._email.value = this._lastAuthor.email;
 
     node.appendChild(text);
     node.appendChild(this._name);
@@ -48,6 +47,5 @@ export class GitAuthorForm
 
   private _name: HTMLInputElement;
   private _email: HTMLInputElement;
-  private _userNameInitialValue: string;
-  private _userEmailInitialValue: string;
+  private _lastAuthor: Git.IIdentity;
 }
