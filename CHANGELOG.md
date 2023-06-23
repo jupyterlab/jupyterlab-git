@@ -29,8 +29,8 @@
 
 - Bump json5 from 2.2.0 to 2.2.3 in /ui-tests [#1235](https://github.com/jupyterlab/jupyterlab-git/pull/1235) ([@dependabot](https://github.com/dependabot))
 - Bump webpack from 5.74.0 to 5.76.1 [#1232](https://github.com/jupyterlab/jupyterlab-git/pull/1232) ([@dependabot](https://github.com/dependabot))
-- add shawnesquivel as a contributor for code [#1225](https://github.com/jupyterlab/jupyterlab-git/pull/1225) ([@allcontributors](https://github.com/allcontributors))
-- add basokant as a contributor for code [#1224](https://github.com/jupyterlab/jupyterlab-git/pull/1224) ([@allcontributors](https://github.com/allcontributors))
+- add shawnesquivel as a contributor for code [#1225](https://github.com/jupyterlab/jupyterlab-git/pull/1225) ([@allcontributors](https://github.com/all-contributors))
+- add basokant as a contributor for code [#1224](https://github.com/jupyterlab/jupyterlab-git/pull/1224) ([@allcontributors](https://github.com/all-contributors))
 - bug: modified password placeholder text depending if remote URI is github (Fix #1176) [#1220](https://github.com/jupyterlab/jupyterlab-git/pull/1220) ([@shawnesquivel](https://github.com/shawnesquivel))
 - Bump http-cache-semantics from 4.1.0 to 4.1.1 [#1213](https://github.com/jupyterlab/jupyterlab-git/pull/1213) ([@dependabot](https://github.com/dependabot))
 - Hide overflow for latest item on click [#1212](https://github.com/jupyterlab/jupyterlab-git/pull/1212) ([@ardislu](https://github.com/ardislu))
