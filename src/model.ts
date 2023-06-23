@@ -203,11 +203,11 @@ export class GitExtension implements IGitExtension {
    *
    */
   get lastAuthor(): Git.IIdentity | null {
-    return this._lastAuthor
+    return this._lastAuthor;
   }
 
   set lastAuthor(lastAuthor: Git.IIdentity) {
-    this._lastAuthor = lastAuthor
+    this._lastAuthor = lastAuthor;
   }
 
   /**
@@ -2136,7 +2136,7 @@ export class GitExtension implements IGitExtension {
   private _selectedHistoryFile: Git.IStatusFile | null = null;
   private _hasDirtyFiles = false;
   private _credentialsRequired = false;
-  private _lastAuthor : Git.IIdentity | null = null;
+  private _lastAuthor: Git.IIdentity | null = null;
 
   // Configurable
   private _statusForDirtyState: Git.Status[] = ['staged', 'partially-staged'];

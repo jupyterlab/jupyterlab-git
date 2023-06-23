@@ -814,7 +814,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.props.settings.composite['promptUserIdentity']
     ) {
       try {
-        let userOrEmailNotSet: boolean = false;
+        let userOrEmailNotSet = false;
         let author: Git.IIdentity;
         let authorOverride: string | null = null;
 
@@ -822,7 +822,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           const data: JSONObject = (await this.props.model.config()) as any;
           const options: JSONObject = data['options'] as JSONObject;
 
-          author = {name: options['user.name'] as string || '', email: options['user.email'] as string || ''};
+          author = {
+            name: (options['user.name'] as string) || '',
+            email: (options['user.email'] as string) || ''
+          };
           userOrEmailNotSet = !author.name || !author.email;
         } else {
           author = this.props.model.lastAuthor;
@@ -830,7 +833,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
         // If explicitly configured or the user name or e-mail is unknown, ask the user to set it
         if (
-          this.props.settings.composite['promptUserIdentity'] || userOrEmailNotSet
+          this.props.settings.composite['promptUserIdentity'] ||
+          userOrEmailNotSet
         ) {
           const result = await showDialog({
             title: this.props.trans.__('Who is committing?'),
