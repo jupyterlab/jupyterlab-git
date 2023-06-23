@@ -190,11 +190,12 @@ describe('GitPanel', () => {
       panel.setState({ commitSummary });
 
       await panel.commitFiles();
-      expect(configSpy).toHaveBeenCalledTimes(1);
+      expect(configSpy).toHaveBeenCalledTimes(2);
       expect(configSpy.mock.calls[0]).toHaveLength(0);
-      expect(commitSpy).toHaveBeenCalledTimes(1);
+      expect(configSpy.mock.calls[1]).toEqual([commitUser]);
 
       const author = `${commitUser['user.name']} <${commitUser['user.email']}>`;
+      expect(commitSpy).toHaveBeenCalledTimes(1);
       expect(commitSpy).toHaveBeenCalledWith(commitSummary, false, author);
     });
 
