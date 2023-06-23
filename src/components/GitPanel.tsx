@@ -817,7 +817,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         const data: JSONObject = (await this.props.model.config()) as any;
         const options: JSONObject = data['options'] as JSONObject;
         const keys = Object.keys(options);
-        let author: string = null;
+        let authorOverride: string = null;
 
         // If explicitly configured or the user name or e-mail is unknown, ask the user to set it
         if (
@@ -840,17 +840,23 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           }
 
           const { name, email } = result.value;
-          if (this.props.settings.composite['promptUserIdentity']) {
-            author = `${name} <${email}>`;
-          } else {
+          if (
+            keys.indexOf('user.name') < 0 ||
+            keys.indexOf('user.email') < 0
+          ) {
             await this.props.model.config({
               'user.name': name,
               'user.email': email
             });
           }
+
+          if (this.props.settings.composite['promptUserIdentity']) {
+            authorOverride = `${name} <${email}>`;
+          }
+
         }
         this._previousRepoPath = path;
-        return author;
+        return authorOverride;
       } catch (error) {
         if (error instanceof Git.GitResponseError) {
           throw error;
