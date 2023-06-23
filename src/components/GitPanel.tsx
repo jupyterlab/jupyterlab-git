@@ -807,8 +807,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    *
    * @param path - repository path
    */
-  private async _hasIdentity(path: string): Promise<string> {
+  private async _hasIdentity(path: string): Promise<string | null> {
     // If the repository path changes or explicitly configured, check the user identity
+    let authorOverride: string | null = null;
     if (
       path !== this._previousRepoPath ||
       this.props.settings.composite['promptUserIdentity']
@@ -817,7 +818,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         const data: JSONObject = (await this.props.model.config()) as any;
         const options: JSONObject = data['options'] as JSONObject;
         const keys = Object.keys(options);
-        let authorOverride: string = null;
 
         // If explicitly configured or the user name or e-mail is unknown, ask the user to set it
         if (
