@@ -102,7 +102,7 @@ async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
             call(
                 ["git", "rev-parse", "--show-prefix"],
                 cwd=str(local_path / "subfolder"),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -156,7 +156,7 @@ async def test_git_show_prefix_not_a_git_repo(mock_execute, jp_fetch, jp_root_di
             call(
                 ["git", "rev-parse", "--show-prefix"],
                 cwd=str(local_path / "subfolder"),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -193,7 +193,7 @@ async def test_git_show_top_level(mock_execute, jp_fetch, jp_root_dir):
             call(
                 ["git", "rev-parse", "--show-toplevel"],
                 cwd=str(local_path / "subfolder"),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -230,7 +230,7 @@ async def test_git_show_top_level_not_a_git_repo(mock_execute, jp_fetch, jp_root
             call(
                 ["git", "rev-parse", "--show-toplevel"],
                 cwd=str(local_path / "subfolder"),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -709,7 +709,7 @@ async def test_content(mock_execute, jp_fetch, jp_root_dir):
                     filename,
                 ],
                 cwd=str(local_path),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -718,7 +718,7 @@ async def test_content(mock_execute, jp_fetch, jp_root_dir):
             call(
                 ["git", "show", "{}:{}".format("previous", filename)],
                 cwd=str(local_path),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -832,7 +832,7 @@ async def test_content_index(mock_execute, jp_fetch, jp_root_dir):
                     filename,
                 ],
                 cwd=str(local_path),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -841,7 +841,7 @@ async def test_content_index(mock_execute, jp_fetch, jp_root_dir):
             call(
                 ["git", "show", "{}:{}".format("", filename)],
                 cwd=str(local_path),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -890,7 +890,7 @@ async def test_content_base(mock_execute, jp_fetch, jp_root_dir):
             call(
                 ["git", "ls-files", "-u", "-z", filename],
                 cwd=str(local_path),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -899,7 +899,7 @@ async def test_content_base(mock_execute, jp_fetch, jp_root_dir):
             call(
                 ["git", "show", "915bb14609daab65e5304e59d89c626283ae49fc"],
                 cwd=str(local_path),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -997,7 +997,7 @@ async def test_content_binary(mock_execute, jp_fetch, jp_root_dir):
                     filename,
                 ],
                 cwd=str(local_path),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -1006,7 +1006,7 @@ async def test_content_binary(mock_execute, jp_fetch, jp_root_dir):
             call(
                 ["git", "show", "{}:{}".format("current", filename)],
                 cwd=str(local_path),
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,

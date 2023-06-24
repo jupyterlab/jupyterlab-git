@@ -20,7 +20,7 @@ async def test_init():
         mock_execute.assert_called_once_with(
             ["git", "init"],
             cwd="test_curr_path",
-            timeout_s=20,
+            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -47,7 +47,7 @@ async def test_init_and_post_init():
         mock_execute.assert_called_with(
             ["echo", "hello"],
             cwd="test_curr_path",
-            timeout_s=20,
+            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -79,7 +79,7 @@ async def test_init_and_post_init_fail():
         mock_execute.assert_called_with(
             ["not_there", "arg"],
             cwd="test_curr_path",
-            timeout_s=20,
+            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -118,7 +118,7 @@ async def test_init_and_post_init_fail_to_run():
         mock_execute.assert_called_with(
             ["not_there", "arg"],
             cwd="test_curr_path",
-            timeout_s=20,
+            timeout=20,
             env=None,
             username=None,
             password=None,

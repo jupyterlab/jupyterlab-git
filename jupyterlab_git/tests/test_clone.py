@@ -27,7 +27,7 @@ async def test_git_clone_success():
             mock_execute.assert_called_once_with(
                 ["git", "clone", "ghjkhjkl"],
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout_s=20,
+                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                 username=None,
                 password=None,
@@ -59,7 +59,7 @@ async def test_git_download_success(tmp_path):
             mock_execute.assert_called_once_with(
                 ["git", "clone", "--depth=1", "ghjkhjkl"],  # to be update
                 cwd=str(tmp_path),  # to be udpated
-                timeout_s=20,
+                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                 username=None,
                 password=None,
@@ -91,7 +91,7 @@ async def test_git_submodules_success(tmp_path):
             mock_execute.assert_called_once_with(
                 ["git", "clone", "--recurse-submodules", "ghjkhjkl"],
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout_s=20,
+                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                 username=None,
                 password=None,
@@ -123,7 +123,7 @@ async def test_git_clone_failure_from_git():
             mock_execute.assert_called_once_with(
                 ["git", "clone", "ghjkhjkl"],
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout_s=20,
+                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                 username=None,
                 password=None,
@@ -153,7 +153,7 @@ async def test_git_clone_with_auth_success():
             mock_authentication.assert_called_once_with(
                 ["git", "clone", "ghjkhjkl", "-q"],
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout_s=20,
+                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
                 username="asdf",
                 password="qwerty",
@@ -186,7 +186,7 @@ async def test_git_clone_with_auth_wrong_repo_url_failure_from_git():
             mock_authentication.assert_called_once_with(
                 ["git", "clone", "ghjkhjkl", "-q"],
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout_s=20,
+                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
                 username="asdf",
                 password="qwerty",
@@ -226,7 +226,7 @@ async def test_git_clone_with_auth_auth_failure_from_git():
             mock_authentication.assert_called_once_with(
                 ["git", "clone", "ghjkhjkl", "-q"],
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout_s=20,
+                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
                 username="asdf",
                 password="qwerty",
@@ -274,7 +274,7 @@ async def test_git_clone_with_auth_and_cache_credentials():
                     call(
                         ["git", "config", "--list"],
                         cwd=test_path,
-                        timeout_s=20,
+                        timeout=20,
                         env=None,
                         username=None,
                         password=None,
@@ -289,7 +289,7 @@ async def test_git_clone_with_auth_and_cache_credentials():
                             credential_helper,
                         ],
                         cwd=test_path,
-                        timeout_s=20,
+                        timeout=20,
                         env=None,
                         username=None,
                         password=None,
@@ -298,7 +298,7 @@ async def test_git_clone_with_auth_and_cache_credentials():
                     call(
                         ["git", "clone", "ghjkhjkl", "-q"],
                         cwd=test_path,
-                        timeout_s=20,
+                        timeout=20,
                         env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
                         username="asdf",
                         password="qwerty",
@@ -333,7 +333,7 @@ async def test_git_clone_with_auth_and_cache_credentials_and_existing_credential
                 call(
                     ["git", "config", "--list"],
                     cwd=test_path,
-                    timeout_s=20,
+                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -342,7 +342,7 @@ async def test_git_clone_with_auth_and_cache_credentials_and_existing_credential
                 call(
                     ["git", "clone", "ghjkhjkl", "-q"],
                     cwd=test_path,
-                    timeout_s=20,
+                    timeout=20,
                     env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
                     username="asdf",
                     password="qwerty",

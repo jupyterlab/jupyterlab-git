@@ -21,7 +21,7 @@ async def test_git_tag_success():
         mock_execute.assert_called_once_with(
             ["git", "tag", "--list"],
             cwd="test_curr_path",
-            timeout_s=20,
+            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -46,7 +46,7 @@ async def test_git_tag_checkout_success():
             mock_execute.assert_called_once_with(
                 ["git", "checkout", "tags/{}".format(tag)],
                 cwd="test_curr_path",
-                timeout_s=20,
+                timeout=20,
                 env=None,
                 username=None,
                 password=None,

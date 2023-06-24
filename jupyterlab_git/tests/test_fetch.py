@@ -22,7 +22,7 @@ async def test_git_fetch_success():
         mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             cwd="test_path",
-            timeout_s=20,
+            timeout=20,
             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
             username=None,
             password=None,
@@ -44,7 +44,7 @@ async def test_git_fetch_fail():
         mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             cwd="test_path",
-            timeout_s=20,
+            timeout=20,
             env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
             username=None,
             password=None,
@@ -73,7 +73,7 @@ async def test_git_fetch_with_auth_success():
         mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             cwd="test_path",
-            timeout_s=20,
+            timeout=20,
             env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
             username="test_user",
             password="test_pass",
@@ -104,7 +104,7 @@ async def test_git_fetch_with_auth_fail():
         mock_execute.assert_called_once_with(
             ["git", "fetch", "--all", "--prune"],
             cwd="test_path",
-            timeout_s=20,
+            timeout=20,
             env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
             username="test_user",
             password="test_pass",
@@ -151,7 +151,7 @@ async def test_git_fetch_with_auth_and_cache_credentials():
                     call(
                         ["git", "config", "--list"],
                         cwd=test_path,
-                        timeout_s=20,
+                        timeout=20,
                         env=None,
                         username=None,
                         password=None,
@@ -166,7 +166,7 @@ async def test_git_fetch_with_auth_and_cache_credentials():
                             credential_helper,
                         ],
                         cwd=test_path,
-                        timeout_s=20,
+                        timeout=20,
                         env=None,
                         username=None,
                         password=None,
@@ -175,7 +175,7 @@ async def test_git_fetch_with_auth_and_cache_credentials():
                     call(
                         ["git", "fetch", "--all", "--prune"],
                         cwd=test_path,
-                        timeout_s=20,
+                        timeout=20,
                         env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
                         username="test_user",
                         password="test_pass",
@@ -214,7 +214,7 @@ async def test_git_fetch_with_auth_and_cache_credentials_and_existing_credential
                 call(
                     ["git", "config", "--list"],
                     cwd=test_path,
-                    timeout_s=20,
+                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -223,7 +223,7 @@ async def test_git_fetch_with_auth_and_cache_credentials_and_existing_credential
                 call(
                     ["git", "fetch", "--all", "--prune"],
                     cwd=test_path,
-                    timeout_s=20,
+                    timeout=20,
                     env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
                     username="test_user",
                     password="test_pass",

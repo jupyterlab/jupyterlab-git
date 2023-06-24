@@ -34,7 +34,7 @@ async def test_git_stash_without_message(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -74,7 +74,7 @@ async def test_git_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -107,7 +107,7 @@ async def test_git_stash_with_message(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -153,7 +153,7 @@ async def test_git_stash_show_with_index(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -191,7 +191,7 @@ async def test_git_stash_show_without_index(mock_execute, jp_fetch, jp_root_dir)
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -242,7 +242,7 @@ async def test_git_stash_show_failure(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -277,7 +277,7 @@ async def test_git_drop_stash_single_success(mock_execute, jp_fetch, jp_root_dir
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -316,7 +316,7 @@ async def test_git_drop_stash_single_failure(mock_execute, jp_fetch, jp_root_dir
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -347,7 +347,7 @@ async def test_git_drop_stash_all_success(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -383,7 +383,7 @@ async def test_git_apply_stash_with_index(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -413,7 +413,7 @@ async def test_git_apply_stash_without_index(mock_execute, jp_fetch, jp_root_dir
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -453,7 +453,7 @@ async def test_git_apply_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -484,7 +484,7 @@ async def test_git_pop_stash_with_index(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -516,7 +516,7 @@ async def test_git_pop_stash_without_index(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
@@ -556,7 +556,7 @@ async def test_git_pop_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout_s=20,
+        timeout=20,
         env=env,
         username=None,
         password=None,
