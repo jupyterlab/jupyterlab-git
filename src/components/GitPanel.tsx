@@ -178,7 +178,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
     this.state = {
       branches: branches,
-      currentBranch: currentBranch ? currentBranch.name : 'master',
+      currentBranch: currentBranch ? currentBranch.name : 'main',
       files: [],
       remoteChangedFiles: [],
       nCommitsAhead: 0,
@@ -265,7 +265,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     const { currentBranch } = this.props.model;
 
     this.setState({
-      currentBranch: currentBranch ? currentBranch.name : 'master',
+      currentBranch: currentBranch ? currentBranch.name : 'main',
       referenceCommit: null,
       challengerCommit: null
     });

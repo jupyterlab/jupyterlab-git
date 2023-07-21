@@ -48,7 +48,7 @@ test.describe('Git Stash Commands', () => {
     // Click drop stash on the first item
     const dropFirstStashBtn = await page
       .locator('span')
-      .filter({ hasText: 'notebook stash (on master)' })
+      .filter({ hasText: 'notebook stash (on main)' })
       .getByRole('button', { name: 'Drop stash entry' });
 
     await dropFirstStashBtn.click();
@@ -139,7 +139,7 @@ test.describe('Git Stash Commands', () => {
     await expect.soft(await numberOfStashes.innerText()).toBe('(3)');
     // check that our stash message showed up properly
     await expect
-      .soft(await page.getByText('some stash message (on master)'))
+      .soft(await page.getByText('some stash message (on main)'))
       .toBeTruthy();
     await page.waitForTimeout(100);
     // Check that the stash removed the old text disappears
@@ -164,12 +164,12 @@ test.describe('Git Stash Commands', () => {
     await page.getByText('Stash(2)').click();
     await page
       .locator('span')
-      .filter({ hasText: 'stashy stash (on master)' })
+      .filter({ hasText: 'stashy stash (on main)' })
       .hover();
 
     const applyStashBtn = await page
       .locator('span')
-      .filter({ hasText: 'stashy stash (on master)' })
+      .filter({ hasText: 'stashy stash (on main)' })
       .getByRole('button', { name: 'Apply stash entry' });
 
     await applyStashBtn.click();
@@ -221,12 +221,12 @@ test.describe('Git Stash Commands', () => {
 
     await page
       .locator('span')
-      .filter({ hasText: 'stashy stash (on master)' })
+      .filter({ hasText: 'stashy stash (on main)' })
       .hover();
 
     const popStashBtn = await page
       .locator('span')
-      .filter({ hasText: 'stashy stash (on master)' })
+      .filter({ hasText: 'stashy stash (on main)' })
       .getByRole('button', { name: 'Pop stash entry' });
 
     await popStashBtn.click();

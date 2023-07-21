@@ -23,7 +23,7 @@ const BRANCHES = [
   {
     is_current_branch: true,
     is_remote_branch: false,
-    name: 'master',
+    name: 'main',
     upstream: '',
     top_commit: '',
     tag: ''
@@ -194,7 +194,7 @@ describe('BranchMenu', () => {
       {
         is_current_branch: false,
         is_remote_branch: false,
-        name: 'master',
+        name: 'main',
         upstream: '',
         top_commit: '',
         tag: ''
@@ -202,7 +202,7 @@ describe('BranchMenu', () => {
       {
         is_current_branch: false,
         is_remote_branch: true,
-        name: 'master',
+        name: 'main',
         upstream: '',
         top_commit: '',
         tag: ''
@@ -251,7 +251,7 @@ describe('BranchMenu', () => {
       });
 
       const spy = jest.spyOn(GitExtension.prototype, 'deleteBranch');
-      const branchName = 'master';
+      const branchName = 'main';
 
       const menu = mount(
         <BranchMenu
@@ -285,7 +285,7 @@ describe('BranchMenu', () => {
     });
 
     it('should call merge branch when clicked on the merge button', async () => {
-      const branchName = 'master';
+      const branchName = 'main';
       const fakeExecutioner = jest.fn();
 
       const menu = mount(

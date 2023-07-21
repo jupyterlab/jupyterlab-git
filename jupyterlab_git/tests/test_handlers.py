@@ -238,8 +238,8 @@ async def test_branch_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
             {
                 "is_current_branch": False,
                 "is_remote_branch": False,
-                "name": "master",
-                "upstream": "origin/master",
+                "name": "main",
+                "upstream": "origin/main",
                 "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                 "tag": None,
             },
@@ -262,7 +262,7 @@ async def test_branch_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
             {
                 "is_current_branch": False,
                 "is_remote_branch": True,
-                "name": "origin/master",
+                "name": "origin/main",
                 "upstream": None,
                 "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                 "tag": None,

@@ -240,7 +240,7 @@ export class NewBranchDialog extends React.Component<
         itemKey={(index, data) => data[index].name}
         itemSize={index => {
           const branch = branches[index];
-          return [this.props.currentBranch, 'master', 'main'].includes(
+          return [this.props.currentBranch, 'main', 'main'].includes(
             branch.name
           )
             ? CURRENT_BRANCH_HEIGHT
@@ -268,9 +268,9 @@ export class NewBranchDialog extends React.Component<
       } else if (b.name === current) {
         return 1;
       }
-      if (a.name === 'master') {
+      if (a.name === 'main') {
         return -1;
-      } else if (b.name === 'master') {
+      } else if (b.name === 'main') {
         return 1;
       }
       if (a.name === 'main') {
@@ -302,7 +302,7 @@ export class NewBranchDialog extends React.Component<
       desc = this.props.trans.__(
         'The current branch. Pick this if you want to build on work done in this branch.'
       );
-    } else if (['master', 'main'].includes(branch.name)) {
+    } else if (['main', 'main'].includes(branch.name)) {
       isBold = true;
       desc = this.props.trans.__(
         'The default branch. Pick this if you want to start fresh from the default branch.'

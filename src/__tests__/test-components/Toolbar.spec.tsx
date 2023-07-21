@@ -29,20 +29,20 @@ describe('Toolbar', () => {
 
   function createProps(props?: Partial<IToolbarProps>): IToolbarProps {
     return {
-      currentBranch: 'master',
+      currentBranch: 'main',
       branches: [
         {
           is_current_branch: true,
           is_remote_branch: false,
-          name: 'master',
-          upstream: 'origin/master',
+          name: 'main',
+          upstream: 'origin/main',
           top_commit: '',
           tag: ''
         },
         {
           is_current_branch: false,
           is_remote_branch: true,
-          name: 'origin/master',
+          name: 'origin/main',
           upstream: '',
           top_commit: '',
           tag: ''
@@ -193,7 +193,7 @@ describe('Toolbar', () => {
     });
 
     it('should set the `title` attribute on the button to toggle a branch menu', () => {
-      const currentBranch = 'master';
+      const currentBranch = 'main';
       const toolbar = shallow<Toolbar>(
         <Toolbar {...createProps({ currentBranch })} />
       );
@@ -251,7 +251,7 @@ describe('Toolbar', () => {
               {
                 is_current_branch: true,
                 is_remote_branch: false,
-                name: 'master',
+                name: 'main',
                 upstream: '',
                 top_commit: '',
                 tag: ''
@@ -304,7 +304,7 @@ describe('Toolbar', () => {
               {
                 is_current_branch: true,
                 is_remote_branch: false,
-                name: 'master',
+                name: 'main',
                 upstream: '',
                 top_commit: '',
                 tag: ''

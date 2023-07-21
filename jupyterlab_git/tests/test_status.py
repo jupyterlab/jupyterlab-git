@@ -14,7 +14,7 @@ from .testutils import maybe_future
     [
         (
             (
-                "## master",
+                "## main",
                 "A  notebook with spaces.ipynb",
                 "M  notebook with λ.ipynb",
                 "M  binary file.gif",
@@ -29,7 +29,7 @@ from .testutils import maybe_future
             ),
             {
                 "code": 0,
-                "branch": "master",
+                "branch": "main",
                 "remote": None,
                 "ahead": 0,
                 "behind": 0,
@@ -74,11 +74,11 @@ from .testutils import maybe_future
         ),
         # Empty answer
         (
-            ("## master",),
+            ("## main",),
             (""),
             {
                 "code": 0,
-                "branch": "master",
+                "branch": "main",
                 "remote": None,
                 "ahead": 0,
                 "behind": 0,
@@ -87,12 +87,12 @@ from .testutils import maybe_future
         ),
         # With upstream only
         (
-            ("## master...origin/master",),
+            ("## main...origin/main",),
             (""),
             {
                 "code": 0,
-                "branch": "master",
-                "remote": "origin/master",
+                "branch": "main",
+                "remote": "origin/main",
                 "ahead": 0,
                 "behind": 0,
                 "files": [],
@@ -100,12 +100,12 @@ from .testutils import maybe_future
         ),
         # Ahead only
         (
-            ("## master...origin/master [ahead 15]",),
+            ("## main...origin/main [ahead 15]",),
             (""),
             {
                 "code": 0,
-                "branch": "master",
-                "remote": "origin/master",
+                "branch": "main",
+                "remote": "origin/main",
                 "ahead": 15,
                 "behind": 0,
                 "files": [],
@@ -113,12 +113,12 @@ from .testutils import maybe_future
         ),
         # Behind only
         (
-            ("## master...origin/master [behind 5]",),
+            ("## main...origin/main [behind 5]",),
             (""),
             {
                 "code": 0,
-                "branch": "master",
-                "remote": "origin/master",
+                "branch": "main",
+                "remote": "origin/main",
                 "ahead": 0,
                 "behind": 5,
                 "files": [],
@@ -126,12 +126,12 @@ from .testutils import maybe_future
         ),
         # Ahead and behind
         (
-            ("## master...origin/master [ahead 3, behind 5]",),
+            ("## main...origin/main [ahead 3, behind 5]",),
             (""),
             {
                 "code": 0,
-                "branch": "master",
-                "remote": "origin/master",
+                "branch": "main",
+                "remote": "origin/main",
                 "ahead": 3,
                 "behind": 5,
                 "files": [],
@@ -139,7 +139,7 @@ from .testutils import maybe_future
         ),
         # Initial commit
         (
-            ("## No commits yet on master",),
+            ("## No commits yet on main",),
             (""),
             {
                 "code": 0,

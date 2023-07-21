@@ -46,7 +46,7 @@ async def test_git_get_config_multiline(mock_execute, jp_fetch, jp_root_dir):
         '" $(git rev-parse --abbrev-ref HEAD);     printf "\n'
         "Most-active files, with churn count\n"
         '"; git churn | head -7;   }; f\n'
-        'alias.topic-base-branch-name=!f(){     printf "master\n'
+        'alias.topic-base-branch-name=!f(){     printf "main\n'
         '";   };f\n'
         'alias.topic-start=!f(){     topic_branch="$1";     git topic-create "$topic_branch";     git topic-push;   };f'
     )
@@ -89,7 +89,7 @@ async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch, jp_root
         '" $(git rev-parse --abbrev-ref HEAD);     printf "\n'
         "Most-active files, with churn count\n"
         '"; git churn | head -7;   }; f\n'
-        'alias.topic-base-branch-name=!f(){     printf "master\n'
+        'alias.topic-base-branch-name=!f(){     printf "main\n'
         '";   };f\n'
         'alias.topic-start=!f(){     topic_branch="$1";     git topic-create "$topic_branch";     git topic-push;   };f'
     )
@@ -116,7 +116,7 @@ async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch, jp_root
             '" $(git rev-parse --abbrev-ref HEAD);     printf "\n'
             "Most-active files, with churn count\n"
             '"; git churn | head -7;   }; f',
-            "alias.topic-base-branch-name": '!f(){     printf "master\n";   };f',
+            "alias.topic-base-branch-name": '!f(){     printf "main\n";   };f',
         },
     }
 
