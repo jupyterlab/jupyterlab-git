@@ -25,23 +25,23 @@ test.describe('Merge commit tests', () => {
   test('should correctly display num files changed, insertions, and deletions', async ({
     page
   }) => {
-    const mergeCommit = await page.getByText("Merge branch 'sort-names'");
+    const mergeCommit = page.getByText("Merge branch 'sort-names'");
 
     await mergeCommit.click();
 
-    const filesChanged = await mergeCommit.getByTitle('# Files Changed');
-    const insertions = await mergeCommit.getByTitle('# Insertions');
-    const deletions = await mergeCommit.getByTitle('# Deletions');
+    const filesChanged = mergeCommit.getByTitle('# Files Changed');
+    const insertions = mergeCommit.getByTitle('# Insertions');
+    const deletions = mergeCommit.getByTitle('# Deletions');
 
     await filesChanged.waitFor();
 
-    await expect(await filesChanged.innerText()).toBe('3');
-    await expect(await insertions.innerText()).toBe('18240');
-    await expect(await deletions.innerText()).toBe('18239');
+    expect(await filesChanged.innerText()).toBe('3');
+    expect(await insertions.innerText()).toBe('18240');
+    expect(await deletions.innerText()).toBe('18239');
   });
 
   test('should correctly display files changed', async ({ page }) => {
-    const mergeCommit = await page.getByText("Merge branch 'sort-names'");
+    const mergeCommit = page.getByText("Merge branch 'sort-names'");
 
     await mergeCommit.click();
 
@@ -57,7 +57,7 @@ test.describe('Merge commit tests', () => {
   });
 
   test('should diff file after clicking', async ({ page }) => {
-    const mergeCommit = await page.getByText("Merge branch 'sort-names'");
+    const mergeCommit = page.getByText("Merge branch 'sort-names'");
 
     await mergeCommit.click();
 
@@ -82,7 +82,7 @@ test.describe('Merge commit tests', () => {
     const dialog = await page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });
 
-    await expect(dialog).toBeTruthy();
+    expect(dialog).toBeTruthy();
 
     await dialog.getByRole('button', { name: 'Submit' }).click();
     await dialog.waitFor({ state: 'detached' });
