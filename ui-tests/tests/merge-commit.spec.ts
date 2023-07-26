@@ -72,7 +72,9 @@ test.describe('Merge commit tests', () => {
   });
 
   test('should revert merge commit', async ({ page }) => {
-    const mergeCommit = page.getByText("Merge branch 'sort-names'", { exact: true });
+    const mergeCommit = page.getByText("Merge branch 'sort-names'", {
+      exact: true
+    });
 
     await mergeCommit.click();
     await page
