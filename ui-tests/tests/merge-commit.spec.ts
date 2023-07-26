@@ -72,14 +72,14 @@ test.describe('Merge commit tests', () => {
   });
 
   test('should revert merge commit', async ({ page }) => {
-    const mergeCommit = await page.getByText("Merge branch 'sort-names'");
+    const mergeCommit = page.getByText("Merge branch 'sort-names'", { exact: true });
 
     await mergeCommit.click();
     await page
       .getByRole('button', { name: 'Revert changes introduced by this commit' })
       .click();
 
-    const dialog = await page.getByRole('dialog');
+    const dialog = page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });
 
     expect(dialog).toBeTruthy();
@@ -87,7 +87,7 @@ test.describe('Merge commit tests', () => {
     await dialog.getByRole('button', { name: 'Submit' }).click();
     await dialog.waitFor({ state: 'detached' });
 
-    const revertMergeCommit = await page
+    const revertMergeCommit = page
       .locator('#jp-git-sessions')
       .getByText("Revert 'Merge branch 'sort-names''");
 
