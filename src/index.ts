@@ -5,9 +5,9 @@ import {
 } from '@jupyterlab/application';
 import {
   Dialog,
+  ICommandPalette,
   showErrorMessage,
-  Toolbar,
-  ICommandPalette
+  Toolbar
 } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -17,11 +17,13 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { gitCloneCommandPlugin } from './cloneCommand';
 import {
   addCommands,
   addFileBrowserContextMenu,
   createGitMenu
 } from './commandsAndMenu';
+import { createImageDiff } from './components/diff/ImageDiff';
 import { createNotebookDiff } from './components/diff/NotebookDiff';
 import { addStatusBarWidget } from './components/StatusWidget';
 import { GitExtension } from './model';
@@ -30,14 +32,12 @@ import { gitIcon } from './style/icons';
 import { CommandIDs, Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
-import { gitCloneCommandPlugin } from './cloneCommand';
-import { createImageDiff } from './components/diff/ImageDiff';
 
 export { DiffModel } from './components/diff/model';
 export { NotebookDiff } from './components/diff/NotebookDiff';
 export { PlainTextDiff } from './components/diff/PlainTextDiff';
-export { Git, IGitExtension } from './tokens';
 export { logger, LoggerContext } from './logger';
+export { Git, IGitExtension } from './tokens';
 
 /**
  * The default running sessions extension.
@@ -45,16 +45,13 @@ export { logger, LoggerContext } from './logger';
 const plugin: JupyterFrontEndPlugin<IGitExtension> = {
   id: '@jupyterlab/git:plugin',
   requires: [
-    IMainMenu,
     ILayoutRestorer,
     IFileBrowserFactory,
     IRenderMimeRegistry,
     ISettingRegistry,
-    IDocumentManager,
-    IStatusBar,
-    ICommandPalette,
-    ITranslator
+    IDocumentManager
   ],
+  optional: [IMainMenu, IStatusBar, ICommandPalette, ITranslator],
   provides: IGitExtension,
   activate,
   autoStart: true
@@ -70,15 +67,15 @@ export default [plugin, gitCloneCommandPlugin];
  */
 async function activate(
   app: JupyterFrontEnd,
-  mainMenu: IMainMenu,
   restorer: ILayoutRestorer,
   factory: IFileBrowserFactory,
   renderMime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   docmanager: IDocumentManager,
-  statusBar: IStatusBar,
-  palette: ICommandPalette,
-  translator?: ITranslator
+  mainMenu: IMainMenu | null,
+  statusBar: IStatusBar | null,
+  palette: ICommandPalette | null,
+  translator: ITranslator | null
 ): Promise<IGitExtension> {
   let gitExtension: GitExtension | null = null;
   let settings: ISettingRegistry.ISettings;
@@ -89,7 +86,7 @@ async function activate(
   // And it is unlikely that another browser than the default will be used.
   // Ref: https://github.com/jupyterlab/jupyterlab-git/issues/1014
   const fileBrowser = factory.defaultBrowser;
-  translator = translator || nullTranslator;
+  translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab_git');
 
   // Attempt to load application settings
@@ -145,7 +142,6 @@ async function activate(
     );
     return null;
   }
-
   // Create the Git model
   gitExtension = new GitExtension(docmanager, app.docRegistry, settings);
 
@@ -194,22 +190,23 @@ async function activate(
     gitPlugin.title.icon = gitIcon;
     gitPlugin.title.caption = 'Git';
 
-    // Add the commands to the command palette
-    const category = 'Git Operations';
-    [
-      CommandIDs.gitToggleSimpleStaging,
-      CommandIDs.gitToggleDoubleClickDiff,
-      CommandIDs.gitOpenGitignore,
-      CommandIDs.gitShowDiff,
-      CommandIDs.gitInit,
-      CommandIDs.gitClone,
-      CommandIDs.gitMerge,
-      CommandIDs.gitPush,
-      CommandIDs.gitPull,
-      CommandIDs.gitResetToRemote,
-      CommandIDs.gitManageRemote,
-      CommandIDs.gitTerminalCommand
-    ].forEach(command => palette.addItem({ command, category }));
+    if (palette) {
+      // Add the commands to the command palette
+      const category = 'Git Operations';
+      [
+        CommandIDs.gitToggleSimpleStaging,
+        CommandIDs.gitToggleDoubleClickDiff,
+        CommandIDs.gitOpenGitignore,
+        CommandIDs.gitShowDiff,
+        CommandIDs.gitInit,
+        CommandIDs.gitMerge,
+        CommandIDs.gitPush,
+        CommandIDs.gitPull,
+        CommandIDs.gitResetToRemote,
+        CommandIDs.gitManageRemote,
+        CommandIDs.gitTerminalCommand
+      ].forEach(command => palette.addItem({ command, category }));
+    }
 
     // Let the application restorer track the running panel for restoration of
     // application state (e.g. setting the running panel as the current side bar
@@ -221,7 +218,7 @@ async function activate(
     app.shell.add(gitPlugin, 'left', { rank: 200 });
 
     // Add a menu for the plugin
-    if (app.version.split('.').slice(0, 2).join('.') < '3.1') {
+    if (mainMenu && app.version.split('.').slice(0, 2).join('.') < '3.1') {
       // Support JLab 3.0
       mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });
     }
@@ -230,7 +227,9 @@ async function activate(
     addCloneButton(gitExtension, fileBrowser, app.commands, trans);
 
     // Add the status bar widget
-    addStatusBarWidget(statusBar, gitExtension, settings, trans);
+    if (statusBar) {
+      addStatusBarWidget(statusBar, gitExtension, settings, trans);
+    }
 
     // Add the context menu items for the default file browser
     addFileBrowserContextMenu(
