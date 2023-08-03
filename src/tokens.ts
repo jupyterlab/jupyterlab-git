@@ -755,12 +755,38 @@ export namespace Git {
 
     export enum SpecialRef {
       // Working version
-      'WORKING',
+      WORKING,
       // Index version
-      'INDEX',
+      INDEX,
       // Common ancestor version (useful for unmerged files)
-      'BASE'
+      BASE
     }
+  }
+
+  /**
+   * Git repository state
+   */
+  export enum State {
+    /**
+     * Default state
+     */
+    DEFAULT = 0,
+    /**
+     * Detached head state
+     */
+    DETACHED,
+    /**
+     * Merge in progress
+     */
+    MERGING,
+    /**
+     * Rebase in progress
+     */
+    REBASING,
+    /**
+     * Cherry-pick in progress
+     */
+    CHERRY_PICKING
   }
 
   /**
@@ -870,7 +896,7 @@ export namespace Git {
     upstream: string | null;
     top_commit: string;
     tag: string | null;
-    detached?: boolean;
+
   }
 
   /** Interface for GitBranch request result,
@@ -928,6 +954,10 @@ export namespace Git {
      */
     behind: number;
     /**
+     * Git repository state
+     */
+    state: Git.State;
+    /**
      * Files status
      */
     files: IStatusFile[];
@@ -962,6 +992,7 @@ export namespace Git {
     remote?: string | null;
     ahead?: number;
     behind?: number;
+    state?: number;
     files?: IStatusFileResult[];
   }
 

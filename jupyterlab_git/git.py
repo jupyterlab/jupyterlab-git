@@ -10,7 +10,8 @@ import shlex
 import shutil
 import subprocess
 import traceback
-from typing import Dict, List, Optional
+from enum import IntEnum
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import unquote
 
 import nbformat
@@ -42,6 +43,19 @@ GIT_BRANCH_STATUS = re.compile(
 GIT_CREDENTIAL_HELPER_CACHE = re.compile(r"cache\b")
 
 execution_lock = tornado.locks.Lock()
+
+
+class State(IntEnum):
+    # Default state
+    DEFAULT = 0,
+    # Detached head state
+    DETACHED = 1,
+    # Merge in progress
+    MERGING = 2,
+    # Rebase in progress
+    REBASING = 3,
+    # Cherry-pick in progress
+    CHERRY_PICKING = 4
 
 
 async def execute(
@@ -527,6 +541,25 @@ class Git:
             data["files"] = result
         except StopIteration:  # Raised if line_iterable is empty
             pass
+
+        # Test for repository state
+        states = {
+            State.CHERRY_PICKING: 'CHERRY_PICK_HEAD',
+            State.MERGING: 'MERGE_HEAD',
+            State.REBASING: 'REBASE_HEAD',
+        }
+        
+        state = State.DEFAULT
+        for state_, head in states.items():
+            code, _, _ = await execute(["git", "show", "--quiet", head], cwd=path)
+            if code == 0:
+                state = state_
+                break
+
+        if state == State.DEFAULT and data["branch"] == "(detached)":
+            state = State.DETACHED
+        
+        data["state"] = state
 
         return data
 

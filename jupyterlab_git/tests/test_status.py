@@ -33,6 +33,7 @@ from .testutils import maybe_future
                 "remote": None,
                 "ahead": 0,
                 "behind": 0,
+                "state": "DEFAULT",
                 "files": [
                     {
                         "x": "A",
@@ -82,6 +83,7 @@ from .testutils import maybe_future
                 "remote": None,
                 "ahead": 0,
                 "behind": 0,
+                "state": "DEFAULT",
                 "files": [],
             },
         ),
@@ -95,6 +97,7 @@ from .testutils import maybe_future
                 "remote": "origin/main",
                 "ahead": 0,
                 "behind": 0,
+                "state": "DEFAULT",
                 "files": [],
             },
         ),
@@ -108,6 +111,7 @@ from .testutils import maybe_future
                 "remote": "origin/main",
                 "ahead": 15,
                 "behind": 0,
+                "state": "DEFAULT",
                 "files": [],
             },
         ),
@@ -121,6 +125,7 @@ from .testutils import maybe_future
                 "remote": "origin/main",
                 "ahead": 0,
                 "behind": 5,
+                "state": "DEFAULT",
                 "files": [],
             },
         ),
@@ -134,6 +139,7 @@ from .testutils import maybe_future
                 "remote": "origin/main",
                 "ahead": 3,
                 "behind": 5,
+                "state": "DEFAULT",
                 "files": [],
             },
         ),
@@ -147,6 +153,7 @@ from .testutils import maybe_future
                 "remote": None,
                 "ahead": 0,
                 "behind": 0,
+                "state": "DEFAULT",
                 "files": [],
             },
         ),
@@ -160,7 +167,182 @@ from .testutils import maybe_future
                 "remote": None,
                 "ahead": 0,
                 "behind": 0,
+                "state": "DETACHED",
                 "files": [],
+            },
+        ),
+        # Cherry pick
+        (
+            (
+                "## master",
+                "UD another_file.txt",
+                "A  branch_file.py",
+                "UU example.ipynb",
+                "UU file.txt",
+            ),
+            (
+                "1\t0\t.gitignore",
+                "0\t0\tanother_file.txt",
+                "21\t0\tbranch_file.py",
+                "0\t0\texample.ipynb",
+                "0\t0\tfile.txt",
+                "-\t-\tgit_workflow.jpg",
+                "-\t-\tjupyter.png",
+                "16\t0\tmaster_file.ts",
+            ),
+            {
+                "code": 0,
+                "branch": "master",
+                "remote": None,
+                "ahead": 0,
+                "behind": 0,
+                "files": [
+                    {
+                        "x": "U",
+                        "y": "D",
+                        "to": "another_file.txt",
+                        "from": "another_file.txt",
+                        "is_binary": False,
+                    },
+                    {
+                        "x": "A",
+                        "y": " ",
+                        "to": "branch_file.py",
+                        "from": "branch_file.py",
+                        "is_binary": False,
+                    },
+                    {
+                        "x": "U",
+                        "y": "U",
+                        "to": "example.ipynb",
+                        "from": "example.ipynb",
+                        "is_binary": False,
+                    },
+                    {
+                        "x": "U",
+                        "y": "U",
+                        "to": "file.txt",
+                        "from": "file.txt",
+                        "is_binary": False,
+                    },
+                ],
+                "state": "CHERRY_PICKING",
+            },
+        ),
+        # Rebasing
+        (
+            (
+                "## master",
+                "UD another_file.txt",
+                "A  branch_file.py",
+                "UU example.ipynb",
+                "UU file.txt",
+            ),
+            (
+                "1\t0\t.gitignore",
+                "0\t0\tanother_file.txt",
+                "21\t0\tbranch_file.py",
+                "0\t0\texample.ipynb",
+                "0\t0\tfile.txt",
+                "-\t-\tgit_workflow.jpg",
+                "-\t-\tjupyter.png",
+                "16\t0\tmaster_file.ts",
+            ),
+            {
+                "code": 0,
+                "branch": "master",
+                "remote": None,
+                "ahead": 0,
+                "behind": 0,
+                "files": [
+                    {
+                        "x": "U",
+                        "y": "D",
+                        "to": "another_file.txt",
+                        "from": "another_file.txt",
+                        "is_binary": False,
+                    },
+                    {
+                        "x": "A",
+                        "y": " ",
+                        "to": "branch_file.py",
+                        "from": "branch_file.py",
+                        "is_binary": False,
+                    },
+                    {
+                        "x": "U",
+                        "y": "U",
+                        "to": "example.ipynb",
+                        "from": "example.ipynb",
+                        "is_binary": False,
+                    },
+                    {
+                        "x": "U",
+                        "y": "U",
+                        "to": "file.txt",
+                        "from": "file.txt",
+                        "is_binary": False,
+                    },
+                ],
+                "state": "REBASING",
+            },
+        ),
+        # Merging
+        (
+            (
+                "## master",
+                "UD another_file.txt",
+                "A  branch_file.py",
+                "UU example.ipynb",
+                "UU file.txt",
+            ),
+            (
+                "1\t0\t.gitignore",
+                "0\t0\tanother_file.txt",
+                "21\t0\tbranch_file.py",
+                "0\t0\texample.ipynb",
+                "0\t0\tfile.txt",
+                "-\t-\tgit_workflow.jpg",
+                "-\t-\tjupyter.png",
+                "16\t0\tmaster_file.ts",
+            ),
+            {
+                "code": 0,
+                "branch": "master",
+                "remote": None,
+                "ahead": 0,
+                "behind": 0,
+                "files": [
+                    {
+                        "x": "U",
+                        "y": "D",
+                        "to": "another_file.txt",
+                        "from": "another_file.txt",
+                        "is_binary": False,
+                    },
+                    {
+                        "x": "A",
+                        "y": " ",
+                        "to": "branch_file.py",
+                        "from": "branch_file.py",
+                        "is_binary": False,
+                    },
+                    {
+                        "x": "U",
+                        "y": "U",
+                        "to": "example.ipynb",
+                        "from": "example.ipynb",
+                        "is_binary": False,
+                    },
+                    {
+                        "x": "U",
+                        "y": "U",
+                        "to": "file.txt",
+                        "from": "file.txt",
+                        "is_binary": False,
+                    },
+                ],
+                "state": "MERGING",
             },
         ),
     ],
@@ -172,40 +354,77 @@ async def test_status(output, diff_output, expected):
         mock_execute.side_effect = [
             maybe_future((0, "\x00".join(output) + "\x00", "")),
             maybe_future((0, "\x00".join(diff_output) + "\x00", "")),
+            maybe_future(
+                (0 if expected["state"] == "CHERRY_PICKING" else 128, "", "cherry pick")
+            ),
+            maybe_future((0 if expected["state"] == "MERGING" else 128, "", "merge")),
+            maybe_future((0 if expected["state"] == "REBASING" else 128, "", "rebase")),
         ]
 
         # When
         actual_response = await Git().status(path=repository)
 
         # Then
-        mock_execute.assert_has_calls(
-            [
-                call(
-                    ["git", "status", "--porcelain", "-b", "-u", "-z"],
-                    cwd=repository,
-                    timeout=20,
-                    env=None,
-                    username=None,
-                    password=None,
-                    is_binary=False,
-                ),
-                call(
-                    [
-                        "git",
-                        "diff",
-                        "--numstat",
-                        "-z",
-                        "--cached",
-                        "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
-                    ],
-                    cwd=repository,
-                    timeout=20,
-                    env=None,
-                    username=None,
-                    password=None,
-                    is_binary=False,
-                ),
-            ]
-        )
+        expected_calls = [
+            call(
+                ["git", "status", "--porcelain", "-b", "-u", "-z"],
+                cwd=repository,
+                timeout=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
+            ),
+            call(
+                [
+                    "git",
+                    "diff",
+                    "--numstat",
+                    "-z",
+                    "--cached",
+                    "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+                ],
+                cwd=repository,
+                timeout=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
+            ),
+            call(
+                ["git", "show", "--quiet", "CHERRY_PICK_HEAD"],
+                cwd=repository,
+                timeout=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
+            ),
+            call(
+                ["git", "show", "--quiet", "MERGE_HEAD"],
+                cwd=repository,
+                timeout=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
+            ),
+            call(
+                ["git", "show", "--quiet", "REBASE_HEAD"],
+                cwd=repository,
+                timeout=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
+            ),
+        ]
+
+        if expected["state"] == "CHERRY_PICKING":
+            expected_calls = expected_calls[:-2]
+        elif expected["state"] == "MERGING":
+            expected_calls = expected_calls[:-1]
+
+        mock_execute.assert_has_calls(expected_calls)
 
         assert expected == actual_response

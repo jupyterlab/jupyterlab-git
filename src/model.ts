@@ -1062,14 +1062,6 @@ export class GitExtension implements IGitExtension {
 
       this._branches = data.branches ?? [];
 
-      const detachedHeadRegex = /\(HEAD detached at (.+)\)/;
-      const result = data.current_branch.name.match(detachedHeadRegex);
-
-      if (result && result.length > 1) {
-        data.current_branch.name = result[1];
-        data.current_branch.detached = true;
-      }
-
       this._currentBranch = data.current_branch;
       if (this._currentBranch) {
         // Set up the marker obj for the current (valid) repo/branch combination
@@ -1149,6 +1141,7 @@ export class GitExtension implements IGitExtension {
         remote: data.remote || null,
         ahead: data.ahead || 0,
         behind: data.behind || 0,
+        state: data.state ?? 0,
         files
       });
       await this.refreshDirtyStatus();
@@ -1868,6 +1861,7 @@ export class GitExtension implements IGitExtension {
       remote: null,
       ahead: 0,
       behind: 0,
+      state: Git.State.DEFAULT,
       files: []
     };
   }
@@ -1912,6 +1906,7 @@ export class GitExtension implements IGitExtension {
       this._status.ahead === v.ahead &&
       this._status.behind === v.behind &&
       this._status.branch === v.branch &&
+      this._status.state === v.state &&
       this._status.files.length === v.files.length;
     if (areEqual) {
       for (const file of v.files) {

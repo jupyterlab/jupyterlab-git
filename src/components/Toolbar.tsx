@@ -260,12 +260,25 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderBranchMenu(): React.ReactElement | null {
-    let branchTitle = this.props.trans.__('Current Branch');
+    let branchTitle = '';
     if (this.props.model.pathRepository === null) {
       return null;
     }
-    if (this.props.model.currentBranch?.detached) {
-      branchTitle = this.props.trans.__('Detached Head at');
+    switch(this.props.model.status.state) {
+      case Git.State.CHERRY_PICKING:
+        branchTitle = this.props.trans.__('Cherry picking in')
+        break;
+      case Git.State.DETACHED:
+        branchTitle = this.props.trans.__('Detached Head at');
+        break;
+      case Git.State.MERGING:
+        branchTitle = this.props.trans.__('Merging in');
+        break;
+      case Git.State.REBASING:
+        branchTitle = this.props.trans.__('Rebasing');
+        break;
+      default:
+        branchTitle = this.props.trans.__('Current Branch');
     }
 
     return (
