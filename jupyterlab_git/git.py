@@ -39,6 +39,10 @@ GIT_VERSION_REGEX = re.compile(r"^git\sversion\s(?P<version>\d+(.\d+)*)")
 GIT_BRANCH_STATUS = re.compile(
     r"^## (?P<branch>([\w\-/]+|HEAD \(no branch\)|No commits yet on \w+))(\.\.\.(?P<remote>[\w\-/]+)( \[(ahead (?P<ahead>\d+))?(, )?(behind (?P<behind>\d+))?\])?)?$"
 )
+# Parse Git branch rebase name
+GIT_REBASING_BRANCH = re.compile(
+    r"^\(no branch, rebasing (?P<branch>.+?)\)$"
+)
 # Git cache as a credential helper
 GIT_CREDENTIAL_HELPER_CACHE = re.compile(r"cache\b")
 
@@ -753,6 +757,14 @@ class Git:
             # error; bail
             return remotes
 
+        # Extract branch name in case of renaming
+        rebasing = GIT_REBASING_BRANCH.match(heads["current_branch"]["name"])
+        if rebasing is not None:
+            try:
+                heads["current_branch"]["name"] = rebasing.groupdict()["branch"]
+            except KeyError:
+                pass
+
         # all's good; concatenate results and return
         return {
             "code": 0,
@@ -1095,7 +1107,7 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
-    async def merge(self, branch, path):
+    async def merge(self, branch: str, path: str) -> dict:
         """
         Execute git merge command & return the result.
         """
@@ -1837,6 +1849,21 @@ class Git:
 
         elif self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.poll():
             self.ensure_git_credential_cache_daemon(socket, debug, True, cwd, env)
+
+    async def rebase(self, branch: str, path: str) -> dict:
+        """
+        Execute git rebase command & return the result.
+
+        Args:
+            branch: Branch to rebase onto
+            path: Git repository path
+        """
+        cmd = ["git", "rebase", branch]
+        code, output, error = await execute(cmd, cwd=path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code, "message": output.strip()}
 
     async def stash(self, path: str, stashMsg: str = "") -> dict:
         """

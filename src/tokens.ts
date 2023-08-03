@@ -477,6 +477,18 @@ export interface IGitExtension extends IDisposable {
   ): Promise<Git.IResultWithMessage>;
 
   /**
+   * Rebase the current branch onto the provided one.
+   *
+   * @param branch to rebase onto
+   * @returns promise which resolves upon rebase action
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  rebase(branch: string): Promise<Git.IResultWithMessage>;
+
+  /**
    * General Git refresh
    */
   refresh(): Promise<void>;
@@ -1332,6 +1344,7 @@ export enum CommandIDs {
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
   gitPull = 'git:pull',
+  gitRebase = 'git:rebase',
   gitResetToRemote = 'git:reset-to-remote',
   gitSubmitCommand = 'git:submit-commit',
   gitShowDiff = 'git:show-diff',

@@ -34,9 +34,14 @@ const ITEM_HEIGHT = 27.5; // HTML element height for a single branch
 const HEIGHT = 200; // HTML element height for the branches list
 
 /**
- * MergeBranchDialog component properties
+ * BranchPicker component properties
  */
-export interface IMergeBranchDialogProps {
+export interface IBranchPickerProps {
+  /**
+   * Action for which to pick a branch
+   */
+  action?: 'merge' | 'rebase'
+
   /**
    * Current branch name.
    */
@@ -59,12 +64,12 @@ export interface IMergeBranchDialogProps {
 }
 
 /**
- * MergeBranchDialog React component
+ * BranchPicker React component
  *
  * @param props Component properties
  * @returns React element
  */
-export function MergeBranchDialog(props: IMergeBranchDialogProps): JSX.Element {
+export function BranchPicker(props: IBranchPickerProps): JSX.Element {
   const [filter, setFilter] = React.useState<string>('');
   const [selectedBranch, setSelectedBranch] = React.useState<string | null>(
     null
@@ -74,7 +79,8 @@ export function MergeBranchDialog(props: IMergeBranchDialogProps): JSX.Element {
     branch => !filter || branch.name.includes(filter)
   );
 
-  const { trans } = props;
+  const { action, trans } = props;
+  const act = action ?? 'merge';
 
   function renderItem(props: ListChildComponentProps): JSX.Element {
     const { data, index, style } = props;
@@ -84,7 +90,7 @@ export function MergeBranchDialog(props: IMergeBranchDialogProps): JSX.Element {
     return (
       <ListItem
         button
-        title={trans.__('Create a new branch based on: %1', branch.name)}
+        title={act === 'merge' ? trans.__('Merge branch %1', branch.name) : trans.__('Rebase branch %1', branch.name)}
         className={classes(
           listItemClass,
           isSelected ? activeListItemClass : null
@@ -111,7 +117,7 @@ export function MergeBranchDialog(props: IMergeBranchDialogProps): JSX.Element {
       onClose={props.onClose}
     >
       <div className={titleWrapperClass}>
-        <p className={titleClass}>{trans.__('Merge Branch')}</p>
+        <p className={titleClass}>{act === 'merge' ? trans.__('Merge Branch') : trans.__('Rebase Branch')}</p>
         <button className={closeButtonClass}>
           <ClearIcon
             titleAccess={trans.__('Close this dialog')}
@@ -124,7 +130,7 @@ export function MergeBranchDialog(props: IMergeBranchDialogProps): JSX.Element {
       </div>
       <div className={contentWrapperClass}>
         <p>
-          {trans.__('Select the branch to merge in %1', props.currentBranch)}
+          {act === 'merge' ? trans.__('Select the branch to merge in %1', props.currentBranch) : trans.__('Select the branch to rebase %1 onto', props.currentBranch)}
         </p>
         <div className={filterWrapperClass}>
           <div className={filterClass}>
@@ -169,7 +175,7 @@ export function MergeBranchDialog(props: IMergeBranchDialogProps): JSX.Element {
         <input
           className={classes(buttonClass, cancelButtonClass)}
           type="button"
-          title={trans.__('Close this dialog without merging a branch')}
+          title={act === 'merge' ? trans.__('Close this dialog without merging a branch') : trans.__('Close this dialog without rebasing the branch')}
           value={trans.__('Cancel')}
           onClick={() => {
             props.onClose();
@@ -178,8 +184,8 @@ export function MergeBranchDialog(props: IMergeBranchDialogProps): JSX.Element {
         <input
           className={classes(buttonClass, createButtonClass)}
           type="button"
-          title={trans.__('Merge branch')}
-          value={trans.__('Merge')}
+          title={act === 'merge' ? trans.__('Merge branch') : trans.__('Rebase branch')}
+          value={act === 'merge' ? trans.__('Merge') : trans.__('Rebase')}
           onClick={() => {
             props.onClose(selectedBranch);
           }}

@@ -200,6 +200,7 @@ async function activate(
         CommandIDs.gitShowDiff,
         CommandIDs.gitInit,
         CommandIDs.gitMerge,
+        CommandIDs.gitRebase,
         CommandIDs.gitPush,
         CommandIDs.gitPull,
         CommandIDs.gitResetToRemote,

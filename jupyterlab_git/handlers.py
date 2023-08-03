@@ -892,6 +892,25 @@ class GitTagCheckoutHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+class GitRebaseHandler(GitHandler):
+    """
+    Handler for git rebase '<rebase_onto>'.
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """
+        POST request handler, rebase the current branch
+        """
+        data = self.get_json_body()
+        branch = data["branch"]
+        body = await self.git.rebase(branch, self.url2localpath(path))
+
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
+
+
 class GitStashHandler(GitHandler):
     """
     Handler for 'git stash'. Stores the changes in the current branch
@@ -1037,6 +1056,7 @@ def setup_handlers(web_app):
         ("/tags", GitTagHandler),
         ("/tag_checkout", GitTagCheckoutHandler),
         ("/add", GitAddHandler),
+        ("/rebase", GitRebaseHandler),
         ("/stash", GitStashHandler),
         ("/stash_pop", GitStashPopHandler),
         ("/stash_apply", GitStashApplyHandler),

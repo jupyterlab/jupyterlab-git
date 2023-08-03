@@ -1021,6 +1021,32 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Rebase the current branch onto the provided one.
+   *
+   * @param branch to rebase onto
+   * @returns promise which resolves upon rebase action
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async rebase(branch: string): Promise<Git.IResultWithMessage>{
+    const path = await this._getPathRepository();
+    return this._taskHandler.execute<Git.IResultWithMessage>(
+      'git:rebase',
+      () => {
+        return requestAPI<Git.IResultWithMessage>(
+          URLExt.join(path, 'rebase'),
+          'POST',
+          {
+            branch
+          }
+        );
+      }
+    );
+  }
+
+  /**
    * Refresh the repository.
    *
    * @returns promise which resolves upon refreshing the repository
