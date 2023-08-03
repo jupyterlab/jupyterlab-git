@@ -1,8 +1,7 @@
 {
   "extends": [
     "stylelint-config-recommended",
-    "stylelint-config-standard",
-    "stylelint-prettier/recommended"
+    "stylelint-config-standard"
   ],
   "rules": {
     "property-no-vendor-prefix": null,
