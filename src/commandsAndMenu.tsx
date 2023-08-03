@@ -951,22 +951,27 @@ export function addCommands(
         const repositoryPath = gitModel.pathRepository;
         const filename = filePath;
         const fullPath = PathExt.join(repositoryPath, filename);
-        const specialRef =
-          status === 'staged'
-            ? Git.Diff.SpecialRef.INDEX
-            : Git.Diff.SpecialRef.WORKING;
 
-        const diffContext: Git.Diff.IContext =
-          status === 'unmerged'
-            ? {
-                currentRef: 'MERGE_HEAD',
-                previousRef: 'HEAD',
-                baseRef: Git.Diff.SpecialRef.BASE
-              }
-            : context ?? {
-                currentRef: specialRef,
-                previousRef: 'HEAD'
-              };
+        const diffContext: Git.Diff.IContext = {
+          currentRef: '',
+          previousRef: 'HEAD',
+          ...context
+        };
+
+        if (status === 'unmerged') {
+          diffContext.baseRef = Git.Diff.SpecialRef.BASE;
+          diffContext.currentRef =
+            gitModel.status.state !== Git.State.MERGING
+              ? gitModel.status.state === Git.State.REBASING
+                ? 'REBASE_HEAD'
+                : 'CHERRY_PICK_HEAD'
+              : 'MERGE_HEAD';
+        } else if (!diffContext.currentRef) {
+          diffContext.currentRef =
+            status === 'staged'
+              ? Git.Diff.SpecialRef.INDEX
+              : Git.Diff.SpecialRef.WORKING;
+        }
 
         const challengerRef = Git.Diff.SpecialRef[diffContext.currentRef as any]
           ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
