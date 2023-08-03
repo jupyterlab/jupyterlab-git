@@ -31,7 +31,15 @@ async def test_git_stash_without_message(mock_execute, jp_fetch, jp_root_dir):
     # Then
     command = ["git", "stash"]
     # Checks that the mock function was called with the correct arguments
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 201
     # json.loads turns a string into a dictionary
@@ -63,7 +71,15 @@ async def test_git_stash_failure(mock_execute, jp_fetch, jp_root_dir):
 
     # Then
     command = ["git", "stash"]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
 
 @patch("jupyterlab_git.git.execute")
@@ -88,7 +104,15 @@ async def test_git_stash_with_message(mock_execute, jp_fetch, jp_root_dir):
 
     # Then
     command = ["git", "stash", "save", "-m", stash_message]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 201
     payload = json.loads(response.body)
@@ -126,7 +150,15 @@ async def test_git_stash_show_with_index(mock_execute, jp_fetch, jp_root_dir):
         f"stash@{{{stash_index!s}}}",
         "--name-only",
     ]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 200
     payload = json.loads(response.body)
@@ -156,7 +188,15 @@ async def test_git_stash_show_without_index(mock_execute, jp_fetch, jp_root_dir)
 
     # Then
     command = ["git", "stash", "list"]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 200
     payload = json.loads(response.body)
@@ -199,7 +239,15 @@ async def test_git_stash_show_failure(mock_execute, jp_fetch, jp_root_dir):
         "--name-only",
     ]
 
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
 
 # Git Stash - DELETE
@@ -226,7 +274,15 @@ async def test_git_drop_stash_single_success(mock_execute, jp_fetch, jp_root_dir
 
     # Then
     command = ["git", "stash", "drop", str(stash_index)]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 204
 
@@ -257,7 +313,15 @@ async def test_git_drop_stash_single_failure(mock_execute, jp_fetch, jp_root_dir
     assert_http_error(e, 500)
 
     command = ["git", "stash", "drop", str(stash_index)]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
 
 @patch("jupyterlab_git.git.execute")
@@ -280,7 +344,15 @@ async def test_git_drop_stash_all_success(mock_execute, jp_fetch, jp_root_dir):
 
     # Then
     command = ["git", "stash", "clear"]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 204
 
@@ -308,7 +380,15 @@ async def test_git_apply_stash_with_index(mock_execute, jp_fetch, jp_root_dir):
 
     # Then
     command = ["git", "stash", "apply", "stash@{" + str(stash_index) + "}"]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 201
 
@@ -330,7 +410,15 @@ async def test_git_apply_stash_without_index(mock_execute, jp_fetch, jp_root_dir
 
     # Then
     command = ["git", "stash", "apply"]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 201
 
@@ -362,7 +450,15 @@ async def test_git_apply_stash_failure(mock_execute, jp_fetch, jp_root_dir):
 
     command = ["git", "stash", "apply", "stash@{" + str(stash_index) + "}"]
 
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
 
 # Git Stash Pop
@@ -385,7 +481,15 @@ async def test_git_pop_stash_with_index(mock_execute, jp_fetch, jp_root_dir):
     )
     # Then
     command = ["git", "stash", "pop", str(stash_index)]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 204
 
@@ -409,7 +513,15 @@ async def test_git_pop_stash_without_index(mock_execute, jp_fetch, jp_root_dir):
     )
     # Then
     command = ["git", "stash", "pop"]
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 204
 
@@ -441,4 +553,12 @@ async def test_git_pop_stash_failure(mock_execute, jp_fetch, jp_root_dir):
 
     command = ["git", "stash", "pop", str(stash_index)]
 
-    mock_execute.assert_called_once_with(command, cwd=str(local_path), env=env)
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(local_path),
+        timeout=20,
+        env=env,
+        username=None,
+        password=None,
+        is_binary=False,
+    )

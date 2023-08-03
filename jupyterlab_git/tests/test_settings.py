@@ -24,7 +24,15 @@ async def test_git_get_settings_success(mock_execute, jp_fetch):
     )
 
     # Then
-    mock_execute.assert_called_once_with(["git", "--version"], cwd=".")
+    mock_execute.assert_called_once_with(
+        ["git", "--version"],
+        cwd=".",
+        timeout=20,
+        env=None,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 200
     payload = json.loads(response.body)
@@ -49,7 +57,15 @@ async def test_git_get_settings_no_git(mock_execute, jp_fetch):
     )
 
     # Then
-    mock_execute.assert_called_once_with(["git", "--version"], cwd=".")
+    mock_execute.assert_called_once_with(
+        ["git", "--version"],
+        cwd=".",
+        timeout=20,
+        env=None,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 200
     payload = json.loads(response.body)
@@ -72,7 +88,15 @@ async def test_git_get_settings_no_jlab(mock_execute, jp_fetch):
     response = await jp_fetch(NAMESPACE, "settings", method="GET")
 
     # Then
-    mock_execute.assert_called_once_with(["git", "--version"], cwd=".")
+    mock_execute.assert_called_once_with(
+        ["git", "--version"],
+        cwd=".",
+        timeout=20,
+        env=None,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
 
     assert response.code == 200
     payload = json.loads(response.body)

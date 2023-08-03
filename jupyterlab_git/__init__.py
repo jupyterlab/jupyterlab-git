@@ -1,6 +1,6 @@
 """Initialize the backend server extension
 """
-from traitlets import List, Dict, Unicode, default
+from traitlets import CFloat, List, Dict, Unicode, default
 from traitlets.config import Configurable
 
 try:
@@ -46,9 +46,18 @@ class JupyterLabGit(Configurable):
         config=True,
     )
 
+    git_command_timeout = CFloat(
+        help="The timeout for executing git operations. By default it is set to 20 seconds.",
+        config=True,
+    )
+
     @default("credential_helper")
     def _credential_helper_default(self):
         return "cache --timeout=3600"
+
+    @default("git_command_timeout")
+    def _git_command_timeout_default(self):
+        return 20.0
 
 
 def _jupyter_server_extension_points():

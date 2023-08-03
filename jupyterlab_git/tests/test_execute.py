@@ -19,7 +19,7 @@ async def test_execute_waits_on_index_lock(tmp_path):
 
         assert "unlock" in repr(execution_lock)
         cmd = ["git", "dummy"]
-        kwargs = {"cwd": "{!s}".format(tmp_path)}
+        kwargs = {"cwd": "{!s}".format(tmp_path), "timeout": 20}
         await execute(cmd, **kwargs)
         assert "unlock" in repr(execution_lock)
 

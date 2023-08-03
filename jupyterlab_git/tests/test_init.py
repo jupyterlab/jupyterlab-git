@@ -17,7 +17,15 @@ async def test_init():
         # When
         actual_response = await Git().init("test_curr_path")
 
-        mock_execute.assert_called_once_with(["git", "init"], cwd="test_curr_path")
+        mock_execute.assert_called_once_with(
+            ["git", "init"],
+            cwd="test_curr_path",
+            timeout=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
+        )
 
         assert {"code": 0, "actions": None} == actual_response
 
@@ -36,7 +44,15 @@ async def test_init_and_post_init():
             JupyterLabGit(actions={"post_init": ['echo "hello"']}),
         ).init("test_curr_path")
 
-        mock_execute.assert_called_with(["echo", "hello"], cwd="test_curr_path")
+        mock_execute.assert_called_with(
+            ["echo", "hello"],
+            cwd="test_curr_path",
+            timeout=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
+        )
 
         assert {
             "code": 0,
@@ -60,7 +76,15 @@ async def test_init_and_post_init_fail():
             JupyterLabGit(actions={"post_init": ["not_there arg"]}),
         ).init("test_curr_path")
 
-        mock_execute.assert_called_with(["not_there", "arg"], cwd="test_curr_path")
+        mock_execute.assert_called_with(
+            ["not_there", "arg"],
+            cwd="test_curr_path",
+            timeout=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
+        )
 
         assert {
             "code": 1,
@@ -91,7 +115,15 @@ async def test_init_and_post_init_fail_to_run():
             JupyterLabGit(actions={"post_init": ["not_there arg"]}),
         ).init("test_curr_path")
 
-        mock_execute.assert_called_with(["not_there", "arg"], cwd="test_curr_path")
+        mock_execute.assert_called_with(
+            ["not_there", "arg"],
+            cwd="test_curr_path",
+            timeout=20,
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
+        )
 
         assert {
             "code": 1,
