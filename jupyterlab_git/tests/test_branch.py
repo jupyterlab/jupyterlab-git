@@ -12,7 +12,7 @@ from .testutils import maybe_future
     "branch,expected",
     [
         ("refs/heads/feature-foo", False),
-        ("refs/heads/master", False),
+        ("refs/heads/main", False),
         ("refs/remotes/origin/feature-foo", True),
         ("refs/remotes/origin/HEAD", True),
         ("refs/stash", False),
@@ -403,7 +403,7 @@ async def test_get_current_branch_detached_success():
         # Given
         process_output = [
             "* (HEAD detached at origin/feature-foo)",
-            "  master",
+            "  main",
             "  remotes/origin/feature-foo",
             "  remotes/origin/HEAD",
         ]
@@ -466,8 +466,8 @@ async def test_get_current_branch_detached_failure():
 @pytest.mark.parametrize(
     "branch,upstream,remotename",
     [
-        ("feature-foo", "master", "origin/withslash"),
-        ("master", "master", "origin"),
+        ("feature-foo", "main", "origin/withslash"),
+        ("main", "main", "origin"),
         ("feature/bar", "feature-foo", ""),
         # Test upstream branch name starts with a letter contained in remote name
         ("rbranch", "rbranch", "origin"),
@@ -698,12 +698,12 @@ async def test_branch_success():
         # Given
         process_output_heads = [
             "feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/feature-foo\t*",
-            "master\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/master\t ",
+            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t ",
             "feature-bar\t01234567899999abcdefghijklmnopqrstuvwxyz\t\t ",
         ]
         process_output_remotes = [
             "origin/feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123",
-            "origin/master\tabcdefghijklmnopqrstuvwxyz01234567890123",
+            "origin/main\tabcdefghijklmnopqrstuvwxyz01234567890123",
         ]
 
         mock_execute.side_effect = [
@@ -727,8 +727,8 @@ async def test_branch_success():
                 {
                     "is_current_branch": False,
                     "is_remote_branch": False,
-                    "name": "master",
-                    "upstream": "origin/master",
+                    "name": "main",
+                    "upstream": "origin/main",
                     "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                     "tag": None,
                 },
@@ -751,7 +751,7 @@ async def test_branch_success():
                 {
                     "is_current_branch": False,
                     "is_remote_branch": True,
-                    "name": "origin/master",
+                    "name": "origin/main",
                     "upstream": None,
                     "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                     "tag": None,
@@ -855,14 +855,14 @@ async def test_branch_success_detached_head():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         process_output_heads = [
-            "master\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/master\t "
+            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t "
         ]
         process_output_remotes = [
             "origin/feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123"
         ]
         detached_head_output = [
             "* (HEAD detached at origin/feature-foo)",
-            "  master",
+            "  main",
             "  remotes/origin/feature-foo",
         ]
 
@@ -883,8 +883,8 @@ async def test_branch_success_detached_head():
                 {
                     "is_current_branch": False,
                     "is_remote_branch": False,
-                    "name": "master",
-                    "upstream": "origin/master",
+                    "name": "main",
+                    "upstream": "origin/main",
                     "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                     "tag": None,
                 },

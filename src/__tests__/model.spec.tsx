@@ -215,7 +215,7 @@ describe('IGitExtension', () => {
       expect(model.status.files).toHaveLength(0);
 
       model.pathRepository = DEFAULT_REPOSITORY_PATH;
-      const branch = 'master';
+      const branch = 'main';
       await model.ready;
       status = {
         branch,
@@ -236,7 +236,7 @@ describe('IGitExtension', () => {
     });
 
     it('should emit a signal if when set', async () => {
-      const branch = 'master';
+      const branch = 'main';
       const status: Partial<Git.IStatusResult> = {
         branch,
         remote: null,
@@ -337,7 +337,7 @@ describe('IGitExtension', () => {
               {
                 is_current_branch: true,
                 is_remote_branch: false,
-                name: 'master',
+                name: 'main',
                 upstream: null,
                 top_commit: '52263564aac988a0888060becc3c76d1023e680f',
                 tag: null
@@ -354,7 +354,7 @@ describe('IGitExtension', () => {
             current_branch: {
               is_current_branch: true,
               is_remote_branch: false,
-              name: 'master',
+              name: 'main',
               upstream: null,
               top_commit: '52263564aac988a0888060becc3c76d1023e680f',
               tag: null

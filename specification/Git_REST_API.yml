@@ -811,7 +811,7 @@ on git command failure
 ```
 
 # ### git pull - Fetch from and integrate with another repository or a local branch
-# Request with a specified remote-repo "origin",  a specified branch "master", and a "curr_fb_path" to fetch.
+# Request with a specified remote-repo "origin",  a specified branch "main", and a "curr_fb_path" to fetch.
 
 # URL:
 # ```bash 
@@ -821,7 +821,7 @@ on git command failure
 # ```bash
 #     {
 #         "origin": "remote-repository-to-Pull-from", 
-#         "master": "branch-to-Pull-into",
+#         "main": "branch-to-Pull-into",
 #         "curr_fb_path": "current/path/in/filebrowser/widget"
 #     }
 # ```
@@ -843,13 +843,13 @@ on git command failure
 # ```bash
 #     {
 #         "code": 11,
-#         "command": "git pull origin master"
+#         "command": "git pull origin main"
 #         "message": "Git pull command error and help tips"
 #     }
 # ```
 
 # ### git push - Update remote refs along with associated objects
-# Request with a specified remote-repo "origin",  a specified branch "master", and a "curr_fb_path" to push.
+# Request with a specified remote-repo "origin",  a specified branch "main", and a "curr_fb_path" to push.
 
 # URL:
 # ```bash 
@@ -859,7 +859,7 @@ on git command failure
 # ```bash
 #     {
 #         "origin": "remote-repository-to-Push-into", 
-#         "master": "branch-to-Push-from",
+#         "main": "branch-to-Push-from",
 #         "curr_fb_path": "current/path/in/filebrowser/widget"
 #     }
 # ```
@@ -881,7 +881,7 @@ on git command failure
 # ```bash
 #     {
 #         "code": 11,
-#         "command": "git push origin master"
+#         "command": "git push origin main"
 #         "message": "Git push command error and help tips"
 #     }
 # ```
