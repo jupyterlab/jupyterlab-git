@@ -6,7 +6,7 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { JupyterLab } from '@jupyterlab/application';
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-import {Signal} from '@lumino/signaling'
+import { Signal } from '@lumino/signaling';
 import {
   defaultMockedResponses,
   IMockedResponses,
@@ -30,7 +30,11 @@ describe('plugin', () => {
 
   beforeAll(() => {
     app = new JupyterLab() as jest.Mocked<JupyterLab>;
-    browserFactory = { defaultBrowser: { model: { pathChanged: new Signal(null), restored: Promise.resolve() } } } as unknown as jest.Mocked<IFileBrowserFactory>;
+    browserFactory = {
+      defaultBrowser: {
+        model: { pathChanged: new Signal(null), restored: Promise.resolve() }
+      }
+    } as unknown as jest.Mocked<IFileBrowserFactory>;
     settingRegistry = new SettingRegistry({
       connector: null
     }) as jest.Mocked<SettingRegistry>;
