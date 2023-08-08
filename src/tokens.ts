@@ -908,7 +908,6 @@ export namespace Git {
     upstream: string | null;
     top_commit: string;
     tag: string | null;
-
   }
 
   /** Interface for GitBranch request result,

@@ -1030,7 +1030,7 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async rebase(branch: string): Promise<Git.IResultWithMessage>{
+  async rebase(branch: string): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
     return this._taskHandler.execute<Git.IResultWithMessage>(
       'git:rebase',

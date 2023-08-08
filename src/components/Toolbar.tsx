@@ -264,9 +264,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     if (this.props.model.pathRepository === null) {
       return null;
     }
-    switch(this.props.model.status.state) {
+    switch (this.props.model.status.state) {
       case Git.State.CHERRY_PICKING:
-        branchTitle = this.props.trans.__('Cherry picking in')
+        branchTitle = this.props.trans.__('Cherry picking in');
         break;
       case Git.State.DETACHED:
         branchTitle = this.props.trans.__('Detached Head at');

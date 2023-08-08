@@ -1,6 +1,8 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
-  Dialog, InputDialog, MainAreaWidget,
+  Dialog,
+  InputDialog,
+  MainAreaWidget,
   ReactWidget,
   showDialog,
   showErrorMessage,
@@ -853,7 +855,7 @@ export function addCommands(
       gitModel.branches.some(
         branch => !branch.is_current_branch && !branch.is_remote_branch
       )
-  })
+  });
 
   commands.addCommand(CommandIDs.gitStash, {
     label: trans.__('Stash Changes'),

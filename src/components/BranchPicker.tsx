@@ -40,7 +40,7 @@ export interface IBranchPickerProps {
   /**
    * Action for which to pick a branch
    */
-  action?: 'merge' | 'rebase'
+  action?: 'merge' | 'rebase';
 
   /**
    * Current branch name.
@@ -90,7 +90,11 @@ export function BranchPicker(props: IBranchPickerProps): JSX.Element {
     return (
       <ListItem
         button
-        title={act === 'merge' ? trans.__('Merge branch %1', branch.name) : trans.__('Rebase branch %1', branch.name)}
+        title={
+          act === 'merge'
+            ? trans.__('Merge branch %1', branch.name)
+            : trans.__('Rebase branch %1', branch.name)
+        }
         className={classes(
           listItemClass,
           isSelected ? activeListItemClass : null
@@ -117,7 +121,11 @@ export function BranchPicker(props: IBranchPickerProps): JSX.Element {
       onClose={props.onClose}
     >
       <div className={titleWrapperClass}>
-        <p className={titleClass}>{act === 'merge' ? trans.__('Merge Branch') : trans.__('Rebase Branch')}</p>
+        <p className={titleClass}>
+          {act === 'merge'
+            ? trans.__('Merge Branch')
+            : trans.__('Rebase Branch')}
+        </p>
         <button className={closeButtonClass}>
           <ClearIcon
             titleAccess={trans.__('Close this dialog')}
@@ -130,7 +138,12 @@ export function BranchPicker(props: IBranchPickerProps): JSX.Element {
       </div>
       <div className={contentWrapperClass}>
         <p>
-          {act === 'merge' ? trans.__('Select the branch to merge in %1', props.currentBranch) : trans.__('Select the branch to rebase %1 onto', props.currentBranch)}
+          {act === 'merge'
+            ? trans.__('Select the branch to merge in %1', props.currentBranch)
+            : trans.__(
+                'Select the branch to rebase %1 onto',
+                props.currentBranch
+              )}
         </p>
         <div className={filterWrapperClass}>
           <div className={filterClass}>
@@ -175,7 +188,11 @@ export function BranchPicker(props: IBranchPickerProps): JSX.Element {
         <input
           className={classes(buttonClass, cancelButtonClass)}
           type="button"
-          title={act === 'merge' ? trans.__('Close this dialog without merging a branch') : trans.__('Close this dialog without rebasing the branch')}
+          title={
+            act === 'merge'
+              ? trans.__('Close this dialog without merging a branch')
+              : trans.__('Close this dialog without rebasing the branch')
+          }
           value={trans.__('Cancel')}
           onClick={() => {
             props.onClose();
@@ -184,7 +201,11 @@ export function BranchPicker(props: IBranchPickerProps): JSX.Element {
         <input
           className={classes(buttonClass, createButtonClass)}
           type="button"
-          title={act === 'merge' ? trans.__('Merge branch') : trans.__('Rebase branch')}
+          title={
+            act === 'merge'
+              ? trans.__('Merge branch')
+              : trans.__('Rebase branch')
+          }
           value={act === 'merge' ? trans.__('Merge') : trans.__('Rebase')}
           onClick={() => {
             props.onClose(selectedBranch);
