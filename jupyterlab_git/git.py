@@ -11,7 +11,7 @@ import shutil
 import subprocess
 import traceback
 from typing import Dict, List, Optional
-from urllib.parse import unquote
+from urllib.parse import quote, unquote
 
 import nbformat
 import pexpect
@@ -73,6 +73,9 @@ async def execute(
         env: "Optional[Dict[str, str]]" = None,
     ) -> "Tuple[int, str, str]":
         try:
+            if not os.path.exists(cwd):
+                cwd = quote(cwd, safe=":/\\")
+
             p = pexpect.spawn(
                 cmdline[0],
                 cmdline[1:],
@@ -113,6 +116,9 @@ async def execute(
         env: "Optional[Dict[str, str]]" = None,
         is_binary=is_binary,
     ) -> "Tuple[int, str, str]":
+        if not os.path.exists(cwd):
+            cwd = quote(cwd, safe=":/\\")
+
         process = subprocess.Popen(
             cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env
         )
