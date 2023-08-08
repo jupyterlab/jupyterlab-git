@@ -39,6 +39,10 @@ GIT_VERSION_REGEX = re.compile(r"^git\sversion\s(?P<version>\d+(.\d+)*)")
 GIT_BRANCH_STATUS = re.compile(
     r"^## (?P<branch>([\w\-/]+|HEAD \(no branch\)|No commits yet on \w+))(\.\.\.(?P<remote>[\w\-/]+)( \[(ahead (?P<ahead>\d+))?(, )?(behind (?P<behind>\d+))?\])?)?$"
 )
+# Parse Git detached head
+GIT_DETACHED_HEAD = re.compile(
+    r"^\(HEAD detached at (?P<commit>.+?)\)$"
+)
 # Parse Git branch rebase name
 GIT_REBASING_BRANCH = re.compile(
     r"^\(no branch, rebasing (?P<branch>.+?)\)$"
@@ -757,13 +761,21 @@ class Git:
             # error; bail
             return remotes
 
-        # Extract branch name in case of renaming
-        rebasing = GIT_REBASING_BRANCH.match(heads["current_branch"]["name"])
-        if rebasing is not None:
+        # Extract commit hash in case of detached head
+        is_detached = GIT_DETACHED_HEAD.match(heads["current_branch"]["name"])
+        if is_detached is not None:
             try:
-                heads["current_branch"]["name"] = rebasing.groupdict()["branch"]
+                heads["current_branch"]["name"] = is_detached.groupdict()["commit"]
             except KeyError:
                 pass
+        else:
+            # Extract branch name in case of rebasing
+            rebasing = GIT_REBASING_BRANCH.match(heads["current_branch"]["name"])
+            if rebasing is not None:
+                try:
+                    heads["current_branch"]["name"] = rebasing.groupdict()["branch"]
+                except KeyError:
+                    pass
 
         # all's good; concatenate results and return
         return {
@@ -1317,7 +1329,7 @@ class Git:
             )
 
     async def _get_current_branch_detached(self, path):
-        """Execute 'git branch -a' to get current branch details in case of detached HEAD"""
+        """Execute 'git branch -a' to get current branch details in case of dirty state (rebasing, detached head,...)."""
         command = ["git", "branch", "-a"]
         code, output, error = await self.__execute(command, cwd=path)
         if code == 0:
@@ -1327,7 +1339,7 @@ class Git:
                     return branch.lstrip("* ")
         else:
             raise Exception(
-                "Error [{}] occurred while executing [{}] command to get detached HEAD name.".format(
+                "Error [{}] occurred while executing [{}] command to get current state.".format(
                     error, " ".join(command)
                 )
             )
