@@ -5,7 +5,7 @@ import { extractFile } from './utils';
 const baseRepositoryPath = 'test-repository.tar.gz';
 test.use({ autoGoto: false, mockSettings: galata.DEFAULT_SETTINGS });
 
-test.describe('Merge conflict tests', () => {
+test.describe('Rebase', () => {
   test.beforeEach(async ({ baseURL, page, tmpPath }) => {
     await extractFile(
       baseURL,
@@ -20,12 +20,18 @@ test.describe('Merge conflict tests', () => {
 
     await page.getByRole('button', { name: 'Current Branch master' }).click();
 
-    // Click on a-branch merge button
-    await page.locator('text=a-branch').hover();
-    await page.getByRole('button', { name: 'Merge this branch into the current one', exact: true }).click();
+    // Switch to a-branch
+    await page.getByRole('button', { name: 'a-branch' }).click();
 
     // Hide branch panel
-    await page.getByRole('button', { name: 'Current Branch master' }).click();
+    await page.getByRole('button', { name: 'Current Branch a-branch' }).click();
+
+    // Rebase on master
+    await page.getByRole('main').press('Control+Shift+C');
+    await page.getByRole('textbox', { name: 'SEARCH' }).fill('rebase');
+    await page.getByText('Rebase branch…').click();
+    await page.getByRole('button', { name: 'master' }).click();
+    await page.getByRole('button', { name: 'Rebase' }).click();
 
     // Force refresh
     await page
