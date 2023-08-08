@@ -141,6 +141,11 @@ jobs:
       run: jlpm playwright install chromium
       working-directory: ui-tests
 
+    - name: Set up git
+      run: |
+        git config --global user.name 'Test Bot'
+        git config --global user.email 'test-bot@example.com'
+
     - name: Execute integration tests
       working-directory: ui-tests
       run: |
