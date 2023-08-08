@@ -121,6 +121,7 @@ describe('GitPanel', () => {
         iconLabel: '',
         label: ''
       },
+      isChecked: null,
       value: {
         name: commitUser['user.name'],
         email: commitUser['user.email']
@@ -207,6 +208,7 @@ describe('GitPanel', () => {
           ...dialogValue.button,
           accept: false
         },
+        isChecked: null,
         value: null
       });
 

@@ -15,7 +15,7 @@ test.describe('Merge commit tests', () => {
     );
 
     // URL for merge commit example repository
-    await page.goto(`tree/${tmpPath}/repository`);
+    await page.goto(`tree/${tmpPath}/test-repository-merge-commits`);
 
     await page.sidebar.openTab('jp-git-sessions');
 

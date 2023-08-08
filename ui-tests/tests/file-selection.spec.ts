@@ -89,6 +89,8 @@ test.describe('File selection for simple staging', () => {
     await page.sidebar.openTab('jp-git-sessions');
     await page.click('button:has-text("Changes")');
 
+    await page.getByText('(4)').waitFor();
+
     let markedFiles = page.locator('[data-test-checked=true]');
     expect(await markedFiles.count()).toBeGreaterThanOrEqual(4);
 

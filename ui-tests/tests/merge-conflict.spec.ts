@@ -15,7 +15,7 @@ test.describe('Merge conflict tests', () => {
     );
 
     // URL for merge conflict example repository
-    await page.goto(`tree/${tmpPath}/repository`);
+    await page.goto(`tree/${tmpPath}/test-repository`);
 
     await page.sidebar.openTab('jp-git-sessions');
 

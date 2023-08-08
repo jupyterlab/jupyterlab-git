@@ -15,7 +15,7 @@ test.describe('Image diff', () => {
     );
 
     // URL for merge conflict example repository
-    await page.goto(`tree/${tmpPath}/repository`);
+    await page.goto(`tree/${tmpPath}/test-repository`);
   });
 
   test('should display image diff from history', async ({ page }) => {

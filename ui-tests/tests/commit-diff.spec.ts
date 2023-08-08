@@ -15,7 +15,7 @@ test.describe('Commits diff', () => {
     );
 
     // URL for merge conflict example repository
-    await page.goto(`tree/${tmpPath}/repository`);
+    await page.goto(`tree/${tmpPath}/test-repository`);
   });
 
   test('should display commits diff from history', async ({ page }) => {
@@ -40,7 +40,6 @@ test.describe('Commits diff', () => {
 
   test('should display diff from single file history', async ({ page }) => {
     await page.sidebar.openTab('filebrowser');
-    await page.pause();
     await page.click('#filebrowser >> text=example.ipynb', {
       button: 'right'
     });
