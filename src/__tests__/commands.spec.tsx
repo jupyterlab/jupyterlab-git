@@ -80,6 +80,7 @@ describe('git-commands', () => {
               iconLabel: '',
               label: ''
             },
+            isChecked: null,
             value: undefined
           });
           const spyReset = jest.spyOn(model, 'reset');
@@ -146,6 +147,7 @@ describe('git-commands', () => {
               iconLabel: '',
               label: ''
             },
+            isChecked: null,
             value: {
               checked
             } as Git.ICheckboxFormValue

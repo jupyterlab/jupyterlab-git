@@ -14,12 +14,5 @@ export async function extractFile(
     method: 'GET'
   });
 
-  const directory = path.dirname(destination);
-
-  await contents.renameDirectory(
-    [directory, path.basename(filePath, '.tar.gz')].join('/'),
-    [directory, path.basename(destination, '.tar.gz')].join('/')
-  );
-
   await contents.deleteFile(destination);
 }

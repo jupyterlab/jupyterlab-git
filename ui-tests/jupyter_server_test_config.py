@@ -4,7 +4,14 @@
 opens the server to the world and provide access to JupyterLab
 JavaScript objects through the global window variable.
 """
+import sys
 from tempfile import mkdtemp
+
+try:
+    import jupyter_archive
+except ImportError:
+    print("You must install `jupyter-archive` for the integration tests.")
+    sys.exit(1)
 
 c.ServerApp.port = 8888
 c.ServerApp.port_retries = 0

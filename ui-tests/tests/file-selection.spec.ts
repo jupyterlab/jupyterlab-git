@@ -1,5 +1,4 @@
-import { test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import { expect, test } from '@jupyterlab/galata';
 import path from 'path';
 import { extractFile } from './utils';
 
@@ -88,6 +87,8 @@ test.describe('File selection for simple staging', () => {
   }) => {
     await page.sidebar.openTab('jp-git-sessions');
     await page.click('button:has-text("Changes")');
+
+    await page.getByText('(4)').waitFor();
 
     let markedFiles = page.locator('[data-test-checked=true]');
     expect(await markedFiles.count()).toBeGreaterThanOrEqual(4);

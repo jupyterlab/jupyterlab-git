@@ -5,7 +5,7 @@ import {
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandIDs, IGitExtension, Level } from './tokens';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { GitCloneForm } from './widgets/GitCloneForm';
 import { logger } from './logger';
 import {
@@ -19,14 +19,16 @@ import { addCloneButton } from './widgets/gitClone';
 
 export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/git:clone',
-  requires: [ITranslator, IGitExtension, IFileBrowserFactory],
+  requires: [IGitExtension, IFileBrowserFactory],
+  optional: [ICommandPalette, ITranslator],
   activate: (
     app: JupyterFrontEnd,
-    translator: ITranslator,
     gitModel: IGitExtension,
-    fileBrowserFactory: IFileBrowserFactory
+    fileBrowserFactory: IFileBrowserFactory,
+    palette: ICommandPalette | null,
+    translator: ITranslator | null
   ) => {
-    translator = translator || nullTranslator;
+    translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab_git');
     const fileBrowser = fileBrowserFactory.defaultBrowser;
     const fileBrowserModel = fileBrowser.model;
@@ -89,6 +91,12 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
 
     // Add the context menu items for the default file browser
     addFileBrowserContextMenu(gitModel, fileBrowser, app.contextMenu, trans);
+
+    if (palette) {
+      // Add the commands to the command palette
+      const category = 'Git Operations';
+      palette.addItem({ command: CommandIDs.gitClone, category });
+    }
   },
   autoStart: true
 };

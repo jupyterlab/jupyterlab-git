@@ -246,6 +246,7 @@ describe('BranchMenu', () => {
             iconLabel: '',
             label: ''
           },
+          isChecked: null,
           value: undefined
         });
       });

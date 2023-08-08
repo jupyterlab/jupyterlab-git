@@ -17,7 +17,7 @@ from .git import Git
 
 
 def _jupyter_labextension_paths():
-    return [{"src": "labextension", "dest": "@jupyerlab/git"}]
+    return [{"src": "labextension", "dest": "@jupyterlab/git"}]
 
 
 class JupyterLabGit(Configurable):

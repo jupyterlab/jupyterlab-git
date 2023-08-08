@@ -1,10 +1,9 @@
-import { test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
 import { extractFile } from './utils';
 
 const baseRepositoryPath = 'test-repository.tar.gz';
-test.use({ autoGoto: false });
+test.use({ autoGoto: false, mockSettings: galata.DEFAULT_SETTINGS });
 
 test.describe('Merge conflict tests', () => {
   test.beforeEach(async ({ baseURL, page, tmpPath }) => {
@@ -15,7 +14,7 @@ test.describe('Merge conflict tests', () => {
     );
 
     // URL for merge conflict example repository
-    await page.goto(`tree/${tmpPath}/repository`);
+    await page.goto(`tree/${tmpPath}/test-repository`);
 
     await page.sidebar.openTab('jp-git-sessions');
 

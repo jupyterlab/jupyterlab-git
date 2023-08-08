@@ -1,5 +1,4 @@
-import { expect } from '@playwright/test';
-import { test } from '@jupyterlab/galata';
+import { expect, test } from '@jupyterlab/galata';
 import path from 'path';
 import { extractFile } from './utils';
 

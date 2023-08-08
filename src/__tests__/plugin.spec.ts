@@ -6,11 +6,13 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { JupyterLab } from '@jupyterlab/application';
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
+import { Signal } from '@lumino/signaling';
 import {
   defaultMockedResponses,
   IMockedResponses,
   mockedRequestAPI
 } from './utils';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 jest.mock('../git');
 jest.mock('@jupyterlab/application');
@@ -22,11 +24,17 @@ const plugin = plugins[0];
 describe('plugin', () => {
   const mockGit = git as jest.Mocked<typeof git>;
   let app: jest.Mocked<JupyterLab>;
+  let browserFactory: jest.Mocked<IFileBrowserFactory>;
   let mockResponses: IMockedResponses = {};
   let settingRegistry: jest.Mocked<ISettingRegistry>;
 
   beforeAll(() => {
     app = new JupyterLab() as jest.Mocked<JupyterLab>;
+    browserFactory = {
+      defaultBrowser: {
+        model: { pathChanged: new Signal(null), restored: Promise.resolve() }
+      }
+    } as unknown as jest.Mocked<IFileBrowserFactory>;
     settingRegistry = new SettingRegistry({
       connector: null
     }) as jest.Mocked<SettingRegistry>;
@@ -59,7 +67,7 @@ describe('plugin', () => {
       const extension = await plugin.activate(
         app,
         null,
-        null,
+        browserFactory,
         { tracker: { currentWidget: null } },
         null,
         settingRegistry
@@ -94,7 +102,7 @@ describe('plugin', () => {
       const extension = await plugin.activate(
         app,
         null,
-        null,
+        browserFactory,
         { tracker: { currentWidget: null } },
         null,
         settingRegistry
@@ -128,7 +136,7 @@ describe('plugin', () => {
       const extension = await plugin.activate(
         app,
         null,
-        null,
+        browserFactory,
         { tracker: { currentWidget: null } },
         null,
         settingRegistry
@@ -159,7 +167,7 @@ describe('plugin', () => {
       const extension = await plugin.activate(
         app,
         null,
-        null,
+        browserFactory,
         { tracker: { currentWidget: null } },
         null,
         settingRegistry
