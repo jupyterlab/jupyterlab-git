@@ -34,7 +34,7 @@ export interface IRebaseActionProps {
   /**
    * Application command registry
    */
-  commands: CommandRegistry
+  commands: CommandRegistry;
   /**
    * Translation object.
    */
@@ -62,10 +62,14 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
     []
   );
   const onContinue = React.useCallback(async () => {
-    await props.commands.execute(CommandIDs.gitResolveRebase, {action: 'continue'});
+    await props.commands.execute(CommandIDs.gitResolveRebase, {
+      action: 'continue'
+    });
   }, []);
   const onSkip = React.useCallback(async () => {
-    await props.commands.execute(CommandIDs.gitResolveRebase, {action: 'skip'});
+    await props.commands.execute(CommandIDs.gitResolveRebase, {
+      action: 'skip'
+    });
   }, []);
   const onAbort = React.useCallback(async () => {
     const answer = await showDialog({
@@ -78,7 +82,9 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
     });
 
     if (answer.button.accept) {
-      await props.commands.execute(CommandIDs.gitResolveRebase, {action: 'abort'});
+      await props.commands.execute(CommandIDs.gitResolveRebase, {
+        action: 'abort'
+      });
     }
   }, []);
 
