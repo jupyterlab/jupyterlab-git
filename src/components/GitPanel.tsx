@@ -34,6 +34,7 @@ import { GitStash } from './GitStash';
 import { ActionButton } from './ActionButton';
 import { addIcon, rewindIcon, trashIcon } from '../style/icons';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
+import { RebaseAction } from './RebaseAction';
 
 /**
  * Interface describing component properties.
@@ -528,30 +529,42 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           trans={this.props.trans}
         />
 
-        <CommitBox
-          commands={this.props.commands}
-          hasFiles={
-            inSimpleMode ? this._markedFiles.length > 0 : this._hasStagedFile()
-          }
-          trans={this.props.trans}
-          label={buttonLabel}
-          summary={this.state.commitSummary}
-          description={this.state.commitDescription}
-          amend={this.state.commitAmend}
-          setSummary={this._setCommitSummary}
-          setDescription={this._setCommitDescription}
-          setAmend={this._setCommitAmend}
-          onCommit={this.commitFiles}
-          warning={
-            this.state.hasDirtyFiles && (
-              <WarningBox
-                headerIcon={<WarningRoundedIcon />}
-                title={warningTitle}
-                content={warningContent}
-              />
-            )
-          }
-        />
+        {this.props.model.status.state !== Git.State.REBASING ? (
+          <CommitBox
+            commands={this.props.commands}
+            hasFiles={
+              inSimpleMode
+                ? this._markedFiles.length > 0
+                : this._hasStagedFile()
+            }
+            trans={this.props.trans}
+            label={buttonLabel}
+            summary={this.state.commitSummary}
+            description={this.state.commitDescription}
+            amend={this.state.commitAmend}
+            setSummary={this._setCommitSummary}
+            setDescription={this._setCommitDescription}
+            setAmend={this._setCommitAmend}
+            onCommit={this.commitFiles}
+            warning={
+              this.state.hasDirtyFiles && (
+                <WarningBox
+                  headerIcon={<WarningRoundedIcon />}
+                  title={warningTitle}
+                  content={warningContent}
+                />
+              )
+            }
+          />
+        ) : (
+          <RebaseAction
+            hasConflict={this.state.files.some(
+              file => file.status === 'unmerged'
+            )}
+            model={this.props.model}
+            trans={this.props.trans}
+          ></RebaseAction>
+        )}
       </React.Fragment>
     );
   }

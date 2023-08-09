@@ -489,6 +489,20 @@ export interface IGitExtension extends IDisposable {
   rebase(branch: string): Promise<Git.IResultWithMessage>;
 
   /**
+   * Resolve in progress rebase.
+   *
+   * @param action to perform
+   * @returns promise which resolves upon rebase action
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  resolveRebase(
+    action: 'continue' | 'skip' | 'abort'
+  ): Promise<Git.IResultWithMessage>;
+
+  /**
    * General Git refresh
    */
   refresh(): Promise<void>;

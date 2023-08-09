@@ -20,7 +20,7 @@ except ImportError:
     hybridcontents = None
 
 from ._version import __version__
-from .git import DEFAULT_REMOTE_NAME, Git
+from .git import DEFAULT_REMOTE_NAME, Git, RebaseAction
 from .log import get_logger
 
 # Git configuration options exposed through the REST API
@@ -903,8 +903,18 @@ class GitRebaseHandler(GitHandler):
         POST request handler, rebase the current branch
         """
         data = self.get_json_body()
-        branch = data["branch"]
-        body = await self.git.rebase(branch, self.url2localpath(path))
+        branch = data.get("branch")
+        action = data.get("action", "")
+        if branch is not None:
+            body = await self.git.rebase(branch, self.url2localpath(path))
+        else:
+            try:
+                body = await self.git.resolve_rebase(self.url2localpath(path), RebaseAction[action.upper()])
+            except KeyError:
+                raise tornado.web.HTTPError(
+                    status_code=404,
+                    reason=f"Unknown action '{action}'"
+                )
 
         if body["code"] != 0:
             self.set_status(500)

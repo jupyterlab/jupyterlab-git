@@ -1047,6 +1047,31 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Resolve in progress rebase.
+   *
+   * @param action to perform
+   * @returns promise which resolves upon rebase action
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async resolveRebase(
+    action: 'continue' | 'skip' | 'abort'
+  ): Promise<Git.IResultWithMessage> {
+    const path = await this._getPathRepository();
+    return this._taskHandler.execute<Git.IResultWithMessage>(
+      'git:rebase:resolve',
+      () =>
+        requestAPI<Git.IResultWithMessage>(
+          URLExt.join(path, 'rebase'),
+          'POST',
+          { action }
+        )
+    );
+  }
+
+  /**
    * Refresh the repository.
    *
    * @returns promise which resolves upon refreshing the repository

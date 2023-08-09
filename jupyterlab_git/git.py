@@ -10,7 +10,7 @@ import shlex
 import shutil
 import subprocess
 import traceback
-from enum import IntEnum
+from enum import Enum, IntEnum
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import unquote
 
@@ -54,6 +54,7 @@ execution_lock = tornado.locks.Lock()
 
 
 class State(IntEnum):
+    """Git repository state."""
     # Default state
     DEFAULT = 0,
     # Detached head state
@@ -64,6 +65,13 @@ class State(IntEnum):
     REBASING = 3,
     # Cherry-pick in progress
     CHERRY_PICKING = 4
+
+
+class RebaseAction(Enum):
+    """Git available action when rebasing."""
+    CONTINUE = 1
+    SKIP = 2
+    ABORT = 3
 
 
 async def execute(
@@ -1871,6 +1879,20 @@ class Git:
             path: Git repository path
         """
         cmd = ["git", "rebase", branch]
+        code, output, error = await execute(cmd, cwd=path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code, "message": output.strip()}
+    
+    async def resolve_rebase(self, path: str, action: RebaseAction) -> dict:
+        """
+        Execute git rebase --continue command & return the result.
+
+        Args:
+            path: Git repository path
+        """
+        cmd = ["git", "rebase", f"--{action.name.lower()}"]
         code, output, error = await execute(cmd, cwd=path)
 
         if code != 0:
