@@ -1,4 +1,17 @@
 import { style } from 'typestyle';
+import type { NestedCSSProperties } from 'typestyle/lib/types';
+import { sectionAreaStyle } from './GitStageStyle';
+
+export const stashContainerStyle = style((() => {
+  const styled: NestedCSSProperties = { $nest: {} };
+
+  styled.$nest[`& > .${sectionAreaStyle}`] = {
+    margin: 0,
+  }
+  return styled;
+}
+
+)())
 
 export const sectionHeaderLabelStyle = style({
   fontSize: 'var(--jp-ui-font-size1)',
