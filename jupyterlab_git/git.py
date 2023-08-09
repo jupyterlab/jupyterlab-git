@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import traceback
 from enum import Enum, IntEnum
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import unquote
 
@@ -482,7 +483,7 @@ class Git:
 
             return {"base": prev_nb, "diff": thediff}
 
-    async def status(self, path):
+    async def status(self, path: str) -> dict:
         """
         Execute git status command & return the result.
         """
@@ -562,15 +563,30 @@ class Git:
         states = {
             State.CHERRY_PICKING: 'CHERRY_PICK_HEAD',
             State.MERGING: 'MERGE_HEAD',
-            State.REBASING: 'REBASE_HEAD',
+            # Looking at REBASE_HEAD is not reliable as it may not be clean in the .git folder
+            # e.g. when skipping the last commit of a ongoing rebase
+            # So looking for folder `rebase-apply` and `rebase-merge`; see https://stackoverflow.com/questions/3921409/how-to-know-if-there-is-a-git-rebase-in-progress
+            State.REBASING: ['rebase-merge', 'rebase-apply'],
         }
         
         state = State.DEFAULT
         for state_, head in states.items():
-            code, _, _ = await execute(["git", "show", "--quiet", head], cwd=path)
-            if code == 0:
-                state = state_
-                break
+            if isinstance(head, str):
+                code, _, _ = await execute(["git", "show", "--quiet", head], cwd=path)
+                if code == 0:
+                    state = state_
+                    break
+            else:
+                found = False
+                for directory in head:
+                    code, output, _ = await execute(["git", "rev-parse", "--git-path", directory], cwd=path)
+                    filepath = output.strip("\n\t ")
+                    if code == 0 and (Path(path) / filepath).exists():
+                        found = True
+                        state = state_
+                        break
+                if found:
+                    break
 
         if state == State.DEFAULT and data["branch"] == "(detached)":
             state = State.DETACHED
@@ -1318,7 +1334,7 @@ class Git:
 
     async def get_current_branch(self, path):
         """Use `symbolic-ref` to get the current branch name. In case of
-        failure, assume that the HEAD is currently detached, and fall back
+        failure, assume that the HEAD is currently detached or rebasing, and fall back
         to the `branch` command to get the name.
         See https://git-blame.blogspot.com/2013/06/checking-current-branch-programatically.html
         """
@@ -1887,13 +1903,20 @@ class Git:
     
     async def resolve_rebase(self, path: str, action: RebaseAction) -> dict:
         """
-        Execute git rebase --continue command & return the result.
+        Execute git rebase --<action> command & return the result.
 
         Args:
             path: Git repository path
         """
-        cmd = ["git", "rebase", f"--{action.name.lower()}"]
-        code, output, error = await execute(cmd, cwd=path)
+        option = action.name.lower()
+        cmd = ["git", "rebase", f"--{option}"]
+        env = None
+        # For continue we force the editor to not show up
+        # Ref: https://stackoverflow.com/questions/43489971/how-to-suppress-the-editor-for-git-rebase-continue
+        if option == "continue":
+            env = os.environ.copy()
+            env["GIT_EDITOR"]="true"
+        code, output, error = await execute(cmd, cwd=path, env=env)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
