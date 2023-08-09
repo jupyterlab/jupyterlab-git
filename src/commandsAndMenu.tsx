@@ -941,9 +941,7 @@ export function addCommands(
       }
     },
     isEnabled: () =>
-      gitModel.branches.some(
-        branch => !branch.is_current_branch && !branch.is_remote_branch
-      )
+      gitModel.status.state === Git.State.REBASING
   });
 
   commands.addCommand(CommandIDs.gitStash, {
