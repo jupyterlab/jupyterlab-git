@@ -857,6 +857,83 @@ export function addCommands(
       )
   });
 
+  commands.addCommand(CommandIDs.gitResolveRebase, {
+    label: (args = {}) => {switch((args.action)) {
+      case 'continue':
+        return trans.__('Continue rebase')
+      case 'skip':
+        return trans.__('Skip current commit')
+      case 'abort':
+        return trans.__('Abort rebase')
+      default:
+        return trans.__('Resolve rebase')
+    }},
+    caption:(args = {}) => {switch((args.action)) {
+      case 'continue':
+        return trans.__('Continue the rebase by committing the current state.')
+      case 'skip':
+        return trans.__('Skip current commit and continue the rebase.')
+      case 'abort':
+        return trans.__('Abort the rebase')
+      default:
+        return trans.__('Resolve rebase')
+    }},
+    execute: async (args: { action?: string } = {}) => {
+      const { action } = args;
+
+      if (['continue', 'abort', 'skip'].includes(action)) {
+        const message = ((action) => {switch((action)) {
+          case 'continue':
+            return trans.__('Continue the rebase…')
+          case 'skip':
+            return trans.__('Skip current commit…')
+          case 'abort':
+            return trans.__('Abort the rebase…')
+        }})(action)
+
+        logger.log({
+          level: Level.RUNNING,
+          message
+        });
+        try {
+          await gitModel.resolveRebase(action as any);
+        } catch (err) {
+          const message = ((action) => {switch((action)) {
+            case 'continue':
+              return trans.__('Fail to continue rebasing.')
+            case 'skip':
+              return trans.__('Fail to skip current commit when rebasing.')
+            case 'abort':
+              return trans.__('Fail to abort the rebase.')
+          }})(action)
+          logger.log({
+            level: Level.ERROR,
+            message,
+            error: err as Error
+          });
+          return;
+        }
+
+        const message_ = ((action) => {switch((action)) {
+          case 'continue':
+            return trans.__('Commit submitted continuing rebase.')
+          case 'skip':
+            return trans.__('Current commit skipped.')
+          case 'abort':
+            return trans.__('Rebase aborted.')
+        }})(action)
+        logger.log({
+          level: Level.SUCCESS,
+          message: message_
+        });
+      }
+    },
+    isEnabled: () =>
+      gitModel.branches.some(
+        branch => !branch.is_current_branch && !branch.is_remote_branch
+      )
+  })
+
   commands.addCommand(CommandIDs.gitStash, {
     label: trans.__('Stash Changes'),
     caption: trans.__('Stash all current changes'),

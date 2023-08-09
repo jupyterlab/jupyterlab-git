@@ -197,7 +197,6 @@ async function activate(
         CommandIDs.gitToggleSimpleStaging,
         CommandIDs.gitToggleDoubleClickDiff,
         CommandIDs.gitOpenGitignore,
-        CommandIDs.gitShowDiff,
         CommandIDs.gitInit,
         CommandIDs.gitMerge,
         CommandIDs.gitRebase,

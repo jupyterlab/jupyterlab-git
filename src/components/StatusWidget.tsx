@@ -202,6 +202,12 @@ namespace Private {
         case 'git:pushing':
           status = 'pushing changes…';
           break;
+        case 'git:rebase':
+          status = 'rebasing…';
+          break;
+        case 'git:rebase:resolve':
+          status = 'resolving rebase…';
+          break;
         case 'git:refresh':
           status = 'refreshing…';
           break;

@@ -558,10 +558,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           />
         ) : (
           <RebaseAction
+            commands={this.props.commands}
             hasConflict={this.state.files.some(
               file => file.status === 'unmerged'
             )}
-            model={this.props.model}
             trans={this.props.trans}
           ></RebaseAction>
         )}

@@ -1,5 +1,6 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import {
   Button,
   ButtonGroup,
@@ -19,7 +20,8 @@ import {
   disabledStyle
 } from '../style/CommitBox';
 import { verticalMoreIcon } from '../style/icons';
-import { IGitExtension } from '../tokens';
+import { rebaseActionStyle } from '../style/RebaseActionStyle';
+import { CommandIDs } from '../tokens';
 
 /**
  * RebaseAction property
@@ -30,9 +32,9 @@ export interface IRebaseActionProps {
    */
   hasConflict: boolean;
   /**
-   * Git model.
+   * Application command registry
    */
-  model: IGitExtension;
+  commands: CommandRegistry
   /**
    * Translation object.
    */
@@ -60,10 +62,10 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
     []
   );
   const onContinue = React.useCallback(async () => {
-    await props.model.resolveRebase('continue');
+    await props.commands.execute(CommandIDs.gitResolveRebase, {action: 'continue'});
   }, []);
   const onSkip = React.useCallback(async () => {
-    await props.model.resolveRebase('skip');
+    await props.commands.execute(CommandIDs.gitResolveRebase, {action: 'skip'});
   }, []);
   const onAbort = React.useCallback(async () => {
     const answer = await showDialog({
@@ -76,12 +78,12 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
     });
 
     if (answer.button.accept) {
-      await props.model.resolveRebase('abort');
+      await props.commands.execute(CommandIDs.gitResolveRebase, {action: 'abort'});
     }
   }, []);
 
   return (
-    <>
+    <div className={rebaseActionStyle}>
       <ButtonGroup ref={anchor} fullWidth={true} size="small">
         <Button
           classes={{
@@ -135,6 +137,6 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
           </Grow>
         )}
       </Popper>
-    </>
+    </div>
   );
 }

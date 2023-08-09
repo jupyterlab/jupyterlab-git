@@ -1358,6 +1358,7 @@ export enum CommandIDs {
   gitPush = 'git:push',
   gitPull = 'git:pull',
   gitRebase = 'git:rebase',
+  gitResolveRebase = 'git:resolve-rebase',
   gitResetToRemote = 'git:reset-to-remote',
   gitSubmitCommand = 'git:submit-commit',
   gitShowDiff = 'git:show-diff',
