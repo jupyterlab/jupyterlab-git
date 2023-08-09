@@ -572,14 +572,14 @@ class Git:
         state = State.DEFAULT
         for state_, head in states.items():
             if isinstance(head, str):
-                code, _, _ = await execute(["git", "show", "--quiet", head], cwd=path)
+                code, _, _ = await self.__execute(["git", "show", "--quiet", head], cwd=path)
                 if code == 0:
                     state = state_
                     break
             else:
                 found = False
                 for directory in head:
-                    code, output, _ = await execute(["git", "rev-parse", "--git-path", directory], cwd=path)
+                    code, output, _ = await self.__execute(["git", "rev-parse", "--git-path", directory], cwd=path)
                     filepath = output.strip("\n\t ")
                     if code == 0 and (Path(path) / filepath).exists():
                         found = True

@@ -457,7 +457,7 @@ async def test_get_current_branch_detached_failure():
         )
         assert (
             "Error [fatal: Not a git repository (or any of the parent directories): .git] "
-            "occurred while executing [git branch -a] command to get detached HEAD name."
+            "occurred while executing [git branch -a] command to get current state."
             == str(error.value)
         )
 
@@ -891,7 +891,7 @@ async def test_branch_success_detached_head():
                 {
                     "is_current_branch": True,
                     "is_remote_branch": False,
-                    "name": "(HEAD detached at origin/feature-foo)",
+                    "name": "origin/feature-foo",
                     "upstream": None,
                     "top_commit": None,
                     "tag": None,
@@ -983,7 +983,7 @@ async def test_branch_success_rebasing():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         process_output_heads = [
-            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t "
+            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t ",
             "feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/feature-foo\t "
         ]
         process_output_remotes = [
@@ -1019,19 +1019,19 @@ async def test_branch_success_rebasing():
                     "tag": None,
                 },
                 {
-                    "is_current_branch": True,
-                    "is_remote_branch": False,
-                    "name": "(no branch, rebasing feature-foo)",
-                    "upstream": None,
-                    "top_commit": None,
-                    "tag": None,
-                },
-                {
                     "is_current_branch": False,
                     "is_remote_branch": False,
                     "name": "feature-foo",
                     "upstream": "origin/feature-foo",
                     "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
+                    "tag": None,
+                },
+                {
+                    "is_current_branch": True,
+                    "is_remote_branch": False,
+                    "name": "feature-foo",
+                    "upstream": None,
+                    "top_commit": None,
                     "tag": None,
                 },
                 {

@@ -33,7 +33,7 @@ from .testutils import maybe_future
                 "remote": None,
                 "ahead": 0,
                 "behind": 0,
-                "state": "DEFAULT",
+                "state": 0,
                 "files": [
                     {
                         "x": "A",
@@ -83,7 +83,7 @@ from .testutils import maybe_future
                 "remote": None,
                 "ahead": 0,
                 "behind": 0,
-                "state": "DEFAULT",
+                "state": 0,
                 "files": [],
             },
         ),
@@ -97,7 +97,7 @@ from .testutils import maybe_future
                 "remote": "origin/main",
                 "ahead": 0,
                 "behind": 0,
-                "state": "DEFAULT",
+                "state": 0,
                 "files": [],
             },
         ),
@@ -111,7 +111,7 @@ from .testutils import maybe_future
                 "remote": "origin/main",
                 "ahead": 15,
                 "behind": 0,
-                "state": "DEFAULT",
+                "state": 0,
                 "files": [],
             },
         ),
@@ -125,7 +125,7 @@ from .testutils import maybe_future
                 "remote": "origin/main",
                 "ahead": 0,
                 "behind": 5,
-                "state": "DEFAULT",
+                "state": 0,
                 "files": [],
             },
         ),
@@ -139,7 +139,7 @@ from .testutils import maybe_future
                 "remote": "origin/main",
                 "ahead": 3,
                 "behind": 5,
-                "state": "DEFAULT",
+                "state": 0,
                 "files": [],
             },
         ),
@@ -153,7 +153,7 @@ from .testutils import maybe_future
                 "remote": None,
                 "ahead": 0,
                 "behind": 0,
-                "state": "DEFAULT",
+                "state": 0,
                 "files": [],
             },
         ),
@@ -167,7 +167,7 @@ from .testutils import maybe_future
                 "remote": None,
                 "ahead": 0,
                 "behind": 0,
-                "state": "DETACHED",
+                "state": 1,
                 "files": [],
             },
         ),
@@ -226,7 +226,7 @@ from .testutils import maybe_future
                         "is_binary": False,
                     },
                 ],
-                "state": "CHERRY_PICKING",
+                "state": 4,
             },
         ),
         # Rebasing
@@ -284,7 +284,7 @@ from .testutils import maybe_future
                         "is_binary": False,
                     },
                 ],
-                "state": "REBASING",
+                "state": 3,
             },
         ),
         # Merging
@@ -342,33 +342,36 @@ from .testutils import maybe_future
                         "is_binary": False,
                     },
                 ],
-                "state": "MERGING",
+                "state": 0,
             },
         ),
     ],
 )
-async def test_status(output, diff_output, expected):
+async def test_status(tmp_path, output, diff_output, expected):
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        repository = "test_curr_path"
+        repository = tmp_path / "test_curr_path"
+        (repository / ".git" / "rebase-merge").mkdir(parents=True)
+
         mock_execute.side_effect = [
             maybe_future((0, "\x00".join(output) + "\x00", "")),
             maybe_future((0, "\x00".join(diff_output) + "\x00", "")),
             maybe_future(
-                (0 if expected["state"] == "CHERRY_PICKING" else 128, "", "cherry pick")
+                (0 if expected["state"] == 4 else 128, "", "cherry pick")
             ),
-            maybe_future((0 if expected["state"] == "MERGING" else 128, "", "merge")),
-            maybe_future((0 if expected["state"] == "REBASING" else 128, "", "rebase")),
+            maybe_future((0 if expected["state"] == 2 else 128, "", "merge")),
+            maybe_future((0 if expected["state"] == 3 else 128, ".git/rebase-merge", "rebase")),
+            maybe_future((0 if expected["state"] == 3 else 128, ".git/rebase-apply", "rebase")),
         ]
 
         # When
-        actual_response = await Git().status(path=repository)
+        actual_response = await Git().status(path=str(repository))
 
         # Then
         expected_calls = [
             call(
                 ["git", "status", "--porcelain", "-b", "-u", "-z"],
-                cwd=repository,
+                cwd=str(repository),
                 timeout=20,
                 env=None,
                 username=None,
@@ -384,7 +387,7 @@ async def test_status(output, diff_output, expected):
                     "--cached",
                     "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
                 ],
-                cwd=repository,
+                cwd=str(repository),
                 timeout=20,
                 env=None,
                 username=None,
@@ -393,7 +396,7 @@ async def test_status(output, diff_output, expected):
             ),
             call(
                 ["git", "show", "--quiet", "CHERRY_PICK_HEAD"],
-                cwd=repository,
+                cwd=str(repository),
                 timeout=20,
                 env=None,
                 username=None,
@@ -402,7 +405,7 @@ async def test_status(output, diff_output, expected):
             ),
             call(
                 ["git", "show", "--quiet", "MERGE_HEAD"],
-                cwd=repository,
+                cwd=str(repository),
                 timeout=20,
                 env=None,
                 username=None,
@@ -410,8 +413,17 @@ async def test_status(output, diff_output, expected):
                 is_binary=False,
             ),
             call(
-                ["git", "show", "--quiet", "REBASE_HEAD"],
-                cwd=repository,
+                ["git", "rev-parse", "--git-path", "rebase-merge"],
+                cwd=str(repository),
+                timeout=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
+            ),
+            call(
+                ["git", "rev-parse", "--git-path", "rebase-apply"],
+                cwd=str(repository),
                 timeout=20,
                 env=None,
                 username=None,
@@ -420,9 +432,11 @@ async def test_status(output, diff_output, expected):
             ),
         ]
 
-        if expected["state"] == "CHERRY_PICKING":
+        if expected["state"] == 4:
+            expected_calls = expected_calls[:-3]
+        elif expected["state"] == 2:
             expected_calls = expected_calls[:-2]
-        elif expected["state"] == "MERGING":
+        elif expected["state"] == 3:
             expected_calls = expected_calls[:-1]
 
         mock_execute.assert_has_calls(expected_calls)
