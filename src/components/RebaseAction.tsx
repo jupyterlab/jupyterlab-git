@@ -97,6 +97,7 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
           {props.trans.__('Continue')}
         </Button>
         <Button
+          title={props.trans.__('Pick another rebase action.')}
           classes={{
             root: commitButtonClass
           }}

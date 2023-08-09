@@ -41,10 +41,11 @@ test.describe('Rebase', () => {
       .click();
   });
 
-  test('should diff conflicted text file', async ({ page }) => {
+  test('should resolve a conflicted rebase', async ({ page }) => {
+    // Resolve conflicts
     await page
       .getByTitle('file.txt • Conflicted', { exact: true })
-      .click({ clickCount: 2 });
+      .dblclick()
     await page.waitForSelector(
       '.jp-git-diff-parent-widget[id^="Current-Incoming"] .jp-spinner',
       { state: 'detached' }
@@ -53,15 +54,18 @@ test.describe('Rebase', () => {
 
     // Verify 3-way merge view appears
     const banner = page.locator('.jp-git-merge-banner');
-    await expect(banner).toHaveText(/Current/);
-    await expect(banner).toHaveText(/Result/);
-    await expect(banner).toHaveText(/Incoming/);
+    await expect.soft(banner).toHaveText(/Current/);
+    await expect.soft(banner).toHaveText(/Result/);
+    await expect.soft(banner).toHaveText(/Incoming/);
 
-    const mergeDiff = page.locator('.CodeMirror-merge-3pane');
-    await expect(mergeDiff).toBeVisible();
-  });
+    await page.getByRole('button', { name: 'Mark as resolved' }).click()
 
-  test('should diff conflicted notebook file', async ({ page }) => {
+    await page
+      .getByTitle('another_file.txt • Conflicted', { exact: true })
+      .dblclick()
+
+    await page.getByRole('button', { name: 'Mark as resolved' }).click()
+    
     await page.getByTitle('example.ipynb • Conflicted').click({
       clickCount: 2
     });
@@ -72,11 +76,45 @@ test.describe('Rebase', () => {
     await page.waitForSelector('.jp-git-diff-root');
 
     // Verify notebook merge view appears
-    const banner = page.locator('.jp-git-merge-banner');
-    await expect(banner).toHaveText(/Current/);
-    await expect(banner).toHaveText(/Incoming/);
+    await expect.soft(banner).toHaveText(/Current/);
+    await expect.soft(banner).toHaveText(/Incoming/);
 
-    const mergeDiff = page.locator('.jp-Notebook-merge');
-    await expect(mergeDiff).toBeVisible();
+    await page.getByRole('button', { name: 'Mark as resolved' }).click()
+
+    // Continue rebase as all conflicts are resolved
+    await page.getByRole('button', { name: 'Continue' }).click();
+
+    await page.getByRole('tab', {name: 'History'}).click();
+
+    // Master changes must be part of the history following the rebase
+    await expect.soft(page.getByTitle('View commit details')).toHaveCount(3);
+    await expect(page.getByText('master changes')).toBeVisible();
   });
+
+  test('should abort a rebase', async ({page}) => {
+    await page.getByTitle('Pick another rebase action.').click();
+
+    await page.getByRole('menuitem', { name: 'Abort' }).click();
+
+    await page.getByRole('button', { name: 'Abort' }).click();
+
+    await page.getByRole('tab', {name: 'History'}).click();
+
+    // Master changes must not be part of the history following the abort
+    await expect.soft(page.getByTitle('View commit details')).toHaveCount(2);
+    await expect(page.getByText('a-branch changes')).toBeVisible();
+  })
+
+  test('should skip the current commit', async ({page}) => {
+    await page.getByTitle('Pick another rebase action.').click();
+
+    await page.getByRole('menuitem', { name: 'Skip' }).click();
+
+    await page.getByRole('tab', {name: 'History'}).click();
+
+    // Master changes must be part of the history following the rebase but not
+    // the old a-branch commit.
+    await expect(page.getByTitle('View commit details')).toHaveCount(2);
+    await expect(page.getByText('master changes')).toBeVisible();
+  })
 });
