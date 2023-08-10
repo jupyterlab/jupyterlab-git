@@ -1156,13 +1156,15 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code, "message": output.strip()}
 
-    async def commit(self, commit_msg, amend, path):
+    async def commit(self, commit_msg, amend, path, author=None):
         """
         Execute git commit <filename> command & return the result.
 
         If the amend argument is true, amend the commit instead of creating a new one.
         """
         cmd = ["git", "commit"]
+        if author:
+            cmd.extend(["--author", author])
         if amend:
             cmd.extend(["--amend", "--no-edit"])
         else:

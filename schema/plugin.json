@@ -65,6 +65,12 @@
       "description": "Whether to trigger or not a push for each commit.",
       "default": false
     },
+    "promptUserIdentity": {
+      "type": "boolean",
+      "title": "Prompt user identity on commit",
+      "description": "Whether to prompt for user name and email for each commit.",
+      "default": false
+    },
     "openFilesBehindWarning": {
       "type": "boolean",
       "title": "Open files behind warning",

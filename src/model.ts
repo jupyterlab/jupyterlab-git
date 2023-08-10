@@ -199,6 +199,18 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Last author
+   *
+   */
+  get lastAuthor(): Git.IIdentity | null {
+    return this._lastAuthor;
+  }
+
+  set lastAuthor(lastAuthor: Git.IIdentity) {
+    this._lastAuthor = lastAuthor;
+  }
+
+  /**
    * Git repository status
    */
   get status(): Git.IStatus {
@@ -670,18 +682,24 @@ export class GitExtension implements IGitExtension {
    *
    * @param message - commit message
    * @param amend - whether this is an amend commit
+   * @param author - override the commit author specified in config
    * @returns promise which resolves upon committing file changes
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async commit(message?: string, amend = false): Promise<void> {
+  async commit(
+    message?: string,
+    amend = false,
+    author?: string
+  ): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute('git:commit:create', async () => {
       await requestAPI(URLExt.join(path, 'commit'), 'POST', {
         commit_msg: message,
-        amend: amend
+        amend: amend,
+        author: author
       });
     });
     await this.refresh();
@@ -2118,6 +2136,7 @@ export class GitExtension implements IGitExtension {
   private _selectedHistoryFile: Git.IStatusFile | null = null;
   private _hasDirtyFiles = false;
   private _credentialsRequired = false;
+  private _lastAuthor: Git.IIdentity | null = null;
 
   // Configurable
   private _statusForDirtyState: Git.Status[] = ['staged', 'partially-staged'];
