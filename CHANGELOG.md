@@ -2,6 +2,35 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.42.0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.42.0rc0...6eab13686a92b04f531118a8d76f4ce94437947d))
+
+### Enhancements made
+
+- Add support for rebase [#1260](https://github.com/jupyterlab/jupyterlab-git/pull/1260) ([@fcollonval](https://github.com/fcollonval))
+- Add option to ask user identity on every commit [#1251](https://github.com/jupyterlab/jupyterlab-git/pull/1251) ([@eyusupov](https://github.com/eyusupov))
+- Add git_command_timeout_s for allowing >20 seconds for git operations [#1250](https://github.com/jupyterlab/jupyterlab-git/pull/1250) ([@mdietz94](https://github.com/mdietz94))
+- Add git to command palette [#1243](https://github.com/jupyterlab/jupyterlab-git/pull/1243) ([@tsabbir96](https://github.com/tsabbir96))
+
+### Maintenance and upkeep improvements
+
+- Switch back to using the Jupyter Releaser actions [#1259](https://github.com/jupyterlab/jupyterlab-git/pull/1259) ([@jtpio](https://github.com/jtpio))
+- Rename master to main [#1257](https://github.com/jupyterlab/jupyterlab-git/pull/1257) ([@fcollonval](https://github.com/fcollonval))
+- Bump stylelint from 14.16.1 to 15.10.1 [#1253](https://github.com/jupyterlab/jupyterlab-git/pull/1253) ([@dependabot](https://github.com/dependabot))
+
+### Documentation improvements
+
+- Hotfix/dependency update [#1249](https://github.com/jupyterlab/jupyterlab-git/pull/1249) ([@mfakaehler](https://github.com/mfakaehler))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-06-19&to=2023-08-10&type=c))
+
+[@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2023-06-19..2023-08-10&type=Issues) | [@eyusupov](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aeyusupov+updated%3A2023-06-19..2023-08-10&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2023-06-19..2023-08-10&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2023-06-19..2023-08-10&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2023-06-19..2023-08-10&type=Issues) | [@mdietz94](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Amdietz94+updated%3A2023-06-19..2023-08-10&type=Issues) | [@mfakaehler](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Amfakaehler+updated%3A2023-06-19..2023-08-10&type=Issues) | [@tsabbir96](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Atsabbir96+updated%3A2023-06-19..2023-08-10&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Awelcome+updated%3A2023-06-19..2023-08-10&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.42.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.41.0...d14ba4ab42371a139dadceb56c2458819bee6c53))
@@ -41,5 +70,3 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2022-12-15&to=2023-06-19&type=c))
 
 [@allcontributors](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aallcontributors+updated%3A2022-12-15..2023-06-19&type=Issues) | [@ardislu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aardislu+updated%3A2022-12-15..2023-06-19&type=Issues) | [@basokant](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Abasokant+updated%3A2022-12-15..2023-06-19&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2022-12-15..2023-06-19&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2022-12-15..2023-06-19&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2022-12-15..2023-06-19&type=Issues) | [@shawnesquivel](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ashawnesquivel+updated%3A2022-12-15..2023-06-19&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Awelcome+updated%3A2022-12-15..2023-06-19&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
