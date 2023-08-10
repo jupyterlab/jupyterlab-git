@@ -13,7 +13,7 @@ To see the extension in action, open the example notebook included in the Binder
 
 ## Requirements
 
-- JupyterLab >= 3.0 , < 4 ([older version](https://github.com/jupyterlab/jupyterlab-git/tree/jlab-2) available for 2.x)
+- JupyterLab >= 3.0, < 4 ([older version](https://github.com/jupyterlab/jupyterlab-git/tree/jlab-2) available for 2.x)
 - Git (version `>=2.x`)
 
 ## Usage
