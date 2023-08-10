@@ -10,7 +10,9 @@ import shlex
 import shutil
 import subprocess
 import traceback
-from typing import Dict, List, Optional
+from enum import Enum, IntEnum
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import unquote
 
 import nbformat
@@ -38,10 +40,37 @@ GIT_VERSION_REGEX = re.compile(r"^git\sversion\s(?P<version>\d+(.\d+)*)")
 GIT_BRANCH_STATUS = re.compile(
     r"^## (?P<branch>([\w\-/]+|HEAD \(no branch\)|No commits yet on \w+))(\.\.\.(?P<remote>[\w\-/]+)( \[(ahead (?P<ahead>\d+))?(, )?(behind (?P<behind>\d+))?\])?)?$"
 )
+# Parse Git detached head
+GIT_DETACHED_HEAD = re.compile(r"^\(HEAD detached at (?P<commit>.+?)\)$")
+# Parse Git branch rebase name
+GIT_REBASING_BRANCH = re.compile(r"^\(no branch, rebasing (?P<branch>.+?)\)$")
 # Git cache as a credential helper
 GIT_CREDENTIAL_HELPER_CACHE = re.compile(r"cache\b")
 
 execution_lock = tornado.locks.Lock()
+
+
+class State(IntEnum):
+    """Git repository state."""
+
+    # Default state
+    DEFAULT = (0,)
+    # Detached head state
+    DETACHED = (1,)
+    # Merge in progress
+    MERGING = (2,)
+    # Rebase in progress
+    REBASING = (3,)
+    # Cherry-pick in progress
+    CHERRY_PICKING = 4
+
+
+class RebaseAction(Enum):
+    """Git available action when rebasing."""
+
+    CONTINUE = 1
+    SKIP = 2
+    ABORT = 3
 
 
 async def execute(
@@ -452,7 +481,7 @@ class Git:
 
             return {"base": prev_nb, "diff": thediff}
 
-    async def status(self, path):
+    async def status(self, path: str) -> dict:
         """
         Execute git status command & return the result.
         """
@@ -527,6 +556,44 @@ class Git:
             data["files"] = result
         except StopIteration:  # Raised if line_iterable is empty
             pass
+
+        # Test for repository state
+        states = {
+            State.CHERRY_PICKING: "CHERRY_PICK_HEAD",
+            State.MERGING: "MERGE_HEAD",
+            # Looking at REBASE_HEAD is not reliable as it may not be clean in the .git folder
+            # e.g. when skipping the last commit of a ongoing rebase
+            # So looking for folder `rebase-apply` and `rebase-merge`; see https://stackoverflow.com/questions/3921409/how-to-know-if-there-is-a-git-rebase-in-progress
+            State.REBASING: ["rebase-merge", "rebase-apply"],
+        }
+
+        state = State.DEFAULT
+        for state_, head in states.items():
+            if isinstance(head, str):
+                code, _, _ = await self.__execute(
+                    ["git", "show", "--quiet", head], cwd=path
+                )
+                if code == 0:
+                    state = state_
+                    break
+            else:
+                found = False
+                for directory in head:
+                    code, output, _ = await self.__execute(
+                        ["git", "rev-parse", "--git-path", directory], cwd=path
+                    )
+                    filepath = output.strip("\n\t ")
+                    if code == 0 and (Path(path) / filepath).exists():
+                        found = True
+                        state = state_
+                        break
+                if found:
+                    break
+
+        if state == State.DEFAULT and data["branch"] == "(detached)":
+            state = State.DETACHED
+
+        data["state"] = state
 
         return data
 
@@ -719,6 +786,22 @@ class Git:
         if remotes["code"] != 0:
             # error; bail
             return remotes
+
+        # Extract commit hash in case of detached head
+        is_detached = GIT_DETACHED_HEAD.match(heads["current_branch"]["name"])
+        if is_detached is not None:
+            try:
+                heads["current_branch"]["name"] = is_detached.groupdict()["commit"]
+            except KeyError:
+                pass
+        else:
+            # Extract branch name in case of rebasing
+            rebasing = GIT_REBASING_BRANCH.match(heads["current_branch"]["name"])
+            if rebasing is not None:
+                try:
+                    heads["current_branch"]["name"] = rebasing.groupdict()["branch"]
+                except KeyError:
+                    pass
 
         # all's good; concatenate results and return
         return {
@@ -1062,7 +1145,7 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
-    async def merge(self, branch, path):
+    async def merge(self, branch: str, path: str) -> dict:
         """
         Execute git merge command & return the result.
         """
@@ -1253,7 +1336,7 @@ class Git:
 
     async def get_current_branch(self, path):
         """Use `symbolic-ref` to get the current branch name. In case of
-        failure, assume that the HEAD is currently detached, and fall back
+        failure, assume that the HEAD is currently detached or rebasing, and fall back
         to the `branch` command to get the name.
         See https://git-blame.blogspot.com/2013/06/checking-current-branch-programatically.html
         """
@@ -1272,7 +1355,7 @@ class Git:
             )
 
     async def _get_current_branch_detached(self, path):
-        """Execute 'git branch -a' to get current branch details in case of detached HEAD"""
+        """Execute 'git branch -a' to get current branch details in case of dirty state (rebasing, detached head,...)."""
         command = ["git", "branch", "-a"]
         code, output, error = await self.__execute(command, cwd=path)
         if code == 0:
@@ -1282,7 +1365,7 @@ class Git:
                     return branch.lstrip("* ")
         else:
             raise Exception(
-                "Error [{}] occurred while executing [{}] command to get detached HEAD name.".format(
+                "Error [{}] occurred while executing [{}] command to get current state.".format(
                     error, " ".join(command)
                 )
             )
@@ -1804,6 +1887,42 @@ class Git:
 
         elif self._GIT_CREDENTIAL_CACHE_DAEMON_PROCESS.poll():
             self.ensure_git_credential_cache_daemon(socket, debug, True, cwd, env)
+
+    async def rebase(self, branch: str, path: str) -> dict:
+        """
+        Execute git rebase command & return the result.
+
+        Args:
+            branch: Branch to rebase onto
+            path: Git repository path
+        """
+        cmd = ["git", "rebase", branch]
+        code, output, error = await execute(cmd, cwd=path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code, "message": output.strip()}
+
+    async def resolve_rebase(self, path: str, action: RebaseAction) -> dict:
+        """
+        Execute git rebase --<action> command & return the result.
+
+        Args:
+            path: Git repository path
+        """
+        option = action.name.lower()
+        cmd = ["git", "rebase", f"--{option}"]
+        env = None
+        # For continue we force the editor to not show up
+        # Ref: https://stackoverflow.com/questions/43489971/how-to-suppress-the-editor-for-git-rebase-continue
+        if option == "continue":
+            env = os.environ.copy()
+            env["GIT_EDITOR"] = "true"
+        code, output, error = await execute(cmd, cwd=path, env=env)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code, "message": output.strip()}
 
     async def stash(self, path: str, stashMsg: str = "") -> dict:
         """

@@ -477,6 +477,32 @@ export interface IGitExtension extends IDisposable {
   ): Promise<Git.IResultWithMessage>;
 
   /**
+   * Rebase the current branch onto the provided one.
+   *
+   * @param branch to rebase onto
+   * @returns promise which resolves upon rebase action
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  rebase(branch: string): Promise<Git.IResultWithMessage>;
+
+  /**
+   * Resolve in progress rebase.
+   *
+   * @param action to perform
+   * @returns promise which resolves upon rebase action
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  resolveRebase(
+    action: 'continue' | 'skip' | 'abort'
+  ): Promise<Git.IResultWithMessage>;
+
+  /**
    * General Git refresh
    */
   refresh(): Promise<void>;
@@ -755,12 +781,38 @@ export namespace Git {
 
     export enum SpecialRef {
       // Working version
-      'WORKING',
+      WORKING,
       // Index version
-      'INDEX',
+      INDEX,
       // Common ancestor version (useful for unmerged files)
-      'BASE'
+      BASE
     }
+  }
+
+  /**
+   * Git repository state
+   */
+  export enum State {
+    /**
+     * Default state
+     */
+    DEFAULT = 0,
+    /**
+     * Detached head state
+     */
+    DETACHED,
+    /**
+     * Merge in progress
+     */
+    MERGING,
+    /**
+     * Rebase in progress
+     */
+    REBASING,
+    /**
+     * Cherry-pick in progress
+     */
+    CHERRY_PICKING
   }
 
   /**
@@ -870,7 +922,6 @@ export namespace Git {
     upstream: string | null;
     top_commit: string;
     tag: string | null;
-    detached?: boolean;
   }
 
   /** Interface for GitBranch request result,
@@ -928,6 +979,10 @@ export namespace Git {
      */
     behind: number;
     /**
+     * Git repository state
+     */
+    state: Git.State;
+    /**
      * Files status
      */
     files: IStatusFile[];
@@ -962,6 +1017,7 @@ export namespace Git {
     remote?: string | null;
     ahead?: number;
     behind?: number;
+    state?: number;
     files?: IStatusFileResult[];
   }
 
@@ -1301,6 +1357,8 @@ export enum CommandIDs {
   gitOpenGitignore = 'git:open-gitignore',
   gitPush = 'git:push',
   gitPull = 'git:pull',
+  gitRebase = 'git:rebase',
+  gitResolveRebase = 'git:resolve-rebase',
   gitResetToRemote = 'git:reset-to-remote',
   gitSubmitCommand = 'git:submit-commit',
   gitShowDiff = 'git:show-diff',

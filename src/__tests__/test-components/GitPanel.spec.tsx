@@ -237,6 +237,7 @@ describe('GitPanel', () => {
       } as any;
       props.model = {
         branches: [],
+        status: {},
         stashChanged: {
           connect: jest.fn()
         },

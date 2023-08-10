@@ -1,6 +1,7 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Dialog,
+  InputDialog,
   MainAreaWidget,
   ReactWidget,
   showDialog,
@@ -15,19 +16,21 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
-import { ArrayExt, toArray, find } from '@lumino/algorithm';
+import { ArrayExt, find, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ContextMenu, DockPanel, Menu, Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { CancelledError } from './cancelledError';
+import { BranchPicker } from './components/BranchPicker';
 import { DiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
+import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
 import { CONTEXT_COMMANDS } from './components/FileList';
-import { MergeBranchDialog } from './components/MergeBranchDialog';
+import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
 import { logger } from './logger';
-import { CancelledError } from './cancelledError';
 import { getDiffProvider, GitExtension } from './model';
 import {
   addIcon,
@@ -45,13 +48,10 @@ import {
   IGitExtension,
   Level
 } from './tokens';
+import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
-import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
-import { AdvancedPushForm } from './widgets/AdvancedPushForm';
-import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
-import { InputDialog } from '@jupyterlab/apputils';
 
 export interface IGitCloneArgs {
   /**
@@ -729,7 +729,8 @@ export function addCommands(
 
         const waitForDialog = new PromiseDelegate<string | null>();
         const dialog = ReactWidget.create(
-          <MergeBranchDialog
+          <BranchPicker
+            action="merge"
             currentBranch={gitModel.currentBranch.name}
             branches={localBranches}
             onClose={(branch?: string) => {
@@ -779,6 +780,167 @@ export function addCommands(
       gitModel.branches.some(
         branch => !branch.is_current_branch && !branch.is_remote_branch
       )
+  });
+
+  commands.addCommand(CommandIDs.gitRebase, {
+    label: trans.__('Rebase branch…'),
+    caption: trans.__('Rebase current branch onto the selected branch'),
+    execute: async args => {
+      let { branch }: { branch?: string } = args ?? {};
+
+      if (!branch) {
+        // Prompts user to pick a branch
+        const localBranches = gitModel.branches.filter(
+          branch => !branch.is_current_branch && !branch.is_remote_branch
+        );
+
+        const widgetId = 'git-dialog-MergeBranch';
+        let anchor = document.querySelector<HTMLDivElement>(`#${widgetId}`);
+        if (!anchor) {
+          anchor = document.createElement('div');
+          anchor.id = widgetId;
+          document.body.appendChild(anchor);
+        }
+
+        const waitForDialog = new PromiseDelegate<string | null>();
+        const dialog = ReactWidget.create(
+          <BranchPicker
+            action="rebase"
+            currentBranch={gitModel.currentBranch.name}
+            branches={localBranches}
+            onClose={(branch?: string) => {
+              dialog.dispose();
+              waitForDialog.resolve(branch ?? null);
+            }}
+            trans={trans}
+          />
+        );
+
+        Widget.attach(dialog, anchor);
+
+        branch = await waitForDialog.promise;
+      }
+
+      if (branch) {
+        logger.log({
+          level: Level.RUNNING,
+          message: trans.__("Rebasing current branch onto '%1'…", branch)
+        });
+        try {
+          await gitModel.rebase(branch);
+        } catch (err) {
+          logger.log({
+            level: Level.ERROR,
+            message: trans.__(
+              "Failed to rebase branch '%1' onto '%2'.",
+              gitModel.currentBranch.name,
+              branch
+            ),
+            error: err as Error
+          });
+          return;
+        }
+
+        logger.log({
+          level: Level.SUCCESS,
+          message: trans.__(
+            "Branch '%1' rebase onto '%2'.",
+            gitModel.currentBranch.name,
+            branch
+          )
+        });
+      }
+    },
+    isEnabled: () =>
+      gitModel.branches.some(
+        branch => !branch.is_current_branch && !branch.is_remote_branch
+      )
+  });
+
+  commands.addCommand(CommandIDs.gitResolveRebase, {
+    label: (args = {}) => {
+      switch (args.action) {
+        case 'continue':
+          return trans.__('Continue rebase');
+        case 'skip':
+          return trans.__('Skip current commit');
+        case 'abort':
+          return trans.__('Abort rebase');
+        default:
+          return trans.__('Resolve rebase');
+      }
+    },
+    caption: (args = {}) => {
+      switch (args.action) {
+        case 'continue':
+          return trans.__(
+            'Continue the rebase by committing the current state.'
+          );
+        case 'skip':
+          return trans.__('Skip current commit and continue the rebase.');
+        case 'abort':
+          return trans.__('Abort the rebase');
+        default:
+          return trans.__('Resolve rebase');
+      }
+    },
+    execute: async (args: { action?: string } = {}) => {
+      const { action } = args;
+
+      if (['continue', 'abort', 'skip'].includes(action)) {
+        const message = (action => {
+          switch (action) {
+            case 'continue':
+              return trans.__('Continue the rebase…');
+            case 'skip':
+              return trans.__('Skip current commit…');
+            case 'abort':
+              return trans.__('Abort the rebase…');
+          }
+        })(action);
+
+        logger.log({
+          level: Level.RUNNING,
+          message
+        });
+        try {
+          await gitModel.resolveRebase(action as any);
+        } catch (err) {
+          const message = (action => {
+            switch (action) {
+              case 'continue':
+                return trans.__('Fail to continue rebasing.');
+              case 'skip':
+                return trans.__('Fail to skip current commit when rebasing.');
+              case 'abort':
+                return trans.__('Fail to abort the rebase.');
+            }
+          })(action);
+          logger.log({
+            level: Level.ERROR,
+            message,
+            error: err as Error
+          });
+          return;
+        }
+
+        const message_ = (action => {
+          switch (action) {
+            case 'continue':
+              return trans.__('Commit submitted continuing rebase.');
+            case 'skip':
+              return trans.__('Current commit skipped.');
+            case 'abort':
+              return trans.__('Rebase aborted.');
+          }
+        })(action);
+        logger.log({
+          level: Level.SUCCESS,
+          message: message_
+        });
+      }
+    },
+    isEnabled: () => gitModel.status.state === Git.State.REBASING
   });
 
   commands.addCommand(CommandIDs.gitStash, {
@@ -951,22 +1113,27 @@ export function addCommands(
         const repositoryPath = gitModel.pathRepository;
         const filename = filePath;
         const fullPath = PathExt.join(repositoryPath, filename);
-        const specialRef =
-          status === 'staged'
-            ? Git.Diff.SpecialRef.INDEX
-            : Git.Diff.SpecialRef.WORKING;
 
-        const diffContext: Git.Diff.IContext =
-          status === 'unmerged'
-            ? {
-                currentRef: 'MERGE_HEAD',
-                previousRef: 'HEAD',
-                baseRef: Git.Diff.SpecialRef.BASE
-              }
-            : context ?? {
-                currentRef: specialRef,
-                previousRef: 'HEAD'
-              };
+        const diffContext: Git.Diff.IContext = {
+          currentRef: '',
+          previousRef: 'HEAD',
+          ...context
+        };
+
+        if (status === 'unmerged') {
+          diffContext.baseRef = Git.Diff.SpecialRef.BASE;
+          diffContext.currentRef =
+            gitModel.status.state !== Git.State.MERGING
+              ? gitModel.status.state === Git.State.REBASING
+                ? 'REBASE_HEAD'
+                : 'CHERRY_PICK_HEAD'
+              : 'MERGE_HEAD';
+        } else if (!diffContext.currentRef) {
+          diffContext.currentRef =
+            status === 'staged'
+              ? Git.Diff.SpecialRef.INDEX
+              : Git.Diff.SpecialRef.WORKING;
+        }
 
         const challengerRef = Git.Diff.SpecialRef[diffContext.currentRef as any]
           ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }

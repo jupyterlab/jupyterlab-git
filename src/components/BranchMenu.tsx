@@ -230,9 +230,16 @@ export class BranchMenu extends React.Component<
   private _renderBranchList(): React.ReactElement {
     // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     const filter = this.state.filter;
-    const branches = this.props.branches.filter(
-      branch => !filter || branch.name.includes(filter)
-    );
+    const branches = this.props.branches.filter(branch => {
+      // Don't include "current branch" is the repository is not in default state
+      if (
+        this.props.model.status.state !== Git.State.DEFAULT &&
+        branch.is_current_branch
+      ) {
+        return false;
+      }
+      return !filter || branch.name.includes(filter);
+    });
     return (
       <FixedSizeList
         height={Math.min(
@@ -260,7 +267,7 @@ export class BranchMenu extends React.Component<
   private _renderItem = (props: ListChildComponentProps): JSX.Element => {
     const { data, index, style } = props;
     const branch = data[index] as Git.IBranch;
-    const isActive = branch.name === this.props.currentBranch;
+    const isActive = branch.is_current_branch;
     return (
       <ListItem
         button

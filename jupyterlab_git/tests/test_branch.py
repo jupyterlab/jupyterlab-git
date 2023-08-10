@@ -457,7 +457,7 @@ async def test_get_current_branch_detached_failure():
         )
         assert (
             "Error [fatal: Not a git repository (or any of the parent directories): .git] "
-            "occurred while executing [git branch -a] command to get detached HEAD name."
+            "occurred while executing [git branch -a] command to get current state."
             == str(error.value)
         )
 
@@ -891,7 +891,7 @@ async def test_branch_success_detached_head():
                 {
                     "is_current_branch": True,
                     "is_remote_branch": False,
-                    "name": "(HEAD detached at origin/feature-foo)",
+                    "name": "origin/feature-foo",
                     "upstream": None,
                     "top_commit": None,
                     "tag": None,
@@ -908,7 +908,145 @@ async def test_branch_success_detached_head():
             "current_branch": {
                 "is_current_branch": True,
                 "is_remote_branch": False,
-                "name": "(HEAD detached at origin/feature-foo)",
+                "name": "origin/feature-foo",
+                "upstream": None,
+                "top_commit": None,
+                "tag": None,
+            },
+        }
+
+        # When
+        actual_response = await Git().branch(path=str(Path("/bin/test_curr_path")))
+
+        # Then
+        mock_execute.assert_has_calls(
+            [
+                # call to get refs/heads
+                call(
+                    [
+                        "git",
+                        "for-each-ref",
+                        "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)",
+                        "refs/heads/",
+                    ],
+                    cwd=str(Path("/bin") / "test_curr_path"),
+                    timeout=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                ),
+                # call to get current branch
+                call(
+                    ["git", "symbolic-ref", "--short", "HEAD"],
+                    cwd=str(Path("/bin") / "test_curr_path"),
+                    timeout=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                ),
+                # call to get current branch name given a detached head
+                call(
+                    ["git", "branch", "-a"],
+                    cwd=str(Path("/bin") / "test_curr_path"),
+                    timeout=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                ),
+                # call to get refs/remotes
+                call(
+                    [
+                        "git",
+                        "for-each-ref",
+                        "--format=%(refname:short)%09%(objectname)",
+                        "refs/remotes/",
+                    ],
+                    cwd=str(Path("/bin") / "test_curr_path"),
+                    timeout=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                ),
+            ],
+            any_order=False,
+        )
+
+        assert expected_response == actual_response
+
+
+@pytest.mark.asyncio
+async def test_branch_success_rebasing():
+    with patch("jupyterlab_git.git.execute") as mock_execute:
+        # Given
+        process_output_heads = [
+            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t ",
+            "feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/feature-foo\t ",
+        ]
+        process_output_remotes = [
+            "origin/feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123"
+        ]
+        detached_head_output = [
+            "* (no branch, rebasing feature-foo)",
+            "  main",
+            "  feature-foo",
+            "  remotes/origin/feature-foo",
+        ]
+
+        mock_execute.side_effect = [
+            # Response for get all refs/heads
+            maybe_future((0, "\n".join(process_output_heads), "")),
+            # Response for get current branch
+            maybe_future((128, "", "fatal: ref HEAD is not a symbolic ref")),
+            # Response for get current branch detached
+            maybe_future((0, "\n".join(detached_head_output), "")),
+            # Response for get all refs/remotes
+            maybe_future((0, "\n".join(process_output_remotes), "")),
+        ]
+
+        expected_response = {
+            "code": 0,
+            "branches": [
+                {
+                    "is_current_branch": False,
+                    "is_remote_branch": False,
+                    "name": "main",
+                    "upstream": "origin/main",
+                    "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
+                    "tag": None,
+                },
+                {
+                    "is_current_branch": False,
+                    "is_remote_branch": False,
+                    "name": "feature-foo",
+                    "upstream": "origin/feature-foo",
+                    "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
+                    "tag": None,
+                },
+                {
+                    "is_current_branch": True,
+                    "is_remote_branch": False,
+                    "name": "feature-foo",
+                    "upstream": None,
+                    "top_commit": None,
+                    "tag": None,
+                },
+                {
+                    "is_current_branch": False,
+                    "is_remote_branch": True,
+                    "name": "origin/feature-foo",
+                    "upstream": None,
+                    "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
+                    "tag": None,
+                },
+            ],
+            "current_branch": {
+                "is_current_branch": True,
+                "is_remote_branch": False,
+                "name": "feature-foo",
                 "upstream": None,
                 "top_commit": None,
                 "tag": None,

@@ -18,10 +18,12 @@ import {
   sectionButtonContainerStyle,
   sectionHeaderLabelStyle,
   stashFileStyle,
-  stashEntryMessageStyle
+  stashEntryMessageStyle,
+  stashContainerStyle
 } from '../style/GitStashStyle';
 import { FilePath } from './FilePath';
 import { stopPropagationWrapper } from '../utils';
+import { classes } from 'typestyle';
 
 const HEADER_HEIGHT = 34;
 const ITEM_HEIGHT = 25;
@@ -215,7 +217,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   );
 
   return (
-    <div className={sectionFileContainerStyle}>
+    <div className={classes(sectionFileContainerStyle, stashContainerStyle)}>
       <div
         className={sectionAreaStyle}
         onClick={() => {

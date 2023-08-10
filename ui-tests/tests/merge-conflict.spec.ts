@@ -18,25 +18,32 @@ test.describe('Merge conflict tests', () => {
 
     await page.sidebar.openTab('jp-git-sessions');
 
-    await page.locator('button:has-text("Current Branchmaster")').click();
+    await page.getByRole('button', { name: 'Current Branch master' }).click();
 
     // Click on a-branch merge button
     await page.locator('text=a-branch').hover();
-    await page.locator('text=a-branchmaster >> button').nth(1).click();
+    await page
+      .getByRole('button', {
+        name: 'Merge this branch into the current one',
+        exact: true
+      })
+      .click();
 
     // Hide branch panel
-    await page.locator('button:has-text("Current Branchmaster")').click();
+    await page.getByRole('button', { name: 'Current Branch master' }).click();
 
     // Force refresh
     await page
-      .locator(
-        'button[title="Refresh the repository to detect local and remote changes"]'
-      )
+      .getByRole('button', {
+        name: 'Refresh the repository to detect local and remote changes'
+      })
       .click();
   });
 
   test('should diff conflicted text file', async ({ page }) => {
-    await page.click('[title="file.txt • Conflicted"]', { clickCount: 2 });
+    await page
+      .getByTitle('file.txt • Conflicted', { exact: true })
+      .click({ clickCount: 2 });
     await page.waitForSelector(
       '.jp-git-diff-parent-widget[id^="Current-Incoming"] .jp-spinner',
       { state: 'detached' }
@@ -54,7 +61,7 @@ test.describe('Merge conflict tests', () => {
   });
 
   test('should diff conflicted notebook file', async ({ page }) => {
-    await page.click('[title="example.ipynb • Conflicted"]', {
+    await page.getByTitle('example.ipynb • Conflicted').click({
       clickCount: 2
     });
     await page.waitForSelector(

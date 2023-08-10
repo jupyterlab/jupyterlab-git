@@ -1021,6 +1021,57 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Rebase the current branch onto the provided one.
+   *
+   * @param branch to rebase onto
+   * @returns promise which resolves upon rebase action
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async rebase(branch: string): Promise<Git.IResultWithMessage> {
+    const path = await this._getPathRepository();
+    return this._taskHandler.execute<Git.IResultWithMessage>(
+      'git:rebase',
+      () => {
+        return requestAPI<Git.IResultWithMessage>(
+          URLExt.join(path, 'rebase'),
+          'POST',
+          {
+            branch
+          }
+        );
+      }
+    );
+  }
+
+  /**
+   * Resolve in progress rebase.
+   *
+   * @param action to perform
+   * @returns promise which resolves upon rebase action
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async resolveRebase(
+    action: 'continue' | 'skip' | 'abort'
+  ): Promise<Git.IResultWithMessage> {
+    const path = await this._getPathRepository();
+    return this._taskHandler.execute<Git.IResultWithMessage>(
+      'git:rebase:resolve',
+      () =>
+        requestAPI<Git.IResultWithMessage>(
+          URLExt.join(path, 'rebase'),
+          'POST',
+          { action }
+        )
+    );
+  }
+
+  /**
    * Refresh the repository.
    *
    * @returns promise which resolves upon refreshing the repository
@@ -1061,14 +1112,6 @@ export class GitExtension implements IGitExtension {
       );
 
       this._branches = data.branches ?? [];
-
-      const detachedHeadRegex = /\(HEAD detached at (.+)\)/;
-      const result = data.current_branch.name.match(detachedHeadRegex);
-
-      if (result && result.length > 1) {
-        data.current_branch.name = result[1];
-        data.current_branch.detached = true;
-      }
 
       this._currentBranch = data.current_branch;
       if (this._currentBranch) {
@@ -1149,6 +1192,7 @@ export class GitExtension implements IGitExtension {
         remote: data.remote || null,
         ahead: data.ahead || 0,
         behind: data.behind || 0,
+        state: data.state ?? 0,
         files
       });
       await this.refreshDirtyStatus();
@@ -1868,6 +1912,7 @@ export class GitExtension implements IGitExtension {
       remote: null,
       ahead: 0,
       behind: 0,
+      state: Git.State.DEFAULT,
       files: []
     };
   }
@@ -1912,6 +1957,7 @@ export class GitExtension implements IGitExtension {
       this._status.ahead === v.ahead &&
       this._status.behind === v.behind &&
       this._status.branch === v.branch &&
+      this._status.state === v.state &&
       this._status.files.length === v.files.length;
     if (areEqual) {
       for (const file of v.files) {
