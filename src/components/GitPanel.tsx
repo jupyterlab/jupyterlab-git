@@ -838,7 +838,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         ) {
           const result = await showDialog({
             title: this.props.trans.__('Who is committing?'),
-            body: new GitAuthorForm(author)
+            body: new GitAuthorForm({ author, trans: this.props.trans })
           });
 
           if (!result.button.accept) {

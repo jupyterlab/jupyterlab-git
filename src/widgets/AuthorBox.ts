@@ -1,4 +1,5 @@
 import { Dialog } from '@jupyterlab/apputils';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import { Git } from '../tokens';
 
@@ -9,29 +10,37 @@ export class GitAuthorForm
   extends Widget
   implements Dialog.IBodyWidget<Git.IIdentity>
 {
-  constructor(lastAuthor: Git.IIdentity) {
+  constructor({
+    author,
+    trans
+  }: {
+    author: Git.IIdentity;
+    trans: TranslationBundle;
+  }) {
     super();
-    this._lastAuthor = lastAuthor;
-    this.node.appendChild(this.createBody());
+    this._populateForm(author, trans);
   }
 
-  private createBody(): HTMLElement {
-    const node = document.createElement('div');
-    const text = document.createElement('span');
-    this._name = document.createElement('input');
-    this._email = document.createElement('input');
+  private _populateForm(
+    author: Git.IIdentity,
+    trans?: TranslationBundle
+  ): void {
+    const nameLabel = document.createElement('label');
+    nameLabel.textContent = trans.__('Committer name:');
+    const emailLabel = document.createElement('label');
+    emailLabel.textContent = trans.__('Committer email:');
 
-    node.className = 'jp-RedirectForm';
-    text.textContent = 'Enter your name and email for commit';
+    this._name = nameLabel.appendChild(document.createElement('input'));
+    this._email = emailLabel.appendChild(document.createElement('input'));
     this._name.placeholder = 'Name';
+    this._email.type = 'text';
     this._email.placeholder = 'Email';
-    this._name.value = this._lastAuthor.name;
-    this._email.value = this._lastAuthor.email;
+    this._email.type = 'email';
+    this._name.value = author.name;
+    this._email.value = author.email;
 
-    node.appendChild(text);
-    node.appendChild(this._name);
-    node.appendChild(this._email);
-    return node;
+    this.node.appendChild(nameLabel);
+    this.node.appendChild(emailLabel);
   }
 
   /**
@@ -47,5 +56,4 @@ export class GitAuthorForm
 
   private _name: HTMLInputElement;
   private _email: HTMLInputElement;
-  private _lastAuthor: Git.IIdentity;
 }

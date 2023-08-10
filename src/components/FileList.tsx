@@ -466,7 +466,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               ({
                 ...fileStatus,
                 status: 'staged'
-              }) as Git.IStatusFile
+              } as Git.IStatusFile)
           )
         );
         break;
@@ -477,7 +477,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
               ({
                 ...fileStatus,
                 status: 'unstaged'
-              }) as Git.IStatusFile
+              } as Git.IStatusFile)
           )
         );
         break;
