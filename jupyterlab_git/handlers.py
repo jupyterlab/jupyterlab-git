@@ -909,11 +909,12 @@ class GitRebaseHandler(GitHandler):
             body = await self.git.rebase(branch, self.url2localpath(path))
         else:
             try:
-                body = await self.git.resolve_rebase(self.url2localpath(path), RebaseAction[action.upper()])
+                body = await self.git.resolve_rebase(
+                    self.url2localpath(path), RebaseAction[action.upper()]
+                )
             except KeyError:
                 raise tornado.web.HTTPError(
-                    status_code=404,
-                    reason=f"Unknown action '{action}'"
+                    status_code=404, reason=f"Unknown action '{action}'"
                 )
 
         if body["code"] != 0:

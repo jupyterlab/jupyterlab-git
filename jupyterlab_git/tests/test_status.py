@@ -356,12 +356,14 @@ async def test_status(tmp_path, output, diff_output, expected):
         mock_execute.side_effect = [
             maybe_future((0, "\x00".join(output) + "\x00", "")),
             maybe_future((0, "\x00".join(diff_output) + "\x00", "")),
-            maybe_future(
-                (0 if expected["state"] == 4 else 128, "", "cherry pick")
-            ),
+            maybe_future((0 if expected["state"] == 4 else 128, "", "cherry pick")),
             maybe_future((0 if expected["state"] == 2 else 128, "", "merge")),
-            maybe_future((0 if expected["state"] == 3 else 128, ".git/rebase-merge", "rebase")),
-            maybe_future((0 if expected["state"] == 3 else 128, ".git/rebase-apply", "rebase")),
+            maybe_future(
+                (0 if expected["state"] == 3 else 128, ".git/rebase-merge", "rebase")
+            ),
+            maybe_future(
+                (0 if expected["state"] == 3 else 128, ".git/rebase-apply", "rebase")
+            ),
         ]
 
         # When

@@ -940,8 +940,7 @@ export function addCommands(
         });
       }
     },
-    isEnabled: () =>
-      gitModel.status.state === Git.State.REBASING
+    isEnabled: () => gitModel.status.state === Git.State.REBASING
   });
 
   commands.addCommand(CommandIDs.gitStash, {

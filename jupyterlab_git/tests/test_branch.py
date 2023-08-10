@@ -984,7 +984,7 @@ async def test_branch_success_rebasing():
         # Given
         process_output_heads = [
             "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t ",
-            "feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/feature-foo\t "
+            "feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/feature-foo\t ",
         ]
         process_output_remotes = [
             "origin/feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123"

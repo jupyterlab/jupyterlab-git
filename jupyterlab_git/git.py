@@ -41,13 +41,9 @@ GIT_BRANCH_STATUS = re.compile(
     r"^## (?P<branch>([\w\-/]+|HEAD \(no branch\)|No commits yet on \w+))(\.\.\.(?P<remote>[\w\-/]+)( \[(ahead (?P<ahead>\d+))?(, )?(behind (?P<behind>\d+))?\])?)?$"
 )
 # Parse Git detached head
-GIT_DETACHED_HEAD = re.compile(
-    r"^\(HEAD detached at (?P<commit>.+?)\)$"
-)
+GIT_DETACHED_HEAD = re.compile(r"^\(HEAD detached at (?P<commit>.+?)\)$")
 # Parse Git branch rebase name
-GIT_REBASING_BRANCH = re.compile(
-    r"^\(no branch, rebasing (?P<branch>.+?)\)$"
-)
+GIT_REBASING_BRANCH = re.compile(r"^\(no branch, rebasing (?P<branch>.+?)\)$")
 # Git cache as a credential helper
 GIT_CREDENTIAL_HELPER_CACHE = re.compile(r"cache\b")
 
@@ -56,20 +52,22 @@ execution_lock = tornado.locks.Lock()
 
 class State(IntEnum):
     """Git repository state."""
+
     # Default state
-    DEFAULT = 0,
+    DEFAULT = (0,)
     # Detached head state
-    DETACHED = 1,
+    DETACHED = (1,)
     # Merge in progress
-    MERGING = 2,
+    MERGING = (2,)
     # Rebase in progress
-    REBASING = 3,
+    REBASING = (3,)
     # Cherry-pick in progress
     CHERRY_PICKING = 4
 
 
 class RebaseAction(Enum):
     """Git available action when rebasing."""
+
     CONTINUE = 1
     SKIP = 2
     ABORT = 3
@@ -561,25 +559,29 @@ class Git:
 
         # Test for repository state
         states = {
-            State.CHERRY_PICKING: 'CHERRY_PICK_HEAD',
-            State.MERGING: 'MERGE_HEAD',
+            State.CHERRY_PICKING: "CHERRY_PICK_HEAD",
+            State.MERGING: "MERGE_HEAD",
             # Looking at REBASE_HEAD is not reliable as it may not be clean in the .git folder
             # e.g. when skipping the last commit of a ongoing rebase
             # So looking for folder `rebase-apply` and `rebase-merge`; see https://stackoverflow.com/questions/3921409/how-to-know-if-there-is-a-git-rebase-in-progress
-            State.REBASING: ['rebase-merge', 'rebase-apply'],
+            State.REBASING: ["rebase-merge", "rebase-apply"],
         }
-        
+
         state = State.DEFAULT
         for state_, head in states.items():
             if isinstance(head, str):
-                code, _, _ = await self.__execute(["git", "show", "--quiet", head], cwd=path)
+                code, _, _ = await self.__execute(
+                    ["git", "show", "--quiet", head], cwd=path
+                )
                 if code == 0:
                     state = state_
                     break
             else:
                 found = False
                 for directory in head:
-                    code, output, _ = await self.__execute(["git", "rev-parse", "--git-path", directory], cwd=path)
+                    code, output, _ = await self.__execute(
+                        ["git", "rev-parse", "--git-path", directory], cwd=path
+                    )
                     filepath = output.strip("\n\t ")
                     if code == 0 and (Path(path) / filepath).exists():
                         found = True
@@ -590,7 +592,7 @@ class Git:
 
         if state == State.DEFAULT and data["branch"] == "(detached)":
             state = State.DETACHED
-        
+
         data["state"] = state
 
         return data
@@ -1900,7 +1902,7 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code, "message": output.strip()}
-    
+
     async def resolve_rebase(self, path: str, action: RebaseAction) -> dict:
         """
         Execute git rebase --<action> command & return the result.
@@ -1915,7 +1917,7 @@ class Git:
         # Ref: https://stackoverflow.com/questions/43489971/how-to-suppress-the-editor-for-git-rebase-continue
         if option == "continue":
             env = os.environ.copy()
-            env["GIT_EDITOR"]="true"
+            env["GIT_EDITOR"] = "true"
         code, output, error = await execute(cmd, cwd=path, env=env)
 
         if code != 0:
