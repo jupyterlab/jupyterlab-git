@@ -230,6 +230,7 @@ export class NewBranchDialog extends React.Component<
       .filter(branch => !filter || branch.name.includes(filter))
       .slice()
       .sort(comparator);
+    console.log(filter);
     return (
       <VariableSizeList
         className={listWrapperClass}

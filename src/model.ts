@@ -1760,6 +1760,27 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Create a new tag pointing to a specific commit.
+   *
+   * @param tagName - name of new tag
+   * @param commitId - identifier of commit tag is pointing to
+   * @returns promise which resolves upon succesfully creating the new tag
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async newTag(tag: string, commitId: string): Promise<void> {
+    const path = await this._getPathRepository();
+    await this._taskHandler.execute<void>('git:tag:create', async () => {
+      return await requestAPI<void>(URLExt.join(path, 'tag'), 'POST', {
+        tag_id: tag,
+        commit_id: commitId
+      });
+    });
+  }
+
+  /**
    * Add a file to the current marker object.
    *
    * @param fname - filename

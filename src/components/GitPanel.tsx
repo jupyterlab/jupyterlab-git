@@ -391,6 +391,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         branches={this.state.branches}
         branching={!disableBranching}
         commands={this.props.commands}
+        pastCommits={this.state.pastCommits}
         logger={this.props.logger}
         model={this.props.model}
         nCommitsAhead={this.state.nCommitsAhead}

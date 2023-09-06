@@ -61,6 +61,11 @@ export interface IToolbarProps {
   currentBranch: string;
 
   /**
+   * List of prior commits.
+   */
+  pastCommits: Git.ISingleCommitInfo[];
+
+  /**
    * Extension logger
    */
   logger: Logger;
@@ -367,6 +372,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   private _renderTags(): JSX.Element {
     return (
       <TagMenu
+        pastCommits={this.props.pastCommits}
         logger={this.props.logger}
         model={this.props.model}
         branching={this.props.branching}

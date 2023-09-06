@@ -14,12 +14,14 @@ import {
   filterWrapperClass,
   listItemClass,
   listItemIconClass,
+  newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
 import { tagIcon } from '../style/icons';
-import { IGitExtension, Level } from '../tokens';
+import { Git, IGitExtension, Level } from '../tokens';
+import { NewTagDialog } from './NewTagDialog';
 
-const ITEM_HEIGHT = 24.8; // HTML element height for a single branch
+const ITEM_HEIGHT = 24.8; // HTML element height for a single tag
 const MIN_HEIGHT = 150; // Minimal HTML element height for the tags list
 const MAX_HEIGHT = 400; // Maximal HTML element height for the tags list
 
@@ -87,9 +89,15 @@ function renderFileName(filename: string): React.ReactElement {
  */
 export interface ITagMenuProps {
   /**
-   * Boolean indicating whether branching is disabled.
+   * Wheather branching is diasbled.
    */
   branching: boolean;
+
+  /**
+   * /**
+   * List of prior commits.
+   */
+  pastCommits: Git.ISingleCommitInfo[];
 
   /**
    * Extension logger
@@ -112,6 +120,11 @@ export interface ITagMenuProps {
  */
 export interface ITagMenuState {
   /**
+   * Boolean indicating whether to show a dialog to create a new tag.
+   */
+  tagDialog: boolean;
+
+  /**
    * Menu filter.
    */
   filter: string;
@@ -123,11 +136,11 @@ export interface ITagMenuState {
 }
 
 /**
- * React component for rendering a branch menu.
+ * React component for rendering a tag menu.
  */
 export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
   /**
-   * Returns a React component for rendering a branch menu.
+   * Returns a React component for rendering a tag menu.
    *
    * @param props - component properties
    * @returns React component
@@ -137,7 +150,8 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
 
     this.state = {
       filter: '',
-      tags: []
+      tags: [],
+      tagDialog: false
     };
   }
 
@@ -168,12 +182,13 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
       <div className={wrapperClass}>
         {this._renderFilter()}
         {this._renderTagList()}
+        {this._renderNewTagDialog()}
       </div>
     );
   }
 
   /**
-   * Renders a branch input filter.
+   * Renders a tag input filter.
    *
    * @returns React element
    */
@@ -187,7 +202,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
             onChange={this._onFilterChange}
             value={this.state.filter}
             placeholder={this.props.trans.__('Filter')}
-            title={this.props.trans.__('Filter branch menu')}
+            title={this.props.trans.__('Filter tag menu')}
           />
           {this.state.filter ? (
             <button className={filterClearClass}>
@@ -199,6 +214,13 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
             </button>
           ) : null}
         </div>
+        <input
+          className={newBranchButtonClass}
+          type="button"
+          title={this.props.trans.__('Create a new tag')}
+          value={this.props.trans.__('New Tag')}
+          onClick={this._onNewTagClick}
+        />
       </div>
     );
   }
@@ -255,6 +277,24 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
   };
 
   /**
+   * Renders a dialog for creating a new tag.
+   *
+   * @returns React element
+   */
+  private _renderNewTagDialog(): React.ReactElement {
+    return (
+      <NewTagDialog
+        pastCommits={this.props.pastCommits}
+        logger={this.props.logger}
+        open={this.state.tagDialog}
+        model={this.props.model}
+        onClose={this._onNewTagDialogClose}
+        trans={this.props.trans}
+      />
+    );
+  }
+
+  /**
    * Callback invoked upon a change to the menu filter.
    *
    * @param event - event object
@@ -275,9 +315,36 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
   };
 
   /**
+   * Callback invoked upon clicking a button to create a new tag.
+   *
+   * @param event - event object
+   */
+  private _onNewTagClick = (): void => {
+    if (!this.props.branching) {
+      showErrorMessage(
+        this.props.trans.__('Creating a new tag is disabled'),
+        this.props.trans.__('Error in creating new tag')
+      );
+      return;
+    }
+    this.setState({
+      tagDialog: true
+    });
+  };
+
+  /**
+   * Callback invoked upon closing a dialog to create a new tag.
+   */
+  private _onNewTagDialogClose = (): void => {
+    this.setState({
+      tagDialog: false
+    });
+  };
+
+  /**
    * Returns a callback which is invoked upon clicking a tag.
    *
-   * @param branch - tag
+   * @param tag - tag
    * @returns callback
    */
   private _onTagClickFactory(tag: string) {

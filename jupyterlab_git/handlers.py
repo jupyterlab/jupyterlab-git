@@ -892,6 +892,27 @@ class GitTagCheckoutHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+class GitNewTagHandler(GitHandler):
+    """
+    Hadler for 'git tag <tag_name> <commit_id>. Create new tag pointing to a specific commit.
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """
+        POST request handler, create a new tag pointing to a specific commit.
+        """
+        data = self.get_json_body()
+        tag = data["tag_id"]
+        commit = data["commit_id"]
+        response = await self.git.new_tag(self.url2localpath(path), tag, commit)
+        if response["code"] == 0:
+            self.set_status(201)
+        else:
+            self.set_status(500)
+        self.finish(json.dumps(response))
+
+
 class GitRebaseHandler(GitHandler):
     """
     Handler for git rebase '<rebase_onto>'.
@@ -1066,6 +1087,7 @@ def setup_handlers(web_app):
         ("/ignore", GitIgnoreHandler),
         ("/tags", GitTagHandler),
         ("/tag_checkout", GitTagCheckoutHandler),
+        ("/new_tag", GitNewTagHandler),
         ("/add", GitAddHandler),
         ("/rebase", GitRebaseHandler),
         ("/stash", GitStashHandler),

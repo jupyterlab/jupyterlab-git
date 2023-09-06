@@ -1765,6 +1765,30 @@ class Git:
                 "message": error,
             }
 
+    async def new_tag(self, path, tag, commitId):
+        """Create new git tag pointing to a specific commit.
+
+        path: str
+            Git path repository
+        tag : str
+            Name of new tag.
+        commitId:
+           Identifier of commit tag is pointing to.
+        """
+        command = ["git", "tag", tag, commitId]
+        code, _, error = await self.__execute(command, cwd=path)
+        if code == 0:
+            return {
+                "code": code,
+                "message": "Tag {} created, poining to commit {}".format(tag, commitId),
+            }
+        else:
+            return {
+                "code": code,
+                "command": " ".join(command),
+                "message": error,
+            }
+
     async def check_credential_helper(self, path: str) -> Optional[bool]:
         """
         Check if the credential helper exists, and whether we need to setup a Git credential cache daemon in case the credential helper is Git credential cache.

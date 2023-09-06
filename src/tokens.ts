@@ -238,6 +238,18 @@ export interface IGitExtension extends IDisposable {
   checkoutTag(tag: string): Promise<Git.ICheckoutResult>;
 
   /**
+   * Create a new tag pointing to a specific commit
+   *
+   * @param tagName name ofnew tag
+   * @param commitId identifier of commit new tag points to
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  newTag(tagName: string, commitId: string): Promise<void>;
+
+  /**
    * Clone a repository.
    *
    * @param path - local path into which the repository will be cloned
