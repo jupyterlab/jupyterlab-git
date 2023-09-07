@@ -89,12 +89,11 @@ function renderFileName(filename: string): React.ReactElement {
  */
 export interface ITagMenuProps {
   /**
-   * Boolean indicating whether branching is diasbled.
+   * Boolean indicating whether branching is disabled.
    */
   branching: boolean;
 
   /**
-   * /**
    * List of prior commits.
    */
   pastCommits: Git.ISingleCommitInfo[];
