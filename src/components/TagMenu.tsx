@@ -89,7 +89,7 @@ function renderFileName(filename: string): React.ReactElement {
  */
 export interface ITagMenuProps {
   /**
-   * Wheather branching is diasbled.
+   * Boolean indicating whether branching is diasbled.
    */
   branching: boolean;
 
