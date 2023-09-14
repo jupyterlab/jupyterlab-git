@@ -1780,7 +1780,9 @@ class Git:
         if code == 0:
             return {
                 "code": code,
-                "message": "Tag {} created, poining to commit {}".format(tag, commitId),
+                "message": "Tag {} created, pointing to commit {}".format(
+                    tag, commitId
+                ),
             }
         else:
             return {

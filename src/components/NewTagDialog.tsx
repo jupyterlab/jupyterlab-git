@@ -3,7 +3,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import ClearIcon from '@material-ui/icons/Clear';
 import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
-import { ListChildComponentProps, VariableSizeList } from 'react-window';
+import { VariableSizeList } from 'react-window';
 import { classes } from 'typestyle';
 import { Logger } from '../logger';
 import {
@@ -31,15 +31,9 @@ import {
   commitHeaderClass,
   commitHeaderItemClass,
   commitWrapperClass
-  // listItemDescClass
 } from '../style/NewTagDialog';
 import { Git, IGitExtension, Level } from '../tokens';
 import { GitCommitGraph } from './GitCommitGraph';
-
-const ITEM_HEIGHT = 50; // 27.5; // HTML element height for a single commit
-const CURRENT_COMMIT_HEIGHT = 66.5; // HTML element height for the current commit with description
-const HEIGHT = 200; // HTML element height for the commit list
-const MAX_LENGTH = 10; // max number of commits to be shown
 
 /**
  * Interface describing component properties.
@@ -100,6 +94,47 @@ export interface INewTagDialogState {
    */
   error: string;
 }
+
+const DialogBoxCommitGraph: React.FunctionComponent<INewTagDialogProps> = (
+  props: INewTagDialogProps
+): React.ReactElement => {
+  const [nodeHeights, setNodeHeights] = React.useState<{
+    [sha: string]: number;
+  }>({});
+  const nodes = React.useRef<{ [sha: string]: HTMLLIElement }>({});
+
+  React.useEffect(() => {
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const borderBoxSize = Array.isArray(entry.borderBoxSize)
+          ? entry.borderBoxSize[0]
+          : entry.borderBoxSize;
+        const offsetHeight = borderBoxSize.blockSize;
+        const sha = entry.target.id;
+        setNodeHeights(prev => ({ ...prev, [sha]: offsetHeight }));
+      }
+    });
+
+    props.pastCommits.forEach(commit =>
+      resizeObserver.observe(nodes.current[commit.commit], {
+        box: 'border-box'
+      })
+    );
+    return () => resizeObserver.disconnect();
+  }, []);
+  console.log('Commits: ', props.pastCommits);
+  console.log('Nodes: ', nodes);
+
+  return (
+    <GitCommitGraph
+      commits={props.pastCommits.map(commit => ({
+        sha: commit.commit,
+        parents: commit.pre_commits
+      }))}
+      getNodeHeight={(sha: string) => nodeHeights[sha] ?? 55}
+    />
+  );
+};
 
 /**
  * React component for rendering a dialog to create a new tag.
@@ -214,6 +249,21 @@ export class NewTagDialog extends React.Component<
     );
   }
 
+  private _renderDialogBoxCommitGraph(): React.ReactElement {
+    return (
+      <React.Fragment>
+        <DialogBoxCommitGraph
+          pastCommits={this.props.pastCommits}
+          logger={this.props.logger}
+          model={this.props.model}
+          open={this.props.open}
+          onClose={this.props.onClose}
+          trans={this.props.trans}
+        />
+      </React.Fragment>
+    );
+  }
+
   /**
    * Renders commit menu items.
    *
@@ -221,39 +271,15 @@ export class NewTagDialog extends React.Component<
    */
   private _renderItems(): JSX.Element {
     const filter = this.state.filter;
-    const commits = this.props.pastCommits
+    const pastCommits = this.props.pastCommits
       .filter(commit => !filter || commit.commit_msg.includes(filter))
       .slice();
     return (
       <div className={historyDialogBoxWrapperStyle}>
-        <GitCommitGraph
-          commits={commits.map(commit => ({
-            sha: commit.commit,
-            parents: commit.pre_commits
-          }))}
-          getNodeHeight={(sha: string) => ITEM_HEIGHT}
-        />
-        <VariableSizeList
-          className={historyDialogBoxStyle}
-          height={HEIGHT}
-          estimatedItemSize={ITEM_HEIGHT}
-          itemCount={MAX_LENGTH}
-          itemData={commits}
-          itemKey={(index, data) => data[index].commit_msg}
-          itemSize={index => {
-            const commit = commits[index];
-            return [this.props.pastCommits[0].commit_msg].includes(
-              commit.commit_msg
-            )
-              ? CURRENT_COMMIT_HEIGHT
-              : ITEM_HEIGHT;
-          }}
-          ref={this._commitsList}
-          style={{ overflowX: 'hidden' }}
-          width={'auto'}
-        >
-          {this._renderItem}
-        </VariableSizeList>
+        {this._renderDialogBoxCommitGraph}
+        <ol className={historyDialogBoxStyle}>
+          {pastCommits.map((commit, index) => this._renderItem(commit, index))}
+        </ol>
       </div>
     );
   }
@@ -264,21 +290,16 @@ export class NewTagDialog extends React.Component<
    * @param props Row properties
    * @returns React element
    */
-  private _renderItem = (props: ListChildComponentProps): JSX.Element => {
-    const { data, index } = props;
-    const commit = data[index] as Git.ISingleCommitInfo;
-
+  private _renderItem = (
+    commit: Git.ISingleCommitInfo,
+    index: number
+  ): JSX.Element => {
     const isLatest = commit === this.props.pastCommits[0];
 
     let isBold;
-    // let desc;
     if (isLatest) {
       isBold = true;
-      // desc = this.props.trans.__(
-      //   'The latest commit. Pick this if you want to create a tag pointing to this commit.'
-      // );
     }
-
     return (
       <li
         id={commit.commit}
@@ -332,9 +353,6 @@ export class NewTagDialog extends React.Component<
         >
           {commit.commit_msg}
         </div>
-        {/* {desc ? (
-            <p className={listItemDescClass}>{this.props.trans.__(desc)}</p>
-          ) : null} */}
       </li>
     );
   };
