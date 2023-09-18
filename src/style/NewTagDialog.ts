@@ -243,14 +243,13 @@ export const historyDialogBoxStyle = style({
   marginBlockEnd: 0,
   paddingLeft: 0,
 
-  overflowY: 'auto',
   listStyleType: 'none'
 });
 
 export const historyDialogBoxWrapperStyle = style({
   display: 'flex',
   height: '200px',
-  overflow: 'hidden'
+  overflowY: 'auto'
 });
 
 export const activeListItemClass = style({
@@ -278,15 +277,7 @@ export const commitWrapperClass = style({
   flexShrink: 0,
   flexDirection: 'column',
   padding: '5px 0px 5px 10px',
-  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-
-  $nest: {
-    '&:active': {
-      backgroundColor: 'var(--jp-brand-color1)!important',
-      color: 'white!important',
-      fontWeight: '700'
-    }
-  }
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
 export const commitHeaderClass = style({

@@ -3,7 +3,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import ClearIcon from '@material-ui/icons/Clear';
 import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
-import { VariableSizeList } from 'react-window';
 import { classes } from 'typestyle';
 import { Logger } from '../logger';
 import {
@@ -71,13 +70,62 @@ export interface INewTagDialogProps {
 }
 
 /**
- * Interface describing component state.
+ * Interface describing component properties.
  */
-export interface INewTagDialogState {
+export interface IDialogBoxCommitGraphProps {
   /**
-   * Tag name.
+   * List of prior commits.
    */
-  name: string;
+  pastCommits: Git.ISingleCommitInfo[];
+
+  /**
+   * Extension logger
+   */
+  logger: Logger;
+
+  /**
+   * Git extension data model.
+   */
+  model: IGitExtension;
+
+  /**
+   * The application language translator.
+   */
+  trans: TranslationBundle;
+
+  /**
+   * Reference to the state object.
+   */
+  stateRef: React.RefObject<{
+    name: string;
+    baseCommitId: string;
+    filter: string;
+    error: string;
+  }>;
+
+  //   currentState: {
+  //     name: string,
+  //     baseCommitId: string,
+  //     filter: string,
+  //     error: string
+  //   }
+
+  //   updateState:React.Dispatch<React.SetStateAction<{
+  //     name: string;
+  //     baseCommitId: string;
+  //     filter: string;
+  //     error: string;
+  // }>>;
+}
+
+/**
+ * Interface describing component properties.
+ */
+export interface ISingleCommitProps {
+  /**
+   * Commit data.
+   */
+  commit: Git.ISingleCommitInfo;
 
   /**
    * Identifier of commit the tag is pointing to.
@@ -85,19 +133,51 @@ export interface INewTagDialogState {
   baseCommitId: string;
 
   /**
-   * Menu filter.
+   * The application language translator.
    */
-  filter: string;
+  trans: TranslationBundle;
 
   /**
-   * Error message.
+   * Callback to store a reference of the rendered <li> element in DialogBoxCommitGraph
    */
-  error: string;
+  setRef: (el: HTMLLIElement) => void;
+
+  /**
+   * Reference to the state object.
+   */
+  stateRef: React.RefObject<{
+    name: string;
+    baseCommitId: string;
+    filter: string;
+    error: string;
+  }>;
+
+  //   currentState: {
+  //     name: string,
+  //     baseCommitId: string,
+  //     filter: string,
+  //     error: string
+  //   }
+
+  //   updateState: React.Dispatch<React.SetStateAction<{
+  //     name: string;
+  //     baseCommitId: string;
+  //     filter: string;
+  //     error: string;
+  // }>>;
 }
 
-const DialogBoxCommitGraph: React.FunctionComponent<INewTagDialogProps> = (
-  props: INewTagDialogProps
-): React.ReactElement => {
+export const DialogBoxCommitGraph: React.FunctionComponent<
+  IDialogBoxCommitGraphProps
+> = (props: IDialogBoxCommitGraphProps): React.ReactElement => {
+  const { current: currentState } = props.stateRef;
+  const pastCommits = props.pastCommits
+    .filter(
+      commit =>
+        !currentState.filter || commit.commit_msg.includes(currentState.filter)
+    )
+    .slice();
+
   const [nodeHeights, setNodeHeights] = React.useState<{
     [sha: string]: number;
   }>({});
@@ -115,292 +195,63 @@ const DialogBoxCommitGraph: React.FunctionComponent<INewTagDialogProps> = (
       }
     });
 
-    props.pastCommits.forEach(commit =>
-      resizeObserver.observe(nodes.current[commit.commit], {
+    pastCommits.forEach(commit => {
+      const node = nodes.current[commit.commit];
+      resizeObserver.observe(node, {
         box: 'border-box'
-      })
-    );
+      });
+    });
+
     return () => resizeObserver.disconnect();
-  }, []);
-  console.log('Commits: ', props.pastCommits);
-  console.log('Nodes: ', nodes);
+  }, [pastCommits]);
 
   return (
-    <GitCommitGraph
-      commits={props.pastCommits.map(commit => ({
-        sha: commit.commit,
-        parents: commit.pre_commits
-      }))}
-      getNodeHeight={(sha: string) => nodeHeights[sha] ?? 55}
-    />
+    <div className={historyDialogBoxWrapperStyle}>
+      <GitCommitGraph
+        commits={pastCommits.map(commit => ({
+          sha: commit.commit,
+          parents: commit.pre_commits
+        }))}
+        getNodeHeight={(sha: string) => nodeHeights[sha] ?? 55}
+      />
+      <ol className={historyDialogBoxStyle}>
+        {pastCommits.map((commit, index) => {
+          return (
+            <SingleCommitNode
+              key={index}
+              commit={commit}
+              baseCommitId={currentState.baseCommitId}
+              trans={props.trans}
+              setRef={node => {
+                nodes.current[commit.commit] = node;
+              }}
+              stateRef={props.stateRef}
+              // currentState={props.currentState}
+              // updateState={props.updateState}
+            ></SingleCommitNode>
+          );
+        })}
+      </ol>
+    </div>
   );
 };
 
-/**
- * React component for rendering a dialog to create a new tag.
- */
-export class NewTagDialog extends React.Component<
-  INewTagDialogProps,
-  INewTagDialogState
-> {
-  /**
-   * Returns a React component for rendering a tag menu.
-   *
-   * @param props - component properties
-   * @returns React component
-   */
-  constructor(props: INewTagDialogProps) {
-    super(props);
+export const SingleCommitNode: React.FunctionComponent<ISingleCommitProps> = (
+  props: ISingleCommitProps
+): React.ReactElement => {
+  const isLatest = props.commit.commit === props.stateRef.current.baseCommitId;
 
-    this._commitsList = React.createRef<VariableSizeList>();
-    this.state = {
-      name: '',
-      baseCommitId: props.pastCommits[0].commit || null,
-      filter: '',
-      error: ''
-    };
+  let isBold;
+  if (isLatest) {
+    isBold = true;
   }
-
-  /**
-   * Renders a dialog for creating a new tag.
-   *
-   * @returns React element
-   */
-  render(): React.ReactElement {
-    return (
-      <Dialog
-        classes={{
-          paper: tagDialogClass
-        }}
-        open={this.props.open}
-        onClose={this._onClose}
-      >
-        <div className={titleWrapperClass}>
-          <p className={titleClass}>{this.props.trans.__('Create a Tag')}</p>
-          <button className={closeButtonClass}>
-            <ClearIcon
-              titleAccess={this.props.trans.__('Close this dialog')}
-              fontSize="small"
-              onClick={this._onClose}
-            />
-          </button>
-        </div>
-        <div className={contentWrapperClass}>
-          {this.state.error ? (
-            <p className={errorMessageClass}>{this.state.error}</p>
-          ) : null}
-          <p>{this.props.trans.__('Name')}</p>
-          <input
-            className={nameInputClass}
-            type="text"
-            onChange={this._onNameChange}
-            value={this.state.name}
-            placeholder=""
-            title={this.props.trans.__('Enter a tag name')}
-          />
-          <p>{this.props.trans.__('Create tag pointing to…')}</p>
-          <div className={filterWrapperClass}>
-            <div className={filterClass}>
-              <input
-                className={filterInputClass}
-                type="text"
-                onChange={this._onFilterChange}
-                value={this.state.filter}
-                placeholder={this.props.trans.__('Filter by commit message')}
-                title={this.props.trans.__('Filter history of commits menu')}
-              />
-              {this.state.filter ? (
-                <button className={filterClearClass}>
-                  <ClearIcon
-                    titleAccess={this.props.trans.__(
-                      'Clear the current filter'
-                    )}
-                    fontSize="small"
-                    onClick={this._resetFilter}
-                  />
-                </button>
-              ) : null}
-            </div>
-          </div>
-          {this._renderItems()}
-        </div>
-        <DialogActions className={actionsWrapperClass}>
-          <input
-            className={classes(buttonClass, cancelButtonClass)}
-            type="button"
-            title={this.props.trans.__(
-              'Close this dialog without creating a new tag'
-            )}
-            value={this.props.trans.__('Cancel')}
-            onClick={this._onClose}
-          />
-          <input
-            className={classes(buttonClass, createButtonClass)}
-            type="button"
-            title={this.props.trans.__('Create a new tag')}
-            value={this.props.trans.__('Create Tag')}
-            onClick={() => {
-              this._createTag();
-            }}
-            disabled={this.state.name === '' || this.state.error !== ''}
-          />
-        </DialogActions>
-      </Dialog>
-    );
-  }
-
-  private _renderDialogBoxCommitGraph(): React.ReactElement {
-    return (
-      <React.Fragment>
-        <DialogBoxCommitGraph
-          pastCommits={this.props.pastCommits}
-          logger={this.props.logger}
-          model={this.props.model}
-          open={this.props.open}
-          onClose={this.props.onClose}
-          trans={this.props.trans}
-        />
-      </React.Fragment>
-    );
-  }
-
-  /**
-   * Renders commit menu items.
-   *
-   * @returns array of React elements
-   */
-  private _renderItems(): JSX.Element {
-    const filter = this.state.filter;
-    const pastCommits = this.props.pastCommits
-      .filter(commit => !filter || commit.commit_msg.includes(filter))
-      .slice();
-    return (
-      <div className={historyDialogBoxWrapperStyle}>
-        {this._renderDialogBoxCommitGraph}
-        <ol className={historyDialogBoxStyle}>
-          {pastCommits.map((commit, index) => this._renderItem(commit, index))}
-        </ol>
-      </div>
-    );
-  }
-
-  /**
-   * Renders a tag menu item.
-   *
-   * @param props Row properties
-   * @returns React element
-   */
-  private _renderItem = (
-    commit: Git.ISingleCommitInfo,
-    index: number
-  ): JSX.Element => {
-    const isLatest = commit === this.props.pastCommits[0];
-
-    let isBold;
-    if (isLatest) {
-      isBold = true;
-    }
-    return (
-      <li
-        id={commit.commit}
-        className={classes(
-          commitWrapperClass,
-          isLatest ? activeListItemClass : null
-        )}
-        title={this.props.trans.__(
-          'Create a new tag pointing to commit %1: %2 by %3',
-          commit.commit in Git.Diff.SpecialRef
-            ? Git.Diff.SpecialRef[+commit.commit]
-            : commit.commit.slice(0, 7),
-          commit.commit_msg,
-          commit.author
-        )}
-        onClick={this._onTagClickFactory(commit.commit)}
-      >
-        <div className={commitHeaderClass}>
-          <span
-            className={classes(
-              commitHeaderItemClass,
-              isBold ? commitItemBoldClass : null
-            )}
-          >
-            {commit.author}
-          </span>
-          <span
-            className={classes(
-              commitHeaderItemClass,
-              isBold ? commitItemBoldClass : null
-            )}
-          >
-            {+commit.commit in Git.Diff.SpecialRef
-              ? Git.Diff.SpecialRef[+commit.commit]
-              : commit.commit.slice(0, 7)}
-          </span>
-          <span
-            className={classes(
-              commitHeaderItemClass,
-              isBold ? commitItemBoldClass : null
-            )}
-          >
-            {commit.date}
-          </span>
-        </div>
-        <div
-          className={classes(
-            commitBodyClass,
-            isBold ? commitHeaderBoldClass : null
-          )}
-        >
-          {commit.commit_msg}
-        </div>
-      </li>
-    );
-  };
-
-  /**
-   * Callback invoked upon closing the dialog.
-   *
-   * @param event - event object
-   */
-  private _onClose = (): void => {
-    this.props.onClose();
-    this.setState({
-      name: '',
-      filter: '',
-      error: ''
-    });
-  };
-
-  /**
-   * Callback invoked upon a change to the menu filter.
-   *
-   * @param event - event object
-   */
-  private _onFilterChange = (event: any): void => {
-    this._commitsList.current.resetAfterIndex(0);
-    this.setState({
-      filter: event.target.value
-    });
-  };
-
-  /**
-   * Callback invoked to reset the menu filter.
-   */
-  private _resetFilter = (): void => {
-    this._commitsList.current.resetAfterIndex(0);
-    this.setState({
-      filter: ''
-    });
-  };
-
   /**
    * Returns a callback which is invoked upon clicking a commit name.
    *
    * @param commit - commit
    * @returns callback
    */
-  private _onTagClickFactory(commitId: string) {
-    const self = this;
+  const onCommitClickFactory = (commitId: string) => {
     return onClick;
 
     /**
@@ -410,22 +261,140 @@ export class NewTagDialog extends React.Component<
      * @param event - event object
      */
     function onClick(): void {
-      self.setState({
-        baseCommitId: commitId
-      });
+      props.stateRef.current.baseCommitId = commitId;
+      // props.updateState({
+      //   baseCommitId:commitId,
+      //   ... props.currentState
+      // })
     }
-  }
+  };
+
+  return (
+    <li
+      id={props.commit.commit}
+      ref={props.setRef}
+      className={classes(
+        commitWrapperClass,
+        isLatest ? activeListItemClass : null
+      )}
+      title={props.trans.__(
+        'Create a new tag pointing to commit %1: %2 by %3',
+        props.commit.commit in Git.Diff.SpecialRef
+          ? Git.Diff.SpecialRef[+props.commit.commit]
+          : props.commit.commit.slice(0, 7),
+        props.commit.commit_msg,
+        props.commit.author
+      )}
+      onClick={onCommitClickFactory(props.commit.commit)}
+    >
+      <div className={commitHeaderClass}>
+        <span
+          className={classes(
+            commitHeaderItemClass,
+            isBold ? commitItemBoldClass : null
+          )}
+        >
+          {props.commit.author}
+        </span>
+        <span
+          className={classes(
+            commitHeaderItemClass,
+            isBold ? commitItemBoldClass : null
+          )}
+        >
+          {+props.commit.commit in Git.Diff.SpecialRef
+            ? Git.Diff.SpecialRef[+props.commit.commit]
+            : props.commit.commit.slice(0, 7)}
+        </span>
+        <span
+          className={classes(
+            commitHeaderItemClass,
+            isBold ? commitItemBoldClass : null
+          )}
+        >
+          {props.commit.date}
+        </span>
+      </div>
+      <div
+        className={classes(
+          commitBodyClass,
+          isBold ? commitHeaderBoldClass : null
+        )}
+      >
+        {props.commit.commit_msg}
+      </div>
+    </li>
+  );
+};
+
+export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
+  props: INewTagDialogProps
+): React.ReactElement => {
+  const initialState = {
+    name: '',
+    baseCommitId: props.pastCommits[0]?.commit || null,
+    filter: '',
+    error: ''
+  };
+
+  // const [state, setState] = React.useState(initialState);
+  const stateRef = React.useRef(initialState);
+
+  /**
+   * Callback invoked upon closing the dialog.
+   *
+   * @param event - event object
+   */
+  const onClose = (): void => {
+    props.onClose();
+    // setState({
+    //   name: '',
+    //   filter: '',
+    //   error: '',
+    //   ... state
+    // })
+    stateRef.current.name = '';
+    stateRef.current.filter = '';
+    stateRef.current.error = '';
+  };
+
+  /**
+   * Callback invoked upon a change to the menu filter.
+   *
+   * @param event - event object
+   */
+  const onFilterChange = (event: any): void => {
+    stateRef.current.filter = event.target.value;
+    // setState({
+    //   filter: event.target.value,
+    //   ... state
+    // })
+  };
+
+  /**
+   * Callback invoked to reset the menu filter.
+   */
+  const resetFilter = (): void => {
+    stateRef.current.filter = '';
+    // setState({
+    //   filter: '',
+    //   ... state
+    // })
+  };
 
   /**
    * Callback invoked upon a change to the tag name input element.
    *
    * @param event - event object
    */
-  private _onNameChange = (event: any): void => {
-    this.setState({
-      name: event.target.value,
-      error: ''
-    });
+  const onNameChange = (event: any): void => {
+    stateRef.current.name = event.target.value;
+    stateRef.current.error = '';
+    // setState({
+    //   name: event.target.value,
+    //   error:'',
+    //   ... state
+    // })
   };
 
   /**
@@ -434,41 +403,128 @@ export class NewTagDialog extends React.Component<
    * @param tag - tag name
    * @returns promise which resolves upon attempting to create a new tag
    */
-  private async _createTag(): Promise<void> {
-    const tagName = this.state.name;
-    const commitId = this.state.baseCommitId;
+  const createTag = async (): Promise<void> => {
+    const tagName = stateRef.current.name;
+    const commitId = stateRef.current.baseCommitId;
 
-    this.props.logger.log({
+    props.logger.log({
       level: Level.RUNNING,
-      message: this.props.trans.__('Creating tag…')
+      message: props.trans.__('Creating tag…')
     });
     try {
-      await this.props.model.newTag(tagName, commitId);
+      await props.model.newTag(tagName, commitId);
     } catch (err) {
-      this.setState({
-        error: err.message.replace(/^fatal:/, '')
-      });
-      this.props.logger.log({
+      stateRef.current.error = err.message.replace(/^fatal:/, '');
+      props.logger.log({
         level: Level.ERROR,
-        message: this.props.trans.__('Failed to create tag.')
+        message: props.trans.__('Failed to create tag.')
       });
       return;
     }
 
-    this.props.logger.log({
+    props.logger.log({
       level: Level.SUCCESS,
-      message: this.props.trans.__('Tag created.')
+      message: props.trans.__('Tag created.')
     });
     // Close the tag dialog:
-    this.props.onClose();
+    props.onClose();
 
     // Reset the tag name and filter:
-    this._commitsList.current.resetAfterIndex(0);
-    this.setState({
-      name: '',
-      filter: ''
-    });
-  }
+    stateRef.current.name = '';
+    stateRef.current.filter = '';
+    // setState({
+    //   name: '',
+    //   filter: '',
+    //    ... state
+    // })
+  };
 
-  private _commitsList: React.RefObject<VariableSizeList>;
-}
+  return (
+    <Dialog
+      classes={{
+        paper: tagDialogClass
+      }}
+      open={props.open}
+      onClose={onClose}
+    >
+      <div className={titleWrapperClass}>
+        <p className={titleClass}>{props.trans.__('Create a Tag')}</p>
+        <button className={closeButtonClass}>
+          <ClearIcon
+            titleAccess={props.trans.__('Close this dialog')}
+            fontSize="small"
+            onClick={onClose}
+          />
+        </button>
+      </div>
+      <div className={contentWrapperClass}>
+        {stateRef.current.error ? (
+          <p className={errorMessageClass}>{stateRef.current.error}</p>
+        ) : null}
+        <p>{props.trans.__('Name')}</p>
+        <input
+          className={nameInputClass}
+          type="text"
+          onChange={onNameChange}
+          value={stateRef.current.name}
+          placeholder=""
+          title={props.trans.__('Enter a tag name')}
+        />
+        <p>{props.trans.__('Create tag pointing to…')}</p>
+        <div className={filterWrapperClass}>
+          <div className={filterClass}>
+            <input
+              className={filterInputClass}
+              type="text"
+              onChange={onFilterChange}
+              value={stateRef.current.filter}
+              placeholder={props.trans.__('Filter by commit message')}
+              title={props.trans.__('Filter history of commits menu')}
+            />
+            {stateRef.current.filter ? (
+              <button className={filterClearClass}>
+                <ClearIcon
+                  titleAccess={props.trans.__('Clear the current filter')}
+                  fontSize="small"
+                  onClick={resetFilter}
+                />
+              </button>
+            ) : null}
+          </div>
+        </div>
+        {
+          <DialogBoxCommitGraph
+            pastCommits={props.pastCommits}
+            logger={props.logger}
+            model={props.model}
+            trans={props.trans}
+            stateRef={stateRef}
+            // currentState={state}
+            // updateState={setState}
+          />
+        }
+      </div>
+      <DialogActions className={actionsWrapperClass}>
+        <input
+          className={classes(buttonClass, cancelButtonClass)}
+          type="button"
+          title={props.trans.__('Close this dialog without creating a new tag')}
+          value={props.trans.__('Cancel')}
+          onClick={onClose}
+        />
+        <input
+          className={classes(buttonClass, createButtonClass)}
+          type="button"
+          title={props.trans.__('Create a new tag')}
+          value={props.trans.__('Create Tag')}
+          onClick={() => {
+            createTag();
+          }}
+          disabled={
+            stateRef.current.name === '' || stateRef.current.error !== ''
+          }
+        />
+      </DialogActions>
+    </Dialog>
+  );
+};

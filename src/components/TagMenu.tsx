@@ -19,7 +19,7 @@ import {
 } from '../style/BranchMenu';
 import { tagIcon } from '../style/icons';
 import { Git, IGitExtension, Level } from '../tokens';
-import { NewTagDialog } from './NewTagDialog';
+import { NewTagDialogBox } from './NewTagDialog';
 
 const ITEM_HEIGHT = 24.8; // HTML element height for a single tag
 const MIN_HEIGHT = 150; // Minimal HTML element height for the tags list
@@ -282,13 +282,13 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
    */
   private _renderNewTagDialog(): React.ReactElement {
     return (
-      <NewTagDialog
+      <NewTagDialogBox
         pastCommits={this.props.pastCommits}
         logger={this.props.logger}
-        open={this.state.tagDialog}
         model={this.props.model}
-        onClose={this._onNewTagDialogClose}
         trans={this.props.trans}
+        open={this.state.tagDialog}
+        onClose={this._onNewTagDialogClose}
       />
     );
   }
