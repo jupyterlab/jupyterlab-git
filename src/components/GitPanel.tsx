@@ -91,6 +91,11 @@ export interface IGitPanelState {
   currentBranch: string;
 
   /**
+   * List of tags.
+   */
+  tagsList: string[];
+
+  /**
    * List of changed files.
    */
   files: Git.IStatusFile[];
@@ -174,7 +179,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       currentBranch,
       pathRepository,
       hasDirtyFiles: hasDirtyStagedFiles,
-      stash
+      stash,
+      tagsList
     } = props.model;
 
     this.state = {
@@ -193,7 +199,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       hasDirtyFiles: hasDirtyStagedFiles,
       referenceCommit: null,
       challengerCommit: null,
-      stash: stash
+      stash: stash,
+      tagsList: tagsList
     };
   }
 
@@ -234,6 +241,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         this.refreshHistory();
       }
     }, this);
+    model.tagsChanged.connect(async () => {
+      await this.refreshTags();
+    }, this);
     model.selectedHistoryFileChanged.connect(() => {
       this.setState({ tab: 1 });
       this.refreshHistory();
@@ -272,6 +282,12 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     });
   };
 
+  refreshTags = async (): Promise<void> => {
+    this.setState({
+      tagsList: this.props.model.tagsList
+    });
+  };
+
   refreshHistory = async (): Promise<void> => {
     if (this.props.model.pathRepository !== null) {
       // Get git log for current branch
@@ -296,6 +312,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     if (this.props.model.pathRepository !== null) {
       await this.refreshBranches();
       await this.refreshHistory();
+      await this.refreshTags();
     }
   };
 
@@ -389,6 +406,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       <Toolbar
         currentBranch={this.state.currentBranch}
         branches={this.state.branches}
+        tagsList={this.state.tagsList}
         branching={!disableBranching}
         commands={this.props.commands}
         pastCommits={this.state.pastCommits}

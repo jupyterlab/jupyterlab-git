@@ -88,6 +88,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Tags list for the current repository.
+   */
+  get tagsList(): string[] {
+    return this._tagsList;
+  }
+
+  /**
    * The current repository branch.
    */
   get currentBranch(): Git.IBranch {
@@ -217,6 +224,13 @@ export class GitExtension implements IGitExtension {
    */
   get headChanged(): ISignal<IGitExtension, void> {
     return this._headChanged;
+  }
+
+  /**
+   * A signal emitted when the list of the Git repository changes.
+   */
+  get tagsChanged(): ISignal<IGitExtension, void> {
+    return this._tagsChanged;
   }
 
   /**
@@ -1152,6 +1166,45 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Refresh the list of repository tags.
+   *
+   * @returns promise which resolves upon refreshing repository tags
+   */
+  async refreshTag(): Promise<void> {
+    try {
+      const data = await this._taskHandler.execute<Git.ITagResult>(
+        'git:refresh:tags',
+        async () => {
+          return await this.tags();
+        }
+      );
+
+      const tagsChanged = !JSONExt.deepEqual(
+        this._tagsList as any,
+        (data.tags ?? []) as any
+      );
+
+      this._tagsList = data.tags ?? [];
+
+      if (tagsChanged) {
+        this._tagsChanged.emit();
+      }
+      this._fetchPoll.stop();
+    } catch (error) {
+      const tagsChanged = this._tagsList.length > 0;
+      this._tagsList = [];
+      this._fetchPoll.stop();
+      if (tagsChanged) {
+        this._tagsChanged.emit();
+      }
+
+      if (!(error instanceof Git.NotInRepository)) {
+        throw error;
+      }
+    }
+  }
+
+  /**
    * Refresh the repository status.
    *
    * Emit statusChanged if required.
@@ -1778,6 +1831,7 @@ export class GitExtension implements IGitExtension {
         commit_id: commitId
       });
     });
+    await this.refreshTag();
   }
 
   /**
@@ -2070,6 +2124,7 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>('git:refresh', async () => {
       try {
         await this.refreshBranch();
+        await this.refreshTag();
         await this.refreshStatus();
         await this.refreshStash();
         await this.checkRemoteChangeNotified();
@@ -2121,6 +2176,7 @@ export class GitExtension implements IGitExtension {
   private _stash: Git.IStash;
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];
+  private _tagsList: string[] = [];
   private _currentBranch: Git.IBranch | null = null;
   private _docmanager: IDocumentManager | null;
   private _docRegistry: DocumentRegistry | null;
@@ -2144,6 +2200,7 @@ export class GitExtension implements IGitExtension {
   private _statusForDirtyState: Git.Status[] = ['staged', 'partially-staged'];
 
   private _branchesChanged = new Signal<IGitExtension, void>(this);
+  private _tagsChanged = new Signal<IGitExtension, void>(this);
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _selectedHistoryFileChanged = new Signal<

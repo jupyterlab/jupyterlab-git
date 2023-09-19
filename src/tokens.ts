@@ -20,6 +20,11 @@ export interface IGitExtension extends IDisposable {
   branches: Git.IBranch[];
 
   /**
+   * The list of tags in the current repo
+   */
+  tagsList: string[];
+
+  /**
    * The current branch
    */
   currentBranch: Git.IBranch;
@@ -33,6 +38,11 @@ export interface IGitExtension extends IDisposable {
    * A signal emitted when the `HEAD` of the Git repository changes.
    */
   readonly headChanged: ISignal<IGitExtension, void>;
+
+  /**
+   * A signal emitted when the tags of the Git repository changes.
+   */
+  readonly tagsChanged: ISignal<IGitExtension, void>;
 
   /**
    * Top level path of the current Git repository
@@ -523,6 +533,11 @@ export interface IGitExtension extends IDisposable {
    * Make request for a list of all Git branches
    */
   refreshBranch(): Promise<void>;
+
+  /**
+   * Make request for a list of all Git tags
+   */
+  refreshTag(): Promise<void>;
 
   /**
    * Determines whether there are unsaved changes on staged files,

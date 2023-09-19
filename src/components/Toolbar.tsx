@@ -46,6 +46,11 @@ export interface IToolbarProps {
   branches: Git.IBranch[];
 
   /**
+   * Current list of tags.
+   */
+  tagsList: string[];
+
+  /**
    * Boolean indicating whether branching is disabled.
    */
   branching: boolean;
@@ -373,6 +378,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <TagMenu
         pastCommits={this.props.pastCommits}
+        tagsList={this.props.tagsList}
         logger={this.props.logger}
         model={this.props.model}
         branching={this.props.branching}

@@ -89,6 +89,11 @@ function renderFileName(filename: string): React.ReactElement {
  */
 export interface ITagMenuProps {
   /**
+   * Current list of tags.
+   */
+  tagsList: string[];
+
+  /**
    * Boolean indicating whether branching is disabled.
    */
   branching: boolean;
@@ -127,11 +132,6 @@ export interface ITagMenuState {
    * Menu filter.
    */
   filter: string;
-
-  /**
-   * Current list of tags.
-   */
-  tags: string[];
 }
 
 /**
@@ -149,26 +149,8 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
 
     this.state = {
       filter: '',
-      tags: [],
       tagDialog: false
     };
-  }
-
-  componentDidMount(): void {
-    this.props.model
-      .tags()
-      .then(response => {
-        this.setState({
-          tags: response.tags
-        });
-      })
-      .catch(error => {
-        console.error(error);
-        this.setState({
-          tags: []
-        });
-        showErrorMessage(this.props.trans.__('Fail to get the tags.'), error);
-      });
   }
 
   /**
@@ -232,7 +214,9 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
   private _renderTagList(): React.ReactElement {
     // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     const filter = this.state.filter;
-    const tags = this.state.tags.filter(tag => !filter || tag.includes(filter));
+    const tags = this.props.tagsList.filter(
+      tag => !filter || tag.includes(filter)
+    );
     return (
       <FixedSizeList
         height={Math.min(
