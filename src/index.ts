@@ -6,9 +6,9 @@ import {
 import {
   Dialog,
   ICommandPalette,
-  showErrorMessage,
-  Toolbar
+  showErrorMessage
 } from '@jupyterlab/apputils';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
@@ -46,6 +46,7 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
   id: '@jupyterlab/git:plugin',
   requires: [
     ILayoutRestorer,
+    IEditorServices,
     IFileBrowserFactory,
     IRenderMimeRegistry,
     ISettingRegistry,
@@ -68,6 +69,7 @@ export default [plugin, gitCloneCommandPlugin];
 async function activate(
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
+  editorServices: IEditorServices,
   factory: IFileBrowserFactory,
   renderMime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
@@ -176,7 +178,16 @@ async function activate(
   // Provided we were able to load application settings, create the extension widgets
   if (settings) {
     // Add JupyterLab commands
-    addCommands(app, gitExtension, fileBrowser.model, settings, translator);
+    addCommands(
+      app,
+      gitExtension,
+      editorServices.factoryService.newInlineEditor.bind(
+        editorServices.factoryService
+      ),
+      fileBrowser.model,
+      settings,
+      translator
+    );
 
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
@@ -245,15 +256,14 @@ async function activate(
   gitExtension.registerDiffProvider(
     'Nbdime',
     ['.ipynb'],
-    (model: Git.Diff.IModel, toolbar?: Toolbar, translator?: ITranslator) =>
-      createNotebookDiff(model, renderMime, toolbar, translator)
+    (options: Git.Diff.IFactoryOptions) =>
+      createNotebookDiff({ ...options, renderMime })
   );
 
   gitExtension.registerDiffProvider(
     'ImageDiff',
     ['.jpeg', '.jpg', '.png'],
-    (model: Git.Diff.IModel, toolbar?: Toolbar, translator?: ITranslator) =>
-      createImageDiff(model, toolbar, translator)
+    createImageDiff
   );
 
   return gitExtension;

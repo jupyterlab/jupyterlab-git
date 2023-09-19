@@ -5,17 +5,21 @@ import {
   MainAreaWidget,
   ReactWidget,
   showDialog,
-  showErrorMessage,
-  Toolbar,
-  ToolbarButton
+  showErrorMessage
 } from '@jupyterlab/apputils';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
 import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
+import {
+  closeIcon,
+  ContextMenuSvg,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -126,6 +130,7 @@ function pluralizedContextLabel(singular: string, plural: string) {
 export function addCommands(
   app: JupyterFrontEnd,
   gitModel: GitExtension,
+  editorFactory: CodeEditor.Factory,
   fileBrowserModel: FileBrowserModel,
   settings: ISettingRegistry.ISettings,
   translator: ITranslator
@@ -548,7 +553,9 @@ export function addCommands(
       );
 
       const buildDiffWidget =
-        getDiffProvider(fullPath) ?? (isText && createPlainTextDiff);
+        getDiffProvider(fullPath) ??
+        (isText &&
+          (options => createPlainTextDiff({ ...options, editorFactory })));
 
       if (buildDiffWidget) {
         const id = `git-diff-${fullPath}-${model.reference.label}-${model.challenger.label}`;
@@ -598,11 +605,11 @@ export function addCommands(
 
           // Create the diff widget
           try {
-            const widget = await buildDiffWidget(
+            const widget = await buildDiffWidget({
               model,
-              diffWidget.toolbar,
+              toolbar: diffWidget.toolbar,
               translator
-            );
+            });
 
             diffWidget.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 

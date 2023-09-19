@@ -1,13 +1,15 @@
-import { Toolbar } from '@jupyterlab/apputils';
-import { EditorLanguageRegistry } from '@jupyterlab/codemirror';
-import { Contents } from '@jupyterlab/services';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+  CodeMirrorEditorFactory,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry
+} from '@jupyterlab/codemirror';
+import { Contents } from '@jupyterlab/services';
+import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
+import { createNbdimeMergeView, MergeView } from 'nbdime/lib/common/mergeview';
+import { StringDiffModel } from 'nbdime/lib/diff/model';
 import { Git } from '../../tokens';
 
 /**
@@ -17,15 +19,19 @@ import { Git } from '../../tokens';
  * @param toolbar MainAreaWidget toolbar
  * @returns PlainText diff widget
  */
-export const createPlainTextDiff: Git.Diff.ICallback = async (
-  model: Git.Diff.IModel,
-  toolbar?: Toolbar,
-  translator?: ITranslator
-): Promise<PlainTextDiff> => {
-  const widget = new PlainTextDiff(
+export const createPlainTextDiff = async ({
+  editorFactory,
+  model,
+  toolbar,
+  translator
+}: Git.Diff.IFactoryOptions & {
+  editorFactory?: CodeEditor.Factory;
+}): Promise<PlainTextDiff> => {
+  const widget = new PlainTextDiff({
     model,
-    (translator ?? nullTranslator).load('jupyterlab_git')
-  );
+    editorFactory,
+    trans: (translator ?? nullTranslator).load('jupyterlab_git')
+  });
   await widget.ready;
   return widget;
 };
@@ -34,7 +40,15 @@ export const createPlainTextDiff: Git.Diff.ICallback = async (
  * Plain Text Diff widget
  */
 export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
-  constructor(model: Git.Diff.IModel, translator?: TranslationBundle) {
+  constructor({
+    model,
+    trans,
+    editorFactory
+  }: {
+    model: Git.Diff.IModel;
+    editorFactory?: CodeEditor.Factory;
+    trans?: TranslationBundle;
+  }) {
     super({
       node: PlainTextDiff.createNode(
         model.reference.label,
@@ -45,47 +59,9 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     const getReady = new PromiseDelegate<void>();
     this._isReady = getReady.promise;
     this._container = this.node.lastElementChild as HTMLElement;
+    this._editorFactory = editorFactory ?? createEditorFactory();
     this._model = model;
-    this._trans = translator ?? nullTranslator.load('jupyterlab_git');
-
-    // The list of internal strings is available at https://codemirror.net/examples/translate/
-    this._translations = {
-      // @codemirror/view
-      'Control character': this._trans.__('Control character'),
-      // @codemirror/commands
-      'Selection deleted': this._trans.__('Selection deleted'),
-      // @codemirror/language
-      'Folded lines': this._trans.__('Folded lines'),
-      'Unfolded lines': this._trans.__('Unfolded lines'),
-      to: this._trans.__('to'),
-      'folded code': this._trans.__('folded code'),
-      unfold: this._trans.__('unfold'),
-      'Fold line': this._trans.__('Fold line'),
-      'Unfold line': this._trans.__('Unfold line'),
-      // @codemirror/search
-      'Go to line': this._trans.__('Go to line'),
-      go: this._trans.__('go'),
-      Find: this._trans.__('Find'),
-      Replace: this._trans.__('Replace'),
-      next: this._trans.__('next'),
-      previous: this._trans.__('previous'),
-      all: this._trans.__('all'),
-      'match case': this._trans.__('match case'),
-      replace: this._trans.__('replace'),
-      'replace all': this._trans.__('replace all'),
-      close: this._trans.__('close'),
-      'current match': this._trans.__('current match'),
-      'replaced $ matches': this._trans.__('replaced $ matches'),
-      'replaced match on line $': this._trans.__('replaced match on line $'),
-      'on line': this._trans.__('on line'),
-      // From https://codemirror.net/5/addon/merge/merge.js
-      'Identical text collapsed. Click to expand.': this._trans.__(
-        'Identical text collapsed. Click to expand.'
-      ),
-      'Toggle locked scrolling': this._trans.__('Toggle locked scrolling'),
-      'Push to left': this._trans.__('Push to left'),
-      'Revert chunk': this._trans.__('Revert chunk')
-    };
+    this._trans = trans ?? nullTranslator.load('jupyterlab_git');
 
     // Load file content early
     Promise.all([
@@ -110,7 +86,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
    * Helper to determine if three-way diff should be shown.
    */
   private get _hasConflict(): boolean {
-    return this._model.hasConflict;
+    return this._model.hasConflict ?? false;
   }
 
   /**
@@ -139,7 +115,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
    * and rejects if unable to retrieve.
    */
   getResolvedFile(): Promise<Partial<Contents.IModel>> {
-    const value = this._mergeView?.editor().getValue() ?? null;
+    const value = this._mergeView?.getMergedValue() ?? null;
     if (value !== null) {
       return Promise.resolve({
         type: 'file',
@@ -164,7 +140,6 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
           this.createDiffView(
             this._challenger,
             this._reference,
-            this._translations,
             this._languageRegistry,
             this._hasConflict ? this._base : null
           );
@@ -192,7 +167,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     try {
       // Clear all
       this._container.innerHTML = '';
-      this._mergeView = null;
+      this._mergeView.dispose();
 
       // ENH request content only if it changed
       if (this._reference !== null) {
@@ -206,9 +181,8 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
       }
 
       this.createDiffView(
-        this._challenger,
-        this._reference,
-        this._translations,
+        this._challenger!,
+        this._reference!,
         this._languageRegistry,
         this._hasConflict ? this._base : null
       );
@@ -249,40 +223,21 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
   protected async createDiffView(
     challengerContent: string,
     referenceContent: string,
-    translations: Record<string, string>,
-    languageRegistry: EditorLanguageRegistry,
-    baseContent?: string
+    languageRegistry: EditorLanguageRegistry | null = null,
+    baseContent: string | null = null
   ): Promise<void> {
     if (!this._mergeView) {
-      const mode =
-        languageRegistry.findByFileName(this._model.filename) ||
-        languageRegistry.findBest(this._model.filename);
+      const remote = new StringDiffModel(
+        referenceContent,
+        challengerContent,
+        [],
+        []
+      );
 
-      let options: LocalMergeView.IMergeViewEditorConfiguration = {
-        value: challengerContent,
-        orig: referenceContent,
-        mode: mode.mime,
-        phrases: translations,
-        ...this.getDefaultOptions()
-      };
-
-      // Show three-way diff on merge conflict
-      // Note: Empty base content ("") is an edge case.
-      if (baseContent !== null && baseContent !== undefined) {
-        options = {
-          ...options,
-          origLeft: referenceContent,
-          value: baseContent,
-          origRight: challengerContent,
-          readOnly: false,
-          revertButtons: true
-        };
-      }
-
-      this._mergeView = mergeView(
-        this._container,
-        options
-      ) as MergeView.MergeViewEditor;
+      this._mergeView = createNbdimeMergeView({
+        remote,
+        factory: this._editorFactory
+      });
     }
 
     return Promise.resolve();
@@ -306,27 +261,25 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     </p>`;
   }
 
-  protected getDefaultOptions(): Partial<MergeView.MergeViewEditorConfiguration> {
-    // FIXME add options from settings and connect settings to update options
-    return {
-      lineNumbers: true,
-      theme: 'jupyter',
-      connect: 'align',
-      collapseIdentical: true,
-      readOnly: true,
-      revertButtons: false
-    };
-  }
-
   protected _container: HTMLElement;
+  protected _editorFactory: CodeEditor.Factory;
   protected _isReady: Promise<void>;
-  protected _mergeView: MergeView.MergeViewEditor;
+  // @ts-expect-error complex initialization
+  protected _mergeView: MergeView;
   protected _model: Git.Diff.IModel;
   protected _trans: TranslationBundle;
-  protected _translations: Record<string, string>;
 
   private _reference: string | null = null;
   private _challenger: string | null = null;
   private _languageRegistry: EditorLanguageRegistry | null = null;
   private _base: string | null = null;
+}
+
+function createEditorFactory(): CodeEditor.Factory {
+  const factory = new CodeMirrorEditorFactory({
+    extensions: new EditorExtensionRegistry(),
+    languages: new EditorLanguageRegistry()
+  });
+
+  return factory.newInlineEditor.bind(factory);
 }

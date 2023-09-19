@@ -14,7 +14,7 @@ import { decodeStage } from './utils';
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
 // Available diff providers
 const DIFF_PROVIDERS: {
-  [key: string]: { name: string; callback: Git.Diff.ICallback };
+  [key: string]: { name: string; factory: Git.Diff.Factory };
 } = {};
 
 /**
@@ -24,9 +24,9 @@ const DIFF_PROVIDERS: {
  */
 export function getDiffProvider(
   filename: string
-): Git.Diff.ICallback | undefined {
+): Git.Diff.Factory | undefined {
   return DIFF_PROVIDERS[PathExt.extname(filename)?.toLocaleLowerCase() ?? '']
-    ?.callback;
+    ?.factory;
 }
 
 /**
@@ -1907,18 +1907,18 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Register a new diff provider for specified file types
+   * Register a new diff provider for specified file extensions
    *
-   * @param fileExtensions File type list
-   * @param callback Callback to use for the provided file types
+   * @param fileExtensions File extension list
+   * @param factory Callback to use for the provided file extensions
    */
   registerDiffProvider(
     name: string,
     fileExtensions: string[],
-    callback: Git.Diff.ICallback
+    factory: Git.Diff.Factory
   ): void {
-    fileExtensions.forEach(fileExtension => {
-      DIFF_PROVIDERS[fileExtension.toLocaleLowerCase()] = { name, callback };
+    fileExtensions.forEach(extension => {
+      DIFF_PROVIDERS[extension] = { name, factory };
     });
   }
 

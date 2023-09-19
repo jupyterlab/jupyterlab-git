@@ -1,8 +1,8 @@
-import { Toolbar } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
+import { Toolbar } from '@jupyterlab/ui-components';
 import { JSONObject, ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
@@ -567,16 +567,15 @@ export interface IGitExtension extends IDisposable {
   checkRemoteChangeNotified(): Promise<void>;
 
   /**
-   * Register a new diff provider for specified file types
+   * Register a new diff provider for specified file extensions
    *
-   * @param name provider name
-   * @param fileExtensions File extensions list
-   * @param callback Callback to use for the provided file types
+   * @param fileExtensions File extension list
+   * @param factory Callback to use for the provided file extensions
    */
   registerDiffProvider(
     name: string,
     fileExtensions: string[],
-    callback: Git.Diff.ICallback
+    factory: Git.Diff.Factory
   ): void;
 
   /**
@@ -703,16 +702,30 @@ export namespace Git {
     }
 
     /**
+     * Diff widget factory options
+     */
+    export interface IFactoryOptions {
+      /**
+       * Diff model
+       */
+      model: IModel;
+      /**
+       * Diff widget toolbar
+       */
+      toolbar?: Toolbar;
+      /**
+       * Application translator object
+       */
+      translator?: ITranslator;
+    }
+
+    /**
      * Callback to generate a comparison widget
      *
      * The toolbar is the one of the MainAreaWidget in which the diff widget
      * will be displayed.
      */
-    export type ICallback = (
-      model: IModel,
-      toolbar?: Toolbar,
-      trans?: ITranslator
-    ) => Promise<IDiffWidget>;
+    export type Factory = (options: IFactoryOptions) => Promise<IDiffWidget>;
 
     /**
      * Content and its context for diff

@@ -5,31 +5,26 @@
 
 /* eslint-disable no-inner-declarations */
 
-import { Toolbar } from '@jupyterlab/apputils';
-import { Contents } from '@jupyterlab/services';
 import { INotebookContent } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Contents } from '@jupyterlab/services';
+import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
 import { IDiffEntry } from 'nbdime/lib/diff/diffentries';
-import { IMergeDecision } from 'nbdime/lib/merge/decisions';
-import { NotebookMergeModel } from 'nbdime/lib/merge/model';
-import { CELLMERGE_CLASS, NotebookMergeWidget } from 'nbdime/lib/merge/widget';
-import { UNCHANGED_MERGE_CLASS } from 'nbdime/lib/merge/widget/common';
 import { NotebookDiffModel } from 'nbdime/lib/diff/model';
 import { CELLDIFF_CLASS, NotebookDiffWidget } from 'nbdime/lib/diff/widget';
 import {
   CHUNK_PANEL_CLASS,
   UNCHANGED_DIFF_CLASS
 } from 'nbdime/lib/diff/widget/common';
+import { IMergeDecision } from 'nbdime/lib/merge/decisions';
+import { NotebookMergeModel } from 'nbdime/lib/merge/model';
+import { CELLMERGE_CLASS, NotebookMergeWidget } from 'nbdime/lib/merge/widget';
+import { UNCHANGED_MERGE_CLASS } from 'nbdime/lib/merge/widget/common';
 import { requestAPI } from '../../git';
 import { Git } from '../../tokens';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
 
 /**
  * Class of the outermost widget, the draggable tab
@@ -79,12 +74,14 @@ interface INbdimeMergeDiff {
  * @param toolbar MainAreaWidget toolbar
  * @returns Diff notebook widget
  */
-export const createNotebookDiff = async (
-  model: Git.Diff.IModel,
-  renderMime: IRenderMimeRegistry,
-  toolbar?: Toolbar,
-  translator?: ITranslator
-): Promise<NotebookDiff> => {
+export const createNotebookDiff = async ({
+  model,
+  renderMime,
+  toolbar,
+  translator
+}: Git.Diff.IFactoryOptions & {
+  renderMime: IRenderMimeRegistry;
+}): Promise<NotebookDiff> => {
   // Create the notebook diff view
   const trans = (translator ?? nullTranslator).load('jupyterlab_git');
   const diffWidget = new NotebookDiff(model, renderMime, trans);

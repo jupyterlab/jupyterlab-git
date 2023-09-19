@@ -17,6 +17,7 @@ To see the extension in action, open the example notebook included in the Binder
 - Git (version `>=2.x`)
 
 For older versions of JupyterLab, go to:
+
 - [3.x branch](https://github.com/jupyterlab/jupyterlab-git/tree/jlab-3)
 - [2.x branch](https://github.com/jupyterlab/jupyterlab-git/tree/jlab-2)
 
