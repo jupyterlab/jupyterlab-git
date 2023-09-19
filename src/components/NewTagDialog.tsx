@@ -94,28 +94,19 @@ export interface IDialogBoxCommitGraphProps {
   trans: TranslationBundle;
 
   /**
-   * Reference to the state object.
+   * Filter state.
    */
-  stateRef: React.RefObject<{
-    name: string;
-    baseCommitId: string;
-    filter: string;
-    error: string;
-  }>;
+  filter: string;
 
-  //   currentState: {
-  //     name: string,
-  //     baseCommitId: string,
-  //     filter: string,
-  //     error: string
-  //   }
+  /**
+   * Base commit id state.
+   */
+  baseCommitId: string;
 
-  //   updateState:React.Dispatch<React.SetStateAction<{
-  //     name: string;
-  //     baseCommitId: string;
-  //     filter: string;
-  //     error: string;
-  // }>>;
+  /**
+   * Update function for baseCommitId.
+   */
+  updateBaseCommitId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 /**
@@ -143,38 +134,20 @@ export interface ISingleCommitProps {
   setRef: (el: HTMLLIElement) => void;
 
   /**
-   * Reference to the state object.
+   * Update function for baseCommitId state.
    */
-  stateRef: React.RefObject<{
-    name: string;
-    baseCommitId: string;
-    filter: string;
-    error: string;
-  }>;
-
-  //   currentState: {
-  //     name: string,
-  //     baseCommitId: string,
-  //     filter: string,
-  //     error: string
-  //   }
-
-  //   updateState: React.Dispatch<React.SetStateAction<{
-  //     name: string;
-  //     baseCommitId: string;
-  //     filter: string;
-  //     error: string;
-  // }>>;
+  updateBaseCommitId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const DialogBoxCommitGraph: React.FunctionComponent<
   IDialogBoxCommitGraphProps
 > = (props: IDialogBoxCommitGraphProps): React.ReactElement => {
-  const { current: currentState } = props.stateRef;
+  const { filter, baseCommitId, updateBaseCommitId } = props;
   const pastCommits = props.pastCommits
     .filter(
       commit =>
-        !currentState.filter || commit.commit_msg.includes(currentState.filter)
+        !filter ||
+        commit.commit_msg.toLowerCase().includes(filter.toLowerCase())
     )
     .slice();
 
@@ -220,14 +193,12 @@ export const DialogBoxCommitGraph: React.FunctionComponent<
             <SingleCommitNode
               key={index}
               commit={commit}
-              baseCommitId={currentState.baseCommitId}
+              baseCommitId={baseCommitId}
               trans={props.trans}
               setRef={node => {
                 nodes.current[commit.commit] = node;
               }}
-              stateRef={props.stateRef}
-              // currentState={props.currentState}
-              // updateState={props.updateState}
+              updateBaseCommitId={updateBaseCommitId}
             ></SingleCommitNode>
           );
         })}
@@ -239,7 +210,8 @@ export const DialogBoxCommitGraph: React.FunctionComponent<
 export const SingleCommitNode: React.FunctionComponent<ISingleCommitProps> = (
   props: ISingleCommitProps
 ): React.ReactElement => {
-  const isLatest = props.commit.commit === props.stateRef.current.baseCommitId;
+  const { baseCommitId, updateBaseCommitId } = props;
+  const isLatest = props.commit.commit === baseCommitId;
 
   let isBold;
   if (isLatest) {
@@ -261,11 +233,7 @@ export const SingleCommitNode: React.FunctionComponent<ISingleCommitProps> = (
      * @param event - event object
      */
     function onClick(): void {
-      props.stateRef.current.baseCommitId = commitId;
-      // props.updateState({
-      //   baseCommitId:commitId,
-      //   ... props.currentState
-      // })
+      updateBaseCommitId(commitId);
     }
   };
 
@@ -330,15 +298,12 @@ export const SingleCommitNode: React.FunctionComponent<ISingleCommitProps> = (
 export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
   props: INewTagDialogProps
 ): React.ReactElement => {
-  const initialState = {
-    name: '',
-    baseCommitId: props.pastCommits[0]?.commit || null,
-    filter: '',
-    error: ''
-  };
-
-  // const [state, setState] = React.useState(initialState);
-  const stateRef = React.useRef(initialState);
+  const [nameState, setNameState] = React.useState('');
+  const [baseCommitIdState, setBaseCommitIdState] = React.useState(
+    props.pastCommits[0]?.commit || null
+  );
+  const [filterState, setFilterState] = React.useState('');
+  const [errorState, setErrorState] = React.useState('');
 
   /**
    * Callback invoked upon closing the dialog.
@@ -347,15 +312,9 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
    */
   const onClose = (): void => {
     props.onClose();
-    // setState({
-    //   name: '',
-    //   filter: '',
-    //   error: '',
-    //   ... state
-    // })
-    stateRef.current.name = '';
-    stateRef.current.filter = '';
-    stateRef.current.error = '';
+    setNameState('');
+    setFilterState('');
+    setErrorState('');
   };
 
   /**
@@ -364,22 +323,14 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
    * @param event - event object
    */
   const onFilterChange = (event: any): void => {
-    stateRef.current.filter = event.target.value;
-    // setState({
-    //   filter: event.target.value,
-    //   ... state
-    // })
+    setFilterState(event.target.value);
   };
 
   /**
    * Callback invoked to reset the menu filter.
    */
   const resetFilter = (): void => {
-    stateRef.current.filter = '';
-    // setState({
-    //   filter: '',
-    //   ... state
-    // })
+    setFilterState('');
   };
 
   /**
@@ -388,13 +339,8 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
    * @param event - event object
    */
   const onNameChange = (event: any): void => {
-    stateRef.current.name = event.target.value;
-    stateRef.current.error = '';
-    // setState({
-    //   name: event.target.value,
-    //   error:'',
-    //   ... state
-    // })
+    setNameState(event.target.value);
+    setErrorState('');
   };
 
   /**
@@ -404,8 +350,8 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
    * @returns promise which resolves upon attempting to create a new tag
    */
   const createTag = async (): Promise<void> => {
-    const tagName = stateRef.current.name;
-    const commitId = stateRef.current.baseCommitId;
+    const tagName = nameState;
+    const commitId = baseCommitIdState;
 
     props.logger.log({
       level: Level.RUNNING,
@@ -414,7 +360,8 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
     try {
       await props.model.newTag(tagName, commitId);
     } catch (err) {
-      stateRef.current.error = err.message.replace(/^fatal:/, '');
+      // stateRef.current.error
+      setErrorState(err.message.replace(/^fatal:/, ''));
       props.logger.log({
         level: Level.ERROR,
         message: props.trans.__('Failed to create tag.')
@@ -429,14 +376,8 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
     // Close the tag dialog:
     props.onClose();
 
-    // Reset the tag name and filter:
-    stateRef.current.name = '';
-    stateRef.current.filter = '';
-    // setState({
-    //   name: '',
-    //   filter: '',
-    //    ... state
-    // })
+    setNameState('');
+    setFilterState('');
   };
 
   return (
@@ -458,15 +399,13 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
         </button>
       </div>
       <div className={contentWrapperClass}>
-        {stateRef.current.error ? (
-          <p className={errorMessageClass}>{stateRef.current.error}</p>
-        ) : null}
+        {errorState ? <p className={errorMessageClass}>{errorState}</p> : null}
         <p>{props.trans.__('Name')}</p>
         <input
           className={nameInputClass}
           type="text"
           onChange={onNameChange}
-          value={stateRef.current.name}
+          value={nameState}
           placeholder=""
           title={props.trans.__('Enter a tag name')}
         />
@@ -477,11 +416,11 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
               className={filterInputClass}
               type="text"
               onChange={onFilterChange}
-              value={stateRef.current.filter}
+              value={filterState}
               placeholder={props.trans.__('Filter by commit message')}
               title={props.trans.__('Filter history of commits menu')}
             />
-            {stateRef.current.filter ? (
+            {filterState ? (
               <button className={filterClearClass}>
                 <ClearIcon
                   titleAccess={props.trans.__('Clear the current filter')}
@@ -498,9 +437,9 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
             logger={props.logger}
             model={props.model}
             trans={props.trans}
-            stateRef={stateRef}
-            // currentState={state}
-            // updateState={setState}
+            filter={filterState}
+            baseCommitId={baseCommitIdState}
+            updateBaseCommitId={setBaseCommitIdState}
           />
         }
       </div>
@@ -520,9 +459,7 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
           onClick={() => {
             createTag();
           }}
-          disabled={
-            stateRef.current.name === '' || stateRef.current.error !== ''
-          }
+          disabled={nameState === '' || errorState !== ''}
         />
       </DialogActions>
     </Dialog>
