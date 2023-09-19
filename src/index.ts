@@ -77,8 +77,7 @@ async function activate(
   palette: ICommandPalette | null,
   translator: ITranslator | null
 ): Promise<IGitExtension> {
-  let gitExtension: GitExtension | null = null;
-  let settings: ISettingRegistry.ISettings;
+  let settings: ISettingRegistry.ISettings | undefined = undefined;
   let serverSettings: Git.IServerSettings;
   // Get a reference to the default file browser extension
   // We don't use the current tracked browser because extension like jupyterlab-github
@@ -140,10 +139,11 @@ async function activate(
       error.message,
       [Dialog.warnButton({ label: trans.__('Dismiss') })]
     );
+    // @ts-expect-error unable to initialize the extension token.
     return null;
   }
   // Create the Git model
-  gitExtension = new GitExtension(docmanager, app.docRegistry, settings);
+  const gitExtension = new GitExtension(docmanager, app.docRegistry, settings);
 
   // Whenever we restore the application, sync the Git extension path
   Promise.all([app.restored, fileBrowser.model.restored]).then(() => {

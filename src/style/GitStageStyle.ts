@@ -33,11 +33,11 @@ export const sectionFileContainerStyle = style(
     };
 
     const focus = `&:focus-within .${sectionAreaStyle} .${hiddenButtonStyle}`;
-    styled.$nest[focus] = {
+    styled.$nest![focus] = {
       display: 'block'
     };
     const hoverSelector = `&:hover .${sectionAreaStyle} .${hiddenButtonStyle}`;
-    styled.$nest[hoverSelector] = {
+    styled.$nest![hoverSelector] = {
       display: 'block'
     };
     return styled;

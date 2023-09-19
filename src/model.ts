@@ -25,7 +25,7 @@ const DIFF_PROVIDERS: {
 export function getDiffProvider(
   filename: string
 ): Git.Diff.ICallback | undefined {
-  return DIFF_PROVIDERS[PathExt.extname(filename)?.toLocaleLowerCase()]
+  return DIFF_PROVIDERS[PathExt.extname(filename)?.toLocaleLowerCase() ?? '']
     ?.callback;
 }
 
@@ -41,8 +41,8 @@ export class GitExtension implements IGitExtension {
    * @returns extension model
    */
   constructor(
-    docmanager: IDocumentManager = null,
-    docRegistry: DocumentRegistry = null,
+    docmanager: IDocumentManager | null = null,
+    docRegistry: DocumentRegistry | null = null,
     settings?: ISettingRegistry.ISettings
   ) {
     this._docmanager = docmanager;
@@ -97,7 +97,7 @@ export class GitExtension implements IGitExtension {
   /**
    * The current repository branch.
    */
-  get currentBranch(): Git.IBranch {
+  get currentBranch(): Git.IBranch | null {
     return this._currentBranch;
   }
 
@@ -135,7 +135,7 @@ export class GitExtension implements IGitExtension {
   }
 
   set pathRepository(v: string | null) {
-    const change: IChangedArgs<string> = {
+    const change: IChangedArgs<string | null> = {
       name: 'pathRepository',
       newValue: null,
       oldValue: this._pathRepository
@@ -213,7 +213,7 @@ export class GitExtension implements IGitExtension {
     return this._lastAuthor;
   }
 
-  set lastAuthor(lastAuthor: Git.IIdentity) {
+  set lastAuthor(lastAuthor: Git.IIdentity | null) {
     this._lastAuthor = lastAuthor;
   }
 
@@ -299,13 +299,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * A signal emitted when the current Git repository changes.
+   * A signal emitted when the Git repository remote changes.
    */
-  get notifyRemoteChanges(): ISignal<
+  get remoteChanged(): ISignal<
     IGitExtension,
-    Git.IRemoteChangedNotification
+    Git.IRemoteChangedNotification | null
   > {
-    return this._notifyRemoteChanges;
+    return this._remoteChanged;
   }
 
   /**
@@ -358,7 +358,11 @@ export class GitExtension implements IGitExtension {
    *
    * Note: This makes sure it always returns non null value
    */
-  protected get _currentMarker(): BranchMarker {
+  protected get _currentMarker(): BranchMarker | null {
+    if (!this.pathRepository) {
+      return null;
+    }
+
     if (!this.__currentMarker) {
       this._setMarker(
         this.pathRepository,
@@ -402,7 +406,7 @@ export class GitExtension implements IGitExtension {
    * @returns The file status or null if path repository is null or path not in repository
    */
   getFile(path: string): Git.IStatusFile | null {
-    if (this.pathRepository === null) {
+    if (!this.pathRepository || this._status === null) {
       return null;
     }
     const fileStatus = this._status.files.find(status => {
@@ -589,7 +593,7 @@ export class GitExtension implements IGitExtension {
         body.checkout_branch = true;
         body.new_check = options.newBranch === true;
         if (options.newBranch) {
-          body.startpoint = options.startpoint || this._currentBranch.name;
+          body.startpoint = options.startpoint || this._currentBranch!.name;
         }
       } else if (options.filename) {
         body.filename = options.filename;
@@ -604,7 +608,7 @@ export class GitExtension implements IGitExtension {
         if (!body.new_check) {
           if (body.checkout_branch && !body.new_check) {
             changes = await this._changedFiles(
-              this._currentBranch.name,
+              this._currentBranch!.name,
               body.branchname
             );
           } else if (body.filename) {
@@ -704,16 +708,16 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async commit(
-    message?: string,
+    message: string | null = null,
     amend = false,
-    author?: string
+    author: string | null = null
   ): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute('git:commit:create', async () => {
       await requestAPI(URLExt.join(path, 'commit'), 'POST', {
         commit_msg: message,
         amend: amend,
-        author: author
+        author: author ?? null
       });
     });
     await this.refresh();
@@ -796,7 +800,7 @@ export class GitExtension implements IGitExtension {
       }
     );
 
-    data.modified_files = data.modified_files.map(f => {
+    data.modified_files = (data.modified_files ?? []).map(f => {
       f.type = this._resolveFileType(f.modified_file_path);
       return f;
     });
@@ -832,7 +836,7 @@ export class GitExtension implements IGitExtension {
         );
       }
     );
-    data.result = data.result.map(f => {
+    data.result = (data.result ?? []).map(f => {
       f.filetype = this._resolveFileType(f.filename);
       return f;
     });
@@ -850,7 +854,7 @@ export class GitExtension implements IGitExtension {
     this._fetchPoll.dispose();
     this._statusPoll.dispose();
     this._taskHandler.dispose();
-    this._settings.changed.disconnect(this._onSettingsChange, this);
+    this._settings?.changed.disconnect(this._onSettingsChange, this);
     Signal.clearData(this);
   }
 
@@ -1134,8 +1138,8 @@ export class GitExtension implements IGitExtension {
         headChanged = this._currentBranch !== data.current_branch; // Object comparison is not working
       } else {
         headChanged =
-          this._currentBranch.name !== data.current_branch.name ||
-          this._currentBranch.top_commit !== data.current_branch.top_commit;
+          this._currentBranch.name !== data.current_branch?.name ||
+          this._currentBranch.top_commit !== data.current_branch?.top_commit;
       }
 
       const branchesChanged = !JSONExt.deepEqual(
@@ -1145,10 +1149,10 @@ export class GitExtension implements IGitExtension {
 
       this._branches = data.branches ?? [];
 
-      this._currentBranch = data.current_branch;
-      if (this._currentBranch) {
+      this._currentBranch = data.current_branch ?? null;
+      if (this._currentBranch && this._pathRepository) {
         // Set up the marker obj for the current (valid) repo/branch combination
-        this._setMarker(this.pathRepository, this._currentBranch.name);
+        this._setMarker(this.pathRepository!, this._currentBranch.name);
       }
       if (headChanged) {
         this._headChanged.emit();
@@ -1260,12 +1264,12 @@ export class GitExtension implements IGitExtension {
         };
       });
       this._setStatus({
-        branch: data.branch || null,
-        remote: data.remote || null,
-        ahead: data.ahead || 0,
-        behind: data.behind || 0,
+        branch: data.branch ?? null,
+        remote: data.remote ?? null,
+        ahead: data.ahead ?? 0,
+        behind: data.behind ?? 0,
         state: data.state ?? 0,
-        files
+        files: files ?? []
       });
       await this.refreshDirtyStatus();
     } catch (err) {
@@ -1282,15 +1286,14 @@ export class GitExtension implements IGitExtension {
    */
   async remoteChangedFiles(): Promise<Git.IStatusFile[]> {
     // if a file is changed on remote add it to list of files with appropriate status.
-    this._remoteChangedFiles = [];
+    this._remoteChangedFiles.length = 0;
     try {
-      let remoteChangedFiles: null | string[] = null;
       if (this.status.remote && this.status.behind > 0) {
-        remoteChangedFiles = (
-          await this._changedFiles('WORKING', this.status.remote)
-        ).files;
-        remoteChangedFiles?.forEach(element => {
-          this._remoteChangedFiles.push({
+        this._remoteChangedFiles.concat(
+          (
+            (await this._changedFiles('WORKING', this.status.remote)).files ??
+            []
+          ).map(element => ({
             status: 'remote-changed',
             type: this._resolveFileType(element),
             x: '?',
@@ -1298,14 +1301,13 @@ export class GitExtension implements IGitExtension {
             to: element,
             from: '?',
             is_binary: false
-          });
-        });
-        return this._remoteChangedFiles;
+          }))
+        );
       }
     } catch (err) {
       console.error(err);
-      return this._remoteChangedFiles;
     }
+    return this._remoteChangedFiles;
   }
 
   /**
@@ -1318,9 +1320,11 @@ export class GitExtension implements IGitExtension {
       const notNotified: Git.IStatusFile[] = [];
       const notified: Git.IStatusFile[] = [];
       for (const val of this._remoteChangedFiles) {
-        const docWidget = this._docmanager.findWidget(
-          this.getRelativeFilePath(val.to)
-        );
+        const filePath = this.getRelativeFilePath(val.to);
+        if (!filePath) {
+          continue;
+        }
+        const docWidget = this._docmanager?.findWidget(filePath);
         const notifiedIndex = this._changeUpstreamNotified.findIndex(
           notified =>
             notified.from === val.from &&
@@ -1345,9 +1349,9 @@ export class GitExtension implements IGitExtension {
           }
         }
       }
-      if (this._settings.composite['openFilesBehindWarning']) {
+      if (this._settings?.composite['openFilesBehindWarning']) {
         if (notNotified.length > 0) {
-          this._notifyRemoteChanges.emit({ notNotified, notified });
+          this._remoteChanged.emit({ notNotified, notified });
         }
       }
     } else {
@@ -1372,12 +1376,14 @@ export class GitExtension implements IGitExtension {
     let result = false;
 
     for (const fileName of fileNames) {
-      const docWidget = this._docmanager.findWidget(
-        this.getRelativeFilePath(fileName)
-      );
+      const filePath = this.getRelativeFilePath(fileName);
+      if (!filePath) {
+        continue;
+      }
+      const docWidget = this._docmanager?.findWidget(filePath);
       if (docWidget !== undefined) {
-        const context = this._docmanager.contextForWidget(docWidget);
-        if (context.model.dirty) {
+        const context = this._docmanager?.contextForWidget(docWidget);
+        if (context?.model.dirty) {
           result = true;
           break;
         }
@@ -1407,13 +1413,13 @@ export class GitExtension implements IGitExtension {
       const reset_all = filename === undefined;
       let files: string[];
       if (reset_all) {
-        files = (await this._changedFiles('INDEX', 'HEAD')).files;
+        files = (await this._changedFiles('INDEX', 'HEAD')).files ?? [];
       } else {
-        files = [filename];
+        files = [filename!];
       }
       await requestAPI(URLExt.join(path, 'reset'), 'POST', {
-        reset_all: filename === undefined,
-        filename: filename === undefined ? null : filename
+        reset_all,
+        filename: filename ?? null
       });
 
       files.forEach(file => {
@@ -1440,7 +1446,8 @@ export class GitExtension implements IGitExtension {
   async resetToCommit(hash = ''): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:reset:hard', async () => {
-      const files = (await this._changedFiles(null, null, hash)).files;
+      const files = (await this._changedFiles(undefined, undefined, hash))
+        .files;
 
       await requestAPI(URLExt.join(path, 'reset_to_commit'), 'POST', {
         commit_id: hash
@@ -1570,7 +1577,7 @@ export class GitExtension implements IGitExtension {
       path = await this._getPathRepository();
       await this._taskHandler.execute<void>('git:stash:drop', async () => {
         const url =
-          index >= 0
+          (index ?? -1) >= 0
             ? URLExt.join(path, `stash?stash_index=${index}`)
             : URLExt.join(path, 'stash');
         await requestAPI(url, 'DELETE');
@@ -1601,7 +1608,7 @@ export class GitExtension implements IGitExtension {
     try {
       const path = await this._getPathRepository();
 
-      const stashFiles = this._stash[index].files;
+      const stashFiles = (index ?? -1) >= 0 ? this._stash[index!].files : [];
 
       await this._taskHandler.execute<void>('git:stash:pop', async () => {
         await requestAPI(
@@ -1664,9 +1671,8 @@ export class GitExtension implements IGitExtension {
       for (const index in stashMsgList) {
         const stashInfo = stashMsgList[index].split(':');
 
-        const branchName = stashInfo[1].match(/WIP on (.*)/)
-          ? stashInfo[1].match(/WIP on (.*)/)[1]
-          : stashInfo[1].split(' ')[2];
+        const WIPMatch = stashInfo[1].match(/WIP on (.*)/);
+        const branchName = WIPMatch ? WIPMatch[1] : stashInfo[1].split(' ')[2];
 
         const stashMsg = stashInfo[2].replace(/^\s+/, '');
 
@@ -1699,7 +1705,7 @@ export class GitExtension implements IGitExtension {
 
       stashList.forEach((stash, index) => {
         stash.files.push(
-          ...fileData.results[index].message.split('\n').slice(0, -1)
+          ...(fileData.results ?? [])[index].message.split('\n').slice(0, -1)
         );
       });
 
@@ -1860,7 +1866,7 @@ export class GitExtension implements IGitExtension {
    * @param mark - mark to set
    */
   addMark(fname: string, mark: boolean): void {
-    this._currentMarker.add(fname, mark);
+    this._currentMarker?.add(fname, mark);
   }
 
   /**
@@ -1870,7 +1876,7 @@ export class GitExtension implements IGitExtension {
    * @param mark - mark to set
    */
   setMark(fname: string, mark: boolean): void {
-    this._currentMarker.set(fname, mark);
+    this._currentMarker?.set(fname, mark);
   }
 
   /**
@@ -1880,7 +1886,7 @@ export class GitExtension implements IGitExtension {
    * @returns mark
    */
   getMark(fname: string): boolean {
-    return this._currentMarker.get(fname);
+    return this._currentMarker?.get(fname) ?? false;
   }
 
   /**
@@ -1889,15 +1895,15 @@ export class GitExtension implements IGitExtension {
    * @param fname - filename
    */
   toggleMark(fname: string): void {
-    this._currentMarker.toggle(fname);
+    this._currentMarker?.toggle(fname);
   }
 
   get markedFiles(): Git.IStatusFile[] {
-    return this._currentMarker.markedFilePaths
-      .filter(path => this.status.files.some(file => file.to === path))
-      .map(path =>
-        this.status.files.find(fileStatus => fileStatus.to === path)
-      );
+    return this._currentMarker!.markedFilePaths.filter(path =>
+      this.status.files.some(file => file.to === path)
+    ).map(
+      path => this.status.files.find(fileStatus => fileStatus.to === path)!
+    );
   }
 
   /**
@@ -1930,7 +1936,9 @@ export class GitExtension implements IGitExtension {
   async revertCommit(message: string, hash: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:commit:revert', async () => {
-      const files = (await this._changedFiles(null, null, hash + '^!')).files;
+      const files = (
+        await this._changedFiles(undefined, undefined, hash + '^!')
+      ).files;
 
       await requestAPI(URLExt.join(path, 'delete_commit'), 'POST', {
         commit_id: hash
@@ -1987,7 +1995,7 @@ export class GitExtension implements IGitExtension {
     singleCommit?: string
   ): Promise<Git.IChangedFilesResult> {
     return await requestAPI<Git.IChangedFilesResult>(
-      URLExt.join(this.pathRepository, 'changed_files'),
+      URLExt.join(this.pathRepository!, 'changed_files'),
       'POST',
       {
         base: base,
@@ -2036,7 +2044,7 @@ export class GitExtension implements IGitExtension {
     }
 
     return (
-      this._docRegistry.getFileTypesForPath(path)[0] ||
+      this._docRegistry?.getFileTypesForPath(path)[0] ??
       DocumentRegistry.getDefaultTextFileType()
     );
   }
@@ -2126,10 +2134,9 @@ export class GitExtension implements IGitExtension {
    * then ensure the editor's content matches the file on disk
    */
   private _openGitignore(): void {
-    if (this._docmanager) {
-      const widget = this._docmanager.openOrReveal(
-        this.getRelativeFilePath('.gitignore')
-      );
+    const filePath = this.getRelativeFilePath('.gitignore');
+    if (this._docmanager && filePath) {
+      const widget = this._docmanager.openOrReveal(filePath);
       if (widget && !widget.context.model.dirty) {
         widget.context.revert();
       }
@@ -2178,7 +2185,11 @@ export class GitExtension implements IGitExtension {
    * @param path path to the file to be reverted
    */
   private _revertFile(path: string): void {
-    const widget = this._docmanager.findWidget(this.getRelativeFilePath(path));
+    const filePath = this.getRelativeFilePath(path);
+    if (!filePath) {
+      return;
+    }
+    const widget = this._docmanager?.findWidget(filePath);
     if (widget && !widget.context.model.dirty) {
       widget.context.revert();
     }
@@ -2191,8 +2202,15 @@ export class GitExtension implements IGitExtension {
     this.__currentMarker = this._markerCache.get(path, branch);
   }
 
-  private _status: Git.IStatus;
-  private _stash: Git.IStash;
+  private _status: Git.IStatus = {
+    branch: null,
+    remote: null,
+    ahead: 0,
+    behind: 0,
+    state: Git.State.DEFAULT,
+    files: []
+  };
+  private _stash: Git.IStash = [];
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];
   private _tagsList: Git.ITag[] = [];
@@ -2202,7 +2220,7 @@ export class GitExtension implements IGitExtension {
   private _fetchPoll: Poll;
   private _isDisposed = false;
   private _markerCache: Markers = new Markers(() => this._markChanged.emit());
-  private __currentMarker: BranchMarker = null;
+  private __currentMarker: BranchMarker | null = null;
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _settings: ISettingRegistry.ISettings | null;
@@ -2235,7 +2253,7 @@ export class GitExtension implements IGitExtension {
     this
   );
   private _statusChanged = new Signal<IGitExtension, Git.IStatus>(this);
-  private _notifyRemoteChanges = new Signal<
+  private _remoteChanged = new Signal<
     IGitExtension,
     Git.IRemoteChangedNotification | null
   >(this);

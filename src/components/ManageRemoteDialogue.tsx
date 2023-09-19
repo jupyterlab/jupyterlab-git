@@ -136,7 +136,7 @@ export class ManageRemoteDialogue extends React.Component<
               }
               onKeyPress={e => {
                 if (e.key === 'Enter') {
-                  this._addRemoteButton.click();
+                  this._addRemoteButton?.click();
                 }
               }}
             />
@@ -161,11 +161,11 @@ export class ManageRemoteDialogue extends React.Component<
                 const { name, url } = this.state.newRemote;
                 try {
                   await this.props.model.addRemote(url, name);
-                  this._nameInput.value = '';
-                  this._urlInput.value = '';
+                  this._nameInput!.value = '';
+                  this._urlInput!.value = '';
                   this.setState(prevState => ({
                     existingRemotes: [
-                      ...prevState.existingRemotes,
+                      ...(prevState.existingRemotes ?? []),
                       prevState.newRemote
                     ],
                     newRemote: { name: '', url: '' }
@@ -199,9 +199,9 @@ export class ManageRemoteDialogue extends React.Component<
                       onClick={async () => {
                         await this.props.model.removeRemote(remote.name);
                         this.setState({
-                          existingRemotes: this.state.existingRemotes.filter(
-                            r => r.name !== remote.name
-                          )
+                          existingRemotes: (
+                            this.state.existingRemotes ?? []
+                          ).filter(r => r.name !== remote.name)
                         });
                       }}
                     />
@@ -217,7 +217,7 @@ export class ManageRemoteDialogue extends React.Component<
     );
   }
 
-  private _nameInput: HTMLInputElement;
-  private _urlInput: HTMLInputElement;
-  private _addRemoteButton: HTMLInputElement;
+  private _nameInput: HTMLInputElement | null = null;
+  private _urlInput: HTMLInputElement | null = null;
+  private _addRemoteButton: HTMLInputElement | null = null;
 }

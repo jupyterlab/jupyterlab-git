@@ -208,16 +208,16 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   render(): JSX.Element {
     // reset lookup table of commit node locations
     const allCommitNodes: JSX.Element[] = [];
-    let allRouteNodes: JSX.Element[] = [];
+    const allRouteNodes: JSX.Element[] = [];
     const commitNodes = this.getGraphData();
     commitNodes.forEach(node => {
       const commit = node;
       const [commitNode, routeNodes] = this.renderCommit(commit);
       allCommitNodes.push(commitNode);
-      allRouteNodes = allRouteNodes.concat(routeNodes);
+      allRouteNodes.push(...routeNodes);
     });
 
-    const children = [].concat(allRouteNodes, allCommitNodes);
+    const children = [...allRouteNodes, ...allCommitNodes];
 
     const height = this.getHeight();
     const width = this.getWidth();

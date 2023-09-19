@@ -110,14 +110,16 @@ export class AdvancedPushForm
 
   getValue(): IAdvancedPushFormValue {
     return {
-      remoteName: this._radioButtons.find(rb => rb.checked)?.value,
+      remoteName: this._radioButtons.find(rb => rb.checked)?.value ?? '',
       force: this._forceCheckbox.checked
     };
   }
 
   private _trans: TranslationBundle;
   private _model: GitExtension;
+  // @ts-expect-error initialization is indirect
   private _remoteOptionsContainer: HTMLElement;
   private _radioButtons: HTMLInputElement[];
+  // @ts-expect-error initialization is indirect
   private _forceCheckbox: HTMLInputElement;
 }

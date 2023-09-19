@@ -305,7 +305,7 @@ export class CommitBox extends React.Component<
     const binding = this.props.commands.keyBindings.find(
       binding => binding.command === CommandIDs.gitSubmitCommand
     );
-    return binding.keys.join(' ');
+    return binding?.keys.join(' ') ?? '';
   };
 
   /**

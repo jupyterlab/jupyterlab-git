@@ -258,7 +258,7 @@ namespace Private {
      * @returns boolean indicating whether the extension should display status updates
      */
     function isActive(): boolean {
-      return settings.composite.displayStatus as boolean;
+      return (settings?.composite.displayStatus ?? true) as boolean;
     }
   }
 }

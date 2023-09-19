@@ -74,7 +74,10 @@ export class GitCredentialsForm
     };
   }
   protected _trans: TranslationBundle;
+  // @ts-expect-error initialization is indirect
   private _user: HTMLInputElement;
+  // @ts-expect-error initialization is indirect
   private _password: HTMLInputElement;
+  // @ts-expect-error initialization is indirect
   private _checkboxCacheCredentials: HTMLInputElement;
 }

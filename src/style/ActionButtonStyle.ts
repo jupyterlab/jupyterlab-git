@@ -39,7 +39,7 @@ export const showButtonOnHover = (() => {
     $nest: {}
   };
   const selector = `&:hover .${hiddenButtonStyle}`;
-  styled.$nest[selector] = {
+  styled.$nest![selector] = {
     display: 'block'
   };
   return styled;

@@ -118,7 +118,9 @@ export function BranchPicker(props: IBranchPickerProps): JSX.Element {
         paper: branchDialogClass
       }}
       open={true}
-      onClose={props.onClose}
+      onClose={() => {
+        props.onClose();
+      }}
     >
       <div className={titleWrapperClass}>
         <p className={titleClass}>
@@ -208,7 +210,7 @@ export function BranchPicker(props: IBranchPickerProps): JSX.Element {
           }
           value={act === 'merge' ? trans.__('Merge') : trans.__('Rebase')}
           onClick={() => {
-            props.onClose(selectedBranch);
+            props.onClose(selectedBranch ?? undefined);
           }}
           disabled={selectedBranch === null}
         />

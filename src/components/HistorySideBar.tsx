@@ -70,7 +70,7 @@ export interface IHistorySideBarProps {
    */
   onSelectForCompare?: (
     commit: Git.ISingleCommitInfo
-  ) => (event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>;
+  ) => (event?: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>;
 
   /**
    * Callback invoked upon clicking to compare a commit against the selected.
@@ -78,7 +78,7 @@ export interface IHistorySideBarProps {
    */
   onCompareWithSelected?: (
     commit: Git.ISingleCommitInfo
-  ) => (event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>;
+  ) => (event?: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>;
 }
 
 export const CONTEXT_COMMANDS = [ContextCommandIDs.gitTagAdd];
@@ -127,7 +127,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
   const [nodeHeights, setNodeHeights] = React.useState<{
     [sha: string]: number;
   }>({});
-  const nodes = React.useRef<{ [sha: string]: HTMLLIElement }>({});
+  const nodes = React.useRef<{ [sha: string]: HTMLLIElement | null }>({});
 
   React.useEffect(() => {
     const resizeObserver = new ResizeObserver(entries => {
@@ -142,7 +142,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
     });
 
     props.commits.forEach(commit =>
-      resizeObserver.observe(nodes.current[commit.commit], {
+      resizeObserver.observe(nodes.current[commit.commit]!, {
         box: 'border-box'
       })
     );
@@ -236,12 +236,14 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
                 isChallengerCommit={isChallengerCommit}
                 onOpenDiff={onOpenDiff}
                 onSelectForCompare={
-                  isChallengerCommit ? null : props.onSelectForCompare(commit)
+                  isChallengerCommit
+                    ? undefined
+                    : props.onSelectForCompare!(commit)
                 }
                 onCompareWithSelected={
                   isReferenceCommit || props.referenceCommit === null
-                    ? null
-                    : props.onCompareWithSelected(commit)
+                    ? undefined
+                    : props.onCompareWithSelected!(commit)
                 }
                 expanded={expandedCommits.includes(commit.commit)}
                 toggleCommitExpansion={sha =>

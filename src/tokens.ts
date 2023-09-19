@@ -27,7 +27,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * The current branch
    */
-  currentBranch: Git.IBranch;
+  currentBranch: Git.IBranch | null;
 
   /**
    * A signal emitted when the branches of the Git repository changes.
@@ -52,7 +52,10 @@ export interface IGitExtension extends IDisposable {
   /**
    * A signal emitted when the current Git repository changes.
    */
-  readonly repositoryChanged: ISignal<IGitExtension, IChangedArgs<string>>;
+  readonly repositoryChanged: ISignal<
+    IGitExtension,
+    IChangedArgs<string | null>
+  >;
 
   /**
    * Test whether the model is ready;
@@ -118,7 +121,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * A signal emitted when files that are behind the remote branch are opened.
    */
-  readonly notifyRemoteChanges: ISignal<
+  readonly remoteChanged: ISignal<
     IGitExtension,
     Git.IRemoteChangedNotification | null
   >;
@@ -384,7 +387,7 @@ export interface IGitExtension extends IDisposable {
    *
    * @param path the file path relative to the server root
    */
-  getFile(path: string): Git.IStatusFile;
+  getFile(path: string): Git.IStatusFile | null;
 
   /**
    * Get current mark of file named fname

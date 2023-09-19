@@ -90,7 +90,7 @@ export interface IFileItemProps {
   /**
    * Action buttons on the file
    */
-  actions?: React.ReactElement;
+  actions?: React.ReactNode;
   /**
    * Callback to open a context menu on the file
    */
@@ -152,18 +152,18 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
   protected _onClick = (event: React.MouseEvent<HTMLInputElement>): void => {
     if (this.props.markBox) {
       if (event.shiftKey) {
-        this.props.markUntilFile(this.props.file);
+        this.props.markUntilFile!(this.props.file);
       } else {
         this.props.model.toggleMark(this.props.file.to);
-        this.props.setSelection(this.props.file, { singleton: true });
+        this.props.setSelection!(this.props.file, { singleton: true });
       }
     } else {
       if (event.ctrlKey || event.metaKey) {
-        this.props.setSelection(this.props.file);
+        this.props.setSelection!(this.props.file);
       } else if (event.shiftKey) {
-        this.props.setSelection(this.props.file, { group: true });
+        this.props.setSelection!(this.props.file, { group: true });
       } else {
-        this.props.setSelection(this.props.file, { singleton: true });
+        this.props.setSelection!(this.props.file, { singleton: true });
       }
     }
   };
@@ -227,7 +227,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         onContextMenu={
           this.props.contextMenu &&
           (event => {
-            this.props.contextMenu(this.props.file, event);
+            this.props.contextMenu!(this.props.file, event);
           })
         }
         onDoubleClick={this.props.onDoubleClick}
@@ -241,7 +241,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
                 fname={this.props.file.to}
                 stage={this.props.file.status}
                 model={this.props.model}
-                checked={this.props.checked}
+                checked={this.props.checked ?? false}
               />
             )}
             <FilePath

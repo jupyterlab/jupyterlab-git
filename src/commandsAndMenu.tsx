@@ -340,7 +340,7 @@ export function addCommands(
               Dialog.okButton({ label: trans.__('Proceed') })
             ]
           });
-          if (result.button.accept) {
+          if (result.button.accept && result.value) {
             remote = result.value.remoteName;
             force = result.value.force;
           } else {
@@ -490,7 +490,7 @@ export function addCommands(
       });
       if (result.button.accept) {
         try {
-          if (result.value.checked) {
+          if (result.value?.checked) {
             logger.log({
               message: trans.__('Closing all opened files...'),
               level: Level.RUNNING
@@ -501,7 +501,7 @@ export function addCommands(
             message: trans.__('Resetting...'),
             level: Level.RUNNING
           });
-          await gitModel.resetToCommit(gitModel.status.remote);
+          await gitModel.resetToCommit(gitModel.status.remote ?? undefined);
           logger.log({
             message: trans.__('Successfully reset'),
             level: Level.SUCCESS,
@@ -592,7 +592,9 @@ export function addCommands(
           });
 
           // Pin the preview screen if applicable
-          PreviewMainAreaWidget.pinWidget(tabPosition, tabBar, diffWidget);
+          if (tabBar) {
+            PreviewMainAreaWidget.pinWidget(tabPosition, tabBar, diffWidget);
+          }
 
           // Create the diff widget
           try {
@@ -736,7 +738,7 @@ export function addCommands(
         const dialog = ReactWidget.create(
           <BranchPicker
             action="merge"
-            currentBranch={gitModel.currentBranch.name}
+            currentBranch={gitModel.currentBranch?.name ?? ''}
             branches={localBranches}
             onClose={(branch?: string) => {
               dialog.dispose();
@@ -748,7 +750,7 @@ export function addCommands(
 
         Widget.attach(dialog, anchor);
 
-        branch = await waitForDialog.promise;
+        branch = (await waitForDialog.promise) ?? undefined;
       }
 
       if (branch) {
@@ -764,7 +766,7 @@ export function addCommands(
             message: trans.__(
               "Failed to merge branch '%1' into '%2'.",
               branch,
-              gitModel.currentBranch.name
+              gitModel.currentBranch?.name
             ),
             error: err as Error
           });
@@ -776,7 +778,7 @@ export function addCommands(
           message: trans.__(
             "Branch '%1' merged into '%2'.",
             branch,
-            gitModel.currentBranch.name
+            gitModel.currentBranch?.name
           )
         });
       }
@@ -811,7 +813,7 @@ export function addCommands(
         const dialog = ReactWidget.create(
           <BranchPicker
             action="rebase"
-            currentBranch={gitModel.currentBranch.name}
+            currentBranch={gitModel.currentBranch?.name ?? ''}
             branches={localBranches}
             onClose={(branch?: string) => {
               dialog.dispose();
@@ -823,7 +825,7 @@ export function addCommands(
 
         Widget.attach(dialog, anchor);
 
-        branch = await waitForDialog.promise;
+        branch = (await waitForDialog.promise) ?? undefined;
       }
 
       if (branch) {
@@ -838,7 +840,7 @@ export function addCommands(
             level: Level.ERROR,
             message: trans.__(
               "Failed to rebase branch '%1' onto '%2'.",
-              gitModel.currentBranch.name,
+              gitModel.currentBranch?.name,
               branch
             ),
             error: err as Error
@@ -850,7 +852,7 @@ export function addCommands(
           level: Level.SUCCESS,
           message: trans.__(
             "Branch '%1' rebase onto '%2'.",
-            gitModel.currentBranch.name,
+            gitModel.currentBranch?.name,
             branch
           )
         });
@@ -892,17 +894,18 @@ export function addCommands(
     execute: async (args: { action?: string } = {}) => {
       const { action } = args;
 
-      if (['continue', 'abort', 'skip'].includes(action)) {
-        const message = (action => {
-          switch (action) {
-            case 'continue':
-              return trans.__('Continue the rebase…');
-            case 'skip':
-              return trans.__('Skip current commit…');
-            case 'abort':
-              return trans.__('Abort the rebase…');
-          }
-        })(action);
+      if (['continue', 'abort', 'skip'].includes(action ?? '')) {
+        const message =
+          (action => {
+            switch (action) {
+              case 'continue':
+                return trans.__('Continue the rebase…');
+              case 'skip':
+                return trans.__('Skip current commit…');
+              case 'abort':
+                return trans.__('Abort the rebase…');
+            }
+          })(action) ?? '';
 
         logger.log({
           level: Level.RUNNING,
@@ -911,16 +914,17 @@ export function addCommands(
         try {
           await gitModel.resolveRebase(action as any);
         } catch (err) {
-          const message = (action => {
-            switch (action) {
-              case 'continue':
-                return trans.__('Fail to continue rebasing.');
-              case 'skip':
-                return trans.__('Fail to skip current commit when rebasing.');
-              case 'abort':
-                return trans.__('Fail to abort the rebase.');
-            }
-          })(action);
+          const message =
+            (action => {
+              switch (action) {
+                case 'continue':
+                  return trans.__('Fail to continue rebasing.');
+                case 'skip':
+                  return trans.__('Fail to skip current commit when rebasing.');
+                case 'abort':
+                  return trans.__('Fail to abort the rebase.');
+              }
+            })(action) ?? '';
           logger.log({
             level: Level.ERROR,
             message,
@@ -929,16 +933,17 @@ export function addCommands(
           return;
         }
 
-        const message_ = (action => {
-          switch (action) {
-            case 'continue':
-              return trans.__('Commit submitted continuing rebase.');
-            case 'skip':
-              return trans.__('Current commit skipped.');
-            case 'abort':
-              return trans.__('Rebase aborted.');
-          }
-        })(action);
+        const message_ =
+          (action => {
+            switch (action) {
+              case 'continue':
+                return trans.__('Commit submitted continuing rebase.');
+              case 'skip':
+                return trans.__('Current commit skipped.');
+              case 'abort':
+                return trans.__('Rebase aborted.');
+            }
+          })(action) ?? '';
         logger.log({
           level: Level.SUCCESS,
           message: message_
@@ -1049,7 +1054,7 @@ export function addCommands(
     execute: async _ => {
       const domNode = app.contextMenuHitTest((node: HTMLElement) => {
         const nodeId = node.dataset.id;
-        return nodeId && nodeId.substring(0, 8) === 'git-diff';
+        return nodeId?.substring(0, 8) === 'git-diff' ?? false;
       });
       if (!domNode) {
         return;
@@ -1100,6 +1105,10 @@ export function addCommands(
     ),
     execute: async args => {
       const { files } = args as any as CommandArguments.IGitFileDiff;
+      if (!gitModel.pathRepository) {
+        return;
+      }
+
       for (const file of files) {
         const {
           context,
@@ -1153,6 +1162,7 @@ export function addCommands(
                 'POST',
                 {
                   filename,
+                  // @ts-expect-error this is serializable
                   reference: challengerRef
                 }
               ).then(data => data.content);
@@ -1253,10 +1263,10 @@ export function addCommands(
               change: Contents.IChangedArgs
             ) => {
               const updateAt = new Date(
-                change.newValue.last_modified
+                change.newValue?.last_modified ?? 0
               ).valueOf();
               if (
-                change.newValue.path === fullPath &&
+                change.newValue?.path === fullPath &&
                 model.challenger.updateAt !== updateAt
               ) {
                 model.challenger = {
@@ -1741,7 +1751,7 @@ export function addFileBrowserContextMenu(
   contextMenu: ContextMenuSvg,
   trans: TranslationBundle
 ): void {
-  let gitMenu: Menu;
+  let gitMenu: Menu | null = null;
   let _commands: ContextCommandIDs[];
   let _paths: string[];
 
@@ -1751,6 +1761,7 @@ export function addFileBrowserContextMenu(
 
     const items = Array.from(filebrowser.selectedItems());
     const statuses = new Set<Git.Status>(
+      // @ts-expect-error file cannot be undefined or null
       items
         .map(item =>
           model.pathRepository === null
@@ -1764,7 +1775,8 @@ export function addFileBrowserContextMenu(
     const allCommands = new Set<ContextCommandIDs>(
       // flatten the list of lists of commands
       []
-        .concat(...[...statuses].map(status => CONTEXT_COMMANDS[status]))
+        // @ts-expect-error status can index the context commands object
+        .concat(...[...statuses].map(status => CONTEXT_COMMANDS[status!]))
         // filter out the Open and Delete commands as
         // those are not needed in file browser
         .filter(
@@ -1797,16 +1809,17 @@ export function addFileBrowserContextMenu(
       addMenuItems(
         commandsList,
         menu,
-        paths
+        // @ts-expect-error file cannot be undefined or null
+        (paths ?? [])
           .map(path => model.getFile(path))
           // if file cannot be resolved (has no action available),
           // omit the undefined result
-          .filter(file => typeof file !== 'undefined')
+          .filter(file => !['null', 'undefined'].includes(typeof file))
       );
 
       if (wasShown) {
         // show the menu again after downtime for refresh
-        parent.triggerActiveItem();
+        parent!.triggerActiveItem();
       }
       _commands = commandsList;
       _paths = paths;
@@ -1836,7 +1849,7 @@ export function addFileBrowserContextMenu(
       .then(() => {
         if (model.status !== renderedStatus) {
           // update items if needed
-          updateItems(gitMenu);
+          updateItems(gitMenu!);
         }
       })
       .catch(error => {
@@ -1988,7 +2001,7 @@ export async function showGitOperationDialog<T>(
         case Operation.ForcePush:
         case Operation.Pull:
           // If the remote is defined, check it against the remote URI list
-          if (model.currentBranch.upstream) {
+          if (model.currentBranch?.upstream) {
             // Compare the remote against the URI list
             const remoteName = model.currentBranch.upstream.split('/')[0];
             const currentRemoteUrl = await getCurrentRemote(remoteName);
@@ -2034,7 +2047,7 @@ export async function showGitOperationDialog<T>(
           operation,
           trans,
           args,
-          credentials.value,
+          credentials.value ?? undefined,
           true
         );
       } else {

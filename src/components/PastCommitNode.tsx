@@ -88,9 +88,9 @@ export interface IPastCommitNodeProps {
    *
    * @param event - event object
    */
-  onSelectForCompare:
-    | ((event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>)
-    | null;
+  onSelectForCompare?: (
+    event?: React.MouseEvent<HTMLElement, MouseEvent>
+  ) => Promise<void>;
 
   /**
    * Callback invoked upon clicking to compare a commit against the selected.
@@ -99,9 +99,9 @@ export interface IPastCommitNodeProps {
    *
    * @param event - event object
    */
-  onCompareWithSelected:
-    | ((event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>)
-    | null;
+  onCompareWithSelected?: (
+    event?: React.MouseEvent<HTMLElement, MouseEvent>
+  ) => Promise<void>;
   /**
    * Whether the PastCommitNode is expanded
    */
@@ -117,7 +117,7 @@ export interface IPastCommitNodeProps {
    *
    * @param el the <li> element representing a past commit
    */
-  setRef: (el: HTMLLIElement) => void;
+  setRef: (el: HTMLLIElement | null) => void;
 
   /**
    * Callback to open a context menu on the commit
@@ -173,7 +173,7 @@ export class PastCommitNode extends React.Component<
         onContextMenu={
           this.props.contextMenu &&
           (event => {
-            this.props.contextMenu(this.props.commit, event);
+            this.props.contextMenu!(this.props.commit, event);
           })
         }
       >

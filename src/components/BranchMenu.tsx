@@ -291,8 +291,10 @@ export class BranchMenu extends React.Component<
               className={hiddenButtonStyle}
               icon={trashIcon}
               title={this.props.trans.__('Delete this branch locally')}
-              onClick={async (event: React.MouseEvent) => {
-                event.stopPropagation();
+              onClick={async (
+                event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+              ) => {
+                event?.stopPropagation();
                 await this._onDeleteBranch(branch.name);
               }}
             />
@@ -302,8 +304,10 @@ export class BranchMenu extends React.Component<
               title={this.props.trans.__(
                 'Merge this branch into the current one'
               )}
-              onClick={(event: React.MouseEvent) => {
-                event.stopPropagation();
+              onClick={(
+                event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+              ) => {
+                event?.stopPropagation();
                 this._onMergeBranch(branch.name);
               }}
             />
@@ -428,9 +432,6 @@ export class BranchMenu extends React.Component<
    * @returns callback
    */
   private _onBranchClickFactory(branch: string) {
-    const self = this;
-    return onClick;
-
     /**
      * Callback invoked upon clicking a branch name.
      *
@@ -438,11 +439,11 @@ export class BranchMenu extends React.Component<
      * @param event - event object
      * @returns promise which resolves upon attempting to switch branches
      */
-    async function onClick(): Promise<void> {
-      if (!self.props.branching) {
+    const onClick = async (): Promise<void> => {
+      if (!this.props.branching) {
         showErrorMessage(
-          self.props.trans.__('Switching branches is disabled'),
-          self.CHANGES_ERR_MSG
+          this.props.trans.__('Switching branches is disabled'),
+          this.CHANGES_ERR_MSG
         );
         return;
       }
@@ -450,21 +451,23 @@ export class BranchMenu extends React.Component<
         branchname: branch
       };
 
-      self.props.logger.log({
+      this.props.logger.log({
         level: Level.RUNNING,
-        message: self.props.trans.__('Switching branch…')
+        message: this.props.trans.__('Switching branch…')
       });
 
       try {
-        await self.props.model.checkout(opts);
+        await this.props.model.checkout(opts);
       } catch (err) {
-        return onBranchError(err, self.props.logger, self.props.trans);
+        return onBranchError(err, this.props.logger, this.props.trans);
       }
 
-      self.props.logger.log({
+      this.props.logger.log({
         level: Level.SUCCESS,
-        message: self.props.trans.__('Switched branch.')
+        message: this.props.trans.__('Switched branch.')
       });
-    }
+    };
+
+    return onClick;
   }
 }

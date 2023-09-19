@@ -8,9 +8,7 @@ import {
 } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
-import { MergeView } from 'codemirror';
 import { Git } from '../../tokens';
-import { MergeView as LocalMergeView, mergeView } from './mergeview';
 
 /**
  * Diff callback to be registered for plain-text files.
@@ -24,7 +22,10 @@ export const createPlainTextDiff: Git.Diff.ICallback = async (
   toolbar?: Toolbar,
   translator?: ITranslator
 ): Promise<PlainTextDiff> => {
-  const widget = new PlainTextDiff(model, translator.load('jupyterlab_git'));
+  const widget = new PlainTextDiff(
+    model,
+    (translator ?? nullTranslator).load('jupyterlab_git')
+  );
   await widget.ready;
   return widget;
 };
@@ -37,7 +38,7 @@ export class PlainTextDiff extends Widget implements Git.Diff.IDiffWidget {
     super({
       node: PlainTextDiff.createNode(
         model.reference.label,
-        model.base?.label,
+        model.base?.label ?? '',
         model.challenger.label
       )
     });

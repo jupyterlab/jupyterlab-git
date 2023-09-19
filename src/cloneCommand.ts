@@ -48,7 +48,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
           ]
         });
 
-        if (result.button.accept && result.value.url) {
+        if (result.button.accept && result.value?.url) {
           logger.log({
             level: Level.RUNNING,
             message: trans.__('Cloning…')

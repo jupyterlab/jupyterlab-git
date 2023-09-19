@@ -86,7 +86,7 @@ export const createNotebookDiff = async (
   translator?: ITranslator
 ): Promise<NotebookDiff> => {
   // Create the notebook diff view
-  const trans = translator.load('jupyterlab_git');
+  const trans = (translator ?? nullTranslator).load('jupyterlab_git');
   const diffWidget = new NotebookDiff(model, renderMime, trans);
   diffWidget.addClass('jp-git-diff-root');
 
@@ -175,7 +175,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
    * Helper to determine if a notebook merge should be shown.
    */
   private get _hasConflict(): boolean {
-    return this._model.hasConflict;
+    return this._model.hasConflict ?? false;
   }
 
   /**
@@ -268,7 +268,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
       this._nbdWidget = await createView(
         challengerContent,
         referenceContent,
-        baseContent
+        baseContent ?? ''
       );
 
       while (this._scroller.widgets.length > 0) {
@@ -363,8 +363,10 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
   protected _isReady: Promise<void>;
   protected _lastSerializeModel: INotebookContent | null = null;
   protected _model: Git.Diff.IModel;
+  // @ts-expect-error Complex initialization
   protected _nbdWidget: NotebookMergeWidget | NotebookDiffWidget;
   protected _renderMime: IRenderMimeRegistry;
+  // @ts-expect-error Complex initialization
   protected _scroller: Panel;
   protected _trans: TranslationBundle;
 }

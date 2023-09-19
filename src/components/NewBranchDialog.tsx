@@ -358,7 +358,7 @@ export class NewBranchDialog extends React.Component<
    * @param event - event object
    */
   private _onFilterChange = (event: any): void => {
-    this._branchList.current.resetAfterIndex(0);
+    this._branchList.current?.resetAfterIndex(0);
     this.setState({
       filter: event.target.value
     });
@@ -368,7 +368,7 @@ export class NewBranchDialog extends React.Component<
    * Callback invoked to reset the menu filter.
    */
   private _resetFilter = (): void => {
-    this._branchList.current.resetAfterIndex(0);
+    this._branchList.current?.resetAfterIndex(0);
     this.setState({
       filter: ''
     });
@@ -381,20 +381,18 @@ export class NewBranchDialog extends React.Component<
    * @returns callback
    */
   private _onBranchClickFactory(branch: string) {
-    const self = this;
-    return onClick;
-
     /**
      * Callback invoked upon clicking a branch name.
      *
      * @private
      * @param event - event object
      */
-    function onClick(): void {
-      self.setState({
+    const onClick = (): void => {
+      this.setState({
         base: branch
       });
-    }
+    };
+    return onClick;
   }
 
   /**
@@ -447,7 +445,7 @@ export class NewBranchDialog extends React.Component<
     this.props.onClose();
 
     // Reset the branch name and filter:
-    this._branchList.current.resetAfterIndex(0);
+    this._branchList.current?.resetAfterIndex(0);
     this.setState({
       name: '',
       filter: ''

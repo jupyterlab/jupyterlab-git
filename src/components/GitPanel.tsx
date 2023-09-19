@@ -29,7 +29,7 @@ import { FileList } from './FileList';
 import { HistorySideBar } from './HistorySideBar';
 import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
-import { WarningRounded as WarningRoundedIcon } from '@material-ui/icons';
+import { WarningRounded as WarningRoundedIcon } from '@mui/icons-material';
 import { GitStash } from './GitStash';
 import { ActionButton } from './ActionButton';
 import { addIcon, rewindIcon, trashIcon } from '../style/icons';
@@ -248,8 +248,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.setState({ tab: 1 });
       this.refreshHistory();
     }, this);
-    model.notifyRemoteChanges.connect((_, args) => {
-      this.warningDialog(args);
+    model.remoteChanged.connect((_, args) => {
+      this.warningDialog(args!);
     }, this);
 
     settings.changed.connect(this.refreshView, this);
@@ -296,7 +296,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       );
       let pastCommits = new Array<Git.ISingleCommitInfo>();
       if (logData.code === 0) {
-        pastCommits = logData.commits;
+        pastCommits = logData.commits ?? [];
       }
 
       this.setState({
@@ -566,13 +566,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             setAmend={this._setCommitAmend}
             onCommit={this.commitFiles}
             warning={
-              this.state.hasDirtyFiles && (
+              this.state.hasDirtyFiles ? (
                 <WarningBox
                   headerIcon={<WarningRoundedIcon />}
                   title={warningTitle}
                   content={warningContent}
                 />
-              )
+              ) : null
             }
           />
         ) : (
@@ -606,7 +606,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           referenceCommit={this.state.referenceCommit}
           challengerCommit={this.state.challengerCommit}
           onSelectForCompare={commit => async event => {
-            event.stopPropagation();
+            event?.stopPropagation();
             this.setState({ referenceCommit: commit }, () => {
               this._openSingleFileComparison(
                 event as React.MouseEvent<HTMLLIElement, MouseEvent>
@@ -614,7 +614,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             });
           }}
           onCompareWithSelected={commit => async event => {
-            event.stopPropagation();
+            event?.stopPropagation();
             this.setState({ challengerCommit: commit }, () => {
               this._openSingleFileComparison(
                 event as React.MouseEvent<HTMLLIElement, MouseEvent>
@@ -641,7 +641,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
               logger={this.props.logger}
               trans={this.props.trans}
               onClose={event => {
-                event.stopPropagation();
+                event?.stopPropagation();
                 this.setState({
                   referenceCommit: null,
                   challengerCommit: null
@@ -766,7 +766,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @param message - commit message
    * @returns a promise which commits the files
    */
-  private _commitMarkedFiles = async (message: string): Promise<void> => {
+  private _commitMarkedFiles = async (
+    message: string | null
+  ): Promise<void> => {
     this.props.logger.log({
       level: Level.RUNNING,
       message: this.props.trans.__('Staging files...')
@@ -783,7 +785,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @param message - commit message
    * @returns a promise which commits the files
    */
-  private _commitStagedFiles = async (message?: string): Promise<void> => {
+  private _commitStagedFiles = async (
+    message: string | null = null
+  ): Promise<void> => {
     const errorLog: ILogMessage = {
       level: Level.ERROR,
       message: this.props.trans.__('Failed to commit changes.')
@@ -827,7 +831,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    *
    * @param path - repository path
    */
-  private async _hasIdentity(path: string): Promise<string | null> {
+  private async _hasIdentity(path: string | null): Promise<string | null> {
+    if (!path) {
+      return null;
+    }
+
     // If the repository path changes or explicitly configured, check the user identity
     if (
       path !== this._previousRepoPath ||
@@ -835,7 +843,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     ) {
       try {
         let userOrEmailNotSet = false;
-        let author: Git.IIdentity;
+        let author: Git.IIdentity | null;
         let authorOverride: string | null = null;
 
         if (this.props.model.lastAuthor === null) {
@@ -870,14 +878,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           author = result.value;
           if (userOrEmailNotSet) {
             await this.props.model.config({
-              'user.name': author.name,
-              'user.email': author.email
+              'user.name': author!.name,
+              'user.email': author!.email
             });
           }
-          this.props.model.lastAuthor = author;
+          this.props.model.lastAuthor = author!;
 
           if (this.props.settings.composite['promptUserIdentity']) {
-            authorOverride = `${author.name} <${author.email}>`;
+            authorOverride = `${author!.name} <${author!.email}>`;
           }
         }
         this._previousRepoPath = path;
@@ -888,10 +896,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         }
 
         throw new Error(
+          // @ts-expect-error error will have message attribute
           this.props.trans.__('Failed to set your identity. %1', error.message)
         );
       }
     }
+
+    return null;
   }
 
   private _hasStagedFile(): boolean {
@@ -926,7 +937,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     return sfiles;
   }
 
-  private _previousRepoPath: string = null;
+  private _previousRepoPath: string | null = null;
 
   /**
    * Show a dialog when a notifyRemoteChanges signal is emitted from the model.

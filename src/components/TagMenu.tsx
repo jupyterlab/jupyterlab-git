@@ -333,9 +333,6 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
    * @returns callback
    */
   private _onTagClickFactory(tag: string) {
-    const self = this;
-    return onClick;
-
     /**
      * Callback invoked upon clicking a tag.
      *
@@ -343,32 +340,33 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
      * @param event - event object
      * @returns promise which resolves upon attempting to switch tags
      */
-    async function onClick(): Promise<void> {
-      if (!self.props.branching) {
+    const onClick = async (): Promise<void> => {
+      if (!this.props.branching) {
         showErrorMessage(
-          self.props.trans.__('Checkout tags is disabled'),
-          self.props.trans.__(
+          this.props.trans.__('Checkout tags is disabled'),
+          this.props.trans.__(
             'The repository contains files with uncommitted changes. Please commit or discard these changes before switching to a tag.'
           )
         );
         return;
       }
 
-      self.props.logger.log({
+      this.props.logger.log({
         level: Level.RUNNING,
-        message: self.props.trans.__('Checking tag out…')
+        message: this.props.trans.__('Checking tag out…')
       });
 
       try {
-        await self.props.model.checkoutTag(tag);
+        await this.props.model.checkoutTag(tag);
       } catch (err) {
-        return onTagError(err, self.props.logger, self.props.trans);
+        return onTagError(err, this.props.logger, this.props.trans);
       }
 
-      self.props.logger.log({
+      this.props.logger.log({
         level: Level.SUCCESS,
-        message: self.props.trans.__('Tag checkout.')
+        message: this.props.trans.__('Tag checkout.')
       });
-    }
+    };
+    return onClick;
   }
 }

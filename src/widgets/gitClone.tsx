@@ -28,9 +28,9 @@ export function addCloneButton(
           newValue: model.pathRepository
         }}
       >
-        {(_, change: IChangedArgs<string | null>) => (
+        {(_, change?: IChangedArgs<string | null>) => (
           <ToolbarButtonComponent
-            enabled={change.newValue === null}
+            enabled={change?.newValue === null}
             icon={cloneIcon}
             onClick={() => {
               commands.execute(CommandIDs.gitClone);

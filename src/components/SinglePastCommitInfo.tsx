@@ -49,7 +49,7 @@ export interface ISinglePastCommitInfoProps {
     filePath: string,
     isText: boolean,
     previousFilePath?: string
-  ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
+  ) => (event?: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
 /**
@@ -137,15 +137,17 @@ export class SinglePastCommitInfo extends React.Component<
     try {
       const log = await this.props.model.detailedLog(this.props.commit.commit);
 
-      this.setState({
-        info: log.modified_file_note,
-        commitBody: log.commit_body,
-        numFiles: log.modified_files_count,
-        insertions: log.number_of_insertions,
-        deletions: log.number_of_deletions,
-        modifiedFiles: log.modified_files,
-        loadingState: 'success'
-      });
+      if (log) {
+        this.setState({
+          info: log.modified_file_note!,
+          commitBody: log.commit_body!,
+          numFiles: log.modified_files_count!,
+          insertions: log.number_of_insertions!,
+          deletions: log.number_of_deletions!,
+          modifiedFiles: log.modified_files!,
+          loadingState: 'success'
+        });
+      }
     } catch (err) {
       console.error(
         `Error while getting detailed log for commit ${this.props.commit.commit} and path ${this.props.model.pathRepository}`,

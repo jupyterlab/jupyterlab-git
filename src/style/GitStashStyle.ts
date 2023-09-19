@@ -6,7 +6,7 @@ export const stashContainerStyle = style(
   (() => {
     const styled: NestedCSSProperties = { $nest: {} };
 
-    styled.$nest[`& > .${sectionAreaStyle}`] = {
+    styled.$nest![`& > .${sectionAreaStyle}`] = {
       margin: 0
     };
     return styled;

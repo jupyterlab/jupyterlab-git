@@ -62,7 +62,7 @@ export interface ICommitComparisonBoxProps {
   /**
    * Returns a callback to be invoked on close.
    */
-  onClose: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  onClose: (event?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 
   /**
    * Returns a callback to be invoked on click to display a file diff.
@@ -76,7 +76,7 @@ export interface ICommitComparisonBoxProps {
     filePath: string,
     isText: boolean,
     previousFilePath?: string
-  ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
+  ) => (event?: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
 /**
@@ -106,7 +106,7 @@ export function CommitComparisonBox(
         return;
       }
 
-      let diffResult: Git.IDiffResult = null;
+      let diffResult: Git.IDiffResult | null = null;
       try {
         diffResult = await model.diff(
           referenceCommit.commit,
@@ -127,7 +127,7 @@ export function CommitComparisonBox(
       }
       if (diffResult) {
         setFiles(
-          diffResult.result.map(changedFile => {
+          (diffResult.result ?? []).map(changedFile => {
             const pathParts = changedFile.filename.split('/');
             const fileName = pathParts[pathParts.length - 1];
             const filePath = changedFile.filename;
@@ -162,7 +162,7 @@ export function CommitComparisonBox(
         <ActionButton
           title={props.trans.__('Close')}
           icon={closeIcon}
-          onClick={(event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+          onClick={(event?: React.MouseEvent<HTMLElement, MouseEvent>) => {
             props.onClose(event);
           }}
         ></ActionButton>
@@ -175,7 +175,12 @@ export function CommitComparisonBox(
             files={files}
             insertions={`${totalInsertions}`}
             numFiles={`${files.length}`}
-            onOpenDiff={props.onOpenDiff}
+            onOpenDiff={
+              props.onOpenDiff ??
+              (() => () => {
+                /* no-op */
+              })
+            }
             trans={props.trans}
           ></CommitDiff>
         ) : (
