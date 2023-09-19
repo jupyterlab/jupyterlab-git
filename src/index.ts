@@ -11,7 +11,7 @@ import {
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { FileBrowserModel, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -47,7 +47,7 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
   requires: [
     ILayoutRestorer,
     IEditorServices,
-    IFileBrowserFactory,
+    IDefaultFileBrowser,
     IRenderMimeRegistry,
     ISettingRegistry,
     IDocumentManager
@@ -70,7 +70,12 @@ async function activate(
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   editorServices: IEditorServices,
-  factory: IFileBrowserFactory,
+  // Get a reference to the default file browser extension
+  // We don't use the current tracked browser because extension like jupyterlab-github
+  // or jupyterlab-gitlab are defining new filebrowsers that we don't support.
+  // And it is unlikely that another browser than the default will be used.
+  // Ref: https://github.com/jupyterlab/jupyterlab-git/issues/1014
+  fileBrowser: IDefaultFileBrowser,
   renderMime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   docmanager: IDocumentManager,
@@ -81,12 +86,6 @@ async function activate(
 ): Promise<IGitExtension> {
   let settings: ISettingRegistry.ISettings | undefined = undefined;
   let serverSettings: Git.IServerSettings;
-  // Get a reference to the default file browser extension
-  // We don't use the current tracked browser because extension like jupyterlab-github
-  // or jupyterlab-gitlab are defining new filebrowsers that we don't support.
-  // And it is unlikely that another browser than the default will be used.
-  // Ref: https://github.com/jupyterlab/jupyterlab-git/issues/1014
-  const fileBrowser = factory.createFileBrowser('id');
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab_git');
 
