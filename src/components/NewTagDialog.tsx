@@ -178,15 +178,22 @@ export const DialogBoxCommitGraph: React.FunctionComponent<
     return () => resizeObserver.disconnect();
   }, [pastCommits]);
 
+  let isFilter;
+  if (filter === '') {
+    isFilter = true;
+  }
+
   return (
     <div className={historyDialogBoxWrapperStyle}>
-      <GitCommitGraph
-        commits={pastCommits.map(commit => ({
-          sha: commit.commit,
-          parents: commit.pre_commits
-        }))}
-        getNodeHeight={(sha: string) => nodeHeights[sha] ?? 55}
-      />
+      {isFilter && (
+        <GitCommitGraph
+          commits={pastCommits.map(commit => ({
+            sha: commit.commit,
+            parents: commit.pre_commits
+          }))}
+          getNodeHeight={(sha: string) => nodeHeights[sha] ?? 55}
+        />
+      )}
       <ol className={historyDialogBoxStyle}>
         {pastCommits.map((commit, index) => {
           return (

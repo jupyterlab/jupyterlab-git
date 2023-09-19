@@ -1773,7 +1773,7 @@ export class GitExtension implements IGitExtension {
   async newTag(tag: string, commitId: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:tag:create', async () => {
-      return await requestAPI<void>(URLExt.join(path, 'tag'), 'POST', {
+      return await requestAPI<void>(URLExt.join(path, 'new_tag'), 'POST', {
         tag_id: tag,
         commit_id: commitId
       });
