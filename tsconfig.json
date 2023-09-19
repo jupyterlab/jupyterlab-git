@@ -15,11 +15,11 @@
     "resolveJsonModule": true,
     "outDir": "lib",
     "rootDir": "src",
-    "skipLibCheck": true,
+"skipLibCheck": true,
     "strict": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "target": "ES2018",
-    "types": ["jest", "resize-observer-browser"]
+    "types": ["resize-observer-browser"]
   },
   "include": ["src/**/*"],
   "exclude": ["src/__tests__"]

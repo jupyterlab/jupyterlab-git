@@ -1,5 +1,8 @@
 {
   "extends": "./tsconfig",
+  "compilerOptions": {
+    "types": ["jest"]
+  },
   "include": ["src/**/*"],
   "exclude": []
 }

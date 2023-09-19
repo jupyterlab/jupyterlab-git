@@ -1,0 +1,14 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.2.1
+_src_path: https://github.com/jupyterlab/extension-template
+author_email: ''
+author_name: Jupyter Development Team
+has_binder: true
+has_settings: true
+kind: server
+labextension_name: '@jupyterlab/git'
+project_short_description: A JupyterLab extension for version control using git
+python_name: jupyterlab_git
+repository: https://github.com/jupyterlab/jupyterlab-git.git
+test: true
+

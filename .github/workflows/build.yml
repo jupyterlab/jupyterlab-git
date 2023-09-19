@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: ['main']
+    branches: main
   pull_request:
-    branches: ['*']
+    branches: '*'
 
 jobs:
   build:
@@ -23,14 +23,14 @@ jobs:
         python_version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: python -m pip install -U jupyterlab~=3.0
+      run: python -m pip install -U "jupyterlab>=4.0.0,<5"
 
     - name: Lint the extension
       run: |
         set -eux
         jlpm
         jlpm run lint:check
-    
+
     - name: Test the extension
       run: |
         set -eux
@@ -39,7 +39,7 @@ jobs:
     - name: Build the extension
       run: |
         set -eux
-        python -m pip install .[dev,test]
+        python -m pip install .[test]
 
         # Python formatting checks
         black . --check
@@ -72,8 +72,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
     - name: Install Python
       uses: actions/setup-python@v4
       with:
@@ -89,7 +87,7 @@ jobs:
         sudo rm -rf $(which node)
         sudo rm -rf $(which node)
 
-        pip install "jupyterlab~=3.0" jupyterlab_git*.whl
+        pip install "jupyterlab>=4.0.0,<5" jupyterlab_git*.whl
 
 
         jupyter server extension list
@@ -97,7 +95,7 @@ jobs:
 
         jupyter labextension list
         jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
-        python -m jupyterlab.browser_check --no-chrome-test
+        python -m jupyterlab.browser_check --no-browser-test
 
   integration-tests:
     name: Integration tests
@@ -118,15 +116,16 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: extension-artifacts
-        
+
     - name: Install the extension
       run: |
         set -eux
-        python -m pip install "jupyterlab~=3.0" jupyter-archive jupyterlab_git*.whl
+        python -m pip install "jupyterlab>=4.0.0,<5" jupyter-archive jupyterlab_git*.whl
 
     - name: Install dependencies
       working-directory: ui-tests
       env:
+        YARN_ENABLE_IMMUTABLE_INSTALLS: 0
         PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
       run: jlpm install
 

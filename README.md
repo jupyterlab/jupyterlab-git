@@ -13,8 +13,12 @@ To see the extension in action, open the example notebook included in the Binder
 
 ## Requirements
 
-- JupyterLab >= 3.0, < 4 ([older version](https://github.com/jupyterlab/jupyterlab-git/tree/jlab-2) available for 2.x)
+- JupyterLab >= 4.0 ([older version] available for 2.x)
 - Git (version `>=2.x`)
+
+For older versions of JupyterLab, go to:
+- [3.x branch](https://github.com/jupyterlab/jupyterlab-git/tree/jlab-3)
+- [2.x branch](https://github.com/jupyterlab/jupyterlab-git/tree/jlab-2)
 
 ## Usage
 
@@ -35,28 +39,18 @@ or with _conda_:
 conda install -c conda-forge "jupyterlab<4" jupyterlab-git
 ```
 
-For JupyterLab < 3, you will need to run the following command after installing the package:
+## Uninstall
+
+To remove the extension, execute:
 
 ```bash
-jupyter lab build
-```
-
-### Uninstall
-
-```bash
-pip uninstall jupyterlab-git
+pip uninstall jupyterlab_git
 ```
 
 or with _conda_:
 
 ```bash
 conda remove jupyterlab-git
-```
-
-For JupyterLab < 3, you will also need to run the following command after removing the Python package:
-
-```bash
-jupyter labextension uninstall @jupyterlab/git
 ```
 
 ## Settings
@@ -143,10 +137,17 @@ Or equivalently in `$HOME/.jupyter/jupyter_notebook_config.json` (on Windows `%U
 
 ## Troubleshoot
 
-Before consulting the following list, be sure the `jupyterlab_git` server extension and the `@jupyterlab/git` frontend extension have the same version by executing the following commands:
+If you are seeing the frontend extension, but it is not working, check
+that the server extension is enabled:
 
 ```bash
 jupyter server extension list
+```
+
+If the server extension is installed and enabled, but you are not seeing
+the frontend extension, check the frontend extension is installed:
+
+```bash
 jupyter labextension list
 ```
 
@@ -190,7 +191,7 @@ Possible fixes:
       If you see `@jupyterlab/git` under `Uninstalled core extensions: `, your installation may have been corrupted. You can run `jupyter lab clean --all` and
       reinstall all your extensions.
 
-  </details>
+</details>
 
 ## Contributing
 
@@ -212,7 +213,7 @@ git clone https://github.com/jupyterlab/jupyterlab-git.git
 # Change directory to the jupyterlab-git directory
 cd jupyterlab-git
 # Install package in development mode
-pip install -e ".[dev]"
+pip install -e ".[test]"
 pre-commit install
 # Link your development version of the extension with JupyterLab
 jupyter labextension develop . --overwrite
@@ -239,12 +240,59 @@ By default, the `jlpm run build` command generates the source maps for this exte
 jupyter lab build --minimize=False
 ```
 
-To execute the tests
+### Development uninstall
 
 ```bash
-pytest jupyterlab_git
-jlpm run test
+# Server extension must be manually disabled in develop mode
+jupyter server extension disable jupyterlab_git
+pip uninstall jupyterlab_git
 ```
+
+In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
+command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
+folder is located. Then you can remove the symlink named `@jupyterlab/git` within that folder.
+
+### Testing the extension
+
+#### Server tests
+
+This extension is using [Pytest](https://docs.pytest.org/) for Python code testing.
+
+Install test dependencies (needed only once):
+
+```sh
+pip install -e ".[test]"
+# Each time you install the Python package, you need to restore the front-end extension link
+jupyter labextension develop . --overwrite
+```
+
+To execute them, run:
+
+```sh
+pytest -vv -r ap --cov jupyterlab_git
+```
+
+#### Frontend tests
+
+This extension is using [Jest](https://jestjs.io/) for JavaScript code testing.
+
+To execute them, execute:
+
+```sh
+jlpm
+jlpm test
+```
+
+#### Integration tests
+
+This extension uses [Playwright](https://playwright.dev/docs/intro) for the integration tests (aka user level tests).
+More precisely, the JupyterLab helper [Galata](https://github.com/jupyterlab/jupyterlab/tree/master/galata) is used to handle testing the extension in JupyterLab.
+
+More information are provided within the [ui-tests](./ui-tests/README.md) README.
+
+### Packaging the extension
+
+See [RELEASE](RELEASE.md)
 
 ## Contributors ✨
 

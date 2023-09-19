@@ -64,7 +64,19 @@ Check out the [workflow documentation](https://jupyter-releaser.readthedocs.io/e
 
 Here is a summary of the steps to cut a new release:
 
-- Add `ADMIN_GITHUB_TOKEN`, `PYPI_TOKEN` and `NPM_TOKEN` to the [Github Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) in the repository
+- Add tokens to the [Github Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) in the repository:
+  - `ADMIN_GITHUB_TOKEN` (with "public_repo" and "repo:status" permissions); see the [documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+  - `NPM_TOKEN` (with "automation" permission); see the [documentation](https://docs.npmjs.com/creating-and-viewing-access-tokens)
+- Set up PyPI
+
+<details><summary>Using PyPI trusted publisher (modern way)</summary>
+
+- Set up your PyPI project by [adding a trusted publisher](https://docs.pypi.org/trusted-publishers/adding-a-publisher/)
+  - The _workflow name_ is `publish-release.yml` and the _environment_ should be left blank.
+- Ensure the publish release job as `permissions`: `id-token : write` (see the [documentation](https://docs.pypi.org/trusted-publishers/using-a-publisher/))
+
+</details>
+
 - Go to the Actions panel
 - Run the "Step 1: Prep Release" workflow
 - Check the draft changelog
