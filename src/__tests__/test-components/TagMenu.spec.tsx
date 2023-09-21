@@ -150,7 +150,7 @@ describe('TagMenu', () => {
 
     it('should not, by default, show a dialog to create a new tag', () => {
       const component = shallow(<TagMenu {...createProps()} />);
-      const node = component.find('NewTagDialog').first();
+      const node = component.find('NewTagDialogBox').first();
       expect(node.prop('open')).toEqual(false);
     });
 
@@ -159,7 +159,7 @@ describe('TagMenu', () => {
       component.setState({
         tagDialog: true
       });
-      const node = component.find('NewTagDialog').first();
+      const node = component.find('NewTagDialogBox').first();
       expect(node.prop('open')).toEqual(true);
     });
   });
