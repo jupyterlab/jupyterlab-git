@@ -222,7 +222,7 @@ describe('TagMenu', () => {
       const node = component.find('input[type="button"]').first();
       node.simulate('click');
 
-      expect(component.state('TagDialog')).toEqual(true);
+      expect(component.state('tagDialog')).toEqual(true);
       expect(spy).toHaveBeenCalledTimes(0);
       spy.mockRestore();
     });
