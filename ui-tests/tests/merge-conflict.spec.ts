@@ -56,7 +56,7 @@ test.describe('Merge conflict tests', () => {
     await expect(banner).toHaveText(/Result/);
     await expect(banner).toHaveText(/Incoming/);
 
-    const mergeDiff = page.locator('.CodeMirror-merge-3pane');
+    const mergeDiff = page.locator('.cm-merge-3pane');
     await expect(mergeDiff).toBeVisible();
   });
 

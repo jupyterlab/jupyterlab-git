@@ -83,7 +83,6 @@
         "@lumino/polling": "^2.0.0",
         "@lumino/signaling": "^2.0.0",
         "@lumino/widgets": "^2.0.1",
-        "@mui/core": "^5.0.0-alpha.54",
         "@mui/icons-material": "^5.11.16",
         "@mui/lab": "^5.0.0-alpha.127",
         "@mui/material": "^5.12.1",
@@ -175,13 +174,13 @@
         "extension": true,
         "schemaDir": "schema",
         "sharedPackages": {
-            "@material-ui/core": {
+            "@mui/core": {
                 "singleton": true
             },
-            "@material-ui/icons": {
+            "@mui/icons": {
                 "singleton": true
             },
-            "@material-ui/lab": {
+            "@mui/lab": {
                 "singleton": true
             },
             "nbdime": {

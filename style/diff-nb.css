@@ -16,57 +16,48 @@
   border: none;
 }
 
-.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-r-chunk-end,
-.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-l-chunk-end,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-l-chunk-end,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-r-chunk-end,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-m-chunk-end-local,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-m-chunk-end-remote {
+.jp-git-diff-root .jp-Notebook-diff .cm-merge-r-chunk-end,
+.jp-git-diff-root .jp-Notebook-diff .cm-merge-l-chunk-end,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-l-chunk-end,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-r-chunk-end,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-m-chunk-end-local,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-m-chunk-end-remote {
   border-bottom: none;
 }
 
-.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-r-chunk-start,
-.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-l-chunk-start,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-l-chunk-start,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-r-chunk-start,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-m-chunk-start-local,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-m-chunk-start-remote {
+.jp-git-diff-root .jp-Notebook-diff .cm-merge-r-chunk-start,
+.jp-git-diff-root .jp-Notebook-diff .cm-merge-l-chunk-start,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-l-chunk-start,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-r-chunk-start,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-m-chunk-start-local,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-m-chunk-start-remote {
   border-top: none;
 }
 
-.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-r-chunk,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-r-chunk {
+.jp-git-diff-root .jp-Notebook-diff .cm-merge-r-chunk,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-r-chunk {
   background-color: var(--jp-git-diff-deleted-color);
 }
 
-.jp-git-diff-root
-  .jp-Notebook-diff
-  .CodeMirror-merge-pane-remote
-  .CodeMirror-merge-r-chunk {
+.jp-git-diff-root .jp-Notebook-diff .cm-merge-pane-remote .cm-merge-r-chunk {
   background-color: var(--jp-git-diff-added-color);
 }
 
-.jp-git-diff-root .jp-Notebook-diff .CodeMirror-merge-spacer,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-spacer,
-.jp-git-diff-root
-  .jp-Notebook-diff
-  .CodeMirror-merge-pane-remote
-  .CodeMirror-merge-spacer,
-.jp-git-diff-root
-  .jp-Notebook-merge
-  .CodeMirror-merge-pane-remote
-  .CodeMirror-merge-spacer {
+.jp-git-diff-root .jp-Notebook-diff .cm-merge-spacer,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-spacer,
+.jp-git-diff-root .jp-Notebook-diff .cm-merge-pane-remote .cm-merge-spacer,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-pane-remote .cm-merge-spacer {
   background-color: transparent;
 }
 
-.jp-git-diff-root .jp-Diff-added .CodeMirror,
+.jp-git-diff-root .jp-Diff-added .cm,
 .jp-git-diff-root .jp-Diff-added .jp-Diff-renderedOutput,
 .jp-git-diff-root .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-remote {
   background-color: var(--jp-git-diff-added-color);
   border: none;
 }
 
-.jp-git-diff-root .jp-Diff-deleted .CodeMirror,
+.jp-git-diff-root .jp-Diff-deleted .cm,
 .jp-git-diff-root .jp-Diff-deleted .jp-Diff-renderedOutput,
 .jp-git-diff-root .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-base {
   background-color: var(--jp-git-diff-deleted-color);
@@ -75,10 +66,8 @@
 
 /* Specific rules for the notebook merge conflict */
 .jp-git-diff-root .jp-Notebook-merge .jp-Merge-conflict,
-.jp-git-diff-root .jp-Notebook-merge .CodeMirror-merge-l-chunk,
-.jp-git-diff-root
-  .jp-Notebook-merge
-  .CodeMirror-merge-l-chunk.CodeMirror-merge-r-chunk,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-l-chunk,
+.jp-git-diff-root .jp-Notebook-merge .cm-merge-l-chunk.cm-merge-r-chunk,
 .jp-git-diff-root
   .jp-Notebook-merge
   .jp-Cellrow-outputs.jp-conflicted-outputs
@@ -86,47 +75,44 @@
   background-color: var(--jp-git-diff-deleted-color);
 }
 
-.jp-git-diff-root
-  .jp-Notebook-merge
-  .CodeMirror-line
-  .CodeMirror-merge-r-inserted {
+.jp-git-diff-root .jp-Notebook-merge .cm-line .cm-merge-r-inserted {
   background-color: var(--jp-git-diff-deleted-color);
 }
 
 .jp-git-diff-root
   .jp-Notebook-merge
-  .CodeMirror-merge-pane-base
-  .CodeMirror-line
-  .CodeMirror-merge-m-deleted,
+  .cm-merge-pane-base
+  .cm-line
+  .cm-merge-m-deleted,
 .jp-git-diff-root
   .jp-Notebook-merge
-  .CodeMirror-merge-pane-base
-  .CodeMirror-line
-  .CodeMirror-merge-l-deleted,
+  .cm-merge-pane-base
+  .cm-line
+  .cm-merge-l-deleted,
 .jp-git-diff-root
   .jp-Notebook-merge
-  .CodeMirror-merge-pane-base
-  .CodeMirror-line
-  .CodeMirror-merge-r-deleted {
+  .cm-merge-pane-base
+  .cm-line
+  .cm-merge-r-deleted {
   background-color: var(--jp-git-diff-deleted-color);
   color: var(--jp-mirror-editor-string-color);
 }
 
 .jp-git-diff-root
   .jp-Notebook-merge
-  .CodeMirror-merge-pane-base
-  .CodeMirror-line
-  .CodeMirror-merge-m-added,
+  .cm-merge-pane-base
+  .cm-line
+  .cm-merge-m-added,
 .jp-git-diff-root
   .jp-Notebook-merge
-  .CodeMirror-merge-pane-base
-  .CodeMirror-line
-  .CodeMirror-merge-l-added,
+  .cm-merge-pane-base
+  .cm-line
+  .cm-merge-l-added,
 .jp-git-diff-root
   .jp-Notebook-merge
-  .CodeMirror-merge-pane-base
-  .CodeMirror-line
-  .CodeMirror-merge-r-added {
+  .cm-merge-pane-base
+  .cm-line
+  .cm-merge-r-added {
   background-color: var(--jp-git-diff-added-color);
   color: var(--jp-mirror-editor-string-color);
 }

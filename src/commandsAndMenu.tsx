@@ -58,6 +58,7 @@ import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
+import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 
 export interface IGitCloneArgs {
   /**
@@ -131,6 +132,7 @@ export function addCommands(
   app: JupyterFrontEnd,
   gitModel: GitExtension,
   editorFactory: CodeEditor.Factory,
+  languageRegistry: IEditorLanguageRegistry,
   fileBrowserModel: FileBrowserModel,
   settings: ISettingRegistry.ISettings,
   translator: ITranslator
@@ -555,18 +557,23 @@ export function addCommands(
       const buildDiffWidget =
         getDiffProvider(fullPath) ??
         (isText &&
-          (options => createPlainTextDiff({ ...options, editorFactory })));
+          (options =>
+            createPlainTextDiff({
+              ...options,
+              editorFactory,
+              languageRegistry
+            })));
 
       if (buildDiffWidget) {
         const id = `git-diff-${fullPath}-${model.reference.label}-${model.challenger.label}`;
         const mainAreaItems = shell.widgets('main');
-        let mainAreaItem = mainAreaItems.next().value;
-        while (mainAreaItem) {
-          if (mainAreaItem.id === id) {
+        let mainAreaItem: Widget | null = null;
+        for (const item of mainAreaItems) {
+          if (item.id === id) {
             shell.activateById(id);
+            mainAreaItem = item;
             break;
           }
-          mainAreaItem = mainAreaItems.next().value;
         }
 
         if (!mainAreaItem) {
@@ -698,7 +705,7 @@ export function addCommands(
               );
               if (!targetFile || targetFile.status === 'unmodified') {
                 gitModel.statusChanged.disconnect(maybeClose);
-                mainAreaItem.dispose();
+                mainAreaItem!.dispose();
               }
             };
             gitModel.statusChanged.connect(maybeClose);

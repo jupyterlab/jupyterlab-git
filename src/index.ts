@@ -32,6 +32,7 @@ import { gitIcon } from './style/icons';
 import { CommandIDs, Git, IGitExtension } from './tokens';
 import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
+import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 
 export { DiffModel } from './components/diff/model';
 export { NotebookDiff } from './components/diff/NotebookDiff';
@@ -46,6 +47,7 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
   id: '@jupyterlab/git:plugin',
   requires: [
     ILayoutRestorer,
+    IEditorLanguageRegistry,
     IEditorServices,
     IDefaultFileBrowser,
     IRenderMimeRegistry,
@@ -69,6 +71,7 @@ export default [plugin, gitCloneCommandPlugin];
 async function activate(
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
+  languageRegistry: IEditorLanguageRegistry,
   editorServices: IEditorServices,
   // Get a reference to the default file browser extension
   // We don't use the current tracked browser because extension like jupyterlab-github
@@ -183,6 +186,7 @@ async function activate(
       editorServices.factoryService.newInlineEditor.bind(
         editorServices.factoryService
       ),
+      languageRegistry,
       fileBrowser.model,
       settings,
       translator

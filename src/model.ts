@@ -358,9 +358,9 @@ export class GitExtension implements IGitExtension {
    *
    * Note: This makes sure it always returns non null value
    */
-  protected get _currentMarker(): BranchMarker | null {
+  protected get _currentMarker(): BranchMarker {
     if (!this.pathRepository) {
-      return null;
+      return new BranchMarker(() => {});
     }
 
     if (!this.__currentMarker) {
@@ -2219,8 +2219,8 @@ export class GitExtension implements IGitExtension {
   private _docRegistry: DocumentRegistry | null;
   private _fetchPoll: Poll;
   private _isDisposed = false;
-  private _markerCache: Markers = new Markers(() => this._markChanged.emit());
-  private __currentMarker: BranchMarker | null = null;
+  private _markerCache = new Markers(() => this._markChanged.emit());
+  private __currentMarker: BranchMarker = new BranchMarker(() => {});
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _settings: ISettingRegistry.ISettings | null;
