@@ -367,7 +367,7 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
       message: props.trans.__('Creating tag…')
     });
     try {
-      await props.model.newTag(tagName, commitId);
+      await props.model.setTag(tagName, commitId);
     } catch (err) {
       setErrorState(err.message.replace(/^fatal:/, ''));
       props.logger.log({

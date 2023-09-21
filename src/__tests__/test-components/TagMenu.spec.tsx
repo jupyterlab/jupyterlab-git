@@ -150,7 +150,7 @@ describe('TagMenu', () => {
 
     it('should not, by default, show a dialog to create a new tag', () => {
       const component = shallow(<TagMenu {...createProps()} />);
-      const node = component.find('NewBranchDialog').first();
+      const node = component.find('NewTagDialog').first();
       expect(node.prop('open')).toEqual(false);
     });
 
@@ -199,8 +199,8 @@ describe('TagMenu', () => {
   });
 
   describe('create tag', () => {
-    it('should not allow creating a new branch when branching is disabled', () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'newTag');
+    it('should not allow creating a new tag when branching is disabled', () => {
+      const spy = jest.spyOn(GitExtension.prototype, 'setTag');
 
       const component = shallow(<TagMenu {...createProps()} />);
 
@@ -213,7 +213,7 @@ describe('TagMenu', () => {
     });
 
     it('should display a dialog to create a new tag when branching is enabled and the new tag button is clicked', () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'newTag');
+      const spy = jest.spyOn(GitExtension.prototype, 'setTag');
 
       const component = shallow(
         <TagMenu {...createProps({ branching: true })} />
