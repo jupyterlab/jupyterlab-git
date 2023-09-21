@@ -186,7 +186,6 @@ describe('TagMenu', () => {
       );
       const nodes = component.find(
         `.${listItemClass}[title*="${TAGS[1].name}"]`
-        
       );
       nodes.at(0).simulate('click');
 
