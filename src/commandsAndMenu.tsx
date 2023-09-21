@@ -521,8 +521,8 @@ export function addCommands(
           );
           logger.log({
             message: trans.__('Reset failed'),
-            level: Level.ERROR
-            /*error*/
+            level: Level.ERROR,
+            error: error as Error
           });
         }
       }
@@ -532,9 +532,9 @@ export function addCommands(
   /**
    * Git display diff command - internal command
    *
-   * @params model {Git.Diff.IModel: The diff model to display
-   * @params isText {boolean}: Optional, whether the content is a plain text
-   * @params isMerge {boolean}: Optional, whether the diff is a merge conflict
+   * @params model: The diff model to display
+   * @params isText: Optional, whether the content is a plain text
+   * @params isMerge: Optional, whether the diff is a merge conflict
    * @returns the main area widget or null
    */
   commands.addCommand(CommandIDs.gitShowDiff, {
@@ -566,7 +566,7 @@ export function addCommands(
             shell.activateById(id);
             break;
           }
-          mainAreaItem = mainAreaItems.next();
+          mainAreaItem = mainAreaItems.next().value;
         }
 
         if (!mainAreaItem) {

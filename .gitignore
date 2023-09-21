@@ -10,6 +10,7 @@ node_modules/
 jupyterlab_git/labextension
 # Version file is handled by hatchling
 jupyterlab_git/_version.py
+src/version.ts
 
 # Integration tests
 ui-tests/test-results/
@@ -123,3 +124,15 @@ dmypy.json
 
 # Yarn cache
 .yarn/
+
+# JetBrains IDE stuff
+*.iml
+.idea/
+
+# vscode ide stuff
+*.code-workspace
+.history
+.vscode
+
+# vim stuff
+*.swp

@@ -4,7 +4,7 @@ import {
 } from '@jupyterlab/application';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandIDs, IGitExtension, Level } from './tokens';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { GitCloneForm } from './widgets/GitCloneForm';
 import { logger } from './logger';
@@ -19,18 +19,17 @@ import { addCloneButton } from './widgets/gitClone';
 
 export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/git:clone',
-  requires: [IGitExtension, IFileBrowserFactory],
+  requires: [IGitExtension, IDefaultFileBrowser],
   optional: [ICommandPalette, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     gitModel: IGitExtension,
-    fileBrowserFactory: IFileBrowserFactory,
+    fileBrowser: IDefaultFileBrowser,
     palette: ICommandPalette | null,
     translator: ITranslator | null
   ) => {
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab_git');
-    const fileBrowser = fileBrowserFactory.createFileBrowser('id');
     const fileBrowserModel = fileBrowser.model;
     /** Add git clone command */
     app.commands.addCommand(CommandIDs.gitClone, {

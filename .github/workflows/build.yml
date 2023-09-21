@@ -39,7 +39,7 @@ jobs:
     - name: Build the extension
       run: |
         set -eux
-        python -m pip install .[test]
+        python -m pip install .[dev,test]
 
         # Python formatting checks
         black . --check
