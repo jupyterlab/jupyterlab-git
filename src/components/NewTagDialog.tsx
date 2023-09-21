@@ -232,19 +232,22 @@ export const SingleCommitNode: React.FunctionComponent<ISingleCommitProps> = (
    * @param commit - commit
    * @returns callback
    */
-  const onCommitClickFactory = (commitId: string) => {
-    return onClick;
+  const onCommitClickFactory = React.useCallback(
+    (commitId: string) => {
+      return onClick;
 
-    /**
-     * Callback invoked upon clicking a commit.
-     *
-     * @private
-     * @param event - event object
-     */
-    function onClick(): void {
-      updateBaseCommitId(commitId);
-    }
-  };
+      /**
+       * Callback invoked upon clicking a commit.
+       *
+       * @private
+       * @param event - event object
+       */
+      function onClick(): void {
+        updateBaseCommitId(commitId);
+      }
+    },
+    [baseCommitId]
+  );
 
   return (
     <li
@@ -331,9 +334,12 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
    *
    * @param event - event object
    */
-  const onFilterChange = (event: any): void => {
-    setFilterState(event.target.value);
-  };
+  const onFilterChange = React.useCallback(
+    (event: any): void => {
+      setFilterState(event.target.value);
+    },
+    [filterState]
+  );
 
   /**
    * Callback invoked to reset the menu filter.
@@ -347,10 +353,13 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
    *
    * @param event - event object
    */
-  const onNameChange = (event: any): void => {
-    setNameState(event.target.value);
-    setErrorState('');
-  };
+  const onNameChange = React.useCallback(
+    (event: any): void => {
+      setNameState(event.target.value);
+      setErrorState('');
+    },
+    [nameState]
+  );
 
   /**
    * Creates a new tag.
