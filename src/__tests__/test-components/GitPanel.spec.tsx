@@ -247,6 +247,9 @@ describe('GitPanel', () => {
         headChanged: {
           connect: jest.fn()
         },
+        tagsChanged: {
+          connect: jest.fn()
+        },
         markChanged: {
           connect: jest.fn()
         },

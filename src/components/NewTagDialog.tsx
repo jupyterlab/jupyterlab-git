@@ -6,8 +6,19 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import { Logger } from '../logger';
 import {
+  historyDialogBoxWrapperStyle,
+  historyDialogBoxStyle,
+  activeListItemClass,
+  commitItemBoldClass,
+  commitHeaderBoldClass,
+  commitBodyClass,
+  commitHeaderClass,
+  commitHeaderItemClass,
+  commitWrapperClass
+} from '../style/NewTagDialog';
+import {
   actionsWrapperClass,
-  tagDialogClass,
+  branchDialogClass,
   buttonClass,
   cancelButtonClass,
   closeButtonClass,
@@ -20,17 +31,8 @@ import {
   filterWrapperClass,
   nameInputClass,
   titleClass,
-  titleWrapperClass,
-  historyDialogBoxWrapperStyle,
-  historyDialogBoxStyle,
-  activeListItemClass,
-  commitItemBoldClass,
-  commitHeaderBoldClass,
-  commitBodyClass,
-  commitHeaderClass,
-  commitHeaderItemClass,
-  commitWrapperClass
-} from '../style/NewTagDialog';
+  titleWrapperClass
+} from '../style/NewBranchDialog';
 import { Git, IGitExtension, Level } from '../tokens';
 import { GitCommitGraph } from './GitCommitGraph';
 
@@ -389,7 +391,7 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
   return (
     <Dialog
       classes={{
-        paper: tagDialogClass
+        paper: branchDialogClass
       }}
       open={props.open}
       onClose={onClose}

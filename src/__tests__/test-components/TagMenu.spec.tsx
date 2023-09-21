@@ -84,6 +84,7 @@ describe('TagMenu', () => {
       pastCommits: [],
       logger: new Logger(),
       model: model as IGitExtension,
+      tagsList: model.tagsList,
       trans: trans,
       ...props
     };

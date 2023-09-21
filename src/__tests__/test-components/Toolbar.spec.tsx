@@ -48,6 +48,7 @@ describe('Toolbar', () => {
           tag: ''
         }
       ],
+      tagsList: model.tagsList,
       repository: model.pathRepository,
       model: model,
       branching: false,
