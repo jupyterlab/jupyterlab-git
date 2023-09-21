@@ -207,7 +207,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
   }
 
   /**
-   * Renders a
+   * Renders list of tags.
    *
    * @returns React element
    */

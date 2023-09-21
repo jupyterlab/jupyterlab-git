@@ -82,7 +82,7 @@ describe('TagMenu', () => {
       pastCommits: [],
       logger: new Logger(),
       model: model as IGitExtension,
-      tagsList: model.tagsList,
+      tagsList: TAGS.map(tag => tag.name),
       trans: trans,
       ...props
     };
@@ -186,6 +186,7 @@ describe('TagMenu', () => {
       );
       const nodes = component.find(
         `.${listItemClass}[title*="${TAGS[1].name}"]`
+        
       );
       nodes.at(0).simulate('click');
 
