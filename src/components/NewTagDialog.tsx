@@ -309,7 +309,7 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
 ): React.ReactElement => {
   const [nameState, setNameState] = React.useState('');
   const [baseCommitIdState, setBaseCommitIdState] = React.useState(
-    props.pastCommits[0]?.commit || null
+    props.pastCommits[0]?.commit ?? null
   );
   const [filterState, setFilterState] = React.useState('');
   const [errorState, setErrorState] = React.useState('');
