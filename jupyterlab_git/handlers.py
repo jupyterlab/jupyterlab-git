@@ -892,7 +892,7 @@ class GitTagCheckoutHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
-class GitNewTagHandler(GitHandler):
+class GitTagHandler(GitHandler):
     """
     Hadler for 'git tag <tag_name> <commit_id>. Create new tag pointing to a specific commit.
     """
@@ -1087,7 +1087,7 @@ def setup_handlers(web_app):
         ("/ignore", GitIgnoreHandler),
         ("/tags", GitTagHandler),
         ("/tag_checkout", GitTagCheckoutHandler),
-        ("/new_tag", GitNewTagHandler),
+        ("/tag", GitNewTagHandler),
         ("/add", GitAddHandler),
         ("/rebase", GitRebaseHandler),
         ("/stash", GitStashHandler),

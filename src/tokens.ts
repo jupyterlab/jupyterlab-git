@@ -250,14 +250,14 @@ export interface IGitExtension extends IDisposable {
   /**
    * Create a new tag pointing to a specific commit
    *
-   * @param tagName name ofnew tag
+   * @param tagName name of new tag
    * @param commitId identifier of commit new tag points to
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  newTag(tagName: string, commitId: string): Promise<void>;
+  setTag(tagName: string, commitId: string): Promise<void>;
 
   /**
    * Clone a repository.

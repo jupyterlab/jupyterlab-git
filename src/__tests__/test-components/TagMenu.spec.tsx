@@ -1,14 +1,12 @@
-import { mount, /* render, */ shallow } from 'enzyme';
-// import { showDialog } from '@jupyterlab/apputils';
+import { mount, shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
-// import { ActionButton } from '../../components/ActionButton';
 import { TagMenu, ITagMenuProps } from '../../components/TagMenu';
 import * as git from '../../git';
 import { Logger } from '../../logger';
 import { GitExtension } from '../../model';
 import { IGitExtension } from '../../tokens';
-import { listItemClass /*, nameClass */ } from '../../style/BranchMenu';
+import { listItemClass } from '../../style/BranchMenu';
 import {
   mockedRequestAPI,
   defaultMockedResponses,

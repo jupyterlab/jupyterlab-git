@@ -1765,8 +1765,8 @@ class Git:
                 "message": error,
             }
 
-    async def new_tag(self, path, tag, commitId):
-        """Create new git tag pointing to a specific commit.
+    async def set_tag(self, path, tag, commitId):
+        """Set a git tag pointing to a specific commit.
 
         path: str
             Git path repository

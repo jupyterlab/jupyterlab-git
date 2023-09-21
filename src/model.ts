@@ -1179,12 +1179,13 @@ export class GitExtension implements IGitExtension {
         }
       );
 
+      const newTags = data.tags ?? [];
       const tagsChanged = !JSONExt.deepEqual(
         this._tagsList as any,
-        (data.tags ?? []) as any
+        newTags as any
       );
 
-      this._tagsList = data.tags ?? [];
+      this._tagsList = newTags;
 
       if (tagsChanged) {
         this._tagsChanged.emit();
@@ -1813,7 +1814,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Create a new tag pointing to a specific commit.
+   * Set a tag pointing to a specific commit.
    *
    * @param tagName - name of new tag
    * @param commitId - identifier of commit tag is pointing to
@@ -1823,7 +1824,7 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async newTag(tag: string, commitId: string): Promise<void> {
+  async setTag(tag: string, commitId: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:tag:create', async () => {
       return await requestAPI<void>(URLExt.join(path, 'new_tag'), 'POST', {
