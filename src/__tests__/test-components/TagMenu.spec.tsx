@@ -20,20 +20,16 @@ jest.mock('@jupyterlab/apputils');
 
 const TAGS = [
   {
-    name: '1.0.0',
-    commitId: '123456'
+    name: '1.0.0'
   },
   {
-    name: 'feature-1',
-    commitId: '678901'
+    name: 'feature-1'
   },
   {
-    name: 'feature-2',
-    commitId: '654321'
+    name: 'feature-2'
   },
   {
-    name: 'patch-007',
-    commitId: '109876'
+    name: 'patch-007'
   }
 ];
 
