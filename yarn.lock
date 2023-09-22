@@ -9740,9 +9740,9 @@ synckit@^0.8.5:
     tslib "^2.5.0"
 
 systeminformation@^5.8.6:
-  version "5.18.12"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.18.12.tgz#6cb902d8163cc49f83bcf545847cfc6028d17370"
-  integrity sha512-xXnT44zWVL7eADtbqQyEmAU/+nFQW1wl2DQ4d64E+zPicBwYV8lBcNmUYxGVEBC2EyGfSKinceal0eiHC8NJPw==
+  version "5.21.8"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.21.8.tgz#18395187e5983698619ed07ca8640ae48ec232b2"
+  integrity sha512-Xf1KDMUTQHLOT9Z7MjpSpsbaICOHcm4OZ9c9qqpkCoXuxq5MoyDrgu5GIQYpoiralXNPrqxDz3ND8MdllpXeQA==
 
 table@^6.8.1:
   version "6.8.1"
