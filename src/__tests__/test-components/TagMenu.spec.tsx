@@ -186,9 +186,7 @@ describe('TagMenu', () => {
       nodes.at(0).simulate('click');
 
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith({
-        tagname: TAGS[1].name
-      });
+      expect(spy).toHaveBeenCalledWith(TAGS[1].name);
 
       spy.mockRestore();
     });
