@@ -69,7 +69,7 @@ async def test_set_tag_succes():
             mock_execute.return_value = maybe_future((0, "", ""))
 
             # When
-            actual_response = await Git.set_tag(
+            actual_response = await Git().set_tag(
                 "test_curr_path", "mock_tag", "mock_commit_id"
             )
 
