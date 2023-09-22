@@ -162,7 +162,7 @@ describe('TagMenu', () => {
 
   describe('switch tag', () => {
     it('should not switch to a specified tag upon clicking its corresponding element when branching is disabled', () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'checkout');
+      const spy = jest.spyOn(GitExtension.prototype, 'checkoutTag');
 
       const component = mount(<TagMenu {...createProps()} />);
       const nodes = component.find(
@@ -175,7 +175,7 @@ describe('TagMenu', () => {
     });
 
     it('should switch to a specified tag upon clicking its corresponding element when branching is enabled', () => {
-      const spy = jest.spyOn(GitExtension.prototype, 'checkout');
+      const spy = jest.spyOn(GitExtension.prototype, 'checkoutTag');
 
       const component = mount(
         <TagMenu {...createProps({ branching: true })} />
