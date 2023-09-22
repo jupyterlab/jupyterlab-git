@@ -892,7 +892,7 @@ class GitTagCheckoutHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
-class GitTagHandler(GitHandler):
+class GitNewTagHandler(GitHandler):
     """
     Hadler for 'git tag <tag_name> <commit_id>. Create new tag pointing to a specific commit.
     """
@@ -905,7 +905,7 @@ class GitTagHandler(GitHandler):
         data = self.get_json_body()
         tag = data["tag_id"]
         commit = data["commit_id"]
-        response = await self.git.new_tag(self.url2localpath(path), tag, commit)
+        response = await self.git.set_tag(self.url2localpath(path), tag, commit)
         if response["code"] == 0:
             self.set_status(201)
         else:

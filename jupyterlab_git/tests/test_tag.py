@@ -60,7 +60,7 @@ async def test_git_tag_checkout_success():
 
 
 @pytest.mark.asyncio
-async def test_new_tag_succes():
+async def test_set_tag_succes():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             tag = "mock_tag"
@@ -69,7 +69,7 @@ async def test_new_tag_succes():
             mock_execute.return_value = maybe_future((0, "", ""))
 
             # When
-            actual_response = await Git().new_tag(
+            actual_response = await Git.set_tag(
                 "test_curr_path", "mock_tag", "mock_commit_id"
             )
 
