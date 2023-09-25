@@ -2,6 +2,27 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.43.0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.42.0...07ee168441fe5b5b8094989ac9168c91ef1dd974))
+
+### Enhancements made
+
+- Add new tag feature [#1264](https://github.com/jupyterlab/jupyterlab-git/pull/1264) ([@DenisaCG](https://github.com/DenisaCG))
+
+### Other merged PRs
+
+- Bump systeminformation from 5.18.12 to 5.21.8 [#1268](https://github.com/jupyterlab/jupyterlab-git/pull/1268) ([@dependabot](https://github.com/dependabot))
+- Bump systeminformation from 5.11.2 to 5.21.8 in /ui-tests [#1267](https://github.com/jupyterlab/jupyterlab-git/pull/1267) ([@dependabot](https://github.com/dependabot))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-08-10&to=2023-09-25&type=c))
+
+[@DenisaCG](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ADenisaCG+updated%3A2023-08-10..2023-09-25&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2023-08-10..2023-09-25&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2023-08-10..2023-09-25&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Awelcome+updated%3A2023-08-10..2023-09-25&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.42.0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.42.0rc0...6eab13686a92b04f531118a8d76f4ce94437947d))
@@ -28,8 +49,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-06-19&to=2023-08-10&type=c))
 
 [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2023-06-19..2023-08-10&type=Issues) | [@eyusupov](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aeyusupov+updated%3A2023-06-19..2023-08-10&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2023-06-19..2023-08-10&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2023-06-19..2023-08-10&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2023-06-19..2023-08-10&type=Issues) | [@mdietz94](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Amdietz94+updated%3A2023-06-19..2023-08-10&type=Issues) | [@mfakaehler](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Amfakaehler+updated%3A2023-06-19..2023-08-10&type=Issues) | [@tsabbir96](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Atsabbir96+updated%3A2023-06-19..2023-08-10&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Awelcome+updated%3A2023-06-19..2023-08-10&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.42.0rc0
 
