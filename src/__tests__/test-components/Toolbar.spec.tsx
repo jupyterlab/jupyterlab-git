@@ -48,6 +48,8 @@ describe('Toolbar', () => {
           tag: ''
         }
       ],
+      tagsList: model.tagsList,
+      pastCommits: [],
       repository: model.pathRepository,
       model: model,
       branching: false,

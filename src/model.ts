@@ -88,6 +88,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Tags list for the current repository.
+   */
+  get tagsList(): string[] {
+    return this._tagsList;
+  }
+
+  /**
    * The current repository branch.
    */
   get currentBranch(): Git.IBranch {
@@ -229,6 +236,13 @@ export class GitExtension implements IGitExtension {
    */
   get headChanged(): ISignal<IGitExtension, void> {
     return this._headChanged;
+  }
+
+  /**
+   * A signal emitted when the list of the Git repository changes.
+   */
+  get tagsChanged(): ISignal<IGitExtension, void> {
+    return this._tagsChanged;
   }
 
   /**
@@ -1170,6 +1184,46 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Refresh the list of repository tags.
+   *
+   * @returns promise which resolves upon refreshing repository tags
+   */
+  async refreshTag(): Promise<void> {
+    try {
+      const data = await this._taskHandler.execute<Git.ITagResult>(
+        'git:refresh:tags',
+        async () => {
+          return await this.tags();
+        }
+      );
+
+      const newTags = data.tags ?? [];
+      const tagsChanged = !JSONExt.deepEqual(
+        this._tagsList as any,
+        newTags as any
+      );
+
+      this._tagsList = newTags;
+
+      if (tagsChanged) {
+        this._tagsChanged.emit();
+      }
+      this._fetchPoll.stop();
+    } catch (error) {
+      const tagsChanged = this._tagsList.length > 0;
+      this._tagsList = [];
+      this._fetchPoll.stop();
+      if (tagsChanged) {
+        this._tagsChanged.emit();
+      }
+
+      if (!(error instanceof Git.NotInRepository)) {
+        throw error;
+      }
+    }
+  }
+
+  /**
    * Refresh the repository status.
    *
    * Emit statusChanged if required.
@@ -1778,6 +1832,28 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Set a tag pointing to a specific commit.
+   *
+   * @param tagName - name of new tag
+   * @param commitId - identifier of commit tag is pointing to
+   * @returns promise which resolves upon succesfully creating the new tag
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async setTag(tag: string, commitId: string): Promise<void> {
+    const path = await this._getPathRepository();
+    await this._taskHandler.execute<void>('git:tag:create', async () => {
+      return await requestAPI<void>(URLExt.join(path, 'new_tag'), 'POST', {
+        tag_id: tag,
+        commit_id: commitId
+      });
+    });
+    await this.refreshTag();
+  }
+
+  /**
    * Add a file to the current marker object.
    *
    * @param fname - filename
@@ -2067,6 +2143,7 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>('git:refresh', async () => {
       try {
         await this.refreshBranch();
+        await this.refreshTag();
         await this.refreshStatus();
         await this.refreshStash();
         await this.checkRemoteChangeNotified();
@@ -2118,6 +2195,7 @@ export class GitExtension implements IGitExtension {
   private _stash: Git.IStash;
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];
+  private _tagsList: string[] = [];
   private _currentBranch: Git.IBranch | null = null;
   private _docmanager: IDocumentManager | null;
   private _docRegistry: DocumentRegistry | null;
@@ -2142,6 +2220,7 @@ export class GitExtension implements IGitExtension {
   private _statusForDirtyState: Git.Status[] = ['staged', 'partially-staged'];
 
   private _branchesChanged = new Signal<IGitExtension, void>(this);
+  private _tagsChanged = new Signal<IGitExtension, void>(this);
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _selectedHistoryFileChanged = new Signal<

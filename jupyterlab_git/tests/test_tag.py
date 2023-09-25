@@ -57,3 +57,36 @@ async def test_git_tag_checkout_success():
                 "code": 0,
                 "message": "Tag {} checked out".format(tag),
             } == actual_response
+
+
+@pytest.mark.asyncio
+async def test_set_tag_succes():
+    with patch("os.environ", {"TEST": "test"}):
+        with patch("jupyterlab_git.git.execute") as mock_execute:
+            tag = "mock_tag"
+            commitId = "mock_commit_id"
+            # Given
+            mock_execute.return_value = maybe_future((0, "", ""))
+
+            # When
+            actual_response = await Git().set_tag(
+                "test_curr_path", "mock_tag", "mock_commit_id"
+            )
+
+            # Then
+            mock_execute.assert_called_once_with(
+                ["git", "tag", tag, commitId],
+                cwd="test_curr_path",
+                timeout=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
+            )
+
+            assert {
+                "code": 0,
+                "message": "Tag {} created, pointing to commit {}".format(
+                    tag, commitId
+                ),
+            } == actual_response

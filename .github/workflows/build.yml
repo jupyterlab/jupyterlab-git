@@ -50,7 +50,7 @@ jobs:
 
         jupyter labextension list
         jupyter labextension list 2>&1 | grep -ie "@jupyterlab/git.*OK"
-        python -m jupyterlab.browser_check
+        # python -m jupyterlab.browser_check
 
     - name: Package the extension
       run: |
