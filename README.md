@@ -26,13 +26,13 @@ To see the extension in action, open the example notebook included in the Binder
 To install perform the following steps, with _pip_:
 
 ```bash
-pip install --upgrade jupyterlab jupyterlab-git
+pip install --upgrade "jupyterlab<4" jupyterlab-git
 ```
 
 or with _conda_:
 
 ```bash
-conda install -c conda-forge jupyterlab jupyterlab-git
+conda install -c conda-forge "jupyterlab<4" jupyterlab-git
 ```
 
 For JupyterLab < 3, you will need to run the following command after installing the package:
