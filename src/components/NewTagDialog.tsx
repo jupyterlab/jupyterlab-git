@@ -1,6 +1,6 @@
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import ClearIcon from '@material-ui/icons/Clear';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import ClearIcon from '@mui/icons-material/Clear';
 import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import { classes } from 'typestyle';
@@ -392,7 +392,7 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
     try {
       await props.model.setTag(tagName, baseCommitId);
     } catch (err) {
-      setErrorState(err.message.replace(/^fatal:/, ''));
+      setErrorState((err as any).message.replace(/^fatal:/, ''));
       props.logger.log({
         level: Level.ERROR,
         message: props.trans.__('Failed to create tag.')
