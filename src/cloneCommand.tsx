@@ -2,29 +2,40 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { CommandIDs, IGitExtension, Level } from './tokens';
+import {
+  Dialog,
+  ICommandPalette,
+  IToolbarWidgetRegistry,
+  ReactWidget,
+  showDialog,
+  ToolbarButtonComponent,
+  UseSignal
+} from '@jupyterlab/apputils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
-import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
-import { GitCloneForm } from './widgets/GitCloneForm';
-import { logger } from './logger';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import * as React from 'react';
 import {
   addFileBrowserContextMenu,
   IGitCloneArgs,
   Operation,
   showGitOperationDialog
 } from './commandsAndMenu';
+import { logger } from './logger';
 import { GitExtension } from './model';
-import { addCloneButton } from './widgets/gitClone';
+import { cloneIcon } from './style/icons';
+import { CommandIDs, IGitExtension, Level } from './tokens';
+import { GitCloneForm } from './widgets/GitCloneForm';
 
 export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/git:clone',
-  requires: [IGitExtension, IDefaultFileBrowser],
+  requires: [IGitExtension, IDefaultFileBrowser, IToolbarWidgetRegistry],
   optional: [ICommandPalette, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     gitModel: IGitExtension,
     fileBrowser: IDefaultFileBrowser,
+    toolbarRegistry: IToolbarWidgetRegistry,
     palette: ICommandPalette | null,
     translator: ITranslator | null
   ) => {
@@ -85,8 +96,31 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
-    // Add a clone button to the file browser extension toolbar
-    addCloneButton(gitModel, fileBrowser, app.commands, trans);
+
+    // Register a clone button to the file browser extension toolbar
+    toolbarRegistry.addFactory('FileBrowser', 'gitClone', () =>
+      ReactWidget.create(
+        <UseSignal
+          signal={gitModel.repositoryChanged}
+          initialArgs={{
+            name: 'pathRepository',
+            oldValue: null,
+            newValue: gitModel.pathRepository
+          }}
+        >
+          {(_, change?: IChangedArgs<string | null>) => (
+            <ToolbarButtonComponent
+              enabled={change?.newValue === null}
+              icon={cloneIcon}
+              onClick={() => {
+                app.commands.execute(CommandIDs.gitClone);
+              }}
+              tooltip={trans.__('Git Clone')}
+            />
+          )}
+        </UseSignal>
+      )
+    );
 
     // Add the context menu items for the default file browser
     addFileBrowserContextMenu(gitModel, fileBrowser, app.contextMenu, trans);

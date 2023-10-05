@@ -30,7 +30,6 @@ import { GitExtension } from './model';
 import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
 import { CommandIDs, Git, IGitExtension } from './tokens';
-import { addCloneButton } from './widgets/gitClone';
 import { GitWidget } from './widgets/GitWidget';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 
@@ -237,9 +236,6 @@ async function activate(
       /*mainMenu.addMenu(createGitMenu(app.commands, trans), { rank: 60 });*/
       mainMenu.addMenu(createGitMenu(app.commands, trans));
     }
-
-    // Add a clone button to the file browser extension toolbar
-    addCloneButton(gitExtension, fileBrowser, app.commands, trans);
 
     // Add the status bar widget
     if (statusBar) {
