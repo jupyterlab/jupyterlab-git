@@ -1777,14 +1777,12 @@ class Git:
         commitId:
            Identifier of commit tag is pointing to.
         """
-        command = ["git", "tag", tag, commitId]
+        command = ["git", "tag", tag, tag]
         code, _, error = await self.__execute(command, cwd=path)
         if code == 0:
             return {
                 "code": code,
-                "message": "Tag {} created, pointing to commit {}".format(
-                    tag, commitId
-                ),
+                "message": "Tag {} created, pointing to commit {}".format(tag, tag),
             }
         else:
             return {

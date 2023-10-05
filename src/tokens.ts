@@ -22,7 +22,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * The list of tags in the current repo
    */
-  tagsList: string[];
+  tagsList: Git.ITag[];
 
   /**
    * The current branch
@@ -1130,6 +1130,8 @@ export namespace Git {
 
     // when file has been relocated
     previous_file_path?: string;
+
+    tag?: string;
   }
 
   /** Interface for GitCommit request result,
@@ -1259,7 +1261,15 @@ export namespace Git {
   export interface ITagResult {
     code: number;
     message?: string;
-    tags?: string[];
+    tags?: ITag[];
+  }
+
+  /**
+   * Tag description interface
+   */
+  export interface ITag {
+    name: string;
+    baseCommitId?: string;
   }
 
   /**

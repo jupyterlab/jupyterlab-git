@@ -93,7 +93,7 @@ export interface IGitPanelState {
   /**
    * List of tags.
    */
-  tagsList: string[];
+  tagsList: Git.ITag[];
 
   /**
    * List of changed files.
@@ -598,6 +598,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       <React.Fragment>
         <HistorySideBar
           branches={this.state.branches}
+          tagsList={this.state.tagsList}
           commits={this.state.pastCommits}
           model={this.props.model}
           commands={this.props.commands}

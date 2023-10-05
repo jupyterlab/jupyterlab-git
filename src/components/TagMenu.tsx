@@ -91,7 +91,7 @@ export interface ITagMenuProps {
   /**
    * Current list of tags.
    */
-  tagsList: string[];
+  tagsList: Git.ITag[];
 
   /**
    * Boolean indicating whether branching is disabled.
@@ -215,8 +215,9 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
     // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
     const filter = this.state.filter;
     const tags = this.props.tagsList.filter(
-      tag => !filter || tag.includes(filter)
+      tag => !filter || tag.name.includes(filter)
     );
+    console.log(tags);
     return (
       <FixedSizeList
         height={Math.min(
@@ -225,7 +226,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
         )}
         itemCount={tags.length}
         itemData={tags}
-        itemKey={(index, data) => data[index]}
+        itemKey={(index, data) => data[index].name}
         itemSize={ITEM_HEIGHT}
         style={{ overflowX: 'hidden', paddingTop: 0, paddingBottom: 0 }}
         width={'auto'}
