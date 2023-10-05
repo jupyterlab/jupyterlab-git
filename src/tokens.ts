@@ -1130,8 +1130,6 @@ export namespace Git {
 
     // when file has been relocated
     previous_file_path?: string;
-
-    tag?: string;
   }
 
   /** Interface for GitCommit request result,

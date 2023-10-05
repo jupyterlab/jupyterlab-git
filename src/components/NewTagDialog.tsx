@@ -369,14 +369,14 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
    */
   const createTag = async (): Promise<void> => {
     const tagName = nameState;
-    const commitId = baseCommitIdState;
+    const baseCommitId = baseCommitIdState;
 
     props.logger.log({
       level: Level.RUNNING,
       message: props.trans.__('Creating tag…')
     });
     try {
-      await props.model.setTag(tagName, commitId);
+      await props.model.setTag(tagName, baseCommitId);
     } catch (err) {
       setErrorState(err.message.replace(/^fatal:/, ''));
       props.logger.log({

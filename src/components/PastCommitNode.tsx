@@ -262,7 +262,7 @@ export class PastCommitNode extends React.Component<
    * @returns array of React elements
    */
   private _renderTags(): React.ReactElement[] {
-    const curr = this.props.commit.tag;
+    const curr = this.props.commit.commit;
     const tags: Git.ITag[] = [];
     for (let i = 0; i < 2; i++) {
       const tag = this.props.tagsList[i];
@@ -282,7 +282,9 @@ export class PastCommitNode extends React.Component<
   private _renderTag(tag: Git.ITag): React.ReactElement {
     return (
       <React.Fragment key={tag.name}>
-        <span className={classes(branchClass)}>{tag}</span>
+        <span className={classes(branchClass, localBranchClass)}>
+          {tag.name}
+        </span>
       </React.Fragment>
     );
   }

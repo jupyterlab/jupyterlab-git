@@ -217,7 +217,6 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
     const tags = this.props.tagsList.filter(
       tag => !filter || tag.name.includes(filter)
     );
-    console.log(tags);
     return (
       <FixedSizeList
         height={Math.min(
@@ -244,18 +243,18 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
    */
   private _renderItem = (props: ListChildComponentProps): JSX.Element => {
     const { data, index, style } = props;
-    const tag = data[index] as string;
+    const tag = data[index] as Git.ITag;
 
     return (
       <ListItem
         button
-        title={this.props.trans.__('Checkout to tag: %1', tag)}
+        title={this.props.trans.__('Checkout to tag: %1', tag.name)}
         className={listItemClass}
-        onClick={this._onTagClickFactory(tag)}
+        onClick={this._onTagClickFactory(tag.name)}
         style={style}
       >
         <tagIcon.react className={listItemIconClass} tag="span" />
-        <span className={nameClass}>{tag}</span>
+        <span className={nameClass}>{tag.name}</span>
       </ListItem>
     );
   };
