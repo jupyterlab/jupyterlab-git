@@ -16,7 +16,11 @@ import {
   diff_match_patch
 } from 'diff-match-patch';
 import { MergeView, createNbdimeMergeView } from 'nbdime/lib/common/mergeview';
-import { IStringDiffModel, StringDiffModel } from 'nbdime/lib/diff/model';
+import {
+  IStringDiffModel,
+  StringDiffModel,
+  createDirectStringDiffModel
+} from 'nbdime/lib/diff/model';
 import { DiffRangeRaw } from 'nbdime/lib/diff/range';
 import { Git } from '../../tokens';
 
@@ -232,16 +236,30 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     baseContent: string | null = null
   ): Promise<void> {
     if (!this._mergeView) {
-      const remote = createStringDiffModel(referenceContent, challengerContent);
-
-      const mimetype =
+      const mimetypes =
         this._languageRegistry.findByFileName(this._model.filename)?.mime ??
         this._languageRegistry.findBest(this._model.filename)?.mime ??
         IEditorMimeTypeService.defaultMimeType;
-      remote.mimetype = Array.isArray(mimetype) ? mimetype[0] : mimetype;
+      const mimetype = Array.isArray(mimetypes) ? mimetypes[0] : mimetypes;
+
+      let remote: IStringDiffModel;
+      let local: IStringDiffModel | undefined = undefined;
+      let merged: IStringDiffModel | undefined = undefined;
+      if (baseContent !== null) {
+        remote = createStringDiffModel(baseContent, referenceContent);
+        local = createStringDiffModel(baseContent, challengerContent);
+        local.mimetype = mimetype;
+        merged = createDirectStringDiffModel(baseContent, baseContent);
+        merged.mimetype = mimetype;
+      } else {
+        remote = createStringDiffModel(referenceContent, challengerContent);
+      }
+      remote.mimetype = mimetype;
 
       this._mergeView = createNbdimeMergeView({
-        remote
+        remote,
+        local,
+        merged
         // factory: this._editorFactory
       });
       this._mergeView.addClass('jp-git-PlainText-diff');
