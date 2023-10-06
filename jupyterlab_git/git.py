@@ -1735,19 +1735,6 @@ class Git:
 
         return None
 
-    # async def tags(self, path):
-    #     """List all tags of the git repository.
-
-    #     path: str
-    #         Git path repository
-    #     """
-    #     command = ["git", "tag", "--list"]
-    #     code, output, error = await self.__execute(command, cwd=path)
-    #     if code != 0:
-    #         return {"code": code, "command": " ".join(command), "message": error}
-    #     tags = [tag for tag in output.split("\n") if len(tag) > 0]
-    #     return {"code": code, "tags": tags}
-
     async def tags(self, path):
         """List all tags of the git repository, including the commit each tag points to.
 
@@ -1765,12 +1752,6 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(command), "message": error}
         tags = []
-        # for line in output.split("\n"):
-        #     if line:
-        #         parts = line.split(" ")
-        #         if len(parts) >= 2:
-        #             tag_name, commit_id = parts[:2]
-        #             tags.append({"name": tag_name, "baseCommitId": commit_id})
         for tag_name, commit_id in (line.split("\t") for line in output.splitlines()):
             tag = {"name": tag_name, "baseCommitId": commit_id}
             tags.append(tag)

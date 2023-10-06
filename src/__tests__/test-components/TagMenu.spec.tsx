@@ -20,16 +20,20 @@ jest.mock('@jupyterlab/apputils');
 
 const TAGS = [
   {
-    name: '1.0.0'
+    name: '1.0.0',
+    baseCommitId: '4738782743'
   },
   {
-    name: 'feature-1'
+    name: 'feature-1',
+    baseCommitId: '7432743264'
   },
   {
-    name: 'feature-2'
+    name: 'feature-2',
+    baseCommitId: '798438398'
   },
   {
-    name: 'patch-007'
+    name: 'patch-007',
+    baseCommitId: '238848848'
   }
 ];
 
@@ -78,7 +82,7 @@ describe('TagMenu', () => {
       pastCommits: [],
       logger: new Logger(),
       model: model as IGitExtension,
-      tagsList: TAGS.map(tag => tag.name),
+      tagsList: TAGS,
       trans: trans,
       ...props
     };

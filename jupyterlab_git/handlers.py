@@ -861,7 +861,7 @@ class GitSettingsHandler(GitHandler):
 
 class GitTagHandler(GitHandler):
     """
-    Handler for 'git tag --list'. Fetches list of all tags in current repository
+    Handler for 'git for-each-ref refs/tags'. Fetches list of all tags in current repository
     """
 
     @tornado.web.authenticated

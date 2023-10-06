@@ -1783,28 +1783,6 @@ export class GitExtension implements IGitExtension {
     });
   }
 
-  // /**
-  //  * Retrieve the list of tags in the repository.
-  //  *
-  //  * @returns promise which resolves upon retrieving the tag list
-  //  *
-  //  * @throws {Git.NotInRepository} If the current path is not a Git repository
-  //  * @throws {Git.GitResponseError} If the server response is not ok
-  //  * @throws {ServerConnection.NetworkError} If the request cannot be made
-  //  */
-  // async tags(): Promise<Git.ITagResult> {
-  //   const path = await this._getPathRepository();
-  //   return await this._taskHandler.execute<Git.ITagResult>(
-  //     'git:tag:list',
-  //     async () => {
-  //       return await requestAPI<Git.ITagResult>(
-  //         URLExt.join(path, 'tags'),
-  //         'POST'
-  //       );
-  //     }
-  //   );
-  // }
-
   /**
    * Retrieve the list of tags in the repository, with the respective commits they point to.
    *

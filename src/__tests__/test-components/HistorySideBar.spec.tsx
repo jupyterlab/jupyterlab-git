@@ -27,6 +27,7 @@ describe('HistorySideBar', () => {
       }
     ],
     branches: [],
+    tagsList: [],
     model: {
       selectedHistoryFile: null
     } as GitExtension,
