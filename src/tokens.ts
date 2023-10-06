@@ -1336,42 +1336,6 @@ export namespace Git {
 }
 
 /**
- * Log message severity.
- */
-export enum Level {
-  SUCCESS = 10,
-  INFO = 20,
-  RUNNING = 30,
-  WARNING = 40,
-  ERROR = 50
-}
-
-/**
- * Interface describing a component log message.
- */
-export interface ILogMessage {
-  /**
-   * Detailed message
-   */
-  details?: string;
-
-  /**
-   * Error object.
-   */
-  error?: Error;
-
-  /**
-   * Message level.
-   */
-  level: Level;
-
-  /**
-   * Message text.
-   */
-  message: string;
-}
-
-/**
  * The command IDs used in the git context menus.
  */
 export enum ContextCommandIDs {

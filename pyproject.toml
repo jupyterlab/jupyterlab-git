@@ -23,7 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "jupyter_server>=2.0.1,<3",
-    "nbdime~=4.0",
+    "nbdime~=4.0.0a0",
     "nbformat",
     "packaging",
     "pexpect",

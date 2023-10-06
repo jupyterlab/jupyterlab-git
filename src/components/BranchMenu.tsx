@@ -1,4 +1,9 @@
-import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  Notification,
+  showDialog,
+  showErrorMessage
+} from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import List from '@mui/material/List';
@@ -7,7 +12,6 @@ import ClearIcon from '@mui/icons-material/Clear';
 import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
-import { Logger } from '../logger';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
   activeListItemClass,
@@ -22,9 +26,10 @@ import {
   wrapperClass
 } from '../style/BranchMenu';
 import { branchIcon, mergeIcon, trashIcon } from '../style/icons';
-import { CommandIDs, Git, IGitExtension, Level } from '../tokens';
+import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { NewBranchDialog } from './NewBranchDialog';
+import { showError } from '../notifications';
 
 const ITEM_HEIGHT = 24.8; // HTML element height for a single branch
 const MIN_HEIGHT = 150; // Minimal HTML element height for the branches list
@@ -35,19 +40,12 @@ const MAX_HEIGHT = 400; // Maximal HTML element height for the branches list
  *
  * @private
  * @param error - error
- * @param logger - the logger
+ * @param id - notification id
+ * @param trans - translation object
  */
-function onBranchError(
-  error: any,
-  logger: Logger,
-  trans: TranslationBundle
-): void {
+function onBranchError(error: any, id: string, trans: TranslationBundle): void {
   if (error.message.includes('following files would be overwritten')) {
-    // Empty log message to hide the executing alert
-    logger.log({
-      message: '',
-      level: Level.INFO
-    });
+    Notification.dismiss(id);
     showDialog({
       title: trans.__('Unable to switch branch'),
       body: (
@@ -70,10 +68,11 @@ function onBranchError(
       buttons: [Dialog.okButton({ label: trans.__('Dismiss') })]
     });
   } else {
-    logger.log({
-      level: Level.ERROR,
+    Notification.update({
+      id,
       message: trans.__('Failed to switch branch.'),
-      error
+      type: 'error',
+      ...showError(error, trans)
     });
   }
 }
@@ -112,11 +111,6 @@ export interface IBranchMenuProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -327,7 +321,6 @@ export class BranchMenu extends React.Component<
       <NewBranchDialog
         currentBranch={this.props.currentBranch}
         branches={this.props.branches}
-        logger={this.props.logger}
         open={this.state.branchDialog}
         model={this.props.model}
         onClose={this._onNewBranchDialogClose}
@@ -451,20 +444,21 @@ export class BranchMenu extends React.Component<
         branchname: branch
       };
 
-      this.props.logger.log({
-        level: Level.RUNNING,
-        message: this.props.trans.__('Switching branch…')
-      });
+      const id = Notification.emit(
+        this.props.trans.__('Switching branch…'),
+        'in-progress'
+      );
 
       try {
         await this.props.model.checkout(opts);
       } catch (err) {
-        return onBranchError(err, this.props.logger, this.props.trans);
+        return onBranchError(err, id, this.props.trans);
       }
 
-      this.props.logger.log({
-        level: Level.SUCCESS,
-        message: this.props.trans.__('Switched branch.')
+      Notification.update({
+        id,
+        message: this.props.trans.__('Switched branch.'),
+        type: 'success'
       });
     };
 

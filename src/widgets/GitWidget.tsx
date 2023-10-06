@@ -1,4 +1,4 @@
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { ReactWidget } from '@jupyterlab/apputils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TranslationBundle } from '@jupyterlab/translation';
@@ -7,12 +7,9 @@ import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { StylesProvider } from '@mui/styles';
 import * as React from 'react';
-import { Feedback } from '../components/Feedback';
 import { GitPanel } from '../components/GitPanel';
-import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
 import { gitWidgetStyle } from '../style/GitWidgetStyle';
-import { ILogMessage, Level } from '../tokens';
 
 /**
  * A class that exposes the git plugin Widget.
@@ -64,34 +61,13 @@ export class GitWidget extends ReactWidget {
   render(): JSX.Element {
     return (
       <StylesProvider injectFirst>
-        <LoggerContext.Consumer>
-          {logger => (
-            <React.Fragment>
-              <GitPanel
-                commands={this._commands}
-                filebrowser={this._fileBrowserModel}
-                logger={logger}
-                model={this._model}
-                settings={this._settings}
-                trans={this._trans}
-              />
-              <UseSignal
-                signal={logger.signal}
-                initialArgs={{ message: '', level: Level.INFO } as ILogMessage}
-              >
-                {(sender, log) =>
-                  log?.message ? (
-                    <Feedback
-                      log={log}
-                      settings={this._settings}
-                      trans={this._trans}
-                    />
-                  ) : null
-                }
-              </UseSignal>
-            </React.Fragment>
-          )}
-        </LoggerContext.Consumer>
+        <GitPanel
+          commands={this._commands}
+          filebrowser={this._fileBrowserModel}
+          model={this._model}
+          settings={this._settings}
+          trans={this._trans}
+        />
       </StylesProvider>
     );
   }

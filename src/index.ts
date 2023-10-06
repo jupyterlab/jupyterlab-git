@@ -36,7 +36,6 @@ import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 export { DiffModel } from './components/diff/model';
 export { NotebookDiff } from './components/diff/NotebookDiff';
 export { PlainTextDiff } from './components/diff/PlainTextDiff';
-export { logger, LoggerContext } from './logger';
 export { Git, IGitExtension } from './tokens';
 
 /**

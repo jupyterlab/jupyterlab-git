@@ -1,21 +1,10 @@
+import { Notification } from '@jupyterlab/apputils';
+import { TranslationBundle } from '@jupyterlab/translation';
+import ClearIcon from '@mui/icons-material/Clear';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
-import ClearIcon from '@mui/icons-material/Clear';
-import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { Logger } from '../logger';
-import {
-  historyDialogBoxWrapperStyle,
-  historyDialogBoxStyle,
-  activeListItemClass,
-  commitItemBoldClass,
-  commitHeaderBoldClass,
-  commitBodyClass,
-  commitHeaderClass,
-  commitHeaderItemClass,
-  commitWrapperClass
-} from '../style/NewTagDialog';
 import {
   actionsWrapperClass,
   branchDialogClass,
@@ -33,7 +22,18 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
-import { Git, IGitExtension, Level } from '../tokens';
+import {
+  activeListItemClass,
+  commitBodyClass,
+  commitHeaderBoldClass,
+  commitHeaderClass,
+  commitHeaderItemClass,
+  commitItemBoldClass,
+  commitWrapperClass,
+  historyDialogBoxStyle,
+  historyDialogBoxWrapperStyle
+} from '../style/NewTagDialog';
+import { Git, IGitExtension } from '../tokens';
 import { GitCommitGraph } from './GitCommitGraph';
 
 /**
@@ -44,11 +44,6 @@ export interface INewTagDialogProps {
    * List of prior commits.
    */
   pastCommits: Git.ISingleCommitInfo[];
-
-  /**
-   * Extension logger.
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -84,11 +79,6 @@ export interface IDialogBoxCommitGraphProps {
    * List of prior commits.
    */
   pastCommits: Git.ISingleCommitInfo[];
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -385,24 +375,26 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
     const tagName = nameState;
     const baseCommitId = baseCommitIdState;
 
-    props.logger.log({
-      level: Level.RUNNING,
-      message: props.trans.__('Creating tag…')
-    });
+    const id = Notification.emit(
+      props.trans.__('Creating tag…'),
+      'in-progress'
+    );
     try {
       await props.model.setTag(tagName, baseCommitId);
     } catch (err) {
       setErrorState((err as any).message.replace(/^fatal:/, ''));
-      props.logger.log({
-        level: Level.ERROR,
-        message: props.trans.__('Failed to create tag.')
+      Notification.update({
+        id,
+        message: props.trans.__('Failed to create tag.'),
+        type: 'error'
       });
       return;
     }
 
-    props.logger.log({
-      level: Level.SUCCESS,
-      message: props.trans.__('Tag created.')
+    Notification.update({
+      id,
+      message: props.trans.__('Tag created.'),
+      type: 'success'
     });
     // Close the tag dialog:
     props.onClose();
@@ -467,7 +459,6 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
         {
           <DialogBoxCommitGraph
             pastCommits={props.pastCommits}
-            logger={props.logger}
             model={props.model}
             trans={props.trans}
             filter={filterState}

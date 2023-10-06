@@ -5,7 +5,6 @@ import * as React from 'react';
 import { ActionButton } from '../../components/ActionButton';
 import { BranchMenu, IBranchMenuProps } from '../../components/BranchMenu';
 import * as git from '../../git';
-import { Logger } from '../../logger';
 import { GitExtension } from '../../model';
 import { listItemClass, nameClass } from '../../style/BranchMenu';
 import {
@@ -102,7 +101,6 @@ describe('BranchMenu', () => {
       commands: {
         execute: jest.fn()
       } as any,
-      logger: new Logger(),
       trans: trans,
       ...props
     };

@@ -6,6 +6,7 @@ import {
   Dialog,
   ICommandPalette,
   IToolbarWidgetRegistry,
+  Notification,
   ReactWidget,
   showDialog,
   ToolbarButtonComponent,
@@ -21,11 +22,11 @@ import {
   Operation,
   showGitOperationDialog
 } from './commandsAndMenu';
-import { logger } from './logger';
 import { GitExtension } from './model';
 import { cloneIcon } from './style/icons';
-import { CommandIDs, IGitExtension, Level } from './tokens';
+import { CommandIDs, IGitExtension } from './tokens';
 import { GitCloneForm } from './widgets/GitCloneForm';
+import { showDetails, showError } from './notifications';
 
 export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/git:clone',
@@ -59,10 +60,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
         });
 
         if (result.button.accept && result.value?.url) {
-          logger.log({
-            level: Level.RUNNING,
-            message: trans.__('Cloning…')
-          });
+          const id = Notification.emit(trans.__('Cloning…'), 'in-progress');
           try {
             const details = await showGitOperationDialog<IGitCloneArgs>(
               gitModel as GitExtension,
@@ -75,10 +73,11 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
                 submodules: result.value.submodules
               }
             );
-            logger.log({
+            Notification.update({
+              id,
               message: trans.__('Successfully cloned'),
-              level: Level.SUCCESS,
-              details
+              type: 'success',
+              ...showDetails(details, trans)
             });
             await fileBrowserModel.refresh();
           } catch (error) {
@@ -86,10 +85,11 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
               'Encountered an error when cloning the repository. Error: ',
               error
             );
-            logger.log({
+            Notification.update({
+              id,
               message: trans.__('Failed to clone'),
-              level: Level.ERROR,
-              error: error as Error
+              type: 'error',
+              ...showError(error as Error, trans)
             });
             throw error;
           }

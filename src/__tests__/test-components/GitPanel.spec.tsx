@@ -7,7 +7,6 @@ import React from 'react';
 import { CommitBox } from '../../components/CommitBox';
 import { GitPanel, IGitPanelProps } from '../../components/GitPanel';
 import * as git from '../../git';
-import { Logger } from '../../logger';
 import { GitExtension as GitModel } from '../../model';
 import {
   defaultMockedResponses,
@@ -59,7 +58,6 @@ describe('GitPanel', () => {
   const props: IGitPanelProps = {
     model: null,
     commands: null,
-    logger: new Logger(),
     settings: null,
     filebrowser: {
       path: '/dummy/path'

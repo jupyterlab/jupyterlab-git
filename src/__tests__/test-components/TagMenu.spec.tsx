@@ -1,19 +1,18 @@
+import { nullTranslator } from '@jupyterlab/translation';
+import ClearIcon from '@mui/icons-material/Clear';
 import { mount, shallow } from 'enzyme';
 import 'jest';
 import * as React from 'react';
-import { TagMenu, ITagMenuProps } from '../../components/TagMenu';
+import { ITagMenuProps, TagMenu } from '../../components/TagMenu';
 import * as git from '../../git';
-import { Logger } from '../../logger';
 import { GitExtension } from '../../model';
-import { IGitExtension } from '../../tokens';
 import { listItemClass } from '../../style/BranchMenu';
+import { IGitExtension } from '../../tokens';
 import {
-  mockedRequestAPI,
+  DEFAULT_REPOSITORY_PATH,
   defaultMockedResponses,
-  DEFAULT_REPOSITORY_PATH
+  mockedRequestAPI
 } from '../utils';
-import ClearIcon from '@material-ui/icons/Clear';
-import { nullTranslator } from '@jupyterlab/translation';
 
 jest.mock('../../git');
 jest.mock('@jupyterlab/apputils');
@@ -80,7 +79,6 @@ describe('TagMenu', () => {
     return {
       branching: false,
       pastCommits: [],
-      logger: new Logger(),
       model: model as IGitExtension,
       tagsList: TAGS,
       trans: trans,

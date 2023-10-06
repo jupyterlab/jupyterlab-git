@@ -6,7 +6,6 @@ import * as React from 'react';
 import { ActionButton } from '../../components/ActionButton';
 import { IToolbarProps, Toolbar } from '../../components/Toolbar';
 import * as git from '../../git';
-import { Logger } from '../../logger';
 import { GitExtension } from '../../model';
 import { pullIcon, pushIcon } from '../../style/icons';
 import { toolbarMenuButtonClass } from '../../style/Toolbar';
@@ -53,7 +52,6 @@ describe('Toolbar', () => {
       repository: model.pathRepository,
       model: model,
       branching: false,
-      logger: new Logger(),
       nCommitsAhead: 0,
       nCommitsBehind: 0,
       commands: {

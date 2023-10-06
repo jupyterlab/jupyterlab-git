@@ -1,10 +1,11 @@
+import { Notification } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
+import ClearIcon from '@mui/icons-material/Clear';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
-import ClearIcon from '@mui/icons-material/Clear';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { Logger } from '../logger';
+import { showError } from '../notifications';
 import {
   actionsWrapperClass,
   buttonClass,
@@ -17,7 +18,7 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/ResetRevertDialog';
-import { Git, IGitExtension, Level } from '../tokens';
+import { Git, IGitExtension } from '../tokens';
 import { CommitMessage } from './CommitMessage';
 
 /**
@@ -38,11 +39,6 @@ export interface IResetRevertDialogProps {
    * Extension data model.
    */
   model: IGitExtension;
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Boolean indicating whether to show the dialog.
@@ -224,22 +220,27 @@ export class ResetRevertDialog extends React.Component<
    * @param hash Git commit hash
    */
   private async _resetCommit(hash: string): Promise<void> {
-    this.props.logger.log({
-      level: Level.RUNNING,
-      message: this.props.trans.__('Discarding changes…')
-    });
+    const id = Notification.emit(
+      this.props.trans.__('Discarding changes…'),
+      'in-progress'
+    );
     try {
       await this.props.model.resetToCommit(hash);
-      this.props.logger.log({
-        level: Level.SUCCESS,
-        message: this.props.trans.__('Successfully discarded changes.')
+      Notification.update({
+        id,
+        message: this.props.trans.__('Successfully discarded changes.'),
+        type: 'success'
       });
     } catch (error) {
-      this.props.logger.log({
-        level: Level.ERROR,
+      Notification.update({
+        id,
         message: this.props.trans.__('Failed to discard changes.'),
-        error: new Error(
-          `Failed to discard changes after ${hash.slice(0, 7)}: ${error}`
+        type: 'error',
+        ...showError(
+          new Error(
+            `Failed to discard changes after ${hash.slice(0, 7)}: ${error}`
+          ),
+          this.props.trans
         )
       });
     }
@@ -251,21 +252,26 @@ export class ResetRevertDialog extends React.Component<
    * @param hash Git commit hash
    */
   private async _revertCommit(hash: string): Promise<void> {
-    this.props.logger.log({
-      level: Level.RUNNING,
-      message: this.props.trans.__('Reverting changes…')
-    });
+    const id = Notification.emit(
+      this.props.trans.__('Reverting changes…'),
+      'in-progress'
+    );
     try {
       await this.props.model.revertCommit(this._commitMessage(), hash);
-      this.props.logger.log({
-        level: Level.SUCCESS,
-        message: this.props.trans.__('Successfully reverted changes.')
+      Notification.update({
+        id,
+        message: this.props.trans.__('Successfully reverted changes.'),
+        type: 'success'
       });
     } catch (error) {
-      this.props.logger.log({
-        level: Level.ERROR,
+      Notification.update({
+        id,
         message: this.props.trans.__('Failed to revert changes.'),
-        error: new Error(`Failed to revert ${hash.slice(0, 7)}: ${error}`)
+        type: 'error',
+        ...showError(
+          new Error(`Failed to revert ${hash.slice(0, 7)}: ${error}`),
+          this.props.trans
+        )
       });
     }
   }

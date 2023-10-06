@@ -1,7 +1,6 @@
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
-import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
 import { discardIcon, rewindIcon } from '../style/icons';
 import {
@@ -192,19 +191,14 @@ export class SinglePastCommitInfo extends React.Component<
                 )}
                 onClick={this._onResetClick}
               />
-              <LoggerContext.Consumer>
-                {logger => (
-                  <ResetRevertDialog
-                    open={this.state.resetRevertDialog}
-                    action={this.state.resetRevertAction}
-                    model={this.props.model}
-                    logger={logger}
-                    commit={this.props.commit}
-                    onClose={this._onResetRevertDialogClose}
-                    trans={this.props.trans}
-                  />
-                )}
-              </LoggerContext.Consumer>
+              <ResetRevertDialog
+                open={this.state.resetRevertDialog}
+                action={this.state.resetRevertAction}
+                model={this.props.model}
+                commit={this.props.commit}
+                onClose={this._onResetRevertDialogClose}
+                trans={this.props.trans}
+              />
             </>
           }
           numFiles={this.state.numFiles}

@@ -1,13 +1,12 @@
+import { Notification } from '@jupyterlab/apputils';
+import { TranslationBundle } from '@jupyterlab/translation';
+import ClearIcon from '@mui/icons-material/Clear';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import ListItem from '@mui/material/ListItem';
-import ClearIcon from '@mui/icons-material/Clear';
-import { TranslationBundle } from '@jupyterlab/translation';
 import * as React from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { classes } from 'typestyle';
-import { Logger } from '../logger';
-import { branchIcon } from '../style/icons';
 import {
   actionsWrapperClass,
   activeListItemClass,
@@ -33,7 +32,8 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
-import { Git, IGitExtension, Level } from '../tokens';
+import { branchIcon } from '../style/icons';
+import { Git, IGitExtension } from '../tokens';
 
 const ITEM_HEIGHT = 27.5; // HTML element height for a single branch
 const CURRENT_BRANCH_HEIGHT = 66.5; // HTML element height for the current branch with description
@@ -52,11 +52,6 @@ export interface INewBranchDialogProps {
    * Current list of branches.
    */
   branches: Git.IBranch[];
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -420,26 +415,28 @@ export class NewBranchDialog extends React.Component<
       startpoint: this.state.base
     };
 
-    this.props.logger.log({
-      level: Level.RUNNING,
-      message: this.props.trans.__('Creating branch…')
-    });
+    const id = Notification.emit(
+      this.props.trans.__('Creating branch…'),
+      'in-progress'
+    );
     try {
       await this.props.model.checkout(opts);
     } catch (err: any) {
       this.setState({
         error: err.message.replace(/^fatal:/, '')
       });
-      this.props.logger.log({
-        level: Level.ERROR,
-        message: this.props.trans.__('Failed to create branch.')
+      Notification.update({
+        id,
+        message: this.props.trans.__('Failed to create branch.'),
+        type: 'error'
       });
       return;
     }
 
-    this.props.logger.log({
-      level: Level.SUCCESS,
-      message: this.props.trans.__('Branch created.')
+    Notification.update({
+      id,
+      message: this.props.trans.__('Branch created.'),
+      type: 'success'
     });
     // Close the branch dialog:
     this.props.onClose();

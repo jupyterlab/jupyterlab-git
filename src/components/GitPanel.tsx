@@ -1,4 +1,4 @@
-import { showDialog, Dialog } from '@jupyterlab/apputils';
+import { Dialog, Notification, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -6,11 +6,13 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
+import { WarningRounded as WarningRoundedIcon } from '@mui/icons-material';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import * as React from 'react';
-import { Logger } from '../logger';
 import { GitExtension } from '../model';
+import { showError } from '../notifications';
+import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
   panelWrapperClass,
   repoButtonClass,
@@ -20,21 +22,19 @@ import {
   tabsClass,
   warningTextClass
 } from '../style/GitPanel';
-import { CommandIDs, Git, ILogMessage, Level } from '../tokens';
+import { addIcon, rewindIcon, trashIcon } from '../style/icons';
+import { CommandIDs, Git } from '../tokens';
 import { openFileDiff, stopPropagationWrapper } from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
+import { ActionButton } from './ActionButton';
 import { CommitBox } from './CommitBox';
 import { CommitComparisonBox } from './CommitComparisonBox';
 import { FileList } from './FileList';
+import { GitStash } from './GitStash';
 import { HistorySideBar } from './HistorySideBar';
+import { RebaseAction } from './RebaseAction';
 import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
-import { WarningRounded as WarningRoundedIcon } from '@mui/icons-material';
-import { GitStash } from './GitStash';
-import { ActionButton } from './ActionButton';
-import { addIcon, rewindIcon, trashIcon } from '../style/icons';
-import { hiddenButtonStyle } from '../style/ActionButtonStyle';
-import { RebaseAction } from './RebaseAction';
 
 /**
  * Interface describing component properties.
@@ -49,11 +49,6 @@ export interface IGitPanelProps {
    * File browser model.
    */
   filebrowser: FileBrowserModel;
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -410,7 +405,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         branching={!disableBranching}
         commands={this.props.commands}
         pastCommits={this.state.pastCommits}
-        logger={this.props.logger}
         model={this.props.model}
         nCommitsAhead={this.state.nCommitsAhead}
         nCommitsBehind={this.state.nCommitsBehind}
@@ -638,7 +632,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
               challengerCommit={this.state.challengerCommit}
               commands={this.props.commands}
               model={this.props.model}
-              logger={this.props.logger}
               trans={this.props.trans}
               onClose={event => {
                 event?.stopPropagation();
@@ -769,14 +762,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   private _commitMarkedFiles = async (
     message: string | null
   ): Promise<void> => {
-    this.props.logger.log({
-      level: Level.RUNNING,
-      message: this.props.trans.__('Staging files...')
-    });
+    const id = Notification.emit(
+      this.props.trans.__('Staging files...'),
+      'in-progress'
+    );
     await this.props.model.reset();
     await this.props.model.add(...this._markedFiles.map(file => file.to));
 
-    await this._commitStagedFiles(message);
+    await this._commitStagedFiles(message, id);
   };
 
   /**
@@ -786,20 +779,23 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns a promise which commits the files
    */
   private _commitStagedFiles = async (
-    message: string | null = null
+    message: string | null = null,
+    notificationId?: string
   ): Promise<void> => {
-    const errorLog: ILogMessage = {
-      level: Level.ERROR,
-      message: this.props.trans.__('Failed to commit changes.')
-    };
-
+    const errorMsg = this.props.trans.__('Failed to commit changes.');
+    let id: string | null = notificationId ?? null;
     try {
       const author = await this._hasIdentity(this.props.model.pathRepository);
 
-      this.props.logger.log({
-        level: Level.RUNNING,
-        message: this.props.trans.__('Committing changes...')
-      });
+      const message = this.props.trans.__('Committing changes...');
+      if (id !== null) {
+        Notification.update({
+          id,
+          message
+        });
+      } else {
+        id = Notification.emit(message, 'in-progress');
+      }
 
       if (this.state.commitAmend) {
         await this.props.model.commit(null, true, author);
@@ -807,8 +803,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         await this.props.model.commit(message, false, author);
       }
 
-      this.props.logger.log({
-        level: Level.SUCCESS,
+      Notification.update({
+        id,
+        type: 'success',
         message: this.props.trans.__('Committed changes.')
       });
 
@@ -821,7 +818,15 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         await this.props.commands.execute(CommandIDs.gitPush);
       }
     } catch (error: any) {
-      this.props.logger.log({ ...errorLog, error });
+      if (id === null) {
+        Notification.error(errorMsg, showError(error, this.props.trans));
+      } else {
+        Notification.update({
+          id,
+          message: errorMsg,
+          ...showError(error, this.props.trans)
+        });
+      }
       throw error;
     }
   };

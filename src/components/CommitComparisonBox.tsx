@@ -1,3 +1,4 @@
+import { Notification } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
 import {
   caretDownIcon,
@@ -6,7 +7,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
-import { Logger } from '../logger';
+import { showError } from '../notifications';
 import {
   commitComparisonBoxStyle,
   commitComparisonDiffStyle
@@ -16,7 +17,7 @@ import {
   sectionAreaStyle,
   sectionHeaderLabelStyle
 } from '../style/GitStageStyle';
-import { Git, IGitExtension, Level } from '../tokens';
+import { Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { CommitDiff } from './CommitDiff';
 
@@ -43,11 +44,6 @@ export interface ICommitComparisonBoxProps {
    * Header text.
    */
   header: string;
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Extension data model.
@@ -118,11 +114,7 @@ export function CommitComparisonBox(
       } catch (err: any) {
         const msg = `Failed to get the diff for ${referenceCommit.commit} and ${challengerCommit.commit}.`;
         console.error(msg, err);
-        props.logger.log({
-          level: Level.ERROR,
-          message: msg,
-          error: err
-        });
+        Notification.error(msg, showError(err, props.trans));
         return;
       }
       if (diffResult) {
