@@ -1300,6 +1300,12 @@ export namespace Git {
     }
   }
 
+  export class HiddenFile extends Error {
+    constructor() {
+      super('File is hidden');
+    }
+  }
+
   /**
    * Interface for dialog with one checkbox.
    */

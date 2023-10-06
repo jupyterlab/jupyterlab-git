@@ -828,7 +828,9 @@ class GitIgnoreHandler(GitHandler):
         else:
             body = await self.git.ensure_gitignore(local_path)
 
-        if body["code"] != 0:
+        if body["code"] == -2:
+            self.set_status(403, body["message"])
+        elif body["code"] != 0:
             self.set_status(500)
         self.finish(json.dumps(body))
 
