@@ -80,7 +80,7 @@ describe('PastCommitNode', () => {
       pre_commits: ['pre_commit']
     },
     branches: branches,
-    tags: tags,
+    tagsList: tags,
     commands: null,
     trans,
     onCompareWithSelected: null,
