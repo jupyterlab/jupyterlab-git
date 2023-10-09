@@ -264,7 +264,7 @@ export class PastCommitNode extends React.Component<
   private _renderTags(): React.ReactElement[] {
     const curr = this.props.commit.commit;
     const tags: Git.ITag[] = [];
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < this.props.tagsList.length; i++) {
       const tag = this.props.tagsList[i];
       if (tag.baseCommitId && tag.baseCommitId === curr) {
         tags.push(tag);
