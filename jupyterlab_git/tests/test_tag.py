@@ -10,10 +10,10 @@ from .testutils import maybe_future
 @pytest.mark.asyncio
 async def test_git_tag_success():
     with patch("jupyterlab_git.git.execute") as mock_execute:
-        tags = "v1.0.0 6db57bf4987d387d439acd16ddfe8d54d46e8f4\nv2.0.1 2aeae86b6010dd1f05b820d8753cff8349c181a6"
+        output_tags = "v1.0.0\t6db57bf4987d387d439acd16ddfe8d54d46e8f4\nv2.0.1\t2aeae86b6010dd1f05b820d8753cff8349c181a6"
 
         # Given
-        mock_execute.return_value = maybe_future((0, tags, ""))
+        mock_execute.return_value = maybe_future((0, output_tags, ""))
 
         # When
         actual_response = await Git().tags("test_curr_path")
