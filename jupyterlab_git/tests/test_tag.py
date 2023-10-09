@@ -10,7 +10,7 @@ from .testutils import maybe_future
 @pytest.mark.asyncio
 async def test_git_tag_success():
     with patch("jupyterlab_git.git.execute") as mock_execute:
-        tag = {"1.0.0", "949239829824982394824"}
+        tag = [{"1.0.0", "949239829824982394824"}]
         # Given
         mock_execute.return_value = maybe_future((0, tag, ""))
 
