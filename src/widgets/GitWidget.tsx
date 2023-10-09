@@ -5,7 +5,6 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import { StylesProvider } from '@mui/styles';
 import * as React from 'react';
 import { GitPanel } from '../components/GitPanel';
 import { GitExtension } from '../model';
@@ -60,15 +59,13 @@ export class GitWidget extends ReactWidget {
    */
   render(): JSX.Element {
     return (
-      <StylesProvider injectFirst>
-        <GitPanel
-          commands={this._commands}
-          filebrowser={this._fileBrowserModel}
-          model={this._model}
-          settings={this._settings}
-          trans={this._trans}
-        />
-      </StylesProvider>
+      <GitPanel
+        commands={this._commands}
+        filebrowser={this._fileBrowserModel}
+        model={this._model}
+        settings={this._settings}
+        trans={this._trans}
+      />
     );
   }
 

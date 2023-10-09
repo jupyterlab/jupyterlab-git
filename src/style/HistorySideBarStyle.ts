@@ -33,6 +33,7 @@ export const historySideBarStyle = style({
   marginBlockStart: 0,
   marginBlockEnd: 0,
   paddingLeft: 0,
+  paddingRight: '8px',
 
   overflowY: 'auto'
 });

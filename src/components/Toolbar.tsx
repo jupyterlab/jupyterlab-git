@@ -248,7 +248,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             PageConfig.getOption('serverRoot') + '/' + this.props.repository
           )}
         >
-          <desktopIcon.react className={toolbarMenuButtonIconClass} />
+          <desktopIcon.react
+            tag="span"
+            className={toolbarMenuButtonIconClass}
+          />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>
               {this.props.trans.__('Current Repository')}
@@ -297,7 +300,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           title={this.props.trans.__('Manage branches and tags')}
           onClick={this._onBranchClick}
         >
-          <branchIcon.react className={toolbarMenuButtonIconClass} />
+          <branchIcon.react tag="span" className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>{branchTitle}</p>
             <p className={toolbarMenuButtonSubtitleClass}>
@@ -305,9 +308,15 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             </p>
           </div>
           {this.state.branchMenu ? (
-            <caretUpIcon.react className={toolbarMenuButtonIconClass} />
+            <caretUpIcon.react
+              tag="span"
+              className={toolbarMenuButtonIconClass}
+            />
           ) : (
-            <caretDownIcon.react className={toolbarMenuButtonIconClass} />
+            <caretDownIcon.react
+              tag="span"
+              className={toolbarMenuButtonIconClass}
+            />
           )}
         </button>
         {this.state.branchMenu ? this._renderTabs() : null}

@@ -147,7 +147,11 @@ export function CommitComparisonBox(
         onClick={() => setCollapsed(!collapsed)}
       >
         <button className={changeStageButtonStyle}>
-          {collapsed ? <caretRightIcon.react /> : <caretDownIcon.react />}
+          {collapsed ? (
+            <caretRightIcon.react tag="span" />
+          ) : (
+            <caretDownIcon.react tag="span" />
+          )}
         </button>
 
         <span className={sectionHeaderLabelStyle}>{props.header}</span>

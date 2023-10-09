@@ -41,10 +41,10 @@ export const listStyle = style({
     }
   }
 });
+
 export const stashEntryMessageStyle = style({
   textOverflow: 'ellipsis',
   overflow: 'hidden',
   whiteSpace: 'nowrap',
-  display: 'inline-block',
-  maxWidth: 'calc(100% - 100px)' // Adjust this value based on the space required for the action buttons
+  display: 'inline-block'
 });

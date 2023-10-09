@@ -73,7 +73,14 @@ export const toolbarMenuButtonTitleWrapperClass = style({
 
   marginTop: 'auto',
   marginBottom: 'auto',
-  marginRight: 'auto'
+  marginRight: 'auto',
+
+  $nest: {
+    '& > p': {
+      marginTop: 0,
+      marginBottom: 0
+    }
+  }
 });
 
 export const toolbarMenuButtonTitleClass = style({});

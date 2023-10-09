@@ -60,11 +60,8 @@ export const tabClass = style({
     'var(--jp-border-width) solid var(--jp-border-color2)!important',
   borderRight: 'var(--jp-border-width) solid var(--jp-border-color2)!important',
 
-  $nest: {
-    span: {
-      textTransform: 'none'
-    }
-  }
+  // @ts-expect-error unknown value
+  textTransform: 'none !important'
 });
 
 export const selectedTabClass = style({

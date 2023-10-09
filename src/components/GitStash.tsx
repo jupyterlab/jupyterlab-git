@@ -133,16 +133,16 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
         {props.collapsible && (
           <button className={changeStageButtonStyle}>
             {showStashFiles && props?.files.length > 0 ? (
-              <caretDownIcon.react />
+              <caretDownIcon.react tag="span" />
             ) : (
-              <caretRightIcon.react />
+              <caretRightIcon.react tag="span" />
             )}
           </button>
         )}
         <span className={sectionHeaderLabelStyle}>
-          <p className={stashEntryMessageStyle}>
+          <span className={stashEntryMessageStyle}>
             {props.trans.__('%1 (on %2)', props.message, props.branch)}
-          </p>
+          </span>
           <span className={sectionButtonContainerStyle}>{props.actions}</span>
         </span>
       </div>
@@ -230,14 +230,14 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
         {props.collapsible && (
           <button className={changeStageButtonStyle}>
             {showStash && nStash > 0 ? (
-              <caretDownIcon.react />
+              <caretDownIcon.react tag="span" />
             ) : (
-              <caretRightIcon.react />
+              <caretRightIcon.react tag="span" />
             )}
           </button>
         )}
         <span className={sectionHeaderLabelStyle}>
-          <p>{props.trans.__('Stash')}</p>
+          <span>{props.trans.__('Stash')}</span>
           <span className={sectionButtonContainerStyle}>
             {props.actions}
             <span
