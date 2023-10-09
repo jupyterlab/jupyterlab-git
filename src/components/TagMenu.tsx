@@ -347,7 +347,8 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
 
       const id = Notification.emit(
         this.props.trans.__('Checking tag out…'),
-        'in-progress'
+        'in-progress',
+        { autoClose: false }
       );
 
       try {
@@ -359,7 +360,8 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
       Notification.update({
         id,
         message: this.props.trans.__('Tag checkout.'),
-        type: 'success'
+        type: 'success',
+        autoClose: 5000
       });
     };
     return onClick;

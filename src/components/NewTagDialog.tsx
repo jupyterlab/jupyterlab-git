@@ -377,7 +377,8 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
 
     const id = Notification.emit(
       props.trans.__('Creating tag…'),
-      'in-progress'
+      'in-progress',
+      { autoClose: false }
     );
     try {
       await props.model.setTag(tagName, baseCommitId);
@@ -386,7 +387,8 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
       Notification.update({
         id,
         message: props.trans.__('Failed to create tag.'),
-        type: 'error'
+        type: 'error',
+        autoClose: false
       });
       return;
     }
@@ -394,7 +396,8 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
     Notification.update({
       id,
       message: props.trans.__('Tag created.'),
-      type: 'success'
+      type: 'success',
+      autoClose: 5000
     });
     // Close the tag dialog:
     props.onClose();

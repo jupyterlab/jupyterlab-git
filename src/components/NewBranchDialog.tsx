@@ -417,7 +417,8 @@ export class NewBranchDialog extends React.Component<
 
     const id = Notification.emit(
       this.props.trans.__('Creating branch…'),
-      'in-progress'
+      'in-progress',
+      { autoClose: false }
     );
     try {
       await this.props.model.checkout(opts);
@@ -428,7 +429,8 @@ export class NewBranchDialog extends React.Component<
       Notification.update({
         id,
         message: this.props.trans.__('Failed to create branch.'),
-        type: 'error'
+        type: 'error',
+        autoClose: false
       });
       return;
     }
@@ -436,7 +438,8 @@ export class NewBranchDialog extends React.Component<
     Notification.update({
       id,
       message: this.props.trans.__('Branch created.'),
-      type: 'success'
+      type: 'success',
+      autoClose: 5000
     });
     // Close the branch dialog:
     this.props.onClose();

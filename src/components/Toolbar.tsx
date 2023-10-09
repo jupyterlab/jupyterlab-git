@@ -431,7 +431,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   private _onRefreshClick = async (): Promise<void> => {
     const id = Notification.emit(
       this.props.trans.__('Refreshing…'),
-      'in-progress'
+      'in-progress',
+      { autoClose: false }
     );
     try {
       await this.props.model.refresh();
@@ -439,7 +440,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       Notification.update({
         id,
         message: this.props.trans.__('Successfully refreshed.'),
-        type: 'success'
+        type: 'success',
+        autoClose: 5000
       });
     } catch (error: any) {
       console.error(error);

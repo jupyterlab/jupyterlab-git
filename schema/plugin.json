@@ -192,8 +192,6 @@
     "domain": "jupyterlab_git"
   },
   "jupyter.lab.toolbars": {
-    "FileBrowser": [
-      { "name": "gitClone", "rank": 31 }
-    ]
+    "FileBrowser": [{ "name": "gitClone", "rank": 31 }]
   }
 }

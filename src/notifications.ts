@@ -13,6 +13,7 @@ export function showError(
   trans: TranslationBundle
 ): Notification.IOptions<null> {
   return {
+    autoClose: false,
     actions: [
       {
         label: trans.__('Show'),
@@ -32,6 +33,7 @@ export function showDetails(
   trans: TranslationBundle
 ): Notification.IOptions<null> {
   return {
+    autoClose: 5000,
     actions: [
       {
         label: trans.__('Details'),

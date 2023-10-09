@@ -221,14 +221,17 @@ export function addCommands(
       });
 
       if (result.button.accept) {
-        const id = Notification.emit(trans.__('Initializing…'), 'in-progress');
+        const id = Notification.emit(trans.__('Initializing…'), 'in-progress', {
+          autoClose: false
+        });
         try {
           await gitModel.init(currentPath);
           gitModel.pathRepository = currentPath;
           Notification.update({
             id,
             message: trans.__('Git repository initialized.'),
-            type: 'success'
+            type: 'success',
+            autoClose: 5000
           });
         } catch (error) {
           console.error(
@@ -350,7 +353,9 @@ export function addCommands(
           }
         }
 
-        id = Notification.emit(trans.__('Pushing…'), 'in-progress');
+        id = Notification.emit(trans.__('Pushing…'), 'in-progress', {
+          autoClose: false
+        });
         const details = await showGitOperationDialog(
           gitModel,
           force ? Operation.ForcePush : Operation.Push,
@@ -411,7 +416,9 @@ export function addCommands(
         if (args.force) {
           await discardAllChanges(gitModel, trans, args.fallback as boolean);
         }
-        id = Notification.emit(trans.__('Pulling…'), 'in-progress');
+        id = Notification.emit(trans.__('Pulling…'), 'in-progress', {
+          autoClose: false
+        });
         const details = await showGitOperationDialog(
           gitModel,
           Operation.Pull,
@@ -509,7 +516,9 @@ export function addCommands(
           if (id) {
             Notification.update({ id, message });
           } else {
-            id = Notification.emit(message, 'in-progress');
+            id = Notification.emit(message, 'in-progress', {
+              autoClose: false
+            });
           }
 
           await gitModel.resetToCommit(gitModel.status.remote ?? undefined);
@@ -939,7 +948,9 @@ export function addCommands(
             }
           })(action) ?? '';
 
-        const id = Notification.emit(message, 'in-progress');
+        const id = Notification.emit(message, 'in-progress', {
+          autoClose: false
+        });
         try {
           await gitModel.resolveRebase(action as any);
         } catch (err) {
@@ -977,7 +988,8 @@ export function addCommands(
         Notification.update({
           id,
           type: 'success',
-          message: message_
+          message: message_,
+          autoClose: 5000
         });
       }
     },
@@ -1000,7 +1012,8 @@ export function addCommands(
       if (stashDialog.button.accept) {
         const id = Notification.emit(
           trans.__('Stashing changes'),
-          'in-progress'
+          'in-progress',
+          { autoClose: false }
         );
         try {
           await gitModel.stashChanges(stashMsg);
@@ -1008,7 +1021,8 @@ export function addCommands(
           Notification.update({
             id,
             message: trans.__('Successfully stashed'),
-            type: 'success'
+            type: 'success',
+            autoClose: 5000
           });
         } catch (error: any) {
           console.error(

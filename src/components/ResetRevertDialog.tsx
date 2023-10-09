@@ -222,14 +222,16 @@ export class ResetRevertDialog extends React.Component<
   private async _resetCommit(hash: string): Promise<void> {
     const id = Notification.emit(
       this.props.trans.__('Discarding changes…'),
-      'in-progress'
+      'in-progress',
+      { autoClose: false }
     );
     try {
       await this.props.model.resetToCommit(hash);
       Notification.update({
         id,
         message: this.props.trans.__('Successfully discarded changes.'),
-        type: 'success'
+        type: 'success',
+        autoClose: 5000
       });
     } catch (error) {
       Notification.update({
@@ -254,14 +256,16 @@ export class ResetRevertDialog extends React.Component<
   private async _revertCommit(hash: string): Promise<void> {
     const id = Notification.emit(
       this.props.trans.__('Reverting changes…'),
-      'in-progress'
+      'in-progress',
+      { autoClose: false }
     );
     try {
       await this.props.model.revertCommit(this._commitMessage(), hash);
       Notification.update({
         id,
         message: this.props.trans.__('Successfully reverted changes.'),
-        type: 'success'
+        type: 'success',
+        autoClose: 5000
       });
     } catch (error) {
       Notification.update({

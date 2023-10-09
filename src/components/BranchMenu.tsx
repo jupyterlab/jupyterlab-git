@@ -446,7 +446,8 @@ export class BranchMenu extends React.Component<
 
       const id = Notification.emit(
         this.props.trans.__('Switching branch…'),
-        'in-progress'
+        'in-progress',
+        { autoClose: false }
       );
 
       try {
@@ -458,7 +459,8 @@ export class BranchMenu extends React.Component<
       Notification.update({
         id,
         message: this.props.trans.__('Switched branch.'),
-        type: 'success'
+        type: 'success',
+        autoClose: 5000
       });
     };
 

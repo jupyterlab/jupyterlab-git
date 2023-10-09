@@ -764,7 +764,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   ): Promise<void> => {
     const id = Notification.emit(
       this.props.trans.__('Staging files...'),
-      'in-progress'
+      'in-progress',
+      { autoClose: false }
     );
     await this.props.model.reset();
     await this.props.model.add(...this._markedFiles.map(file => file.to));
@@ -791,10 +792,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       if (id !== null) {
         Notification.update({
           id,
-          message
+          message,
+          autoClose: false
         });
       } else {
-        id = Notification.emit(message, 'in-progress');
+        id = Notification.emit(message, 'in-progress', { autoClose: false });
       }
 
       if (this.state.commitAmend) {
@@ -806,7 +808,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       Notification.update({
         id,
         type: 'success',
-        message: this.props.trans.__('Committed changes.')
+        message: this.props.trans.__('Committed changes.'),
+        autoClose: 5000
       });
 
       const hasRemote = this.props.model.branches.some(

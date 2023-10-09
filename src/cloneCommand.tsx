@@ -60,7 +60,9 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
         });
 
         if (result.button.accept && result.value?.url) {
-          const id = Notification.emit(trans.__('Cloning…'), 'in-progress');
+          const id = Notification.emit(trans.__('Cloning…'), 'in-progress', {
+            autoClose: false
+          });
           try {
             const details = await showGitOperationDialog<IGitCloneArgs>(
               gitModel as GitExtension,
