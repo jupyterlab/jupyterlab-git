@@ -300,10 +300,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
     });
 
     const model = new NotebookDiffModel(data.base, data.diff);
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return new NotebookDiffWidget(model, this._renderMime);
+    return new NotebookDiffWidget({ model, rendermime: this._renderMime });
   }
 
   protected async createMergeView(
@@ -318,10 +315,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
     });
 
     const model = new NotebookMergeModel(data.base, data.merge_decisions);
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return new NotebookMergeWidget(model, this._renderMime);
+    return new NotebookMergeWidget({ model, rendermime: this._renderMime });
   }
 
   /**
