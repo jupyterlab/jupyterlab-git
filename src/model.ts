@@ -90,7 +90,7 @@ export class GitExtension implements IGitExtension {
   /**
    * Tags list for the current repository.
    */
-  get tagsList(): string[] {
+  get tagsList(): Git.ITag[] {
     return this._tagsList;
   }
 
@@ -1784,7 +1784,7 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Retrieve the list of tags in the repository.
+   * Retrieve the list of tags in the repository, with the respective commits they point to.
    *
    * @returns promise which resolves upon retrieving the tag list
    *
@@ -1845,7 +1845,7 @@ export class GitExtension implements IGitExtension {
   async setTag(tag: string, commitId: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:tag:create', async () => {
-      return await requestAPI<void>(URLExt.join(path, 'new_tag'), 'POST', {
+      return await requestAPI<void>(URLExt.join(path, 'tag'), 'POST', {
         tag_id: tag,
         commit_id: commitId
       });
@@ -2195,7 +2195,7 @@ export class GitExtension implements IGitExtension {
   private _stash: Git.IStash;
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];
-  private _tagsList: string[] = [];
+  private _tagsList: Git.ITag[] = [];
   private _currentBranch: Git.IBranch | null = null;
   private _docmanager: IDocumentManager | null;
   private _docRegistry: DocumentRegistry | null;

@@ -33,6 +33,11 @@ export interface IHistorySideBarProps {
   branches: Git.IBranch[];
 
   /**
+   * List of tags.
+   */
+  tagsList: Git.ITag[];
+
+  /**
    * Git extension data model.
    */
   model: GitExtension;
@@ -175,6 +180,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
             const commonProps = {
               commit,
               branches: props.branches,
+              tagsList: props.tagsList,
               model: props.model,
               commands: props.commands,
               trans: props.trans

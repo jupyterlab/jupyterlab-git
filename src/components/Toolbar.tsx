@@ -48,7 +48,7 @@ export interface IToolbarProps {
   /**
    * Current list of tags.
    */
-  tagsList: string[];
+  tagsList: Git.ITag[];
 
   /**
    * Boolean indicating whether branching is disabled.

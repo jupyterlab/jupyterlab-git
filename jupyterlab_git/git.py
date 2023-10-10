@@ -1736,16 +1736,25 @@ class Git:
         return None
 
     async def tags(self, path):
-        """List all tags of the git repository.
+        """List all tags of the git repository, including the commit each tag points to.
 
         path: str
             Git path repository
         """
-        command = ["git", "tag", "--list"]
+        formats = ["refname:short", "objectname"]
+        command = [
+            "git",
+            "for-each-ref",
+            "--format=" + "%09".join("%({})".format(f) for f in formats),
+            "refs/tags",
+        ]
         code, output, error = await self.__execute(command, cwd=path)
         if code != 0:
             return {"code": code, "command": " ".join(command), "message": error}
-        tags = [tag for tag in output.split("\n") if len(tag) > 0]
+        tags = []
+        for tag_name, commit_id in (line.split("\t") for line in output.splitlines()):
+            tag = {"name": tag_name, "baseCommitId": commit_id}
+            tags.append(tag)
         return {"code": code, "tags": tags}
 
     async def tag_checkout(self, path, tag):

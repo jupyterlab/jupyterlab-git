@@ -43,6 +43,11 @@ export interface IPastCommitNodeProps {
   branches: Git.IBranch[];
 
   /**
+   * List of tags.
+   */
+  tagsList: Git.ITag[];
+
+  /**
    * Extension data model.
    */
   model: GitExtension;
@@ -199,6 +204,7 @@ export class PastCommitNode extends React.Component<
           )}
         </div>
         <div className={branchWrapperClass}>{this._renderBranches()}</div>
+        <div className={branchWrapperClass}>{this._renderTags()}</div>
         <div className={commitBodyClass}>
           {this.props.commit.commit_msg}
           {this.props.expanded && this.props.children}
@@ -245,6 +251,39 @@ export class PastCommitNode extends React.Component<
           )}
         >
           {branch.name}
+        </span>
+      </React.Fragment>
+    );
+  }
+
+  /**
+   * Renders tags information.
+   *
+   * @returns array of React elements
+   */
+  private _renderTags(): React.ReactElement[] {
+    const curr = this.props.commit.commit;
+    const tags: Git.ITag[] = [];
+    for (let i = 0; i < this.props.tagsList.length; i++) {
+      const tag = this.props.tagsList[i];
+      if (tag.baseCommitId && tag.baseCommitId === curr) {
+        tags.push(tag);
+      }
+    }
+    return tags.map(this._renderTag, this);
+  }
+
+  /**
+   * Renders individual tag data.
+   *
+   * @param tag - tag data
+   * @returns React element
+   */
+  private _renderTag(tag: Git.ITag): React.ReactElement {
+    return (
+      <React.Fragment key={tag.name}>
+        <span className={classes(branchClass, localBranchClass)}>
+          {tag.name}
         </span>
       </React.Fragment>
     );

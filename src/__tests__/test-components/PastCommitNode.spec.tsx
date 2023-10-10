@@ -48,6 +48,27 @@ describe('PastCommitNode', () => {
     }
   ];
   const branches: Git.IBranch[] = notMatchingBranches.concat(matchingBranches);
+  const matchingTags: Git.ITag[] = [
+    {
+      name: '1.0.0',
+      baseCommitId: '2414721b194453f058079d897d13c4e377f92dc6'
+    },
+    {
+      name: 'feature-1',
+      baseCommitId: '2414721b194453f058079d897d13c4e377f92dc6'
+    }
+  ];
+  const notMatchingTags: Git.ITag[] = [
+    {
+      name: 'feature-2',
+      baseCommitId: '798438398'
+    },
+    {
+      name: 'patch-007',
+      baseCommitId: '238848848'
+    }
+  ];
+  const tags: Git.ITag[] = notMatchingTags.concat(matchingTags);
   const toggleCommitExpansion = jest.fn();
   const props: IPastCommitNodeProps = {
     model: null,
@@ -59,6 +80,7 @@ describe('PastCommitNode', () => {
       pre_commits: ['pre_commit']
     },
     branches: branches,
+    tagsList: tags,
     commands: null,
     trans,
     onCompareWithSelected: null,
@@ -82,6 +104,14 @@ describe('PastCommitNode', () => {
     expect(node.text()).toMatch('name4');
     expect(node.text()).not.toMatch('name1');
     expect(node.text()).not.toMatch('name2');
+  });
+
+  test('Includes only relevant tag info', () => {
+    const node = shallow(<PastCommitNode {...props} />);
+    expect(node.text()).toMatch('1.0.0');
+    expect(node.text()).toMatch('feature-1');
+    expect(node.text()).not.toMatch('feature-2');
+    expect(node.text()).not.toMatch('patch-007');
   });
 
   test('Toggle show details', () => {
