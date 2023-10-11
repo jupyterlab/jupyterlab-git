@@ -826,6 +826,8 @@ class GitIgnoreHandler(GitHandler):
                     file_path = "**/*" + ".".join(suffixes)
             body = await self.git.ignore(local_path, file_path)
         else:
+            if not self.serverapp.contents_manager.allow_hidden:
+                self.set_status(403, "hidden files cannot be accessed")
             body = await self.git.ensure_gitignore(local_path)
 
         if body["code"] == -2:

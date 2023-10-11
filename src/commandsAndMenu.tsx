@@ -309,7 +309,40 @@ export function addCommands(
     caption: trans.__('Open .gitignore'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async () => {
-      await gitModel.ensureGitignore();
+      try {
+        await gitModel.ensureGitignore();
+      } catch (error: any) {
+        if (error?.name === 'hiddenFile') {
+          await showDialog({
+            title: trans.__('The .gitignore file cannot be accessed'),
+            body: (
+              <div>
+                {trans.__(
+                  'Hidden files by default cannot be accessed. In order to open the .gitignore file you must:'
+                )}
+                <ol>
+                  <li>
+                    {trans.__(
+                      'Print the command below to create a jupyter_server_config.py file with defaults commented out. If you already have the file located in .jupyter, skip this step.'
+                    )}
+                    <div style={{ padding: '0.5rem' }}>
+                      {trans.__('jupyter server --generate-config')}
+                    </div>
+                  </li>
+                  <li>
+                    {trans.__(
+                      'Open jupyter_server_config.py, uncomment out the following line and set it to True:'
+                    )}
+                    <div style={{ padding: '0.5rem' }}>
+                      {trans.__('c.ContentsManager.allow_hidden = False')}
+                    </div>
+                  </li>
+                </ol>
+              </div>
+            )
+          });
+        }
+      }
     }
   });
 

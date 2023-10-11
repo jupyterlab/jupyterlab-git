@@ -1698,8 +1698,6 @@ class Git:
                 if content[-1] != "\n":
                     with gitignore.open("a") as f:
                         f.write("\n")
-                else:  # .gitignore exists, but the file is hidden
-                    return {"code": -2, "message": ".gitignore exists but is hidden"}
         except BaseException as error:
             return {"code": -1, "message": str(error)}
         return {"code": 0}
