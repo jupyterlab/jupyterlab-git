@@ -220,7 +220,7 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     head.innerHTML = labels
       .filter(label => !!label)
       .map(label => `<span>${label}</span>`)
-      .join('<span class="jp-spacer"></span>');
+      .join('');
     return head;
   }
 
@@ -259,8 +259,9 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
       this._mergeView = createNbdimeMergeView({
         remote,
         local,
-        merged
+        merged,
         // factory: this._editorFactory
+        showBase: false
       });
       this._mergeView.addClass('jp-git-PlainText-diff');
 

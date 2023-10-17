@@ -3,11 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |---------------------------------------------------------------------------- */
 
+@import url('variables.css');
 @import url('credentials-box.css');
 @import url('diff-common.css');
-@import url('diff-nb.css');
-@import url('diff-text.css');
-@import url('variables.css');
 @import url('status-widget.css');
 @import url('advanced-push-form.css');
 

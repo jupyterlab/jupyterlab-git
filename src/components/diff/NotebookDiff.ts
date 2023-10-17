@@ -379,11 +379,10 @@ namespace Private {
     node.className = 'jp-git-diff-header';
     node.innerHTML = `<div class="${bannerClass}">
         <span>${localLabel}</span>
-        <span class="jp-spacer"></span>
         ${
           hasConflict
             ? // Add extra space during notebook merge view
-              `<span>${baseLabel}</span><span class="jp-spacer"></span>`
+              `<span>${baseLabel}</span>`
             : ''
         }
         <span>${remoteLabel}</span>

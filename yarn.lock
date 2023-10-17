@@ -2665,8 +2665,8 @@ __metadata:
     jest-fetch-mock: ^3.0.0
     lint-staged: ^13.2.3
     mkdirp: ^1.0.3
-    nbdime: ^7.0.0-alpha.0
-    nbdime-jupyterlab: ^3.0.0-alpha.0
+    nbdime: ^7.0.0-alpha.2
+    nbdime-jupyterlab: ^3.0.0-alpha.2
     npm-run-all: ^4.1.5
     prettier: ^3.0.0
     react: ^18.2.0
@@ -9240,9 +9240,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nbdime-jupyterlab@npm:^3.0.0-alpha.0":
-  version: 3.0.0-alpha.0
-  resolution: "nbdime-jupyterlab@npm:3.0.0-alpha.0"
+"nbdime-jupyterlab@npm:^3.0.0-alpha.2":
+  version: 3.0.0-alpha.2
+  resolution: "nbdime-jupyterlab@npm:3.0.0-alpha.2"
   dependencies:
     "@jupyterlab/apputils": ^4.0.0
     "@jupyterlab/codeeditor": ^4.0.0
@@ -9256,14 +9256,14 @@ __metadata:
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/widgets": ^2.3.0
-    nbdime: ^7.0.0-alpha.0
-  checksum: 70c14dfcb92bc7a12c022d31e3a8fb968115dc0f75eb2a92f5a4a0d128ab32d9e4daad88f790f00a22df6b6b6f011871fd45a845414472d493e13722d6dbb421
+    nbdime: ^7.0.0-alpha.2
+  checksum: ab4ff90c517d282da47590f7951eb08a69492a7e847d763574a73ba5b3a11989ef62e7e4af5bd306bc9d44291ca48eec73c3dd826dcd8f416a96591f76daea0c
   languageName: node
   linkType: hard
 
-"nbdime@npm:^7.0.0-alpha.0":
-  version: 7.0.0-alpha.0
-  resolution: "nbdime@npm:7.0.0-alpha.0"
+"nbdime@npm:^7.0.0-alpha.2":
+  version: 7.0.0-alpha.2
+  resolution: "nbdime@npm:7.0.0-alpha.2"
   dependencies:
     "@codemirror/lang-markdown": ^6.1.1
     "@codemirror/language": ^6.6.0
@@ -9284,7 +9284,7 @@ __metadata:
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.0
     json-stable-stringify: ^1.0.1
-  checksum: b6769fc8251c83d2bd8f377c8544676515efa9f7f219de84fa5d2af7eefc96f018b8478c2a82441761caf0b45f414865a76be9b6ec2c43690317dc75b524e96a
+  checksum: 32c1d3d5504146c53ec4977eb73338c33e8231c31b51c42d650a68bb06a25ee1b8bf5c4dd7cd45c086fbc1fbb3f333fb2f47a5ad7214161f333b34056ad06605
   languageName: node
   linkType: hard
 
