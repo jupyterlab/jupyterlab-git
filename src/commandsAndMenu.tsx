@@ -52,6 +52,9 @@ import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
+import { CodeEditor } from '@jupyterlab/codeeditor/lib/editor';
+import { CodeEditorWrapper } from '@jupyterlab/codeeditor/lib/widget';
+import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror/lib/factory';
 
 export interface IGitCloneArgs {
   /**
@@ -313,7 +316,7 @@ export function addCommands(
         await gitModel.ensureGitignore();
       } catch (error: any) {
         if (error?.name === 'hiddenFile') {
-          await showDialog({
+          const result = await showDialog({
             title: trans.__('The .gitignore file cannot be accessed'),
             body: (
               <div>
@@ -339,8 +342,40 @@ export function addCommands(
                   </li>
                 </ol>
               </div>
-            )
+            ),
+            buttons: [
+              Dialog.cancelButton({ label: trans.__('Cancel') }),
+              Dialog.okButton({ label: trans.__('Show .gitignore file') })
+            ]
           });
+          if (result.button.accept) {
+            const model = new CodeEditor.Model({});
+            // const host = document.createElement('div');
+            const previewWidget = new PreviewMainAreaWidget<Panel>({
+              content: new Panel()
+            });
+            const id = 'git-ignore';
+            // document.body.appendChild(host);
+            model.sharedModel.setSource(error.content ? error.content : '');
+            const widget = new CodeEditorWrapper({
+              factory: () =>
+                new CodeMirrorEditorFactory().newDocumentEditor({
+                  model: model,
+                  host: previewWidget.node,
+                  config: { readOnly: true }
+                }),
+              model: model
+            });
+            widget.disposed.connect(() => {
+              model.dispose();
+            });
+            // widget.id = id;
+            // shell.add(widget);
+            // shell.activateById(widget.id);
+
+            previewWidget.id = id;
+            shell.add(previewWidget);
+          }
         }
       }
     }
