@@ -306,6 +306,63 @@ export function addCommands(
     }
   });
 
+  /* Helper: Show gitignore hidden file */
+  async function showGitignoreHiddenFile(error: any) {
+    const result = await showDialog({
+      title: trans.__('The .gitignore file cannot be accessed'),
+      body: (
+        <div>
+          {trans.__(
+            'Hidden files by default cannot be accessed. In order to open the .gitignore file you must:'
+          )}
+          <ol>
+            <li>
+              {trans.__(
+                'Print the command below to create a jupyter_server_config.py file with defaults commented out. If you already have the file located in .jupyter, skip this step.'
+              )}
+              <div style={{ padding: '0.5rem' }}>
+                {trans.__('jupyter server --generate-config')}
+              </div>
+            </li>
+            <li>
+              {trans.__(
+                'Open jupyter_server_config.py, uncomment out the following line and set it to True:'
+              )}
+              <div style={{ padding: '0.5rem' }}>
+                {trans.__('c.ContentsManager.allow_hidden = False')}
+              </div>
+            </li>
+          </ol>
+        </div>
+      ),
+      buttons: [
+        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.okButton({ label: trans.__('Show .gitignore file') })
+      ]
+    });
+    if (result.button.accept) {
+      const model = new CodeEditor.Model({});
+      const id = 'git-ignore';
+      model.sharedModel.setSource(error.content ? error.content : '');
+      const editor = new CodeEditorWrapper({
+        factory: editorServices.factoryService.newDocumentEditor,
+        model: model,
+        config: { readOnly: true }
+      });
+      editor.disposed.connect(() => {
+        model.dispose();
+      });
+      const preview = new PreviewMainAreaWidget({
+        content: editor
+      });
+      preview.title.label = '.gitignore';
+      preview.id = id;
+      preview.title.icon = gitIcon;
+      preview.title.closable = true;
+      shell.add(preview);
+    }
+  }
+
   /** Add git open gitignore command */
   commands.addCommand(CommandIDs.gitOpenGitignore, {
     label: trans.__('Open .gitignore'),
@@ -316,59 +373,7 @@ export function addCommands(
         await gitModel.ensureGitignore();
       } catch (error: any) {
         if (error?.name === 'hiddenFile') {
-          const result = await showDialog({
-            title: trans.__('The .gitignore file cannot be accessed'),
-            body: (
-              <div>
-                {trans.__(
-                  'Hidden files by default cannot be accessed. In order to open the .gitignore file you must:'
-                )}
-                <ol>
-                  <li>
-                    {trans.__(
-                      'Print the command below to create a jupyter_server_config.py file with defaults commented out. If you already have the file located in .jupyter, skip this step.'
-                    )}
-                    <div style={{ padding: '0.5rem' }}>
-                      {trans.__('jupyter server --generate-config')}
-                    </div>
-                  </li>
-                  <li>
-                    {trans.__(
-                      'Open jupyter_server_config.py, uncomment out the following line and set it to True:'
-                    )}
-                    <div style={{ padding: '0.5rem' }}>
-                      {trans.__('c.ContentsManager.allow_hidden = False')}
-                    </div>
-                  </li>
-                </ol>
-              </div>
-            ),
-            buttons: [
-              Dialog.cancelButton({ label: trans.__('Cancel') }),
-              Dialog.okButton({ label: trans.__('Show .gitignore file') })
-            ]
-          });
-          if (result.button.accept) {
-            const model = new CodeEditor.Model({});
-            const id = 'git-ignore';
-            model.sharedModel.setSource(error.content ? error.content : '');
-            const editor = new CodeEditorWrapper({
-              factory: editorServices.factoryService.newDocumentEditor,
-              model: model,
-              config: { readOnly: true }
-            });
-            editor.disposed.connect(() => {
-              model.dispose();
-            });
-            const preview = new PreviewMainAreaWidget({
-              content: editor
-            });
-            preview.title.label = '.gitignore';
-            preview.id = id;
-            preview.title.icon = gitIcon;
-            preview.title.closable = true;
-            shell.add(preview);
-          }
+          await showGitignoreHiddenFile(error);
         }
       }
     }
@@ -1517,7 +1522,14 @@ export function addCommands(
       const { files } = args as any as CommandArguments.IGitContextAction;
       for (const file of files) {
         if (file) {
-          await gitModel.ignore(file.to, false);
+          try {
+            await gitModel.ignore(file.to, false);
+          } catch (error: any) {
+            console.log(error);
+            if (error?.name === 'hiddenFile') {
+              await showGitignoreHiddenFile(error);
+            }
+          }
         }
       }
     }

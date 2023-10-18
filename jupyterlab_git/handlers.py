@@ -827,9 +827,9 @@ class GitIgnoreHandler(GitHandler):
             body = await self.git.ignore(local_path, file_path)
         else:
             body = await self.git.ensure_gitignore(local_path)
-            if not self.serverapp.contents_manager.allow_hidden:
-                self.set_status(403, "hidden files cannot be accessed")
-                body["content"] = await self.git.read_file(local_path + "/.gitignore")
+        if not self.serverapp.contents_manager.allow_hidden:
+            self.set_status(403, "hidden files cannot be accessed")
+            body["content"] = await self.git.read_file(local_path + "/.gitignore")
 
         if body["code"] != 0:
             self.set_status(500)

@@ -924,6 +924,7 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
+   * @throws {Git.HiddenFile} If hidden files are not enabled
    */
   async ignore(filePath: string, useExtension: boolean): Promise<void> {
     const path = await this._getPathRepository();
