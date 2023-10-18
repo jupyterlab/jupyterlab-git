@@ -1681,6 +1681,17 @@ class Git:
 
         return response
 
+    async def read_file(self, path):
+        try:
+            file = pathlib.Path(path)
+            if file.stat().st_size > 0:
+                content = file.read_text()
+                print(content)
+                return content
+            return ""
+        except BaseException as error:
+            return ""
+
     async def ensure_gitignore(self, path):
         """Handle call to ensure .gitignore file exists and the
         next append will be on a new line (this means an empty file

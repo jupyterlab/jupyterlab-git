@@ -1301,10 +1301,12 @@ export namespace Git {
   }
 
   export class HiddenFile extends Error {
-    constructor() {
+    content: string;
+    constructor(content: string) {
       super('File is hidden');
       this.name = 'hiddenFile';
       this.message = 'File is hidden and cannot be accessed.';
+      this.content = content;
     }
   }
 
