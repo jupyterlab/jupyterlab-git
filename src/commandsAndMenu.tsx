@@ -54,7 +54,7 @@ import { discardAllChanges } from './widgets/discardAllChanges';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
 import { CodeEditor } from '@jupyterlab/codeeditor/lib/editor';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor/lib/widget';
-import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror/lib/factory';
+import { editorServices } from '@jupyterlab/codemirror';
 
 export interface IGitCloneArgs {
   /**
@@ -350,31 +350,24 @@ export function addCommands(
           });
           if (result.button.accept) {
             const model = new CodeEditor.Model({});
-            // const host = document.createElement('div');
-            const previewWidget = new PreviewMainAreaWidget<Panel>({
-              content: new Panel()
-            });
             const id = 'git-ignore';
-            // document.body.appendChild(host);
             model.sharedModel.setSource(error.content ? error.content : '');
-            const widget = new CodeEditorWrapper({
-              factory: () =>
-                new CodeMirrorEditorFactory().newDocumentEditor({
-                  model: model,
-                  host: previewWidget.node,
-                  config: { readOnly: true }
-                }),
-              model: model
+            const editor = new CodeEditorWrapper({
+              factory: editorServices.factoryService.newDocumentEditor,
+              model: model,
+              config: { readOnly: true }
             });
-            widget.disposed.connect(() => {
+            editor.disposed.connect(() => {
               model.dispose();
             });
-            // widget.id = id;
-            // shell.add(widget);
-            // shell.activateById(widget.id);
-
-            previewWidget.id = id;
-            shell.add(previewWidget);
+            const preview = new PreviewMainAreaWidget({
+              content: editor
+            });
+            preview.title.label = '.gitignore';
+            preview.id = id;
+            preview.title.icon = gitIcon;
+            preview.title.closable = true;
+            shell.add(preview);
           }
         }
       }
