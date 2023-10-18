@@ -1,8 +1,9 @@
-import { FileItem, IFileItemProps } from '../../src/components/FileItem';
-import * as React from 'react';
-import 'jest';
-import { shallow } from 'enzyme';
 import { nullTranslator } from '@jupyterlab/translation';
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import 'jest';
+import * as React from 'react';
+import { FileItem, IFileItemProps } from '../../components/FileItem';
 
 describe('FileItem', () => {
   const trans = nullTranslator.load('jupyterlab_git');
@@ -17,7 +18,7 @@ describe('FileItem', () => {
       is_binary: null,
       status: null
     },
-    model: null,
+    model: null as any,
     onDoubleClick: () => {},
     selected: false,
     setSelection: file => {},
@@ -26,10 +27,10 @@ describe('FileItem', () => {
   };
 
   describe('#render()', () => {
-    const component = shallow(<FileItem {...props} />);
     it('should display the full path on hover', () => {
+      render(<FileItem {...props} />);
       expect(
-        component.find('[title="some/file/path/file-name • Modified"]')
+        screen.getAllByTitle('some/file/path/file-name • Modified')
       ).toHaveLength(1);
     });
   });

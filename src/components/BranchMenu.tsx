@@ -275,6 +275,7 @@ export class BranchMenu extends React.Component<
           isActive ? activeListItemClass : null
         )}
         onClick={this._onBranchClickFactory(branch.name)}
+        role="listitem"
         style={style}
       >
         <branchIcon.react className={listItemIconClass} tag="span" />

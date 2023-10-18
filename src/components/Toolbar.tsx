@@ -167,7 +167,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           className={badgeClass}
           variant="dot"
           invisible={!hasRemote || this.props.nCommitsBehind === 0}
-          data-test-id="pull-badge"
         >
           <ActionButton
             className={toolbarButtonClass}
@@ -193,7 +192,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           invisible={
             !hasRemote || (this.props.nCommitsAhead === 0 && hasUpstream)
           }
-          data-test-id="push-badge"
         >
           <ActionButton
             className={toolbarButtonClass}

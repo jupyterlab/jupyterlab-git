@@ -117,7 +117,7 @@ export const badgeClass = style({
   $nest: {
     '& > .MuiBadge-badge': {
       top: 12,
-      right: 15,
+      right: 5,
       backgroundColor: 'var(--jp-warn-color1)'
     }
   }

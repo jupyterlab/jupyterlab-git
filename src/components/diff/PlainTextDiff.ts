@@ -62,7 +62,7 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     editorFactory
   }: {
     model: Git.Diff.IModel;
-    languageRegistry: IEditorLanguageRegistry;
+    languageRegistry?: IEditorLanguageRegistry;
     editorFactory?: CodeEditor.Factory;
     trans?: TranslationBundle;
   }) {
@@ -80,8 +80,9 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     );
     const getReady = new PromiseDelegate<void>();
     this._isReady = getReady.promise;
-    this._editorFactory = editorFactory ?? createEditorFactory();
-    this._languageRegistry = languageRegistry;
+    this._languageRegistry = languageRegistry ?? new EditorLanguageRegistry();
+    this._editorFactory =
+      editorFactory ?? createEditorFactory(this._languageRegistry);
     this._model = model;
     this._trans = trans ?? nullTranslator.load('jupyterlab_git');
 
@@ -399,10 +400,12 @@ function createStringDiffModel(
  *
  * @returns Editor factory
  */
-function createEditorFactory(): CodeEditor.Factory {
+function createEditorFactory(
+  languages: IEditorLanguageRegistry
+): CodeEditor.Factory {
   const factory = new CodeMirrorEditorFactory({
     extensions: new EditorExtensionRegistry(),
-    languages: new EditorLanguageRegistry()
+    languages
   });
 
   return factory.newInlineEditor.bind(factory);

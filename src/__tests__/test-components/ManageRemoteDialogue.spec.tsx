@@ -1,22 +1,20 @@
-import { shallow } from 'enzyme';
+import { nullTranslator } from '@jupyterlab/translation';
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import 'jest';
 import * as React from 'react';
-import { ActionButton } from '../../components/ActionButton';
 import {
-  ManageRemoteDialogue,
   IManageRemoteDialogueProps,
-  IManageRemoteDialogueState
+  ManageRemoteDialogue
 } from '../../components/ManageRemoteDialogue';
 import * as git from '../../git';
 import { GitExtension } from '../../model';
-import { createButtonClass } from '../../style/NewBranchDialog';
 import {
-  mockedRequestAPI,
+  DEFAULT_REPOSITORY_PATH,
   defaultMockedResponses,
-  DEFAULT_REPOSITORY_PATH
+  mockedRequestAPI
 } from '../utils';
-import ClearIcon from '@mui/icons-material/Clear';
-import { nullTranslator } from '@jupyterlab/translation';
 
 jest.mock('../../git');
 jest.mock('@jupyterlab/apputils');
@@ -63,7 +61,7 @@ describe('ManageRemoteDialogue', () => {
             }
           }
         }
-      })
+      }) as any
     );
 
     model = await createModel();
@@ -81,108 +79,69 @@ describe('ManageRemoteDialogue', () => {
   }
 
   describe('constructor', () => {
-    it('should return a new instance with initial state', () => {
-      const remoteDialogue = shallow(
-        <ManageRemoteDialogue {...createProps()} />
-      );
-      expect(remoteDialogue.instance()).toBeInstanceOf(ManageRemoteDialogue);
-      const initialState: IManageRemoteDialogueState = {
-        newRemote: {
-          name: '',
-          url: ''
-        },
-        existingRemotes: null
-      };
-      expect(remoteDialogue.state()).toEqual(initialState);
-    });
-
     it('should set the correct state after mounting', async () => {
       const spyGitGetRemotes = jest.spyOn(GitExtension.prototype, 'getRemotes');
       const spyComponentDidMount = jest.spyOn(
         ManageRemoteDialogue.prototype,
         'componentDidMount'
       );
-      const remoteDialogue = shallow(
-        <ManageRemoteDialogue {...createProps()} />
-      );
-      await remoteDialogue.instance().componentDidMount();
-      expect(remoteDialogue.state()).toEqual({
-        newRemote: {
-          name: '',
-          url: ''
-        },
-        existingRemotes: REMOTES
-      });
-      expect(spyGitGetRemotes).toHaveBeenCalledTimes(2);
-      expect(spyComponentDidMount).toHaveBeenCalledTimes(2);
+      render(<ManageRemoteDialogue {...createProps()} />);
+      expect(spyGitGetRemotes).toHaveBeenCalledTimes(1);
+      expect(spyComponentDidMount).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('render', () => {
     it('should display a title for the dialogue "Manage Remotes"', () => {
-      const remoteDialogue = shallow(
-        <ManageRemoteDialogue {...createProps()} />
-      );
-      const node = remoteDialogue.find('p').first();
-      expect(node.text()).toEqual('Manage Remotes');
+      render(<ManageRemoteDialogue {...createProps()} />);
+      const node = screen.getByRole('dialog').querySelector('p');
+      expect(node?.textContent).toEqual('Manage Remotes');
     });
     it('should display a button to close the dialogue', () => {
-      const remoteDialogue = shallow(
-        <ManageRemoteDialogue {...createProps()} />
-      );
-      const nodes = remoteDialogue.find(ClearIcon);
-      expect(nodes.length).toEqual(1);
+      render(<ManageRemoteDialogue {...createProps()} />);
+      expect(screen.getAllByTitle('Close this dialog')).toHaveLength(1);
     });
 
     it('should display two input boxes for entering new remote name and url', () => {
-      const remoteDialogue = shallow(
-        <ManageRemoteDialogue {...createProps()} />
-      );
-      const nameInput = remoteDialogue.find('input[placeholder="name"]');
-      const urlInput = remoteDialogue.find(
-        'input[placeholder="Remote Git repository URL"]'
-      );
-      expect(nameInput.length).toEqual(1);
-      expect(urlInput.length).toEqual(1);
+      render(<ManageRemoteDialogue {...createProps()} />);
+      const nameInput = screen.getByPlaceholderText('name');
+      const urlInput = screen.getByPlaceholderText('Remote Git repository URL');
+      expect(nameInput).toBeDefined();
+      expect(urlInput).toBeDefined();
     });
 
     it('should display a button to add a new remote', () => {
-      const remoteDialogue = shallow(
-        <ManageRemoteDialogue {...createProps()} />
-      );
-      const node = remoteDialogue.find(`.${createButtonClass}`).first();
-      expect(node.prop('value')).toEqual('Add');
+      render(<ManageRemoteDialogue {...createProps()} />);
+
+      expect(screen.getByRole('button', { name: 'Add' })).toBeDefined();
     });
 
     it('should display buttons to remove existing remotes', async () => {
-      const remoteDialogue = shallow(
-        <ManageRemoteDialogue {...createProps()} />
-      );
-      await remoteDialogue.instance().componentDidMount();
-      const nodes = remoteDialogue.find(ActionButton);
-      expect(nodes.length).toEqual(REMOTES.length);
+      render(<ManageRemoteDialogue {...createProps()} />);
+      await screen.findByText(REMOTES[0].name);
+      expect(
+        screen.getAllByRole('button', { name: 'Remove this remote' })
+      ).toHaveLength(REMOTES.length);
     });
   });
 
   describe('functionality', () => {
     it('should add a new remote', async () => {
-      const remoteDialogue = shallow(
-        <ManageRemoteDialogue {...createProps()} />
-      );
+      render(<ManageRemoteDialogue {...createProps()} />);
       const newRemote = {
         name: 'newRemote',
         url: 'newremote.com'
       };
-      await remoteDialogue.setState({
-        newRemote
-      });
+
+      await userEvent.type(screen.getByPlaceholderText('name'), newRemote.name);
+      await userEvent.type(
+        screen.getByPlaceholderText('Remote Git repository URL'),
+        newRemote.url
+      );
 
       const spyGitAddRemote = jest.spyOn(GitExtension.prototype, 'addRemote');
-      const addRemoteButton = remoteDialogue
-        .find(`.${createButtonClass}`)
-        .first();
-      addRemoteButton.simulate('click');
 
+      await userEvent.click(screen.getByRole('button', { name: 'Add' }));
       expect(spyGitAddRemote).toHaveBeenCalledTimes(1);
       expect(spyGitAddRemote).toHaveBeenCalledWith(
         newRemote.url,

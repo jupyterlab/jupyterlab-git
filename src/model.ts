@@ -406,12 +406,14 @@ export class GitExtension implements IGitExtension {
    * @returns The file status or null if path repository is null or path not in repository
    */
   getFile(path: string): Git.IStatusFile | null {
-    if (!this.pathRepository || this._status === null) {
+    if (this.pathRepository === null) {
       return null;
     }
-    const fileStatus = this._status.files.find(status => {
-      return this.getRelativeFilePath(status.to) === path;
-    });
+    const fileStatus = this._status?.files
+      ? this._status.files.find(status => {
+          return this.getRelativeFilePath(status.to) === path;
+        })
+      : null;
 
     if (!fileStatus) {
       const relativePath = PathExt.relative(

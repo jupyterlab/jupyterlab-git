@@ -1622,7 +1622,6 @@ export function addCommands(
       const dialog = ReactWidget.create(
         <NewTagDialogBox
           pastCommits={[commit.commit]}
-          logger={logger}
           model={gitModel}
           trans={trans}
           open={tagDialog}
@@ -1639,35 +1638,34 @@ export function addCommands(
       const tagName = await waitForDialog.promise;
 
       if (tagName) {
-        logger.log({
-          level: Level.RUNNING,
-          message: trans.__(
-            "Create tag pointing to '%1'...",
-            commit.commit.commit_msg
-          )
-        });
+        const id = Notification.emit(
+          trans.__("Create tag pointing to '%1'...", commit.commit.commit_msg),
+          'in-progress'
+        );
         try {
           await gitModel.setTag(tagName, commit.commit.commit);
         } catch (err) {
-          logger.log({
-            level: Level.ERROR,
+          Notification.update({
+            id,
             message: trans.__(
               "Failed to create tag '%1' poining to '%2'.",
               tagName,
               commit
             ),
-            error: err as Error
+            type: 'error',
+            ...showError(err as any, trans)
           });
           return;
         }
 
-        logger.log({
-          level: Level.SUCCESS,
+        Notification.update({
+          id,
           message: trans.__(
             "Created tag '%1' pointing to '%2'.",
             tagName,
             commit
-          )
+          ),
+          type: 'success'
         });
       }
     },

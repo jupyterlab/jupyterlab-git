@@ -19,19 +19,6 @@ import { fileLabelStyle } from '../style/FilePathStyle';
 import { Git } from '../tokens';
 import { FilePath } from './FilePath';
 
-// Git status codes https://git-scm.com/docs/git-status
-export const STATUS_CODES = {
-  M: 'Modified',
-  A: 'Added',
-  D: 'Deleted',
-  R: 'Renamed',
-  C: 'Copied',
-  U: 'Updated',
-  B: 'Behind',
-  '?': 'Untracked',
-  '!': 'Ignored'
-};
-
 /**
  * File marker properties
  */
@@ -168,8 +155,11 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
     }
   };
 
-  protected _getFileChangedLabel(change: keyof typeof STATUS_CODES): string {
-    return STATUS_CODES[change] || 'Unmodified';
+  protected _getFileChangedLabel(
+    change: string,
+    trans: TranslationBundle
+  ): string {
+    return Private.get_status(change, trans) || trans.__('Unmodified');
   }
 
   protected _getFileChangedLabelClass(change: string): string {
@@ -215,8 +205,8 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
     const status_code = file.status === 'staged' ? file.x : file.y;
     const status =
       file.status === 'unmerged'
-        ? 'Conflicted'
-        : this._getFileChangedLabel(status_code as any);
+        ? this.props.trans.__('Conflicted')
+        : this._getFileChangedLabel(status_code as any, this.props.trans);
 
     return (
       <div
@@ -266,5 +256,26 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         </div>
       </div>
     );
+  }
+}
+
+namespace Private {
+  let i18nCodes: Record<string, string> | null = null;
+  export function get_status(code: string, trans: TranslationBundle): string {
+    if (!i18nCodes) {
+      // Git status codes https://git-scm.com/docs/git-status
+      i18nCodes = {
+        M: trans.__('Modified'),
+        A: trans.__('Added'),
+        D: trans.__('Deleted'),
+        R: trans.__('Renamed'),
+        C: trans.__('Copied'),
+        U: trans.__('Updated'),
+        B: trans.__('Behind'),
+        '?': trans.__('Untracked'),
+        '!': trans.__('Ignored')
+      };
+    }
+    return i18nCodes[code];
   }
 }

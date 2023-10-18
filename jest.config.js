@@ -6,6 +6,7 @@ const esModules = [
   '@jupyterlab/',
   'lib0',
   'nanoid',
+  'nbdime',
   'vscode-ws-jsonrpc',
   'y-protocols',
   'y-websocket',
@@ -30,6 +31,8 @@ module.exports = {
     '<rootDir>/jupyter-config',
     '<rootDir>/ui-tests'
   ],
+  reporters: ['default', 'github-actions'],
+  setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
   testRegex: 'src/.*/.*.spec.ts[x]?$',
   transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
 };

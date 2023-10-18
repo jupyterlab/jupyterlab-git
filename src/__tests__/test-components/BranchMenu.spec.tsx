@@ -1,19 +1,18 @@
-import { mount, render, shallow } from 'enzyme';
 import { showDialog } from '@jupyterlab/apputils';
+import { nullTranslator } from '@jupyterlab/translation';
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import 'jest';
 import * as React from 'react';
-import { ActionButton } from '../../components/ActionButton';
 import { BranchMenu, IBranchMenuProps } from '../../components/BranchMenu';
 import * as git from '../../git';
 import { GitExtension } from '../../model';
-import { listItemClass, nameClass } from '../../style/BranchMenu';
 import {
-  mockedRequestAPI,
+  DEFAULT_REPOSITORY_PATH,
   defaultMockedResponses,
-  DEFAULT_REPOSITORY_PATH
+  mockedRequestAPI
 } from '../utils';
-import ClearIcon from '@mui/icons-material/Clear';
-import { nullTranslator } from '@jupyterlab/translation';
 
 jest.mock('../../git');
 jest.mock('@jupyterlab/apputils');
@@ -86,7 +85,7 @@ describe('BranchMenu', () => {
             }
           }
         }
-      })
+      }) as any
     );
 
     model = await createModel();
@@ -107,76 +106,61 @@ describe('BranchMenu', () => {
   }
 
   describe('constructor', () => {
-    it('should return a new instance', () => {
-      const menu = shallow(<BranchMenu {...createProps()} />);
-      expect(menu.instance()).toBeInstanceOf(BranchMenu);
-    });
-
     it('should set the default menu filter to an empty string', () => {
-      const menu = shallow(<BranchMenu {...createProps()} />);
-      expect(menu.state('filter')).toEqual('');
-    });
-
-    it('should set the default flag indicating whether to show a dialog to create a new branch to `false`', () => {
-      const menu = shallow(<BranchMenu {...createProps()} />);
-      expect(menu.state('branchDialog')).toEqual(false);
+      render(<BranchMenu {...createProps()} />);
+      expect(
+        screen.getByRole('textbox', { name: 'Filter branch menu' })
+      ).toHaveValue('');
     });
   });
 
   describe('render', () => {
     it('should display placeholder text for the menu filter', () => {
-      const component = shallow(<BranchMenu {...createProps()} />);
-      const node = component.find('input[type="text"]').first();
-      expect(node.prop('placeholder')).toEqual('Filter');
+      render(<BranchMenu {...createProps()} />);
+      expect(
+        screen.getByRole('textbox', { name: 'Filter branch menu' })
+      ).toHaveAttribute('placeholder', 'Filter');
     });
 
     it('should set a `title` attribute on the input element to filter a branch menu', () => {
-      const component = shallow(<BranchMenu {...createProps()} />);
-      const node = component.find('input[type="text"]').first();
-      expect(node.prop('title').length > 0).toEqual(true);
+      render(<BranchMenu {...createProps()} />);
+      expect(screen.getByRole('textbox')).toHaveAttribute(
+        'title',
+        'Filter branch menu'
+      );
     });
 
-    it('should display a button to clear the menu filter once a filter is provided', () => {
-      const component = shallow(<BranchMenu {...createProps()} />);
-      component.setState({
-        filter: 'foo'
-      });
-      const nodes = component.find(ClearIcon);
-      expect(nodes.length).toEqual(1);
-    });
-
-    it('should set a `title` on the button to clear the menu filter', () => {
-      const component = shallow(<BranchMenu {...createProps()} />);
-      component.setState({
-        filter: 'foo'
-      });
-      const html = component.find(ClearIcon).first().html();
-      expect(html.includes('<title>')).toEqual(true);
+    it('should display a button to clear the menu filter once a filter is provided', async () => {
+      render(<BranchMenu {...createProps()} />);
+      await userEvent.type(screen.getByRole('textbox'), 'foo');
+      expect(screen.getAllByTitle('Clear the current filter').length).toEqual(
+        1
+      );
     });
 
     it('should display a button to create a new branch', () => {
-      const component = shallow(<BranchMenu {...createProps()} />);
-      const node = component.find('input[type="button"]').first();
-      expect(node.prop('value')).toEqual('New Branch');
+      render(<BranchMenu {...createProps()} />);
+      expect(screen.getByRole('button', { name: 'New Branch' })).toBeDefined();
     });
 
     it('should set a `title` attribute on the button to create a new branch', () => {
-      const component = shallow(<BranchMenu {...createProps()} />);
-      const node = component.find('input[type="button"]').first();
-      expect(node.prop('title').length > 0).toEqual(true);
+      render(<BranchMenu {...createProps()} />);
+      expect(
+        screen.getByRole('button', { name: 'New Branch' })
+      ).toHaveAttribute('title', 'Create a new branch');
     });
 
     it('should display a list of branches', () => {
-      const component = render(<BranchMenu {...createProps()} />);
-      const nodes = component.find(`.${nameClass}`);
+      render(<BranchMenu {...createProps()} />);
 
       const branches = BRANCHES;
-      expect(nodes.length).toEqual(branches.length);
+      expect(screen.getAllByRole('listitem').length).toEqual(branches.length);
 
       // Should contain the branch names...
       for (let i = 0; i < branches.length; i++) {
-        // @ts-expect-error lastChild not always defined
-        expect(nodes[i].lastChild.data).toEqual(branches[i].name);
+        expect(
+          screen.getByText(branches[i].name, { exact: true })
+        ).toBeDefined();
       }
     });
 
@@ -210,7 +194,7 @@ describe('BranchMenu', () => {
       it(`should${
         display ? ' ' : 'not '
       }display delete and merge buttons for ${JSON.stringify(branch)}`, () => {
-        const menu = mount(
+        render(
           <BranchMenu
             {...createProps({
               currentBranch: 'current',
@@ -219,9 +203,9 @@ describe('BranchMenu', () => {
           />
         );
 
-        const item = menu.find(`.${listItemClass}`);
-
-        expect(item.find(ActionButton).length).toEqual(display ? 2 : 0);
+        expect(
+          screen.getByRole('listitem').querySelectorAll('button').length
+        ).toEqual(display ? 2 : 0);
       });
     });
 
@@ -246,13 +230,13 @@ describe('BranchMenu', () => {
           },
           isChecked: null,
           value: undefined
-        });
+        }) as any;
       });
 
       const spy = jest.spyOn(GitExtension.prototype, 'deleteBranch');
       const branchName = 'main';
 
-      const menu = mount(
+      render(
         <BranchMenu
           {...createProps({
             currentBranch: 'current',
@@ -270,9 +254,9 @@ describe('BranchMenu', () => {
         />
       );
 
-      const item = menu.find(`.${listItemClass}`);
-      const button = item.find(ActionButton);
-      button.at(0).simulate('click');
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Delete this branch locally' })
+      );
 
       // Need to wait that the dialog is resolve so 'deleteBranch' is called before
       // this test ends.
@@ -287,7 +271,7 @@ describe('BranchMenu', () => {
       const branchName = 'main';
       const fakeExecutioner = jest.fn();
 
-      const menu = mount(
+      render(
         <BranchMenu
           {...createProps({
             currentBranch: 'current',
@@ -308,9 +292,11 @@ describe('BranchMenu', () => {
         />
       );
 
-      const item = menu.find(`.${listItemClass}`);
-      const button = item.find(ActionButton);
-      button.at(1).simulate('click');
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: 'Merge this branch into the current one'
+        })
+      );
 
       expect(fakeExecutioner).toHaveBeenCalledTimes(1);
       expect(fakeExecutioner).toHaveBeenCalledWith('git:merge', {
@@ -318,59 +304,40 @@ describe('BranchMenu', () => {
       });
     });
 
-    it('should set a `title` attribute for each displayed branch', () => {
-      const component = render(<BranchMenu {...createProps()} />);
-      const nodes = component.find(`.${listItemClass}`);
+    it('should show a dialog to create a new branch when the flag indicating whether to show the dialog is `true`', async () => {
+      render(<BranchMenu {...createProps({ branching: true })} />);
 
-      const branches = BRANCHES;
-      expect(nodes.length).toEqual(branches.length);
+      await userEvent.click(screen.getByRole('button', { name: 'New Branch' }));
 
-      for (let i = 0; i < branches.length; i++) {
-        // @ts-expect-error attribs not always defined
-        expect(nodes[i].attribs['title'].length).toBeGreaterThanOrEqual(0);
-      }
-    });
-
-    it('should not, by default, show a dialog to create a new branch', () => {
-      const component = shallow(<BranchMenu {...createProps()} />);
-      const node = component.find('NewBranchDialog').first();
-      expect(node.prop('open')).toEqual(false);
-    });
-
-    it('should show a dialog to create a new branch when the flag indicating whether to show the dialog is `true`', () => {
-      const component = shallow(<BranchMenu {...createProps()} />);
-      component.setState({
-        branchDialog: true
-      });
-      const node = component.find('NewBranchDialog').first();
-      expect(node.prop('open')).toEqual(true);
+      expect(screen.getByRole('dialog')).toBeDefined();
     });
   });
 
   describe('switch branch', () => {
-    it('should not switch to a specified branch upon clicking its corresponding element when branching is disabled', () => {
+    it('should not switch to a specified branch upon clicking its corresponding element when branching is disabled', async () => {
       const spy = jest.spyOn(GitExtension.prototype, 'checkout');
 
-      const component = mount(<BranchMenu {...createProps()} />);
-      const nodes = component.find(
-        `.${listItemClass}[title*="${BRANCHES[1].name}"]`
+      render(<BranchMenu {...createProps()} />);
+
+      await userEvent.click(
+        screen.getByRole('listitem', {
+          name: `Switch to branch: ${BRANCHES[1].name}`
+        })
       );
-      nodes.at(0).simulate('click');
 
       expect(spy).toHaveBeenCalledTimes(0);
       spy.mockRestore();
     });
 
-    it('should switch to a specified branch upon clicking its corresponding element when branching is enabled', () => {
+    it('should switch to a specified branch upon clicking its corresponding element when branching is enabled', async () => {
       const spy = jest.spyOn(GitExtension.prototype, 'checkout');
 
-      const component = mount(
-        <BranchMenu {...createProps({ branching: true })} />
+      render(<BranchMenu {...createProps({ branching: true })} />);
+      await userEvent.click(
+        screen.getByRole('listitem', {
+          name: `Switch to branch: ${BRANCHES[1].name}`
+        })
       );
-      const nodes = component.find(
-        `.${listItemClass}[title*="${BRANCHES[1].name}"]`
-      );
-      nodes.at(0).simulate('click');
 
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith({
@@ -382,30 +349,25 @@ describe('BranchMenu', () => {
   });
 
   describe('create branch', () => {
-    it('should not allow creating a new branch when branching is disabled', () => {
+    it('should not allow creating a new branch when branching is disabled', async () => {
       const spy = jest.spyOn(GitExtension.prototype, 'checkout');
 
-      const component = shallow(<BranchMenu {...createProps()} />);
+      render(<BranchMenu {...createProps()} />);
 
-      const node = component.find('input[type="button"]').first();
-      node.simulate('click');
+      await userEvent.click(screen.getByRole('button', { name: 'New Branch' }));
 
-      expect(component.state('branchDialog')).toEqual(false);
       expect(spy).toHaveBeenCalledTimes(0);
       spy.mockRestore();
     });
 
-    it('should display a dialog to create a new branch when branching is enabled and the new branch button is clicked', () => {
+    it('should display a dialog to create a new branch when branching is enabled and the new branch button is clicked', async () => {
       const spy = jest.spyOn(GitExtension.prototype, 'checkout');
 
-      const component = shallow(
-        <BranchMenu {...createProps({ branching: true })} />
-      );
+      render(<BranchMenu {...createProps({ branching: true })} />);
 
-      const node = component.find('input[type="button"]').first();
-      node.simulate('click');
+      await userEvent.click(screen.getByRole('button', { name: 'New Branch' }));
 
-      expect(component.state('branchDialog')).toEqual(true);
+      expect(screen.getByRole('dialog')).toBeDefined();
       expect(spy).toHaveBeenCalledTimes(0);
       spy.mockRestore();
     });

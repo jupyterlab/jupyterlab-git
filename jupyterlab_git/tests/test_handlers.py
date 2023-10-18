@@ -51,6 +51,7 @@ async def test_all_history_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     mock_git.status.return_value = maybe_future(status)
 
     # When
+    body = {"history_count": 25}
     response = await jp_fetch(
         NAMESPACE, local_path.name, "all_history", body=json.dumps(body), method="POST"
     )

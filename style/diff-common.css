@@ -60,7 +60,13 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
 .jp-git-diff-banner span {
   padding: 0 4px;
   font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
+.jp-git-merge-banner span {
+  padding: 0 4px;
+  font-weight: bold;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -84,14 +90,6 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
 .jp-git-merge-banner {
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-}
-
-.jp-git-merge-banner span {
-  padding: 0 4px;
-  font-weight: bold;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .jp-git-merge-banner span:first-of-type {
@@ -149,12 +147,10 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
   background-color: var(--jp-git-diff-deleted-color);
 }
 
-.jp-git-diff-root .cm-merge-left-editor .cm-merge-l-chunk:not(.jp-Merge-conflict) {
+.jp-git-diff-root
+  .cm-merge-left-editor
+  .cm-merge-l-chunk:not(.jp-Merge-conflict) {
   background-color: var(--jp-merge-local-color);
-}
-
-.jp-git-diff-root .cm-merge-left-editor .cm-merge-l-inserted {
-  background-color: var(--jp-merge-local-color1);
 }
 
 .jp-git-diff-root .cm-merge-r-inserted,
@@ -162,6 +158,10 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
 .jp-git-diff-root .cm-diff-right-editor .cm-merge-r-chunk,
 .jp-git-diff-root .cm-merge-right-editor .cm-merge-r-chunk {
   background-color: var(--jp-git-diff-added-color);
+}
+
+.jp-git-diff-root .cm-merge-left-editor .cm-merge-l-inserted {
+  background-color: var(--jp-merge-local-color1);
 }
 
 .jp-git-diff-root .cm-merge-spacer {

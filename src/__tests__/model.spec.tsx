@@ -7,7 +7,8 @@ import {
   defaultMockedResponses,
   DEFAULT_REPOSITORY_PATH,
   IMockedResponses,
-  mockedRequestAPI
+  mockedRequestAPI,
+  IMockedResponse
 } from './utils';
 
 jest.mock('../git');
@@ -16,7 +17,9 @@ describe('IGitExtension', () => {
   const mockGit = git as jest.Mocked<typeof git>;
   let model: IGitExtension;
   const docmanager = jest.mock('@jupyterlab/docmanager') as any;
-  let mockResponses: IMockedResponses;
+  let mockResponses: IMockedResponses & {
+    responses: { [endpoint: string]: IMockedResponse };
+  };
 
   beforeEach(async () => {
     jest.restoreAllMocks();
@@ -29,7 +32,9 @@ describe('IGitExtension', () => {
       responses: { ...defaultMockedResponses }
     };
 
-    mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
+    mockGit.requestAPI.mockImplementation(
+      mockedRequestAPI(mockResponses) as any
+    );
 
     model = new GitExtension(docmanager as any, docregistry as any);
   });
@@ -94,7 +99,7 @@ describe('IGitExtension', () => {
     });
 
     it('should emit repositoryChanged signal and request a refresh', async () => {
-      let path = DEFAULT_REPOSITORY_PATH;
+      let path: string | null = DEFAULT_REPOSITORY_PATH;
 
       const testPathSignal = testEmission(model.repositoryChanged, {
         test: (model, change) => {
@@ -198,7 +203,7 @@ describe('IGitExtension', () => {
   describe('#status', () => {
     it('should be clear if not in a git repository', async () => {
       let status: Partial<Git.IStatusResult> = {
-        branch: null,
+        branch: undefined,
         remote: null,
         ahead: 0,
         behind: 0,
@@ -254,9 +259,9 @@ describe('IGitExtension', () => {
       const testSignal = testEmission(model.statusChanged, {
         test: (model, receivedStatus) => {
           expect(receivedStatus.branch).toEqual(branch);
-          expect(receivedStatus.files).toHaveLength(status.files.length);
+          expect(receivedStatus.files).toHaveLength(status.files?.length ?? 0);
           expect(receivedStatus.files[0]).toMatchObject<Git.IStatusFileResult>({
-            ...status.files[0]
+            ...status.files![0]
           });
         }
       });
@@ -280,7 +285,7 @@ describe('IGitExtension', () => {
       ['other_repo/file', null, 'repo'],
       ['root/other_repo/file', null, 'root/repo']
     ])(
-      '%s should return unmodified status with path relative to the repository',
+      '%s should return unmodified status with path %s to the repository %s',
       async (path, expected, repo) => {
         // Given
         mockResponses.path = repo;
@@ -292,8 +297,8 @@ describe('IGitExtension', () => {
         if (expected === null) {
           expect(status).toBeNull();
         } else {
-          expect(status.status).toEqual('unmodified');
-          expect(status.to).toEqual(expected);
+          expect(status!.status).toEqual('unmodified');
+          expect(status!.to).toEqual(expected);
         }
       }
     );

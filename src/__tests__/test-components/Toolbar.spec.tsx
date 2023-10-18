@@ -1,14 +1,13 @@
 import { nullTranslator } from '@jupyterlab/translation';
-import { refreshIcon } from '@jupyterlab/ui-components';
-import { shallow } from 'enzyme';
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import 'jest';
 import * as React from 'react';
-import { ActionButton } from '../../components/ActionButton';
 import { IToolbarProps, Toolbar } from '../../components/Toolbar';
 import * as git from '../../git';
 import { GitExtension } from '../../model';
-import { pullIcon, pushIcon } from '../../style/icons';
-import { toolbarMenuButtonClass } from '../../style/Toolbar';
+import { badgeClass } from '../../style/Toolbar';
 import { DEFAULT_REPOSITORY_PATH, mockedRequestAPI } from '../utils';
 import { CommandIDs } from '../../tokens';
 
@@ -49,7 +48,7 @@ describe('Toolbar', () => {
       ],
       tagsList: model.tagsList,
       pastCommits: [],
-      repository: model.pathRepository,
+      repository: model.pathRepository!,
       model: model,
       branching: false,
       nCommitsAhead: 0,
@@ -66,164 +65,122 @@ describe('Toolbar', () => {
     jest.restoreAllMocks();
 
     const mock = git as jest.Mocked<typeof git>;
-    mock.requestAPI.mockImplementation(mockedRequestAPI());
+    mock.requestAPI.mockImplementation(mockedRequestAPI() as any);
 
     model = await createModel();
   });
 
   describe('constructor', () => {
-    it('should return a new instance', () => {
-      const el = shallow(<Toolbar {...createProps()} />);
-      expect(el.instance()).toBeInstanceOf(Toolbar);
-    });
-
     it('should set the default flag indicating whether to show a branch menu to `false`', () => {
-      const el = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      expect(el.state().branchMenu).toEqual(false);
+      render(<Toolbar {...createProps()} />);
+
+      expect(screen.queryByText('Branches')).toBeNull();
     });
   });
 
   describe('render', () => {
     it('should display a button to pull the latest changes', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const nodes = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === pullIcon);
-      expect(nodes.length).toEqual(1);
+      render(<Toolbar {...createProps()} />);
 
       expect(
-        toolbar.find('[data-test-id="pull-badge"]').prop('invisible')
-      ).toEqual(true);
-    });
+        screen.getAllByRole('button', { name: 'Pull latest changes' })
+      ).toBeDefined();
 
-    it('should set the `title` attribute on the button to pull the latest changes', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const button = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === pullIcon);
-
-      expect(button.prop('title')).toEqual('Pull latest changes');
+      expect(
+        screen
+          .getByRole('button', { name: 'Pull latest changes' })
+          .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
+      ).toHaveClass('MuiBadge-invisible');
     });
 
     it('should display a badge on pull icon if behind', () => {
-      const toolbar = shallow<Toolbar>(
-        <Toolbar {...createProps({ nCommitsBehind: 1 })} />
-      );
+      render(<Toolbar {...createProps({ nCommitsBehind: 1 })} />);
 
       expect(
-        toolbar.find('[data-test-id="pull-badge"]').prop('invisible')
-      ).toEqual(false);
+        screen
+          .getByRole('button', { name: /^Pull latest changes/ })
+          .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
+      ).not.toHaveClass('MuiBadge-invisible');
     });
 
     it('should display a button to push the latest changes', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const nodes = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === pushIcon);
-      expect(nodes.length).toEqual(1);
+      render(<Toolbar {...createProps()} />);
 
       expect(
-        toolbar.find('[data-test-id="push-badge"]').prop('invisible')
-      ).toEqual(true);
-    });
-
-    it('should set the `title` attribute on the button to push the latest changes', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const button = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === pushIcon)
-        .first();
-
-      expect(button.prop('title')).toEqual('Push committed changes');
-    });
-
-    it('should display a badge on pull icon if behind', () => {
-      const toolbar = shallow<Toolbar>(
-        <Toolbar {...createProps({ nCommitsAhead: 1 })} />
-      );
+        screen.getAllByRole('button', { name: 'Push committed changes' })
+      ).toBeDefined();
 
       expect(
-        toolbar.find('[data-test-id="push-badge"]').prop('invisible')
-      ).toEqual(false);
+        screen
+          .getByRole('button', { name: 'Push committed changes' })
+          .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
+      ).toHaveClass('MuiBadge-invisible');
+    });
+
+    it('should display a badge on push icon if behind', () => {
+      render(<Toolbar {...createProps({ nCommitsAhead: 1 })} />);
+
+      expect(
+        screen
+          .getByRole('button', { name: /^Push committed changes/ })
+          .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
+      ).not.toHaveClass('MuiBadge-invisible');
     });
 
     it('should display a button to refresh the current repository', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const nodes = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === refreshIcon);
+      render(<Toolbar {...createProps()} />);
 
-      expect(nodes.length).toEqual(1);
-    });
-
-    it('should set the `title` attribute on the button to refresh the current repository', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const button = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === refreshIcon)
-        .first();
-
-      expect(button.prop('title')).toEqual(
-        'Refresh the repository to detect local and remote changes'
-      );
+      expect(
+        screen.getAllByRole('button', {
+          name: 'Refresh the repository to detect local and remote changes'
+        })
+      ).toBeDefined();
     });
 
     it('should display a button to toggle a repository menu', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const button = toolbar.find(`.${toolbarMenuButtonClass}`).first();
+      render(<Toolbar {...createProps()} />);
 
-      const text = button.text();
-      expect(text.includes('Current Repository')).toEqual(true);
-    });
-
-    it('should set the `title` attribute on the button to toggle a repository menu', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const button = toolbar.find(`.${toolbarMenuButtonClass}`).first();
-
-      const bool = button.prop('title').includes('Current repository: ');
-      expect(bool).toEqual(true);
+      expect(screen.getByText('Current Repository')).toBeDefined();
     });
 
     it('should display a button to toggle a branch menu', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const button = toolbar.find(`.${toolbarMenuButtonClass}`).at(1);
+      render(<Toolbar {...createProps()} />);
 
-      const text = button.text();
-      expect(text.includes('Current Branch')).toEqual(true);
+      expect(screen.getByText('Current Branch')).toBeDefined();
     });
 
     it('should set the `title` attribute on the button to toggle a branch menu', () => {
       const currentBranch = 'main';
-      const toolbar = shallow<Toolbar>(
-        <Toolbar {...createProps({ currentBranch })} />
-      );
-      const button = toolbar.find(`.${toolbarMenuButtonClass}`).at(1);
+      render(<Toolbar {...createProps({ currentBranch })} />);
 
-      expect(button.prop('title')).toEqual('Manage branches and tags');
+      expect(
+        screen.getByRole('button', { name: /^Current Branch/ })
+      ).toHaveAttribute('title', 'Manage branches and tags');
     });
   });
 
   describe('branch menu', () => {
     it('should not, by default, display a branch menu', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const nodes = toolbar.find('BranchMenu');
+      render(<Toolbar {...createProps()} />);
 
-      expect(nodes.length).toEqual(0);
+      expect(screen.queryByText('Branches')).toBeNull();
     });
 
-    it('should display a branch menu when the button to display a branch menu is clicked', () => {
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const button = toolbar.find(`.${toolbarMenuButtonClass}`).at(1);
+    it('should display a branch menu when the button to display a branch menu is clicked', async () => {
+      render(<Toolbar {...createProps()} />);
 
-      button.simulate('click');
-      expect(toolbar.find('BranchMenu').length).toEqual(1);
+      await userEvent.click(
+        screen.getByRole('button', { name: /^Current Branch/ })
+      );
+
+      expect(screen.getByText('Branches')).toBeDefined();
     });
   });
 
   describe('pull changes', () => {
-    it('should pull changes when the button to pull the latest changes is clicked', () => {
+    it('should pull changes when the button to pull the latest changes is clicked', async () => {
       const mockedExecute = jest.fn();
-      const toolbar = shallow<Toolbar>(
+      render(
         <Toolbar
           {...createProps({
             commands: {
@@ -232,19 +189,18 @@ describe('Toolbar', () => {
           })}
         />
       );
-      const button = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === pullIcon)
-        .first();
 
-      button.simulate('click');
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Pull latest changes' })
+      );
+
       expect(mockedExecute).toHaveBeenCalledTimes(1);
       expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPull);
     });
 
-    it('should not pull changes when the pull button is clicked but there is no remote branch', () => {
+    it('should not pull changes when the pull button is clicked but there is no remote branch', async () => {
       const mockedExecute = jest.fn();
-      const toolbar = shallow<Toolbar>(
+      render(
         <Toolbar
           {...createProps({
             branches: [
@@ -263,20 +219,21 @@ describe('Toolbar', () => {
           })}
         />
       );
-      const button = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === pullIcon)
-        .first();
 
-      button.simulate('click');
+      await userEvent.click(
+        screen.getAllByRole('button', {
+          name: 'No remote repository defined'
+        })[0]
+      );
+
       expect(mockedExecute).toHaveBeenCalledTimes(0);
     });
   });
 
   describe('push changes', () => {
-    it('should push changes when the button to push the latest changes is clicked', () => {
+    it('should push changes when the button to push the latest changes is clicked', async () => {
       const mockedExecute = jest.fn();
-      const toolbar = shallow<Toolbar>(
+      render(
         <Toolbar
           {...createProps({
             commands: {
@@ -285,19 +242,16 @@ describe('Toolbar', () => {
           })}
         />
       );
-      const button = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === pushIcon)
-        .first();
-
-      button.simulate('click');
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Push committed changes' })
+      );
       expect(mockedExecute).toHaveBeenCalledTimes(1);
       expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPush);
     });
 
-    it('should not push changes when the push button is clicked but there is no remote branch', () => {
+    it('should not push changes when the push button is clicked but there is no remote branch', async () => {
       const mockedExecute = jest.fn();
-      const toolbar = shallow<Toolbar>(
+      render(
         <Toolbar
           {...createProps({
             branches: [
@@ -316,26 +270,24 @@ describe('Toolbar', () => {
           })}
         />
       );
-      const button = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === pushIcon)
-        .first();
-
-      button.simulate('click');
+      await userEvent.click(
+        screen.getAllByRole('button', {
+          name: 'No remote repository defined'
+        })[1]
+      );
       expect(mockedExecute).toHaveBeenCalledTimes(0);
     });
   });
 
   describe('refresh repository', () => {
-    it('should refresh the repository when the button to refresh the repository is clicked', () => {
+    it('should refresh the repository when the button to refresh the repository is clicked', async () => {
       const spy = jest.spyOn(model, 'refresh');
-      const toolbar = shallow<Toolbar>(<Toolbar {...createProps()} />);
-      const button = toolbar
-        .find(ActionButton)
-        .findWhere(n => n.prop('icon') === refreshIcon)
-        .first();
-
-      button.simulate('click');
+      render(<Toolbar {...createProps()} />);
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: 'Refresh the repository to detect local and remote changes'
+        })
+      );
       expect(spy).toHaveBeenCalledTimes(1);
 
       spy.mockReset();
