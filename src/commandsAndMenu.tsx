@@ -1569,7 +1569,6 @@ export function addCommands(
           trans={trans}
           open={tagDialog}
           onClose={(tagName?: string) => {
-            // () => {
             dialog.dispose();
             waitForDialog.resolve(tagName ?? null);
           }}
