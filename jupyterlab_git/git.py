@@ -946,7 +946,7 @@ class Git:
                 "message": my_error,
             }
 
-    async def show_prefix(self, path):
+    async def show_prefix(self, path, contents_manager):
         """
         Execute git --show-prefix command & return the result.
         """
@@ -955,8 +955,15 @@ class Git:
             cmd,
             cwd=path,
         )
+
+        relative_path = os.path.relpath(path, contents_manager.root_dir)
+
         if code == 0:
-            result = {"code": code, "path": my_output.strip("\n")}
+            result = {
+                "code": code,
+                "path": my_output.strip("\n"),
+                "relative_path": relative_path,
+            }
             return result
         else:
             # Handle special case where cwd not inside a git repo
