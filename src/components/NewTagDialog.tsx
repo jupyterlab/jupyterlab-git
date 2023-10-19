@@ -441,27 +441,29 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
           title={props.trans.__('Enter a tag name')}
         />
         <p>{props.trans.__('Create tag pointing to…')}</p>
-        <div className={filterWrapperClass}>
-          <div className={filterClass}>
-            <input
-              className={filterInputClass}
-              type="text"
-              onChange={onFilterChange}
-              value={filterState}
-              placeholder={props.trans.__('Filter by commit message')}
-              title={props.trans.__('Filter history of commits menu')}
-            />
-            {filterState ? (
-              <button className={filterClearClass}>
-                <ClearIcon
-                  titleAccess={props.trans.__('Clear the current filter')}
-                  fontSize="small"
-                  onClick={resetFilter}
-                />
-              </button>
-            ) : null}
+        {props.isSingleCommit ? null : (
+          <div className={filterWrapperClass}>
+            <div className={filterClass}>
+              <input
+                className={filterInputClass}
+                type="text"
+                onChange={onFilterChange}
+                value={filterState}
+                placeholder={props.trans.__('Filter by commit message')}
+                title={props.trans.__('Filter history of commits menu')}
+              />
+              {filterState ? (
+                <button className={filterClearClass}>
+                  <ClearIcon
+                    titleAccess={props.trans.__('Clear the current filter')}
+                    fontSize="small"
+                    onClick={resetFilter}
+                  />
+                </button>
+              ) : null}
+            </div>
           </div>
-        </div>
+        )}
         {
           <DialogBoxCommitGraph
             pastCommits={props.pastCommits}
