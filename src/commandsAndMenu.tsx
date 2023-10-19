@@ -24,6 +24,7 @@ import { ContextMenu, DockPanel, Menu, Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { CancelledError } from './cancelledError';
 import { BranchPicker } from './components/BranchPicker';
+import { NewTagDialogBox } from './components/NewTagDialog';
 import { DiffModel } from './components/diff/model';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
 import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
@@ -39,7 +40,8 @@ import {
   gitIcon,
   historyIcon,
   openIcon,
-  removeIcon
+  removeIcon,
+  tagIcon
 } from './style/icons';
 import {
   CommandIDs,
@@ -101,6 +103,9 @@ export namespace CommandArguments {
   }
   export interface IGitContextAction {
     files: Git.IStatusFile[];
+  }
+  export interface IGitCommitInfo {
+    commit: Git.ISingleCommitInfo;
   }
 }
 
@@ -1537,6 +1542,80 @@ export function addCommands(
     isEnabled: () => false,
     execute: () => void 0
   });
+
+  commands.addCommand(ContextCommandIDs.gitTagAdd, {
+    label: trans.__('Add Tag'),
+    caption: trans.__('Add tag pointing to selected commit'),
+    execute: async args => {
+      const commit = args as any as CommandArguments.IGitCommitInfo;
+
+      const widgetId = 'git-dialog-AddTag';
+      let anchor = document.querySelector<HTMLDivElement>(`#${widgetId}`);
+      if (!anchor) {
+        anchor = document.createElement('div');
+        anchor.id = widgetId;
+        document.body.appendChild(anchor);
+      }
+
+      const tagDialog = true;
+      const isSingleCommit = true;
+
+      const waitForDialog = new PromiseDelegate<string | null>();
+      const dialog = ReactWidget.create(
+        <NewTagDialogBox
+          pastCommits={[commit.commit]}
+          logger={logger}
+          model={gitModel}
+          trans={trans}
+          open={tagDialog}
+          onClose={(tagName?: string) => {
+            // () => {
+            dialog.dispose();
+            waitForDialog.resolve(tagName ?? null);
+          }}
+          isSingleCommit={isSingleCommit}
+        />
+      );
+
+      Widget.attach(dialog, anchor);
+
+      const tagName = await waitForDialog.promise;
+
+      if (tagName) {
+        logger.log({
+          level: Level.RUNNING,
+          message: trans.__(
+            "Create tag pointing to '%1'...",
+            commit.commit.commit_msg
+          )
+        });
+        try {
+          await gitModel.setTag(tagName, commit.commit.commit);
+        } catch (err) {
+          logger.log({
+            level: Level.ERROR,
+            message: trans.__(
+              "Failed to create tag '%1' poining to '%2'.",
+              tagName,
+              commit
+            ),
+            error: err as Error
+          });
+          return;
+        }
+
+        logger.log({
+          level: Level.SUCCESS,
+          message: trans.__(
+            "Created tag '%1' pointing to '%2'.",
+            tagName,
+            commit
+          )
+        });
+      }
+    },
+    icon: tagIcon.bindprops({ stylesheet: 'menuItem' })
+  });
 }
 
 /**
@@ -1636,6 +1715,21 @@ export function addMenuItems(
         } as CommandArguments.IGitContextAction as any
       });
     }
+  });
+}
+
+export function addHistoryMenuItems(
+  commands: ContextCommandIDs[],
+  contextMenu: Menu,
+  selectedCommit: Git.ISingleCommitInfo
+): void {
+  commands.forEach(command => {
+    contextMenu.addItem({
+      command,
+      args: {
+        commit: selectedCommit
+      } as CommandArguments.IGitCommitInfo as any
+    });
   });
 }
 

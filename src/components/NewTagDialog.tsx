@@ -46,7 +46,7 @@ export interface INewTagDialogProps {
   pastCommits: Git.ISingleCommitInfo[];
 
   /**
-   * Extension logger
+   * Extension logger.
    */
   logger: Logger;
 
@@ -69,6 +69,11 @@ export interface INewTagDialogProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Dialog box open from the context menu?
+   */
+  isSingleCommit: boolean;
 }
 
 /**
@@ -109,6 +114,11 @@ export interface IDialogBoxCommitGraphProps {
    * Update function for baseCommitId.
    */
   updateBaseCommitId: React.Dispatch<React.SetStateAction<string>>;
+
+  /**
+   * Dialog box open from the context menu.
+   */
+  isSingleCommit: boolean;
 }
 
 /**
@@ -183,6 +193,10 @@ export const DialogBoxCommitGraph: React.FunctionComponent<
   let isFilter;
   if (filter === '') {
     isFilter = true;
+  }
+
+  if (props.isSingleCommit === true) {
+    isFilter = false;
   }
 
   return (
@@ -457,6 +471,7 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
             filter={filterState}
             baseCommitId={baseCommitIdState}
             updateBaseCommitId={setBaseCommitIdState}
+            isSingleCommit={props.isSingleCommit}
           />
         }
       </div>

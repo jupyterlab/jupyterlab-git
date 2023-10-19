@@ -265,6 +265,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
    * @returns React element
    */
   private _renderNewTagDialog(): React.ReactElement {
+    const isSingleCommit = false;
     return (
       <NewTagDialogBox
         pastCommits={this.props.pastCommits}
@@ -273,6 +274,7 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
         trans={this.props.trans}
         open={this.state.tagDialog}
         onClose={this._onNewTagDialogClose}
+        isSingleCommit={isSingleCommit}
       />
     );
   }

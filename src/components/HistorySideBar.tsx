@@ -1,6 +1,8 @@
 import { TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
+import { Menu } from '@lumino/widgets';
+import { addHistoryMenuItems } from '../commandsAndMenu';
 import * as React from 'react';
 import { GitExtension } from '../model';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
@@ -10,7 +12,7 @@ import {
   selectedHistoryFileStyle,
   historySideBarWrapperStyle
 } from '../style/HistorySideBarStyle';
-import { Git } from '../tokens';
+import { ContextCommandIDs, Git } from '../tokens';
 import { openFileDiff } from '../utils';
 import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
@@ -79,6 +81,8 @@ export interface IHistorySideBarProps {
   ) => (event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>;
 }
 
+export const CONTEXT_COMMANDS = [ContextCommandIDs.gitTagAdd];
+
 /**
  * Returns a React component for displaying commit history.
  *
@@ -144,6 +148,25 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
     );
     return () => resizeObserver.disconnect();
   }, [props.commits]);
+
+  /**
+   * Open the context menu on the advanced view
+   *
+   * @param selectedCommit The commit on which the context menu is opened
+   * @param event The click event
+   */
+  const openContextMenu = (
+    selectedCommit: Git.ISingleCommitInfo,
+    event: React.MouseEvent
+  ): void => {
+    event.preventDefault();
+
+    const contextMenu = new Menu({ commands: props.commands });
+    const commands = [ContextCommandIDs.gitTagAdd];
+    addHistoryMenuItems(commands, contextMenu, selectedCommit);
+
+    contextMenu.open(event.clientX, event.clientY);
+  };
 
   return (
     <div className={historySideBarWrapperStyle}>
@@ -232,6 +255,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
                     }
                   })
                 }
+                contextMenu={openContextMenu}
               >
                 {!props.model.selectedHistoryFile && (
                   <SinglePastCommitInfo
