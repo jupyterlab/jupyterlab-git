@@ -1474,10 +1474,8 @@ export class GitExtension implements IGitExtension {
         }
       );
       if (data?.relative_path && data?.path) {
-        if (data?.relative_path === '.') {
-          if (data.path !== '') {
-            return null;
-          }
+        if (data?.relative_path === '.' && data.path !== '') {
+          return null;
         } else {
           if (
             !arraysAreEqual(
@@ -1809,7 +1807,6 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async tags(): Promise<Git.ITagResult> {
-    const path = await this._getPathRepository();
     return await this._taskHandler.execute<Git.ITagResult>(
       'git:tag:list',
       async () => {

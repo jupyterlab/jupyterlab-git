@@ -956,13 +956,11 @@ class Git:
             cwd=path,
         )
 
-        relative_path = os.path.relpath(path, contents_manager.root_dir)
-
         if code == 0:
             result = {
                 "code": code,
                 "path": my_output.strip("\n"),
-                "relative_path": relative_path,
+                "relative_path": os.path.relpath(path, contents_manager.root_dir),
             }
             return result
         else:
