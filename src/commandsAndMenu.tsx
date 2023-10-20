@@ -1656,6 +1656,7 @@ export function addFileBrowserContextMenu(
     const wasShown = menu.isVisible;
     const parent = menu.parentMenu;
 
+    // need to rmv the ignored files from this
     const items = toArray(filebrowser.selectedItems());
     const statuses = new Set<Git.Status>(
       items

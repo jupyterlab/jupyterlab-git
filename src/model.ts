@@ -81,6 +81,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Requests the new GET endpoint.
+   */
+  get isIgnored(): Git.IBranch {
+    return;
+  }
+
+  /**
    * Branch list for the current repository.
    */
   get branches(): Git.IBranch[] {
