@@ -1373,7 +1373,8 @@ export enum ContextCommandIDs {
   gitIgnoreExtension = 'git:context-ignoreExtension',
   gitNoAction = 'git:no-action',
   openFileFromDiff = 'git:open-file-from-diff',
-  gitFileStashPop = 'git:context-stash-pop'
+  gitFileStashPop = 'git:context-stash-pop',
+  gitTagAdd = 'git:context-tag-add'
 }
 
 /**
