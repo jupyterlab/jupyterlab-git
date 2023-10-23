@@ -1235,7 +1235,7 @@ class Git:
         auth=None,
         set_upstream=False,
         force=False,
-        tags=True
+        tags=True,
     ):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
