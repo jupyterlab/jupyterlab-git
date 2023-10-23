@@ -343,6 +343,16 @@ export function addCommands(
     if (result.button.accept) {
       const model = new CodeEditor.Model({});
       const id = 'git-ignore';
+      //
+      const gitIgnoreWidget = find(shell.widgets(), shellWidget => {
+        if (shellWidget.id === id) {
+          return true;
+        }
+      });
+      if (gitIgnoreWidget) {
+        shell.activateById(id);
+        return;
+      }
       model.sharedModel.setSource(error.content ? error.content : '');
       const editor = new CodeEditorWrapper({
         factory: editorServices.factoryService.newDocumentEditor,
