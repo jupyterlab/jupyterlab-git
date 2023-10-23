@@ -871,6 +871,20 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Overwrites content onto .gitignore file
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async writeGitIgnore(content: string): Promise<void> {
+    const path = await this._getPathRepository();
+
+    await requestAPI(URLExt.join(path, 'ignore'), 'POST', { content: content });
+    await this.refreshStatus();
+  }
+
+  /**
    * Fetch to get ahead/behind status
    *
    * @param auth - remote authentication information

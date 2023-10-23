@@ -15,7 +15,7 @@ import { Contents, ContentsManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
+import { closeIcon, ContextMenuSvg, saveIcon } from '@jupyterlab/ui-components';
 import { ArrayExt, find, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -346,9 +346,9 @@ export function addCommands(
       model.sharedModel.setSource(error.content ? error.content : '');
       const editor = new CodeEditorWrapper({
         factory: editorServices.factoryService.newDocumentEditor,
-        model: model,
-        config: { readOnly: true }
+        model: model
       });
+      const modelChangedSignal = model.sharedModel.changed;
       editor.disposed.connect(() => {
         model.dispose();
       });
@@ -359,7 +359,32 @@ export function addCommands(
       preview.id = id;
       preview.title.icon = gitIcon;
       preview.title.closable = true;
+      const saveButton = new ToolbarButton({
+        icon: saveIcon,
+        onClick: async () => {
+          if (saved) {
+            return;
+          }
+          const newContent = model.sharedModel.getSource();
+          try {
+            await gitModel.writeGitIgnore(newContent);
+            preview.title.className = '';
+            saved = true;
+          } catch (error) {
+            console.log('Could not save .gitignore');
+          }
+        },
+        tooltip: trans.__('Saves .gitignore')
+      });
+      let saved = true;
+      preview.toolbar.addItem('save', saveButton);
       shell.add(preview);
+      modelChangedSignal.connect(() => {
+        if (saved) {
+          saved = false;
+          preview.title.className = 'not-saved';
+        }
+      });
     }
   }
 
@@ -1525,7 +1550,6 @@ export function addCommands(
           try {
             await gitModel.ignore(file.to, false);
           } catch (error: any) {
-            console.log(error);
             if (error?.name === 'hiddenFile') {
               await showGitignoreHiddenFile(error);
             }

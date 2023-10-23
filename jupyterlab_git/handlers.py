@@ -818,8 +818,11 @@ class GitIgnoreHandler(GitHandler):
         local_path = self.url2localpath(path)
         data = self.get_json_body()
         file_path = data.get("file_path", None)
+        content = data.get("content", None)
         use_extension = data.get("use_extension", False)
-        if file_path:
+        if content:
+            body = await self.git.writeGitignore(local_path, content)
+        elif file_path:
             if use_extension:
                 suffixes = Path(file_path).suffixes
                 if len(suffixes) > 0:
@@ -827,7 +830,7 @@ class GitIgnoreHandler(GitHandler):
             body = await self.git.ignore(local_path, file_path)
         else:
             body = await self.git.ensure_gitignore(local_path)
-        if not self.serverapp.contents_manager.allow_hidden:
+        if not self.serverapp.contents_manager.allow_hidden and not content:
             self.set_status(403, "hidden files cannot be accessed")
             body["content"] = await self.git.read_file(local_path + "/.gitignore")
 

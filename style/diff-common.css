@@ -180,3 +180,17 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
     var(--jp-border-color0) 12px
   );
 }
+
+.not-saved
+  > .lm-TabBar-tabCloseIcon
+  > :not(:hover)
+  > .jp-icon-busy[fill] {
+  fill: var(--jp-inverse-layout-color3);
+}
+
+.not-saved
+  > .lm-TabBar-tabCloseIcon
+  > :not(:hover)
+  > .jp-icon3[fill] {
+  fill: none;
+}
