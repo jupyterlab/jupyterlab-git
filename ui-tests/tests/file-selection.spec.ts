@@ -6,9 +6,9 @@ const baseRepositoryPath = 'test-repository-dirty.tar.gz';
 test.use({ autoGoto: false });
 
 test.describe('File selection for normal staging', () => {
-  test.beforeEach(async ({ baseURL, page, tmpPath }) => {
+  test.beforeEach(async ({ page, request, tmpPath }) => {
     await extractFile(
-      baseURL,
+      request,
       path.resolve(__dirname, 'data', baseRepositoryPath),
       path.join(tmpPath, 'repository.tar.gz')
     );
@@ -51,9 +51,9 @@ test.describe('File selection for normal staging', () => {
 });
 
 test.describe('File selection for simple staging', () => {
-  test.beforeEach(async ({ baseURL, page, tmpPath }) => {
+  test.beforeEach(async ({ page, request, tmpPath }) => {
     await extractFile(
-      baseURL,
+      request,
       path.resolve(__dirname, 'data', baseRepositoryPath),
       path.join(tmpPath, 'repository.tar.gz')
     );

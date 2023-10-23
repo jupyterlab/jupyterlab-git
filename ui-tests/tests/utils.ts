@@ -1,18 +1,15 @@
 import { galata } from '@jupyterlab/galata';
-import fetch from 'node-fetch';
-import path from 'path';
+import { APIRequestContext } from '@playwright/test';
 
 export async function extractFile(
-  baseURL: string,
+  request: APIRequestContext,
   filePath: string,
   destination: string
 ): Promise<void> {
-  const contents = galata.newContentsHelper(baseURL);
+  const contents = galata.newContentsHelper(request);
   await contents.uploadFile(filePath, destination);
 
-  await fetch(`${contents.baseURL}/extract-archive/${destination}`, {
-    method: 'GET'
-  });
+  await request.get(`/extract-archive/${destination}`);
 
   await contents.deleteFile(destination);
 }

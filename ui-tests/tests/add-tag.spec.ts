@@ -6,9 +6,9 @@ const baseRepositoryPath = 'test-repository-dirty.tar.gz';
 test.use({ autoGoto: false, mockSettings: galata.DEFAULT_SETTINGS });
 
 test.describe('Add tag', () => {
-  test.beforeEach(async ({ baseURL, page, tmpPath }) => {
+  test.beforeEach(async ({ page, request, tmpPath }) => {
     await extractFile(
-      baseURL,
+      request,
       path.resolve(__dirname, 'data', baseRepositoryPath),
       path.join(tmpPath, 'repository.tar.gz')
     );
