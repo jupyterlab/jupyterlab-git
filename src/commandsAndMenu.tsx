@@ -306,14 +306,71 @@ export function addCommands(
     }
   });
 
+  async function showGitignore(error: any) {
+    const model = new CodeEditor.Model({});
+    const id = 'git-ignore';
+    //
+    const gitIgnoreWidget = find(shell.widgets(), shellWidget => {
+      if (shellWidget.id === id) {
+        return true;
+      }
+    });
+    if (gitIgnoreWidget) {
+      shell.activateById(id);
+      return;
+    }
+    model.sharedModel.setSource(error.content ? error.content : '');
+    const editor = new CodeEditorWrapper({
+      factory: editorServices.factoryService.newDocumentEditor,
+      model: model
+    });
+    const modelChangedSignal = model.sharedModel.changed;
+    editor.disposed.connect(() => {
+      model.dispose();
+    });
+    const preview = new PreviewMainAreaWidget({
+      content: editor
+    });
+    preview.title.label = '.gitignore';
+    preview.id = id;
+    preview.title.icon = gitIcon;
+    preview.title.closable = true;
+    const saveButton = new ToolbarButton({
+      icon: saveIcon,
+      onClick: async () => {
+        if (saved) {
+          return;
+        }
+        const newContent = model.sharedModel.getSource();
+        try {
+          await gitModel.writeGitIgnore(newContent);
+          preview.title.className = '';
+          saved = true;
+        } catch (error) {
+          console.log('Could not save .gitignore');
+        }
+      },
+      tooltip: trans.__('Saves .gitignore')
+    });
+    let saved = true;
+    preview.toolbar.addItem('save', saveButton);
+    shell.add(preview);
+    modelChangedSignal.connect(() => {
+      if (saved) {
+        saved = false;
+        preview.title.className = 'not-saved';
+      }
+    });
+  }
+
   /* Helper: Show gitignore hidden file */
   async function showGitignoreHiddenFile(error: any) {
     const result = await showDialog({
-      title: trans.__('The .gitignore file cannot be accessed'),
+      title: trans.__('Warning: The .gitignore file is a hidden file.'),
       body: (
         <div>
           {trans.__(
-            'Hidden files by default cannot be accessed. In order to open the .gitignore file you must:'
+            'Hidden files by default cannot be accessed with the regular code editor. In order to open the .gitignore file you must:'
           )}
           <ol>
             <li>
@@ -337,64 +394,16 @@ export function addCommands(
       ),
       buttons: [
         Dialog.cancelButton({ label: trans.__('Cancel') }),
-        Dialog.okButton({ label: trans.__('Show .gitignore file') })
-      ]
+        Dialog.okButton({ label: trans.__('Show .gitignore file anyways') })
+      ],
+      checkbox: {
+        label: 'Do not show this warning again',
+        checked: false
+      }
     });
     if (result.button.accept) {
-      const model = new CodeEditor.Model({});
-      const id = 'git-ignore';
-      //
-      const gitIgnoreWidget = find(shell.widgets(), shellWidget => {
-        if (shellWidget.id === id) {
-          return true;
-        }
-      });
-      if (gitIgnoreWidget) {
-        shell.activateById(id);
-        return;
-      }
-      model.sharedModel.setSource(error.content ? error.content : '');
-      const editor = new CodeEditorWrapper({
-        factory: editorServices.factoryService.newDocumentEditor,
-        model: model
-      });
-      const modelChangedSignal = model.sharedModel.changed;
-      editor.disposed.connect(() => {
-        model.dispose();
-      });
-      const preview = new PreviewMainAreaWidget({
-        content: editor
-      });
-      preview.title.label = '.gitignore';
-      preview.id = id;
-      preview.title.icon = gitIcon;
-      preview.title.closable = true;
-      const saveButton = new ToolbarButton({
-        icon: saveIcon,
-        onClick: async () => {
-          if (saved) {
-            return;
-          }
-          const newContent = model.sharedModel.getSource();
-          try {
-            await gitModel.writeGitIgnore(newContent);
-            preview.title.className = '';
-            saved = true;
-          } catch (error) {
-            console.log('Could not save .gitignore');
-          }
-        },
-        tooltip: trans.__('Saves .gitignore')
-      });
-      let saved = true;
-      preview.toolbar.addItem('save', saveButton);
-      shell.add(preview);
-      modelChangedSignal.connect(() => {
-        if (saved) {
-          saved = false;
-          preview.title.className = 'not-saved';
-        }
-      });
+      settings.set('hideHiddenFileWarning', result.isChecked);
+      showGitignore(error);
     }
   }
 
@@ -408,7 +417,11 @@ export function addCommands(
         await gitModel.ensureGitignore();
       } catch (error: any) {
         if (error?.name === 'hiddenFile') {
-          await showGitignoreHiddenFile(error);
+          if (settings.composite['hideHiddenFileWarning']) {
+            await showGitignore(error);
+          } else {
+            await showGitignoreHiddenFile(error);
+          }
         }
       }
     }
