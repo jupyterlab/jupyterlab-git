@@ -39,10 +39,10 @@ test.describe('Commits diff', () => {
 
   test('should display diff from single file history', async ({ page }) => {
     await page.sidebar.openTab('filebrowser');
-    await page.click('#filebrowser >> text=example.ipynb', {
+    await page.getByText('example.ipynb').click({
       button: 'right'
     });
-    await page.hover('ul[role="menu"] >> text=Git');
+    await page.getByRole('menu').getByText('Git').hover();
     await page.click('#jp-contextmenu-git >> text=History');
 
     await page.waitForSelector('#jp-git-sessions >> ol >> text=example.ipynb');

@@ -21,7 +21,9 @@ test.describe('Rebase', () => {
     await page.getByRole('button', { name: 'Current Branch master' }).click();
 
     // Switch to a-branch
-    await page.getByRole('button', { name: 'a-branch' }).click();
+    await page
+      .getByRole('listitem', { name: 'Switch to branch: a-branch' })
+      .click();
 
     // Hide branch panel
     await page.getByRole('button', { name: 'Current Branch a-branch' }).click();
