@@ -15,7 +15,7 @@ export class PreviewMainAreaWidget<
 
     if (options.isPreview ?? true) {
       PreviewMainAreaWidget.disposePreviewWidget(
-        PreviewMainAreaWidget.previewWidget
+        PreviewMainAreaWidget.previewWidget!
       );
       PreviewMainAreaWidget.previewWidget = this;
     }
@@ -25,7 +25,7 @@ export class PreviewMainAreaWidget<
    * Dispose screen as a preview screen
    */
   static disposePreviewWidget(isPreview: PreviewMainAreaWidget<Widget>): void {
-    return isPreview && PreviewMainAreaWidget.previewWidget.dispose();
+    return isPreview && PreviewMainAreaWidget.previewWidget?.dispose();
   }
 
   /**
@@ -41,7 +41,11 @@ export class PreviewMainAreaWidget<
       // Get the most recent tab opened
       const tab =
         tabPosition >= 0 ? tabBar.contentNode.children[tabPosition] : null;
-      const tabTitle = tab.querySelector<HTMLElement>('.lm-TabBar-tabLabel');
+      const tabTitle = tab?.querySelector<HTMLElement>('.lm-TabBar-tabLabel');
+
+      if (!tabTitle) {
+        return;
+      }
 
       tabTitle.classList.add('jp-git-tab-mod-preview');
 

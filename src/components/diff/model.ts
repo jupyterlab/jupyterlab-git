@@ -129,5 +129,5 @@ export class DiffModel implements IDisposable, Git.Diff.IModel {
   private _changed: Signal<DiffModel, Git.Diff.IModelChange>;
   private _isDisposed = false;
   private _filename: string;
-  private _repositoryPath: string;
+  private _repositoryPath: string | undefined;
 }

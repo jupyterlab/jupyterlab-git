@@ -1,5 +1,5 @@
 import { TranslationBundle } from '@jupyterlab/translation';
-import Input from '@material-ui/core/Input';
+import Input from '@mui/material/Input';
 import * as React from 'react';
 import {
   activeStyle,

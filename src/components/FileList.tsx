@@ -56,7 +56,10 @@ export interface IFileListProps {
   trans: TranslationBundle;
 }
 
-export type ContextCommands = Record<Git.Status, ContextCommandIDs[]>;
+export type ContextCommands = Record<
+  NonNullable<Git.Status>,
+  ContextCommandIDs[]
+>;
 
 export const CONTEXT_COMMANDS: ContextCommands = {
   'partially-staged': [
@@ -183,6 +186,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
 
     const contextMenu = new Menu({ commands: this.props.commands });
+    // @ts-expect-error unproper index
     const commands = CONTEXT_COMMANDS[selectedFiles[0].status];
     addMenuItems(commands, contextMenu, selectedFiles);
 
@@ -202,14 +206,17 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     event.preventDefault();
 
     const contextMenu = new Menu({ commands: this.props.commands });
+    // @ts-expect-error unproper index
     const commands = SIMPLE_CONTEXT_COMMANDS[selectedFile.status];
     addMenuItems(commands, contextMenu, [selectedFile]);
     contextMenu.open(event.clientX, event.clientY);
   };
 
   /** Reset all staged files */
-  resetAllStagedFiles = async (event: React.MouseEvent): Promise<void> => {
-    event.stopPropagation();
+  resetAllStagedFiles = async (
+    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): Promise<void> => {
+    event?.stopPropagation();
     await this.props.model.reset();
   };
 
@@ -238,15 +245,19 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Add all unstaged files */
-  addAllUnstagedFiles = async (event: React.MouseEvent): Promise<void> => {
-    event.stopPropagation();
+  addAllUnstagedFiles = async (
+    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): Promise<void> => {
+    event?.stopPropagation();
 
     await this.props.model.addAllUnstaged();
   };
 
   /** Discard changes in all unstaged files */
-  discardAllUnstagedFiles = async (event: React.MouseEvent): Promise<void> => {
-    event.stopPropagation();
+  discardAllUnstagedFiles = async (
+    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): Promise<void> => {
+    event?.stopPropagation();
 
     const result = await showDialog({
       title: this.props.trans.__('Discard all changes'),
@@ -261,7 +272,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     if (result.button.accept) {
       try {
         await this.props.model.checkout();
-      } catch (reason) {
+      } catch (reason: any) {
         showErrorMessage(
           this.props.trans.__('Discard all unstaged changes failed.'),
           reason
@@ -271,8 +282,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Discard changes in all unstaged and staged files */
-  discardAllChanges = async (event: React.MouseEvent): Promise<void> => {
-    event.stopPropagation();
+  discardAllChanges = async (
+    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): Promise<void> => {
+    event?.stopPropagation();
     await discardAllChanges(this.props.model, this.props.trans);
   };
 
@@ -295,8 +308,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Add all untracked files */
-  addAllUntrackedFiles = async (event: React.MouseEvent): Promise<void> => {
-    event.stopPropagation();
+  addAllUntrackedFiles = async (
+    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): Promise<void> => {
+    event?.stopPropagation();
     await this.props.model.addAllUntracked();
   };
 
@@ -335,11 +350,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       return;
     }
     const filesWithMarkBox = this.props.files.filter(
-      fileStatus => !['unmerged', 'remote-changed'].includes(fileStatus.status)
+      fileStatus => !['unmerged', 'remote-changed'].includes(fileStatus.status!)
     );
 
     const lastClickedFileIndex = filesWithMarkBox.findIndex(fileStatus =>
-      areFilesEqual(fileStatus, this.state.lastClickedFile)
+      areFilesEqual(
+        fileStatus,
+        this.state.lastClickedFile ?? ({} as Git.IStatusFile)
+      )
     );
     const currentFileIndex = filesWithMarkBox.findIndex(fileStatus =>
       areFilesEqual(fileStatus, file)
@@ -382,7 +400,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param file The clicked file
    */
   private _toggleFile = (file: Git.IStatusFile): void => {
-    if (file.status !== this.state.lastClickedFile.status) {
+    if (file.status !== this.state.lastClickedFile?.status) {
       this._selectOnlyOneFile(file);
       return;
     }
@@ -486,7 +504,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     allFilesWithSelectedStatus.sort((a, b) => a.to.localeCompare(b.to));
 
     const lastClickedFileIndex = allFilesWithSelectedStatus.findIndex(
-      fileStatus => areFilesEqual(fileStatus, this.state.lastClickedFile)
+      fileStatus =>
+        areFilesEqual(
+          fileStatus,
+          this.state.lastClickedFile ?? ({} as Git.IStatusFile)
+        )
     );
     const currentFileIndex = allFilesWithSelectedStatus.findIndex(fileStatus =>
       areFilesEqual(fileStatus, file)
@@ -548,7 +570,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
-  pullFromRemote = async (event: React.MouseEvent): Promise<void> => {
+  pullFromRemote = async (
+    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitPull, {});
   };
 
@@ -678,7 +702,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     return (
       <FileItem
         trans={this.props.trans}
-        actions={!file.is_binary && diffButton}
+        actions={!file.is_binary ? diffButton : null}
         contextMenu={this.openContextMenu}
         file={file}
         model={this.props.model}
@@ -1227,7 +1251,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    * @param path File path of interest
    * @param currentRef the ref to diff against the git 'HEAD' ref
    */
-  private _createDiffButton(file: Git.IStatusFile): JSX.Element {
+  private _createDiffButton(file: Git.IStatusFile): React.ReactNode {
     let handleClick: () => void;
     if (this.props.settings.composite['simpleStaging']) {
       handleClick = () => this._openDiffViews([file]);
@@ -1278,7 +1302,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
    */
   private _areFilesAllMarked(): boolean {
     const filesForSimpleStaging = this.props.files.filter(
-      file => !['unmerged', 'remote-changed'].includes(file.status)
+      file => !['unmerged', 'remote-changed'].includes(file.status!)
     );
     return (
       filesForSimpleStaging.length !== 0 &&

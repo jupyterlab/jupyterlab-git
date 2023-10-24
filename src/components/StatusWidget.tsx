@@ -2,7 +2,7 @@ import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { TranslationBundle } from '@jupyterlab/translation';
-import { Badge } from '@material-ui/core';
+import { Badge } from '@mui/material';
 import React from 'react';
 import { classes } from 'typestyle';
 import { Operation, showGitOperationDialog } from '../commandsAndMenu';
@@ -258,7 +258,7 @@ namespace Private {
      * @returns boolean indicating whether the extension should display status updates
      */
     function isActive(): boolean {
-      return settings.composite.displayStatus as boolean;
+      return (settings?.composite.displayStatus ?? true) as boolean;
     }
   }
 }

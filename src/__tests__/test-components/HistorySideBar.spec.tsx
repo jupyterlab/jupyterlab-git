@@ -1,17 +1,20 @@
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { nullTranslator } from '@jupyterlab/translation';
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import 'jest';
 import * as React from 'react';
-import { shallow } from 'enzyme';
 import {
   HistorySideBar,
   IHistorySideBarProps
 } from '../../components/HistorySideBar';
-import 'jest';
-
-import { PastCommitNode } from '../../components/PastCommitNode';
 import { GitExtension } from '../../model';
-import { nullTranslator } from '@jupyterlab/translation';
-import { FileItem } from '../../components/FileItem';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { SinglePastCommitInfo } from '../../components/SinglePastCommitInfo';
+import { fileStyle } from '../../style/FileItemStyle';
+import {
+  commitBodyClass,
+  commitWrapperClass
+} from '../../style/PastCommitNode';
+import { selectedHistoryFileStyle } from '../../style/HistorySideBarStyle';
 
 describe('HistorySideBar', () => {
   const trans = nullTranslator.load('jupyterlab-git');
@@ -19,11 +22,11 @@ describe('HistorySideBar', () => {
   const props: IHistorySideBarProps = {
     commits: [
       {
-        commit: null,
-        author: null,
-        date: null,
-        commit_msg: null,
-        pre_commits: [null]
+        commit: '1234567890',
+        author: null as any,
+        date: null as any,
+        commit_msg: null as any,
+        pre_commits: [null as any]
       }
     ],
     branches: [],
@@ -31,12 +34,12 @@ describe('HistorySideBar', () => {
     model: {
       selectedHistoryFile: null
     } as GitExtension,
-    commands: null,
+    commands: null as any,
     trans,
     referenceCommit: null,
     challengerCommit: null,
-    onSelectForCompare: _ => async _ => null,
-    onCompareWithSelected: _ => async _ => null
+    onSelectForCompare: (() => async () => null) as any,
+    onCompareWithSelected: (() => async () => null) as any
   };
 
   beforeEach(() => {
@@ -51,21 +54,34 @@ describe('HistorySideBar', () => {
   });
 
   it('renders the commit nodes', () => {
-    const historySideBar = shallow(<HistorySideBar {...props} />);
-    expect(historySideBar.find(PastCommitNode)).toHaveLength(1);
-    expect(historySideBar.find(SinglePastCommitInfo)).toHaveLength(1);
+    render(<HistorySideBar {...props} />);
+
+    const pastCommitNodes = screen
+      .getAllByRole('listitem')
+      .filter(el => el.classList.contains(commitWrapperClass));
+    expect(pastCommitNodes).toHaveLength(1);
+    const singlePastCommit = Array.from(
+      pastCommitNodes[0].querySelectorAll(`.${commitBodyClass}`)
+    );
+    expect(singlePastCommit).toHaveLength(1);
     // Selected history file element
-    expect(historySideBar.find(FileItem)).toHaveLength(0);
+    expect(
+      Array.from(singlePastCommit[0].querySelectorAll(`.${fileStyle}`))
+    ).toHaveLength(0);
   });
 
   it('shows a message if no commits are found', () => {
     const propsWithoutCommits: IHistorySideBarProps = { ...props, commits: [] };
-    const historySideBar = shallow(<HistorySideBar {...propsWithoutCommits} />);
-    expect(historySideBar.find(PastCommitNode)).toHaveLength(0);
+    render(<HistorySideBar {...propsWithoutCommits} />);
 
-    const noHistoryFound = historySideBar.find('li');
-    expect(noHistoryFound).toHaveLength(1);
-    expect(noHistoryFound.text()).toEqual('No history found.');
+    expect(
+      screen
+        .getAllByRole('listitem')
+        .filter(el => el.classList.contains(commitWrapperClass))
+    ).toHaveLength(0);
+
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(screen.getByRole('listitem')).toHaveTextContent('No history found.');
   });
 
   it('correctly shows the selected history file', () => {
@@ -84,15 +100,21 @@ describe('HistorySideBar', () => {
       } as GitExtension
     };
 
-    const historySideBar = shallow(
-      <HistorySideBar {...propsWithSelectedFile} />
+    render(<HistorySideBar {...propsWithSelectedFile} />);
+
+    const selectedHistoryFile = Array.from(
+      screen
+        .getAllByRole('list')[0]
+        .querySelectorAll(`.${selectedHistoryFileStyle}`)
     );
-    const selectedHistoryFile = historySideBar.find(FileItem);
     expect(selectedHistoryFile).toHaveLength(1);
-    expect(selectedHistoryFile.prop('file')).toEqual(
-      propsWithSelectedFile.model.selectedHistoryFile
-    );
+    expect(selectedHistoryFile[0]).toHaveTextContent('filepath/to');
     // Only renders with repository history
-    expect(historySideBar.find(SinglePastCommitInfo)).toHaveLength(0);
+    const singlePastCommit = Array.from(
+      screen
+        .getAllByRole('listitem')[0]
+        .querySelectorAll(`.${commitBodyClass}`)[0].children
+    );
+    expect(singlePastCommit).toHaveLength(0);
   });
 });

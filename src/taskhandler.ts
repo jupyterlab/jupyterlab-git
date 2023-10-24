@@ -98,8 +98,8 @@ export class TaskHandler<T> implements IDisposable {
       this._taskList.removeNode(node);
     } else {
       // Walk the task list looking for a task with the provided identifier...
-      while (node.next) {
-        node = node.next;
+      while (node?.next) {
+        node = node?.next;
         if (node.value && node.value.id === taskID) {
           this._taskList.removeNode(node);
           break;

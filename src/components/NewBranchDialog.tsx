@@ -1,13 +1,12 @@
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import ListItem from '@material-ui/core/ListItem';
-import ClearIcon from '@material-ui/icons/Clear';
+import { Notification } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
+import ClearIcon from '@mui/icons-material/Clear';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import ListItem from '@mui/material/ListItem';
 import * as React from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { classes } from 'typestyle';
-import { Logger } from '../logger';
-import { branchIcon } from '../style/icons';
 import {
   actionsWrapperClass,
   activeListItemClass,
@@ -33,7 +32,8 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
-import { Git, IGitExtension, Level } from '../tokens';
+import { branchIcon } from '../style/icons';
+import { Git, IGitExtension } from '../tokens';
 
 const ITEM_HEIGHT = 27.5; // HTML element height for a single branch
 const CURRENT_BRANCH_HEIGHT = 66.5; // HTML element height for the current branch with description
@@ -52,11 +52,6 @@ export interface INewBranchDialogProps {
    * Current list of branches.
    */
   branches: Git.IBranch[];
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -358,7 +353,7 @@ export class NewBranchDialog extends React.Component<
    * @param event - event object
    */
   private _onFilterChange = (event: any): void => {
-    this._branchList.current.resetAfterIndex(0);
+    this._branchList.current?.resetAfterIndex(0);
     this.setState({
       filter: event.target.value
     });
@@ -368,7 +363,7 @@ export class NewBranchDialog extends React.Component<
    * Callback invoked to reset the menu filter.
    */
   private _resetFilter = (): void => {
-    this._branchList.current.resetAfterIndex(0);
+    this._branchList.current?.resetAfterIndex(0);
     this.setState({
       filter: ''
     });
@@ -381,20 +376,18 @@ export class NewBranchDialog extends React.Component<
    * @returns callback
    */
   private _onBranchClickFactory(branch: string) {
-    const self = this;
-    return onClick;
-
     /**
      * Callback invoked upon clicking a branch name.
      *
      * @private
      * @param event - event object
      */
-    function onClick(): void {
-      self.setState({
+    const onClick = (): void => {
+      this.setState({
         base: branch
       });
-    }
+    };
+    return onClick;
   }
 
   /**
@@ -422,32 +415,37 @@ export class NewBranchDialog extends React.Component<
       startpoint: this.state.base
     };
 
-    this.props.logger.log({
-      level: Level.RUNNING,
-      message: this.props.trans.__('Creating branch…')
-    });
+    const id = Notification.emit(
+      this.props.trans.__('Creating branch…'),
+      'in-progress',
+      { autoClose: false }
+    );
     try {
       await this.props.model.checkout(opts);
-    } catch (err) {
+    } catch (err: any) {
       this.setState({
         error: err.message.replace(/^fatal:/, '')
       });
-      this.props.logger.log({
-        level: Level.ERROR,
-        message: this.props.trans.__('Failed to create branch.')
+      Notification.update({
+        id,
+        message: this.props.trans.__('Failed to create branch.'),
+        type: 'error',
+        autoClose: false
       });
       return;
     }
 
-    this.props.logger.log({
-      level: Level.SUCCESS,
-      message: this.props.trans.__('Branch created.')
+    Notification.update({
+      id,
+      message: this.props.trans.__('Branch created.'),
+      type: 'success',
+      autoClose: 5000
     });
     // Close the branch dialog:
     this.props.onClose();
 
     // Reset the branch name and filter:
-    this._branchList.current.resetAfterIndex(0);
+    this._branchList.current?.resetAfterIndex(0);
     this.setState({
       name: '',
       filter: ''

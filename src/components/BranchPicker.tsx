@@ -1,8 +1,8 @@
 import { TranslationBundle } from '@jupyterlab/translation';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import ListItem from '@material-ui/core/ListItem';
-import ClearIcon from '@material-ui/icons/Clear';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import ListItem from '@mui/material/ListItem';
+import ClearIcon from '@mui/icons-material/Clear';
 import React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
@@ -118,7 +118,9 @@ export function BranchPicker(props: IBranchPickerProps): JSX.Element {
         paper: branchDialogClass
       }}
       open={true}
-      onClose={props.onClose}
+      onClose={() => {
+        props.onClose();
+      }}
     >
       <div className={titleWrapperClass}>
         <p className={titleClass}>
@@ -208,7 +210,7 @@ export function BranchPicker(props: IBranchPickerProps): JSX.Element {
           }
           value={act === 'merge' ? trans.__('Merge') : trans.__('Rebase')}
           onClick={() => {
-            props.onClose(selectedBranch);
+            props.onClose(selectedBranch ?? undefined);
           }}
           disabled={selectedBranch === null}
         />

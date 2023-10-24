@@ -28,7 +28,7 @@ export const AUTH_ERROR_MESSAGES = [
 export async function requestAPI<T>(
   endPoint = '',
   method = 'GET',
-  body: ReadonlyJSONObject | null = null,
+  body: Partial<ReadonlyJSONObject> | null = null,
   namespace = 'git'
 ): Promise<T> {
   // Make request to Jupyter API
@@ -47,7 +47,7 @@ export async function requestAPI<T>(
   let response: Response;
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
-  } catch (error) {
+  } catch (error: any) {
     throw new ServerConnection.NetworkError(error);
   }
 

@@ -44,7 +44,13 @@ export const titleWrapperClass = style({
 
   padding: '15px',
 
-  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
+
+  $nest: {
+    '& > p': {
+      margin: 0
+    }
+  }
 });
 
 export const titleClass = style({
@@ -207,7 +213,13 @@ export const listItemContentClass = style({
 
   marginTop: 'auto',
   marginBottom: 'auto',
-  marginRight: 'auto'
+  marginRight: 'auto',
+
+  $nest: {
+    '& > p': {
+      margin: 0
+    }
+  }
 });
 
 export const listItemDescClass = style({

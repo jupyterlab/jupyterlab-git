@@ -1,8 +1,8 @@
-import { Toolbar } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
+import { Toolbar } from '@jupyterlab/ui-components';
 import { JSONObject, ReadonlyJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
@@ -27,7 +27,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * The current branch
    */
-  currentBranch: Git.IBranch;
+  currentBranch: Git.IBranch | null;
 
   /**
    * A signal emitted when the branches of the Git repository changes.
@@ -52,7 +52,10 @@ export interface IGitExtension extends IDisposable {
   /**
    * A signal emitted when the current Git repository changes.
    */
-  readonly repositoryChanged: ISignal<IGitExtension, IChangedArgs<string>>;
+  readonly repositoryChanged: ISignal<
+    IGitExtension,
+    IChangedArgs<string | null>
+  >;
 
   /**
    * Test whether the model is ready;
@@ -118,7 +121,7 @@ export interface IGitExtension extends IDisposable {
   /**
    * A signal emitted when files that are behind the remote branch are opened.
    */
-  readonly notifyRemoteChanges: ISignal<
+  readonly remoteChanged: ISignal<
     IGitExtension,
     Git.IRemoteChangedNotification | null
   >;
@@ -384,7 +387,7 @@ export interface IGitExtension extends IDisposable {
    *
    * @param path the file path relative to the server root
    */
-  getFile(path: string): Git.IStatusFile;
+  getFile(path: string): Git.IStatusFile | null;
 
   /**
    * Get current mark of file named fname
@@ -564,16 +567,15 @@ export interface IGitExtension extends IDisposable {
   checkRemoteChangeNotified(): Promise<void>;
 
   /**
-   * Register a new diff provider for specified file types
+   * Register a new diff provider for specified file extensions
    *
-   * @param name provider name
-   * @param fileExtensions File extensions list
-   * @param callback Callback to use for the provided file types
+   * @param fileExtensions File extension list
+   * @param factory Callback to use for the provided file extensions
    */
   registerDiffProvider(
     name: string,
     fileExtensions: string[],
-    callback: Git.Diff.ICallback
+    factory: Git.Diff.Factory
   ): void;
 
   /**
@@ -700,16 +702,30 @@ export namespace Git {
     }
 
     /**
+     * Diff widget factory options
+     */
+    export interface IFactoryOptions {
+      /**
+       * Diff model
+       */
+      model: IModel;
+      /**
+       * Diff widget toolbar
+       */
+      toolbar?: Toolbar;
+      /**
+       * Application translator object
+       */
+      translator?: ITranslator;
+    }
+
+    /**
      * Callback to generate a comparison widget
      *
      * The toolbar is the one of the MainAreaWidget in which the diff widget
      * will be displayed.
      */
-    export type ICallback = (
-      model: IModel,
-      toolbar?: Toolbar,
-      trans?: ITranslator
-    ) => Promise<IDiffWidget>;
+    export type Factory = (options: IFactoryOptions) => Promise<IDiffWidget>;
 
     /**
      * Content and its context for diff
@@ -1317,42 +1333,6 @@ export namespace Git {
      */
     checked: boolean;
   }
-}
-
-/**
- * Log message severity.
- */
-export enum Level {
-  SUCCESS = 10,
-  INFO = 20,
-  RUNNING = 30,
-  WARNING = 40,
-  ERROR = 50
-}
-
-/**
- * Interface describing a component log message.
- */
-export interface ILogMessage {
-  /**
-   * Detailed message
-   */
-  details?: string;
-
-  /**
-   * Error object.
-   */
-  error?: Error;
-
-  /**
-   * Message level.
-   */
-  level: Level;
-
-  /**
-   * Message text.
-   */
-  message: string;
 }
 
 /**

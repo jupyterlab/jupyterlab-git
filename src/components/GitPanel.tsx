@@ -1,4 +1,4 @@
-import { showDialog, Dialog } from '@jupyterlab/apputils';
+import { Dialog, Notification, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -6,11 +6,13 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
+import { WarningRounded as WarningRoundedIcon } from '@mui/icons-material';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import * as React from 'react';
-import { Logger } from '../logger';
 import { GitExtension } from '../model';
+import { showError } from '../notifications';
+import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
   panelWrapperClass,
   repoButtonClass,
@@ -20,21 +22,19 @@ import {
   tabsClass,
   warningTextClass
 } from '../style/GitPanel';
-import { CommandIDs, Git, ILogMessage, Level } from '../tokens';
+import { addIcon, rewindIcon, trashIcon } from '../style/icons';
+import { CommandIDs, Git } from '../tokens';
 import { openFileDiff, stopPropagationWrapper } from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
+import { ActionButton } from './ActionButton';
 import { CommitBox } from './CommitBox';
 import { CommitComparisonBox } from './CommitComparisonBox';
 import { FileList } from './FileList';
+import { GitStash } from './GitStash';
 import { HistorySideBar } from './HistorySideBar';
+import { RebaseAction } from './RebaseAction';
 import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
-import { WarningRounded as WarningRoundedIcon } from '@material-ui/icons';
-import { GitStash } from './GitStash';
-import { ActionButton } from './ActionButton';
-import { addIcon, rewindIcon, trashIcon } from '../style/icons';
-import { hiddenButtonStyle } from '../style/ActionButtonStyle';
-import { RebaseAction } from './RebaseAction';
 
 /**
  * Interface describing component properties.
@@ -49,11 +49,6 @@ export interface IGitPanelProps {
    * File browser model.
    */
   filebrowser: FileBrowserModel;
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -248,8 +243,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.setState({ tab: 1 });
       this.refreshHistory();
     }, this);
-    model.notifyRemoteChanges.connect((_, args) => {
-      this.warningDialog(args);
+    model.remoteChanged.connect((_, args) => {
+      this.warningDialog(args!);
     }, this);
 
     settings.changed.connect(this.refreshView, this);
@@ -296,7 +291,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       );
       let pastCommits = new Array<Git.ISingleCommitInfo>();
       if (logData.code === 0) {
-        pastCommits = logData.commits;
+        pastCommits = logData.commits ?? [];
       }
 
       this.setState({
@@ -410,7 +405,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         branching={!disableBranching}
         commands={this.props.commands}
         pastCommits={this.state.pastCommits}
-        logger={this.props.logger}
         model={this.props.model}
         nCommitsAhead={this.state.nCommitsAhead}
         nCommitsBehind={this.state.nCommitsBehind}
@@ -566,13 +560,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             setAmend={this._setCommitAmend}
             onCommit={this.commitFiles}
             warning={
-              this.state.hasDirtyFiles && (
+              this.state.hasDirtyFiles ? (
                 <WarningBox
                   headerIcon={<WarningRoundedIcon />}
                   title={warningTitle}
                   content={warningContent}
                 />
-              )
+              ) : null
             }
           />
         ) : (
@@ -606,7 +600,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           referenceCommit={this.state.referenceCommit}
           challengerCommit={this.state.challengerCommit}
           onSelectForCompare={commit => async event => {
-            event.stopPropagation();
+            event?.stopPropagation();
             this.setState({ referenceCommit: commit }, () => {
               this._openSingleFileComparison(
                 event as React.MouseEvent<HTMLLIElement, MouseEvent>
@@ -614,7 +608,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
             });
           }}
           onCompareWithSelected={commit => async event => {
-            event.stopPropagation();
+            event?.stopPropagation();
             this.setState({ challengerCommit: commit }, () => {
               this._openSingleFileComparison(
                 event as React.MouseEvent<HTMLLIElement, MouseEvent>
@@ -638,10 +632,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
               challengerCommit={this.state.challengerCommit}
               commands={this.props.commands}
               model={this.props.model}
-              logger={this.props.logger}
               trans={this.props.trans}
               onClose={event => {
-                event.stopPropagation();
+                event?.stopPropagation();
                 this.setState({
                   referenceCommit: null,
                   challengerCommit: null
@@ -766,15 +759,18 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @param message - commit message
    * @returns a promise which commits the files
    */
-  private _commitMarkedFiles = async (message: string): Promise<void> => {
-    this.props.logger.log({
-      level: Level.RUNNING,
-      message: this.props.trans.__('Staging files...')
-    });
+  private _commitMarkedFiles = async (
+    message: string | null
+  ): Promise<void> => {
+    const id = Notification.emit(
+      this.props.trans.__('Staging files...'),
+      'in-progress',
+      { autoClose: false }
+    );
     await this.props.model.reset();
     await this.props.model.add(...this._markedFiles.map(file => file.to));
 
-    await this._commitStagedFiles(message);
+    await this._commitStagedFiles(message, id);
   };
 
   /**
@@ -783,19 +779,25 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @param message - commit message
    * @returns a promise which commits the files
    */
-  private _commitStagedFiles = async (message?: string): Promise<void> => {
-    const errorLog: ILogMessage = {
-      level: Level.ERROR,
-      message: this.props.trans.__('Failed to commit changes.')
-    };
-
+  private _commitStagedFiles = async (
+    message: string | null = null,
+    notificationId?: string
+  ): Promise<void> => {
+    const errorMsg = this.props.trans.__('Failed to commit changes.');
+    let id: string | null = notificationId ?? null;
     try {
       const author = await this._hasIdentity(this.props.model.pathRepository);
 
-      this.props.logger.log({
-        level: Level.RUNNING,
-        message: this.props.trans.__('Committing changes...')
-      });
+      const message = this.props.trans.__('Committing changes...');
+      if (id !== null) {
+        Notification.update({
+          id,
+          message,
+          autoClose: false
+        });
+      } else {
+        id = Notification.emit(message, 'in-progress', { autoClose: false });
+      }
 
       if (this.state.commitAmend) {
         await this.props.model.commit(null, true, author);
@@ -803,9 +805,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         await this.props.model.commit(message, false, author);
       }
 
-      this.props.logger.log({
-        level: Level.SUCCESS,
-        message: this.props.trans.__('Committed changes.')
+      Notification.update({
+        id,
+        type: 'success',
+        message: this.props.trans.__('Committed changes.'),
+        autoClose: 5000
       });
 
       const hasRemote = this.props.model.branches.some(
@@ -816,8 +820,16 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       if (this.props.settings.composite['commitAndPush'] && hasRemote) {
         await this.props.commands.execute(CommandIDs.gitPush);
       }
-    } catch (error) {
-      this.props.logger.log({ ...errorLog, error });
+    } catch (error: any) {
+      if (id === null) {
+        Notification.error(errorMsg, showError(error, this.props.trans));
+      } else {
+        Notification.update({
+          id,
+          message: errorMsg,
+          ...showError(error, this.props.trans)
+        });
+      }
       throw error;
     }
   };
@@ -827,7 +839,11 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    *
    * @param path - repository path
    */
-  private async _hasIdentity(path: string): Promise<string | null> {
+  private async _hasIdentity(path: string | null): Promise<string | null> {
+    if (!path) {
+      return null;
+    }
+
     // If the repository path changes or explicitly configured, check the user identity
     if (
       path !== this._previousRepoPath ||
@@ -835,7 +851,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     ) {
       try {
         let userOrEmailNotSet = false;
-        let author: Git.IIdentity;
+        let author: Git.IIdentity | null;
         let authorOverride: string | null = null;
 
         if (this.props.model.lastAuthor === null) {
@@ -870,14 +886,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           author = result.value;
           if (userOrEmailNotSet) {
             await this.props.model.config({
-              'user.name': author.name,
-              'user.email': author.email
+              'user.name': author!.name,
+              'user.email': author!.email
             });
           }
-          this.props.model.lastAuthor = author;
+          this.props.model.lastAuthor = author!;
 
           if (this.props.settings.composite['promptUserIdentity']) {
-            authorOverride = `${author.name} <${author.email}>`;
+            authorOverride = `${author!.name} <${author!.email}>`;
           }
         }
         this._previousRepoPath = path;
@@ -888,10 +904,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         }
 
         throw new Error(
+          // @ts-expect-error error will have message attribute
           this.props.trans.__('Failed to set your identity. %1', error.message)
         );
       }
     }
+
+    return null;
   }
 
   private _hasStagedFile(): boolean {
@@ -926,7 +945,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     return sfiles;
   }
 
-  private _previousRepoPath: string = null;
+  private _previousRepoPath: string | null = null;
 
   /**
    * Show a dialog when a notifyRemoteChanges signal is emitted from the model.

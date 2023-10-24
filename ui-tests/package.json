@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/git-ui-tests",
   "version": "1.0.0",
-  "description": "JupyterLab Git Integration Tests",
+  "description": "JupyterLab @jupyterlab/git Integration Tests",
   "private": true,
   "scripts": {
     "start": "jupyter lab --config jupyter_server_test_config.py",
@@ -9,6 +9,7 @@
     "test:update": "jlpm playwright test --update-snapshots"
   },
   "devDependencies": {
-    "@jupyterlab/galata": "^4.5.3"
+    "@jupyterlab/galata": "^5.0.6",
+    "@playwright/test": "^1.37.0"
   }
 }

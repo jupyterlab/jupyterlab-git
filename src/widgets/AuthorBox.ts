@@ -1,5 +1,5 @@
 import { Dialog } from '@jupyterlab/apputils';
-import { TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import { Git } from '../tokens';
 
@@ -25,6 +25,7 @@ export class GitAuthorForm
     author: Git.IIdentity,
     trans?: TranslationBundle
   ): void {
+    trans ??= nullTranslator.load('jupyterlab_git');
     const nameLabel = document.createElement('label');
     nameLabel.textContent = trans.__('Committer name:');
     const emailLabel = document.createElement('label');
@@ -54,6 +55,8 @@ export class GitAuthorForm
     return credentials;
   }
 
+  // @ts-expect-error initialization is indirect
   private _name: HTMLInputElement;
+  // @ts-expect-error initialization is indirect
   private _email: HTMLInputElement;
 }

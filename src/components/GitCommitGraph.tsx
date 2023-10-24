@@ -114,7 +114,7 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
     const colour = getColour(branch);
     const style = {
       stroke: colour,
-      'stroke-width': this._lineWidth,
+      strokeWidth: this._lineWidth,
       fill: 'none'
     };
 
@@ -165,7 +165,7 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
     const strokeWidth = 1;
     const style = {
       stroke: colour,
-      'stroke-width': strokeWidth,
+      strokeWidth: strokeWidth,
       fill: colour
     };
 
@@ -208,21 +208,21 @@ export class GitCommitGraph extends React.Component<IGitCommitGraphProps> {
   render(): JSX.Element {
     // reset lookup table of commit node locations
     const allCommitNodes: JSX.Element[] = [];
-    let allRouteNodes: JSX.Element[] = [];
+    const allRouteNodes: JSX.Element[] = [];
     const commitNodes = this.getGraphData();
     commitNodes.forEach(node => {
       const commit = node;
       const [commitNode, routeNodes] = this.renderCommit(commit);
       allCommitNodes.push(commitNode);
-      allRouteNodes = allRouteNodes.concat(routeNodes);
+      allRouteNodes.push(...routeNodes);
     });
 
-    const children = [].concat(allRouteNodes, allCommitNodes);
+    const children = [...allRouteNodes, ...allCommitNodes];
 
     const height = this.getHeight();
     const width = this.getWidth();
 
-    const style = { height, width, 'flex-shrink': 0 };
+    const style = { height, width, flexShrink: 0 };
 
     return (
       <svg height={height} width={width} style={style}>

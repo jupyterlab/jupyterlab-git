@@ -1,31 +1,26 @@
+import { ReactWidget } from '@jupyterlab/apputils';
 import { Contents } from '@jupyterlab/services';
+import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel } from '@lumino/widgets';
-import { ReactWidget } from '@jupyterlab/apputils';
-
+import Slider, { SliderProps } from '@mui/material/Slider';
+import { styled } from '@mui/material/styles';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import { filesize } from 'filesize';
 import * as React from 'react';
 import {
-  useState,
   useCallback,
-  useRef,
+  useEffect,
   useLayoutEffect,
-  useEffect
+  useRef,
+  useState
 } from 'react';
-import { Slider as MUISlider, withStyles } from '@material-ui/core';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-
-import { Git } from '../../tokens';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { Toolbar } from '@jupyterlab/apputils';
-
 import {
   challengerImageClass,
   challengerLabelClass,
+  emptyChallImage,
+  emptyRefImage,
   imageCol,
   imageDiffWidgetClass,
   labelsClass,
@@ -36,29 +31,30 @@ import {
   onionSkinReferenceImage,
   referenceImageClass,
   referenceLabelClass,
+  slider,
   sliderChallengerCircle,
   sliderReferenceCircle,
   swipeBackground,
   swipeChallengerImage,
   swipeContainer,
+  swipeImage,
   swipeReferenceImage,
-  slider,
   tabClass,
   tabIndicatorClass,
   tabsClass,
-  twoUpView,
-  swipeImage,
-  emptyRefImage,
-  emptyChallImage
+  twoUpView
 } from '../../style/ImageDiffStyle';
-import { filesize } from 'filesize';
+import { Git } from '../../tokens';
 
-export const createImageDiff: Git.Diff.ICallback = async (
-  model: Git.Diff.IModel,
-  toolbar?: Toolbar,
-  translator?: ITranslator
-): Promise<ImageDiffWidget> => {
-  const widget = new ImageDiffWidget(model, translator.load('jupyterlab_git'));
+export const createImageDiff: Git.Diff.Factory = async ({
+  model,
+  toolbar,
+  translator
+}): Promise<ImageDiffWidget> => {
+  const widget = new ImageDiffWidget(
+    model,
+    (translator ?? nullTranslator).load('jupyterlab_git')
+  );
   await widget.ready;
   return widget;
 };
@@ -266,26 +262,19 @@ const TwoUp = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
   );
 };
 
-type SliderProps = {
-  value: number;
-  onChange: (
-    event: React.ChangeEvent<unknown>,
-    newValue: number | number[]
-  ) => void;
+type SliderProps_ = Pick<SliderProps, 'onChange' | 'value'> & {
   width: number;
   reversed?: boolean;
 };
 
-const CustomMUISlider = withStyles({
-  root: {
-    color: 'var(--jp-brand-color1)'
-  },
-  thumb: {
+const CustomMUISlider = styled(Slider)({
+  color: 'var(--jp-brand-color1)',
+  '& .MuiSlider-thumb': {
     backgroundColor: 'var(--jp-brand-color1)'
   }
-})(MUISlider);
+});
 
-const Slider = ({ value, onChange, width, reversed }: SliderProps) => {
+const Slider_ = ({ value, onChange, width, reversed }: SliderProps_) => {
   const circleClasses = reversed
     ? [sliderChallengerCircle, sliderReferenceCircle]
     : [sliderReferenceCircle, sliderChallengerCircle];
@@ -307,28 +296,25 @@ const Swipe = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
   const [sliderValue, setSliderValue] = useState(50);
   const [sliderWidth, setSliderWidth] = useState(0);
 
-  const referenceImageRef = useRef(null);
-  const challengerImageRef = useRef(null);
+  const referenceImageRef = useRef<HTMLImageElement>(null);
+  const challengerImageRef = useRef<HTMLImageElement>(null);
 
-  const handleSliderChange = (
-    event: React.ChangeEvent<unknown>,
-    newValue: number | number[]
-  ) => {
+  const handleSliderChange = (event: Event, newValue: number | number[]) => {
     if (typeof newValue === 'number') {
       setSliderValue(newValue);
     }
   };
 
   useLayoutEffect(() => {
-    const refWidth = reference ? referenceImageRef.current.offsetWidth : 0;
-    const challWidth = challenger ? challengerImageRef.current.offsetWidth : 0;
+    const refWidth = reference ? referenceImageRef.current!.offsetWidth : 0;
+    const challWidth = challenger ? challengerImageRef.current!.offsetWidth : 0;
 
     setSliderWidth(Math.max(refWidth, challWidth) - 10);
   }, []);
 
   return (
     <div className={swipeContainer}>
-      <Slider
+      <Slider_
         value={sliderValue}
         onChange={handleSliderChange}
         width={sliderWidth}
@@ -336,6 +322,7 @@ const Swipe = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
       />
       <div className={swipeBackground}>
         <img
+          ref={referenceImageRef}
           src={`data:image/${fileType};base64,${reference}`}
           className={`${swipeImage} ${swipeReferenceImage} ${
             !reference ? emptyRefImage : ''
@@ -347,9 +334,9 @@ const Swipe = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
             width: sliderWidth ? `${sliderWidth}px` : ''
           }}
           alt="Reference"
-          ref={referenceImageRef}
         />
         <img
+          ref={challengerImageRef}
           src={`data:image/${fileType};base64,${challenger}`}
           className={`${swipeImage} ${swipeChallengerImage} ${
             !challenger ? emptyChallImage : ''
@@ -361,7 +348,6 @@ const Swipe = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
             width: sliderWidth ? `${sliderWidth}px` : ''
           }}
           alt="Challenger"
-          ref={challengerImageRef}
         />
       </div>
     </div>
@@ -372,28 +358,27 @@ const OnionSkin = ({ reference, challenger, fileType }: ImageDiffViewProps) => {
   const [sliderValue, setSliderValue] = useState(50);
   const [sliderWidth, setSliderWidth] = useState(40);
 
-  const referenceImageRef = useRef(null);
-  const challengerImageRef = useRef(null);
+  const referenceImageRef = useRef<HTMLImageElement>(null);
+  const challengerImageRef = useRef<HTMLImageElement>(null);
 
-  const handleSliderChange = (
-    event: React.ChangeEvent<unknown>,
-    newValue: number | number[]
-  ) => {
+  const handleSliderChange = (event: Event, newValue: number | number[]) => {
     if (typeof newValue === 'number') {
       setSliderValue(newValue);
     }
   };
 
   useLayoutEffect(() => {
-    const refWidth = reference ? referenceImageRef.current.offsetWidth : 40;
-    const challWidth = challenger ? challengerImageRef.current.offsetWidth : 40;
+    const refWidth = reference ? referenceImageRef.current!.offsetWidth : 40;
+    const challWidth = challenger
+      ? challengerImageRef.current!.offsetWidth
+      : 40;
 
     setSliderWidth(Math.max(refWidth, challWidth) - 10);
   }, []);
 
   return (
     <div className={onionSkinContainer}>
-      <Slider
+      <Slider_
         value={sliderValue}
         onChange={handleSliderChange}
         width={sliderWidth}
@@ -460,11 +445,13 @@ export class ImageDiffWidget extends Panel implements Git.Diff.IDiffWidget {
   }
 
   get isFileResolved(): boolean {
-    return null;
+    // TODO
+    return true;
   }
 
   async getResolvedFile(): Promise<Partial<Contents.IModel>> {
-    return null;
+    // TODO
+    return {};
   }
 
   async refresh(): Promise<void> {

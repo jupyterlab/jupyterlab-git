@@ -1,3 +1,4 @@
+import { Notification } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
 import {
   caretDownIcon,
@@ -6,7 +7,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
-import { Logger } from '../logger';
+import { showError } from '../notifications';
 import {
   commitComparisonBoxStyle,
   commitComparisonDiffStyle
@@ -16,7 +17,7 @@ import {
   sectionAreaStyle,
   sectionHeaderLabelStyle
 } from '../style/GitStageStyle';
-import { Git, IGitExtension, Level } from '../tokens';
+import { Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { CommitDiff } from './CommitDiff';
 
@@ -45,11 +46,6 @@ export interface ICommitComparisonBoxProps {
   header: string;
 
   /**
-   * Extension logger
-   */
-  logger: Logger;
-
-  /**
    * Extension data model.
    */
   model: IGitExtension;
@@ -62,7 +58,7 @@ export interface ICommitComparisonBoxProps {
   /**
    * Returns a callback to be invoked on close.
    */
-  onClose: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  onClose: (event?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 
   /**
    * Returns a callback to be invoked on click to display a file diff.
@@ -76,7 +72,7 @@ export interface ICommitComparisonBoxProps {
     filePath: string,
     isText: boolean,
     previousFilePath?: string
-  ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
+  ) => (event?: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
 /**
@@ -106,7 +102,7 @@ export function CommitComparisonBox(
         return;
       }
 
-      let diffResult: Git.IDiffResult = null;
+      let diffResult: Git.IDiffResult | null = null;
       try {
         diffResult = await model.diff(
           referenceCommit.commit,
@@ -115,19 +111,15 @@ export function CommitComparisonBox(
         if (diffResult.code !== 0) {
           throw new Error(diffResult.message);
         }
-      } catch (err) {
+      } catch (err: any) {
         const msg = `Failed to get the diff for ${referenceCommit.commit} and ${challengerCommit.commit}.`;
         console.error(msg, err);
-        props.logger.log({
-          level: Level.ERROR,
-          message: msg,
-          error: err
-        });
+        Notification.error(msg, showError(err, props.trans));
         return;
       }
       if (diffResult) {
         setFiles(
-          diffResult.result.map(changedFile => {
+          (diffResult.result ?? []).map(changedFile => {
             const pathParts = changedFile.filename.split('/');
             const fileName = pathParts[pathParts.length - 1];
             const filePath = changedFile.filename;
@@ -155,14 +147,18 @@ export function CommitComparisonBox(
         onClick={() => setCollapsed(!collapsed)}
       >
         <button className={changeStageButtonStyle}>
-          {collapsed ? <caretRightIcon.react /> : <caretDownIcon.react />}
+          {collapsed ? (
+            <caretRightIcon.react tag="span" />
+          ) : (
+            <caretDownIcon.react tag="span" />
+          )}
         </button>
 
         <span className={sectionHeaderLabelStyle}>{props.header}</span>
         <ActionButton
           title={props.trans.__('Close')}
           icon={closeIcon}
-          onClick={(event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+          onClick={(event?: React.MouseEvent<HTMLElement, MouseEvent>) => {
             props.onClose(event);
           }}
         ></ActionButton>
@@ -175,7 +171,12 @@ export function CommitComparisonBox(
             files={files}
             insertions={`${totalInsertions}`}
             numFiles={`${files.length}`}
-            onOpenDiff={props.onOpenDiff}
+            onOpenDiff={
+              props.onOpenDiff ??
+              (() => () => {
+                /* no-op */
+              })
+            }
             trans={props.trans}
           ></CommitDiff>
         ) : (

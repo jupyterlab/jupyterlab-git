@@ -63,7 +63,7 @@ export const commitSummaryClass = style({
 
 export const commitDescriptionClass = style({
   marginBottom: '1em',
-  padding: 'var(--jp-code-padding)',
+  padding: 'var(--jp-code-padding) !important',
 
   outline: 'none',
   overflowX: 'auto',
@@ -89,13 +89,12 @@ export const commitDescriptionClass = style({
 });
 
 export const commitButtonClass = style({
-  cursor: 'pointer',
-  color: 'var(--jp-ui-inverse-font-color1)',
-  backgroundColor: 'var(--jp-brand-color1)',
+  color: 'var(--jp-ui-inverse-font-color1) !important',
+  backgroundColor: 'var(--jp-brand-color1) !important',
 
   $nest: {
     '&:hover': {
-      backgroundColor: 'var(--jp-brand-color2)'
+      backgroundColor: 'var(--jp-brand-color2) !important'
     }
   }
 });
@@ -129,9 +128,9 @@ export const commitVariantText = style({
 });
 
 export const commitRoot = style({
-  color: 'var(--jp-ui-font-color1)',
-  fontSize: 'var(--jp-ui-font-size1)',
-  fontFamily: 'var(--jp-ui-font-family)',
+  color: 'var(--jp-ui-font-color1) !important',
+  fontSize: 'var(--jp-ui-font-size1) !important',
+  fontFamily: 'var(--jp-ui-font-family) !important',
   backgroundColor: 'var(--jp-layout-color1)'
 });
 

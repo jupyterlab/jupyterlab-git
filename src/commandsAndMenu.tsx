@@ -3,20 +3,25 @@ import {
   Dialog,
   InputDialog,
   MainAreaWidget,
+  Notification,
   ReactWidget,
   showDialog,
-  showErrorMessage,
-  Toolbar,
-  ToolbarButton
+  showErrorMessage
 } from '@jupyterlab/apputils';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
-import { Contents, ContentsManager } from '@jupyterlab/services';
+import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
-import { ArrayExt, find, toArray } from '@lumino/algorithm';
+import {
+  closeIcon,
+  ContextMenuSvg,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
+import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
@@ -31,7 +36,6 @@ import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
 import { CONTEXT_COMMANDS } from './components/FileList';
 import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
-import { logger } from './logger';
 import { getDiffProvider, GitExtension } from './model';
 import {
   addIcon,
@@ -43,17 +47,13 @@ import {
   removeIcon,
   tagIcon
 } from './style/icons';
-import {
-  CommandIDs,
-  ContextCommandIDs,
-  Git,
-  IGitExtension,
-  Level
-} from './tokens';
+import { CommandIDs, ContextCommandIDs, Git, IGitExtension } from './tokens';
 import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
+import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
+import { showDetails, showError } from './notifications';
 
 export interface IGitCloneArgs {
   /**
@@ -126,6 +126,8 @@ function pluralizedContextLabel(singular: string, plural: string) {
 export function addCommands(
   app: JupyterFrontEnd,
   gitModel: GitExtension,
+  editorFactory: CodeEditor.Factory,
+  languageRegistry: IEditorLanguageRegistry,
   fileBrowserModel: FileBrowserModel,
   settings: ISettingRegistry.ISettings,
   translator: ITranslator
@@ -219,16 +221,17 @@ export function addCommands(
       });
 
       if (result.button.accept) {
-        logger.log({
-          message: trans.__('Initializing…'),
-          level: Level.RUNNING
+        const id = Notification.emit(trans.__('Initializing…'), 'in-progress', {
+          autoClose: false
         });
         try {
           await gitModel.init(currentPath);
           gitModel.pathRepository = currentPath;
-          logger.log({
+          Notification.update({
+            id,
             message: trans.__('Git repository initialized.'),
-            level: Level.SUCCESS
+            type: 'success',
+            autoClose: 5000
           });
         } catch (error) {
           console.error(
@@ -237,10 +240,11 @@ export function addCommands(
             ),
             error
           );
-          logger.log({
+          Notification.update({
+            id,
             message: trans.__('Failed to initialize the Git repository'),
-            level: Level.ERROR,
-            error: error as Error
+            type: 'error',
+            ...showError(error as Error, trans)
           });
         }
       }
@@ -327,6 +331,7 @@ export function addCommands(
     caption: trans.__('Push code to remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
+      let id: string | null = null;
       try {
         let remote;
         let force;
@@ -340,7 +345,7 @@ export function addCommands(
               Dialog.okButton({ label: trans.__('Proceed') })
             ]
           });
-          if (result.button.accept) {
+          if (result.button.accept && result.value) {
             remote = result.value.remoteName;
             force = result.value.force;
           } else {
@@ -348,9 +353,8 @@ export function addCommands(
           }
         }
 
-        logger.log({
-          level: Level.RUNNING,
-          message: trans.__('Pushing…')
+        id = Notification.emit(trans.__('Pushing…'), 'in-progress', {
+          autoClose: false
         });
         const details = await showGitOperationDialog(
           gitModel,
@@ -359,10 +363,11 @@ export function addCommands(
           (args = { remote })
         );
 
-        logger.log({
+        Notification.update({
+          id,
           message: trans.__('Successfully pushed'),
-          level: Level.SUCCESS,
-          details
+          type: 'success',
+          ...showDetails(details, trans)
         });
       } catch (error: any) {
         if (error.name !== 'CancelledError') {
@@ -370,17 +375,23 @@ export function addCommands(
             trans.__('Encountered an error when pushing changes. Error: '),
             error
           );
-          logger.log({
-            message: trans.__('Failed to push'),
-            level: Level.ERROR,
-            error: error as Error
-          });
+
+          const message = trans.__('Failed to push');
+          const options = showError(error as Error, trans);
+          if (id) {
+            Notification.update({
+              id,
+              message,
+              type: 'error',
+              ...options
+            });
+          } else {
+            Notification.error(message, options);
+          }
         } else {
-          return logger.log({
-            //Empty logger to supress the message
-            message: '',
-            level: Level.INFO
-          });
+          if (id) {
+            Notification.dismiss(id);
+          }
         }
       }
     }
@@ -400,23 +411,24 @@ export function addCommands(
         : trans.__('Pull latest code from remote repository'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async args => {
+      let id: string | null = null;
       try {
         if (args.force) {
           await discardAllChanges(gitModel, trans, args.fallback as boolean);
         }
-        logger.log({
-          level: Level.RUNNING,
-          message: trans.__('Pulling…')
+        id = Notification.emit(trans.__('Pulling…'), 'in-progress', {
+          autoClose: false
         });
         const details = await showGitOperationDialog(
           gitModel,
           Operation.Pull,
           trans
         );
-        logger.log({
+        Notification.update({
+          id,
           message: trans.__('Successfully pulled'),
-          level: Level.SUCCESS,
-          details
+          type: 'success',
+          ...showDetails(details, trans)
         });
       } catch (error: any) {
         if (error.name !== 'CancelledError') {
@@ -442,25 +454,27 @@ export function addCommands(
             });
           } else {
             if ((error as any).cancelled) {
-              // Empty message to hide alert
-              logger.log({
-                message: '',
-                level: Level.INFO
-              });
+              if (id) {
+                Notification.dismiss(id);
+              }
             } else {
-              logger.log({
-                message: trans.__('Failed to pull'),
-                level: Level.ERROR,
-                error
-              });
+              const message = trans.__('Failed to pull');
+              const options = showError(error, trans);
+              if (id) {
+                Notification.update({
+                  id,
+                  message,
+                  ...options
+                });
+              } else {
+                Notification.error(message, options);
+              }
             }
           }
         } else {
-          return logger.log({
-            //Empty logger to supress the message
-            message: '',
-            level: Level.INFO
-          });
+          if (id) {
+            Notification.dismiss(id);
+          }
         }
       }
     }
@@ -489,24 +503,34 @@ export function addCommands(
         ]
       });
       if (result.button.accept) {
+        let id: string | null = null;
         try {
-          if (result.value.checked) {
-            logger.log({
-              message: trans.__('Closing all opened files...'),
-              level: Level.RUNNING
-            });
+          if (result.value?.checked) {
+            id = Notification.emit(
+              trans.__('Closing all opened files...'),
+              'in-progress'
+            );
             await fileBrowserModel.manager.closeAll();
           }
-          logger.log({
-            message: trans.__('Resetting...'),
-            level: Level.RUNNING
-          });
-          await gitModel.resetToCommit(gitModel.status.remote);
-          logger.log({
+          const message = trans.__('Resetting...');
+          if (id) {
+            Notification.update({ id, message });
+          } else {
+            id = Notification.emit(message, 'in-progress', {
+              autoClose: false
+            });
+          }
+
+          await gitModel.resetToCommit(gitModel.status.remote ?? undefined);
+          Notification.update({
+            id,
             message: trans.__('Successfully reset'),
-            level: Level.SUCCESS,
-            details: trans.__(
-              'Successfully reset the current branch to its remote state'
+            type: 'success',
+            ...showDetails(
+              trans.__(
+                'Successfully reset the current branch to its remote state'
+              ),
+              trans
             )
           });
         } catch (error) {
@@ -514,11 +538,18 @@ export function addCommands(
             'Encountered an error when resetting the current branch to its remote state. Error: ',
             error
           );
-          logger.log({
-            message: trans.__('Reset failed'),
-            level: Level.ERROR,
-            error
-          });
+          const message = trans.__('Reset failed');
+          const options = showError(error as Error, trans);
+          if (id) {
+            Notification.update({
+              id,
+              type: 'error',
+              message,
+              ...options
+            });
+          } else {
+            Notification.error(message, options);
+          }
         }
       }
     }
@@ -527,9 +558,9 @@ export function addCommands(
   /**
    * Git display diff command - internal command
    *
-   * @params model {Git.Diff.IModel: The diff model to display
-   * @params isText {boolean}: Optional, whether the content is a plain text
-   * @params isMerge {boolean}: Optional, whether the diff is a merge conflict
+   * @params model: The diff model to display
+   * @params isText: Optional, whether the content is a plain text
+   * @params isMerge: Optional, whether the diff is a merge conflict
    * @returns the main area widget or null
    */
   commands.addCommand(CommandIDs.gitShowDiff, {
@@ -548,18 +579,25 @@ export function addCommands(
       );
 
       const buildDiffWidget =
-        getDiffProvider(fullPath) ?? (isText && createPlainTextDiff);
+        getDiffProvider(fullPath) ??
+        (isText &&
+          (options =>
+            createPlainTextDiff({
+              ...options,
+              editorFactory,
+              languageRegistry
+            })));
 
       if (buildDiffWidget) {
         const id = `git-diff-${fullPath}-${model.reference.label}-${model.challenger.label}`;
         const mainAreaItems = shell.widgets('main');
-        let mainAreaItem = mainAreaItems.next();
-        while (mainAreaItem) {
-          if (mainAreaItem.id === id) {
+        let mainAreaItem: Widget | null = null;
+        for (const item of mainAreaItems) {
+          if (item.id === id) {
             shell.activateById(id);
+            mainAreaItem = item;
             break;
           }
-          mainAreaItem = mainAreaItems.next();
         }
 
         if (!mainAreaItem) {
@@ -586,21 +624,23 @@ export function addCommands(
 
           // Get the index of the most recent tab opened
           let tabPosition = -1;
-          const tabBar = find(dockPanel.tabBars(), bar => {
+          const tabBar = Array.from(dockPanel.tabBars()).find(bar => {
             tabPosition = bar.titles.indexOf(diffWidget.title);
             return tabPosition !== -1;
           });
 
           // Pin the preview screen if applicable
-          PreviewMainAreaWidget.pinWidget(tabPosition, tabBar, diffWidget);
+          if (tabBar) {
+            PreviewMainAreaWidget.pinWidget(tabPosition, tabBar, diffWidget);
+          }
 
           // Create the diff widget
           try {
-            const widget = await buildDiffWidget(
+            const widget = await buildDiffWidget({
               model,
-              diffWidget.toolbar,
+              toolbar: diffWidget.toolbar,
               translator
-            );
+            });
 
             diffWidget.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
@@ -631,10 +671,9 @@ export function addCommands(
                     await gitModel.add(model.filename);
                     await gitModel.refresh();
                   } catch (reason) {
-                    logger.log({
-                      message: (reason as Error).message ?? (reason as string),
-                      level: Level.ERROR
-                    });
+                    Notification.error(
+                      (reason as Error).message ?? (reason as string)
+                    );
                   } finally {
                     diffWidget.dispose();
                   }
@@ -689,7 +728,7 @@ export function addCommands(
               );
               if (!targetFile || targetFile.status === 'unmodified') {
                 gitModel.statusChanged.disconnect(maybeClose);
-                mainAreaItem.dispose();
+                mainAreaItem!.dispose();
               }
             };
             gitModel.statusChanged.connect(maybeClose);
@@ -736,7 +775,7 @@ export function addCommands(
         const dialog = ReactWidget.create(
           <BranchPicker
             action="merge"
-            currentBranch={gitModel.currentBranch.name}
+            currentBranch={gitModel.currentBranch?.name ?? ''}
             branches={localBranches}
             onClose={(branch?: string) => {
               dialog.dispose();
@@ -748,35 +787,37 @@ export function addCommands(
 
         Widget.attach(dialog, anchor);
 
-        branch = await waitForDialog.promise;
+        branch = (await waitForDialog.promise) ?? undefined;
       }
 
       if (branch) {
-        logger.log({
-          level: Level.RUNNING,
-          message: trans.__("Merging branch '%1'…", branch)
-        });
+        const id = Notification.emit(
+          trans.__("Merging branch '%1'…", branch),
+          'in-progress'
+        );
         try {
           await gitModel.merge(branch);
         } catch (err) {
-          logger.log({
-            level: Level.ERROR,
+          Notification.update({
+            id,
+            type: 'error',
             message: trans.__(
               "Failed to merge branch '%1' into '%2'.",
               branch,
-              gitModel.currentBranch.name
+              gitModel.currentBranch?.name
             ),
-            error: err as Error
+            ...showError(err as Error, trans)
           });
           return;
         }
 
-        logger.log({
-          level: Level.SUCCESS,
+        Notification.update({
+          id,
+          type: 'success',
           message: trans.__(
             "Branch '%1' merged into '%2'.",
             branch,
-            gitModel.currentBranch.name
+            gitModel.currentBranch?.name
           )
         });
       }
@@ -811,7 +852,7 @@ export function addCommands(
         const dialog = ReactWidget.create(
           <BranchPicker
             action="rebase"
-            currentBranch={gitModel.currentBranch.name}
+            currentBranch={gitModel.currentBranch?.name ?? ''}
             branches={localBranches}
             onClose={(branch?: string) => {
               dialog.dispose();
@@ -823,34 +864,36 @@ export function addCommands(
 
         Widget.attach(dialog, anchor);
 
-        branch = await waitForDialog.promise;
+        branch = (await waitForDialog.promise) ?? undefined;
       }
 
       if (branch) {
-        logger.log({
-          level: Level.RUNNING,
-          message: trans.__("Rebasing current branch onto '%1'…", branch)
-        });
+        const id = Notification.emit(
+          trans.__("Rebasing current branch onto '%1'…", branch),
+          'in-progress'
+        );
         try {
           await gitModel.rebase(branch);
         } catch (err) {
-          logger.log({
-            level: Level.ERROR,
+          Notification.update({
+            id,
+            type: 'error',
             message: trans.__(
               "Failed to rebase branch '%1' onto '%2'.",
-              gitModel.currentBranch.name,
+              gitModel.currentBranch?.name,
               branch
             ),
-            error: err as Error
+            ...showError(err as Error, trans)
           });
           return;
         }
 
-        logger.log({
-          level: Level.SUCCESS,
+        Notification.update({
+          id,
+          type: 'success',
           message: trans.__(
             "Branch '%1' rebase onto '%2'.",
-            gitModel.currentBranch.name,
+            gitModel.currentBranch?.name,
             branch
           )
         });
@@ -892,56 +935,61 @@ export function addCommands(
     execute: async (args: { action?: string } = {}) => {
       const { action } = args;
 
-      if (['continue', 'abort', 'skip'].includes(action)) {
-        const message = (action => {
-          switch (action) {
-            case 'continue':
-              return trans.__('Continue the rebase…');
-            case 'skip':
-              return trans.__('Skip current commit…');
-            case 'abort':
-              return trans.__('Abort the rebase…');
-          }
-        })(action);
+      if (['continue', 'abort', 'skip'].includes(action ?? '')) {
+        const message =
+          (action => {
+            switch (action) {
+              case 'continue':
+                return trans.__('Continue the rebase…');
+              case 'skip':
+                return trans.__('Skip current commit…');
+              case 'abort':
+                return trans.__('Abort the rebase…');
+            }
+          })(action) ?? '';
 
-        logger.log({
-          level: Level.RUNNING,
-          message
+        const id = Notification.emit(message, 'in-progress', {
+          autoClose: false
         });
         try {
           await gitModel.resolveRebase(action as any);
         } catch (err) {
-          const message = (action => {
-            switch (action) {
-              case 'continue':
-                return trans.__('Fail to continue rebasing.');
-              case 'skip':
-                return trans.__('Fail to skip current commit when rebasing.');
-              case 'abort':
-                return trans.__('Fail to abort the rebase.');
-            }
-          })(action);
-          logger.log({
-            level: Level.ERROR,
+          const message =
+            (action => {
+              switch (action) {
+                case 'continue':
+                  return trans.__('Fail to continue rebasing.');
+                case 'skip':
+                  return trans.__('Fail to skip current commit when rebasing.');
+                case 'abort':
+                  return trans.__('Fail to abort the rebase.');
+              }
+            })(action) ?? '';
+          Notification.update({
+            id,
+            type: 'error',
             message,
-            error: err as Error
+            ...showError(err as Error, trans)
           });
           return;
         }
 
-        const message_ = (action => {
-          switch (action) {
-            case 'continue':
-              return trans.__('Commit submitted continuing rebase.');
-            case 'skip':
-              return trans.__('Current commit skipped.');
-            case 'abort':
-              return trans.__('Rebase aborted.');
-          }
-        })(action);
-        logger.log({
-          level: Level.SUCCESS,
-          message: message_
+        const message_ =
+          (action => {
+            switch (action) {
+              case 'continue':
+                return trans.__('Commit submitted continuing rebase.');
+              case 'skip':
+                return trans.__('Current commit skipped.');
+              case 'abort':
+                return trans.__('Rebase aborted.');
+            }
+          })(action) ?? '';
+        Notification.update({
+          id,
+          type: 'success',
+          message: message_,
+          autoClose: 5000
         });
       }
     },
@@ -962,22 +1010,31 @@ export function addCommands(
       const stashMsg = stashDialog.value ?? '';
 
       if (stashDialog.button.accept) {
-        logger.log({
-          level: Level.RUNNING,
-          message: trans.__('Stashing changes')
-        });
+        const id = Notification.emit(
+          trans.__('Stashing changes'),
+          'in-progress',
+          { autoClose: false }
+        );
         try {
           await gitModel.stashChanges(stashMsg);
           // Success
-          logger.log({
+          Notification.update({
+            id,
             message: trans.__('Successfully stashed'),
-            level: Level.SUCCESS
+            type: 'success',
+            autoClose: 5000
           });
         } catch (error: any) {
           console.error(
             'Encountered an error when pulling changes. Error: ',
             error
           );
+          Notification.update({
+            id,
+            message: trans.__('Failed to stash'),
+            type: 'error',
+            ...showError(error as Error, trans)
+          });
         }
       }
     }
@@ -995,16 +1052,12 @@ export function addCommands(
     execute: async args => {
       try {
         await gitModel.refreshStash();
-        logger.log({
-          message: trans.__('Got the stash list'),
-          level: Level.INFO
-        });
+        Notification.info(trans.__('Got the stash list'));
       } catch (err) {
-        logger.log({
-          message: trans.__('Failed to get the stash'),
-          level: Level.ERROR,
-          error: err as Error
-        });
+        Notification.error(
+          trans.__('Failed to get the stash'),
+          showError(err as Error, trans)
+        );
       }
     }
   });
@@ -1049,13 +1102,13 @@ export function addCommands(
     execute: async _ => {
       const domNode = app.contextMenuHitTest((node: HTMLElement) => {
         const nodeId = node.dataset.id;
-        return nodeId && nodeId.substring(0, 8) === 'git-diff';
+        return nodeId?.substring(0, 8) === 'git-diff' ?? false;
       });
       if (!domNode) {
         return;
       }
 
-      const matches = toArray(shell.widgets('main')).filter(
+      const matches = Array.from(shell.widgets('main')).filter(
         widget => widget.id === domNode.dataset.id
       );
 
@@ -1100,6 +1153,10 @@ export function addCommands(
     ),
     execute: async args => {
       const { files } = args as any as CommandArguments.IGitFileDiff;
+      if (!gitModel.pathRepository) {
+        return;
+      }
+
       for (const file of files) {
         const {
           context,
@@ -1153,6 +1210,7 @@ export function addCommands(
                 'POST',
                 {
                   filename,
+                  // @ts-expect-error this is serializable
                   reference: challengerRef
                 }
               ).then(data => data.content);
@@ -1249,14 +1307,14 @@ export function addCommands(
           // If the diff is on the current file and it is updated => diff model changed
           if (diffContext.currentRef === Git.Diff.SpecialRef.WORKING) {
             const updateCurrent = (
-              m: ContentsManager,
+              m: Contents.IManager,
               change: Contents.IChangedArgs
             ) => {
               const updateAt = new Date(
-                change.newValue.last_modified
+                change.newValue?.last_modified ?? 0
               ).valueOf();
               if (
-                change.newValue.path === fullPath &&
+                change.newValue?.path === fullPath &&
                 model.challenger.updateAt !== updateAt
               ) {
                 model.challenger = {
@@ -1382,7 +1440,7 @@ export function addCommands(
             await app.commands.execute('docmanager:delete-file', {
               path: gitModel.getRelativeFilePath(file.to)
             });
-          } catch (reason) {
+          } catch (reason: any) {
             showErrorMessage(trans.__('Deleting %1 failed.', file.to), reason, [
               Dialog.warnButton({ label: trans.__('Dismiss') })
             ]);
@@ -1435,7 +1493,7 @@ export function addCommands(
               // resetting an added file moves it to untracked category => checkout will fail
               await gitModel.checkout({ filename: file.to });
             }
-          } catch (reason) {
+          } catch (reason: any) {
             showErrorMessage(
               trans.__('Discard changes for %1 failed.', file.to),
               reason,
@@ -1564,7 +1622,6 @@ export function addCommands(
       const dialog = ReactWidget.create(
         <NewTagDialogBox
           pastCommits={[commit.commit]}
-          logger={logger}
           model={gitModel}
           trans={trans}
           open={tagDialog}
@@ -1581,35 +1638,34 @@ export function addCommands(
       const tagName = await waitForDialog.promise;
 
       if (tagName) {
-        logger.log({
-          level: Level.RUNNING,
-          message: trans.__(
-            "Create tag pointing to '%1'...",
-            commit.commit.commit_msg
-          )
-        });
+        const id = Notification.emit(
+          trans.__("Create tag pointing to '%1'...", commit.commit.commit_msg),
+          'in-progress'
+        );
         try {
           await gitModel.setTag(tagName, commit.commit.commit);
         } catch (err) {
-          logger.log({
-            level: Level.ERROR,
+          Notification.update({
+            id,
             message: trans.__(
               "Failed to create tag '%1' poining to '%2'.",
               tagName,
               commit
             ),
-            error: err as Error
+            type: 'error',
+            ...showError(err as any, trans)
           });
           return;
         }
 
-        logger.log({
-          level: Level.SUCCESS,
+        Notification.update({
+          id,
           message: trans.__(
             "Created tag '%1' pointing to '%2'.",
             tagName,
             commit
-          )
+          ),
+          type: 'success'
         });
       }
     },
@@ -1741,7 +1797,7 @@ export function addFileBrowserContextMenu(
   contextMenu: ContextMenuSvg,
   trans: TranslationBundle
 ): void {
-  let gitMenu: Menu;
+  let gitMenu: Menu | null = null;
   let _commands: ContextCommandIDs[];
   let _paths: string[];
 
@@ -1749,8 +1805,9 @@ export function addFileBrowserContextMenu(
     const wasShown = menu.isVisible;
     const parent = menu.parentMenu;
 
-    const items = toArray(filebrowser.selectedItems());
+    const items = Array.from(filebrowser.selectedItems());
     const statuses = new Set<Git.Status>(
+      // @ts-expect-error file cannot be undefined or null
       items
         .map(item =>
           model.pathRepository === null
@@ -1764,7 +1821,8 @@ export function addFileBrowserContextMenu(
     const allCommands = new Set<ContextCommandIDs>(
       // flatten the list of lists of commands
       []
-        .concat(...[...statuses].map(status => CONTEXT_COMMANDS[status]))
+        // @ts-expect-error status can index the context commands object
+        .concat(...[...statuses].map(status => CONTEXT_COMMANDS[status!]))
         // filter out the Open and Delete commands as
         // those are not needed in file browser
         .filter(
@@ -1797,16 +1855,17 @@ export function addFileBrowserContextMenu(
       addMenuItems(
         commandsList,
         menu,
-        paths
+        // @ts-expect-error file cannot be undefined or null
+        (paths ?? [])
           .map(path => model.getFile(path))
           // if file cannot be resolved (has no action available),
           // omit the undefined result
-          .filter(file => typeof file !== 'undefined')
+          .filter(file => !['null', 'undefined'].includes(typeof file))
       );
 
       if (wasShown) {
         // show the menu again after downtime for refresh
-        parent.triggerActiveItem();
+        parent!.triggerActiveItem();
       }
       _commands = commandsList;
       _paths = paths;
@@ -1836,7 +1895,7 @@ export function addFileBrowserContextMenu(
       .then(() => {
         if (model.status !== renderedStatus) {
           // update items if needed
-          updateItems(gitMenu);
+          updateItems(gitMenu!);
         }
       })
       .catch(error => {
@@ -1988,7 +2047,7 @@ export async function showGitOperationDialog<T>(
         case Operation.ForcePush:
         case Operation.Pull:
           // If the remote is defined, check it against the remote URI list
-          if (model.currentBranch.upstream) {
+          if (model.currentBranch?.upstream) {
             // Compare the remote against the URI list
             const remoteName = model.currentBranch.upstream.split('/')[0];
             const currentRemoteUrl = await getCurrentRemote(remoteName);
@@ -2034,7 +2093,7 @@ export async function showGitOperationDialog<T>(
           operation,
           trans,
           args,
-          credentials.value,
+          credentials.value ?? undefined,
           true
         );
       } else {

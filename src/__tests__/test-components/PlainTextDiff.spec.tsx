@@ -1,11 +1,9 @@
 import 'jest';
-import { mergeView } from '../../components/diff/mergeview';
 import { DiffModel } from '../../components/diff/model';
 import { PlainTextDiff } from '../../components/diff/PlainTextDiff';
 import { Git } from '../../tokens';
 
 jest.mock('../../git');
-jest.mock('../../components/diff/mergeview');
 
 describe('PlainTextDiff', () => {
   it('should render file diff', async () => {
@@ -25,10 +23,8 @@ describe('PlainTextDiff', () => {
       repositoryPath: 'path'
     });
 
-    const mockMergeView = mergeView as jest.Mocked<typeof mergeView>;
-
     // When
-    const widget = new PlainTextDiff(model);
+    const widget = new PlainTextDiff({ model });
     await widget.ready;
 
     // Then
@@ -36,14 +32,12 @@ describe('PlainTextDiff', () => {
     const terminateTest = new Promise(resolve => {
       resolveTest = resolve;
     });
-    setImmediate(() => {
+    setTimeout(() => {
       expect(widget.node.querySelectorAll('.jp-git-diff-error')).toHaveLength(
         0
       );
-      // merge view was not called as it happens when the widget got attach
-      expect(mockMergeView).not.toHaveBeenCalled();
       resolveTest();
-    });
+    }, 0);
     await terminateTest;
   });
 
@@ -64,10 +58,8 @@ describe('PlainTextDiff', () => {
       repositoryPath: 'path'
     });
 
-    const mockMergeView = mergeView as jest.Mocked<typeof mergeView>;
-
     // When
-    const widget = new PlainTextDiff(model);
+    const widget = new PlainTextDiff({ model });
     await widget.ready;
 
     // Then
@@ -75,13 +67,12 @@ describe('PlainTextDiff', () => {
     const terminateTest = new Promise(resolve => {
       resolveTest = resolve;
     });
-    setImmediate(() => {
+    setTimeout(() => {
       expect(
-        widget.node.querySelector('.jp-git-diff-error').innerHTML
+        widget.node.querySelector('.jp-git-diff-error')!.innerHTML
       ).toContain('TEST_ERROR_MESSAGE');
-      expect(mockMergeView).not.toHaveBeenCalled();
       resolveTest();
-    });
+    }, 0);
     await terminateTest;
   });
 });

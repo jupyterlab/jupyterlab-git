@@ -19,19 +19,6 @@ import { fileLabelStyle } from '../style/FilePathStyle';
 import { Git } from '../tokens';
 import { FilePath } from './FilePath';
 
-// Git status codes https://git-scm.com/docs/git-status
-export const STATUS_CODES = {
-  M: 'Modified',
-  A: 'Added',
-  D: 'Deleted',
-  R: 'Renamed',
-  C: 'Copied',
-  U: 'Updated',
-  B: 'Behind',
-  '?': 'Untracked',
-  '!': 'Ignored'
-};
-
 /**
  * File marker properties
  */
@@ -90,7 +77,7 @@ export interface IFileItemProps {
   /**
    * Action buttons on the file
    */
-  actions?: React.ReactElement;
+  actions?: React.ReactNode;
   /**
    * Callback to open a context menu on the file
    */
@@ -152,24 +139,27 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
   protected _onClick = (event: React.MouseEvent<HTMLInputElement>): void => {
     if (this.props.markBox) {
       if (event.shiftKey) {
-        this.props.markUntilFile(this.props.file);
+        this.props.markUntilFile!(this.props.file);
       } else {
         this.props.model.toggleMark(this.props.file.to);
-        this.props.setSelection(this.props.file, { singleton: true });
+        this.props.setSelection!(this.props.file, { singleton: true });
       }
     } else {
       if (event.ctrlKey || event.metaKey) {
-        this.props.setSelection(this.props.file);
+        this.props.setSelection!(this.props.file);
       } else if (event.shiftKey) {
-        this.props.setSelection(this.props.file, { group: true });
+        this.props.setSelection!(this.props.file, { group: true });
       } else {
-        this.props.setSelection(this.props.file, { singleton: true });
+        this.props.setSelection!(this.props.file, { singleton: true });
       }
     }
   };
 
-  protected _getFileChangedLabel(change: keyof typeof STATUS_CODES): string {
-    return STATUS_CODES[change] || 'Unmodified';
+  protected _getFileChangedLabel(
+    change: string,
+    trans: TranslationBundle
+  ): string {
+    return Private.get_status(change, trans) || trans.__('Unmodified');
   }
 
   protected _getFileChangedLabelClass(change: string): string {
@@ -215,8 +205,8 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
     const status_code = file.status === 'staged' ? file.x : file.y;
     const status =
       file.status === 'unmerged'
-        ? 'Conflicted'
-        : this._getFileChangedLabel(status_code as any);
+        ? this.props.trans.__('Conflicted')
+        : this._getFileChangedLabel(status_code as any, this.props.trans);
 
     return (
       <div
@@ -227,7 +217,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         onContextMenu={
           this.props.contextMenu &&
           (event => {
-            this.props.contextMenu(this.props.file, event);
+            this.props.contextMenu!(this.props.file, event);
           })
         }
         onDoubleClick={this.props.onDoubleClick}
@@ -241,7 +231,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
                 fname={this.props.file.to}
                 stage={this.props.file.status}
                 model={this.props.model}
-                checked={this.props.checked}
+                checked={this.props.checked ?? false}
               />
             )}
             <FilePath
@@ -266,5 +256,26 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         </div>
       </div>
     );
+  }
+}
+
+namespace Private {
+  let i18nCodes: Record<string, string> | null = null;
+  export function get_status(code: string, trans: TranslationBundle): string {
+    if (!i18nCodes) {
+      // Git status codes https://git-scm.com/docs/git-status
+      i18nCodes = {
+        M: trans.__('Modified'),
+        A: trans.__('Added'),
+        D: trans.__('Deleted'),
+        R: trans.__('Renamed'),
+        C: trans.__('Copied'),
+        U: trans.__('Updated'),
+        B: trans.__('Behind'),
+        '?': trans.__('Untracked'),
+        '!': trans.__('Ignored')
+      };
+    }
+    return i18nCodes[code];
   }
 }

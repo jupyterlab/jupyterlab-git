@@ -1,24 +1,29 @@
-import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  Notification,
+  showDialog,
+  showErrorMessage
+} from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ClearIcon from '@material-ui/icons/Clear';
+import ClearIcon from '@mui/icons-material/Clear';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import { Logger } from '../logger';
+import { showError } from '../notifications';
 import {
-  nameClass,
   filterClass,
   filterClearClass,
   filterInputClass,
   filterWrapperClass,
   listItemClass,
   listItemIconClass,
+  nameClass,
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
 import { tagIcon } from '../style/icons';
-import { Git, IGitExtension, Level } from '../tokens';
+import { Git, IGitExtension } from '../tokens';
 import { NewTagDialogBox } from './NewTagDialog';
 
 const ITEM_HEIGHT = 24.8; // HTML element height for a single tag
@@ -30,19 +35,13 @@ const MAX_HEIGHT = 400; // Maximal HTML element height for the tags list
  *
  * @private
  * @param error - error
- * @param logger - the logger
+ * @param id - notificatin id
+ * @param trans - Translation object
  */
-function onTagError(
-  error: any,
-  logger: Logger,
-  trans: TranslationBundle
-): void {
+function onTagError(error: any, id: string, trans: TranslationBundle): void {
   if (error.message.includes('following files would be overwritten')) {
     // Empty log message to hide the executing alert
-    logger.log({
-      message: '',
-      level: Level.INFO
-    });
+    Notification.dismiss(id);
     showDialog({
       title: trans.__('Unable to checkout tag'),
       body: (
@@ -65,10 +64,11 @@ function onTagError(
       buttons: [Dialog.okButton({ label: trans.__('Dismiss') })]
     });
   } else {
-    logger.log({
-      level: Level.ERROR,
+    Notification.update({
+      id,
       message: trans.__('Failed to checkout tag.'),
-      error
+      type: 'error',
+      ...showError(error, trans)
     });
   }
 }
@@ -102,11 +102,6 @@ export interface ITagMenuProps {
    * List of prior commits.
    */
   pastCommits: Git.ISingleCommitInfo[];
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -269,7 +264,6 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
     return (
       <NewTagDialogBox
         pastCommits={this.props.pastCommits}
-        logger={this.props.logger}
         model={this.props.model}
         trans={this.props.trans}
         open={this.state.tagDialog}
@@ -333,9 +327,6 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
    * @returns callback
    */
   private _onTagClickFactory(tag: string) {
-    const self = this;
-    return onClick;
-
     /**
      * Callback invoked upon clicking a tag.
      *
@@ -343,32 +334,36 @@ export class TagMenu extends React.Component<ITagMenuProps, ITagMenuState> {
      * @param event - event object
      * @returns promise which resolves upon attempting to switch tags
      */
-    async function onClick(): Promise<void> {
-      if (!self.props.branching) {
+    const onClick = async (): Promise<void> => {
+      if (!this.props.branching) {
         showErrorMessage(
-          self.props.trans.__('Checkout tags is disabled'),
-          self.props.trans.__(
+          this.props.trans.__('Checkout tags is disabled'),
+          this.props.trans.__(
             'The repository contains files with uncommitted changes. Please commit or discard these changes before switching to a tag.'
           )
         );
         return;
       }
 
-      self.props.logger.log({
-        level: Level.RUNNING,
-        message: self.props.trans.__('Checking tag out…')
-      });
+      const id = Notification.emit(
+        this.props.trans.__('Checking tag out…'),
+        'in-progress',
+        { autoClose: false }
+      );
 
       try {
-        await self.props.model.checkoutTag(tag);
+        await this.props.model.checkoutTag(tag);
       } catch (err) {
-        return onTagError(err, self.props.logger, self.props.trans);
+        return onTagError(err, id, this.props.trans);
       }
 
-      self.props.logger.log({
-        level: Level.SUCCESS,
-        message: self.props.trans.__('Tag checkout.')
+      Notification.update({
+        id,
+        message: this.props.trans.__('Tag checkout.'),
+        type: 'success',
+        autoClose: 5000
       });
-    }
+    };
+    return onClick;
   }
 }

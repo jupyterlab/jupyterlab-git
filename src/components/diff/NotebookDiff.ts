@@ -5,31 +5,26 @@
 
 /* eslint-disable no-inner-declarations */
 
-import { Toolbar } from '@jupyterlab/apputils';
-import { Contents } from '@jupyterlab/services';
 import { INotebookContent } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Contents } from '@jupyterlab/services';
+import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
 import { IDiffEntry } from 'nbdime/lib/diff/diffentries';
-import { IMergeDecision } from 'nbdime/lib/merge/decisions';
-import { NotebookMergeModel } from 'nbdime/lib/merge/model';
-import { CELLMERGE_CLASS, NotebookMergeWidget } from 'nbdime/lib/merge/widget';
-import { UNCHANGED_MERGE_CLASS } from 'nbdime/lib/merge/widget/common';
 import { NotebookDiffModel } from 'nbdime/lib/diff/model';
 import { CELLDIFF_CLASS, NotebookDiffWidget } from 'nbdime/lib/diff/widget';
 import {
   CHUNK_PANEL_CLASS,
   UNCHANGED_DIFF_CLASS
 } from 'nbdime/lib/diff/widget/common';
+import { IMergeDecision } from 'nbdime/lib/merge/decisions';
+import { NotebookMergeModel } from 'nbdime/lib/merge/model';
+import { CELLMERGE_CLASS, NotebookMergeWidget } from 'nbdime/lib/merge/widget';
+import { UNCHANGED_MERGE_CLASS } from 'nbdime/lib/merge/widget/common';
 import { requestAPI } from '../../git';
 import { Git } from '../../tokens';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
 
 /**
  * Class of the outermost widget, the draggable tab
@@ -79,14 +74,16 @@ interface INbdimeMergeDiff {
  * @param toolbar MainAreaWidget toolbar
  * @returns Diff notebook widget
  */
-export const createNotebookDiff = async (
-  model: Git.Diff.IModel,
-  renderMime: IRenderMimeRegistry,
-  toolbar?: Toolbar,
-  translator?: ITranslator
-): Promise<NotebookDiff> => {
+export const createNotebookDiff = async ({
+  model,
+  renderMime,
+  toolbar,
+  translator
+}: Git.Diff.IFactoryOptions & {
+  renderMime: IRenderMimeRegistry;
+}): Promise<NotebookDiff> => {
   // Create the notebook diff view
-  const trans = translator.load('jupyterlab_git');
+  const trans = (translator ?? nullTranslator).load('jupyterlab_git');
   const diffWidget = new NotebookDiff(model, renderMime, trans);
   diffWidget.addClass('jp-git-diff-root');
 
@@ -107,7 +104,10 @@ export const createNotebookDiff = async (
 
     if (model.hasConflict) {
       // Move merge notebook controls in the toolbar
-      toolbar.addItem('clear-outputs', diffWidget.nbdimeWidget.widgets[0]);
+      toolbar.addItem(
+        'clear-outputs',
+        diffWidget.nbdimeWidget.widgets[0] as any
+      );
     }
 
     // Connect toolbar checkbox and notebook diff widget
@@ -172,7 +172,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
    * Helper to determine if a notebook merge should be shown.
    */
   private get _hasConflict(): boolean {
-    return this._model.hasConflict;
+    return this._model.hasConflict ?? false;
   }
 
   /**
@@ -265,13 +265,13 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
       this._nbdWidget = await createView(
         challengerContent,
         referenceContent,
-        baseContent
+        baseContent ?? ''
       );
 
       while (this._scroller.widgets.length > 0) {
         this._scroller.widgets[0].dispose();
       }
-      this._scroller.addWidget(this._nbdWidget);
+      this._scroller.addWidget(this._nbdWidget as any);
       try {
         await this._nbdWidget.init();
 
@@ -300,10 +300,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
     });
 
     const model = new NotebookDiffModel(data.base, data.diff);
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return new NotebookDiffWidget(model, this._renderMime);
+    return new NotebookDiffWidget({ model, rendermime: this._renderMime });
   }
 
   protected async createMergeView(
@@ -318,10 +315,7 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
     });
 
     const model = new NotebookMergeModel(data.base, data.merge_decisions);
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return new NotebookMergeWidget(model, this._renderMime);
+    return new NotebookMergeWidget({ model, rendermime: this._renderMime });
   }
 
   /**
@@ -360,8 +354,10 @@ export class NotebookDiff extends Panel implements Git.Diff.IDiffWidget {
   protected _isReady: Promise<void>;
   protected _lastSerializeModel: INotebookContent | null = null;
   protected _model: Git.Diff.IModel;
+  // @ts-expect-error Complex initialization
   protected _nbdWidget: NotebookMergeWidget | NotebookDiffWidget;
   protected _renderMime: IRenderMimeRegistry;
+  // @ts-expect-error Complex initialization
   protected _scroller: Panel;
   protected _trans: TranslationBundle;
 }
@@ -383,11 +379,10 @@ namespace Private {
     node.className = 'jp-git-diff-header';
     node.innerHTML = `<div class="${bannerClass}">
         <span>${localLabel}</span>
-        <span class="jp-spacer"></span>
         ${
           hasConflict
             ? // Add extra space during notebook merge view
-              `<span>${baseLabel}</span><span class="jp-spacer"></span>`
+              `<span>${baseLabel}</span>`
             : ''
         }
         <span>${remoteLabel}</span>
