@@ -2,6 +2,34 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.44.0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.43.0...bb1da19878be3e92c7652d999c90eb93fbd8df87))
+
+### Enhancements made
+
+- Push tags [#1279](https://github.com/jupyterlab/jupyterlab-git/pull/1279) ([@fcollonval](https://github.com/fcollonval))
+- Add context menu on commits in the HistorySidebar with add tag command [#1277](https://github.com/jupyterlab/jupyterlab-git/pull/1277) ([@DenisaCG](https://github.com/DenisaCG))
+- Show tags in history sidebar [#1272](https://github.com/jupyterlab/jupyterlab-git/pull/1272) ([@DenisaCG](https://github.com/DenisaCG))
+
+### Maintenance and upkeep improvements
+
+- Bump @babel/traverse from 7.22.10 to 7.23.2 [#1276](https://github.com/jupyterlab/jupyterlab-git/pull/1276) ([@dependabot](https://github.com/dependabot))
+- Bump postcss from 8.4.6 to 8.4.31 in /ui-tests [#1275](https://github.com/jupyterlab/jupyterlab-git/pull/1275) ([@dependabot](https://github.com/dependabot))
+- Bump postcss from 8.4.27 to 8.4.31 [#1274](https://github.com/jupyterlab/jupyterlab-git/pull/1274) ([@dependabot](https://github.com/dependabot))
+
+### Documentation improvements
+
+- Add constrain in install instructions [#1271](https://github.com/jupyterlab/jupyterlab-git/pull/1271) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-09-25&to=2023-10-24&type=c))
+
+[@DenisaCG](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ADenisaCG+updated%3A2023-09-25..2023-10-24&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2023-09-25..2023-10-24&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2023-09-25..2023-10-24&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2023-09-25..2023-10-24&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Awelcome+updated%3A2023-09-25..2023-10-24&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.43.0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.42.0...07ee168441fe5b5b8094989ac9168c91ef1dd974))
@@ -20,8 +48,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-08-10&to=2023-09-25&type=c))
 
 [@DenisaCG](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ADenisaCG+updated%3A2023-08-10..2023-09-25&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2023-08-10..2023-09-25&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2023-08-10..2023-09-25&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Awelcome+updated%3A2023-08-10..2023-09-25&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.42.0
 
