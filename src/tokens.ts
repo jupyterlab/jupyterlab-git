@@ -1064,6 +1064,9 @@ export namespace Git {
     files?: IStatusFileResult[];
   }
 
+  /**
+   * Stash entry given by 
+   */
   export interface IStashEntry {
     /**
      * Stash index

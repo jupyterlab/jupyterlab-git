@@ -204,8 +204,8 @@ async def test_git_stash_show_without_index(mock_execute, jp_fetch, jp_root_dir)
     assert payload == {
         "code": 0,
         "stashes": [
-            {"index": "0", "branch": "main", "message": "testsd"},
-            {"index": "1", "branch": "main", "message": "bea6895 first commit"},
+            {"index": 0, "branch": "main", "message": "testsd"},
+            {"index": 1, "branch": "main", "message": "bea6895 first commit"},
         ],
     }
 

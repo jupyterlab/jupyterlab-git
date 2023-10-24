@@ -2010,7 +2010,9 @@ class Git:
         for line in output.strip("\n").splitlines():
             match = GIT_STASH_LIST.match(line)
             if match is not None:
-                stashes.append(match.groupdict())
+                d = match.groupdict()
+                d['index'] = int(d['index'])
+                stashes.append(d)
 
         return {"code": code, "stashes": stashes}
 

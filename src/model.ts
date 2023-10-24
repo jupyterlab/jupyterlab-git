@@ -1669,7 +1669,7 @@ export class GitExtension implements IGitExtension {
         Git.IStashShowResult[]
       >('git:refresh:stash', () =>
         Promise.all(
-          stashList.map(({ index }) =>
+          response.stashes.map(({ index }) =>
             requestAPI<Git.IStashShowResult>(
               URLExt.join(path, 'stash') + `?index=${index}`,
               'GET'
@@ -1678,7 +1678,10 @@ export class GitExtension implements IGitExtension {
         )
       );
       const stashList: Git.IStash[] = response.stashes.map((s, index) =>
-        Object.assign(s, { files: allStashFiles[index].files })
+        Object.assign(s, {
+          index: parseInt(s.index, 10),
+          files: allStashFiles[index].files
+        })
       );
 
       if (!this.isStashDeepEqual(stashList, this._stash)) {
