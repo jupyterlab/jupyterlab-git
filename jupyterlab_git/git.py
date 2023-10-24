@@ -1235,11 +1235,14 @@ class Git:
         auth=None,
         set_upstream=False,
         force=False,
+        tags=True,
     ):
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
         """
         command = ["git", "push"]
+        if tags:
+            command.append("--tags")
         if force:
             command.append("--force-with-lease")
         if set_upstream:
