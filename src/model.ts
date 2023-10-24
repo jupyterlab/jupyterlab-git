@@ -1679,7 +1679,6 @@ export class GitExtension implements IGitExtension {
       );
       const stashList: Git.IStash[] = response.stashes.map((s, index) =>
         Object.assign(s, {
-          index: parseInt(s.index, 10),
           files: allStashFiles[index].files
         })
       );
