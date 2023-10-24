@@ -1064,31 +1064,6 @@ export namespace Git {
     files?: IStatusFileResult[];
   }
 
-  /**
-   * Interface for Git Stash List request result
-   */
-  export interface IStashListResult {
-    /**
-     * Command error message
-     */
-    message: string;
-    /**
-     * Executed command
-     */
-    command: string;
-    /**
-     * Command result code
-     */
-    code: number;
-    /**
-     * Command results
-     */
-    results?: IStashListResult[];
-  }
-
-  /**
-   * Git Stash interface
-   */
   export interface IStashEntry {
     /**
      * Stash index
@@ -1102,16 +1077,45 @@ export namespace Git {
      * Stash message
      */
     message: string;
+  }
+
+  /**
+   * Interface for Git Stash List request result
+   */
+  export interface IStashListResult {
     /**
-     * Stashed files
+     * Command result code
+     */
+    code: number;
+    /**
+     * Repository stashes
+     */
+    stashes: IStashEntry[];
+  }
+
+  /**
+   * Interface for Git Stash show request result
+   */
+  export interface IStashShowResult {
+    /**
+     * Command result code
+     */
+    code: number;
+    /**
+     * Stash files
      */
     files: string[];
   }
 
   /**
-   * List of stashes
+   * Git Stash interface
    */
-  export type IStash = IStashEntry[];
+  export interface IStash extends IStashEntry {
+    /**
+     * Stashed files
+     */
+    files: string[];
+  }
 
   /** Interface for changed_files request result
    * lists the names of files that have differences between two commits
