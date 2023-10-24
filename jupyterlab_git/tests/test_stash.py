@@ -42,13 +42,6 @@ async def test_git_stash_without_message(mock_execute, jp_fetch, jp_root_dir):
     )
 
     assert response.code == 201
-    # json.loads turns a string into a dictionary
-    payload = json.loads(response.body)
-    assert payload == {
-        "code": 0,
-        "message": "",
-        "command": " ".join(command),
-    }
 
 
 @patch("jupyterlab_git.git.execute")
@@ -115,12 +108,6 @@ async def test_git_stash_with_message(mock_execute, jp_fetch, jp_root_dir):
     )
 
     assert response.code == 201
-    payload = json.loads(response.body)
-    assert payload == {
-        "code": 0,
-        "message": "",
-        "command": " ".join(command),
-    }
 
 
 # Git Stash - GET
@@ -134,7 +121,13 @@ async def test_git_stash_show_with_index(mock_execute, jp_fetch, jp_root_dir):
     local_path = jp_root_dir / "test_path"
     stash_index = 1
 
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = maybe_future(
+        (
+            0,
+            "node_modules/playwright-core/README.md\nnode_modules/playwright-core/package.json\n",
+            "",
+        )
+    )
 
     # When
     response = await jp_fetch(
@@ -164,8 +157,10 @@ async def test_git_stash_show_with_index(mock_execute, jp_fetch, jp_root_dir):
     payload = json.loads(response.body)
     assert payload == {
         "code": 0,
-        "message": "",
-        "command": " ".join(command),
+        "files": [
+            "node_modules/playwright-core/README.md",
+            "node_modules/playwright-core/package.json",
+        ],
     }
 
 
@@ -176,7 +171,13 @@ async def test_git_stash_show_without_index(mock_execute, jp_fetch, jp_root_dir)
     env["GIT_TERMINAL_PROMPT"] = "0"
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = maybe_future(
+        (
+            0,
+            "stash@{0}: On main: testsd\nstash@{1}: WIP on main: bea6895 first commit\n",
+            "",
+        )
+    )
 
     # When
     response = await jp_fetch(
@@ -202,8 +203,10 @@ async def test_git_stash_show_without_index(mock_execute, jp_fetch, jp_root_dir)
     payload = json.loads(response.body)
     assert payload == {
         "code": 0,
-        "message": "",
-        "command": " ".join(command),
+        "stashes": [
+            {"index": "0", "branch": "main", "message": "testsd"},
+            {"index": "1", "branch": "main", "message": "bea6895 first commit"},
+        ],
     }
 
 

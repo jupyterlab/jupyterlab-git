@@ -47,7 +47,9 @@ GIT_REBASING_BRANCH = re.compile(r"^\(no branch, rebasing (?P<branch>.+?)\)$")
 # Git cache as a credential helper
 GIT_CREDENTIAL_HELPER_CACHE = re.compile(r"cache\b")
 # Parse git stash list
-GIT_STASH_LIST = re.compile(r"^stash@{(?P<index>\d+)}: (WIP on|On) (?P<branch>.+?): (?P<message>.+?)$")
+GIT_STASH_LIST = re.compile(
+    r"^stash@{(?P<index>\d+)}: (WIP on|On) (?P<branch>.+?): (?P<message>.+?)$"
+)
 
 execution_lock = tornado.locks.Lock()
 
@@ -1987,7 +1989,8 @@ class Git:
         # code 0: no changes to stash
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
-        return {"code": code, "message": output, "command": " ".join(cmd)}
+        
+        return {"code": code, "message": output.strip()}
 
     async def stash_list(self, path: str) -> dict:
         """
@@ -2003,7 +2006,13 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
-        return {"code": code, "message": output}
+        stashes = []
+        for line in output.strip("\n").splitlines():
+            match = GIT_STASH_LIST.match(line)
+            if match is not None:
+                stashes.append(match.groupdict())
+
+        return {"code": code, "stashes": stashes}
 
     async def stash_show(self, path: str, index: int) -> dict:
         """
@@ -2022,7 +2031,9 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
-        return {"code": code, "message": output}
+        files = output.strip("\n").splitlines()
+
+        return {"code": code, "files": files}
 
     async def pop_stash(self, path: str, stash_index: Optional[int] = None) -> dict:
         """
@@ -2046,8 +2057,8 @@ class Git:
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
-
-        return {"code": code, "message": output}
+        
+        return {"code": code, "message": output.strip()}
 
     async def drop_stash(self, path, stash_index: Optional[int] = None) -> dict:
         """
@@ -2072,8 +2083,8 @@ class Git:
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
-
-        return {"code": code, "message": output, "command": " ".join(cmd)}
+        
+        return {"code": code, "message": output.strip()}
 
     async def apply_stash(self, path: str, stash_index: Optional[int] = None) -> dict:
         """
@@ -2099,8 +2110,8 @@ class Git:
         # error:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
-
-        return {"code": code, "message": output, "command": " ".join(cmd)}
+        
+        return {"code": code, "message": output.strip()}
 
     @property
     def excluded_paths(self) -> List[str]:

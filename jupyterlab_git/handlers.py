@@ -964,8 +964,7 @@ class GitStashHandler(GitHandler):
             self.set_status(201)
         else:
             self.set_status(500)
-
-        self.finish(json.dumps(response))
+            self.finish(json.dumps(response))
 
     @tornado.web.authenticated
     async def delete(self, path: str = ""):
@@ -983,9 +982,10 @@ class GitStashHandler(GitHandler):
 
         if response["code"] == 0:
             self.set_status(204)
+            self.finish()
         else:
             self.set_status(500)
-        self.finish()
+            self.finish(json.dumps(response))
 
     @tornado.web.authenticated
     async def get(self, path: str = ""):
@@ -1048,8 +1048,7 @@ class GitStashApplyHandler(GitHandler):
             self.set_status(201)
         else:
             self.set_status(500)
-
-        self.finish(json.dumps(response))
+            self.finish(json.dumps(response))
 
 
 def setup_handlers(web_app):
