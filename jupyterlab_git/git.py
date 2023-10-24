@@ -46,6 +46,8 @@ GIT_DETACHED_HEAD = re.compile(r"^\(HEAD detached at (?P<commit>.+?)\)$")
 GIT_REBASING_BRANCH = re.compile(r"^\(no branch, rebasing (?P<branch>.+?)\)$")
 # Git cache as a credential helper
 GIT_CREDENTIAL_HELPER_CACHE = re.compile(r"cache\b")
+# Parse git stash list
+GIT_STASH_LIST = re.compile(r"^stash@{(?P<index>\d+)}: (WIP on|On) (?P<branch>.+?): (?P<message>.+?)$")
 
 execution_lock = tornado.locks.Lock()
 
@@ -2001,7 +2003,7 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
-        return {"code": code, "message": output, "command": " ".join(cmd)}
+        return {"code": code, "message": output}
 
     async def stash_show(self, path: str, index: int) -> dict:
         """
@@ -2020,7 +2022,7 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
-        return {"code": code, "message": output, "command": " ".join(cmd)}
+        return {"code": code, "message": output}
 
     async def pop_stash(self, path: str, stash_index: Optional[int] = None) -> dict:
         """
@@ -2045,7 +2047,7 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
-        return {"code": code, "message": output, "command": " ".join(cmd)}
+        return {"code": code, "message": output}
 
     async def drop_stash(self, path, stash_index: Optional[int] = None) -> dict:
         """
