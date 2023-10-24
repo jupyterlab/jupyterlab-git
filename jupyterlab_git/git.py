@@ -1989,7 +1989,7 @@ class Git:
         # code 0: no changes to stash
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
-        
+
         return {"code": code, "message": output.strip()}
 
     async def stash_list(self, path: str) -> dict:
@@ -2011,7 +2011,7 @@ class Git:
             match = GIT_STASH_LIST.match(line)
             if match is not None:
                 d = match.groupdict()
-                d['index'] = int(d['index'])
+                d["index"] = int(d["index"])
                 stashes.append(d)
 
         return {"code": code, "stashes": stashes}
@@ -2059,7 +2059,7 @@ class Git:
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
-        
+
         return {"code": code, "message": output.strip()}
 
     async def drop_stash(self, path, stash_index: Optional[int] = None) -> dict:
@@ -2085,7 +2085,7 @@ class Git:
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
-        
+
         return {"code": code, "message": output.strip()}
 
     async def apply_stash(self, path: str, stash_index: Optional[int] = None) -> dict:
@@ -2112,7 +2112,7 @@ class Git:
         # error:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
-        
+
         return {"code": code, "message": output.strip()}
 
     @property

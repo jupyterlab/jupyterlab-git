@@ -1065,7 +1065,7 @@ export namespace Git {
   }
 
   /**
-   * Stash entry given by 
+   * Stash entry given by
    */
   export interface IStashEntry {
     /**
