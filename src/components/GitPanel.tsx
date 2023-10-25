@@ -788,15 +788,15 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     try {
       const author = await this._hasIdentity(this.props.model.pathRepository);
 
-      const message = this.props.trans.__('Committing changes...');
+      const notificationMsg = this.props.trans.__('Committing changes...');
       if (id !== null) {
         Notification.update({
           id,
-          message,
+          message: notificationMsg,
           autoClose: false
         });
       } else {
-        id = Notification.emit(message, 'in-progress', { autoClose: false });
+        id = Notification.emit(notificationMsg, 'in-progress', { autoClose: false });
       }
 
       if (this.state.commitAmend) {
