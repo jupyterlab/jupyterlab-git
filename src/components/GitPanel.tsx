@@ -796,7 +796,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           autoClose: false
         });
       } else {
-        id = Notification.emit(notificationMsg, 'in-progress', { autoClose: false });
+        id = Notification.emit(notificationMsg, 'in-progress', {
+          autoClose: false
+        });
       }
 
       if (this.state.commitAmend) {
