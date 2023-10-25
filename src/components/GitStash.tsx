@@ -47,7 +47,8 @@ export interface IGitStashProps {
   /**
    * Files in the group
    */
-  stash: Git.IStash;
+  stash: Git.IStash[];
+
   /**
    * HTML element height
    */

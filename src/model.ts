@@ -266,14 +266,14 @@ export class GitExtension implements IGitExtension {
    *  A signal emitted when the Git stash changes.
    *
    */
-  get stashChanged(): ISignal<IGitExtension, IChangedArgs<Git.IStash>> {
+  get stashChanged(): ISignal<IGitExtension, IChangedArgs<Git.IStash[]>> {
     return this._stashChanged;
   }
 
   /**
    * The repository stash
    */
-  get stash(): Git.IStash {
+  get stash(): Git.IStash[] {
     return this._stash;
   }
 
@@ -1655,64 +1655,36 @@ export class GitExtension implements IGitExtension {
 
     // Get the entire stash list
     try {
-      const stashListData =
-        await this._taskHandler.execute<Git.IStashListResult>(
-          'git:refresh:stash',
-          async () => {
-            return await requestAPI<Git.IStashListResult>(
-              URLExt.join(path, 'stash'),
-              'GET'
-            );
-          }
-        );
-
-      // Contains the raw message
-      const stashMsgList = stashListData.message.split('\n').slice(0, -1);
-
-      const stashList: Git.IStashEntry[] = [];
-      for (const index in stashMsgList) {
-        const stashInfo = stashMsgList[index].split(':');
-
-        const WIPMatch = stashInfo[1].match(/WIP on (.*)/);
-        const branchName = WIPMatch ? WIPMatch[1] : stashInfo[1].split(' ')[2];
-
-        const stashMsg = stashInfo[2].replace(/^\s+/, '');
-
-        stashList.push({
-          index: parseInt(index, 10),
-          branch: branchName,
-          message: stashMsg,
-          files: []
-        });
-      }
-      const fileData = await this._taskHandler.execute<Git.IStashListResult>(
+      const response = await this._taskHandler.execute<Git.IStashListResult>(
         'git:refresh:stash',
         async () => {
-          const results = await Promise.all(
-            stashList.map(({ index }) =>
-              requestAPI<Git.IStashListResult>(
-                URLExt.join(path, 'stash') + `?index=${index}`,
-                'GET'
-              )
-            )
+          return await requestAPI<Git.IStashListResult>(
+            URLExt.join(path, 'stash'),
+            'GET'
           );
-          return {
-            message: 'Stash list result',
-            command: 'git:refresh:stash',
-            code: 0,
-            results
-          };
         }
       );
 
-      stashList.forEach((stash, index) => {
-        stash.files.push(
-          ...(fileData.results ?? [])[index].message.split('\n').slice(0, -1)
-        );
-      });
+      const allStashFiles = await this._taskHandler.execute<
+        Git.IStashShowResult[]
+      >('git:refresh:stash', () =>
+        Promise.all(
+          response.stashes.map(({ index }) =>
+            requestAPI<Git.IStashShowResult>(
+              URLExt.join(path, 'stash') + `?index=${index}`,
+              'GET'
+            )
+          )
+        )
+      );
+      const stashList: Git.IStash[] = response.stashes.map((s, index) =>
+        Object.assign(s, {
+          files: allStashFiles[index].files
+        })
+      );
 
       if (!this.isStashDeepEqual(stashList, this._stash)) {
-        const change: IChangedArgs<Git.IStash> = {
+        const change: IChangedArgs<Git.IStash[]> = {
           name: 'stash',
           newValue: stashList,
           oldValue: this._stash
@@ -1772,10 +1744,7 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  protected isStashDeepEqual(
-    a: Git.IStashEntry[],
-    b: Git.IStashEntry[]
-  ): boolean {
+  protected isStashDeepEqual(a: Git.IStash[], b: Git.IStash[]): boolean {
     if (a?.length !== b?.length) {
       return false;
     }
@@ -2212,7 +2181,7 @@ export class GitExtension implements IGitExtension {
     state: Git.State.DEFAULT,
     files: []
   };
-  private _stash: Git.IStash = [];
+  private _stash: Git.IStash[] = [];
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];
   private _tagsList: Git.ITag[] = [];
@@ -2251,7 +2220,7 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     IChangedArgs<string | null>
   >(this);
-  private _stashChanged = new Signal<IGitExtension, IChangedArgs<Git.IStash>>(
+  private _stashChanged = new Signal<IGitExtension, IChangedArgs<Git.IStash[]>>(
     this
   );
   private _statusChanged = new Signal<IGitExtension, Git.IStatus>(this);

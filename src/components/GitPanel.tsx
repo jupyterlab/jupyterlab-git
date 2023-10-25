@@ -154,7 +154,7 @@ export interface IGitPanelState {
    * Stashed files
    *
    */
-  stash: Git.IStash;
+  stash: Git.IStash[];
 }
 
 /**

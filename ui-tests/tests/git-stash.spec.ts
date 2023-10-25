@@ -38,10 +38,11 @@ test.describe('Git Stash Commands', () => {
   test('should drop a single stash entry when `stash drop` button is clicked', async ({
     page
   }) => {
+    const stashSection = page.getByText('Stash(2)');
+    await stashSection.waitFor();
     // Open the stash list
     await page.getByText('Stash', { exact: true }).click();
     // Hover on the stash list
-    const stashSection = page.getByText('Stash(2)');
     await stashSection.hover();
 
     // Click drop stash on the first item
