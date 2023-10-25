@@ -8,7 +8,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
 import { TaskHandler } from './taskhandler';
 import { Git, IGitExtension } from './tokens';
-import { arraysAreEqual, decodeStage } from './utils';
+import { decodeStage } from './utils';
 
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
@@ -1473,20 +1473,6 @@ export class GitExtension implements IGitExtension {
           );
         }
       );
-      if (data?.relative_path && data?.path) {
-        if (data?.relative_path === '.' && data.path !== '') {
-          return null;
-        } else {
-          if (
-            !arraysAreEqual(
-              data.relative_path.split('\\'),
-              data.path.split('/').slice(0, -1) // slicing accounts for additional "/" at end of path
-            )
-          ) {
-            return null;
-          }
-        }
-      }
       return data.path ?? null;
     } catch (error) {
       if (

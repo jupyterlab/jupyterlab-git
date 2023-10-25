@@ -903,10 +903,6 @@ export namespace Git {
      * Relative path of the current folder within its Git repository
      */
     path?: string;
-    /**
-     * Relative path of the root folder
-     */
-    relative_path?: string;
   }
 
   /**

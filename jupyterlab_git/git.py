@@ -957,12 +957,21 @@ class Git:
         )
 
         if code == 0:
+            relative_git_path = my_output.strip("\n")
+            relative_server_path = os.path.relpath(path, contents_manager.root_dir)
+
             result = {
                 "code": code,
-                "path": my_output.strip("\n"),
-                "relative_path": os.path.relpath(path, contents_manager.root_dir),
+                "path": relative_git_path,
+                "relative_path": relative_server_path,
             }
-            return result
+
+            if relative_server_path == "." and relative_git_path == "":
+                return result
+            elif relative_git_path.split("/")[:-1] == relative_server_path.split("\\"):
+                return result
+            else:
+                return {"code": code, "path": None}
         else:
             # Handle special case where cwd not inside a git repo
             lower_error = my_error.lower()
