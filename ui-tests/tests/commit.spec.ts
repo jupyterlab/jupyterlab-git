@@ -18,19 +18,25 @@ test.describe('Commit', () => {
   });
 
   test('should commit a change', async ({ page }) => {
-
-    await page.getByRole('listitem', { name: 'Name: another_file.txt' }).dblclick();
-    await page.getByLabel('another_file.txt').getByRole('textbox').fill('My new content')
+    await page
+      .getByRole('listitem', { name: 'Name: another_file.txt' })
+      .dblclick();
+    await page
+      .getByLabel('another_file.txt')
+      .getByRole('textbox')
+      .fill('My new content');
     await page.keyboard.press('Control+s');
-    
-    await page.getByRole('tab', {name: 'Git'}).click();
+
+    await page.getByRole('tab', { name: 'Git' }).click();
     await page.getByTitle('another_file.txt • Modified').hover();
     await page.getByRole('button', { name: 'Stage this change' }).click();
-    
-    await page.getByPlaceholder('Summary (Ctrl+Enter to commit)').fill('My new commit');
-    
+
+    await page
+      .getByPlaceholder('Summary (Ctrl+Enter to commit)')
+      .fill('My new commit');
+
     await page.getByRole('button', { name: 'Commit', exact: true }).click();
-    
+
     await page.getByRole('tab', { name: 'History' }).click();
 
     await expect(page.getByText('My new commit')).toBeVisible();
