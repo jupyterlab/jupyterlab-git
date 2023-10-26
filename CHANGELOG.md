@@ -2,6 +2,26 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.50.0a1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.50.0a0...a901350985c00bd532fc78c56a8ab5f8b13cef0c))
+
+### Enhancements made
+
+- Fix stash REST API [#1280](https://github.com/jupyterlab/jupyterlab-git/pull/1280) ([@fcollonval](https://github.com/fcollonval))
+
+### Bugs fixed
+
+- Fix commit message [#1283](https://github.com/jupyterlab/jupyterlab-git/pull/1283) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-10-24&to=2023-10-26&type=c))
+
+[@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2023-10-24..2023-10-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2023-10-24..2023-10-26&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.50.0a0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.44.0...e77defa1129336d028929559176d3091204abd95))
@@ -15,8 +35,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-10-24&to=2023-10-24&type=c))
 
 [@benz0li](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Abenz0li+updated%3A2023-10-24..2023-10-24&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2023-10-24..2023-10-24&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AHaudinFlorence+updated%3A2023-10-24..2023-10-24&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AJasonWeill+updated%3A2023-10-24..2023-10-24&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2023-10-24..2023-10-24&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Awelcome+updated%3A2023-10-24..2023-10-24&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.44.0
 
