@@ -210,7 +210,9 @@ export function addCommands(
       'Create an empty Git repository or reinitialize an existing one'
     ),
     execute: async () => {
-      const currentPath = fileBrowserModel.path;
+      const currentPath = app.serviceManager.contents.localPath(
+        fileBrowserModel.path
+      );
       const result = await showDialog({
         title: trans.__('Initialize a Repository'),
         body: trans.__('Do you really want to make this directory a Git Repo?'),
@@ -1314,7 +1316,9 @@ export function addCommands(
                 change.newValue?.last_modified ?? 0
               ).valueOf();
               if (
-                change.newValue?.path === fullPath &&
+                app.serviceManager.contents.localPath(
+                  change.newValue?.path ?? ''
+                ) === fullPath &&
                 model.challenger.updateAt !== updateAt
               ) {
                 model.challenger = {
@@ -1794,6 +1798,7 @@ export function addHistoryMenuItems(
 export function addFileBrowserContextMenu(
   model: IGitExtension,
   filebrowser: FileBrowser,
+  contents: Contents.IManager,
   contextMenu: ContextMenuSvg,
   trans: TranslationBundle
 ): void {
@@ -1809,11 +1814,12 @@ export function addFileBrowserContextMenu(
     const statuses = new Set<Git.Status>(
       // @ts-expect-error file cannot be undefined or null
       items
-        .map(item =>
-          model.pathRepository === null
+        .map(item => {
+          const itemPath = contents.localPath(item.path);
+          return model.pathRepository === null
             ? undefined
-            : model.getFile(item.path)?.status
-        )
+            : model.getFile(itemPath)?.status;
+        })
         .filter(status => typeof status !== 'undefined')
     );
 

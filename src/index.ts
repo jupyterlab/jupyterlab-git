@@ -147,18 +147,24 @@ async function activate(
   // Create the Git model
   const gitExtension = new GitExtension(docmanager, app.docRegistry, settings);
 
-  // Whenever we restore the application, sync the Git extension path
-  Promise.all([app.restored, fileBrowser.model.restored]).then(() => {
-    gitExtension.pathRepository = fileBrowser.model.path;
-  });
-
   const onPathChanged = (
     model: FileBrowserModel,
     change: IChangedArgs<string>
   ) => {
-    gitExtension.pathRepository = change.newValue;
+    gitExtension.pathRepository = app.serviceManager.contents.localPath(
+      change.newValue
+    );
     gitExtension.refreshBranch();
   };
+
+  // Whenever we restore the application, sync the Git extension path
+  Promise.all([app.restored, fileBrowser.model.restored]).then(() => {
+    onPathChanged(fileBrowser.model, {
+      name: 'path',
+      newValue: fileBrowser.model.path,
+      oldValue: ''
+    });
+  });
 
   // Whenever the file browser path changes, sync the Git extension path
   fileBrowser.model.pathChanged.connect(onPathChanged);
@@ -245,6 +251,7 @@ async function activate(
     addFileBrowserContextMenu(
       gitExtension,
       fileBrowser,
+      app.serviceManager.contents,
       app.contextMenu,
       trans
     );

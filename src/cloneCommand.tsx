@@ -69,7 +69,9 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
               Operation.Clone,
               trans,
               {
-                path: fileBrowserModel.path,
+                path: app.serviceManager.contents.localPath(
+                  fileBrowserModel.path
+                ),
                 url: result.value.url,
                 versioning: result.value.versioning,
                 submodules: result.value.submodules
@@ -125,7 +127,13 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
     );
 
     // Add the context menu items for the default file browser
-    addFileBrowserContextMenu(gitModel, fileBrowser, app.contextMenu, trans);
+    addFileBrowserContextMenu(
+      gitModel,
+      fileBrowser,
+      app.serviceManager.contents,
+      app.contextMenu,
+      trans
+    );
 
     if (palette) {
       // Add the commands to the command palette
