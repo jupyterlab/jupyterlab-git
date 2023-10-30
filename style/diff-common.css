@@ -181,16 +181,10 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
   );
 }
 
-.not-saved
-  > .lm-TabBar-tabCloseIcon
-  > :not(:hover)
-  > .jp-icon-busy[fill] {
+.not-saved > .lm-TabBar-tabCloseIcon > :not(:hover) > .jp-icon-busy[fill] {
   fill: var(--jp-inverse-layout-color3);
 }
 
-.not-saved
-  > .lm-TabBar-tabCloseIcon
-  > :not(:hover)
-  > .jp-icon3[fill] {
+.not-saved > .lm-TabBar-tabCloseIcon > :not(:hover) > .jp-icon3[fill] {
   fill: none;
 }
