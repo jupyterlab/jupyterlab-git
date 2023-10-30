@@ -308,8 +308,10 @@ export function addCommands(
 
   async function showGitignore(error: any) {
     const model = new CodeEditor.Model({});
-    const id = 'git-ignore';
-    //
+    const repoPath = gitModel.getRelativeFilePath();
+    const id = repoPath + '/.git-ignore';
+    const contentData = await gitModel.readGitIgnore();
+
     const gitIgnoreWidget = find(shell.widgets(), shellWidget => {
       if (shellWidget.id === id) {
         return true;
@@ -319,7 +321,7 @@ export function addCommands(
       shell.activateById(id);
       return;
     }
-    model.sharedModel.setSource(error.content ? error.content : '');
+    model.sharedModel.setSource(contentData.content ? contentData.content : '');
     const editor = new CodeEditorWrapper({
       factory: editorServices.factoryService.newDocumentEditor,
       model: model
@@ -328,13 +330,15 @@ export function addCommands(
     editor.disposed.connect(() => {
       model.dispose();
     });
-    const preview = new PreviewMainAreaWidget({
+    const preview = new MainAreaWidget({
       content: editor
     });
+
     preview.title.label = '.gitignore';
     preview.id = id;
     preview.title.icon = gitIcon;
     preview.title.closable = true;
+    preview.title.caption = repoPath + '/.gitignore';
     const saveButton = new ToolbarButton({
       icon: saveIcon,
       onClick: async () => {
@@ -364,7 +368,10 @@ export function addCommands(
   }
 
   /* Helper: Show gitignore hidden file */
-  async function showGitignoreHiddenFile(error: any) {
+  async function showGitignoreHiddenFile(error: any, hidePrompt: boolean) {
+    if (hidePrompt) {
+      return showGitignore(error);
+    }
     const result = await showDialog({
       title: trans.__('Warning: The .gitignore file is a hidden file.'),
       body: (
@@ -417,11 +424,10 @@ export function addCommands(
         await gitModel.ensureGitignore();
       } catch (error: any) {
         if (error?.name === 'hiddenFile') {
-          if (settings.composite['hideHiddenFileWarning']) {
-            await showGitignore(error);
-          } else {
-            await showGitignoreHiddenFile(error);
-          }
+          await showGitignoreHiddenFile(
+            error,
+            settings.composite['hideHiddenFileWarning'] as boolean
+          );
         }
       }
     }
@@ -1574,7 +1580,10 @@ export function addCommands(
             await gitModel.ignore(file.to, false);
           } catch (error: any) {
             if (error?.name === 'hiddenFile') {
-              await showGitignoreHiddenFile(error);
+              await showGitignoreHiddenFile(
+                error,
+                settings.composite['hideHiddenFileWarning'] as boolean
+              );
             }
           }
         }

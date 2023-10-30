@@ -1681,7 +1681,7 @@ class Git:
 
         return response
 
-    async def read_file(self, path):
+    def read_file(self, path):
         """
         Reads file content located at path and returns it as a string
 
@@ -1690,12 +1690,10 @@ class Git:
         """
         try:
             file = pathlib.Path(path)
-            if file.stat().st_size > 0:
-                content = file.read_text()
-                return content
-            return ""
+            content = file.read_text()
+            return {"code": 0, "content": content}
         except BaseException as error:
-            return ""
+            return {"code": -1, "content": ""}
 
     async def ensure_gitignore(self, path):
         """Handle call to ensure .gitignore file exists and the
@@ -1737,7 +1735,7 @@ class Git:
             return {"code": -1, "message": str(error)}
         return {"code": 0}
 
-    async def writeGitignore(self, path, content):
+    async def write_gitignore(self, path, content):
         """
         Handle call to overwrite .gitignore.
         Takes the .gitignore file and clears its previous contents
@@ -1753,12 +1751,9 @@ class Git:
             if res["code"] != 0:
                 return res
             gitignore = pathlib.Path(path) / ".gitignore"
-            with gitignore.open("a") as f:
-                f.truncate(0)
-                f.seek(0)
-                f.write(content)
-                if content[-1] != "\n":
-                    f.write("\n")
+            if content and content[-1] != "\n":
+                content += "\n"
+            gitignore.write_text(content)
         except BaseException as error:
             return {"code": -1, "message": str(error)}
         return {"code": 0}

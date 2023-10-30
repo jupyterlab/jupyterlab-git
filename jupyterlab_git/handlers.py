@@ -811,6 +811,17 @@ class GitIgnoreHandler(GitHandler):
     """
 
     @tornado.web.authenticated
+    async def get(self, path: str = ""):
+        """
+        GET read content in .gitignore
+        """
+        local_path = self.url2localpath(path)
+        body = self.git.read_file(local_path + "/.gitignore")
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
+
+    @tornado.web.authenticated
     async def post(self, path: str = ""):
         """
         POST add entry in .gitignore
@@ -821,7 +832,7 @@ class GitIgnoreHandler(GitHandler):
         content = data.get("content", None)
         use_extension = data.get("use_extension", False)
         if content:
-            body = await self.git.writeGitignore(local_path, content)
+            body = await self.git.write_gitignore(local_path, content)
         elif file_path:
             if use_extension:
                 suffixes = Path(file_path).suffixes
@@ -830,10 +841,6 @@ class GitIgnoreHandler(GitHandler):
             body = await self.git.ignore(local_path, file_path)
         else:
             body = await self.git.ensure_gitignore(local_path)
-        if not self.serverapp.contents_manager.allow_hidden and not content:
-            self.set_status(403, "hidden files cannot be accessed")
-            body["content"] = await self.git.read_file(local_path + "/.gitignore")
-
         if body["code"] != 0:
             self.set_status(500)
         self.finish(json.dumps(body))

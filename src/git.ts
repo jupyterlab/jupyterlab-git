@@ -65,9 +65,6 @@ export async function requestAPI<T>(
   if (!response.ok) {
     if (isJSON) {
       const { message, traceback, ...json } = data;
-      if (response.status === 403) {
-        throw new Git.HiddenFile(data.content);
-      }
       throw new Git.GitResponseError(
         response,
         message ||
