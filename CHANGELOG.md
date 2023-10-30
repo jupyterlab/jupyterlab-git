@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.50.0a2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.50.0a1...81c258fc958f5b1c08a457e7b51a999e5f2e25b2))
+
+### Bugs fixed
+
+- Remove drive from path. [#1285](https://github.com/jupyterlab/jupyterlab-git/pull/1285) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-10-26&to=2023-10-30&type=c))
+
+[@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2023-10-26..2023-10-30&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.50.0a1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.50.0a0...a901350985c00bd532fc78c56a8ab5f8b13cef0c))
@@ -19,8 +35,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-10-24&to=2023-10-26&type=c))
 
 [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2023-10-24..2023-10-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2023-10-24..2023-10-26&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.50.0a0
 
