@@ -10,6 +10,7 @@ import MenuList from '@mui/material/MenuList';
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import React from 'react';
+import { classes } from 'typestyle';
 import {
   commitButtonClass,
   commitPaperClass,
@@ -100,9 +101,8 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
         <Button
           title={props.trans.__('Pick another rebase action.')}
           classes={{
-            root: commitButtonClass
+            root: classes(commitButtonClass, commitVariantSelector)
           }}
-          className={commitVariantSelector}
           onClick={onToggle}
           size="small"
           aria-controls={open ? 'rebase-split-button-menu' : undefined}
@@ -114,7 +114,7 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
       <Popper open={open} anchorEl={anchor.current} transition disablePortal>
         {({ TransitionProps }) => (
           <Grow {...TransitionProps}>
-            <Paper classes={{ root: commitRoot }} className={commitPaperClass}>
+            <Paper classes={{ root: classes(commitRoot, commitPaperClass) }}>
               <ClickAwayListener onClickAway={onClose}>
                 <MenuList id="rebase-split-button-menu">
                   <MenuItem

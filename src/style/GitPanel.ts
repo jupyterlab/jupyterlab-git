@@ -54,6 +54,7 @@ export const tabClass = style({
   maxWidth: '50%!important',
   minHeight: '36px!important',
 
+  color: 'var(--jp-ui-font-color1)!important',
   backgroundColor: 'var(--jp-layout-color2)!important',
 
   borderBottom:
