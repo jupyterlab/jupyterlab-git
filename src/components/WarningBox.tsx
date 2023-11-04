@@ -2,6 +2,7 @@ import { CardContent } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import * as React from 'react';
+import { classes } from 'typestyle';
 import {
   commitRoot,
   dirtyStagedFilesWarningBoxClass,
@@ -34,9 +35,8 @@ export function WarningBox(props: IWarningBoxProps): JSX.Element {
   return (
     <Card
       classes={{
-        root: commitRoot
+        root: classes(commitRoot, dirtyStagedFilesWarningBoxClass)
       }}
-      className={dirtyStagedFilesWarningBoxClass}
       variant="outlined"
     >
       <CardHeader

@@ -223,9 +223,8 @@ export class CommitBox extends React.Component<
           </Button>
           <Button
             classes={{
-              root: commitButtonClass
+              root: classes(commitButtonClass, commitVariantSelector)
             }}
-            className={commitVariantSelector}
             size="small"
             aria-controls={this.state.open ? 'split-button-menu' : undefined}
             aria-expanded={this.state.open ? 'true' : undefined}
@@ -245,10 +244,7 @@ export class CommitBox extends React.Component<
         >
           {({ TransitionProps }) => (
             <Grow {...TransitionProps}>
-              <Paper
-                classes={{ root: commitRoot }}
-                className={commitPaperClass}
-              >
+              <Paper classes={{ root: classes(commitRoot, commitPaperClass) }}>
                 <ClickAwayListener onClickAway={this._handleClose}>
                   <MenuList id="split-button-menu">
                     {this._options.map((option, index) => (

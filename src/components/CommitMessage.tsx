@@ -1,6 +1,7 @@
 import { TranslationBundle } from '@jupyterlab/translation';
 import Input from '@mui/material/Input';
 import * as React from 'react';
+import { classes } from 'typestyle';
 import {
   activeStyle,
   commitDescriptionClass,
@@ -106,9 +107,8 @@ export function CommitMessage(props: ICommitMessageProps): JSX.Element {
   return (
     <React.Fragment>
       <Input
-        className={commitSummaryClass}
         classes={{
-          root: commitRoot,
+          root: classes(commitRoot, commitSummaryClass),
           focused: activeStyle,
           disabled: disabledStyle
         }}
@@ -132,9 +132,8 @@ export function CommitMessage(props: ICommitMessageProps): JSX.Element {
         fullWidth={true}
       />
       <Input
-        className={commitDescriptionClass}
         classes={{
-          root: commitRoot,
+          root: classes(commitRoot, commitDescriptionClass),
           focused: activeStyle,
           disabled: disabledStyle
         }}

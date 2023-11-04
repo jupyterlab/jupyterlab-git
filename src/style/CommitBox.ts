@@ -101,9 +101,12 @@ export const commitButtonClass = style({
 
 export const commitVariantSelector = style({
   flex: '0 0 20px',
-  lineHeight: 'initial',
+  lineHeight: 'initial !important',
 
   $nest: {
+    '& span': {
+      lineHeight: '0'
+    },
     '& .jp-icon3[fill]': {
       fill: 'var(--jp-ui-inverse-font-color1)'
     }
@@ -131,7 +134,7 @@ export const commitRoot = style({
   color: 'var(--jp-ui-font-color1) !important',
   fontSize: 'var(--jp-ui-font-size1) !important',
   fontFamily: 'var(--jp-ui-font-family) !important',
-  backgroundColor: 'var(--jp-layout-color1)'
+  backgroundColor: 'var(--jp-layout-color1) !important'
 });
 
 export const activeStyle = style({
