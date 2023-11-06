@@ -2667,8 +2667,8 @@ __metadata:
     jest: ^29.2.0
     lint-staged: ^13.2.3
     mkdirp: ^1.0.3
-    nbdime: ^7.0.0-alpha.2
-    nbdime-jupyterlab: ^3.0.0-alpha.2
+    nbdime: ^7.0.0-rc.1
+    nbdime-jupyterlab: ^3.0.0-rc.1
     npm-run-all: ^4.1.5
     prettier: ^3.0.0
     react: ^18.2.0
@@ -9161,9 +9161,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nbdime-jupyterlab@npm:^3.0.0-alpha.2":
-  version: 3.0.0-alpha.2
-  resolution: "nbdime-jupyterlab@npm:3.0.0-alpha.2"
+"nbdime-jupyterlab@npm:^3.0.0-rc.1":
+  version: 3.0.0-rc.1
+  resolution: "nbdime-jupyterlab@npm:3.0.0-rc.1"
   dependencies:
     "@jupyterlab/apputils": ^4.0.0
     "@jupyterlab/codeeditor": ^4.0.0
@@ -9173,18 +9173,19 @@ __metadata:
     "@jupyterlab/rendermime": ^4.0.0
     "@jupyterlab/services": ^7.0.0
     "@jupyterlab/settingregistry": ^4.0.0
+    "@jupyterlab/translation": ^4.0.0
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/widgets": ^2.3.0
-    nbdime: ^7.0.0-alpha.2
-  checksum: ab4ff90c517d282da47590f7951eb08a69492a7e847d763574a73ba5b3a11989ef62e7e4af5bd306bc9d44291ca48eec73c3dd826dcd8f416a96591f76daea0c
+    nbdime: ^7.0.0-rc.1
+  checksum: d1cae94bca4989f0c9c781490aee63cfd0135fe7d7bcf6caa3bd5e232f59d7ddab081ab92866b87104581a46375250c6f6555f61021e7249c7271d97eff6f33f
   languageName: node
   linkType: hard
 
-"nbdime@npm:^7.0.0-alpha.2":
-  version: 7.0.0-alpha.2
-  resolution: "nbdime@npm:7.0.0-alpha.2"
+"nbdime@npm:^7.0.0-rc.1":
+  version: 7.0.0-rc.1
+  resolution: "nbdime@npm:7.0.0-rc.1"
   dependencies:
     "@codemirror/lang-markdown": ^6.1.1
     "@codemirror/language": ^6.6.0
@@ -9205,7 +9206,7 @@ __metadata:
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.0
     json-stable-stringify: ^1.0.1
-  checksum: 32c1d3d5504146c53ec4977eb73338c33e8231c31b51c42d650a68bb06a25ee1b8bf5c4dd7cd45c086fbc1fbb3f333fb2f47a5ad7214161f333b34056ad06605
+  checksum: 02d12ccf865c6bde4fbb3c685cd5cd48a709adcdea72b24a43d0ad5ea3b3e970476a5394ede915a45324e35339ffecb9ddfbc5a0bcfd96bb11f4f950f3e857b1
   languageName: node
   linkType: hard
 
