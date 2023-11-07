@@ -2,6 +2,26 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.50.0rc0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.50.0a2...d539f3b510ba2b596daad68814112ff7786abf91))
+
+### Bugs fixed
+
+- Fix styling [#1289](https://github.com/jupyterlab/jupyterlab-git/pull/1289) ([@fcollonval](https://github.com/fcollonval))
+
+### Maintenance and upkeep improvements
+
+- Bump nbdime to rc0 [#1290](https://github.com/jupyterlab/jupyterlab-git/pull/1290) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-10-30&to=2023-11-06&type=c))
+
+[@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2023-10-30..2023-11-06&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2023-10-30..2023-11-06&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.50.0a2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.50.0a1...81c258fc958f5b1c08a457e7b51a999e5f2e25b2))
@@ -15,8 +35,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-10-26&to=2023-10-30&type=c))
 
 [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2023-10-26..2023-10-30&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.50.0a1
 
