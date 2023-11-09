@@ -385,7 +385,7 @@ export function addCommands(
                 'Print the command below to create a jupyter_server_config.py file with defaults commented out. If you already have the file located in .jupyter, skip this step.'
               )}
               <div style={{ padding: '0.5rem' }}>
-                {trans.__('jupyter server --generate-config')}
+                {'jupyter server --generate-config'}
               </div>
             </li>
             <li>
@@ -393,7 +393,7 @@ export function addCommands(
                 'Open jupyter_server_config.py, uncomment out the following line and set it to True:'
               )}
               <div style={{ padding: '0.5rem' }}>
-                {trans.__('c.ContentsManager.allow_hidden = False')}
+                {'c.ContentsManager.allow_hidden = False'}
               </div>
             </li>
           </ol>
@@ -404,7 +404,7 @@ export function addCommands(
         Dialog.okButton({ label: trans.__('Show .gitignore file anyways') })
       ],
       checkbox: {
-        label: 'Do not show this warning again',
+        label: trans.__('Do not show this warning again'),
         checked: false
       }
     });
