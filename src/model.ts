@@ -888,15 +888,15 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async readGitIgnore(): Promise<{ code: number; content: string }> {
+  async readGitIgnore(): Promise<string> {
     const path = await this._getPathRepository();
 
-    const res = (await requestAPI(URLExt.join(path, 'ignore'), 'GET')) as {
-      code: number;
-      content: string;
-    };
-    await this.refreshStatus();
-    return res;
+    return (
+      (await requestAPI(URLExt.join(path, 'ignore'), 'GET')) as {
+        code: number;
+        content: string;
+      }
+    ).content;
   }
 
   /**
