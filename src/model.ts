@@ -1793,6 +1793,7 @@ export class GitExtension implements IGitExtension {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async tags(): Promise<Git.ITagResult> {
+    const path = await this._getPathRepository();
     return await this._taskHandler.execute<Git.ITagResult>(
       'git:tag:list',
       async () => {
