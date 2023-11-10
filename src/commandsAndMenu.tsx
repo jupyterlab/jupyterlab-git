@@ -321,7 +321,7 @@ export function addCommands(
       shell.activateById(id);
       return;
     }
-    model.sharedModel.setSource(contentData.content ? contentData.content : '');
+    model.sharedModel.setSource(contentData ? contentData : '');
     const editor = new CodeEditorWrapper({
       factory: editorServices.factoryService.newDocumentEditor,
       model: model
