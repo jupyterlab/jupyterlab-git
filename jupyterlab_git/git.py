@@ -973,8 +973,6 @@ class Git:
                     "code": code,
                     "path": None,
                     "relative_path": relative_git_path,
-                    "repo_path": repository_path,
-                    "root_dir": contents_manager.root_dir,
                 }
             else:
                 result = {
