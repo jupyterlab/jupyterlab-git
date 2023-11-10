@@ -972,7 +972,6 @@ class Git:
                 return {
                     "code": code,
                     "path": None,
-                    "relative_path": relative_git_path,
                 }
             else:
                 result = {
