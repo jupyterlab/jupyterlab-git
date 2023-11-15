@@ -15,7 +15,7 @@ import { Contents, ContentsManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITerminal } from '@jupyterlab/terminal';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { closeIcon, ContextMenuSvg } from '@jupyterlab/ui-components';
+import { closeIcon, ContextMenuSvg, saveIcon } from '@jupyterlab/ui-components';
 import { ArrayExt, find, toArray } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -54,6 +54,9 @@ import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { discardAllChanges } from './widgets/discardAllChanges';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
+import { CodeEditor } from '@jupyterlab/codeeditor/lib/editor';
+import { CodeEditorWrapper } from '@jupyterlab/codeeditor/lib/widget';
+import { editorServices } from '@jupyterlab/codemirror';
 
 export interface IGitCloneArgs {
   /**
@@ -308,13 +311,130 @@ export function addCommands(
     }
   });
 
+  async function showGitignore(error: any) {
+    const model = new CodeEditor.Model({});
+    const repoPath = gitModel.getRelativeFilePath();
+    const id = repoPath + '/.git-ignore';
+    const contentData = await gitModel.readGitIgnore();
+
+    const gitIgnoreWidget = find(shell.widgets(), shellWidget => {
+      if (shellWidget.id === id) {
+        return true;
+      }
+    });
+    if (gitIgnoreWidget) {
+      shell.activateById(id);
+      return;
+    }
+    model.sharedModel.setSource(contentData ? contentData : '');
+    const editor = new CodeEditorWrapper({
+      factory: editorServices.factoryService.newDocumentEditor,
+      model: model
+    });
+    const modelChangedSignal = model.sharedModel.changed;
+    editor.disposed.connect(() => {
+      model.dispose();
+    });
+    const preview = new MainAreaWidget({
+      content: editor
+    });
+
+    preview.title.label = '.gitignore';
+    preview.id = id;
+    preview.title.icon = gitIcon;
+    preview.title.closable = true;
+    preview.title.caption = repoPath + '/.gitignore';
+    const saveButton = new ToolbarButton({
+      icon: saveIcon,
+      onClick: async () => {
+        if (saved) {
+          return;
+        }
+        const newContent = model.sharedModel.getSource();
+        try {
+          await gitModel.writeGitIgnore(newContent);
+          preview.title.className = '';
+          saved = true;
+        } catch (error) {
+          console.log('Could not save .gitignore');
+        }
+      },
+      tooltip: trans.__('Saves .gitignore')
+    });
+    let saved = true;
+    preview.toolbar.addItem('save', saveButton);
+    shell.add(preview);
+    modelChangedSignal.connect(() => {
+      if (saved) {
+        saved = false;
+        preview.title.className = 'not-saved';
+      }
+    });
+  }
+
+  /* Helper: Show gitignore hidden file */
+  async function showGitignoreHiddenFile(error: any, hidePrompt: boolean) {
+    if (hidePrompt) {
+      return showGitignore(error);
+    }
+    const result = await showDialog({
+      title: trans.__('Warning: The .gitignore file is a hidden file.'),
+      body: (
+        <div>
+          {trans.__(
+            'Hidden files by default cannot be accessed with the regular code editor. In order to open the .gitignore file you must:'
+          )}
+          <ol>
+            <li>
+              {trans.__(
+                'Print the command below to create a jupyter_server_config.py file with defaults commented out. If you already have the file located in .jupyter, skip this step.'
+              )}
+              <div style={{ padding: '0.5rem' }}>
+                {'jupyter server --generate-config'}
+              </div>
+            </li>
+            <li>
+              {trans.__(
+                'Open jupyter_server_config.py, uncomment out the following line and set it to True:'
+              )}
+              <div style={{ padding: '0.5rem' }}>
+                {'c.ContentsManager.allow_hidden = False'}
+              </div>
+            </li>
+          </ol>
+        </div>
+      ),
+      buttons: [
+        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.okButton({ label: trans.__('Show .gitignore file anyways') })
+      ],
+      checkbox: {
+        label: trans.__('Do not show this warning again'),
+        checked: false
+      }
+    });
+    if (result.button.accept) {
+      settings.set('hideHiddenFileWarning', result.isChecked);
+      showGitignore(error);
+    }
+  }
+
   /** Add git open gitignore command */
   commands.addCommand(CommandIDs.gitOpenGitignore, {
     label: trans.__('Open .gitignore'),
     caption: trans.__('Open .gitignore'),
     isEnabled: () => gitModel.pathRepository !== null,
     execute: async () => {
-      await gitModel.ensureGitignore();
+      try {
+        await gitModel.ensureGitignore();
+      } catch (error: any) {
+        if (error?.name === 'hiddenFile') {
+          await showGitignoreHiddenFile(
+            error,
+            settings.composite['hideHiddenFileWarning'] as boolean
+          );
+        }
+      }
     }
   });
 
@@ -1461,7 +1581,16 @@ export function addCommands(
       const { files } = args as any as CommandArguments.IGitContextAction;
       for (const file of files) {
         if (file) {
-          await gitModel.ignore(file.to, false);
+          try {
+            await gitModel.ignore(file.to, false);
+          } catch (error: any) {
+            if (error?.name === 'hiddenFile') {
+              await showGitignoreHiddenFile(
+                error,
+                settings.composite['hideHiddenFileWarning'] as boolean
+              );
+            }
+          }
         }
       }
     }

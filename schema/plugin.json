@@ -76,6 +76,12 @@
       "title": "Open files behind warning",
       "description": "If true, a popup dialog will be displayed if a user opens a file that is behind its remote branch version, or if an opened file has updates on the remote branch.",
       "default": true
+    },
+    "hideHiddenFileWarning": {
+      "type": "boolean",
+      "title": "Hide hidden file warning",
+      "description": "If true, the warning popup when opening the .gitignore file without hidden files will not be displayed.",
+      "default": false
     }
   },
   "jupyter.lab.shortcuts": [

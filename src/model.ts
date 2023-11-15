@@ -9,6 +9,7 @@ import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
 import { TaskHandler } from './taskhandler';
 import { Git, IGitExtension } from './tokens';
 import { decodeStage } from './utils';
+import { ServerConnection } from '@jupyterlab/services';
 
 // Default refresh interval (in milliseconds) for polling the current Git status (NOTE: this value should be the same value as in the plugin settings schema):
 const DEFAULT_REFRESH_INTERVAL = 3000; // ms
@@ -860,12 +861,55 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
+   * @throws {Git.HiddenFile} If the file is hidden
    */
   async ensureGitignore(): Promise<void> {
     const path = await this._getPathRepository();
 
     await requestAPI(URLExt.join(path, 'ignore'), 'POST', {});
+    try {
+      await this._docmanager.services.contents.get(`${path}/.gitignore`, {
+        content: false
+      });
+    } catch (e) {
+      // If the previous request failed with a 404 error, it means hidden file cannot be accessed
+      if ((e as ServerConnection.ResponseError).response?.status === 404) {
+        throw new Git.HiddenFile();
+      }
+    }
     this._openGitignore();
+    await this.refreshStatus();
+  }
+
+  /**
+   * Reads content of .gitignore file
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async readGitIgnore(): Promise<string> {
+    const path = await this._getPathRepository();
+
+    return (
+      (await requestAPI(URLExt.join(path, 'ignore'), 'GET')) as {
+        code: number;
+        content: string;
+      }
+    ).content;
+  }
+
+  /**
+   * Overwrites content onto .gitignore file
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async writeGitIgnore(content: string): Promise<void> {
+    const path = await this._getPathRepository();
+
+    await requestAPI(URLExt.join(path, 'ignore'), 'POST', { content: content });
     await this.refreshStatus();
   }
 
@@ -923,6 +967,7 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
+   * @throws {Git.HiddenFile} If hidden files are not enabled
    */
   async ignore(filePath: string, useExtension: boolean): Promise<void> {
     const path = await this._getPathRepository();
@@ -931,7 +976,16 @@ export class GitExtension implements IGitExtension {
       file_path: filePath,
       use_extension: useExtension
     });
-
+    try {
+      await this._docmanager.services.contents.get(`${path}/.gitignore`, {
+        content: false
+      });
+    } catch (e) {
+      // If the previous request failed with a 404 error, it means hidden file cannot be accessed
+      if ((e as ServerConnection.ResponseError).response?.status === 404) {
+        throw new Git.HiddenFile();
+      }
+    }
     this._openGitignore();
     await this.refreshStatus();
   }
