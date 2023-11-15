@@ -1,5 +1,5 @@
 import { style } from 'typestyle';
-import { NestedCSSProperties } from 'typestyle/lib/types';
+import type { NestedCSSProperties } from 'typestyle/lib/types';
 
 export const actionButtonStyle = style({
   flex: '0 0 auto',

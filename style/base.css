@@ -12,3 +12,11 @@
 .jp-git-tab-mod-preview {
   font-style: italic;
 }
+
+.not-saved > .lm-TabBar-tabCloseIcon > :not(:hover) > .jp-icon-busy[fill] {
+  fill: var(--jp-inverse-layout-color3);
+}
+
+.not-saved > .lm-TabBar-tabCloseIcon > :not(:hover) > .jp-icon3[fill] {
+  fill: none;
+}

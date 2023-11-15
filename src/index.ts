@@ -187,9 +187,7 @@ async function activate(
     addCommands(
       app,
       gitExtension,
-      editorServices.factoryService.newInlineEditor.bind(
-        editorServices.factoryService
-      ),
+      editorServices.factoryService,
       languageRegistry,
       fileBrowser.model,
       settings,

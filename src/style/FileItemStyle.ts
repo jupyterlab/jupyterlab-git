@@ -1,5 +1,5 @@
 import { style } from 'typestyle';
-import { NestedCSSProperties } from 'typestyle/lib/types';
+import type { NestedCSSProperties } from 'typestyle/lib/types';
 import { actionButtonStyle, showButtonOnHover } from './ActionButtonStyle';
 
 export const fileStyle = style(
