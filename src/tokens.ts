@@ -1331,6 +1331,14 @@ export namespace Git {
     }
   }
 
+  export class HiddenFile extends Error {
+    constructor() {
+      super('File is hidden');
+      this.name = 'hiddenFile';
+      this.message = 'File is hidden and cannot be accessed.';
+    }
+  }
+
   /**
    * Interface for dialog with one checkbox.
    */
