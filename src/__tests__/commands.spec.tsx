@@ -60,7 +60,7 @@ describe('git-commands', () => {
     addCommands(
       app as JupyterFrontEnd,
       model,
-      new CodeMirrorEditorFactory().newDocumentEditor,
+      new CodeMirrorEditorFactory(),
       new EditorLanguageRegistry(),
       mockedFileBrowserModel,
       null as any,

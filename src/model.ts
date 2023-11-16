@@ -874,7 +874,7 @@ export class GitExtension implements IGitExtension {
 
     await requestAPI(URLExt.join(path, 'ignore'), 'POST', {});
     try {
-      await this._docmanager.services.contents.get(`${path}/.gitignore`, {
+      await this._docmanager?.services.contents.get(`${path}/.gitignore`, {
         content: false
       });
     } catch (e) {
@@ -983,7 +983,7 @@ export class GitExtension implements IGitExtension {
       use_extension: useExtension
     });
     try {
-      await this._docmanager.services.contents.get(`${path}/.gitignore`, {
+      await this._docmanager?.services.contents.get(`${path}/.gitignore`, {
         content: false
       });
     } catch (e) {
