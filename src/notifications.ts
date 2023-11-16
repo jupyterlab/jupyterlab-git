@@ -28,11 +28,21 @@ export function showError(
   };
 }
 
+/**
+ * Display additional information in a dialog from a notification
+ * button.
+ *
+ * Note: it will not add a button if the message is empty.
+ *
+ * @param message Details to display
+ * @param trans Translation object
+ * @returns Notification option to display the message
+ */
 export function showDetails(
   message: string,
   trans: TranslationBundle
 ): Notification.IOptions<null> {
-  return {
+  return message ? {
     autoClose: 5000,
     actions: [
       {
@@ -45,5 +55,5 @@ export function showDetails(
         displayType: 'warn'
       } as Notification.IAction
     ]
-  };
+  } : {};
 }
