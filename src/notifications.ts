@@ -42,18 +42,20 @@ export function showDetails(
   message: string,
   trans: TranslationBundle
 ): Notification.IOptions<null> {
-  return message ? {
-    autoClose: 5000,
-    actions: [
-      {
-        label: trans.__('Details'),
-        callback: () => {
-          showErrorMessage(trans.__('Detailed message'), message, [
-            Dialog.okButton({ label: trans.__('Dismiss') })
-          ]);
-        },
-        displayType: 'warn'
-      } as Notification.IAction
-    ]
-  } : {};
+  return message
+    ? {
+        autoClose: 5000,
+        actions: [
+          {
+            label: trans.__('Details'),
+            callback: () => {
+              showErrorMessage(trans.__('Detailed message'), message, [
+                Dialog.okButton({ label: trans.__('Dismiss') })
+              ]);
+            },
+            displayType: 'warn'
+          } as Notification.IAction
+        ]
+      }
+    : {};
 }
