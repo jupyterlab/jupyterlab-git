@@ -116,32 +116,23 @@ async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
 
 @patch("jupyterlab_git.git.execute")
 async def test_git_show_prefix_nested_directory(mock_execute, jp_fetch, jp_root_dir):
-    # Given
-    path = "path/to/repo"
-
-    local_path = jp_root_dir / "test_path"
-
-    mock_execute.return_value = maybe_future((0, str(path), ""))
-
+    mock_execute.return_value = maybe_future((0, f"{jp_root_dir.name}/", ""))
     # When
     response = await jp_fetch(
         NAMESPACE,
-        local_path.name + "/subfolder",
         "show_prefix",
         body="{}",
         method="POST",
     )
-
     # Then
     assert response.code == 200
     payload = json.loads(response.body)
-    assert payload["path"] == str(path)
-
+    assert payload["path"] is None
     mock_execute.assert_has_calls(
         [
             call(
                 ["git", "rev-parse", "--show-prefix"],
-                cwd=str(local_path / "subfolder"),
+                cwd=str(jp_root_dir),
                 timeout=20,
                 env=None,
                 username=None,
@@ -150,14 +141,6 @@ async def test_git_show_prefix_nested_directory(mock_execute, jp_fetch, jp_root_
             ),
         ]
     )
-
-    try:
-        Path(path).absolute().relative_to(Path(local_path).absolute())
-    except ValueError:
-        # pass the test if the path is not a subdirectory of the root directory
-        pass
-    else:
-        assert False, "The path should not be a subdirectory of the root directory"
 
 
 async def test_git_show_prefix_for_excluded_path(
