@@ -1,4 +1,4 @@
-import { MainAreaWidget } from '@jupyterlab/apputils/lib/mainareawidget';
+import { MainAreaWidget } from '@jupyterlab/apputils';
 import { Message } from '@lumino/messaging';
 import { Panel, TabBar, Widget } from '@lumino/widgets';
 
