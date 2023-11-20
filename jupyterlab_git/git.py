@@ -955,7 +955,6 @@ class Git:
             cmd,
             cwd=path,
         )
-
         if code == 0:
             result = {"code": code, "path": my_output.strip("\n")}
             return result
