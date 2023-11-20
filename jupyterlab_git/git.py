@@ -946,7 +946,7 @@ class Git:
                 "message": my_error,
             }
 
-    async def show_prefix(self, path, contents_manager):
+    async def show_prefix(self, path):
         """
         Execute git --show-prefix command & return the result.
         """
@@ -957,27 +957,8 @@ class Git:
         )
 
         if code == 0:
-            relative_git_path = my_output.strip("\n")
-            repository_path = path[: -len(relative_git_path)]
-            try:
-                # Raise an error is the repository_path is not a subpath of root_dir
-                Path(repository_path).absolute().relative_to(
-                    Path(contents_manager.root_dir).absolute()
-                )
-            except ValueError:
-                return {
-                    "code": code,
-                    "path": None,
-                    "relative_path": relative_git_path,
-                    "repo_path": repository_path,
-                    "root_dir": contents_manager.root_dir,
-                }
-            else:
-                result = {
-                    "code": code,
-                    "path": relative_git_path,
-                }
-                return result
+            result = {"code": code, "path": my_output.strip("\n")}
+            return result
         else:
             # Handle special case where cwd not inside a git repo
             lower_error = my_error.lower()

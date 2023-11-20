@@ -174,8 +174,7 @@ class GitShowPrefixHandler(GitHandler):
         POST request handler, displays the prefix path of a directory in a repository,
         with respect to the root directory.
         """
-        local_path, cm = self.url2localpath(path, with_contents_manager=True)
-        result = await self.git.show_prefix(local_path, cm)
+        result = await self.git.show_prefix(self.url2localpath(path))
 
         if result["code"] != 0:
             self.set_status(500)
