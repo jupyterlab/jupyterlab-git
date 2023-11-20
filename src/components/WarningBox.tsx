@@ -1,9 +1,10 @@
 import { CardContent } from '@material-ui/core';
-import Card from '@material-ui/core/Card';
+// import Card from '@material-ui/core/Card';
+import { Card } from '@jupyter/react-components';
 import CardHeader from '@material-ui/core/CardHeader';
 import * as React from 'react';
 import {
-  commitRoot,
+  // commitRoot,
   dirtyStagedFilesWarningBoxClass,
   dirtyStagedFilesWarningBoxContentClass,
   dirtyStagedFilesWarningBoxHeaderClass
@@ -33,11 +34,11 @@ export interface IWarningBoxProps {
 export function WarningBox(props: IWarningBoxProps): JSX.Element {
   return (
     <Card
-      classes={{
-        root: commitRoot
-      }}
+      // classes={{
+      //   root: commitRoot
+      // }}
       className={dirtyStagedFilesWarningBoxClass}
-      variant="outlined"
+      // variant="outlined"
     >
       <CardHeader
         className={dirtyStagedFilesWarningBoxHeaderClass}

@@ -1,11 +1,12 @@
 import { TranslationBundle } from '@jupyterlab/translation';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-import { Button } from '@material-ui/core';
+import { Button } from '@jupyter/react-components';
 import Portal from '@material-ui/core/Portal';
 import Slide from '@material-ui/core/Slide';
 import Snackbar from '@material-ui/core/Snackbar';
 import { Color, default as MuiAlert } from '@material-ui/lab/Alert';
 import * as React from 'react';
+import { alertStyle } from '../style/AlertStyle';
 
 /**
  * Returns a React component for "sliding-in" an alert.
@@ -100,7 +101,9 @@ export class Alert extends React.Component<IAlertProps> {
       action = (
         <Button
           color="inherit"
-          size="small"
+          style={{
+            background: '#bc2a2a'
+          }}
           onClick={() => {
             showErrorMessage(this.props.trans.__('Error'), this.props.error, [
               Dialog.warnButton({ label: this.props.trans.__('Dismiss') })
@@ -113,8 +116,9 @@ export class Alert extends React.Component<IAlertProps> {
     } else if (this.props.details) {
       action = (
         <Button
-          color="inherit"
-          size="small"
+          style={{
+            background: '#bc2a2a'
+          }}
           onClick={() => {
             showDialog({
               title: this.props.trans.__('Detailed message'),
@@ -144,7 +148,14 @@ export class Alert extends React.Component<IAlertProps> {
           onClick={this._onClick}
           onClose={this._onClose}
         >
-          <MuiAlert action={action} variant="filled" severity={severity}>
+          <MuiAlert
+            action={action}
+            variant="filled"
+            severity={severity}
+            classes={{
+              filledError: alertStyle
+            }}
+          >
             {this.props.message || this.props.trans.__('(missing message)')}
           </MuiAlert>
         </Snackbar>

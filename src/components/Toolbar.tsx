@@ -5,7 +5,8 @@ import {
   refreshIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import { Badge, Tab, Tabs } from '@material-ui/core';
+import { Tab, Tabs } from '@material-ui/core';
+import { Badge } from '@jupyter/react-components';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { Logger } from '../logger';
@@ -169,8 +170,14 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <span className={spacer} />
         <Badge
           className={badgeClass}
-          variant="dot"
-          invisible={!hasRemote || this.props.nCommitsBehind === 0}
+          circular
+          style={{
+            display: `${
+              !hasRemote || this.props.nCommitsBehind === 0
+                ? 'none'
+                : 'inline-flex'
+            }`
+          }}
           data-test-id="pull-badge"
         >
           <ActionButton
@@ -192,12 +199,16 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           />
         </Badge>
         <Badge
-          className={badgeClass}
-          variant="dot"
-          invisible={
-            !hasRemote || (this.props.nCommitsAhead === 0 && hasUpstream)
-          }
           data-test-id="push-badge"
+          className={badgeClass}
+          circular
+          style={{
+            display: `${
+              !hasRemote || (this.props.nCommitsBehind === 0 && hasUpstream)
+                ? 'none'
+                : 'inline-flex'
+            }`
+          }}
         >
           <ActionButton
             className={toolbarButtonClass}
@@ -442,7 +453,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       this.props.logger.log({
         level: Level.ERROR,
         message: this.props.trans.__('Failed to refresh.'),
-        error
+        error: error as Error
       });
     }
   };
