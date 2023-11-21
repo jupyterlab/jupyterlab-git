@@ -360,7 +360,7 @@ export class GitExtension implements IGitExtension {
    * Note: This makes sure it always returns non null value
    */
   protected get _currentMarker(): BranchMarker {
-    if (!this.pathRepository) {
+    if (this.pathRepository === null) {
       return new BranchMarker(() => {});
     }
 
