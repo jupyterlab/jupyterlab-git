@@ -962,7 +962,7 @@ class Git:
 
         if code == 0:
             relative_git_path = my_output.strip("\n")
-            repository_path = path[: -len(relative_git_path)]
+            repository_path = path[: -len(relative_git_path)] if relative_git_path else path
             try:
                 # Raise an error is the repository_path is not a subpath of root_dir
                 Path(repository_path).absolute().relative_to(
