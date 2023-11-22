@@ -132,7 +132,7 @@ async def test_git_show_prefix_nested_directory(mock_execute, jp_fetch, jp_root_
         [
             call(
                 ["git", "rev-parse", "--show-prefix"],
-                cwd=str(jp_root_dir),
+                cwd=str(jp_root_dir) + "/",
                 timeout=20,
                 env=None,
                 username=None,
