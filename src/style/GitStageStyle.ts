@@ -12,6 +12,8 @@ export const sectionAreaStyle = style(
     borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
     letterSpacing: '1px',
     fontSize: '12px',
+    overflowY: 'hidden',
+    height: '16px',
 
     $nest: {
       '&:hover': {
