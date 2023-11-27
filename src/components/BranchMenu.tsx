@@ -30,6 +30,7 @@ import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { NewBranchDialog } from './NewBranchDialog';
 import { showError } from '../notifications';
+import { Button } from '@jupyter/react-components';
 
 const ITEM_HEIGHT = 24.8; // HTML element height for a single branch
 const MIN_HEIGHT = 150; // Minimal HTML element height for the branches list
@@ -196,13 +197,12 @@ export class BranchMenu extends React.Component<
             title={this.props.trans.__('Filter branch menu')}
           />
           {this.state.filter ? (
-            <button className={filterClearClass}>
+            <Button className={filterClearClass} onClick={this._resetFilter}>
               <ClearIcon
                 titleAccess={this.props.trans.__('Clear the current filter')}
                 fontSize="small"
-                onClick={this._resetFilter}
               />
-            </button>
+            </Button>
           ) : null}
         </div>
         <input

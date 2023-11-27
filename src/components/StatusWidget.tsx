@@ -2,7 +2,7 @@ import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { TranslationBundle } from '@jupyterlab/translation';
-import { Badge } from '@mui/material';
+import { Badge } from '@jupyter/react-components';
 import React from 'react';
 import { classes } from 'typestyle';
 import { Operation, showGitOperationDialog } from '../commandsAndMenu';
@@ -52,8 +52,10 @@ export class StatusWidget extends ReactWidget {
           {(_, needsCredentials) => (
             <Badge
               className={badgeClass}
-              variant="dot"
-              invisible={!needsCredentials}
+              circular
+              style={{
+                display: `${!needsCredentials ? 'none' : 'inline-flex'}`
+              }}
               data-test-id="git-credential-badge"
             >
               <ActionButton
