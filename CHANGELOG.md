@@ -44,7 +44,7 @@
 
 ### Documentation improvements
 
-- add kentarolim10 as a contributor for code [#1297](https://github.com/jupyterlab/jupyterlab-git/pull/1297) ([@allcontributors](https://github.com/allcontributors))
+- add kentarolim10 as a contributor for code [#1297](https://github.com/jupyterlab/jupyterlab-git/pull/1297) ([@allcontributors](https://github.com/all-contributors))
 - Add constrain in install instructions [#1271](https://github.com/jupyterlab/jupyterlab-git/pull/1271) ([@fcollonval](https://github.com/fcollonval))
 - Hotfix/dependency update [#1249](https://github.com/jupyterlab/jupyterlab-git/pull/1249) ([@mfakaehler](https://github.com/mfakaehler))
 
