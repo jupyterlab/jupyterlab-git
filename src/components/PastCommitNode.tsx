@@ -88,9 +88,9 @@ export interface IPastCommitNodeProps {
    *
    * @param event - event object
    */
-  onSelectForCompare:
-    | ((event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>)
-    | null;
+  onSelectForCompare?: (
+    event?: React.MouseEvent<HTMLElement, MouseEvent>
+  ) => Promise<void>;
 
   /**
    * Callback invoked upon clicking to compare a commit against the selected.
@@ -99,9 +99,9 @@ export interface IPastCommitNodeProps {
    *
    * @param event - event object
    */
-  onCompareWithSelected:
-    | ((event: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>)
-    | null;
+  onCompareWithSelected?: (
+    event?: React.MouseEvent<HTMLElement, MouseEvent>
+  ) => Promise<void>;
   /**
    * Whether the PastCommitNode is expanded
    */
@@ -117,7 +117,15 @@ export interface IPastCommitNodeProps {
    *
    * @param el the <li> element representing a past commit
    */
-  setRef: (el: HTMLLIElement) => void;
+  setRef: (el: HTMLLIElement | null) => void;
+
+  /**
+   * Callback to open a context menu on the commit
+   */
+  contextMenu?: (
+    commit: Git.ISingleCommitInfo,
+    event: React.MouseEvent
+  ) => void;
 }
 
 /**
@@ -162,6 +170,12 @@ export class PastCommitNode extends React.Component<
             : this.props.trans.__('View file changes')
         }
         onClick={event => this._onCommitClick(event, this.props.commit.commit)}
+        onContextMenu={
+          this.props.contextMenu &&
+          (event => {
+            this.props.contextMenu!(this.props.commit, event);
+          })
+        }
       >
         <div className={commitHeaderClass}>
           <span className={commitHeaderItemClass}>

@@ -20,6 +20,12 @@
   outline: none;
   background: var(--jp-layout-color0);
   color: var(--jp-ui-font-color0);
+  padding: 0;
+  overflow: hidden;
+}
+
+.jp-git-diff-root .cm-editor {
+  height: 100%;
 }
 
 button.jp-git-diff-refresh {
@@ -42,38 +48,59 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
 .jp-git-merge-banner {
   flex: 0 0 auto;
   margin: 2px 0;
-  display: flex;
+  display: grid;
+  grid-auto-rows: minmax(18px, auto);
+  width: 100%;
+}
+
+.jp-git-diff-banner {
+  grid-template-columns: 47% 6% 47%;
 }
 
 .jp-git-diff-banner span {
   padding: 0 4px;
-  width: 47%;
   font-weight: bold;
-}
-
-.jp-git-diff-banner span.jp-spacer {
-  width: 6%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .jp-git-merge-banner span {
   padding: 0 4px;
-  width: 31%;
   font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jp-git-diff-banner span:first-child {
+  grid-column: 1;
+}
+
+.jp-git-diff-banner span:last-child {
+  grid-column: 3;
 }
 
 .jp-git-diff-banner span:first-of-type {
-  background-color: var(--jp-git-diff-deleted-color);
+  background-color: var(--jp-git-diff-deleted-color1);
 }
 
 .jp-git-diff-banner span:last-of-type {
-  background-color: var(--jp-git-diff-added-color);
+  background-color: var(--jp-git-diff-added-color1);
 }
 
-.jp-git-merge-banner span.jp-spacer {
-  width: 3.5%;
+.jp-git-merge-banner {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-.jp-git-diff-root .CodeMirror-merge {
+.jp-git-merge-banner span:first-of-type {
+  background-color: var(--jp-merge-local-color1);
+}
+
+.jp-git-merge-banner span:last-of-type {
+  background-color: var(--jp-git-diff-added-color1);
+}
+
+.jp-git-diff-root .cm-merge {
   position: relative;
   white-space: pre;
   border: var(--codemirror-border);
@@ -81,97 +108,63 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
   background: var(--jp-cell-editor-background);
 }
 
-.jp-git-diff-root .CodeMirror {
+.jp-git-diff-root .cm {
   background: var(--jp-layout-color0);
 }
 
-.jp-git-diff-root .CodeMirror-merge,
-.CodeMirror-merge .CodeMirror {
+.jp-git-diff-root .cm-merge,
+.cm-merge .cm {
   height: auto;
 }
 
-.jp-git-diff-root .CodeMirror-merge-4pane .CodeMirror-merge-pane-deleted {
+.jp-git-diff-root .cm-merge-4pane .cm-merge-pane-deleted {
   display: none;
 }
 
-.jp-git-diff-root .CodeMirror-merge-pane-unchanged {
+.jp-git-diff-root .cm-merge-pane-unchanged {
   width: 100%;
 }
 
-.jp-git-diff-root .CodeMirror-merge-pane {
+.jp-git-diff-root .cm-merge-pane {
   display: inline-block;
   white-space: normal;
   vertical-align: top;
 }
 
-.jp-git-diff-root .CodeMirror-merge-1pane .CodeMirror-merge-gap {
-  width: 6%;
-}
-
-.jp-git-diff-root .CodeMirror-merge-2pane .CodeMirror-merge-pane {
-  width: 47%;
-}
-
-.jp-git-diff-root .CodeMirror-merge-2pane .CodeMirror-merge-gap {
-  width: 6%;
-}
-
-.jp-git-diff-root .CodeMirror-merge-3pane .CodeMirror-merge-pane {
-  width: 31%;
-}
-
-.jp-git-diff-root .CodeMirror-merge-3pane .CodeMirror-merge-gap {
-  width: 3.5%;
-}
-
-.jp-git-diff-root .CodeMirror-merge-pane-rightmost {
+.jp-git-diff-root .cm-merge-pane-rightmost {
   position: absolute;
   right: 0;
   z-index: 1;
 }
 
-.jp-git-diff-root .CodeMirror-merge-scrolllock-wrap {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
+.jp-Notebook-merge .jp-Merge-conflict {
+  background-color: var(--jp-merge-both-color2);
 }
 
-.jp-git-diff-root .CodeMirror-merge-scrolllock {
-  position: relative;
-  left: -50%;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.jp-git-diff-root .CodeMirror-merge-r-inserted,
-.jp-git-diff-root .CodeMirror-merge-l-inserted {
-  background-color: var(--jp-git-diff-added-color);
-}
-
-.jp-git-diff-root .CodeMirror-merge-r-deleted,
-.jp-git-diff-root .CodeMirror-merge-l-deleted {
+.jp-git-diff-root .cm-merge-r-deleted,
+.jp-git-diff-root .cm-merge-l-deleted,
+.jp-git-diff-root .cm-diff-left-editor .cm-merge-r-chunk {
   background-color: var(--jp-git-diff-deleted-color);
 }
 
-.jp-git-diff-root .CodeMirror-merge-collapsed-widget::before {
-  content: '(...)';
+.jp-git-diff-root
+  .cm-merge-left-editor
+  .cm-merge-l-chunk:not(.jp-Merge-conflict) {
+  background-color: var(--jp-merge-local-color);
 }
 
-.jp-git-diff-root .CodeMirror-merge-collapsed-widget {
-  cursor: pointer;
-  color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color2);
-  border: 1px solid var(--jp-border-color1);
-  font-size: 90%;
-  padding: 0 3px;
-  border-radius: 4px;
+.jp-git-diff-root .cm-merge-r-inserted,
+.jp-git-diff-root .cm-merge-l-inserted,
+.jp-git-diff-root .cm-diff-right-editor .cm-merge-r-chunk,
+.jp-git-diff-root .cm-merge-right-editor .cm-merge-r-chunk {
+  background-color: var(--jp-git-diff-added-color);
 }
 
-.jp-git-diff-root .CodeMirror-merge-collapsed-line .CodeMirror-gutter-elt {
-  display: none;
+.jp-git-diff-root .cm-merge-left-editor .cm-merge-l-inserted {
+  background-color: var(--jp-merge-local-color1);
 }
 
-.jp-git-diff-root .CodeMirror-merge-spacer {
+.jp-git-diff-root .cm-merge-spacer {
   background-image: repeating-linear-gradient(
     145deg,
     transparent,
@@ -179,4 +172,16 @@ button.jp-git-diff-resolve .jp-ToolbarButtonComponent-label {
     var(--jp-border-color0) 10px,
     var(--jp-border-color0) 12px
   );
+}
+
+/* Hide drag handles */
+.jp-git-diff-root .jp-Notebook-merge .jp-DragPanel-dragHandle {
+  display: none;
+}
+
+.jp-git-diff-parent-widget .jp-Merge-notebook-controls {
+  margin-bottom: 0;
+  padding: 0;
+  background-color: transparent;
+  border: none;
 }

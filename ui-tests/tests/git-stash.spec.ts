@@ -6,9 +6,9 @@ const baseRepositoryPath = 'test-repository-stash.tar.gz';
 test.use({ autoGoto: false });
 
 test.describe('Git Stash Commands', () => {
-  test.beforeEach(async ({ baseURL, page, tmpPath }) => {
+  test.beforeEach(async ({ page, request, tmpPath }) => {
     await extractFile(
-      baseURL,
+      request,
       path.resolve(__dirname, 'data', baseRepositoryPath),
       path.join(tmpPath, 'repository.tar.gz')
     );
@@ -24,30 +24,32 @@ test.describe('Git Stash Commands', () => {
   });
 
   test('should show the current stash list of two items', async ({ page }) => {
-    const stashButton = await page.getByRole('button', {
+    const stashButton = page.getByRole('button', {
       name: 'Stash latest changes'
     });
-    const numberOfStashes = await page.locator('[data-test-id="num-stashes"]');
+    const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
 
     await page.getByText('Stash', { exact: true }).click();
 
     expect.soft(stashButton).toBeTruthy();
-    await expect(await numberOfStashes.innerText()).toBe('(2)');
+    await expect(numberOfStashes).toHaveText('(2)');
   });
 
   test('should drop a single stash entry when `stash drop` button is clicked', async ({
     page
   }) => {
+    const stashSection = page.getByText('Stash(2)');
+    await stashSection.waitFor();
     // Open the stash list
     await page.getByText('Stash', { exact: true }).click();
     // Hover on the stash list
-    const stashSection = await page.getByText('Stash(2)');
     await stashSection.hover();
 
     // Click drop stash on the first item
-    const dropFirstStashBtn = await page
-      .locator('span')
-      .filter({ hasText: 'notebook stash (on master)' })
+    const dropFirstStashBtn = page
+      .locator('div')
+      .filter({ hasText: /^notebook stash \(on master\)$/ })
+      .last()
       .getByRole('button', { name: 'Drop stash entry' });
 
     await dropFirstStashBtn.click();
@@ -59,9 +61,9 @@ test.describe('Git Stash Commands', () => {
     });
 
     // Now there should be only one stash
-    const numberOfStashes = await page.locator('[data-test-id="num-stashes"]');
+    const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
 
-    await expect(await numberOfStashes.innerText()).toBe('(1)');
+    await expect(numberOfStashes).toHaveText('(1)');
   });
 
   test('should clear all the stashes when `stash clear` button is clicked', async ({
@@ -70,7 +72,7 @@ test.describe('Git Stash Commands', () => {
     // Open the stash list
     await page.getByText('Stash', { exact: true }).click();
     // Hover on the stash list
-    const stashSection = await page.getByText('Stash(2)');
+    const stashSection = page.getByText('Stash(2)');
     await stashSection.hover();
 
     // Click clear all stash button
@@ -87,9 +89,9 @@ test.describe('Git Stash Commands', () => {
     });
 
     // Now there should be only one stash
-    const numberOfStashes = await page.locator('[data-test-id="num-stashes"]');
+    const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
 
-    await expect(await numberOfStashes.innerText()).toBe('(0)');
+    await expect(numberOfStashes).toHaveText('(0)');
   });
 
   test('should add a stash when the `stash changes` button is clicked', async ({
@@ -112,9 +114,9 @@ test.describe('Git Stash Commands', () => {
 
     // Should have the old tetx
 
-    const oldText = await page.locator('text="This is some dirty changes"');
-    await expect.soft(await oldText.count()).toBe(1);
-    const stashButton = await page.getByRole('button', {
+    const oldText = page.locator('text="This is some dirty changes"');
+    await expect.soft(oldText).toHaveCount(1);
+    const stashButton = page.getByRole('button', {
       name: 'Stash latest changes'
     });
     await stashButton.click();
@@ -133,16 +135,16 @@ test.describe('Git Stash Commands', () => {
     });
 
     // See if the nStashes becomes (3)
-    const numberOfStashes = await page.locator('[data-test-id="num-stashes"]');
+    const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
 
-    await expect.soft(await numberOfStashes.innerText()).toBe('(3)');
+    await expect.soft(numberOfStashes).toHaveText('(3)');
     // check that our stash message showed up properly
     await expect
-      .soft(await page.getByText('some stash message (on master)'))
-      .toBeTruthy();
+      .soft(page.getByText('some stash message (on master)'))
+      .toBeVisible();
     await page.waitForTimeout(100);
     // Check that the stash removed the old text disappears
-    await expect(await oldText.count()).toBe(0);
+    await expect(oldText).toHaveCount(0);
   });
 
   test('should apply a stash entry when the `stash apply` button is clicked (does not remove stash entry from list)', async ({
@@ -162,21 +164,23 @@ test.describe('Git Stash Commands', () => {
     // Show the stash entries and hover on the stash entry
     await page.getByText('Stash(2)').click();
     await page
-      .locator('span')
-      .filter({ hasText: 'stashy stash (on master)' })
+      .locator('div')
+      .filter({ hasText: /^stashy stash \(on master\)$/ })
+      .last()
       .hover();
 
-    const applyStashBtn = await page
-      .locator('span')
-      .filter({ hasText: 'stashy stash (on master)' })
+    const applyStashBtn = page
+      .locator('div')
+      .filter({ hasText: /^stashy stash \(on master\)$/ })
+      .last()
       .getByRole('button', { name: 'Apply stash entry' });
 
     await applyStashBtn.click();
 
     // Check that the stash applies
     await expect
-      .soft(await page.getByText('console.log("dirty changes");'))
-      .toBeTruthy();
+      .soft(page.getByText('console.log("dirty changes");'))
+      .toHaveCount(1);
 
     // open the second file has changes applied
     await page.getByRole('tab', { name: 'File Browser' }).click();
@@ -187,12 +191,12 @@ test.describe('Git Stash Commands', () => {
       .dblclick();
 
     await expect
-      .soft(await page.getByText('This is some dirty changes'))
-      .toBeTruthy();
+      .soft(page.getByText('This is some dirty changes'))
+      .toHaveCount(1);
 
     // See if the nStashes remains the same
-    const numberOfStashes = await page.locator('[data-test-id="num-stashes"]');
-    await expect(await numberOfStashes.innerText()).toBe('(2)');
+    const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
+    await expect(numberOfStashes).toHaveText('(2)');
   });
 
   test('should pop a stash entry when the `stash pop` button is clicked (apply stash then remove from list)', async ({
@@ -219,16 +223,17 @@ test.describe('Git Stash Commands', () => {
     await page.getByText('Stash', { exact: true }).click();
 
     await page
-      .locator('span')
-      .filter({ hasText: 'stashy stash (on master)' })
+      .locator('div')
+      .filter({ hasText: /^stashy stash \(on master\)$/ })
+      .last()
       .hover();
 
-    const popStashBtn = await page
-      .locator('span')
-      .filter({ hasText: 'stashy stash (on master)' })
-      .getByRole('button', { name: 'Pop stash entry' });
-
-    await popStashBtn.click();
+    await page
+      .locator('div')
+      .filter({ hasText: /^stashy stash \(on master\)$/ })
+      .last()
+      .getByRole('button', { name: 'Pop stash entry' })
+      .click();
 
     // Wait for the number of stashes to change
     await page.waitForFunction(() => {
@@ -237,11 +242,9 @@ test.describe('Git Stash Commands', () => {
     });
     await page.waitForTimeout(100);
     // Check that the stash applies
-    const firstStashFileText = await page
-      .locator('pre')
-      .filter({ hasText: 'console.log("dirty changes");' });
+    const firstStashFileText = page.getByText('console.log("dirty changes");');
 
-    await expect.soft(await firstStashFileText.count()).toBe(1);
+    await expect.soft(firstStashFileText).toHaveCount(1);
 
     // open the second file has changes applied
     await page.getByRole('tab', { name: 'File Browser' }).click();
@@ -254,11 +257,9 @@ test.describe('Git Stash Commands', () => {
     // Wait for revertFile to finish
     await page.waitForTimeout(100);
 
-    const secondStashFileText = await page
-      .locator('pre')
-      .filter({ hasText: 'This is some dirty changes' });
+    const secondStashFileText = page.getByText('This is some dirty changes');
 
-    await expect.soft(await secondStashFileText.count()).toBe(1);
+    await expect.soft(secondStashFileText).toHaveCount(1);
 
     // See if the nStashes remains the same
 
@@ -267,7 +268,7 @@ test.describe('Git Stash Commands', () => {
       return element && !(element.textContent ?? '').includes('(2)');
     });
 
-    const numberOfStashes = await page.locator('[data-test-id="num-stashes"]');
-    await expect(await numberOfStashes.innerText()).toBe('(1)');
+    const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
+    await expect(numberOfStashes).toHaveText('(1)');
   });
 });

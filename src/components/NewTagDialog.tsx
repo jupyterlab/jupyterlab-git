@@ -1,21 +1,10 @@
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import ClearIcon from '@material-ui/icons/Clear';
+import { Notification } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
+import ClearIcon from '@mui/icons-material/Clear';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { Logger } from '../logger';
-import {
-  historyDialogBoxWrapperStyle,
-  historyDialogBoxStyle,
-  activeListItemClass,
-  commitItemBoldClass,
-  commitHeaderBoldClass,
-  commitBodyClass,
-  commitHeaderClass,
-  commitHeaderItemClass,
-  commitWrapperClass
-} from '../style/NewTagDialog';
 import {
   actionsWrapperClass,
   branchDialogClass,
@@ -33,7 +22,18 @@ import {
   titleClass,
   titleWrapperClass
 } from '../style/NewBranchDialog';
-import { Git, IGitExtension, Level } from '../tokens';
+import {
+  activeListItemClass,
+  commitBodyClass,
+  commitHeaderBoldClass,
+  commitHeaderClass,
+  commitHeaderItemClass,
+  commitItemBoldClass,
+  commitWrapperClass,
+  historyDialogBoxStyle,
+  historyDialogBoxWrapperStyle
+} from '../style/NewTagDialog';
+import { Git, IGitExtension } from '../tokens';
 import { GitCommitGraph } from './GitCommitGraph';
 
 /**
@@ -44,11 +44,6 @@ export interface INewTagDialogProps {
    * List of prior commits.
    */
   pastCommits: Git.ISingleCommitInfo[];
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -69,6 +64,11 @@ export interface INewTagDialogProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Dialog box open from the context menu?
+   */
+  isSingleCommit: boolean;
 }
 
 /**
@@ -79,11 +79,6 @@ export interface IDialogBoxCommitGraphProps {
    * List of prior commits.
    */
   pastCommits: Git.ISingleCommitInfo[];
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -109,6 +104,11 @@ export interface IDialogBoxCommitGraphProps {
    * Update function for baseCommitId.
    */
   updateBaseCommitId: React.Dispatch<React.SetStateAction<string>>;
+
+  /**
+   * Dialog box open from the context menu.
+   */
+  isSingleCommit: boolean;
 }
 
 /**
@@ -183,6 +183,10 @@ export const DialogBoxCommitGraph: React.FunctionComponent<
   let isFilter;
   if (filter === '') {
     isFilter = true;
+  }
+
+  if (props.isSingleCommit === true) {
+    isFilter = false;
   }
 
   return (
@@ -371,24 +375,29 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
     const tagName = nameState;
     const baseCommitId = baseCommitIdState;
 
-    props.logger.log({
-      level: Level.RUNNING,
-      message: props.trans.__('Creating tag…')
-    });
+    const id = Notification.emit(
+      props.trans.__('Creating tag…'),
+      'in-progress',
+      { autoClose: false }
+    );
     try {
       await props.model.setTag(tagName, baseCommitId);
     } catch (err) {
-      setErrorState(err.message.replace(/^fatal:/, ''));
-      props.logger.log({
-        level: Level.ERROR,
-        message: props.trans.__('Failed to create tag.')
+      setErrorState((err as any).message.replace(/^fatal:/, ''));
+      Notification.update({
+        id,
+        message: props.trans.__('Failed to create tag.'),
+        type: 'error',
+        autoClose: false
       });
       return;
     }
 
-    props.logger.log({
-      level: Level.SUCCESS,
-      message: props.trans.__('Tag created.')
+    Notification.update({
+      id,
+      message: props.trans.__('Tag created.'),
+      type: 'success',
+      autoClose: 5000
     });
     // Close the tag dialog:
     props.onClose();
@@ -427,36 +436,38 @@ export const NewTagDialogBox: React.FunctionComponent<INewTagDialogProps> = (
           title={props.trans.__('Enter a tag name')}
         />
         <p>{props.trans.__('Create tag pointing to…')}</p>
-        <div className={filterWrapperClass}>
-          <div className={filterClass}>
-            <input
-              className={filterInputClass}
-              type="text"
-              onChange={onFilterChange}
-              value={filterState}
-              placeholder={props.trans.__('Filter by commit message')}
-              title={props.trans.__('Filter history of commits menu')}
-            />
-            {filterState ? (
-              <button className={filterClearClass}>
-                <ClearIcon
-                  titleAccess={props.trans.__('Clear the current filter')}
-                  fontSize="small"
-                  onClick={resetFilter}
-                />
-              </button>
-            ) : null}
+        {props.isSingleCommit ? null : (
+          <div className={filterWrapperClass}>
+            <div className={filterClass}>
+              <input
+                className={filterInputClass}
+                type="text"
+                onChange={onFilterChange}
+                value={filterState}
+                placeholder={props.trans.__('Filter by commit message')}
+                title={props.trans.__('Filter history of commits menu')}
+              />
+              {filterState ? (
+                <button className={filterClearClass}>
+                  <ClearIcon
+                    titleAccess={props.trans.__('Clear the current filter')}
+                    fontSize="small"
+                    onClick={resetFilter}
+                  />
+                </button>
+              ) : null}
+            </div>
           </div>
-        </div>
+        )}
         {
           <DialogBoxCommitGraph
             pastCommits={props.pastCommits}
-            logger={props.logger}
             model={props.model}
             trans={props.trans}
             filter={filterState}
             baseCommitId={baseCommitIdState}
             updateBaseCommitId={setBaseCommitIdState}
+            isSingleCommit={props.isSingleCommit}
           />
         }
       </div>

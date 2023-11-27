@@ -45,5 +45,6 @@ export class CheckboxForm
     };
   }
 
+  // @ts-expect-error initialization is indirect
   private _checkbox: HTMLInputElement;
 }

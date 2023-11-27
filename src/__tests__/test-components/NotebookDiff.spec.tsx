@@ -4,6 +4,7 @@ import { NotebookDiff, ROOT_CLASS } from '../../components/diff/NotebookDiff';
 import { requestAPI } from '../../git';
 import { Git } from '../../tokens';
 import * as diffResponse from './data/nbDiffResponse.json';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
 jest.mock('../../git');
 
@@ -28,7 +29,7 @@ describe('NotebookDiff', () => {
     (requestAPI as jest.Mock).mockResolvedValueOnce(diffResponse);
 
     // When
-    const widget = new NotebookDiff(model, null);
+    const widget = new NotebookDiff(model, new RenderMimeRegistry());
     await widget.ready;
 
     // Then
@@ -36,7 +37,7 @@ describe('NotebookDiff', () => {
     const terminateTest = new Promise(resolve => {
       resolveTest = resolve;
     });
-    setImmediate(() => {
+    setTimeout(() => {
       expect(requestAPI).toHaveBeenCalled();
       expect(requestAPI).toBeCalledWith('diffnotebook', 'POST', {
         currentContent: 'challenger',
@@ -48,7 +49,7 @@ describe('NotebookDiff', () => {
       expect(widget.node.querySelectorAll(`.${ROOT_CLASS}`)).toHaveLength(1);
       expect(widget.node.querySelectorAll('.jp-Notebook-diff')).toHaveLength(1);
       resolveTest();
-    });
+    }, 1);
     await terminateTest;
   });
 
@@ -77,7 +78,7 @@ describe('NotebookDiff', () => {
     );
 
     // When
-    const widget = new NotebookDiff(model, null);
+    const widget = new NotebookDiff(model, new RenderMimeRegistry());
     await widget.ready;
 
     // Then
@@ -85,17 +86,17 @@ describe('NotebookDiff', () => {
     const terminateTest = new Promise(resolve => {
       resolveTest = resolve;
     });
-    setImmediate(() => {
+    setTimeout(() => {
       expect(requestAPI).toHaveBeenCalled();
       expect(requestAPI).toBeCalledWith('diffnotebook', 'POST', {
         currentContent: 'challenger',
         previousContent: 'reference'
       });
       expect(
-        widget.node.querySelector('.jp-git-diff-error').innerHTML
+        widget.node.querySelector('.jp-git-diff-error')!.innerHTML
       ).toContain('TEST_ERROR_MESSAGE');
       resolveTest();
-    });
+    }, 1);
     await terminateTest;
   });
 });

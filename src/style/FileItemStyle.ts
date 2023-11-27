@@ -1,5 +1,5 @@
 import { style } from 'typestyle';
-import { NestedCSSProperties } from 'typestyle/lib/types';
+import type { NestedCSSProperties } from 'typestyle/lib/types';
 import { actionButtonStyle, showButtonOnHover } from './ActionButtonStyle';
 
 export const fileStyle = style(
@@ -49,11 +49,11 @@ export const selectedFileStyle = style(
       }
     };
 
-    styled.$nest[`& .${actionButtonStyle}:active`] = {
+    styled.$nest![`& .${actionButtonStyle}:active`] = {
       backgroundColor: 'var(--jp-brand-color1)'
     };
 
-    styled.$nest[`& .${actionButtonStyle}:hover`] = {
+    styled.$nest![`& .${actionButtonStyle}:hover`] = {
       backgroundColor: 'var(--jp-brand-color1)'
     };
 

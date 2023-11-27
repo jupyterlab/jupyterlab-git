@@ -6,9 +6,9 @@ const baseRepositoryPath = 'test-repository-merge-commits.tar.gz';
 test.use({ autoGoto: false, mockSettings: galata.DEFAULT_SETTINGS });
 
 test.describe('Merge commit tests', () => {
-  test.beforeEach(async ({ baseURL, page, tmpPath }) => {
+  test.beforeEach(async ({ page, request, tmpPath }) => {
     await extractFile(
-      baseURL,
+      request,
       path.resolve(__dirname, 'data', baseRepositoryPath),
       path.join(tmpPath, 'repository.tar.gz')
     );
@@ -67,7 +67,7 @@ test.describe('Merge commit tests', () => {
       .getByRole('tab', { name: 'hello-world.py' })
       .waitFor({ state: 'visible' });
 
-    expect(page.waitForSelector('.jp-git-diff-root')).toBeTruthy();
+    await expect(page.locator('.jp-git-diff-root')).toBeVisible();
   });
 
   test('should revert merge commit', async ({ page }) => {
@@ -92,8 +92,6 @@ test.describe('Merge commit tests', () => {
       .locator('#jp-git-sessions')
       .getByText("Revert 'Merge branch 'sort-names''");
 
-    await revertMergeCommit.waitFor({ state: 'visible' });
-
-    expect(revertMergeCommit).toBeTruthy();
+    await expect(revertMergeCommit).toBeVisible();
   });
 });

@@ -313,7 +313,7 @@ async def test_git_push_fail():
 
             # Then
             mock_execute.assert_called_once_with(
-                ["git", "push", "test_origin", "HEAD:test_master"],
+                ["git", "push", "--tags", "test_origin", "HEAD:test_master"],
                 cwd="test_curr_path",
                 timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
@@ -345,7 +345,7 @@ async def test_git_push_with_auth_fail():
 
             # Then
             mock_execute_with_authentication.assert_called_once_with(
-                ["git", "push", "test_origin", "HEAD:test_master"],
+                ["git", "push", "--tags", "test_origin", "HEAD:test_master"],
                 cwd="test_curr_path",
                 timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
@@ -374,7 +374,7 @@ async def test_git_push_success():
 
             # Then
             mock_execute.assert_called_once_with(
-                ["git", "push", ".", "HEAD:test_master"],
+                ["git", "push", "--tags", ".", "HEAD:test_master"],
                 cwd="test_curr_path",
                 timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
@@ -403,7 +403,7 @@ async def test_git_push_with_auth_success():
 
             # Then
             mock_execute_with_authentication.assert_called_once_with(
-                ["git", "push", ".", "HEAD:test_master"],
+                ["git", "push", "--tags", ".", "HEAD:test_master"],
                 cwd="test_curr_path",
                 timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
@@ -466,7 +466,7 @@ async def test_git_push_with_auth_and_cache_credentials():
                         is_binary=False,
                     ),
                     call(
-                        ["git", "push", ".", "HEAD:test_master"],
+                        ["git", "push", "--tags", ".", "HEAD:test_master"],
                         cwd=test_path,
                         timeout=20,
                         env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
@@ -511,7 +511,7 @@ async def test_git_push_with_auth_and_cache_credentials_and_existing_credential_
                     is_binary=False,
                 ),
                 call(
-                    ["git", "push", ".", "HEAD:test_master"],
+                    ["git", "push", "--tags", ".", "HEAD:test_master"],
                     cwd=test_path,
                     timeout=20,
                     env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
@@ -522,3 +522,29 @@ async def test_git_push_with_auth_and_cache_credentials_and_existing_credential_
             ]
         )
         assert {"code": 0, "message": ""} == actual_response
+
+
+@pytest.mark.asyncio
+async def test_git_push_no_tags_success():
+    with patch("os.environ", {"TEST": "test"}):
+        with patch("jupyterlab_git.git.execute") as mock_execute:
+            # Given
+            output = "output"
+            mock_execute.return_value = maybe_future((0, output, "does not matter"))
+
+            # When
+            actual_response = await Git().push(
+                ".", "HEAD:test_master", "test_curr_path", tags=False
+            )
+
+            # Then
+            mock_execute.assert_called_once_with(
+                ["git", "push", ".", "HEAD:test_master"],
+                cwd="test_curr_path",
+                timeout=20,
+                env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
+                username=None,
+                password=None,
+                is_binary=False,
+            )
+            assert {"code": 0, "message": output} == actual_response

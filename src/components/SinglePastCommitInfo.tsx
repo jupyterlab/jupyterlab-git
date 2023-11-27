@@ -1,7 +1,6 @@
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
-import { LoggerContext } from '../logger';
 import { GitExtension } from '../model';
 import { discardIcon, rewindIcon } from '../style/icons';
 import {
@@ -49,7 +48,7 @@ export interface ISinglePastCommitInfoProps {
     filePath: string,
     isText: boolean,
     previousFilePath?: string
-  ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
+  ) => (event?: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
 /**
@@ -137,15 +136,17 @@ export class SinglePastCommitInfo extends React.Component<
     try {
       const log = await this.props.model.detailedLog(this.props.commit.commit);
 
-      this.setState({
-        info: log.modified_file_note,
-        commitBody: log.commit_body,
-        numFiles: log.modified_files_count,
-        insertions: log.number_of_insertions,
-        deletions: log.number_of_deletions,
-        modifiedFiles: log.modified_files,
-        loadingState: 'success'
-      });
+      if (log) {
+        this.setState({
+          info: log.modified_file_note!,
+          commitBody: log.commit_body!,
+          numFiles: log.modified_files_count!,
+          insertions: log.number_of_insertions!,
+          deletions: log.number_of_deletions!,
+          modifiedFiles: log.modified_files!,
+          loadingState: 'success'
+        });
+      }
     } catch (err) {
       console.error(
         `Error while getting detailed log for commit ${this.props.commit.commit} and path ${this.props.model.pathRepository}`,
@@ -190,19 +191,14 @@ export class SinglePastCommitInfo extends React.Component<
                 )}
                 onClick={this._onResetClick}
               />
-              <LoggerContext.Consumer>
-                {logger => (
-                  <ResetRevertDialog
-                    open={this.state.resetRevertDialog}
-                    action={this.state.resetRevertAction}
-                    model={this.props.model}
-                    logger={logger}
-                    commit={this.props.commit}
-                    onClose={this._onResetRevertDialogClose}
-                    trans={this.props.trans}
-                  />
-                )}
-              </LoggerContext.Consumer>
+              <ResetRevertDialog
+                open={this.state.resetRevertDialog}
+                action={this.state.resetRevertAction}
+                model={this.props.model}
+                commit={this.props.commit}
+                onClose={this._onResetRevertDialogClose}
+                trans={this.props.trans}
+              />
             </>
           }
           numFiles={this.state.numFiles}

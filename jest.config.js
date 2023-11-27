@@ -1,39 +1,22 @@
 const jestJupyterLab = require('@jupyterlab/testutils/lib/jest-config');
 
 const esModules = [
-  '.*@jupyterlab/',
+  '@codemirror',
   '@jupyter/ydoc',
+  '@jupyterlab/',
   'lib0',
-  'y\\-protocols',
-  'y\\-websocket',
+  'nanoid',
+  'nbdime',
+  'vscode-ws-jsonrpc',
+  'y-protocols',
+  'y-websocket',
   'yjs'
 ].join('|');
 
-const jlabConfig = jestJupyterLab(__dirname);
-
-const {
-  moduleFileExtensions,
-  moduleNameMapper,
-  preset,
-  setupFilesAfterEnv,
-  testPathIgnorePatterns,
-  transform
-} = jlabConfig;
+const baseConfig = jestJupyterLab(__dirname);
 
 module.exports = {
-  moduleFileExtensions,
-  moduleNameMapper,
-  modulePathIgnorePatterns: [
-    '<rootDir>/build',
-    '<rootDir>/jupyterlab_git',
-    '<rootDir>/jupyter-config',
-    '<rootDir>/ui-tests'
-  ],
-  preset,
-  setupFilesAfterEnv,
-  setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
-  testPathIgnorePatterns,
-  transform,
+  ...baseConfig,
   automock: false,
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
@@ -42,11 +25,14 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['lcov', 'text'],
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.test.json'
-    }
-  },
+  modulePathIgnorePatterns: [
+    '<rootDir>/build',
+    '<rootDir>/jupyterlab_git',
+    '<rootDir>/jupyter-config',
+    '<rootDir>/ui-tests'
+  ],
+  reporters: ['default', 'github-actions'],
+  setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
   testRegex: 'src/.*/.*.spec.ts[x]?$',
   transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
 };

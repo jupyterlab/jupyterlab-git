@@ -6,9 +6,9 @@ const baseRepositoryPath = 'test-repository.tar.gz';
 test.use({ autoGoto: false });
 
 test.describe('Image diff', () => {
-  test.beforeEach(async ({ baseURL, page, tmpPath }) => {
+  test.beforeEach(async ({ page, request, tmpPath }) => {
     await extractFile(
-      baseURL,
+      request,
       path.resolve(__dirname, 'data', baseRepositoryPath),
       path.join(tmpPath, 'repository.tar.gz')
     );

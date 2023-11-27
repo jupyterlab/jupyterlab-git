@@ -97,5 +97,6 @@ export const actionButtonClass = style({
 export const commitBodyClass = style({
   paddingTop: '5px',
   whiteSpace: 'pre-wrap',
-  wordWrap: 'break-word'
+  wordWrap: 'break-word',
+  margin: '0'
 });

@@ -811,6 +811,17 @@ class GitIgnoreHandler(GitHandler):
     """
 
     @tornado.web.authenticated
+    async def get(self, path: str = ""):
+        """
+        GET read content in .gitignore
+        """
+        local_path = self.url2localpath(path)
+        body = self.git.read_file(local_path + "/.gitignore")
+        if body["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(body))
+
+    @tornado.web.authenticated
     async def post(self, path: str = ""):
         """
         POST add entry in .gitignore
@@ -818,8 +829,11 @@ class GitIgnoreHandler(GitHandler):
         local_path = self.url2localpath(path)
         data = self.get_json_body()
         file_path = data.get("file_path", None)
+        content = data.get("content", None)
         use_extension = data.get("use_extension", False)
-        if file_path:
+        if content:
+            body = await self.git.write_gitignore(local_path, content)
+        elif file_path:
             if use_extension:
                 suffixes = Path(file_path).suffixes
                 if len(suffixes) > 0:
@@ -827,7 +841,6 @@ class GitIgnoreHandler(GitHandler):
             body = await self.git.ignore(local_path, file_path)
         else:
             body = await self.git.ensure_gitignore(local_path)
-
         if body["code"] != 0:
             self.set_status(500)
         self.finish(json.dumps(body))
@@ -964,8 +977,7 @@ class GitStashHandler(GitHandler):
             self.set_status(201)
         else:
             self.set_status(500)
-
-        self.finish(json.dumps(response))
+            self.finish(json.dumps(response))
 
     @tornado.web.authenticated
     async def delete(self, path: str = ""):
@@ -983,9 +995,10 @@ class GitStashHandler(GitHandler):
 
         if response["code"] == 0:
             self.set_status(204)
+            self.finish()
         else:
             self.set_status(500)
-        self.finish()
+            self.finish(json.dumps(response))
 
     @tornado.web.authenticated
     async def get(self, path: str = ""):
@@ -1048,8 +1061,7 @@ class GitStashApplyHandler(GitHandler):
             self.set_status(201)
         else:
             self.set_status(500)
-
-        self.finish(json.dumps(response))
+            self.finish(json.dumps(response))
 
 
 def setup_handlers(web_app):

@@ -84,7 +84,7 @@ export interface ICommitDiffProps {
     filePath: string,
     isText: boolean,
     previousFilePath?: string
-  ) => (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
+  ) => (event?: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
 
 /**

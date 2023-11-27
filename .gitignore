@@ -85,9 +85,6 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
 # pyenv
 .python-version
 
@@ -96,14 +93,6 @@ celerybeat-schedule
 
 # SageMath parsed files
 *.sage.py
-
-# dotenv
-.env
-
-# virtualenv
-.venv
-venv/
-ENV/
 
 # Spyder project settings
 .spyderproject
@@ -133,7 +122,10 @@ dmypy.json
 # OSX files
 .DS_Store
 
-# jetbrains ide stuff
+# Yarn cache
+.yarn/
+
+# JetBrains IDE stuff
 *.iml
 .idea/
 

@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
-import Button from '@material-ui/core/Button';
-import { shallow } from 'enzyme';
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
 import 'jest';
 import * as React from 'react';
 import { CommitBox, ICommitBoxProps } from '../../components/CommitBox';
-import { CommitMessage } from '../../components/CommitMessage';
 import { WarningBox } from '../../components/WarningBox';
 import { CommandIDs } from '../../tokens';
 
@@ -44,9 +43,10 @@ describe('CommitBox', () => {
   describe('#render()', () => {
     it('should display placeholder text for the commit message summary', () => {
       const props = defaultProps;
-      const component = shallow(<CommitBox {...props} />);
-      const node = component.find(CommitMessage);
-      expect(node.prop('summaryPlaceholder')).toEqual(
+      render(<CommitBox {...props} />);
+
+      expect(screen.getAllByRole('textbox')[0]).toHaveAttribute(
+        'placeholder',
         'Summary (Ctrl+Enter to commit)'
       );
     });
@@ -62,33 +62,34 @@ describe('CommitBox', () => {
         ...defaultProps,
         commands: adjustedCommands
       };
-      const component = shallow(<CommitBox {...props} />);
-      const node = component.find(CommitMessage);
-      expect(node.prop('summaryPlaceholder')).toEqual(
+
+      render(<CommitBox {...props} />);
+
+      expect(screen.getAllByRole('textbox')[0]).toHaveAttribute(
+        'placeholder',
         'Summary (Shift+Enter to commit)'
       );
     });
 
     it('should display a button to commit changes', () => {
       const props = defaultProps;
-      const component = shallow(<CommitBox {...props} />);
-      const node = component.find(Button).first();
-      expect(node.text()).toEqual('Commit');
+      render(<CommitBox {...props} />);
+
+      expect(screen.getAllByRole('button')[0]).toHaveTextContent('Commit');
     });
 
     it('should set a `title` attribute on the button to commit changes', () => {
       const props = defaultProps;
-      const component = shallow(<CommitBox {...props} />);
-      const node = component.find(Button).first();
-      expect(node.prop('title').length > 0).toEqual(true);
+      render(<CommitBox {...props} />);
+
+      expect(screen.getAllByRole('button')[0]).toHaveAttribute('title');
     });
 
     it('should apply a class to disable the commit button when no files have changes to commit', () => {
       const props = defaultProps;
-      const component = shallow(<CommitBox {...props} />);
-      const node = component.find(Button).first();
-      const prop = node.prop('disabled');
-      expect(prop).toEqual(true);
+      render(<CommitBox {...props} />);
+
+      expect(screen.getAllByRole('button')[0]).toHaveAttribute('disabled');
     });
 
     it('should apply a class to disable the commit button when files have changes to commit, but the user has not entered a commit message summary', () => {
@@ -96,10 +97,9 @@ describe('CommitBox', () => {
         ...defaultProps,
         hasFiles: true
       };
-      const component = shallow(<CommitBox {...props} />);
-      const node = component.find(Button).first();
-      const prop = node.prop('disabled');
-      expect(prop).toEqual(true);
+      render(<CommitBox {...props} />);
+
+      expect(screen.getAllByRole('button')[0]).toHaveAttribute('disabled');
     });
 
     it('should not apply a class to disable the commit button when files have changes to commit and the user has entered a commit message summary', () => {
@@ -108,10 +108,10 @@ describe('CommitBox', () => {
         summary: 'beep boop',
         hasFiles: true
       };
-      const component = shallow(<CommitBox {...props} />);
-      const node = component.find(Button).first();
-      const prop = node.prop('disabled');
-      expect(prop).toEqual(false);
+
+      render(<CommitBox {...props} />);
+
+      expect(screen.getAllByRole('button')[0]).not.toHaveAttribute('disabled');
     });
 
     it('should apply a class to disable the commit input fields in amend mode', () => {
@@ -120,8 +120,9 @@ describe('CommitBox', () => {
         summary: 'beep boop',
         amend: true
       };
-      const component = shallow(<CommitBox {...props} />);
-      expect(component.find(CommitMessage).length).toEqual(0);
+
+      render(<CommitBox {...props} />);
+      expect(screen.queryByRole('textbox')).toBeNull();
     });
 
     it('should not apply a class to disable the commit button in amend mode', () => {
@@ -130,10 +131,9 @@ describe('CommitBox', () => {
         hasFiles: true,
         amend: true
       };
-      const component = shallow(<CommitBox {...props} />);
-      const node = component.find(Button).first();
-      const prop = node.prop('disabled');
-      expect(prop).toEqual(false);
+      render(<CommitBox {...props} />);
+
+      expect(screen.getAllByRole('button')[0]).not.toHaveAttribute('disabled');
     });
 
     it('should render a warning box when there are dirty staged files', () => {
@@ -143,8 +143,9 @@ describe('CommitBox', () => {
           <WarningBox title="Warning" content="Warning content."></WarningBox>
         )
       };
-      const component = shallow(<CommitBox {...props} />);
-      expect(component.find(WarningBox).length).toEqual(1);
+      render(<CommitBox {...props} />);
+
+      expect(screen.getByText('Warning content.')).toBeDefined();
     });
   });
 });

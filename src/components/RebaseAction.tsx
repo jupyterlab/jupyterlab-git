@@ -1,17 +1,16 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
-import {
-  Button,
-  ButtonGroup,
-  ClickAwayListener,
-  Grow,
-  MenuItem,
-  MenuList,
-  Paper,
-  Popper
-} from '@material-ui/core';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import { ClickAwayListener } from '@mui/base';
+import Grow from '@mui/material/Grow';
+import MenuItem from '@mui/material/MenuItem';
+import MenuList from '@mui/material/MenuList';
+import Paper from '@mui/material/Paper';
+import Popper from '@mui/material/Popper';
 import React from 'react';
+import { classes } from 'typestyle';
 import {
   commitButtonClass,
   commitPaperClass,
@@ -48,19 +47,16 @@ export interface IRebaseActionProps {
  */
 export function RebaseAction(props: IRebaseActionProps): JSX.Element {
   const [open, setOpen] = React.useState<boolean>(false);
-  const anchor = React.useRef<HTMLDivElement>();
+  const anchor = React.useRef<HTMLDivElement>(null);
   const onToggle = React.useCallback(() => {
     setOpen(!open);
   }, []);
-  const onClose = React.useCallback(
-    (event: React.MouseEvent<Document, MouseEvent>) => {
-      if (anchor.current.contains(event.target as HTMLElement)) {
-        return;
-      }
-      setOpen(false);
-    },
-    []
-  );
+  const onClose = React.useCallback((event: MouseEvent | TouchEvent) => {
+    if (anchor.current?.contains(event.target as HTMLElement)) {
+      return;
+    }
+    setOpen(false);
+  }, []);
   const onContinue = React.useCallback(async () => {
     await props.commands.execute(CommandIDs.gitResolveRebase, {
       action: 'continue'
@@ -105,9 +101,8 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
         <Button
           title={props.trans.__('Pick another rebase action.')}
           classes={{
-            root: commitButtonClass
+            root: classes(commitButtonClass, commitVariantSelector)
           }}
-          className={commitVariantSelector}
           onClick={onToggle}
           size="small"
           aria-controls={open ? 'rebase-split-button-menu' : undefined}
@@ -119,7 +114,7 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
       <Popper open={open} anchorEl={anchor.current} transition disablePortal>
         {({ TransitionProps }) => (
           <Grow {...TransitionProps}>
-            <Paper classes={{ root: commitRoot }} className={commitPaperClass}>
+            <Paper classes={{ root: classes(commitRoot, commitPaperClass) }}>
               <ClickAwayListener onClickAway={onClose}>
                 <MenuList id="rebase-split-button-menu">
                   <MenuItem

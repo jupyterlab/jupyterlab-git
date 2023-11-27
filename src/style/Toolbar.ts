@@ -73,7 +73,14 @@ export const toolbarMenuButtonTitleWrapperClass = style({
 
   marginTop: 'auto',
   marginBottom: 'auto',
-  marginRight: 'auto'
+  marginRight: 'auto',
+
+  $nest: {
+    '& > p': {
+      marginTop: 0,
+      marginBottom: 0
+    }
+  }
 });
 
 export const toolbarMenuButtonTitleClass = style({});
@@ -110,7 +117,7 @@ export const badgeClass = style({
   $nest: {
     '& > .MuiBadge-badge': {
       top: 12,
-      right: 15,
+      right: 5,
       backgroundColor: 'var(--jp-warn-color1)'
     }
   }

@@ -18,10 +18,10 @@ export function extractFilename(path: string): string {
  * @returns Mouse event handler that stops event from propagating
  */
 export function stopPropagationWrapper(
-  fn: React.EventHandler<React.MouseEvent>
-): React.EventHandler<React.MouseEvent> {
-  return (event: React.MouseEvent) => {
-    event.stopPropagation();
+  fn: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+): (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void {
+  return (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event?.stopPropagation();
     fn(event);
   };
 }
@@ -99,9 +99,11 @@ export const openFileDiff =
    *
    * @param event - event object
    */
-  async (event: React.MouseEvent<HTMLLIElement, MouseEvent>): Promise<void> => {
+  async (
+    event?: React.MouseEvent<HTMLLIElement, MouseEvent>
+  ): Promise<void> => {
     // Prevent the commit component from being collapsed:
-    event.stopPropagation();
+    event?.stopPropagation();
 
     if (isText) {
       try {

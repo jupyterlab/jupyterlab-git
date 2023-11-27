@@ -69,11 +69,8 @@ export const commitBodyClass = style({
 });
 
 export const iconButtonClass = style({
-  width: '16px',
-  height: '16px',
-
-  /* top | right | bottom | left */
-  margin: 'auto 8px auto auto'
+  // width: '16px',
+  // height: '16px'
 });
 
 export const singleFileCommitClass = style({

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { nullTranslator } from '@jupyterlab/translation';
-import Input from '@material-ui/core/Input';
-import { shallow } from 'enzyme';
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
 import 'jest';
 import * as React from 'react';
 import {
@@ -22,36 +22,43 @@ describe('CommitMessage', () => {
 
   it('should set a `title` attribute on the input element to provide a commit message summary', () => {
     const props = defaultProps;
-    const component = shallow(<CommitMessage {...props} />);
-    const node = component.find(Input).first();
-    expect(node.prop('title').length > 0).toEqual(true);
+    render(<CommitMessage {...props} />);
+
+    expect(screen.getAllByRole('textbox')[0].parentElement).toHaveAttribute(
+      'title'
+    );
   });
 
   it('should display placeholder text for the commit message description', () => {
     const props = defaultProps;
-    const component = shallow(<CommitMessage {...props} />);
-    const node = component.find(Input).last();
-    expect(node.prop('placeholder')).toEqual('Description (optional)');
+    render(<CommitMessage {...props} />);
+
+    expect(screen.getAllByRole('textbox')[1]).toHaveAttribute(
+      'placeholder',
+      'Description (optional)'
+    );
   });
 
   it('should set a `title` attribute on the input element to provide a commit message description', () => {
     const props = defaultProps;
-    const component = shallow(<CommitMessage {...props} />);
-    const node = component.find(Input).last();
-    expect(node.prop('title').length > 0).toEqual(true);
+    render(<CommitMessage {...props} />);
+
+    expect(screen.getAllByRole('textbox')[1].parentElement).toHaveAttribute(
+      'title'
+    );
   });
 
   it('should disable summary input if disabled is true', () => {
     const props = { ...defaultProps, disabled: true };
-    const component = shallow(<CommitMessage {...props} />);
-    const node = component.find(Input).first();
-    expect(node.prop('disabled')).toEqual(true);
+    render(<CommitMessage {...props} />);
+
+    expect(screen.getAllByRole('textbox')[0]).toHaveAttribute('disabled');
   });
 
   it('should disable description input if disabled is true', () => {
     const props = { ...defaultProps, disabled: true };
-    const component = shallow(<CommitMessage {...props} />);
-    const node = component.find(Input).last();
-    expect(node.prop('disabled')).toEqual(true);
+    render(<CommitMessage {...props} />);
+
+    expect(screen.getAllByRole('textbox')[1]).toHaveAttribute('disabled');
   });
 });

@@ -1,4 +1,6 @@
+import { Notification } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
+import { TranslationBundle } from '@jupyterlab/translation';
 import {
   caretDownIcon,
   caretUpIcon,
@@ -9,14 +11,13 @@ import { Tab, Tabs } from '@material-ui/core';
 import { Badge } from '@jupyter/react-components';
 import * as React from 'react';
 import { classes } from 'typestyle';
-import { Logger } from '../logger';
+import { showError } from '../notifications';
 import {
   selectedTabClass,
   tabClass,
   tabIndicatorClass,
   tabsClass
 } from '../style/GitPanel';
-import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import {
   badgeClass,
   spacer,
@@ -31,11 +32,11 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { CommandIDs, Git, IGitExtension, Level } from '../tokens';
+import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
+import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { BranchMenu } from './BranchMenu';
 import { TagMenu } from './TagMenu';
-import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * Interface describing  properties.
@@ -70,11 +71,6 @@ export interface IToolbarProps {
    * List of prior commits.
    */
   pastCommits: Git.ISingleCommitInfo[];
-
-  /**
-   * Extension logger
-   */
-  logger: Logger;
 
   /**
    * Git extension data model.
@@ -263,7 +259,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             PageConfig.getOption('serverRoot') + '/' + this.props.repository
           )}
         >
-          <desktopIcon.react className={toolbarMenuButtonIconClass} />
+          <desktopIcon.react
+            tag="span"
+            className={toolbarMenuButtonIconClass}
+          />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>
               {this.props.trans.__('Current Repository')}
@@ -312,7 +311,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           title={this.props.trans.__('Manage branches and tags')}
           onClick={this._onBranchClick}
         >
-          <branchIcon.react className={toolbarMenuButtonIconClass} />
+          <branchIcon.react tag="span" className={toolbarMenuButtonIconClass} />
           <div className={toolbarMenuButtonTitleWrapperClass}>
             <p className={toolbarMenuButtonTitleClass}>{branchTitle}</p>
             <p className={toolbarMenuButtonSubtitleClass}>
@@ -320,9 +319,15 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             </p>
           </div>
           {this.state.branchMenu ? (
-            <caretUpIcon.react className={toolbarMenuButtonIconClass} />
+            <caretUpIcon.react
+              tag="span"
+              className={toolbarMenuButtonIconClass}
+            />
           ) : (
-            <caretDownIcon.react className={toolbarMenuButtonIconClass} />
+            <caretDownIcon.react
+              tag="span"
+              className={toolbarMenuButtonIconClass}
+            />
           )}
         </button>
         {this.state.branchMenu ? this._renderTabs() : null}
@@ -378,7 +383,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         branches={this.props.branches}
         branching={this.props.branching}
         commands={this.props.commands}
-        logger={this.props.logger}
         model={this.props.model}
         trans={this.props.trans}
       />
@@ -390,7 +394,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       <TagMenu
         pastCommits={this.props.pastCommits}
         tagsList={this.props.tagsList}
-        logger={this.props.logger}
         model={this.props.model}
         branching={this.props.branching}
         trans={this.props.trans}
@@ -437,23 +440,27 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns a promise which resolves upon refreshing the model
    */
   private _onRefreshClick = async (): Promise<void> => {
-    this.props.logger.log({
-      level: Level.RUNNING,
-      message: this.props.trans.__('Refreshing…')
-    });
+    const id = Notification.emit(
+      this.props.trans.__('Refreshing…'),
+      'in-progress',
+      { autoClose: false }
+    );
     try {
       await this.props.model.refresh();
 
-      this.props.logger.log({
-        level: Level.SUCCESS,
-        message: this.props.trans.__('Successfully refreshed.')
+      Notification.update({
+        id,
+        message: this.props.trans.__('Successfully refreshed.'),
+        type: 'success',
+        autoClose: 5000
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      this.props.logger.log({
-        level: Level.ERROR,
+      Notification.update({
+        id,
         message: this.props.trans.__('Failed to refresh.'),
-        error: error as Error
+        type: 'error',
+        ...showError(error, this.props.trans)
       });
     }
   };

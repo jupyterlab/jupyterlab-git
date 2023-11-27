@@ -14,6 +14,10 @@ import {
   IMockedResponse,
   mockedRequestAPI
 } from './utils';
+import {
+  CodeMirrorEditorFactory,
+  EditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 
 jest.mock('../git');
 jest.mock('@jupyterlab/apputils');
@@ -43,7 +47,7 @@ describe('git-commands', () => {
     };
 
     mockGit.requestAPI.mockImplementation(
-      mockedRequestAPI({ responses: mockResponses })
+      mockedRequestAPI({ responses: mockResponses }) as any
     );
 
     commands = new CommandRegistry();
@@ -56,8 +60,10 @@ describe('git-commands', () => {
     addCommands(
       app as JupyterFrontEnd,
       model,
+      new CodeMirrorEditorFactory(),
+      new EditorLanguageRegistry(),
       mockedFileBrowserModel,
-      null,
+      null as any,
       nullTranslator
     );
   });
@@ -73,6 +79,7 @@ describe('git-commands', () => {
             button: {
               accept: true,
               actions: [],
+              ariaLabel: '',
               caption: '',
               className: '',
               displayType: 'default',
@@ -86,7 +93,7 @@ describe('git-commands', () => {
           const spyReset = jest.spyOn(model, 'reset');
           spyReset.mockResolvedValueOnce(undefined);
           const spyCheckout = jest.spyOn(model, 'checkout');
-          spyCheckout.mockResolvedValueOnce(undefined);
+          spyCheckout.mockResolvedValueOnce({} as any);
 
           const path = 'file/path.ext';
           model.pathRepository = DEFAULT_REPOSITORY_PATH;
@@ -140,6 +147,7 @@ describe('git-commands', () => {
             button: {
               accept: true,
               actions: [],
+              ariaLabel: '',
               caption: '',
               className: '',
               displayType: 'default',
@@ -169,7 +177,7 @@ describe('git-commands', () => {
                   }
                 }
               }
-            })
+            }) as any
           );
 
           const path = DEFAULT_REPOSITORY_PATH;

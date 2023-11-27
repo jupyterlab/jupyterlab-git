@@ -6,9 +6,9 @@ const baseRepositoryPath = 'test-repository.tar.gz';
 test.use({ autoGoto: false, mockSettings: galata.DEFAULT_SETTINGS });
 
 test.describe('Rebase', () => {
-  test.beforeEach(async ({ baseURL, page, tmpPath }) => {
+  test.beforeEach(async ({ page, request, tmpPath }) => {
     await extractFile(
-      baseURL,
+      request,
       path.resolve(__dirname, 'data', baseRepositoryPath),
       path.join(tmpPath, 'repository.tar.gz')
     );
@@ -21,7 +21,9 @@ test.describe('Rebase', () => {
     await page.getByRole('button', { name: 'Current Branch master' }).click();
 
     // Switch to a-branch
-    await page.getByRole('button', { name: 'a-branch' }).click();
+    await page
+      .getByRole('listitem', { name: 'Switch to branch: a-branch' })
+      .click();
 
     // Hide branch panel
     await page.getByRole('button', { name: 'Current Branch a-branch' }).click();

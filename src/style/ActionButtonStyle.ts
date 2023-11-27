@@ -1,15 +1,16 @@
 import { style } from 'typestyle';
-import { NestedCSSProperties } from 'typestyle/lib/types';
+import type { NestedCSSProperties } from 'typestyle/lib/types';
 
 export const actionButtonStyle = style({
   flex: '0 0 auto',
   background: 'none',
   lineHeight: '0px',
-  padding: '0px 4px',
+  padding: '0px 0px',
   width: '16px',
   border: 'none',
   outline: 'none',
   cursor: 'pointer',
+  margin: '0 4px',
 
   $nest: {
     '&:active': {
@@ -39,7 +40,7 @@ export const showButtonOnHover = (() => {
     $nest: {}
   };
   const selector = `&:hover .${hiddenButtonStyle}`;
-  styled.$nest[selector] = {
+  styled.$nest![selector] = {
     display: 'block'
   };
   return styled;

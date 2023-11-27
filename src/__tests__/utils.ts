@@ -10,7 +10,7 @@ export interface IMockedResponse {
 
 export interface IMockedResponses {
   // Folder path in URI; default = DEFAULT_REPOSITORY_PATH
-  path?: string;
+  path?: string | null;
   // Endpoint
   responses?: {
     [endpoint: string]: IMockedResponse;
@@ -23,37 +23,42 @@ export const defaultMockedResponses: {
   [endpoint: string]: IMockedResponse;
 } = {
   branch: {
-    body: () => {
-      return {
-        code: 0,
-        branches: [],
-        current_branch: { name: '' }
-      };
-    }
+    body: () => ({
+      code: 0,
+      branches: [],
+      current_branch: { name: '' }
+    })
   },
   changed_files: {
-    body: () => {
-      return {
-        code: 0,
-        files: []
-      };
-    }
+    body: () => ({
+      code: 0,
+      files: []
+    })
   },
   show_prefix: {
-    body: () => {
-      return {
-        code: 0,
-        path: ''
-      };
-    }
+    body: () => ({
+      code: 0,
+      path: ''
+    })
+  },
+  stash: {
+    body: () => ({
+      code: 0,
+      message: '',
+      command: ''
+    })
   },
   status: {
-    body: () => {
-      return {
-        code: 0,
-        files: []
-      };
-    }
+    body: () => ({
+      code: 0,
+      files: []
+    })
+  },
+  tags: {
+    body: () => ({
+      code: 0,
+      tags: []
+    })
   }
 };
 

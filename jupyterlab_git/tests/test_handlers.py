@@ -1055,7 +1055,6 @@ async def test_content_getcontent_deleted_file(mock_execute, jp_fetch, jp_root_d
         NAMESPACE, local_path.name, "content", body=json.dumps(body), method="POST"
     )
 
-    # Then
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload["content"] == ""

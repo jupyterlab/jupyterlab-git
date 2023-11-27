@@ -1,14 +1,14 @@
 import { TranslationBundle } from '@jupyterlab/translation';
 import { checkIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import Grow from '@material-ui/core/Grow';
-import MenuItem from '@material-ui/core/MenuItem';
-import MenuList from '@material-ui/core/MenuList';
-import Paper from '@material-ui/core/Paper';
-import Popper from '@material-ui/core/Popper';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import Grow from '@mui/material/Grow';
+import MenuItem from '@mui/material/MenuItem';
+import MenuList from '@mui/material/MenuList';
+import Paper from '@mui/material/Paper';
+import Popper from '@mui/material/Popper';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { listItemIconClass } from '../style/BranchMenu';
@@ -223,9 +223,8 @@ export class CommitBox extends React.Component<
           </Button>
           <Button
             classes={{
-              root: commitButtonClass
+              root: classes(commitButtonClass, commitVariantSelector)
             }}
-            className={commitVariantSelector}
             size="small"
             aria-controls={this.state.open ? 'split-button-menu' : undefined}
             aria-expanded={this.state.open ? 'true' : undefined}
@@ -245,10 +244,7 @@ export class CommitBox extends React.Component<
         >
           {({ TransitionProps }) => (
             <Grow {...TransitionProps}>
-              <Paper
-                classes={{ root: commitRoot }}
-                className={commitPaperClass}
-              >
+              <Paper classes={{ root: classes(commitRoot, commitPaperClass) }}>
                 <ClickAwayListener onClickAway={this._handleClose}>
                   <MenuList id="split-button-menu">
                     {this._options.map((option, index) => (
@@ -305,15 +301,13 @@ export class CommitBox extends React.Component<
     const binding = this.props.commands.keyBindings.find(
       binding => binding.command === CommandIDs.gitSubmitCommand
     );
-    return binding.keys.join(' ');
+    return binding?.keys.join(' ') ?? '';
   };
 
   /**
    * Close the commit variant menu if needed.
    */
-  private _handleClose = (
-    event: React.MouseEvent<Document, MouseEvent>
-  ): void => {
+  private _handleClose = (event: MouseEvent | TouchEvent): void => {
     if (
       this._anchorRef.current &&
       this._anchorRef.current.contains(event.target as HTMLElement)

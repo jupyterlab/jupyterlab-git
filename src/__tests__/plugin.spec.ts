@@ -36,21 +36,23 @@ describe('plugin', () => {
       }
     } as unknown as jest.Mocked<IFileBrowserFactory>;
     settingRegistry = new SettingRegistry({
-      connector: null
-    }) as jest.Mocked<SettingRegistry>;
+      connector: null as any
+    }) as any;
   });
 
   beforeEach(() => {
     jest.resetAllMocks();
     mockResponses = { responses: { ...defaultMockedResponses } };
-    mockGit.requestAPI.mockImplementation(mockedRequestAPI(mockResponses));
+    mockGit.requestAPI.mockImplementation(
+      mockedRequestAPI(mockResponses) as any
+    );
   });
 
   describe('#activate', () => {
     it('should fail if no git is installed', async () => {
       // Given
       const endpoint = 'settings' + URLExt.objectToQueryString({ version });
-      mockResponses.responses[endpoint] = {
+      mockResponses.responses![endpoint] = {
         body: request => {
           return {
             gitVersion: null,
@@ -85,7 +87,7 @@ describe('plugin', () => {
     it('should fail if git version is < 2', async () => {
       // Given
       const endpoint = 'settings' + URLExt.objectToQueryString({ version });
-      mockResponses.responses[endpoint] = {
+      mockResponses.responses![endpoint] = {
         body: request => {
           return {
             gitVersion: '1.8.7',
@@ -119,7 +121,7 @@ describe('plugin', () => {
     it('should fail if server and extension version do not match', async () => {
       // Given
       const endpoint = 'settings' + URLExt.objectToQueryString({ version });
-      mockResponses.responses[endpoint] = {
+      mockResponses.responses![endpoint] = {
         body: request => {
           return {
             gitVersion: '2.22.0',
@@ -156,7 +158,7 @@ describe('plugin', () => {
     it('should fail if the server extension is not installed', async () => {
       // Given
       const endpoint = 'settings' + URLExt.objectToQueryString({ version });
-      mockResponses.responses[endpoint] = {
+      mockResponses.responses![endpoint] = {
         status: 404
       };
       const mockedErrorMessage = showErrorMessage as jest.MockedFunction<

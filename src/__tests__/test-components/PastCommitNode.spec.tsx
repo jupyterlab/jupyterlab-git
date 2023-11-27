@@ -1,5 +1,7 @@
 import { nullTranslator } from '@jupyterlab/translation';
-import { shallow } from 'enzyme';
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import 'jest';
 import * as React from 'react';
 import {
@@ -71,7 +73,7 @@ describe('PastCommitNode', () => {
   const tags: Git.ITag[] = notMatchingTags.concat(matchingTags);
   const toggleCommitExpansion = jest.fn();
   const props: IPastCommitNodeProps = {
-    model: null,
+    model: null as any,
     commit: {
       commit: '2414721b194453f058079d897d13c4e377f92dc6',
       author: 'author',
@@ -81,47 +83,47 @@ describe('PastCommitNode', () => {
     },
     branches: branches,
     tagsList: tags,
-    commands: null,
+    commands: null as any,
     trans,
-    onCompareWithSelected: null,
-    onSelectForCompare: null,
+    onCompareWithSelected: null as any,
+    onSelectForCompare: null as any,
     expanded: false,
     toggleCommitExpansion,
     setRef: () => null
   };
 
   test('Includes commit info', () => {
-    const node = shallow(<PastCommitNode {...props} />);
-    expect(node.text()).toMatch(props.commit.author);
-    expect(node.text()).toMatch(props.commit.commit.slice(0, 7));
-    expect(node.text()).toMatch(props.commit.date);
-    expect(node.text()).toMatch(props.commit.commit_msg);
+    render(<PastCommitNode {...props} />);
+    expect(screen.getByText(props.commit.author)).toBeDefined();
+    expect(screen.getByText(props.commit.commit.slice(0, 7))).toBeDefined();
+    expect(screen.getByText(props.commit.date)).toBeDefined();
+    expect(screen.getByText(props.commit.commit_msg)).toBeDefined();
   });
 
   test('Includes only relevant branch info', () => {
-    const node = shallow(<PastCommitNode {...props} />);
-    expect(node.text()).toMatch('name3');
-    expect(node.text()).toMatch('name4');
-    expect(node.text()).not.toMatch('name1');
-    expect(node.text()).not.toMatch('name2');
+    render(<PastCommitNode {...props} />);
+    expect(screen.getByText('name3')).toBeDefined();
+    expect(screen.getByText('name4')).toBeDefined();
+    expect(screen.queryByText('name1')).toBeNull();
+    expect(screen.queryByText('name2')).toBeNull();
   });
 
   test('Includes only relevant tag info', () => {
-    const node = shallow(<PastCommitNode {...props} />);
-    expect(node.text()).toMatch('1.0.0');
-    expect(node.text()).toMatch('feature-1');
-    expect(node.text()).not.toMatch('feature-2');
-    expect(node.text()).not.toMatch('patch-007');
+    render(<PastCommitNode {...props} />);
+    expect(screen.getByText('1.0.0')).toBeDefined();
+    expect(screen.getByText('feature-1')).toBeDefined();
+    expect(screen.queryByText('feature-2')).toBeNull();
+    expect(screen.queryByText('patch-007')).toBeNull();
   });
 
-  test('Toggle show details', () => {
+  test('Toggle show details', async () => {
     // simulates SinglePastCommitInfo child
-    const node = shallow(
+    render(
       <PastCommitNode {...props}>
         <div id="singlePastCommitInfo"></div>
       </PastCommitNode>
     );
-    node.simulate('click');
+    await userEvent.click(screen.getByRole('listitem'));
     expect(toggleCommitExpansion).toBeCalledTimes(1);
     expect(toggleCommitExpansion).toHaveBeenCalledWith(props.commit.commit);
   });
