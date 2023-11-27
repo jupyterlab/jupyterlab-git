@@ -1276,7 +1276,7 @@ export function addCommands(
     ),
     execute: async args => {
       const { files } = args as any as CommandArguments.IGitFileDiff;
-      if (!gitModel.pathRepository) {
+      if (gitModel.pathRepository === null) {
         return;
       }
 

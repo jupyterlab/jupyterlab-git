@@ -1,6 +1,6 @@
 {
     "name": "@jupyterlab/git",
-    "version": "0.50.0-rc0",
+    "version": "0.50.0",
     "description": "A JupyterLab extension for version control using git",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -94,8 +94,8 @@
         "@playwright/test": "^1.32.1",
         "diff-match-patch": "^1.0.4",
         "filesize": "^10.0.7",
-        "nbdime": "^7.0.0-rc.1",
-        "nbdime-jupyterlab": "^3.0.0-rc.1",
+        "nbdime": "^7.0.1",
+        "nbdime-jupyterlab": "^3.0.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-virtualized-auto-sizer": "^1.0.2",

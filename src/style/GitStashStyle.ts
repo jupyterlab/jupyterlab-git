@@ -20,7 +20,8 @@ export const sectionHeaderLabelStyle = style({
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   display: 'flex',
-  justifyContent: 'space-between'
+  justifyContent: 'space-between',
+  alignSelf: 'flex-start'
 });
 
 export const sectionButtonContainerStyle = style({

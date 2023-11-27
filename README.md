@@ -13,7 +13,7 @@ To see the extension in action, open the example notebook included in the Binder
 
 ## Requirements
 
-- JupyterLab >= 4.0 ([older version] available for 2.x)
+- JupyterLab >= 4.0 ([older version] available for 2.x and 3.x)
 - Git (version `>=2.x`)
 
 For older versions of JupyterLab, go to:
@@ -31,13 +31,13 @@ For older versions of JupyterLab, go to:
 To install perform the following steps, with _pip_:
 
 ```bash
-pip install --upgrade "jupyterlab<4" jupyterlab-git
+pip install --upgrade jupyterlab jupyterlab-git
 ```
 
 or with _conda_:
 
 ```bash
-conda install -c conda-forge "jupyterlab<4" jupyterlab-git
+conda install -c conda-forge jupyterlab jupyterlab-git
 ```
 
 ## Uninstall

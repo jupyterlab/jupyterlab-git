@@ -3090,8 +3090,8 @@ __metadata:
     jest: ^29.2.0
     lint-staged: ^13.2.3
     mkdirp: ^1.0.3
-    nbdime: ^7.0.0-rc.1
-    nbdime-jupyterlab: ^3.0.0-rc.1
+    nbdime: ^7.0.1
+    nbdime-jupyterlab: ^3.0.1
     npm-run-all: ^4.1.5
     prettier: ^3.0.0
     react: ^18.2.0
@@ -11443,7 +11443,11 @@ __metadata:
   languageName: node
   linkType: hard
 
+<<<<<<< HEAD
 "nbdime-jupyterlab@npm:^3.0.0-rc.1":
+=======
+"nbdime-jupyterlab@npm:^3.0.1":
+>>>>>>> be1df97fa81864e2b84024de4ceaee9efaa4c21a
   version: 3.0.1
   resolution: "nbdime-jupyterlab@npm:3.0.1"
   dependencies:
@@ -11465,7 +11469,11 @@ __metadata:
   languageName: node
   linkType: hard
 
+<<<<<<< HEAD
 "nbdime@npm:^7.0.0-rc.1, nbdime@npm:^7.0.1":
+=======
+"nbdime@npm:^7.0.1":
+>>>>>>> be1df97fa81864e2b84024de4ceaee9efaa4c21a
   version: 7.0.1
   resolution: "nbdime@npm:7.0.1"
   dependencies:
