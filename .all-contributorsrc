@@ -111,7 +111,7 @@
       "login": "hzarea",
       "name": "Hana Zarea",
       "avatar_url": "https://avatars1.githubusercontent.com/u/27518229?v=4",
-      "profile": "https://github.com/hzarea",
+      "profile": "",
       "contributions": [
         "code",
         "review"
@@ -214,7 +214,7 @@
       "login": "krassowski",
       "name": "Michał Krassowski",
       "avatar_url": "https://avatars.githubusercontent.com/u/5832902?v=4",
-      "profile": "http://linkedin.com/in/michal-krassowski/",
+      "profile": "https://www.linkedin.com/in/michal-krassowski/",
       "contributions": [
         "code",
         "review",
@@ -307,6 +307,15 @@
       "name": "Kentaro Lim",
       "avatar_url": "https://avatars.githubusercontent.com/u/61769040?v=4",
       "profile": "https://github.com/kentarolim10",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Zxun2",
+      "name": "Zong Xun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/63457492?v=4",
+      "profile": "https://dub.sh/lzongxun",
       "contributions": [
         "code"
       ]

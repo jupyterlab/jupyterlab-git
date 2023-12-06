@@ -1,7 +1,7 @@
 # jupyterlab-git
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-git/main?urlpath=lab/tree/examples/demo.ipynb) [![Github Actions Status](https://github.com/jupyterlab/jupyterlab-git/actions/workflows/build.yml/badge.svg)](https://github.com/jupyterlab/jupyterlab-git/actions/workflows/build.yml) [![Version](https://img.shields.io/npm/v/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/pypi/v/jupyterlab-git.svg)](https://pypi.org/project/jupyterlab-git/) [![Downloads](https://img.shields.io/npm/dm/@jupyterlab/git.svg)](https://www.npmjs.com/package/@jupyterlab/git) [![Version](https://img.shields.io/conda/vn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git) [![Downloads](https://img.shields.io/conda/dn/conda-forge/jupyterlab-git.svg)](https://anaconda.org/conda-forge/jupyterlab-git)<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-30-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-31-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -81,7 +81,7 @@ Here are the steps to follow to set up SSH authentication (skip any that is alre
 1. [Create a SSH key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 2. Register the public part of it to your Git server:
    - [GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
-   - [GitLab](https://docs.gitlab.com/ee/ssh/index.html#add-an-ssh-key-to-your-gitlab-account)
+   - [GitLab](https://docs.gitlab.com/ee/user/ssh.html#add-an-ssh-key-to-your-gitlab-account)
 3. Optionally, if you have more than one key managed by your ssh agent: [Create a config file for the ssh-agent](https://stackoverflow.com/a/21938804)
 4. Tell your local Git repository to [connect to remote via ssh](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#switching-remote-urls-from-https-to-ssh)
 
@@ -342,6 +342,7 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ZeshanFayyaz"><img src="https://avatars.githubusercontent.com/u/43391249?v=4?s=100" width="100px;" alt="Zeshan Fayyaz"/><br /><sub><b>Zeshan Fayyaz</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=ZeshanFayyaz" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://dub.sh/lzongxun"><img src="https://avatars.githubusercontent.com/u/63457492?v=4?s=100" width="100px;" alt="Zong Xun"/><br /><sub><b>Zong Xun</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=Zxun2" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jupytercalpoly"><img src="https://avatars0.githubusercontent.com/u/19445175?v=4?s=100" width="100px;" alt="jupytercalpoly"/><br /><sub><b>jupytercalpoly</b></sub></a><br /><a href="#financial-jupytercalpoly" title="">🤝</a></td>
     </tr>
   </tbody>
