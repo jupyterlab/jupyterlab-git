@@ -286,7 +286,7 @@ export const SingleCommitNode: React.FunctionComponent<ISingleCommitProps> = (
             isBold ? commitItemBoldClass : null
           )}
         >
-          {+props.commit.commit in Git.Diff.SpecialRef
+          {(+props.commit.commit) in Git.Diff.SpecialRef
             ? Git.Diff.SpecialRef[+props.commit.commit]
             : props.commit.commit.slice(0, 7)}
         </span>

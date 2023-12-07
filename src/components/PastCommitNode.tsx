@@ -88,9 +88,7 @@ export interface IPastCommitNodeProps {
    *
    * @param event - event object
    */
-  onSelectForCompare?: (
-    event?: React.MouseEvent<HTMLElement, MouseEvent>
-  ) => Promise<void>;
+  onSelectForCompare?: (event?: React.MouseEvent) => Promise<void>;
 
   /**
    * Callback invoked upon clicking to compare a commit against the selected.
@@ -99,9 +97,7 @@ export interface IPastCommitNodeProps {
    *
    * @param event - event object
    */
-  onCompareWithSelected?: (
-    event?: React.MouseEvent<HTMLElement, MouseEvent>
-  ) => Promise<void>;
+  onCompareWithSelected?: (event?: React.MouseEvent) => Promise<void>;
   /**
    * Whether the PastCommitNode is expanded
    */
@@ -159,8 +155,8 @@ export class PastCommitNode extends React.Component<
           !this.props.children && !!this.props.onOpenDiff
             ? singleFileCommitClass
             : this.props.expanded
-            ? commitExpandedClass
-            : null,
+              ? commitExpandedClass
+              : null,
           this.props.isReferenceCommit && referenceCommitNodeClass,
           this.props.isChallengerCommit && challengerCommitNodeClass
         )}
@@ -182,7 +178,7 @@ export class PastCommitNode extends React.Component<
             {this.props.commit.author}
           </span>
           <span className={commitHeaderItemClass}>
-            {+this.props.commit.commit in Git.Diff.SpecialRef
+            {(+this.props.commit.commit) in Git.Diff.SpecialRef
               ? Git.Diff.SpecialRef[+this.props.commit.commit]
               : this.props.commit.commit.slice(0, 7)}
           </span>

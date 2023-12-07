@@ -58,7 +58,7 @@ export interface ICommitComparisonBoxProps {
   /**
    * Returns a callback to be invoked on close.
    */
-  onClose: (event?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  onClose: (event?: React.MouseEvent) => void;
 
   /**
    * Returns a callback to be invoked on click to display a file diff.
@@ -158,7 +158,7 @@ export function CommitComparisonBox(
         <ActionButton
           title={props.trans.__('Close')}
           icon={closeIcon}
-          onClick={(event?: React.MouseEvent<HTMLElement, MouseEvent>) => {
+          onClick={(event?: React.MouseEvent) => {
             props.onClose(event);
           }}
         ></ActionButton>

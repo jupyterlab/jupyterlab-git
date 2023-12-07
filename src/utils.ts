@@ -18,9 +18,9 @@ export function extractFilename(path: string): string {
  * @returns Mouse event handler that stops event from propagating
  */
 export function stopPropagationWrapper(
-  fn: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
-): (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void {
-  return (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  fn: (event?: React.MouseEvent) => void
+): (event?: React.MouseEvent) => void {
+  return (event?: React.MouseEvent) => {
     event?.stopPropagation();
     fn(event);
   };

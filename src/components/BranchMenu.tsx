@@ -286,9 +286,7 @@ export class BranchMenu extends React.Component<
               className={hiddenButtonStyle}
               icon={trashIcon}
               title={this.props.trans.__('Delete this branch locally')}
-              onClick={async (
-                event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-              ) => {
+              onClick={async (event?: React.MouseEvent) => {
                 event?.stopPropagation();
                 await this._onDeleteBranch(branch.name);
               }}
@@ -299,9 +297,7 @@ export class BranchMenu extends React.Component<
               title={this.props.trans.__(
                 'Merge this branch into the current one'
               )}
-              onClick={(
-                event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-              ) => {
+              onClick={(event?: React.MouseEvent) => {
                 event?.stopPropagation();
                 this._onMergeBranch(branch.name);
               }}

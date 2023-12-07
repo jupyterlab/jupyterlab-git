@@ -4,7 +4,7 @@ import CardHeader from '@mui/material/CardHeader';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import {
-  // commitRoot,
+  commitRoot,
   dirtyStagedFilesWarningBoxClass,
   dirtyStagedFilesWarningBoxContentClass,
   dirtyStagedFilesWarningBoxHeaderClass

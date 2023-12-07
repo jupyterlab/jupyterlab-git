@@ -483,8 +483,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         ? this.props.trans.__('Commit (Amend) and Push')
         : this.props.trans.__('Commit and Push')
       : this.state.commitAmend
-      ? this.props.trans.__('Commit (Amend)')
-      : this.props.trans.__('Commit');
+        ? this.props.trans.__('Commit (Amend)')
+        : this.props.trans.__('Commit');
     const warningTitle = this.props.trans.__('Warning');
     const inSimpleMode = this.props.settings.composite[
       'simpleStaging'

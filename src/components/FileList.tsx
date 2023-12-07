@@ -213,9 +213,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Reset all staged files */
-  resetAllStagedFiles = async (
-    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ): Promise<void> => {
+  resetAllStagedFiles = async (event?: React.MouseEvent): Promise<void> => {
     event?.stopPropagation();
     await this.props.model.reset();
   };
@@ -245,18 +243,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Add all unstaged files */
-  addAllUnstagedFiles = async (
-    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ): Promise<void> => {
+  addAllUnstagedFiles = async (event?: React.MouseEvent): Promise<void> => {
     event?.stopPropagation();
 
     await this.props.model.addAllUnstaged();
   };
 
   /** Discard changes in all unstaged files */
-  discardAllUnstagedFiles = async (
-    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ): Promise<void> => {
+  discardAllUnstagedFiles = async (event?: React.MouseEvent): Promise<void> => {
     event?.stopPropagation();
 
     const result = await showDialog({
@@ -282,9 +276,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Discard changes in all unstaged and staged files */
-  discardAllChanges = async (
-    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ): Promise<void> => {
+  discardAllChanges = async (event?: React.MouseEvent): Promise<void> => {
     event?.stopPropagation();
     await discardAllChanges(this.props.model, this.props.trans);
   };
@@ -308,9 +300,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   };
 
   /** Add all untracked files */
-  addAllUntrackedFiles = async (
-    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ): Promise<void> => {
+  addAllUntrackedFiles = async (event?: React.MouseEvent): Promise<void> => {
     event?.stopPropagation();
     await this.props.model.addAllUntracked();
   };
@@ -570,9 +560,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     }
   };
 
-  pullFromRemote = async (
-    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ): Promise<void> => {
+  pullFromRemote = async (event?: React.MouseEvent): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitPull, {});
   };
 
@@ -607,7 +595,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       return (
         <div className={fileListWrapperClass}>
           <AutoSizer disableWidth={true}>
-            {({ height }) => (
+            {({ height }: { height: number }) => (
               <>
                 {this._renderUnmerged(unmergedFiles, height, false)}
                 {this._renderRemoteChanged(remoteChangedFiles, height)}
@@ -660,7 +648,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           onContextMenu={event => event.preventDefault()}
         >
           <AutoSizer disableWidth={true}>
-            {({ height }) => (
+            {({ height }: { height: number }) => (
               <>
                 {this._renderUnmerged(unmergedFiles, height)}
                 {this._renderRemoteChanged(remoteChangedFiles, height)}

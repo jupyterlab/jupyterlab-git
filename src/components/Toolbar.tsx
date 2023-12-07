@@ -7,7 +7,7 @@ import {
   refreshIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import { Tab, Tabs } from '@material-ui/core';
+import { Tab, Tabs } from '@mui/material';
 import { Badge } from '@jupyter/react-components';
 import * as React from 'react';
 import { classes } from 'typestyle';
@@ -195,7 +195,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           />
         </Badge>
         <Badge
-          data-test-id="push-badge"
           className={badgeClass}
           circular
           style={{

@@ -249,8 +249,8 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
               {this.props.file.status === 'unmerged'
                 ? '!'
                 : this.props.file.y === '?'
-                ? 'U'
-                : status_code}
+                  ? 'U'
+                  : status_code}
             </span>
           </div>
         </div>

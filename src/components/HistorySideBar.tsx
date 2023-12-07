@@ -70,7 +70,7 @@ export interface IHistorySideBarProps {
    */
   onSelectForCompare?: (
     commit: Git.ISingleCommitInfo
-  ) => (event?: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>;
+  ) => (event?: React.MouseEvent) => Promise<void>;
 
   /**
    * Callback invoked upon clicking to compare a commit against the selected.
@@ -78,7 +78,7 @@ export interface IHistorySideBarProps {
    */
   onCompareWithSelected?: (
     commit: Git.ISingleCommitInfo
-  ) => (event?: React.MouseEvent<HTMLElement, MouseEvent>) => Promise<void>;
+  ) => (event?: React.MouseEvent) => Promise<void>;
 }
 
 export const CONTEXT_COMMANDS = [ContextCommandIDs.gitTagAdd];

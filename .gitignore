@@ -137,4 +137,4 @@ dmypy.json
 # vim stuff
 *.swp
 
-/venv
+venv
