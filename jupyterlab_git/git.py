@@ -1,6 +1,7 @@
 """
 Module for executing git commands, sending results back to the handlers
 """
+
 import base64
 import datetime
 import os
@@ -646,9 +647,11 @@ class Git:
                 "author": line_array[i + 1],
                 "date": line_array[i + 2],
                 "commit_msg": line_array[i + 3],
-                "pre_commits": line_array[i + 4].split(" ")
-                if i + 4 < len(line_array) and line_array[i + 4]
-                else [],
+                "pre_commits": (
+                    line_array[i + 4].split(" ")
+                    if i + 4 < len(line_array) and line_array[i + 4]
+                    else []
+                ),
             }
 
             if is_single_file:

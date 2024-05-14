@@ -1,5 +1,6 @@
 """Initialize the backend server extension
 """
+
 from traitlets import CFloat, List, Dict, Unicode, default
 from traitlets.config import Configurable
 
@@ -32,7 +33,7 @@ class JupyterLabGit(Configurable):
         config=True,
         value_trait=List(
             trait=Unicode(), help='List of commands to run. E.g. ["touch baz.py"]'
-        )
+        ),
         # TODO Validate
     )
 
