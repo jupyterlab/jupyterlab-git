@@ -842,7 +842,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @param path - repository path
    */
   private async _hasIdentity(path: string | null): Promise<string | null> {
-    if (!path) {
+    if (path === null) {
       return null;
     }
 
