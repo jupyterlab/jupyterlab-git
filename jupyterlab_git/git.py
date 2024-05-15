@@ -1,6 +1,7 @@
 """
 Module for executing git commands, sending results back to the handlers
 """
+
 import base64
 import datetime
 import os
@@ -646,9 +647,11 @@ class Git:
                 "author": line_array[i + 1],
                 "date": line_array[i + 2],
                 "commit_msg": line_array[i + 3],
-                "pre_commits": line_array[i + 4].split(" ")
-                if i + 4 < len(line_array) and line_array[i + 4]
-                else [],
+                "pre_commits": (
+                    line_array[i + 4].split(" ")
+                    if i + 4 < len(line_array) and line_array[i + 4]
+                    else []
+                ),
             }
 
             if is_single_file:
@@ -1238,9 +1241,9 @@ class Git:
                     cwd=path,
                 )
                 if code == 0:
-                    response[
-                        "message"
-                    ] = "Unable to pull latest changes as doing so would result in a merge conflict. In order to push your local changes, you may want to consider creating a new branch based on your current work and pushing the new branch. Provided your repository is hosted (e.g., on GitHub), once pushed, you can create a pull request against the original branch on the remote repository and manually resolve the conflicts during pull request review."
+                    response["message"] = (
+                        "Unable to pull latest changes as doing so would result in a merge conflict. In order to push your local changes, you may want to consider creating a new branch based on your current work and pushing the new branch. Provided your repository is hosted (e.g., on GitHub), once pushed, you can create a pull request against the original branch on the remote repository and manually resolve the conflicts during pull request review."
+                    )
                 else:
                     response["message"] = error.strip()
             elif has_conflict:

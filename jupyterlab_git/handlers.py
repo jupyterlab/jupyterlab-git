@@ -1,6 +1,7 @@
 """
 Module with all the individual handlers, which execute git commands and return the results to the frontend.
 """
+
 import functools
 import json
 import os
