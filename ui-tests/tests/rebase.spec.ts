@@ -58,13 +58,13 @@ test.describe('Rebase', () => {
     await expect.soft(banner).toHaveText(/Result/);
     await expect.soft(banner).toHaveText(/Incoming/);
 
-    await page.getByRole('button', { name: 'Mark as resolved' }).click();
+    await page.locator('button >> text="Mark as resolved"').click();
 
     await page
       .getByTitle('another_file.txt • Conflicted', { exact: true })
       .dblclick();
 
-    await page.getByRole('button', { name: 'Mark as resolved' }).click();
+    await page.locator('button >> text="Mark as resolved"').click();
 
     await page.getByTitle('example.ipynb • Conflicted').click({
       clickCount: 2
@@ -79,7 +79,7 @@ test.describe('Rebase', () => {
     await expect.soft(banner).toHaveText(/Current/);
     await expect.soft(banner).toHaveText(/Incoming/);
 
-    await page.getByRole('button', { name: 'Mark as resolved' }).click();
+    await page.locator('button >> text="Mark as resolved"').click();
 
     // Continue rebase as all conflicts are resolved
     await page.getByRole('button', { name: 'Continue' }).click();
