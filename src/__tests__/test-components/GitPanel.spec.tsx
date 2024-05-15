@@ -2,7 +2,7 @@ import * as apputils from '@jupyterlab/apputils';
 import { nullTranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { RenderResult, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import 'jest';
 import React from 'react';
@@ -108,6 +108,7 @@ describe('GitPanel', () => {
   describe('#commitFiles()', () => {
     let commitSpy: jest.SpyInstance<Promise<void>>;
     let configSpy: jest.SpyInstance<Promise<void | JSONObject>>;
+    let renderResult: RenderResult;
 
     const commitSummary = 'Fix really stupid bug';
     const commitDescription = 'This will probably break everything :)';
@@ -181,7 +182,7 @@ describe('GitPanel', () => {
         props.model['_statusChanged'].emit(props.model['_status']);
       });
 
-      render(<GitPanel {...props} />);
+      renderResult = render(<GitPanel {...props} />);
     });
 
     it('should commit when commit message is provided', async () => {
@@ -222,6 +223,9 @@ describe('GitPanel', () => {
 
     it('should prompt for user identity if explicitly configured', async () => {
       configSpy.mockResolvedValue({ options: commitUser });
+
+      props.settings = MockSettings(false, true) as any;
+      renderResult.rerender(<GitPanel {...props} />);
 
       mockUtils.showDialog.mockResolvedValue(dialogValue);
 
