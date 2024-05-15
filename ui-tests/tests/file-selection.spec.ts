@@ -61,8 +61,8 @@ test.describe('File selection for simple staging', () => {
     // URL for merge conflict example repository
     await page.goto(`tree/${tmpPath}/test-repository`);
 
-    // Click [aria-label="main"] >> text=Git
-    await page.locator('[aria-label="main"] >> text=Git').click();
+    // Click Git menu
+    await page.locator('[aria-label="main menu"] >> text=Git').click();
     // Click text=Simple staging
     await page.getByRole('menuitem', { name: 'Simple staging' }).click();
   });

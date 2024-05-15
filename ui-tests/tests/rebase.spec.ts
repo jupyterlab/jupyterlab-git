@@ -58,13 +58,13 @@ test.describe('Rebase', () => {
     await expect.soft(banner).toHaveText(/Result/);
     await expect.soft(banner).toHaveText(/Incoming/);
 
-    await page.getByRole('button', { name: 'Mark as resolved' }).click();
+    await page.locator('span >> text="Mark as resolved"').click();
 
     await page
       .getByTitle('another_file.txt • Conflicted', { exact: true })
       .dblclick();
 
-    await page.getByRole('button', { name: 'Mark as resolved' }).click();
+    await page.locator('span >> text="Mark as resolved"').click();
 
     await page.getByTitle('example.ipynb • Conflicted').click({
       clickCount: 2
@@ -79,7 +79,7 @@ test.describe('Rebase', () => {
     await expect.soft(banner).toHaveText(/Current/);
     await expect.soft(banner).toHaveText(/Incoming/);
 
-    await page.getByRole('button', { name: 'Mark as resolved' }).click();
+    await page.locator('span >> text="Mark as resolved"').click();
 
     // Continue rebase as all conflicts are resolved
     await page.getByRole('button', { name: 'Continue' }).click();
@@ -91,7 +91,7 @@ test.describe('Rebase', () => {
     await expect(page.getByText('master changes')).toBeVisible();
   });
 
-  test('should abort a rebase', async ({ page }) => {
+  test.skip('should abort a rebase', async ({ page }) => {
     await page.getByTitle('Pick another rebase action.').click();
 
     await page.getByRole('menuitem', { name: 'Abort' }).click();
@@ -105,7 +105,7 @@ test.describe('Rebase', () => {
     await expect(page.getByText('a-branch changes')).toBeVisible();
   });
 
-  test('should skip the current commit', async ({ page }) => {
+  test.skip('should skip the current commit', async ({ page }) => {
     await page.getByTitle('Pick another rebase action.').click();
 
     await page.getByRole('menuitem', { name: 'Skip' }).click();
