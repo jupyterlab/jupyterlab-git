@@ -178,7 +178,7 @@ describe('GitPanel', () => {
 
       // @ts-expect-error turn off set status
       props.model._setStatus = jest.fn(() => {
-        props.model._statusChanged.emit(props.model._status);
+        props.model['_statusChanged'].emit(props.model['_status']);
       });
 
       render(<GitPanel {...props} />);
