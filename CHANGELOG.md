@@ -2,6 +2,44 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.50.1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.50.0...d0480eba0d11cbb25f7af443a49d4033c3bfbefd))
+
+### Enhancements made
+
+- Deny git access to nested server root [#1278](https://github.com/jupyterlab/jupyterlab-git/pull/1278) ([@Zxun2](https://github.com/Zxun2))
+
+### Bugs fixed
+
+- Unable to set email/username on a remote server [#1324](https://github.com/jupyterlab/jupyterlab-git/pull/1324) ([@jzhang20133](https://github.com/jzhang20133))
+- Fix jitter in git panel [#1306](https://github.com/jupyterlab/jupyterlab-git/pull/1306) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Fix GitPanel unit tests [#1331](https://github.com/jupyterlab/jupyterlab-git/pull/1331) ([@Zsailer](https://github.com/Zsailer))
+- Fix integration tests [#1330](https://github.com/jupyterlab/jupyterlab-git/pull/1330) ([@Zsailer](https://github.com/Zsailer))
+- Remove hybridcontents from test dependencies. [#1329](https://github.com/jupyterlab/jupyterlab-git/pull/1329) ([@Zsailer](https://github.com/Zsailer))
+- Update yarn lock for proper checksum [#1326](https://github.com/jupyterlab/jupyterlab-git/pull/1326) ([@Zsailer](https://github.com/Zsailer))
+- Bump tar from 6.2.0 to 6.2.1 [#1321](https://github.com/jupyterlab/jupyterlab-git/pull/1321) ([@dependabot](https://github.com/dependabot))
+- Bump tar from 6.2.0 to 6.2.1 in /ui-tests [#1320](https://github.com/jupyterlab/jupyterlab-git/pull/1320) ([@dependabot](https://github.com/dependabot))
+- Bump ip from 2.0.0 to 2.0.1 in /ui-tests [#1316](https://github.com/jupyterlab/jupyterlab-git/pull/1316) ([@dependabot](https://github.com/dependabot))
+- Bump ip from 2.0.0 to 2.0.1 [#1315](https://github.com/jupyterlab/jupyterlab-git/pull/1315) ([@dependabot](https://github.com/dependabot))
+- Bump @adobe/css-tools from 4.3.1 to 4.3.2 [#1307](https://github.com/jupyterlab/jupyterlab-git/pull/1307) ([@dependabot](https://github.com/dependabot))
+
+### Documentation improvements
+
+- add Zxun2 as a contributor for code [#1308](https://github.com/jupyterlab/jupyterlab-git/pull/1308) ([@allcontributors](https://github.com/allcontributors))
+- Update installation instruction [#1305](https://github.com/jupyterlab/jupyterlab-git/pull/1305) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2023-11-21&to=2024-05-16&type=c))
+
+[@allcontributors](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aallcontributors+updated%3A2023-11-21..2024-05-16&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2023-11-21..2024-05-16&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2023-11-21..2024-05-16&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2023-11-21..2024-05-16&type=Issues) | [@jzhang20133](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajzhang20133+updated%3A2023-11-21..2024-05-16&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2023-11-21..2024-05-16&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Awelcome+updated%3A2023-11-21..2024-05-16&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AZsailer+updated%3A2023-11-21..2024-05-16&type=Issues) | [@Zxun2](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AZxun2+updated%3A2023-11-21..2024-05-16&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.50.0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.9.0...f5efbc41b31f253f23fcb05adca8e4b54b33e327))
@@ -53,8 +91,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2019-12-04&to=2023-11-21&type=c))
 
 [@ajbozarth](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aajbozarth+updated%3A2019-12-04..2023-11-21&type=Issues) | [@allcontributors](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aallcontributors+updated%3A2019-12-04..2023-11-21&type=Issues) | [@benz0li](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Abenz0li+updated%3A2019-12-04..2023-11-21&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ablink1073+updated%3A2019-12-04..2023-11-21&type=Issues) | [@bryant-finney](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Abryant-finney+updated%3A2019-12-04..2023-11-21&type=Issues) | [@btel](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Abtel+updated%3A2019-12-04..2023-11-21&type=Issues) | [@charliwar](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Acharliwar+updated%3A2019-12-04..2023-11-21&type=Issues) | [@chrisjohn2306](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Achrisjohn2306+updated%3A2019-12-04..2023-11-21&type=Issues) | [@DenisaCG](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ADenisaCG+updated%3A2019-12-04..2023-11-21&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2019-12-04..2023-11-21&type=Issues) | [@Dombo](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ADombo+updated%3A2019-12-04..2023-11-21&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aecharles+updated%3A2019-12-04..2023-11-21&type=Issues) | [@eyusupov](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aeyusupov+updated%3A2019-12-04..2023-11-21&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2019-12-04..2023-11-21&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2019-12-04..2023-11-21&type=Issues) | [@goanpeca](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agoanpeca+updated%3A2019-12-04..2023-11-21&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AHaudinFlorence+updated%3A2019-12-04..2023-11-21&type=Issues) | [@ianhi](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aianhi+updated%3A2019-12-04..2023-11-21&type=Issues) | [@jaipreet-s](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajaipreet-s+updated%3A2019-12-04..2023-11-21&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajasongrout+updated%3A2019-12-04..2023-11-21&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AJasonWeill+updated%3A2019-12-04..2023-11-21&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2019-12-04..2023-11-21&type=Issues) | [@kgryte](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akgryte+updated%3A2019-12-04..2023-11-21&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2019-12-04..2023-11-21&type=Issues) | [@lresende](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Alresende+updated%3A2019-12-04..2023-11-21&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Alumberbot-app+updated%3A2019-12-04..2023-11-21&type=Issues) | [@mdietz94](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Amdietz94+updated%3A2019-12-04..2023-11-21&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ameeseeksmachine+updated%3A2019-12-04..2023-11-21&type=Issues) | [@mfakaehler](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Amfakaehler+updated%3A2019-12-04..2023-11-21&type=Issues) | [@mlucool](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Amlucool+updated%3A2019-12-04..2023-11-21&type=Issues) | [@navn-r](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Anavn-r+updated%3A2019-12-04..2023-11-21&type=Issues) | [@saulshanabrook](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Asaulshanabrook+updated%3A2019-12-04..2023-11-21&type=Issues) | [@shawnesquivel](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ashawnesquivel+updated%3A2019-12-04..2023-11-21&type=Issues) | [@telamonian](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Atelamonian+updated%3A2019-12-04..2023-11-21&type=Issues) | [@tsabbir96](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Atsabbir96+updated%3A2019-12-04..2023-11-21&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Awelcome+updated%3A2019-12-04..2023-11-21&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.50.0rc0
 
