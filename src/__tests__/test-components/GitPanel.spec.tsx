@@ -274,6 +274,72 @@ describe('GitPanel', () => {
       expect(commitSpy).toHaveBeenCalledWith(commitSummary, false, null);
     });
 
+    it('should prompt for user identity if user.name is not set when pathRepository is empty string', async () => {
+      props.model.pathRepository = '';
+      renderResult.rerender(<GitPanel {...props} />);
+
+      configSpy.mockImplementation(mockConfigImplementation('user.email'));
+      mockUtils.showDialog.mockResolvedValue(dialogValue);
+
+      await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
+      await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
+
+      await waitFor(() => {
+        expect(configSpy).toHaveBeenCalledTimes(2);
+      });
+      expect(configSpy.mock.calls[0]).toHaveLength(0);
+      expect(configSpy.mock.calls[1]).toEqual([commitUser]);
+      expect(commitSpy).toHaveBeenCalledTimes(1);
+      expect(commitSpy).toHaveBeenCalledWith(commitSummary, false, null);
+    });
+
+    it('should prompt for user identity if user.email is not set when pathRepository is empty string', async () => {
+      props.model.pathRepository = '';
+      renderResult.rerender(<GitPanel {...props} />);
+      configSpy.mockImplementation(mockConfigImplementation('user.name'));
+      mockUtils.showDialog.mockResolvedValue(dialogValue);
+
+      await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
+      await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
+
+      await waitFor(() => {
+        expect(configSpy).toHaveBeenCalledTimes(2);
+      });
+      expect(configSpy.mock.calls[0]).toHaveLength(0);
+      expect(configSpy.mock.calls[1]).toEqual([commitUser]);
+      expect(commitSpy).toHaveBeenCalledTimes(1);
+      expect(commitSpy).toHaveBeenCalledWith(commitSummary, false, null);
+    });
+
+    it('should not commit if no user identity is set and the user rejects the dialog when pathRepository is empty string', async () => {
+      props.model.pathRepository = '';
+      renderResult.rerender(<GitPanel {...props} />);
+      configSpy.mockResolvedValue({ options: {} });
+      mockUtils.showDialog.mockResolvedValue({
+        button: {
+          ...dialogValue.button,
+          accept: false
+        },
+        isChecked: null,
+        value: null
+      });
+
+      await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
+      await userEvent.type(
+        screen.getAllByRole('textbox')[1],
+        commitDescription
+      );
+      await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
+
+      await waitFor(() => expect(configSpy).toHaveBeenCalledTimes(1));
+      expect(configSpy).toHaveBeenCalledWith();
+      expect(commitSpy).not.toHaveBeenCalled();
+
+      // Should not erase commit message
+      expect(screen.getAllByRole('textbox')[0]).toHaveValue(commitSummary);
+      expect(screen.getAllByRole('textbox')[1]).toHaveValue(commitDescription);
+    });
+
     it('should not commit if no user identity is set and the user rejects the dialog', async () => {
       configSpy.mockResolvedValue({ options: {} });
       mockUtils.showDialog.mockResolvedValue({
