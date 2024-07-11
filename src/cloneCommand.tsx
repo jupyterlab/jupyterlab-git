@@ -14,6 +14,7 @@ import {
 } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import * as React from 'react';
 import {
@@ -28,20 +29,41 @@ import { CommandIDs, IGitExtension } from './tokens';
 import { GitCloneForm } from './widgets/GitCloneForm';
 import { showDetails, showError } from './notifications';
 
+const gitClonePluginId = '@jupyterlab/git:clone';
+
 export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/git:clone',
-  requires: [IGitExtension, IDefaultFileBrowser, IToolbarWidgetRegistry],
+  id: gitClonePluginId,
+  requires: [
+    IGitExtension,
+    IDefaultFileBrowser,
+    IToolbarWidgetRegistry,
+    ISettingRegistry
+  ],
   optional: [ICommandPalette, ITranslator],
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     gitModel: IGitExtension,
     fileBrowser: IDefaultFileBrowser,
     toolbarRegistry: IToolbarWidgetRegistry,
+    settingRegistry: ISettingRegistry,
     palette: ICommandPalette | null,
     translator: ITranslator | null
   ) => {
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab_git');
+
+    // Attempt to load application settings
+    let settings: ISettingRegistry.ISettings | undefined = undefined;
+    try {
+      settings = await settingRegistry.load(gitClonePluginId);
+    } catch (error) {
+      console.error(
+        trans.__('Failed to load settings for the Git Extension.\n%1', error)
+      );
+    }
+    const popupDuration =
+      ((settings?.composite['popupDuration'] as number) ?? 5) * 1000;
+
     const fileBrowserModel = fileBrowser.model;
     /** Add git clone command */
     app.commands.addCommand(CommandIDs.gitClone, {
@@ -81,6 +103,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
               id,
               message: trans.__('Successfully cloned'),
               type: 'success',
+              autoClose: popupDuration,
               ...showDetails(details, trans)
             });
             await fileBrowserModel.refresh();
@@ -93,6 +116,7 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
               id,
               message: trans.__('Failed to clone'),
               type: 'error',
+              autoClose: popupDuration,
               ...showError(error as Error, trans)
             });
             throw error;
