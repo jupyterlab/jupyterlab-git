@@ -352,6 +352,7 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+0xFa1dB6794de6e994b60741DecaE0567946992181
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcomed!
 
