@@ -715,6 +715,9 @@ class GitInitHandler(GitHandler):
         """
         body = await self.git.init(self.url2localpath(path))
 
+        if body["code"] == 0:
+            body = await self.git._empty_commit_for_init(self.url2localpath(path))
+
         if body["code"] != 0:
             self.set_status(500)
 
