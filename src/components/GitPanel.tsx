@@ -846,17 +846,22 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       return null;
     }
 
-    // If the repository path changes or explicitly configured, check the user identity
+    const isIdentityValid =
+      !!this.props.model.lastAuthor?.name &&
+      !!this.props.model.lastAuthor?.email;
+
+    // If the repository path changes, is explicitly configured, or the last authors identity is invalid check the user identity
     if (
       path !== this._previousRepoPath ||
-      this.props.settings.composite['promptUserIdentity']
+      this.props.settings.composite['promptUserIdentity'] ||
+      !isIdentityValid
     ) {
       try {
         let userOrEmailNotSet = false;
         let author: Git.IIdentity | null;
         let authorOverride: string | null = null;
 
-        if (this.props.model.lastAuthor === null) {
+        if (this.props.model.lastAuthor === null || !isIdentityValid) {
           const data: JSONObject = (await this.props.model.config()) as any;
           const options: JSONObject = data['options'] as JSONObject;
 
