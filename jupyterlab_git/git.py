@@ -1323,6 +1323,15 @@ class Git:
             }
         return {"code": code, "actions": actions}
 
+    async def _empty_commit_for_init(self, path):
+        cmd = ["git", "commit", "--allow-empty", "-m", '"First Commit"']
+
+        code, _, error = await self.__execute(cmd, cwd=path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+        return {"code": code}
+
     async def _maybe_run_actions(self, name, cwd):
         code = 0
         actions = None
