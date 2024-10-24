@@ -110,6 +110,11 @@ export interface IToolbarState {
    * Panel tab identifier.
    */
   tab: number;
+
+  /**
+   * Boolean indicating whether a refresh is currently in progress.
+   */
+  refreshInProgress: boolean;
 }
 
 /**
@@ -126,7 +131,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     super(props);
     this.state = {
       branchMenu: false,
-      tab: 0
+      tab: 0,
+      refreshInProgress: false
     };
   }
 
@@ -218,6 +224,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           className={toolbarButtonClass}
           icon={refreshIcon}
           onClick={this._onRefreshClick}
+          disabled={this.state.refreshInProgress}
           title={this.props.trans.__(
             'Refresh the repository to detect local and remote changes'
           )}
@@ -432,6 +439,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       'in-progress',
       { autoClose: false }
     );
+
+    this.setState({ refreshInProgress: true });
+
     try {
       await this.props.model.refresh();
 
@@ -449,6 +459,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         type: 'error',
         ...showError(error, this.props.trans)
       });
+    } finally {
+      this.setState({ refreshInProgress: false });
     }
   };
 }
