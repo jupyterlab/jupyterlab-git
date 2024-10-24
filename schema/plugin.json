@@ -82,6 +82,12 @@
       "title": "Hide hidden file warning",
       "description": "If true, the warning popup when opening the .gitignore file without hidden files will not be displayed.",
       "default": false
+    },
+    "popupDuration": {
+      "type": "integer",
+      "title": "Popup duration",
+      "description": "Number of seconds a popup is displayed.",
+      "default": 10
     }
   },
   "jupyter.lab.shortcuts": [

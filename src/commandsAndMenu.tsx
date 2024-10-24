@@ -140,6 +140,8 @@ export function addCommands(
   const { commands, shell, serviceManager } = app;
   const trans = translator.load('jupyterlab_git');
 
+  const popupDuration = (settings.composite['popupDuration'] as number) * 1000;
+
   /**
    * Commit using a keystroke combination when in CommitBox.
    *
@@ -238,7 +240,7 @@ export function addCommands(
             id,
             message: trans.__('Git repository initialized.'),
             type: 'success',
-            autoClose: 5000
+            autoClose: popupDuration
           });
         } catch (error) {
           console.error(
@@ -251,6 +253,7 @@ export function addCommands(
             id,
             message: trans.__('Failed to initialize the Git repository'),
             type: 'error',
+            autoClose: popupDuration,
             ...showError(error as Error, trans)
           });
         }
@@ -490,6 +493,7 @@ export function addCommands(
           id,
           message: trans.__('Successfully pushed'),
           type: 'success',
+          autoClose: popupDuration,
           ...showDetails(details, trans)
         });
       } catch (error: any) {
@@ -506,6 +510,7 @@ export function addCommands(
               id,
               message,
               type: 'error',
+              autoClose: popupDuration,
               ...options
             });
           } else {
@@ -551,6 +556,7 @@ export function addCommands(
           id,
           message: trans.__('Successfully pulled'),
           type: 'success',
+          autoClose: popupDuration,
           ...showDetails(details, trans)
         });
       } catch (error: any) {
@@ -587,6 +593,7 @@ export function addCommands(
                 Notification.update({
                   id,
                   message,
+                  autoClose: popupDuration,
                   ...options
                 });
               } else {
@@ -637,7 +644,11 @@ export function addCommands(
           }
           const message = trans.__('Resetting...');
           if (id) {
-            Notification.update({ id, message });
+            Notification.update({
+              id,
+              message,
+              autoClose: popupDuration
+            });
           } else {
             id = Notification.emit(message, 'in-progress', {
               autoClose: false
@@ -649,6 +660,7 @@ export function addCommands(
             id,
             message: trans.__('Successfully reset'),
             type: 'success',
+            autoClose: popupDuration,
             ...showDetails(
               trans.__(
                 'Successfully reset the current branch to its remote state'
@@ -668,6 +680,7 @@ export function addCommands(
               id,
               type: 'error',
               message,
+              autoClose: popupDuration,
               ...options
             });
           } else {
