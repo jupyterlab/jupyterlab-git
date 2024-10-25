@@ -6,22 +6,23 @@ import {
 } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
+import ClearIcon from '@mui/icons-material/Clear';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ClearIcon from '@mui/icons-material/Clear';
 import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { classes } from 'typestyle';
+import { showError } from '../notifications';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
   activeListItemClass,
-  nameClass,
   filterClass,
   filterClearClass,
   filterInputClass,
   filterWrapperClass,
   listItemClass,
   listItemIconClass,
+  nameClass,
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
@@ -29,7 +30,6 @@ import { branchIcon, mergeIcon, trashIcon } from '../style/icons';
 import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { NewBranchDialog } from './NewBranchDialog';
-import { showError } from '../notifications';
 
 const ITEM_HEIGHT = 24.8; // HTML element height for a single branch
 const MIN_HEIGHT = 150; // Minimal HTML element height for the branches list
@@ -274,7 +274,10 @@ export class BranchMenu extends React.Component<
           listItemClass,
           isActive ? activeListItemClass : null
         )}
-        onClick={this._onBranchClickFactory(branch.name)}
+        onClick={this._onBranchClickFactory(
+          branch.name,
+          branch.is_remote_branch
+        )}
         role="listitem"
         style={style}
       >
@@ -425,7 +428,7 @@ export class BranchMenu extends React.Component<
    * @param branch - branch name
    * @returns callback
    */
-  private _onBranchClickFactory(branch: string) {
+  private _onBranchClickFactory(branch: string, isRemote: boolean) {
     /**
      * Callback invoked upon clicking a branch name.
      *
@@ -441,6 +444,9 @@ export class BranchMenu extends React.Component<
         );
         return;
       }
+
+      let message = 'Switched branch.';
+      let type: Notification.TypeOptions = 'success';
       const opts = {
         branchname: branch
       };
@@ -452,15 +458,42 @@ export class BranchMenu extends React.Component<
       );
 
       try {
-        await this.props.model.checkout(opts);
+        let shouldCheckout = true;
+        const localBranchname = branch.split('/').slice(-1)[0];
+        const localBranchExists = this.props.model.branches.find(
+          branch => branch.name === localBranchname
+        );
+
+        if (localBranchExists && isRemote) {
+          const result = await showDialog({
+            title: this.props.trans.__('Confirm Checkout'),
+            body: this.props.trans.__(
+              'Checking out this branch will reset your local copy to the remote. Any changes not pushed to the remote will be lost. Are you sure you want to continue?'
+            ),
+            buttons: [
+              Dialog.cancelButton({ label: this.props.trans.__('Cancel') }),
+              Dialog.warnButton({ label: this.props.trans.__('Continue') })
+            ]
+          });
+
+          if (!result.button.accept) {
+            shouldCheckout = false;
+            message = 'Checkout cancelled.';
+            type = 'warning';
+          }
+        }
+
+        if (shouldCheckout) {
+          await this.props.model.checkout(opts);
+        }
       } catch (err) {
         return onBranchError(err, id, this.props.trans);
       }
 
       Notification.update({
         id,
-        message: this.props.trans.__('Switched branch.'),
-        type: 'success',
+        message: this.props.trans.__(message),
+        type,
         autoClose: 5000
       });
     };
