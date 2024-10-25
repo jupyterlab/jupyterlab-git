@@ -224,11 +224,15 @@ describe('Toolbar', () => {
         />
       );
 
-      await waitFor(async () => {
-        await userEvent.click(
+      await waitFor(() => {
+        expect(
           screen.getByRole('button', { name: 'Pull latest changes' })
-        );
+        ).toBeDefined();
       });
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Pull latest changes' })
+      );
 
       expect(mockedExecute).toHaveBeenCalledTimes(1);
       expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPull);
@@ -246,11 +250,15 @@ describe('Toolbar', () => {
         />
       );
 
-      await waitFor(async () => {
-        await userEvent.click(
+      await waitFor(() => {
+        expect(
           screen.getByRole('button', { name: 'Push committed changes' })
-        );
+        ).toBeDefined();
       });
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Push committed changes' })
+      );
 
       expect(mockedExecute).toHaveBeenCalledTimes(1);
       expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPush);
