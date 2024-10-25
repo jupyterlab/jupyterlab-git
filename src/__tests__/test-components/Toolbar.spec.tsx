@@ -1,6 +1,6 @@
 import { nullTranslator } from '@jupyterlab/translation';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import 'jest';
 import * as React from 'react';
@@ -8,10 +8,25 @@ import { IToolbarProps, Toolbar } from '../../components/Toolbar';
 import * as git from '../../git';
 import { GitExtension } from '../../model';
 import { badgeClass } from '../../style/Toolbar';
-import { DEFAULT_REPOSITORY_PATH, mockedRequestAPI } from '../utils';
 import { CommandIDs } from '../../tokens';
+import {
+  DEFAULT_REPOSITORY_PATH,
+  defaultMockedResponses,
+  mockedRequestAPI
+} from '../utils';
 
 jest.mock('../../git');
+
+const REMOTES = [
+  {
+    name: 'test',
+    url: 'https://test.com'
+  },
+  {
+    name: 'origin',
+    url: 'https://origin.com'
+  }
+];
 
 async function createModel() {
   const model = new GitExtension();
@@ -65,7 +80,18 @@ describe('Toolbar', () => {
     jest.restoreAllMocks();
 
     const mock = git as jest.Mocked<typeof git>;
-    mock.requestAPI.mockImplementation(mockedRequestAPI() as any);
+    mock.requestAPI.mockImplementation(
+      mockedRequestAPI({
+        responses: {
+          ...defaultMockedResponses,
+          'remote/show': {
+            body: () => {
+              return { code: 0, remotes: REMOTES };
+            }
+          }
+        }
+      }) as any
+    );
 
     model = await createModel();
   });
@@ -79,12 +105,14 @@ describe('Toolbar', () => {
   });
 
   describe('render', () => {
-    it('should display a button to pull the latest changes', () => {
+    it('should display a button to pull the latest changes', async () => {
       render(<Toolbar {...createProps()} />);
 
-      expect(
-        screen.getAllByRole('button', { name: 'Pull latest changes' })
-      ).toBeDefined();
+      await waitFor(() => {
+        expect(
+          screen.getAllByRole('button', { name: 'Pull latest changes' })
+        ).toBeDefined();
+      });
 
       expect(
         screen
@@ -93,22 +121,26 @@ describe('Toolbar', () => {
       ).toHaveClass('MuiBadge-invisible');
     });
 
-    it('should display a badge on pull icon if behind', () => {
+    it('should display a badge on pull icon if behind', async () => {
       render(<Toolbar {...createProps({ nCommitsBehind: 1 })} />);
 
-      expect(
-        screen
-          .getByRole('button', { name: /^Pull latest changes/ })
-          .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
-      ).not.toHaveClass('MuiBadge-invisible');
+      await waitFor(() => {
+        expect(
+          screen
+            .getByRole('button', { name: /^Pull latest changes/ })
+            .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
+        ).not.toHaveClass('MuiBadge-invisible');
+      });
     });
 
-    it('should display a button to push the latest changes', () => {
+    it('should display a button to push the latest changes', async () => {
       render(<Toolbar {...createProps()} />);
 
-      expect(
-        screen.getAllByRole('button', { name: 'Push committed changes' })
-      ).toBeDefined();
+      await waitFor(() => {
+        expect(
+          screen.getAllByRole('button', { name: 'Push committed changes' })
+        ).toBeDefined();
+      });
 
       expect(
         screen
@@ -117,14 +149,16 @@ describe('Toolbar', () => {
       ).toHaveClass('MuiBadge-invisible');
     });
 
-    it('should display a badge on push icon if behind', () => {
+    it('should display a badge on push icon if behind', async () => {
       render(<Toolbar {...createProps({ nCommitsAhead: 1 })} />);
 
-      expect(
-        screen
-          .getByRole('button', { name: /^Push committed changes/ })
-          .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
-      ).not.toHaveClass('MuiBadge-invisible');
+      await waitFor(() => {
+        expect(
+          screen
+            .getByRole('button', { name: /^Push committed changes/ })
+            .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
+        ).not.toHaveClass('MuiBadge-invisible');
+      });
     });
 
     it('should display a button to refresh the current repository', () => {
@@ -177,7 +211,7 @@ describe('Toolbar', () => {
     });
   });
 
-  describe('pull changes', () => {
+  describe('push/pull changes with remote', () => {
     it('should pull changes when the button to pull the latest changes is clicked', async () => {
       const mockedExecute = jest.fn();
       render(
@@ -190,12 +224,58 @@ describe('Toolbar', () => {
         />
       );
 
-      await userEvent.click(
-        screen.getByRole('button', { name: 'Pull latest changes' })
-      );
+      await waitFor(async () => {
+        await userEvent.click(
+          screen.getByRole('button', { name: 'Pull latest changes' })
+        );
+      });
 
       expect(mockedExecute).toHaveBeenCalledTimes(1);
       expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPull);
+    });
+
+    it('should push changes when the button to push the latest changes is clicked', async () => {
+      const mockedExecute = jest.fn();
+      render(
+        <Toolbar
+          {...createProps({
+            commands: {
+              execute: mockedExecute
+            } as any
+          })}
+        />
+      );
+
+      await waitFor(async () => {
+        await userEvent.click(
+          screen.getByRole('button', { name: 'Push committed changes' })
+        );
+      });
+
+      expect(mockedExecute).toHaveBeenCalledTimes(1);
+      expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPush);
+    });
+  });
+
+  describe('push/pull changes without remote', () => {
+    beforeEach(async () => {
+      jest.restoreAllMocks();
+
+      const mock = git as jest.Mocked<typeof git>;
+      mock.requestAPI.mockImplementation(
+        mockedRequestAPI({
+          responses: {
+            ...defaultMockedResponses,
+            'remote/show': {
+              body: () => {
+                return { code: -1, remotes: [] };
+              }
+            }
+          }
+        }) as any
+      );
+
+      model = await createModel();
     });
 
     it('should not pull changes when the pull button is clicked but there is no remote branch', async () => {
@@ -203,16 +283,6 @@ describe('Toolbar', () => {
       render(
         <Toolbar
           {...createProps({
-            branches: [
-              {
-                is_current_branch: true,
-                is_remote_branch: false,
-                name: 'main',
-                upstream: '',
-                top_commit: '',
-                tag: ''
-              }
-            ],
             commands: {
               execute: mockedExecute
             } as any
@@ -228,42 +298,12 @@ describe('Toolbar', () => {
 
       expect(mockedExecute).toHaveBeenCalledTimes(0);
     });
-  });
-
-  describe('push changes', () => {
-    it('should push changes when the button to push the latest changes is clicked', async () => {
-      const mockedExecute = jest.fn();
-      render(
-        <Toolbar
-          {...createProps({
-            commands: {
-              execute: mockedExecute
-            } as any
-          })}
-        />
-      );
-      await userEvent.click(
-        screen.getByRole('button', { name: 'Push committed changes' })
-      );
-      expect(mockedExecute).toHaveBeenCalledTimes(1);
-      expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPush);
-    });
 
     it('should not push changes when the push button is clicked but there is no remote branch', async () => {
       const mockedExecute = jest.fn();
       render(
         <Toolbar
           {...createProps({
-            branches: [
-              {
-                is_current_branch: true,
-                is_remote_branch: false,
-                name: 'main',
-                upstream: '',
-                top_commit: '',
-                tag: ''
-              }
-            ],
             commands: {
               execute: mockedExecute
             } as any
