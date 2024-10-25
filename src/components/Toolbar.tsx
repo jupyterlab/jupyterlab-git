@@ -115,6 +115,11 @@ export interface IToolbarState {
    * Boolean indicating whether a refresh is currently in progress.
    */
   refreshInProgress: boolean;
+
+  /**
+   * Boolean indicating whether a remote exists.
+   */
+  hasRemote: boolean;
 }
 
 /**
@@ -132,8 +137,22 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     this.state = {
       branchMenu: false,
       tab: 0,
-      refreshInProgress: false
+      refreshInProgress: false,
+      hasRemote: false
     };
+  }
+
+  /**
+   * Check whether or not the repo has any remotes
+   */
+  async componentDidMount(): Promise<void> {
+    try {
+      const remotes = await this.props.model.getRemotes();
+      const hasRemote = remotes.length > 0 ? true : false;
+      this.setState({ hasRemote });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   /**
@@ -160,10 +179,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     const activeBranch = this.props.branches.filter(
       branch => branch.is_current_branch
     );
-    // FIXME whether the repository as a remote or not should be done through a call to `git remote`
-    const hasRemote = this.props.branches.some(
-      branch => branch.is_remote_branch
-    );
+    const hasRemote = this.state.hasRemote;
     const hasUpstream = activeBranch[0]?.upstream !== null;
 
     return (
