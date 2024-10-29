@@ -29,6 +29,8 @@ export interface IGitExtension extends IDisposable {
    */
   currentBranch: Git.IBranch | null;
 
+  subModules: Git.ISubModule[];
+
   /**
    * A signal emitted when the branches of the Git repository changes.
    */

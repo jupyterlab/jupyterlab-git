@@ -88,7 +88,7 @@ export class GitExtension implements IGitExtension {
     return this._branches;
   }
 
-  get subModules(): Git.ISubModule[] | null {
+  get subModules(): Git.ISubModule[] {
     return this._subModules;
   }
 
@@ -2282,7 +2282,7 @@ export class GitExtension implements IGitExtension {
   private _hasDirtyFiles = false;
   private _credentialsRequired = false;
   private _lastAuthor: Git.IIdentity | null = null;
-  private _subModules: Git.ISubModule[] | null = null;
+  private _subModules: Git.ISubModule[] = [];
 
   // Configurable
   private _statusForDirtyState: Git.Status[] = ['staged', 'partially-staged'];
