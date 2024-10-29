@@ -11,16 +11,16 @@ import {
 import { desktopIcon } from '../style/icons';
 import { Git, IGitExtension } from '../tokens';
 
-const ITEM_HEIGHT = 24.8; // HTML element height for a single tag
-const MIN_HEIGHT = 150; // Minimal HTML element height for the tags list
-const MAX_HEIGHT = 400; // Maximal HTML element height for the tags list
+const ITEM_HEIGHT = 24.8; // HTML element height for a single item
+const MIN_HEIGHT = 150; // Minimal HTML element height for the list
+const MAX_HEIGHT = 400; // Maximal HTML element height for the list
 
 /**
  * Interface describing component properties.
  */
 export interface ISubModuleMenuProps {
   /**
-   * Current list of tags.
+   * Current list of submodules.
    */
   subModuleList: Git.ISubModule[];
 
@@ -41,14 +41,14 @@ export interface ISubModuleMenuProps {
 export interface ISubModuleMenuState {}
 
 /**
- * React component for rendering a tag menu.
+ * React component for rendering a submodule menu.
  */
 export class SubModuleMenu extends React.Component<
   ISubModuleMenuProps,
   ISubModuleMenuState
 > {
   /**
-   * Returns a React component for rendering a tag menu.
+   * Returns a React component for rendering a submodule menu.
    *
    * @param props - component properties
    * @returns React component
@@ -69,7 +69,7 @@ export class SubModuleMenu extends React.Component<
   }
 
   /**
-   * Renders list of tags.
+   * Renders list of submodules.
    *
    * @returns React element
    */
