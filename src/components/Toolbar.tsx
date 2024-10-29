@@ -35,6 +35,7 @@ import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { BranchMenu } from './BranchMenu';
+import { SubModuleMenu } from './SubModuleMenu';
 import { TagMenu } from './TagMenu';
 
 /**
@@ -120,6 +121,8 @@ export interface IToolbarState {
    * Boolean indicating whether a remote exists.
    */
   hasRemote: boolean;
+
+  repoMenu: boolean;
 }
 
 /**
@@ -138,7 +141,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       branchMenu: false,
       tab: 0,
       refreshInProgress: false,
-      hasRemote: false
+      hasRemote: false,
+      repoMenu: false
     };
   }
 
@@ -262,12 +266,15 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
-          disabled
-          className={toolbarMenuButtonClass}
+          className={classes(
+            toolbarMenuButtonClass,
+            toolbarMenuButtonEnabledClass
+          )}
           title={this.props.trans.__(
             'Current repository: %1',
             PageConfig.getOption('serverRoot') + '/' + this.props.repository
           )}
+          onClick={this._onRepoClick}
         >
           <desktopIcon.react
             tag="span"
@@ -279,7 +286,19 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             </p>
             <p className={toolbarMenuButtonSubtitleClass}>{repositoryName}</p>
           </div>
+          {this.state.repoMenu ? (
+            <caretUpIcon.react
+              tag="span"
+              className={toolbarMenuButtonIconClass}
+            />
+          ) : (
+            <caretDownIcon.react
+              tag="span"
+              className={toolbarMenuButtonIconClass}
+            />
+          )}
         </button>
+        {this.state.repoMenu ? this._renderSubModules() : null}
       </div>
     );
   }
@@ -399,6 +418,16 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
+  private _renderSubModules(): JSX.Element {
+    return (
+      <SubModuleMenu
+        subModuleList={this.props.model.subModules}
+        model={this.props.model}
+        trans={this.props.trans}
+      />
+    );
+  }
+
   private _renderTags(): JSX.Element {
     return (
       <TagMenu
@@ -440,6 +469,13 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     // Toggle the branch menu:
     this.setState({
       branchMenu: !this.state.branchMenu
+    });
+  };
+
+  private _onRepoClick = (): void => {
+    // Toggle the submodule menu:
+    this.setState({
+      repoMenu: !this.state.repoMenu
     });
   };
 
