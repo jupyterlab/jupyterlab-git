@@ -1,6 +1,6 @@
 {
     "name": "@jupyterlab/git",
-    "version": "0.50.1",
+    "version": "0.50.2",
     "description": "A JupyterLab extension for version control using git",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -159,7 +159,7 @@
     },
     "homepage": "https://github.com/jupyterlab/jupyterlab-git",
     "publishConfig": {
-      "access": "public"
+        "access": "public"
     },
     "jupyterlab": {
         "discovery": {
