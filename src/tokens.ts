@@ -976,6 +976,15 @@ export namespace Git {
     current_branch?: IBranch;
   }
 
+  export interface ISubModule {
+    name: string;
+  }
+
+  export interface ISubModuleResult {
+    code: number;
+    subModules: ISubModule[];
+  }
+
   /**
    * Data interface of diffcontent request
    */

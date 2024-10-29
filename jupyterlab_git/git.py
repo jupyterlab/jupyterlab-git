@@ -2183,6 +2183,29 @@ class Git:
 
         return {"code": code, "message": output.strip()}
 
+    async def submodule(self, path):
+        """
+        Execute git config --file .gitmodules --name-only --get-regexp path
+        """
+
+        cmd = [
+            "git",
+            "config",
+            "--file",
+            ".gitmodules",
+            "--name-only",
+            "--get-regexp",
+            "path",
+        ]
+
+        code, output, error = await self.__execute(cmd, cwd=path)
+
+        results = []
+        for prefix, name, postfix in (line.split(".") for line in output.splitlines()):
+            results.append(name)
+
+        return {"code": code, "submodules": results, "error": error}
+
     @property
     def excluded_paths(self) -> List[str]:
         """Wildcard-style path patterns that do not support git commands.

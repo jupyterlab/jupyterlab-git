@@ -88,6 +88,10 @@ export class GitExtension implements IGitExtension {
     return this._branches;
   }
 
+  get subModules(): Git.ISubModule[] | null {
+    return this._subModules;
+  }
+
   /**
    * Tags list for the current repository.
    */
@@ -1976,6 +1980,26 @@ export class GitExtension implements IGitExtension {
     await this.commit(message);
   }
 
+  async listSubModules(): Promise<void> {
+    try {
+      const path = await this._getPathRepository();
+      const data = await this._taskHandler.execute<Git.ISubModuleResult>(
+        'git:fetch:submodules',
+        async () => {
+          return await requestAPI<Git.ISubModuleResult>(
+            URLExt.join(path, 'submodules'),
+            'POST'
+          );
+        }
+      );
+
+      const newSubModules = data.subModules;
+      this._subModules = newSubModules;
+    } catch (error) {
+      console.error('Failed to retrieve submodules');
+    }
+  }
+
   /**
    * Make request for a list of all git branches in the repository
    * Retrieve a list of repository branches.
@@ -2258,6 +2282,7 @@ export class GitExtension implements IGitExtension {
   private _hasDirtyFiles = false;
   private _credentialsRequired = false;
   private _lastAuthor: Git.IIdentity | null = null;
+  private _subModules: Git.ISubModule[] | null = null;
 
   // Configurable
   private _statusForDirtyState: Git.Status[] = ['staged', 'partially-staged'];
