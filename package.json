@@ -158,6 +158,9 @@
         "url": "https://github.com/jupyterlab/jupyterlab-git/issues"
     },
     "homepage": "https://github.com/jupyterlab/jupyterlab-git",
+    "publishConfig": {
+      "access": "public"
+    },
     "jupyterlab": {
         "discovery": {
             "server": {
