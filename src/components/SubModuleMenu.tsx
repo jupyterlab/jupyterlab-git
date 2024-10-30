@@ -25,6 +25,11 @@ export interface ISubModuleMenuProps {
   model: IGitExtension;
 
   /**
+   * The list of submodules in the repo
+   */
+  subModules: Git.ISubModule[];
+
+  /**
    * The application language translator.
    */
   trans: TranslationBundle;
@@ -67,7 +72,7 @@ export class SubModuleMenu extends React.Component<
    * @returns React element
    */
   private _renderSubModuleList(): React.ReactElement {
-    const subModules = this.props.model.subModules;
+    const subModules = this.props.subModules;
 
     return (
       <FixedSizeList
@@ -105,6 +110,7 @@ export class SubModuleMenu extends React.Component<
       <ListItem
         title={this.props.trans.__('SubModule: %1', subModule.name)}
         className={listItemClass}
+        role="listitem"
         style={style}
       >
         <desktopIcon.react className={listItemIconClass} tag="span" />

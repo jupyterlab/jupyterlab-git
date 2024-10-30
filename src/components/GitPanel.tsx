@@ -155,6 +155,11 @@ export interface IGitPanelState {
    *
    */
   stash: Git.IStash[];
+
+  /**
+   * List of submodules.
+   */
+  subModules: Git.ISubModule[];
 }
 
 /**
@@ -175,7 +180,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       pathRepository,
       hasDirtyFiles: hasDirtyStagedFiles,
       stash,
-      tagsList
+      tagsList,
+      subModules
     } = props.model;
 
     this.state = {
@@ -195,7 +201,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       referenceCommit: null,
       challengerCommit: null,
       stash: stash,
-      tagsList: tagsList
+      tagsList: tagsList,
+      subModules: subModules
     };
   }
 
@@ -247,7 +254,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.warningDialog(args!);
     }, this);
     model.repositoryChanged.connect(async () => {
-      await this.props.model.listSubModules();
+      await this.refreshSubModules();
     }, this);
 
     settings.changed.connect(this.refreshView, this);
@@ -301,6 +308,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         pastCommits: pastCommits
       });
     }
+  };
+
+  refreshSubModules = async (): Promise<void> => {
+    await this.props.model.listSubModules();
+    this.setState({
+      subModules: this.props.model.subModules
+    });
   };
 
   /**
@@ -413,6 +427,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         nCommitsBehind={this.state.nCommitsBehind}
         repository={this.state.repository || ''}
         trans={this.props.trans}
+        subModules={this.state.subModules}
       />
     );
   }

@@ -96,6 +96,12 @@ export interface IToolbarProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Current list of submodules
+   */
+
+  subModules: Git.ISubModule[];
 }
 
 /**
@@ -262,7 +268,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderRepoMenu(): React.ReactElement {
-    const hasModules = !(this.props.model.subModules.length === 0);
+    const hasModules = !(this.props.subModules.length === 0);
     const repositoryName =
       PathExt.basename(
         this.props.repository || PageConfig.getOption('serverRoot')
@@ -424,10 +430,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
-  private _renderSubModules(): JSX.Element {
-    return <SubModuleMenu model={this.props.model} trans={this.props.trans} />;
-  }
-
   private _renderTags(): JSX.Element {
     return (
       <TagMenu
@@ -437,6 +439,16 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         branching={this.props.branching}
         trans={this.props.trans}
       ></TagMenu>
+    );
+  }
+
+  private _renderSubModules(): JSX.Element {
+    return (
+      <SubModuleMenu
+        model={this.props.model}
+        subModules={this.props.subModules}
+        trans={this.props.trans}
+      />
     );
   }
 
