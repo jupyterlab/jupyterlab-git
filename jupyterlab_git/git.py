@@ -2185,23 +2185,17 @@ class Git:
 
     async def submodule(self, path):
         """
-        Execute git config --file .gitmodules --name-only --get-regexp path
+        Execute git submodule status --recursive
         """
 
-        cmd = [
-            "git",
-            "config",
-            "--file",
-            ".gitmodules",
-            "--name-only",
-            "--get-regexp",
-            "path",
-        ]
+        cmd = ["git", "submodule", "status", "--recursive"]
 
         code, output, error = await self.__execute(cmd, cwd=path)
 
         results = []
-        for prefix, name, postfix in (line.split(".") for line in output.splitlines()):
+        for sha, name, commit in (
+            line.strip().split(" ") for line in output.splitlines()
+        ):
             submodule = {
                 "name": name,
             }

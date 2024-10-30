@@ -88,7 +88,11 @@ export class SubModuleMenu extends React.Component<
         itemData={subModules}
         itemKey={(index, data) => data[index].name}
         itemSize={ITEM_HEIGHT}
-        style={{ overflowX: 'hidden', paddingTop: 0, paddingBottom: 0 }}
+        style={{
+          overflowX: 'hidden',
+          paddingTop: 0,
+          paddingBottom: 0
+        }}
         width={'auto'}
       >
         {this._renderItem}
@@ -108,7 +112,6 @@ export class SubModuleMenu extends React.Component<
 
     return (
       <ListItem
-        button
         title={this.props.trans.__('SubModule: %1', subModule.name)}
         className={listItemClass}
         style={style}
