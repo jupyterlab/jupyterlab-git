@@ -1,5 +1,6 @@
 import * as apputils from '@jupyterlab/apputils';
 import { nullTranslator } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import '@testing-library/jest-dom';
 import { RenderResult, render, screen, waitFor } from '@testing-library/react';
@@ -10,12 +11,11 @@ import { GitPanel, IGitPanelProps } from '../../components/GitPanel';
 import * as git from '../../git';
 import { GitExtension as GitModel } from '../../model';
 import {
-  defaultMockedResponses,
   DEFAULT_REPOSITORY_PATH,
   IMockedResponse,
+  defaultMockedResponses,
   mockedRequestAPI
 } from '../utils';
-import { CommandRegistry } from '@lumino/commands';
 
 jest.mock('../../git');
 jest.mock('@jupyterlab/apputils');
@@ -372,6 +372,7 @@ describe('GitPanel', () => {
     beforeEach(() => {
       props.model = {
         branches: [],
+        subModules: [],
         status: {},
         stashChanged: {
           connect: jest.fn()
