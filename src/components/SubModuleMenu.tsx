@@ -8,6 +8,7 @@ import {
   nameClass,
   wrapperClass
 } from '../style/BranchMenu';
+import { subModuleHeaderStyle } from '../style/SubModuleMenuStyle';
 import { desktopIcon } from '../style/icons';
 import { Git, IGitExtension } from '../tokens';
 
@@ -75,24 +76,27 @@ export class SubModuleMenu extends React.Component<
     const subModules = this.props.subModules;
 
     return (
-      <FixedSizeList
-        height={Math.min(
-          Math.max(MIN_HEIGHT, subModules.length * ITEM_HEIGHT),
-          MAX_HEIGHT
-        )}
-        itemCount={subModules.length}
-        itemData={subModules}
-        itemKey={(index, data) => data[index].name}
-        itemSize={ITEM_HEIGHT}
-        style={{
-          overflowX: 'hidden',
-          paddingTop: 0,
-          paddingBottom: 0
-        }}
-        width={'auto'}
-      >
-        {this._renderItem}
-      </FixedSizeList>
+      <>
+        <div className={subModuleHeaderStyle}>SubModules</div>
+        <FixedSizeList
+          height={Math.min(
+            Math.max(MIN_HEIGHT, subModules.length * ITEM_HEIGHT),
+            MAX_HEIGHT
+          )}
+          itemCount={subModules.length}
+          itemData={subModules}
+          itemKey={(index, data) => data[index].name}
+          itemSize={ITEM_HEIGHT}
+          style={{
+            overflowX: 'hidden',
+            paddingTop: 0,
+            paddingBottom: 0
+          }}
+          width={'auto'}
+        >
+          {this._renderItem}
+        </FixedSizeList>
+      </>
     );
   }
 

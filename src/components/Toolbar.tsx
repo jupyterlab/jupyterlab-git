@@ -100,7 +100,6 @@ export interface IToolbarProps {
   /**
    * Current list of submodules
    */
-
   subModules: Git.ISubModule[];
 }
 
