@@ -259,6 +259,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderRepoMenu(): React.ReactElement {
+    const hasModules = !(this.props.model.subModules.length === 0);
     const repositoryName =
       PathExt.basename(
         this.props.repository || PageConfig.getOption('serverRoot')
@@ -266,9 +267,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
+          disabled={!hasModules}
           className={classes(
             toolbarMenuButtonClass,
-            toolbarMenuButtonEnabledClass
+            hasModules && toolbarMenuButtonEnabledClass
           )}
           title={this.props.trans.__(
             'Current repository: %1',
@@ -286,17 +288,18 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             </p>
             <p className={toolbarMenuButtonSubtitleClass}>{repositoryName}</p>
           </div>
-          {this.state.repoMenu ? (
-            <caretUpIcon.react
-              tag="span"
-              className={toolbarMenuButtonIconClass}
-            />
-          ) : (
-            <caretDownIcon.react
-              tag="span"
-              className={toolbarMenuButtonIconClass}
-            />
-          )}
+          {hasModules &&
+            (this.state.repoMenu ? (
+              <caretUpIcon.react
+                tag="span"
+                className={toolbarMenuButtonIconClass}
+              />
+            ) : (
+              <caretDownIcon.react
+                tag="span"
+                className={toolbarMenuButtonIconClass}
+              />
+            ))}
         </button>
         {this.state.repoMenu ? this._renderSubModules() : null}
       </div>
