@@ -229,7 +229,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     }, this);
     model.branchesChanged.connect(async () => {
       await this.refreshBranches();
-      await this.props.model.listSubModules();
     }, this);
     model.headChanged.connect(async () => {
       await this.refreshCurrentBranch();
@@ -246,6 +245,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     }, this);
     model.remoteChanged.connect((_, args) => {
       this.warningDialog(args!);
+    }, this);
+    model.repositoryChanged.connect(async () => {
+      await this.props.model.listSubModules();
     }, this);
 
     settings.changed.connect(this.refreshView, this);

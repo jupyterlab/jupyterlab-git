@@ -1984,7 +1984,7 @@ export class GitExtension implements IGitExtension {
     try {
       const path = await this._getPathRepository();
       const data = await this._taskHandler.execute<Git.ISubModuleResult>(
-        'git:fetch:submodules',
+        'git:submodules:list',
         async () => {
           return await requestAPI<Git.ISubModuleResult>(
             URLExt.join(path, 'submodules'),
