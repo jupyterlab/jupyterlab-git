@@ -29,6 +29,9 @@ export interface IGitExtension extends IDisposable {
    */
   currentBranch: Git.IBranch | null;
 
+  /**
+   * The list of submodules in the current repo
+   */
   subModules: Git.ISubModule[];
 
   /**
@@ -978,10 +981,17 @@ export namespace Git {
     current_branch?: IBranch;
   }
 
+  /**
+   * SubModule description interface
+   */
   export interface ISubModule {
     name: string;
   }
 
+  /**
+   * Interface for submodule request result,
+   * has the name of the submodules in the current repo
+   */
   export interface ISubModuleResult {
     code: number;
     subModules: ISubModule[];

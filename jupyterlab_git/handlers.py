@@ -150,7 +150,6 @@ class GitShowTopLevelHandler(GitHandler):
     Displays the git root directory inside a repository.
     """
 
-    # sdsdsdsds
     @tornado.web.authenticated
     async def post(self, path: str = ""):
         """
@@ -916,7 +915,7 @@ class GitTagCheckoutHandler(GitHandler):
 
 class GitNewTagHandler(GitHandler):
     """
-    Hadler for 'git tag <tag_name> <commit_id>. Create new tag pointing to a specific commit.
+    Handler for 'git tag <tag_name> <commit_id>. Create new tag pointing to a specific commit.
     """
 
     @tornado.web.authenticated
@@ -1071,10 +1070,15 @@ class GitStashApplyHandler(GitHandler):
 
 
 class GitSubModulesHandler(GitHandler):
+    """
+    Handler for 'git submodule status --recursive.
+    Get a list of submodules in the repo.
+    """
+
     @tornado.web.authenticated
-    async def post(self, path: str = ""):
+    async def get(self, path: str = ""):
         """
-        POST request handler, fetches all submodules in current repository.
+        GET request handler, fetches all submodules in current repository.
         """
         result = await self.git.submodule(self.url2localpath(path))
 

@@ -20,11 +20,6 @@ const MAX_HEIGHT = 400; // Maximal HTML element height for the list
  */
 export interface ISubModuleMenuProps {
   /**
-   * Current list of submodules.
-   */
-  subModuleList: Git.ISubModule[];
-
-  /**
    * Git extension data model.
    */
   model: IGitExtension;
@@ -55,8 +50,6 @@ export class SubModuleMenu extends React.Component<
    */
   constructor(props: ISubModuleMenuProps) {
     super(props);
-
-    this.state = {};
   }
 
   /**
@@ -74,9 +67,7 @@ export class SubModuleMenu extends React.Component<
    * @returns React element
    */
   private _renderSubModuleList(): React.ReactElement {
-    // Perform a "simple" filter... (TODO: consider implementing fuzzy filtering)
-
-    const subModules = this.props.subModuleList;
+    const subModules = this.props.model.subModules;
 
     return (
       <FixedSizeList

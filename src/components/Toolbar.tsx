@@ -122,6 +122,9 @@ export interface IToolbarState {
    */
   hasRemote: boolean;
 
+  /**
+   * Boolean indicating whether a repo menu is shown.
+   */
   repoMenu: boolean;
 }
 
@@ -422,13 +425,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   private _renderSubModules(): JSX.Element {
-    return (
-      <SubModuleMenu
-        subModuleList={this.props.model.subModules}
-        model={this.props.model}
-        trans={this.props.trans}
-      />
-    );
+    return <SubModuleMenu model={this.props.model} trans={this.props.trans} />;
   }
 
   private _renderTags(): JSX.Element {

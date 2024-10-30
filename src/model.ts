@@ -88,6 +88,9 @@ export class GitExtension implements IGitExtension {
     return this._branches;
   }
 
+  /**
+   * SubModule list for the current repository.
+   */
   get subModules(): Git.ISubModule[] {
     return this._subModules;
   }
@@ -1980,6 +1983,15 @@ export class GitExtension implements IGitExtension {
     await this.commit(message);
   }
 
+  /**
+   * Get the submodules in the current repository.
+  
+   * @returns A promise that resolves upon getting submodule names
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
   async listSubModules(): Promise<void> {
     try {
       const path = await this._getPathRepository();
@@ -1988,7 +2000,7 @@ export class GitExtension implements IGitExtension {
         async () => {
           return await requestAPI<Git.ISubModuleResult>(
             URLExt.join(path, 'submodules'),
-            'POST'
+            'GET'
           );
         }
       );
