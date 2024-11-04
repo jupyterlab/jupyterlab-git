@@ -2193,9 +2193,9 @@ class Git:
         code, output, error = await self.__execute(cmd, cwd=path)
 
         results = []
-        for sha, name, commit in (
-            line.strip().split(" ") for line in output.splitlines()
-        ):
+
+        for line in output.splitlines():
+            name = line.strip().split(" ")[-1]
             submodule = {
                 "name": name,
             }
