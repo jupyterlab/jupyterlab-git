@@ -1069,7 +1069,7 @@ class GitStashApplyHandler(GitHandler):
             self.finish(json.dumps(response))
 
 
-class GitSubModulesHandler(GitHandler):
+class GitSubmodulesHandler(GitHandler):
     """
     Handler for 'git submodule status --recursive.
     Get a list of submodules in the repo.
@@ -1131,7 +1131,7 @@ def setup_handlers(web_app):
         ("/stash", GitStashHandler),
         ("/stash_pop", GitStashPopHandler),
         ("/stash_apply", GitStashApplyHandler),
-        ("/submodules", GitSubModulesHandler),
+        ("/submodules", GitSubmodulesHandler),
     ]
 
     handlers = [
