@@ -45,7 +45,7 @@ conda install -c conda-forge jupyterlab jupyterlab-git
 To remove the extension, execute:
 
 ```bash
-pip uninstall jupyterlab_git
+pip uninstall jupyterlab-git
 ```
 
 or with _conda_:
