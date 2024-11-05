@@ -8,7 +8,7 @@ import {
   nameClass,
   wrapperClass
 } from '../style/BranchMenu';
-import { subModuleHeaderStyle } from '../style/SubModuleMenuStyle';
+import { submoduleHeaderStyle } from '../style/SubmoduleMenuStyle';
 import { desktopIcon } from '../style/icons';
 import { Git, IGitExtension } from '../tokens';
 
@@ -19,7 +19,7 @@ const MAX_HEIGHT = 400; // Maximal HTML element height for the list
 /**
  * Interface describing component properties.
  */
-export interface ISubModuleMenuProps {
+export interface ISubmoduleMenuProps {
   /**
    * Git extension data model.
    */
@@ -28,7 +28,7 @@ export interface ISubModuleMenuProps {
   /**
    * The list of submodules in the repo
    */
-  subModules: Git.ISubModule[];
+  submodules: Git.ISubmodule[];
 
   /**
    * The application language translator.
@@ -39,14 +39,14 @@ export interface ISubModuleMenuProps {
 /**
  * Interface describing component state.
  */
-export interface ISubModuleMenuState {}
+export interface ISubmoduleMenuState {}
 
 /**
  * React component for rendering a submodule menu.
  */
-export class SubModuleMenu extends React.Component<
-  ISubModuleMenuProps,
-  ISubModuleMenuState
+export class SubmoduleMenu extends React.Component<
+  ISubmoduleMenuProps,
+  ISubmoduleMenuState
 > {
   /**
    * Returns a React component for rendering a submodule menu.
@@ -54,7 +54,7 @@ export class SubModuleMenu extends React.Component<
    * @param props - component properties
    * @returns React component
    */
-  constructor(props: ISubModuleMenuProps) {
+  constructor(props: ISubmoduleMenuProps) {
     super(props);
   }
 
@@ -64,7 +64,7 @@ export class SubModuleMenu extends React.Component<
    * @returns React element
    */
   render(): React.ReactElement {
-    return <div className={wrapperClass}>{this._renderSubModuleList()}</div>;
+    return <div className={wrapperClass}>{this._renderSubmoduleList()}</div>;
   }
 
   /**
@@ -72,19 +72,19 @@ export class SubModuleMenu extends React.Component<
    *
    * @returns React element
    */
-  private _renderSubModuleList(): React.ReactElement {
-    const subModules = this.props.subModules;
+  private _renderSubmoduleList(): React.ReactElement {
+    const submodules = this.props.submodules;
 
     return (
       <>
-        <div className={subModuleHeaderStyle}>SubModules</div>
+        <div className={submoduleHeaderStyle}>Submodules</div>
         <FixedSizeList
           height={Math.min(
-            Math.max(MIN_HEIGHT, subModules.length * ITEM_HEIGHT),
+            Math.max(MIN_HEIGHT, submodules.length * ITEM_HEIGHT),
             MAX_HEIGHT
           )}
-          itemCount={subModules.length}
-          itemData={subModules}
+          itemCount={submodules.length}
+          itemData={submodules}
           itemKey={(index, data) => data[index].name}
           itemSize={ITEM_HEIGHT}
           style={{
@@ -108,17 +108,17 @@ export class SubModuleMenu extends React.Component<
    */
   private _renderItem = (props: ListChildComponentProps): JSX.Element => {
     const { data, index, style } = props;
-    const subModule = data[index] as Git.ISubModule;
+    const submodule = data[index] as Git.ISubmodule;
 
     return (
       <ListItem
-        title={this.props.trans.__('SubModule: %1', subModule.name)}
+        title={this.props.trans.__('Submodule: %1', submodule.name)}
         className={listItemClass}
         role="listitem"
         style={style}
       >
         <desktopIcon.react className={listItemIconClass} tag="span" />
-        <span className={nameClass}>{subModule.name}</span>
+        <span className={nameClass}>{submodule.name}</span>
       </ListItem>
     );
   };

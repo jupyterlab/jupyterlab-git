@@ -35,7 +35,7 @@ import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { BranchMenu } from './BranchMenu';
-import { SubModuleMenu } from './SubModuleMenu';
+import { SubmoduleMenu } from './SubmoduleMenu';
 import { TagMenu } from './TagMenu';
 
 /**
@@ -100,7 +100,7 @@ export interface IToolbarProps {
   /**
    * Current list of submodules
    */
-  subModules: Git.ISubModule[];
+  submodules: Git.ISubmodule[];
 }
 
 /**
@@ -267,7 +267,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderRepoMenu(): React.ReactElement {
-    const hasModules = !(this.props.subModules.length === 0);
+    const hasSubmodules = !(this.props.submodules.length === 0);
     const repositoryName =
       PathExt.basename(
         this.props.repository || PageConfig.getOption('serverRoot')
@@ -275,10 +275,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
-          disabled={!hasModules}
+          disabled={!hasSubmodules}
           className={classes(
             toolbarMenuButtonClass,
-            hasModules && toolbarMenuButtonEnabledClass
+            hasSubmodules && toolbarMenuButtonEnabledClass
           )}
           title={this.props.trans.__(
             'Current repository: %1',
@@ -296,7 +296,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             </p>
             <p className={toolbarMenuButtonSubtitleClass}>{repositoryName}</p>
           </div>
-          {hasModules &&
+          {hasSubmodules &&
             (this.state.repoMenu ? (
               <caretUpIcon.react
                 tag="span"
@@ -309,7 +309,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
               />
             ))}
         </button>
-        {this.state.repoMenu ? this._renderSubModules() : null}
+        {this.state.repoMenu ? this._renderSubmodules() : null}
       </div>
     );
   }
@@ -441,11 +441,11 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
-  private _renderSubModules(): JSX.Element {
+  private _renderSubmodules(): JSX.Element {
     return (
-      <SubModuleMenu
+      <SubmoduleMenu
         model={this.props.model}
-        subModules={this.props.subModules}
+        submodules={this.props.submodules}
         trans={this.props.trans}
       />
     );

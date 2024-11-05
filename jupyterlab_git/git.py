@@ -2195,13 +2195,13 @@ class Git:
         results = []
 
         for line in output.splitlines():
-            name = line.strip().split(" ")[-1]
+            name = line.strip().split(" ")[1]
             submodule = {
                 "name": name,
             }
             results.append(submodule)
 
-        return {"code": code, "subModules": results, "error": error}
+        return {"code": code, "submodules": results, "error": error}
 
     @property
     def excluded_paths(self) -> List[str]:

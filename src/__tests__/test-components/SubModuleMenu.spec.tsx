@@ -4,9 +4,9 @@ import { render, screen } from '@testing-library/react';
 import 'jest';
 import * as React from 'react';
 import {
-  ISubModuleMenuProps,
-  SubModuleMenu
-} from '../../components/SubModuleMenu';
+  ISubmoduleMenuProps,
+  SubmoduleMenu
+} from '../../components/SubmoduleMenu';
 import { GitExtension } from '../../model';
 import { IGitExtension } from '../../tokens';
 import { DEFAULT_REPOSITORY_PATH } from '../utils';
@@ -31,7 +31,7 @@ async function createModel() {
   return model;
 }
 
-describe('SubModuleMenu', () => {
+describe('Submodule Menu', () => {
   let model: GitExtension;
   const trans = nullTranslator.load('jupyterlab_git');
 
@@ -42,19 +42,19 @@ describe('SubModuleMenu', () => {
   });
 
   function createProps(
-    props?: Partial<ISubModuleMenuProps>
-  ): ISubModuleMenuProps {
+    props?: Partial<ISubmoduleMenuProps>
+  ): ISubmoduleMenuProps {
     return {
       model: model as IGitExtension,
       trans: trans,
-      subModules: SUBMODULES,
+      submodules: SUBMODULES,
       ...props
     };
   }
 
   describe('render', () => {
     it('should display a list of submodules', () => {
-      render(<SubModuleMenu {...createProps()} />);
+      render(<SubmoduleMenu {...createProps()} />);
 
       const submodules = SUBMODULES;
       expect(screen.getAllByRole('listitem').length).toEqual(submodules.length);

@@ -372,7 +372,7 @@ describe('GitPanel', () => {
     beforeEach(() => {
       props.model = {
         branches: [],
-        subModules: [],
+        submodules: [],
         status: {},
         stashChanged: {
           connect: jest.fn()

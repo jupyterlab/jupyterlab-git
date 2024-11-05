@@ -1,6 +1,6 @@
 import { style } from 'typestyle';
 
-export const subModuleHeaderStyle = style({
+export const submoduleHeaderStyle = style({
   padding: '4px 4px 1px',
   margin: '0 6px',
   fontWeight: 600,

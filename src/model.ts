@@ -89,10 +89,10 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * SubModule list for the current repository.
+   * Submodule list for the current repository.
    */
-  get subModules(): Git.ISubModule[] {
-    return this._subModules;
+  get submodules(): Git.ISubmodule[] {
+    return this._submodules;
   }
 
   /**
@@ -1992,21 +1992,21 @@ export class GitExtension implements IGitExtension {
    * @throws {Git.GitResponseError} If the server response is not ok
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async listSubModules(): Promise<void> {
+  async listSubmodules(): Promise<void> {
     try {
       const path = await this._getPathRepository();
-      const data = await this._taskHandler.execute<Git.ISubModuleResult>(
+      const data = await this._taskHandler.execute<Git.ISubmoduleResult>(
         'git:submodules:list',
         async () => {
-          return await requestAPI<Git.ISubModuleResult>(
+          return await requestAPI<Git.ISubmoduleResult>(
             URLExt.join(path, 'submodules'),
             'GET'
           );
         }
       );
 
-      const newSubModules = data.subModules;
-      this._subModules = newSubModules;
+      const newSubmodules = data.submodules;
+      this._submodules = newSubmodules;
     } catch (error) {
       console.error('Failed to retrieve submodules');
     }
@@ -2294,7 +2294,7 @@ export class GitExtension implements IGitExtension {
   private _hasDirtyFiles = false;
   private _credentialsRequired = false;
   private _lastAuthor: Git.IIdentity | null = null;
-  private _subModules: Git.ISubModule[] = [];
+  private _submodules: Git.ISubmodule[] = [];
 
   // Configurable
   private _statusForDirtyState: Git.Status[] = ['staged', 'partially-staged'];
