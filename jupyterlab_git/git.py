@@ -2183,6 +2183,26 @@ class Git:
 
         return {"code": code, "message": output.strip()}
 
+    async def submodule(self, path):
+        """
+        Execute git submodule status --recursive
+        """
+
+        cmd = ["git", "submodule", "status", "--recursive"]
+
+        code, output, error = await self.__execute(cmd, cwd=path)
+
+        results = []
+
+        for line in output.splitlines():
+            name = line.strip().split(" ")[1]
+            submodule = {
+                "name": name,
+            }
+            results.append(submodule)
+
+        return {"code": code, "submodules": results, "error": error}
+
     @property
     def excluded_paths(self) -> List[str]:
         """Wildcard-style path patterns that do not support git commands.

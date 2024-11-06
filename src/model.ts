@@ -89,6 +89,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Submodule list for the current repository.
+   */
+  get submodules(): Git.ISubmodule[] {
+    return this._submodules;
+  }
+
+  /**
    * Tags list for the current repository.
    */
   get tagsList(): Git.ITag[] {
@@ -1977,6 +1984,35 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Get the submodules in the current repository.
+  
+   * @returns A promise that resolves upon getting submodule names
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async listSubmodules(): Promise<void> {
+    try {
+      const path = await this._getPathRepository();
+      const data = await this._taskHandler.execute<Git.ISubmoduleResult>(
+        'git:submodules:list',
+        async () => {
+          return await requestAPI<Git.ISubmoduleResult>(
+            URLExt.join(path, 'submodules'),
+            'GET'
+          );
+        }
+      );
+
+      const newSubmodules = data.submodules;
+      this._submodules = newSubmodules;
+    } catch (error) {
+      console.error('Failed to retrieve submodules');
+    }
+  }
+
+  /**
    * Make request for a list of all git branches in the repository
    * Retrieve a list of repository branches.
    *
@@ -2258,6 +2294,7 @@ export class GitExtension implements IGitExtension {
   private _hasDirtyFiles = false;
   private _credentialsRequired = false;
   private _lastAuthor: Git.IIdentity | null = null;
+  private _submodules: Git.ISubmodule[] = [];
 
   // Configurable
   private _statusForDirtyState: Git.Status[] = ['staged', 'partially-staged'];

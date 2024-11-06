@@ -43,17 +43,17 @@ export class GitCloneForm extends Widget {
     const inputLink = document.createElement('input');
     const linkText = document.createElement('span');
     const checkboxWrapper = document.createElement('div');
-    const subModulesLabel = document.createElement('label');
-    const subModules = document.createElement('input');
+    const submodulesLabel = document.createElement('label');
+    const submodules = document.createElement('input');
     const downloadLabel = document.createElement('label');
     const download = document.createElement('input');
 
     node.className = 'jp-CredentialsBox';
     inputWrapper.className = 'jp-RedirectForm';
     checkboxWrapper.className = 'jp-CredentialsBox-wrapper';
-    subModulesLabel.className = 'jp-CredentialsBox-label-checkbox';
+    submodulesLabel.className = 'jp-CredentialsBox-label-checkbox';
     downloadLabel.className = 'jp-CredentialsBox-label-checkbox';
-    subModules.id = 'submodules';
+    submodules.id = 'submodules';
     download.id = 'download';
     inputLink.id = 'input-link';
 
@@ -62,12 +62,12 @@ export class GitCloneForm extends Widget {
     );
     inputLink.placeholder = 'https://host.com/org/repo.git';
 
-    subModulesLabel.textContent = trans.__('Include submodules');
-    subModulesLabel.title = trans.__(
+    submodulesLabel.textContent = trans.__('Include submodules');
+    submodulesLabel.title = trans.__(
       'If checked, the remote submodules in the repository will be cloned recursively'
     );
-    subModules.setAttribute('type', 'checkbox');
-    subModules.setAttribute('checked', 'checked');
+    submodules.setAttribute('type', 'checkbox');
+    submodules.setAttribute('checked', 'checked');
 
     downloadLabel.textContent = trans.__('Download the repository');
     downloadLabel.title = trans.__(
@@ -80,8 +80,8 @@ export class GitCloneForm extends Widget {
 
     inputWrapper.append(inputLinkLabel);
 
-    subModulesLabel.prepend(subModules);
-    checkboxWrapper.appendChild(subModulesLabel);
+    submodulesLabel.prepend(submodules);
+    checkboxWrapper.appendChild(submodulesLabel);
 
     downloadLabel.prepend(download);
     checkboxWrapper.appendChild(downloadLabel);

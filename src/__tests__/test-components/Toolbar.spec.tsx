@@ -72,6 +72,7 @@ describe('Toolbar', () => {
         execute: jest.fn()
       } as any,
       trans: trans,
+      submodules: model.submodules,
       ...props
     };
   }

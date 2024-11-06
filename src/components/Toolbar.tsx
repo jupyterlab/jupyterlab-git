@@ -35,6 +35,7 @@ import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { BranchMenu } from './BranchMenu';
+import { SubmoduleMenu } from './SubmoduleMenu';
 import { TagMenu } from './TagMenu';
 
 /**
@@ -95,6 +96,11 @@ export interface IToolbarProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Current list of submodules
+   */
+  submodules: Git.ISubmodule[];
 }
 
 /**
@@ -120,6 +126,11 @@ export interface IToolbarState {
    * Boolean indicating whether a remote exists.
    */
   hasRemote: boolean;
+
+  /**
+   * Boolean indicating whether a repo menu is shown.
+   */
+  repoMenu: boolean;
 }
 
 /**
@@ -138,7 +149,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       branchMenu: false,
       tab: 0,
       refreshInProgress: false,
-      hasRemote: false
+      hasRemote: false,
+      repoMenu: false
     };
   }
 
@@ -255,6 +267,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * @returns React element
    */
   private _renderRepoMenu(): React.ReactElement {
+    const hasSubmodules = !(this.props.submodules.length === 0);
     const repositoryName =
       PathExt.basename(
         this.props.repository || PageConfig.getOption('serverRoot')
@@ -262,12 +275,16 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     return (
       <div className={toolbarMenuWrapperClass}>
         <button
-          disabled
-          className={toolbarMenuButtonClass}
+          disabled={!hasSubmodules}
+          className={classes(
+            toolbarMenuButtonClass,
+            hasSubmodules && toolbarMenuButtonEnabledClass
+          )}
           title={this.props.trans.__(
             'Current repository: %1',
             PageConfig.getOption('serverRoot') + '/' + this.props.repository
           )}
+          onClick={this._onRepoClick}
         >
           <desktopIcon.react
             tag="span"
@@ -279,7 +296,20 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             </p>
             <p className={toolbarMenuButtonSubtitleClass}>{repositoryName}</p>
           </div>
+          {hasSubmodules &&
+            (this.state.repoMenu ? (
+              <caretUpIcon.react
+                tag="span"
+                className={toolbarMenuButtonIconClass}
+              />
+            ) : (
+              <caretDownIcon.react
+                tag="span"
+                className={toolbarMenuButtonIconClass}
+              />
+            ))}
         </button>
+        {this.state.repoMenu ? this._renderSubmodules() : null}
       </div>
     );
   }
@@ -411,6 +441,16 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
+  private _renderSubmodules(): JSX.Element {
+    return (
+      <SubmoduleMenu
+        model={this.props.model}
+        submodules={this.props.submodules}
+        trans={this.props.trans}
+      />
+    );
+  }
+
   /**
    * Callback invoked upon clicking a button to pull the latest changes.
    *
@@ -440,6 +480,13 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     // Toggle the branch menu:
     this.setState({
       branchMenu: !this.state.branchMenu
+    });
+  };
+
+  private _onRepoClick = (): void => {
+    // Toggle the submodule menu:
+    this.setState({
+      repoMenu: !this.state.repoMenu
     });
   };
 

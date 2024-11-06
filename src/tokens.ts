@@ -30,6 +30,11 @@ export interface IGitExtension extends IDisposable {
   currentBranch: Git.IBranch | null;
 
   /**
+   * The list of submodules in the current repo
+   */
+  submodules: Git.ISubmodule[];
+
+  /**
    * A signal emitted when the branches of the Git repository changes.
    */
   readonly branchesChanged: ISignal<IGitExtension, void>;
@@ -974,6 +979,22 @@ export namespace Git {
     code: number;
     branches?: IBranch[];
     current_branch?: IBranch;
+  }
+
+  /**
+   * Submodule description interface
+   */
+  export interface ISubmodule {
+    name: string;
+  }
+
+  /**
+   * Interface for submodule request result,
+   * has the name of the submodules in the current repo
+   */
+  export interface ISubmoduleResult {
+    code: number;
+    submodules: ISubmodule[];
   }
 
   /**

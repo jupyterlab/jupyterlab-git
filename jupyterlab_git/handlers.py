@@ -2,6 +2,7 @@
 Module with all the individual handlers, which execute git commands and return the results to the frontend.
 """
 
+import fnmatch
 import functools
 import json
 import os
@@ -11,9 +12,8 @@ from typing import Tuple, Union
 import tornado
 from jupyter_server.base.handlers import APIHandler, path_regex
 from jupyter_server.services.contents.manager import ContentsManager
-from jupyter_server.utils import url2path, url_path_join, ensure_async
+from jupyter_server.utils import ensure_async, url2path, url_path_join
 from packaging.version import parse
-import fnmatch
 
 try:
     import hybridcontents
@@ -915,7 +915,7 @@ class GitTagCheckoutHandler(GitHandler):
 
 class GitNewTagHandler(GitHandler):
     """
-    Hadler for 'git tag <tag_name> <commit_id>. Create new tag pointing to a specific commit.
+    Handler for 'git tag <tag_name> <commit_id>. Create new tag pointing to a specific commit.
     """
 
     @tornado.web.authenticated
@@ -1069,6 +1069,24 @@ class GitStashApplyHandler(GitHandler):
             self.finish(json.dumps(response))
 
 
+class GitSubmodulesHandler(GitHandler):
+    """
+    Handler for 'git submodule status --recursive.
+    Get a list of submodules in the repo.
+    """
+
+    @tornado.web.authenticated
+    async def get(self, path: str = ""):
+        """
+        GET request handler, fetches all submodules in current repository.
+        """
+        result = await self.git.submodule(self.url2localpath(path))
+
+        if result["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(result))
+
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -1113,6 +1131,7 @@ def setup_handlers(web_app):
         ("/stash", GitStashHandler),
         ("/stash_pop", GitStashPopHandler),
         ("/stash_apply", GitStashApplyHandler),
+        ("/submodules", GitSubmodulesHandler),
     ]
 
     handlers = [
