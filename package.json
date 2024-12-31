@@ -55,6 +55,7 @@
         "style/index.js"
     ],
     "styleModule": "style/index.js",
+    "packageManager": "yarn@3.5.0",
     "dependencies": {
         "@emotion/react": "^11.10.6",
         "@emotion/styled": "^11.10.6",
