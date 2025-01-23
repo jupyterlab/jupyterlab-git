@@ -312,7 +312,7 @@ class Git:
             elif base == "INDEX":
                 cmd = ["git", "diff", "--staged", remote, "--name-only", "-z"]
             else:
-                cmd = ["git", "diff", base, remote, "--name-only", "-z"]
+                cmd = ["git", "diff", base, remote, "--name-only", "-z", "--"]
         else:
             raise tornado.web.HTTPError(
                 400, "Either single_commit or (base and remote) must be provided"
