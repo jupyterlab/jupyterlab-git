@@ -39,6 +39,7 @@ export interface ISubmoduleMenuProps {
 /**
  * Interface describing component state.
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ISubmoduleMenuState {}
 
 /**
