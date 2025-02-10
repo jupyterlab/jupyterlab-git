@@ -7,7 +7,9 @@ import {
   refreshIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import { Badge, Tab, Tabs } from '@mui/material';
+import Badge from '@mui/material/Badge';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import * as React from 'react';
 import { classes } from 'typestyle';
 import { showError } from '../notifications';

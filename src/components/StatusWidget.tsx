@@ -2,7 +2,7 @@ import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { TranslationBundle } from '@jupyterlab/translation';
-import { Badge } from '@mui/material';
+import Badge from '@mui/material/Badge';
 import React from 'react';
 import { classes } from 'typestyle';
 import { Operation, showGitOperationDialog } from '../commandsAndMenu';

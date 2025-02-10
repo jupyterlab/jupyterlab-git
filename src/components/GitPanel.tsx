@@ -6,7 +6,7 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-import { WarningRounded as WarningRoundedIcon } from '@mui/icons-material';
+import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import * as React from 'react';
