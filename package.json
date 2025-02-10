@@ -211,6 +211,7 @@
             "sourceType": "module"
         },
         "plugins": [
+            "@stylistic",
             "@typescript-eslint"
         ],
         "rules": {
@@ -249,6 +250,24 @@
                 "all"
             ],
             "eqeqeq": "error",
+            "no-restricted-imports": [
+                "error",
+                {
+                  "paths": [
+                    {
+                      "name": "@mui/icons-material",
+                      "message":
+                        "Please import icons using path imports, e.g. import AddIcon from '@mui/icons-material/Add'"
+                    }
+                  ],
+                  "patterns": [
+                    {
+                      "group": ["@mui/*/*/*"],
+                      "message": "3rd level imports in mui are considered private"
+                    }
+                  ]
+                }
+              ],
             "prefer-arrow-callback": "error"
         }
     },
