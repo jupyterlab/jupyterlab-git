@@ -2,6 +2,45 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.51.0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.50.2...6eb59d0f89a246fa78e26e61012127998a4f2adc))
+
+### Enhancements made
+
+- Enforce Path Imports for MUI Icons [#1393](https://github.com/jupyterlab/jupyterlab-git/pull/1393) ([@Darshan808](https://github.com/Darshan808))
+- Add submodules display [#1374](https://github.com/jupyterlab/jupyterlab-git/pull/1374) ([@gjmooney](https://github.com/gjmooney))
+
+### Bugs fixed
+
+- Fix switching branches by adding double dash separator [#1390](https://github.com/jupyterlab/jupyterlab-git/pull/1390) ([@Paul2708](https://github.com/Paul2708))
+
+### Maintenance and upkeep improvements
+
+- Fix CI failures [#1394](https://github.com/jupyterlab/jupyterlab-git/pull/1394) ([@krassowski](https://github.com/krassowski))
+- Bump markdown-to-jsx from 7.3.2 to 7.7.2 [#1388](https://github.com/jupyterlab/jupyterlab-git/pull/1388) ([@dependabot](https://github.com/dependabot))
+- Bump webpack from 5.88.2 to 5.97.1 [#1387](https://github.com/jupyterlab/jupyterlab-git/pull/1387) ([@dependabot](https://github.com/dependabot))
+- Bump systeminformation from 5.21.8 to 5.23.14 in /ui-tests [#1385](https://github.com/jupyterlab/jupyterlab-git/pull/1385) ([@dependabot](https://github.com/dependabot))
+- Bump nanoid from 3.3.6 to 3.3.8 [#1384](https://github.com/jupyterlab/jupyterlab-git/pull/1384) ([@dependabot](https://github.com/dependabot))
+- Bump nanoid from 3.3.6 to 3.3.8 in /ui-tests [#1383](https://github.com/jupyterlab/jupyterlab-git/pull/1383) ([@dependabot](https://github.com/dependabot))
+- Bump markdown-to-jsx from 7.3.2 to 7.7.0 in /ui-tests [#1380](https://github.com/jupyterlab/jupyterlab-git/pull/1380) ([@dependabot](https://github.com/dependabot))
+- Bump cross-spawn from 7.0.3 to 7.0.6 in /ui-tests [#1379](https://github.com/jupyterlab/jupyterlab-git/pull/1379) ([@dependabot](https://github.com/dependabot))
+- Bump cross-spawn from 6.0.5 to 6.0.6 [#1377](https://github.com/jupyterlab/jupyterlab-git/pull/1377) ([@dependabot](https://github.com/dependabot))
+- Bump actions/download-artifact from 3 to 4.1.7 in /.github/workflows [#1346](https://github.com/jupyterlab/jupyterlab-git/pull/1346) ([@dependabot](https://github.com/dependabot))
+- Bump micromatch from 4.0.5 to 4.0.8 [#1345](https://github.com/jupyterlab/jupyterlab-git/pull/1345) ([@dependabot](https://github.com/dependabot))
+
+### Documentation improvements
+
+- Fix Typo on README about Installation [#1375](https://github.com/jupyterlab/jupyterlab-git/pull/1375) ([@Yuto-24](https://github.com/Yuto-24))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2024-10-29&to=2025-02-10&type=c))
+
+[@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ADarshan808+updated%3A2024-10-29..2025-02-10&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2024-10-29..2025-02-10&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2024-10-29..2025-02-10&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2024-10-29..2025-02-10&type=Issues) | [@gjmooney](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agjmooney+updated%3A2024-10-29..2025-02-10&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2024-10-29..2025-02-10&type=Issues) | [@Paul2708](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3APaul2708+updated%3A2024-10-29..2025-02-10&type=Issues) | [@Yuto-24](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AYuto-24+updated%3A2024-10-29..2025-02-10&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.50.2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.50.1...0fba06e6662494c14e88241f39c360126e23c8f9))
@@ -32,8 +71,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2024-05-16&to=2024-10-29&type=c))
 
 [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2024-05-16..2024-10-29&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2024-05-16..2024-10-29&type=Issues) | [@gjmooney](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agjmooney+updated%3A2024-05-16..2024-10-29&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2024-05-16..2024-10-29&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2024-05-16..2024-10-29&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.50.1
 
