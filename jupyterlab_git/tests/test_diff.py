@@ -112,7 +112,7 @@ async def test_changed_files_two_commits():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"],
+            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z", "--"],
             cwd="test-path",
             timeout=20,
             env=None,
@@ -136,7 +136,7 @@ async def test_changed_files_git_diff_error():
 
         # Then
         mock_execute.assert_called_once_with(
-            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z"],
+            ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z", "--"],
             cwd="test-path",
             timeout=20,
             env=None,
