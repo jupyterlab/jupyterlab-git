@@ -24,10 +24,19 @@ from ._version import __version__
 from .git import DEFAULT_REMOTE_NAME, Git, RebaseAction
 from .log import get_logger
 
+from .ssh import SSH
+
 # Git configuration options exposed through the REST API
 ALLOWED_OPTIONS = ["user.name", "user.email"]
 # REST API namespace
 NAMESPACE = "/git"
+
+
+class SSHHandler(APIHandler):
+
+    @property
+    def ssh(self) -> SSH:
+        return SSH()
 
 
 class GitHandler(APIHandler):
@@ -1087,6 +1096,28 @@ class GitSubmodulesHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+class SshHostHandler(SSHHandler):
+    """
+    Handler for checking if a host is known by SSH
+    """
+
+    @tornado.web.authenticated
+    async def get(self):
+        """
+        GET request handler, check if the host is known by SSH
+        """
+        hostname = self.get_query_argument("hostname")
+        is_known_host = self.ssh.is_known_host(hostname)
+        self.set_status(200)
+        self.finish(json.dumps(is_known_host))
+
+    @tornado.web.authenticated
+    async def post(self):
+        data = self.get_json_body()
+        hostname = data["hostname"]
+        self.ssh.add_host(hostname)
+
+
 def setup_handlers(web_app):
     """
     Setups all of the git command handlers.
@@ -1137,6 +1168,7 @@ def setup_handlers(web_app):
     handlers = [
         ("/diffnotebook", GitDiffNotebookHandler),
         ("/settings", GitSettingsHandler),
+        ("/known_hosts", SshHostHandler),
     ]
 
     # add the baseurl to our paths

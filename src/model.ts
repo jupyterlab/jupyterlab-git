@@ -368,7 +368,7 @@ export class GitExtension implements IGitExtension {
    */
   protected get _currentMarker(): BranchMarker {
     if (this.pathRepository === null) {
-      return new BranchMarker(() => {});
+      return new BranchMarker(() => { });
     }
 
     if (!this.__currentMarker) {
@@ -419,8 +419,8 @@ export class GitExtension implements IGitExtension {
     }
     const fileStatus = this._status?.files
       ? this._status.files.find(status => {
-          return this.getRelativeFilePath(status.to) === path;
-        })
+        return this.getRelativeFilePath(status.to) === path;
+      })
       : null;
 
     if (!fileStatus) {
@@ -2013,6 +2013,58 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Checks if the hostname is a known host
+   *
+   * @param hostname - the host name to be checked
+   * @returns A boolean indicating that the host is a known one
+   *
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async checkKnownHost(hostname: string): Promise<Boolean> {
+    try {
+      return await this._taskHandler.execute<Boolean>(
+        'git:checkHost',
+        async () => {
+          return await requestAPI<Boolean>(
+            `known_hosts?hostname=${hostname}`,
+            'GET'
+          );
+        }
+      );
+
+    } catch (error) {
+      console.error('Failed to check host');
+      // just ignore the host check
+      return true;
+    }
+  }
+
+  /**
+   * Adds a hostname to the list of known host files
+   * @param hostname - the hostname to be added
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async addHostToKnownList(hostname: string): Promise<void> {
+    try {
+      await this._taskHandler.execute<Boolean>(
+        'git:addHost',
+        async () => {
+          return await requestAPI<Boolean>(
+            `known_hosts`,
+            'POST',
+            {
+              hostname: hostname
+            }
+          );
+        }
+      );
+
+    } catch (error) {
+      console.error('Failed to add hostname to the list of known hosts');
+    }
+  }
+
+  /**
    * Make request for a list of all git branches in the repository
    * Retrieve a list of repository branches.
    *
@@ -2281,7 +2333,7 @@ export class GitExtension implements IGitExtension {
   private _fetchPoll: Poll;
   private _isDisposed = false;
   private _markerCache = new Markers(() => this._markChanged.emit());
-  private __currentMarker: BranchMarker = new BranchMarker(() => {});
+  private __currentMarker: BranchMarker = new BranchMarker(() => { });
   private _readyPromise: Promise<void> = Promise.resolve();
   private _pendingReadyPromise = 0;
   private _settings: ISettingRegistry.ISettings | null;
@@ -2326,7 +2378,7 @@ export class GitExtension implements IGitExtension {
 }
 
 export class BranchMarker implements Git.IBranchMarker {
-  constructor(private _refresh: () => void) {}
+  constructor(private _refresh: () => void) { }
 
   add(fname: string, mark = true): void {
     if (!(fname in this._marks)) {
@@ -2361,7 +2413,7 @@ export class BranchMarker implements Git.IBranchMarker {
 }
 
 export class Markers {
-  constructor(private _refresh: () => void) {}
+  constructor(private _refresh: () => void) { }
 
   get(path: string, branch: string): BranchMarker {
     const key = Markers.markerKey(path, branch);

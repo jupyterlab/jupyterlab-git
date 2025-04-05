@@ -629,6 +629,23 @@ export interface IGitExtension extends IDisposable {
   revertCommit(message: string, hash: string): Promise<void>;
 
   /**
+   * Checks if the hostname is a known host
+   *
+   * @param hostname - the host name to be checked
+   * @returns A boolean indicating that the host is a known one
+   *
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  checkKnownHost(hostname: string): Promise<Boolean>;
+
+  /**
+   * Adds a hostname to the list of known host files
+   * @param hostname - the hostname to be added
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  addHostToKnownList(hostname: string): Promise<void>;
+
+  /**
    * Get the prefix path of a directory 'path',
    * with respect to the root directory of repository
    *
