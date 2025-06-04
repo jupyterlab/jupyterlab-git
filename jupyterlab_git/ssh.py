@@ -18,9 +18,9 @@ class SSH:
 
     def is_known_host(self, hostname):
         """
-        Check if the given git clone URL contains a known host
+        Check if the provided hostname is a known one
         """
-        cmd = ["ssh-keygen", "-F", hostname.replace(" ", "")]
+        cmd = ["ssh-keygen", "-F", hostname.strip()]
         try:
             code = subprocess.call(
                 cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
