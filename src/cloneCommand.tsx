@@ -72,7 +72,10 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
             if (!isKnownHost) {
               const result = await showDialog({
                 title: trans.__('Unknown Host'),
-                body: trans.__('The host is unknown, would you like to add it to the list of known hosts?'),
+                body: trans.__(
+                  'The host %1 is not known. Would you like to add it to the known_hosts file?',
+                  hostname
+                ),
                 buttons: [
                   Dialog.cancelButton({ label: trans.__('Cancel') }),
                   Dialog.okButton({ label: trans.__('OK') })
@@ -83,7 +86,6 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
               }
             }
           }
-
 
           try {
             const details = await showGitOperationDialog<IGitCloneArgs>(
