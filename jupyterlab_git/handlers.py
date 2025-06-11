@@ -523,7 +523,7 @@ class GitCheckoutHandler(GitHandler):
 
                 #  If start point is not valid, we need to make an empty commit
                 if not isStartPointValid:
-                    await self.git._empty_commit_for_init(local_path)
+                    await self.git._empty_commit(local_path)
 
                 body = await self.git.checkout_new_branch(
                     data["branchname"], data["startpoint"], local_path
@@ -725,7 +725,7 @@ class GitInitHandler(GitHandler):
         body = await self.git.init(self.url2localpath(path))
 
         if body["code"] == 0:
-            body = await self.git._empty_commit_for_init(self.url2localpath(path))
+            body = await self.git._empty_commit(self.url2localpath(path))
 
         if body["code"] != 0:
             self.set_status(500)
