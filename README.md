@@ -342,7 +342,7 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ZeshanFayyaz"><img src="https://avatars.githubusercontent.com/u/43391249?v=4?s=100" width="100px;" alt="Zeshan Fayyaz"/><br /><sub><b>Zeshan Fayyaz</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=ZeshanFayyaz" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://dub.sh/lzongxun"><img src="https://avatars.githubusercontent.com/u/63457492?v=4?s=100" width="100px;" alt="Zong Xun"/><br /><sub><b>Zong Xun</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=Zxun2" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Zxun2"><img src="https://avatars.githubusercontent.com/u/63457492?v=4?s=100" width="100px;" alt="Zong Xun"/><br /><sub><b>Zong Xun</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=Zxun2" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jupytercalpoly"><img src="https://avatars0.githubusercontent.com/u/19445175?v=4?s=100" width="100px;" alt="jupytercalpoly"/><br /><sub><b>jupytercalpoly</b></sub></a><br /><a href="#financial-jupytercalpoly" title="">🤝</a></td>
     </tr>
   </tbody>
