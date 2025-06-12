@@ -1,5 +1,6 @@
 import { Dialog, Notification, showErrorMessage } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
+import * as React from 'react';
 
 /**
  * Build notification options to display in a dialog the detailed error.
@@ -18,9 +19,20 @@ export function showError(
       {
         label: trans.__('Show'),
         callback: () => {
-          showErrorMessage(trans.__('Error'), error, [
-            Dialog.warnButton({ label: trans.__('Dismiss') })
-          ]);
+          showErrorMessage(
+            trans.__('Error'),
+            {
+              // Render error in a <pre> element to preserve line breaks and
+              // use a monospace font so e.g. pre-commit errors are readable.
+              // Ref: https://github.com/jupyterlab/jupyterlab-git/issues/1407
+              message: (
+                <pre style={{ whiteSpace: 'pre-wrap', fontSize: '7pt' }}>
+                  {error.message || error.stack || String(error)}
+                </pre>
+              )
+            },
+            [Dialog.warnButton({ label: trans.__('Dismiss') })]
+          );
         },
         displayType: 'warn'
       } as Notification.IAction

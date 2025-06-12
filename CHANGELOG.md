@@ -2,6 +2,24 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.51.1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.51.0...3dcaf17a0db3161e7256961ac8eb2a8c6f1edaab))
+
+### Maintenance and upkeep improvements
+
+- Bump vega from 5.31.0 to 5.33.0 in /ui-tests [#1399](https://github.com/jupyterlab/jupyterlab-git/pull/1399) ([@dependabot](https://github.com/dependabot))
+- Bump vega from 5.23.0 to 5.31.0 in /ui-tests [#1396](https://github.com/jupyterlab/jupyterlab-git/pull/1396) ([@dependabot](https://github.com/dependabot))
+- Bump serialize-javascript from 6.0.1 to 6.0.2 [#1395](https://github.com/jupyterlab/jupyterlab-git/pull/1395) ([@dependabot](https://github.com/dependabot))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2025-02-10&to=2025-04-03&type=c))
+
+[@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2025-02-10..2025-04-03&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2025-02-10..2025-04-03&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.51.0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.50.2...6eb59d0f89a246fa78e26e61012127998a4f2adc))
@@ -38,8 +56,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2024-10-29&to=2025-02-10&type=c))
 
 [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ADarshan808+updated%3A2024-10-29..2025-02-10&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2024-10-29..2025-02-10&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Afcollonval+updated%3A2024-10-29..2025-02-10&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2024-10-29..2025-02-10&type=Issues) | [@gjmooney](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agjmooney+updated%3A2024-10-29..2025-02-10&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2024-10-29..2025-02-10&type=Issues) | [@Paul2708](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3APaul2708+updated%3A2024-10-29..2025-02-10&type=Issues) | [@Yuto-24](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AYuto-24+updated%3A2024-10-29..2025-02-10&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.50.2
 

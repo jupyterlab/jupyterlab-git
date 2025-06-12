@@ -164,31 +164,13 @@ export function addCommands(
     label: trans.__('Open Git Repository in Terminal'),
     caption: trans.__('Open a New Terminal to the Git Repository'),
     execute: async args => {
-      const main = (await commands.execute(
-        'terminal:create-new',
-        args
-      )) as MainAreaWidget<ITerminal.ITerminal>;
+      const cwd = gitModel.pathRepository;
+      const main = (await commands.execute('terminal:create-new', {
+        ...args,
+        cwd
+      })) as MainAreaWidget<ITerminal.ITerminal>;
 
-      try {
-        if (gitModel.pathRepository !== null) {
-          const terminal = main.content;
-          terminal.session.send({
-            type: 'stdin',
-            content: [
-              `cd "${gitModel.pathRepository
-                .split('"')
-                .join('\\"')
-                .split('`')
-                .join('\\`')}"\n`
-            ]
-          });
-        }
-
-        return main;
-      } catch (e) {
-        console.error(e);
-        main.dispose();
-      }
+      return main;
     },
     isEnabled: () =>
       gitModel.pathRepository !== null &&
