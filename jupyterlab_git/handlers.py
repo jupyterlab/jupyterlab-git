@@ -517,12 +517,12 @@ class GitCheckoutHandler(GitHandler):
         if data["checkout_branch"]:
             if data["new_check"]:
                 #  Need to check if startpoint is valid
-                isStartPointValid = await self.git._get_branch_reference(
+                is_start_point_valid = await self.git._get_branch_reference(
                     data["startpoint"], local_path
                 )
 
                 #  If start point is not valid, we need to make an empty commit
-                if not isStartPointValid:
+                if not is_start_point_valid:
                     await self.git._empty_commit(local_path)
 
                 body = await self.git.checkout_new_branch(
