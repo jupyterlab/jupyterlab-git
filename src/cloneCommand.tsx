@@ -63,6 +63,30 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
           const id = Notification.emit(trans.__('Cloning…'), 'in-progress', {
             autoClose: false
           });
+          const url = decodeURIComponent(result.value.url);
+          const hostnameMatch = url.match(/git@(.+):.+/);
+
+          if (hostnameMatch && hostnameMatch.length > 1) {
+            const hostname = hostnameMatch[1];
+            const isKnownHost = await gitModel.checkKnownHost(hostname);
+            if (!isKnownHost) {
+              const result = await showDialog({
+                title: trans.__('Unknown Host'),
+                body: trans.__(
+                  'The host %1 is not known. Would you like to add it to the known_hosts file?',
+                  hostname
+                ),
+                buttons: [
+                  Dialog.cancelButton({ label: trans.__('Cancel') }),
+                  Dialog.okButton({ label: trans.__('OK') })
+                ]
+              });
+              if (result.button.accept) {
+                await gitModel.addHostToKnownList(hostname);
+              }
+            }
+          }
+
           try {
             const details = await showGitOperationDialog<IGitCloneArgs>(
               gitModel as GitExtension,

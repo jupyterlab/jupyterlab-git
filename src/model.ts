@@ -2013,6 +2013,49 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Checks if the hostname is a known host
+   *
+   * @param hostname - the host name to be checked
+   * @returns A boolean indicating that the host is a known one
+   *
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async checkKnownHost(hostname: string): Promise<Boolean> {
+    try {
+      return await this._taskHandler.execute<Boolean>(
+        'git:checkHost',
+        async () => {
+          return await requestAPI<Boolean>(
+            `known_hosts?hostname=${hostname}`,
+            'GET'
+          );
+        }
+      );
+    } catch (error) {
+      console.error('Failed to check host');
+      // just ignore the host check
+      return true;
+    }
+  }
+
+  /**
+   * Adds a hostname to the list of known host files
+   * @param hostname - the hostname to be added
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async addHostToKnownList(hostname: string): Promise<void> {
+    try {
+      await this._taskHandler.execute<Boolean>('git:addHost', async () => {
+        return await requestAPI<Boolean>(`known_hosts`, 'POST', {
+          hostname: hostname
+        });
+      });
+    } catch (error) {
+      console.error('Failed to add hostname to the list of known hosts');
+    }
+  }
+
+  /**
    * Make request for a list of all git branches in the repository
    * Retrieve a list of repository branches.
    *
