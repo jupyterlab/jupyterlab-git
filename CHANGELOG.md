@@ -2,6 +2,32 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.51.2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.51.1...bee4e6492440dd17280fb30478420f18e7f3c416))
+
+### Enhancements made
+
+- Use `<pre>` tag for error messages in `showErrorMessage` dialog [#1410](https://github.com/jupyterlab/jupyterlab-git/pull/1410) ([@ctcjab](https://github.com/ctcjab))
+
+### Bugs fixed
+
+- Fix branch creation for empty clone [#1411](https://github.com/jupyterlab/jupyterlab-git/pull/1411) ([@gjmooney](https://github.com/gjmooney))
+
+### Maintenance and upkeep improvements
+
+- Bump brace-expansion from 1.1.11 to 1.1.12 in /ui-tests [#1413](https://github.com/jupyterlab/jupyterlab-git/pull/1413) ([@dependabot](https://github.com/dependabot))
+- Ignore github.com links for now, fix some other links [#1412](https://github.com/jupyterlab/jupyterlab-git/pull/1412) ([@jtpio](https://github.com/jtpio))
+- Bump @babel/runtime from 7.23.2 to 7.27.0 [#1401](https://github.com/jupyterlab/jupyterlab-git/pull/1401) ([@dependabot](https://github.com/dependabot))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2025-04-03&to=2025-06-12&type=c))
+
+[@ctcjab](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Actcjab+updated%3A2025-04-03..2025-06-12&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2025-04-03..2025-06-12&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2025-04-03..2025-06-12&type=Issues) | [@gjmooney](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agjmooney+updated%3A2025-04-03..2025-06-12&type=Issues) | [@jiridanek](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajiridanek+updated%3A2025-04-03..2025-06-12&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2025-04-03..2025-06-12&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.51.1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.51.0...3dcaf17a0db3161e7256961ac8eb2a8c6f1edaab))
@@ -17,8 +43,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2025-02-10&to=2025-04-03&type=c))
 
 [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adependabot+updated%3A2025-02-10..2025-04-03&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Agithub-actions+updated%3A2025-02-10..2025-04-03&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.51.0
 
