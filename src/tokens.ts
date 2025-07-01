@@ -636,7 +636,7 @@ export interface IGitExtension extends IDisposable {
    *
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  checkKnownHost(hostname: string): Promise<Boolean>;
+  checkKnownHost(hostname: string): Promise<boolean>;
 
   /**
    * Adds a hostname to the list of known host files

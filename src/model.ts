@@ -2020,19 +2020,19 @@ export class GitExtension implements IGitExtension {
    *
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
-  async checkKnownHost(hostname: string): Promise<Boolean> {
+  async checkKnownHost(hostname: string): Promise<boolean> {
     try {
-      return await this._taskHandler.execute<Boolean>(
+      return await this._taskHandler.execute<boolean>(
         'git:checkHost',
         async () => {
-          return await requestAPI<Boolean>(
+          return await requestAPI<boolean>(
             `known_hosts?hostname=${hostname}`,
             'GET'
           );
         }
       );
     } catch (error) {
-      console.error('Failed to check host');
+      console.error('Failed to check host: ' + error);
       // just ignore the host check
       return true;
     }
@@ -2045,13 +2045,14 @@ export class GitExtension implements IGitExtension {
    */
   async addHostToKnownList(hostname: string): Promise<void> {
     try {
-      await this._taskHandler.execute<Boolean>('git:addHost', async () => {
-        return await requestAPI<Boolean>(`known_hosts`, 'POST', {
+      await this._taskHandler.execute<boolean>('git:addHost', async () => {
+        return await requestAPI<boolean>('known_hosts', 'POST', {
           hostname: hostname
         });
       });
     } catch (error) {
       console.error('Failed to add hostname to the list of known hosts');
+      console.debug(error);
     }
   }
 
