@@ -22,13 +22,14 @@ class SSH:
         """
         cmd = ["ssh-keygen", "-F", hostname.strip()]
         try:
-            code = subprocess.call(
+            subprocess.check_call(
                 cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
-            return code == 0
-        except subprocess.CalledProcessError as e:
-            get_logger().debug("Error verifying host using keygen")
-            raise e
+        except Exception as e:
+            get_logger().debug("Error verifying host using ssh-keygen command")
+            return False
+        else:
+            return True
 
     def add_host(self, hostname):
         """
