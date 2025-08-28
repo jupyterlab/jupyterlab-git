@@ -467,7 +467,7 @@ async def test_push_handler_noupstream(mock_git, jp_fetch, jp_root_dir):
     mock_git.remote_show.assert_called_with(str(local_path))
     mock_git.push.assert_not_called()
 
-    assert response.code == 500
+    assert response.code == 404
     payload = json.loads(response.body)
     assert payload == {
         "code": 128,
@@ -500,7 +500,7 @@ async def test_push_handler_multipleupstream(mock_git, jp_fetch, jp_root_dir):
     mock_git.remote_show.assert_called_with(str(local_path))
     mock_git.push.assert_not_called()
 
-    assert response.code == 500
+    assert response.code == 404
     payload = json.loads(response.body)
     assert payload == {
         "code": 128,
