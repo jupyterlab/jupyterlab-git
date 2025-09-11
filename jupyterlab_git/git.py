@@ -491,7 +491,9 @@ class Git:
         Execute git status command & return the result.
         """
         cmd = ["git", "status", "--porcelain", "-b", "-u", "-z"]
-        code, status, my_error = await self.__execute(cmd, cwd=path, env=os.environ.copy())
+        code, status, my_error = await self.__execute(
+            cmd, cwd=path, env=os.environ.copy()
+        )
 
         if code != 0:
             return {
