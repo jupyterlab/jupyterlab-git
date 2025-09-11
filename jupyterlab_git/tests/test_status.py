@@ -2,6 +2,8 @@ from unittest.mock import call, patch
 
 import pytest
 
+import os
+
 # local lib
 from jupyterlab_git.git import Git
 
@@ -375,7 +377,7 @@ async def test_status(tmp_path, output, diff_output, expected):
                 ["git", "status", "--porcelain", "-b", "-u", "-z"],
                 cwd=str(repository),
                 timeout=20,
-                env=None,
+                env=os.environ.copy(),
                 username=None,
                 password=None,
                 is_binary=False,
@@ -391,7 +393,7 @@ async def test_status(tmp_path, output, diff_output, expected):
                 ],
                 cwd=str(repository),
                 timeout=20,
-                env=None,
+                env=os.environ.copy(),
                 username=None,
                 password=None,
                 is_binary=False,
@@ -400,7 +402,7 @@ async def test_status(tmp_path, output, diff_output, expected):
                 ["git", "show", "--quiet", "CHERRY_PICK_HEAD"],
                 cwd=str(repository),
                 timeout=20,
-                env=None,
+                env=os.environ.copy(),
                 username=None,
                 password=None,
                 is_binary=False,
@@ -409,7 +411,7 @@ async def test_status(tmp_path, output, diff_output, expected):
                 ["git", "show", "--quiet", "MERGE_HEAD"],
                 cwd=str(repository),
                 timeout=20,
-                env=None,
+                env=os.environ.copy(),
                 username=None,
                 password=None,
                 is_binary=False,
@@ -418,7 +420,7 @@ async def test_status(tmp_path, output, diff_output, expected):
                 ["git", "rev-parse", "--git-path", "rebase-merge"],
                 cwd=str(repository),
                 timeout=20,
-                env=None,
+                env=os.environ.copy(),
                 username=None,
                 password=None,
                 is_binary=False,
@@ -427,7 +429,7 @@ async def test_status(tmp_path, output, diff_output, expected):
                 ["git", "rev-parse", "--git-path", "rebase-apply"],
                 cwd=str(repository),
                 timeout=20,
-                env=None,
+                env=os.environ.copy(),
                 username=None,
                 password=None,
                 is_binary=False,
