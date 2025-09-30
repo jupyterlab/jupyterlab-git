@@ -215,6 +215,7 @@ async def test_checkout_branch_remoteref_success_when_has_slash():
 
             assert {"code": rc, "message": stdout_message} == actual_response
 
+
 @pytest.mark.asyncio
 async def test_checkout_branch_headsref_failure():
     branch = "test-branch"
