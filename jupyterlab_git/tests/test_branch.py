@@ -175,6 +175,47 @@ async def test_checkout_branch_remoteref_success():
 
 
 @pytest.mark.asyncio
+async def test_checkout_branch_remoteref_success_when_has_slash():
+    branch = "origin/test-branch/test"
+    local_branch = "test-branch/test"
+    curr_path = str(Path("/bin/test_curr_path"))
+    stdout_message = "checkout output from git"
+    stderr_message = ""
+    rc = 0
+
+    with patch("jupyterlab_git.git.execute") as mock_execute:
+        with patch.object(
+            Git,
+            "_get_branch_reference",
+            return_value=maybe_future("refs/remotes/remote_branch"),
+        ) as mock__get_branch_reference:
+            # Given
+            mock_execute.return_value = maybe_future(
+                (rc, stdout_message, stderr_message)
+            )
+
+            # When
+            actual_response = await Git().checkout_branch(
+                branchname=branch, path=curr_path
+            )
+
+            # Then
+            mock__get_branch_reference.assert_has_calls([call(branch, curr_path)])
+
+            cmd = ["git", "checkout", "-B", local_branch, branch]
+            mock_execute.assert_called_once_with(
+                cmd,
+                cwd=str(Path("/bin") / "test_curr_path"),
+                timeout=20,
+                env=None,
+                username=None,
+                password=None,
+                is_binary=False,
+            )
+
+            assert {"code": rc, "message": stdout_message} == actual_response
+
+@pytest.mark.asyncio
 async def test_checkout_branch_headsref_failure():
     branch = "test-branch"
     curr_path = str(Path("/bin/test_curr_path"))
