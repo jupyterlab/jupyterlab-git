@@ -1096,10 +1096,7 @@ async def test_merge_handler_success(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     branch_to_merge = "feature-branch"
-    merge_result = {
-        "code": 0,
-        "message": "Merge made by the 'ort' strategy."
-    }
+    merge_result = {"code": 0, "message": "Merge made by the 'ort' strategy."}
     mock_git.merge.return_value = maybe_future(merge_result)
 
     # When
@@ -1123,7 +1120,7 @@ async def test_merge_handler_conflict(mock_git, jp_fetch, jp_root_dir):
     merge_result = {
         "code": 1,
         "command": "git merge conflicting-branch",
-        "message": "Automatic merge failed; fix conflicts and then commit the result."
+        "message": "Automatic merge failed; fix conflicts and then commit the result.",
     }
     mock_git.merge.return_value = maybe_future(merge_result)
 
