@@ -486,6 +486,14 @@ class Git:
 
             return {"base": prev_nb, "diff": thediff}
 
+    async def _is_first_commit(self, path: str) -> bool:
+        """Return True if repo has no commits yet."""
+        code, _, _ = await self.__execute(
+            ["git", "rev-parse", "--verify", "HEAD"], cwd=path
+        )
+        return code != 0
+
+
     async def status(self, path: str) -> dict:
         """
         Execute git status command & return the result.
@@ -501,14 +509,20 @@ class Git:
             }
 
         # Add attribute `is_binary`
-        command = [  # Compare stage to an empty tree see `_is_binary`
-            "git",
-            "diff",
-            "--numstat",
-            "-z",
-            "--cached",
-            "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
-        ]
+        first_commit = await self._is_first_commit(path)
+        if first_commit:
+            # only first commit has to compare to an empty tree
+            command = [  # Compare stage to an empty tree see `_is_binary`
+                "git",
+                "diff",
+                "--numstat",
+                "-z",
+                "--cached",
+                "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+            ]
+        else:
+            command = ["git", "diff", "--numstat", "-z", "--cached"]
+
         text_code, text_output, _ = await self.__execute(command, cwd=path)
 
         are_binary = dict()
