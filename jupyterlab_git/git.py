@@ -493,7 +493,6 @@ class Git:
         )
         return code != 0
 
-
     async def status(self, path: str) -> dict:
         """
         Execute git status command & return the result.
