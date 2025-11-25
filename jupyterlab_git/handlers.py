@@ -599,6 +599,44 @@ class GitCommitHandler(GitHandler):
         self.finish(json.dumps(body))
 
 
+class GitStripNotebooksHandler(GitHandler):
+    """Handler to strip outputs from notebooks in a repository."""
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """
+        POST request handler to strip outputs from notebooks.
+        """
+        data = self.get_json_body()
+        notebooks = data.get("notebooks", [])
+
+        try:
+            await self.git.strip_notebook_outputs(notebooks, self.url2localpath(path))
+            self.set_status(200)
+            self.finish(json.dumps({"code": 0, "message": "Notebooks stripped"}))
+        except Exception as e:
+            self.set_status(500)
+            self.finish(
+                json.dumps(
+                    {
+                        "code": 1,
+                        "message": f"Failed to strip notebook outputs: {str(e)}",
+                    }
+                )
+            )
+
+
+class GitCheckNotebooksHandler(GitHandler):
+    """
+    Handler to check staged notebooks for outputs.
+    """
+
+    @tornado.web.authenticated
+    async def get(self, path: str = ""):
+        body = await self.git.check_notebooks_with_outputs(self.url2localpath(path))
+        self.finish(json.dumps(body))
+
+
 class GitUpstreamHandler(GitHandler):
     @tornado.web.authenticated
     async def post(self, path: str = ""):
@@ -1182,6 +1220,8 @@ def setup_handlers(web_app):
         ("/stash_pop", GitStashPopHandler),
         ("/stash_apply", GitStashApplyHandler),
         ("/submodules", GitSubmodulesHandler),
+        ("/check_notebooks", GitCheckNotebooksHandler),
+        ("/strip_notebooks", GitStripNotebooksHandler),
     ]
 
     handlers = [

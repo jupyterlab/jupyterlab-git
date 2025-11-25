@@ -803,8 +803,46 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   ): Promise<void> => {
     const errorMsg = this.props.trans.__('Failed to commit changes.');
     let id: string | null = notificationId ?? null;
+
     try {
       const author = await this._hasIdentity(this.props.model.pathRepository);
+
+      const notebooksWithOutputs =
+        await this.props.model.checkNotebooksForOutputs();
+
+      if (notebooksWithOutputs.length > 0) {
+        const dialog = new Dialog({
+          title: this.props.trans.__('Notebook outputs detected'),
+          body: `You are about to commit ${notebooksWithOutputs.length} notebook(s) with outputs. 
+            Would you like to clean them before committing?`,
+          buttons: [
+            Dialog.cancelButton({
+              label: this.props.trans.__('Commit Anyway')
+            }),
+            Dialog.okButton({
+              label: this.props.trans.__('Clean & Commit')
+            })
+          ]
+        });
+
+        const result = await dialog.launch();
+        dialog.dispose();
+
+        if (result.button.label === this.props.trans.__('Commit Anyway')) {
+        } else if (
+          result.button.label === this.props.trans.__('Clean & Commit')
+        ) {
+          id = Notification.emit(
+            this.props.trans.__('Cleaning notebook outputs…'),
+            'in-progress',
+            { autoClose: false }
+          );
+
+          await this.props.model.stripNotebooksOutputs(notebooksWithOutputs);
+        } else {
+          return;
+        }
+      }
 
       const notificationMsg = this.props.trans.__('Committing changes...');
       if (id !== null) {
