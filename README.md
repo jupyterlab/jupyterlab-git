@@ -297,7 +297,7 @@ See [RELEASE](RELEASE.md)
 
 ## Contributors ✨
 
-The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. To see who has been active recently, please look at the ["Contributors"](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors) tab. Below we list the people and entities who contributed in different ways to the project ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community of contributors. To see who has been active recently, please look at the ["Contributors"](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors) tab. Below we list the people and entities who contributed in different ways to the project ([emoji key](https://allcontributors.org/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -325,6 +325,7 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="http://taletskiy.com"><img src="https://avatars0.githubusercontent.com/u/8834829?v=4?s=100" width="100px;" alt="Konstantin Taletskiy"/><br /><sub><b>Konstantin Taletskiy</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=ktaletsk" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Aktaletsk" title="Reviewed Pull Requests">👀</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://kostyafarber.com"><img src="https://avatars.githubusercontent.com/u/73378227?v=4?s=100" width="100px;" alt="Kostya Farber"/><br /><sub><b>Kostya Farber</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=kostyafarber" title="Code">💻</a></td>
+      <!-- this link needs to be ignored because the domain has expired and it is causing the check_links workflow to fail -->
       <td align="center" valign="top" width="14.28%"><a href="https://www.lindaful.com"><img src="https://avatars.githubusercontent.com/u/68607795?v=4?s=100" width="100px;" alt="Linda Ngoc Nguyen"/><br /><sub><b>Linda Ngoc Nguyen</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=iflinda" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://fellowship.mlh.io/"><img src="https://avatars.githubusercontent.com/u/65834464?s=200&v=4?s=100" width="100px;" alt="Major League Hacking"/><br /><sub><b>Major League Hacking</b></sub></a><br /><a href="#financial-mlh" title="">🤝</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/max-klein-b514419"><img src="https://avatars2.githubusercontent.com/u/2263641?v=4?s=100" width="100px;" alt="Max Klein"/><br /><sub><b>Max Klein</b></sub></a><br /><a href="https://github.com/jupyterlab/jupyterlab-git/commits?author=telamonian" title="Code">💻</a> <a href="https://github.com/jupyterlab/jupyterlab-git/pulls?q=is%3Apr+reviewed-by%3Atelamonian" title="Reviewed Pull Requests">👀</a> <a href="#projectManagement-telamonian" title="Project Management">📆</a> <a href="#design-telamonian" title="Design">🎨</a> <a href="#infra-telamonian" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
@@ -355,6 +356,6 @@ The Jupyter Git extension is part of [Project Jupyter](http://jupyter.org/) and 
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcomed!
 
-To add yourself, or someone else, to this list you can either [use the bot](https://allcontributors.org/docs/en/bot/usage) (`@all-contributors please add <username> for <contributions>`) or [the CLI](https://allcontributors.org/docs/en/cli/usage) (`jlpm all-contributors add <username> <contributions>`).
+To add yourself, or someone else, to this list you can either [use the bot](https://allcontributors.org/bot/usage) (`@all-contributors please add <username> for <contributions>`) or [the CLI](https://allcontributors.org/cli/usage) (`jlpm all-contributors add <username> <contributions>`).
 
 If you manually edit the `.all-contributorsrc` config file, run `yarn run contributors:generate`.
