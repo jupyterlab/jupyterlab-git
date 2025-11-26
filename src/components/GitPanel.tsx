@@ -810,7 +810,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       const notebooksWithOutputs =
         await this.props.model.checkNotebooksForOutputs();
 
-      if (notebooksWithOutputs.length > 0) {
+      if (
+        notebooksWithOutputs.length > 0 &&
+        !this.props.settings.composite['clearOutputsBeforeCommit']
+      ) {
         const dialog = new Dialog({
           title: this.props.trans.__('Notebook outputs detected'),
           body: `You are about to commit ${notebooksWithOutputs.length} notebook(s) with outputs. 
@@ -842,6 +845,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         } else {
           return;
         }
+      } else if (this.props.settings.composite['clearOutputsBeforeCommit']) {
+        id = Notification.emit(
+          this.props.trans.__('Cleaning notebook outputs…'),
+          'in-progress',
+          { autoClose: false }
+        );
+        await this.props.model.stripNotebooksOutputs(notebooksWithOutputs);
       }
 
       const notificationMsg = this.props.trans.__('Committing changes...');
