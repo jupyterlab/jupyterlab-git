@@ -817,7 +817,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         const dialog = new Dialog({
           title: this.props.trans.__('Notebook outputs detected'),
           body: `You are about to commit ${notebooksWithOutputs.length} notebook(s) with outputs. 
-            Would you like to clean them before committing?`,
+            Would you like to clean them before committing? If you prefer not to be asked every time, you can enable the "Clear outputs before commit" option in the settings.`,
           buttons: [
             Dialog.cancelButton({
               label: this.props.trans.__('Commit Anyway')
@@ -831,10 +831,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         const result = await dialog.launch();
         dialog.dispose();
 
-        if (result.button.label === this.props.trans.__('Commit Anyway')) {
-        } else if (
-          result.button.label === this.props.trans.__('Clean & Commit')
-        ) {
+        if (result.button.label === this.props.trans.__('Cancel')) {
+          return;
+        }
+        const accepted =
+          typeof result.button.accept === 'boolean'
+            ? result.button.accept
+            : result.button.label === this.props.trans.__('Clean & Commit');
+        if (accepted) {
           id = Notification.emit(
             this.props.trans.__('Cleaning notebook outputs…'),
             'in-progress',
@@ -842,8 +846,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           );
 
           await this.props.model.stripNotebooksOutputs(notebooksWithOutputs);
-        } else {
-          return;
         }
       } else if (this.props.settings.composite['clearOutputsBeforeCommit']) {
         id = Notification.emit(
