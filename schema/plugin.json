@@ -83,7 +83,7 @@
       "description": "If true, the warning popup when opening the .gitignore file without hidden files will not be displayed.",
       "default": false
     },
-    "clearOutputsBeforeCommit":{
+    "clearOutputsBeforeCommit": {
       "type": "boolean",
       "title": "Clear outputs before commit",
       "description": "If true, notebook outputs will be cleared before committing.",
