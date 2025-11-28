@@ -86,8 +86,9 @@
     "clearOutputsBeforeCommit": {
       "type": "boolean",
       "title": "Clear outputs before commit",
-      "description": "If true, notebook outputs will be cleared before committing.",
-      "default": false
+      "description": "If true, notebook outputs will be cleared before committing. If false, outputs are kept. If null, ask each time.",
+      "default": null,
+      "nullable": true
     }
   },
   "jupyter.lab.shortcuts": [

@@ -1214,17 +1214,13 @@ class Git:
             full_path = os.path.join(repo_path, nb_path)
 
             try:
-                # Clear outputs using nbconvert
-                subprocess.run(
-                    [
-                        "jupyter",
-                        "nbconvert",
-                        "--ClearOutputPreprocessor.enabled=True",
-                        "--inplace",
-                        full_path,
-                    ],
-                    check=True,
-                )
+                cmd = shlex.split(self._config.output_cleaning_command)
+                options = shlex.split(self._config.output_cleaning_options)
+
+                full_cmd = cmd + options + [full_path]
+
+                # Run the cleaning command
+                subprocess.run(full_cmd, check=True)
 
                 # Re-stage the cleaned notebook
                 subprocess.run(["git", "-C", repo_path, "add", full_path], check=True)

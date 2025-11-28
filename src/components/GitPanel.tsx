@@ -35,6 +35,7 @@ import { HistorySideBar } from './HistorySideBar';
 import { RebaseAction } from './RebaseAction';
 import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
+import { Widget } from '@lumino/widgets';
 
 /**
  * Interface describing component properties.
@@ -810,22 +811,29 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       const notebooksWithOutputs =
         await this.props.model.checkNotebooksForOutputs();
 
-      if (
-        notebooksWithOutputs.length > 0 &&
-        !this.props.settings.composite['clearOutputsBeforeCommit']
-      ) {
+      const clearSetting =
+        this.props.settings.composite['clearOutputsBeforeCommit'];
+      if (notebooksWithOutputs.length > 0 && clearSetting == null) {
+        const bodyWidget = new Widget();
+        bodyWidget.node.innerHTML = `
+            <div>
+              <p>Clear all outputs before committing?</p>
+              <label>
+                <input type="checkbox" id="dontAskAgain" /> Save my preference
+              </label>
+            </div>
+          `;
+
         const dialog = new Dialog({
           title: this.props.trans.__('Notebook outputs detected'),
-          body: `You are about to commit ${notebooksWithOutputs.length} notebook(s) with outputs. 
-            Would you like to clean them before committing? If you prefer not to be asked every time, you can enable the "Clear outputs before commit" option in the settings.`,
+          body: bodyWidget,
           buttons: [
             Dialog.cancelButton({
-              label: this.props.trans.__('Commit Anyway')
+              label: this.props.trans.__('Keep Outputs & Commit')
             }),
-            Dialog.okButton({
-              label: this.props.trans.__('Clean & Commit')
-            })
-          ]
+            Dialog.okButton({ label: this.props.trans.__('Clean & Commit') })
+          ],
+          defaultButton: 0
         });
 
         const result = await dialog.launch();
@@ -835,9 +843,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           return;
         }
         const accepted =
-          typeof result.button.accept === 'boolean'
-            ? result.button.accept
-            : result.button.label === this.props.trans.__('Clean & Commit');
+          result.button.label === this.props.trans.__('Clean & Commit');
+        const checkbox =
+          bodyWidget.node.querySelector<HTMLInputElement>('#dontAskAgain');
+
+        // Remember the user’s choice if checkbox is checked
+        if (checkbox?.checked) {
+          this.props.settings.set('clearOutputsBeforeCommit', accepted);
+        }
         if (accepted) {
           id = Notification.emit(
             this.props.trans.__('Cleaning notebook outputs…'),
@@ -847,7 +860,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
           await this.props.model.stripNotebooksOutputs(notebooksWithOutputs);
         }
-      } else if (this.props.settings.composite['clearOutputsBeforeCommit']) {
+      } else if (clearSetting === true) {
+        // Always clean before commit
         id = Notification.emit(
           this.props.trans.__('Cleaning notebook outputs…'),
           'in-progress',
