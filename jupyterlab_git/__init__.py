@@ -51,6 +51,19 @@ class JupyterLabGit(Configurable):
         config=True,
     )
 
+    output_cleaning_command = Unicode(
+        "jupyter nbconvert",
+        help="Notebook cleaning command. Configurable by server admin.",
+        config=True,
+    )
+
+    # Extra options to pass to the cleaning tool
+    output_cleaning_options = Unicode(
+        "--ClearOutputPreprocessor.enabled=True --inplace",
+        help="Extra command-line options to pass to the cleaning tool.",
+        config=True,
+    )
+
     @default("credential_helper")
     def _credential_helper_default(self):
         return "cache --timeout=3600"
