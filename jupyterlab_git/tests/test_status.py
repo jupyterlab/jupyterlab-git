@@ -353,9 +353,20 @@ async def test_status(tmp_path, output, diff_output, expected):
         repository = tmp_path / "test_curr_path"
         (repository / ".git" / "rebase-merge").mkdir(parents=True)
 
+        # Determine if this is a first commit scenario
+        is_first_commit = expected.get("branch") == "(initial)"
+
+        # Build mock_execute.side_effect list
+        # First: git status call
+        # Second: git rev-parse --verify HEAD (for _is_first_commit)
+        # Third: git diff call (with or without empty tree SHA based on is_first_commit)
+        # Then: state detection calls (cherry pick, merge, rebase)
         mock_execute.side_effect = [
-            maybe_future((0, "\x00".join(output) + "\x00", "")),
-            maybe_future((0, "\x00".join(diff_output) + "\x00", "")),
+            maybe_future((0, "\x00".join(output) + "\x00", "")),  # git status
+            maybe_future(
+                (128 if is_first_commit else 0, "", "")
+            ),  # git rev-parse --verify HEAD
+            maybe_future((0, "\x00".join(diff_output) + "\x00", "")),  # git diff
             maybe_future((0 if expected["state"] == 4 else 128, "", "cherry pick")),
             maybe_future((0 if expected["state"] == 2 else 128, "", "merge")),
             maybe_future(
@@ -381,50 +392,7 @@ async def test_status(tmp_path, output, diff_output, expected):
                 is_binary=False,
             ),
             call(
-                [
-                    "git",
-                    "diff",
-                    "--numstat",
-                    "-z",
-                    "--cached",
-                    "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
-                ],
-                cwd=str(repository),
-                timeout=20,
-                env=None,
-                username=None,
-                password=None,
-                is_binary=False,
-            ),
-            call(
-                ["git", "show", "--quiet", "CHERRY_PICK_HEAD"],
-                cwd=str(repository),
-                timeout=20,
-                env=None,
-                username=None,
-                password=None,
-                is_binary=False,
-            ),
-            call(
-                ["git", "show", "--quiet", "MERGE_HEAD"],
-                cwd=str(repository),
-                timeout=20,
-                env=None,
-                username=None,
-                password=None,
-                is_binary=False,
-            ),
-            call(
-                ["git", "rev-parse", "--git-path", "rebase-merge"],
-                cwd=str(repository),
-                timeout=20,
-                env=None,
-                username=None,
-                password=None,
-                is_binary=False,
-            ),
-            call(
-                ["git", "rev-parse", "--git-path", "rebase-apply"],
+                ["git", "rev-parse", "--verify", "HEAD"],
                 cwd=str(repository),
                 timeout=20,
                 env=None,
@@ -433,6 +401,87 @@ async def test_status(tmp_path, output, diff_output, expected):
                 is_binary=False,
             ),
         ]
+
+        # Add diff command based on whether it's first commit
+        if is_first_commit:
+            expected_calls.append(
+                call(
+                    [
+                        "git",
+                        "diff",
+                        "--numstat",
+                        "-z",
+                        "--cached",
+                        "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+                    ],
+                    cwd=str(repository),
+                    timeout=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                )
+            )
+        else:
+            expected_calls.append(
+                call(
+                    [
+                        "git",
+                        "diff",
+                        "--numstat",
+                        "-z",
+                        "--cached",
+                    ],
+                    cwd=str(repository),
+                    timeout=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                )
+            )
+
+        # Add state detection calls
+        expected_calls.extend(
+            [
+                call(
+                    ["git", "show", "--quiet", "CHERRY_PICK_HEAD"],
+                    cwd=str(repository),
+                    timeout=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                ),
+                call(
+                    ["git", "show", "--quiet", "MERGE_HEAD"],
+                    cwd=str(repository),
+                    timeout=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                ),
+                call(
+                    ["git", "rev-parse", "--git-path", "rebase-merge"],
+                    cwd=str(repository),
+                    timeout=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                ),
+                call(
+                    ["git", "rev-parse", "--git-path", "rebase-apply"],
+                    cwd=str(repository),
+                    timeout=20,
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                ),
+            ]
+        )
 
         if expected["state"] == 4:
             expected_calls = expected_calls[:-3]
