@@ -813,7 +813,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
       const clearSetting =
         this.props.settings.composite['clearOutputsBeforeCommit'];
-      if (notebooksWithOutputs.length > 0 && clearSetting == null) {
+      if (
+        notebooksWithOutputs.length > 0 &&
+        (clearSetting === null || clearSetting === undefined)
+      ) {
         const bodyWidget = new Widget();
         bodyWidget.node.innerHTML = `
             <div>
