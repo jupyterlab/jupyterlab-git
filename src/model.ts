@@ -734,6 +734,47 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Check staged notebooks for outputs.
+   *
+   * @returns A promise resolving to an array of notebook paths that have outputs
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async checkNotebooksForOutputs(): Promise<string[]> {
+    const path = await this._getPathRepository();
+
+    return this._taskHandler.execute('git:check-notebooks', async () => {
+      const result = await requestAPI<{ notebooks_with_outputs: string[] }>(
+        URLExt.join(path, 'check_notebooks')
+      );
+      return result.notebooks_with_outputs;
+    });
+  }
+
+  /**
+   * Strip outputs from the given staged notebooks.
+   *
+   * @param notebooks - Array of notebook paths to clean
+   *
+   * @returns A promise resolving when the operation completes
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async stripNotebooksOutputs(notebooks: string[]): Promise<void> {
+    const path = await this._getPathRepository();
+
+    await this._taskHandler.execute('git:strip-notebooks', async () => {
+      await requestAPI(URLExt.join(path, 'strip_notebooks'), 'POST', {
+        notebooks
+      });
+    });
+  }
+
+  /**
    * Get (or set) Git configuration options.
    *
    * @param options - configuration options to set
