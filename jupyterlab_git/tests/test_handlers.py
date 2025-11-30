@@ -1089,3 +1089,49 @@ async def test_content_getcontent_deleted_file(mock_execute, jp_fetch, jp_root_d
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload["content"] == ""
+
+
+@patch("jupyterlab_git.handlers.GitMergeHandler.git", spec=Git)
+async def test_merge_handler_success(mock_git, jp_fetch, jp_root_dir):
+    # Given
+    local_path = jp_root_dir / "test_path"
+    branch_to_merge = "feature-branch"
+    merge_result = {"code": 0, "message": "Merge made by the 'ort' strategy."}
+    mock_git.merge.return_value = maybe_future(merge_result)
+
+    # When
+    body = {"branch": branch_to_merge}
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "merge", body=json.dumps(body), method="POST"
+    )
+
+    # Then
+    mock_git.merge.assert_called_with(branch_to_merge, str(local_path))
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload == merge_result
+
+
+@patch("jupyterlab_git.handlers.GitMergeHandler.git", spec=Git)
+async def test_merge_handler_conflict(mock_git, jp_fetch, jp_root_dir):
+    # Given
+    local_path = jp_root_dir / "test_path"
+    branch_to_merge = "conflicting-branch"
+    merge_result = {
+        "code": 1,
+        "command": "git merge conflicting-branch",
+        "message": "Automatic merge failed; fix conflicts and then commit the result.",
+    }
+    mock_git.merge.return_value = maybe_future(merge_result)
+
+    # When
+    body = {"branch": branch_to_merge}
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "merge", body=json.dumps(body), method="POST"
+    )
+
+    # Then
+    mock_git.merge.assert_called_with(branch_to_merge, str(local_path))
+    assert response.code == 500
+    payload = json.loads(response.body)
+    assert payload == merge_result
