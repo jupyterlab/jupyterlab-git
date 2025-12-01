@@ -1182,6 +1182,52 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code, "message": output.strip()}
 
+    async def check_notebooks_with_outputs(self, path):
+        import nbformat, os
+
+        code, stdout, _ = await self.__execute(
+            ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"], cwd=path
+        )
+        staged_files = stdout.splitlines()
+        notebooks = [f for f in staged_files if f.endswith(".ipynb")]
+
+        dirty_notebooks = []
+
+        for nb_path in notebooks:
+            full_nb_path = os.path.join(path, nb_path)
+            try:
+                nb = nbformat.read(full_nb_path, as_version=nbformat.NO_CONVERT)
+                for cell in nb.get("cells", []):
+                    if cell.get("cell_type") == "code" and cell.get("outputs"):
+                        dirty_notebooks.append(nb_path)
+                        break
+            except Exception:
+                pass
+
+        return {
+            "notebooks_with_outputs": dirty_notebooks,
+            "has_outputs": len(dirty_notebooks) > 0,
+        }
+
+    async def strip_notebook_outputs(self, notebooks: list, repo_path: str):
+        for nb_path in notebooks:
+            full_path = os.path.join(repo_path, nb_path)
+
+            try:
+                cmd = shlex.split(self._config.output_cleaning_command)
+                options = shlex.split(self._config.output_cleaning_options)
+
+                full_cmd = cmd + options + [full_path]
+
+                # Run the cleaning command
+                subprocess.run(full_cmd, check=True)
+
+                # Re-stage the cleaned notebook
+                subprocess.run(["git", "-C", repo_path, "add", full_path], check=True)
+
+            except Exception as e:
+                print(f"Failed: {nb_path}: {e}")
+
     async def commit(self, commit_msg, amend, path, author=None):
         """
         Execute git commit <filename> command & return the result.

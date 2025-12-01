@@ -803,8 +803,65 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   ): Promise<void> => {
     const errorMsg = this.props.trans.__('Failed to commit changes.');
     let id: string | null = notificationId ?? null;
+
     try {
       const author = await this._hasIdentity(this.props.model.pathRepository);
+
+      const notebooksWithOutputs =
+        await this.props.model.checkNotebooksForOutputs();
+
+      const clearSetting =
+        this.props.settings.composite['clearOutputsBeforeCommit'];
+      if (
+        notebooksWithOutputs.length > 0 &&
+        (clearSetting === null || clearSetting === undefined)
+      ) {
+        const dialog = new Dialog({
+          title: this.props.trans.__('Notebook outputs detected'),
+          checkbox: {
+            label: this.props.trans.__('Clear all outputs before committing?'),
+            checked: false
+          },
+          buttons: [
+            Dialog.cancelButton({
+              label: this.props.trans.__('Keep Outputs & Commit')
+            }),
+            Dialog.okButton({ label: this.props.trans.__('Clean & Commit') })
+          ],
+          defaultButton: 0
+        });
+
+        const result = await dialog.launch();
+        dialog.dispose();
+
+        if (result.button.label === this.props.trans.__('Cancel')) {
+          return;
+        }
+        const accepted =
+          result.button.label === this.props.trans.__('Clean & Commit');
+
+        // Remember the user’s choice if checkbox is checked
+        if (result?.isChecked) {
+          this.props.settings.set('clearOutputsBeforeCommit', accepted);
+        }
+        if (accepted) {
+          id = Notification.emit(
+            this.props.trans.__('Cleaning notebook outputs…'),
+            'in-progress',
+            { autoClose: false }
+          );
+
+          await this.props.model.stripNotebooksOutputs(notebooksWithOutputs);
+        }
+      } else if (clearSetting === true) {
+        // Always clean before commit
+        id = Notification.emit(
+          this.props.trans.__('Cleaning notebook outputs…'),
+          'in-progress',
+          { autoClose: false }
+        );
+        await this.props.model.stripNotebooksOutputs(notebooksWithOutputs);
+      }
 
       const notificationMsg = this.props.trans.__('Committing changes...');
       if (id !== null) {
