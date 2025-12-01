@@ -188,6 +188,8 @@ describe('GitPanel', () => {
     it('should commit when commit message is provided', async () => {
       configSpy.mockResolvedValue({ options: commitUser });
 
+      props.model.checkNotebooksForOutputs = jest.fn().mockResolvedValue([]);
+
       await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
       await userEvent.type(
         screen.getAllByRole('textbox')[1],
@@ -223,6 +225,7 @@ describe('GitPanel', () => {
 
     it('should prompt for user identity if explicitly configured', async () => {
       configSpy.mockResolvedValue({ options: commitUser });
+      props.model.checkNotebooksForOutputs = jest.fn().mockResolvedValue([]);
 
       props.settings = MockSettings(false, true) as any;
       renderResult.rerender(<GitPanel {...props} />);
@@ -245,6 +248,7 @@ describe('GitPanel', () => {
     it('should prompt for user identity if user.name is not set', async () => {
       configSpy.mockImplementation(mockConfigImplementation('user.email'));
       mockUtils.showDialog.mockResolvedValue(dialogValue);
+      props.model.checkNotebooksForOutputs = jest.fn().mockResolvedValue([]);
 
       await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
       await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
@@ -261,6 +265,7 @@ describe('GitPanel', () => {
     it('should prompt for user identity if user.email is not set', async () => {
       configSpy.mockImplementation(mockConfigImplementation('user.name'));
       mockUtils.showDialog.mockResolvedValue(dialogValue);
+      props.model.checkNotebooksForOutputs = jest.fn().mockResolvedValue([]);
 
       await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
       await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
@@ -280,6 +285,7 @@ describe('GitPanel', () => {
 
       configSpy.mockImplementation(mockConfigImplementation('user.email'));
       mockUtils.showDialog.mockResolvedValue(dialogValue);
+      props.model.checkNotebooksForOutputs = jest.fn().mockResolvedValue([]);
 
       await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
       await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
@@ -298,6 +304,7 @@ describe('GitPanel', () => {
       renderResult.rerender(<GitPanel {...props} />);
       configSpy.mockImplementation(mockConfigImplementation('user.name'));
       mockUtils.showDialog.mockResolvedValue(dialogValue);
+      props.model.checkNotebooksForOutputs = jest.fn().mockResolvedValue([]);
 
       await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
       await userEvent.click(screen.getByRole('button', { name: 'Commit' }));

@@ -35,7 +35,6 @@ import { HistorySideBar } from './HistorySideBar';
 import { RebaseAction } from './RebaseAction';
 import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
-import { Widget } from '@lumino/widgets';
 
 /**
  * Interface describing component properties.
@@ -817,19 +816,12 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         notebooksWithOutputs.length > 0 &&
         (clearSetting === null || clearSetting === undefined)
       ) {
-        const bodyWidget = new Widget();
-        bodyWidget.node.innerHTML = `
-            <div>
-              <p>Clear all outputs before committing?</p>
-              <label>
-                <input type="checkbox" id="dontAskAgain" /> Save my preference
-              </label>
-            </div>
-          `;
-
         const dialog = new Dialog({
           title: this.props.trans.__('Notebook outputs detected'),
-          body: bodyWidget,
+          checkbox: {
+            label: this.props.trans.__('Clear all outputs before committing?'),
+            checked: false
+          },
           buttons: [
             Dialog.cancelButton({
               label: this.props.trans.__('Keep Outputs & Commit')
@@ -847,11 +839,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         }
         const accepted =
           result.button.label === this.props.trans.__('Clean & Commit');
-        const checkbox =
-          bodyWidget.node.querySelector<HTMLInputElement>('#dontAskAgain');
 
         // Remember the user’s choice if checkbox is checked
-        if (checkbox?.checked) {
+        if (result?.isChecked) {
           this.props.settings.set('clearOutputsBeforeCommit', accepted);
         }
         if (accepted) {
