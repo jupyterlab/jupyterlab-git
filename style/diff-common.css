@@ -21,7 +21,6 @@
   background: var(--jp-layout-color0);
   color: var(--jp-ui-font-color0);
   padding: 0;
-  overflow: hidden;
 }
 
 .jp-git-diff-root .cm-editor {
