@@ -1,3 +1,4 @@
+import { ServerConnection } from '@jupyterlab/services';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Git } from '../tokens';
 
@@ -44,8 +45,7 @@ export const defaultMockedResponses: {
   stash: {
     body: () => ({
       code: 0,
-      message: '',
-      command: ''
+      stashes: []
     })
   },
   status: {
@@ -68,13 +68,15 @@ export function mockedRequestAPI(
   endPoint?: string,
   method?: string,
   body?: ReadonlyJSONObject | null,
-  namespace?: string
+  namespace?: string,
+  serverSettings?: ServerConnection.ISettings
 ) => Promise<any> {
   const mockedImplementation = (
     url?: string,
     method?: string,
     body?: ReadonlyJSONObject | null,
-    namespace?: string
+    namespace?: string,
+    serverSettings?: ServerConnection.ISettings
   ) => {
     mockedResponses = mockedResponses ?? {};
     const path = mockedResponses.path ?? DEFAULT_REPOSITORY_PATH;
