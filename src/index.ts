@@ -14,7 +14,6 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { FileBrowserModel, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { IServerSettings, ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -53,13 +52,7 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     ISettingRegistry,
     IDocumentManager
   ],
-  optional: [
-    IMainMenu,
-    IStatusBar,
-    ICommandPalette,
-    ITranslator,
-    IServerSettings
-  ],
+  optional: [IMainMenu, IStatusBar, ICommandPalette, ITranslator],
   provides: IGitExtension,
   activate,
   autoStart: true
@@ -90,8 +83,7 @@ async function activate(
   mainMenu: IMainMenu | null,
   statusBar: IStatusBar | null,
   palette: ICommandPalette | null,
-  translator: ITranslator | null,
-  connectionSettings: ServerConnection.ISettings | null
+  translator: ITranslator | null
 ): Promise<IGitExtension> {
   let settings: ISettingRegistry.ISettings | undefined = undefined;
   let serverSettings: Git.IServerSettings;
@@ -106,11 +98,9 @@ async function activate(
       trans.__('Failed to load settings for the Git Extension.\n%1', error)
     );
   }
+  const connectionSettings = app.serviceManager.serverSettings;
   try {
-    serverSettings = await getServerSettings(
-      trans,
-      connectionSettings ?? undefined
-    );
+    serverSettings = await getServerSettings(trans, connectionSettings);
     const { frontendVersion, gitVersion, serverVersion } = serverSettings;
 
     // Version validation
@@ -160,7 +150,7 @@ async function activate(
     docmanager,
     app.docRegistry,
     settings,
-    connectionSettings ?? undefined
+    connectionSettings
   );
 
   const onPathChanged = (
