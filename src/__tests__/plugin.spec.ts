@@ -6,6 +6,7 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { JupyterLab } from '@jupyterlab/application';
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
+import { ServerConnection } from '@jupyterlab/services';
 import { Signal } from '@lumino/signaling';
 import {
   defaultMockedResponses,
@@ -30,6 +31,10 @@ describe('plugin', () => {
 
   beforeAll(() => {
     app = new JupyterLab() as jest.Mocked<JupyterLab>;
+    // Add the serviceManager.serverSettings mock
+    (app as any).serviceManager = {
+      serverSettings: ServerConnection.makeSettings()
+    };
     browserFactory = {
       defaultBrowser: {
         model: { pathChanged: new Signal(null), restored: Promise.resolve() }
