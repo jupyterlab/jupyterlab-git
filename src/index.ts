@@ -14,6 +14,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { FileBrowserModel, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IServerSettings, ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -52,7 +53,13 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     ISettingRegistry,
     IDocumentManager
   ],
-  optional: [IMainMenu, IStatusBar, ICommandPalette, ITranslator],
+  optional: [
+    IMainMenu,
+    IStatusBar,
+    ICommandPalette,
+    ITranslator,
+    IServerSettings
+  ],
   provides: IGitExtension,
   activate,
   autoStart: true
@@ -83,7 +90,8 @@ async function activate(
   mainMenu: IMainMenu | null,
   statusBar: IStatusBar | null,
   palette: ICommandPalette | null,
-  translator: ITranslator | null
+  translator: ITranslator | null,
+  connectionSettings: ServerConnection.ISettings | null
 ): Promise<IGitExtension> {
   let settings: ISettingRegistry.ISettings | undefined = undefined;
   let serverSettings: Git.IServerSettings;
@@ -99,7 +107,10 @@ async function activate(
     );
   }
   try {
-    serverSettings = await getServerSettings(trans);
+    serverSettings = await getServerSettings(
+      trans,
+      connectionSettings ?? undefined
+    );
     const { frontendVersion, gitVersion, serverVersion } = serverSettings;
 
     // Version validation
@@ -145,7 +156,12 @@ async function activate(
     return null;
   }
   // Create the Git model
-  const gitExtension = new GitExtension(docmanager, app.docRegistry, settings);
+  const gitExtension = new GitExtension(
+    docmanager,
+    app.docRegistry,
+    settings,
+    connectionSettings ?? undefined
+  );
 
   const onPathChanged = (
     model: FileBrowserModel,

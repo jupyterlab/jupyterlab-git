@@ -8,17 +8,26 @@ import { TranslationBundle } from '@jupyterlab/translation';
 /**
  * Obtain the server settings or provide meaningful error message for the end user
  *
+ * @param trans Translation bundle
+ * @param serverSettings Optional server connection settings
  * @returns The server settings
  *
  * @throws {ServerConnection.ResponseError} If the response was not ok
  * @throws {ServerConnection.NetworkError} If the request failed to reach the server
  */
 export async function getServerSettings(
-  trans: TranslationBundle
+  trans: TranslationBundle,
+  serverSettings?: ServerConnection.ISettings
 ): Promise<Git.IServerSettings> {
   try {
     const endpoint = 'settings' + URLExt.objectToQueryString({ version });
-    const settings = await requestAPI<Git.IServerSettings>(endpoint, 'GET');
+    const settings = await requestAPI<Git.IServerSettings>(
+      endpoint,
+      'GET',
+      null,
+      'git',
+      serverSettings
+    );
     return settings;
   } catch (error) {
     if (error instanceof Git.GitResponseError) {

@@ -20,6 +20,7 @@ export const AUTH_ERROR_MESSAGES = [
  * @param method HTML method; default 'GET'
  * @param body JSON object to be passed as body or null; default null
  * @param namespace API namespace; default 'git'
+ * @param serverSettings Optional server connection settings; if not provided, uses ServerConnection.makeSettings()
  * @returns The response body interpreted as JSON
  *
  * @throws {Git.GitResponseError} If the server response is not ok
@@ -29,10 +30,11 @@ export async function requestAPI<T>(
   endPoint = '',
   method = 'GET',
   body: Partial<ReadonlyJSONObject> | null = null,
-  namespace = 'git'
+  namespace = 'git',
+  serverSettings?: ServerConnection.ISettings
 ): Promise<T> {
   // Make request to Jupyter API
-  const settings = ServerConnection.makeSettings();
+  const settings = serverSettings ?? ServerConnection.makeSettings();
   const requestUrl = URLExt.join(
     settings.baseUrl,
     namespace, // API Namespace
