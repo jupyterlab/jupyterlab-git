@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import unquote
 
-import nbformat
+import nbformat, os
 import pexpect
 import tornado
 import tornado.locks
@@ -1183,8 +1183,6 @@ class Git:
         return {"code": code, "message": output.strip()}
 
     async def check_notebooks_with_outputs(self, path):
-        import nbformat, os
-
         code, stdout, _ = await self.__execute(
             ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"], cwd=path
         )
@@ -1210,20 +1208,26 @@ class Git:
         }
 
     async def strip_notebook_outputs(self, notebooks: list, repo_path: str):
+        print(f"Stripping outputs from notebooks: {notebooks}")
         for nb_path in notebooks:
             full_path = os.path.join(repo_path, nb_path)
 
             try:
-                cmd = shlex.split(self._config.output_cleaning_command)
-                options = shlex.split(self._config.output_cleaning_options)
+                full_cmd = (
+                    shlex.split(self._config.output_cleaning_command)
+                    + shlex.split(self._config.output_cleaning_options)
+                    + [full_path]
+                )
 
-                full_cmd = cmd + options + [full_path]
+                code, _, stderr = await self.__execute(full_cmd, cwd=repo_path)
+                if code != 0:
+                    raise RuntimeError(f"Cleaning failed: {stderr}")
 
-                # Run the cleaning command
-                subprocess.run(full_cmd, check=True)
-
-                # Re-stage the cleaned notebook
-                subprocess.run(["git", "-C", repo_path, "add", full_path], check=True)
+                code, _, stderr = await self.__execute(
+                    ["git", "add", nb_path], cwd=repo_path
+                )
+                if code != 0:
+                    raise RuntimeError(f"Git add failed: {stderr}")
 
             except Exception as e:
                 print(f"Failed: {nb_path}: {e}")

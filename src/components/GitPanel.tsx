@@ -834,25 +834,23 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         const result = await dialog.launch();
         dialog.dispose();
 
-        if (result.button.label === this.props.trans.__('Cancel')) {
+        if (!result.button.accept) {
           return;
         }
-        const accepted =
-          result.button.label === this.props.trans.__('Clean & Commit');
 
-        // Remember the user’s choice if checkbox is checked
+        const accepted = true;
+
         if (result?.isChecked) {
           this.props.settings.set('clearOutputsBeforeCommit', accepted);
         }
-        if (accepted) {
-          id = Notification.emit(
-            this.props.trans.__('Cleaning notebook outputs…'),
-            'in-progress',
-            { autoClose: false }
-          );
 
-          await this.props.model.stripNotebooksOutputs(notebooksWithOutputs);
-        }
+        id = Notification.emit(
+          this.props.trans.__('Cleaning notebook outputs…'),
+          'in-progress',
+          { autoClose: false }
+        );
+
+        await this.props.model.stripNotebooksOutputs(notebooksWithOutputs);
       } else if (clearSetting === true) {
         // Always clean before commit
         id = Notification.emit(
