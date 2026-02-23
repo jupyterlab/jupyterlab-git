@@ -3,7 +3,6 @@ import pytest
 
 from jupyterlab_git.git import Git
 
-
 pytest.importorskip("jupytext")
 
 
