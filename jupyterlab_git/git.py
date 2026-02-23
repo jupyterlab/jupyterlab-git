@@ -1208,7 +1208,6 @@ class Git:
         }
 
     async def strip_notebook_outputs(self, notebooks: list, repo_path: str):
-        print(f"Stripping outputs from notebooks: {notebooks}")
         for nb_path in notebooks:
             full_path = os.path.join(repo_path, nb_path)
 
@@ -1230,7 +1229,9 @@ class Git:
                     raise RuntimeError(f"Git add failed: {stderr}")
 
             except Exception as e:
-                print(f"Failed: {nb_path}: {e}")
+                get_logger().error(
+                    f"Failed to strip notebook outputs for {nb_path}: {e}"
+                )
 
     async def commit(self, commit_msg, amend, path, author=None):
         """
