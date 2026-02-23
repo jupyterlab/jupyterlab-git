@@ -756,9 +756,9 @@ export class GitExtension implements IGitExtension {
     const path = await this._getPathRepository();
 
     return this._taskHandler.execute('git:check-notebooks', async () => {
-      const result = await requestAPI<{ notebooks_with_outputs: string[] }>(
-        URLExt.join(path, 'check_notebooks')
-      );
+      const result = await this._requestAPI<{
+        notebooks_with_outputs: string[];
+      }>(URLExt.join(path, 'check_notebooks'));
       return result.notebooks_with_outputs;
     });
   }
@@ -778,7 +778,7 @@ export class GitExtension implements IGitExtension {
     const path = await this._getPathRepository();
 
     await this._taskHandler.execute('git:strip-notebooks', async () => {
-      await requestAPI(URLExt.join(path, 'strip_notebooks'), 'POST', {
+      await this._requestAPI(URLExt.join(path, 'strip_notebooks'), 'POST', {
         notebooks
       });
     });
