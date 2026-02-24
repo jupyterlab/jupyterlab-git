@@ -819,7 +819,9 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         const dialog = new Dialog({
           title: this.props.trans.__('Notebook outputs detected'),
           checkbox: {
-            label: this.props.trans.__('Clear all outputs before committing?'),
+            label: this.props.trans.__(
+              'Always clear outputs before committing?'
+            ),
             checked: false
           },
           buttons: [
@@ -833,24 +835,25 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
         const result = await dialog.launch();
         dialog.dispose();
-
-        if (!result.button.accept) {
+        if (result.button.label === this.props.trans.__('Cancel')) {
           return;
         }
 
-        const accepted = true;
+        if (result.button.accept) {
+          const accepted = true;
 
-        if (result?.isChecked) {
-          this.props.settings.set('clearOutputsBeforeCommit', accepted);
+          if (result?.isChecked) {
+            this.props.settings.set('clearOutputsBeforeCommit', accepted);
+          }
+
+          id = Notification.emit(
+            this.props.trans.__('Cleaning notebook outputs…'),
+            'in-progress',
+            { autoClose: false }
+          );
+
+          await this.props.model.stripNotebooksOutputs(notebooksWithOutputs);
         }
-
-        id = Notification.emit(
-          this.props.trans.__('Cleaning notebook outputs…'),
-          'in-progress',
-          { autoClose: false }
-        );
-
-        await this.props.model.stripNotebooksOutputs(notebooksWithOutputs);
       } else if (clearSetting === true) {
         // Always clean before commit
         id = Notification.emit(
