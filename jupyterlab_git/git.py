@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import unquote
 
-import nbformat, os
+import nbformat
 import pexpect
 import tornado
 import tornado.locks
