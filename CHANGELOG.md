@@ -2,6 +2,25 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.52.0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.51.4...ed6707c04743c388f228d6541d64ed03c24a23f1))
+
+### Enhancements made
+
+- Add Option to Clear Notebook Outputs Before Commit [#1434](https://github.com/jupyterlab/jupyterlab-git/pull/1434) ([@Meriem-BenIsmail](https://github.com/Meriem-BenIsmail), [@SylvainCorlay](https://github.com/SylvainCorlay), [@afshin](https://github.com/afshin), [@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2026-01-05&to=2026-03-02&type=c))
+
+@afshin ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aafshin+updated%3A2026-01-05..2026-03-02&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2026-01-05..2026-03-02&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2026-01-05..2026-03-02&type=Issues)) | @Meriem-BenIsmail ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AMeriem-BenIsmail+updated%3A2026-01-05..2026-03-02&type=Issues)) | @SylvainCorlay ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ASylvainCorlay+updated%3A2026-01-05..2026-03-02&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.51.4
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.51.3...1a6a04b339c47a586ac95c5cc3470299d3e2c69a))
@@ -19,8 +38,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2025-12-10&to=2026-01-05&type=c))
 
 @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2025-12-10..2026-01-05&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2025-12-10..2026-01-05&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.51.3
 
