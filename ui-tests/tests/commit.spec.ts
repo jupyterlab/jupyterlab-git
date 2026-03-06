@@ -28,7 +28,8 @@ test.describe('Commit', () => {
     await page.keyboard.press('Control+s');
 
     await page.getByRole('tab', { name: 'Git' }).click();
-    await page.getByTitle('another_file.txt • Modified').hover();
+    await page.waitForSelector('[title="another_file.txt • Modified"]');
+    await page.locator('[title="another_file.txt • Modified"]').hover();
     await page.getByRole('button', { name: 'Stage this change' }).click();
 
     await page

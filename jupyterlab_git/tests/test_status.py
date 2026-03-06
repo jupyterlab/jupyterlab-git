@@ -1,4 +1,4 @@
-from unittest.mock import call, patch
+from unittest.mock import call, patch, ANY
 
 import pytest
 
@@ -374,8 +374,8 @@ async def test_status(tmp_path, output, diff_output, expected):
             call(
                 ["git", "status", "--porcelain", "-b", "-u", "-z"],
                 cwd=str(repository),
-                timeout=20,
-                env=None,
+                timeout=20.0,
+                env=ANY,
                 username=None,
                 password=None,
                 is_binary=False,
@@ -390,8 +390,8 @@ async def test_status(tmp_path, output, diff_output, expected):
                     "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
                 ],
                 cwd=str(repository),
-                timeout=20,
-                env=None,
+                timeout=20.0,
+                env=ANY,
                 username=None,
                 password=None,
                 is_binary=False,
@@ -399,8 +399,8 @@ async def test_status(tmp_path, output, diff_output, expected):
             call(
                 ["git", "show", "--quiet", "CHERRY_PICK_HEAD"],
                 cwd=str(repository),
-                timeout=20,
-                env=None,
+                timeout=20.0,
+                env=ANY,
                 username=None,
                 password=None,
                 is_binary=False,
@@ -408,8 +408,8 @@ async def test_status(tmp_path, output, diff_output, expected):
             call(
                 ["git", "show", "--quiet", "MERGE_HEAD"],
                 cwd=str(repository),
-                timeout=20,
-                env=None,
+                timeout=20.0,
+                env=ANY,
                 username=None,
                 password=None,
                 is_binary=False,
@@ -417,8 +417,8 @@ async def test_status(tmp_path, output, diff_output, expected):
             call(
                 ["git", "rev-parse", "--git-path", "rebase-merge"],
                 cwd=str(repository),
-                timeout=20,
-                env=None,
+                timeout=20.0,
+                env=ANY,
                 username=None,
                 password=None,
                 is_binary=False,
@@ -426,8 +426,8 @@ async def test_status(tmp_path, output, diff_output, expected):
             call(
                 ["git", "rev-parse", "--git-path", "rebase-apply"],
                 cwd=str(repository),
-                timeout=20,
-                env=None,
+                timeout=20.0,
+                env=ANY,
                 username=None,
                 password=None,
                 is_binary=False,
