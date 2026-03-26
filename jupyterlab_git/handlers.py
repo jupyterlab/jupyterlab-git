@@ -22,7 +22,7 @@ except ImportError:
     hybridcontents = None
 
 from ._version import __version__
-from .git import DEFAULT_REMOTE_NAME, Git, RebaseAction
+from .git import DEFAULT_REMOTE_NAME, Git, RebaseAction, GitParameterError
 from .log import get_logger
 
 from .ssh import SSH
@@ -750,9 +750,18 @@ class GitInitHandler(GitHandler):
 class GitChangedFilesHandler(GitHandler):
     @tornado.web.authenticated
     async def post(self, path: str = ""):
-        body = await self.git.changed_files(
-            self.url2localpath(path), **self.get_json_body()
-        )
+        try:
+            body = await self.git.changed_files(
+                self.url2localpath(path), **self.get_json_body()
+            )
+        except GitParameterError as e:
+            self.set_status(400)
+            self.finish(json.dumps({"code": 400, "message": str(e)}))
+            return
+        except Exception as e:
+            self.set_status(500)
+            self.finish(json.dumps({"code": 500, "message": str(e)}))
+            return
 
         if body["code"] != 0:
             self.set_status(500)
@@ -797,10 +806,15 @@ class GitContentHandler(GitHandler):
         filename = data["filename"]
         reference = data["reference"]
         local_path, cm = self.url2localpath(path, with_contents_manager=True)
-        response = await self.git.get_content_at_reference(
-            filename, reference, local_path, cm
-        )
-        self.finish(json.dumps(response))
+
+        try:
+            response = await self.git.get_content_at_reference(
+                filename, reference, local_path, cm
+            )
+        except Exception as e:
+            raise tornado.web.HTTPError(500, log_message=str(e))
+
+        self.finish(json.dumps({"code": 0, "content": response["content"]}))
 
 
 class GitDiffNotebookHandler(GitHandler):
@@ -815,7 +829,7 @@ class GitDiffNotebookHandler(GitHandler):
             prev_content = data["previousContent"]
             curr_content = data["currentContent"]
         except KeyError as e:
-            get_logger().error(f"Missing key in POST request.", exc_info=e)
+            get_logger().error("Missing key in POST request.", exc_info=e)
             raise tornado.web.HTTPError(
                 status_code=400, reason=f"Missing POST key: {e}"
             )
@@ -825,7 +839,7 @@ class GitDiffNotebookHandler(GitHandler):
                 prev_content, curr_content, base_content
             )
         except Exception as e:
-            get_logger().error(f"Error computing notebook diff.", exc_info=e)
+            get_logger().error("Error computing notebook diff.", exc_info=e)
             raise tornado.web.HTTPError(
                 status_code=500,
                 reason=f"Error diffing content: {e}.",

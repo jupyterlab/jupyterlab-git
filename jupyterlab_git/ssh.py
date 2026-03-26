@@ -4,7 +4,6 @@ Module for executing SSH commands
 
 import re
 import subprocess
-import shutil
 from .log import get_logger
 from pathlib import Path
 
@@ -25,7 +24,7 @@ class SSH:
             subprocess.check_call(
                 cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
-        except Exception as e:
+        except Exception:
             get_logger().debug("Error verifying host using ssh-keygen command")
             return False
         else:

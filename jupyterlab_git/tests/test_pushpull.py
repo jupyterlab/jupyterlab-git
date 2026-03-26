@@ -21,7 +21,6 @@ async def test_git_pull_fail():
             mock_execute.assert_called_once_with(
                 ["git", "pull", "--no-commit"],
                 cwd="test_curr_path",
-                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                 username=None,
                 password=None,
@@ -50,7 +49,6 @@ async def test_git_pull_with_conflict_fail():
                     call(
                         ["git", "pull", "--no-commit"],
                         cwd="test_curr_path",
-                        timeout=20,
                         env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                         username=None,
                         password=None,
@@ -83,7 +81,6 @@ async def test_git_pull_with_auth_fail():
             mock_execute_with_authentication.assert_called_once_with(
                 ["git", "pull", "--no-commit"],
                 cwd="test_curr_path",
-                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
                 username="asdf",
                 password="qwerty",
@@ -110,7 +107,6 @@ async def test_git_pull_success():
             mock_execute.assert_called_once_with(
                 ["git", "pull", "--no-commit"],
                 cwd="test_curr_path",
-                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                 username=None,
                 password=None,
@@ -135,7 +131,6 @@ async def test_git_pull_with_auth_success():
             mock_execute_with_authentication.assert_called_once_with(
                 ["git", "pull", "--no-commit"],
                 cwd="test_curr_path",
-                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
                 username="asdf",
                 password="qwerty",
@@ -165,7 +160,6 @@ async def test_git_pull_with_auth_success_and_conflict_fail():
                     call(
                         ["git", "pull", "--no-commit"],
                         cwd="test_curr_path",
-                        timeout=20,
                         env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
                         username="asdf",
                         password="qwerty",
@@ -207,7 +201,6 @@ async def test_git_pull_with_auth_and_cache_credentials():
                     call(
                         ["git", "config", "--list"],
                         cwd=test_path,
-                        timeout=20,
                         env=None,
                         username=None,
                         password=None,
@@ -222,7 +215,6 @@ async def test_git_pull_with_auth_and_cache_credentials():
                             credential_helper,
                         ],
                         cwd=test_path,
-                        timeout=20,
                         env=None,
                         username=None,
                         password=None,
@@ -231,7 +223,6 @@ async def test_git_pull_with_auth_and_cache_credentials():
                     call(
                         ["git", "pull", "--no-commit"],
                         cwd=test_path,
-                        timeout=20,
                         env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
                         username="user",
                         password="pass",
@@ -265,7 +256,6 @@ async def test_git_pull_with_auth_and_cache_credentials_and_existing_credential_
                 call(
                     ["git", "config", "--list"],
                     cwd=test_path,
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -274,7 +264,6 @@ async def test_git_pull_with_auth_and_cache_credentials_and_existing_credential_
                 call(
                     ["git", "pull", "--no-commit"],
                     cwd=test_path,
-                    timeout=20,
                     env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
                     username="user",
                     password="pass",
@@ -301,7 +290,6 @@ async def test_git_push_fail():
             mock_execute.assert_called_once_with(
                 ["git", "push", "--tags", "test_origin", "HEAD:test_master"],
                 cwd="test_curr_path",
-                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                 username=None,
                 password=None,
@@ -331,7 +319,6 @@ async def test_git_push_with_auth_fail():
             mock_execute_with_authentication.assert_called_once_with(
                 ["git", "push", "--tags", "test_origin", "HEAD:test_master"],
                 cwd="test_curr_path",
-                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
                 username="asdf",
                 password="qwerty",
@@ -360,7 +347,6 @@ async def test_git_push_success():
             mock_execute.assert_called_once_with(
                 ["git", "push", "--tags", ".", "HEAD:test_master"],
                 cwd="test_curr_path",
-                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                 username=None,
                 password=None,
@@ -391,7 +377,6 @@ async def test_git_push_with_auth_success():
             mock_execute_with_authentication.assert_called_once_with(
                 ["git", "push", "--tags", ".", "HEAD:test_master"],
                 cwd="test_curr_path",
-                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "1"},
                 username="asdf",
                 password="qwerty",
@@ -430,7 +415,6 @@ async def test_git_push_with_auth_and_cache_credentials():
                     call(
                         ["git", "config", "--list"],
                         cwd=test_path,
-                        timeout=20,
                         env=None,
                         username=None,
                         password=None,
@@ -445,7 +429,6 @@ async def test_git_push_with_auth_and_cache_credentials():
                             credential_helper,
                         ],
                         cwd=test_path,
-                        timeout=20,
                         env=None,
                         username=None,
                         password=None,
@@ -454,7 +437,6 @@ async def test_git_push_with_auth_and_cache_credentials():
                     call(
                         ["git", "push", "--tags", ".", "HEAD:test_master"],
                         cwd=test_path,
-                        timeout=20,
                         env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
                         username="user",
                         password="pass",
@@ -490,7 +472,6 @@ async def test_git_push_with_auth_and_cache_credentials_and_existing_credential_
                 call(
                     ["git", "config", "--list"],
                     cwd=test_path,
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -499,7 +480,6 @@ async def test_git_push_with_auth_and_cache_credentials_and_existing_credential_
                 call(
                     ["git", "push", "--tags", ".", "HEAD:test_master"],
                     cwd=test_path,
-                    timeout=20,
                     env={**os.environ, "GIT_TERMINAL_PROMPT": "1"},
                     username="user",
                     password="pass",
@@ -527,7 +507,6 @@ async def test_git_push_no_tags_success():
             mock_execute.assert_called_once_with(
                 ["git", "push", ".", "HEAD:test_master"],
                 cwd="test_curr_path",
-                timeout=20,
                 env={"TEST": "test", "GIT_TERMINAL_PROMPT": "0"},
                 username=None,
                 password=None,

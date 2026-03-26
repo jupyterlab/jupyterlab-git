@@ -2,8 +2,8 @@
 Module for executing git commands, sending results back to the handlers
 """
 
+import anyio
 import base64
-import datetime
 import os
 import pathlib
 import re
@@ -18,8 +18,6 @@ from urllib.parse import unquote
 
 import nbformat
 import pexpect
-import tornado
-import tornado.locks
 from jupyter_server.utils import ensure_async
 from nbdime import diff_notebooks, merge_notebooks
 
@@ -52,7 +50,35 @@ GIT_STASH_LIST = re.compile(
     r"^stash@{(?P<index>\d+)}: (WIP on|On) (?P<branch>.+?): (?P<message>.+?)$"
 )
 
-execution_lock = tornado.locks.Lock()
+_execution_lock: "Optional[anyio.Lock]" = None
+
+
+def _get_execution_lock() -> "anyio.Lock":
+    """Return the process-wide git execution lock, creating it on first async call."""
+    global _execution_lock
+    if _execution_lock is None:
+        _execution_lock = anyio.Lock()
+    return _execution_lock
+
+
+class GitParameterError(Exception):
+    """Raised when required parameters for a Git operation are missing."""
+
+    pass
+
+
+class GitCommandError(Exception):
+    """Raised when a Git command fails unexpectedly."""
+
+    def __init__(self, message, command=None):
+        super().__init__(message)
+        self.command = command
+
+
+class GitError(Exception):
+    """Custom exception for Git module errors."""
+
+    pass
 
 
 class State(IntEnum):
@@ -81,7 +107,6 @@ class RebaseAction(Enum):
 async def execute(
     cmdline: "List[str]",
     cwd: "str",
-    timeout: "float" = 20,
     env: "Optional[Dict[str, str]]" = None,
     username: "Optional[str]" = None,
     password: "Optional[str]" = None,
@@ -161,16 +186,11 @@ async def execute(
             return (process.returncode, output.decode("utf-8"), error.decode("utf-8"))
 
     try:
-        await execution_lock.acquire(timeout=datetime.timedelta(seconds=timeout))
-    except tornado.util.TimeoutError:
-        return (1, "", "Unable to get the lock on the directory")
-
-    try:
         # Ensure our execution operation will succeed by first checking and waiting for the lock to be removed
         time_slept = 0
         lockfile = os.path.join(cwd, ".git", "index.lock")
         while os.path.exists(lockfile) and time_slept < MAX_WAIT_FOR_LOCK_S:
-            await tornado.gen.sleep(CHECK_LOCK_INTERVAL_S)
+            await anyio.sleep(CHECK_LOCK_INTERVAL_S)
             time_slept += CHECK_LOCK_INTERVAL_S
 
         # If the lock still exists at this point, we will likely fail anyway, but let's try anyway
@@ -185,9 +205,8 @@ async def execute(
                 env,
             )
         else:
-            current_loop = tornado.ioloop.IOLoop.current()
-            code, output, error = await current_loop.run_in_executor(
-                None, call_subprocess, cmdline, cwd, env
+            code, output, error = await anyio.to_thread.run_sync(
+                call_subprocess, cmdline, cwd, env, is_binary
             )
         log_output = (
             output[:MAX_LOG_OUTPUT] + "..." if len(output) > MAX_LOG_OUTPUT else output
@@ -198,11 +217,9 @@ async def execute(
         get_logger().debug(
             "Code: {}\nOutput: {}\nError: {}".format(code, log_output, log_error)
         )
-    except BaseException as e:
+    except BaseException:
         code, output, error = -1, "", traceback.format_exc()
         get_logger().warning("Fail to execute {!s}".format(cmdline), exc_info=True)
-    finally:
-        execution_lock.release()
 
     return code, output, error
 
@@ -240,15 +257,22 @@ class Git:
         password: "Optional[str]" = None,
         is_binary=False,
     ) -> "Tuple[int, str, str]":
-        return await execute(
-            cmdline,
-            cwd=cwd,
-            timeout=self._execute_timeout,
-            env=env,
-            username=username,
-            password=password,
-            is_binary=is_binary,
-        )
+        lock = _get_execution_lock()
+        with anyio.move_on_after(self._execute_timeout) as scope:
+            await lock.acquire()
+        if scope.cancelled_caught:
+            return 1, "", "Unable to get the lock on the directory"
+        try:
+            return await execute(
+                cmdline,
+                cwd=cwd,
+                env=env,
+                username=username,
+                password=password,
+                is_binary=is_binary,
+            )
+        finally:
+            lock.release()
 
     async def config(self, path, **kwargs):
         """Get or set Git options.
@@ -314,8 +338,8 @@ class Git:
             else:
                 cmd = ["git", "diff", base, remote, "--name-only", "-z", "--"]
         else:
-            raise tornado.web.HTTPError(
-                400, "Either single_commit or (base and remote) must be provided"
+            raise GitParameterError(
+                "Either single_commit or (base and remote) must be provided"
             )
 
         response = {}
@@ -462,16 +486,12 @@ class Git:
                 cell.pop("id", None)
             return nb
 
-        current_loop = tornado.ioloop.IOLoop.current()
-        prev_nb = await current_loop.run_in_executor(None, read_notebook, prev_content)
-        curr_nb = await current_loop.run_in_executor(None, read_notebook, curr_content)
+        prev_nb = await anyio.to_thread.run_sync(read_notebook, prev_content)
+        curr_nb = await anyio.to_thread.run_sync(read_notebook, curr_content)
         if base_content:
-            base_nb = await current_loop.run_in_executor(
-                None, read_notebook, base_content
-            )
+            base_nb = await anyio.to_thread.run_sync(read_notebook, base_content)
             # Only remove ids from merge_notebooks as a workaround
-            _, merge_decisions = await current_loop.run_in_executor(
-                None,
+            _, merge_decisions = await anyio.to_thread.run_sync(
                 merge_notebooks,
                 remove_cell_ids(base_nb),
                 remove_cell_ids(prev_nb),
@@ -480,9 +500,7 @@ class Git:
 
             return {"base": base_nb, "merge_decisions": merge_decisions}
         else:
-            thediff = await current_loop.run_in_executor(
-                None, diff_notebooks, prev_nb, curr_nb
-            )
+            thediff = await anyio.to_thread.run_sync(diff_notebooks, prev_nb, curr_nb)
 
             return {"base": prev_nb, "diff": thediff}
 
@@ -1569,10 +1587,9 @@ class Git:
         elif any([msg in lower_error for msg in error_messages]):
             return ""
         else:
-            raise tornado.web.HTTPError(
-                log_message="Error [{}] occurred while executing [{}] command to retrieve plaintext diff.".format(
-                    error, " ".join(command)
-                )
+            raise GitCommandError(
+                f"Error [{error}] occurred while executing [{' '.join(command)}] command to retrieve plaintext diff.",
+                command=command,
             )
 
     async def get_content(self, contents_manager, filename, path):
@@ -1587,11 +1604,15 @@ class Git:
                     path=os.path.join(relative_repo, filename), type="file"
                 )
             )
-        except tornado.web.HTTPError as error:
+        except Exception as error:
             # Handle versioned file being deleted case
-            if error.status_code == 404 and (
-                error.log_message.startswith("No such file or directory: ")
-                or error.log_message.startswith("file or directory does not exist:")
+            if (
+                hasattr(error, "status_code")
+                and error.status_code == 404
+                and (
+                    error.log_message.startswith("No such file or directory: ")
+                    or error.log_message.startswith("file or directory does not exist:")
+                )
             ):
                 return ""
             raise error
@@ -1619,10 +1640,8 @@ class Git:
                 ref = await self._get_base_ref(path, filename)
                 content = await self.show(path, ref)
             else:
-                raise tornado.web.HTTPError(
-                    log_message="Error while retrieving plaintext content, unknown special ref '{}'.".format(
-                        reference["special"]
-                    )
+                raise GitError(
+                    f"Error while retrieving plaintext content, unknown special ref '{reference['special']}'"
                 )
         elif "git" in reference:
             is_binary = await self._is_binary(filename, reference["git"], path)
@@ -1694,10 +1713,9 @@ class Git:
             if any([msg in lower_error for msg in error_messages]):
                 return False
 
-            raise tornado.web.HTTPError(
-                log_message="Error while determining if file is binary or text '{}'.".format(
-                    error
-                )
+            raise GitCommandError(
+                f"Error while determining if file is binary or text '{error}'",
+                command=command,
             )
 
         # For binary files, `--numstat` outputs two `-` characters separated by TABs:
@@ -1781,7 +1799,7 @@ class Git:
             file = pathlib.Path(path)
             content = file.read_text()
             return {"code": 0, "content": content}
-        except BaseException as error:
+        except BaseException:
             return {"code": -1, "content": ""}
 
     async def ensure_gitignore(self, path):

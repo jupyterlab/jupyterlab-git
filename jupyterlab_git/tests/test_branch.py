@@ -38,7 +38,6 @@ async def test_get_current_branch_success():
         mock_execute.assert_called_once_with(
             ["git", "symbolic-ref", "--short", "HEAD"],
             cwd=str(Path("/bin") / "test_curr_path"),
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -74,7 +73,6 @@ async def test_checkout_branch_noref_success():
             mock_execute.assert_called_once_with(
                 cmd,
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -112,7 +110,6 @@ async def test_checkout_branch_noref_failure():
             mock_execute.assert_called_once_with(
                 cmd,
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -156,7 +153,6 @@ async def test_checkout_branch_remoteref_success():
             mock_execute.assert_called_once_with(
                 cmd,
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -197,7 +193,6 @@ async def test_checkout_branch_headsref_failure():
             mock_execute.assert_called_once_with(
                 cmd,
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -236,7 +231,6 @@ async def test_checkout_branch_headsref_success():
             mock_execute.assert_called_once_with(
                 cmd,
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -274,7 +268,6 @@ async def test_checkout_branch_remoteref_failure():
             mock_execute.assert_called_once_with(
                 cmd,
                 cwd=str(Path("/bin") / "test_curr_path"),
-                timeout=20,
                 env=None,
                 username=None,
                 password=None,
@@ -306,7 +299,6 @@ async def test_get_branch_reference_success():
         mock_execute.assert_called_once_with(
             ["git", "rev-parse", "--symbolic-full-name", branch],
             cwd=str(Path("/bin") / "test_curr_path"),
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -339,7 +331,6 @@ async def test_get_branch_reference_failure():
         mock_execute.assert_called_once_with(
             ["git", "rev-parse", "--symbolic-full-name", branch],
             cwd=str(Path("/bin") / "test_curr_path"),
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -366,7 +357,6 @@ async def test_get_current_branch_failure():
         mock_execute.assert_called_once_with(
             ["git", "symbolic-ref", "--short", "HEAD"],
             cwd=str(Path("/bin") / "test_curr_path"),
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -400,7 +390,6 @@ async def test_get_current_branch_detached_success():
         mock_execute.assert_called_once_with(
             ["git", "branch", "-a"],
             cwd=str(Path("/bin") / "test_curr_path"),
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -429,7 +418,6 @@ async def test_get_current_branch_detached_failure():
         mock_execute.assert_called_once_with(
             ["git", "branch", "-a"],
             cwd=str(Path("/bin") / "test_curr_path"),
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -477,7 +465,6 @@ async def test_get_upstream_branch_success(branch, upstream, remotename):
                         "{}@{{upstream}}".format(branch),
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -486,7 +473,6 @@ async def test_get_upstream_branch_success(branch, upstream, remotename):
                 call(
                     ["git", "config", "--local", "branch.{}.remote".format(branch)],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -545,7 +531,6 @@ async def test_get_upstream_branch_failure(outputs, message):
                 call(
                     ["git", "rev-parse", "--abbrev-ref", "blah@{upstream}"],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -572,7 +557,6 @@ async def test_get_tag_success():
         mock_execute.assert_called_once_with(
             ["git", "describe", "--tags", "abcdefghijklmnopqrstuvwxyz01234567890123"],
             cwd=str(Path("/bin") / "test_curr_path"),
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -619,7 +603,6 @@ async def test_get_tag_failure():
                 call(
                     ["git", "describe", "--tags", "blah"],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -633,7 +616,6 @@ async def test_get_tag_failure():
                         "01234567899999abcdefghijklmnopqrstuvwxyz",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -663,7 +645,6 @@ async def test_no_tags():
         mock_execute.assert_called_once_with(
             ["git", "describe", "--tags", "768c79ad661598889f29bdf8916f4cc488f5062a"],
             cwd="/path/foo",
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -762,7 +743,6 @@ async def test_branch_success():
                         "refs/heads/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -777,7 +757,6 @@ async def test_branch_success():
                         "refs/remotes/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -818,7 +797,6 @@ async def test_branch_failure():
         mock_execute.assert_called_once_with(
             expected_cmd,
             cwd=str(Path("/bin") / "test_curr_path"),
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -908,7 +886,6 @@ async def test_branch_success_detached_head():
                         "refs/heads/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -918,7 +895,6 @@ async def test_branch_success_detached_head():
                 call(
                     ["git", "symbolic-ref", "--short", "HEAD"],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -928,7 +904,6 @@ async def test_branch_success_detached_head():
                 call(
                     ["git", "branch", "-a"],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -943,7 +918,6 @@ async def test_branch_success_detached_head():
                         "refs/remotes/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -1046,7 +1020,6 @@ async def test_branch_success_rebasing():
                         "refs/heads/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -1056,7 +1029,6 @@ async def test_branch_success_rebasing():
                 call(
                     ["git", "symbolic-ref", "--short", "HEAD"],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -1066,7 +1038,6 @@ async def test_branch_success_rebasing():
                 call(
                     ["git", "branch", "-a"],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,
@@ -1081,7 +1052,6 @@ async def test_branch_success_rebasing():
                         "refs/remotes/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    timeout=20,
                     env=None,
                     username=None,
                     password=None,

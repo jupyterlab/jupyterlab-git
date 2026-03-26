@@ -27,7 +27,6 @@ async def test_git_get_settings_success(mock_execute, jp_fetch):
     mock_execute.assert_called_once_with(
         ["git", "--version"],
         cwd=".",
-        timeout=20,
         env=None,
         username=None,
         password=None,
@@ -60,7 +59,6 @@ async def test_git_get_settings_no_git(mock_execute, jp_fetch):
     mock_execute.assert_called_once_with(
         ["git", "--version"],
         cwd=".",
-        timeout=20,
         env=None,
         username=None,
         password=None,
@@ -93,7 +91,6 @@ async def test_git_get_settings_no_jlab(mock_execute, jp_fetch):
     mock_execute.assert_called_once_with(
         ["git", "--version"],
         cwd=".",
-        timeout=20,
         env=None,
         username=None,
         password=None,

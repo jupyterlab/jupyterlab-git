@@ -34,7 +34,6 @@ async def test_git_add_remote_success_no_name(mock_execute, jp_fetch, jp_root_di
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout=20,
         env=None,
         username=None,
         password=None,
@@ -73,7 +72,6 @@ async def test_git_add_remote_success(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout=20,
         env=None,
         username=None,
         password=None,
@@ -117,7 +115,6 @@ async def test_git_add_remote_failure(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         ["git", "remote", "add", "origin", url],
         cwd=str(local_path),
-        timeout=20,
         env=None,
         username=None,
         password=None,
@@ -139,7 +136,6 @@ async def test_git_remote_show(mock_execute, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout=20,
         env=None,
         username=None,
         password=None,
@@ -176,7 +172,6 @@ async def test_git_remote_show_verbose(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout=20,
         env=None,
         username=None,
         password=None,
@@ -215,7 +210,6 @@ async def test_git_remote_remove(mock_execute, jp_fetch, jp_root_dir):
     mock_execute.assert_called_once_with(
         command,
         cwd=str(local_path),
-        timeout=20,
         env=None,
         username=None,
         password=None,

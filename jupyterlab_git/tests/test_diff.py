@@ -7,12 +7,12 @@ from unittest.mock import patch
 import pytest
 import tornado
 
-from jupyterlab_git.git import Git
+from jupyterlab_git.git import Git, GitCommandError
 
 
 @pytest.mark.asyncio
 async def test_changed_files_invalid_input():
-    with pytest.raises(tornado.web.HTTPError):
+    with pytest.raises(Exception):
         await Git().changed_files(
             path="test-path", base="64950a634cd11d1a01ddfedaeffed67b531cb11e"
         )
@@ -40,7 +40,6 @@ async def test_changed_files_single_commit():
                 "-z",
             ],
             cwd="test-path",
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -64,7 +63,6 @@ async def test_changed_files_working_tree():
         mock_execute.assert_called_once_with(
             ["git", "diff", "HEAD", "--name-only", "-z"],
             cwd="test-path",
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -88,7 +86,6 @@ async def test_changed_files_index():
         mock_execute.assert_called_once_with(
             ["git", "diff", "--staged", "HEAD", "--name-only", "-z"],
             cwd="test-path",
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -112,7 +109,6 @@ async def test_changed_files_two_commits():
         mock_execute.assert_called_once_with(
             ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z", "--"],
             cwd="test-path",
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -136,7 +132,6 @@ async def test_changed_files_git_diff_error():
         mock_execute.assert_called_once_with(
             ["git", "diff", "HEAD", "origin/HEAD", "--name-only", "-z", "--"],
             cwd="test-path",
-            timeout=20,
             env=None,
             username=None,
             password=None,
@@ -245,7 +240,7 @@ async def test_is_binary_file(args, cli_result, cmd, expected):
         mock_execute.return_value = cli_result
 
         if isinstance(expected, type) and issubclass(expected, Exception):
-            with pytest.raises(expected):
+            with pytest.raises(GitCommandError):
                 await Git()._is_binary(*args)
         else:
             # When
@@ -255,7 +250,6 @@ async def test_is_binary_file(args, cli_result, cmd, expected):
             mock_execute.assert_called_once_with(
                 cmd,
                 cwd="/bin",
-                timeout=20,
                 env=None,
                 username=None,
                 password=None,

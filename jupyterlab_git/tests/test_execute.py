@@ -1,27 +1,26 @@
 import pytest
 from unittest.mock import patch
+from jupyterlab_git.git import Git, _get_execution_lock
 
-from jupyterlab_git.git import execute, execution_lock
 
-
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_execute_waits_on_index_lock(tmp_path):
     lock_file = tmp_path / ".git/index.lock"
     lock_file.parent.mkdir(parents=True, exist_ok=True)
     lock_file.write_text("")
 
+    git = Git()
+    lock = _get_execution_lock()
+
     async def remove_lock_file(*args):
-        assert "unlocked" not in repr(execution_lock)  # Check that the lock is working
-        lock_file.unlink()  # Raise an error for missing file
+        assert lock.locked()  # Check that the lock is working
+        lock_file.unlink()
 
-    with patch("tornado.gen.sleep") as sleep:
-        sleep.side_effect = remove_lock_file  # Remove the lock file instead of sleeping
-
-        assert "unlock" in repr(execution_lock)
+    # Remove the lock file instead of sleeping
+    with patch("anyio.sleep", side_effect=remove_lock_file) as sleep_mock:
         cmd = ["git", "dummy"]
-        kwargs = {"cwd": "{!s}".format(tmp_path), "timeout": 20}
-        await execute(cmd, **kwargs)
-        assert "unlock" in repr(execution_lock)
+        await git._Git__execute(cmd, cwd=str(tmp_path))
 
+        assert not lock.locked()
         assert not lock_file.exists()
-        assert sleep.call_count == 1
+        assert sleep_mock.call_count == 1
