@@ -7,7 +7,7 @@ import tornado
 from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import NAMESPACE, setup_handlers, GitHandler
 
-from .testutils import assert_http_error, maybe_future
+from .testutils import assert_http_error
 from tornado.httpclient import HTTPClientError
 
 from pathlib import Path
@@ -47,10 +47,10 @@ async def test_all_history_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
 
     local_path = jp_root_dir / "test_path"
 
-    mock_git.show_top_level.return_value = maybe_future(show_top_level)
-    mock_git.branch.return_value = maybe_future(branch)
-    mock_git.log.return_value = maybe_future(log)
-    mock_git.status.return_value = maybe_future(status)
+    mock_git.show_top_level.return_value = show_top_level
+    mock_git.branch.return_value = branch
+    mock_git.log.return_value = log
+    mock_git.status.return_value = status
 
     # When
     body = {"history_count": 25}
@@ -84,7 +84,7 @@ async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
 
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future((0, str(path), ""))
+    mock_execute.return_value = (0, str(path), "")
 
     # When
     response = await jp_fetch(
@@ -116,7 +116,7 @@ async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
 
 @patch("jupyterlab_git.git.execute")
 async def test_git_show_prefix_nested_directory(mock_execute, jp_fetch, jp_root_dir):
-    mock_execute.return_value = maybe_future((0, f"{jp_root_dir.name}/", ""))
+    mock_execute.return_value = (0, f"{jp_root_dir.name}/", "")
     # When
     response = await jp_fetch(
         NAMESPACE,
@@ -165,9 +165,7 @@ async def test_git_show_prefix_not_a_git_repo(mock_execute, jp_fetch, jp_root_di
     # Given
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future(
-        (128, "", "fatal: not a git repository (or any")
-    )
+    mock_execute.return_value = (128, "", "fatal: not a git repository (or any")
 
     # When
     response = await jp_fetch(
@@ -204,7 +202,7 @@ async def test_git_show_top_level(mock_execute, jp_fetch, jp_root_dir):
 
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future((0, str(path), ""))
+    mock_execute.return_value = (0, str(path), "")
 
     # When
     response = await jp_fetch(
@@ -239,9 +237,7 @@ async def test_git_show_top_level_not_a_git_repo(mock_execute, jp_fetch, jp_root
     # Given
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future(
-        (128, "", "fatal: not a git repository (or any")
-    )
+    mock_execute.return_value = (128, "", "fatal: not a git repository (or any")
 
     # When
     response = await jp_fetch(
@@ -321,7 +317,7 @@ async def test_branch_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
         ],
     }
 
-    mock_git.branch.return_value = maybe_future(branch)
+    mock_git.branch.return_value = branch
 
     # When
     response = await jp_fetch(
@@ -341,7 +337,7 @@ async def test_log_handler(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     log = {"code": 0, "commits": []}
-    mock_git.log.return_value = maybe_future(log)
+    mock_git.log.return_value = log
 
     # When
     body = {"history_count": 20}
@@ -362,7 +358,7 @@ async def test_log_handler_no_history_count(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     log = {"code": 0, "commits": []}
-    mock_git.log.return_value = maybe_future(log)
+    mock_git.log.return_value = log
 
     # When
     response = await jp_fetch(
@@ -381,11 +377,13 @@ async def test_log_handler_no_history_count(mock_git, jp_fetch, jp_root_dir):
 async def test_push_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = maybe_future("localbranch")
-    mock_git.get_upstream_branch.return_value = maybe_future(
-        {"code": 0, "remote_short_name": ".", "remote_branch": "localbranch"}
-    )
-    mock_git.push.return_value = maybe_future({"code": 0})
+    mock_git.get_current_branch.return_value = "localbranch"
+    mock_git.get_upstream_branch.return_value = {
+        "code": 0,
+        "remote_short_name": ".",
+        "remote_branch": "localbranch",
+    }
+    mock_git.push.return_value = {"code": 0}
 
     # When
     response = await jp_fetch(
@@ -408,14 +406,14 @@ async def test_push_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
 async def test_push_handler_remotebranch(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = maybe_future("foo/bar")
+    mock_git.get_current_branch.return_value = "foo/bar"
     upstream = {
         "code": 0,
         "remote_short_name": "origin/something",
         "remote_branch": "remote-branch-name",
     }
-    mock_git.get_upstream_branch.return_value = maybe_future(upstream)
-    mock_git.push.return_value = maybe_future({"code": 0})
+    mock_git.get_upstream_branch.return_value = upstream
+    mock_git.push.return_value = {"code": 0}
 
     # When
     response = await jp_fetch(
@@ -443,16 +441,16 @@ async def test_push_handler_remotebranch(mock_git, jp_fetch, jp_root_dir):
 async def test_push_handler_noupstream(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = maybe_future("foo")
+    mock_git.get_current_branch.return_value = "foo"
     upstream = {
         "code": 128,
         "command": "",
         "message": "fatal: no upstream configured for branch 'foo'",
     }
-    mock_git.get_upstream_branch.return_value = maybe_future(upstream)
-    mock_git.config.return_value = maybe_future({"options": dict()})
-    mock_git.remote_show.return_value = maybe_future({})
-    mock_git.push.return_value = maybe_future({"code": 0})
+    mock_git.get_upstream_branch.return_value = upstream
+    mock_git.config.return_value = {"options": dict()}
+    mock_git.remote_show.return_value = {}
+    mock_git.push.return_value = {"code": 0}
 
     # When
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
@@ -481,12 +479,12 @@ async def test_push_handler_multipleupstream(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     remotes = ["origin", "upstream"]
-    mock_git.get_current_branch.return_value = maybe_future("foo")
+    mock_git.get_current_branch.return_value = "foo"
     upstream = {"code": -1, "message": "oups"}
-    mock_git.get_upstream_branch.return_value = maybe_future(upstream)
-    mock_git.config.return_value = maybe_future({"options": dict()})
-    mock_git.remote_show.return_value = maybe_future({"remotes": remotes})
-    mock_git.push.return_value = maybe_future({"code": 0})
+    mock_git.get_upstream_branch.return_value = upstream
+    mock_git.config.return_value = {"options": dict()}
+    mock_git.remote_show.return_value = {"remotes": remotes}
+    mock_git.push.return_value = {"code": 0}
 
     # When
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
@@ -514,12 +512,12 @@ async def test_push_handler_noupstream_unique_remote(mock_git, jp_fetch, jp_root
     # Given
     local_path = jp_root_dir / "test_path"
     remote = "origin"
-    mock_git.get_current_branch.return_value = maybe_future("foo")
+    mock_git.get_current_branch.return_value = "foo"
     upstream = {"code": -1, "message": "oups"}
-    mock_git.get_upstream_branch.return_value = maybe_future(upstream)
-    mock_git.config.return_value = maybe_future({"options": dict()})
-    mock_git.remote_show.return_value = maybe_future({"remotes": [remote]})
-    mock_git.push.return_value = maybe_future({"code": 0})
+    mock_git.get_upstream_branch.return_value = upstream
+    mock_git.config.return_value = {"options": dict()}
+    mock_git.remote_show.return_value = {"remotes": [remote]}
+    mock_git.push.return_value = {"code": 0}
 
     # When
     response = await jp_fetch(
@@ -550,14 +548,12 @@ async def test_push_handler_noupstream_pushdefault(mock_git, jp_fetch, jp_root_d
     # Given
     local_path = jp_root_dir / "test_path"
     remote = "rorigin"
-    mock_git.get_current_branch.return_value = maybe_future("foo")
+    mock_git.get_current_branch.return_value = "foo"
     upstream = {"code": -1, "message": "oups"}
-    mock_git.get_upstream_branch.return_value = maybe_future(upstream)
-    mock_git.config.return_value = maybe_future(
-        {"options": {"remote.pushdefault": remote}}
-    )
-    mock_git.remote_show.return_value = maybe_future({"remotes": [remote, "upstream"]})
-    mock_git.push.return_value = maybe_future({"code": 0})
+    mock_git.get_upstream_branch.return_value = upstream
+    mock_git.config.return_value = {"options": {"remote.pushdefault": remote}}
+    mock_git.remote_show.return_value = {"remotes": [remote, "upstream"]}
+    mock_git.push.return_value = {"code": 0}
 
     # When
     response = await jp_fetch(
@@ -589,12 +585,12 @@ async def test_push_handler_noupstream_pass_remote_nobranch(
 ):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = maybe_future("foo")
+    mock_git.get_current_branch.return_value = "foo"
     upstream = {"code": -1, "message": "oups"}
-    mock_git.get_upstream_branch.return_value = maybe_future(upstream)
-    mock_git.config.return_value = maybe_future({"options": dict()})
-    mock_git.remote_show.return_value = maybe_future({})
-    mock_git.push.return_value = maybe_future({"code": 0})
+    mock_git.get_upstream_branch.return_value = upstream
+    mock_git.config.return_value = {"options": dict()}
+    mock_git.remote_show.return_value = {}
+    mock_git.push.return_value = {"code": 0}
 
     remote = "online"
 
@@ -624,12 +620,12 @@ async def test_push_handler_noupstream_pass_remote_branch(
 ):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = maybe_future("foo")
+    mock_git.get_current_branch.return_value = "foo"
     upstream = {"code": -1, "message": "oups"}
-    mock_git.get_upstream_branch.return_value = maybe_future(upstream)
-    mock_git.config.return_value = maybe_future({"options": dict()})
-    mock_git.remote_show.return_value = maybe_future({})
-    mock_git.push.return_value = maybe_future({"code": 0})
+    mock_git.get_upstream_branch.return_value = upstream
+    mock_git.config.return_value = {"options": dict()}
+    mock_git.remote_show.return_value = {}
+    mock_git.push.return_value = {"code": 0}
 
     remote = "online"
     remote_branch = "onfoo"
@@ -658,13 +654,13 @@ async def test_push_handler_noupstream_pass_remote_branch(
 async def test_upstream_handler_forward_slashes(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = maybe_future("foo/bar")
+    mock_git.get_current_branch.return_value = "foo/bar"
     upstream = {
         "code": 0,
         "remote_short_name": "origin/something",
         "remote_branch": "foo/bar",
     }
-    mock_git.get_upstream_branch.return_value = maybe_future(upstream)
+    mock_git.get_upstream_branch.return_value = upstream
 
     # When
     response = await jp_fetch(
@@ -684,9 +680,9 @@ async def test_upstream_handler_forward_slashes(mock_git, jp_fetch, jp_root_dir)
 async def test_upstream_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = maybe_future("foo/bar")
+    mock_git.get_current_branch.return_value = "foo/bar"
     upstream = {"code": 0, "remote_short_name": ".", "remote_branch": "foo/bar"}
-    mock_git.get_upstream_branch.return_value = maybe_future(upstream)
+    mock_git.get_upstream_branch.return_value = upstream
 
     # When
     response = await jp_fetch(
@@ -710,8 +706,8 @@ async def test_content(mock_execute, jp_fetch, jp_root_dir):
     content = "dummy content file\nwith multiple lines"
 
     mock_execute.side_effect = [
-        maybe_future((0, "1\t1\t{}".format(filename), "")),
-        maybe_future((0, content, "")),
+        (0, "1\t1\t{}".format(filename), ""),
+        (0, content, ""),
     ]
 
     # When
@@ -833,8 +829,8 @@ async def test_content_index(mock_execute, jp_fetch, jp_root_dir):
     content = "dummy content file\nwith multiple lines"
 
     mock_execute.side_effect = [
-        maybe_future((0, "1\t1\t{}".format(filename), "")),
-        maybe_future((0, content, "")),
+        (0, "1\t1\t{}".format(filename), ""),
+        (0, content, ""),
     ]
 
     # When
@@ -891,16 +887,14 @@ async def test_content_base(mock_execute, jp_fetch, jp_root_dir):
     obj_ref = "915bb14609daab65e5304e59d89c626283ae49fc"
 
     mock_execute.side_effect = [
-        maybe_future(
-            (
-                0,
-                "100644 {1} 1       {0}\x00100644 285bdbc14e499b85ec407512a3bb3992fa3d4082 2 {0}\x00100644 66ac842dfb0b5c20f757111d6b3edd56d80622b4 3 {0}\x00".format(
-                    filename, obj_ref
-                ),
-                "",
-            )
+        (
+            0,
+            "100644 {1} 1       {0}\x00100644 285bdbc14e499b85ec407512a3bb3992fa3d4082 2 {0}\x00100644 66ac842dfb0b5c20f757111d6b3edd56d80622b4 3 {0}\x00".format(
+                filename, obj_ref
+            ),
+            "",
         ),
-        maybe_future((0, content, "")),
+        (0, content, ""),
     ]
 
     # When
@@ -948,8 +942,8 @@ async def test_content_unknown_special(mock_execute, jp_fetch, jp_root_dir):
     content = "dummy content file\nwith multiple lines"
 
     mock_execute.side_effect = [
-        maybe_future((0, "1\t1\t{}".format(filename), "")),
-        maybe_future((0, content, "")),
+        (0, "1\t1\t{}".format(filename), ""),
+        (0, content, ""),
     ]
 
     # When
@@ -971,14 +965,12 @@ async def test_content_show_handled_error(mock_execute, jp_fetch, jp_root_dir):
     local_path = jp_root_dir / "test_path"
     filename = "my/file"
 
-    mock_execute.return_value = maybe_future(
-        (
-            -1,
-            "",
-            "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(
-                filename
-            ),
-        )
+    mock_execute.return_value = (
+        -1,
+        "",
+        "fatal: Path '{}' does not exist (neither on disk nor in the index)".format(
+            filename
+        ),
     )
 
     # When
@@ -1002,7 +994,7 @@ async def test_content_binary(mock_execute, jp_fetch, jp_root_dir):
     local_path = jp_root_dir / "test_path"
     filename = "my/file"
 
-    mock_execute.return_value = maybe_future((0, "-\t-\t{}".format(filename), ""))
+    mock_execute.return_value = (0, "-\t-\t{}".format(filename), "")
 
     # When
     body = {
@@ -1053,7 +1045,7 @@ async def test_content_show_unhandled_error(mock_execute, jp_fetch, jp_root_dir)
     local_path = jp_root_dir / "test_path"
     filename = "my/file"
 
-    mock_execute.return_value = maybe_future((-1, "", "Dummy error"))
+    mock_execute.return_value = (-1, "", "Dummy error")
 
     # When
     body = {

@@ -6,17 +6,13 @@ import pytest
 from jupyterlab_git import JupyterLabGit
 from jupyterlab_git.git import Git
 
-from .testutils import maybe_future
-
 
 @pytest.mark.asyncio
 async def test_git_pull_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = maybe_future(
-                (1, "output", "Authentication failed")
-            )
+            mock_execute.return_value = (1, "output", "Authentication failed")
 
             # When
             actual_response = await Git().pull("test_curr_path")
@@ -39,12 +35,10 @@ async def test_git_pull_with_conflict_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = maybe_future(
-                (
-                    1,
-                    "",
-                    "Automatic merge failed; fix conflicts and then commit the result.",
-                )
+            mock_execute.return_value = (
+                1,
+                "",
+                "Automatic merge failed; fix conflicts and then commit the result.",
             )
 
             # When
@@ -75,12 +69,10 @@ async def test_git_pull_with_auth_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
-            mock_execute_with_authentication.return_value = maybe_future(
-                (
-                    1,
-                    "",
-                    "remote: Invalid username or password.\r\nfatal: Authentication failed for 'repo_url'",
-                )
+            mock_execute_with_authentication.return_value = (
+                1,
+                "",
+                "remote: Invalid username or password.\r\nfatal: Authentication failed for 'repo_url'",
             )
 
             # When
@@ -109,7 +101,7 @@ async def test_git_pull_success():
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
             output = "output"
-            mock_execute.return_value = maybe_future((0, output, ""))
+            mock_execute.return_value = (0, output, "")
 
             # When
             actual_response = await Git().pull("test_curr_path")
@@ -133,9 +125,7 @@ async def test_git_pull_with_auth_success():
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
             output = "output"
-            mock_execute_with_authentication.return_value = maybe_future(
-                (0, output, "")
-            )
+            mock_execute_with_authentication.return_value = (0, output, "")
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
@@ -159,12 +149,10 @@ async def test_git_pull_with_auth_success_and_conflict_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
-            mock_execute_with_authentication.return_value = maybe_future(
-                (
-                    1,
-                    "output",
-                    "Automatic merge failed; fix conflicts and then commit the result.",
-                )
+            mock_execute_with_authentication.return_value = (
+                1,
+                "output",
+                "Automatic merge failed; fix conflicts and then commit the result.",
             )
 
             # When
@@ -203,9 +191,9 @@ async def test_git_pull_with_auth_and_cache_credentials():
             credential_helper = default_config.credential_helper
             test_path = "test_path"
             mock_execute.side_effect = [
-                maybe_future((0, "", "")),
-                maybe_future((0, "", "")),
-                maybe_future((0, "", "")),
+                (0, "", ""),
+                (0, "", ""),
+                (0, "", ""),
             ]
 
             # When
@@ -262,8 +250,8 @@ async def test_git_pull_with_auth_and_cache_credentials_and_existing_credential_
         default_config = JupyterLabGit()
         test_path = "test_path"
         mock_execute.side_effect = [
-            maybe_future((0, "credential.helper=something", "")),
-            maybe_future((0, "", "")),
+            (0, "credential.helper=something", ""),
+            (0, "", ""),
         ]
 
         # When
@@ -302,9 +290,7 @@ async def test_git_push_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = maybe_future(
-                (1, "output", "Authentication failed")
-            )
+            mock_execute.return_value = (1, "output", "Authentication failed")
 
             # When
             actual_response = await Git().push(
@@ -329,12 +315,10 @@ async def test_git_push_with_auth_fail():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
-            mock_execute_with_authentication.return_value = maybe_future(
-                (
-                    1,
-                    "",
-                    "remote: Invalid username or password.\r\nfatal: Authentication failed for 'repo_url'",
-                )
+            mock_execute_with_authentication.return_value = (
+                1,
+                "",
+                "remote: Invalid username or password.\r\nfatal: Authentication failed for 'repo_url'",
             )
 
             # When
@@ -365,7 +349,7 @@ async def test_git_push_success():
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
             output = "output"
-            mock_execute.return_value = maybe_future((0, output, "does not matter"))
+            mock_execute.return_value = (0, output, "does not matter")
 
             # When
             actual_response = await Git().push(
@@ -391,8 +375,10 @@ async def test_git_push_with_auth_success():
         with patch("jupyterlab_git.git.execute") as mock_execute_with_authentication:
             # Given
             output = "output"
-            mock_execute_with_authentication.return_value = maybe_future(
-                (0, output, "does not matter")
+            mock_execute_with_authentication.return_value = (
+                0,
+                output,
+                "does not matter",
             )
 
             # When
@@ -426,9 +412,9 @@ async def test_git_push_with_auth_and_cache_credentials():
             credential_helper = default_config.credential_helper
             test_path = "test_path"
             mock_execute.side_effect = [
-                maybe_future((0, "", "")),
-                maybe_future((0, "", "")),
-                maybe_future((0, "", "")),
+                (0, "", ""),
+                (0, "", ""),
+                (0, "", ""),
             ]
 
             # When
@@ -487,8 +473,8 @@ async def test_git_push_with_auth_and_cache_credentials_and_existing_credential_
         default_config = JupyterLabGit()
         test_path = "test_path"
         mock_execute.side_effect = [
-            maybe_future((0, "credential.helper=something", "")),
-            maybe_future((0, "", "")),
+            (0, "credential.helper=something", ""),
+            (0, "", ""),
         ]
 
         # When
@@ -530,7 +516,7 @@ async def test_git_push_no_tags_success():
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
             output = "output"
-            mock_execute.return_value = maybe_future((0, output, "does not matter"))
+            mock_execute.return_value = (0, output, "does not matter")
 
             # When
             actual_response = await Git().push(

@@ -3,14 +3,14 @@ from unittest.mock import call, patch
 
 from jupyterlab_git.handlers import NAMESPACE
 
-from .testutils import maybe_future
-
 
 @patch("jupyterlab_git.git.execute")
 async def test_git_get_config_success(mock_execute, jp_fetch, jp_root_dir):
     # Given
-    mock_execute.return_value = maybe_future(
-        (0, "user.name=John Snow\nuser.email=john.snow@iscoming.com", "")
+    mock_execute.return_value = (
+        0,
+        "user.name=John Snow\nuser.email=john.snow@iscoming.com",
+        "",
     )
     local_path = jp_root_dir / "test_path"
 
@@ -56,7 +56,7 @@ async def test_git_get_config_multiline(mock_execute, jp_fetch, jp_root_dir):
         '";   };f\n'
         'alias.topic-start=!f(){     topic_branch="$1";     git topic-create "$topic_branch";     git topic-push;   };f'
     )
-    mock_execute.return_value = maybe_future((0, output, ""))
+    mock_execute.return_value = (0, output, "")
     local_path = jp_root_dir / "test_path"
 
     # When
@@ -105,7 +105,7 @@ async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch, jp_root
         '";   };f\n'
         'alias.topic-start=!f(){     topic_branch="$1";     git topic-create "$topic_branch";     git topic-push;   };f'
     )
-    mock_execute.return_value = maybe_future((0, output, ""))
+    mock_execute.return_value = (0, output, "")
     local_path = jp_root_dir / "test_path"
 
     # When
@@ -142,7 +142,7 @@ async def test_git_get_config_accepted_multiline(mock_execute, jp_fetch, jp_root
 @patch("jupyterlab_git.git.execute")
 async def test_git_set_config_success(mock_execute, jp_fetch, jp_root_dir):
     # Given
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
     local_path = jp_root_dir / "test_path"
 
     # When

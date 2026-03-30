@@ -6,7 +6,7 @@ import tornado
 
 from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import NAMESPACE
-from .testutils import assert_http_error, maybe_future
+from .testutils import assert_http_error
 
 
 @patch("jupyterlab_git.git.execute")
@@ -14,7 +14,7 @@ async def test_git_add_remote_success_no_name(mock_execute, jp_fetch, jp_root_di
     # Given
     local_path = jp_root_dir / "test_path"
     url = "http://github.com/myid/myrepository.git"
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
 
     # When
     body = {
@@ -55,7 +55,7 @@ async def test_git_add_remote_success(mock_execute, jp_fetch, jp_root_dir):
     local_path = jp_root_dir / "test_path"
     url = "http://github.com/myid/myrepository.git"
     name = "distant"
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
 
     # When
     body = {"url": url, "name": name}
@@ -95,7 +95,7 @@ async def test_git_add_remote_failure(mock_execute, jp_fetch, jp_root_dir):
     url = "http://github.com/myid/myrepository.git"
     error_msg = "Fake failure"
     error_code = 128
-    mock_execute.return_value = maybe_future((error_code, "", error_msg))
+    mock_execute.return_value = (error_code, "", error_msg)
 
     # When
     body = {
@@ -129,9 +129,7 @@ async def test_git_add_remote_failure(mock_execute, jp_fetch, jp_root_dir):
 async def test_git_remote_show(mock_execute, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_execute.return_value = maybe_future(
-        (0, os.linesep.join(["origin", "test"]), "")
-    )
+    mock_execute.return_value = (0, os.linesep.join(["origin", "test"]), "")
 
     # When
     output = await Git().remote_show(str(local_path), False)
@@ -162,7 +160,7 @@ async def test_git_remote_show_verbose(mock_execute, jp_fetch, jp_root_dir):
     process_output = os.linesep.join(
         [f"origin\t{url} (fetch)", f"origin\t{url} (push)"]
     )
-    mock_execute.return_value = maybe_future((0, process_output, ""))
+    mock_execute.return_value = (0, process_output, "")
 
     # When
     response = await jp_fetch(
@@ -200,7 +198,7 @@ async def test_git_remote_show_verbose(mock_execute, jp_fetch, jp_root_dir):
 async def test_git_remote_remove(mock_execute, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
 
     # When
     name = "origin"

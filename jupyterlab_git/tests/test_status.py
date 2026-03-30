@@ -5,8 +5,6 @@ import pytest
 # local lib
 from jupyterlab_git.git import Git
 
-from .testutils import maybe_future
-
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
@@ -354,16 +352,12 @@ async def test_status(tmp_path, output, diff_output, expected):
         (repository / ".git" / "rebase-merge").mkdir(parents=True)
 
         mock_execute.side_effect = [
-            maybe_future((0, "\x00".join(output) + "\x00", "")),
-            maybe_future((0, "\x00".join(diff_output) + "\x00", "")),
-            maybe_future((0 if expected["state"] == 4 else 128, "", "cherry pick")),
-            maybe_future((0 if expected["state"] == 2 else 128, "", "merge")),
-            maybe_future(
-                (0 if expected["state"] == 3 else 128, ".git/rebase-merge", "rebase")
-            ),
-            maybe_future(
-                (0 if expected["state"] == 3 else 128, ".git/rebase-apply", "rebase")
-            ),
+            (0, "\x00".join(output) + "\x00", ""),
+            (0, "\x00".join(diff_output) + "\x00", ""),
+            (0 if expected["state"] == 4 else 128, "", "cherry pick"),
+            (0 if expected["state"] == 2 else 128, "", "merge"),
+            (0 if expected["state"] == 3 else 128, ".git/rebase-merge", "rebase"),
+            (0 if expected["state"] == 3 else 128, ".git/rebase-apply", "rebase"),
         ]
 
         # When

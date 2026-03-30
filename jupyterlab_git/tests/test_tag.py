@@ -4,8 +4,6 @@ import pytest
 
 from jupyterlab_git.git import Git
 
-from .testutils import maybe_future
-
 
 @pytest.mark.asyncio
 async def test_git_tag_success():
@@ -13,7 +11,7 @@ async def test_git_tag_success():
         output_tags = "v1.0.0\t6db57bf4987d387d439acd16ddfe8d54d46e8f4\nv2.0.1\t2aeae86b6010dd1f05b820d8753cff8349c181a6"
 
         # Given
-        mock_execute.return_value = maybe_future((0, output_tags, ""))
+        mock_execute.return_value = (0, output_tags, "")
 
         # When
         actual_response = await Git().tags("test_curr_path")
@@ -57,7 +55,7 @@ async def test_git_tag_checkout_success():
         with patch("jupyterlab_git.git.execute") as mock_execute:
             tag = "mock_tag"
             # Given
-            mock_execute.return_value = maybe_future((0, "", ""))
+            mock_execute.return_value = (0, "", "")
 
             # When
             actual_response = await Git().tag_checkout("test_curr_path", "mock_tag")
@@ -86,7 +84,7 @@ async def test_set_tag_succes():
             tag = "mock_tag"
             commitId = "mock_commit_id"
             # Given
-            mock_execute.return_value = maybe_future((0, "", ""))
+            mock_execute.return_value = (0, "", "")
 
             # When
             actual_response = await Git().set_tag(

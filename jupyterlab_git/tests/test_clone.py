@@ -7,8 +7,6 @@ import pytest
 from jupyterlab_git import JupyterLabGit
 from jupyterlab_git.git import Git
 
-from .testutils import maybe_future
-
 
 @pytest.mark.asyncio
 async def test_git_clone_success():
@@ -16,7 +14,7 @@ async def test_git_clone_success():
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
             output = "output"
-            mock_execute.return_value = maybe_future((0, output, "error"))
+            mock_execute.return_value = (0, output, "error")
 
             # When
             actual_response = await Git().clone(
@@ -46,7 +44,7 @@ async def test_git_download_success(tmp_path):
 
             def create_fake_git_repo(*args, **kwargs):
                 git_folder.mkdir(parents=True)
-                return maybe_future((0, output, "error"))
+                return (0, output, "error")
 
             mock_execute.side_effect = create_fake_git_repo
 
@@ -78,7 +76,7 @@ async def test_git_submodules_success(tmp_path):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
             output = "output"
-            mock_execute.return_value = maybe_future((0, output, "error"))
+            mock_execute.return_value = (0, output, "error")
 
             # When
             actual_response = await Git().clone(
@@ -110,8 +108,10 @@ async def test_git_clone_failure_from_git():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_execute:
             # Given
-            mock_execute.return_value = maybe_future(
-                (128, "test_output", "fatal: Not a git repository")
+            mock_execute.return_value = (
+                128,
+                "test_output",
+                "fatal: Not a git repository",
             )
 
             # When
@@ -141,7 +141,7 @@ async def test_git_clone_with_auth_success():
         with patch("jupyterlab_git.git.execute") as mock_authentication:
             # Given
             output = "output"
-            mock_authentication.return_value = maybe_future((0, output, ""))
+            mock_authentication.return_value = (0, output, "")
 
             # When
             auth = {"username": "asdf", "password": "qwerty"}
@@ -172,8 +172,10 @@ async def test_git_clone_with_auth_wrong_repo_url_failure_from_git():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_authentication:
             # Given
-            mock_authentication.return_value = maybe_future(
-                (128, "", "fatal: repository 'ghjkhjkl' does not exist")
+            mock_authentication.return_value = (
+                128,
+                "",
+                "fatal: repository 'ghjkhjkl' does not exist",
             )
 
             # When
@@ -208,12 +210,10 @@ async def test_git_clone_with_auth_auth_failure_from_git():
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git.git.execute") as mock_authentication:
             # Given
-            mock_authentication.return_value = maybe_future(
-                (
-                    128,
-                    "",
-                    "remote: Invalid username or password.\r\nfatal: Authentication failed for 'ghjkhjkl'",
-                )
+            mock_authentication.return_value = (
+                128,
+                "",
+                "remote: Invalid username or password.\r\nfatal: Authentication failed for 'ghjkhjkl'",
             )
 
             # When
@@ -251,9 +251,9 @@ async def test_git_clone_with_auth_and_cache_credentials():
             credential_helper = default_config.credential_helper
             test_path = "test_curr_path"
             mock_execute.side_effect = [
-                maybe_future((0, "", "")),
-                maybe_future((0, "", "")),
-                maybe_future((0, "", "")),
+                (0, "", ""),
+                (0, "", ""),
+                (0, "", ""),
             ]
             # When
             auth = {
@@ -317,8 +317,8 @@ async def test_git_clone_with_auth_and_cache_credentials_and_existing_credential
         default_config = JupyterLabGit()
         test_path = str(Path("/bin") / "test_curr_path")
         mock_execute.side_effect = [
-            maybe_future((0, "credential.helper=something", "")),
-            maybe_future((0, "", "")),
+            (0, "credential.helper=something", ""),
+            (0, "", ""),
         ]
         # When
         auth = {"username": "asdf", "password": "qwerty", "cache_credentials": True}

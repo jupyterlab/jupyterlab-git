@@ -5,8 +5,6 @@ import pytest
 
 from jupyterlab_git.git import Git
 
-from .testutils import maybe_future
-
 
 @pytest.mark.asyncio
 async def test_detailed_log():
@@ -25,9 +23,7 @@ async def test_detailed_log():
             "-\t-\tbinary_file.png",
         ]
 
-        mock_execute.return_value = maybe_future(
-            (0, "\x00".join(process_output) + "\x00", "")
-        )
+        mock_execute.return_value = (0, "\x00".join(process_output) + "\x00", "")
 
         expected_response = {
             "code": 0,
