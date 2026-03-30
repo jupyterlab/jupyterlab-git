@@ -6,14 +6,12 @@ import pytest
 from jupyterlab_git import JupyterLabGit
 from jupyterlab_git.git import Git
 
-from .testutils import maybe_future
-
 
 @pytest.mark.asyncio
 async def test_git_fetch_success():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((0, "", ""))
+        mock_execute.return_value = (0, "", "")
 
         # When
         actual_response = await Git().fetch(path="test_path")
@@ -35,7 +33,7 @@ async def test_git_fetch_success():
 async def test_git_fetch_fail():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((1, "", "error"))
+        mock_execute.return_value = (1, "", "error")
 
         # When
         actual_response = await Git().fetch(path="test_path")
@@ -62,7 +60,7 @@ async def test_git_fetch_fail():
 async def test_git_fetch_with_auth_success():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((0, "", ""))
+        mock_execute.return_value = (0, "", "")
 
         # When
         actual_response = await Git().fetch(
@@ -87,12 +85,10 @@ async def test_git_fetch_with_auth_fail():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         error_message = "remote: Invalid username or password.\r\nfatal: Authentication failed for 'test_repo'"
-        mock_execute.return_value = maybe_future(
-            (
-                128,
-                "",
-                error_message,
-            )
+        mock_execute.return_value = (
+            128,
+            "",
+            error_message,
         )
 
         # When
@@ -130,9 +126,9 @@ async def test_git_fetch_with_auth_and_cache_credentials():
             credential_helper = default_config.credential_helper
             test_path = "test_path"
             mock_execute.side_effect = [
-                maybe_future((0, "", "")),
-                maybe_future((0, "", "")),
-                maybe_future((0, "", "")),
+                (0, "", ""),
+                (0, "", ""),
+                (0, "", ""),
             ]
             # When
             actual_response = await Git(config=default_config).fetch(
@@ -194,8 +190,8 @@ async def test_git_fetch_with_auth_and_cache_credentials_and_existing_credential
         default_config = JupyterLabGit()
         test_path = "test_path"
         mock_execute.side_effect = [
-            maybe_future((0, "credential.helper=something", "")),
-            maybe_future((0, "", "")),
+            (0, "credential.helper=something", ""),
+            (0, "", ""),
         ]
         # When
         actual_response = await Git(config=default_config).fetch(

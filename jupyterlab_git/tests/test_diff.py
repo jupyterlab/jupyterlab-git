@@ -9,8 +9,6 @@ import tornado
 
 from jupyterlab_git.git import Git
 
-from .testutils import maybe_future
-
 
 @pytest.mark.asyncio
 async def test_changed_files_invalid_input():
@@ -24,7 +22,7 @@ async def test_changed_files_invalid_input():
 async def test_changed_files_single_commit():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((0, "file1.ipynb\x00file2.py\x00", ""))
+        mock_execute.return_value = (0, "file1.ipynb\x00file2.py\x00", "")
 
         # When
         actual_response = await Git().changed_files(
@@ -55,7 +53,7 @@ async def test_changed_files_single_commit():
 async def test_changed_files_working_tree():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((0, "file1.ipynb\x00file2.py", ""))
+        mock_execute.return_value = (0, "file1.ipynb\x00file2.py", "")
 
         # When
         actual_response = await Git().changed_files(
@@ -79,7 +77,7 @@ async def test_changed_files_working_tree():
 async def test_changed_files_index():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((0, "file1.ipynb\x00file2.py", ""))
+        mock_execute.return_value = (0, "file1.ipynb\x00file2.py", "")
 
         # When
         actual_response = await Git().changed_files(
@@ -103,7 +101,7 @@ async def test_changed_files_index():
 async def test_changed_files_two_commits():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((0, "file1.ipynb\x00file2.py", ""))
+        mock_execute.return_value = (0, "file1.ipynb\x00file2.py", "")
 
         # When
         actual_response = await Git().changed_files(
@@ -244,7 +242,7 @@ async def test_changed_files_git_diff_error():
 async def test_is_binary_file(args, cli_result, cmd, expected):
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future(cli_result)
+        mock_execute.return_value = cli_result
 
         if isinstance(expected, type) and issubclass(expected, Exception):
             with pytest.raises(expected):

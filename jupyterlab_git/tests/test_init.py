@@ -5,14 +5,12 @@ import pytest
 from jupyterlab_git import JupyterLabGit
 from jupyterlab_git.git import Git
 
-from .testutils import maybe_future
-
 
 @pytest.mark.asyncio
 async def test_init():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((0, "", ""))
+        mock_execute.return_value = (0, "", "")
 
         # When
         actual_response = await Git().init("test_curr_path")
@@ -35,8 +33,8 @@ async def test_init_and_post_init():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.side_effect = [
-            maybe_future((0, "", "")),
-            maybe_future((0, "hello", "")),
+            (0, "", ""),
+            (0, "hello", ""),
         ]
 
         # When
@@ -67,8 +65,8 @@ async def test_init_and_post_init_fail():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.side_effect = [
-            maybe_future((0, "", "")),
-            maybe_future((1, "", "not_there: command not found")),
+            (0, "", ""),
+            (1, "", "not_there: command not found"),
         ]
 
         # When
@@ -106,7 +104,7 @@ async def test_init_and_post_init_fail_to_run():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.side_effect = [
-            maybe_future((0, "", "")),
+            (0, "", ""),
             Exception("Not a command!"),
         ]
 

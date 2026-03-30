@@ -5,8 +5,6 @@ import pytest
 
 from jupyterlab_git.git import Git
 
-from .testutils import maybe_future
-
 
 @pytest.mark.asyncio
 async def test_single_file_log():
@@ -31,7 +29,7 @@ async def test_single_file_log():
             "1	1	test.txt",
         ]
 
-        mock_execute.return_value = maybe_future((0, "\n".join(process_output), ""))
+        mock_execute.return_value = (0, "\n".join(process_output), "")
 
         expected_response = {
             "code": 0,

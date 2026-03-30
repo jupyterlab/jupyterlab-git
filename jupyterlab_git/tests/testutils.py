@@ -2,14 +2,7 @@
 
 import json
 
-try:
-    from unittest.mock import AsyncMock  # New in Python 3.8 and used by unittest.mock
-except ImportError:
-    AsyncMock = None
-
-
 import tornado
-from jupyter_server.utils import ensure_async
 
 
 def assert_http_error(error, expected_code, expected_message=None):
@@ -43,10 +36,3 @@ def assert_http_error(error, expected_code, expected_message=None):
 class FakeContentManager:
     def get(self, path=None):
         return {"content": ""}
-
-
-def maybe_future(args):
-    if AsyncMock is None:
-        return ensure_async(args)
-    else:
-        return args

@@ -5,8 +5,6 @@ import pytest
 
 from jupyterlab_git.git import Git
 
-from .testutils import maybe_future
-
 
 @pytest.mark.parametrize(
     "branch,expected",
@@ -29,7 +27,7 @@ def test_is_remote_branch(branch, expected):
 async def test_get_current_branch_success():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((0, "feature-foo", ""))
+        mock_execute.return_value = (0, "feature-foo", "")
 
         # When
         actual_response = await Git().get_current_branch(
@@ -59,12 +57,10 @@ async def test_checkout_branch_noref_success():
 
     with patch("jupyterlab_git.git.execute") as mock_execute:
         with patch.object(
-            Git, "_get_branch_reference", return_value=maybe_future(None)
+            Git, "_get_branch_reference", return_value=None
         ) as mock__get_branch_reference:
             # Given
-            mock_execute.return_value = maybe_future(
-                (rc, stdout_message, stderr_message)
-            )
+            mock_execute.return_value = (rc, stdout_message, stderr_message)
 
             # When
             actual_response = await Git().checkout_branch(
@@ -99,12 +95,10 @@ async def test_checkout_branch_noref_failure():
     rc = 1
     with patch("jupyterlab_git.git.execute") as mock_execute:
         with patch.object(
-            Git, "_get_branch_reference", return_value=maybe_future(None)
+            Git, "_get_branch_reference", return_value=None
         ) as mock__get_branch_reference:
             # Given
-            mock_execute.return_value = maybe_future(
-                (rc, stdout_message, stderr_message)
-            )
+            mock_execute.return_value = (rc, stdout_message, stderr_message)
 
             # When
             actual_response = await Git().checkout_branch(
@@ -145,12 +139,10 @@ async def test_checkout_branch_remoteref_success():
         with patch.object(
             Git,
             "_get_branch_reference",
-            return_value=maybe_future("refs/remotes/remote_branch"),
+            return_value="refs/remotes/remote_branch",
         ) as mock__get_branch_reference:
             # Given
-            mock_execute.return_value = maybe_future(
-                (rc, stdout_message, stderr_message)
-            )
+            mock_execute.return_value = (rc, stdout_message, stderr_message)
 
             # When
             actual_response = await Git().checkout_branch(
@@ -188,12 +180,10 @@ async def test_checkout_branch_headsref_failure():
         with patch.object(
             Git,
             "_get_branch_reference",
-            return_value=maybe_future("refs/heads/local_branch"),
+            return_value="refs/heads/local_branch",
         ) as mock__get_branch_reference:
             # Given
-            mock_execute.return_value = maybe_future(
-                (rc, stdout_message, stderr_message)
-            )
+            mock_execute.return_value = (rc, stdout_message, stderr_message)
 
             # When
             actual_response = await Git().checkout_branch(
@@ -231,12 +221,10 @@ async def test_checkout_branch_headsref_success():
         with patch.object(
             Git,
             "_get_branch_reference",
-            return_value=maybe_future("refs/heads/local_branch"),
+            return_value="refs/heads/local_branch",
         ):
             # Given
-            mock_execute.return_value = maybe_future(
-                (rc, stdout_message, stderr_message)
-            )
+            mock_execute.return_value = (rc, stdout_message, stderr_message)
 
             # When
             actual_response = await Git().checkout_branch(
@@ -271,12 +259,10 @@ async def test_checkout_branch_remoteref_failure():
         with patch.object(
             Git,
             "_get_branch_reference",
-            return_value=maybe_future("refs/remotes/remote_branch"),
+            return_value="refs/remotes/remote_branch",
         ):
             # Given
-            mock_execute.return_value = maybe_future(
-                (rc, stdout_message, stderr_message)
-            )
+            mock_execute.return_value = (rc, stdout_message, stderr_message)
 
             # When
             actual_response = await Git().checkout_branch(
@@ -309,7 +295,7 @@ async def test_get_branch_reference_success():
         branch = "test-branch"
         reference = "refs/remotes/origin/test_branch"
 
-        mock_execute.return_value = maybe_future((0, reference, ""))
+        mock_execute.return_value = (0, reference, "")
 
         # When
         actual_response = await Git()._get_branch_reference(
@@ -336,14 +322,12 @@ async def test_get_branch_reference_failure():
         branch = "test-branch"
         reference = "test-branch"
         # Given
-        mock_execute.return_value = maybe_future(
-            (
-                128,
-                reference,
-                "fatal: ambiguous argument '{}': unknown revision or path not in the working tree.".format(
-                    branch
-                ),
-            )
+        mock_execute.return_value = (
+            128,
+            reference,
+            "fatal: ambiguous argument '{}': unknown revision or path not in the working tree.".format(
+                branch
+            ),
         )
 
         # When
@@ -368,12 +352,10 @@ async def test_get_branch_reference_failure():
 async def test_get_current_branch_failure():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future(
-            (
-                128,
-                "",
-                "fatal: Not a git repository (or any of the parent directories): .git",
-            )
+        mock_execute.return_value = (
+            128,
+            "",
+            "fatal: Not a git repository (or any of the parent directories): .git",
         )
 
         # When
@@ -407,7 +389,7 @@ async def test_get_current_branch_detached_success():
             "  remotes/origin/feature-foo",
             "  remotes/origin/HEAD",
         ]
-        mock_execute.return_value = maybe_future((0, "\n".join(process_output), ""))
+        mock_execute.return_value = (0, "\n".join(process_output), "")
 
         # When
         actual_response = await Git()._get_current_branch_detached(
@@ -431,12 +413,10 @@ async def test_get_current_branch_detached_success():
 async def test_get_current_branch_detached_failure():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future(
-            (
-                128,
-                "",
-                "fatal: Not a git repository (or any of the parent directories): .git",
-            )
+        mock_execute.return_value = (
+            128,
+            "",
+            "fatal: Not a git repository (or any of the parent directories): .git",
         )
 
         # When
@@ -477,8 +457,8 @@ async def test_get_upstream_branch_success(branch, upstream, remotename):
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.side_effect = [
-            maybe_future((0, remotename + "/" + upstream, "")),
-            maybe_future((0, remotename, "")),
+            (0, remotename + "/" + upstream, ""),
+            (0, remotename, ""),
         ]
 
         # When
@@ -545,7 +525,7 @@ async def test_get_upstream_branch_success(branch, upstream, remotename):
 async def test_get_upstream_branch_failure(outputs, message):
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future(outputs)
+        mock_execute.return_value = outputs
 
         # When
         response = await Git().get_upstream_branch(
@@ -580,7 +560,7 @@ async def test_get_upstream_branch_failure(outputs, message):
 async def test_get_tag_success():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future((0, "v0.3.0", ""))
+        mock_execute.return_value = (0, "v0.3.0", "")
 
         # When
         actual_response = await Git()._get_tag(
@@ -606,13 +586,11 @@ async def test_get_tag_failure():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
         mock_execute.side_effect = [
-            maybe_future((128, "", "fatal: Not a valid object name blah")),
-            maybe_future(
-                (
-                    128,
-                    "",
-                    "fatal: No tags can describe '01234567899999abcdefghijklmnopqrstuvwxyz'.",
-                )
+            (128, "", "fatal: Not a valid object name blah"),
+            (
+                128,
+                "",
+                "fatal: No tags can describe '01234567899999abcdefghijklmnopqrstuvwxyz'.",
             ),
         ]
 
@@ -670,8 +648,10 @@ async def test_get_tag_failure():
 async def test_no_tags():
     with patch("jupyterlab_git.git.execute") as mock_execute:
         # Given
-        mock_execute.return_value = maybe_future(
-            (128, "", "fatal: No names found, cannot describe anything.\n")
+        mock_execute.return_value = (
+            128,
+            "",
+            "fatal: No names found, cannot describe anything.\n",
         )
 
         # When
@@ -708,9 +688,9 @@ async def test_branch_success():
 
         mock_execute.side_effect = [
             # Response for get all refs/heads
-            maybe_future((0, "\n".join(process_output_heads), "")),
+            (0, "\n".join(process_output_heads), ""),
             # Response for get all refs/remotes
-            maybe_future((0, "\n".join(process_output_remotes), "")),
+            (0, "\n".join(process_output_remotes), ""),
         ]
 
         expected_response = {
@@ -820,12 +800,10 @@ async def test_branch_failure():
             "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)",
             "refs/heads/",
         ]
-        mock_execute.return_value = maybe_future(
-            (
-                128,
-                "",
-                "fatal: Not a git repository (or any of the parent directories): .git",
-            )
+        mock_execute.return_value = (
+            128,
+            "",
+            "fatal: Not a git repository (or any of the parent directories): .git",
         )
         expected_response = {
             "code": 128,
@@ -868,13 +846,13 @@ async def test_branch_success_detached_head():
 
         mock_execute.side_effect = [
             # Response for get all refs/heads
-            maybe_future((0, "\n".join(process_output_heads), "")),
+            (0, "\n".join(process_output_heads), ""),
             # Response for get current branch
-            maybe_future((128, "", "fatal: ref HEAD is not a symbolic ref")),
+            (128, "", "fatal: ref HEAD is not a symbolic ref"),
             # Response for get current branch detached
-            maybe_future((0, "\n".join(detached_head_output), "")),
+            (0, "\n".join(detached_head_output), ""),
             # Response for get all refs/remotes
-            maybe_future((0, "\n".join(process_output_remotes), "")),
+            (0, "\n".join(process_output_remotes), ""),
         ]
 
         expected_response = {
@@ -998,13 +976,13 @@ async def test_branch_success_rebasing():
 
         mock_execute.side_effect = [
             # Response for get all refs/heads
-            maybe_future((0, "\n".join(process_output_heads), "")),
+            (0, "\n".join(process_output_heads), ""),
             # Response for get current branch
-            maybe_future((128, "", "fatal: ref HEAD is not a symbolic ref")),
+            (128, "", "fatal: ref HEAD is not a symbolic ref"),
             # Response for get current branch detached
-            maybe_future((0, "\n".join(detached_head_output), "")),
+            (0, "\n".join(detached_head_output), ""),
             # Response for get all refs/remotes
-            maybe_future((0, "\n".join(process_output_remotes), "")),
+            (0, "\n".join(process_output_remotes), ""),
         ]
 
         expected_response = {

@@ -5,7 +5,7 @@ import tornado
 import os
 from jupyterlab_git.git import Git
 from jupyterlab_git.handlers import NAMESPACE
-from .testutils import assert_http_error, maybe_future
+from .testutils import assert_http_error
 
 # Git Stash - POST
 
@@ -19,7 +19,7 @@ async def test_git_stash_without_message(mock_execute, jp_fetch, jp_root_dir):
 
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
     # When
     response = await jp_fetch(
         NAMESPACE,
@@ -54,7 +54,7 @@ async def test_git_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     error_msg = "Fake failure"
     error_code = 128
 
-    mock_execute.return_value = maybe_future((error_code, "", error_msg))
+    mock_execute.return_value = (error_code, "", error_msg)
 
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
         response = await jp_fetch(
@@ -84,7 +84,7 @@ async def test_git_stash_with_message(mock_execute, jp_fetch, jp_root_dir):
     local_path = jp_root_dir / "test_path"
     stash_message = "Custom stash message"
 
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
 
     # When
     response = await jp_fetch(
@@ -121,12 +121,10 @@ async def test_git_stash_show_with_index(mock_execute, jp_fetch, jp_root_dir):
     local_path = jp_root_dir / "test_path"
     stash_index = 1
 
-    mock_execute.return_value = maybe_future(
-        (
-            0,
-            "node_modules/playwright-core/README.md\nnode_modules/playwright-core/package.json\n",
-            "",
-        )
+    mock_execute.return_value = (
+        0,
+        "node_modules/playwright-core/README.md\nnode_modules/playwright-core/package.json\n",
+        "",
     )
 
     # When
@@ -171,12 +169,10 @@ async def test_git_stash_show_without_index(mock_execute, jp_fetch, jp_root_dir)
     env["GIT_TERMINAL_PROMPT"] = "0"
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future(
-        (
-            0,
-            "stash@{0}: On main: testsd\nstash@{1}: WIP on main: bea6895 first commit\n",
-            "",
-        )
+    mock_execute.return_value = (
+        0,
+        "stash@{0}: On main: testsd\nstash@{1}: WIP on main: bea6895 first commit\n",
+        "",
     )
 
     # When
@@ -220,7 +216,7 @@ async def test_git_stash_show_failure(mock_execute, jp_fetch, jp_root_dir):
     error_msg = "Fake failure"
     error_code = 128
 
-    mock_execute.return_value = maybe_future((error_code, "", error_msg))
+    mock_execute.return_value = (error_code, "", error_msg)
 
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
         response = await jp_fetch(
@@ -264,7 +260,7 @@ async def test_git_drop_stash_single_success(mock_execute, jp_fetch, jp_root_dir
     local_path = jp_root_dir / "test_path"
     stash_index = 1
 
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
 
     # When
     response = await jp_fetch(
@@ -300,7 +296,7 @@ async def test_git_drop_stash_single_failure(mock_execute, jp_fetch, jp_root_dir
     error_code = 128
     stash_index = 1
 
-    mock_execute.return_value = maybe_future((error_code, "", error_msg))
+    mock_execute.return_value = (error_code, "", error_msg)
 
     # When
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
@@ -335,7 +331,7 @@ async def test_git_drop_stash_all_success(mock_execute, jp_fetch, jp_root_dir):
 
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
 
     # When
     response = await jp_fetch(
@@ -370,7 +366,7 @@ async def test_git_apply_stash_with_index(mock_execute, jp_fetch, jp_root_dir):
     env["GIT_TERMINAL_PROMPT"] = "0"
     local_path = jp_root_dir / "test_path"
     stash_index = 1
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
 
     # When
     response = await jp_fetch(
@@ -404,7 +400,7 @@ async def test_git_apply_stash_without_index(mock_execute, jp_fetch, jp_root_dir
 
     local_path = jp_root_dir / "test_path"
 
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
 
     # When
     response = await jp_fetch(
@@ -436,7 +432,7 @@ async def test_git_apply_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     error_code = 128
     stash_index = 1
 
-    mock_execute.return_value = maybe_future((error_code, "", error_msg))
+    mock_execute.return_value = (error_code, "", error_msg)
 
     # When
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:
@@ -473,7 +469,7 @@ async def test_git_pop_stash_with_index(mock_execute, jp_fetch, jp_root_dir):
     local_path = jp_root_dir / "test_path"
     stash_index = 1
 
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
     # When
     response = await jp_fetch(
         NAMESPACE,
@@ -505,7 +501,7 @@ async def test_git_pop_stash_without_index(mock_execute, jp_fetch, jp_root_dir):
     local_path = jp_root_dir / "test_path"
     stash_index = None
 
-    mock_execute.return_value = maybe_future((0, "", ""))
+    mock_execute.return_value = (0, "", "")
     # When
     response = await jp_fetch(
         NAMESPACE,
@@ -539,7 +535,7 @@ async def test_git_pop_stash_failure(mock_execute, jp_fetch, jp_root_dir):
     stash_index = 1
     error_msg = "Fake failure"
     error_code = 128
-    mock_execute.return_value = maybe_future((error_code, "", error_msg))
+    mock_execute.return_value = (error_code, "", error_msg)
 
     # When
     with pytest.raises(tornado.httpclient.HTTPClientError) as e:

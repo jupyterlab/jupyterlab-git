@@ -7,16 +7,16 @@ import os
 import shlex
 import shutil
 import sys
+from collections.abc import Callable
 from pathlib import Path
 from subprocess import check_call
-from typing import Callable, Dict, List, Union
 
 from pytest import fixture, skip
 
 FILES_PATH = Path(__file__).parent / "files"
 
 
-def call(cmd: Union[str, List[str]], cwd: Union[str, Path, None] = None) -> int:
+def call(cmd: str | list[str], cwd: str | Path | None = None) -> int:
     """Call a command
     if str, split into command list
     """
