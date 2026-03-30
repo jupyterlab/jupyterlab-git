@@ -548,36 +548,6 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
-   * Retrieve the repository commit log.
-   *
-   * ## Notes
-   *
-   * -  This API can be used to implicitly check if the current folder is a Git repository.
-   *
-   * @param count - number of commits to retrieve
-   * @returns promise which resolves upon retrieving the repository commit log
-   *
-   * @throws {Git.NotInRepository} If the current path is not a Git repository
-   * @throws {Git.GitResponseError} If the server response is not ok
-   * @throws {ServerConnection.NetworkError} If the request cannot be made
-   */
-  async allHistory(count = 25): Promise<Git.IAllHistory> {
-    const path = await this._getPathRepository();
-    return await this._taskHandler.execute<Git.IAllHistory>(
-      'git:fetch:history',
-      async () => {
-        return await this._requestAPI<Git.IAllHistory>(
-          URLExt.join(path, 'all_history'),
-          'POST',
-          {
-            history_count: count
-          }
-        );
-      }
-    );
-  }
-
-  /**
    * Checkout a branch.
    *
    * ## Notes

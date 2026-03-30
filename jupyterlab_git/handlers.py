@@ -120,47 +120,6 @@ class GitCloneHandler(GitHandler):
         self.finish(json.dumps(response))
 
 
-class GitAllHistoryHandler(GitHandler):
-    """
-    Parent handler for all four history/status git commands:
-    1. git show_top_level
-    2. git branch
-    3. git log
-    4. git status
-    Called on refresh of extension's widget
-    """
-
-    @tornado.web.authenticated
-    async def post(self, path: str = ""):
-        """
-        POST request handler, calls individual handlers for
-        'git show_top_level', 'git branch', 'git log', and 'git status'
-        """
-        body = self.get_json_body()
-        history_count = body["history_count"]
-        local_path = self.url2localpath(path)
-
-        show_top_level = await self.git.show_top_level(local_path)
-        if show_top_level.get("path") is None:
-            self.set_status(500)
-            self.finish(json.dumps(show_top_level))
-        else:
-            branch = await self.git.branch(local_path)
-            log = await self.git.log(local_path, history_count)
-            status = await self.git.status(local_path)
-
-            result = {
-                "code": show_top_level["code"],
-                "data": {
-                    "show_top_level": show_top_level,
-                    "branch": branch,
-                    "log": log,
-                    "status": status,
-                },
-            }
-            self.finish(json.dumps(result))
-
-
 class GitShowTopLevelHandler(GitHandler):
     """
     Handler for 'git rev-parse --show-toplevel'.
@@ -1184,7 +1143,6 @@ def setup_handlers(web_app):
     handlers_with_path = [
         ("/add_all_unstaged", GitAddAllUnstagedHandler),
         ("/add_all_untracked", GitAddAllUntrackedHandler),
-        ("/all_history", GitAllHistoryHandler),
         ("/branch/delete", GitBranchDeleteHandler),
         ("/branch", GitBranchHandler),
         ("/changed_files", GitChangedFilesHandler),

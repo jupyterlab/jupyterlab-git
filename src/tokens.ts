@@ -198,22 +198,6 @@ export interface IGitExtension extends IDisposable {
   addRemote(url: string, name?: string): Promise<void>;
 
   /**
-   * Retrieve the repository commit log.
-   *
-   * ## Notes
-   *
-   * -  This API can be used to implicitly check if the current folder is a Git repository.
-   *
-   * @param count - number of commits to retrieve
-   * @returns promise which resolves upon retrieving the repository commit log
-   *
-   * @throws {Git.NotInRepository} If the current path is not a Git repository
-   * @throws {Git.GitResponseError} If the server response is not ok
-   * @throws {ServerConnection.NetworkError} If the request cannot be made
-   */
-  allHistory(historyCount?: number): Promise<Git.IAllHistory>;
-
-  /**
    * Apply a given stash
    *
    * @param index - Index of the stash to apply.
@@ -882,20 +866,6 @@ export namespace Git {
      * Cherry-pick in progress
      */
     CHERRY_PICKING
-  }
-
-  /**
-   * Interface for GitAllHistory request result,
-   * has all repo information
-   */
-  export interface IAllHistory {
-    code: number;
-    data?: {
-      show_top_level?: IShowTopLevelResult;
-      branch?: IBranchResult;
-      log?: ILogResult;
-      status?: IStatusResult;
-    };
   }
 
   /**
