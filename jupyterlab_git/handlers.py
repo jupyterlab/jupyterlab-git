@@ -489,24 +489,14 @@ class GitCheckoutHandler(GitHandler):
         """
         data = self.get_json_body()
         local_path = self.url2localpath(path)
-
         if data["checkout_branch"]:
-            if data["new_check"]:
-                #  Need to check if startpoint is valid
-                is_start_point_valid = await self.git._get_branch_reference(
-                    data["startpoint"], local_path
-                )
-
-                #  If start point is not valid, we need to make an empty commit
-                if not is_start_point_valid:
-                    await self.git._empty_commit(local_path)
-
-                body = await self.git.checkout_new_branch(
-                    data["branchname"], data["startpoint"], local_path
-                )
-            else:
-                body = await self.git.checkout_branch(data["branchname"], local_path)
-        elif data["checkout_all"]:
+            body = await self.git.checkout_branch_safe(
+                data["branchname"],
+                data["startpoint"],
+                local_path,
+                new_branch=data["new_check"],
+            )
+        elif data.get("checkout_all"):
             body = await self.git.checkout_all(local_path)
         else:
             body = await self.git.checkout(data["filename"], local_path)
@@ -656,73 +646,14 @@ class GitPushHandler(GitHandler):
         data = self.get_json_body()
         known_remote = data.get("remote")
         force = data.get("force", False)
+        auth = data.get("auth")
 
-        current_local_branch = await self.git.get_current_branch(local_path)
-
-        set_upstream = False
-        current_upstream_branch = await self.git.get_upstream_branch(
-            local_path, current_local_branch
+        response = await self.git.push_current_branch(
+            local_path=local_path, remote=known_remote, auth=auth, force=force
         )
-
-        if known_remote is not None:
-            set_upstream = current_upstream_branch["code"] != 0
-
-            remote_name, _, remote_branch = known_remote.partition("/")
-
-            current_upstream_branch = {
-                "code": 0,
-                "remote_branch": remote_branch or current_local_branch,
-                "remote_short_name": remote_name,
-            }
-
-        if current_upstream_branch["code"] == 0:
-            branch = ":".join(["HEAD", current_upstream_branch["remote_branch"]])
-            response = await self.git.push(
-                current_upstream_branch["remote_short_name"],
-                branch,
-                local_path,
-                data.get("auth", None),
-                set_upstream,
-                force,
-            )
-
-        else:
-            # Allow users to specify upstream through their configuration
-            # https://git-scm.com/docs/git-config#Documentation/git-config.txt-pushdefault
-            # Or use the remote defined if only one remote exists
-            config = await self.git.config(local_path)
-            config_options = config["options"]
-            list_remotes = await self.git.remote_show(local_path)
-            remotes = list_remotes.get("remotes", list())
-            push_default = config_options.get("remote.pushdefault")
-
-            default_remote = None
-            if push_default is not None and push_default in remotes:
-                default_remote = push_default
-            elif len(remotes) == 1:
-                default_remote = remotes[0]
-
-            if default_remote is not None:
-                response = await self.git.push(
-                    default_remote,
-                    current_local_branch,
-                    local_path,
-                    data.get("auth", None),
-                    set_upstream=True,
-                    force=force,
-                )
-            else:
-                response = {
-                    "code": 128,
-                    "message": "fatal: The current branch {} has no upstream branch.".format(
-                        current_local_branch
-                    ),
-                    "remotes": remotes,  # Returns the list of known remotes
-                }
 
         if response["code"] != 0:
             self.set_status(500)
-
         self.finish(json.dumps(response))
 
 
@@ -873,16 +804,13 @@ class GitIgnoreHandler(GitHandler):
         file_path = data.get("file_path", None)
         content = data.get("content", None)
         use_extension = data.get("use_extension", False)
-        if content:
-            body = await self.git.write_gitignore(local_path, content)
-        elif file_path:
-            if use_extension:
-                suffixes = Path(file_path).suffixes
-                if len(suffixes) > 0:
-                    file_path = "**/*" + ".".join(suffixes)
-            body = await self.git.ignore(local_path, file_path)
-        else:
-            body = await self.git.ensure_gitignore(local_path)
+
+        body = await self.git.update_gitignore(
+            local_path,
+            file_path=file_path,
+            content=content,
+            use_extension=use_extension,
+        )
         if body["code"] != 0:
             self.set_status(500)
         self.finish(json.dumps(body))

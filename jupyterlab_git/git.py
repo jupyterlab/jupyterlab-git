@@ -1189,6 +1189,23 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": error}
         return {"code": code}
 
+    async def checkout_branch_safe(
+        self, branchname, startpoint, local_path, new_branch=False
+    ):
+        """
+        Checkout a branch, creating it from startpoint if needed.
+        Handles empty commit if startpoint is invalid.
+        """
+        if new_branch:
+            is_start_point_valid = await self._get_branch_reference(
+                startpoint, local_path
+            )
+            if not is_start_point_valid:
+                await self._empty_commit(local_path)
+            return await self.checkout_new_branch(branchname, startpoint, local_path)
+        else:
+            return await self.checkout_branch(branchname, local_path)
+
     async def merge(self, branch: str, path: str) -> dict:
         """
         Execute git merge command & return the result.
@@ -1370,6 +1387,71 @@ class Git:
             response["message"] = error.strip()
 
         return response
+
+    async def push_current_branch(
+        self,
+        local_path: str,
+        remote: str | None = None,
+        auth: dict | None = None,
+        force: bool = False,
+    ) -> dict:
+        """
+        Push the current branch to the specified remote or determine default remote.
+        Handles upstream configuration if needed.
+        """
+        current_local_branch = await self.get_current_branch(local_path)
+        set_upstream = False
+        current_upstream_branch = await self.get_upstream_branch(
+            local_path, current_local_branch
+        )
+
+        if remote is not None:
+            set_upstream = current_upstream_branch["code"] != 0
+            remote_name, _, remote_branch = remote.partition("/")
+            current_upstream_branch = {
+                "code": 0,
+                "remote_branch": remote_branch or current_local_branch,
+                "remote_short_name": remote_name,
+            }
+
+        if current_upstream_branch["code"] == 0:
+            branch = ":".join(["HEAD", current_upstream_branch["remote_branch"]])
+            return await self.push(
+                current_upstream_branch["remote_short_name"],
+                branch,
+                local_path,
+                auth,
+                set_upstream,
+                force,
+            )
+
+        # fallback: use push.default or single remote
+        config = await self.config(local_path)
+        config_options = config["options"]
+        list_remotes = await self.remote_show(local_path)
+        remotes = list_remotes.get("remotes", [])
+        push_default = config_options.get("remote.pushdefault")
+        default_remote = None
+        if push_default is not None and push_default in remotes:
+            default_remote = push_default
+        elif len(remotes) == 1:
+            default_remote = remotes[0]
+
+        if default_remote is not None:
+            return await self.push(
+                default_remote,
+                current_local_branch,
+                local_path,
+                auth,
+                set_upstream=True,
+                force=force,
+            )
+
+        return {
+            "code": 128,
+            "message": f"fatal: The current branch {current_local_branch} has no upstream branch.",
+            "remotes": remotes,
+        }
 
     async def init(self, path):
         """
@@ -1841,6 +1923,30 @@ class Git:
         except BaseException as error:
             return {"code": -1, "message": str(error)}
         return {"code": 0}
+
+    async def update_gitignore(
+        self,
+        local_path: str,
+        file_path: str | None = None,
+        content: str | None = None,
+        use_extension: bool = False,
+    ) -> dict:
+        """
+        Update .gitignore by either:
+        - writing raw content,
+        - ignoring a specific file,
+        - or ensuring the file exists if nothing provided.
+        """
+        if content:
+            return await self.write_gitignore(local_path, content)
+        elif file_path:
+            if use_extension:
+                suffixes = Path(file_path).suffixes
+                if len(suffixes) > 0:
+                    file_path = "**/*" + ".".join(suffixes)
+            return await self.ignore(local_path, file_path)
+        else:
+            return await self.ensure_gitignore(local_path)
 
     async def write_gitignore(self, path, content):
         """

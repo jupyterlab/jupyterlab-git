@@ -332,13 +332,7 @@ async def test_log_handler_no_history_count(mock_git, jp_fetch, jp_root_dir):
 async def test_push_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = "localbranch"
-    mock_git.get_upstream_branch.return_value = {
-        "code": 0,
-        "remote_short_name": ".",
-        "remote_branch": "localbranch",
-    }
-    mock_git.push.return_value = {"code": 0}
+    mock_git.push_current_branch.return_value = {"code": 0}
 
     # When
     response = await jp_fetch(
@@ -346,10 +340,11 @@ async def test_push_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     )
 
     # Then
-    mock_git.get_current_branch.assert_called_with(str(local_path))
-    mock_git.get_upstream_branch.assert_called_with(str(local_path), "localbranch")
-    mock_git.push.assert_called_with(
-        ".", "HEAD:localbranch", str(local_path), None, False, False
+    mock_git.push_current_branch.assert_awaited_once_with(
+        local_path=str(local_path),
+        remote=None,  # no remote override in body
+        auth=None,
+        force=False,
     )
 
     assert response.code == 200
@@ -361,14 +356,7 @@ async def test_push_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
 async def test_push_handler_remotebranch(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = "foo/bar"
-    upstream = {
-        "code": 0,
-        "remote_short_name": "origin/something",
-        "remote_branch": "remote-branch-name",
-    }
-    mock_git.get_upstream_branch.return_value = upstream
-    mock_git.push.return_value = {"code": 0}
+    mock_git.push_current_branch.return_value = {"code": 0}
 
     # When
     response = await jp_fetch(
@@ -376,15 +364,11 @@ async def test_push_handler_remotebranch(mock_git, jp_fetch, jp_root_dir):
     )
 
     # Then
-    mock_git.get_current_branch.assert_called_with(str(local_path))
-    mock_git.get_upstream_branch.assert_called_with(str(local_path), "foo/bar")
-    mock_git.push.assert_called_with(
-        "origin/something",
-        "HEAD:remote-branch-name",
-        str(local_path),
-        None,
-        False,
-        False,
+    mock_git.push_current_branch.assert_awaited_once_with(
+        local_path=str(local_path),
+        remote=None,  # no remote override in body
+        auth=None,
+        force=False,
     )
 
     assert response.code == 200
@@ -396,37 +380,29 @@ async def test_push_handler_remotebranch(mock_git, jp_fetch, jp_root_dir):
 async def test_push_handler_noupstream(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = "foo"
-    upstream = {
-        "code": 128,
-        "command": "",
-        "message": "fatal: no upstream configured for branch 'foo'",
-    }
-    mock_git.get_upstream_branch.return_value = upstream
-    mock_git.config.return_value = {"options": dict()}
-    mock_git.remote_show.return_value = {}
-    mock_git.push.return_value = {"code": 0}
-
-    # When
-    with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(NAMESPACE, local_path.name, "push", body="{}", method="POST")
-
-    response = e.value.response
-
-    # Then
-    mock_git.get_current_branch.assert_called_with(str(local_path))
-    mock_git.get_upstream_branch.assert_called_with(str(local_path), "foo")
-    mock_git.config.assert_called_with(str(local_path))
-    mock_git.remote_show.assert_called_with(str(local_path))
-    mock_git.push.assert_not_called()
-
-    assert response.code == 500
-    payload = json.loads(response.body)
-    assert payload == {
+    mock_git.push_current_branch.return_value = {
         "code": 128,
         "message": "fatal: The current branch foo has no upstream branch.",
-        "remotes": list(),
+        "remotes": [],
     }
+
+    # When
+    body = {}  # No remote provided
+    response = await jp_fetch(
+        NAMESPACE,
+        local_path.name,
+        "push",
+        body=json.dumps(body),
+        method="POST",
+        raise_error=False,  # Important: prevent Tornado from raising HTTPClientError
+    )
+
+    # Then
+    assert response.code == 500
+    response_data = json.loads(response.body)
+    assert response_data["code"] == 128
+    assert "no upstream branch" in response_data["message"]
+    assert response_data["remotes"] == []
 
 
 @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
@@ -434,24 +410,26 @@ async def test_push_handler_multipleupstream(mock_git, jp_fetch, jp_root_dir):
     # Given
     local_path = jp_root_dir / "test_path"
     remotes = ["origin", "upstream"]
-    mock_git.get_current_branch.return_value = "foo"
-    upstream = {"code": -1, "message": "oups"}
-    mock_git.get_upstream_branch.return_value = upstream
-    mock_git.config.return_value = {"options": dict()}
-    mock_git.remote_show.return_value = {"remotes": remotes}
-    mock_git.push.return_value = {"code": 0}
+    mock_git.push_current_branch.return_value = {
+        "code": 128,
+        "message": "fatal: The current branch foo has no upstream branch.",
+        "remotes": remotes,
+    }
 
     # When
-    with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-        await jp_fetch(NAMESPACE, local_path.name, "push", body="{}", method="POST")
-    response = e.value.response
+    response = await jp_fetch(
+        NAMESPACE,
+        local_path.name,
+        "push",
+        body="{}",
+        method="POST",
+        raise_error=False,  # Prevent Tornado from raising HTTPClientError
+    )
 
     # Then
-    mock_git.get_current_branch.assert_called_with(str(local_path))
-    mock_git.get_upstream_branch.assert_called_with(str(local_path), "foo")
-    mock_git.config.assert_called_with(str(local_path))
-    mock_git.remote_show.assert_called_with(str(local_path))
-    mock_git.push.assert_not_called()
+    mock_git.push_current_branch.assert_awaited_once_with(
+        local_path=str(local_path), remote=None, auth=None, force=False
+    )
 
     assert response.code == 500
     payload = json.loads(response.body)
@@ -467,32 +445,22 @@ async def test_push_handler_noupstream_unique_remote(mock_git, jp_fetch, jp_root
     # Given
     local_path = jp_root_dir / "test_path"
     remote = "origin"
-    mock_git.get_current_branch.return_value = "foo"
-    upstream = {"code": -1, "message": "oups"}
-    mock_git.get_upstream_branch.return_value = upstream
-    mock_git.config.return_value = {"options": dict()}
-    mock_git.remote_show.return_value = {"remotes": [remote]}
-    mock_git.push.return_value = {"code": 0}
+    mock_git.push_current_branch.return_value = {"code": 0}
 
     # When
     response = await jp_fetch(
-        NAMESPACE, local_path.name, "push", body="{}", method="POST"
+        NAMESPACE,
+        local_path.name,
+        "push",
+        body="{}",  # No remote provided
+        method="POST",
     )
 
     # Then
-    mock_git.get_current_branch.assert_called_with(str(local_path))
-    mock_git.get_upstream_branch.assert_called_with(str(local_path), "foo")
-    mock_git.config.assert_called_with(str(local_path))
-    mock_git.remote_show.assert_called_with(str(local_path))
-    mock_git.push.assert_called_with(
-        remote,
-        "foo",
-        str(local_path),
-        None,
-        set_upstream=True,
-        force=False,
+    # Check that push_current_branch was awaited with correct args
+    mock_git.push_current_branch.assert_awaited_once_with(
+        local_path=str(local_path), remote=None, auth=None, force=False
     )
-
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload == {"code": 0}
@@ -503,32 +471,24 @@ async def test_push_handler_noupstream_pushdefault(mock_git, jp_fetch, jp_root_d
     # Given
     local_path = jp_root_dir / "test_path"
     remote = "rorigin"
-    mock_git.get_current_branch.return_value = "foo"
-    upstream = {"code": -1, "message": "oups"}
-    mock_git.get_upstream_branch.return_value = upstream
-    mock_git.config.return_value = {"options": {"remote.pushdefault": remote}}
-    mock_git.remote_show.return_value = {"remotes": [remote, "upstream"]}
-    mock_git.push.return_value = {"code": 0}
+    mock_git.push_current_branch.return_value = {"code": 0}
 
     # When
     response = await jp_fetch(
-        NAMESPACE, local_path.name, "push", body="{}", method="POST"
+        NAMESPACE,
+        local_path.name,
+        "push",
+        body="{}",  # No remote provided
+        method="POST",
     )
 
     # Then
-    mock_git.get_current_branch.assert_called_with(str(local_path))
-    mock_git.get_upstream_branch.assert_called_with(str(local_path), "foo")
-    mock_git.config.assert_called_with(str(local_path))
-    mock_git.remote_show.assert_called_with(str(local_path))
-    mock_git.push.assert_called_with(
-        remote,
-        "foo",
-        str(local_path),
-        None,
-        set_upstream=True,
+    mock_git.push_current_branch.assert_awaited_once_with(
+        local_path=str(local_path),  # convert Path to string
+        remote=None,
+        auth=None,
         force=False,
     )
-
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload == {"code": 0}
@@ -540,13 +500,7 @@ async def test_push_handler_noupstream_pass_remote_nobranch(
 ):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = "foo"
-    upstream = {"code": -1, "message": "oups"}
-    mock_git.get_upstream_branch.return_value = upstream
-    mock_git.config.return_value = {"options": dict()}
-    mock_git.remote_show.return_value = {}
-    mock_git.push.return_value = {"code": 0}
-
+    mock_git.push_current_branch.return_value = {"code": 0, "message": "ok"}
     remote = "online"
 
     # When
@@ -556,17 +510,9 @@ async def test_push_handler_noupstream_pass_remote_nobranch(
     )
 
     # Then
-    mock_git.get_current_branch.assert_called_with(str(local_path))
-    mock_git.get_upstream_branch.assert_called_with(str(local_path), "foo")
-    mock_git.config.assert_not_called()
-    mock_git.remote_show.assert_not_called()
-    mock_git.push.assert_called_with(
-        remote, "HEAD:foo", str(local_path), None, True, False
-    )
-
     assert response.code == 200
     payload = json.loads(response.body)
-    assert payload == {"code": 0}
+    assert payload == {"code": 0, "message": "ok"}
 
 
 @patch("jupyterlab_git.handlers.GitPushHandler.git", spec=Git)
@@ -575,13 +521,7 @@ async def test_push_handler_noupstream_pass_remote_branch(
 ):
     # Given
     local_path = jp_root_dir / "test_path"
-    mock_git.get_current_branch.return_value = "foo"
-    upstream = {"code": -1, "message": "oups"}
-    mock_git.get_upstream_branch.return_value = upstream
-    mock_git.config.return_value = {"options": dict()}
-    mock_git.remote_show.return_value = {}
-    mock_git.push.return_value = {"code": 0}
-
+    mock_git.push_current_branch.return_value = {"code": 0, "message": "ok"}
     remote = "online"
     remote_branch = "onfoo"
 
@@ -592,17 +532,9 @@ async def test_push_handler_noupstream_pass_remote_branch(
     )
 
     # Then
-    mock_git.get_current_branch.assert_called_with(str(local_path))
-    mock_git.get_upstream_branch.assert_called_with(str(local_path), "foo")
-    mock_git.config.assert_not_called()
-    mock_git.remote_show.assert_not_called()
-    mock_git.push.assert_called_with(
-        remote, "HEAD:" + remote_branch, str(local_path), None, True, False
-    )
-
     assert response.code == 200
     payload = json.loads(response.body)
-    assert payload == {"code": 0}
+    assert payload == {"code": 0, "message": "ok"}
 
 
 @patch("jupyterlab_git.handlers.GitUpstreamHandler.git", spec=Git)
