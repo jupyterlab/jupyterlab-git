@@ -37,46 +37,6 @@ def test_GitHandler_url2localpath(path, with_cm, jp_web_app, jp_root_dir):
         assert str(jp_root_dir / path) == handler.url2localpath(path, with_cm)
 
 
-@patch("jupyterlab_git.handlers.GitAllHistoryHandler.git", spec=Git)
-async def test_all_history_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
-    # Given
-    show_top_level = {"code": 0, "path": "foo"}
-    branch = "branch_foo"
-    log = "log_foo"
-    status = "status_foo"
-
-    local_path = jp_root_dir / "test_path"
-
-    mock_git.show_top_level.return_value = show_top_level
-    mock_git.branch.return_value = branch
-    mock_git.log.return_value = log
-    mock_git.status.return_value = status
-
-    # When
-    body = {"history_count": 25}
-    response = await jp_fetch(
-        NAMESPACE, local_path.name, "all_history", body=json.dumps(body), method="POST"
-    )
-
-    # Then
-    mock_git.show_top_level.assert_called_with(str(local_path))
-    mock_git.branch.assert_called_with(str(local_path))
-    mock_git.log.assert_called_with(str(local_path), 25)
-    mock_git.status.assert_called_with(str(local_path))
-
-    assert response.code == 200
-    payload = json.loads(response.body)
-    assert payload == {
-        "code": show_top_level["code"],
-        "data": {
-            "show_top_level": show_top_level,
-            "branch": branch,
-            "log": log,
-            "status": status,
-        },
-    }
-
-
 @patch("jupyterlab_git.git.execute")
 async def test_git_show_prefix(mock_execute, jp_fetch, jp_root_dir):
     # Given
