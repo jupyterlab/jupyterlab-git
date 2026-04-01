@@ -24,14 +24,10 @@ export class GitCloneForm extends Widget {
         ).value.trim()
       ),
       versioning: Boolean(
-        encodeURIComponent(
-          (this.node.querySelector('#download') as HTMLInputElement).checked
-        )
+        (this.node.querySelector('#download') as HTMLInputElement).checked
       ),
       submodules: Boolean(
-        encodeURIComponent(
-          (this.node.querySelector('#submodules') as HTMLInputElement).checked
-        )
+        (this.node.querySelector('#submodules') as HTMLInputElement).checked
       )
     };
   }
