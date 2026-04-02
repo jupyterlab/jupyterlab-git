@@ -39,12 +39,13 @@ jobs:
     - name: Build the extension
       run: |
         set -eux
-        python -m pip install .[dev,test]
+        python -m pip install "packages/core[test]" "packages/jupyterlab[dev,test]"
 
         # Python formatting checks
-        black . --check
+        black packages/ --check
 
-        pytest -vv -r ap --cov jupyterlab_git
+        pytest packages/core/tests/ -vv -r ap --cov jupyterlab_git_core
+        pytest packages/jupyterlab/tests/ -vv -r ap --cov jupyterlab_git
         jupyter server extension list
         jupyter server extension list 2>&1 | grep -ie "jupyterlab_git.*OK"
 
@@ -57,8 +58,9 @@ jobs:
         set -eux
 
         pip install build
-        python -m build
-        pip uninstall -y "jupyterlab_git" jupyterlab
+        python -m build --outdir dist packages/core
+        python -m build --outdir dist packages/jupyterlab
+        pip uninstall -y "jupyterlab_git" "jupyterlab_git_core" jupyterlab
 
     - name: Upload extension packages
       uses: actions/upload-artifact@v4
@@ -88,7 +90,7 @@ jobs:
         sudo rm -rf $(which node)
         sudo rm -rf $(which node)
 
-        pip install "jupyterlab>=4.0.0,<5" jupyterlab_git*.whl
+        pip install "jupyterlab>=4.0.0,<5" jupyterlab_git-*.whl --find-links .
 
 
         jupyter server extension list
@@ -121,7 +123,7 @@ jobs:
     - name: Install the extension
       run: |
         set -eux
-        python -m pip install "jupyterlab>=4.0.0,<5" jupyter-archive jupyterlab_git*.whl
+        python -m pip install "jupyterlab>=4.0.0,<5" jupyter-archive jupyterlab_git-*.whl --find-links .
 
     - name: Install dependencies
       working-directory: ui-tests
