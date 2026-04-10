@@ -185,7 +185,7 @@ export function addCommands(
     execute: () => {
       try {
         shell.activateById('jp-git-sessions');
-      } catch (err) {
+      } catch (_err) {
         console.error('Fail to open Git tab.');
       }
     }
@@ -345,7 +345,7 @@ export function addCommands(
           await gitModel.writeGitIgnore(newContent);
           preview.title.className = '';
           saved = true;
-        } catch (error) {
+        } catch (_error) {
           console.log('Could not save .gitignore');
         }
       },
@@ -1195,7 +1195,7 @@ export function addCommands(
           } else {
             console.log('Cannot open a folder here');
           }
-        } catch (err) {
+        } catch (_err) {
           console.error(`Fail to open ${to}.`);
         }
       }

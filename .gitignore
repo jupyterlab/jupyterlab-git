@@ -7,9 +7,9 @@ node_modules/
 *.egg-info/
 .ipynb_checkpoints
 *.tsbuildinfo
-jupyterlab_git/labextension
+packages/core/jupyterlab_git_core/labextension
 # Version file is handled by hatchling
-jupyterlab_git/_version.py
+packages/core/jupyterlab_git_core/_version.py
 src/version.ts
 
 # Integration tests

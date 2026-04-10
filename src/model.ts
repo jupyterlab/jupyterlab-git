@@ -1065,7 +1065,7 @@ export class GitExtension implements IGitExtension {
               follow_path: this.selectedHistoryFile?.to
             }
           );
-        } catch (error) {
+        } catch (_error) {
           return { code: 1 };
         }
       }
@@ -2030,7 +2030,7 @@ export class GitExtension implements IGitExtension {
 
       const newSubmodules = data.submodules;
       this._submodules = newSubmodules;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to retrieve submodules');
     }
   }
