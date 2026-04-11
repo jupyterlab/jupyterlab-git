@@ -1,3 +1,4 @@
+ec575eae57c59e35827cfa250e0c72a3ff3a21e5
 import { IChangedArgs, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
