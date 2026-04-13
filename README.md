@@ -55,6 +55,8 @@ In this mode, `jupyter_server` and Tornado are not required.
 
 ## Uninstall
 
+### With jupyter-server backend (standard)
+
 To remove the extension, execute:
 
 ```bash
@@ -65,6 +67,12 @@ or with _conda_:
 
 ```bash
 conda remove jupyterlab-git
+```
+
+### Without jupyter-server backend (jupyverse)
+
+```bash
+pip uninstall jupyterlab-git-core fps-jupyterlab-git
 ```
 
 ## Settings
