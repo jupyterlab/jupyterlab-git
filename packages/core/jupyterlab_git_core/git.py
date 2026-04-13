@@ -2196,7 +2196,7 @@ class Git:
             path: Git repository path
         """
         cmd = ["git", "rebase", branch]
-        code, output, error = await execute(cmd, cwd=path)
+        code, output, error = await self.__execute(cmd, cwd=path)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
