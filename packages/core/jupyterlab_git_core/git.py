@@ -2217,7 +2217,7 @@ class Git:
         if option == "continue":
             env = os.environ.copy()
             env["GIT_EDITOR"] = "true"
-        code, output, error = await execute(cmd, cwd=path, env=env)
+        code, output, error = await self.__execute(cmd, cwd=path, env=env)
 
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
