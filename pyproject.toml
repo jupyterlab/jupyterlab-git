@@ -17,6 +17,9 @@ version_cmd = "hatch version"
 python-packages = ["packages/core", "packages/jupyterlab"]
 
 [tool.jupyter-releaser.hooks]
+after-bump-version = [
+    "python -c \"import json, subprocess; v=json.load(open('packages/jupyterlab/package.json'))['version']; subprocess.run(['npm','version',v,'--no-git-tag-version','--allow-same-version'], check=True)\"",
+]
 before-build-npm = [
     "python -m pip install 'jupyterlab>=4.0.0,<5'",
     "jlpm",
