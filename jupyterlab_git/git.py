@@ -491,7 +491,7 @@ class Git:
         Execute git status command & return the result.
         """
         cmd = ["git", "status", "--porcelain", "-b", "-u", "-z"]
-        code, status, my_error = await self.__execute(cmd, cwd=path)
+        code, status, my_error = await self.__execute(cmd, cwd=path, env=os.environ.copy())
 
         if code != 0:
             return {
@@ -839,7 +839,7 @@ class Git:
             "refs/heads/",
         ]
 
-        code, output, error = await self.__execute(cmd, cwd=path)
+        code, output, error = await self.__execute(cmd, cwd=path, env=os.environ.copy())
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
@@ -905,7 +905,7 @@ class Git:
             "refs/remotes/",
         ]
 
-        code, output, error = await self.__execute(cmd, cwd=path)
+        code, output, error = await self.__execute(cmd, cwd=path, env=os.environ.copy())
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
