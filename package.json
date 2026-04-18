@@ -22,7 +22,7 @@
         "build:prod": "jlpm clean && jlpm build:lib:prod && jlpm build:labextension",
         "clean": "jlpm clean:lib",
         "clean:all": "jlpm clean:lib && jlpm clean:labextension && jlpm clean:lintcache",
-        "clean:labextension": "rimraf jupyterlab_git/labextension jupyterlab_git/_version.py",
+        "clean:labextension": "rimraf packages/core/jupyterlab_git_core/labextension packages/core/jupyterlab_git_core/_version.py",
         "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
         "clean:lintcache": "rimraf .eslintcache .stylelintcache",
         "clean:more": "jlpm clean && rimraf build dist MANIFEST",
@@ -196,7 +196,7 @@
                 "singleton": true
             }
         },
-        "outputDir": "jupyterlab_git/labextension"
+        "outputDir": "packages/core/jupyterlab_git_core/labextension"
     },
     "eslintConfig": {
         "extends": [
