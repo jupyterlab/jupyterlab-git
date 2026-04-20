@@ -116,7 +116,11 @@ class GitCloneHandler(GitHandler):
         )
 
         if response["code"] != 0:
-            self.set_status(500)
+            if response["code"] == 128:
+                self.set_status(401)
+            else:
+                self.set_status(404)
+
         self.finish(json.dumps(response))
 
 
@@ -176,7 +180,8 @@ class GitFetchHandler(GitHandler):
         )
 
         if result["code"] != 0:
-            self.set_status(500)
+            self.set_status(404)
+
         self.finish(json.dumps(result))
 
 
@@ -629,7 +634,7 @@ class GitPullHandler(GitHandler):
         )
 
         if response["code"] != 0:
-            self.set_status(500)
+            self.set_status(404)
 
         self.finish(json.dumps(response))
 
@@ -711,6 +716,8 @@ class GitPushHandler(GitHandler):
                     set_upstream=True,
                     force=force,
                 )
+                if response["code"] != 0:
+                    self.set_status(401)
             else:
                 response = {
                     "code": 128,
@@ -719,9 +726,8 @@ class GitPushHandler(GitHandler):
                     ),
                     "remotes": remotes,  # Returns the list of known remotes
                 }
-
-        if response["code"] != 0:
-            self.set_status(500)
+                if response["code"] != 0:
+                    self.set_status(404)
 
         self.finish(json.dumps(response))
 
