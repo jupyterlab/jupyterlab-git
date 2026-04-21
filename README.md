@@ -28,6 +28,13 @@ For older versions of JupyterLab, go to:
 
 ## Install
 
+> **Note for users upgrading from a previous version:**
+> Starting with the split into `jupyterlab-git-core` and `jupyterlab-git`,
+> the JupyterLab frontend extension (`@jupyterlab/git`) is now bundled in
+> and owned by `jupyterlab-git-core`.
+> Running `pip install --upgrade jupyterlab-git` will automatically install
+> the correct version of `jupyterlab-git-core`.
+
 ### With jupyter-server backend (standard)
 
 The standard installation includes the Tornado/jupyter-server backend:
