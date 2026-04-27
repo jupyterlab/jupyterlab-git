@@ -5,6 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "jupyterlab-git-workspace"
 dynamic = ["version"]
+classifiers = ["Private :: Do Not Upload"]
 
 [tool.hatch.version]
 source = "nodejs"
