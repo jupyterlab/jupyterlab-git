@@ -28,6 +28,9 @@ addopts = "--import-mode=importlib"
 [tool.check-wheel-contents]
 ignore = ["W002"]
 
+[tool.jupyter-releaser]
+skip = ["check-python"]
+
 [tool.jupyter-releaser.options]
 version_cmd = "hatch version"
 python-packages = ["packages/core", "packages/jupyterlab"]
