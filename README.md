@@ -28,7 +28,16 @@ For older versions of JupyterLab, go to:
 
 ## Install
 
-To install perform the following steps, with _pip_:
+> **Note for users upgrading from a previous version:**
+> Starting with the split into `jupyterlab-git-core` and `jupyterlab-git`,
+> the JupyterLab frontend extension (`@jupyterlab/git`) is now bundled in
+> and owned by `jupyterlab-git-core`.
+> Running `pip install --upgrade jupyterlab-git` will automatically install
+> the correct version of `jupyterlab-git-core`.
+
+### With jupyter-server backend (standard)
+
+The standard installation includes the Tornado/jupyter-server backend:
 
 ```bash
 pip install --upgrade jupyterlab jupyterlab-git
@@ -40,7 +49,20 @@ or with _conda_:
 conda install -c conda-forge jupyterlab jupyterlab-git
 ```
 
+### Without jupyter-server backend (jupyverse)
+
+To use jupyterlab-git with [jupyverse](https://github.com/jupyter-server/jupyverse) (FastAPI-based, no Tornado dependency), install the core package — it includes the frontend labextension but no Tornado/jupyter-server dependency. The backend routes are provided by the `fps-jupyterlab-git` jupyverse plugin:
+
+```bash
+pip install --upgrade jupyterlab-git-core
+pip install --upgrade fps-jupyterlab-git
+```
+
+In this mode, `jupyter_server` and Tornado are not required.
+
 ## Uninstall
+
+### With jupyter-server backend (standard)
 
 To remove the extension, execute:
 
@@ -52,6 +74,12 @@ or with _conda_:
 
 ```bash
 conda remove jupyterlab-git
+```
+
+### Without jupyter-server backend (jupyverse)
+
+```bash
+pip uninstall jupyterlab-git-core fps-jupyterlab-git
 ```
 
 ## Settings
@@ -208,16 +236,20 @@ The `jlpm` command is JupyterLab's pinned version of
 [yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
 `yarn` or `npm` in lieu of `jlpm` below.
 
+This is a monorepo with two Python packages: `packages/core` (pure Git logic + labextension) and `packages/jupyterlab` (Tornado/jupyter-server extension).
+
 ```bash
 # Clone the repo to your local environment
 git clone https://github.com/jupyterlab/jupyterlab-git.git
 # Change directory to the jupyterlab-git directory
 cd jupyterlab-git
-# Install package in development mode
-pip install -e ".[dev,test]"
+# Install both packages in development mode (recommended: uv)
+uv sync
+# or with pip
+pip install -e "packages/core[dev]" -e "packages/jupyterlab[dev,test]"
 pre-commit install
 # Link your development version of the extension with JupyterLab
-jupyter labextension develop . --overwrite
+jupyter labextension develop packages/core --overwrite
 # Server extension must be manually installed in develop mode
 jupyter server extension enable jupyterlab_git
 # Rebuild extension Typescript source after making changes
@@ -246,7 +278,7 @@ jupyter lab build --minimize=False
 ```bash
 # Server extension must be manually disabled in develop mode
 jupyter server extension disable jupyterlab_git
-pip uninstall jupyterlab_git
+pip uninstall jupyterlab-git jupyterlab-git-core
 ```
 
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
@@ -262,15 +294,19 @@ This extension is using [Pytest](https://docs.pytest.org/) for Python code testi
 Install test dependencies (needed only once):
 
 ```sh
-pip install -e ".[test]"
+pip install -e "packages/core[test]" -e "packages/jupyterlab[test]"
 # Each time you install the Python package, you need to restore the front-end extension link
-jupyter labextension develop . --overwrite
+jupyter labextension develop packages/core --overwrite
 ```
 
 To execute them, run:
 
 ```sh
-pytest -vv -r ap --cov jupyterlab_git
+# Core tests (no tornado/jupyter-server dependency)
+pytest packages/core/tests/
+
+# JupyterLab server extension tests
+pytest packages/jupyterlab/tests/
 ```
 
 #### Frontend tests
