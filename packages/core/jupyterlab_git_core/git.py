@@ -657,6 +657,13 @@ class Git:
             cwd=path,
         )
         if code != 0:
+            # A git repo may be initialized but not have any commits yet
+            head_check_code, _, _ = await self.__execute(
+                ["git", "rev-parse", "--verify", "--quiet", "HEAD"],
+                cwd=path,
+            )
+            if head_check_code != 0:
+                return {"code": 0, "commits": []}
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
