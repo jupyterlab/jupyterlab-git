@@ -1,3 +1,18 @@
+[build-system]
+requires = ["hatchling", "hatch-nodejs-version"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jupyterlab-git-workspace"
+dynamic = ["version"]
+
+[tool.hatch.version]
+source = "nodejs"
+path = "package.json"
+
+[tool.hatch.metadata.hooks.nodejs]
+fields = ["description"]
+
 [tool.uv.workspace]
 members = ["packages/core", "packages/jupyterlab"]
 
