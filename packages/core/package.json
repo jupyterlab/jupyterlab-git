@@ -1,20 +1,20 @@
 {
-  "name": "@jupyterlab/git-core",
-  "version": "0.52.0",
-  "description": "A JupyterLab extension for version control using git",
-  "keywords": [
-    "Jupyter",
-    "JupyterLab",
-    "jupyterlab-extension",
-    "Git"
-  ],
-  "author": "Jupyter Development Team",
-  "homepage": "https://github.com/jupyterlab/jupyterlab-git",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab-git.git"
-  },
-  "bugs": {
-    "url": "https://github.com/jupyterlab/jupyterlab-git/issues"
-  }
+    "name": "@jupyterlab/git-core",
+    "version": "0.53.0-a0",
+    "description": "A JupyterLab extension for version control using git",
+    "keywords": [
+        "Jupyter",
+        "JupyterLab",
+        "jupyterlab-extension",
+        "Git"
+    ],
+    "author": "Jupyter Development Team",
+    "homepage": "https://github.com/jupyterlab/jupyterlab-git",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jupyterlab/jupyterlab-git.git"
+    },
+    "bugs": {
+        "url": "https://github.com/jupyterlab/jupyterlab-git/issues"
+    }
 }

@@ -2,6 +2,37 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.53.0a0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.52.0...786a0c0833262d868d315ee028361fb37349d55e))
+
+### Enhancements made
+
+- refactor: remove Tornado dependency from git.py [#1453](https://github.com/jupyterlab/jupyterlab-git/pull/1453) ([@djangoliv](https://github.com/djangoliv), [@davidbrochart](https://github.com/davidbrochart), [@jtpio](https://github.com/jtpio))
+
+### Bugs fixed
+
+- fix: GitCloneForm checkboxes return correct booleans [#1457](https://github.com/jupyterlab/jupyterlab-git/pull/1457) ([@djangoliv](https://github.com/djangoliv), [@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Fix check release [#1461](https://github.com/jupyterlab/jupyterlab-git/pull/1461) ([@jtpio](https://github.com/jtpio), [@djangoliv](https://github.com/djangoliv))
+- fix: read version from package.json instead of hatch at workspace root [#1460](https://github.com/jupyterlab/jupyterlab-git/pull/1460) ([@djangoliv](https://github.com/djangoliv), [@jtpio](https://github.com/jtpio))
+- Drop Python 3.9 on CI [#1455](https://github.com/jupyterlab/jupyterlab-git/pull/1455) ([@jtpio](https://github.com/jtpio))
+- refactor: remove unused GitAllHistoryHandler endpoint [#1454](https://github.com/jupyterlab/jupyterlab-git/pull/1454) ([@djangoliv](https://github.com/djangoliv), [@jtpio](https://github.com/jtpio))
+- Update snapshots bot checkout and permission check [#1441](https://github.com/jupyterlab/jupyterlab-git/pull/1441) ([@martinRenou](https://github.com/martinRenou), [@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2026-03-02&to=2026-04-27&type=c))
+
+@davidbrochart ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adavidbrochart+updated%3A2026-03-02..2026-04-27&type=Issues)) | @djangoliv ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adjangoliv+updated%3A2026-03-02..2026-04-27&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2026-03-02..2026-04-27&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2026-03-02..2026-04-27&type=Issues)) | @martinRenou ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AmartinRenou+updated%3A2026-03-02..2026-04-27&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.52.0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.51.4...ed6707c04743c388f228d6541d64ed03c24a23f1))
@@ -18,8 +49,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2026-01-05&to=2026-03-02&type=c))
 
 @afshin ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aafshin+updated%3A2026-01-05..2026-03-02&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2026-01-05..2026-03-02&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2026-01-05..2026-03-02&type=Issues)) | @Meriem-BenIsmail ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AMeriem-BenIsmail+updated%3A2026-01-05..2026-03-02&type=Issues)) | @SylvainCorlay ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ASylvainCorlay+updated%3A2026-01-05..2026-03-02&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.51.4
 
