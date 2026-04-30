@@ -1,6 +1,6 @@
 {
     "name": "@jupyterlab/git",
-    "version": "0.53.0-a1",
+    "version": "0.53.0",
     "description": "A JupyterLab extension for version control using git",
     "keywords": [
         "Jupyter",
