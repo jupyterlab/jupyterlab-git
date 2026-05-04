@@ -13,7 +13,6 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { FileBrowserModel, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -23,15 +22,15 @@ import {
   addFileBrowserContextMenu,
   createGitMenu
 } from './commandsAndMenu';
-import { createImageDiff } from './components/diff/ImageDiff';
-import { createNotebookDiff } from './components/diff/NotebookDiff';
 import { addStatusBarWidget } from './components/StatusWidget';
+import { imageDiffPlugin } from './imageDiffPlugin';
 import { GitExtension } from './model';
+import { notebookDiffPlugin } from './notebookDiffPlugin';
+import { plainTextDiffPlugin } from './plainTextDiffPlugin';
 import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
 import { CommandIDs, Git, IGitExtension } from './tokens';
 import { GitWidget } from './widgets/GitWidget';
-import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 
 export { DiffModel } from './components/diff/model';
 export { NotebookDiff } from './components/diff/NotebookDiff';
@@ -45,10 +44,8 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
   id: '@jupyterlab/git:plugin',
   requires: [
     ILayoutRestorer,
-    IEditorLanguageRegistry,
     IEditorServices,
     IDefaultFileBrowser,
-    IRenderMimeRegistry,
     ISettingRegistry,
     IDocumentManager
   ],
@@ -61,7 +58,13 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
 /**
  * Export the plugin as default.
  */
-export default [plugin, gitCloneCommandPlugin];
+export default [
+  plugin,
+  gitCloneCommandPlugin,
+  notebookDiffPlugin,
+  imageDiffPlugin,
+  plainTextDiffPlugin
+];
 
 /**
  * Activate the running plugin.
@@ -69,7 +72,6 @@ export default [plugin, gitCloneCommandPlugin];
 async function activate(
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
-  languageRegistry: IEditorLanguageRegistry,
   editorServices: IEditorServices,
   // Get a reference to the default file browser extension
   // We don't use the current tracked browser because extension like jupyterlab-github
@@ -77,7 +79,6 @@ async function activate(
   // And it is unlikely that another browser than the default will be used.
   // Ref: https://github.com/jupyterlab/jupyterlab-git/issues/1014
   fileBrowser: IDefaultFileBrowser,
-  renderMime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   docmanager: IDocumentManager,
   mainMenu: IMainMenu | null,
@@ -194,7 +195,6 @@ async function activate(
       app,
       gitExtension,
       editorServices.factoryService,
-      languageRegistry,
       fileBrowser.model,
       settings,
       translator
@@ -260,20 +260,6 @@ async function activate(
       trans
     );
   }
-
-  // Register diff providers
-  gitExtension.registerDiffProvider(
-    'Nbdime',
-    ['.ipynb'],
-    (options: Git.Diff.IFactoryOptions) =>
-      createNotebookDiff({ ...options, renderMime })
-  );
-
-  gitExtension.registerDiffProvider(
-    'ImageDiff',
-    ['.jpeg', '.jpg', '.png'],
-    createImageDiff
-  );
 
   return gitExtension;
 }
