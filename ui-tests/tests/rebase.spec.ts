@@ -18,7 +18,9 @@ test.describe('Rebase', () => {
 
     await page.sidebar.openTab('jp-git-sessions');
 
-    await page.getByRole('button', { name: 'Current Branch master' }).click();
+    await page
+      .getByRole('button', { name: 'Manage branches and tags' })
+      .click();
 
     // Switch to a-branch
     await page
@@ -26,7 +28,9 @@ test.describe('Rebase', () => {
       .click();
 
     // Hide branch panel
-    await page.getByRole('button', { name: 'Current Branch a-branch' }).click();
+    await page
+      .getByRole('button', { name: 'Manage branches and tags' })
+      .click();
 
     // Rebase on master
     await page.getByRole('main').press('Control+Shift+C');
@@ -84,7 +88,7 @@ test.describe('Rebase', () => {
     // Continue rebase as all conflicts are resolved
     await page.getByRole('button', { name: 'Continue' }).click();
 
-    await page.getByRole('tab', { name: 'History' }).click();
+    await page.getByRole('button', { name: /^History/ }).click();
 
     // Master changes must be part of the history following the rebase
     await expect.soft(page.getByTitle('View commit details')).toHaveCount(3);
@@ -98,7 +102,7 @@ test.describe('Rebase', () => {
 
     await page.getByRole('button', { name: 'Abort' }).click();
 
-    await page.getByRole('tab', { name: 'History' }).click();
+    await page.getByRole('button', { name: /^History/ }).click();
 
     // Master changes must not be part of the history following the abort
     await expect.soft(page.getByTitle('View commit details')).toHaveCount(2);
@@ -110,7 +114,7 @@ test.describe('Rebase', () => {
 
     await page.getByRole('menuitem', { name: 'Skip' }).click();
 
-    await page.getByRole('tab', { name: 'History' }).click();
+    await page.getByRole('button', { name: /^History/ }).click();
 
     // Master changes must be part of the history following the rebase but not
     // the old a-branch commit.

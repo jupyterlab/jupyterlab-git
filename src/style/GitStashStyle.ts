@@ -25,7 +25,11 @@ export const sectionHeaderLabelStyle = style({
 });
 
 export const sectionButtonContainerStyle = style({
-  display: 'flex'
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: '0 0 auto',
+  height: '100%'
 });
 
 export const stashFileStyle = style({

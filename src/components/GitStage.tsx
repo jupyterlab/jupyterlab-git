@@ -1,11 +1,11 @@
-import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
+import { caretDownIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
+import { classes } from 'typestyle';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import {
-  changeStageButtonStyle,
   sectionAreaStyle,
   sectionFileContainerStyle,
-  sectionHeaderLabelStyle,
+  sectionHeaderActionsStyle,
   sectionHeaderSizeStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
@@ -52,30 +52,48 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
 ) => {
   const [showFiles, setShowFiles] = React.useState(true);
   const nFiles = props.files.length;
+  const canToggle = props.collapsible && nFiles > 0;
+
+  const onToggle = () => {
+    if (canToggle) {
+      setShowFiles(!showFiles);
+    }
+  };
 
   return (
     <div className={sectionFileContainerStyle}>
       <div
-        className={sectionAreaStyle}
-        onClick={() => {
-          if (props.collapsible && nFiles > 0) {
-            setShowFiles(!showFiles);
-          }
-        }}
+        className={classes(
+          'jp-AccordionPanel-title',
+          showFiles && nFiles > 0 ? 'lm-mod-expanded' : null,
+          sectionAreaStyle
+        )}
+        onClick={onToggle}
       >
         {props.selectAllButton && props.selectAllButton}
         {props.collapsible && (
-          <button className={changeStageButtonStyle}>
-            {showFiles && nFiles > 0 ? (
-              <caretDownIcon.react tag="span" />
-            ) : (
-              <caretRightIcon.react tag="span" />
-            )}
-          </button>
+          <div className="lm-AccordionPanel-titleCollapser">
+            <caretDownIcon.react tag="span" />
+          </div>
         )}
-        <span className={sectionHeaderLabelStyle}>{props.heading}</span>
-        {props.actions}
-        <span className={sectionHeaderSizeStyle}>({nFiles})</span>
+        <span className="lm-AccordionPanel-titleLabel">{props.heading}</span>
+        {(nFiles > 0 || props.actions) && (
+          <div
+            className={classes(
+              'jp-AccordionPanel-toolbar',
+              sectionHeaderActionsStyle
+            )}
+          >
+            {/* Action buttons appear/disappear on hover. Rendering them
+                before the count badge keeps the badge anchored to the right
+                edge of the row, so it does not jump when actions become
+                visible. */}
+            {props.actions}
+            {nFiles > 0 && (
+              <span className={sectionHeaderSizeStyle}>{nFiles}</span>
+            )}
+          </div>
+        )}
       </div>
       {showFiles && nFiles > 0 && (
         <FixedSizeList

@@ -37,7 +37,7 @@ test.describe('Commit', () => {
 
     await page.getByRole('button', { name: 'Commit', exact: true }).click();
 
-    await page.getByRole('tab', { name: 'History' }).click();
+    await page.getByRole('button', { name: /^History/ }).click();
 
     await expect(page.getByText('My new commit')).toBeVisible();
   });

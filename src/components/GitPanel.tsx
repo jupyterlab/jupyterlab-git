@@ -7,19 +7,14 @@ import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import * as React from 'react';
 import { GitExtension } from '../model';
 import { showError } from '../notifications';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
   panelWrapperClass,
+  panelMainClass,
   repoButtonClass,
-  selectedTabClass,
-  tabClass,
-  tabIndicatorClass,
-  tabsClass,
   warningTextClass
 } from '../style/GitPanel';
 import { addIcon, rewindIcon, trashIcon } from '../style/icons';
@@ -32,9 +27,11 @@ import { CommitComparisonBox } from './CommitComparisonBox';
 import { FileList } from './FileList';
 import { GitStash } from './GitStash';
 import { HistorySideBar } from './HistorySideBar';
+import { BranchMenu } from './BranchMenu';
 import { RebaseAction } from './RebaseAction';
 import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
+import { TagMenu } from './TagMenu';
 
 /**
  * Interface describing component properties.
@@ -64,6 +61,22 @@ export interface IGitPanelProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Which body to render.
+   */
+  contentMode?: 'all' | 'changes' | 'history' | 'branches';
+
+  /**
+   * Whether to show the toolbar above the rendered body.
+   */
+  showToolbar?: boolean;
+
+  /**
+   * Whether to render the "not a git repository" warning when no repository
+   * is available.
+   */
+  showNoRepositoryWarning?: boolean;
 }
 
 /**
@@ -116,10 +129,8 @@ export interface IGitPanelState {
   pastCommits: Git.ISingleCommitInfo[];
 
   /**
-   * Panel tab identifier.
+   * Which accordion sections are currently expanded.
    */
-  tab: number;
-
   /**
    * Commit message summary.
    */
@@ -193,7 +204,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       nCommitsBehind: 0,
       pastCommits: [],
       repository: pathRepository,
-      tab: 0,
       commitSummary: '',
       commitDescription: '',
       commitAmend: false,
@@ -211,6 +221,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   componentDidMount(): void {
     const { model, settings } = this.props;
+    const contentMode = this.props.contentMode ?? 'all';
     model.stashChanged.connect((_, args) => {
       this.setState({
         stash: args.newValue as any
@@ -239,16 +250,17 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     }, this);
     model.headChanged.connect(async () => {
       await this.refreshCurrentBranch();
-      if (this.state.tab === 1) {
-        this.refreshHistory();
+      if (contentMode === 'all' || contentMode === 'history') {
+        await this.refreshHistory();
       }
     }, this);
     model.tagsChanged.connect(async () => {
       await this.refreshTags();
     }, this);
     model.selectedHistoryFileChanged.connect(() => {
-      this.setState({ tab: 1 });
-      this.refreshHistory();
+      if (contentMode === 'all' || contentMode === 'history') {
+        this.refreshHistory();
+      }
     }, this);
     model.remoteChanged.connect((_, args) => {
       this.warningDialog(args!);
@@ -372,16 +384,16 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns React element
    */
   render(): React.ReactElement {
+    if (this.state.repository === null) {
+      if (this.props.showNoRepositoryWarning ?? false) {
+        return <div className={panelWrapperClass}>{this._renderWarning()}</div>;
+      }
+      return <div className={panelWrapperClass} />;
+    }
     return (
       <div className={panelWrapperClass}>
-        {this.state.repository !== null ? (
-          <React.Fragment>
-            {this._renderToolbar()}
-            {this._renderMain()}
-          </React.Fragment>
-        ) : (
-          this._renderWarning()
-        )}
+        {this.props.showToolbar !== false ? this._renderToolbar() : null}
+        {this._renderMain()}
       </div>
     );
   }
@@ -410,85 +422,70 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns React element
    */
   private _renderToolbar(): React.ReactElement {
-    const disableBranching = Boolean(
-      this.props.settings.composite['disableBranchWithChanges'] &&
-        (this._hasUnStagedFile() || this._hasStagedFile())
-    );
     return (
       <Toolbar
-        currentBranch={this.state.currentBranch}
-        branches={this.state.branches}
-        tagsList={this.state.tagsList}
-        branching={!disableBranching}
         commands={this.props.commands}
-        pastCommits={this.state.pastCommits}
+        onExpandBranches={() => undefined}
         model={this.props.model}
-        nCommitsAhead={this.state.nCommitsAhead}
-        nCommitsBehind={this.state.nCommitsBehind}
-        repository={this.state.repository || ''}
         trans={this.props.trans}
-        submodules={this.state.submodules}
       />
     );
   }
 
   /**
-   * Renders the main panel.
-   *
-   * @returns React element
+   * Renders the main panel — a stack of accordion sections (Changes,
+   * History) that replaces the previous Changes/History tab pair.
    */
   private _renderMain(): React.ReactElement {
+    const mode = this.props.contentMode ?? 'all';
+
+    if (mode === 'changes') {
+      return <div className={panelMainClass}>{this._renderChanges()}</div>;
+    }
+    if (mode === 'history') {
+      return <div className={panelMainClass}>{this._renderHistory()}</div>;
+    }
+    if (mode === 'branches') {
+      return <div className={panelMainClass}>{this._renderBranches()}</div>;
+    }
+
+    return (
+      <div className={panelMainClass}>
+        {this._renderChanges()}
+        {this._renderHistory()}
+      </div>
+    );
+  }
+
+  private _renderBranches(): React.ReactElement {
+    const branching = !(
+      this.props.settings.composite['disableBranchWithChanges'] &&
+      (this._hasUnStagedFile() || this._hasStagedFile())
+    );
     return (
       <React.Fragment>
-        {this._renderTabs()}
-        {this.state.tab === 1 ? this._renderHistory() : this._renderChanges()}
+        <BranchMenu
+          currentBranch={this.state.currentBranch}
+          branches={this.state.branches}
+          branching={branching}
+          commands={this.props.commands}
+          model={this.props.model}
+          trans={this.props.trans}
+        />
+        <TagMenu
+          pastCommits={this.state.pastCommits}
+          tagsList={this.state.tagsList}
+          model={this.props.model}
+          branching={branching}
+          trans={this.props.trans}
+        />
       </React.Fragment>
     );
   }
 
   /**
-   * Renders panel tabs.
-   *
-   * @returns React element
-   */
-  private _renderTabs(): React.ReactElement {
-    return (
-      <Tabs
-        classes={{
-          root: tabsClass,
-          indicator: tabIndicatorClass
-        }}
-        value={this.state.tab}
-        onChange={this._onTabChange}
-      >
-        <Tab
-          classes={{
-            root: tabClass,
-            selected: selectedTabClass
-          }}
-          title={this.props.trans.__('View changed files')}
-          label={this.props.trans.__('Changes')}
-          disableFocusRipple={true}
-          disableRipple={true}
-        />
-        <Tab
-          classes={{
-            root: tabClass,
-            selected: selectedTabClass
-          }}
-          title={this.props.trans.__('View commit history')}
-          label={this.props.trans.__('History')}
-          disableFocusRipple={true}
-          disableRipple={true}
-        />
-      </Tabs>
-    );
-  }
-
-  /**
-   * Renders a panel for viewing and committing file changes.
-   *
-   * @returns React element
+   * Renders the contents of the Changes accordion section: file lists,
+   * stash, and the commit / rebase action box.
    */
   private _renderChanges(): React.ReactElement {
     const hasRemote = this.props.model.branches.some(
@@ -601,9 +598,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   }
 
   /**
-   * Renders a panel for viewing commit history.
-   *
-   * @returns React element
+   * Renders the contents of the History accordion section.
    */
   private _renderHistory(): React.ReactElement {
     return (
@@ -722,21 +717,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       </React.Fragment>
     );
   }
-
-  /**
-   * Callback invoked upon changing the active panel tab.
-   *
-   * @param event - event object
-   * @param tab - tab number
-   */
-  private _onTabChange = (event: any, tab: number): void => {
-    if (tab === 1) {
-      this.refreshHistory();
-    }
-    this.setState({
-      tab: tab
-    });
-  };
 
   /**
    * Updates the commit message description.

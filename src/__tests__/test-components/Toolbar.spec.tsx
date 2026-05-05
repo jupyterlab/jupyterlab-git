@@ -8,7 +8,7 @@ import { IToolbarProps, Toolbar } from '../../components/Toolbar';
 import * as git from '../../git';
 import { GitExtension } from '../../model';
 import { badgeClass } from '../../style/Toolbar';
-import { CommandIDs } from '../../tokens';
+import { CommandIDs, Git } from '../../tokens';
 import {
   DEFAULT_REPOSITORY_PATH,
   defaultMockedResponses,
@@ -28,12 +28,80 @@ const REMOTES = [
   }
 ];
 
-async function createModel() {
+const DEFAULT_BRANCHES: Git.IBranch[] = [
+  {
+    is_current_branch: true,
+    is_remote_branch: false,
+    name: 'main',
+    upstream: 'origin/main',
+    top_commit: '',
+    tag: ''
+  },
+  {
+    is_current_branch: false,
+    is_remote_branch: true,
+    name: 'origin/main',
+    upstream: '',
+    top_commit: '',
+    tag: ''
+  }
+];
+
+interface IModelOverrides {
+  branches?: Git.IBranch[];
+  ahead?: number;
+  behind?: number;
+  state?: Git.State;
+  submodules?: Git.ISubmodule[];
+}
+
+async function createModel(
+  overrides: IModelOverrides = {}
+): Promise<GitExtension> {
   const model = new GitExtension();
   model.pathRepository = DEFAULT_REPOSITORY_PATH;
 
   await model.ready;
+
+  // The toolbar reads `model.branches`, `model.currentBranch`, `model.status.*`
+  // and `model.submodules` directly. The status comes from the polled API
+  // response, but `branches` / `currentBranch` / `submodules` are populated
+  // by methods on the model. Inject test fixtures by type-asserting onto the
+  // private fields.
+  const _model = model as any;
+  _model._branches = overrides.branches ?? DEFAULT_BRANCHES;
+  _model._currentBranch =
+    (overrides.branches ?? DEFAULT_BRANCHES).find(b => b.is_current_branch) ??
+    null;
+  // For status fields (ahead/behind/state) the poll runs on a timer and the
+  // mocked `status` endpoint controls the values — see the per-test
+  // `requestAPI.mockImplementation` overrides below.
+  if (overrides.submodules) {
+    _model._submodules = overrides.submodules;
+  }
+  // Mark the test caller's intent on the model so the per-test setup can
+  // align its `status` response with the requested ahead/behind. Used only
+  // as a hint — it is not read by the model.
+  _model.__testStatus = {
+    ahead: overrides.ahead ?? 0,
+    behind: overrides.behind ?? 0,
+    state: overrides.state ?? Git.State.DEFAULT
+  };
   return model;
+}
+
+function statusMockResponse(ahead = 0, behind = 0, state = Git.State.DEFAULT) {
+  return {
+    body: () => ({
+      code: 0,
+      files: [],
+      ahead,
+      behind,
+      state,
+      branch: 'main',
+      remote: 'origin/main'
+    })
+  };
 }
 
 describe('Toolbar', () => {
@@ -42,37 +110,12 @@ describe('Toolbar', () => {
 
   function createProps(props?: Partial<IToolbarProps>): IToolbarProps {
     return {
-      currentBranch: 'main',
-      branches: [
-        {
-          is_current_branch: true,
-          is_remote_branch: false,
-          name: 'main',
-          upstream: 'origin/main',
-          top_commit: '',
-          tag: ''
-        },
-        {
-          is_current_branch: false,
-          is_remote_branch: true,
-          name: 'origin/main',
-          upstream: '',
-          top_commit: '',
-          tag: ''
-        }
-      ],
-      tagsList: model.tagsList,
-      pastCommits: [],
-      repository: model.pathRepository!,
       model: model,
-      branching: false,
-      nCommitsAhead: 0,
-      nCommitsBehind: 0,
       commands: {
         execute: jest.fn()
       } as any,
+      onExpandBranches: jest.fn(),
       trans: trans,
-      submodules: model.submodules,
       ...props
     };
   }
@@ -97,14 +140,6 @@ describe('Toolbar', () => {
     model = await createModel();
   });
 
-  describe('constructor', () => {
-    it('should set the default flag indicating whether to show a branch menu to `false`', () => {
-      render(<Toolbar {...createProps()} />);
-
-      expect(screen.queryByText('Branches')).toBeNull();
-    });
-  });
-
   describe('render', () => {
     it('should display a button to pull the latest changes', async () => {
       render(<Toolbar {...createProps()} />);
@@ -123,7 +158,20 @@ describe('Toolbar', () => {
     });
 
     it('should display a badge on pull icon if behind', async () => {
-      render(<Toolbar {...createProps({ nCommitsBehind: 1 })} />);
+      const mock = git as jest.Mocked<typeof git>;
+      mock.requestAPI.mockImplementation(
+        mockedRequestAPI({
+          responses: {
+            ...defaultMockedResponses,
+            status: statusMockResponse(0, 1),
+            'remote/show': {
+              body: () => ({ code: 0, remotes: REMOTES })
+            }
+          }
+        }) as any
+      );
+      model = await createModel({ behind: 1 });
+      render(<Toolbar {...createProps()} />);
 
       await waitFor(() => {
         expect(
@@ -150,8 +198,21 @@ describe('Toolbar', () => {
       ).toHaveClass('MuiBadge-invisible');
     });
 
-    it('should display a badge on push icon if behind', async () => {
-      render(<Toolbar {...createProps({ nCommitsAhead: 1 })} />);
+    it('should display a badge on push icon if ahead', async () => {
+      const mock = git as jest.Mocked<typeof git>;
+      mock.requestAPI.mockImplementation(
+        mockedRequestAPI({
+          responses: {
+            ...defaultMockedResponses,
+            status: statusMockResponse(1, 0),
+            'remote/show': {
+              body: () => ({ code: 0, remotes: REMOTES })
+            }
+          }
+        }) as any
+      );
+      model = await createModel({ ahead: 1 });
+      render(<Toolbar {...createProps()} />);
 
       await waitFor(() => {
         expect(
@@ -172,43 +233,53 @@ describe('Toolbar', () => {
       ).toBeDefined();
     });
 
-    it('should display a button to toggle a repository menu', () => {
+    it('should display a non-interactive repository label when there are no submodules', () => {
       render(<Toolbar {...createProps()} />);
 
-      expect(screen.getByText('Current Repository')).toBeDefined();
+      // `DEFAULT_REPOSITORY_PATH` resolves to `path/to/repo`, so the basename
+      // displayed in the toolbar is `repo`. With no submodules, this is a
+      // plain label rather than a button.
+      expect(screen.getByText('repo')).toBeDefined();
+      expect(screen.queryByRole('button', { name: 'repo' })).toBeNull();
     });
 
-    it('should display a button to toggle a branch menu', () => {
+    it('should display a repository menu button when submodules are present', async () => {
+      model = await createModel({
+        submodules: [{ name: 'sub', path: 'sub' } as any]
+      });
       render(<Toolbar {...createProps()} />);
 
-      expect(screen.getByText('Current Branch')).toBeDefined();
+      // The repo name is now inside a button (because the dropdown for
+      // switching submodules is meaningful).
+      expect(screen.getByRole('button', { name: 'repo' })).toBeDefined();
     });
 
-    it('should set the `title` attribute on the button to toggle a branch menu', () => {
-      const currentBranch = 'main';
-      render(<Toolbar {...createProps({ currentBranch })} />);
+    it('should display a button to expand the branches & tags section', () => {
+      render(<Toolbar {...createProps()} />);
 
       expect(
-        screen.getByRole('button', { name: /^Current Branch/ })
-      ).toHaveAttribute('title', 'Manage branches and tags');
-    });
-  });
-
-  describe('branch menu', () => {
-    it('should not, by default, display a branch menu', () => {
-      render(<Toolbar {...createProps()} />);
-
-      expect(screen.queryByText('Branches')).toBeNull();
+        screen.getByRole('button', { name: 'Manage branches and tags' })
+      ).toBeDefined();
     });
 
-    it('should display a branch menu when the button to display a branch menu is clicked', async () => {
+    it('should expose the current branch in the branch button title', () => {
       render(<Toolbar {...createProps()} />);
+
+      const button = screen.getByRole('button', {
+        name: 'Manage branches and tags'
+      });
+      expect(button.getAttribute('title')).toContain('main');
+    });
+
+    it('should call onExpandBranches when the branch button is clicked', async () => {
+      const onExpandBranches = jest.fn();
+      render(<Toolbar {...createProps({ onExpandBranches })} />);
 
       await userEvent.click(
-        screen.getByRole('button', { name: /^Current Branch/ })
+        screen.getByRole('button', { name: 'Manage branches and tags' })
       );
 
-      expect(screen.getByText('Branches')).toBeDefined();
+      expect(onExpandBranches).toHaveBeenCalledTimes(1);
     });
   });
 

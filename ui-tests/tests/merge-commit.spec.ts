@@ -18,7 +18,7 @@ test.describe('Merge commit tests', () => {
 
     await page.sidebar.openTab('jp-git-sessions');
 
-    await page.getByRole('tab', { name: 'History' }).click();
+    await page.getByRole('button', { name: /^History/ }).click();
   });
 
   test('should correctly display num files changed, insertions, and deletions', async ({

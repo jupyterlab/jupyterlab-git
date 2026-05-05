@@ -434,8 +434,9 @@ describe('GitPanel', () => {
 
       render(<GitPanel {...props} />);
 
-      const buttons = screen.getAllByRole('button');
-      expect(buttons[buttons.length - 2]).toHaveTextContent('Commit and Push');
+      expect(
+        screen.getByRole('button', { name: 'Commit and Push' })
+      ).toBeInTheDocument();
     });
 
     it('should render Commit if there is no remote branch', () => {
@@ -453,8 +454,9 @@ describe('GitPanel', () => {
 
       render(<GitPanel {...props} />);
 
-      const buttons = screen.getAllByRole('button');
-      expect(buttons[buttons.length - 2]).toHaveTextContent('Commit');
+      expect(
+        screen.getByRole('button', { name: 'Commit' })
+      ).toBeInTheDocument();
     });
 
     it('should render Commit if there is a remote branch but commitAndPush is false', () => {
@@ -473,8 +475,9 @@ describe('GitPanel', () => {
 
       render(<GitPanel {...props} />);
 
-      const buttons = screen.getAllByRole('button');
-      expect(buttons[buttons.length - 2]).toHaveTextContent('Commit');
+      expect(
+        screen.getByRole('button', { name: 'Commit' })
+      ).toBeInTheDocument();
     });
   });
 });

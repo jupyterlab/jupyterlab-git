@@ -1,4 +1,4 @@
-import { Notification } from '@jupyterlab/apputils';
+import { Notification, UseSignal } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { TranslationBundle } from '@jupyterlab/translation';
 import {
@@ -8,71 +8,40 @@ import {
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import Badge from '@mui/material/Badge';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import * as React from 'react';
-import { classes } from 'typestyle';
 import { showError } from '../notifications';
 import {
-  selectedTabClass,
-  tabClass,
-  tabIndicatorClass,
-  tabsClass
-} from '../style/GitPanel';
-import {
   badgeClass,
+  branchInfoClass,
+  branchNameClass,
+  repoButtonClass,
+  repoButtonLabelClass,
+  repoLabelClass,
   spacer,
   toolbarButtonClass,
   toolbarClass,
-  toolbarMenuButtonClass,
-  toolbarMenuButtonEnabledClass,
-  toolbarMenuButtonIconClass,
-  toolbarMenuButtonSubtitleClass,
-  toolbarMenuButtonTitleClass,
-  toolbarMenuButtonTitleWrapperClass,
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
 import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
-import { BranchMenu } from './BranchMenu';
 import { SubmoduleMenu } from './SubmoduleMenu';
-import { TagMenu } from './TagMenu';
 
 /**
  * Interface describing  properties.
  */
 export interface IToolbarProps {
   /**
-   * Current list of branches.
-   */
-  branches: Git.IBranch[];
-
-  /**
-   * Current list of tags.
-   */
-  tagsList: Git.ITag[];
-
-  /**
-   * Boolean indicating whether branching is disabled.
-   */
-  branching: boolean;
-
-  /**
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
 
   /**
-   * Current branch name.
+   * Callback invoked when the branch name in the header is clicked. Wired
+   * to expand the Branches & Tags accordion section in `GitWidget`.
    */
-  currentBranch: string;
-
-  /**
-   * List of prior commits.
-   */
-  pastCommits: Git.ISingleCommitInfo[];
+  onExpandBranches: () => void;
 
   /**
    * Git extension data model.
@@ -80,45 +49,15 @@ export interface IToolbarProps {
   model: IGitExtension;
 
   /**
-   * Number of commits ahead
-   */
-  nCommitsAhead: number;
-
-  /**
-   * Number of commits behind
-   */
-  nCommitsBehind: number;
-
-  /**
-   * Current repository.
-   */
-  repository: string;
-
-  /**
    * The application language translator.
    */
   trans: TranslationBundle;
-
-  /**
-   * Current list of submodules
-   */
-  submodules: Git.ISubmodule[];
 }
 
 /**
  * Interface describing component state.
  */
 export interface IToolbarState {
-  /**
-   * Boolean indicating whether a branch menu is shown.
-   */
-  branchMenu: boolean;
-
-  /**
-   * Panel tab identifier.
-   */
-  tab: number;
-
   /**
    * Boolean indicating whether a refresh is currently in progress.
    */
@@ -130,26 +69,28 @@ export interface IToolbarState {
   hasRemote: boolean;
 
   /**
-   * Boolean indicating whether a repo menu is shown.
+   * Boolean indicating whether the submodule menu is shown.
    */
   repoMenu: boolean;
 }
 
 /**
- * React component for rendering a panel toolbar.
+ * React component for rendering the panel header.
+ *
+ * The header is split into two visual rows:
+ *  1. **Info row** — repository name (with submodule dropdown when applicable)
+ *     followed by the current branch name. Both are displayed compactly with
+ *     small leading icons.
+ *  2. **Action row** — pull / push / refresh buttons aligned to the right.
+ *
+ * Branch click expands the dedicated Branches & Tags accordion section
+ * rather than showing an inline dropdown, keeping the header at a fixed
+ * height regardless of branch operations.
  */
 export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
-  /**
-   * Returns a React component for rendering a panel toolbar.
-   *
-   * @param props - component properties
-   * @returns React component
-   */
   constructor(props: IToolbarProps) {
     super(props);
     this.state = {
-      branchMenu: false,
-      tab: 0,
       refreshInProgress: false,
       hasRemote: false,
       repoMenu: false
@@ -162,7 +103,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   async componentDidMount(): Promise<void> {
     try {
       const remotes = await this.props.model.getRemotes();
-      const hasRemote = remotes.length > 0 ? true : false;
+      const hasRemote = remotes.length > 0;
       this.setState({ hasRemote });
     } catch (err) {
       console.error(err);
@@ -172,37 +113,179 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   /**
    * Renders the component.
    *
-   * @returns React element
+   * The outermost `UseSignal` subscribes to `repositoryChanged` unconditionally
+   * so the toolbar re-renders when a repository is detected after the widget
+   * has already mounted (typical when the side panel is constructed at app
+   * activation, before the file browser has been restored).
    */
   render(): React.ReactElement {
     return (
-      <div className={toolbarClass}>
-        {this._renderTopNav()}
-        {this._renderRepoMenu()}
-        {this._renderBranchMenu()}
+      <UseSignal signal={this.props.model.repositoryChanged}>
+        {() => {
+          if (this.props.model.pathRepository === null) {
+            return <div className={toolbarClass} />;
+          }
+          return (
+            <UseSignal signal={this.props.model.headChanged}>
+              {() => (
+                <UseSignal signal={this.props.model.branchesChanged}>
+                  {() => (
+                    <UseSignal signal={this.props.model.statusChanged}>
+                      {() => (
+                        <div className={toolbarClass}>
+                          {this._renderToolbarRow()}
+                          {this.state.repoMenu
+                            ? this._renderSubmodules()
+                            : null}
+                        </div>
+                      )}
+                    </UseSignal>
+                  )}
+                </UseSignal>
+              )}
+            </UseSignal>
+          );
+        }}
+      </UseSignal>
+    );
+  }
+
+  /**
+   * Renders the single toolbar row containing the repository label + branch
+   * chip on the left and the pull / push / refresh actions on the right.
+   */
+  private _renderToolbarRow(): React.ReactElement {
+    const hasSubmodules = this.props.model.submodules.length > 0;
+    return (
+      <div className={toolbarNavClass}>
+        {hasSubmodules ? this._renderRepoButton() : this._renderRepoLabel()}
+        {this._renderBranchInfo()}
+        <span className={spacer} />
+        {this._renderRemoteActions()}
       </div>
     );
   }
 
   /**
-   * Renders the top navigation.
-   *
-   * @returns React element
+   * Renders a non-interactive label showing the current repository name. Used
+   * when there are no submodules — clicking does nothing because there is no
+   * submodule menu to open.
    */
-  private _renderTopNav(): React.ReactElement {
-    const activeBranch = this.props.branches.filter(
+  private _renderRepoLabel(): React.ReactElement {
+    const repositoryName = this._getRepositoryName();
+    return (
+      <span
+        className={repoLabelClass}
+        title={this.props.trans.__(
+          'Current repository: %1',
+          this._getFullRepositoryPath()
+        )}
+      >
+        <desktopIcon.react tag="span" className="jp-Icon" />
+        <span className={repoButtonLabelClass}>{repositoryName}</span>
+      </span>
+    );
+  }
+
+  /**
+   * Renders the repository menu trigger. Used when the repository has
+   * submodules — the dropdown lets the user switch the active submodule.
+   */
+  private _renderRepoButton(): React.ReactElement {
+    const repositoryName = this._getRepositoryName();
+    return (
+      <button
+        type="button"
+        className={repoButtonClass}
+        title={this.props.trans.__(
+          'Current repository: %1 — click to switch submodule',
+          this._getFullRepositoryPath()
+        )}
+        aria-haspopup="menu"
+        aria-expanded={this.state.repoMenu}
+        onClick={this._onRepoClick}
+      >
+        <desktopIcon.react tag="span" className="jp-Icon" />
+        <span className={repoButtonLabelClass}>{repositoryName}</span>
+        {this.state.repoMenu ? (
+          <caretUpIcon.react tag="span" className="jp-Icon" />
+        ) : (
+          <caretDownIcon.react tag="span" className="jp-Icon" />
+        )}
+      </button>
+    );
+  }
+
+  /**
+   * Renders the current-branch chip in the info row. Clicking it expands the
+   * Branches & Tags accordion section.
+   */
+  private _renderBranchInfo(): React.ReactElement {
+    const currentBranch = this.props.model.currentBranch?.name || 'main';
+    let branchTitle: string;
+    switch (this.props.model.status.state) {
+      case Git.State.CHERRY_PICKING:
+        branchTitle = this.props.trans.__(
+          'Cherry-picking on %1 — click to manage branches and tags',
+          currentBranch
+        );
+        break;
+      case Git.State.DETACHED:
+        branchTitle = this.props.trans.__(
+          'Detached HEAD at %1 — click to manage branches and tags',
+          currentBranch
+        );
+        break;
+      case Git.State.MERGING:
+        branchTitle = this.props.trans.__(
+          'Merging on %1 — click to manage branches and tags',
+          currentBranch
+        );
+        break;
+      case Git.State.REBASING:
+        branchTitle = this.props.trans.__(
+          'Rebasing %1 — click to manage branches and tags',
+          currentBranch
+        );
+        break;
+      default:
+        branchTitle = this.props.trans.__(
+          'Current branch: %1 — click to manage branches and tags',
+          currentBranch
+        );
+    }
+
+    return (
+      <button
+        type="button"
+        className={branchInfoClass}
+        title={branchTitle}
+        aria-label={this.props.trans.__('Manage branches and tags')}
+        onClick={this.props.onExpandBranches}
+      >
+        <branchIcon.react tag="span" className="jp-Icon" />
+        <span className={branchNameClass}>{currentBranch}</span>
+      </button>
+    );
+  }
+
+  /**
+   * Renders the pull / push / refresh action buttons aligned on the right of
+   * the toolbar row.
+   */
+  private _renderRemoteActions(): React.ReactElement {
+    const activeBranch = this.props.model.branches.filter(
       branch => branch.is_current_branch
     );
     const hasRemote = this.state.hasRemote;
     const hasUpstream = activeBranch[0]?.upstream !== null;
 
     return (
-      <div className={toolbarNavClass}>
-        <span className={spacer} />
+      <React.Fragment>
         <Badge
           className={badgeClass}
           variant="dot"
-          invisible={!hasRemote || this.props.nCommitsBehind === 0}
+          invisible={!hasRemote || this.props.model.status.behind === 0}
         >
           <ActionButton
             className={toolbarButtonClass}
@@ -212,10 +295,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             title={
               hasRemote
                 ? this.props.trans.__('Pull latest changes') +
-                  (this.props.nCommitsBehind > 0
+                  (this.props.model.status.behind > 0
                     ? this.props.trans.__(
                         ' (behind by %1 commits)',
-                        this.props.nCommitsBehind
+                        this.props.model.status.behind
                       )
                     : '')
                 : this.props.trans.__('No remote repository defined')
@@ -226,7 +309,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           className={badgeClass}
           variant="dot"
           invisible={
-            !hasRemote || (this.props.nCommitsAhead === 0 && hasUpstream)
+            !hasRemote || (this.props.model.status.ahead === 0 && hasUpstream)
           }
         >
           <ActionButton
@@ -238,10 +321,10 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
               hasRemote
                 ? hasUpstream
                   ? this.props.trans.__('Push committed changes') +
-                    (this.props.nCommitsAhead > 0
+                    (this.props.model.status.ahead > 0
                       ? this.props.trans.__(
                           ' (ahead by %1 commits)',
-                          this.props.nCommitsAhead
+                          this.props.model.status.ahead
                         )
                       : '')
                   : this.props.trans.__('Publish branch')
@@ -249,7 +332,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             }
           />
         </Badge>
-
         <ActionButton
           className={toolbarButtonClass}
           icon={refreshIcon}
@@ -259,244 +341,52 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
             'Refresh the repository to detect local and remote changes'
           )}
         />
-      </div>
-    );
-  }
-
-  /**
-   * Renders a repository menu.
-   *
-   * @returns React element
-   */
-  private _renderRepoMenu(): React.ReactElement {
-    const hasSubmodules = !(this.props.submodules.length === 0);
-    const repositoryName =
-      PathExt.basename(
-        this.props.repository || PageConfig.getOption('serverRoot')
-      ) || 'Jupyter Server Root';
-    return (
-      <div className={toolbarMenuWrapperClass}>
-        <button
-          disabled={!hasSubmodules}
-          className={classes(
-            toolbarMenuButtonClass,
-            hasSubmodules && toolbarMenuButtonEnabledClass
-          )}
-          title={this.props.trans.__(
-            'Current repository: %1',
-            PageConfig.getOption('serverRoot') + '/' + this.props.repository
-          )}
-          onClick={this._onRepoClick}
-        >
-          <desktopIcon.react
-            tag="span"
-            className={toolbarMenuButtonIconClass}
-          />
-          <div className={toolbarMenuButtonTitleWrapperClass}>
-            <p className={toolbarMenuButtonTitleClass}>
-              {this.props.trans.__('Current Repository')}
-            </p>
-            <p className={toolbarMenuButtonSubtitleClass}>{repositoryName}</p>
-          </div>
-          {hasSubmodules &&
-            (this.state.repoMenu ? (
-              <caretUpIcon.react
-                tag="span"
-                className={toolbarMenuButtonIconClass}
-              />
-            ) : (
-              <caretDownIcon.react
-                tag="span"
-                className={toolbarMenuButtonIconClass}
-              />
-            ))}
-        </button>
-        {this.state.repoMenu ? this._renderSubmodules() : null}
-      </div>
-    );
-  }
-
-  /**
-   * Renders a branch menu.
-   *
-   * @returns React element
-   */
-  private _renderBranchMenu(): React.ReactElement | null {
-    let branchTitle = '';
-    if (this.props.model.pathRepository === null) {
-      return null;
-    }
-    switch (this.props.model.status.state) {
-      case Git.State.CHERRY_PICKING:
-        branchTitle = this.props.trans.__('Cherry picking in');
-        break;
-      case Git.State.DETACHED:
-        branchTitle = this.props.trans.__('Detached Head at');
-        break;
-      case Git.State.MERGING:
-        branchTitle = this.props.trans.__('Merging in');
-        break;
-      case Git.State.REBASING:
-        branchTitle = this.props.trans.__('Rebasing');
-        break;
-      default:
-        branchTitle = this.props.trans.__('Current Branch');
-    }
-
-    return (
-      <div className={toolbarMenuWrapperClass}>
-        <button
-          className={classes(
-            toolbarMenuButtonClass,
-            toolbarMenuButtonEnabledClass
-          )}
-          title={this.props.trans.__('Manage branches and tags')}
-          onClick={this._onBranchClick}
-        >
-          <branchIcon.react tag="span" className={toolbarMenuButtonIconClass} />
-          <div className={toolbarMenuButtonTitleWrapperClass}>
-            <p className={toolbarMenuButtonTitleClass}>{branchTitle}</p>
-            <p className={toolbarMenuButtonSubtitleClass}>
-              {this.props.currentBranch || ''}
-            </p>
-          </div>
-          {this.state.branchMenu ? (
-            <caretUpIcon.react
-              tag="span"
-              className={toolbarMenuButtonIconClass}
-            />
-          ) : (
-            <caretDownIcon.react
-              tag="span"
-              className={toolbarMenuButtonIconClass}
-            />
-          )}
-        </button>
-        {this.state.branchMenu ? this._renderTabs() : null}
-      </div>
-    );
-  }
-
-  private _renderTabs(): JSX.Element {
-    return (
-      <React.Fragment>
-        <Tabs
-          classes={{
-            root: tabsClass,
-            indicator: tabIndicatorClass
-          }}
-          value={this.state.tab}
-          onChange={(event: any, tab: number): void => {
-            this.setState({
-              tab: tab
-            });
-          }}
-        >
-          <Tab
-            classes={{
-              root: tabClass,
-              selected: selectedTabClass
-            }}
-            title={this.props.trans.__('View branches')}
-            label={this.props.trans.__('Branches')}
-            disableFocusRipple={true}
-            disableRipple={true}
-          ></Tab>
-          <Tab
-            classes={{
-              root: tabClass,
-              selected: selectedTabClass
-            }}
-            title={this.props.trans.__('View tags')}
-            label={this.props.trans.__('Tags')}
-            disableFocusRipple={true}
-            disableRipple={true}
-          ></Tab>
-        </Tabs>
-        {this.state.tab === 0 ? this._renderBranches() : this._renderTags()}
       </React.Fragment>
-    );
-  }
-
-  private _renderBranches(): JSX.Element {
-    return (
-      <BranchMenu
-        currentBranch={this.props.currentBranch || ''}
-        branches={this.props.branches}
-        branching={this.props.branching}
-        commands={this.props.commands}
-        model={this.props.model}
-        trans={this.props.trans}
-      />
-    );
-  }
-
-  private _renderTags(): JSX.Element {
-    return (
-      <TagMenu
-        pastCommits={this.props.pastCommits}
-        tagsList={this.props.tagsList}
-        model={this.props.model}
-        branching={this.props.branching}
-        trans={this.props.trans}
-      ></TagMenu>
     );
   }
 
   private _renderSubmodules(): JSX.Element {
     return (
-      <SubmoduleMenu
-        model={this.props.model}
-        submodules={this.props.submodules}
-        trans={this.props.trans}
-      />
+      <div className={toolbarMenuWrapperClass}>
+        <SubmoduleMenu
+          model={this.props.model}
+          submodules={this.props.model.submodules}
+          trans={this.props.trans}
+        />
+      </div>
     );
   }
 
-  /**
-   * Callback invoked upon clicking a button to pull the latest changes.
-   *
-   * @param event - event object
-   * @returns a promise which resolves upon pulling the latest changes
-   */
+  private _getRepositoryName(): string {
+    return (
+      PathExt.basename(
+        this.props.model.pathRepository || PageConfig.getOption('serverRoot')
+      ) || 'Jupyter Server Root'
+    );
+  }
+
+  private _getFullRepositoryPath(): string {
+    return (
+      PageConfig.getOption('serverRoot') +
+      '/' +
+      (this.props.model.pathRepository ?? '')
+    );
+  }
+
   private _onPullClick = async (): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitPull);
   };
 
-  /**
-   * Callback invoked upon clicking a button to push the latest changes.
-   *
-   * @param event - event object
-   * @returns a promise which resolves upon pushing the latest changes
-   */
   private _onPushClick = async (): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitPush);
   };
 
-  /**
-   * Callback invoked upon clicking a button to change the current branch.
-   *
-   * @param event - event object
-   */
-  private _onBranchClick = (): void => {
-    // Toggle the branch menu:
-    this.setState({
-      branchMenu: !this.state.branchMenu
-    });
-  };
-
   private _onRepoClick = (): void => {
-    // Toggle the submodule menu:
-    this.setState({
-      repoMenu: !this.state.repoMenu
-    });
+    this.setState({ repoMenu: !this.state.repoMenu });
   };
 
   /**
    * Callback invoked upon clicking a button to refresh the model.
-   *
-   * @param event - event object
-   * @returns a promise which resolves upon refreshing the model
    */
   private _onRefreshClick = async (): Promise<void> => {
     const id = Notification.emit(
@@ -504,12 +394,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       'in-progress',
       { autoClose: false }
     );
-
     this.setState({ refreshInProgress: true });
-
     try {
       await this.props.model.refresh();
-
       Notification.update({
         id,
         message: this.props.trans.__('Successfully refreshed.'),

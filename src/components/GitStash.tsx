@@ -1,9 +1,9 @@
-import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
+import { caretDownIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import {
-  changeStageButtonStyle,
   sectionAreaStyle,
-  sectionFileContainerStyle
+  sectionFileContainerStyle,
+  sectionHeaderSizeStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
 import { GitExtension } from '../model';
@@ -16,7 +16,6 @@ import { FixedSizeList } from 'react-window';
 import {
   listStyle,
   sectionButtonContainerStyle,
-  sectionHeaderLabelStyle,
   stashFileStyle,
   stashEntryMessageStyle,
   stashContainerStyle
@@ -124,7 +123,11 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
   return (
     <div className={sectionFileContainerStyle}>
       <div
-        className={sectionAreaStyle}
+        className={classes(
+          'jp-AccordionPanel-title',
+          showStashFiles && props?.files.length > 0 ? 'lm-mod-expanded' : null,
+          sectionAreaStyle
+        )}
         onClick={() => {
           if (props.collapsible && props?.files.length > 0) {
             setShowStashFiles(!showStashFiles);
@@ -132,20 +135,25 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
         }}
       >
         {props.collapsible && (
-          <button className={changeStageButtonStyle}>
-            {showStashFiles && props?.files.length > 0 ? (
-              <caretDownIcon.react tag="span" />
-            ) : (
-              <caretRightIcon.react tag="span" />
-            )}
-          </button>
+          <div className="lm-AccordionPanel-titleCollapser">
+            <caretDownIcon.react tag="span" />
+          </div>
         )}
-        <span className={sectionHeaderLabelStyle}>
+        <span className="lm-AccordionPanel-titleLabel">
           <span className={stashEntryMessageStyle}>
             {props.trans.__('%1 (on %2)', props.message, props.branch)}
           </span>
-          <span className={sectionButtonContainerStyle}>{props.actions}</span>
         </span>
+        {props.actions && (
+          <div
+            className={classes(
+              'jp-AccordionPanel-toolbar',
+              sectionButtonContainerStyle
+            )}
+          >
+            {props.actions}
+          </div>
+        )}
       </div>
       {showStashFiles && (
         <FixedSizeList
@@ -220,7 +228,11 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   return (
     <div className={classes(sectionFileContainerStyle, stashContainerStyle)}>
       <div
-        className={sectionAreaStyle}
+        className={classes(
+          'jp-AccordionPanel-title',
+          showStash && nStash > 0 ? 'lm-mod-expanded' : null,
+          sectionAreaStyle
+        )}
         onClick={() => {
           if (props.collapsible && nStash > 0) {
             setShowStash(!showStash);
@@ -229,26 +241,30 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
       >
         {props.selectAllButton && props.selectAllButton}
         {props.collapsible && (
-          <button className={changeStageButtonStyle}>
-            {showStash && nStash > 0 ? (
-              <caretDownIcon.react tag="span" />
-            ) : (
-              <caretRightIcon.react tag="span" />
-            )}
-          </button>
+          <div className="lm-AccordionPanel-titleCollapser">
+            <caretDownIcon.react tag="span" />
+          </div>
         )}
-        <span className={sectionHeaderLabelStyle}>
-          <span>{props.trans.__('Stash')}</span>
-          <span className={sectionButtonContainerStyle}>
-            {props.actions}
-            <span
-              data-test-id="num-stashes"
-              data-loading={stashIsLoading ? 'true' : 'false'}
-            >
-              ({nStash})
-            </span>
-          </span>
+        <span className="lm-AccordionPanel-titleLabel">
+          {props.trans.__('Stash')}
         </span>
+        <div
+          className={classes(
+            'jp-AccordionPanel-toolbar',
+            sectionButtonContainerStyle
+          )}
+        >
+          {/* Actions render before the badge so the count chip stays
+              anchored on the right edge regardless of hover state. */}
+          {props.actions}
+          <span
+            className={nStash > 0 ? sectionHeaderSizeStyle : undefined}
+            data-test-id="num-stashes"
+            data-loading={stashIsLoading ? 'true' : 'false'}
+          >
+            {nStash > 0 ? nStash : ''}
+          </span>
+        </div>
       </div>
 
       <UseSignal signal={props.model.stashChanged}>
