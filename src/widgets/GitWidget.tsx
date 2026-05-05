@@ -4,11 +4,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
-import {
-  AccordionPanel,
-  PanelLayout,
-  Widget
-} from '@lumino/widgets';
+import { AccordionPanel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { PanelWithToolbar, SidePanel } from '@jupyterlab/ui-components';
 import { GitPanel } from '../components/GitPanel';
@@ -57,8 +53,12 @@ export class GitWidget extends SidePanel {
     topToolbar.addClass('jp-git-TopToolbar');
     (this.layout as PanelLayout).insertWidget(0, topToolbar);
 
-    this.addWidget(this._createSection('Changes', this._createChangesSection()));
-    this.addWidget(this._createSection('History', this._createHistorySection()));
+    this.addWidget(
+      this._createSection('Changes', this._createChangesSection())
+    );
+    this.addWidget(
+      this._createSection('History', this._createHistorySection())
+    );
     this.addWidget(
       this._createSection('Branches and Tags', this._createBranchesSection())
     );
