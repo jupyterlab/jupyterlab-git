@@ -18,16 +18,38 @@ const DIFF_PROVIDERS: {
   [key: string]: { name: string; factory: Git.Diff.Factory };
 } = {};
 
+// Fallback diff provider for text files without a specific provider
+const FALLBACK_DIFF_PROVIDER: { factory: Git.Diff.Factory | null } = {
+  factory: null
+};
+
 /**
  * Get the diff provider for a filename
+ *
+ * The lookup first tries to find a provider registered for the filename's
+ * extension. If none is registered and `isText` is true, the fallback diff
+ * provider is returned (if one has been registered).
+ *
  * @param filename Filename to look for
+ * @param isText Whether the file is a text file. When true and no
+ *   extension-specific provider matches, the fallback provider (if any)
+ *   is returned.
  * @returns The diff provider callback or undefined
  */
 export function getDiffProvider(
-  filename: string
+  filename: string,
+  isText?: boolean
 ): Git.Diff.Factory | undefined {
-  return DIFF_PROVIDERS[PathExt.extname(filename)?.toLocaleLowerCase() ?? '']
-    ?.factory;
+  const factory =
+    DIFF_PROVIDERS[PathExt.extname(filename)?.toLocaleLowerCase() ?? '']
+      ?.factory;
+  if (factory) {
+    return factory;
+  }
+  if (isText && FALLBACK_DIFF_PROVIDER.factory) {
+    return FALLBACK_DIFF_PROVIDER.factory;
+  }
+  return undefined;
 }
 
 /**
@@ -1975,6 +1997,19 @@ export class GitExtension implements IGitExtension {
     fileExtensions.forEach(extension => {
       DIFF_PROVIDERS[extension] = { name, factory };
     });
+  }
+
+  /**
+   * Register a fallback diff provider used for any text file that does not
+   * have an extension-specific provider registered.
+   *
+   * Only one fallback provider can be registered at a time; subsequent
+   * calls replace the previous fallback.
+   *
+   * @param factory Callback to use for text files without a specific provider
+   */
+  registerFallbackDiffProvider(factory: Git.Diff.Factory): void {
+    FALLBACK_DIFF_PROVIDER.factory = factory;
   }
 
   /**

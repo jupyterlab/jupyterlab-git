@@ -14,10 +14,7 @@ import {
   IMockedResponse,
   mockedRequestAPI
 } from './utils';
-import {
-  CodeMirrorEditorFactory,
-  EditorLanguageRegistry
-} from '@jupyterlab/codemirror';
+import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
 jest.mock('../git');
 jest.mock('@jupyterlab/apputils');
@@ -64,7 +61,6 @@ describe('git-commands', () => {
       app as JupyterFrontEnd,
       model,
       new CodeMirrorEditorFactory(),
-      new EditorLanguageRegistry(),
       mockedFileBrowserModel,
       null as any,
       nullTranslator

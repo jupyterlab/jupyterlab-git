@@ -568,6 +568,17 @@ export interface IGitExtension extends IDisposable {
   ): void;
 
   /**
+   * Register a fallback diff provider used for any text file that does not
+   * have an extension-specific provider registered.
+   *
+   * Only one fallback provider can be registered at a time; subsequent
+   * calls replace the previous fallback.
+   *
+   * @param factory Callback to use for text files without a specific provider
+   */
+  registerFallbackDiffProvider(factory: Git.Diff.Factory): void;
+
+  /**
    * Move files from the "staged" to the "unstaged" area.
    *
    * ## Notes

@@ -13,7 +13,6 @@ import {
   CodeEditorWrapper,
   IEditorFactoryService
 } from '@jupyterlab/codeeditor';
-import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
 import { Contents } from '@jupyterlab/services';
@@ -38,7 +37,6 @@ import { BranchPicker } from './components/BranchPicker';
 import { CONTEXT_COMMANDS } from './components/FileList';
 import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { NewTagDialogBox } from './components/NewTagDialog';
-import { createPlainTextDiff } from './components/diff/PlainTextDiff';
 import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
 import { DiffModel } from './components/diff/model';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
@@ -132,7 +130,6 @@ export function addCommands(
   app: JupyterFrontEnd,
   gitModel: GitExtension,
   editorFactory: IEditorFactoryService,
-  languageRegistry: IEditorLanguageRegistry,
   fileBrowserModel: FileBrowserModel,
   settings: ISettingRegistry.ISettings,
   translator: ITranslator
@@ -684,15 +681,7 @@ export function addCommands(
         model.filename
       );
 
-      const buildDiffWidget =
-        getDiffProvider(fullPath) ??
-        (isText &&
-          (options =>
-            createPlainTextDiff({
-              ...options,
-              editorFactory: editorFactory.newInlineEditor.bind(editorFactory),
-              languageRegistry
-            })));
+      const buildDiffWidget = getDiffProvider(fullPath, isText);
 
       if (buildDiffWidget) {
         const id = `git-diff-${fullPath}-${model.reference.label}-${model.challenger.label}`;
