@@ -5,58 +5,20 @@ import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import {
-  AccordionLayout,
   AccordionPanel,
   PanelLayout,
-  Title,
   Widget
 } from '@lumino/widgets';
 import * as React from 'react';
 import { PanelWithToolbar, SidePanel } from '@jupyterlab/ui-components';
-// `AccordionToolbar` is part of `@jupyterlab/ui-components` but is not
-// re-exported from the package's barrel index in the version we depend on,
-// so we import it from its deep path.
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { AccordionToolbar } from '@jupyterlab/ui-components/lib/components/accordiontoolbar';
 import { GitPanel } from '../components/GitPanel';
 import { Toolbar } from '../components/Toolbar';
 import { GitExtension } from '../model';
-import { sectionCountBadgeClass } from '../style/AccordionRenderer';
 import {
   gitWidgetStyle,
   sectionBodyStyle,
   sectionStyle
 } from '../style/GitWidgetStyle';
-
-/**
- * Custom AccordionPanel renderer that draws a count badge in the section
- * title when `widget.title.dataset.count` is set. Sections that need a count
- * (e.g. Changes, History) update their `dataset` and trigger
- * `AccordionLayout.updateTitle(...)` to re-render the title node.
- *
- * The badge is appended directly to the title node so its
- * `margin-left: auto` rule pushes it to the right edge. We deliberately do
- * NOT mount it inside the section's `.jp-AccordionPanel-toolbar` because
- * that slot is a Fluent `<jp-toolbar>` web component whose
- * `::part(positioning-region)` centers default-slotted children — putting
- * the badge there would render it in the middle of the row.
- *
- * Empty toolbar slots are hidden in `gitWidgetStyle` so they do not consume
- * the right-side `auto` margin and shift the badge.
- */
-class GitAccordionRenderer extends AccordionToolbar.Renderer {
-  createSectionTitle(data: Title<Widget>): HTMLElement {
-    const handle = super.createSectionTitle(data);
-    const count = data.dataset?.count;
-    if (count) {
-      const badge = document.createElement('span');
-      badge.className = sectionCountBadgeClass;
-      badge.textContent = count;
-      handle.appendChild(badge);
-    }
-    return handle;
-  }
-}
 
 /**
  * The Git extension's main side-bar widget. Built on top of JupyterLab's
@@ -73,8 +35,7 @@ export class GitWidget extends SidePanel {
     options?: Widget.IOptions
   ) {
     super({
-      ...(options as any),
-      renderer: new GitAccordionRenderer()
+      ...(options as any)
     } as SidePanel.IOptions);
     this.node.id = 'GitSession-root';
     this.addClass(gitWidgetStyle);
@@ -96,34 +57,14 @@ export class GitWidget extends SidePanel {
     topToolbar.addClass('jp-git-TopToolbar');
     (this.layout as PanelLayout).insertWidget(0, topToolbar);
 
-    this._changesSection = this._createSection(
-      'Changes',
-      this._createChangesSection()
+    this.addWidget(this._createSection('Changes', this._createChangesSection()));
+    this.addWidget(this._createSection('History', this._createHistorySection()));
+    this.addWidget(
+      this._createSection('Branches and Tags', this._createBranchesSection())
     );
-    this.addWidget(this._changesSection);
-
-    this._historySection = this._createSection(
-      'History',
-      this._createHistorySection()
-    );
-    this.addWidget(this._historySection);
-
-    this._branchesSection = this._createSection(
-      'Branches and Tags',
-      this._createBranchesSection()
-    );
-    this.addWidget(this._branchesSection);
 
     // Branches & Tags is reference material — collapse it by default.
     (this.content as AccordionPanel).collapse(2);
-
-    // Wire up the Changes count badge. The count reflects the total number
-    // of files reported by the model's status, which covers staged, changed
-    // and untracked files. The badge is rendered by the custom accordion
-    // renderer; we just keep `widget.title.dataset.count` up to date.
-    model.statusChanged.connect(() => {
-      this._setSectionCount(this._changesSection, model.status.files.length);
-    }, this);
 
     // Add refresh standby condition if this widget is hidden
     model.refreshStandbyCondition = (): boolean =>
@@ -159,25 +100,6 @@ export class GitWidget extends SidePanel {
     reactWidget.addClass(sectionBodyStyle);
     section.addWidget(reactWidget);
     return section;
-  }
-
-  /**
-   * Update the count badge displayed in a section's title bar.
-   */
-  private _setSectionCount(section: Widget, count: number): void {
-    const layout = (this.content as AccordionPanel).layout as AccordionLayout;
-    const index = (this.content as AccordionPanel).widgets.indexOf(section);
-    if (index < 0) {
-      return;
-    }
-    const dataset = { ...(section.title.dataset ?? {}) };
-    if (count > 0) {
-      dataset.count = String(count);
-    } else {
-      delete dataset.count;
-    }
-    section.title.dataset = dataset;
-    layout.updateTitle(index, section);
   }
 
   private _createChangesSection(): React.ReactElement {
@@ -239,7 +161,4 @@ export class GitWidget extends SidePanel {
   private _fileBrowserModel: FileBrowserModel;
   private _model: GitExtension;
   private _settings: ISettingRegistry.ISettings;
-  private _changesSection: PanelWithToolbar;
-  private _historySection: PanelWithToolbar;
-  private _branchesSection: PanelWithToolbar;
 }

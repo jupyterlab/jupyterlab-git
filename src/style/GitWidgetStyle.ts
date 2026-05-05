@@ -6,19 +6,7 @@ export const gitWidgetStyle = style({
   minWidth: '300px',
   color: 'var(--jp-ui-font-color1)',
   background: 'var(--jp-layout-color1)',
-  fontSize: 'var(--jp-ui-font-size1)',
-
-  $nest: {
-    // Outer-accordion sections use `PanelWithToolbar`, which always attaches
-    // an (often empty) Fluent `<jp-toolbar>` to the title. The empty slot
-    // still has its own `margin-left: auto`, which would split the available
-    // space with our count-badge `margin-left: auto` and stop the badge from
-    // hugging the right edge. Hide the slot when it has no items so the
-    // badge floats fully right.
-    '& .jp-AccordionPanel-toolbar:empty': {
-      display: 'none'
-    }
-  }
+  fontSize: 'var(--jp-ui-font-size1)'
 });
 
 /**
