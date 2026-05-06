@@ -49,9 +49,6 @@ const DEFAULT_BRANCHES: Git.IBranch[] = [
 
 interface IModelOverrides {
   branches?: Git.IBranch[];
-  ahead?: number;
-  behind?: number;
-  state?: Git.State;
   submodules?: Git.ISubmodule[];
 }
 
@@ -65,28 +62,17 @@ async function createModel(
 
   // The toolbar reads `model.branches`, `model.currentBranch`, `model.status.*`
   // and `model.submodules` directly. The status comes from the polled API
-  // response, but `branches` / `currentBranch` / `submodules` are populated
-  // by methods on the model. Inject test fixtures by type-asserting onto the
-  // private fields.
+  // response (controlled by `statusMockResponse`), but `branches` /
+  // `currentBranch` / `submodules` are populated by methods on the model.
+  // Inject test fixtures by type-asserting onto the private fields.
   const _model = model as any;
   _model._branches = overrides.branches ?? DEFAULT_BRANCHES;
   _model._currentBranch =
     (overrides.branches ?? DEFAULT_BRANCHES).find(b => b.is_current_branch) ??
     null;
-  // For status fields (ahead/behind/state) the poll runs on a timer and the
-  // mocked `status` endpoint controls the values — see the per-test
-  // `requestAPI.mockImplementation` overrides below.
   if (overrides.submodules) {
     _model._submodules = overrides.submodules;
   }
-  // Mark the test caller's intent on the model so the per-test setup can
-  // align its `status` response with the requested ahead/behind. Used only
-  // as a hint — it is not read by the model.
-  _model.__testStatus = {
-    ahead: overrides.ahead ?? 0,
-    behind: overrides.behind ?? 0,
-    state: overrides.state ?? Git.State.DEFAULT
-  };
   return model;
 }
 
@@ -114,7 +100,6 @@ describe('Toolbar', () => {
       commands: {
         execute: jest.fn()
       } as any,
-      onExpandBranches: jest.fn(),
       trans: trans,
       ...props
     };
@@ -170,7 +155,7 @@ describe('Toolbar', () => {
           }
         }) as any
       );
-      model = await createModel({ behind: 1 });
+      model = await createModel();
       render(<Toolbar {...createProps()} />);
 
       await waitFor(() => {
@@ -211,7 +196,7 @@ describe('Toolbar', () => {
           }
         }) as any
       );
-      model = await createModel({ ahead: 1 });
+      model = await createModel();
       render(<Toolbar {...createProps()} />);
 
       await waitFor(() => {
@@ -254,32 +239,12 @@ describe('Toolbar', () => {
       expect(screen.getByRole('button', { name: 'repo' })).toBeDefined();
     });
 
-    it('should display a button to expand the branches & tags section', () => {
+    it('should display the current branch as a static label', () => {
       render(<Toolbar {...createProps()} />);
 
-      expect(
-        screen.getByRole('button', { name: 'Manage branches and tags' })
-      ).toBeDefined();
-    });
-
-    it('should expose the current branch in the branch button title', () => {
-      render(<Toolbar {...createProps()} />);
-
-      const button = screen.getByRole('button', {
-        name: 'Manage branches and tags'
-      });
-      expect(button.getAttribute('title')).toContain('main');
-    });
-
-    it('should call onExpandBranches when the branch button is clicked', async () => {
-      const onExpandBranches = jest.fn();
-      render(<Toolbar {...createProps({ onExpandBranches })} />);
-
-      await userEvent.click(
-        screen.getByRole('button', { name: 'Manage branches and tags' })
-      );
-
-      expect(onExpandBranches).toHaveBeenCalledTimes(1);
+      // The branch name is just text — no `button` role, no click handler.
+      expect(screen.getByText('main')).toBeDefined();
+      expect(screen.queryByRole('button', { name: /branches/i })).toBeNull();
     });
   });
 

@@ -1,6 +1,7 @@
 import { caretDownIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import {
+  changeStageButtonStyle,
   sectionAreaStyle,
   sectionFileContainerStyle,
   sectionHeaderSizeStyle
@@ -119,30 +120,44 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
   const [showStashFiles, setShowStashFiles] = React.useState(false);
 
   const nFiles = props.files.length;
+  const canToggle = (props.collapsible ?? false) && nFiles > 0;
+  const onToggle = () => {
+    if (canToggle) {
+      setShowStashFiles(!showStashFiles);
+    }
+  };
+  const stashEntryLabel = props.trans.__(
+    '%1 (on %2)',
+    props.message,
+    props.branch
+  );
 
   return (
     <div className={sectionFileContainerStyle}>
       <div
         className={classes(
           'jp-AccordionPanel-title',
-          showStashFiles && props?.files.length > 0 ? 'lm-mod-expanded' : null,
+          showStashFiles && nFiles > 0 ? 'lm-mod-expanded' : null,
           sectionAreaStyle
         )}
-        onClick={() => {
-          if (props.collapsible && props?.files.length > 0) {
-            setShowStashFiles(!showStashFiles);
-          }
-        }}
+        onClick={onToggle}
       >
         {props.collapsible && (
-          <div className="lm-AccordionPanel-titleCollapser">
+          <button
+            type="button"
+            className={classes(
+              'lm-AccordionPanel-titleCollapser',
+              changeStageButtonStyle
+            )}
+            aria-expanded={canToggle ? showStashFiles : undefined}
+            aria-label={stashEntryLabel}
+            disabled={!canToggle}
+          >
             <caretDownIcon.react tag="span" />
-          </div>
+          </button>
         )}
         <span className="lm-AccordionPanel-titleLabel">
-          <span className={stashEntryMessageStyle}>
-            {props.trans.__('%1 (on %2)', props.message, props.branch)}
-          </span>
+          <span className={stashEntryMessageStyle}>{stashEntryLabel}</span>
         </span>
         {props.actions && (
           <div
@@ -191,6 +206,13 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   const [stashIsLoading, setStashIsLoading] = React.useState(true);
 
   const nStash = props.stash?.length ?? 0;
+  const canToggle = (props.collapsible ?? false) && nStash > 0;
+  const onToggle = () => {
+    if (canToggle) {
+      setShowStash(!showStash);
+    }
+  };
+  const stashLabel = props.trans.__('Stash');
 
   const gitStashPop = React.useCallback(
     async (index: number): Promise<void> => {
@@ -233,21 +255,24 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
           showStash && nStash > 0 ? 'lm-mod-expanded' : null,
           sectionAreaStyle
         )}
-        onClick={() => {
-          if (props.collapsible && nStash > 0) {
-            setShowStash(!showStash);
-          }
-        }}
+        onClick={onToggle}
       >
         {props.selectAllButton && props.selectAllButton}
         {props.collapsible && (
-          <div className="lm-AccordionPanel-titleCollapser">
+          <button
+            type="button"
+            className={classes(
+              'lm-AccordionPanel-titleCollapser',
+              changeStageButtonStyle
+            )}
+            aria-expanded={canToggle ? showStash : undefined}
+            aria-label={stashLabel}
+            disabled={!canToggle}
+          >
             <caretDownIcon.react tag="span" />
-          </div>
+          </button>
         )}
-        <span className="lm-AccordionPanel-titleLabel">
-          {props.trans.__('Stash')}
-        </span>
+        <span className="lm-AccordionPanel-titleLabel">{stashLabel}</span>
         <div
           className={classes(
             'jp-AccordionPanel-toolbar',

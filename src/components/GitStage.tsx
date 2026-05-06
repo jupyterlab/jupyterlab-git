@@ -3,6 +3,7 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import {
+  changeStageButtonStyle,
   sectionAreaStyle,
   sectionFileContainerStyle,
   sectionHeaderActionsStyle,
@@ -52,7 +53,7 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
 ) => {
   const [showFiles, setShowFiles] = React.useState(true);
   const nFiles = props.files.length;
-  const canToggle = props.collapsible && nFiles > 0;
+  const canToggle = (props.collapsible ?? false) && nFiles > 0;
 
   const onToggle = () => {
     if (canToggle) {
@@ -72,9 +73,18 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
       >
         {props.selectAllButton && props.selectAllButton}
         {props.collapsible && (
-          <div className="lm-AccordionPanel-titleCollapser">
+          <button
+            type="button"
+            className={classes(
+              'lm-AccordionPanel-titleCollapser',
+              changeStageButtonStyle
+            )}
+            aria-expanded={canToggle ? showFiles : undefined}
+            aria-label={props.heading}
+            disabled={!canToggle}
+          >
             <caretDownIcon.react tag="span" />
-          </div>
+          </button>
         )}
         <span className="lm-AccordionPanel-titleLabel">{props.heading}</span>
         {(nFiles > 0 || props.actions) && (

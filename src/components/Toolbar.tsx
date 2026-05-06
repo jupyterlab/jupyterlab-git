@@ -14,6 +14,7 @@ import {
   badgeClass,
   branchInfoClass,
   branchNameClass,
+  repoBranchColumnClass,
   repoButtonClass,
   repoButtonLabelClass,
   repoLabelClass,
@@ -36,12 +37,6 @@ export interface IToolbarProps {
    * Jupyter App commands registry
    */
   commands: CommandRegistry;
-
-  /**
-   * Callback invoked when the branch name in the header is clicked. Wired
-   * to expand the Branches & Tags accordion section in `GitWidget`.
-   */
-  onExpandBranches: () => void;
 
   /**
    * Git extension data model.
@@ -77,15 +72,11 @@ export interface IToolbarState {
 /**
  * React component for rendering the panel header.
  *
- * The header is split into two visual rows:
- *  1. **Info row** — repository name (with submodule dropdown when applicable)
- *     followed by the current branch name. Both are displayed compactly with
- *     small leading icons.
- *  2. **Action row** — pull / push / refresh buttons aligned to the right.
- *
- * Branch click expands the dedicated Branches & Tags accordion section
- * rather than showing an inline dropdown, keeping the header at a fixed
- * height regardless of branch operations.
+ * The header is a single row containing the repository name (with submodule
+ * dropdown when applicable), the current branch name, and the pull / push /
+ * refresh action buttons aligned to the right. The branch name is shown as
+ * a static label — managing branches and tags is done through the dedicated
+ * "Branches and Tags" accordion section below the toolbar.
  */
 export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   constructor(props: IToolbarProps) {
@@ -132,12 +123,16 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
                   {() => (
                     <UseSignal signal={this.props.model.statusChanged}>
                       {() => (
-                        <div className={toolbarClass}>
-                          {this._renderToolbarRow()}
-                          {this.state.repoMenu
-                            ? this._renderSubmodules()
-                            : null}
-                        </div>
+                        <UseSignal signal={this.props.model.submodulesChanged}>
+                          {() => (
+                            <div className={toolbarClass}>
+                              {this._renderToolbarRow()}
+                              {this.state.repoMenu
+                                ? this._renderSubmodules()
+                                : null}
+                            </div>
+                          )}
+                        </UseSignal>
                       )}
                     </UseSignal>
                   )}
@@ -151,15 +146,17 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   /**
-   * Renders the single toolbar row containing the repository label + branch
-   * chip on the left and the pull / push / refresh actions on the right.
+   * Renders the toolbar row: stacked repo / branch column on the left and
+   * pull / push / refresh actions on the right.
    */
   private _renderToolbarRow(): React.ReactElement {
     const hasSubmodules = this.props.model.submodules.length > 0;
     return (
       <div className={toolbarNavClass}>
-        {hasSubmodules ? this._renderRepoButton() : this._renderRepoLabel()}
-        {this._renderBranchInfo()}
+        <div className={repoBranchColumnClass}>
+          {hasSubmodules ? this._renderRepoButton() : this._renderRepoLabel()}
+          {this._renderBranchInfo()}
+        </div>
         <span className={spacer} />
         {this._renderRemoteActions()}
       </div>
@@ -217,8 +214,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   /**
-   * Renders the current-branch chip in the info row. Clicking it expands the
-   * Branches & Tags accordion section.
+   * Renders the current-branch label in the info row.
    */
   private _renderBranchInfo(): React.ReactElement {
     const currentBranch = this.props.model.currentBranch?.name || 'main';
@@ -226,46 +222,28 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     switch (this.props.model.status.state) {
       case Git.State.CHERRY_PICKING:
         branchTitle = this.props.trans.__(
-          'Cherry-picking on %1 — click to manage branches and tags',
+          'Cherry-picking on %1',
           currentBranch
         );
         break;
       case Git.State.DETACHED:
-        branchTitle = this.props.trans.__(
-          'Detached HEAD at %1 — click to manage branches and tags',
-          currentBranch
-        );
+        branchTitle = this.props.trans.__('Detached HEAD at %1', currentBranch);
         break;
       case Git.State.MERGING:
-        branchTitle = this.props.trans.__(
-          'Merging on %1 — click to manage branches and tags',
-          currentBranch
-        );
+        branchTitle = this.props.trans.__('Merging on %1', currentBranch);
         break;
       case Git.State.REBASING:
-        branchTitle = this.props.trans.__(
-          'Rebasing %1 — click to manage branches and tags',
-          currentBranch
-        );
+        branchTitle = this.props.trans.__('Rebasing %1', currentBranch);
         break;
       default:
-        branchTitle = this.props.trans.__(
-          'Current branch: %1 — click to manage branches and tags',
-          currentBranch
-        );
+        branchTitle = this.props.trans.__('Current branch: %1', currentBranch);
     }
 
     return (
-      <button
-        type="button"
-        className={branchInfoClass}
-        title={branchTitle}
-        aria-label={this.props.trans.__('Manage branches and tags')}
-        onClick={this.props.onExpandBranches}
-      >
+      <span className={branchInfoClass} title={branchTitle}>
         <branchIcon.react tag="span" className="jp-Icon" />
         <span className={branchNameClass}>{currentBranch}</span>
-      </button>
+      </span>
     );
   }
 

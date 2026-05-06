@@ -29,7 +29,6 @@ import { GitStash } from './GitStash';
 import { HistorySideBar } from './HistorySideBar';
 import { BranchMenu } from './BranchMenu';
 import { RebaseAction } from './RebaseAction';
-import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
 import { TagMenu } from './TagMenu';
 
@@ -66,11 +65,6 @@ export interface IGitPanelProps {
    * Which body to render.
    */
   contentMode?: 'all' | 'changes' | 'history' | 'branches';
-
-  /**
-   * Whether to show the toolbar above the rendered body.
-   */
-  showToolbar?: boolean;
 
   /**
    * Whether to render the "not a git repository" warning when no repository
@@ -414,12 +408,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       }
       return <div className={panelWrapperClass} />;
     }
-    return (
-      <div className={panelWrapperClass}>
-        {this.props.showToolbar !== false ? this._renderToolbar() : null}
-        {this._renderMain()}
-      </div>
-    );
+    return <div className={panelWrapperClass}>{this._renderMain()}</div>;
   }
 
   private _gitStashClear = async (): Promise<void> => {
@@ -439,22 +428,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   private _onStashClick = async (): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitStash);
   };
-
-  /**
-   * Renders a toolbar.
-   *
-   * @returns React element
-   */
-  private _renderToolbar(): React.ReactElement {
-    return (
-      <Toolbar
-        commands={this.props.commands}
-        onExpandBranches={() => undefined}
-        model={this.props.model}
-        trans={this.props.trans}
-      />
-    );
-  }
 
   /**
    * Renders the main panel — a stack of accordion sections (Changes,

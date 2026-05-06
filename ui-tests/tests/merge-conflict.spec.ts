@@ -22,9 +22,8 @@ test.describe('Merge conflict tests', () => {
 
     await page.sidebar.openTab('jp-git-sessions');
 
-    await page
-      .getByRole('button', { name: 'Manage branches and tags' })
-      .click();
+    // Expand the Branches and Tags accordion section.
+    await page.getByRole('heading', { name: 'Branches and Tags' }).click();
 
     // Click on a-branch merge button
     await page.locator('text=a-branch').hover();
@@ -35,10 +34,8 @@ test.describe('Merge conflict tests', () => {
       })
       .click();
 
-    // Hide branch panel
-    await page
-      .getByRole('button', { name: 'Manage branches and tags' })
-      .click();
+    // Collapse the Branches and Tags accordion section.
+    await page.getByRole('heading', { name: 'Branches and Tags' }).click();
 
     // Force refresh
     await page

@@ -15,6 +15,13 @@ export async function extractFile(
   await contents.deleteFile(destination);
 }
 
+/**
+ * Maximum time to wait for the JupyterLab launcher to become the active tab
+ * before failing fast. Without this cap, a stuck startup can hang the test
+ * indefinitely on `waitForCondition`.
+ */
+const APPLICATION_READY_TIMEOUT_MS = 30_000;
+
 export async function waitForStableApplication(
   page: Page,
   helpers: IJupyterLabPage
@@ -29,6 +36,9 @@ export async function waitForStableApplication(
   await launcher.waitFor();
 
   if (!(await helpers.isInSimpleMode())) {
+    // Activate the launcher tab and wait for it to actually become the
+    // current tab — otherwise tests can race against the default focused
+    // tab (e.g., a notebook restored from a previous session).
     await launcher.click();
     await helpers.waitForCondition(async () => {
       try {
@@ -38,7 +48,7 @@ export async function waitForStableApplication(
       } catch {
         return false;
       }
-    });
+    }, APPLICATION_READY_TIMEOUT_MS);
   }
 }
 

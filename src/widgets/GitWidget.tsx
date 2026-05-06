@@ -16,6 +16,8 @@ import {
   sectionStyle
 } from '../style/GitWidgetStyle';
 
+const BRANCHES_SECTION_INDEX = 2;
+
 /**
  * The Git extension's main side-bar widget. Built on top of JupyterLab's
  * `SidePanel` so that the visual chrome (accordion sections, per-section
@@ -63,8 +65,9 @@ export class GitWidget extends SidePanel {
       this._createSection('Branches and Tags', this._createBranchesSection())
     );
 
-    // Branches & Tags is reference material — collapse it by default.
-    (this.content as AccordionPanel).collapse(2);
+    // Branches & Tags is reference material — collapse it by default. Users
+    // expand it via the standard accordion section title bar.
+    (this.content as AccordionPanel).collapse(BRANCHES_SECTION_INDEX);
 
     // Add refresh standby condition if this widget is hidden
     model.refreshStandbyCondition = (): boolean =>
@@ -80,25 +83,6 @@ export class GitWidget extends SidePanel {
       console.error('Fail to refresh model when displaying GitWidget.', error);
     });
     super.onBeforeShow(msg);
-  }
-
-  /**
-   * Toggle the branches and tags section. Expanding Branches collapses
-   * Changes and History so the branch list and tags get the full panel
-   * height; collapsing Branches re-expands them.
-   */
-  expandBranchesSection(): void {
-    const accordion = this.content as AccordionPanel;
-    const branches = accordion.widgets[2];
-    if (branches.isHidden) {
-      accordion.collapse(0);
-      accordion.collapse(1);
-      accordion.expand(2);
-    } else {
-      accordion.collapse(2);
-      accordion.expand(0);
-      accordion.expand(1);
-    }
   }
 
   private _createSection(
@@ -123,7 +107,6 @@ export class GitWidget extends SidePanel {
         settings={this._settings}
         trans={this._gitTrans}
         contentMode="changes"
-        showToolbar={false}
         showNoRepositoryWarning
       />
     );
@@ -138,7 +121,6 @@ export class GitWidget extends SidePanel {
         settings={this._settings}
         trans={this._gitTrans}
         contentMode="history"
-        showToolbar={false}
       />
     );
   }
@@ -152,7 +134,6 @@ export class GitWidget extends SidePanel {
         settings={this._settings}
         trans={this._gitTrans}
         contentMode="branches"
-        showToolbar={false}
       />
     );
   }
@@ -162,7 +143,6 @@ export class GitWidget extends SidePanel {
       <Toolbar
         commands={this._commands}
         model={this._model}
-        onExpandBranches={() => this.expandBranchesSection()}
         trans={this._gitTrans}
       />
     );

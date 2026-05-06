@@ -22,19 +22,16 @@ test.describe('Rebase', () => {
 
     await page.sidebar.openTab('jp-git-sessions');
 
-    await page
-      .getByRole('button', { name: 'Manage branches and tags' })
-      .click();
+    // Expand the Branches and Tags accordion section.
+    await page.getByRole('heading', { name: 'Branches and Tags' }).click();
 
     // Switch to a-branch
     await page
       .getByRole('listitem', { name: 'Switch to branch: a-branch' })
       .click();
 
-    // Hide branch panel
-    await page
-      .getByRole('button', { name: 'Manage branches and tags' })
-      .click();
+    // Collapse the Branches and Tags accordion section.
+    await page.getByRole('heading', { name: 'Branches and Tags' }).click();
 
     // Rebase on master
     await page.getByRole('main').press('Control+Shift+C');

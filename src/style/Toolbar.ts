@@ -9,9 +9,10 @@ export const toolbarClass = style({
 });
 
 /**
- * Single toolbar row: repo + branch on the left, pull / push / refresh on
- * the right. The flex layout lets the repo / branch chips shrink and
- * ellipsize before crowding the action buttons on narrow panels.
+ * Toolbar row: stacked repo / branch column on the left, pull / push /
+ * refresh actions vertically centered on the right. The flex layout lets
+ * the repo / branch labels shrink and ellipsize before crowding the action
+ * buttons on narrow panels.
  */
 export const toolbarNavClass = style({
   display: 'flex',
@@ -19,13 +20,25 @@ export const toolbarNavClass = style({
   alignItems: 'center',
   flexWrap: 'nowrap',
 
-  minHeight: '28px',
   padding: '4px 8px',
   gap: '6px',
 
   fontSize: 'var(--jp-ui-font-size1)',
   color: 'var(--jp-ui-font-color1)',
   backgroundColor: 'var(--jp-layout-color1)'
+});
+
+/**
+ * Vertical stack containing the repo label / button on the first line and
+ * the branch label on the second.
+ */
+export const repoBranchColumnClass = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  flex: '0 1 auto',
+  minWidth: 0,
+  gap: '2px'
 });
 
 export const toolbarMenuWrapperClass = style({
@@ -111,8 +124,9 @@ export const repoButtonClass = style({
 });
 
 /**
- * Branch chip in the toolbar — sits to the right of the repo label and
- * opens the Branches & Tags accordion section when clicked.
+ * Branch chip in the toolbar — a static label showing the current branch.
+ * The Branches & Tags accordion section below the toolbar is the place to
+ * manage branches and tags.
  */
 export const branchInfoClass = style({
   boxSizing: 'border-box',
@@ -122,28 +136,19 @@ export const branchInfoClass = style({
   minWidth: 0,
   gap: '4px',
 
-  height: '20px',
+  height: '18px',
   padding: '0 6px',
 
-  fontSize: 'var(--jp-ui-font-size1)',
+  fontSize: 'var(--jp-ui-font-size0)',
   color: 'var(--jp-ui-font-color1)',
 
-  border: 'none',
-  borderRadius: '10px',
+  borderRadius: '9px',
   background: 'var(--jp-layout-color2)',
-  cursor: 'pointer',
 
   $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color3)'
-    },
-    '&:focus-visible': {
-      outline: '2px solid var(--jp-brand-color1)',
-      outlineOffset: '-2px'
-    },
     '& > span.jp-Icon': {
-      width: '14px',
-      height: '14px',
+      width: '12px',
+      height: '12px',
       flex: '0 0 auto'
     }
   }
