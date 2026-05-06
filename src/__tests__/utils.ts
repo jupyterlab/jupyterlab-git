@@ -3,8 +3,10 @@ import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Git } from '../tokens';
 
 export interface IMockedResponse {
-  // Response body
-  body?: (body: any) => ReadonlyJSONObject | null;
+  // Response body. Returns an object shape rather than `ReadonlyJSONObject`
+  // so test fixtures typed against domain interfaces (e.g. `Git.IBranch[]`)
+  // don't need to be cast through JSON-friendly types at every call site.
+  body?: (body: any) => Record<string, any> | null;
   // Response status code
   status?: number;
 }

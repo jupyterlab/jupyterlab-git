@@ -17,7 +17,7 @@ import {
 
 jest.mock('../../git');
 
-const REMOTES = [
+const REMOTES: Git.IGitRemote[] = [
   {
     name: 'test',
     url: 'https://test.com'
@@ -47,47 +47,61 @@ const DEFAULT_BRANCHES: Git.IBranch[] = [
   }
 ];
 
-interface IModelOverrides {
+interface IModelOptions {
   branches?: Git.IBranch[];
   submodules?: Git.ISubmodule[];
+  remotes?: Git.IGitRemote[];
+  status?: { ahead?: number; behind?: number; state?: Git.State };
 }
 
-async function createModel(
-  overrides: IModelOverrides = {}
-): Promise<GitExtension> {
+async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
+  const branches = options.branches ?? DEFAULT_BRANCHES;
+  const currentBranch = branches.find(b => b.is_current_branch) ?? null;
+  const submodules = options.submodules ?? [];
+  const remotes = options.remotes ?? REMOTES;
+  const ahead = options.status?.ahead ?? 0;
+  const behind = options.status?.behind ?? 0;
+  const state = options.status?.state ?? Git.State.DEFAULT;
+
+  const mock = git as jest.Mocked<typeof git>;
+  mock.requestAPI.mockImplementation(
+    mockedRequestAPI({
+      responses: {
+        ...defaultMockedResponses,
+        branch: {
+          body: () => ({ code: 0, branches, current_branch: currentBranch })
+        },
+        submodules: {
+          body: () => ({ code: 0, submodules })
+        },
+        'remote/show': {
+          body: () => ({ code: 0, remotes })
+        },
+        status: {
+          body: () => ({
+            code: 0,
+            files: [],
+            ahead,
+            behind,
+            state,
+            branch: 'main',
+            remote: 'origin/main'
+          })
+        }
+      }
+    }) as any
+  );
+
   const model = new GitExtension();
   model.pathRepository = DEFAULT_REPOSITORY_PATH;
-
   await model.ready;
-
-  // The toolbar reads `model.branches`, `model.currentBranch`, `model.status.*`
-  // and `model.submodules` directly. The status comes from the polled API
-  // response (controlled by `statusMockResponse`), but `branches` /
-  // `currentBranch` / `submodules` are populated by methods on the model.
-  // Inject test fixtures by type-asserting onto the private fields.
-  const _model = model as any;
-  _model._branches = overrides.branches ?? DEFAULT_BRANCHES;
-  _model._currentBranch =
-    (overrides.branches ?? DEFAULT_BRANCHES).find(b => b.is_current_branch) ??
-    null;
-  if (overrides.submodules) {
-    _model._submodules = overrides.submodules;
-  }
+  // `model.ready` resolves once the repository path is set, but the polled
+  // refresh that fills `branches`/`currentBranch`/`submodules` runs
+  // asynchronously. Drive those public refresh methods so the toolbar sees
+  // the test fixtures synchronously.
+  await model.refreshBranch();
+  await model.listSubmodules();
   return model;
-}
-
-function statusMockResponse(ahead = 0, behind = 0, state = Git.State.DEFAULT) {
-  return {
-    body: () => ({
-      code: 0,
-      files: [],
-      ahead,
-      behind,
-      state,
-      branch: 'main',
-      remote: 'origin/main'
-    })
-  };
 }
 
 describe('Toolbar', () => {
@@ -107,21 +121,6 @@ describe('Toolbar', () => {
 
   beforeEach(async () => {
     jest.restoreAllMocks();
-
-    const mock = git as jest.Mocked<typeof git>;
-    mock.requestAPI.mockImplementation(
-      mockedRequestAPI({
-        responses: {
-          ...defaultMockedResponses,
-          'remote/show': {
-            body: () => {
-              return { code: 0, remotes: REMOTES };
-            }
-          }
-        }
-      }) as any
-    );
-
     model = await createModel();
   });
 
@@ -143,19 +142,7 @@ describe('Toolbar', () => {
     });
 
     it('should display a badge on pull icon if behind', async () => {
-      const mock = git as jest.Mocked<typeof git>;
-      mock.requestAPI.mockImplementation(
-        mockedRequestAPI({
-          responses: {
-            ...defaultMockedResponses,
-            status: statusMockResponse(0, 1),
-            'remote/show': {
-              body: () => ({ code: 0, remotes: REMOTES })
-            }
-          }
-        }) as any
-      );
-      model = await createModel();
+      model = await createModel({ status: { behind: 1 } });
       render(<Toolbar {...createProps()} />);
 
       await waitFor(() => {
@@ -184,19 +171,7 @@ describe('Toolbar', () => {
     });
 
     it('should display a badge on push icon if ahead', async () => {
-      const mock = git as jest.Mocked<typeof git>;
-      mock.requestAPI.mockImplementation(
-        mockedRequestAPI({
-          responses: {
-            ...defaultMockedResponses,
-            status: statusMockResponse(1, 0),
-            'remote/show': {
-              body: () => ({ code: 0, remotes: REMOTES })
-            }
-          }
-        }) as any
-      );
-      model = await createModel();
+      model = await createModel({ status: { ahead: 1 } });
       render(<Toolbar {...createProps()} />);
 
       await waitFor(() => {
@@ -230,7 +205,7 @@ describe('Toolbar', () => {
 
     it('should display a repository menu button when submodules are present', async () => {
       model = await createModel({
-        submodules: [{ name: 'sub', path: 'sub' } as any]
+        submodules: [{ name: 'sub' }]
       });
       render(<Toolbar {...createProps()} />);
 
@@ -304,23 +279,7 @@ describe('Toolbar', () => {
 
   describe('push/pull changes without remote', () => {
     beforeEach(async () => {
-      jest.restoreAllMocks();
-
-      const mock = git as jest.Mocked<typeof git>;
-      mock.requestAPI.mockImplementation(
-        mockedRequestAPI({
-          responses: {
-            ...defaultMockedResponses,
-            'remote/show': {
-              body: () => {
-                return { code: -1, remotes: [] };
-              }
-            }
-          }
-        }) as any
-      );
-
-      model = await createModel();
+      model = await createModel({ remotes: [] });
     });
 
     it('should not pull changes when the pull button is clicked but there is no remote branch', async () => {
