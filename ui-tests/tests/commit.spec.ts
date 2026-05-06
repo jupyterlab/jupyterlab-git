@@ -1,9 +1,12 @@
 import { expect, test } from '@jupyterlab/galata';
 import path from 'path';
-import { extractFile } from './utils';
+import { extractFile, waitForStableApplicationFixture } from './utils';
 
 const baseRepositoryPath = 'test-repository.tar.gz';
-test.use({ autoGoto: false });
+test.use({
+  autoGoto: false,
+  waitForApplication: waitForStableApplicationFixture
+});
 
 test.describe('Commit', () => {
   test.beforeEach(async ({ page, request, tmpPath }) => {

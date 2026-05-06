@@ -1,9 +1,13 @@
 import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
-import { extractFile } from './utils';
+import { extractFile, waitForStableApplicationFixture } from './utils';
 
 const baseRepositoryPath = 'test-repository-dirty.tar.gz';
-test.use({ autoGoto: false, mockSettings: galata.DEFAULT_SETTINGS });
+test.use({
+  autoGoto: false,
+  mockSettings: galata.DEFAULT_SETTINGS,
+  waitForApplication: waitForStableApplicationFixture
+});
 
 test.describe('Add tag', () => {
   test.beforeEach(async ({ page, request, tmpPath }) => {
