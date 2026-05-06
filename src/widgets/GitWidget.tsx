@@ -4,7 +4,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
-import { AccordionPanel, PanelLayout, Widget } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { PanelWithToolbar, SidePanel } from '@jupyterlab/ui-components';
 import { GitPanel } from '../components/GitPanel';
@@ -15,8 +15,6 @@ import {
   sectionBodyStyle,
   sectionStyle
 } from '../style/GitWidgetStyle';
-
-const BRANCHES_SECTION_INDEX = 2;
 
 /**
  * The Git extension's main side-bar widget. Built on top of JupyterLab's
@@ -64,10 +62,6 @@ export class GitWidget extends SidePanel {
     this.addWidget(
       this._createSection('Branches and Tags', this._createBranchesSection())
     );
-
-    // Branches & Tags is reference material — collapse it by default. Users
-    // expand it via the standard accordion section title bar.
-    (this.content as AccordionPanel).collapse(BRANCHES_SECTION_INDEX);
 
     // Add refresh standby condition if this widget is hidden
     model.refreshStandbyCondition = (): boolean =>

@@ -129,8 +129,13 @@ test.describe('Git Stash Commands', () => {
     await page
       .getByPlaceholder('Stash message (optional)')
       .fill('some stash message');
-    // click yes
-    await page.getByRole('button', { name: 'Stash' }).click();
+    // Confirm via the dialog's Stash button. Scope to the dialog because
+    // each stash section header also exposes a chevron button labeled
+    // "Stash".
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Stash' })
+      .click();
 
     // Wait
     await page.waitForFunction(() => {

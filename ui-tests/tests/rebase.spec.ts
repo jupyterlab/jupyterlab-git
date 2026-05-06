@@ -22,16 +22,21 @@ test.describe('Rebase', () => {
 
     await page.sidebar.openTab('jp-git-sessions');
 
-    // Expand the Branches and Tags accordion section.
-    await page.getByRole('heading', { name: 'Branches and Tags' }).click();
+    // Collapse Changes and History temporarily so Branches and Tags has
+    // room for the branch list — otherwise the bottom of the list can be
+    // obscured by the JupyterLab status bar.
+    await page.getByRole('heading', { name: 'Changes' }).click();
+    await page.getByRole('heading', { name: 'History' }).click();
 
     // Switch to a-branch
     await page
       .getByRole('listitem', { name: 'Switch to branch: a-branch' })
       .click();
 
-    // Collapse the Branches and Tags accordion section.
-    await page.getByRole('heading', { name: 'Branches and Tags' }).click();
+    // Re-expand Changes and History so subsequent test steps can interact
+    // with files and commits.
+    await page.getByRole('heading', { name: 'Changes' }).click();
+    await page.getByRole('heading', { name: 'History' }).click();
 
     // Rebase on master
     await page.getByRole('main').press('Control+Shift+C');

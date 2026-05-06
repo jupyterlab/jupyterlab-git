@@ -22,8 +22,11 @@ test.describe('Merge conflict tests', () => {
 
     await page.sidebar.openTab('jp-git-sessions');
 
-    // Expand the Branches and Tags accordion section.
-    await page.getByRole('heading', { name: 'Branches and Tags' }).click();
+    // Collapse Changes and History temporarily so Branches and Tags has
+    // room for the branch list — otherwise the bottom of the list can be
+    // obscured by the JupyterLab status bar.
+    await page.getByRole('heading', { name: 'Changes' }).click();
+    await page.getByRole('heading', { name: 'History' }).click();
 
     // Click on a-branch merge button
     await page.locator('text=a-branch').hover();
@@ -34,8 +37,8 @@ test.describe('Merge conflict tests', () => {
       })
       .click();
 
-    // Collapse the Branches and Tags accordion section.
-    await page.getByRole('heading', { name: 'Branches and Tags' }).click();
+    // Re-expand Changes so the conflicted files are visible to the tests.
+    await page.getByRole('heading', { name: 'Changes' }).click();
 
     // Force refresh
     await page
