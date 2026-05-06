@@ -88,8 +88,7 @@ test.describe('Rebase', () => {
     // Continue rebase as all conflicts are resolved
     await page.getByRole('button', { name: 'Continue' }).click();
 
-    await page.getByRole('button', { name: /^History/ }).click();
-
+    await page.getByTitle('View commit details').first().waitFor();
     // Master changes must be part of the history following the rebase
     await expect.soft(page.getByTitle('View commit details')).toHaveCount(3);
     await expect(page.getByText('master changes')).toBeVisible();
@@ -102,8 +101,6 @@ test.describe('Rebase', () => {
 
     await page.getByRole('button', { name: 'Abort' }).click();
 
-    await page.getByRole('button', { name: /^History/ }).click();
-
     // Master changes must not be part of the history following the abort
     await expect.soft(page.getByTitle('View commit details')).toHaveCount(2);
     await expect(page.getByText('a-branch changes')).toBeVisible();
@@ -113,8 +110,6 @@ test.describe('Rebase', () => {
     await page.getByTitle('Pick another rebase action.').click();
 
     await page.getByRole('menuitem', { name: 'Skip' }).click();
-
-    await page.getByRole('button', { name: /^History/ }).click();
 
     // Master changes must be part of the history following the rebase but not
     // the old a-branch commit.

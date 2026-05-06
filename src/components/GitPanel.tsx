@@ -276,6 +276,27 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
         hasDirtyFiles: args
       });
     });
+
+    // The model may have already emitted `repositoryChanged` /
+    // `statusChanged` / `headChanged` before this component mounted, so the
+    // signal connections above can miss the initial fetch. Seed state from
+    // the model and trigger the refreshes relevant to this `contentMode`.
+    if (contentMode === 'all' || contentMode === 'changes') {
+      this.setState({
+        files: model.status.files,
+        nCommitsAhead: model.status.ahead,
+        nCommitsBehind: model.status.behind
+      });
+    }
+    if (model.pathRepository !== null) {
+      if (contentMode === 'all' || contentMode === 'history') {
+        this.refreshHistory();
+      }
+      if (contentMode === 'all' || contentMode === 'branches') {
+        this.refreshBranches();
+        this.refreshTags();
+      }
+    }
   }
 
   componentWillUnmount(): void {

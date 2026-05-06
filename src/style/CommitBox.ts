@@ -3,8 +3,8 @@ import { style } from 'typestyle';
 export const commitFormClass = style({
   display: 'flex',
   flexWrap: 'wrap',
+  flexShrink: 0,
 
-  marginTop: 'auto',
   padding: '8px',
 
   alignItems: 'flex-start',

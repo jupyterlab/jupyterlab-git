@@ -83,10 +83,22 @@ export class GitWidget extends SidePanel {
   }
 
   /**
-   * Expand the branches and tags section.
+   * Toggle the branches and tags section. Expanding Branches collapses
+   * Changes and History so the branch list and tags get the full panel
+   * height; collapsing Branches re-expands them.
    */
   expandBranchesSection(): void {
-    (this.content as AccordionPanel).expand(2);
+    const accordion = this.content as AccordionPanel;
+    const branches = accordion.widgets[2];
+    if (branches.isHidden) {
+      accordion.collapse(0);
+      accordion.collapse(1);
+      accordion.expand(2);
+    } else {
+      accordion.collapse(2);
+      accordion.expand(0);
+      accordion.expand(1);
+    }
   }
 
   private _createSection(

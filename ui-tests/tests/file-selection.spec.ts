@@ -19,8 +19,8 @@ test.describe('File selection for normal staging', () => {
 
   test('should select two files with ctlr-click', async ({ page }) => {
     await page.sidebar.openTab('jp-git-sessions');
-    await page.click('button:has-text("Changes")');
 
+    await page.locator('#jp-git-sessions >> text=another_file.txt').waitFor();
     // Click another_file.txt
     await page.locator('#jp-git-sessions >> text=another_file.txt').click();
     // Control-click master_file.ts
@@ -36,8 +36,8 @@ test.describe('File selection for normal staging', () => {
 
   test('should select four files with shift-click', async ({ page }) => {
     await page.sidebar.openTab('jp-git-sessions');
-    await page.click('button:has-text("Changes")');
 
+    await page.locator('#jp-git-sessions >> text=another_file.txt').waitFor();
     // Click another_file.txt
     await page.locator('#jp-git-sessions >> text=another_file.txt').click();
     // Shift-click master_file.ts
@@ -69,8 +69,8 @@ test.describe('File selection for simple staging', () => {
 
   test('should mark four files with shift-click', async ({ page }) => {
     await page.sidebar.openTab('jp-git-sessions');
-    await page.click('button:has-text("Changes")');
 
+    await page.locator('#jp-git-sessions >> text=another_file.txt').waitFor();
     // Click another_file.txt
     await page.locator('#jp-git-sessions >> text=another_file.txt').click();
     // Shift-click master_file.ts
@@ -86,12 +86,9 @@ test.describe('File selection for simple staging', () => {
     page
   }) => {
     await page.sidebar.openTab('jp-git-sessions');
-    await page.click('button:has-text("Changes")');
-
-    await page.getByText('(4)').waitFor();
 
     let markedFiles = page.locator('[data-test-checked=true]');
-    expect(await markedFiles.count()).toBeGreaterThanOrEqual(4);
+    await expect.poll(() => markedFiles.count()).toBeGreaterThanOrEqual(4);
 
     await page.locator('[data-test-id=SelectAllButton]').click();
 

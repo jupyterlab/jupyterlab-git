@@ -19,9 +19,9 @@ test.describe('Commits diff', () => {
 
   test('should display commits diff from history', async ({ page }) => {
     await page.sidebar.openTab('jp-git-sessions');
-    await page.click('button:has-text("History")');
     const commits = page.locator('li[title="View commit details"]');
 
+    await commits.first().waitFor();
     expect(await commits.count()).toBeGreaterThanOrEqual(2);
 
     await commits.last().locator('button[title="Select for compare"]').click();

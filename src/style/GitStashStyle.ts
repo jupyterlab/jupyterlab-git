@@ -4,7 +4,10 @@ import { sectionAreaStyle } from './GitStageStyle';
 
 export const stashContainerStyle = style(
   (() => {
-    const styled: NestedCSSProperties = { $nest: {} };
+    const styled: NestedCSSProperties = {
+      flexShrink: 0,
+      $nest: {}
+    };
 
     styled.$nest![`& > .${sectionAreaStyle}`] = {
       margin: 0

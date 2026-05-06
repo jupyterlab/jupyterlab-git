@@ -15,7 +15,8 @@ export const panelMainClass = style({
   display: 'flex',
   flexDirection: 'column',
   flex: '1 1 auto',
-  minHeight: 0
+  minHeight: 0,
+  overflowY: 'auto'
 });
 
 export const warningTextClass = style({
