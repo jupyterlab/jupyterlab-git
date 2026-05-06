@@ -129,9 +129,6 @@ export interface IGitPanelState {
   pastCommits: Git.ISingleCommitInfo[];
 
   /**
-   * Which accordion sections are currently expanded.
-   */
-  /**
    * Commit message summary.
    */
   commitSummary: string;
