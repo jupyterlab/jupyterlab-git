@@ -380,7 +380,11 @@ describe('GitPanel', () => {
       props.model = {
         branches: [],
         submodules: [],
-        status: {},
+        status: { files: [], ahead: 0, behind: 0 },
+        tagsList: [],
+        log: jest.fn().mockResolvedValue({ code: 0, commits: [] }),
+        listSubmodules: jest.fn().mockResolvedValue(undefined),
+        remoteChangedFiles: jest.fn().mockResolvedValue([]),
         stashChanged: {
           connect: jest.fn()
         },

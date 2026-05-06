@@ -281,20 +281,26 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     // `statusChanged` / `headChanged` before this component mounted, so the
     // signal connections above can miss the initial fetch. Seed state from
     // the model and trigger the refreshes relevant to this `contentMode`.
-    if (contentMode === 'all' || contentMode === 'changes') {
+    if (
+      (contentMode === 'all' || contentMode === 'changes') &&
+      model.status?.files
+    ) {
       this.setState({
         files: model.status.files,
-        nCommitsAhead: model.status.ahead,
-        nCommitsBehind: model.status.behind
+        nCommitsAhead: model.status.ahead ?? 0,
+        nCommitsBehind: model.status.behind ?? 0
       });
     }
     if (model.pathRepository !== null) {
+      const onError = (error: unknown) => {
+        console.error('Failed to refresh Git panel on mount.', error);
+      };
       if (contentMode === 'all' || contentMode === 'history') {
-        this.refreshHistory();
+        this.refreshHistory().catch(onError);
       }
       if (contentMode === 'all' || contentMode === 'branches') {
-        this.refreshBranches();
-        this.refreshTags();
+        this.refreshBranches().catch(onError);
+        this.refreshTags().catch(onError);
       }
     }
   }
