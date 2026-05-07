@@ -94,8 +94,6 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
               sectionHeaderActionsStyle
             )}
           >
-            {/* Render actions before the count so the count stays anchored
-                on the right when hover-revealed actions appear. */}
             {props.actions}
             {nFiles > 0 && (
               <span className={sectionHeaderSizeStyle}>{nFiles}</span>
