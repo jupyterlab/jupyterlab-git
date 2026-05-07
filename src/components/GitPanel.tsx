@@ -64,7 +64,7 @@ export interface IGitPanelProps {
   /**
    * Which body to render.
    */
-  contentMode?: 'all' | 'changes' | 'history' | 'branches';
+  contentMode: 'changes' | 'history' | 'branches';
 
   /**
    * Whether to render the "not a git repository" warning when no repository
@@ -211,8 +211,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
    */
   componentDidMount(): void {
-    const { model, settings } = this.props;
-    const contentMode = this.props.contentMode ?? 'all';
+    const { model, settings, contentMode } = this.props;
     model.stashChanged.connect((_, args) => {
       this.setState({
         stash: args.newValue as any
@@ -241,7 +240,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     }, this);
     model.headChanged.connect(async () => {
       await this.refreshCurrentBranch();
-      if (contentMode === 'all' || contentMode === 'history') {
+      if (contentMode === 'history') {
         await this.refreshHistory();
       }
     }, this);
@@ -249,7 +248,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       await this.refreshTags();
     }, this);
     model.selectedHistoryFileChanged.connect(() => {
-      if (contentMode === 'all' || contentMode === 'history') {
+      if (contentMode === 'history') {
         this.refreshHistory();
       }
     }, this);
@@ -270,10 +269,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
     // Seed state from the current model and trigger fetches for the active
     // `contentMode`, in case the relevant signals fired before this mount.
-    if (
-      (contentMode === 'all' || contentMode === 'changes') &&
-      model.status?.files
-    ) {
+    if (contentMode === 'changes' && model.status?.files) {
       this.setState({
         files: model.status.files,
         nCommitsAhead: model.status.ahead ?? 0,
@@ -284,10 +280,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       const onError = (error: unknown) => {
         console.error('Failed to refresh Git panel on mount.', error);
       };
-      if (contentMode === 'all' || contentMode === 'history') {
+      if (contentMode === 'history') {
         this.refreshHistory().catch(onError);
       }
-      if (contentMode === 'all' || contentMode === 'branches') {
+      if (contentMode === 'branches') {
         this.refreshBranches().catch(onError);
         this.refreshTags().catch(onError);
       }
@@ -428,24 +424,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   };
 
   private _renderMain(): React.ReactElement {
-    const mode = this.props.contentMode ?? 'all';
-
-    if (mode === 'changes') {
+    const { contentMode } = this.props;
+    if (contentMode === 'changes') {
       return <div className={panelMainClass}>{this._renderChanges()}</div>;
     }
-    if (mode === 'history') {
+    if (contentMode === 'history') {
       return <div className={panelMainClass}>{this._renderHistory()}</div>;
     }
-    if (mode === 'branches') {
-      return <div className={panelMainClass}>{this._renderBranches()}</div>;
-    }
-
-    return (
-      <div className={panelMainClass}>
-        {this._renderChanges()}
-        {this._renderHistory()}
-      </div>
-    );
+    return <div className={panelMainClass}>{this._renderBranches()}</div>;
   }
 
   private _renderBranches(): React.ReactElement {

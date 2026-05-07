@@ -69,7 +69,8 @@ describe('GitPanel', () => {
     filebrowser: {
       path: '/dummy/path'
     } as any,
-    trans: trans
+    trans: trans,
+    contentMode: 'changes'
   };
 
   beforeEach(async () => {

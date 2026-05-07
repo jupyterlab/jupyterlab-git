@@ -3,7 +3,7 @@ import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Git } from '../tokens';
 
 export interface IMockedResponse {
-  // Response body. Wider return type allows domain-typed fixtures without casting.
+  // Response body
   body?: (body: any) => Record<string, any> | null;
   // Response status code
   status?: number;
