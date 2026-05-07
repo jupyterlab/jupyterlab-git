@@ -8,12 +8,6 @@ export const toolbarClass = style({
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
-/**
- * Toolbar row: stacked repo / branch column on the left, pull / push /
- * refresh actions vertically centered on the right. The flex layout lets
- * the repo / branch labels shrink and ellipsize before crowding the action
- * buttons on narrow panels.
- */
 export const toolbarNavClass = style({
   display: 'flex',
   flexDirection: 'row',
@@ -28,10 +22,6 @@ export const toolbarNavClass = style({
   backgroundColor: 'var(--jp-layout-color1)'
 });
 
-/**
- * Vertical stack containing the repo label / button on the first line and
- * the branch label on the second.
- */
 export const repoBranchColumnClass = style({
   display: 'flex',
   flexDirection: 'column',
@@ -46,10 +36,6 @@ export const toolbarMenuWrapperClass = style({
   borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
-/**
- * Repository name label shown inside the submodule dropdown button or as a
- * standalone label.
- */
 export const repoButtonLabelClass = style({
   flex: '0 1 auto',
   minWidth: 0,
@@ -58,9 +44,6 @@ export const repoButtonLabelClass = style({
   whiteSpace: 'nowrap'
 });
 
-/**
- * Non-interactive repository label rendered when there are no submodules.
- */
 export const repoLabelClass = style({
   display: 'inline-flex',
   alignItems: 'center',
@@ -81,9 +64,6 @@ export const repoLabelClass = style({
   }
 });
 
-/**
- * Repository dropdown button, used when submodules exist.
- */
 export const repoButtonClass = style({
   boxSizing: 'border-box',
   display: 'inline-flex',
@@ -123,11 +103,6 @@ export const repoButtonClass = style({
   }
 });
 
-/**
- * Branch chip in the toolbar — a static label showing the current branch.
- * The Branches & Tags accordion section below the toolbar is the place to
- * manage branches and tags.
- */
 export const branchInfoClass = style({
   boxSizing: 'border-box',
   display: 'inline-flex',

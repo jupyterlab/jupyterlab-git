@@ -22,9 +22,7 @@ test.describe('Merge conflict tests', () => {
 
     await page.sidebar.openTab('jp-git-sessions');
 
-    // Collapse Changes and History temporarily so Branches and Tags has
-    // room for the branch list — otherwise the bottom of the list can be
-    // obscured by the JupyterLab status bar.
+    // Collapse Changes and History to expose the branch list.
     await page.getByRole('heading', { name: 'Changes' }).click();
     await page.getByRole('heading', { name: 'History' }).click();
 
@@ -37,7 +35,7 @@ test.describe('Merge conflict tests', () => {
       })
       .click();
 
-    // Re-expand Changes so the conflicted files are visible to the tests.
+    // Re-expand Changes so conflicted files are visible.
     await page.getByRole('heading', { name: 'Changes' }).click();
 
     // Force refresh

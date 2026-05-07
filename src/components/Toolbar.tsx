@@ -64,20 +64,11 @@ export interface IToolbarState {
   hasRemote: boolean;
 
   /**
-   * Boolean indicating whether the submodule menu is shown.
+   * Boolean indicating whether the repository menu is shown.
    */
   repoMenu: boolean;
 }
 
-/**
- * React component for rendering the panel header.
- *
- * The header is a single row containing the repository name (with submodule
- * dropdown when applicable), the current branch name, and the pull / push /
- * refresh action buttons aligned to the right. The branch name is shown as
- * a static label — managing branches and tags is done through the dedicated
- * "Branches and Tags" accordion section below the toolbar.
- */
 export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   constructor(props: IToolbarProps) {
     super(props);
@@ -101,14 +92,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     }
   }
 
-  /**
-   * Renders the component.
-   *
-   * The outermost `UseSignal` subscribes to `repositoryChanged` unconditionally
-   * so the toolbar re-renders when a repository is detected after the widget
-   * has already mounted (typical when the side panel is constructed at app
-   * activation, before the file browser has been restored).
-   */
   render(): React.ReactElement {
     return (
       <UseSignal signal={this.props.model.repositoryChanged}>
@@ -145,10 +128,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
-  /**
-   * Renders the toolbar row: stacked repo / branch column on the left and
-   * pull / push / refresh actions on the right.
-   */
   private _renderToolbarRow(): React.ReactElement {
     const hasSubmodules = this.props.model.submodules.length > 0;
     return (
@@ -163,11 +142,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
-  /**
-   * Renders a non-interactive label showing the current repository name. Used
-   * when there are no submodules — clicking does nothing because there is no
-   * submodule menu to open.
-   */
   private _renderRepoLabel(): React.ReactElement {
     const repositoryName = this._getRepositoryName();
     return (
@@ -184,10 +158,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
-  /**
-   * Renders the repository menu trigger. Used when the repository has
-   * submodules — the dropdown lets the user switch the active submodule.
-   */
   private _renderRepoButton(): React.ReactElement {
     const repositoryName = this._getRepositoryName();
     return (
@@ -213,9 +183,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
-  /**
-   * Renders the current-branch label in the info row.
-   */
   private _renderBranchInfo(): React.ReactElement {
     const currentBranch = this.props.model.currentBranch?.name || 'main';
     let branchTitle: string;
@@ -247,10 +214,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
-  /**
-   * Renders the pull / push / refresh action buttons aligned on the right of
-   * the toolbar row.
-   */
   private _renderRemoteActions(): React.ReactElement {
     const activeBranch = this.props.model.branches.filter(
       branch => branch.is_current_branch

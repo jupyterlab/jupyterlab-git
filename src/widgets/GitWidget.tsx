@@ -17,9 +17,7 @@ import {
 } from '../style/GitWidgetStyle';
 
 /**
- * The Git extension's main side-bar widget. Built on top of JupyterLab's
- * `SidePanel` so that the visual chrome (accordion sections, per-section
- * toolbars, focus styles) matches the rest of the application.
+ * The Git extension's main side-bar widget.
  */
 export class GitWidget extends SidePanel {
   constructor(
@@ -42,13 +40,6 @@ export class GitWidget extends SidePanel {
     this._model = model;
     this._settings = settings;
 
-    // Mount the React-rendered toolbar (repo + branch info row + pull / push
-    // / refresh action row) at the very top of the SidePanel layout. We
-    // intentionally do NOT use `this.header` because `.jp-SidePanel-header`
-    // imposes `text-transform: uppercase` and a smaller `--jp-ui-font-size0`
-    // on its descendants — both of which would mangle the repository / branch
-    // names. Inserting directly into the panel layout keeps the toolbar's
-    // own styling intact and visually separate from the accordion sections.
     const topToolbar = ReactWidget.create(this._renderTopToolbar());
     topToolbar.addClass('jp-git-TopToolbar');
     (this.layout as PanelLayout).insertWidget(0, topToolbar);

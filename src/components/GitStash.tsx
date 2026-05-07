@@ -279,8 +279,8 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
             sectionButtonContainerStyle
           )}
         >
-          {/* Actions render before the badge so the count chip stays
-              anchored on the right edge regardless of hover state. */}
+          {/* Render actions before the count so the count stays anchored
+              on the right when hover-revealed actions appear. */}
           {props.actions}
           <span
             className={nStash > 0 ? sectionHeaderSizeStyle : undefined}

@@ -95,10 +95,7 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
   const model = new GitExtension();
   model.pathRepository = DEFAULT_REPOSITORY_PATH;
   await model.ready;
-  // `model.ready` resolves once the repository path is set, but the polled
-  // refresh that fills `branches`/`currentBranch`/`submodules` runs
-  // asynchronously. Drive those public refresh methods so the toolbar sees
-  // the test fixtures synchronously.
+  // Manually fetch branch/submodule data; model.ready does not await these.
   await model.refreshBranch();
   await model.listSubmodules();
   return model;
@@ -196,9 +193,7 @@ describe('Toolbar', () => {
     it('should display a non-interactive repository label when there are no submodules', () => {
       render(<Toolbar {...createProps()} />);
 
-      // `DEFAULT_REPOSITORY_PATH` resolves to `path/to/repo`, so the basename
-      // displayed in the toolbar is `repo`. With no submodules, this is a
-      // plain label rather than a button.
+      // DEFAULT_REPOSITORY_PATH basename is 'repo'.
       expect(screen.getByText('repo')).toBeDefined();
       expect(screen.queryByRole('button', { name: 'repo' })).toBeNull();
     });
@@ -209,15 +204,12 @@ describe('Toolbar', () => {
       });
       render(<Toolbar {...createProps()} />);
 
-      // The repo name is now inside a button (because the dropdown for
-      // switching submodules is meaningful).
       expect(screen.getByRole('button', { name: 'repo' })).toBeDefined();
     });
 
     it('should display the current branch as a static label', () => {
       render(<Toolbar {...createProps()} />);
 
-      // The branch name is just text — no `button` role, no click handler.
       expect(screen.getByText('main')).toBeDefined();
       expect(screen.queryByRole('button', { name: /branches/i })).toBeNull();
     });

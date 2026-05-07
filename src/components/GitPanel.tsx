@@ -268,10 +268,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       });
     });
 
-    // The model may have already emitted `repositoryChanged` /
-    // `statusChanged` / `headChanged` before this component mounted, so the
-    // signal connections above can miss the initial fetch. Seed state from
-    // the model and trigger the refreshes relevant to this `contentMode`.
+    // Seed state from the current model and trigger fetches for the active
+    // `contentMode`, in case the relevant signals fired before this mount.
     if (
       (contentMode === 'all' || contentMode === 'changes') &&
       model.status?.files
@@ -429,10 +427,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     await this.props.commands.execute(CommandIDs.gitStash);
   };
 
-  /**
-   * Renders the main panel — a stack of accordion sections (Changes,
-   * History) that replaces the previous Changes/History tab pair.
-   */
   private _renderMain(): React.ReactElement {
     const mode = this.props.contentMode ?? 'all';
 
@@ -480,10 +474,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     );
   }
 
-  /**
-   * Renders the contents of the Changes accordion section: file lists,
-   * stash, and the commit / rebase action box.
-   */
   private _renderChanges(): React.ReactElement {
     const hasRemote = this.props.model.branches.some(
       branch => branch.is_remote_branch
@@ -594,9 +584,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     );
   }
 
-  /**
-   * Renders the contents of the History accordion section.
-   */
   private _renderHistory(): React.ReactElement {
     return (
       <React.Fragment>

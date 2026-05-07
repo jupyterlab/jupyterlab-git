@@ -19,8 +19,7 @@ test.describe('Git Stash Commands', () => {
     // Open Git panel
     await page.goto(`tree/${tmpPath}/test-repository`);
     await page.sidebar.openTab('jp-git-sessions');
-    // Changes accordion section is expanded by default; just wait for the
-    // stash list to finish loading.
+    // Wait for the stash list to finish loading.
     await page.waitForSelector(
       '[data-test-id="num-stashes"][data-loading="false"]'
     );
@@ -129,9 +128,7 @@ test.describe('Git Stash Commands', () => {
     await page
       .getByPlaceholder('Stash message (optional)')
       .fill('some stash message');
-    // Confirm via the dialog's Stash button. Scope to the dialog because
-    // each stash section header also exposes a chevron button labeled
-    // "Stash".
+    // Scope to the dialog to disambiguate from the section-header Stash button.
     await page
       .getByRole('dialog')
       .getByRole('button', { name: 'Stash' })
@@ -143,7 +140,6 @@ test.describe('Git Stash Commands', () => {
       return element && (element.textContent ?? '').trim() !== '2';
     });
 
-    // See if the nStashes becomes 3
     const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
 
     await expect.soft(numberOfStashes).toHaveText('3');

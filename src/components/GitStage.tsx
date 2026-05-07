@@ -94,10 +94,8 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
               sectionHeaderActionsStyle
             )}
           >
-            {/* Action buttons appear/disappear on hover. Rendering them
-                before the count badge keeps the badge anchored to the right
-                edge of the row, so it does not jump when actions become
-                visible. */}
+            {/* Render actions before the count so the count stays anchored
+                on the right when hover-revealed actions appear. */}
             {props.actions}
             {nFiles > 0 && (
               <span className={sectionHeaderSizeStyle}>{nFiles}</span>
