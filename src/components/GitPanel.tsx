@@ -212,11 +212,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    */
   componentDidMount(): void {
     const { model, settings, contentMode } = this.props;
-    model.stashChanged.connect((_, args) => {
-      this.setState({
-        stash: args.newValue as any
-      });
-    }, this);
+
     model.repositoryChanged.connect((_, args) => {
       this.setState({
         repository: args.newValue,
@@ -225,56 +221,86 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       });
       this.refreshView();
     }, this);
-    model.statusChanged.connect(async () => {
-      const remotechangedFiles: Git.IStatusFile[] =
-        await model.remoteChangedFiles();
-      this.setState({
-        files: model.status.files,
-        remoteChangedFiles: remotechangedFiles,
-        nCommitsAhead: model.status.ahead,
-        nCommitsBehind: model.status.behind
-      });
-    }, this);
-    model.branchesChanged.connect(async () => {
-      await this.refreshBranches();
-    }, this);
-    model.headChanged.connect(async () => {
-      await this.refreshCurrentBranch();
-      if (contentMode === 'history') {
-        await this.refreshHistory();
-      }
-    }, this);
-    model.tagsChanged.connect(async () => {
-      await this.refreshTags();
-    }, this);
-    model.selectedHistoryFileChanged.connect(() => {
-      if (contentMode === 'history') {
-        this.refreshHistory();
-      }
-    }, this);
-    model.remoteChanged.connect((_, args) => {
-      this.warningDialog(args!);
-    }, this);
-    model.repositoryChanged.connect(async () => {
-      await this.refreshSubmodules();
-    }, this);
 
     settings.changed.connect(this.refreshView, this);
 
-    model.dirtyFilesStatusChanged.connect((_, args) => {
-      this.setState({
-        hasDirtyFiles: args
-      });
-    });
+    if (contentMode === 'changes') {
+      model.statusChanged.connect(async () => {
+        const remotechangedFiles: Git.IStatusFile[] =
+          await model.remoteChangedFiles();
+        this.setState({
+          files: model.status.files,
+          remoteChangedFiles: remotechangedFiles,
+          nCommitsAhead: model.status.ahead,
+          nCommitsBehind: model.status.behind
+        });
+      }, this);
+      model.stashChanged.connect((_, args) => {
+        this.setState({
+          stash: args.newValue as any
+        });
+      }, this);
+      model.dirtyFilesStatusChanged.connect((_, args) => {
+        this.setState({
+          hasDirtyFiles: args
+        });
+      }, this);
+      model.remoteChanged.connect((_, args) => {
+        this.warningDialog(args!);
+      }, this);
+      model.repositoryChanged.connect(async () => {
+        await this.refreshSubmodules();
+      }, this);
+    }
+
+    if (contentMode === 'history') {
+      model.branchesChanged.connect(async () => {
+        await this.refreshBranches();
+      }, this);
+      model.tagsChanged.connect(async () => {
+        await this.refreshTags();
+      }, this);
+      model.headChanged.connect(async () => {
+        await this.refreshCurrentBranch();
+        await this.refreshHistory();
+      }, this);
+      model.selectedHistoryFileChanged.connect(() => {
+        this.refreshHistory();
+      }, this);
+    }
+
+    if (contentMode === 'branches') {
+      model.statusChanged.connect(() => {
+        this.setState({
+          files: model.status.files
+        });
+      }, this);
+      model.branchesChanged.connect(async () => {
+        await this.refreshBranches();
+      }, this);
+      model.tagsChanged.connect(async () => {
+        await this.refreshTags();
+      }, this);
+      model.headChanged.connect(async () => {
+        await this.refreshCurrentBranch();
+        await this.refreshHistory();
+      }, this);
+    }
 
     // Seed state from the current model and trigger fetches for the active
     // `contentMode`, in case the relevant signals fired before this mount.
-    if (contentMode === 'changes' && model.status?.files) {
-      this.setState({
-        files: model.status.files,
-        nCommitsAhead: model.status.ahead ?? 0,
-        nCommitsBehind: model.status.behind ?? 0
-      });
+    if (model.status?.files) {
+      if (contentMode === 'changes') {
+        this.setState({
+          files: model.status.files,
+          nCommitsAhead: model.status.ahead ?? 0,
+          nCommitsBehind: model.status.behind ?? 0
+        });
+      } else if (contentMode === 'branches') {
+        this.setState({
+          files: model.status.files
+        });
+      }
     }
     if (model.pathRepository !== null) {
       const onError = (error: unknown) => {
@@ -286,6 +312,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       if (contentMode === 'branches') {
         this.refreshBranches().catch(onError);
         this.refreshTags().catch(onError);
+        this.refreshHistory().catch(onError);
       }
     }
   }
@@ -345,11 +372,18 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * Refresh widget, update all content
    */
   refreshView = async (): Promise<void> => {
-    if (this.props.model.pathRepository !== null) {
-      await this.refreshBranches();
-      await this.refreshHistory();
-      await this.refreshTags();
+    if (this.props.model.pathRepository === null) {
+      return;
     }
+    if (this.props.contentMode === 'changes') {
+      // 'changes' state is driven by statusChanged/stashChanged/dirtyFilesStatusChanged;
+      // a forceUpdate here covers setting-driven re-renders (e.g. commitAndPush, simpleStaging).
+      this.forceUpdate();
+      return;
+    }
+    await this.refreshBranches();
+    await this.refreshHistory();
+    await this.refreshTags();
   };
 
   /**
