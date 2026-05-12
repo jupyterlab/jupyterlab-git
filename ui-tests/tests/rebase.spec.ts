@@ -1,13 +1,9 @@
 import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
-import { extractFile, waitForStableApplicationFixture } from './utils';
+import { extractFile } from './utils';
 
 const baseRepositoryPath = 'test-repository.tar.gz';
-test.use({
-  autoGoto: false,
-  mockSettings: galata.DEFAULT_SETTINGS,
-  waitForApplication: waitForStableApplicationFixture
-});
+test.use({ autoGoto: false, mockSettings: galata.DEFAULT_SETTINGS });
 
 test.describe('Rebase', () => {
   test.beforeEach(async ({ page, request, tmpPath }) => {

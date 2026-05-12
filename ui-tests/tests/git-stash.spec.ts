@@ -1,12 +1,9 @@
 import { expect, test } from '@jupyterlab/galata';
 import path from 'path';
-import { extractFile, waitForStableApplicationFixture } from './utils';
+import { extractFile } from './utils';
 
 const baseRepositoryPath = 'test-repository-stash.tar.gz';
-test.use({
-  autoGoto: false,
-  waitForApplication: waitForStableApplicationFixture
-});
+test.use({ autoGoto: false });
 
 test.describe('Git Stash Commands', () => {
   test.beforeEach(async ({ page, request, tmpPath }) => {

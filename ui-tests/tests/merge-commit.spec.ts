@@ -1,13 +1,9 @@
 import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
-import { extractFile, waitForStableApplicationFixture } from './utils';
+import { extractFile } from './utils';
 
 const baseRepositoryPath = 'test-repository-merge-commits.tar.gz';
-test.use({
-  autoGoto: false,
-  mockSettings: galata.DEFAULT_SETTINGS,
-  waitForApplication: waitForStableApplicationFixture
-});
+test.use({ autoGoto: false, mockSettings: galata.DEFAULT_SETTINGS });
 
 test.describe('Merge commit tests', () => {
   test.beforeEach(async ({ page, request, tmpPath }) => {

@@ -1,12 +1,9 @@
 import { expect, test } from '@jupyterlab/galata';
 import path from 'path';
-import { extractFile, waitForStableApplicationFixture } from './utils';
+import { extractFile } from './utils';
 
 const baseRepositoryPath = 'test-repository-dirty.tar.gz';
-test.use({
-  autoGoto: false,
-  waitForApplication: waitForStableApplicationFixture
-});
+test.use({ autoGoto: false });
 
 test.describe('File selection for normal staging', () => {
   test.beforeEach(async ({ page, request, tmpPath }) => {
