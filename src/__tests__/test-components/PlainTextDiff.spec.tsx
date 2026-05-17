@@ -1,6 +1,11 @@
 import 'jest';
+import { EditorLanguageRegistry } from '@jupyterlab/codemirror';
+import { Toolbar } from '@jupyterlab/ui-components';
 import { DiffModel } from '../../components/diff/model';
-import { PlainTextDiff } from '../../components/diff/PlainTextDiff';
+import {
+  createPlainTextDiff,
+  PlainTextDiff
+} from '../../components/diff/PlainTextDiff';
 import { Git } from '../../tokens';
 
 jest.mock('../../git');
@@ -74,5 +79,300 @@ describe('PlainTextDiff', () => {
       resolveTest();
     }, 0);
     await terminateTest;
+  });
+
+  it('should add edit toolbar item for working tree diffs', async () => {
+    // Given
+    const model = new DiffModel({
+      challenger: {
+        content: () => Promise.resolve('challenger'),
+        label: 'WORKING',
+        source: Git.Diff.SpecialRef.WORKING
+      },
+      reference: {
+        content: () => Promise.resolve('reference'),
+        label: 'HEAD',
+        source: 'HEAD'
+      },
+      filename: 'to/File.py',
+      repositoryPath: 'path'
+    });
+    const toolbar = new Toolbar();
+
+    // When
+    const widget = await createPlainTextDiff({
+      model,
+      toolbar,
+      languageRegistry: new EditorLanguageRegistry(),
+      contentsManager: {
+        save: jest.fn()
+      } as any
+    });
+
+    // Then
+    expect(Array.from(toolbar.names())).toContain('edit');
+    widget.dispose();
+  });
+
+  it('should not add edit toolbar item for non-working diffs', async () => {
+    // Given
+    const model = new DiffModel({
+      challenger: {
+        content: () => Promise.resolve('challenger'),
+        label: 'INDEX',
+        source: Git.Diff.SpecialRef.INDEX
+      },
+      reference: {
+        content: () => Promise.resolve('reference'),
+        label: 'HEAD',
+        source: 'HEAD'
+      },
+      filename: 'to/File.py',
+      repositoryPath: 'path'
+    });
+    const toolbar = new Toolbar();
+
+    // When
+    const widget = await createPlainTextDiff({
+      model,
+      toolbar,
+      languageRegistry: new EditorLanguageRegistry(),
+      contentsManager: {
+        save: jest.fn()
+      } as any
+    });
+
+    // Then
+    expect(Array.from(toolbar.names())).not.toContain('edit');
+    widget.dispose();
+  });
+
+  it('should save edited working content to underlying file', async () => {
+    // Given
+    const model = new DiffModel({
+      challenger: {
+        content: () => Promise.resolve('challenger'),
+        label: 'WORKING',
+        source: Git.Diff.SpecialRef.WORKING
+      },
+      reference: {
+        content: () => Promise.resolve('reference'),
+        label: 'HEAD',
+        source: 'HEAD'
+      },
+      filename: 'to/File.py',
+      repositoryPath: 'path'
+    });
+    const save = jest.fn(() => Promise.resolve({}));
+    const widget = await createPlainTextDiff({
+      model,
+      languageRegistry: new EditorLanguageRegistry(),
+      contentsManager: { save } as any
+    });
+    const refresh = jest
+      .spyOn(widget, 'refresh')
+      .mockImplementation(async () => undefined);
+
+    (widget as any)._mergeView = {
+      right: {
+        remoteEditorWidget: {
+          doc: {
+            toString: () => 'edited content'
+          }
+        }
+      }
+    };
+    (widget as any)._lastSavedContent = 'challenger';
+
+    // When
+    (widget as any)._saveEditedContent();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // Then
+    expect(save).toHaveBeenCalledWith('path/to/File.py', {
+      type: 'file',
+      format: 'text',
+      content: 'edited content'
+    });
+    expect(refresh).toHaveBeenCalled();
+    refresh.mockRestore();
+    widget.dispose();
+  });
+
+  it('should refresh safely when merge view is unavailable', async () => {
+    // Given
+    const model = new DiffModel({
+      challenger: {
+        content: () => Promise.resolve('new challenger'),
+        label: 'WORKING',
+        source: Git.Diff.SpecialRef.WORKING
+      },
+      reference: {
+        content: () => Promise.resolve('new reference'),
+        label: 'HEAD',
+        source: 'HEAD'
+      },
+      filename: 'to/File.py',
+      repositoryPath: 'path'
+    });
+    const widget = await createPlainTextDiff({
+      model,
+      languageRegistry: new EditorLanguageRegistry(),
+      contentsManager: { save: jest.fn() } as any
+    });
+    const createDiffView = jest
+      .spyOn(widget as any, 'createDiffView')
+      .mockImplementation(async () => undefined);
+
+    (widget as any)._mergeView = null;
+
+    // When
+    await widget.refresh();
+
+    // Then
+    expect(createDiffView).toHaveBeenCalledWith(
+      'new challenger',
+      'new reference',
+      null
+    );
+    createDiffView.mockRestore();
+    widget.dispose();
+  });
+
+  it('should restore editor selection on refresh', async () => {
+    // Given
+    const model = new DiffModel({
+      challenger: {
+        content: () => Promise.resolve('new challenger'),
+        label: 'WORKING',
+        source: Git.Diff.SpecialRef.WORKING
+      },
+      reference: {
+        content: () => Promise.resolve('new reference'),
+        label: 'HEAD',
+        source: 'HEAD'
+      },
+      filename: 'to/File.py',
+      repositoryPath: 'path'
+    });
+    const widget = await createPlainTextDiff({
+      model,
+      languageRegistry: new EditorLanguageRegistry(),
+      contentsManager: { save: jest.fn() } as any
+    });
+    const previousSelection = {
+      start: { line: 1, column: 2 },
+      end: { line: 1, column: 2 }
+    };
+    const setSelection = jest.fn();
+    const revealSelection = jest.fn();
+    const focus = jest.fn();
+
+    (widget as any)._mergeView = {
+      right: {
+        remoteEditorWidget: {
+          editor: {
+            getSelection: () => previousSelection,
+            hasFocus: () => true,
+            setSelection,
+            revealSelection,
+            focus
+          },
+          doc: {
+            toString: () => 'new challenger'
+          },
+          cm: {
+            scrollDOM: {
+              scrollTop: 12,
+              scrollLeft: 4
+            }
+          }
+        }
+      },
+      dispose: jest.fn()
+    };
+    (widget as any)._lastSavedContent = 'new challenger';
+
+    const createDiffView = jest
+      .spyOn(widget as any, 'createDiffView')
+      .mockImplementation(async () => {
+        (widget as any)._mergeView = {
+          right: {
+            remoteEditorWidget: {
+              editor: {
+                setSelection,
+                revealSelection,
+                focus
+              },
+              doc: {
+                toString: () => 'new challenger'
+              },
+              cm: {
+                scrollDOM: {
+                  scrollTop: 0,
+                  scrollLeft: 0
+                }
+              }
+            }
+          }
+        };
+      });
+
+    // When
+    await widget.refresh();
+    await new Promise(resolve => window.requestAnimationFrame(() => resolve(0)));
+
+    // Then
+    expect(setSelection).toHaveBeenCalledWith(previousSelection);
+    expect(revealSelection).toHaveBeenCalledWith(previousSelection);
+    expect(focus).toHaveBeenCalled();
+    createDiffView.mockRestore();
+    widget.dispose();
+  });
+
+  it('should save pending edited content on dispose', async () => {
+    // Given
+    const model = new DiffModel({
+      challenger: {
+        content: () => Promise.resolve('challenger'),
+        label: 'WORKING',
+        source: Git.Diff.SpecialRef.WORKING
+      },
+      reference: {
+        content: () => Promise.resolve('reference'),
+        label: 'HEAD',
+        source: 'HEAD'
+      },
+      filename: 'to/File.py',
+      repositoryPath: 'path'
+    });
+    const save = jest.fn(() => Promise.resolve({}));
+    const widget = await createPlainTextDiff({
+      model,
+      languageRegistry: new EditorLanguageRegistry(),
+      contentsManager: { save } as any
+    });
+
+    (widget as any)._mergeView = {
+      right: {
+        remoteEditorWidget: {
+          doc: {
+            toString: () => 'edited content on close'
+          }
+        }
+      }
+    };
+    (widget as any)._lastSavedContent = 'challenger';
+
+    // When
+    widget.dispose();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // Then
+    expect(save).toHaveBeenCalledWith('path/to/File.py', {
+      type: 'file',
+      format: 'text',
+      content: 'edited content on close'
+    });
   });
 });

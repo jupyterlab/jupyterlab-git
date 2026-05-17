@@ -118,6 +118,7 @@ const plainTextDiffPlugin: JupyterFrontEndPlugin<void> = {
       (options: Git.Diff.IFactoryOptions) =>
         createPlainTextDiff({
           ...options,
+          contentsManager: app.serviceManager.contents,
           editorFactory: editorFactory.newInlineEditor.bind(editorFactory),
           languageRegistry
         })
