@@ -320,7 +320,9 @@ describe('PlainTextDiff', () => {
 
     // When
     await widget.refresh();
-    await new Promise(resolve => window.requestAnimationFrame(() => resolve(0)));
+    await new Promise(resolve =>
+      window.requestAnimationFrame(() => resolve(0))
+    );
 
     // Then
     expect(setSelection).toHaveBeenCalledWith(previousSelection);
