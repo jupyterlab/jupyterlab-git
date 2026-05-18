@@ -22,7 +22,7 @@ import {
   stashContainerStyle
 } from '../style/GitStashStyle';
 import { FilePath } from './FilePath';
-import { stopPropagationWrapper } from '../utils';
+import { stopPropagation, stopPropagationWrapper } from '../utils';
 import { classes } from 'typestyle';
 
 const HEADER_HEIGHT = 34;
@@ -165,6 +165,7 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
               'jp-AccordionPanel-toolbar',
               sectionButtonContainerStyle
             )}
+            onClick={stopPropagation}
           >
             {props.actions}
           </div>
@@ -257,7 +258,11 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
         )}
         onClick={onToggle}
       >
-        {props.selectAllButton && props.selectAllButton}
+        {props.selectAllButton && (
+          <span style={{ display: 'contents' }} onClick={stopPropagation}>
+            {props.selectAllButton}
+          </span>
+        )}
         {props.collapsible && (
           <button
             type="button"
@@ -278,6 +283,7 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
             'jp-AccordionPanel-toolbar',
             sectionButtonContainerStyle
           )}
+          onClick={stopPropagation}
         >
           {props.actions}
           <span

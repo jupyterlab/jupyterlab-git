@@ -10,6 +10,7 @@ import {
   sectionHeaderSizeStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
+import { stopPropagation } from '../utils';
 
 const HEADER_HEIGHT = 34;
 const ITEM_HEIGHT = 25;
@@ -71,7 +72,11 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
         )}
         onClick={onToggle}
       >
-        {props.selectAllButton && props.selectAllButton}
+        {props.selectAllButton && (
+          <span style={{ display: 'contents' }} onClick={stopPropagation}>
+            {props.selectAllButton}
+          </span>
+        )}
         {props.collapsible && (
           <button
             type="button"
@@ -93,6 +98,7 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
               'jp-AccordionPanel-toolbar',
               sectionHeaderActionsStyle
             )}
+            onClick={stopPropagation}
           >
             {props.actions}
             {nFiles > 0 && (
