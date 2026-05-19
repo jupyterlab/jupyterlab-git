@@ -140,6 +140,8 @@ test.describe('Git Stash Commands', () => {
     const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
 
     await expect.soft(numberOfStashes).toHaveText('3');
+    // Expand the Stash section to view its entries.
+    await page.getByText('Stash', { exact: true }).click();
     // check that our stash message showed up properly
     await expect
       .soft(page.getByText('some stash message (on master)'))
