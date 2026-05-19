@@ -16,8 +16,7 @@ test.describe('Git Stash Commands', () => {
     // Open Git panel
     await page.goto(`tree/${tmpPath}/test-repository`);
     await page.sidebar.openTab('jp-git-sessions');
-    await page.getByRole('tab', { name: 'Changes' }).click();
-    // Let stash list finish loading
+    // Wait for the stash list to finish loading.
     await page.waitForSelector(
       '[data-test-id="num-stashes"][data-loading="false"]'
     );
@@ -32,16 +31,16 @@ test.describe('Git Stash Commands', () => {
     await page.getByText('Stash', { exact: true }).click();
 
     expect.soft(stashButton).toBeTruthy();
-    await expect(numberOfStashes).toHaveText('(2)');
+    await expect(numberOfStashes).toHaveText('2');
   });
 
   test('should drop a single stash entry when `stash drop` button is clicked', async ({
     page
   }) => {
-    const stashSection = page.getByText('Stash(2)');
+    const stashSection = page.getByText('Stash', { exact: true });
     await stashSection.waitFor();
     // Open the stash list
-    await page.getByText('Stash', { exact: true }).click();
+    await stashSection.click();
     // Hover on the stash list
     await stashSection.hover();
 
@@ -57,13 +56,13 @@ test.describe('Git Stash Commands', () => {
     // Wait for the number of stashes to change
     await page.waitForFunction(() => {
       const element = document.querySelector('[data-test-id="num-stashes"]');
-      return element && !(element.textContent ?? '').includes('(2)');
+      return element && (element.textContent ?? '').trim() !== '2';
     });
 
     // Now there should be only one stash
     const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
 
-    await expect(numberOfStashes).toHaveText('(1)');
+    await expect(numberOfStashes).toHaveText('1');
   });
 
   test('should clear all the stashes when `stash clear` button is clicked', async ({
@@ -72,7 +71,7 @@ test.describe('Git Stash Commands', () => {
     // Open the stash list
     await page.getByText('Stash', { exact: true }).click();
     // Hover on the stash list
-    const stashSection = page.getByText('Stash(2)');
+    const stashSection = page.getByText('Stash', { exact: true });
     await stashSection.hover();
 
     // Click clear all stash button
@@ -85,13 +84,14 @@ test.describe('Git Stash Commands', () => {
     // Wait for the number of stashes to change
     await page.waitForFunction(() => {
       const element = document.querySelector('[data-test-id="num-stashes"]');
-      return element && !(element.textContent ?? '').includes('(2)');
+      return element && (element.textContent ?? '').trim() !== '2';
     });
 
     // Now there should be only one stash
     const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
 
-    await expect(numberOfStashes).toHaveText('(0)');
+    // The empty/zero state renders no badge text.
+    await expect(numberOfStashes).toHaveText('');
   });
 
   test('should add a stash when the `stash changes` button is clicked', async ({
@@ -110,7 +110,7 @@ test.describe('Git Stash Commands', () => {
 
     // Click stash changes
     // Hover
-    await page.getByText('Stash(2)').hover();
+    await page.getByText('Stash', { exact: true }).hover();
 
     // Should have the old tetx
 
@@ -125,19 +125,23 @@ test.describe('Git Stash Commands', () => {
     await page
       .getByPlaceholder('Stash message (optional)')
       .fill('some stash message');
-    // click yes
-    await page.getByRole('button', { name: 'Stash' }).click();
+    // Scope to the dialog to disambiguate from the section-header Stash button.
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Stash' })
+      .click();
 
     // Wait
     await page.waitForFunction(() => {
       const element = document.querySelector('[data-test-id="num-stashes"]');
-      return element && !(element.textContent ?? '').includes('(2)');
+      return element && (element.textContent ?? '').trim() !== '2';
     });
 
-    // See if the nStashes becomes (3)
     const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
 
-    await expect.soft(numberOfStashes).toHaveText('(3)');
+    await expect.soft(numberOfStashes).toHaveText('3');
+    // Expand the Stash section to view its entries.
+    await page.getByText('Stash', { exact: true }).click();
     // check that our stash message showed up properly
     await expect
       .soft(page.getByText('some stash message (on master)'))
@@ -162,7 +166,7 @@ test.describe('Git Stash Commands', () => {
     await page.getByRole('tab', { name: 'Git' }).click();
 
     // Show the stash entries and hover on the stash entry
-    await page.getByText('Stash(2)').click();
+    await page.getByText('Stash', { exact: true }).click();
     await page
       .locator('div')
       .filter({ hasText: /^stashy stash \(on master\)$/ })
@@ -196,7 +200,7 @@ test.describe('Git Stash Commands', () => {
 
     // See if the nStashes remains the same
     const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
-    await expect(numberOfStashes).toHaveText('(2)');
+    await expect(numberOfStashes).toHaveText('2');
   });
 
   test('should pop a stash entry when the `stash pop` button is clicked (apply stash then remove from list)', async ({
@@ -238,7 +242,7 @@ test.describe('Git Stash Commands', () => {
     // Wait for the number of stashes to change
     await page.waitForFunction(() => {
       const element = document.querySelector('[data-test-id="num-stashes"]');
-      return element && !(element.textContent ?? '').includes('(2)');
+      return element && (element.textContent ?? '').trim() !== '2';
     });
     await page.waitForTimeout(100);
     // Check that the stash applies
@@ -265,10 +269,10 @@ test.describe('Git Stash Commands', () => {
 
     await page.waitForFunction(() => {
       const element = document.querySelector('[data-test-id="num-stashes"]');
-      return element && !(element.textContent ?? '').includes('(2)');
+      return element && (element.textContent ?? '').trim() !== '2';
     });
 
     const numberOfStashes = page.locator('[data-test-id="num-stashes"]');
-    await expect(numberOfStashes).toHaveText('(1)');
+    await expect(numberOfStashes).toHaveText('1');
   });
 });

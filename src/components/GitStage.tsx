@@ -1,14 +1,16 @@
-import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
+import { caretDownIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
+import { classes } from 'typestyle';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import {
   changeStageButtonStyle,
   sectionAreaStyle,
   sectionFileContainerStyle,
-  sectionHeaderLabelStyle,
+  sectionHeaderActionsStyle,
   sectionHeaderSizeStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
+import { stopPropagation } from '../utils';
 
 const HEADER_HEIGHT = 34;
 const ITEM_HEIGHT = 25;
@@ -52,30 +54,58 @@ export const GitStage: React.FunctionComponent<IGitStageProps> = (
 ) => {
   const [showFiles, setShowFiles] = React.useState(true);
   const nFiles = props.files.length;
+  const canToggle = (props.collapsible ?? false) && nFiles > 0;
+
+  const onToggle = () => {
+    if (canToggle) {
+      setShowFiles(!showFiles);
+    }
+  };
 
   return (
     <div className={sectionFileContainerStyle}>
       <div
-        className={sectionAreaStyle}
-        onClick={() => {
-          if (props.collapsible && nFiles > 0) {
-            setShowFiles(!showFiles);
-          }
-        }}
+        className={classes(
+          'jp-AccordionPanel-title',
+          showFiles && nFiles > 0 ? 'lm-mod-expanded' : null,
+          sectionAreaStyle
+        )}
+        onClick={onToggle}
       >
-        {props.selectAllButton && props.selectAllButton}
+        {props.selectAllButton && (
+          <span style={{ display: 'contents' }} onClick={stopPropagation}>
+            {props.selectAllButton}
+          </span>
+        )}
         {props.collapsible && (
-          <button className={changeStageButtonStyle}>
-            {showFiles && nFiles > 0 ? (
-              <caretDownIcon.react tag="span" />
-            ) : (
-              <caretRightIcon.react tag="span" />
+          <button
+            type="button"
+            className={classes(
+              'lm-AccordionPanel-titleCollapser',
+              changeStageButtonStyle
             )}
+            aria-expanded={canToggle ? showFiles : undefined}
+            aria-label={props.heading}
+            disabled={!canToggle}
+          >
+            <caretDownIcon.react tag="span" />
           </button>
         )}
-        <span className={sectionHeaderLabelStyle}>{props.heading}</span>
-        {props.actions}
-        <span className={sectionHeaderSizeStyle}>({nFiles})</span>
+        <span className="lm-AccordionPanel-titleLabel">{props.heading}</span>
+        {(nFiles > 0 || props.actions) && (
+          <div
+            className={classes(
+              'jp-AccordionPanel-toolbar',
+              sectionHeaderActionsStyle
+            )}
+            onClick={stopPropagation}
+          >
+            {props.actions}
+            {nFiles > 0 && (
+              <span className={sectionHeaderSizeStyle}>{nFiles}</span>
+            )}
+          </div>
+        )}
       </div>
       {showFiles && nFiles > 0 && (
         <FixedSizeList

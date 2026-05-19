@@ -22,10 +22,9 @@ test.describe('Add tag', () => {
   test('should show Add Tag command on commit from history sidebar', async ({
     page
   }) => {
-    await page.click('button:has-text("History")');
-
     const commits = page.locator('li[title="View commit details"]');
 
+    await commits.first().waitFor();
     expect(await commits.count()).toBeGreaterThanOrEqual(2);
 
     // Right click the first commit to open the context menu, with the add tag command
@@ -35,10 +34,9 @@ test.describe('Add tag', () => {
   });
 
   test('should open new tag dialog box', async ({ page }) => {
-    await page.click('button:has-text("History")');
-
     const commits = page.locator('li[title="View commit details"]');
 
+    await commits.first().waitFor();
     expect(await commits.count()).toBeGreaterThanOrEqual(2);
 
     // Right click the first commit to open the context menu, with the add tag command
@@ -53,9 +51,8 @@ test.describe('Add tag', () => {
   test('should create new tag pointing to selected commit', async ({
     page
   }) => {
-    await page.click('button:has-text("History")');
-
     const commits = page.locator('li[title="View commit details"]');
+    await commits.first().waitFor();
     expect(await commits.count()).toBeGreaterThanOrEqual(2);
 
     // Right click the first commit to open the context menu, with the add tag command

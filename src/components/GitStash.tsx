@@ -1,9 +1,10 @@
-import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
+import { caretDownIcon } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import {
   changeStageButtonStyle,
   sectionAreaStyle,
-  sectionFileContainerStyle
+  sectionFileContainerStyle,
+  sectionHeaderSizeStyle
 } from '../style/GitStageStyle';
 import { Git } from '../tokens';
 import { GitExtension } from '../model';
@@ -16,13 +17,12 @@ import { FixedSizeList } from 'react-window';
 import {
   listStyle,
   sectionButtonContainerStyle,
-  sectionHeaderLabelStyle,
   stashFileStyle,
   stashEntryMessageStyle,
   stashContainerStyle
 } from '../style/GitStashStyle';
 import { FilePath } from './FilePath';
-import { stopPropagationWrapper } from '../utils';
+import { stopPropagation, stopPropagationWrapper } from '../utils';
 import { classes } from 'typestyle';
 
 const HEADER_HEIGHT = 34;
@@ -120,32 +120,56 @@ const GitStashEntry: React.FunctionComponent<IGitStashEntryProps> = (
   const [showStashFiles, setShowStashFiles] = React.useState(false);
 
   const nFiles = props.files.length;
+  const canToggle = (props.collapsible ?? false) && nFiles > 0;
+  const onToggle = () => {
+    if (canToggle) {
+      setShowStashFiles(!showStashFiles);
+    }
+  };
+  const stashEntryLabel = props.trans.__(
+    '%1 (on %2)',
+    props.message,
+    props.branch
+  );
 
   return (
     <div className={sectionFileContainerStyle}>
       <div
-        className={sectionAreaStyle}
-        onClick={() => {
-          if (props.collapsible && props?.files.length > 0) {
-            setShowStashFiles(!showStashFiles);
-          }
-        }}
+        className={classes(
+          'jp-AccordionPanel-title',
+          showStashFiles && nFiles > 0 ? 'lm-mod-expanded' : null,
+          sectionAreaStyle
+        )}
+        onClick={onToggle}
       >
         {props.collapsible && (
-          <button className={changeStageButtonStyle}>
-            {showStashFiles && props?.files.length > 0 ? (
-              <caretDownIcon.react tag="span" />
-            ) : (
-              <caretRightIcon.react tag="span" />
+          <button
+            type="button"
+            className={classes(
+              'lm-AccordionPanel-titleCollapser',
+              changeStageButtonStyle
             )}
+            aria-expanded={canToggle ? showStashFiles : undefined}
+            aria-label={stashEntryLabel}
+            disabled={!canToggle}
+          >
+            <caretDownIcon.react tag="span" />
           </button>
         )}
-        <span className={sectionHeaderLabelStyle}>
-          <span className={stashEntryMessageStyle}>
-            {props.trans.__('%1 (on %2)', props.message, props.branch)}
-          </span>
-          <span className={sectionButtonContainerStyle}>{props.actions}</span>
+        <span className="lm-AccordionPanel-titleLabel">
+          <span className={stashEntryMessageStyle}>{stashEntryLabel}</span>
         </span>
+        {props.actions && (
+          <div
+            className={classes(
+              'jp-AccordionPanel-toolbar',
+              sectionButtonContainerStyle
+            )}
+            onClick={stopPropagation}
+          >
+            {props.actions}
+          </div>
+        )}
       </div>
       {showStashFiles && (
         <FixedSizeList
@@ -183,6 +207,13 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   const [stashIsLoading, setStashIsLoading] = React.useState(true);
 
   const nStash = props.stash?.length ?? 0;
+  const canToggle = (props.collapsible ?? false) && nStash > 0;
+  const onToggle = () => {
+    if (canToggle) {
+      setShowStash(!showStash);
+    }
+  };
+  const stashLabel = props.trans.__('Stash');
 
   const gitStashPop = React.useCallback(
     async (index: number): Promise<void> => {
@@ -220,35 +251,49 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
   return (
     <div className={classes(sectionFileContainerStyle, stashContainerStyle)}>
       <div
-        className={sectionAreaStyle}
-        onClick={() => {
-          if (props.collapsible && nStash > 0) {
-            setShowStash(!showStash);
-          }
-        }}
+        className={classes(
+          'jp-AccordionPanel-title',
+          showStash && nStash > 0 ? 'lm-mod-expanded' : null,
+          sectionAreaStyle
+        )}
+        onClick={onToggle}
       >
-        {props.selectAllButton && props.selectAllButton}
+        {props.selectAllButton && (
+          <span style={{ display: 'contents' }} onClick={stopPropagation}>
+            {props.selectAllButton}
+          </span>
+        )}
         {props.collapsible && (
-          <button className={changeStageButtonStyle}>
-            {showStash && nStash > 0 ? (
-              <caretDownIcon.react tag="span" />
-            ) : (
-              <caretRightIcon.react tag="span" />
+          <button
+            type="button"
+            className={classes(
+              'lm-AccordionPanel-titleCollapser',
+              changeStageButtonStyle
             )}
+            aria-expanded={canToggle ? showStash : undefined}
+            aria-label={stashLabel}
+            disabled={!canToggle}
+          >
+            <caretDownIcon.react tag="span" />
           </button>
         )}
-        <span className={sectionHeaderLabelStyle}>
-          <span>{props.trans.__('Stash')}</span>
-          <span className={sectionButtonContainerStyle}>
-            {props.actions}
-            <span
-              data-test-id="num-stashes"
-              data-loading={stashIsLoading ? 'true' : 'false'}
-            >
-              ({nStash})
-            </span>
+        <span className="lm-AccordionPanel-titleLabel">{stashLabel}</span>
+        <div
+          className={classes(
+            'jp-AccordionPanel-toolbar',
+            sectionButtonContainerStyle
+          )}
+          onClick={stopPropagation}
+        >
+          {props.actions}
+          <span
+            className={nStash > 0 ? sectionHeaderSizeStyle : undefined}
+            data-test-id="num-stashes"
+            data-loading={stashIsLoading ? 'true' : 'false'}
+          >
+            {nStash > 0 ? nStash : ''}
           </span>
-        </span>
+        </div>
       </div>
 
       <UseSignal signal={props.model.stashChanged}>

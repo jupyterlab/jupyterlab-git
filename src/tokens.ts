@@ -50,6 +50,11 @@ export interface IGitExtension extends IDisposable {
   readonly tagsChanged: ISignal<IGitExtension, void>;
 
   /**
+   * A signal emitted when the submodules of the Git repository change.
+   */
+  readonly submodulesChanged: ISignal<IGitExtension, void>;
+
+  /**
    * Top level path of the current Git repository
    */
   pathRepository: string | null;

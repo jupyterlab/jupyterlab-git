@@ -280,6 +280,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * A signal emitted when the submodules of the Git repository change.
+   */
+  get submodulesChanged(): ISignal<IGitExtension, void> {
+    return this._submodulesChanged;
+  }
+
+  /**
    * A signal emitted when the current marking of the Git repository changes.
    */
   get markChanged(): ISignal<IGitExtension, void> {
@@ -2065,6 +2072,7 @@ export class GitExtension implements IGitExtension {
 
       const newSubmodules = data.submodules;
       this._submodules = newSubmodules;
+      this._submodulesChanged.emit();
     } catch (_error) {
       console.error('Failed to retrieve submodules');
     }
@@ -2428,6 +2436,7 @@ export class GitExtension implements IGitExtension {
 
   private _branchesChanged = new Signal<IGitExtension, void>(this);
   private _tagsChanged = new Signal<IGitExtension, void>(this);
+  private _submodulesChanged = new Signal<IGitExtension, void>(this);
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _selectedHistoryFileChanged = new Signal<

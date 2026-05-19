@@ -18,7 +18,9 @@ test.describe('Merge conflict tests', () => {
 
     await page.sidebar.openTab('jp-git-sessions');
 
-    await page.getByRole('button', { name: 'Current Branch master' }).click();
+    // Collapse Changes and History to expose the branch list.
+    await page.getByRole('heading', { name: 'Changes' }).click();
+    await page.getByRole('heading', { name: 'History' }).click();
 
     // Click on a-branch merge button
     await page.locator('text=a-branch').hover();
@@ -29,8 +31,8 @@ test.describe('Merge conflict tests', () => {
       })
       .click();
 
-    // Hide branch panel
-    await page.getByRole('button', { name: 'Current Branch master' }).click();
+    // Re-expand Changes so conflicted files are visible.
+    await page.getByRole('heading', { name: 'Changes' }).click();
 
     // Force refresh
     await page
