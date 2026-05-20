@@ -157,7 +157,11 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         this.props.setSelection!(this.props.file, { group: true });
       } else {
         this.props.setSelection!(this.props.file, { singleton: true });
-        this.props.onClick?.(this.props.file);
+        // Skip on the second click of a double-click so a `diff-on-single`
+        // navigation isn't triggered twice on the way to `onDoubleClick`.
+        if (event.detail <= 1) {
+          this.props.onClick?.(this.props.file);
+        }
       }
     }
   };
