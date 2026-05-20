@@ -2,11 +2,8 @@ import { style } from 'typestyle';
 import type { NestedCSSProperties } from 'typestyle/lib/types';
 import { actionButtonStyle, showButtonOnHover } from './ActionButtonStyle';
 
-// Status indicator: a colored, bold monospace letter showing the git
-// status code. The 10 + 18 + 6 = 34px total footprint matches the
-// section header count chip so row action buttons align with header
-// buttons; the 18px inline-flex slot keeps every letter in the same
-// vertical column regardless of glyph width.
+// 10 + 18 + 6 = 34px total width matches the section header count chip,
+// so row action buttons align with the header buttons.
 export const fileChangedLabelStyle = style({
   display: 'inline-flex',
   alignItems: 'center',
@@ -20,7 +17,6 @@ export const fileChangedLabelStyle = style({
   fontWeight: 600
 });
 
-// Semantic per-status color overrides applied on top of the base badge.
 export const fileChangedLabelAddedStyle = style({
   color: 'var(--jp-success-color1)'
 });
