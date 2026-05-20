@@ -45,7 +45,6 @@ export const fileStyle = style(
     alignItems: 'center',
     boxSizing: 'border-box',
     color: 'var(--jp-ui-font-color1)',
-    cursor: 'pointer',
     lineHeight: 'var(--jp-private-running-item-height)',
     padding: '0px 4px',
     listStyleType: 'none',
@@ -58,6 +57,12 @@ export const fileStyle = style(
   },
   showButtonOnHover
 );
+
+// Applied to rows whose single-click triggers a navigation action
+// (opening a diff or the file) so the cursor signals interactivity.
+export const fileClickableStyle = style({
+  cursor: 'pointer'
+});
 
 export const selectedFileStyle = style(
   (() => {

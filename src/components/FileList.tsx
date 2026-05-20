@@ -696,9 +696,16 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderUnmergedRow = (
     rowProps: ListChildComponentProps
   ): JSX.Element => {
+    const action = this.props.settings.get('fileClickAction')
+      .composite as Git.FileClickAction;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
     const diffButton = this._createDiffButton(file);
+    const openDiff = (): void => {
+      void this._openDiffViews([file]);
+    };
+    // Conflicted files only resolve through the diff view, so double-click
+    // opens the diff for every non-`select-only` action.
     return (
       <FileItem
         trans={this.props.trans}
@@ -708,8 +715,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         selected={this._isSelectedFile(file)}
         setSelection={this.setSelection}
-        onClick={() => this._openDiffViews([file])}
-        onDoubleClick={() => this._openDiffViews([file])}
+        onClick={action === 'diff-on-single' ? openDiff : undefined}
+        onDoubleClick={
+          action === 'select-only' ? (): void => undefined : openDiff
+        }
         style={{ ...style }}
       />
     );
@@ -743,8 +752,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderStagedRow = (
     rowProps: ListChildComponentProps
   ): JSX.Element => {
-    const doubleClickDiff = this.props.settings.get('doubleClickDiff')
-      .composite as boolean;
+    const action = this.props.settings.get('fileClickAction')
+      .composite as Git.FileClickAction;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
     const diffButton = this._createDiffButton(file);
@@ -777,18 +786,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         selected={this._isSelectedFile(file)}
         setSelection={this.setSelection}
-        onClick={
+        onClick={this._stagedOrChangedSingleClick(action, file, diffButton)}
+        onDoubleClick={this._stagedOrChangedDoubleClick(
+          action,
+          file,
           diffButton
-            ? () => this._openDiffViews([file])
-            : () => this.openSelectedFiles(file)
-        }
-        onDoubleClick={
-          doubleClickDiff
-            ? diffButton
-              ? () => this._openDiffViews([file])
-              : () => undefined
-            : () => this.openSelectedFiles(file)
-        }
+        )}
         style={style}
       />
     );
@@ -840,8 +843,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderChangedRow = (
     rowProps: ListChildComponentProps
   ): JSX.Element => {
-    const doubleClickDiff = this.props.settings.get('doubleClickDiff')
-      .composite as boolean;
+    const action = this.props.settings.get('fileClickAction')
+      .composite as Git.FileClickAction;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
     const diffButton = this._createDiffButton(file);
@@ -890,18 +893,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         selected={this._isSelectedFile(file)}
         setSelection={this.setSelection}
-        onClick={
+        onClick={this._stagedOrChangedSingleClick(action, file, diffButton)}
+        onDoubleClick={this._stagedOrChangedDoubleClick(
+          action,
+          file,
           diffButton
-            ? () => this._openDiffViews([file])
-            : () => this.openSelectedFiles(file)
-        }
-        onDoubleClick={
-          doubleClickDiff
-            ? diffButton
-              ? () => this._openDiffViews([file])
-              : () => undefined
-            : () => this.openSelectedFiles(file)
-        }
+        )}
         style={style}
       />
     );
@@ -961,8 +958,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderUntrackedRow = (
     rowProps: ListChildComponentProps
   ): JSX.Element => {
-    const doubleClickDiff = this.props.settings.get('doubleClickDiff')
-      .composite as boolean;
+    const action = this.props.settings.get('fileClickAction')
+      .composite as Git.FileClickAction;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
     return (
@@ -999,18 +996,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         file={file}
         contextMenu={this.openContextMenu}
         model={this.props.model}
-        onClick={() =>
-          this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-            files: [file]
-          } as CommandArguments.IGitContextAction as any)
-        }
-        onDoubleClick={() => {
-          if (!doubleClickDiff) {
-            this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-              files: [file]
-            } as CommandArguments.IGitContextAction as any);
-          }
-        }}
+        onClick={this._noDiffSingleClick(action, file)}
+        onDoubleClick={this._noDiffDoubleClick(action, file)}
         selected={this._isSelectedFile(file)}
         setSelection={this.setSelection}
         style={style}
@@ -1056,8 +1043,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderRemoteChangedRow = (
     rowProps: ListChildComponentProps
   ): JSX.Element => {
-    const doubleClickDiff = this.props.settings.get('doubleClickDiff')
-      .composite as boolean;
+    const action = this.props.settings.get('fileClickAction')
+      .composite as Git.FileClickAction;
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
     return (
@@ -1078,18 +1065,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         file={file}
         contextMenu={this.openContextMenu}
         model={this.props.model}
-        onClick={() =>
-          this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-            files: [file]
-          } as CommandArguments.IGitContextAction as any)
-        }
-        onDoubleClick={() => {
-          if (!doubleClickDiff) {
-            this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
-              files: [file]
-            } as CommandArguments.IGitContextAction as any);
-          }
-        }}
+        onClick={this._noDiffSingleClick(action, file)}
+        onDoubleClick={this._noDiffDoubleClick(action, file)}
         selected={this._isSelectedFile(file)}
         setSelection={this.setSelection}
         style={style}
@@ -1137,8 +1114,14 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
   private _renderSimpleStageRow = (rowProps: ListChildComponentProps) => {
     const { data, index, style } = rowProps;
     const file = data[index] as Git.IStatusFile;
-    const doubleClickDiff = this.props.settings.get('doubleClickDiff')
-      .composite as boolean;
+    const action = this.props.settings.get('fileClickAction')
+      .composite as Git.FileClickAction;
+    // Simple-stage rows reserve single-click for toggling the file's mark,
+    // so the `diff-on-single` action is mapped to the same double-click
+    // behaviour as `diff-on-double`.
+    const wantsDiff =
+      action === 'diff-on-double' || action === 'diff-on-single';
+    const wantsSelectOnly = action === 'select-only';
 
     const openFile = (): void => {
       this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
@@ -1155,7 +1138,8 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         onClick={stopPropagationWrapper(openFile)}
       />
     );
-    let onDoubleClick = doubleClickDiff ? (): void => undefined : openFile;
+    let onDoubleClick =
+      wantsSelectOnly || wantsDiff ? () => undefined : openFile;
 
     if (file.status === 'unstaged' || file.status === 'partially-staged') {
       const diffButton = this._createDiffButton(file);
@@ -1178,7 +1162,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           />
         </React.Fragment>
       );
-      onDoubleClick = doubleClickDiff
+      onDoubleClick = wantsSelectOnly
+        ? () => undefined
+        : wantsDiff
         ? diffButton
           ? () => this._openDiffViews([file])
           : () => undefined
@@ -1204,7 +1190,9 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
           />
         </React.Fragment>
       );
-      onDoubleClick = doubleClickDiff
+      onDoubleClick = wantsSelectOnly
+        ? () => undefined
+        : wantsDiff
         ? diffButton
           ? () => this._openDiffViews([file])
           : () => undefined
@@ -1295,6 +1283,83 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         />
       )
     );
+  }
+
+  /**
+   * Single-click handler for a Staged or Changed row, or `undefined` when
+   * the action doesn't trigger anything on a single click.
+   */
+  private _stagedOrChangedSingleClick(
+    action: Git.FileClickAction,
+    file: Git.IStatusFile,
+    diffButton: React.ReactNode
+  ): (() => void) | undefined {
+    if (action !== 'diff-on-single') {
+      return undefined;
+    }
+    return diffButton
+      ? () => void this._openDiffViews([file])
+      : () => this.openSelectedFiles(file);
+  }
+
+  /**
+   * Double-click handler for a Staged or Changed row. A no-op for
+   * `diff-on-single` since the single-click handler already runs on the
+   * way to a double-click.
+   */
+  private _stagedOrChangedDoubleClick(
+    action: Git.FileClickAction,
+    file: Git.IStatusFile,
+    diffButton: React.ReactNode
+  ): () => void {
+    switch (action) {
+      case 'open-on-double':
+        return () => this.openSelectedFiles(file);
+      case 'diff-on-double':
+        return diffButton
+          ? () => void this._openDiffViews([file])
+          : () => undefined;
+      case 'diff-on-single':
+      case 'select-only':
+      default:
+        return () => undefined;
+    }
+  }
+
+  /**
+   * Single-click handler for Untracked or Remote-Changed rows, where no
+   * diff is available; `diff-on-single` opens the file instead.
+   */
+  private _noDiffSingleClick(
+    action: Git.FileClickAction,
+    file: Git.IStatusFile
+  ): (() => void) | undefined {
+    if (action !== 'diff-on-single') {
+      return undefined;
+    }
+    return () => {
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+        files: [file]
+      } as CommandArguments.IGitContextAction as any);
+    };
+  }
+
+  /**
+   * Double-click handler for Untracked or Remote-Changed rows; only
+   * `open-on-double` opens the file, every other action is a no-op.
+   */
+  private _noDiffDoubleClick(
+    action: Git.FileClickAction,
+    file: Git.IStatusFile
+  ): () => void {
+    if (action !== 'open-on-double') {
+      return () => undefined;
+    }
+    return () => {
+      this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+        files: [file]
+      } as CommandArguments.IGitContextAction as any);
+    };
   }
 
   /**

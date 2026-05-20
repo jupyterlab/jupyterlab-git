@@ -11,6 +11,7 @@ import {
   fileChangedLabelInfoStyle,
   fileChangedLabelModifiedStyle,
   fileChangedLabelStyle,
+  fileClickableStyle,
   fileStyle,
   gitMarkBoxStyle,
   selectedFileChangedLabelStyle,
@@ -196,9 +197,12 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
   }
 
   protected _getFileClass(): string {
+    // Show the pointer cursor only when a single click triggers an action
+    // beyond selection (i.e. when `onClick` is provided by the parent).
+    const clickableClass = this.props.onClick ? fileClickableStyle : '';
     const baseClass = this.props.selected
-      ? classes(fileStyle, selectedFileStyle)
-      : fileStyle;
+      ? classes(fileStyle, selectedFileStyle, clickableClass)
+      : classes(fileStyle, clickableClass);
 
     return this.props.className
       ? `${baseClass} ${this.props.className}`
