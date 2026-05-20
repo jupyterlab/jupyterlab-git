@@ -2238,10 +2238,24 @@ export class GitExtension implements IGitExtension {
       return DocumentRegistry.getDefaultDirectoryFileType();
     }
 
-    return (
-      this._docRegistry?.getFileTypesForPath(path)[0] ??
-      DocumentRegistry.getDefaultTextFileType()
-    );
+    const matches = this._docRegistry?.getFileTypesForPath(path) ?? [];
+    // Prefer a file type whose `extensions` array actually contains the
+    // file's extension. Some extensions (e.g. jupytext) register a
+    // catch-all file type with an empty `extensions` array that matches
+    // by pattern; left to position alone it shadows the
+    // extension-keyed type (so `.csv` would render with the plain file
+    // icon instead of the spreadsheet icon the file browser uses).
+    const dot = path.lastIndexOf('.');
+    if (dot > -1) {
+      const ext = path.slice(dot).toLowerCase();
+      const byExt = matches.find(t =>
+        t.extensions?.some(e => e.toLowerCase() === ext)
+      );
+      if (byExt) {
+        return byExt;
+      }
+    }
+    return matches[0] ?? DocumentRegistry.getDefaultTextFileType();
   }
 
   /**

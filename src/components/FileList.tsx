@@ -708,6 +708,7 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         selected={this._isSelectedFile(file)}
         setSelection={this.setSelection}
+        onClick={() => this._openDiffViews([file])}
         onDoubleClick={() => this._openDiffViews([file])}
         style={{ ...style }}
       />
@@ -776,6 +777,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         selected={this._isSelectedFile(file)}
         setSelection={this.setSelection}
+        onClick={
+          diffButton
+            ? () => this._openDiffViews([file])
+            : () => this.openSelectedFiles(file)
+        }
         onDoubleClick={
           doubleClickDiff
             ? diffButton
@@ -884,6 +890,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         model={this.props.model}
         selected={this._isSelectedFile(file)}
         setSelection={this.setSelection}
+        onClick={
+          diffButton
+            ? () => this._openDiffViews([file])
+            : () => this.openSelectedFiles(file)
+        }
         onDoubleClick={
           doubleClickDiff
             ? diffButton
@@ -988,6 +999,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         file={file}
         contextMenu={this.openContextMenu}
         model={this.props.model}
+        onClick={() =>
+          this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+            files: [file]
+          } as CommandArguments.IGitContextAction as any)
+        }
         onDoubleClick={() => {
           if (!doubleClickDiff) {
             this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
@@ -1062,6 +1078,11 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
         file={file}
         contextMenu={this.openContextMenu}
         model={this.props.model}
+        onClick={() =>
+          this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
+            files: [file]
+          } as CommandArguments.IGitContextAction as any)
+        }
         onDoubleClick={() => {
           if (!doubleClickDiff) {
             this.props.commands.execute(ContextCommandIDs.gitFileOpen, {
