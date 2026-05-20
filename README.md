@@ -125,12 +125,14 @@ Once installed, extension behavior can be modified via the following settings wh
 - **disableBranchWithChanges**: disable all branch operations, such as creating a new branch or switching to a different branch, when there are changed/staged files. When set to `true`, this setting guards against overwriting and/or losing uncommitted changes.
 - **displayStatus**: display Git extension status updates in the JupyterLab status bar. If `true`, the extension displays status updates in the JupyterLab status bar, such as when pulling and pushing changes, switching branches, and polling for changes. Depending on the level of extension activity, some users may find the status updates distracting. In which case, setting this to `false` should reduce visual noise.
 - **fileClickAction**: what happens when you click or double-click a file in the Git panel file list. One of:
-  - `"open-on-double"` *(default)*: double-click opens the file in an editor.
+
+  - `"open-on-double"` _(default)_: double-click opens the file in an editor.
   - `"diff-on-double"`: double-click opens a diff of the file (no-op when no diff is available).
   - `"diff-on-single"`: single-click opens a diff (or the file itself when no diff is available, e.g. for untracked or remote-changed files).
   - `"select-only"`: clicking only selects the file; no other action is triggered.
 
   This setting replaces the previous boolean `doubleClickDiff`. User settings using the old key are migrated automatically on load (`doubleClickDiff: true` → `"diff-on-double"`).
+
 - **historyCount**: number of commits shown in the history log, beginning with the most recent. Displaying a larger number of commits can lead to performance degradation, so use caution when modifying this setting.
 - **promptUserIdentity**: Whether to prompt for user name and email on every commit.
 - **refreshIfHidden**: whether to refresh even if the Git tab is hidden; default to `false` (i.e. refresh is turned off if the Git tab is hidden).
