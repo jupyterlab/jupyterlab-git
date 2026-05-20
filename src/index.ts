@@ -161,34 +161,6 @@ async function activate(
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab_git');
 
-  // Map `doubleClickDiff` / `singleClickDiff` boolean keys to the
-  // `fileClickAction` enum in user settings. The schema sets
-  // `"jupyter.lab.transform": true`, so `settingRegistry.load` waits for
-  // this transform before resolving.
-  settingRegistry.transform(plugin.id, {
-    fetch: settingsPlugin => {
-      const user = settingsPlugin.data.user as
-        | { [key: string]: unknown }
-        | undefined;
-      if (!user) {
-        return settingsPlugin;
-      }
-      // Respect an explicit `fileClickAction` if one is set.
-      if (!('fileClickAction' in user)) {
-        if (user['singleClickDiff'] === true) {
-          user['fileClickAction'] = 'diff-on-single';
-        } else if (user['doubleClickDiff'] === true) {
-          user['fileClickAction'] = 'diff-on-double';
-        }
-      }
-      // Always drop the boolean keys so they don't shadow future writes
-      // or trigger schema-validation noise.
-      delete user['doubleClickDiff'];
-      delete user['singleClickDiff'];
-      return settingsPlugin;
-    }
-  });
-
   // Attempt to load application settings
   try {
     settings = await settingRegistry.load(plugin.id);
@@ -196,6 +168,22 @@ async function activate(
     console.error(
       trans.__('Failed to load settings for the Git Extension.\n%1', error)
     );
+  }
+
+  // One-shot migration of the legacy `doubleClickDiff` boolean to the
+  // `fileClickAction` enum. Only users upgrading from a prior version have
+  // `doubleClickDiff` saved.
+  if (settings) {
+    const legacyDoubleClick = settings.get('doubleClickDiff').user;
+    if (legacyDoubleClick !== undefined) {
+      if (
+        legacyDoubleClick === true &&
+        settings.get('fileClickAction').user === undefined
+      ) {
+        await settings.set('fileClickAction', 'diff-on-double');
+      }
+      await settings.remove('doubleClickDiff');
+    }
   }
   const serverSettings = app.serviceManager.serverSettings;
   try {

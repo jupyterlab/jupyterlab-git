@@ -1,7 +1,6 @@
 {
   "jupyter.lab.setting-icon": "git",
   "jupyter.lab.setting-icon-label": "Git",
-  "jupyter.lab.transform": true,
   "title": "Git",
   "description": "jupyterlab-git settings.",
   "type": "object",
@@ -103,11 +102,10 @@
       "default": false
     },
     "clearOutputsBeforeCommit": {
-      "type": "boolean",
+      "type": ["boolean", "null"],
       "title": "Clear outputs before commit",
       "description": "If true, notebook outputs will be cleared before committing. If false, outputs are kept. If null, ask each time.",
-      "default": null,
-      "nullable": true
+      "default": null
     }
   },
   "jupyter.lab.shortcuts": [
