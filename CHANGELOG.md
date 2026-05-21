@@ -2,6 +2,30 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.54.0a1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.54.0a0...781591d4ed36d071a21b0decd0e08814021dbe8c))
+
+### Enhancements made
+
+- Git panel UI tweaks [#1480](https://github.com/jupyterlab/jupyterlab-git/pull/1480) ([@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+
+### Other merged PRs
+
+- Bump lodash from 4.17.23 to 4.18.1 [#1479](https://github.com/jupyterlab/jupyterlab-git/pull/1479) ([@jtpio](https://github.com/jtpio))
+- Bump ws from 8.17.1 to 8.20.1 [#1478](https://github.com/jupyterlab/jupyterlab-git/pull/1478) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2026-05-19&to=2026-05-21&type=c))
+
+@jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2026-05-19..2026-05-21&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2026-05-19..2026-05-21&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.54.0a0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.53.0...bd6fc650c3264f32cf14d7d3e6919b927ea65dbf))
@@ -34,8 +58,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2026-04-30&to=2026-05-19&type=c))
 
 @alexblanchard0808-boop ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aalexblanchard0808-boop+updated%3A2026-04-30..2026-05-19&type=Issues)) | @djangoliv ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adjangoliv+updated%3A2026-04-30..2026-05-19&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2026-04-30..2026-05-19&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2026-04-30..2026-05-19&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.53.0
 
