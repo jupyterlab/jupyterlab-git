@@ -2238,9 +2238,16 @@ export class GitExtension implements IGitExtension {
       return DocumentRegistry.getDefaultDirectoryFileType();
     }
 
+    const matches = this._docRegistry?.getFileTypesForPath(path) ?? [];
+    // `getFileTypesForPath` returns pattern matches before extension matches,
+    // so a pattern-only catch-all (e.g. jupytext) can shadow the type
+    // registered against this file's extension. Prefer an extension match.
+    const ext = PathExt.extname(path).toLowerCase();
+    const byExtension = ext
+      ? matches.find(t => t.extensions?.some(e => e.toLowerCase() === ext))
+      : undefined;
     return (
-      this._docRegistry?.getFileTypesForPath(path)[0] ??
-      DocumentRegistry.getDefaultTextFileType()
+      byExtension ?? matches[0] ?? DocumentRegistry.getDefaultTextFileType()
     );
   }
 

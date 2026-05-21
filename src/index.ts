@@ -169,6 +169,22 @@ async function activate(
       trans.__('Failed to load settings for the Git Extension.\n%1', error)
     );
   }
+
+  // One-shot migration of the legacy `doubleClickDiff` boolean to the
+  // `fileClickAction` enum. Only users upgrading from a prior version have
+  // `doubleClickDiff` saved.
+  if (settings) {
+    const legacyDoubleClick = settings.get('doubleClickDiff').user;
+    if (legacyDoubleClick !== undefined) {
+      if (
+        legacyDoubleClick === true &&
+        settings.get('fileClickAction').user === undefined
+      ) {
+        await settings.set('fileClickAction', 'diff-on-double');
+      }
+      await settings.remove('doubleClickDiff');
+    }
+  }
   const serverSettings = app.serviceManager.serverSettings;
   try {
     gitServerSettings = await getServerSettings(trans, serverSettings);
@@ -287,7 +303,6 @@ async function activate(
       const category = 'Git Operations';
       [
         CommandIDs.gitToggleSimpleStaging,
-        CommandIDs.gitToggleDoubleClickDiff,
         CommandIDs.gitOpenGitignore,
         CommandIDs.gitInit,
         CommandIDs.gitMerge,

@@ -257,15 +257,6 @@ export function addCommands(
     }
   });
 
-  /** add toggle for double click opens diffs */
-  commands.addCommand(CommandIDs.gitToggleDoubleClickDiff, {
-    label: trans.__('Double click opens diff'),
-    isToggled: () => !!settings.composite['doubleClickDiff'],
-    execute: args => {
-      settings.set('doubleClickDiff', !settings.composite['doubleClickDiff']);
-    }
-  });
-
   /** Command to add a remote Git repository */
   commands.addCommand(CommandIDs.gitManageRemote, {
     label: trans.__('Manage Remote Repositories'),
@@ -1833,8 +1824,6 @@ export function createGitMenu(
   menu.addItem({ type: 'separator' });
 
   menu.addItem({ command: CommandIDs.gitToggleSimpleStaging });
-
-  menu.addItem({ command: CommandIDs.gitToggleDoubleClickDiff });
 
   menu.addItem({ type: 'separator' });
 
