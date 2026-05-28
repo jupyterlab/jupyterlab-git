@@ -274,6 +274,34 @@ describe('IGitExtension', () => {
     });
   });
 
+  describe('#compareWithReference', () => {
+    it('should compare HEAD with the provided reference', async () => {
+      const reference = 'origin/main';
+      mockResponses.responses['compare_reference'] = {
+        body: body => {
+          expect(body?.reference).toBe(reference);
+          return {
+            code: 0,
+            reference,
+            ahead: 2,
+            behind: 11
+          };
+        }
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+
+      const result = await model.compareWithReference(reference);
+      expect(result).toMatchObject({
+        code: 0,
+        reference,
+        ahead: 2,
+        behind: 11
+      });
+    });
+  });
+
   describe('#getFile', () => {
     it.each([
       ['dir1/dir2/repo/somefolder/file', 'somefolder/file', 'dir1/dir2/repo'],

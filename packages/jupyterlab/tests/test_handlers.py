@@ -308,6 +308,58 @@ async def test_log_handler(mock_git, jp_fetch, jp_root_dir):
     assert payload == log
 
 
+@patch("jupyterlab_git.handlers.GitCompareReferenceHandler.git", spec=Git)
+async def test_compare_reference_handler(mock_git, jp_fetch, jp_root_dir):
+    # Given
+    local_path = jp_root_dir / "test_path"
+    compare_result = {
+        "code": 0,
+        "reference": "origin/main",
+        "ahead": 2,
+        "behind": 37,
+    }
+    mock_git.compare_reference.return_value = compare_result
+
+    # When
+    body = {"reference": "origin/main"}
+    response = await jp_fetch(
+        NAMESPACE,
+        local_path.name,
+        "compare_reference",
+        body=json.dumps(body),
+        method="POST",
+    )
+
+    # Then
+    mock_git.compare_reference.assert_called_with(str(local_path), "origin/main")
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload == compare_result
+
+
+@patch("jupyterlab_git.handlers.GitCompareReferenceHandler.git", spec=Git)
+async def test_compare_reference_handler_failure(mock_git, jp_fetch, jp_root_dir):
+    # Given
+    local_path = jp_root_dir / "test_path"
+    compare_result = {"code": 1, "message": "comparison failed"}
+    mock_git.compare_reference.return_value = compare_result
+
+    # When
+    body = {"reference": "origin/main"}
+    with pytest.raises(HTTPClientError) as e:
+        await jp_fetch(
+            NAMESPACE,
+            local_path.name,
+            "compare_reference",
+            body=json.dumps(body),
+            method="POST",
+        )
+
+    # Then
+    mock_git.compare_reference.assert_called_with(str(local_path), "origin/main")
+    assert_http_error(e, 500)
+
+
 @patch("jupyterlab_git.handlers.GitLogHandler.git", spec=Git)
 async def test_log_handler_no_history_count(mock_git, jp_fetch, jp_root_dir):
     # Given

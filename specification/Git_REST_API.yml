@@ -70,6 +70,14 @@ paths:
             in: path
             required: true
             type: string
+  /{path}/compare_reference:
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
   /{path}/commit:
     post:
       parameters:

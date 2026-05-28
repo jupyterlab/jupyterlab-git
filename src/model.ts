@@ -1006,6 +1006,30 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Compare HEAD with a reference branch and return ahead/behind counts.
+   *
+   * @param reference - branch or ref to compare against (e.g. origin/main)
+   * @returns promise which resolves upon retrieving ahead/behind counts
+   */
+  async compareWithReference(
+    reference = 'origin/main'
+  ): Promise<Git.IReferenceCompareResult> {
+    const path = await this._getPathRepository();
+    return this._taskHandler.execute<Git.IReferenceCompareResult>(
+      'git:compare:reference',
+      async () => {
+        return await this._requestAPI<Git.IReferenceCompareResult>(
+          URLExt.join(path, 'compare_reference'),
+          'POST',
+          {
+            reference
+          }
+        );
+      }
+    );
+  }
+
+  /**
    * Return the path of a file relative to the Jupyter server root.
    *
    * ## Notes

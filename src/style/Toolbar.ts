@@ -138,6 +138,44 @@ export const branchNameClass = style({
   fontWeight: 600
 });
 
+export const branchWarningButtonClass = style({
+  boxSizing: 'border-box',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
+  maxWidth: '100%',
+  height: '18px',
+  padding: '0 6px',
+  fontSize: 'var(--jp-ui-font-size0)',
+  color: 'var(--jp-warn-color2)',
+  border: '1px solid var(--jp-warn-color1)',
+  borderRadius: '9px',
+  background: 'var(--jp-layout-color2)',
+  cursor: 'pointer',
+
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color3)'
+    },
+    '&:focus-visible': {
+      outline: '2px solid var(--jp-brand-color1)',
+      outlineOffset: '-2px'
+    },
+    '& svg': {
+      width: '12px',
+      height: '12px',
+      flex: '0 0 auto'
+    }
+  }
+});
+
+export const branchWarningTextClass = style({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  fontWeight: 600
+});
+
 export const toolbarButtonClass = style({
   boxSizing: 'border-box',
   height: '24px',

@@ -36,6 +36,14 @@ export const defaultMockedResponses: {
       files: []
     })
   },
+  compare_reference: {
+    body: () => ({
+      code: 0,
+      reference: 'origin/main',
+      ahead: 0,
+      behind: 0
+    })
+  },
   show_prefix: {
     body: () => ({
       code: 0,
