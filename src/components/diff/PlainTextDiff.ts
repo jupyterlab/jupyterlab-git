@@ -224,7 +224,7 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     try {
       this._saveEditedContent();
       // Clear all
-      this._setEditableEditorNode(null);
+      this._setEditableEditor(null);
       this._clearSaveTimer();
       this._mergeView?.dispose();
       // @ts-expect-error complex initialization
@@ -345,7 +345,7 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
    * @param error Error object
    */
   protected showError(error: Error): void {
-    this._setEditableEditorNode(null);
+    this._setEditableEditor(null);
     this._clearSaveTimer();
     console.error(
       this._trans.__('Failed to load file diff.'),
@@ -374,7 +374,7 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
       return;
     }
     this._saveEditedContent();
-    this._setEditableEditorNode(null);
+    this._setEditableEditor(null);
     this._clearSaveTimer();
     super.dispose();
   }
@@ -394,7 +394,7 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
   protected _isRefreshing = false;
   protected _refreshQueued = false;
   protected _nextSaveContent: string | null = null;
-  protected _editableEditorNode: HTMLElement | null = null;
+  protected _editableEditor: CodeEditor.IEditor | null = null;
   protected _lastSavedContent: string | null = null;
 
   private _reference: string | null = null;
@@ -440,40 +440,53 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
 
     const editorWidget = this._mergeView.right.remoteEditorWidget;
     editorWidget.editor.setOption('readOnly', !this._isEditMode);
-    this._setEditableEditorNode(this._isEditMode ? editorWidget.node : null);
+    this._setEditableEditor(this._isEditMode ? editorWidget.editor : null);
   }
 
   /**
-   * Set the current editable editor node.
+   * Set the current editable editor.
    */
-  private _setEditableEditorNode(node: HTMLElement | null): void {
-    if (this._editableEditorNode === node) {
+  private _setEditableEditor(editor: CodeEditor.IEditor | null): void {
+    if (this._editableEditor === editor) {
       return;
     }
-    this._editableEditorNode?.removeEventListener('input', this._onInput);
-    this._editableEditorNode?.removeEventListener('keyup', this._onKeyup);
-    this._editableEditorNode = node;
-    this._editableEditorNode?.addEventListener('input', this._onInput);
-    this._editableEditorNode?.addEventListener('keyup', this._onKeyup);
+    this._editableEditor?.model.sharedModel.changed.disconnect(
+      this._onSharedModelChanged
+    );
+    this._editableEditor?.host.removeEventListener('keyup', this._onKeyup);
+
+    this._editableEditor = editor;
+
+    this._editableEditor?.model.sharedModel.changed.connect(
+      this._onSharedModelChanged
+    );
+    this._editableEditor?.host.addEventListener('keyup', this._onKeyup);
   }
 
   /**
-   * Debounce file save while typing.
+   * Shared model change handler.
    */
-  private _onInput = (): void => {
+  private _onSharedModelChanged = (): void => {
+    this._queueSave();
+  };
+
+  /**
+   * Debounce file save while editing.
+   */
+  private _queueSave(): void {
     this._clearSaveTimer();
     this._saveTimer = window.setTimeout(() => {
       this._saveTimer = null;
       this._saveEditedContent();
     }, 1000);
-  };
+  }
 
   /**
-   * Fallback for key events where input may not fire (e.g. newline on Enter).
+   * Fallback for key events where shared model change can be delayed.
    */
   private _onKeyup = (event: KeyboardEvent): void => {
     if (event.key === 'Enter') {
-      this._onInput();
+      this._queueSave();
     }
   };
 
@@ -494,7 +507,10 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     if (!this._contentsManager || !this._mergeView?.right) {
       return;
     }
-    const content = this._mergeView.right.remoteEditorWidget.doc.toString();
+    const content = this._getEditedContent();
+    if (content === null) {
+      return;
+    }
     if (content === this._lastSavedContent) {
       return;
     }
@@ -502,6 +518,23 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     if (!this._isSaving) {
       void this._flushSaveQueue();
     }
+  }
+
+  /**
+   * Get the current edited content from the active editor model.
+   */
+  private _getEditedContent(): string | null {
+    const right = this._mergeView?.right;
+    if (!right) {
+      return null;
+    }
+    const editorWidget = right.remoteEditorWidget;
+    const sharedContent =
+      editorWidget.editor?.model?.sharedModel?.getSource?.() ?? null;
+    if (typeof sharedContent === 'string') {
+      return sharedContent;
+    }
+    return editorWidget.doc.toString();
   }
 
   /**
