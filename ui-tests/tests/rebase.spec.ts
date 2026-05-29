@@ -18,15 +18,18 @@ test.describe('Rebase', () => {
 
     await page.sidebar.openTab('jp-git-sessions');
 
-    await page.getByRole('button', { name: 'Current Branch master' }).click();
+    // Collapse Changes and History to expose the branch list.
+    await page.getByRole('heading', { name: 'Changes' }).click();
+    await page.getByRole('heading', { name: 'History' }).click();
 
     // Switch to a-branch
     await page
       .getByRole('listitem', { name: 'Switch to branch: a-branch' })
       .click();
 
-    // Hide branch panel
-    await page.getByRole('button', { name: 'Current Branch a-branch' }).click();
+    // Re-expand panels for subsequent steps.
+    await page.getByRole('heading', { name: 'Changes' }).click();
+    await page.getByRole('heading', { name: 'History' }).click();
 
     // Rebase on master
     await page.getByRole('main').press('Control+Shift+C');
@@ -84,8 +87,7 @@ test.describe('Rebase', () => {
     // Continue rebase as all conflicts are resolved
     await page.getByRole('button', { name: 'Continue' }).click();
 
-    await page.getByRole('tab', { name: 'History' }).click();
-
+    await page.getByTitle('View commit details').first().waitFor();
     // Master changes must be part of the history following the rebase
     await expect.soft(page.getByTitle('View commit details')).toHaveCount(3);
     await expect(page.getByText('master changes')).toBeVisible();
@@ -98,8 +100,6 @@ test.describe('Rebase', () => {
 
     await page.getByRole('button', { name: 'Abort' }).click();
 
-    await page.getByRole('tab', { name: 'History' }).click();
-
     // Master changes must not be part of the history following the abort
     await expect.soft(page.getByTitle('View commit details')).toHaveCount(2);
     await expect(page.getByText('a-branch changes')).toBeVisible();
@@ -109,8 +109,6 @@ test.describe('Rebase', () => {
     await page.getByTitle('Pick another rebase action.').click();
 
     await page.getByRole('menuitem', { name: 'Skip' }).click();
-
-    await page.getByRole('tab', { name: 'History' }).click();
 
     // Master changes must be part of the history following the rebase but not
     // the old a-branch commit.

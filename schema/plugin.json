@@ -29,11 +29,29 @@
       "description": "Display Git extension status updates in the JupyterLab status bar. If true, the extension displays status updates in the JupyterLab status bar, such as when pulling and pushing changes, switching branches, and polling for changes. Depending on the level of extension activity, some users may find the status updates distracting. In which case, setting this to false should reduce visual noise.",
       "default": true
     },
-    "doubleClickDiff": {
-      "type": "boolean",
-      "title": "Show diff on double click",
-      "description": "If true, double clicking a file in the list of changed files will open a diff.",
-      "default": false
+    "fileClickAction": {
+      "type": "string",
+      "title": "File click action",
+      "description": "What happens when you click or double-click a file in the Git panel file list.",
+      "oneOf": [
+        {
+          "const": "open-on-double",
+          "title": "Double click opens the file"
+        },
+        {
+          "const": "diff-on-double",
+          "title": "Double click opens a diff"
+        },
+        {
+          "const": "diff-on-single",
+          "title": "Single click opens a diff"
+        },
+        {
+          "const": "select-only",
+          "title": "Click only selects the file"
+        }
+      ],
+      "default": "open-on-double"
     },
     "historyCount": {
       "type": "integer",
@@ -84,11 +102,10 @@
       "default": false
     },
     "clearOutputsBeforeCommit": {
-      "type": "boolean",
+      "type": ["boolean", "null"],
       "title": "Clear outputs before commit",
       "description": "If true, notebook outputs will be cleared before committing. If false, outputs are kept. If null, ask each time.",
-      "default": null,
-      "nullable": true
+      "default": null
     }
   },
   "jupyter.lab.shortcuts": [
@@ -142,9 +159,6 @@
           },
           {
             "command": "git:toggle-simple-staging"
-          },
-          {
-            "command": "git:toggle-double-click-diff"
           },
           {
             "type": "separator"

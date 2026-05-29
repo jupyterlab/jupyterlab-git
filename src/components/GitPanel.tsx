@@ -7,19 +7,14 @@ import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import * as React from 'react';
 import { GitExtension } from '../model';
 import { showError } from '../notifications';
 import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import {
   panelWrapperClass,
+  panelMainClass,
   repoButtonClass,
-  selectedTabClass,
-  tabClass,
-  tabIndicatorClass,
-  tabsClass,
   warningTextClass
 } from '../style/GitPanel';
 import { addIcon, rewindIcon, trashIcon } from '../style/icons';
@@ -32,9 +27,10 @@ import { CommitComparisonBox } from './CommitComparisonBox';
 import { FileList } from './FileList';
 import { GitStash } from './GitStash';
 import { HistorySideBar } from './HistorySideBar';
+import { BranchMenu } from './BranchMenu';
 import { RebaseAction } from './RebaseAction';
-import { Toolbar } from './Toolbar';
 import { WarningBox } from './WarningBox';
+import { TagMenu } from './TagMenu';
 
 /**
  * Interface describing component properties.
@@ -64,6 +60,17 @@ export interface IGitPanelProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Which body to render.
+   */
+  contentMode: 'changes' | 'history' | 'branches';
+
+  /**
+   * Whether to render the "not a git repository" warning when no repository
+   * is available.
+   */
+  showNoRepositoryWarning?: boolean;
 }
 
 /**
@@ -114,11 +121,6 @@ export interface IGitPanelState {
    * List of prior commits.
    */
   pastCommits: Git.ISingleCommitInfo[];
-
-  /**
-   * Panel tab identifier.
-   */
-  tab: number;
 
   /**
    * Commit message summary.
@@ -193,7 +195,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       nCommitsBehind: 0,
       pastCommits: [],
       repository: pathRepository,
-      tab: 0,
       commitSummary: '',
       commitDescription: '',
       commitAmend: false,
@@ -210,12 +211,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * Callback invoked immediately after mounting a component (i.e., inserting into a tree).
    */
   componentDidMount(): void {
-    const { model, settings } = this.props;
-    model.stashChanged.connect((_, args) => {
-      this.setState({
-        stash: args.newValue as any
-      });
-    }, this);
+    const { model, settings, contentMode } = this.props;
+
     model.repositoryChanged.connect((_, args) => {
       this.setState({
         repository: args.newValue,
@@ -224,46 +221,100 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       });
       this.refreshView();
     }, this);
-    model.statusChanged.connect(async () => {
-      const remotechangedFiles: Git.IStatusFile[] =
-        await model.remoteChangedFiles();
-      this.setState({
-        files: model.status.files,
-        remoteChangedFiles: remotechangedFiles,
-        nCommitsAhead: model.status.ahead,
-        nCommitsBehind: model.status.behind
-      });
-    }, this);
-    model.branchesChanged.connect(async () => {
-      await this.refreshBranches();
-    }, this);
-    model.headChanged.connect(async () => {
-      await this.refreshCurrentBranch();
-      if (this.state.tab === 1) {
-        this.refreshHistory();
-      }
-    }, this);
-    model.tagsChanged.connect(async () => {
-      await this.refreshTags();
-    }, this);
-    model.selectedHistoryFileChanged.connect(() => {
-      this.setState({ tab: 1 });
-      this.refreshHistory();
-    }, this);
-    model.remoteChanged.connect((_, args) => {
-      this.warningDialog(args!);
-    }, this);
-    model.repositoryChanged.connect(async () => {
-      await this.refreshSubmodules();
-    }, this);
 
     settings.changed.connect(this.refreshView, this);
 
-    model.dirtyFilesStatusChanged.connect((_, args) => {
-      this.setState({
-        hasDirtyFiles: args
-      });
-    });
+    if (contentMode === 'changes') {
+      model.statusChanged.connect(async () => {
+        const remotechangedFiles: Git.IStatusFile[] =
+          await model.remoteChangedFiles();
+        this.setState({
+          files: model.status.files,
+          remoteChangedFiles: remotechangedFiles,
+          nCommitsAhead: model.status.ahead,
+          nCommitsBehind: model.status.behind
+        });
+      }, this);
+      model.stashChanged.connect((_, args) => {
+        this.setState({
+          stash: args.newValue as any
+        });
+      }, this);
+      model.dirtyFilesStatusChanged.connect((_, args) => {
+        this.setState({
+          hasDirtyFiles: args
+        });
+      }, this);
+      model.remoteChanged.connect((_, args) => {
+        this.warningDialog(args!);
+      }, this);
+      model.repositoryChanged.connect(async () => {
+        await this.refreshSubmodules();
+      }, this);
+    }
+
+    if (contentMode === 'history') {
+      model.branchesChanged.connect(async () => {
+        await this.refreshBranches();
+      }, this);
+      model.tagsChanged.connect(async () => {
+        await this.refreshTags();
+      }, this);
+      model.headChanged.connect(async () => {
+        await this.refreshCurrentBranch();
+        await this.refreshHistory();
+      }, this);
+      model.selectedHistoryFileChanged.connect(() => {
+        this.refreshHistory();
+      }, this);
+    }
+
+    if (contentMode === 'branches') {
+      model.statusChanged.connect(() => {
+        this.setState({
+          files: model.status.files
+        });
+      }, this);
+      model.branchesChanged.connect(async () => {
+        await this.refreshBranches();
+      }, this);
+      model.tagsChanged.connect(async () => {
+        await this.refreshTags();
+      }, this);
+      model.headChanged.connect(async () => {
+        await this.refreshCurrentBranch();
+        await this.refreshHistory();
+      }, this);
+    }
+
+    // Seed state from the current model and trigger fetches for the active
+    // `contentMode`, in case the relevant signals fired before this mount.
+    if (model.status?.files) {
+      if (contentMode === 'changes') {
+        this.setState({
+          files: model.status.files,
+          nCommitsAhead: model.status.ahead ?? 0,
+          nCommitsBehind: model.status.behind ?? 0
+        });
+      } else if (contentMode === 'branches') {
+        this.setState({
+          files: model.status.files
+        });
+      }
+    }
+    if (model.pathRepository !== null) {
+      const onError = (error: unknown) => {
+        console.error('Failed to refresh Git panel on mount.', error);
+      };
+      if (contentMode === 'history') {
+        this.refreshHistory().catch(onError);
+      }
+      if (contentMode === 'branches') {
+        this.refreshBranches().catch(onError);
+        this.refreshTags().catch(onError);
+        this.refreshHistory().catch(onError);
+      }
+    }
   }
 
   componentWillUnmount(): void {
@@ -321,11 +372,18 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * Refresh widget, update all content
    */
   refreshView = async (): Promise<void> => {
-    if (this.props.model.pathRepository !== null) {
-      await this.refreshBranches();
-      await this.refreshHistory();
-      await this.refreshTags();
+    if (this.props.model.pathRepository === null) {
+      return;
     }
+    if (this.props.contentMode === 'changes') {
+      // 'changes' state is driven by statusChanged/stashChanged/dirtyFilesStatusChanged;
+      // a forceUpdate here covers setting-driven re-renders (e.g. commitAndPush, simpleStaging).
+      this.forceUpdate();
+      return;
+    }
+    await this.refreshBranches();
+    await this.refreshHistory();
+    await this.refreshTags();
   };
 
   /**
@@ -372,18 +430,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns React element
    */
   render(): React.ReactElement {
-    return (
-      <div className={panelWrapperClass}>
-        {this.state.repository !== null ? (
-          <React.Fragment>
-            {this._renderToolbar()}
-            {this._renderMain()}
-          </React.Fragment>
-        ) : (
-          this._renderWarning()
-        )}
-      </div>
-    );
+    if (this.state.repository === null) {
+      if (this.props.showNoRepositoryWarning ?? false) {
+        return <div className={panelWrapperClass}>{this._renderWarning()}</div>;
+      }
+      return <div className={panelWrapperClass} />;
+    }
+    return <div className={panelWrapperClass}>{this._renderMain()}</div>;
   }
 
   private _gitStashClear = async (): Promise<void> => {
@@ -404,92 +457,43 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     await this.props.commands.execute(CommandIDs.gitStash);
   };
 
-  /**
-   * Renders a toolbar.
-   *
-   * @returns React element
-   */
-  private _renderToolbar(): React.ReactElement {
-    const disableBranching = Boolean(
-      this.props.settings.composite['disableBranchWithChanges'] &&
-        (this._hasUnStagedFile() || this._hasStagedFile())
-    );
-    return (
-      <Toolbar
-        currentBranch={this.state.currentBranch}
-        branches={this.state.branches}
-        tagsList={this.state.tagsList}
-        branching={!disableBranching}
-        commands={this.props.commands}
-        pastCommits={this.state.pastCommits}
-        model={this.props.model}
-        nCommitsAhead={this.state.nCommitsAhead}
-        nCommitsBehind={this.state.nCommitsBehind}
-        repository={this.state.repository || ''}
-        trans={this.props.trans}
-        submodules={this.state.submodules}
-      />
-    );
+  private _renderMain(): React.ReactElement {
+    const { contentMode } = this.props;
+    if (contentMode === 'changes') {
+      return <div className={panelMainClass}>{this._renderChanges()}</div>;
+    }
+    if (contentMode === 'history') {
+      return <div className={panelMainClass}>{this._renderHistory()}</div>;
+    }
+    return <div className={panelMainClass}>{this._renderBranches()}</div>;
   }
 
-  /**
-   * Renders the main panel.
-   *
-   * @returns React element
-   */
-  private _renderMain(): React.ReactElement {
+  private _renderBranches(): React.ReactElement {
+    const branching = !(
+      this.props.settings.composite['disableBranchWithChanges'] &&
+      (this._hasUnStagedFile() || this._hasStagedFile())
+    );
     return (
       <React.Fragment>
-        {this._renderTabs()}
-        {this.state.tab === 1 ? this._renderHistory() : this._renderChanges()}
+        <BranchMenu
+          currentBranch={this.state.currentBranch}
+          branches={this.state.branches}
+          branching={branching}
+          commands={this.props.commands}
+          model={this.props.model}
+          trans={this.props.trans}
+        />
+        <TagMenu
+          pastCommits={this.state.pastCommits}
+          tagsList={this.state.tagsList}
+          model={this.props.model}
+          branching={branching}
+          trans={this.props.trans}
+        />
       </React.Fragment>
     );
   }
 
-  /**
-   * Renders panel tabs.
-   *
-   * @returns React element
-   */
-  private _renderTabs(): React.ReactElement {
-    return (
-      <Tabs
-        classes={{
-          root: tabsClass,
-          indicator: tabIndicatorClass
-        }}
-        value={this.state.tab}
-        onChange={this._onTabChange}
-      >
-        <Tab
-          classes={{
-            root: tabClass,
-            selected: selectedTabClass
-          }}
-          title={this.props.trans.__('View changed files')}
-          label={this.props.trans.__('Changes')}
-          disableFocusRipple={true}
-          disableRipple={true}
-        />
-        <Tab
-          classes={{
-            root: tabClass,
-            selected: selectedTabClass
-          }}
-          title={this.props.trans.__('View commit history')}
-          label={this.props.trans.__('History')}
-          disableFocusRipple={true}
-          disableRipple={true}
-        />
-      </Tabs>
-    );
-  }
-
-  /**
-   * Renders a panel for viewing and committing file changes.
-   *
-   * @returns React element
-   */
   private _renderChanges(): React.ReactElement {
     const hasRemote = this.props.model.branches.some(
       branch => branch.is_remote_branch
@@ -600,11 +604,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     );
   }
 
-  /**
-   * Renders a panel for viewing commit history.
-   *
-   * @returns React element
-   */
   private _renderHistory(): React.ReactElement {
     return (
       <React.Fragment>
@@ -722,21 +721,6 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       </React.Fragment>
     );
   }
-
-  /**
-   * Callback invoked upon changing the active panel tab.
-   *
-   * @param event - event object
-   * @param tab - tab number
-   */
-  private _onTabChange = (event: any, tab: number): void => {
-    if (tab === 1) {
-      this.refreshHistory();
-    }
-    this.setState({
-      tab: tab
-    });
-  };
 
   /**
    * Updates the commit message description.

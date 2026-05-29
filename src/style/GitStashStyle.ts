@@ -4,7 +4,10 @@ import { sectionAreaStyle } from './GitStageStyle';
 
 export const stashContainerStyle = style(
   (() => {
-    const styled: NestedCSSProperties = { $nest: {} };
+    const styled: NestedCSSProperties = {
+      flexShrink: 0,
+      $nest: {}
+    };
 
     styled.$nest![`& > .${sectionAreaStyle}`] = {
       margin: 0
@@ -25,7 +28,11 @@ export const sectionHeaderLabelStyle = style({
 });
 
 export const sectionButtonContainerStyle = style({
-  display: 'flex'
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: '0 0 auto',
+  height: '100%'
 });
 
 export const stashFileStyle = style({

@@ -223,9 +223,11 @@ export class CommitBox extends React.Component<
           </Button>
           <Button
             classes={{
-              root: classes(commitButtonClass, commitVariantSelector)
+              root: classes(commitButtonClass, commitVariantSelector),
+              disabled: disabledStyle
             }}
             size="small"
+            disabled={!this.props.hasFiles}
             aria-controls={this.state.open ? 'split-button-menu' : undefined}
             aria-expanded={this.state.open ? 'true' : undefined}
             aria-label="select commit variant"

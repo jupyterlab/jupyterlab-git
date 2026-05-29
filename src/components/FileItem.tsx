@@ -6,10 +6,12 @@ import {
   checkboxLabelContainerStyle,
   checkboxLabelLastContainerStyle,
   checkboxLabelStyle,
-  fileChangedLabelBrandStyle,
+  fileChangedLabelAddedStyle,
+  fileChangedLabelDeletedStyle,
   fileChangedLabelInfoStyle,
+  fileChangedLabelModifiedStyle,
   fileChangedLabelStyle,
-  fileChangedLabelWarnStyle,
+  fileClickableStyle,
   fileStyle,
   gitMarkBoxStyle,
   selectedFileChangedLabelStyle,
@@ -99,6 +101,10 @@ export interface IFileItemProps {
    */
   onDoubleClick: () => void;
   /**
+   * Callback on plain (non-modifier) click
+   */
+  onClick?: (file: Git.IStatusFile) => void;
+  /**
    * Is the file selected?
    */
   selected?: boolean;
@@ -151,6 +157,11 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         this.props.setSelection!(this.props.file, { group: true });
       } else {
         this.props.setSelection!(this.props.file, { singleton: true });
+        // Skip on the second click of a double-click so a `diff-on-single`
+        // navigation isn't triggered twice on the way to `onDoubleClick`.
+        if (event.detail <= 1) {
+          this.props.onClick?.(this.props.file);
+        }
       }
     }
   };
@@ -163,37 +174,39 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
   }
 
   protected _getFileChangedLabelClass(change: string): string {
-    if (change === 'M') {
-      return this.props.selected
-        ? classes(
-            fileChangedLabelStyle,
-            fileChangedLabelBrandStyle,
-            selectedFileChangedLabelStyle
-          )
-        : classes(fileChangedLabelStyle, fileChangedLabelBrandStyle);
-    } else if (change === '!') {
-      return this.props.selected
-        ? classes(
-            fileChangedLabelStyle,
-            fileChangedLabelWarnStyle,
-            selectedFileChangedLabelStyle
-          )
-        : classes(fileChangedLabelStyle, fileChangedLabelWarnStyle);
-    } else {
-      return this.props.selected
-        ? classes(
-            fileChangedLabelStyle,
-            fileChangedLabelInfoStyle,
-            selectedFileChangedLabelStyle
-          )
-        : classes(fileChangedLabelStyle, fileChangedLabelInfoStyle);
+    let colorStyle: string;
+    switch (change) {
+      case 'A':
+      case 'U':
+        colorStyle = fileChangedLabelAddedStyle;
+        break;
+      case 'D':
+      case '!':
+        colorStyle = fileChangedLabelDeletedStyle;
+        break;
+      case 'M':
+      case 'R':
+        colorStyle = fileChangedLabelModifiedStyle;
+        break;
+      default:
+        colorStyle = fileChangedLabelInfoStyle;
     }
+    return this.props.selected
+      ? classes(
+          fileChangedLabelStyle,
+          colorStyle,
+          selectedFileChangedLabelStyle
+        )
+      : classes(fileChangedLabelStyle, colorStyle);
   }
 
   protected _getFileClass(): string {
+    // Show the pointer cursor only when a single click triggers an action
+    // beyond selection (i.e. when `onClick` is provided by the parent).
+    const clickableClass = this.props.onClick ? fileClickableStyle : '';
     const baseClass = this.props.selected
-      ? classes(fileStyle, selectedFileStyle)
-      : fileStyle;
+      ? classes(fileStyle, selectedFileStyle, clickableClass)
+      : classes(fileStyle, clickableClass);
 
     return this.props.className
       ? `${baseClass} ${this.props.className}`
@@ -203,6 +216,8 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
   render(): JSX.Element {
     const { file } = this.props;
     const status_code = file.status === 'staged' ? file.x : file.y;
+    const badge_code =
+      file.status === 'unmerged' ? '!' : file.y === '?' ? 'U' : status_code;
     const status =
       file.status === 'unmerged'
         ? this.props.trans.__('Conflicted')
@@ -241,16 +256,8 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
           </div>
           <div className={checkboxLabelLastContainerStyle}>
             {this.props.actions}
-            <span
-              className={this._getFileChangedLabelClass(
-                this.props.file.status === 'unmerged' ? '!' : this.props.file.y
-              )}
-            >
-              {this.props.file.status === 'unmerged'
-                ? '!'
-                : this.props.file.y === '?'
-                ? 'U'
-                : status_code}
+            <span className={this._getFileChangedLabelClass(badge_code)}>
+              {badge_code}
             </span>
           </div>
         </div>

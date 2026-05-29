@@ -13,6 +13,17 @@ export function extractFilename(path: string): string {
 }
 
 /**
+ * Click handler that prevents the event from reaching an ancestor.
+ *
+ * @param event Mouse event
+ */
+export function stopPropagation(
+  event: React.MouseEvent<HTMLElement, MouseEvent>
+): void {
+  event.stopPropagation();
+}
+
+/**
  * Wrap mouse event handler to stop event propagation
  * @param fn Mouse event handler
  * @returns Mouse event handler that stops event from propagating
