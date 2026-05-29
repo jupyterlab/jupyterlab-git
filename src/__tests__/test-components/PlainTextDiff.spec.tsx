@@ -385,9 +385,9 @@ describe('PlainTextDiff', () => {
       findWidget: jest.fn(() => openWidget as any),
       contextForWidget: jest.fn(() => context as any)
     };
-    const notify = jest.spyOn(Notification, 'error').mockImplementation(
-      () => 'notification-id'
-    );
+    const notify = jest
+      .spyOn(Notification, 'error')
+      .mockImplementation(() => 'notification-id');
 
     const widget = await createPlainTextDiff({
       model,
@@ -439,9 +439,9 @@ describe('PlainTextDiff', () => {
     // Given
     const model = createModel();
     const save = jest.fn(() => Promise.reject(new Error('save failed')));
-    const notify = jest.spyOn(Notification, 'error').mockImplementation(
-      () => 'notification-id'
-    );
+    const notify = jest
+      .spyOn(Notification, 'error')
+      .mockImplementation(() => 'notification-id');
     const widget = await createPlainTextDiff({
       model,
       languageRegistry: new EditorLanguageRegistry(),
