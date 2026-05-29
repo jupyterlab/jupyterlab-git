@@ -1,3 +1,4 @@
+import { Notification } from '@jupyterlab/apputils';
 import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditorFactory,
@@ -401,6 +402,7 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
   protected _isSaving = false;
   protected _isRefreshing = false;
   protected _refreshQueued = false;
+  protected _refreshAfterSave = false;
   protected _nextSaveContent: string | null = null;
   protected _editableEditor: CodeEditor.IEditor | null = null;
   protected _lastSavedContent: string | null = null;
@@ -428,9 +430,13 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     if (!this._isEditableDiff || this._isEditMode === isEditMode) {
       return;
     }
+    if (isEditMode && this._hasConflictingDirtyContext()) {
+      this._showDirtyContextWarning();
+      return;
+    }
     this._isEditMode = isEditMode;
     if (!this._isEditMode) {
-      this._saveEditedContent();
+      this._refreshAfterSave = this._saveEditedContent();
     }
     this._updateEditMode();
     if (this._editButton) {
@@ -513,9 +519,39 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
       return;
     }
     const source = context.model.toString();
+    if (this._hasConflictingDirtyContext(content, context)) {
+      this._setEditMode(false);
+      this._showDirtyContextWarning();
+      return;
+    }
     if (source !== content) {
       context.model.fromString(content);
     }
+  }
+
+  /**
+   * Check if an open editor has unsaved changes that conflict with inline edit.
+   */
+  private _hasConflictingDirtyContext(
+    content = this._getEditedContent(),
+    context = this._getOpenDocumentContext()
+  ): boolean {
+    if (!context || content === null || !context.model.dirty) {
+      return false;
+    }
+    return context.model.toString() !== content;
+  }
+
+  /**
+   * Warn the user that inline edit cannot safely sync to a dirty open editor.
+   */
+  private _showDirtyContextWarning(): void {
+    Notification.error(
+      this._trans.__(
+        'Inline edit is unavailable while this file has unsaved changes in another editor.'
+      ),
+      { autoClose: 5000 }
+    );
   }
 
   /**
@@ -547,21 +583,22 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
   /**
    * Save edited content to the underlying file.
    */
-  private _saveEditedContent(): void {
+  private _saveEditedContent(): boolean {
     if (!this._contentsManager || !this._mergeView?.right) {
-      return;
+      return false;
     }
     const content = this._getEditedContent();
     if (content === null) {
-      return;
+      return false;
     }
     if (content === this._lastSavedContent) {
-      return;
+      return false;
     }
     this._nextSaveContent = content;
     if (!this._isSaving) {
       void this._flushSaveQueue();
     }
+    return true;
   }
 
   /**
@@ -589,13 +626,17 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
       return;
     }
     this._isSaving = true;
-    let didSave = false;
     while (this._nextSaveContent !== null) {
       const content = this._nextSaveContent;
       this._nextSaveContent = null;
       try {
         const context = this._getOpenDocumentContext();
         if (context) {
+          if (this._hasConflictingDirtyContext(content, context)) {
+            this._setEditMode(false);
+            this._showDirtyContextWarning();
+            continue;
+          }
           if (context.model.toString() !== content) {
             context.model.fromString(content);
           }
@@ -608,17 +649,21 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
           });
         }
         this._lastSavedContent = content;
-        didSave = true;
       } catch (reason) {
         console.error(
           this._trans.__('Failed to save inline diff changes.'),
           reason,
           (reason as any)?.traceback
         );
+        Notification.error(
+          this._trans.__('Failed to save inline diff changes.'),
+          { autoClose: 5000 }
+        );
       }
     }
     this._isSaving = false;
-    if (didSave && !this.isDisposed) {
+    if (this._refreshAfterSave && !this.isDisposed) {
+      this._refreshAfterSave = false;
       void this.refresh();
     }
   }
