@@ -6,6 +6,7 @@ import {
   IEditorLanguageRegistry
 } from '@jupyterlab/codemirror';
 import { PathExt } from '@jupyterlab/coreutils';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
 import { TranslationBundle, nullTranslator } from '@jupyterlab/translation';
 import { Toolbar, ToolbarButton } from '@jupyterlab/ui-components';
@@ -38,18 +39,21 @@ export const createPlainTextDiff = async ({
   languageRegistry,
   model,
   contentsManager,
+  documentManager,
   toolbar,
   translator
 }: Git.Diff.IFactoryOptions & {
   languageRegistry: IEditorLanguageRegistry;
   editorFactory?: CodeEditor.Factory;
   contentsManager?: Contents.IManager;
+  documentManager?: IDocumentManager;
 }): Promise<PlainTextDiff> => {
   const widget = new PlainTextDiff({
     model,
     languageRegistry,
     editorFactory,
     contentsManager,
+    documentManager,
     trans: (translator ?? nullTranslator).load('jupyterlab_git')
   });
   widget.addToolbarItems(toolbar);
@@ -66,12 +70,14 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     languageRegistry,
     trans,
     editorFactory,
-    contentsManager
+    contentsManager,
+    documentManager
   }: {
     model: Git.Diff.IModel;
     languageRegistry?: IEditorLanguageRegistry;
     editorFactory?: CodeEditor.Factory;
     contentsManager?: Contents.IManager;
+    documentManager?: IDocumentManager;
     trans?: TranslationBundle;
   }) {
     super();
@@ -94,6 +100,7 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     this._model = model;
     this._trans = trans ?? nullTranslator.load('jupyterlab_git');
     this._contentsManager = contentsManager;
+    this._documentManager = documentManager;
     this._fullPath = PathExt.join(
       this._model.repositoryPath ?? '/',
       this._model.filename
@@ -386,6 +393,7 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
   protected _model: Git.Diff.IModel;
   protected _trans: TranslationBundle;
   protected _contentsManager: Contents.IManager | undefined;
+  protected _documentManager: IDocumentManager | undefined;
   protected _fullPath: string;
   protected _editButton: ToolbarButton | null = null;
   protected _isEditMode = false;
@@ -467,6 +475,7 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
    * Shared model change handler.
    */
   private _onSharedModelChanged = (): void => {
+    this._syncOpenEditor();
     this._queueSave();
   };
 
@@ -486,9 +495,44 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
    */
   private _onKeyup = (event: KeyboardEvent): void => {
     if (event.key === 'Enter') {
+      this._syncOpenEditor();
       this._queueSave();
     }
   };
+
+  /**
+   * Synchronize inline diff edits with an already-open file editor context.
+   */
+  private _syncOpenEditor(): void {
+    const context = this._getOpenDocumentContext();
+    if (!context) {
+      return;
+    }
+    const content = this._getEditedContent();
+    if (content === null) {
+      return;
+    }
+    const source = context.model.toString();
+    if (source !== content) {
+      context.model.fromString(content);
+    }
+  }
+
+  /**
+   * Get the currently open document context for this file path.
+   */
+  private _getOpenDocumentContext():
+    | ReturnType<IDocumentManager['contextForWidget']>
+    | undefined {
+    if (!this._documentManager) {
+      return undefined;
+    }
+    const widget = this._documentManager.findWidget(this._fullPath);
+    if (!widget) {
+      return undefined;
+    }
+    return this._documentManager.contextForWidget(widget);
+  }
 
   /**
    * Clear pending save timer.
@@ -550,11 +594,19 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
       const content = this._nextSaveContent;
       this._nextSaveContent = null;
       try {
-        await this._contentsManager.save(this._fullPath, {
-          type: 'file',
-          format: 'text',
-          content
-        });
+        const context = this._getOpenDocumentContext();
+        if (context) {
+          if (context.model.toString() !== content) {
+            context.model.fromString(content);
+          }
+          await context.save();
+        } else {
+          await this._contentsManager.save(this._fullPath, {
+            type: 'file',
+            format: 'text',
+            content
+          });
+        }
         this._lastSavedContent = content;
         didSave = true;
       } catch (reason) {

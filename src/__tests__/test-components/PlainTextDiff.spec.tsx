@@ -287,6 +287,153 @@ describe('PlainTextDiff', () => {
     widget.dispose();
   });
 
+  it('should sync edited content to open file context while in edit mode', async () => {
+    // Given
+    const model = new DiffModel({
+      challenger: {
+        content: () => Promise.resolve('challenger'),
+        label: 'WORKING',
+        source: Git.Diff.SpecialRef.WORKING
+      },
+      reference: {
+        content: () => Promise.resolve('reference'),
+        label: 'HEAD',
+        source: 'HEAD'
+      },
+      filename: 'to/File.py',
+      repositoryPath: 'path'
+    });
+    const fromString = jest.fn();
+    const openWidget = {};
+    const context = {
+      model: {
+        toString: () => 'challenger',
+        fromString
+      },
+      save: jest.fn(() => Promise.resolve())
+    };
+    const documentManager = {
+      findWidget: jest.fn(() => openWidget as any),
+      contextForWidget: jest.fn(() => context as any)
+    };
+    const widget = await createPlainTextDiff({
+      model,
+      languageRegistry: new EditorLanguageRegistry(),
+      contentsManager: { save: jest.fn() } as any,
+      documentManager: documentManager as any
+    });
+    const setOption = jest.fn();
+    const hostAddEventListener = jest.fn();
+    const hostRemoveEventListener = jest.fn();
+    const connect = jest.fn();
+    const disconnect = jest.fn();
+    let onSharedModelChanged: (() => void) | null = null;
+    connect.mockImplementation((cb: unknown) => {
+      onSharedModelChanged = cb as () => void;
+    });
+    const sharedModel = {
+      getSource: () => 'edited from shared model',
+      changed: {
+        connect,
+        disconnect
+      }
+    };
+
+    (widget as any)._mergeView = {
+      right: {
+        remoteEditorWidget: {
+          editor: {
+            setOption,
+            host: {
+              addEventListener: hostAddEventListener,
+              removeEventListener: hostRemoveEventListener
+            },
+            model: {
+              sharedModel
+            }
+          },
+          doc: {
+            toString: () => 'edited from doc'
+          }
+        }
+      }
+    };
+    (widget as any)._lastSavedContent = 'challenger';
+
+    // When
+    (widget as any)._setEditMode(true);
+    expect(onSharedModelChanged).not.toBeNull();
+    onSharedModelChanged!();
+
+    // Then
+    expect(fromString).toHaveBeenCalledWith('edited from shared model');
+    widget.dispose();
+  });
+
+  it('should use open document context save when available', async () => {
+    // Given
+    const model = new DiffModel({
+      challenger: {
+        content: () => Promise.resolve('challenger'),
+        label: 'WORKING',
+        source: Git.Diff.SpecialRef.WORKING
+      },
+      reference: {
+        content: () => Promise.resolve('reference'),
+        label: 'HEAD',
+        source: 'HEAD'
+      },
+      filename: 'to/File.py',
+      repositoryPath: 'path'
+    });
+    const save = jest.fn(() => Promise.resolve());
+    const fromString = jest.fn();
+    const openWidget = {};
+    const context = {
+      model: {
+        toString: () => 'challenger',
+        fromString
+      },
+      save
+    };
+    const documentManager = {
+      findWidget: jest.fn(() => openWidget as any),
+      contextForWidget: jest.fn(() => context as any)
+    };
+    const contentsSave = jest.fn(() => Promise.resolve({}));
+    const widget = await createPlainTextDiff({
+      model,
+      languageRegistry: new EditorLanguageRegistry(),
+      contentsManager: { save: contentsSave } as any,
+      documentManager: documentManager as any
+    });
+    const refresh = jest
+      .spyOn(widget, 'refresh')
+      .mockImplementation(async () => undefined);
+
+    (widget as any)._mergeView = {
+      right: {
+        remoteEditorWidget: {
+          doc: {
+            toString: () => 'edited content'
+          }
+        }
+      }
+    };
+    (widget as any)._lastSavedContent = 'challenger';
+
+    // When
+    (widget as any)._saveEditedContent();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // Then
+    expect(fromString).toHaveBeenCalledWith('edited content');
+    expect(save).toHaveBeenCalled();
+    expect(contentsSave).not.toHaveBeenCalled();
+    refresh.mockRestore();
+    widget.dispose();
+  });
+
   it('should refresh safely when merge view is unavailable', async () => {
     // Given
     const model = new DiffModel({
