@@ -266,9 +266,9 @@ describe('PlainTextDiff', () => {
 
     // When
     (widget as any)._setEditMode(true);
-    if (onSharedModelChanged) {
-      onSharedModelChanged();
-    }
+    expect(onSharedModelChanged).not.toBeNull();
+    const sharedModelChangeHandler = connect.mock.calls[0][0] as () => void;
+    sharedModelChangeHandler();
     jest.advanceTimersByTime(1000);
     await Promise.resolve();
     await Promise.resolve();
