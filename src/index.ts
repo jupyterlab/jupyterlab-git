@@ -105,19 +105,27 @@ const plainTextDiffPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/git:plain-text-diff',
   description:
     'Registers the fallback CodeMirror-based diff provider for text files.',
-  requires: [IGitExtension, IEditorServices, IEditorLanguageRegistry],
+  requires: [
+    IGitExtension,
+    IEditorServices,
+    IEditorLanguageRegistry,
+    IDocumentManager
+  ],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     gitExtension: IGitExtension,
     editorServices: IEditorServices,
-    languageRegistry: IEditorLanguageRegistry
+    languageRegistry: IEditorLanguageRegistry,
+    documentManager: IDocumentManager
   ): void => {
     const editorFactory = editorServices.factoryService;
     gitExtension.registerFallbackDiffProvider(
       (options: Git.Diff.IFactoryOptions) =>
         createPlainTextDiff({
           ...options,
+          contentsManager: app.serviceManager.contents,
+          documentManager,
           editorFactory: editorFactory.newInlineEditor.bind(editorFactory),
           languageRegistry
         })
