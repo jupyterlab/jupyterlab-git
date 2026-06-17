@@ -128,6 +128,7 @@ export class GitWidget extends SidePanel {
       <Toolbar
         commands={this._commands}
         model={this._model}
+        settings={this._settings}
         trans={this._gitTrans}
       />
     );

@@ -95,6 +95,24 @@
       "description": "If true, a popup dialog will be displayed if a user opens a file that is behind its remote branch version, or if an opened file has updates on the remote branch.",
       "default": true
     },
+    "branchBehindWarningEnabled": {
+      "type": "boolean",
+      "title": "Branch behind warning",
+      "description": "If true, show a persistent warning when the current branch is significantly behind a configured reference branch.",
+      "default": false
+    },
+    "branchBehindWarningThreshold": {
+      "type": "integer",
+      "title": "Branch behind warning threshold",
+      "description": "Number of commits behind the reference branch required before showing the warning.",
+      "default": 250
+    },
+    "branchBehindWarningReference": {
+      "type": "string",
+      "title": "Branch behind warning reference",
+      "description": "Reference branch to compare against for the behind warning.",
+      "default": "origin/main"
+    },
     "hideHiddenFileWarning": {
       "type": "boolean",
       "title": "Hide hidden file warning",

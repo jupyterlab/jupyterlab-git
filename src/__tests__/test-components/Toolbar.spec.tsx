@@ -4,6 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import 'jest';
 import * as React from 'react';
+import { Signal } from '@lumino/signaling';
 import { IToolbarProps, Toolbar } from '../../components/Toolbar';
 import * as git from '../../git';
 import { GitExtension } from '../../model';
@@ -52,6 +53,7 @@ interface IModelOptions {
   submodules?: Git.ISubmodule[];
   remotes?: Git.IGitRemote[];
   status?: { ahead?: number; behind?: number; state?: Git.State };
+  referenceComparison?: { ahead?: number; behind?: number; reference?: string };
 }
 
 async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
@@ -62,6 +64,9 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
   const ahead = options.status?.ahead ?? 0;
   const behind = options.status?.behind ?? 0;
   const state = options.status?.state ?? Git.State.DEFAULT;
+  const referenceAhead = options.referenceComparison?.ahead ?? 0;
+  const referenceBehind = options.referenceComparison?.behind ?? 0;
+  const reference = options.referenceComparison?.reference ?? 'origin/main';
 
   const mock = git as jest.Mocked<typeof git>;
   mock.requestAPI.mockImplementation(
@@ -87,6 +92,14 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
             branch: 'main',
             remote: 'origin/main'
           })
+        },
+        compare_reference: {
+          body: () => ({
+            code: 0,
+            reference,
+            ahead: referenceAhead,
+            behind: referenceBehind
+          })
         }
       }
     }) as any
@@ -103,11 +116,13 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
 
 describe('Toolbar', () => {
   let model: GitExtension;
+  let settings: any;
   const trans = nullTranslator.load('jupyterlab_git');
 
   function createProps(props?: Partial<IToolbarProps>): IToolbarProps {
     return {
       model: model,
+      settings: settings,
       commands: {
         execute: jest.fn()
       } as any,
@@ -119,6 +134,14 @@ describe('Toolbar', () => {
   beforeEach(async () => {
     jest.restoreAllMocks();
     model = await createModel();
+    settings = {
+      composite: {
+        branchBehindWarningEnabled: false,
+        branchBehindWarningThreshold: 250,
+        branchBehindWarningReference: 'origin/main'
+      },
+      changed: new Signal<any, void>({})
+    } as any;
   });
 
   describe('render', () => {
@@ -212,6 +235,21 @@ describe('Toolbar', () => {
 
       expect(screen.getByText('main')).toBeDefined();
       expect(screen.queryByRole('button', { name: /branches/i })).toBeNull();
+    });
+
+    it('should display a behind-reference warning when enabled and threshold is reached', async () => {
+      model = await createModel({
+        referenceComparison: { behind: 350, reference: 'origin/main' }
+      });
+      settings.composite.branchBehindWarningEnabled = true;
+      settings.composite.branchBehindWarningThreshold = 250;
+      render(<Toolbar {...createProps()} />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: /350 behind origin\/main/ })
+        ).toBeDefined();
+      });
     });
   });
 

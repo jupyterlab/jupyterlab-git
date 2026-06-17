@@ -1,5 +1,11 @@
-import { Notification, UseSignal } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  Notification,
+  showDialog,
+  UseSignal
+} from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TranslationBundle } from '@jupyterlab/translation';
 import {
   caretDownIcon,
@@ -7,12 +13,16 @@ import {
   refreshIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
+import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import Badge from '@mui/material/Badge';
 import * as React from 'react';
+import { Operation, showGitOperationDialog } from '../commandsAndMenu';
 import { showError } from '../notifications';
 import {
   badgeClass,
   branchInfoClass,
+  branchWarningButtonClass,
+  branchWarningTextClass,
   branchNameClass,
   repoBranchColumnClass,
   repoButtonClass,
@@ -44,6 +54,11 @@ export interface IToolbarProps {
   model: IGitExtension;
 
   /**
+   * Git extension settings.
+   */
+  settings: ISettingRegistry.ISettings;
+
+  /**
    * The application language translator.
    */
   trans: TranslationBundle;
@@ -67,6 +82,11 @@ export interface IToolbarState {
    * Boolean indicating whether the repository menu is shown.
    */
   repoMenu: boolean;
+
+  /**
+   * Number of commits the current branch is behind a configured reference.
+   */
+  commitsBehindReference: number;
 }
 
 export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
@@ -75,7 +95,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     this.state = {
       refreshInProgress: false,
       hasRemote: false,
-      repoMenu: false
+      repoMenu: false,
+      commitsBehindReference: 0
     };
   }
 
@@ -83,6 +104,15 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Check whether or not the repo has any remotes
    */
   async componentDidMount(): Promise<void> {
+    this.props.model.branchesChanged.connect(
+      this._refreshBehindReferenceWarning
+    );
+    this.props.model.headChanged.connect(this._refreshBehindReferenceWarning);
+    this.props.model.repositoryChanged.connect(
+      this._refreshBehindReferenceWarning
+    );
+    this.props.settings.changed.connect(this._refreshBehindReferenceWarning);
+
     try {
       const remotes = await this.props.model.getRemotes();
       const hasRemote = remotes.length > 0;
@@ -90,6 +120,21 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     } catch (err) {
       console.error(err);
     }
+
+    await this._refreshBehindReferenceWarning();
+  }
+
+  componentWillUnmount(): void {
+    this.props.model.branchesChanged.disconnect(
+      this._refreshBehindReferenceWarning
+    );
+    this.props.model.headChanged.disconnect(
+      this._refreshBehindReferenceWarning
+    );
+    this.props.model.repositoryChanged.disconnect(
+      this._refreshBehindReferenceWarning
+    );
+    this.props.settings.changed.disconnect(this._refreshBehindReferenceWarning);
   }
 
   render(): React.ReactElement {
@@ -135,6 +180,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <div className={repoBranchColumnClass}>
           {hasSubmodules ? this._renderRepoButton() : this._renderRepoLabel()}
           {this._renderBranchInfo()}
+          {this._renderBehindReferenceWarning()}
         </div>
         <span className={spacer} />
         {this._renderRemoteActions()}
@@ -211,6 +257,34 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <branchIcon.react tag="span" className="jp-Icon" />
         <span className={branchNameClass}>{currentBranch}</span>
       </span>
+    );
+  }
+
+  private _renderBehindReferenceWarning(): React.ReactElement | null {
+    const { enabled, threshold, reference } =
+      this._getBehindReferenceSettings();
+    const commitsBehind = this.state.commitsBehindReference;
+    const shouldWarn = enabled && commitsBehind >= threshold;
+    if (!shouldWarn) {
+      return null;
+    }
+
+    return (
+      <button
+        type="button"
+        className={branchWarningButtonClass}
+        onClick={this._onBehindReferenceWarningClick}
+        title={this.props.trans.__(
+          "Current branch is %1 commits behind '%2'. Click for options.",
+          commitsBehind,
+          reference
+        )}
+      >
+        <WarningRoundedIcon fontSize="inherit" />
+        <span className={branchWarningTextClass}>
+          {this.props.trans.__('%1 behind %2', commitsBehind, reference)}
+        </span>
+      </button>
     );
   }
 
@@ -314,6 +388,126 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
+  private _getBehindReferenceSettings(): {
+    enabled: boolean;
+    threshold: number;
+    reference: string;
+  } {
+    const enabled =
+      (this.props.settings.composite[
+        'branchBehindWarningEnabled'
+      ] as boolean) ?? false;
+    const thresholdSetting = this.props.settings.composite[
+      'branchBehindWarningThreshold'
+    ] as number;
+    const threshold = Number.isFinite(thresholdSetting)
+      ? Math.max(1, Math.floor(thresholdSetting))
+      : 250;
+    const referenceSetting =
+      (this.props.settings.composite[
+        'branchBehindWarningReference'
+      ] as string) ?? 'origin/main';
+    const reference = referenceSetting.trim() || 'origin/main';
+
+    return { enabled, threshold, reference };
+  }
+
+  private _refreshBehindReferenceWarning = async (): Promise<void> => {
+    const { enabled, reference } = this._getBehindReferenceSettings();
+    const requestId = ++this._compareRequestId;
+
+    if (!enabled || this.props.model.pathRepository === null) {
+      if (this.state.commitsBehindReference !== 0) {
+        this.setState({
+          commitsBehindReference: 0
+        });
+      }
+      return;
+    }
+
+    try {
+      const data = await this.props.model.compareWithReference(reference);
+      if (requestId !== this._compareRequestId) {
+        return;
+      }
+      const commitsBehindReference = data.behind ?? 0;
+      if (this.state.commitsBehindReference !== commitsBehindReference) {
+        this.setState({
+          commitsBehindReference
+        });
+      }
+    } catch {
+      if (requestId !== this._compareRequestId) {
+        return;
+      }
+      // The configured reference may not exist in this repository yet.
+      if (this.state.commitsBehindReference !== 0) {
+        this.setState({
+          commitsBehindReference: 0
+        });
+      }
+    }
+  };
+
+  private _onBehindReferenceWarningClick = async (): Promise<void> => {
+    const { threshold, reference } = this._getBehindReferenceSettings();
+    const commitsBehind = this.state.commitsBehindReference;
+
+    const result = await showDialog({
+      title: this.props.trans.__('Branch Behind Warning'),
+      body: this.props.trans.__(
+        "The current branch '%1' is %2 commits behind '%3' (threshold: %4).\n\nRebasing now can reduce future merge conflicts.",
+        this.props.model.currentBranch?.name ?? 'HEAD',
+        commitsBehind,
+        reference,
+        threshold
+      ),
+      buttons: [
+        Dialog.cancelButton({ label: this.props.trans.__('Cancel') }),
+        Dialog.warnButton({ label: this.props.trans.__('Fetch & Rebase') })
+      ]
+    });
+
+    if (!result.button.accept) {
+      return;
+    }
+
+    const fetchNotification = Notification.emit(
+      this.props.trans.__('Fetching latest changes…'),
+      'in-progress'
+    );
+    try {
+      await showGitOperationDialog(
+        this.props.model,
+        Operation.Fetch,
+        this.props.trans
+      );
+      Notification.update({
+        id: fetchNotification,
+        type: 'success',
+        message: this.props.trans.__('Successfully fetched latest changes.')
+      });
+    } catch (error: any) {
+      if (error.name === 'CancelledError') {
+        Notification.dismiss(fetchNotification);
+        return;
+      }
+      Notification.update({
+        id: fetchNotification,
+        type: 'error',
+        message: this.props.trans.__('Failed to fetch latest changes.'),
+        ...showError(error as Error, this.props.trans)
+      });
+      return;
+    }
+
+    await this.props.commands.execute(CommandIDs.gitRebase, {
+      branch: reference
+    });
+    await this.props.model.refresh();
+    await this._refreshBehindReferenceWarning();
+  };
+
   private _onPullClick = async (): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitPull);
   };
@@ -356,4 +550,6 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       this.setState({ refreshInProgress: false });
     }
   };
+
+  private _compareRequestId = 0;
 }
