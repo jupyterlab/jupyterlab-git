@@ -1,5 +1,6 @@
 node_modules
 **/node_modules
+.venv
 **/lib
 **/package.json
 !/package.json

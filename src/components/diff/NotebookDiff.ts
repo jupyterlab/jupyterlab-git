@@ -394,16 +394,20 @@ namespace Private {
       : 'jp-git-diff-banner';
     const node = document.createElement('div');
     node.className = 'jp-git-diff-header';
-    node.innerHTML = `<div class="${bannerClass}">
-        <span>${localLabel}</span>
-        ${
-          hasConflict
-            ? // Add extra space during notebook merge view
-              `<span>${baseLabel}</span>`
-            : ''
-        }
-        <span>${remoteLabel}</span>
-      </div>`;
+    const banner = document.createElement('div');
+    banner.className = bannerClass;
+    // Add the common ancestor label during the notebook merge view
+    const labels = hasConflict
+      ? [localLabel, baseLabel, remoteLabel]
+      : [localLabel, remoteLabel];
+    labels
+      .filter((label): label is string => !!label)
+      .forEach(label => {
+        const span = document.createElement('span');
+        span.textContent = label;
+        banner.appendChild(span);
+      });
+    node.appendChild(banner);
 
     return new Widget({ node });
   }

@@ -26,6 +26,7 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageReporters: ['lcov', 'text'],
   modulePathIgnorePatterns: [
+    '<rootDir>/.venv',
     '<rootDir>/build',
     '<rootDir>/jupyterlab_git',
     '<rootDir>/jupyter-config',
