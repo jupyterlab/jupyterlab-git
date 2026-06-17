@@ -101,21 +101,18 @@ async def test_git_show_prefix_nested_directory(mock_execute, jp_fetch, jp_root_
     )
 
 
-async def test_git_show_prefix_for_excluded_path(
-    jp_fetch, jp_server_config, jp_root_dir
-):
-    local_path = jp_root_dir / "ignored-path"
-
-    try:
-        response = await jp_fetch(
+@pytest.mark.parametrize("path", ["ignored-path/subdir", "Ignored-Path/subdir"])
+async def test_git_show_prefix_for_excluded_path(path, jp_fetch, jp_server_config):
+    with pytest.raises(HTTPClientError) as error:
+        await jp_fetch(
             NAMESPACE,
-            local_path.name + "/subdir",
+            path,
             "show_prefix",
             body="{}",
             method="POST",
         )
-    except HTTPClientError as e:
-        assert e.code == 404
+
+    assert_http_error(error, 404)
 
 
 @patch("jupyterlab_git_core.git.execute")
