@@ -2,6 +2,41 @@ import { style } from 'typestyle';
 import type { NestedCSSProperties } from 'typestyle/lib/types';
 import { actionButtonStyle, showButtonOnHover } from './ActionButtonStyle';
 
+// 10 + 18 + 6 = 34px total width matches the section header count chip,
+// so row action buttons align with the header buttons.
+export const fileChangedLabelStyle = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '18px',
+  height: '18px',
+  marginLeft: '10px',
+  marginRight: '6px',
+  fontFamily: 'var(--jp-code-font-family)',
+  fontSize: 'var(--jp-ui-font-size0)',
+  fontWeight: 600
+});
+
+export const fileChangedLabelAddedStyle = style({
+  color: 'var(--jp-success-color1)'
+});
+
+export const fileChangedLabelDeletedStyle = style({
+  color: 'var(--jp-error-color1)'
+});
+
+export const fileChangedLabelModifiedStyle = style({
+  color: 'var(--jp-warn-color1)'
+});
+
+export const fileChangedLabelInfoStyle = style({
+  color: 'var(--jp-info-color1)'
+});
+
+export const selectedFileChangedLabelStyle = style({
+  color: 'white !important'
+});
+
 export const fileStyle = style(
   {
     userSelect: 'none',
@@ -22,6 +57,12 @@ export const fileStyle = style(
   },
   showButtonOnHover
 );
+
+// Applied to rows whose single-click triggers a navigation action
+// (opening a diff or the file) so the cursor signals interactivity.
+export const fileClickableStyle = style({
+  cursor: 'pointer'
+});
 
 export const selectedFileStyle = style(
   (() => {
@@ -61,28 +102,6 @@ export const selectedFileStyle = style(
   })()
 );
 
-export const fileChangedLabelStyle = style({
-  fontSize: '10px',
-  marginLeft: '5px'
-});
-
-export const selectedFileChangedLabelStyle = style({
-  color: 'white !important'
-});
-
-export const fileChangedLabelBrandStyle = style({
-  color: 'var(--jp-brand-color0)'
-});
-
-export const fileChangedLabelWarnStyle = style({
-  color: 'var(--jp-warn-color0)',
-  fontWeight: 'bold'
-});
-
-export const fileChangedLabelInfoStyle = style({
-  color: 'var(--jp-info-color0)'
-});
-
 export const fileGitButtonStyle = style({
   display: 'none'
 });
@@ -108,5 +127,7 @@ export const checkboxLabelContainerStyle = style({
 export const checkboxLabelLastContainerStyle = style({
   display: 'flex',
   marginLeft: 'auto',
+  // Don't shrink so long file names truncate instead of clipping the status.
+  flexShrink: 0,
   overflow: 'hidden'
 });

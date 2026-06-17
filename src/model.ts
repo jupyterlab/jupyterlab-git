@@ -280,6 +280,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * A signal emitted when the submodules of the Git repository change.
+   */
+  get submodulesChanged(): ISignal<IGitExtension, void> {
+    return this._submodulesChanged;
+  }
+
+  /**
    * A signal emitted when the current marking of the Git repository changes.
    */
   get markChanged(): ISignal<IGitExtension, void> {
@@ -2065,6 +2072,7 @@ export class GitExtension implements IGitExtension {
 
       const newSubmodules = data.submodules;
       this._submodules = newSubmodules;
+      this._submodulesChanged.emit();
     } catch (_error) {
       console.error('Failed to retrieve submodules');
     }
@@ -2230,9 +2238,16 @@ export class GitExtension implements IGitExtension {
       return DocumentRegistry.getDefaultDirectoryFileType();
     }
 
+    const matches = this._docRegistry?.getFileTypesForPath(path) ?? [];
+    // `getFileTypesForPath` returns pattern matches before extension matches,
+    // so a pattern-only catch-all (e.g. jupytext) can shadow the type
+    // registered against this file's extension. Prefer an extension match.
+    const ext = PathExt.extname(path).toLowerCase();
+    const byExtension = ext
+      ? matches.find(t => t.extensions?.some(e => e.toLowerCase() === ext))
+      : undefined;
     return (
-      this._docRegistry?.getFileTypesForPath(path)[0] ??
-      DocumentRegistry.getDefaultTextFileType()
+      byExtension ?? matches[0] ?? DocumentRegistry.getDefaultTextFileType()
     );
   }
 
@@ -2428,6 +2443,7 @@ export class GitExtension implements IGitExtension {
 
   private _branchesChanged = new Signal<IGitExtension, void>(this);
   private _tagsChanged = new Signal<IGitExtension, void>(this);
+  private _submodulesChanged = new Signal<IGitExtension, void>(this);
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _selectedHistoryFileChanged = new Signal<

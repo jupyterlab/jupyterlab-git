@@ -19,9 +19,9 @@ test.describe('Image diff', () => {
 
   test('should display image diff from history', async ({ page }) => {
     await page.sidebar.openTab('jp-git-sessions');
-    await page.click('button:has-text("History")');
     const commits = page.getByTitle('View commit details');
 
+    await commits.first().waitFor();
     await commits.first().click();
 
     await page

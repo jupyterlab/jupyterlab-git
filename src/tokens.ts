@@ -50,6 +50,11 @@ export interface IGitExtension extends IDisposable {
   readonly tagsChanged: ISignal<IGitExtension, void>;
 
   /**
+   * A signal emitted when the submodules of the Git repository change.
+   */
+  readonly submodulesChanged: ISignal<IGitExtension, void>;
+
+  /**
    * Top level path of the current Git repository
    */
   pathRepository: string | null;
@@ -692,6 +697,16 @@ export interface IGitExtension extends IDisposable {
 }
 
 export namespace Git {
+  /**
+   * Possible values of the `fileClickAction` setting controlling what
+   * happens when clicking or double-clicking a file in the Git panel.
+   */
+  export type FileClickAction =
+    | 'select-only'
+    | 'open-on-double'
+    | 'diff-on-double'
+    | 'diff-on-single';
+
   export namespace Diff {
     /**
      * Diff widget interface
@@ -1404,7 +1419,6 @@ export enum CommandIDs {
   gitInit = 'git:init',
   gitOpenUrl = 'git:open-url',
   gitToggleSimpleStaging = 'git:toggle-simple-staging',
-  gitToggleDoubleClickDiff = 'git:toggle-double-click-diff',
   gitManageRemote = 'git:manage-remote',
   gitClone = 'git:clone',
   gitMerge = 'git:merge',

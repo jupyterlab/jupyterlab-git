@@ -17,8 +17,7 @@ test.describe('Merge commit tests', () => {
     await page.goto(`tree/${tmpPath}/test-repository-merge-commits`);
 
     await page.sidebar.openTab('jp-git-sessions');
-
-    await page.getByRole('tab', { name: 'History' }).click();
+    await page.locator('li[title="View commit details"]').first().waitFor();
   });
 
   test('should correctly display num files changed, insertions, and deletions', async ({

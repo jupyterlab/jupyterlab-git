@@ -4,20 +4,16 @@ import { hiddenButtonStyle, showButtonOnHover } from './ActionButtonStyle';
 
 export const sectionAreaStyle = style(
   {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: '4px',
-    fontWeight: 600,
-    borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)',
-    letterSpacing: '1px',
-    fontSize: '12px',
-    overflowY: 'hidden',
-    height: '16px',
+    cursor: 'pointer',
+    minHeight: '24px',
+    paddingRight: '4px !important',
 
     $nest: {
       '&:hover': {
         backgroundColor: 'var(--jp-layout-color2)'
+      },
+      '& .lm-AccordionPanel-titleLabel': {
+        userSelect: 'none'
       }
     }
   },
@@ -46,25 +42,49 @@ export const sectionFileContainerStyle = style(
 );
 
 export const sectionHeaderLabelStyle = style({
-  fontSize: 'var(--jp-ui-font-size1)',
   flex: '1 1 auto',
   textOverflow: 'ellipsis',
   overflow: 'hidden',
-  whiteSpace: 'nowrap'
+  whiteSpace: 'nowrap',
+  userSelect: 'none'
 });
 
 export const sectionHeaderSizeStyle = style({
-  fontSize: 'var(--jp-ui-font-size1)',
   flex: '0 0 auto',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: '18px',
+  height: '16px',
+  padding: '0 6px',
+  marginLeft: '4px',
+
+  fontSize: 'var(--jp-ui-font-size0)',
+  fontWeight: 600,
+  lineHeight: 1,
+  letterSpacing: 0,
   whiteSpace: 'nowrap',
-  borderRadius: '2px'
+
+  color: 'var(--jp-ui-inverse-font-color0)',
+  backgroundColor: 'var(--jp-layout-color3)',
+  borderRadius: '10px'
 });
 
 export const changeStageButtonStyle = style({
   flex: '0 0 auto',
   backgroundColor: 'transparent',
-  height: '13px',
   border: 'none',
   outline: 'none',
-  paddingLeft: '0px'
+  padding: 0,
+  margin: 0,
+  height: '16px',
+  cursor: 'pointer'
+});
+
+export const sectionHeaderActionsStyle = style({
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: '0 0 auto',
+  height: '100%'
 });

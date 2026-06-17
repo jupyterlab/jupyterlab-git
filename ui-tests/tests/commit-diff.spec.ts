@@ -19,9 +19,9 @@ test.describe('Commits diff', () => {
 
   test('should display commits diff from history', async ({ page }) => {
     await page.sidebar.openTab('jp-git-sessions');
-    await page.click('button:has-text("History")');
     const commits = page.locator('li[title="View commit details"]');
 
+    await commits.first().waitFor();
     expect(await commits.count()).toBeGreaterThanOrEqual(2);
 
     await commits.last().locator('button[title="Select for compare"]').click();
@@ -60,7 +60,7 @@ test.describe('Commits diff', () => {
     await expect(
       page.locator('.nbdime-Widget >> .jp-git-diff-banner')
     ).toHaveText(
-      /79fe96219f6eaec1ae607c7c8d21d5b269a6dd29[\n\s]+51fe1f8995113884e943201341a5d5b7a1393e24/
+      /79fe96219f6eaec1ae607c7c8d21d5b269a6dd29[\n\s]*51fe1f8995113884e943201341a5d5b7a1393e24/
     );
   });
 });
