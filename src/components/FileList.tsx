@@ -1165,10 +1165,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       onDoubleClick = wantsSelectOnly
         ? () => undefined
         : wantsDiff
-          ? diffButton
-            ? () => this._openDiffViews([file])
-            : () => undefined
-          : openFile;
+        ? diffButton
+          ? () => this._openDiffViews([file])
+          : () => undefined
+        : openFile;
     } else if (file.status === 'staged') {
       const diffButton = this._createDiffButton(file);
       actions = (
@@ -1193,10 +1193,10 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       onDoubleClick = wantsSelectOnly
         ? () => undefined
         : wantsDiff
-          ? diffButton
-            ? () => this._openDiffViews([file])
-            : () => undefined
-          : openFile;
+        ? diffButton
+          ? () => this._openDiffViews([file])
+          : () => undefined
+        : openFile;
     }
 
     const checked = this.markedFiles.some(fileStatus =>
