@@ -30,6 +30,7 @@ import { showDetails, showError } from './notifications';
 
 export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/git:clone',
+  description: 'Adds a Git clone command to the file browser toolbar.',
   requires: [IGitExtension, IDefaultFileBrowser, IToolbarWidgetRegistry],
   optional: [ICommandPalette, ITranslator],
   activate: (
