@@ -1198,7 +1198,7 @@ export function addCommands(
     execute: async _ => {
       const domNode = app.contextMenuHitTest((node: HTMLElement) => {
         const nodeId = node.dataset.id;
-        return nodeId?.substring(0, 8) === 'git-diff' ?? false;
+        return nodeId?.substring(0, 8) === 'git-diff';
       });
       if (!domNode) {
         return;

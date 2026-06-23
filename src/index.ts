@@ -44,6 +44,7 @@ export { Git, IGitExtension } from './tokens';
  */
 const plugin: JupyterFrontEndPlugin<IGitExtension> = {
   id: '@jupyterlab/git:plugin',
+  description: 'A JupyterLab extension for version control using Git.',
   requires: [
     ILayoutRestorer,
     IEditorServices,

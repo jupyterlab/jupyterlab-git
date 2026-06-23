@@ -3,8 +3,6 @@
  * https://github.com/jupyter/nbdime/blob/master/packages/labextension/src/widget.ts
  */
 
-/* eslint-disable no-inner-declarations */
-
 import { INotebookContent } from '@jupyterlab/nbformat';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Contents } from '@jupyterlab/services';
