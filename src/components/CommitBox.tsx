@@ -180,8 +180,8 @@ export class CommitBox extends React.Component<
     const title = !this.props.hasFiles
       ? this.props.trans.__('Disabled: No files are staged for commit')
       : !this.props.summary && !this.props.amend
-      ? this.props.trans.__('Disabled: No commit message summary')
-      : this.props.label;
+        ? this.props.trans.__('Disabled: No commit message summary')
+        : this.props.label;
 
     const shortcutHint = CommandRegistry.formatKeystroke(
       this._getSubmitKeystroke()
