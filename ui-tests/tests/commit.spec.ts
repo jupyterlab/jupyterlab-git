@@ -28,6 +28,7 @@ test.describe('Commit', () => {
     await page.keyboard.press('Control+s');
 
     await page.getByRole('tab', { name: 'Git' }).click();
+    await page.getByTitle('another_file.txt • Modified').waitFor();
     await page.getByTitle('another_file.txt • Modified').hover();
     await page.getByRole('button', { name: 'Stage this change' }).click();
 
@@ -36,8 +37,6 @@ test.describe('Commit', () => {
       .fill('My new commit');
 
     await page.getByRole('button', { name: 'Commit', exact: true }).click();
-
-    await page.getByRole('tab', { name: 'History' }).click();
 
     await expect(page.getByText('My new commit')).toBeVisible();
   });

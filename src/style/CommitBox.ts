@@ -3,10 +3,9 @@ import { style } from 'typestyle';
 export const commitFormClass = style({
   display: 'flex',
   flexWrap: 'wrap',
+  flexShrink: 0,
 
-  marginTop: 'auto',
   padding: '8px',
-  paddingTop: '1em',
 
   alignItems: 'flex-start',
 
@@ -45,14 +44,16 @@ export const dirtyStagedFilesWarningBoxContentClass = style({
 export const commitSummaryClass = style({
   height: '2em',
 
-  marginBottom: '1em',
+  marginBottom: '8px',
   padding: 'var(--jp-code-padding)',
 
   outline: 'none',
   overflowX: 'auto',
 
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  borderRadius: '3px',
+  borderRadius: '4px',
+
+  transition: 'border-color 120ms ease, box-shadow 120ms ease',
 
   $nest: {
     '&.Mui-error': {
@@ -62,7 +63,7 @@ export const commitSummaryClass = style({
 });
 
 export const commitDescriptionClass = style({
-  marginBottom: '1em',
+  marginBottom: '8px',
   padding: 'var(--jp-code-padding) !important',
 
   outline: 'none',
@@ -70,7 +71,9 @@ export const commitDescriptionClass = style({
   resize: 'none',
 
   border: 'var(--jp-border-width) solid var(--jp-border-color2)',
-  borderRadius: '3px',
+  borderRadius: '4px',
+
+  transition: 'border-color 120ms ease, box-shadow 120ms ease',
 
   $nest: {
     '&>*::placeholder': {
@@ -91,6 +94,8 @@ export const commitDescriptionClass = style({
 export const commitButtonClass = style({
   color: 'var(--jp-ui-inverse-font-color1) !important',
   backgroundColor: 'var(--jp-brand-color1) !important',
+  textTransform: 'none' as any,
+  fontWeight: 600,
 
   $nest: {
     '&:hover': {
@@ -139,7 +144,8 @@ export const commitRoot = style({
 
 export const activeStyle = style({
   outline: 'none',
-  border: 'var(--jp-border-width) solid var(--jp-brand-color1)'
+  border: 'var(--jp-border-width) solid var(--jp-brand-color1)',
+  boxShadow: '0 0 0 1px var(--jp-brand-color1)'
 });
 
 export const disabledStyle = style({

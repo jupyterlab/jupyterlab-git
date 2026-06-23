@@ -4,7 +4,7 @@ import { Git } from '../tokens';
 
 export interface IMockedResponse {
   // Response body
-  body?: (body: any) => ReadonlyJSONObject | null;
+  body?: (body: any) => Record<string, any> | null;
   // Response status code
   status?: number;
 }

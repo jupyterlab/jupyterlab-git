@@ -4,16 +4,22 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
-import { Widget } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { PanelWithToolbar, SidePanel } from '@jupyterlab/ui-components';
 import { GitPanel } from '../components/GitPanel';
+import { Toolbar } from '../components/Toolbar';
 import { GitExtension } from '../model';
-import { gitWidgetStyle } from '../style/GitWidgetStyle';
+import {
+  gitWidgetStyle,
+  sectionBodyStyle,
+  sectionStyle
+} from '../style/GitWidgetStyle';
 
 /**
- * A class that exposes the git plugin Widget.
+ * The Git extension's main side-bar widget.
  */
-export class GitWidget extends ReactWidget {
+export class GitWidget extends SidePanel {
   constructor(
     model: GitExtension,
     settings: ISettingRegistry.ISettings,
@@ -22,15 +28,31 @@ export class GitWidget extends ReactWidget {
     trans: TranslationBundle,
     options?: Widget.IOptions
   ) {
-    super();
+    super({
+      ...(options as any)
+    } as SidePanel.IOptions);
     this.node.id = 'GitSession-root';
     this.addClass(gitWidgetStyle);
 
-    this._trans = trans;
+    this._gitTrans = trans;
     this._commands = commands;
     this._fileBrowserModel = fileBrowserModel;
     this._model = model;
     this._settings = settings;
+
+    const topToolbar = ReactWidget.create(this._renderTopToolbar());
+    topToolbar.addClass('jp-git-TopToolbar');
+    (this.layout as PanelLayout).insertWidget(0, topToolbar);
+
+    this.addWidget(
+      this._createSection('Changes', this._createChangesSection())
+    );
+    this.addWidget(
+      this._createSection('History', this._createHistorySection())
+    );
+    this.addWidget(
+      this._createSection('Branches and Tags', this._createBranchesSection())
+    );
 
     // Add refresh standby condition if this widget is hidden
     model.refreshStandbyCondition = (): boolean =>
@@ -39,9 +61,6 @@ export class GitWidget extends ReactWidget {
 
   /**
    * A message handler invoked on a `'before-show'` message.
-   *
-   * #### Notes
-   * The default implementation of this handler is a no-op.
    */
   onBeforeShow(msg: Message): void {
     // Trigger refresh when the widget is displayed
@@ -51,27 +70,72 @@ export class GitWidget extends ReactWidget {
     super.onBeforeShow(msg);
   }
 
-  /**
-   * Render the content of this widget using the virtual DOM.
-   *
-   * This method will be called anytime the widget needs to be rendered, which
-   * includes layout triggered rendering.
-   */
-  render(): JSX.Element {
+  private _createSection(
+    title: string,
+    body: React.ReactElement
+  ): PanelWithToolbar {
+    const section = new PanelWithToolbar();
+    section.title.label = title;
+    section.addClass(sectionStyle);
+    const reactWidget = ReactWidget.create(body);
+    reactWidget.addClass(sectionBodyStyle);
+    section.addWidget(reactWidget);
+    return section;
+  }
+
+  private _createChangesSection(): React.ReactElement {
     return (
       <GitPanel
         commands={this._commands}
         filebrowser={this._fileBrowserModel}
         model={this._model}
         settings={this._settings}
-        trans={this._trans}
+        trans={this._gitTrans}
+        contentMode="changes"
+        showNoRepositoryWarning
       />
     );
   }
 
+  private _createHistorySection(): React.ReactElement {
+    return (
+      <GitPanel
+        commands={this._commands}
+        filebrowser={this._fileBrowserModel}
+        model={this._model}
+        settings={this._settings}
+        trans={this._gitTrans}
+        contentMode="history"
+      />
+    );
+  }
+
+  private _createBranchesSection(): React.ReactElement {
+    return (
+      <GitPanel
+        commands={this._commands}
+        filebrowser={this._fileBrowserModel}
+        model={this._model}
+        settings={this._settings}
+        trans={this._gitTrans}
+        contentMode="branches"
+      />
+    );
+  }
+
+  private _renderTopToolbar(): React.ReactElement {
+    return (
+      <Toolbar
+        commands={this._commands}
+        model={this._model}
+        trans={this._gitTrans}
+      />
+    );
+  }
+
+  private _gitTrans: TranslationBundle;
   private _commands: CommandRegistry;
   private _fileBrowserModel: FileBrowserModel;
   private _model: GitExtension;
   private _settings: ISettingRegistry.ISettings;
-  private _trans: TranslationBundle;
 }
