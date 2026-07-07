@@ -1,6 +1,6 @@
 import { nullTranslator } from '@jupyterlab/translation';
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import 'jest';
 import * as React from 'react';
@@ -116,6 +116,18 @@ describe('Toolbar', () => {
     };
   }
 
+  function emitRepositoryChanged(): void {
+    (model as any)._repositoryChanged.emit({
+      name: 'pathRepository',
+      oldValue: null,
+      newValue: DEFAULT_REPOSITORY_PATH
+    });
+  }
+
+  function emitRemoteChanged(): void {
+    (model as any)._remoteChanged.emit(null);
+  }
+
   beforeEach(async () => {
     jest.restoreAllMocks();
     model = await createModel();
@@ -212,6 +224,81 @@ describe('Toolbar', () => {
 
       expect(screen.getByText('main')).toBeDefined();
       expect(screen.queryByRole('button', { name: /branches/i })).toBeNull();
+    });
+  });
+
+  describe('remote availability', () => {
+    async function expectRemoteButtonsEnabledAfterSignal(
+      emitSignal: () => void
+    ): Promise<void> {
+      let remoteIsAvailable = false;
+      jest.spyOn(console, 'error').mockImplementation();
+      const getRemotes = jest
+        .spyOn(model, 'getRemotes')
+        .mockImplementation(() =>
+          remoteIsAvailable
+            ? Promise.resolve(REMOTES)
+            : Promise.reject(new Error('Not in a Git Repository'))
+        );
+
+      render(<Toolbar {...createProps()} />);
+
+      await waitFor(() => {
+        expect(getRemotes).toHaveBeenCalled();
+      });
+
+      screen
+        .getAllByRole('button', { name: 'No remote repository defined' })
+        .forEach(button => {
+          expect(button).toBeDisabled();
+        });
+
+      const callsBeforeSignal = getRemotes.mock.calls.length;
+      remoteIsAvailable = true;
+      await act(async () => {
+        emitSignal();
+      });
+
+      await waitFor(() => {
+        expect(getRemotes.mock.calls.length).toBeGreaterThan(
+          callsBeforeSignal
+        );
+        expect(
+          screen.getByRole('button', { name: 'Pull latest changes' })
+        ).toBeEnabled();
+        expect(
+          screen.getByRole('button', { name: 'Push committed changes' })
+        ).toBeEnabled();
+      });
+    }
+
+    it('should re-check remotes when the repository changes', async () => {
+      await expectRemoteButtonsEnabledAfterSignal(emitRepositoryChanged);
+    });
+
+    it('should re-check remotes when remote state changes', async () => {
+      await expectRemoteButtonsEnabledAfterSignal(emitRemoteChanged);
+    });
+
+    it('should disconnect remote checks when unmounted', async () => {
+      const getRemotes = jest
+        .spyOn(model, 'getRemotes')
+        .mockResolvedValue(REMOTES);
+      const { unmount } = render(<Toolbar {...createProps()} />);
+
+      await waitFor(() => {
+        expect(getRemotes).toHaveBeenCalled();
+      });
+
+      unmount();
+      const callsBeforeSignal = getRemotes.mock.calls.length;
+
+      await act(async () => {
+        emitRepositoryChanged();
+        emitRemoteChanged();
+      });
+
+      expect(getRemotes.mock.calls.length).toBe(callsBeforeSignal);
     });
   });
 

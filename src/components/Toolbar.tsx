@@ -83,11 +83,23 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
    * Check whether or not the repo has any remotes
    */
   async componentDidMount(): Promise<void> {
+    this.props.model.repositoryChanged.connect(this._checkRemote, this);
+    this.props.model.remoteChanged.connect(this._checkRemote, this);
+    await this._checkRemote();
+  }
+
+  componentWillUnmount(): void {
+    this.props.model.repositoryChanged.disconnect(this._checkRemote, this);
+    this.props.model.remoteChanged.disconnect(this._checkRemote, this);
+  }
+
+  private async _checkRemote(): Promise<void> {
     try {
       const remotes = await this.props.model.getRemotes();
       const hasRemote = remotes.length > 0;
       this.setState({ hasRemote });
     } catch (err) {
+      this.setState({ hasRemote: false });
       console.error(err);
     }
   }
