@@ -151,7 +151,6 @@ export function addStatusBarWidget(
     model.taskChanged.disconnect(callback);
   });
 }
-/* eslint-disable no-inner-declarations */
 namespace Private {
   /**
    * Returns a callback for updating a status widget upon receiving model events.
@@ -262,4 +261,3 @@ namespace Private {
     }
   }
 }
-/* eslint-enable no-inner-declarations */
