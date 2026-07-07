@@ -115,6 +115,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Remote list for the current repository.
+   */
+  get remotes(): Git.IGitRemote[] {
+    return this._remotes;
+  }
+
+  /**
    * Submodule list for the current repository.
    */
   get submodules(): Git.ISubmodule[] {
@@ -552,7 +559,7 @@ export class GitExtension implements IGitExtension {
         name
       });
     });
-    this._remotesChanged.emit();
+    await this.refreshRemotes();
   }
 
   /**
@@ -588,7 +595,40 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>('git:remove:remote', async () => {
       await this._requestAPI<void>(URLExt.join(path, 'remote', name), 'DELETE');
     });
-    this._remotesChanged.emit();
+    await this.refreshRemotes();
+  }
+
+  /**
+   * Refresh the list of remotes of the current repository.
+   *
+   * Emit remotesChanged if the list of remotes changes.
+   *
+   * @returns promise which resolves upon refreshing the remotes
+   *
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async refreshRemotes(): Promise<void> {
+    try {
+      const remotes = await this.getRemotes();
+      const remotesChanged = !JSONExt.deepEqual(
+        this._remotes as any,
+        remotes as any
+      );
+      this._remotes = remotes;
+      if (remotesChanged) {
+        this._remotesChanged.emit();
+      }
+    } catch (error) {
+      const remotesChanged = this._remotes.length > 0;
+      this._remotes = [];
+      if (remotesChanged) {
+        this._remotesChanged.emit();
+      }
+      if (!(error instanceof Git.NotInRepository)) {
+        throw error;
+      }
+    }
   }
 
   /**
@@ -2370,6 +2410,7 @@ export class GitExtension implements IGitExtension {
         await this.refreshTag();
         await this.refreshStatus();
         await this.refreshStash();
+        await this.refreshRemotes();
         await this.checkRemoteChangeNotified();
       } catch (error) {
         console.error('Failed to refresh git status', error);
@@ -2430,6 +2471,7 @@ export class GitExtension implements IGitExtension {
   private _stash: Git.IStash[] = [];
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];
+  private _remotes: Git.IGitRemote[] = [];
   private _tagsList: Git.ITag[] = [];
   private _currentBranch: Git.IBranch | null = null;
   private _docmanager: IDocumentManager | null;

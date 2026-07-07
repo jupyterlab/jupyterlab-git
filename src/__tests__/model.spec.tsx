@@ -429,35 +429,88 @@ describe('IGitExtension', () => {
     });
   });
 
+  describe('#refreshRemotes', () => {
+    it('should update the list of remotes and emit remotesChanged only when it changes', async () => {
+      const remotes: Git.IGitRemote[] = [
+        { name: 'origin', url: 'https://example.com/repo.git' }
+      ];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await model.refresh();
+
+      expect(model.remotes).toEqual(remotes);
+
+      const onRemotesChanged = jest.fn();
+      model.remotesChanged.connect(onRemotesChanged);
+
+      await model.refreshRemotes();
+      expect(onRemotesChanged).not.toHaveBeenCalled();
+
+      remotes.push({
+        name: 'upstream',
+        url: 'https://example.com/upstream.git'
+      });
+      await model.refreshRemotes();
+      expect(onRemotesChanged).toHaveBeenCalledTimes(1);
+      expect(model.remotes).toEqual(remotes);
+    });
+  });
+
   describe('#addRemote', () => {
     it('should emit remotesChanged when a remote is added', async () => {
+      const remotes: Git.IGitRemote[] = [];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
       mockResponses.responses['remote/add'] = {
         body: () => null
       };
 
       model.pathRepository = DEFAULT_REPOSITORY_PATH;
       await model.ready;
+      await model.refresh();
+
+      expect(model.remotes).toEqual([]);
 
       const testSignal = testEmission(model.remotesChanged, {});
 
+      remotes.push({ name: 'origin', url: 'https://example.com/repo.git' });
       await model.addRemote('https://example.com/repo.git', 'origin');
       await testSignal;
+
+      expect(model.remotes).toEqual(remotes);
     });
   });
 
   describe('#removeRemote', () => {
     it('should emit remotesChanged when a remote is removed', async () => {
+      const remotes: Git.IGitRemote[] = [
+        { name: 'origin', url: 'https://example.com/repo.git' }
+      ];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
       mockResponses.responses['remote/origin'] = {
         body: () => null
       };
 
       model.pathRepository = DEFAULT_REPOSITORY_PATH;
       await model.ready;
+      await model.refresh();
+
+      expect(model.remotes).toEqual(remotes);
 
       const testSignal = testEmission(model.remotesChanged, {});
 
+      remotes.length = 0;
       await model.removeRemote('origin');
       await testSignal;
+
+      expect(model.remotes).toEqual([]);
     });
   });
 

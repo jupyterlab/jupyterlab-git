@@ -77,7 +77,7 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
           body: () => ({ code: 0, submodules })
         },
         'remote/show': {
-          body: () => ({ code: 0, remotes })
+          body: () => ({ code: 0, remotes: [...remotes] })
         },
         'remote/add': {
           body: () => ({ code: 0 })
@@ -104,9 +104,10 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
   if (options.repository !== null) {
     model.pathRepository = options.repository ?? DEFAULT_REPOSITORY_PATH;
     await model.ready;
-    // Manually fetch branch/submodule data; model.ready does not await these.
+    // Manually fetch branch/submodule/remote data; model.ready does not await these.
     await model.refreshBranch();
     await model.listSubmodules();
+    await model.refreshRemotes();
   }
   return model;
 }

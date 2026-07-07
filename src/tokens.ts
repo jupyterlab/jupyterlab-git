@@ -20,6 +20,11 @@ export interface IGitExtension extends IDisposable {
   branches: Git.IBranch[];
 
   /**
+   * The list of remotes in the current repo
+   */
+  remotes: Git.IGitRemote[];
+
+  /**
    * The list of tags in the current repo
    */
   tagsList: Git.ITag[];
@@ -549,6 +554,18 @@ export interface IGitExtension extends IDisposable {
    * @returns promise that resolves upon refreshing the dirty status of staged files
    */
   refreshDirtyStatus(): Promise<void>;
+
+  /**
+   * Refresh the list of remotes of the current repository.
+   *
+   * Emit remotesChanged if the list of remotes changes.
+   *
+   * @returns promise which resolves upon refreshing the remotes
+   *
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  refreshRemotes(): Promise<void>;
 
   /**
    * Request Git status refresh
