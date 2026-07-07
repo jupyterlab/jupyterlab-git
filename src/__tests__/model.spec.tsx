@@ -458,6 +458,69 @@ describe('IGitExtension', () => {
       expect(onRemotesChanged).toHaveBeenCalledTimes(1);
       expect(model.remotes).toEqual(remotes);
     });
+
+    it('should keep the cached remotes if refreshing fails', async () => {
+      const remotes: Git.IGitRemote[] = [
+        { name: 'origin', url: 'https://example.com/repo.git' }
+      ];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await model.refresh();
+
+      expect(model.remotes).toEqual(remotes);
+
+      mockResponses.responses['remote/show'] = {
+        status: 500,
+        body: () => ({ message: 'Server error' })
+      };
+
+      await expect(model.refreshRemotes()).rejects.toThrow();
+      expect(model.remotes).toEqual(remotes);
+    });
+
+    it('should clear the cached remotes when leaving a Git repository', async () => {
+      const remotes: Git.IGitRemote[] = [
+        { name: 'origin', url: 'https://example.com/repo.git' }
+      ];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await model.refresh();
+
+      expect(model.remotes).toEqual(remotes);
+
+      model.pathRepository = null;
+      await model.ready;
+
+      await model.refreshRemotes();
+      expect(model.remotes).toEqual([]);
+    });
+
+    it('should refresh the remotes before repositoryChanged is emitted', async () => {
+      const remotes: Git.IGitRemote[] = [
+        { name: 'origin', url: 'https://example.com/repo.git' }
+      ];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
+
+      const testSignal = testEmission(model.repositoryChanged, {
+        test: () => {
+          expect(model.remotes).toEqual(remotes);
+        }
+      });
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await testSignal;
+    });
   });
 
   describe('#addRemote', () => {
@@ -483,6 +546,22 @@ describe('IGitExtension', () => {
       await testSignal;
 
       expect(model.remotes).toEqual(remotes);
+    });
+
+    it('should not fail when refreshing the remotes fails', async () => {
+      mockResponses.responses['remote/add'] = {
+        body: () => null
+      };
+      mockResponses.responses['remote/show'] = {
+        status: 500,
+        body: () => ({ message: 'Server error' })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+
+      await model.addRemote('https://example.com/repo.git', 'origin');
+      expect(model.remotes).toEqual([]);
     });
   });
 

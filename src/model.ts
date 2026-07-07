@@ -559,7 +559,9 @@ export class GitExtension implements IGitExtension {
         name
       });
     });
-    await this.refreshRemotes();
+    // Refresh through the poll so the remotes cache update stays serialized
+    // with the periodic refreshes; refresh failures do not fail the mutation
+    await this.refresh();
   }
 
   /**
@@ -595,13 +597,20 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>('git:remove:remote', async () => {
       await this._requestAPI<void>(URLExt.join(path, 'remote', name), 'DELETE');
     });
-    await this.refreshRemotes();
+    // Refresh through the poll so the remotes cache update stays serialized
+    // with the periodic refreshes; refresh failures do not fail the mutation
+    await this.refresh();
   }
 
   /**
    * Refresh the list of remotes of the current repository.
    *
    * Emit remotesChanged if the list of remotes changes.
+   *
+   * ## Notes
+   *
+   * -   The cached list of remotes is kept on failure, unless the current
+   *     path is not a Git repository anymore.
    *
    * @returns promise which resolves upon refreshing the remotes
    *
@@ -620,13 +629,13 @@ export class GitExtension implements IGitExtension {
         this._remotesChanged.emit();
       }
     } catch (error) {
+      if (!(error instanceof Git.NotInRepository)) {
+        throw error;
+      }
       const remotesChanged = this._remotes.length > 0;
       this._remotes = [];
       if (remotesChanged) {
         this._remotesChanged.emit();
-      }
-      if (!(error instanceof Git.NotInRepository)) {
-        throw error;
       }
     }
   }

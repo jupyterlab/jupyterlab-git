@@ -560,6 +560,11 @@ export interface IGitExtension extends IDisposable {
    *
    * Emit remotesChanged if the list of remotes changes.
    *
+   * ## Notes
+   *
+   * -   The cached list of remotes is kept on failure, unless the current
+   *     path is not a Git repository anymore.
+   *
    * @returns promise which resolves upon refreshing the remotes
    *
    * @throws {Git.GitResponseError} If the server response is not ok
