@@ -350,6 +350,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * A signal emitted when the list of remotes of the Git repository changes.
+   */
+  get remotesChanged(): ISignal<IGitExtension, void> {
+    return this._remotesChanged;
+  }
+
+  /**
    * Boolean indicating whether there are dirty files
    * A dirty file is a file with unsaved changes that is staged in classical mode
    * or modified in simple mode.
@@ -545,6 +552,7 @@ export class GitExtension implements IGitExtension {
         name
       });
     });
+    this._remotesChanged.emit();
   }
 
   /**
@@ -567,13 +575,20 @@ export class GitExtension implements IGitExtension {
 
   /**
    * Remove a remote repository by name
-   * @param name name of remote to remove
+   *
+   * @param name - name of the remote to remove
+   * @returns promise which resolves upon removing the remote
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async removeRemote(name: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:remove:remote', async () => {
       await this._requestAPI<void>(URLExt.join(path, 'remote', name), 'DELETE');
     });
+    this._remotesChanged.emit();
   }
 
   /**
@@ -2462,6 +2477,7 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     Git.IRemoteChangedNotification | null
   >(this);
+  private _remotesChanged = new Signal<IGitExtension, void>(this);
   private _dirtyFilesStatusChanged = new Signal<IGitExtension, boolean>(this);
   private _credentialsRequiredChanged = new Signal<IGitExtension, boolean>(
     this

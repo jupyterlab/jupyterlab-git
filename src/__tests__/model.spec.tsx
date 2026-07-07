@@ -429,6 +429,38 @@ describe('IGitExtension', () => {
     });
   });
 
+  describe('#addRemote', () => {
+    it('should emit remotesChanged when a remote is added', async () => {
+      mockResponses.responses['remote/add'] = {
+        body: () => null
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+
+      const testSignal = testEmission(model.remotesChanged, {});
+
+      await model.addRemote('https://example.com/repo.git', 'origin');
+      await testSignal;
+    });
+  });
+
+  describe('#removeRemote', () => {
+    it('should emit remotesChanged when a remote is removed', async () => {
+      mockResponses.responses['remote/origin'] = {
+        body: () => null
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+
+      const testSignal = testEmission(model.remotesChanged, {});
+
+      await model.removeRemote('origin');
+      await testSignal;
+    });
+  });
+
   describe('#resetToCommit', () => {
     it('should refresh branches if successfully reset to commit', async () => {
       const spy = jest.spyOn(GitExtension.prototype, 'refreshBranch');

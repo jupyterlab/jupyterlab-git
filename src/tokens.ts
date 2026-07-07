@@ -137,6 +137,11 @@ export interface IGitExtension extends IDisposable {
   >;
 
   /**
+   * A signal emitted when the list of remotes of the Git repository changes.
+   */
+  readonly remotesChanged: ISignal<IGitExtension, void>;
+
+  /**
    * A signal emitted indicating whether there are dirty (e.g., unsaved) staged files.
    * This signal is emitted when there is a dirty staged file but none in prior,
    * and vice versa, when there are no dirty staged files but there were previously.
@@ -559,6 +564,18 @@ export interface IGitExtension extends IDisposable {
    * Notifies user is a file that is attached has is behind changes in the remote branch with a pop-up Dialog
    */
   checkRemoteChangeNotified(): Promise<void>;
+
+  /**
+   * Remove a remote repository by name
+   *
+   * @param name - name of the remote to remove
+   * @returns promise which resolves upon removing the remote
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  removeRemote(name: string): Promise<void>;
 
   /**
    * Register a new diff provider for specified file extensions

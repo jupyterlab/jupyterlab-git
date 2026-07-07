@@ -7,6 +7,7 @@ import {
   refreshIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
+import { Signal } from '@lumino/signaling';
 import Badge from '@mui/material/Badge';
 import * as React from 'react';
 import { showError } from '../notifications';
@@ -80,16 +81,17 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   /**
-   * Check whether or not the repo has any remotes
+   * Check whether or not the repo has any remotes, and update the check
+   * whenever the repository or its list of remotes changes.
    */
-  async componentDidMount(): Promise<void> {
-    try {
-      const remotes = await this.props.model.getRemotes();
-      const hasRemote = remotes.length > 0;
-      this.setState({ hasRemote });
-    } catch (err) {
-      console.error(err);
-    }
+  componentDidMount(): void {
+    this.props.model.repositoryChanged.connect(this._refreshRemotes, this);
+    this.props.model.remotesChanged.connect(this._refreshRemotes, this);
+    void this._refreshRemotes();
+  }
+
+  componentWillUnmount(): void {
+    Signal.clearData(this);
   }
 
   render(): React.ReactElement {
@@ -314,6 +316,29 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     );
   }
 
+  /**
+   * Update the `hasRemote` state for the current repository.
+   */
+  private _refreshRemotes = async (): Promise<void> => {
+    const fetchId = ++this._remotesFetchId;
+    if (this.props.model.pathRepository === null) {
+      this.setState({ hasRemote: false });
+      return;
+    }
+    try {
+      const remotes = await this.props.model.getRemotes();
+      // Discard the response if a newer remotes update superseded this one
+      if (fetchId === this._remotesFetchId) {
+        this.setState({ hasRemote: remotes.length > 0 });
+      }
+    } catch (err) {
+      if (fetchId === this._remotesFetchId) {
+        this.setState({ hasRemote: false });
+      }
+      console.error(err);
+    }
+  };
+
   private _onPullClick = async (): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitPull);
   };
@@ -338,6 +363,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     this.setState({ refreshInProgress: true });
     try {
       await this.props.model.refresh();
+      await this._refreshRemotes();
       Notification.update({
         id,
         message: this.props.trans.__('Successfully refreshed.'),
@@ -356,4 +382,9 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       this.setState({ refreshInProgress: false });
     }
   };
+
+  /**
+   * Monotonic id used to discard outdated remotes responses.
+   */
+  private _remotesFetchId = 0;
 }
