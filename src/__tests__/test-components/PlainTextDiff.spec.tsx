@@ -66,6 +66,35 @@ describe('PlainTextDiff', () => {
     await terminateTest;
   });
 
+  it('should render diff header labels as text', async () => {
+    // Given
+    const maliciousLabel =
+      '<img src=x onerror="window.__jupyterLabGitXss = true">.py';
+    const model = new DiffModel({
+      challenger: {
+        content: () => Promise.resolve('challenger'),
+        label: maliciousLabel,
+        source: 'HEAD'
+      },
+      reference: {
+        content: () => Promise.resolve('reference'),
+        label: '83baee',
+        source: '83baee'
+      },
+      filename: maliciousLabel,
+      repositoryPath: 'path'
+    });
+
+    // When
+    const widget = new PlainTextDiff({ model });
+    await widget.ready;
+
+    // Then
+    const header = widget.node.querySelector('.jp-git-diff-banner')!;
+    expect(header.querySelector('img')).toBeNull();
+    expect(header.textContent).toContain(maliciousLabel);
+  });
+
   it('should render error in if API response is failed', async () => {
     // Given
     const model = new DiffModel({

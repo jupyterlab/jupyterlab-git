@@ -290,10 +290,13 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
       labels[1] !== undefined ? 'jp-git-merge-banner' : 'jp-git-diff-banner';
     const head = document.createElement('div');
     head.classList.add(bannerClass);
-    head.innerHTML = labels
-      .filter(label => !!label)
-      .map(label => `<span>${label}</span>`)
-      .join('');
+    labels
+      .filter((label): label is string => !!label)
+      .forEach(label => {
+        const span = document.createElement('span');
+        span.textContent = label;
+        head.appendChild(span);
+      });
     return head;
   }
 

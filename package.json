@@ -1,6 +1,6 @@
 {
     "name": "@jupyterlab/git",
-    "version": "0.54.0-a1",
+    "version": "0.54.0",
     "description": "A JupyterLab extension for version control using git",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -29,7 +29,7 @@
         "clean:slate": "jlpm clean:more && jlpm clean:labextension && rimraf node_modules",
         "contributors:generate": "jlpm run all-contributors generate",
         "eslint": "jlpm eslint:check --fix",
-        "eslint:check": "eslint . --cache --ext .ts,.tsx",
+        "eslint:check": "eslint . --cache",
         "install:extension": "jlpm build",
         "lint": "jlpm stylelint && jlpm prettier && jlpm eslint",
         "lint:check": "jlpm stylelint:check && jlpm prettier:check && jlpm eslint:check",
@@ -100,6 +100,8 @@
     "devDependencies": {
         "@babel/core": "^7.0.0",
         "@babel/preset-env": "^7.0.0",
+        "@eslint/js": "^9.0.0",
+        "@jupyter/eslint-plugin": "^1.0.1",
         "@jupyterlab/builder": "^4.0.0",
         "@jupyterlab/testutils": "^4.0.0",
         "@stylistic/eslint-plugin": "^3.0.1",
@@ -115,14 +117,12 @@
         "@types/react-virtualized-auto-sizer": "^1.0.0",
         "@types/react-window": "^1.8.2",
         "@types/resize-observer-browser": "^0.1.7",
-        "@typescript-eslint/eslint-plugin": "^8.0.0",
-        "@typescript-eslint/parser": "^8.0.0",
         "all-contributors-cli": "^6.14.0",
         "css-loader": "^6.7.1",
-        "eslint": "^8.56.0",
-        "eslint-config-prettier": "^8.8.0",
-        "eslint-plugin-prettier": "^5.0.0",
-        "eslint-plugin-react": "^7.33.0",
+        "eslint": "^9.0.0",
+        "eslint-config-prettier": "^10.0.0",
+        "eslint-plugin-prettier": "^5.2.0",
+        "eslint-plugin-react": "^7.37.0",
         "genversion": "^2.2.1",
         "husky": "^8.0.3",
         "identity-obj-proxy": "^3.0.0",
@@ -142,6 +142,7 @@
         "stylelint-prettier": "^4.0.0",
         "ts-jest": "^29.1.0",
         "typescript": "~5.0.2",
+        "typescript-eslint": "^8.0.0",
         "yjs": "^13.5.40"
     },
     "directories": {
@@ -149,7 +150,7 @@
     },
     "lint-staged": {
         "*.{ts,tsx}": [
-            "eslint . --ext .ts,.tsx --fix"
+            "eslint --fix"
         ]
     },
     "repository": {
@@ -198,89 +199,6 @@
         },
         "outputDir": "packages/core/jupyterlab_git_core/labextension"
     },
-    "eslintConfig": {
-        "extends": [
-            "eslint:recommended",
-            "plugin:@typescript-eslint/eslint-recommended",
-            "plugin:@typescript-eslint/recommended",
-            "plugin:prettier/recommended"
-        ],
-        "parser": "@typescript-eslint/parser",
-        "parserOptions": {
-            "project": "tsconfig.json",
-            "sourceType": "module"
-        },
-        "plugins": [
-            "@stylistic",
-            "@typescript-eslint"
-        ],
-        "rules": {
-            "@typescript-eslint/naming-convention": [
-                "error",
-                {
-                    "selector": "interface",
-                    "format": [
-                        "PascalCase"
-                    ],
-                    "custom": {
-                        "regex": "^I[A-Z]",
-                        "match": true
-                    }
-                }
-            ],
-            "@typescript-eslint/no-unused-vars": [
-                "warn",
-                {
-                    "args": "none"
-                }
-            ],
-            "@typescript-eslint/no-explicit-any": "off",
-            "@typescript-eslint/no-namespace": "off",
-            "@typescript-eslint/no-use-before-define": "off",
-            "@stylistic/quotes": [
-                "error",
-                "single",
-                {
-                    "avoidEscape": true,
-                    "allowTemplateLiterals": false
-                }
-            ],
-            "curly": [
-                "error",
-                "all"
-            ],
-            "eqeqeq": "error",
-            "no-restricted-imports": [
-                "error",
-                {
-                    "paths": [
-                        {
-                            "name": "@mui/icons-material",
-                            "message": "Please import icons using path imports, e.g. import AddIcon from '@mui/icons-material/Add'"
-                        }
-                    ],
-                    "patterns": [
-                        {
-                            "group": [
-                                "@mui/*/*/*"
-                            ],
-                            "message": "3rd level imports in mui are considered private"
-                        }
-                    ]
-                }
-            ],
-            "prefer-arrow-callback": "error"
-        }
-    },
-    "eslintIgnore": [
-        "node_modules",
-        "dist",
-        "coverage",
-        "**/*.d.ts",
-        "tests",
-        "**/__tests__",
-        "ui-tests"
-    ],
     "prettier": {
         "singleQuote": true,
         "trailingComma": "none",

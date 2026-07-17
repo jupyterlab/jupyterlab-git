@@ -73,7 +73,9 @@ export const imageCol = style({
   alignItems: 'center',
   justifyContent: 'center',
   gap: '5px',
-  color: 'var(--jp-ui-font-color2)'
+  color: 'var(--jp-ui-font-color2)',
+  // let the column shrink below the natural image width so images scale to fit
+  minWidth: 0
 });
 
 export const emptyRefImage = style({
@@ -90,14 +92,16 @@ export const referenceImageClass = style({
   width: 'auto',
   maxHeight: '500px!important',
   border: '5px solid var(--jp-diff-deleted-color0)',
-  maxWidth: '400px!important'
+  // 10px accounts for the horizontal borders around the image
+  maxWidth: 'min(100% - 10px, 400px)!important'
 });
 
 export const challengerImageClass = style({
   width: 'auto',
   maxHeight: '500px',
   border: '5px solid var(--jp-diff-added-color0)',
-  maxWidth: '400px'
+  // 10px accounts for the horizontal borders around the image
+  maxWidth: 'min(100% - 10px, 400px)'
 });
 
 export const slider = style({
