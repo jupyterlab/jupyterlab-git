@@ -88,7 +88,7 @@ class GitHandler(APIHandler):
         if path is not None:
             excluded_paths = self.git.excluded_paths
             for excluded_path in excluded_paths:
-                if fnmatch.fnmatchcase(path, excluded_path):
+                if fnmatch.fnmatchcase(path.casefold(), excluded_path.casefold()):
                     raise tornado.web.HTTPError(404)
 
     @functools.lru_cache()
