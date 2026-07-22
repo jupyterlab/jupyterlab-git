@@ -115,6 +115,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Remote list for the current repository.
+   */
+  get remotes(): Git.IGitRemote[] {
+    return this._remotes;
+  }
+
+  /**
    * Submodule list for the current repository.
    */
   get submodules(): Git.ISubmodule[] {
@@ -350,6 +357,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * A signal emitted when the list of remotes of the Git repository changes.
+   */
+  get remotesChanged(): ISignal<IGitExtension, void> {
+    return this._remotesChanged;
+  }
+
+  /**
    * Boolean indicating whether there are dirty files
    * A dirty file is a file with unsaved changes that is staged in classical mode
    * or modified in simple mode.
@@ -545,6 +559,7 @@ export class GitExtension implements IGitExtension {
         name
       });
     });
+    await this.refresh();
   }
 
   /**
@@ -567,13 +582,58 @@ export class GitExtension implements IGitExtension {
 
   /**
    * Remove a remote repository by name
-   * @param name name of remote to remove
+   *
+   * @param name - name of the remote to remove
+   * @returns promise which resolves upon removing the remote
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   async removeRemote(name: string): Promise<void> {
     const path = await this._getPathRepository();
     await this._taskHandler.execute<void>('git:remove:remote', async () => {
       await this._requestAPI<void>(URLExt.join(path, 'remote', name), 'DELETE');
     });
+    await this.refresh();
+  }
+
+  /**
+   * Refresh the list of remotes of the current repository.
+   *
+   * Emit remotesChanged if the list of remotes changes.
+   *
+   * ## Notes
+   *
+   * -   The cached list of remotes is kept on failure, unless the current
+   *     path is not a Git repository anymore.
+   *
+   * @returns promise which resolves upon refreshing the remotes
+   *
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async refreshRemotes(): Promise<void> {
+    try {
+      const remotes = await this.getRemotes();
+      const remotesChanged = !JSONExt.deepEqual(
+        this._remotes as any,
+        remotes as any
+      );
+      this._remotes = remotes;
+      if (remotesChanged) {
+        this._remotesChanged.emit();
+      }
+    } catch (error) {
+      if (!(error instanceof Git.NotInRepository)) {
+        throw error;
+      }
+      const remotesChanged = this._remotes.length > 0;
+      this._remotes = [];
+      if (remotesChanged) {
+        this._remotesChanged.emit();
+      }
+    }
   }
 
   /**
@@ -2355,6 +2415,7 @@ export class GitExtension implements IGitExtension {
         await this.refreshTag();
         await this.refreshStatus();
         await this.refreshStash();
+        await this.refreshRemotes();
         await this.checkRemoteChangeNotified();
       } catch (error) {
         console.error('Failed to refresh git status', error);
@@ -2415,6 +2476,7 @@ export class GitExtension implements IGitExtension {
   private _stash: Git.IStash[] = [];
   private _pathRepository: string | null = null;
   private _branches: Git.IBranch[] = [];
+  private _remotes: Git.IGitRemote[] = [];
   private _tagsList: Git.ITag[] = [];
   private _currentBranch: Git.IBranch | null = null;
   private _docmanager: IDocumentManager | null;
@@ -2462,6 +2524,7 @@ export class GitExtension implements IGitExtension {
     IGitExtension,
     Git.IRemoteChangedNotification | null
   >(this);
+  private _remotesChanged = new Signal<IGitExtension, void>(this);
   private _dirtyFilesStatusChanged = new Signal<IGitExtension, boolean>(this);
   private _credentialsRequiredChanged = new Signal<IGitExtension, boolean>(
     this
