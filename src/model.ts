@@ -559,8 +559,6 @@ export class GitExtension implements IGitExtension {
         name
       });
     });
-    // Refresh through the poll so the remotes cache update stays serialized
-    // with the periodic refreshes; refresh failures do not fail the mutation
     await this.refresh();
   }
 
@@ -597,8 +595,6 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>('git:remove:remote', async () => {
       await this._requestAPI<void>(URLExt.join(path, 'remote', name), 'DELETE');
     });
-    // Refresh through the poll so the remotes cache update stays serialized
-    // with the periodic refreshes; refresh failures do not fail the mutation
     await this.refresh();
   }
 
