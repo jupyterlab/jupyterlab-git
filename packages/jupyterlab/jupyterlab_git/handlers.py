@@ -222,6 +222,25 @@ class GitStatusHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+class GitCompareReferenceHandler(GitHandler):
+    """
+    Handler for comparing HEAD with another reference (e.g. origin/main).
+    """
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """
+        POST request handler, returns ahead/behind counts for HEAD...reference.
+        """
+        data = self.get_json_body() or {}
+        reference = data.get("reference", f"{DEFAULT_REMOTE_NAME}/main")
+        result = await self.git.compare_reference(self.url2localpath(path), reference)
+
+        if result["code"] != 0:
+            self.set_status(500)
+        self.finish(json.dumps(result))
+
+
 class GitLogHandler(GitHandler):
     """
     Handler for 'git log'.
@@ -1109,6 +1128,7 @@ def setup_handlers(web_app):
         ("/changed_files", GitChangedFilesHandler),
         ("/checkout", GitCheckoutHandler),
         ("/clone", GitCloneHandler),
+        ("/compare_reference", GitCompareReferenceHandler),
         ("/commit", GitCommitHandler),
         ("/config", GitConfigHandler),
         ("/content", GitContentHandler),

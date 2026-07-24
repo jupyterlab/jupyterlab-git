@@ -375,6 +375,20 @@ export interface IGitExtension extends IDisposable {
   fetch(auth?: Git.IAuth): Promise<Git.IResultWithMessage>;
 
   /**
+   * Compare HEAD with a reference branch and return ahead/behind counts.
+   *
+   * @param reference - branch or ref to compare against (e.g. origin/main)
+   * @returns promise which resolves upon retrieving ahead/behind counts
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  compareWithReference(
+    reference?: string
+  ): Promise<Git.IReferenceCompareResult>;
+
+  /**
    * Match files status information based on a provided file path.
    *
    * If the file is tracked and has no changes, a StatusFile of unmodified will be returned
@@ -1100,6 +1114,18 @@ export namespace Git {
     behind?: number;
     state?: number;
     files?: IStatusFileResult[];
+  }
+
+  /**
+   * Interface for comparing HEAD with another reference.
+   */
+  export interface IReferenceCompareResult {
+    code: number;
+    reference?: string;
+    ahead?: number;
+    behind?: number;
+    command?: string;
+    message?: string;
   }
 
   /**

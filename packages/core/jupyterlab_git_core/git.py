@@ -454,6 +454,35 @@ class Git:
 
         return result
 
+    async def compare_reference(
+        self, path: str, reference: str = f"{DEFAULT_REMOTE_NAME}/main"
+    ) -> dict:
+        """
+        Compare HEAD to a reference branch and return ahead/behind counts.
+
+        Args:
+            path: Git repository path
+            reference: Git reference to compare with (e.g. origin/main)
+        """
+        cmd = ["git", "rev-list", "--left-right", "--count", f"HEAD...{reference}"]
+        code, output, error = await self.__execute(cmd, cwd=path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        try:
+            ahead_raw, behind_raw = output.strip().split()
+            ahead = int(ahead_raw)
+            behind = int(behind_raw)
+        except (TypeError, ValueError):
+            return {
+                "code": -1,
+                "command": " ".join(cmd),
+                "message": f"Unexpected output from git rev-list: {output!r}",
+            }
+
+        return {"code": 0, "reference": reference, "ahead": ahead, "behind": behind}
+
     async def get_nbdiff(
         self, prev_content: str, curr_content: str, base_content=None
     ) -> dict:

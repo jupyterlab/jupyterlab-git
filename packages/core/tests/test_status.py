@@ -432,3 +432,65 @@ async def test_status(tmp_path, output, diff_output, expected):
         mock_execute.assert_has_calls(expected_calls)
 
         assert expected == actual_response
+
+
+@pytest.mark.asyncio
+@patch("jupyterlab_git_core.git.execute")
+async def test_compare_reference_success(mock_execute, tmp_path):
+    # Given
+    repository = tmp_path / "test_curr_path"
+    reference = "origin/main"
+    mock_execute.return_value = (0, "3\t41\n", "")
+
+    # When
+    actual_response = await Git().compare_reference(
+        path=str(repository), reference=reference
+    )
+
+    # Then
+    command = ["git", "rev-list", "--left-right", "--count", f"HEAD...{reference}"]
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(repository),
+        env=None,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
+    assert actual_response == {
+        "code": 0,
+        "reference": reference,
+        "ahead": 3,
+        "behind": 41,
+    }
+
+
+@pytest.mark.asyncio
+@patch("jupyterlab_git_core.git.execute")
+async def test_compare_reference_failure(mock_execute, tmp_path):
+    # Given
+    repository = tmp_path / "test_curr_path"
+    reference = "origin/main"
+    error = "fatal: bad revision 'HEAD...origin/main'"
+    mock_execute.return_value = (128, "", error)
+
+    # When
+    actual_response = await Git().compare_reference(
+        path=str(repository), reference=reference
+    )
+
+    # Then
+    command = ["git", "rev-list", "--left-right", "--count", f"HEAD...{reference}"]
+    mock_execute.assert_called_once_with(
+        command,
+        cwd=str(repository),
+        env=None,
+        username=None,
+        password=None,
+        is_binary=False,
+    )
+    assert actual_response == {
+        "code": 128,
+        "command": " ".join(command),
+        "message": error,
+    }
