@@ -1,34 +1,7 @@
 import { style } from 'typestyle';
 
-export const worktreeButtonWrapperClass = style({
-  padding: '4px 11px 4px',
-  display: 'flex',
-  justifyContent: 'flex-end'
-});
-
-export const newWorktreeButtonClass = style({
-  boxSizing: 'border-box',
-
-  height: '2em',
-  flex: '0 0 auto',
-
-  padding: '0 8px',
-
-  color: 'white',
-  fontSize: 'var(--jp-ui-font-size1)',
-
-  backgroundColor: 'var(--md-blue-500)',
-  border: '0',
-  borderRadius: '3px',
-
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--md-blue-600)'
-    },
-    '&:active': {
-      backgroundColor: 'var(--md-blue-700)'
-    }
-  }
+export const worktreeWrapperClass = style({
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
 export const worktreePathClass = style({

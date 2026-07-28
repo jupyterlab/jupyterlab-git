@@ -30,10 +30,13 @@ module.exports = {
     '<rootDir>/build',
     '<rootDir>/jupyterlab_git',
     '<rootDir>/jupyter-config',
-    '<rootDir>/ui-tests'
+    '<rootDir>/ui-tests',
+    // Nested Git worktrees hold their own copy of the sources
+    '/worktrees/'
   ],
   reporters: ['default', 'github-actions'],
   setupFiles: ['<rootDir>/testutils/jest-setup-files.js'],
+  testPathIgnorePatterns: ['/node_modules/', '/worktrees/'],
   testRegex: 'src/.*/.*.spec.ts[x]?$',
   transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
 };

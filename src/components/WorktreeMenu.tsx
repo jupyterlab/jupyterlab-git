@@ -11,16 +11,14 @@ import {
   activeListItemClass,
   listItemClass,
   listItemIconClass,
-  nameClass,
-  wrapperClass
+  nameClass
 } from '../style/BranchMenu';
 import {
   activeWorktreeDetailClass,
   disabledListItemClass,
-  newWorktreeButtonClass,
-  worktreeButtonWrapperClass,
   worktreePathClass,
-  worktreeStateClass
+  worktreeStateClass,
+  worktreeWrapperClass
 } from '../style/WorktreeMenuStyle';
 import { trashIcon, worktreeIcon } from '../style/icons';
 import { CommandIDs, Git, IGitExtension } from '../tokens';
@@ -65,29 +63,7 @@ export class WorktreeMenu extends React.Component<IWorktreeMenuProps> {
    */
   render(): React.ReactElement {
     return (
-      <div className={wrapperClass}>
-        {this._renderNewWorktreeButton()}
-        {this._renderWorktreeList()}
-      </div>
-    );
-  }
-
-  /**
-   * Renders a button to create a new worktree.
-   *
-   * @returns React element
-   */
-  private _renderNewWorktreeButton(): React.ReactElement {
-    return (
-      <div className={worktreeButtonWrapperClass}>
-        <input
-          className={newWorktreeButtonClass}
-          type="button"
-          title={this.props.trans.__('Create a new worktree')}
-          value={this.props.trans.__('New Worktree')}
-          onClick={this._onNewWorktreeClick}
-        />
-      </div>
+      <div className={worktreeWrapperClass}>{this._renderWorktreeList()}</div>
     );
   }
 
@@ -207,13 +183,6 @@ export class WorktreeMenu extends React.Component<IWorktreeMenuProps> {
         )}
       </ListItem>
     );
-  };
-
-  /**
-   * Callback invoked upon clicking a button to create a new worktree.
-   */
-  private _onNewWorktreeClick = (): void => {
-    this.props.commands.execute(CommandIDs.gitAddWorktree);
   };
 
   /**

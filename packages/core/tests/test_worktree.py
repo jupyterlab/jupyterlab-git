@@ -209,6 +209,47 @@ async def test_worktree_list_sibling_worktrees_write_no_exclude(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_worktree_list_excludes_nested_worktrees_in_one_write(tmp_path):
+    with patch("jupyterlab_git_core.git.execute") as mock_execute:
+        # Given
+        main_path = tmp_path / "repo"
+        main_path.mkdir()
+        first_path = main_path / "worktrees" / "first"
+        second_path = main_path / "worktrees" / "second"
+
+        process_output = [
+            "worktree {}".format(main_path),
+            "HEAD abcdefghijklmnopqrstuvwxyz01234567890123",
+            "branch refs/heads/main",
+            "",
+            "worktree {}".format(first_path),
+            "HEAD abcdefghijklmnopqrstuvwxyz01234567890123",
+            "branch refs/heads/first",
+            "",
+            "worktree {}".format(second_path),
+            "HEAD abcdefghijklmnopqrstuvwxyz01234567890123",
+            "branch refs/heads/second",
+            "",
+        ]
+        mock_execute.side_effect = [
+            # Response for git worktree list
+            (0, "\n".join(process_output), ""),
+            # Response for git rev-parse --git-common-dir; a single call
+            # covers the exclusion of all nested worktrees
+            (0, ".git", ""),
+        ]
+
+        # When
+        actual_response = await Git().worktree_list(path=str(main_path))
+
+        # Then
+        assert actual_response["code"] == 0
+        assert mock_execute.call_count == 2
+        exclude_file = main_path / ".git" / "info" / "exclude"
+        assert exclude_file.read_text() == "/worktrees/first/\n/worktrees/second/\n"
+
+
+@pytest.mark.asyncio
 async def test_worktree_list_failure():
     with patch("jupyterlab_git_core.git.execute") as mock_execute:
         # Given
