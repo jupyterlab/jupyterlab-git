@@ -658,9 +658,9 @@ async def test_branch_success():
     with patch("jupyterlab_git_core.git.execute") as mock_execute:
         # Given
         process_output_heads = [
-            "feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/feature-foo\t*",
-            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t ",
-            "feature-bar\t01234567899999abcdefghijklmnopqrstuvwxyz\t\t ",
+            "feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/feature-foo\t*\t/bin/test_curr_path",
+            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t \t",
+            "feature-bar\t01234567899999abcdefghijklmnopqrstuvwxyz\t\t \t/bin/worktrees/feature-bar",
         ]
         process_output_remotes = [
             "origin/feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123",
@@ -684,6 +684,7 @@ async def test_branch_success():
                     "upstream": "origin/feature-foo",
                     "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                     "tag": None,
+                    "worktree": "/bin/test_curr_path",
                 },
                 {
                     "is_current_branch": False,
@@ -692,6 +693,7 @@ async def test_branch_success():
                     "upstream": "origin/main",
                     "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                     "tag": None,
+                    "worktree": None,
                 },
                 {
                     "is_current_branch": False,
@@ -700,6 +702,7 @@ async def test_branch_success():
                     "upstream": None,
                     "top_commit": "01234567899999abcdefghijklmnopqrstuvwxyz",
                     "tag": None,
+                    "worktree": "/bin/worktrees/feature-bar",
                 },
                 {
                     "is_current_branch": False,
@@ -725,6 +728,7 @@ async def test_branch_success():
                 "upstream": "origin/feature-foo",
                 "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                 "tag": None,
+                "worktree": "/bin/test_curr_path",
             },
         }
 
@@ -739,7 +743,7 @@ async def test_branch_success():
                     [
                         "git",
                         "for-each-ref",
-                        "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)",
+                        "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)%09%(worktreepath)",
                         "refs/heads/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
@@ -776,7 +780,7 @@ async def test_branch_failure():
         expected_cmd = [
             "git",
             "for-each-ref",
-            "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)",
+            "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)%09%(worktreepath)",
             "refs/heads/",
         ]
         mock_execute.return_value = (
@@ -811,7 +815,7 @@ async def test_branch_success_detached_head():
     with patch("jupyterlab_git_core.git.execute") as mock_execute:
         # Given
         process_output_heads = [
-            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t "
+            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t \t"
         ]
         process_output_remotes = [
             "origin/feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123"
@@ -843,6 +847,7 @@ async def test_branch_success_detached_head():
                     "upstream": "origin/main",
                     "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                     "tag": None,
+                    "worktree": None,
                 },
                 {
                     "is_current_branch": True,
@@ -851,6 +856,7 @@ async def test_branch_success_detached_head():
                     "upstream": None,
                     "top_commit": None,
                     "tag": None,
+                    "worktree": None,
                 },
                 {
                     "is_current_branch": False,
@@ -868,6 +874,7 @@ async def test_branch_success_detached_head():
                 "upstream": None,
                 "top_commit": None,
                 "tag": None,
+                "worktree": None,
             },
         }
 
@@ -882,7 +889,7 @@ async def test_branch_success_detached_head():
                     [
                         "git",
                         "for-each-ref",
-                        "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)",
+                        "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)%09%(worktreepath)",
                         "refs/heads/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
@@ -935,8 +942,8 @@ async def test_branch_success_rebasing():
     with patch("jupyterlab_git_core.git.execute") as mock_execute:
         # Given
         process_output_heads = [
-            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t ",
-            "feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/feature-foo\t ",
+            "main\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/main\t \t",
+            "feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123\torigin/feature-foo\t \t",
         ]
         process_output_remotes = [
             "origin/feature-foo\tabcdefghijklmnopqrstuvwxyz01234567890123"
@@ -969,6 +976,7 @@ async def test_branch_success_rebasing():
                     "upstream": "origin/main",
                     "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                     "tag": None,
+                    "worktree": None,
                 },
                 {
                     "is_current_branch": False,
@@ -977,6 +985,7 @@ async def test_branch_success_rebasing():
                     "upstream": "origin/feature-foo",
                     "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
                     "tag": None,
+                    "worktree": None,
                 },
                 {
                     "is_current_branch": True,
@@ -985,6 +994,7 @@ async def test_branch_success_rebasing():
                     "upstream": None,
                     "top_commit": None,
                     "tag": None,
+                    "worktree": None,
                 },
                 {
                     "is_current_branch": False,
@@ -1002,6 +1012,7 @@ async def test_branch_success_rebasing():
                 "upstream": None,
                 "top_commit": None,
                 "tag": None,
+                "worktree": None,
             },
         }
 
@@ -1016,7 +1027,7 @@ async def test_branch_success_rebasing():
                     [
                         "git",
                         "for-each-ref",
-                        "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)",
+                        "--format=%(refname:short)%09%(objectname)%09%(upstream:short)%09%(HEAD)%09%(worktreepath)",
                         "refs/heads/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),

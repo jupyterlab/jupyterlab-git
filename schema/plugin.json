@@ -233,6 +233,9 @@
             "command": "git:manage-remote"
           },
           {
+            "command": "git:add-worktree"
+          },
+          {
             "command": "git:terminal-command"
           },
           {

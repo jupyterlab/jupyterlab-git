@@ -24,7 +24,13 @@ import {
   repoLabelClass,
   toolbarButtonClass
 } from '../style/Toolbar';
-import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
+import {
+  branchIcon,
+  desktopIcon,
+  pullIcon,
+  pushIcon,
+  worktreeIcon
+} from '../style/icons';
 import {
   CommandIDs,
   GIT_PANEL_TOOLBAR_FACTORY,
@@ -84,55 +90,88 @@ export function RepositoryItem(props: IRepositoryItemProps): JSX.Element {
   const getFullRepositoryPath = (): string =>
     PageConfig.getOption('serverRoot') + '/' + (model.pathRepository ?? '');
 
-  const renderLabel = (): JSX.Element => (
-    <span
-      className={repoLabelClass}
-      title={trans.__('Current repository: %1', getFullRepositoryPath())}
-    >
-      <desktopIcon.react tag="span" className="jp-Icon" />
-      <span className={repoButtonLabelClass}>{getRepositoryName()}</span>
-    </span>
-  );
+  const isLinkedWorktree = (): boolean =>
+    model.worktrees.some(worktree => worktree.is_current && !worktree.is_main);
 
-  const renderButton = (menuShown: boolean): JSX.Element => (
-    <button
-      type="button"
-      className={repoButtonClass}
-      title={trans.__(
-        'Current repository: %1 — click to switch submodule',
-        getFullRepositoryPath()
-      )}
-      aria-haspopup="menu"
-      aria-expanded={menuShown}
-      onClick={() => panel.toggleSubmoduleMenu()}
-    >
-      <desktopIcon.react tag="span" className="jp-Icon" />
-      <span className={repoButtonLabelClass}>{getRepositoryName()}</span>
-      {menuShown ? (
-        <caretUpIcon.react tag="span" className="jp-Icon" />
-      ) : (
-        <caretDownIcon.react tag="span" className="jp-Icon" />
-      )}
-    </button>
-  );
+  const renderLabel = (): JSX.Element => {
+    const linkedWorktree = isLinkedWorktree();
+    return (
+      <span
+        className={repoLabelClass}
+        title={
+          linkedWorktree
+            ? trans.__(
+                'Current repository: %1 — linked worktree',
+                getFullRepositoryPath()
+              )
+            : trans.__('Current repository: %1', getFullRepositoryPath())
+        }
+      >
+        <desktopIcon.react tag="span" className="jp-Icon" />
+        <span className={repoButtonLabelClass}>{getRepositoryName()}</span>
+        {linkedWorktree && (
+          <worktreeIcon.react tag="span" className="jp-Icon" />
+        )}
+      </span>
+    );
+  };
+
+  const renderButton = (menuShown: boolean): JSX.Element => {
+    const linkedWorktree = isLinkedWorktree();
+    return (
+      <button
+        type="button"
+        className={repoButtonClass}
+        title={
+          linkedWorktree
+            ? trans.__(
+                'Current repository: %1 — linked worktree — click to switch submodule',
+                getFullRepositoryPath()
+              )
+            : trans.__(
+                'Current repository: %1 — click to switch submodule',
+                getFullRepositoryPath()
+              )
+        }
+        aria-haspopup="menu"
+        aria-expanded={menuShown}
+        onClick={() => panel.toggleSubmoduleMenu()}
+      >
+        <desktopIcon.react tag="span" className="jp-Icon" />
+        <span className={repoButtonLabelClass}>{getRepositoryName()}</span>
+        {linkedWorktree && (
+          <worktreeIcon.react tag="span" className="jp-Icon" />
+        )}
+        {menuShown ? (
+          <caretUpIcon.react tag="span" className="jp-Icon" />
+        ) : (
+          <caretDownIcon.react tag="span" className="jp-Icon" />
+        )}
+      </button>
+    );
+  };
 
   return (
     <UseSignal signal={model.repositoryChanged}>
       {() =>
         model.pathRepository === null ? null : (
           <UseSignal signal={model.submodulesChanged}>
-            {() =>
-              model.submodules.length > 0 ? (
-                <UseSignal
-                  signal={panel.submoduleMenuShownChanged}
-                  initialArgs={panel.submoduleMenuShown}
-                >
-                  {(_, menuShown) => renderButton(menuShown ?? false)}
-                </UseSignal>
-              ) : (
-                renderLabel()
-              )
-            }
+            {() => (
+              <UseSignal signal={model.worktreesChanged}>
+                {() =>
+                  model.submodules.length > 0 ? (
+                    <UseSignal
+                      signal={panel.submoduleMenuShownChanged}
+                      initialArgs={panel.submoduleMenuShown}
+                    >
+                      {(_, menuShown) => renderButton(menuShown ?? false)}
+                    </UseSignal>
+                  ) : (
+                    renderLabel()
+                  )
+                }
+              </UseSignal>
+            )}
           </UseSignal>
         )
       }

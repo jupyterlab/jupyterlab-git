@@ -246,6 +246,38 @@ paths:
             in: path
             required: true
             type: string
+  /{path}/worktrees:
+    get:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+    post:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+    delete:
+      parameters:
+          - name: path
+            description: Git repository path
+            in: path
+            required: true
+            type: string
+          - name: worktree_path
+            description: Worktree path relative to the server root
+            in: query
+            required: true
+            type: string
+          - name: force
+            description: Whether to remove the worktree even if it is dirty or locked
+            in: query
+            required: false
+            type: string
   /diffnotebook:
     post:
   /settings:

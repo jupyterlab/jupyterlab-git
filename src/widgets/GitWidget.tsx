@@ -62,6 +62,17 @@ export class GitWidget extends SidePanel {
       !this._settings.composite['refreshIfHidden'] && this.isHidden;
   }
 
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._model.worktreesChanged.disconnect(this._updateWorktreesSection, this);
+    if (this._worktreesSection?.parent === null) {
+      this._worktreesSection.dispose();
+    }
+    super.dispose();
+  }
+
   /**
    * Whether the submodule menu is currently shown below the toolbar.
    */
@@ -162,6 +173,15 @@ export class GitWidget extends SidePanel {
         this._createBranchesSection(GitPanel)
       )
     );
+
+    // The worktrees section is only shown when the repository has linked
+    // worktrees.
+    this._worktreesSection = this._createSection(
+      'Worktrees',
+      this._createWorktreesSection(GitPanel)
+    );
+    this._updateWorktreesSection();
+    this._model.worktreesChanged.connect(this._updateWorktreesSection, this);
   }
 
   private _createSection(
@@ -223,6 +243,40 @@ export class GitWidget extends SidePanel {
     );
   }
 
+  private _createWorktreesSection(
+    GitPanel: typeof GitPanelComponent
+  ): React.ReactElement {
+    return (
+      <GitPanel
+        commands={this._commands}
+        filebrowser={this._fileBrowserModel}
+        model={this._model}
+        settings={this._settings}
+        trans={this._gitTrans}
+        contentMode="worktrees"
+      />
+    );
+  }
+
+  /**
+   * Attach or detach the worktrees section depending on whether the current
+   * repository has linked worktrees.
+   */
+  private _updateWorktreesSection(): void {
+    const section = this._worktreesSection;
+    if (!section) {
+      return;
+    }
+    const hasLinkedWorktrees = this._model.worktrees.some(
+      worktree => !worktree.is_main
+    );
+    if (hasLinkedWorktrees && section.parent === null) {
+      this.addWidget(section);
+    } else if (!hasLinkedWorktrees && section.parent !== null) {
+      section.parent = null;
+    }
+  }
+
   private _onRepositoryChanged(): void {
     this.toolbar.setHidden(this._model.pathRepository === null);
     if (this._submoduleMenu) {
@@ -240,5 +294,6 @@ export class GitWidget extends SidePanel {
   private _submoduleMenuComponent: typeof SubmoduleMenuComponent | null = null;
   private _submoduleMenu: Widget | null = null;
   private _submoduleMenuShownChanged = new Signal<GitWidget, boolean>(this);
+  private _worktreesSection: PanelWithToolbar | null = null;
   private _contentPromise: Promise<void> | null = null;
 }
