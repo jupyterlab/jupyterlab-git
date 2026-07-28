@@ -109,6 +109,29 @@ class RebaseAction(Enum):
     ABORT = 3
 
 
+def get_index_lock_path(cwd: str) -> str:
+    """Return the path of the ``index.lock`` file for the repository at ``cwd``.
+
+    In the main worktree, ``.git`` is a directory containing the lock file.
+    In linked worktrees and submodules, ``.git`` is a file with a
+    ``gitdir: <path>`` pointer to the actual git directory holding the lock;
+    that pointer may be relative to ``cwd``.
+    """
+    dot_git = os.path.join(cwd, ".git")
+    if os.path.isfile(dot_git):
+        try:
+            with open(dot_git) as f:
+                content = f.read().strip()
+        except OSError:
+            content = ""
+        if content.startswith("gitdir:"):
+            git_dir = content[len("gitdir:") :].strip()
+            if not os.path.isabs(git_dir):
+                git_dir = os.path.join(cwd, git_dir)
+            return os.path.join(git_dir, "index.lock")
+    return os.path.join(dot_git, "index.lock")
+
+
 async def execute(
     cmdline: "List[str]",
     cwd: "str",
@@ -193,7 +216,7 @@ async def execute(
     try:
         # Ensure our execution operation will succeed by first checking and waiting for the lock to be removed
         time_slept = 0
-        lockfile = os.path.join(cwd, ".git", "index.lock")
+        lockfile = get_index_lock_path(cwd)
         while os.path.exists(lockfile) and time_slept < MAX_WAIT_FOR_LOCK_S:
             await anyio.sleep(CHECK_LOCK_INTERVAL_S)
             time_slept += CHECK_LOCK_INTERVAL_S
@@ -869,7 +892,13 @@ class Git:
         Execute 'git for-each-ref' command on refs/heads & return the result.
         """
         # Format reference: https://git-scm.com/docs/git-for-each-ref#_field_names
-        formats = ["refname:short", "objectname", "upstream:short", "HEAD"]
+        formats = [
+            "refname:short",
+            "objectname",
+            "upstream:short",
+            "HEAD",
+            "worktreepath",
+        ]
         cmd = [
             "git",
             "for-each-ref",
@@ -884,7 +913,7 @@ class Git:
         current_branch = None
         results = []
         try:
-            for name, commit_sha, upstream_name, is_current_branch in (
+            for name, commit_sha, upstream_name, is_current_branch, worktree_path in (
                 line.split("\t") for line in output.splitlines()
             ):
                 is_current_branch = bool(is_current_branch.strip())
@@ -896,6 +925,9 @@ class Git:
                     "upstream": upstream_name if upstream_name else None,
                     "top_commit": commit_sha,
                     "tag": None,
+                    # Absolute path of the worktree where the branch is
+                    # checked out, or None if it is not checked out anywhere
+                    "worktree": worktree_path if worktree_path else None,
                 }
                 results.append(branch)
                 if is_current_branch:
@@ -913,6 +945,7 @@ class Git:
                     "upstream": None,
                     "top_commit": None,
                     "tag": None,
+                    "worktree": None,
                 }
                 results.append(branch)
                 current_branch = branch
@@ -2396,6 +2429,191 @@ class Git:
             results.append(submodule)
 
         return {"code": code, "submodules": results, "error": error}
+
+    async def worktree_list(self, path: str) -> dict:
+        """
+        Execute git worktree list --porcelain & parse the result.
+
+        path: str
+            Git path repository
+        """
+        cmd = ["git", "worktree", "list", "--porcelain"]
+
+        code, output, error = await self.__execute(cmd, cwd=path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        current_path = os.path.realpath(path)
+        worktrees = []
+        entry = None
+        for line in output.splitlines():
+            if not line.strip():
+                entry = None
+                continue
+            key, _, value = line.partition(" ")
+            if key == "worktree":
+                entry = {
+                    "path": value,
+                    "head": None,
+                    "branch": None,
+                    "detached": False,
+                    "bare": False,
+                    "locked": False,
+                    "prunable": False,
+                    # The main worktree (or bare repository) is always listed first
+                    "is_main": len(worktrees) == 0,
+                    "is_current": os.path.realpath(value) == current_path,
+                }
+                worktrees.append(entry)
+            elif entry is None:
+                continue
+            elif key == "HEAD":
+                entry["head"] = value
+            elif key == "branch":
+                entry["branch"] = value.removeprefix("refs/heads/")
+            elif key == "detached":
+                entry["detached"] = True
+            elif key == "bare":
+                entry["bare"] = True
+            elif key == "locked":
+                entry["locked"] = True
+            elif key == "prunable":
+                entry["prunable"] = True
+
+        # Worktrees nested inside the current working tree would show up as
+        # untracked files in its status; exclude them, including worktrees
+        # created outside of JupyterLab (e.g. by coding agents).
+        await self._ensure_worktrees_excluded(
+            path,
+            [
+                entry["path"]
+                for entry in worktrees
+                if not (
+                    entry["is_main"]
+                    or entry["is_current"]
+                    or entry["bare"]
+                    or entry["prunable"]
+                )
+            ],
+        )
+
+        return {"code": code, "worktrees": worktrees}
+
+    async def worktree_add(
+        self,
+        path: str,
+        worktree_path: str,
+        branch: str,
+        new_branch: bool = False,
+        start_point: Optional[str] = None,
+    ) -> dict:
+        """
+        Execute git worktree add & return the result.
+
+        path: str
+            Git path repository
+        worktree_path: str
+            Absolute path at which the worktree is created
+        branch: str
+            Branch to check out in the new worktree; created if new_branch is True
+        new_branch: bool
+            Whether to create the branch
+        start_point: Optional[str]
+            Commit-ish the new branch starts from; defaults to HEAD
+        """
+        if new_branch:
+            cmd = ["git", "worktree", "add", "-b", branch, worktree_path]
+            if start_point:
+                cmd.append(start_point)
+        else:
+            cmd = ["git", "worktree", "add", worktree_path, branch]
+
+        code, output, error = await self.__execute(cmd, cwd=path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        await self._ensure_worktrees_excluded(path, [worktree_path])
+
+        return {"code": code, "message": output.strip() or error.strip()}
+
+    async def worktree_remove(
+        self, path: str, worktree_path: str, force: bool = False
+    ) -> dict:
+        """
+        Execute git worktree remove & return the result.
+
+        path: str
+            Git path repository
+        worktree_path: str
+            Absolute path of the worktree to remove
+        force: bool
+            Whether to remove the worktree even if it is dirty or locked
+        """
+        cmd = ["git", "worktree", "remove"]
+        if force:
+            # Git requires the flag twice to remove locked worktrees
+            cmd.extend(["--force", "--force"])
+        cmd.append(worktree_path)
+
+        code, output, error = await self.__execute(cmd, cwd=path)
+
+        if code != 0:
+            return {"code": code, "command": " ".join(cmd), "message": error}
+
+        return {"code": code, "message": output.strip()}
+
+    async def _ensure_worktrees_excluded(
+        self, path: str, worktree_paths: List[str]
+    ) -> None:
+        """Exclude the worktrees nested inside the working tree at ``path``
+        from its Git status, by adding entries to the ``info/exclude`` file.
+        """
+        patterns = []
+        for worktree_path in worktree_paths:
+            relative_path = os.path.relpath(worktree_path, path)
+            if (
+                relative_path in (".", "")
+                or relative_path.startswith("..")
+                or os.path.isabs(relative_path)
+            ):
+                continue
+            patterns.append("/" + Path(relative_path).as_posix() + "/")
+
+        if not patterns:
+            return
+
+        cmd = ["git", "rev-parse", "--git-common-dir"]
+        code, output, _ = await self.__execute(cmd, cwd=path)
+        if code != 0:
+            return
+
+        common_dir = output.strip()
+        if not os.path.isabs(common_dir):
+            common_dir = os.path.join(path, common_dir)
+        exclude_path = os.path.join(common_dir, "info", "exclude")
+
+        try:
+            content = ""
+            if os.path.exists(exclude_path):
+                with open(exclude_path) as f:
+                    content = f.read()
+            lines = content.splitlines()
+            missing = [pattern for pattern in patterns if pattern not in lines]
+            if missing:
+                os.makedirs(os.path.dirname(exclude_path), exist_ok=True)
+                with open(exclude_path, "a") as f:
+                    if content and not content.endswith("\n"):
+                        f.write("\n")
+                    f.write("\n".join(missing) + "\n")
+        except OSError:
+            get_logger().warning(
+                "Failed to exclude worktrees {!s} from Git status".format(
+                    worktree_paths
+                ),
+                exc_info=True,
+            )
 
     @property
     def excluded_paths(self) -> List[str]:

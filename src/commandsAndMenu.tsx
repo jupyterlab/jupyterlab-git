@@ -37,6 +37,7 @@ import { BranchPicker } from './components/BranchPicker';
 import { CONTEXT_COMMANDS } from './components/FileList';
 import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
 import { NewTagDialogBox } from './components/NewTagDialog';
+import { NewWorktreeDialog } from './components/NewWorktreeDialog';
 import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
 import { DiffModel } from './components/diff/model';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
@@ -50,7 +51,8 @@ import {
   historyIcon,
   openIcon,
   removeIcon,
-  tagIcon
+  tagIcon,
+  worktreeIcon
 } from './style/icons';
 import { CommandIDs, ContextCommandIDs, Git, IGitExtension } from './tokens';
 import { AdvancedPushForm } from './widgets/AdvancedPushForm';
@@ -1145,6 +1147,116 @@ export function addCommands(
           trans.__('Failed to get the stash'),
           showError(err as Error, trans)
         );
+      }
+    }
+  });
+
+  /** Add git worktree command */
+  commands.addCommand(CommandIDs.gitAddWorktree, {
+    label: trans.__('Add Worktree…'),
+    caption: trans.__(
+      'Create a new worktree to check out a second branch of the current repository'
+    ),
+    icon: worktreeIcon.bindprops({ stylesheet: 'menuItem' }),
+    isEnabled: () => gitModel.pathRepository !== null,
+    execute: async () => {
+      const localBranches = gitModel.branches.filter(
+        branch => !branch.is_remote_branch
+      );
+
+      const widgetId = 'git-dialog-AddWorktree';
+      let anchor = document.querySelector<HTMLDivElement>(`#${widgetId}`);
+      if (!anchor) {
+        anchor = document.createElement('div');
+        anchor.id = widgetId;
+        document.body.appendChild(anchor);
+      }
+
+      const waitForDialog =
+        new PromiseDelegate<Git.IAddWorktreeOptions | null>();
+      const dialog = ReactWidget.create(
+        <NewWorktreeDialog
+          currentBranch={gitModel.currentBranch?.name ?? ''}
+          branches={localBranches}
+          onClose={(options?: Git.IAddWorktreeOptions) => {
+            dialog.dispose();
+            waitForDialog.resolve(options ?? null);
+          }}
+          trans={trans}
+        />
+      );
+
+      Widget.attach(dialog, anchor);
+
+      const options = await waitForDialog.promise;
+      if (!options) {
+        return;
+      }
+
+      const id = Notification.emit(
+        trans.__('Adding worktree…'),
+        'in-progress',
+        { autoClose: false }
+      );
+      try {
+        const response = await gitModel.addWorktree(options);
+        const worktreePath = response.worktree_path ?? options.worktreePath;
+        Notification.update({
+          id,
+          type: 'success',
+          message: trans.__("Worktree '%1' added.", worktreePath),
+          autoClose: 5000,
+          actions:
+            response.worktree_path && !response.worktree_path.startsWith('..')
+              ? [
+                  {
+                    label: trans.__('Open Worktree'),
+                    callback: () => {
+                      void commands.execute(CommandIDs.gitOpenWorktree, {
+                        path: response.worktree_path
+                      });
+                    }
+                  }
+                ]
+              : undefined
+        });
+      } catch (error) {
+        Notification.update({
+          id,
+          type: 'error',
+          message: trans.__('Failed to add worktree.'),
+          ...showError(error as Error, trans)
+        });
+      }
+    }
+  });
+
+  /** Open worktree in the file browser command */
+  commands.addCommand(CommandIDs.gitOpenWorktree, {
+    label: trans.__('Open Worktree'),
+    caption: trans.__(
+      'Open a worktree of the current repository in the file browser'
+    ),
+    isEnabled: () => gitModel.pathRepository !== null,
+    execute: async args => {
+      const path = args?.path as string | undefined;
+      if (typeof path !== 'string' || path.startsWith('..')) {
+        return;
+      }
+      try {
+        await fileBrowserModel.cd('/' + path);
+      } catch (error) {
+        // The contents API does not serve hidden folders by default
+        const isHidden = path
+          .split('/')
+          .some(part => part.startsWith('.') && part !== '.');
+        const message = isHidden
+          ? trans.__(
+              "Failed to open the worktree '%1'. It is inside a hidden folder; start the Jupyter server with 'ContentsManager.allow_hidden=True' to open it.",
+              path
+            )
+          : trans.__("Failed to open the worktree '%1'.", path);
+        Notification.error(message, showError(error as Error, trans));
       }
     }
   });

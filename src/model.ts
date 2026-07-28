@@ -122,6 +122,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Worktree list for the current repository.
+   */
+  get worktrees(): Git.IWorktree[] {
+    return this._worktrees;
+  }
+
+  /**
    * Tags list for the current repository.
    */
   get tagsList(): Git.ITag[] {
@@ -284,6 +291,13 @@ export class GitExtension implements IGitExtension {
    */
   get submodulesChanged(): ISignal<IGitExtension, void> {
     return this._submodulesChanged;
+  }
+
+  /**
+   * A signal emitted when the worktrees of the Git repository change.
+   */
+  get worktreesChanged(): ISignal<IGitExtension, void> {
+    return this._worktreesChanged;
   }
 
   /**
@@ -1343,6 +1357,114 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * Refresh the list of repository worktrees.
+   *
+   * Emit worktreesChanged if the worktree list changes.
+   *
+   * @returns promise which resolves upon refreshing repository worktrees
+   */
+  async refreshWorktrees(): Promise<void> {
+    try {
+      const path = await this._getPathRepository();
+      const data = await this._taskHandler.execute<Git.IWorktreeResult>(
+        'git:refresh:worktrees',
+        async () => {
+          return await this._requestAPI<Git.IWorktreeResult>(
+            URLExt.join(path, 'worktrees'),
+            'GET'
+          );
+        }
+      );
+
+      const worktrees = data.worktrees ?? [];
+      const worktreesChanged = !JSONExt.deepEqual(
+        this._worktrees as any,
+        worktrees as any
+      );
+
+      this._worktrees = worktrees;
+
+      if (worktreesChanged) {
+        this._worktreesChanged.emit();
+      }
+    } catch (error) {
+      const worktreesChanged = this._worktrees.length > 0;
+      this._worktrees = [];
+      if (worktreesChanged) {
+        this._worktreesChanged.emit();
+      }
+
+      if (!(error instanceof Git.NotInRepository)) {
+        throw error;
+      }
+    }
+  }
+
+  /**
+   * Add a new worktree to the current repository.
+   *
+   * @param options - worktree options
+   * @returns promise which resolves upon adding a worktree
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async addWorktree(
+    options: Git.IAddWorktreeOptions
+  ): Promise<Git.IWorktreeAddResult> {
+    const path = await this._getPathRepository();
+    const data = await this._taskHandler.execute<Git.IWorktreeAddResult>(
+      'git:worktree:add',
+      async () => {
+        return await this._requestAPI<Git.IWorktreeAddResult>(
+          URLExt.join(path, 'worktrees'),
+          'POST',
+          {
+            worktree_path: options.worktreePath,
+            branch: options.branch,
+            new_branch: options.newBranch ?? false,
+            start_point: options.startPoint ?? null
+          }
+        );
+      }
+    );
+
+    await this.refreshWorktrees();
+    await this.refreshBranch();
+
+    return data;
+  }
+
+  /**
+   * Remove a worktree from the current repository.
+   *
+   * @param worktreePath - worktree path relative to the server root
+   * @param force - whether to remove the worktree even if it is dirty or locked
+   * @returns promise which resolves upon removing the worktree
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  async removeWorktree(worktreePath: string, force = false): Promise<void> {
+    const path = await this._getPathRepository();
+    await this._taskHandler.execute<void>('git:worktree:remove', async () => {
+      await this._requestAPI(
+        URLExt.join(path, 'worktrees') +
+          URLExt.objectToQueryString({
+            worktree_path: worktreePath,
+            force: String(force)
+          }),
+        'DELETE'
+      );
+    });
+
+    await this.refreshWorktrees();
+    await this.refreshBranch();
+  }
+
+  /**
    * Refresh the repository status.
    *
    * Emit statusChanged if required.
@@ -2353,6 +2475,7 @@ export class GitExtension implements IGitExtension {
       try {
         await this.refreshBranch();
         await this.refreshTag();
+        await this.refreshWorktrees();
         await this.refreshStatus();
         await this.refreshStash();
         await this.checkRemoteChangeNotified();
@@ -2437,6 +2560,7 @@ export class GitExtension implements IGitExtension {
   private _credentialsRequired = false;
   private _lastAuthor: Git.IIdentity | null = null;
   private _submodules: Git.ISubmodule[] = [];
+  private _worktrees: Git.IWorktree[] = [];
 
   // Configurable
   private _statusForDirtyState: Git.Status[] = ['staged', 'partially-staged'];
@@ -2444,6 +2568,7 @@ export class GitExtension implements IGitExtension {
   private _branchesChanged = new Signal<IGitExtension, void>(this);
   private _tagsChanged = new Signal<IGitExtension, void>(this);
   private _submodulesChanged = new Signal<IGitExtension, void>(this);
+  private _worktreesChanged = new Signal<IGitExtension, void>(this);
   private _headChanged = new Signal<IGitExtension, void>(this);
   private _markChanged = new Signal<IGitExtension, void>(this);
   private _selectedHistoryFileChanged = new Signal<

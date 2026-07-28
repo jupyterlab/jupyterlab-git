@@ -6,7 +6,12 @@ import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { PanelWithToolbar, SidePanel } from '@jupyterlab/ui-components';
+import {
+  PanelWithToolbar,
+  SidePanel,
+  ToolbarButton,
+  addIcon
+} from '@jupyterlab/ui-components';
 import { GitPanel } from '../components/GitPanel';
 import { Toolbar } from '../components/Toolbar';
 import { GitExtension } from '../model';
@@ -15,6 +20,7 @@ import {
   sectionBodyStyle,
   sectionStyle
 } from '../style/GitWidgetStyle';
+import { CommandIDs } from '../tokens';
 
 /**
  * The Git extension's main side-bar widget.
@@ -54,9 +60,39 @@ export class GitWidget extends SidePanel {
       this._createSection('Branches and Tags', this._createBranchesSection())
     );
 
+    // The worktrees section is only shown when the repository has linked
+    // worktrees.
+    this._worktreesSection = this._createSection(
+      'Worktrees',
+      this._createWorktreesSection()
+    );
+    this._worktreesSection.toolbar.addItem(
+      'new-worktree',
+      new ToolbarButton({
+        icon: addIcon,
+        onClick: () => {
+          void this._commands.execute(CommandIDs.gitAddWorktree);
+        },
+        tooltip: trans.__('Create a new worktree')
+      })
+    );
+    this._updateWorktreesSection();
+    model.worktreesChanged.connect(this._updateWorktreesSection, this);
+
     // Add refresh standby condition if this widget is hidden
     model.refreshStandbyCondition = (): boolean =>
       !this._settings.composite['refreshIfHidden'] && this.isHidden;
+  }
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._model.worktreesChanged.disconnect(this._updateWorktreesSection, this);
+    if (this._worktreesSection.parent === null) {
+      this._worktreesSection.dispose();
+    }
+    super.dispose();
   }
 
   /**
@@ -123,6 +159,34 @@ export class GitWidget extends SidePanel {
     );
   }
 
+  private _createWorktreesSection(): React.ReactElement {
+    return (
+      <GitPanel
+        commands={this._commands}
+        filebrowser={this._fileBrowserModel}
+        model={this._model}
+        settings={this._settings}
+        trans={this._gitTrans}
+        contentMode="worktrees"
+      />
+    );
+  }
+
+  /**
+   * Attach or detach the worktrees section depending on whether the current
+   * repository has linked worktrees.
+   */
+  private _updateWorktreesSection(): void {
+    const hasLinkedWorktrees = this._model.worktrees.some(
+      worktree => !worktree.is_main
+    );
+    if (hasLinkedWorktrees && this._worktreesSection.parent === null) {
+      this.addWidget(this._worktreesSection);
+    } else if (!hasLinkedWorktrees && this._worktreesSection.parent !== null) {
+      this._worktreesSection.parent = null;
+    }
+  }
+
   private _renderTopToolbar(): React.ReactElement {
     return (
       <Toolbar
@@ -138,4 +202,5 @@ export class GitWidget extends SidePanel {
   private _fileBrowserModel: FileBrowserModel;
   private _model: GitExtension;
   private _settings: ISettingRegistry.ISettings;
+  private _worktreesSection: PanelWithToolbar;
 }

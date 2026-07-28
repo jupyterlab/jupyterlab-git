@@ -312,6 +312,7 @@ async function activate(
         CommandIDs.gitPull,
         CommandIDs.gitResetToRemote,
         CommandIDs.gitManageRemote,
+        CommandIDs.gitAddWorktree,
         CommandIDs.gitTerminalCommand
       ].forEach(command => palette.addItem({ command, category }));
     }
