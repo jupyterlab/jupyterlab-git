@@ -57,6 +57,19 @@ def to_server_path(local_path: str, root_dir: str) -> str:
     return Path(relative).as_posix()
 
 
+def is_inside_root(local_path: str, root_dir: str) -> bool:
+    """Whether an absolute local path is inside the server root directory.
+
+    Args:
+        local_path: absolute local path
+        root_dir: resolved (``os.path.realpath``) server root directory
+    """
+    try:
+        return os.path.commonpath([local_path, root_dir]) == root_dir
+    except ValueError:
+        return False
+
+
 class SSHHandler(APIHandler):
     """
     Top-level parent class for SSH actions
@@ -1103,6 +1116,18 @@ class GitWorktreeHandler(GitHandler):
     Handler for 'git worktree'. Lists, adds and removes worktrees.
     """
 
+    def _finish_outside_root_error(self) -> None:
+        """Reject a worktree path outside of the server root directory."""
+        self.set_status(400)
+        self.finish(
+            json.dumps(
+                {
+                    "code": 400,
+                    "message": "The worktree path must be inside the Jupyter server root directory",
+                }
+            )
+        )
+
     @tornado.web.authenticated
     async def get(self, path: str = ""):
         """
@@ -1160,20 +1185,8 @@ class GitWorktreeHandler(GitHandler):
         root_dir = os.path.realpath(os.path.expanduser(contents_manager.root_dir))
         destination = os.path.realpath(os.path.join(local_path, worktree_path))
 
-        try:
-            inside_root = os.path.commonpath([destination, root_dir]) == root_dir
-        except ValueError:
-            inside_root = False
-        if not inside_root:
-            self.set_status(400)
-            self.finish(
-                json.dumps(
-                    {
-                        "code": 400,
-                        "message": "The worktree path must be inside the Jupyter server root directory",
-                    }
-                )
-            )
+        if not is_inside_root(destination, root_dir):
+            self._finish_outside_root_error()
             return
 
         result = await self.git.worktree_add(
@@ -1210,20 +1223,8 @@ class GitWorktreeHandler(GitHandler):
         root_dir = os.path.realpath(os.path.expanduser(contents_manager.root_dir))
         target = os.path.realpath(os.path.join(root_dir, worktree_path))
 
-        try:
-            inside_root = os.path.commonpath([target, root_dir]) == root_dir
-        except ValueError:
-            inside_root = False
-        if not inside_root:
-            self.set_status(400)
-            self.finish(
-                json.dumps(
-                    {
-                        "code": 400,
-                        "message": "The worktree path must be inside the Jupyter server root directory",
-                    }
-                )
-            )
+        if not is_inside_root(target, root_dir):
+            self._finish_outside_root_error()
             return
 
         response = await self.git.worktree_remove(local_path, target, force)

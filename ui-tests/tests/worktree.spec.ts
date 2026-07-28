@@ -54,6 +54,11 @@ test.describe('Git Worktrees', () => {
     });
     await worktreeItem.waitFor();
 
+    // The worktrees section toolbar offers to create another worktree
+    await page.getByRole('button', { name: 'Create a new worktree' }).click();
+    await dialog.waitFor();
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+
     // Open the worktree; the whole panel now targets it
     await worktreeItem.click();
 

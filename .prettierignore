@@ -5,3 +5,4 @@ node_modules
 **/package.json
 !/package.json
 jupyterlab_git
+**/worktrees

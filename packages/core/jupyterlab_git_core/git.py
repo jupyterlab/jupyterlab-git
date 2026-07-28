@@ -2436,24 +2436,6 @@ class Git:
 
         path: str
             Git path repository
-
-        Returns:
-            dict: {
-                "code": int,
-                "worktrees": [
-                    {
-                        "path": str,  # absolute path as reported by Git
-                        "head": Optional[str],
-                        "branch": Optional[str],  # short branch name
-                        "detached": bool,
-                        "bare": bool,
-                        "locked": bool,
-                        "prunable": bool,
-                        "is_main": bool,
-                        "is_current": bool,
-                    }
-                ]
-            }
         """
         cmd = ["git", "worktree", "list", "--porcelain"]
 
@@ -2489,7 +2471,7 @@ class Git:
             elif key == "HEAD":
                 entry["head"] = value
             elif key == "branch":
-                entry["branch"] = value.split("refs/heads/", 1)[-1]
+                entry["branch"] = value.removeprefix("refs/heads/")
             elif key == "detached":
                 entry["detached"] = True
             elif key == "bare":
@@ -2502,15 +2484,19 @@ class Git:
         # Worktrees nested inside the current working tree would show up as
         # untracked files in its status; exclude them, including worktrees
         # created outside of JupyterLab (e.g. by coding agents).
-        for entry in worktrees:
-            if (
-                entry["is_main"]
-                or entry["is_current"]
-                or entry["bare"]
-                or entry["prunable"]
-            ):
-                continue
-            await self._ensure_worktree_excluded(path, entry["path"])
+        await self._ensure_worktrees_excluded(
+            path,
+            [
+                entry["path"]
+                for entry in worktrees
+                if not (
+                    entry["is_main"]
+                    or entry["is_current"]
+                    or entry["bare"]
+                    or entry["prunable"]
+                )
+            ],
+        )
 
         return {"code": code, "worktrees": worktrees}
 
@@ -2548,7 +2534,7 @@ class Git:
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
-        await self._ensure_worktree_excluded(path, worktree_path)
+        await self._ensure_worktrees_excluded(path, [worktree_path])
 
         return {"code": code, "message": output.strip() or error.strip()}
 
@@ -2563,12 +2549,11 @@ class Git:
         worktree_path: str
             Absolute path of the worktree to remove
         force: bool
-            Whether to remove the worktree even if it is dirty or locked;
-            passes --force twice as Git requires the double flag for locked
-            worktrees
+            Whether to remove the worktree even if it is dirty or locked
         """
         cmd = ["git", "worktree", "remove"]
         if force:
+            # Git requires the flag twice to remove locked worktrees
             cmd.extend(["--force", "--force"])
         cmd.append(worktree_path)
 
@@ -2579,23 +2564,25 @@ class Git:
 
         return {"code": code, "message": output.strip()}
 
-    async def _ensure_worktree_excluded(self, path: str, worktree_path: str) -> None:
-        """Exclude a worktree nested inside the working tree at ``path`` from
-        its Git status.
-
-        The exclude entry is written to ``info/exclude`` in the common git
-        directory so the nested worktree does not show up as untracked files.
-        Does nothing if the worktree lies outside of ``path``.
+    async def _ensure_worktrees_excluded(
+        self, path: str, worktree_paths: List[str]
+    ) -> None:
+        """Exclude the worktrees nested inside the working tree at ``path``
+        from its Git status, by adding entries to the ``info/exclude`` file.
         """
-        relative_path = os.path.relpath(worktree_path, path)
-        if (
-            relative_path in (".", "")
-            or relative_path.startswith("..")
-            or os.path.isabs(relative_path)
-        ):
-            return
+        patterns = []
+        for worktree_path in worktree_paths:
+            relative_path = os.path.relpath(worktree_path, path)
+            if (
+                relative_path in (".", "")
+                or relative_path.startswith("..")
+                or os.path.isabs(relative_path)
+            ):
+                continue
+            patterns.append("/" + Path(relative_path).as_posix() + "/")
 
-        pattern = "/" + Path(relative_path).as_posix() + "/"
+        if not patterns:
+            return
 
         cmd = ["git", "rev-parse", "--git-common-dir"]
         code, output, _ = await self.__execute(cmd, cwd=path)
@@ -2612,15 +2599,19 @@ class Git:
             if os.path.exists(exclude_path):
                 with open(exclude_path) as f:
                     content = f.read()
-            if pattern not in content.splitlines():
+            lines = content.splitlines()
+            missing = [pattern for pattern in patterns if pattern not in lines]
+            if missing:
                 os.makedirs(os.path.dirname(exclude_path), exist_ok=True)
                 with open(exclude_path, "a") as f:
                     if content and not content.endswith("\n"):
                         f.write("\n")
-                    f.write(pattern + "\n")
+                    f.write("\n".join(missing) + "\n")
         except OSError:
             get_logger().warning(
-                "Failed to exclude worktree {!s} from Git status".format(worktree_path),
+                "Failed to exclude worktrees {!s} from Git status".format(
+                    worktree_paths
+                ),
                 exc_info=True,
             )
 

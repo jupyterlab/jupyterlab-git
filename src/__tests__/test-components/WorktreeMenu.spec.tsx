@@ -110,13 +110,6 @@ describe('WorktreeMenu', () => {
   }
 
   describe('render', () => {
-    it('should display a button to create a new worktree', () => {
-      render(<WorktreeMenu {...createProps()} />);
-      expect(
-        screen.getByRole('button', { name: 'New Worktree' })
-      ).toHaveAttribute('title', 'Create a new worktree');
-    });
-
     it('should display a list of worktrees', () => {
       render(<WorktreeMenu {...createProps()} />);
       expect(screen.getAllByRole('listitem').length).toEqual(WORKTREES.length);
@@ -153,25 +146,6 @@ describe('WorktreeMenu', () => {
       expect(screen.getAllByTitle('Remove this worktree').length).toEqual(
         WORKTREES.length - 1
       );
-    });
-  });
-
-  describe('new worktree', () => {
-    it('should execute the add worktree command upon clicking the New Worktree button', async () => {
-      const fakeExecutioner = jest.fn();
-      render(
-        <WorktreeMenu
-          {...createProps({
-            commands: { execute: fakeExecutioner } as any
-          })}
-        />
-      );
-
-      await userEvent.click(
-        screen.getByRole('button', { name: 'New Worktree' })
-      );
-
-      expect(fakeExecutioner).toHaveBeenCalledWith(CommandIDs.gitAddWorktree);
     });
   });
 

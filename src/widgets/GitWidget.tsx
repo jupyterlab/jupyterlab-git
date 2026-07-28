@@ -6,7 +6,12 @@ import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { PanelWithToolbar, SidePanel } from '@jupyterlab/ui-components';
+import {
+  PanelWithToolbar,
+  SidePanel,
+  ToolbarButton,
+  addIcon
+} from '@jupyterlab/ui-components';
 import { GitPanel } from '../components/GitPanel';
 import { Toolbar } from '../components/Toolbar';
 import { GitExtension } from '../model';
@@ -15,6 +20,7 @@ import {
   sectionBodyStyle,
   sectionStyle
 } from '../style/GitWidgetStyle';
+import { CommandIDs } from '../tokens';
 
 /**
  * The Git extension's main side-bar widget.
@@ -59,6 +65,16 @@ export class GitWidget extends SidePanel {
     this._worktreesSection = this._createSection(
       'Worktrees',
       this._createWorktreesSection()
+    );
+    this._worktreesSection.toolbar.addItem(
+      'new-worktree',
+      new ToolbarButton({
+        icon: addIcon,
+        onClick: () => {
+          void this._commands.execute(CommandIDs.gitAddWorktree);
+        },
+        tooltip: trans.__('Create a new worktree')
+      })
     );
     this._updateWorktreesSection();
     model.worktreesChanged.connect(this._updateWorktreesSection, this);
