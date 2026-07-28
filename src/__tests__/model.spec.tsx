@@ -455,4 +455,146 @@ describe('IGitExtension', () => {
       spy.mockRestore();
     });
   });
+
+  describe('#refreshWorktrees', () => {
+    const WORKTREES: Git.IWorktree[] = [
+      {
+        path: DEFAULT_REPOSITORY_PATH,
+        head: 'abcdefghijklmnopqrstuvwxyz01234567890123',
+        branch: 'main',
+        detached: false,
+        bare: false,
+        locked: false,
+        prunable: false,
+        is_main: true,
+        is_current: true
+      },
+      {
+        path: DEFAULT_REPOSITORY_PATH + '/.worktrees/feature',
+        head: 'abcdefghijklmnopqrstuvwxyz01234567890123',
+        branch: 'feature',
+        detached: false,
+        bare: false,
+        locked: false,
+        prunable: false,
+        is_main: false,
+        is_current: false
+      }
+    ];
+
+    it('should fetch the worktree list and emit worktreesChanged', async () => {
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      // Settle the initial refresh, which sees an empty worktree list
+      await model.refresh();
+
+      mockResponses.responses['worktrees'] = {
+        body: () => ({ code: 0, worktrees: WORKTREES })
+      };
+
+      const testSignal = testEmission(model.worktreesChanged, {
+        test: model => {
+          expect(model.worktrees).toEqual(WORKTREES);
+        }
+      });
+
+      await model.refreshWorktrees();
+      await testSignal;
+
+      expect(model.worktrees).toEqual(WORKTREES);
+    });
+
+    it('should not emit worktreesChanged when the list is unchanged', async () => {
+      mockResponses.responses['worktrees'] = {
+        body: () => ({ code: 0, worktrees: WORKTREES })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+
+      await model.refreshWorktrees();
+      expect(model.worktrees).toEqual(WORKTREES);
+
+      let emissions = 0;
+      model.worktreesChanged.connect(() => {
+        emissions += 1;
+      });
+
+      await model.refreshWorktrees();
+      expect(emissions).toEqual(0);
+    });
+  });
+
+  describe('#addWorktree', () => {
+    it('should request the server to add a worktree and refresh', async () => {
+      const spy = jest.spyOn(GitExtension.prototype, 'refreshBranch');
+      mockResponses.responses['worktreesPOST'] = {
+        body: () => ({
+          code: 0,
+          message: '',
+          worktree_path: DEFAULT_REPOSITORY_PATH + '/.worktrees/feature'
+        })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      spy.mockClear();
+
+      const response = await model.addWorktree({
+        worktreePath: '.worktrees/feature',
+        branch: 'feature',
+        newBranch: true,
+        startPoint: 'main'
+      });
+
+      expect(response.worktree_path).toEqual(
+        DEFAULT_REPOSITORY_PATH + '/.worktrees/feature'
+      );
+      expect(mockGit.requestAPI).toHaveBeenCalledWith(
+        DEFAULT_REPOSITORY_PATH + '/worktrees',
+        'POST',
+        {
+          worktree_path: '.worktrees/feature',
+          branch: 'feature',
+          new_branch: true,
+          start_point: 'main'
+        },
+        'git',
+        undefined
+      );
+      expect(spy).toHaveBeenCalledTimes(1);
+
+      spy.mockRestore();
+    });
+  });
+
+  describe('#removeWorktree', () => {
+    it('should request the server to remove a worktree and refresh', async () => {
+      const spy = jest.spyOn(GitExtension.prototype, 'refreshBranch');
+      const worktreePath = DEFAULT_REPOSITORY_PATH + '/.worktrees/feature';
+      const query = `?worktree_path=${encodeURIComponent(
+        worktreePath
+      )}&force=false`;
+      mockResponses.responses['worktrees' + query + 'DELETE'] = {
+        body: () => null
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      spy.mockClear();
+
+      await model.removeWorktree(worktreePath);
+
+      expect(mockGit.requestAPI).toHaveBeenCalledWith(
+        DEFAULT_REPOSITORY_PATH + '/worktrees' + query,
+        'DELETE',
+        null,
+        'git',
+        undefined
+      );
+      expect(spy).toHaveBeenCalledTimes(1);
+
+      spy.mockRestore();
+    });
+  });
 });

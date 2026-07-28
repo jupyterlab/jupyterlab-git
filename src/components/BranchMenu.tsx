@@ -26,7 +26,7 @@ import {
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
-import { branchIcon, mergeIcon, trashIcon } from '../style/icons';
+import { branchIcon, mergeIcon, trashIcon, worktreeIcon } from '../style/icons';
 import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { NewBranchDialog } from './NewBranchDialog';
@@ -283,6 +283,16 @@ export class BranchMenu extends React.Component<
       >
         <branchIcon.react className={listItemIconClass} tag="span" />
         <span className={nameClass}>{branch.name}</span>
+        {!branch.is_remote_branch && !isActive && branch.worktree && (
+          <worktreeIcon.react
+            className={listItemIconClass}
+            tag="span"
+            title={this.props.trans.__(
+              'Checked out in worktree: %1',
+              branch.worktree
+            )}
+          />
+        )}
         {!branch.is_remote_branch && !isActive && (
           <>
             <ActionButton
@@ -359,6 +369,21 @@ export class BranchMenu extends React.Component<
    * @param branchName Branch name
    */
   private _onDeleteBranch = async (branchName: string): Promise<void> => {
+    // A branch checked out in another worktree cannot be deleted; show a
+    // helpful dialog instead of attempting the deletion.
+    const branchData = this.props.model.branches.find(
+      candidate => !candidate.is_remote_branch && candidate.name === branchName
+    );
+    if (branchData && !branchData.is_current_branch && branchData.worktree) {
+      const becameAvailable = await this._onCheckedOutElsewhere(
+        branchData,
+        'delete'
+      );
+      if (!becameAvailable) {
+        return;
+      }
+    }
+
     const acknowledgement = await showDialog<void>({
       title: this.props.trans.__('Delete branch'),
       body: (
@@ -393,6 +418,98 @@ export class BranchMenu extends React.Component<
    */
   private _onMergeBranch = async (branch: string): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitMerge, { branch });
+  };
+
+  /**
+   * Shows a dialog for a branch which is checked out in another worktree,
+   * offering to open that worktree, or to remove it when it is stale.
+   *
+   * @param branch - branch data
+   * @param action - user action having triggered the dialog
+   * @returns whether the branch became available because its stale worktree
+   *   was removed
+   */
+  private _onCheckedOutElsewhere = async (
+    branch: Git.IBranch,
+    action: 'switch' | 'delete'
+  ): Promise<boolean> => {
+    const trans = this.props.trans;
+    const worktreePath = branch.worktree!;
+    const worktree = this.props.model.worktrees.find(
+      candidate => candidate.path === worktreePath
+    );
+    const isOutsideRoot = worktreePath.startsWith('..');
+
+    if (worktree?.prunable) {
+      const result = await showDialog<void>({
+        title: trans.__('Branch used by a stale worktree'),
+        body: (
+          <p>
+            {trans.__('The branch ')}
+            <b>{branch.name}</b>
+            {trans.__(' is used by the worktree ')}
+            <b>{worktreePath}</b>
+            {trans.__(
+              ', whose folder is missing. Remove the stale worktree to make the branch available again.'
+            )}
+          </p>
+        ),
+        buttons: [
+          Dialog.cancelButton({ label: trans.__('Cancel') }),
+          Dialog.warnButton({ label: trans.__('Remove Stale Worktree') })
+        ]
+      });
+      if (!result.button.accept) {
+        return false;
+      }
+      try {
+        await this.props.model.removeWorktree(worktreePath);
+        return true;
+      } catch (error) {
+        Notification.error(
+          trans.__('Failed to remove worktree.'),
+          showError(error as Error, trans)
+        );
+        return false;
+      }
+    }
+
+    const result = await showDialog<void>({
+      title: trans.__('Branch checked out in another worktree'),
+      body: (
+        <p>
+          {trans.__('The branch ')}
+          <b>{branch.name}</b>
+          {trans.__(' is checked out in the worktree ')}
+          <b>{worktreePath}</b>
+          {'. '}
+          {action === 'delete'
+            ? trans.__('Remove that worktree before deleting the branch.')
+            : trans.__(
+                'A branch can be active in only one worktree at a time.'
+              )}
+          {isOutsideRoot
+            ? ' ' +
+              trans.__(
+                'That worktree is outside of the Jupyter server root and cannot be opened here.'
+              )
+            : ''}
+        </p>
+      ),
+      buttons: isOutsideRoot
+        ? [Dialog.okButton({ label: trans.__('Dismiss') })]
+        : [
+            Dialog.cancelButton({ label: trans.__('Dismiss') }),
+            Dialog.okButton({ label: trans.__('Open Worktree') })
+          ]
+    });
+
+    if (!isOutsideRoot && result.button.accept) {
+      await this.props.commands.execute(CommandIDs.gitOpenWorktree, {
+        path: worktreePath
+      });
+    }
+    return false;
   };
 
   /**
@@ -443,6 +560,29 @@ export class BranchMenu extends React.Component<
           this.CHANGES_ERR_MSG
         );
         return;
+      }
+
+      // Switching to a branch which is active in another worktree always
+      // fails; show a helpful dialog instead of attempting the checkout.
+      const checkedOutBranchName = isRemote
+        ? branch.split('/').slice(-1)[0]
+        : branch;
+      const checkedOutBranch = this.props.model.branches.find(
+        candidate =>
+          !candidate.is_remote_branch && candidate.name === checkedOutBranchName
+      );
+      if (
+        checkedOutBranch &&
+        !checkedOutBranch.is_current_branch &&
+        checkedOutBranch.worktree
+      ) {
+        const becameAvailable = await this._onCheckedOutElsewhere(
+          checkedOutBranch,
+          'switch'
+        );
+        if (!becameAvailable) {
+          return;
+        }
       }
 
       let message = 'Switched branch.';

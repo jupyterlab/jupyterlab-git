@@ -24,7 +24,13 @@ import {
   toolbarMenuWrapperClass,
   toolbarNavClass
 } from '../style/Toolbar';
-import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
+import {
+  branchIcon,
+  desktopIcon,
+  pullIcon,
+  pushIcon,
+  worktreeIcon
+} from '../style/icons';
 import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { SubmoduleMenu } from './SubmoduleMenu';
@@ -108,12 +114,18 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
                       {() => (
                         <UseSignal signal={this.props.model.submodulesChanged}>
                           {() => (
-                            <div className={toolbarClass}>
-                              {this._renderToolbarRow()}
-                              {this.state.repoMenu
-                                ? this._renderSubmodules()
-                                : null}
-                            </div>
+                            <UseSignal
+                              signal={this.props.model.worktreesChanged}
+                            >
+                              {() => (
+                                <div className={toolbarClass}>
+                                  {this._renderToolbarRow()}
+                                  {this.state.repoMenu
+                                    ? this._renderSubmodules()
+                                    : null}
+                                </div>
+                              )}
+                            </UseSignal>
                           )}
                         </UseSignal>
                       )}
@@ -144,42 +156,75 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
 
   private _renderRepoLabel(): React.ReactElement {
     const repositoryName = this._getRepositoryName();
+    const linkedWorktree = this._getLinkedWorktree();
     return (
       <span
         className={repoLabelClass}
-        title={this.props.trans.__(
-          'Current repository: %1',
-          this._getFullRepositoryPath()
-        )}
+        title={
+          linkedWorktree
+            ? this.props.trans.__(
+                'Current repository: %1 — linked worktree',
+                this._getFullRepositoryPath()
+              )
+            : this.props.trans.__(
+                'Current repository: %1',
+                this._getFullRepositoryPath()
+              )
+        }
       >
         <desktopIcon.react tag="span" className="jp-Icon" />
         <span className={repoButtonLabelClass}>{repositoryName}</span>
+        {linkedWorktree && (
+          <worktreeIcon.react tag="span" className="jp-Icon" />
+        )}
       </span>
     );
   }
 
   private _renderRepoButton(): React.ReactElement {
     const repositoryName = this._getRepositoryName();
+    const linkedWorktree = this._getLinkedWorktree();
     return (
       <button
         type="button"
         className={repoButtonClass}
-        title={this.props.trans.__(
-          'Current repository: %1 — click to switch submodule',
-          this._getFullRepositoryPath()
-        )}
+        title={
+          linkedWorktree
+            ? this.props.trans.__(
+                'Current repository: %1 — linked worktree — click to switch submodule',
+                this._getFullRepositoryPath()
+              )
+            : this.props.trans.__(
+                'Current repository: %1 — click to switch submodule',
+                this._getFullRepositoryPath()
+              )
+        }
         aria-haspopup="menu"
         aria-expanded={this.state.repoMenu}
         onClick={this._onRepoClick}
       >
         <desktopIcon.react tag="span" className="jp-Icon" />
         <span className={repoButtonLabelClass}>{repositoryName}</span>
+        {linkedWorktree && (
+          <worktreeIcon.react tag="span" className="jp-Icon" />
+        )}
         {this.state.repoMenu ? (
           <caretUpIcon.react tag="span" className="jp-Icon" />
         ) : (
           <caretDownIcon.react tag="span" className="jp-Icon" />
         )}
       </button>
+    );
+  }
+
+  /**
+   * Returns the current worktree if it is a linked worktree, `null` otherwise.
+   */
+  private _getLinkedWorktree(): Git.IWorktree | null {
+    return (
+      this.props.model.worktrees.find(
+        worktree => worktree.is_current && !worktree.is_main
+      ) ?? null
     );
   }
 

@@ -35,6 +35,11 @@ export interface IGitExtension extends IDisposable {
   submodules: Git.ISubmodule[];
 
   /**
+   * The list of worktrees of the current repo
+   */
+  worktrees: Git.IWorktree[];
+
+  /**
    * A signal emitted when the branches of the Git repository changes.
    */
   readonly branchesChanged: ISignal<IGitExtension, void>;
@@ -53,6 +58,11 @@ export interface IGitExtension extends IDisposable {
    * A signal emitted when the submodules of the Git repository change.
    */
   readonly submodulesChanged: ISignal<IGitExtension, void>;
+
+  /**
+   * A signal emitted when the worktrees of the Git repository change.
+   */
+  readonly worktreesChanged: ISignal<IGitExtension, void>;
 
   /**
    * Top level path of the current Git repository
@@ -201,6 +211,20 @@ export interface IGitExtension extends IDisposable {
    * @throws {ServerConnection.NetworkError} If the request cannot be made
    */
   addRemote(url: string, name?: string): Promise<void>;
+
+  /**
+   * Add a new worktree to the current repository.
+   *
+   * @param options - worktree options
+   * @returns promise which resolves upon adding a worktree
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  addWorktree(
+    options: Git.IAddWorktreeOptions
+  ): Promise<Git.IWorktreeAddResult>;
 
   /**
    * Apply a given stash
@@ -535,6 +559,24 @@ export interface IGitExtension extends IDisposable {
    * Make request for a list of all Git tags
    */
   refreshTag(): Promise<void>;
+
+  /**
+   * Make request for a list of all Git worktrees
+   */
+  refreshWorktrees(): Promise<void>;
+
+  /**
+   * Remove a worktree from the current repository.
+   *
+   * @param worktreePath - worktree path relative to the server root
+   * @param force - whether to remove the worktree even if it is dirty or locked
+   * @returns promise which resolves upon removing the worktree
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  removeWorktree(worktreePath: string, force?: boolean): Promise<void>;
 
   /**
    * Determines whether there are unsaved changes on staged files,
@@ -987,6 +1029,13 @@ export namespace Git {
     upstream: string | null;
     top_commit: string;
     tag: string | null;
+    /**
+     * Path of the worktree where the branch is checked out, relative to the
+     * server root; starts with '..' if outside of the server root. `null` if
+     * the branch is not checked out in any worktree. Only set for local
+     * branches.
+     */
+    worktree?: string | null;
   }
 
   /** Interface for GitBranch request result,
@@ -1012,6 +1061,92 @@ export namespace Git {
   export interface ISubmoduleResult {
     code: number;
     submodules: ISubmodule[];
+  }
+
+  /**
+   * Worktree description interface
+   */
+  export interface IWorktree {
+    /**
+     * Worktree path relative to the server root; starts with '..' if the
+     * worktree is outside of the server root and cannot be opened.
+     */
+    path: string;
+    /**
+     * Commit the worktree HEAD points to.
+     */
+    head: string | null;
+    /**
+     * Branch checked out in the worktree; `null` if detached or bare.
+     */
+    branch: string | null;
+    /**
+     * Whether the worktree HEAD is detached.
+     */
+    detached: boolean;
+    /**
+     * Whether the entry is a bare repository.
+     */
+    bare: boolean;
+    /**
+     * Whether the worktree is locked.
+     */
+    locked: boolean;
+    /**
+     * Whether the worktree is stale and can be pruned (e.g. its folder was
+     * deleted manually).
+     */
+    prunable: boolean;
+    /**
+     * Whether the entry is the main worktree.
+     */
+    is_main: boolean;
+    /**
+     * Whether the entry is the current repository.
+     */
+    is_current: boolean;
+  }
+
+  /**
+   * Interface for worktree list request result
+   */
+  export interface IWorktreeResult {
+    code: number;
+    worktrees?: IWorktree[];
+  }
+
+  /**
+   * Options to add a new worktree
+   */
+  export interface IAddWorktreeOptions {
+    /**
+     * Worktree path relative to the repository root.
+     */
+    worktreePath: string;
+    /**
+     * Branch to check out in the new worktree.
+     */
+    branch: string;
+    /**
+     * Whether to create the branch.
+     */
+    newBranch?: boolean;
+    /**
+     * Commit-ish a new branch starts from; defaults to HEAD.
+     */
+    startPoint?: string;
+  }
+
+  /**
+   * Interface for worktree add request result
+   */
+  export interface IWorktreeAddResult {
+    code: number;
+    message?: string;
+    /**
+     * Path of the created worktree relative to the server root.
+     */
+    worktree_path?: string;
   }
 
   /**
@@ -1432,5 +1567,7 @@ export enum CommandIDs {
   gitShowDiff = 'git:show-diff',
   gitStash = 'git:stash',
   gitStashPop = 'git:stash-pop',
-  gitStashList = 'git:stash-list'
+  gitStashList = 'git:stash-list',
+  gitAddWorktree = 'git:add-worktree',
+  gitOpenWorktree = 'git:open-worktree'
 }

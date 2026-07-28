@@ -40,6 +40,23 @@ NAMESPACE = "/git"
 SSH_AUTH_RESOURCE = "ssh"
 
 
+def to_server_path(local_path: str, root_dir: str) -> str:
+    """Convert an absolute local path into a POSIX path relative to the
+    server root directory.
+
+    The returned path starts with ``..`` when the path is outside of the
+    server root; the frontend uses that marker to flag entries it cannot open.
+
+    Args:
+        local_path: absolute local path
+        root_dir: resolved (``os.path.realpath``) server root directory
+    """
+    relative = os.path.relpath(os.path.realpath(local_path), root_dir)
+    if relative == ".":
+        return ""
+    return Path(relative).as_posix()
+
+
 class SSHHandler(APIHandler):
     """
     Top-level parent class for SSH actions
@@ -305,10 +322,20 @@ class GitBranchHandler(GitHandler):
         """
         POST request handler, fetches all branches in current repository.
         """
-        result = await self.git.branch(self.url2localpath(path))
+        local_path, contents_manager = self.url2localpath(
+            path, with_contents_manager=True
+        )
+        result = await self.git.branch(local_path)
 
         if result["code"] != 0:
             self.set_status(500)
+        else:
+            # Convert the absolute worktree paths reported by Git into paths
+            # relative to the server root, as expected by the frontend.
+            root_dir = os.path.realpath(os.path.expanduser(contents_manager.root_dir))
+            for branch in result.get("branches", []):
+                if branch.get("worktree"):
+                    branch["worktree"] = to_server_path(branch["worktree"], root_dir)
         self.finish(json.dumps(result))
 
 
@@ -1071,6 +1098,144 @@ class GitSubmodulesHandler(GitHandler):
         self.finish(json.dumps(result))
 
 
+class GitWorktreeHandler(GitHandler):
+    """
+    Handler for 'git worktree'. Lists, adds and removes worktrees.
+    """
+
+    @tornado.web.authenticated
+    async def get(self, path: str = ""):
+        """
+        GET request handler, lists all worktrees of the current repository.
+
+        Worktree paths are returned relative to the server root; paths
+        starting with ``..`` denote worktrees outside of the server root.
+        """
+        local_path, contents_manager = self.url2localpath(
+            path, with_contents_manager=True
+        )
+        result = await self.git.worktree_list(local_path)
+
+        if result["code"] != 0:
+            self.set_status(500)
+        else:
+            root_dir = os.path.realpath(os.path.expanduser(contents_manager.root_dir))
+            for worktree in result.get("worktrees", []):
+                worktree["path"] = to_server_path(worktree["path"], root_dir)
+        self.finish(json.dumps(result))
+
+    @tornado.web.authenticated
+    async def post(self, path: str = ""):
+        """
+        POST request handler, adds a worktree to the current repository.
+
+        Args:
+            path: Git repository path relatively to the server root
+        Body: {
+            "worktree_path": Worktree path relatively to the repository root,
+            "branch": Branch to check out in the new worktree,
+            "new_branch": Whether to create the branch (default False),
+            "start_point": Commit-ish a new branch starts from (optional)
+        }
+        """
+        local_path, contents_manager = self.url2localpath(
+            path, with_contents_manager=True
+        )
+        data = self.get_json_body()
+        worktree_path = data.get("worktree_path")
+        branch = data.get("branch")
+
+        if not worktree_path or not branch:
+            self.set_status(400)
+            self.finish(
+                json.dumps(
+                    {
+                        "code": 400,
+                        "message": "worktree_path and branch are required",
+                    }
+                )
+            )
+            return
+
+        root_dir = os.path.realpath(os.path.expanduser(contents_manager.root_dir))
+        destination = os.path.realpath(os.path.join(local_path, worktree_path))
+
+        try:
+            inside_root = os.path.commonpath([destination, root_dir]) == root_dir
+        except ValueError:
+            inside_root = False
+        if not inside_root:
+            self.set_status(400)
+            self.finish(
+                json.dumps(
+                    {
+                        "code": 400,
+                        "message": "The worktree path must be inside the Jupyter server root directory",
+                    }
+                )
+            )
+            return
+
+        result = await self.git.worktree_add(
+            local_path,
+            destination,
+            branch,
+            new_branch=data.get("new_branch", False),
+            start_point=data.get("start_point"),
+        )
+
+        if result["code"] != 0:
+            self.set_status(500)
+        else:
+            self.set_status(201)
+            result["worktree_path"] = to_server_path(destination, root_dir)
+        self.finish(json.dumps(result))
+
+    @tornado.web.authenticated
+    async def delete(self, path: str = ""):
+        """
+        DELETE request handler, removes a worktree from the current repository.
+
+        Query arguments:
+            worktree_path: Worktree path relatively to the server root
+            force: Whether to remove the worktree even if it is dirty or
+                locked ("true"/"false", default "false")
+        """
+        local_path, contents_manager = self.url2localpath(
+            path, with_contents_manager=True
+        )
+        worktree_path = self.get_query_argument("worktree_path")
+        force = self.get_query_argument("force", "false").lower() == "true"
+
+        root_dir = os.path.realpath(os.path.expanduser(contents_manager.root_dir))
+        target = os.path.realpath(os.path.join(root_dir, worktree_path))
+
+        try:
+            inside_root = os.path.commonpath([target, root_dir]) == root_dir
+        except ValueError:
+            inside_root = False
+        if not inside_root:
+            self.set_status(400)
+            self.finish(
+                json.dumps(
+                    {
+                        "code": 400,
+                        "message": "The worktree path must be inside the Jupyter server root directory",
+                    }
+                )
+            )
+            return
+
+        response = await self.git.worktree_remove(local_path, target, force)
+
+        if response["code"] == 0:
+            self.set_status(204)
+            self.finish()
+        else:
+            self.set_status(500)
+            self.finish(json.dumps(response))
+
+
 class SshHostHandler(SSHHandler):
     """
     Handler for checking if a host is known by SSH
@@ -1139,6 +1304,7 @@ def setup_handlers(web_app):
         ("/stash_pop", GitStashPopHandler),
         ("/stash_apply", GitStashApplyHandler),
         ("/submodules", GitSubmodulesHandler),
+        ("/worktrees", GitWorktreeHandler),
         ("/check_notebooks", GitCheckNotebooksHandler),
         ("/strip_notebooks", GitStripNotebooksHandler),
     ]

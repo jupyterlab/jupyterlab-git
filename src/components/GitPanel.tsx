@@ -31,6 +31,7 @@ import { BranchMenu } from './BranchMenu';
 import { RebaseAction } from './RebaseAction';
 import { WarningBox } from './WarningBox';
 import { TagMenu } from './TagMenu';
+import { WorktreeMenu } from './WorktreeMenu';
 
 /**
  * Interface describing component properties.
@@ -64,7 +65,7 @@ export interface IGitPanelProps {
   /**
    * Which body to render.
    */
-  contentMode: 'changes' | 'history' | 'branches';
+  contentMode: 'changes' | 'history' | 'branches' | 'worktrees';
 
   /**
    * Whether to render the "not a git repository" warning when no repository
@@ -162,6 +163,11 @@ export interface IGitPanelState {
    * List of submodules.
    */
   submodules: Git.ISubmodule[];
+
+  /**
+   * List of worktrees.
+   */
+  worktrees: Git.IWorktree[];
 }
 
 /**
@@ -183,7 +189,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       hasDirtyFiles: hasDirtyStagedFiles,
       stash,
       tagsList,
-      submodules: submodules
+      submodules: submodules,
+      worktrees
     } = props.model;
 
     this.state = {
@@ -203,7 +210,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       challengerCommit: null,
       stash: stash,
       tagsList: tagsList,
-      submodules: submodules
+      submodules: submodules,
+      worktrees: worktrees
     };
   }
 
@@ -284,6 +292,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       model.headChanged.connect(async () => {
         await this.refreshCurrentBranch();
         await this.refreshHistory();
+      }, this);
+    }
+
+    if (contentMode === 'worktrees') {
+      model.worktreesChanged.connect(() => {
+        this.setState({
+          worktrees: model.worktrees
+        });
       }, this);
     }
 
@@ -381,6 +397,10 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.forceUpdate();
       return;
     }
+    if (this.props.contentMode === 'worktrees') {
+      this.setState({ worktrees: this.props.model.worktrees });
+      return;
+    }
     await this.refreshBranches();
     await this.refreshHistory();
     await this.refreshTags();
@@ -465,7 +485,21 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     if (contentMode === 'history') {
       return <div className={panelMainClass}>{this._renderHistory()}</div>;
     }
+    if (contentMode === 'worktrees') {
+      return <div className={panelMainClass}>{this._renderWorktrees()}</div>;
+    }
     return <div className={panelMainClass}>{this._renderBranches()}</div>;
+  }
+
+  private _renderWorktrees(): React.ReactElement {
+    return (
+      <WorktreeMenu
+        commands={this.props.commands}
+        model={this.props.model}
+        worktrees={this.state.worktrees}
+        trans={this.props.trans}
+      />
+    );
   }
 
   private _renderBranches(): React.ReactElement {
