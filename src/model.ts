@@ -559,7 +559,11 @@ export class GitExtension implements IGitExtension {
         name
       });
     });
-    await this.refresh();
+    try {
+      await this.refreshRemotes();
+    } catch (error) {
+      console.error('Failed to refresh the list of remotes', error);
+    }
   }
 
   /**
@@ -595,7 +599,11 @@ export class GitExtension implements IGitExtension {
     await this._taskHandler.execute<void>('git:remove:remote', async () => {
       await this._requestAPI<void>(URLExt.join(path, 'remote', name), 'DELETE');
     });
-    await this.refresh();
+    try {
+      await this.refreshRemotes();
+    } catch (error) {
+      console.error('Failed to refresh the list of remotes', error);
+    }
   }
 
   /**
