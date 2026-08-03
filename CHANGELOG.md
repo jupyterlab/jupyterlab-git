@@ -2,6 +2,51 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.54.1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.54.0...934b086265595578382ed85c1723d2bf1d1c3bee))
+
+### Bugs fixed
+
+- Fix push buttons [#1500](https://github.com/jupyterlab/jupyterlab-git/pull/1500) ([@jtpio](https://github.com/jtpio))
+
+### Maintenance and upkeep improvements
+
+- Bump nodejs to 22 in the binder environment [#1510](https://github.com/jupyterlab/jupyterlab-git/pull/1510) ([@jtpio](https://github.com/jtpio))
+- Fix UI tests JupyterLab 4.6 [#1496](https://github.com/jupyterlab/jupyterlab-git/pull/1496) ([@jtpio](https://github.com/jtpio))
+- Migrates the linting setup to ESLint v9. [#1491](https://github.com/jupyterlab/jupyterlab-git/pull/1491) ([@Darshan808](https://github.com/Darshan808), [@jtpio](https://github.com/jtpio))
+- Fix commit-diff UI test after diff banner sanitization [#1487](https://github.com/jupyterlab/jupyterlab-git/pull/1487) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Fix changelog for 0.54.0 [#1486](https://github.com/jupyterlab/jupyterlab-git/pull/1486) ([@jtpio](https://github.com/jtpio))
+
+### Other merged PRs
+
+- Bump vega-selections from 5.6.0 to 5.6.3 in /ui-tests [#1509](https://github.com/jupyterlab/jupyterlab-git/pull/1509) ([@jtpio](https://github.com/jtpio))
+- Bump dompurify from 3.4.11 to 3.4.12 in /ui-tests [#1507](https://github.com/jupyterlab/jupyterlab-git/pull/1507) ([@jtpio](https://github.com/jtpio))
+- Bump shell-quote from 1.8.4 to 1.10.0 [#1506](https://github.com/jupyterlab/jupyterlab-git/pull/1506) ([@jtpio](https://github.com/jtpio))
+- Bump brace-expansion from 1.1.14 to 1.1.16 in /ui-tests [#1505](https://github.com/jupyterlab/jupyterlab-git/pull/1505) ([@jtpio](https://github.com/jtpio))
+- Bump brace-expansion from 1.1.11 to 1.1.16 [#1503](https://github.com/jupyterlab/jupyterlab-git/pull/1503) ([@jtpio](https://github.com/jtpio))
+- Bump ws from 8.17.1 to 8.21.1 in /ui-tests [#1502](https://github.com/jupyterlab/jupyterlab-git/pull/1502) ([@jtpio](https://github.com/jtpio))
+- Bump @tootallnate/once from 2.0.0 to 2.0.1 [#1498](https://github.com/jupyterlab/jupyterlab-git/pull/1498) ([@jtpio](https://github.com/jtpio))
+- Bump postcss from 8.4.6 to 8.5.16 in /ui-tests [#1497](https://github.com/jupyterlab/jupyterlab-git/pull/1497) ([@jtpio](https://github.com/jtpio))
+- Bump js-yaml from 3.14.2 to 3.15.0 [#1495](https://github.com/jupyterlab/jupyterlab-git/pull/1495) ([@jtpio](https://github.com/jtpio))
+- Bump form-data from 4.0.4 to 4.0.6 [#1489](https://github.com/jupyterlab/jupyterlab-git/pull/1489) ([@jtpio](https://github.com/jtpio))
+- Bump ws from 8.20.1 to 8.21.0 [#1488](https://github.com/jupyterlab/jupyterlab-git/pull/1488) ([@jtpio](https://github.com/jtpio))
+- Bump @babel/plugin-transform-modules-systemjs from 7.23.0 to 7.29.4 [#1475](https://github.com/jupyterlab/jupyterlab-git/pull/1475) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2026-06-17&to=2026-08-03&type=c))
+
+@Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ADarshan808+updated%3A2026-06-17..2026-08-03&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2026-06-17..2026-08-03&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.54.0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.53.0...af267598e7437993c02a14101db41c75809a7f88))
@@ -41,8 +86,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2026-04-30&to=2026-06-16&type=c))
 
 @alexblanchard0808-boop ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aalexblanchard0808-boop+updated%3A2026-04-30..2026-06-16&type=Issues)) | @djangoliv ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Adjangoliv+updated%3A2026-04-30..2026-06-16&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2026-04-30..2026-06-16&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2026-04-30..2026-06-16&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.54.0a1
 
