@@ -21,11 +21,9 @@ describe('CommitBox', () => {
 
   const defaultProps: ICommitBoxProps = {
     onCommit: async () => {},
-    setSummary: () => {},
-    setDescription: () => {},
+    setMessage: () => {},
     setAmend: () => {},
-    summary: '',
-    description: '',
+    message: '',
     amend: false,
     hasFiles: false,
     commands: defaultCommands,
@@ -41,17 +39,17 @@ describe('CommitBox', () => {
   });
 
   describe('#render()', () => {
-    it('should display placeholder text for the commit message summary', () => {
+    it('should display placeholder text for the commit message', () => {
       const props = defaultProps;
       render(<CommitBox {...props} />);
 
       expect(screen.getAllByRole('textbox')[0]).toHaveAttribute(
         'placeholder',
-        'Summary (Ctrl+Enter to commit)'
+        'Commit message (Ctrl+Enter to commit)'
       );
     });
 
-    it('should adjust placeholder text for the commit message summary when keybinding changes', () => {
+    it('should adjust placeholder text for the commit message when keybinding changes', () => {
       const adjustedCommands = new CommandRegistry();
       adjustedCommands.addKeyBinding({
         keys: ['Shift Enter'],
@@ -67,7 +65,7 @@ describe('CommitBox', () => {
 
       expect(screen.getAllByRole('textbox')[0]).toHaveAttribute(
         'placeholder',
-        'Summary (Shift+Enter to commit)'
+        'Commit message (Shift+Enter to commit)'
       );
     });
 
@@ -102,10 +100,10 @@ describe('CommitBox', () => {
       expect(screen.getAllByRole('button')[0]).toHaveAttribute('disabled');
     });
 
-    it('should not apply a class to disable the commit button when files have changes to commit and the user has entered a commit message summary', () => {
+    it('should not apply a class to disable the commit button when files have changes to commit and the user has entered a commit message', () => {
       const props = {
         ...defaultProps,
-        summary: 'beep boop',
+        message: 'beep boop',
         hasFiles: true
       };
 
@@ -117,7 +115,7 @@ describe('CommitBox', () => {
     it('should apply a class to disable the commit input fields in amend mode', () => {
       const props = {
         ...defaultProps,
-        summary: 'beep boop',
+        message: 'beep boop',
         amend: true
       };
 

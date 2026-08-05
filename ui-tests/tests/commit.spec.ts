@@ -33,7 +33,7 @@ test.describe('Commit', () => {
     await page.getByRole('button', { name: 'Stage this change' }).click();
 
     await page
-      .getByPlaceholder('Summary (Ctrl+Enter to commit)')
+      .getByPlaceholder('Commit message (Ctrl+Enter to commit)')
       .fill('My new commit');
 
     await page.getByRole('button', { name: 'Commit', exact: true }).click();

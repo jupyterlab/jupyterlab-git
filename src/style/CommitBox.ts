@@ -10,7 +10,7 @@ export const commitFormClass = style({
   alignItems: 'flex-start',
 
   backgroundColor: 'var(--jp-layout-color1)',
-  borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)'
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
 export const dirtyStagedFilesWarningBoxClass = style({
@@ -91,10 +91,43 @@ export const commitDescriptionClass = style({
   }
 });
 
+export const commitMessageClass = style({
+  marginBottom: '8px',
+  padding: 'var(--jp-code-padding) !important',
+
+  outline: 'none',
+  overflowX: 'auto',
+  resize: 'none',
+
+  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  borderRadius: '4px',
+
+  transition: 'border-color 120ms ease, box-shadow 120ms ease',
+
+  $nest: {
+    '&.Mui-error': {
+      border: 'calc(2 * var(--jp-border-width)) solid var(--jp-error-color1)'
+    },
+    '&>*::placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    },
+    '&>*::-webkit-input-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    },
+    '&>*::-moz-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    },
+    '&>*::-ms-input-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    }
+  }
+});
+
 export const commitButtonClass = style({
+  height: '28px',
   color: 'var(--jp-ui-inverse-font-color1) !important',
   backgroundColor: 'var(--jp-brand-color1) !important',
-  textTransform: 'none' as any,
+  textTransform: 'none !important' as any,
   fontWeight: 600,
 
   $nest: {

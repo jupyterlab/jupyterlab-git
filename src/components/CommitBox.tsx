@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
+import Input from '@mui/material/Input';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 import Paper from '@mui/material/Paper';
@@ -13,8 +14,10 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import { listItemIconClass } from '../style/BranchMenu';
 import {
+  activeStyle,
   commitButtonClass,
   commitFormClass,
+  commitMessageClass,
   commitPaperClass,
   commitRoot,
   commitVariantSelector,
@@ -27,7 +30,6 @@ import {
   listItemDescClass
 } from '../style/NewBranchDialog';
 import { CommandIDs } from '../tokens';
-import { CommitMessage } from './CommitMessage';
 
 /**
  * Commit action
@@ -68,14 +70,10 @@ export interface ICommitBoxProps {
   trans: TranslationBundle;
 
   /**
-   * Commit message summary.
+   * Commit message. The first line is used as the commit summary and the
+   * remaining lines as the commit description.
    */
-  summary: string;
-
-  /**
-   * Commit message description.
-   */
-  description: string;
+  message: string;
 
   /**
    * Whether commit is amending the previous one or not
@@ -88,18 +86,11 @@ export interface ICommitBoxProps {
   warning?: JSX.Element | null;
 
   /**
-   * Updates the commit message summary.
+   * Updates the commit message.
    *
-   * @param summary - commit message summary
+   * @param message - commit message
    */
-  setSummary: (summary: string) => void;
-
-  /**
-   * Updates the commit message description.
-   *
-   * @param description - commit message description
-   */
-  setDescription: (description: string) => void;
+  setMessage: (message: string) => void;
 
   /**
    * Updates the amend checkbox state
@@ -179,15 +170,15 @@ export class CommitBox extends React.Component<
     const disabled = !this._canCommit();
     const title = !this.props.hasFiles
       ? this.props.trans.__('Disabled: No files are staged for commit')
-      : !this.props.summary && !this.props.amend
-      ? this.props.trans.__('Disabled: No commit message summary')
+      : !this._summary && !this.props.amend
+      ? this.props.trans.__('Disabled: No commit message')
       : this.props.label;
 
     const shortcutHint = CommandRegistry.formatKeystroke(
       this._getSubmitKeystroke()
     );
-    const summaryPlaceholder = this.props.trans.__(
-      'Summary (%1 to commit)',
+    const messagePlaceholder = this.props.trans.__(
+      'Commit message (%1 to commit)',
       shortcutHint
     );
 
@@ -195,18 +186,24 @@ export class CommitBox extends React.Component<
       <div className={classes(commitFormClass, 'jp-git-CommitBox')}>
         {this.props.warning ?? null}
         {!this.props.amend && (
-          <CommitMessage
-            error={
-              this.props.hasFiles &&
-              !this.props.amend &&
-              this.props.summary.length === 0
-            }
-            trans={this.props.trans}
-            summary={this.props.summary}
-            summaryPlaceholder={summaryPlaceholder}
-            description={this.props.description}
-            setSummary={this.props.setSummary}
-            setDescription={this.props.setDescription}
+          <Input
+            classes={{
+              root: classes(commitRoot, commitMessageClass),
+              focused: activeStyle,
+              disabled: disabledStyle
+            }}
+            error={this.props.hasFiles && this._summary.length === 0}
+            multiline
+            minRows={1}
+            maxRows={10}
+            placeholder={messagePlaceholder}
+            title={this.props.trans.__(
+              'Enter a commit message. The first line is used as the commit summary; the following lines as the description.'
+            )}
+            value={this.props.message}
+            onChange={this._handleMessageChange}
+            disableUnderline={true}
+            fullWidth={true}
           />
         )}
         <ButtonGroup ref={this._anchorRef} fullWidth={true} size="small">
@@ -293,8 +290,26 @@ export class CommitBox extends React.Component<
     if (this.props.amend) {
       return this.props.hasFiles;
     }
-    return !!(this.props.hasFiles && this.props.summary);
+    return !!(this.props.hasFiles && this._summary);
   }
+
+  /**
+   * Commit message summary, i.e. the first line of the commit message.
+   */
+  private get _summary(): string {
+    return this.props.message.split('\n', 1)[0];
+  }
+
+  /**
+   * Callback invoked upon updating the commit message.
+   *
+   * @param event - event object
+   */
+  private _handleMessageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    this.props.setMessage(event.target.value);
+  };
 
   /**
    * Get keystroke configured to act as a submit action.

@@ -15,20 +15,11 @@ export const toolbarNavClass = style({
   flexWrap: 'nowrap',
 
   padding: '4px 8px',
-  gap: '6px',
+  gap: '4px',
 
   fontSize: 'var(--jp-ui-font-size1)',
   color: 'var(--jp-ui-font-color1)',
   backgroundColor: 'var(--jp-layout-color1)'
-});
-
-export const repoBranchColumnClass = style({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  flex: '0 1 auto',
-  minWidth: 0,
-  gap: '2px'
 });
 
 export const toolbarMenuWrapperClass = style({
@@ -107,8 +98,9 @@ export const branchInfoClass = style({
   boxSizing: 'border-box',
   display: 'inline-flex',
   alignItems: 'center',
-  flex: '0 1 auto',
-  minWidth: 0,
+  // Shrink well before the repository label but never collapse entirely
+  flex: '0 10000 auto',
+  minWidth: '54px',
   gap: '4px',
 
   height: '18px',

@@ -14,7 +14,6 @@ import {
   badgeClass,
   branchInfoClass,
   branchNameClass,
-  repoBranchColumnClass,
   repoButtonClass,
   repoButtonLabelClass,
   repoLabelClass,
@@ -117,10 +116,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     const hasSubmodules = this.props.model.submodules.length > 0;
     return (
       <div className={toolbarNavClass}>
-        <div className={repoBranchColumnClass}>
-          {hasSubmodules ? this._renderRepoButton() : this._renderRepoLabel()}
-          {this._renderBranchInfo()}
-        </div>
+        {hasSubmodules ? this._renderRepoButton() : this._renderRepoLabel()}
+        {this._renderBranchInfo()}
         <span className={spacer} />
         {this._renderRemoteActions()}
       </div>
