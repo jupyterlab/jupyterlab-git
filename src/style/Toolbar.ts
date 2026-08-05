@@ -1,30 +1,32 @@
 import { style } from 'typestyle';
 
-export const toolbarClass = style({
-  display: 'flex',
-  flexDirection: 'column',
-
-  backgroundColor: 'var(--jp-layout-color1)',
-  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
-});
-
-export const toolbarNavClass = style({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  flexWrap: 'nowrap',
-
-  padding: '4px 8px',
-  gap: '4px',
-
-  fontSize: 'var(--jp-ui-font-size1)',
-  color: 'var(--jp-ui-font-color1)',
-  backgroundColor: 'var(--jp-layout-color1)'
+export const panelToolbarClass = style({
+  $nest: {
+    // The `&.jp-Toolbar`-prefixed selectors need the extra specificity to win
+    // over the core `.jp-Toolbar` and `.jp-Toolbar > .jp-Toolbar-item` rules
+    '&.jp-Toolbar': {
+      padding: '2px 8px',
+      gap: '4px'
+    },
+    '&.jp-Toolbar > .jp-Toolbar-item': {
+      alignItems: 'center'
+    },
+    '&.jp-Toolbar > .jp-git-toolbarRepository': {
+      flex: '0 1 auto',
+      minWidth: 0,
+      overflow: 'hidden'
+    },
+    // Shrink well before the repository label but never collapse entirely
+    '&.jp-Toolbar > .jp-git-toolbarBranch': {
+      flex: '0 10000 auto',
+      minWidth: '54px'
+    }
+  }
 });
 
 export const toolbarMenuWrapperClass = style({
   background: 'var(--jp-layout-color1)',
-  borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)'
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
 export const repoButtonLabelClass = style({

@@ -4,8 +4,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   Dialog,
   ICommandPalette,
+  IToolbarWidgetRegistry,
+  setToolbar,
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
@@ -28,6 +31,10 @@ import { createImageDiff } from './components/diff/ImageDiff';
 import { createNotebookDiff } from './components/diff/NotebookDiff';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
 import { addStatusBarWidget } from './components/StatusWidget';
+import {
+  addToolbarItems,
+  GIT_PANEL_TOOLBAR_FACTORY
+} from './components/Toolbar';
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
@@ -50,7 +57,8 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     IEditorServices,
     IDefaultFileBrowser,
     ISettingRegistry,
-    IDocumentManager
+    IDocumentManager,
+    IToolbarWidgetRegistry
   ],
   optional: [IMainMenu, IStatusBar, ICommandPalette, ITranslator],
   provides: IGitExtension,
@@ -152,6 +160,7 @@ async function activate(
   fileBrowser: IDefaultFileBrowser,
   settingRegistry: ISettingRegistry,
   docmanager: IDocumentManager,
+  toolbarRegistry: IToolbarWidgetRegistry,
   mainMenu: IMainMenu | null,
   statusBar: IStatusBar | null,
   palette: ICommandPalette | null,
@@ -161,6 +170,14 @@ async function activate(
   let gitServerSettings: Git.IServerSettings;
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab_git');
+
+  const toolbarFactory = createToolbarFactory(
+    toolbarRegistry,
+    settingRegistry,
+    GIT_PANEL_TOOLBAR_FACTORY,
+    plugin.id,
+    translator
+  );
 
   // Attempt to load application settings
   try {
@@ -287,6 +304,8 @@ async function activate(
       translator
     );
 
+    addToolbarItems(toolbarRegistry, gitExtension, app.commands, trans);
+
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
       gitExtension,
@@ -298,6 +317,8 @@ async function activate(
     gitPlugin.id = 'jp-git-sessions';
     gitPlugin.title.icon = gitIcon;
     gitPlugin.title.caption = 'Git';
+
+    setToolbar(gitPlugin, toolbarFactory);
 
     if (palette) {
       // Add the commands to the command palette

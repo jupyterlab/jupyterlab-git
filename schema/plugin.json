@@ -106,6 +106,71 @@
       "title": "Clear outputs before commit",
       "description": "If true, notebook outputs will be cleared before committing. If false, outputs are kept. If null, ask each time.",
       "default": null
+    },
+    "toolbar": {
+      "title": "Git panel toolbar items",
+      "description": "Note: To disable a toolbar item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable the refresh button:\n{\n  \"toolbar\": [\n    {\n      \"name\": \"refresh\",\n      \"disabled\": true\n    }\n  ]\n}\n\nToolbar description:",
+      "items": {
+        "$ref": "#/definitions/toolbarItem"
+      },
+      "type": "array",
+      "default": []
+    }
+  },
+  "definitions": {
+    "toolbarItem": {
+      "properties": {
+        "name": {
+          "title": "Unique name",
+          "type": "string"
+        },
+        "args": {
+          "title": "Command arguments",
+          "type": "object"
+        },
+        "command": {
+          "title": "Command id",
+          "type": "string",
+          "default": ""
+        },
+        "disabled": {
+          "title": "Whether the item is ignored or not",
+          "type": "boolean",
+          "default": false
+        },
+        "icon": {
+          "title": "Item icon id",
+          "description": "If defined, it will override the command icon",
+          "type": "string"
+        },
+        "label": {
+          "title": "Item label",
+          "description": "If defined, it will override the command label",
+          "type": "string"
+        },
+        "caption": {
+          "title": "Item caption",
+          "description": "If defined, it will override the command caption",
+          "type": "string"
+        },
+        "type": {
+          "title": "Item type",
+          "type": "string",
+          "oneOf": [
+            { "const": "command", "title": "Command" },
+            { "const": "spacer", "title": "Spacer" }
+          ]
+        },
+        "rank": {
+          "title": "Item rank",
+          "type": "number",
+          "minimum": 0,
+          "default": 50
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false,
+      "type": "object"
     }
   },
   "jupyter.lab.shortcuts": [
@@ -219,6 +284,15 @@
     "domain": "jupyterlab_git"
   },
   "jupyter.lab.toolbars": {
-    "FileBrowser": [{ "name": "gitClone", "rank": 31 }]
-  }
+    "FileBrowser": [{ "name": "gitClone", "rank": 31 }],
+    "Git": [
+      { "name": "repository", "rank": 10 },
+      { "name": "branch", "rank": 20 },
+      { "name": "spacer", "type": "spacer", "rank": 50 },
+      { "name": "pull", "rank": 60 },
+      { "name": "push", "rank": 70 },
+      { "name": "refresh", "rank": 80 }
+    ]
+  },
+  "jupyter.lab.transform": true
 }
