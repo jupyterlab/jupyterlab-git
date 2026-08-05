@@ -306,7 +306,7 @@ export class CommitBox extends React.Component<
    * @param event - event object
    */
   private _handleMessageChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ): void => {
     this.props.setMessage(event.target.value);
   };
