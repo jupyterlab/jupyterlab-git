@@ -152,10 +152,6 @@ export const toolbarButtonClass = style({
   }
 });
 
-export const spacer = style({
-  flex: '1 1 auto'
-});
-
 export const badgeClass = style({
   $nest: {
     '& > .MuiBadge-badge': {
