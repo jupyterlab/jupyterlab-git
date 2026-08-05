@@ -429,6 +429,170 @@ describe('IGitExtension', () => {
     });
   });
 
+  describe('#refreshRemotes', () => {
+    it('should update the list of remotes and emit remotesChanged only when it changes', async () => {
+      const remotes: Git.IGitRemote[] = [
+        { name: 'origin', url: 'https://example.com/repo.git' }
+      ];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await model.refresh();
+
+      expect(model.remotes).toEqual(remotes);
+
+      const onRemotesChanged = jest.fn();
+      model.remotesChanged.connect(onRemotesChanged);
+
+      await model.refreshRemotes();
+      expect(onRemotesChanged).not.toHaveBeenCalled();
+
+      remotes.push({
+        name: 'upstream',
+        url: 'https://example.com/upstream.git'
+      });
+      await model.refreshRemotes();
+      expect(onRemotesChanged).toHaveBeenCalledTimes(1);
+      expect(model.remotes).toEqual(remotes);
+    });
+
+    it('should keep the cached remotes if refreshing fails', async () => {
+      const remotes: Git.IGitRemote[] = [
+        { name: 'origin', url: 'https://example.com/repo.git' }
+      ];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await model.refresh();
+
+      expect(model.remotes).toEqual(remotes);
+
+      mockResponses.responses['remote/show'] = {
+        status: 500,
+        body: () => ({ message: 'Server error' })
+      };
+
+      await expect(model.refreshRemotes()).rejects.toThrow();
+      expect(model.remotes).toEqual(remotes);
+    });
+
+    it('should clear the cached remotes when leaving a Git repository', async () => {
+      const remotes: Git.IGitRemote[] = [
+        { name: 'origin', url: 'https://example.com/repo.git' }
+      ];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await model.refresh();
+
+      expect(model.remotes).toEqual(remotes);
+
+      model.pathRepository = null;
+      await model.ready;
+
+      await model.refreshRemotes();
+      expect(model.remotes).toEqual([]);
+    });
+
+    it('should refresh the remotes before repositoryChanged is emitted', async () => {
+      const remotes: Git.IGitRemote[] = [
+        { name: 'origin', url: 'https://example.com/repo.git' }
+      ];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
+
+      const testSignal = testEmission(model.repositoryChanged, {
+        test: () => {
+          expect(model.remotes).toEqual(remotes);
+        }
+      });
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await testSignal;
+    });
+  });
+
+  describe('#addRemote', () => {
+    it('should emit remotesChanged when a remote is added', async () => {
+      const remotes: Git.IGitRemote[] = [];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
+      mockResponses.responses['remote/add'] = {
+        body: () => null
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await model.refresh();
+
+      expect(model.remotes).toEqual([]);
+
+      const testSignal = testEmission(model.remotesChanged, {});
+
+      remotes.push({ name: 'origin', url: 'https://example.com/repo.git' });
+      await model.addRemote('https://example.com/repo.git', 'origin');
+      await testSignal;
+
+      expect(model.remotes).toEqual(remotes);
+    });
+
+    it('should not fail when refreshing the remotes fails', async () => {
+      mockResponses.responses['remote/add'] = {
+        body: () => null
+      };
+      mockResponses.responses['remote/show'] = {
+        status: 500,
+        body: () => ({ message: 'Server error' })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+
+      await model.addRemote('https://example.com/repo.git', 'origin');
+      expect(model.remotes).toEqual([]);
+    });
+  });
+
+  describe('#removeRemote', () => {
+    it('should emit remotesChanged when a remote is removed', async () => {
+      const remotes: Git.IGitRemote[] = [
+        { name: 'origin', url: 'https://example.com/repo.git' }
+      ];
+      mockResponses.responses['remote/show'] = {
+        body: () => ({ code: 0, remotes: [...remotes] })
+      };
+      mockResponses.responses['remote/origin'] = {
+        body: () => null
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await model.refresh();
+
+      expect(model.remotes).toEqual(remotes);
+
+      const testSignal = testEmission(model.remotesChanged, {});
+
+      remotes.length = 0;
+      await model.removeRemote('origin');
+      await testSignal;
+
+      expect(model.remotes).toEqual([]);
+    });
+  });
+
   describe('#resetToCommit', () => {
     it('should refresh branches if successfully reset to commit', async () => {
       const spy = jest.spyOn(GitExtension.prototype, 'refreshBranch');

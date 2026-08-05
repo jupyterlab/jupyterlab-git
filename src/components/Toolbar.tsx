@@ -59,11 +59,6 @@ export interface IToolbarState {
   refreshInProgress: boolean;
 
   /**
-   * Boolean indicating whether a remote exists.
-   */
-  hasRemote: boolean;
-
-  /**
    * Boolean indicating whether the repository menu is shown.
    */
   repoMenu: boolean;
@@ -74,22 +69,8 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     super(props);
     this.state = {
       refreshInProgress: false,
-      hasRemote: false,
       repoMenu: false
     };
-  }
-
-  /**
-   * Check whether or not the repo has any remotes
-   */
-  async componentDidMount(): Promise<void> {
-    try {
-      const remotes = await this.props.model.getRemotes();
-      const hasRemote = remotes.length > 0;
-      this.setState({ hasRemote });
-    } catch (err) {
-      console.error(err);
-    }
   }
 
   render(): React.ReactElement {
@@ -108,12 +89,16 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
                       {() => (
                         <UseSignal signal={this.props.model.submodulesChanged}>
                           {() => (
-                            <div className={toolbarClass}>
-                              {this._renderToolbarRow()}
-                              {this.state.repoMenu
-                                ? this._renderSubmodules()
-                                : null}
-                            </div>
+                            <UseSignal signal={this.props.model.remotesChanged}>
+                              {() => (
+                                <div className={toolbarClass}>
+                                  {this._renderToolbarRow()}
+                                  {this.state.repoMenu
+                                    ? this._renderSubmodules()
+                                    : null}
+                                </div>
+                              )}
+                            </UseSignal>
                           )}
                         </UseSignal>
                       )}
@@ -218,7 +203,7 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
     const activeBranch = this.props.model.branches.filter(
       branch => branch.is_current_branch
     );
-    const hasRemote = this.state.hasRemote;
+    const hasRemote = this.props.model.remotes.length > 0;
     const hasUpstream = activeBranch[0]?.upstream !== null;
 
     return (
