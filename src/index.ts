@@ -57,10 +57,15 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     IEditorServices,
     IDefaultFileBrowser,
     ISettingRegistry,
-    IDocumentManager,
-    IToolbarWidgetRegistry
+    IDocumentManager
   ],
-  optional: [IMainMenu, IStatusBar, ICommandPalette, ITranslator],
+  optional: [
+    IToolbarWidgetRegistry,
+    IMainMenu,
+    IStatusBar,
+    ICommandPalette,
+    ITranslator
+  ],
   provides: IGitExtension,
   activate,
   autoStart: true
@@ -160,7 +165,7 @@ async function activate(
   fileBrowser: IDefaultFileBrowser,
   settingRegistry: ISettingRegistry,
   docmanager: IDocumentManager,
-  toolbarRegistry: IToolbarWidgetRegistry,
+  toolbarRegistry: IToolbarWidgetRegistry | null,
   mainMenu: IMainMenu | null,
   statusBar: IStatusBar | null,
   palette: ICommandPalette | null,
@@ -171,13 +176,22 @@ async function activate(
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab_git');
 
-  const toolbarFactory = createToolbarFactory(
-    toolbarRegistry,
-    settingRegistry,
-    GIT_PANEL_TOOLBAR_FACTORY,
-    plugin.id,
-    translator
-  );
+  // The schema sets `jupyter.lab.transform`, so the settings load below waits for a
+  // transform to be registered for this plugin and times out if none ever is.
+  // `createToolbarFactory` registers one; without a toolbar registry a pass-through
+  // transform takes its place and the panel is built without a toolbar.
+  let toolbarFactory: ReturnType<typeof createToolbarFactory> | null = null;
+  if (toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      GIT_PANEL_TOOLBAR_FACTORY,
+      plugin.id,
+      translator
+    );
+  } else {
+    settingRegistry.transform(plugin.id, {});
+  }
 
   // Attempt to load application settings
   try {
@@ -304,7 +318,13 @@ async function activate(
       translator
     );
 
-    addToolbarItems(toolbarRegistry, gitExtension, app.commands, trans);
+    // Register the widget factory for each toolbar item, keyed by the names used in
+    // the `jupyter.lab.toolbars` schema defaults and in the user settings. The toolbar
+    // built by `setToolbar` below instantiates the items through those factories, so
+    // they have to be registered first.
+    if (toolbarRegistry) {
+      addToolbarItems(toolbarRegistry, gitExtension, app.commands, trans);
+    }
 
     // Create the Git widget sidebar
     const gitPlugin = new GitWidget(
@@ -318,7 +338,9 @@ async function activate(
     gitPlugin.title.icon = gitIcon;
     gitPlugin.title.caption = 'Git';
 
-    setToolbar(gitPlugin, toolbarFactory);
+    if (toolbarFactory) {
+      setToolbar(gitPlugin, toolbarFactory);
+    }
 
     if (palette) {
       // Add the commands to the command palette
