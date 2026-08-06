@@ -123,6 +123,16 @@ export const commitMessageClass = style({
   }
 });
 
+export const commitDescriptionHintClass = style({
+  width: '100%',
+  // Tuck the hint under the input's 8px bottom margin
+  margin: '-4px 0 8px',
+
+  color: 'var(--jp-ui-font-color2)',
+  fontSize: 'var(--jp-ui-font-size0)',
+  lineHeight: 1.35
+});
+
 export const commitButtonClass = style({
   height: '28px',
   color: 'var(--jp-ui-inverse-font-color1) !important',

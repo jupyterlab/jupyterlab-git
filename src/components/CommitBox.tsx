@@ -16,6 +16,7 @@ import { listItemIconClass } from '../style/BranchMenu';
 import {
   activeStyle,
   commitButtonClass,
+  commitDescriptionHintClass,
   commitFormClass,
   commitMessageClass,
   commitPaperClass,
@@ -183,30 +184,45 @@ export class CommitBox extends React.Component<
       'Commit message (%1 to commit)',
       shortcutHint
     );
+    const summaryHint = this.props.trans.__(
+      'The first line is used as the commit summary; the following lines as the description.'
+    );
+    const showSummaryHint = this.props.message.includes('\n');
 
     return (
       <div className={classes(commitFormClass, 'jp-git-CommitBox')}>
         {this.props.warning ?? null}
         {!this.props.amend && (
-          <Input
-            classes={{
-              root: classes(commitRoot, commitMessageClass),
-              focused: activeStyle,
-              disabled: disabledStyle
-            }}
-            error={this.props.hasFiles && this._summary.length === 0}
-            multiline
-            minRows={1}
-            maxRows={10}
-            placeholder={messagePlaceholder}
-            title={this.props.trans.__(
-              'Enter a commit message. The first line is used as the commit summary; the following lines as the description.'
+          <React.Fragment>
+            <Input
+              classes={{
+                root: classes(commitRoot, commitMessageClass),
+                focused: activeStyle,
+                disabled: disabledStyle
+              }}
+              error={this.props.hasFiles && this._summary.length === 0}
+              multiline
+              minRows={1}
+              maxRows={10}
+              placeholder={messagePlaceholder}
+              title={summaryHint}
+              aria-describedby={
+                showSummaryHint ? 'jp-git-commit-message-hint' : undefined
+              }
+              value={this.props.message}
+              onChange={this._handleMessageChange}
+              disableUnderline={true}
+              fullWidth={true}
+            />
+            {showSummaryHint && (
+              <p
+                id="jp-git-commit-message-hint"
+                className={commitDescriptionHintClass}
+              >
+                {summaryHint}
+              </p>
             )}
-            value={this.props.message}
-            onChange={this._handleMessageChange}
-            disableUnderline={true}
-            fullWidth={true}
-          />
+          </React.Fragment>
         )}
         <ButtonGroup ref={this._anchorRef} fullWidth={true} size="small">
           <Button

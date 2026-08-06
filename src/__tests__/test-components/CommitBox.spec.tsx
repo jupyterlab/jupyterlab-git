@@ -69,6 +69,38 @@ describe('CommitBox', () => {
       );
     });
 
+    it('should not display the summary hint for a single-line message', () => {
+      const props = {
+        ...defaultProps,
+        message: 'Fix a bug'
+      };
+      render(<CommitBox {...props} />);
+
+      expect(
+        screen.queryByText(
+          'The first line is used as the commit summary; the following lines as the description.'
+        )
+      ).toBeNull();
+    });
+
+    it('should display the summary hint when the message spans multiple lines', () => {
+      const props = {
+        ...defaultProps,
+        message: 'Fix a bug\n\nLonger description of the fix'
+      };
+      render(<CommitBox {...props} />);
+
+      expect(
+        screen.getByText(
+          'The first line is used as the commit summary; the following lines as the description.'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getAllByRole('textbox')[0]).toHaveAttribute(
+        'aria-describedby',
+        'jp-git-commit-message-hint'
+      );
+    });
+
     it('should display a button to commit changes', () => {
       const props = defaultProps;
       render(<CommitBox {...props} />);
