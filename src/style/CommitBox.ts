@@ -160,7 +160,28 @@ export const commitInputWrapperClass = style({
 });
 
 export const commitPaperClass = style({
-  maxWidth: '250px'
+  maxWidth: '250px',
+  border: 'var(--jp-border-width) solid var(--jp-border-color1)',
+  boxShadow: 'var(--jp-elevation-z6) !important'
+});
+
+// The commit variant menu renders inline (disablePortal) before the file list,
+// whose virtualized rows are absolutely positioned and would paint over it.
+export const commitPopperClass = style({
+  zIndex: 1
+});
+
+// commitRoot pins the item background with !important, which also suppresses
+// the MUI hover/focus tints; restate them at higher specificity.
+export const commitVariantItemClass = style({
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2) !important'
+    },
+    '&.Mui-focusVisible': {
+      backgroundColor: 'var(--jp-layout-color2) !important'
+    }
+  }
 });
 
 export const commitVariantText = style({

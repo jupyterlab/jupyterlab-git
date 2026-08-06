@@ -19,7 +19,9 @@ import {
   commitFormClass,
   commitMessageClass,
   commitPaperClass,
+  commitPopperClass,
   commitRoot,
+  commitVariantItemClass,
   commitVariantSelector,
   disabledStyle
 } from '../style/CommitBox';
@@ -235,8 +237,10 @@ export class CommitBox extends React.Component<
           </Button>
         </ButtonGroup>
         <Popper
+          className={commitPopperClass}
           open={this.state.open}
           anchorEl={this._anchorRef.current}
+          placement="bottom-end"
           role={undefined}
           transition
           disablePortal
@@ -249,7 +253,9 @@ export class CommitBox extends React.Component<
                     {this._options.map((option, index) => (
                       <MenuItem
                         key={option.title}
-                        classes={{ root: commitRoot }}
+                        classes={{
+                          root: classes(commitRoot, commitVariantItemClass)
+                        }}
                         selected={this.props.amend ? index === 1 : index === 0}
                         onClick={event =>
                           this._handleMenuItemClick(event, index)
