@@ -114,7 +114,7 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
   if (options.repository !== null) {
     model.pathRepository = options.repository ?? DEFAULT_REPOSITORY_PATH;
     await model.ready;
-    // Manually fetch branch/submodule/remote data; model.ready does not await these.
+    // `model.ready` does not await branch/submodule/remote data.
     await model.refreshBranch();
     await model.listSubmodules();
     await model.refreshRemotes();
@@ -340,7 +340,6 @@ describe('Toolbar items', () => {
       model = await createModel({ repository: null });
       render(<RemoteActions />);
 
-      // No item is rendered as long as no repository is detected
       expect(screen.queryAllByRole('button')).toHaveLength(0);
 
       model.pathRepository = DEFAULT_REPOSITORY_PATH;

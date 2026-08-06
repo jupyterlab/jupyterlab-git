@@ -176,10 +176,6 @@ async function activate(
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab_git');
 
-  // The schema sets `jupyter.lab.transform`, so the settings load below waits for a
-  // transform to be registered for this plugin and times out if none ever is.
-  // `createToolbarFactory` registers one; without a toolbar registry a pass-through
-  // transform takes its place and the panel is built without a toolbar.
   let toolbarFactory: ReturnType<typeof createToolbarFactory> | null = null;
   if (toolbarRegistry) {
     toolbarFactory = createToolbarFactory(
@@ -190,6 +186,8 @@ async function activate(
       translator
     );
   } else {
+    // The schema sets `jupyter.lab.transform`, so `settingRegistry.load` below
+    // would time out if no transform were ever registered.
     settingRegistry.transform(plugin.id, {});
   }
 
@@ -318,10 +316,8 @@ async function activate(
       translator
     );
 
-    // Register the widget factory for each toolbar item, keyed by the names used in
-    // the `jupyter.lab.toolbars` schema defaults and in the user settings. The toolbar
-    // built by `setToolbar` below instantiates the items through those factories, so
-    // they have to be registered first.
+    // The factory names must match the `jupyter.lab.toolbars` entries in the
+    // schema and user settings, and must be registered before `setToolbar` runs.
     if (toolbarRegistry) {
       addToolbarItems(toolbarRegistry, gitExtension, app.commands, trans);
     }
