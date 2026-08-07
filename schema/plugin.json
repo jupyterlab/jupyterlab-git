@@ -77,6 +77,22 @@
       "description": "If true, use a simplified concept of staging. Only files with changes are shown (instead of showing staged/changed/untracked), and all files with changes will be automatically staged",
       "default": false
     },
+    "commitBoxPosition": {
+      "type": "string",
+      "title": "Commit box position",
+      "description": "Where the commit message box appears in the Git panel.",
+      "oneOf": [
+        {
+          "const": "top",
+          "title": "Above the list of changed files"
+        },
+        {
+          "const": "bottom",
+          "title": "Below the list of changed files"
+        }
+      ],
+      "default": "top"
+    },
     "commitAndPush": {
       "type": "boolean",
       "title": "Trigger push on commit",

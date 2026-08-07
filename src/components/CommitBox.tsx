@@ -17,6 +17,7 @@ import {
   activeStyle,
   commitButtonClass,
   commitDescriptionHintClass,
+  commitFormBottomClass,
   commitFormClass,
   commitMessageClass,
   commitPaperClass,
@@ -87,6 +88,11 @@ export interface ICommitBoxProps {
    * Warning element to display
    */
   warning?: JSX.Element | null;
+
+  /**
+   * Position of the box in the panel; defaults to 'top'
+   */
+  position?: 'top' | 'bottom';
 
   /**
    * Updates the commit message.
@@ -170,6 +176,7 @@ export class CommitBox extends React.Component<
    * @returns React element
    */
   render(): React.ReactElement {
+    const atBottom = this.props.position === 'bottom';
     const disabled = !this._canCommit();
     const title = !this.props.hasFiles
       ? this.props.trans.__('Disabled: No files are staged for commit')
@@ -190,7 +197,13 @@ export class CommitBox extends React.Component<
     const showSummaryHint = this.props.message.includes('\n');
 
     return (
-      <div className={classes(commitFormClass, 'jp-git-CommitBox')}>
+      <div
+        className={classes(
+          commitFormClass,
+          atBottom && commitFormBottomClass,
+          'jp-git-CommitBox'
+        )}
+      >
         {this.props.warning ?? null}
         {!this.props.amend && (
           <React.Fragment>
@@ -256,7 +269,7 @@ export class CommitBox extends React.Component<
           className={commitPopperClass}
           open={this.state.open}
           anchorEl={this._anchorRef.current}
-          placement="bottom-end"
+          placement={atBottom ? 'top-end' : 'bottom-end'}
           role={undefined}
           transition
           disablePortal

@@ -519,42 +519,48 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           'You have unsaved staged files. You probably want to save and stage all needed changes before committing.'
         );
 
+    const commitBoxPosition =
+      this.props.settings.composite['commitBoxPosition'] === 'bottom'
+        ? 'bottom'
+        : 'top';
+    const commitAction =
+      this.props.model.status.state !== Git.State.REBASING ? (
+        <CommitBox
+          commands={this.props.commands}
+          hasFiles={
+            inSimpleMode ? this._markedFiles.length > 0 : this._hasStagedFile()
+          }
+          trans={this.props.trans}
+          label={buttonLabel}
+          message={this.state.commitMessage}
+          amend={this.state.commitAmend}
+          position={commitBoxPosition}
+          setMessage={this._setCommitMessage}
+          setAmend={this._setCommitAmend}
+          onCommit={this.commitFiles}
+          warning={
+            this.state.hasDirtyFiles ? (
+              <WarningBox
+                headerIcon={<WarningRoundedIcon />}
+                title={warningTitle}
+                content={warningContent}
+              />
+            ) : null
+          }
+        />
+      ) : (
+        <RebaseAction
+          commands={this.props.commands}
+          hasConflict={this.state.files.some(
+            file => file.status === 'unmerged'
+          )}
+          trans={this.props.trans}
+        ></RebaseAction>
+      );
+
     return (
       <React.Fragment>
-        {this.props.model.status.state !== Git.State.REBASING ? (
-          <CommitBox
-            commands={this.props.commands}
-            hasFiles={
-              inSimpleMode
-                ? this._markedFiles.length > 0
-                : this._hasStagedFile()
-            }
-            trans={this.props.trans}
-            label={buttonLabel}
-            message={this.state.commitMessage}
-            amend={this.state.commitAmend}
-            setMessage={this._setCommitMessage}
-            setAmend={this._setCommitAmend}
-            onCommit={this.commitFiles}
-            warning={
-              this.state.hasDirtyFiles ? (
-                <WarningBox
-                  headerIcon={<WarningRoundedIcon />}
-                  title={warningTitle}
-                  content={warningContent}
-                />
-              ) : null
-            }
-          />
-        ) : (
-          <RebaseAction
-            commands={this.props.commands}
-            hasConflict={this.state.files.some(
-              file => file.status === 'unmerged'
-            )}
-            trans={this.props.trans}
-          ></RebaseAction>
-        )}
+        {commitBoxPosition === 'top' && commitAction}
         <FileList
           files={this._sortedFiles}
           model={this.props.model}
@@ -597,6 +603,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           collapsible={true}
           trans={this.props.trans}
         />
+        {commitBoxPosition === 'bottom' && commitAction}
       </React.Fragment>
     );
   }

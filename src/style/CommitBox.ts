@@ -13,6 +13,11 @@ export const commitFormClass = style({
   borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
+export const commitFormBottomClass = style({
+  borderBottom: 'none',
+  borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)'
+});
+
 export const dirtyStagedFilesWarningBoxClass = style({
   marginBottom: '1em',
   padding: 'var(--jp-code-padding)',
