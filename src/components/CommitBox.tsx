@@ -19,6 +19,7 @@ import {
   commitDescriptionHintClass,
   commitFormBottomClass,
   commitFormClass,
+  commitHintErrorClass,
   commitMessageClass,
   commitPaperClass,
   commitPopperClass,
@@ -178,8 +179,13 @@ export class CommitBox extends React.Component<
   render(): React.ReactElement {
     const atBottom = this.props.position === 'bottom';
     const disabled = !this._canCommit();
+    const summaryEmpty = !this._summary && this.props.message.length > 0;
     const title = !this.props.hasFiles
       ? this.props.trans.__('Disabled: No files are staged for commit')
+      : summaryEmpty && !this.props.amend
+      ? this.props.trans.__(
+          'Disabled: The first line of the commit message is empty'
+        )
       : !this._summary && !this.props.amend
       ? this.props.trans.__('Disabled: No commit message')
       : this.props.label;
@@ -191,9 +197,13 @@ export class CommitBox extends React.Component<
       'Commit message (%1 to commit)',
       shortcutHint
     );
-    const summaryHint = this.props.trans.__(
-      'The first line is used as the commit summary; the following lines as the description.'
-    );
+    const summaryHint = summaryEmpty
+      ? this.props.trans.__(
+          'The first line is used as the commit summary and cannot be empty.'
+        )
+      : this.props.trans.__(
+          'The first line is used as the commit summary; the following lines as the description.'
+        );
     const showSummaryHint = this.props.message.includes('\n');
 
     return (
@@ -230,7 +240,11 @@ export class CommitBox extends React.Component<
             {showSummaryHint && (
               <p
                 id="jp-git-commit-message-hint"
-                className={commitDescriptionHintClass}
+                className={
+                  summaryEmpty
+                    ? commitHintErrorClass
+                    : commitDescriptionHintClass
+                }
               >
                 {summaryHint}
               </p>

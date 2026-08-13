@@ -101,6 +101,41 @@ describe('CommitBox', () => {
       );
     });
 
+    it('should display a dedicated message when the first line of the message is empty', () => {
+      const props = {
+        ...defaultProps,
+        message: '\nLonger description of the fix',
+        hasFiles: true
+      };
+      render(<CommitBox {...props} />);
+
+      expect(
+        screen.getByText(
+          'The first line is used as the commit summary and cannot be empty.'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          'The first line is used as the commit summary; the following lines as the description.'
+        )
+      ).toBeNull();
+    });
+
+    it('should explain in the commit button title that the first line is empty', () => {
+      const props = {
+        ...defaultProps,
+        message: '\nLonger description of the fix',
+        hasFiles: true
+      };
+      render(<CommitBox {...props} />);
+
+      expect(screen.getAllByRole('button')[0]).toHaveAttribute(
+        'title',
+        'Disabled: The first line of the commit message is empty'
+      );
+      expect(screen.getAllByRole('button')[0]).toHaveAttribute('disabled');
+    });
+
     it('should display a button to commit changes', () => {
       const props = defaultProps;
       render(<CommitBox {...props} />);
