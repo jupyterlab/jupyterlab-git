@@ -1050,21 +1050,17 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     notNotifiedList: Git.IStatusFile[],
     notifiedList: Git.IStatusFile[] = []
   ): JSX.Element {
-    const listedItems = notNotifiedList.map((item: Git.IStatusFile) => {
-      console.log(item.to);
-      const item_val = this.props.trans.__(item.to);
-      return <li key={item_val}>{item_val}</li>;
-    });
+    const listedItems = notNotifiedList.map((item: Git.IStatusFile) => (
+      <li key={item.to}>{item.to}</li>
+    ));
     let elem: JSX.Element = <ul>{listedItems}</ul>;
     if (notifiedList.length > 0) {
       const remaining = this.props.trans.__(
         'The following open files remain behind:'
       );
-      const alreadyListedItems = notifiedList.map((item: Git.IStatusFile) => {
-        console.log(item.to);
-        const item_val = this.props.trans.__(item.to);
-        return <li key={item_val}>{item_val}</li>;
-      });
+      const alreadyListedItems = notifiedList.map((item: Git.IStatusFile) => (
+        <li key={item.to}>{item.to}</li>
+      ));
       const full: JSX.Element = (
         <div>
           {elem}

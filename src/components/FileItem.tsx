@@ -237,7 +237,7 @@ export class FileItem extends React.PureComponent<IFileItemProps> {
         }
         onDoubleClick={this.props.onDoubleClick}
         style={this.props.style}
-        title={this.props.trans.__(`%1 • ${status}`, this.props.file.to)}
+        title={this.props.trans.__('%1 • %2', this.props.file.to, status)}
       >
         <div className={checkboxLabelContainerStyle}>
           <div className={checkboxLabelStyle + ' ' + fileLabelStyle}>
