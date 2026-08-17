@@ -1,4 +1,9 @@
-import { Notification, UseSignal } from '@jupyterlab/apputils';
+import {
+  IToolbarWidgetRegistry,
+  Notification,
+  ReactWidget,
+  UseSignal
+} from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { TranslationBundle } from '@jupyterlab/translation';
 import {
@@ -14,30 +19,25 @@ import {
   badgeClass,
   branchInfoClass,
   branchNameClass,
-  repoBranchColumnClass,
   repoButtonClass,
   repoButtonLabelClass,
   repoLabelClass,
-  spacer,
-  toolbarButtonClass,
-  toolbarClass,
-  toolbarMenuWrapperClass,
-  toolbarNavClass
+  toolbarButtonClass
 } from '../style/Toolbar';
 import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
 import { CommandIDs, Git, IGitExtension } from '../tokens';
+import type { GitWidget } from '../widgets/GitWidget';
 import { ActionButton } from './ActionButton';
-import { SubmoduleMenu } from './SubmoduleMenu';
 
 /**
- * Interface describing  properties.
+ * Toolbar factory name of the Git panel toolbar.
  */
-export interface IToolbarProps {
-  /**
-   * Jupyter App commands registry
-   */
-  commands: CommandRegistry;
+export const GIT_PANEL_TOOLBAR_FACTORY = 'Git';
 
+/**
+ * Interface describing toolbar item properties.
+ */
+export interface IToolbarItemProps {
   /**
    * Git extension data model.
    */
@@ -50,145 +50,120 @@ export interface IToolbarProps {
 }
 
 /**
- * Interface describing component state.
+ * Interface describing repository toolbar item properties.
  */
-export interface IToolbarState {
+export interface IRepositoryItemProps extends IToolbarItemProps {
   /**
-   * Boolean indicating whether a refresh is currently in progress.
+   * The Git panel hosting the submodule menu.
    */
-  refreshInProgress: boolean;
-
-  /**
-   * Boolean indicating whether the repository menu is shown.
-   */
-  repoMenu: boolean;
+  panel: GitWidget;
 }
 
-export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
-  constructor(props: IToolbarProps) {
-    super(props);
-    this.state = {
-      refreshInProgress: false,
-      repoMenu: false
-    };
-  }
+/**
+ * Interface describing remote action toolbar item properties.
+ */
+export interface IRemoteActionItemProps extends IToolbarItemProps {
+  /**
+   * Jupyter App commands registry
+   */
+  commands: CommandRegistry;
+}
 
-  render(): React.ReactElement {
-    return (
-      <UseSignal signal={this.props.model.repositoryChanged}>
-        {() => {
-          if (this.props.model.pathRepository === null) {
-            return <div className={toolbarClass} />;
-          }
-          return (
-            <UseSignal signal={this.props.model.headChanged}>
-              {() => (
-                <UseSignal signal={this.props.model.branchesChanged}>
-                  {() => (
-                    <UseSignal signal={this.props.model.statusChanged}>
-                      {() => (
-                        <UseSignal signal={this.props.model.submodulesChanged}>
-                          {() => (
-                            <UseSignal signal={this.props.model.remotesChanged}>
-                              {() => (
-                                <div className={toolbarClass}>
-                                  {this._renderToolbarRow()}
-                                  {this.state.repoMenu
-                                    ? this._renderSubmodules()
-                                    : null}
-                                </div>
-                              )}
-                            </UseSignal>
-                          )}
-                        </UseSignal>
-                      )}
-                    </UseSignal>
-                  )}
+/**
+ * Toolbar item displaying the current repository, as a plain label or as a
+ * button toggling the submodule menu when the repository has submodules.
+ */
+export function RepositoryItem(props: IRepositoryItemProps): JSX.Element {
+  const { model, panel, trans } = props;
+
+  const getRepositoryName = (): string =>
+    PathExt.basename(
+      model.pathRepository || PageConfig.getOption('serverRoot')
+    ) || 'Jupyter Server Root';
+
+  const getFullRepositoryPath = (): string =>
+    PageConfig.getOption('serverRoot') + '/' + (model.pathRepository ?? '');
+
+  const renderLabel = (): JSX.Element => (
+    <span
+      className={repoLabelClass}
+      title={trans.__('Current repository: %1', getFullRepositoryPath())}
+    >
+      <desktopIcon.react tag="span" className="jp-Icon" />
+      <span className={repoButtonLabelClass}>{getRepositoryName()}</span>
+    </span>
+  );
+
+  const renderButton = (menuShown: boolean): JSX.Element => (
+    <button
+      type="button"
+      className={repoButtonClass}
+      title={trans.__(
+        'Current repository: %1 — click to switch submodule',
+        getFullRepositoryPath()
+      )}
+      aria-haspopup="menu"
+      aria-expanded={menuShown}
+      onClick={() => panel.toggleSubmoduleMenu()}
+    >
+      <desktopIcon.react tag="span" className="jp-Icon" />
+      <span className={repoButtonLabelClass}>{getRepositoryName()}</span>
+      {menuShown ? (
+        <caretUpIcon.react tag="span" className="jp-Icon" />
+      ) : (
+        <caretDownIcon.react tag="span" className="jp-Icon" />
+      )}
+    </button>
+  );
+
+  return (
+    <UseSignal signal={model.repositoryChanged}>
+      {() =>
+        model.pathRepository === null ? null : (
+          <UseSignal signal={model.submodulesChanged}>
+            {() =>
+              model.submodules.length > 0 ? (
+                <UseSignal
+                  signal={panel.submoduleMenuShownChanged}
+                  initialArgs={panel.submoduleMenuShown}
+                >
+                  {(_, menuShown) => renderButton(menuShown ?? false)}
                 </UseSignal>
-              )}
-            </UseSignal>
-          );
-        }}
-      </UseSignal>
-    );
-  }
+              ) : (
+                renderLabel()
+              )
+            }
+          </UseSignal>
+        )
+      }
+    </UseSignal>
+  );
+}
 
-  private _renderToolbarRow(): React.ReactElement {
-    const hasSubmodules = this.props.model.submodules.length > 0;
-    return (
-      <div className={toolbarNavClass}>
-        <div className={repoBranchColumnClass}>
-          {hasSubmodules ? this._renderRepoButton() : this._renderRepoLabel()}
-          {this._renderBranchInfo()}
-        </div>
-        <span className={spacer} />
-        {this._renderRemoteActions()}
-      </div>
-    );
-  }
+/**
+ * Toolbar item displaying the current branch and repository state.
+ */
+export function BranchItem(props: IToolbarItemProps): JSX.Element {
+  const { model, trans } = props;
 
-  private _renderRepoLabel(): React.ReactElement {
-    const repositoryName = this._getRepositoryName();
-    return (
-      <span
-        className={repoLabelClass}
-        title={this.props.trans.__(
-          'Current repository: %1',
-          this._getFullRepositoryPath()
-        )}
-      >
-        <desktopIcon.react tag="span" className="jp-Icon" />
-        <span className={repoButtonLabelClass}>{repositoryName}</span>
-      </span>
-    );
-  }
-
-  private _renderRepoButton(): React.ReactElement {
-    const repositoryName = this._getRepositoryName();
-    return (
-      <button
-        type="button"
-        className={repoButtonClass}
-        title={this.props.trans.__(
-          'Current repository: %1 — click to switch submodule',
-          this._getFullRepositoryPath()
-        )}
-        aria-haspopup="menu"
-        aria-expanded={this.state.repoMenu}
-        onClick={this._onRepoClick}
-      >
-        <desktopIcon.react tag="span" className="jp-Icon" />
-        <span className={repoButtonLabelClass}>{repositoryName}</span>
-        {this.state.repoMenu ? (
-          <caretUpIcon.react tag="span" className="jp-Icon" />
-        ) : (
-          <caretDownIcon.react tag="span" className="jp-Icon" />
-        )}
-      </button>
-    );
-  }
-
-  private _renderBranchInfo(): React.ReactElement {
-    const currentBranch = this.props.model.currentBranch?.name || 'main';
+  const renderBranch = (): JSX.Element => {
+    const currentBranch = model.currentBranch?.name || 'main';
     let branchTitle: string;
-    switch (this.props.model.status.state) {
+    switch (model.status.state) {
       case Git.State.CHERRY_PICKING:
-        branchTitle = this.props.trans.__(
-          'Cherry-picking on %1',
-          currentBranch
-        );
+        branchTitle = trans.__('Cherry-picking on %1', currentBranch);
         break;
       case Git.State.DETACHED:
-        branchTitle = this.props.trans.__('Detached HEAD at %1', currentBranch);
+        branchTitle = trans.__('Detached HEAD at %1', currentBranch);
         break;
       case Git.State.MERGING:
-        branchTitle = this.props.trans.__('Merging on %1', currentBranch);
+        branchTitle = trans.__('Merging on %1', currentBranch);
         break;
       case Git.State.REBASING:
-        branchTitle = this.props.trans.__('Rebasing %1', currentBranch);
+        branchTitle = trans.__('Rebasing %1', currentBranch);
         break;
       default:
-        branchTitle = this.props.trans.__('Current branch: %1', currentBranch);
+        branchTitle = trans.__('Current branch: %1', currentBranch);
     }
 
     return (
@@ -197,123 +172,190 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
         <span className={branchNameClass}>{currentBranch}</span>
       </span>
     );
+  };
+
+  return (
+    <UseSignal signal={model.repositoryChanged}>
+      {() =>
+        model.pathRepository === null ? null : (
+          <UseSignal signal={model.headChanged}>
+            {() => (
+              <UseSignal signal={model.statusChanged}>
+                {() => renderBranch()}
+              </UseSignal>
+            )}
+          </UseSignal>
+        )
+      }
+    </UseSignal>
+  );
+}
+
+/**
+ * Toolbar item to pull the latest changes, with a badge showing whether the
+ * current branch is behind its remote.
+ */
+export class PullItem extends React.Component<IRemoteActionItemProps> {
+  render(): JSX.Element {
+    const { model } = this.props;
+    return (
+      <UseSignal signal={model.repositoryChanged}>
+        {() =>
+          model.pathRepository === null ? null : (
+            <UseSignal signal={model.statusChanged}>
+              {() => (
+                <UseSignal signal={model.remotesChanged}>
+                  {() => this._renderButton()}
+                </UseSignal>
+              )}
+            </UseSignal>
+          )
+        }
+      </UseSignal>
+    );
   }
 
-  private _renderRemoteActions(): React.ReactElement {
-    const activeBranch = this.props.model.branches.filter(
-      branch => branch.is_current_branch
-    );
-    const hasRemote = this.props.model.remotes.length > 0;
-    const hasUpstream = activeBranch[0]?.upstream !== null;
-
+  private _renderButton(): JSX.Element {
+    const { model, trans } = this.props;
+    const hasRemote = model.remotes.length > 0;
     return (
-      <React.Fragment>
-        <Badge
-          className={badgeClass}
-          variant="dot"
-          invisible={!hasRemote || this.props.model.status.behind === 0}
-        >
-          <ActionButton
-            className={toolbarButtonClass}
-            disabled={!hasRemote}
-            icon={pullIcon}
-            onClick={hasRemote ? this._onPullClick : undefined}
-            title={
-              hasRemote
-                ? this.props.trans.__('Pull latest changes') +
-                  (this.props.model.status.behind > 0
-                    ? this.props.trans.__(
-                        ' (behind by %1 commits)',
-                        this.props.model.status.behind
-                      )
-                    : '')
-                : this.props.trans.__('No remote repository defined')
-            }
-          />
-        </Badge>
-        <Badge
-          className={badgeClass}
-          variant="dot"
-          invisible={
-            !hasRemote || (this.props.model.status.ahead === 0 && hasUpstream)
-          }
-        >
-          <ActionButton
-            className={toolbarButtonClass}
-            disabled={!hasRemote}
-            icon={pushIcon}
-            onClick={hasRemote ? this._onPushClick : undefined}
-            title={
-              hasRemote
-                ? hasUpstream
-                  ? this.props.trans.__('Push committed changes') +
-                    (this.props.model.status.ahead > 0
-                      ? this.props.trans.__(
-                          ' (ahead by %1 commits)',
-                          this.props.model.status.ahead
-                        )
-                      : '')
-                  : this.props.trans.__('Publish branch')
-                : this.props.trans.__('No remote repository defined')
-            }
-          />
-        </Badge>
+      <Badge
+        className={badgeClass}
+        variant="dot"
+        invisible={!hasRemote || model.status.behind === 0}
+      >
         <ActionButton
           className={toolbarButtonClass}
-          icon={refreshIcon}
-          onClick={this._onRefreshClick}
-          disabled={this.state.refreshInProgress}
-          title={this.props.trans.__(
-            'Refresh the repository to detect local and remote changes'
-          )}
+          disabled={!hasRemote}
+          icon={pullIcon}
+          onClick={hasRemote ? this._onPullClick : undefined}
+          title={
+            hasRemote
+              ? trans.__('Pull latest changes') +
+                (model.status.behind > 0
+                  ? trans.__(' (behind by %1 commits)', model.status.behind)
+                  : '')
+              : trans.__('No remote repository defined')
+          }
         />
-      </React.Fragment>
-    );
-  }
-
-  private _renderSubmodules(): JSX.Element {
-    return (
-      <div className={toolbarMenuWrapperClass}>
-        <SubmoduleMenu
-          model={this.props.model}
-          submodules={this.props.model.submodules}
-          trans={this.props.trans}
-        />
-      </div>
-    );
-  }
-
-  private _getRepositoryName(): string {
-    return (
-      PathExt.basename(
-        this.props.model.pathRepository || PageConfig.getOption('serverRoot')
-      ) || 'Jupyter Server Root'
-    );
-  }
-
-  private _getFullRepositoryPath(): string {
-    return (
-      PageConfig.getOption('serverRoot') +
-      '/' +
-      (this.props.model.pathRepository ?? '')
+      </Badge>
     );
   }
 
   private _onPullClick = async (): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitPull);
   };
+}
+
+/**
+ * Toolbar item to push committed changes, with a badge showing whether the
+ * current branch is ahead of its remote.
+ */
+export class PushItem extends React.Component<IRemoteActionItemProps> {
+  render(): JSX.Element {
+    const { model } = this.props;
+    return (
+      <UseSignal signal={model.repositoryChanged}>
+        {() =>
+          model.pathRepository === null ? null : (
+            <UseSignal signal={model.branchesChanged}>
+              {() => (
+                <UseSignal signal={model.statusChanged}>
+                  {() => (
+                    <UseSignal signal={model.remotesChanged}>
+                      {() => this._renderButton()}
+                    </UseSignal>
+                  )}
+                </UseSignal>
+              )}
+            </UseSignal>
+          )
+        }
+      </UseSignal>
+    );
+  }
+
+  private _renderButton(): JSX.Element {
+    const { model, trans } = this.props;
+    const activeBranch = model.branches.filter(
+      branch => branch.is_current_branch
+    );
+    const hasRemote = model.remotes.length > 0;
+    const hasUpstream = activeBranch[0]?.upstream !== null;
+    return (
+      <Badge
+        className={badgeClass}
+        variant="dot"
+        invisible={!hasRemote || (model.status.ahead === 0 && hasUpstream)}
+      >
+        <ActionButton
+          className={toolbarButtonClass}
+          disabled={!hasRemote}
+          icon={pushIcon}
+          onClick={hasRemote ? this._onPushClick : undefined}
+          title={
+            hasRemote
+              ? hasUpstream
+                ? trans.__('Push committed changes') +
+                  (model.status.ahead > 0
+                    ? trans.__(' (ahead by %1 commits)', model.status.ahead)
+                    : '')
+                : trans.__('Publish branch')
+              : trans.__('No remote repository defined')
+          }
+        />
+      </Badge>
+    );
+  }
 
   private _onPushClick = async (): Promise<void> => {
     await this.props.commands.execute(CommandIDs.gitPush);
   };
+}
 
-  private _onRepoClick = (): void => {
-    this.setState({ repoMenu: !this.state.repoMenu });
-  };
-
+/**
+ * Interface describing refresh item state.
+ */
+interface IRefreshItemState {
   /**
-   * Callback invoked upon clicking a button to refresh the model.
+   * Boolean indicating whether a refresh is currently in progress.
    */
+  refreshInProgress: boolean;
+}
+
+/**
+ * Toolbar item to refresh the repository.
+ */
+export class RefreshItem extends React.Component<
+  IToolbarItemProps,
+  IRefreshItemState
+> {
+  constructor(props: IToolbarItemProps) {
+    super(props);
+    this.state = { refreshInProgress: false };
+  }
+
+  render(): JSX.Element {
+    const { model, trans } = this.props;
+    return (
+      <UseSignal signal={model.repositoryChanged}>
+        {() =>
+          model.pathRepository === null ? null : (
+            <ActionButton
+              className={toolbarButtonClass}
+              icon={refreshIcon}
+              onClick={this._onRefreshClick}
+              disabled={this.state.refreshInProgress}
+              title={trans.__(
+                'Refresh the repository to detect local and remote changes'
+              )}
+            />
+          )
+        }
+      </UseSignal>
+    );
+  }
+
   private _onRefreshClick = async (): Promise<void> => {
     const id = Notification.emit(
       this.props.trans.__('Refreshing…'),
@@ -341,4 +383,51 @@ export class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
       this.setState({ refreshInProgress: false });
     }
   };
+}
+
+/**
+ * Add the Git panel toolbar item factories to the toolbar registry.
+ *
+ * @param toolbarRegistry Toolbar widget registry
+ * @param model Git extension data model
+ * @param commands Jupyter App commands registry
+ * @param trans The application language translator
+ */
+export function addToolbarItems(
+  toolbarRegistry: IToolbarWidgetRegistry,
+  model: IGitExtension,
+  commands: CommandRegistry,
+  trans: TranslationBundle
+): void {
+  const addItem = (
+    name: string,
+    itemClass: string,
+    render: (panel: GitWidget) => JSX.Element
+  ): void => {
+    toolbarRegistry.addFactory<GitWidget>(
+      GIT_PANEL_TOOLBAR_FACTORY,
+      name,
+      panel => {
+        const widget = ReactWidget.create(render(panel));
+        widget.addClass(itemClass);
+        return widget;
+      }
+    );
+  };
+
+  addItem('repository', 'jp-git-toolbarRepository', panel => (
+    <RepositoryItem model={model} panel={panel} trans={trans} />
+  ));
+  addItem('branch', 'jp-git-toolbarBranch', () => (
+    <BranchItem model={model} trans={trans} />
+  ));
+  addItem('pull', 'jp-git-toolbarPull', () => (
+    <PullItem commands={commands} model={model} trans={trans} />
+  ));
+  addItem('push', 'jp-git-toolbarPush', () => (
+    <PushItem commands={commands} model={model} trans={trans} />
+  ));
+  addItem('refresh', 'jp-git-toolbarRefresh', () => (
+    <RefreshItem model={model} trans={trans} />
+  ));
 }

@@ -21,11 +21,9 @@ describe('CommitBox', () => {
 
   const defaultProps: ICommitBoxProps = {
     onCommit: async () => {},
-    setSummary: () => {},
-    setDescription: () => {},
+    setMessage: () => {},
     setAmend: () => {},
-    summary: '',
-    description: '',
+    message: '',
     amend: false,
     hasFiles: false,
     commands: defaultCommands,
@@ -41,17 +39,17 @@ describe('CommitBox', () => {
   });
 
   describe('#render()', () => {
-    it('should display placeholder text for the commit message summary', () => {
+    it('should display placeholder text for the commit message', () => {
       const props = defaultProps;
       render(<CommitBox {...props} />);
 
       expect(screen.getAllByRole('textbox')[0]).toHaveAttribute(
         'placeholder',
-        'Summary (Ctrl+Enter to commit)'
+        'Commit message (Ctrl+Enter to commit)'
       );
     });
 
-    it('should adjust placeholder text for the commit message summary when keybinding changes', () => {
+    it('should adjust placeholder text for the commit message when keybinding changes', () => {
       const adjustedCommands = new CommandRegistry();
       adjustedCommands.addKeyBinding({
         keys: ['Shift Enter'],
@@ -67,8 +65,75 @@ describe('CommitBox', () => {
 
       expect(screen.getAllByRole('textbox')[0]).toHaveAttribute(
         'placeholder',
-        'Summary (Shift+Enter to commit)'
+        'Commit message (Shift+Enter to commit)'
       );
+    });
+
+    it('should not display the summary hint for a single-line message', () => {
+      const props = {
+        ...defaultProps,
+        message: 'Fix a bug'
+      };
+      render(<CommitBox {...props} />);
+
+      expect(
+        screen.queryByText(
+          'The first line is used as the commit summary; the following lines as the description.'
+        )
+      ).toBeNull();
+    });
+
+    it('should display the summary hint when the message spans multiple lines', () => {
+      const props = {
+        ...defaultProps,
+        message: 'Fix a bug\n\nLonger description of the fix'
+      };
+      render(<CommitBox {...props} />);
+
+      expect(
+        screen.getByText(
+          'The first line is used as the commit summary; the following lines as the description.'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getAllByRole('textbox')[0]).toHaveAttribute(
+        'aria-describedby',
+        'jp-git-commit-message-hint'
+      );
+    });
+
+    it('should display a dedicated message when the first line of the message is empty', () => {
+      const props = {
+        ...defaultProps,
+        message: '\nLonger description of the fix',
+        hasFiles: true
+      };
+      render(<CommitBox {...props} />);
+
+      expect(
+        screen.getByText(
+          'The first line is used as the commit summary and cannot be empty.'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          'The first line is used as the commit summary; the following lines as the description.'
+        )
+      ).toBeNull();
+    });
+
+    it('should explain in the commit button title that the first line is empty', () => {
+      const props = {
+        ...defaultProps,
+        message: '\nLonger description of the fix',
+        hasFiles: true
+      };
+      render(<CommitBox {...props} />);
+
+      expect(screen.getAllByRole('button')[0]).toHaveAttribute(
+        'title',
+        'Disabled: The first line of the commit message is empty'
+      );
+      expect(screen.getAllByRole('button')[0]).toHaveAttribute('disabled');
     });
 
     it('should display a button to commit changes', () => {
@@ -102,10 +167,10 @@ describe('CommitBox', () => {
       expect(screen.getAllByRole('button')[0]).toHaveAttribute('disabled');
     });
 
-    it('should not apply a class to disable the commit button when files have changes to commit and the user has entered a commit message summary', () => {
+    it('should not apply a class to disable the commit button when files have changes to commit and the user has entered a commit message', () => {
       const props = {
         ...defaultProps,
-        summary: 'beep boop',
+        message: 'beep boop',
         hasFiles: true
       };
 
@@ -117,7 +182,7 @@ describe('CommitBox', () => {
     it('should apply a class to disable the commit input fields in amend mode', () => {
       const props = {
         ...defaultProps,
-        summary: 'beep boop',
+        message: 'beep boop',
         amend: true
       };
 

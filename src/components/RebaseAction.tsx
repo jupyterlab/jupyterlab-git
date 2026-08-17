@@ -14,7 +14,9 @@ import { classes } from 'typestyle';
 import {
   commitButtonClass,
   commitPaperClass,
+  commitPopperClass,
   commitRoot,
+  commitVariantItemClass,
   commitVariantSelector,
   disabledStyle
 } from '../style/CommitBox';
@@ -111,7 +113,14 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
           <verticalMoreIcon.react tag="span"></verticalMoreIcon.react>
         </Button>
       </ButtonGroup>
-      <Popper open={open} anchorEl={anchor.current} transition disablePortal>
+      <Popper
+        className={commitPopperClass}
+        open={open}
+        anchorEl={anchor.current}
+        placement="bottom-end"
+        transition
+        disablePortal
+      >
         {({ TransitionProps }) => (
           <Grow {...TransitionProps}>
             <Paper classes={{ root: classes(commitRoot, commitPaperClass) }}>
@@ -119,7 +128,9 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
                 <MenuList id="rebase-split-button-menu">
                   <MenuItem
                     key={'skip'}
-                    classes={{ root: commitRoot }}
+                    classes={{
+                      root: classes(commitRoot, commitVariantItemClass)
+                    }}
                     onClick={onSkip}
                     title={props.trans.__('Skip the current commit.')}
                   >
@@ -127,7 +138,9 @@ export function RebaseAction(props: IRebaseActionProps): JSX.Element {
                   </MenuItem>
                   <MenuItem
                     key={'abort'}
-                    classes={{ root: commitRoot }}
+                    classes={{
+                      root: classes(commitRoot, commitVariantItemClass)
+                    }}
                     onClick={onAbort}
                     title={props.trans.__('Abort the rebase.')}
                   >

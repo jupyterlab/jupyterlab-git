@@ -123,14 +123,10 @@ export interface IGitPanelState {
   pastCommits: Git.ISingleCommitInfo[];
 
   /**
-   * Commit message summary.
+   * Commit message. The first line is used as the commit summary and the
+   * remaining lines as the commit description.
    */
-  commitSummary: string;
-
-  /**
-   * Commit message description.
-   */
-  commitDescription: string;
+  commitMessage: string;
 
   /**
    * Amend option toggle
@@ -195,8 +191,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       nCommitsBehind: 0,
       pastCommits: [],
       repository: pathRepository,
-      commitSummary: '',
-      commitDescription: '',
+      commitMessage: '',
       commitAmend: false,
       hasDirtyFiles: hasDirtyStagedFiles,
       referenceCommit: null,
@@ -392,11 +387,17 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns a promise which commits changes
    */
   commitFiles = async (): Promise<void> => {
-    let msg = this.state.commitSummary;
+    const [summary, ...rest] = this.state.commitMessage.split('\n');
+    // Git only treats the text up to the first blank line as the commit
+    // summary, so separate the description with a blank line if it is not
+    // already there.
+    const description = rest.join('\n').replace(/^\n+/, '');
+
+    let msg = summary;
 
     // Only include description if not empty
-    if (this.state.commitDescription) {
-      msg = msg + '\n\n' + this.state.commitDescription + '\n';
+    if (description) {
+      msg = msg + '\n\n' + description + '\n';
     }
 
     if (!msg && !this.state.commitAmend) {
@@ -416,8 +417,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
       // Only erase commit message upon success
       this.setState({
-        commitSummary: '',
-        commitDescription: ''
+        commitMessage: ''
       });
     } catch (error) {
       console.error(error);
@@ -519,8 +519,48 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           'You have unsaved staged files. You probably want to save and stage all needed changes before committing.'
         );
 
+    const commitBoxPosition =
+      this.props.settings.composite['commitBoxPosition'] === 'bottom'
+        ? 'bottom'
+        : 'top';
+    const commitAction =
+      this.props.model.status.state !== Git.State.REBASING ? (
+        <CommitBox
+          commands={this.props.commands}
+          hasFiles={
+            inSimpleMode ? this._markedFiles.length > 0 : this._hasStagedFile()
+          }
+          trans={this.props.trans}
+          label={buttonLabel}
+          message={this.state.commitMessage}
+          amend={this.state.commitAmend}
+          position={commitBoxPosition}
+          setMessage={this._setCommitMessage}
+          setAmend={this._setCommitAmend}
+          onCommit={this.commitFiles}
+          warning={
+            this.state.hasDirtyFiles ? (
+              <WarningBox
+                headerIcon={<WarningRoundedIcon />}
+                title={warningTitle}
+                content={warningContent}
+              />
+            ) : null
+          }
+        />
+      ) : (
+        <RebaseAction
+          commands={this.props.commands}
+          hasConflict={this.state.files.some(
+            file => file.status === 'unmerged'
+          )}
+          trans={this.props.trans}
+        ></RebaseAction>
+      );
+
     return (
       <React.Fragment>
+        {commitBoxPosition === 'top' && commitAction}
         <FileList
           files={this._sortedFiles}
           model={this.props.model}
@@ -563,43 +603,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           collapsible={true}
           trans={this.props.trans}
         />
-
-        {this.props.model.status.state !== Git.State.REBASING ? (
-          <CommitBox
-            commands={this.props.commands}
-            hasFiles={
-              inSimpleMode
-                ? this._markedFiles.length > 0
-                : this._hasStagedFile()
-            }
-            trans={this.props.trans}
-            label={buttonLabel}
-            summary={this.state.commitSummary}
-            description={this.state.commitDescription}
-            amend={this.state.commitAmend}
-            setSummary={this._setCommitSummary}
-            setDescription={this._setCommitDescription}
-            setAmend={this._setCommitAmend}
-            onCommit={this.commitFiles}
-            warning={
-              this.state.hasDirtyFiles ? (
-                <WarningBox
-                  headerIcon={<WarningRoundedIcon />}
-                  title={warningTitle}
-                  content={warningContent}
-                />
-              ) : null
-            }
-          />
-        ) : (
-          <RebaseAction
-            commands={this.props.commands}
-            hasConflict={this.state.files.some(
-              file => file.status === 'unmerged'
-            )}
-            trans={this.props.trans}
-          ></RebaseAction>
-        )}
+        {commitBoxPosition === 'bottom' && commitAction}
       </React.Fragment>
     );
   }
@@ -723,24 +727,13 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   }
 
   /**
-   * Updates the commit message description.
+   * Updates the commit message.
    *
-   * @param description - commit message description
+   * @param message - commit message
    */
-  private _setCommitDescription = (description: string): void => {
+  private _setCommitMessage = (message: string): void => {
     this.setState({
-      commitDescription: description
-    });
-  };
-
-  /**
-   * Updates the commit message summary.
-   *
-   * @param summary - commit message summary
-   */
-  private _setCommitSummary = (summary: string): void => {
-    this.setState({
-      commitSummary: summary
+      commitMessage: message
     });
   };
 
