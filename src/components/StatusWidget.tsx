@@ -35,8 +35,8 @@ export class StatusWidget extends ReactWidget {
   /**
    * Sets the current status.
    */
-  set status(text: string) {
-    this._status = text;
+  set status(status: StatusWidget.IStatus) {
+    this._status = status;
     if (!this._locked) {
       this._animate();
     }
@@ -59,9 +59,9 @@ export class StatusWidget extends ReactWidget {
               <ActionButton
                 className={classes(
                   toolbarButtonClass,
-                  this._status !== 'idle'
-                    ? statusAnimatedIconClass
-                    : statusIconClass
+                  this._status.isIdle
+                    ? statusIconClass
+                    : statusAnimatedIconClass
                 )}
                 icon={gitIcon}
                 onClick={
@@ -72,7 +72,7 @@ export class StatusWidget extends ReactWidget {
                 title={
                   needsCredentials
                     ? `Git: ${this._trans.__('credentials required')}`
-                    : `Git: ${this._trans.__(this._status)}`
+                    : `Git: ${this._status.message}`
                 }
               />
             </Badge>
@@ -121,12 +121,29 @@ export class StatusWidget extends ReactWidget {
   private _locked = false;
 
   /**
-   * Status string.
+   * Current status.
    */
-  private _status = '';
+  private _status: StatusWidget.IStatus = { isIdle: false, message: '' };
 
   private _model: IGitExtension;
   private _trans: TranslationBundle;
+}
+
+export namespace StatusWidget {
+  /**
+   * Status displayed by the Git status bar widget.
+   */
+  export interface IStatus {
+    /**
+     * Whether no Git operation is currently running.
+     */
+    isIdle: boolean;
+
+    /**
+     * Translated message describing the current Git operation.
+     */
+    message: string;
+  }
 }
 
 export function addStatusBarWidget(
@@ -144,7 +161,7 @@ export function addStatusBarWidget(
     activeStateChanged: settings && settings.changed
   });
 
-  const callback = Private.createEventCallback(statusWidget);
+  const callback = Private.createEventCallback(statusWidget, trans);
   model.taskChanged.connect(callback);
 
   statusWidget.disposed.connect(() => {
@@ -157,10 +174,12 @@ namespace Private {
    *
    * @private
    * @param widget - status widget
+   * @param trans - language translator
    * @returns callback
    */
   export function createEventCallback(
-    widget: StatusWidget
+    widget: StatusWidget,
+    trans: TranslationBundle
   ): (model: IGitExtension, event: string) => void {
     return onEvent;
 
@@ -172,59 +191,61 @@ namespace Private {
      * @param event - event name
      */
     function onEvent(model: IGitExtension, event: string) {
-      let status;
+      let isIdle = false;
+      let message: string;
       switch (event) {
         case 'empty':
-          status = 'idle';
+          isIdle = true;
+          message = trans.__('idle');
           break;
         case 'git:checkout':
-          status = 'checking out…';
+          message = trans.__('checking out…');
           break;
         case 'git:clone':
-          status = 'cloning repository…';
+          message = trans.__('cloning repository…');
           break;
         case 'git:commit:create':
-          status = 'committing changes…';
+          message = trans.__('committing changes…');
           break;
         case 'git:commit:revert':
-          status = 'reverting changes…';
+          message = trans.__('reverting changes…');
           break;
         case 'git:init':
-          status = 'initializing repository…';
+          message = trans.__('initializing repository…');
           break;
         case 'git:merge':
-          status = 'merging…';
+          message = trans.__('merging…');
           break;
         case 'git:pull':
-          status = 'pulling changes…';
+          message = trans.__('pulling changes…');
           break;
         case 'git:pushing':
-          status = 'pushing changes…';
+          message = trans.__('pushing changes…');
           break;
         case 'git:rebase':
-          status = 'rebasing…';
+          message = trans.__('rebasing…');
           break;
         case 'git:rebase:resolve':
-          status = 'resolving rebase…';
+          message = trans.__('resolving rebase…');
           break;
         case 'git:refresh':
-          status = 'refreshing…';
+          message = trans.__('refreshing…');
           break;
         case 'git:reset:changes':
-          status = 'resetting changes…';
+          message = trans.__('resetting changes…');
           break;
         case 'git:reset:hard':
-          status = 'discarding changes…';
+          message = trans.__('discarding changes…');
           break;
         default:
           if (/git:add:files/.test(event)) {
-            status = 'adding files…';
+            message = trans.__('adding files…');
           } else {
-            status = 'working…';
+            message = trans.__('working…');
           }
           break;
       }
-      widget.status = status;
+      widget.status = { isIdle, message };
     }
   }
 
