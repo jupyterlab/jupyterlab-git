@@ -1,3 +1,4 @@
+import { Notification } from '@jupyterlab/apputils';
 import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditorFactory,
@@ -5,8 +6,11 @@ import {
   EditorLanguageRegistry,
   IEditorLanguageRegistry
 } from '@jupyterlab/codemirror';
+import { PathExt } from '@jupyterlab/coreutils';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
 import { TranslationBundle, nullTranslator } from '@jupyterlab/translation';
+import { Toolbar, ToolbarButton } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel, Widget } from '@lumino/widgets';
 import {
@@ -35,18 +39,25 @@ export const createPlainTextDiff = async ({
   editorFactory,
   languageRegistry,
   model,
+  contentsManager,
+  documentManager,
   toolbar,
   translator
 }: Git.Diff.IFactoryOptions & {
   languageRegistry: IEditorLanguageRegistry;
   editorFactory?: CodeEditor.Factory;
+  contentsManager?: Contents.IManager;
+  documentManager?: IDocumentManager;
 }): Promise<PlainTextDiff> => {
   const widget = new PlainTextDiff({
     model,
     languageRegistry,
     editorFactory,
+    contentsManager,
+    documentManager,
     trans: (translator ?? nullTranslator).load('jupyterlab_git')
   });
+  widget.addToolbarItems(toolbar);
   await widget.ready;
   return widget;
 };
@@ -59,11 +70,15 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
     model,
     languageRegistry,
     trans,
-    editorFactory
+    editorFactory,
+    contentsManager,
+    documentManager
   }: {
     model: Git.Diff.IModel;
     languageRegistry?: IEditorLanguageRegistry;
     editorFactory?: CodeEditor.Factory;
+    contentsManager?: Contents.IManager;
+    documentManager?: IDocumentManager;
     trans?: TranslationBundle;
   }) {
     super();
@@ -85,6 +100,12 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
       editorFactory ?? createEditorFactory(this._languageRegistry);
     this._model = model;
     this._trans = trans ?? nullTranslator.load('jupyterlab_git');
+    this._contentsManager = contentsManager;
+    this._documentManager = documentManager;
+    this._fullPath = PathExt.join(
+      this._model.repositoryPath ?? '/',
+      this._model.filename
+    );
 
     // Load file content early
     Promise.all([
@@ -134,6 +155,25 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
   }
 
   /**
+   * Add plain text diff toolbar items.
+   */
+  addToolbarItems(toolbar?: Toolbar): void {
+    if (!toolbar || !this._isEditableDiff) {
+      return;
+    }
+
+    this._editButton = new ToolbarButton({
+      label: this._trans.__('Edit'),
+      onClick: () => {
+        this._setEditMode(!this._isEditMode);
+      },
+      tooltip: this._trans.__('Toggle inline edit mode')
+    });
+    this._editButton.pressed = this._isEditMode;
+    toolbar.addItem('edit', this._editButton);
+  }
+
+  /**
    * Gets the file model of a resolved merge conflict,
    * and rejects if unable to retrieve.
    */
@@ -179,32 +219,64 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
    */
   async refresh(): Promise<void> {
     await this.ready;
+    if (this._isRefreshing) {
+      this._refreshQueued = true;
+      return;
+    }
+    this._isRefreshing = true;
+    const previousEditor = this._mergeView?.right?.remoteEditorWidget;
+    const previousSelection = previousEditor?.editor.getSelection() ?? null;
+    const wasFocused = previousEditor?.editor.hasFocus() ?? false;
+    const previousScrollTop = previousEditor?.cm.scrollDOM.scrollTop ?? null;
+    const previousScrollLeft = previousEditor?.cm.scrollDOM.scrollLeft ?? null;
     try {
+      this._saveEditedContent();
       // Clear all
-      this._mergeView.dispose();
+      this._setEditableEditor(null);
+      this._clearSaveTimer();
+      this._mergeView?.dispose();
+      // @ts-expect-error complex initialization
+      this._mergeView = null;
 
-      // ENH request content only if it changed
-      if (this._reference !== null) {
-        this._reference = await this._model.reference.content();
-      }
-      if (this._challenger !== null) {
-        this._challenger = await this._model.challenger.content();
-      }
-      if (this._base !== null) {
-        this._base = (await this._model.base?.content()) ?? null;
-      }
+      // Always fetch latest content to support repeated refreshes.
+      this._reference = await this._model.reference.content();
+      this._challenger = await this._model.challenger.content();
+      this._base = this._hasConflict
+        ? (await this._model.base?.content()) ?? null
+        : null;
 
-      this.createDiffView(
+      await this.createDiffView(
         this._challenger!,
         this._reference!,
         this._hasConflict ? this._base : null
       );
-
-      this._challenger = null;
-      this._reference = null;
-      this._base = null;
+      if (previousSelection && this._mergeView?.right) {
+        const editorWidget = this._mergeView.right.remoteEditorWidget;
+        window.requestAnimationFrame(() => {
+          if (this.isDisposed || !this._mergeView?.right) {
+            return;
+          }
+          editorWidget.editor.setSelection(previousSelection);
+          editorWidget.editor.revealSelection(previousSelection);
+          if (previousScrollTop !== null) {
+            editorWidget.cm.scrollDOM.scrollTop = previousScrollTop;
+          }
+          if (previousScrollLeft !== null) {
+            editorWidget.cm.scrollDOM.scrollLeft = previousScrollLeft;
+          }
+          if (wasFocused) {
+            editorWidget.editor.focus();
+          }
+        });
+      }
     } catch (reason) {
       this.showError(reason as Error);
+    } finally {
+      this._isRefreshing = false;
+      if (this._refreshQueued && !this.isDisposed) {
+        this._refreshQueued = false;
+        void this.refresh();
+      }
     }
   }
 
@@ -264,13 +336,16 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
         remote,
         local,
         merged,
-        // factory: this._editorFactory
+        factory: this._editorFactory,
         showBase: false
       });
       this._mergeView.addClass('jp-git-PlainText-diff');
 
       this.addWidget(this._mergeView);
     }
+
+    this._lastSavedContent = challengerContent;
+    this._updateEditMode();
 
     return Promise.resolve();
   }
@@ -281,6 +356,8 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
    * @param error Error object
    */
   protected showError(error: Error): void {
+    this._setEditableEditor(null);
+    this._clearSaveTimer();
     console.error(
       this._trans.__('Failed to load file diff.'),
       error,
@@ -292,10 +369,25 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
       this.layout?.removeWidget(w);
       w.dispose();
     }
+    // @ts-expect-error complex initialization
+    this._mergeView = null;
     this.node.innerHTML = `<p class="jp-git-diff-error">
       <span>${this._trans.__('Error Loading File Diff:')}</span>
       <span class="jp-git-diff-error-message">${msg}</span>
     </p>`;
+  }
+
+  /**
+   * Dispose plain text diff widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._saveEditedContent();
+    this._setEditableEditor(null);
+    this._clearSaveTimer();
+    super.dispose();
   }
 
   protected _editorFactory: CodeEditor.Factory;
@@ -304,11 +396,280 @@ export class PlainTextDiff extends Panel implements Git.Diff.IDiffWidget {
   protected _mergeView: MergeView;
   protected _model: Git.Diff.IModel;
   protected _trans: TranslationBundle;
+  protected _contentsManager: Contents.IManager | undefined;
+  protected _documentManager: IDocumentManager | undefined;
+  protected _fullPath: string;
+  protected _editButton: ToolbarButton | null = null;
+  protected _isEditMode = false;
+  protected _saveTimer: number | null = null;
+  protected _isSaving = false;
+  protected _isRefreshing = false;
+  protected _refreshQueued = false;
+  protected _refreshAfterSave = false;
+  protected _nextSaveContent: string | null = null;
+  protected _editableEditor: CodeEditor.IEditor | null = null;
+  protected _lastSavedContent: string | null = null;
 
   private _reference: string | null = null;
   private _challenger: string | null = null;
   private _languageRegistry: IEditorLanguageRegistry;
   private _base: string | null = null;
+
+  /**
+   * Whether this diff can be edited inline.
+   */
+  private get _isEditableDiff(): boolean {
+    return (
+      !this._hasConflict &&
+      this._contentsManager !== undefined &&
+      this._model.challenger.source === Git.Diff.SpecialRef.WORKING
+    );
+  }
+
+  /**
+   * Set inline edit mode.
+   */
+  private _setEditMode(isEditMode: boolean): void {
+    if (!this._isEditableDiff || this._isEditMode === isEditMode) {
+      return;
+    }
+    if (isEditMode && this._hasConflictingDirtyContext()) {
+      this._showDirtyContextWarning();
+      return;
+    }
+    this._isEditMode = isEditMode;
+    if (!this._isEditMode) {
+      this._refreshAfterSave = this._saveEditedContent();
+    }
+    this._updateEditMode();
+    if (this._editButton) {
+      this._editButton.pressed = isEditMode;
+    }
+  }
+
+  /**
+   * Update editor read-only mode and save listeners.
+   */
+  private _updateEditMode(): void {
+    if (!this._isEditableDiff || !this._mergeView?.right) {
+      return;
+    }
+
+    const editorWidget = this._mergeView.right.remoteEditorWidget;
+    editorWidget.editor.setOption('readOnly', !this._isEditMode);
+    this._setEditableEditor(this._isEditMode ? editorWidget.editor : null);
+  }
+
+  /**
+   * Set the current editable editor.
+   */
+  private _setEditableEditor(editor: CodeEditor.IEditor | null): void {
+    if (this._editableEditor === editor) {
+      return;
+    }
+    this._editableEditor?.model.sharedModel.changed.disconnect(
+      this._onSharedModelChanged
+    );
+    this._editableEditor?.host.removeEventListener('keyup', this._onKeyup);
+
+    this._editableEditor = editor;
+
+    this._editableEditor?.model.sharedModel.changed.connect(
+      this._onSharedModelChanged
+    );
+    this._editableEditor?.host.addEventListener('keyup', this._onKeyup);
+  }
+
+  /**
+   * Shared model change handler.
+   */
+  private _onSharedModelChanged = (): void => {
+    this._syncOpenEditor();
+    this._queueSave();
+  };
+
+  /**
+   * Debounce file save while editing.
+   */
+  private _queueSave(): void {
+    this._clearSaveTimer();
+    this._saveTimer = window.setTimeout(() => {
+      this._saveTimer = null;
+      this._saveEditedContent();
+    }, 1000);
+  }
+
+  /**
+   * Fallback for key events where shared model change can be delayed.
+   */
+  private _onKeyup = (event: KeyboardEvent): void => {
+    if (event.key === 'Enter') {
+      this._syncOpenEditor();
+      this._queueSave();
+    }
+  };
+
+  /**
+   * Synchronize inline diff edits with an already-open file editor context.
+   */
+  private _syncOpenEditor(): void {
+    const context = this._getOpenDocumentContext();
+    if (!context) {
+      return;
+    }
+    const content = this._getEditedContent();
+    if (content === null) {
+      return;
+    }
+    const source = context.model.toString();
+    if (this._hasConflictingDirtyContext(content, context)) {
+      this._setEditMode(false);
+      this._showDirtyContextWarning();
+      return;
+    }
+    if (source !== content) {
+      context.model.fromString(content);
+    }
+  }
+
+  /**
+   * Check if an open editor has unsaved changes that conflict with inline edit.
+   */
+  private _hasConflictingDirtyContext(
+    content = this._getEditedContent(),
+    context = this._getOpenDocumentContext()
+  ): boolean {
+    if (!context || content === null || !context.model.dirty) {
+      return false;
+    }
+    return context.model.toString() !== content;
+  }
+
+  /**
+   * Warn the user that inline edit cannot safely sync to a dirty open editor.
+   */
+  private _showDirtyContextWarning(): void {
+    Notification.error(
+      this._trans.__(
+        'Inline edit is unavailable while this file has unsaved changes in another editor.'
+      ),
+      { autoClose: 5000 }
+    );
+  }
+
+  /**
+   * Get the currently open document context for this file path.
+   */
+  private _getOpenDocumentContext():
+    | ReturnType<IDocumentManager['contextForWidget']>
+    | undefined {
+    if (!this._documentManager) {
+      return undefined;
+    }
+    const widget = this._documentManager.findWidget(this._fullPath);
+    if (!widget) {
+      return undefined;
+    }
+    return this._documentManager.contextForWidget(widget);
+  }
+
+  /**
+   * Clear pending save timer.
+   */
+  private _clearSaveTimer(): void {
+    if (this._saveTimer !== null) {
+      window.clearTimeout(this._saveTimer);
+      this._saveTimer = null;
+    }
+  }
+
+  /**
+   * Save edited content to the underlying file.
+   */
+  private _saveEditedContent(): boolean {
+    if (!this._contentsManager || !this._mergeView?.right) {
+      return false;
+    }
+    const content = this._getEditedContent();
+    if (content === null) {
+      return false;
+    }
+    if (content === this._lastSavedContent) {
+      return false;
+    }
+    this._nextSaveContent = content;
+    if (!this._isSaving) {
+      void this._flushSaveQueue();
+    }
+    return true;
+  }
+
+  /**
+   * Get the current edited content from the active editor model.
+   */
+  private _getEditedContent(): string | null {
+    const right = this._mergeView?.right;
+    if (!right) {
+      return null;
+    }
+    const editorWidget = right.remoteEditorWidget;
+    const sharedContent =
+      editorWidget.editor?.model?.sharedModel?.getSource?.() ?? null;
+    if (typeof sharedContent === 'string') {
+      return sharedContent;
+    }
+    return editorWidget.doc.toString();
+  }
+
+  /**
+   * Flush pending save requests sequentially.
+   */
+  private async _flushSaveQueue(): Promise<void> {
+    if (!this._contentsManager) {
+      return;
+    }
+    this._isSaving = true;
+    while (this._nextSaveContent !== null) {
+      const content = this._nextSaveContent;
+      this._nextSaveContent = null;
+      try {
+        const context = this._getOpenDocumentContext();
+        if (context) {
+          if (this._hasConflictingDirtyContext(content, context)) {
+            this._setEditMode(false);
+            this._showDirtyContextWarning();
+            continue;
+          }
+          if (context.model.toString() !== content) {
+            context.model.fromString(content);
+          }
+          await context.save();
+        } else {
+          await this._contentsManager.save(this._fullPath, {
+            type: 'file',
+            format: 'text',
+            content
+          });
+        }
+        this._lastSavedContent = content;
+      } catch (reason) {
+        console.error(
+          this._trans.__('Failed to save inline diff changes.'),
+          reason,
+          (reason as any)?.traceback
+        );
+        Notification.error(
+          this._trans.__('Failed to save inline diff changes.'),
+          { autoClose: 5000 }
+        );
+      }
+    }
+    this._isSaving = false;
+    if (this._refreshAfterSave && !this.isDisposed) {
+      this._refreshAfterSave = false;
+      void this.refresh();
+    }
+  }
 }
 
 /**
