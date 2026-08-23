@@ -19,7 +19,11 @@ import {
 } from '../style/GitPanel';
 import { addIcon, rewindIcon, trashIcon } from '../style/icons';
 import { CommandIDs, Git } from '../tokens';
-import { openFileDiff, stopPropagationWrapper } from '../utils';
+import {
+  commitToDiffRef,
+  openFileDiff,
+  stopPropagationWrapper
+} from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import { ActionButton } from './ActionButton';
 import { CommitBox } from './CommitBox';
@@ -153,6 +157,14 @@ export interface IGitPanelState {
   challengerCommit: Git.ISingleCommitInfo | null;
 
   /**
+   * Branch comparison to display.
+   */
+  branchComparison: {
+    reference: Git.IRefComparison;
+    challenger: Git.IRefComparison;
+  } | null;
+
+  /**
    * Stashed files
    *
    */
@@ -201,6 +213,7 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       hasDirtyFiles: hasDirtyStagedFiles,
       referenceCommit: null,
       challengerCommit: null,
+      branchComparison: null,
       stash: stash,
       tagsList: tagsList,
       submodules: submodules
@@ -217,7 +230,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.setState({
         repository: args.newValue,
         referenceCommit: null,
-        challengerCommit: null
+        challengerCommit: null,
+        branchComparison: null
       });
       this.refreshView();
     }, this);
@@ -334,7 +348,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
     this.setState({
       currentBranch: currentBranch ? currentBranch.name : 'main',
       referenceCommit: null,
-      challengerCommit: null
+      challengerCommit: null,
+      branchComparison: null
     });
   };
 
@@ -482,7 +497,29 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
           commands={this.props.commands}
           model={this.props.model}
           trans={this.props.trans}
+          onCompareWithCurrent={this._onCompareBranchWithCurrent}
         />
+        {this.state.branchComparison && (
+          <CommitComparisonBox
+            header={this.props.trans.__(
+              'Compare %1 and %2',
+              this.state.branchComparison.reference.label,
+              this.state.branchComparison.challenger.label
+            )}
+            reference={this.state.branchComparison.reference}
+            challenger={this.state.branchComparison.challenger}
+            model={this.props.model}
+            trans={this.props.trans}
+            onClose={event => {
+              event?.stopPropagation();
+              this.setState({ branchComparison: null });
+            }}
+            onOpenDiff={openFileDiff(this.props.commands)(
+              this.state.branchComparison.challenger,
+              this.state.branchComparison.reference
+            )}
+          />
+        )}
         <TagMenu
           pastCommits={this.state.pastCommits}
           tagsList={this.state.tagsList}
@@ -645,9 +682,16 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
                   ? this.state.challengerCommit.commit.substring(0, 7)
                   : '...'
               )}
-              referenceCommit={this.state.referenceCommit}
-              challengerCommit={this.state.challengerCommit}
-              commands={this.props.commands}
+              reference={
+                this.state.referenceCommit
+                  ? commitToDiffRef(this.state.referenceCommit)
+                  : null
+              }
+              challenger={
+                this.state.challengerCommit
+                  ? commitToDiffRef(this.state.challengerCommit)
+                  : null
+              }
               model={this.props.model}
               trans={this.props.trans}
               onClose={event => {
@@ -660,8 +704,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
               onOpenDiff={
                 this.state.referenceCommit && this.state.challengerCommit
                   ? openFileDiff(this.props.commands)(
-                      this.state.challengerCommit,
-                      this.state.referenceCommit
+                      commitToDiffRef(this.state.challengerCommit),
+                      commitToDiffRef(this.state.referenceCommit)
                     )
                   : undefined
               }
@@ -721,6 +765,29 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       </React.Fragment>
     );
   }
+
+  private _onCompareBranchWithCurrent = (branch: Git.IBranch): void => {
+    const currentBranch =
+      this.props.model.currentBranch ??
+      this.state.branches.find(branch => branch.is_current_branch);
+
+    if (!currentBranch) {
+      return;
+    }
+
+    this.setState({
+      branchComparison: {
+        reference: {
+          ref: branch.name,
+          label: branch.name
+        },
+        challenger: {
+          ref: currentBranch.name,
+          label: currentBranch.name
+        }
+      }
+    });
+  };
 
   /**
    * Updates the commit message description.
@@ -1085,8 +1152,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
       this.state.challengerCommit
     ) {
       openFileDiff(this.props.commands)(
-        this.state.challengerCommit,
-        this.state.referenceCommit
+        commitToDiffRef(this.state.challengerCommit),
+        commitToDiffRef(this.state.referenceCommit)
       )(
         this.props.model.selectedHistoryFile.to,
         !this.props.model.selectedHistoryFile.is_binary
