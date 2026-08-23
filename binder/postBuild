@@ -43,10 +43,7 @@ _(
     "packages/jupyterlab",
 )
 _(
-    sys.executable,
-    "-m",
-    "jupyter",
-    "labextension",
+    "jupyter-builder",
     "develop",
     "packages/core",
     "--overwrite",

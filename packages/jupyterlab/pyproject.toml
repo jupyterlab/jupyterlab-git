@@ -33,6 +33,7 @@ dynamic = ["version", "description", "authors", "urls", "keywords"]
 [project.optional-dependencies]
 dev = [
   "black",
+  "jupyter-builder>=1.2.0",
   "jupyterlab~=4.0",
   "pre-commit"
 ]

@@ -182,7 +182,7 @@ export function addCommands(
     execute: () => {
       try {
         shell.activateById('jp-git-sessions');
-      } catch (_err) {
+      } catch {
         console.error('Fail to open Git tab.');
       }
     }
@@ -241,7 +241,8 @@ export function addCommands(
 
   /** Open URL externally */
   commands.addCommand(CommandIDs.gitOpenUrl, {
-    label: args => trans.__(args['text'] as string),
+    // `text` is already translated by the caller (see RESOURCES in createGitMenu)
+    label: args => args['text'] as string,
     execute: args => {
       const url = args['url'] as string;
       window.open(url);
@@ -333,7 +334,7 @@ export function addCommands(
           await gitModel.writeGitIgnore(newContent);
           preview.title.className = '';
           saved = true;
-        } catch (_error) {
+        } catch {
           console.log('Could not save .gitignore');
         }
       },
@@ -1175,7 +1176,7 @@ export function addCommands(
           } else {
             console.log('Cannot open a folder here');
           }
-        } catch (_err) {
+        } catch {
           console.error(`Fail to open ${to}.`);
         }
       }
@@ -1381,6 +1382,9 @@ export function addCommands(
         } as any);
 
         if (widget) {
+          // The model lives as long as the widget displaying it.
+          widget.disposed.connect(() => model.dispose());
+
           // Trigger diff model update
           if (diffContext.previousRef === 'HEAD') {
             const updateHead = () => {
@@ -1426,6 +1430,9 @@ export function addCommands(
               app.serviceManager.contents.fileChanged.disconnect(updateCurrent);
             });
           }
+        } else {
+          // No diff widget was opened, so nothing else will dispose the model.
+          model.dispose();
         }
       }
     },
@@ -2024,6 +2031,10 @@ export function addFileBrowserContextMenu(
     }
 
     const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+    // Ownership is handed to the application context menu right below, which
+    // outlives this extension: `addFileBrowserContextMenu` only runs at plugin
+    // activation, so the submenu lives for the whole session.
+    // eslint-disable-next-line jupyter/require-disposable-ownership
     gitMenu = new GitMenu({ commands: contextMenu.menu.commands });
     gitMenu.title.label = trans.__('Git');
     gitMenu.title.icon = gitIcon.bindprops({ stylesheet: 'menuItem' });

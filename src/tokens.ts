@@ -20,6 +20,11 @@ export interface IGitExtension extends IDisposable {
   branches: Git.IBranch[];
 
   /**
+   * The list of remotes in the current repo
+   */
+  remotes: Git.IGitRemote[];
+
+  /**
    * The list of tags in the current repo
    */
   tagsList: Git.ITag[];
@@ -135,6 +140,11 @@ export interface IGitExtension extends IDisposable {
     IGitExtension,
     Git.IRemoteChangedNotification | null
   >;
+
+  /**
+   * A signal emitted when the list of remotes of the Git repository changes.
+   */
+  readonly remotesChanged: ISignal<IGitExtension, void>;
 
   /**
    * A signal emitted indicating whether there are dirty (e.g., unsaved) staged files.
@@ -546,6 +556,23 @@ export interface IGitExtension extends IDisposable {
   refreshDirtyStatus(): Promise<void>;
 
   /**
+   * Refresh the list of remotes of the current repository.
+   *
+   * Emit remotesChanged if the list of remotes changes.
+   *
+   * ## Notes
+   *
+   * -   The cached list of remotes is kept on failure, unless the current
+   *     path is not a Git repository anymore.
+   *
+   * @returns promise which resolves upon refreshing the remotes
+   *
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  refreshRemotes(): Promise<void>;
+
+  /**
    * Request Git status refresh
    */
   refreshStatus(): Promise<void>;
@@ -559,6 +586,18 @@ export interface IGitExtension extends IDisposable {
    * Notifies user is a file that is attached has is behind changes in the remote branch with a pop-up Dialog
    */
   checkRemoteChangeNotified(): Promise<void>;
+
+  /**
+   * Remove a remote repository by name
+   *
+   * @param name - name of the remote to remove
+   * @returns promise which resolves upon removing the remote
+   *
+   * @throws {Git.NotInRepository} If the current path is not a Git repository
+   * @throws {Git.GitResponseError} If the server response is not ok
+   * @throws {ServerConnection.NetworkError} If the request cannot be made
+   */
+  removeRemote(name: string): Promise<void>;
 
   /**
    * Register a new diff provider for specified file extensions

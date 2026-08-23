@@ -52,6 +52,8 @@ interface IModelOptions {
   submodules?: Git.ISubmodule[];
   remotes?: Git.IGitRemote[];
   status?: { ahead?: number; behind?: number; state?: Git.State };
+  // Repository path to set on the model; `null` leaves the model without a repository
+  repository?: string | null;
 }
 
 async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
@@ -75,7 +77,13 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
           body: () => ({ code: 0, submodules })
         },
         'remote/show': {
-          body: () => ({ code: 0, remotes })
+          body: () => ({ code: 0, remotes: [...remotes] })
+        },
+        'remote/add': {
+          body: () => ({ code: 0 })
+        },
+        'remote/origin': {
+          body: () => ({ code: 0 })
         },
         status: {
           body: () => ({
@@ -93,11 +101,14 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
   );
 
   const model = new GitExtension();
-  model.pathRepository = DEFAULT_REPOSITORY_PATH;
-  await model.ready;
-  // Manually fetch branch/submodule data; model.ready does not await these.
-  await model.refreshBranch();
-  await model.listSubmodules();
+  if (options.repository !== null) {
+    model.pathRepository = options.repository ?? DEFAULT_REPOSITORY_PATH;
+    await model.ready;
+    // Manually fetch branch/submodule/remote data; model.ready does not await these.
+    await model.refreshBranch();
+    await model.listSubmodules();
+    await model.refreshRemotes();
+  }
   return model;
 }
 
@@ -312,6 +323,75 @@ describe('Toolbar', () => {
         })[1]
       );
       expect(mockedExecute).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('repository discovery', () => {
+    it('should enable the pull and push buttons when the repository is discovered after mount', async () => {
+      model = await createModel({ repository: null });
+      render(<Toolbar {...createProps()} />);
+
+      // The toolbar is empty as long as no repository is detected
+      expect(screen.queryAllByRole('button')).toHaveLength(0);
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: 'Pull latest changes' })
+        ).toBeEnabled();
+        expect(
+          screen.getByRole('button', { name: 'Push committed changes' })
+        ).toBeEnabled();
+      });
+    });
+  });
+
+  describe('remotes management', () => {
+    it('should enable the pull and push buttons when a remote is added', async () => {
+      const remotes: Git.IGitRemote[] = [];
+      model = await createModel({ remotes });
+      render(<Toolbar {...createProps()} />);
+
+      expect(
+        await screen.findAllByRole('button', {
+          name: 'No remote repository defined'
+        })
+      ).toHaveLength(2);
+
+      remotes.push({ name: 'origin', url: 'https://origin.com' });
+      await model.addRemote('https://origin.com', 'origin');
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: 'Pull latest changes' })
+        ).toBeEnabled();
+        expect(
+          screen.getByRole('button', { name: 'Push committed changes' })
+        ).toBeEnabled();
+      });
+    });
+
+    it('should disable the pull and push buttons when the last remote is removed', async () => {
+      const remotes: Git.IGitRemote[] = [...REMOTES];
+      model = await createModel({ remotes });
+      render(<Toolbar {...createProps()} />);
+
+      expect(
+        await screen.findByRole('button', { name: 'Pull latest changes' })
+      ).toBeEnabled();
+
+      remotes.length = 0;
+      await model.removeRemote('origin');
+
+      await waitFor(() => {
+        expect(
+          screen.getAllByRole('button', {
+            name: 'No remote repository defined'
+          })
+        ).toHaveLength(2);
+      });
     });
   });
 

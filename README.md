@@ -257,7 +257,7 @@ uv sync
 pip install -e "packages/core[dev]" -e "packages/jupyterlab[dev,test]"
 pre-commit install
 # Link your development version of the extension with JupyterLab
-jupyter labextension develop packages/core --overwrite
+jupyter-builder develop packages/core --overwrite
 # Server extension must be manually installed in develop mode
 jupyter server extension enable jupyterlab_git
 # Rebuild extension Typescript source after making changes
@@ -289,7 +289,7 @@ jupyter server extension disable jupyterlab_git
 pip uninstall jupyterlab-git jupyterlab-git-core
 ```
 
-In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
+In development mode, you will also need to remove the symlink created by `jupyter-builder develop`
 command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
 folder is located. Then you can remove the symlink named `@jupyterlab/git` within that folder.
 
@@ -304,7 +304,7 @@ Install test dependencies (needed only once):
 ```sh
 pip install -e "packages/core[test]" -e "packages/jupyterlab[test]"
 # Each time you install the Python package, you need to restore the front-end extension link
-jupyter labextension develop packages/core --overwrite
+jupyter-builder develop packages/core --overwrite
 ```
 
 To execute them, run:
