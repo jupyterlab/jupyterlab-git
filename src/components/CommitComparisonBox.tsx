@@ -78,7 +78,7 @@ export function CommitComparisonBox(
   const [collapsed, setCollapsed] = React.useState<boolean>(false);
   const [files, setFiles] = React.useState<Git.ICommitModifiedFile[]>([]);
 
-  const { reference, challenger, model } = props;
+  const { reference, challenger, model, trans } = props;
   const referenceRef = reference?.ref ?? null;
   const referenceLabel = reference?.label ?? null;
   const challengerRef = challenger?.ref ?? null;
@@ -94,11 +94,15 @@ export function CommitComparisonBox(
   }, 0);
 
   React.useEffect(() => {
+    let cancelled = false;
+
     (async () => {
       if (referenceRef === null || challengerRef === null) {
         setFiles([]);
         return;
       }
+
+      setFiles([]);
 
       let diffResult: Git.IDiffResult | null = null;
       try {
@@ -107,11 +111,20 @@ export function CommitComparisonBox(
           throw new Error(diffResult.message);
         }
       } catch (err: any) {
+        if (cancelled) {
+          return;
+        }
         const msg = `Failed to get the diff for ${referenceLabel} and ${challengerLabel}.`;
         console.error(msg, err);
-        Notification.error(msg, showError(err, props.trans));
+        setFiles([]);
+        Notification.error(msg, showError(err, trans));
         return;
       }
+
+      if (cancelled) {
+        return;
+      }
+
       if (diffResult) {
         setFiles(
           (diffResult.result ?? []).map(changedFile => {
@@ -133,7 +146,18 @@ export function CommitComparisonBox(
         setFiles([]);
       }
     })();
-  }, [referenceRef, referenceLabel, challengerRef, challengerLabel, model]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    referenceRef,
+    referenceLabel,
+    challengerRef,
+    challengerLabel,
+    model,
+    trans
+  ]);
 
   return (
     <div className={commitComparisonBoxStyle}>
@@ -178,7 +202,7 @@ export function CommitComparisonBox(
           <p>
             {hasDiff
               ? props.trans.__('No changes')
-              : props.trans.__('No challenger selected.')}
+              : props.trans.__('No challenger commit selected.')}
           </p>
         ))}
     </div>

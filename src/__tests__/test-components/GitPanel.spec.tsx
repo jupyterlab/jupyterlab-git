@@ -519,7 +519,51 @@ describe('GitPanel', () => {
       );
 
       await waitFor(() => {
-        expect(props.model.diff).toHaveBeenCalledWith('main', 'feature');
+        expect(props.model.diff).toHaveBeenCalledWith(
+          'refs/heads/main',
+          'refs/heads/feature'
+        );
+      });
+    });
+
+    it('should compare a selected remote branch against the current branch', async () => {
+      const currentBranch = {
+        is_current_branch: true,
+        is_remote_branch: false,
+        name: 'feature',
+        tag: null,
+        top_commit: 'feature-hash',
+        upstream: null
+      };
+      const baseBranch = {
+        is_current_branch: false,
+        is_remote_branch: true,
+        name: 'origin/main',
+        tag: null,
+        top_commit: 'main-hash',
+        upstream: null
+      };
+
+      (props.model as any).branches = [currentBranch, baseBranch];
+      (props.model as any).currentBranch = currentBranch;
+      (props.model as any).pathRepository = '/path';
+      (props.model as any).status = { files: [], state: 0 };
+      (props.model as any).diff = jest.fn().mockResolvedValue({
+        code: 0,
+        result: []
+      });
+
+      render(<GitPanel {...props} contentMode="branches" />);
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Compare with current branch' })
+      );
+
+      await waitFor(() => {
+        expect(props.model.diff).toHaveBeenCalledWith(
+          'refs/remotes/origin/main',
+          'refs/heads/feature'
+        );
       });
     });
   });

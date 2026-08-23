@@ -777,17 +777,20 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
 
     this.setState({
       branchComparison: {
-        reference: {
-          ref: branch.name,
-          label: branch.name
-        },
-        challenger: {
-          ref: currentBranch.name,
-          label: currentBranch.name
-        }
+        reference: this._branchToDiffRef(branch),
+        challenger: this._branchToDiffRef(currentBranch)
       }
     });
   };
+
+  private _branchToDiffRef(branch: Git.IBranch): Git.IRefComparison {
+    return {
+      ref: branch.is_remote_branch
+        ? `refs/remotes/${branch.name}`
+        : `refs/heads/${branch.name}`,
+      label: branch.name
+    };
+  }
 
   /**
    * Updates the commit message description.
