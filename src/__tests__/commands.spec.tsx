@@ -3,6 +3,7 @@ import { showDialog } from '@jupyterlab/apputils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import 'jest';
 import { CommandArguments, addCommands } from '../commandsAndMenu';
 import * as git from '../git';
@@ -65,6 +66,41 @@ describe('git-commands', () => {
       null as any,
       nullTranslator
     );
+  });
+
+  describe('git:context-diff', () => {
+    function diffArgs(statuses: Git.Status[]): ReadonlyPartialJSONObject {
+      return {
+        files: statuses.map((status, index) => ({
+          filePath: `file-${index}.txt`,
+          isText: true,
+          status
+        }))
+      } as unknown as ReadonlyPartialJSONObject;
+    }
+
+    it('should use conflict resolution labels for unmerged files', () => {
+      const args = diffArgs(['unmerged']);
+
+      expect(commands.label(ContextCommandIDs.gitFileDiff, args)).toBe(
+        'Resolve Conflicts'
+      );
+      expect(commands.caption(ContextCommandIDs.gitFileDiff, args)).toBe(
+        'Resolve conflicts in selected file'
+      );
+    });
+
+    it('should keep diff labels for non-conflict and mixed selections', () => {
+      expect(
+        commands.label(ContextCommandIDs.gitFileDiff, diffArgs(['staged']))
+      ).toBe('Diff');
+      expect(
+        commands.label(
+          ContextCommandIDs.gitFileDiff,
+          diffArgs(['unmerged', 'staged'])
+        )
+      ).toBe('Diff');
+    });
   });
 
   describe('git:context-discard', () => {

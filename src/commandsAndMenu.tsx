@@ -28,7 +28,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { PromiseDelegate } from '@lumino/coreutils';
+import { PromiseDelegate, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ContextMenu, DockPanel, Menu, Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
@@ -121,6 +121,12 @@ function pluralizedContextLabel(singular: string, plural: string) {
       return singular;
     }
   };
+}
+
+function isOnlyUnmergedDiff(args: ReadonlyPartialJSONObject): boolean {
+  const files = (args as unknown as Partial<CommandArguments.IGitFileDiff>)
+    .files;
+  return !!files?.length && files.every(file => file.status === 'unmerged');
 }
 
 /**
@@ -1233,12 +1239,24 @@ export function addCommands(
     }
   });
 
+  const diffCaption = pluralizedContextLabel(
+    trans.__('Diff selected file'),
+    trans.__('Diff selected files')
+  );
+  const resolveConflictsCaption = pluralizedContextLabel(
+    trans.__('Resolve conflicts in selected file'),
+    trans.__('Resolve conflicts in selected files')
+  );
+
   commands.addCommand(ContextCommandIDs.gitFileDiff, {
-    label: trans.__('Diff'),
-    caption: pluralizedContextLabel(
-      trans.__('Diff selected file'),
-      trans.__('Diff selected files')
-    ),
+    label: args =>
+      isOnlyUnmergedDiff(args)
+        ? trans.__('Resolve Conflicts')
+        : trans.__('Diff'),
+    caption: args =>
+      isOnlyUnmergedDiff(args)
+        ? resolveConflictsCaption(args)
+        : diffCaption(args),
     execute: async args => {
       const { files } = args as any as CommandArguments.IGitFileDiff;
       if (gitModel.pathRepository === null) {
