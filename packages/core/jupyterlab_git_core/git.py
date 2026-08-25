@@ -265,7 +265,7 @@ class Git:
         lock = _get_execution_lock()
         with anyio.move_on_after(self._execute_timeout) as scope:
             await lock.acquire()
-        if scope.cancelled_caught:
+        if scope.cancel_called:
             return 1, "", "Unable to get the lock on the directory"
         try:
             return await execute(
