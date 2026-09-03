@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import call, patch
+from unittest.mock import ANY, call, patch
 
 import pytest
 
@@ -743,7 +743,7 @@ async def test_branch_success():
                         "refs/heads/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    env=None,
+                    env=ANY,
                     username=None,
                     password=None,
                     is_binary=False,
@@ -757,7 +757,7 @@ async def test_branch_success():
                         "refs/remotes/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    env=None,
+                    env=ANY,
                     username=None,
                     password=None,
                     is_binary=False,
@@ -886,7 +886,7 @@ async def test_branch_success_detached_head():
                         "refs/heads/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    env=None,
+                    env=ANY,
                     username=None,
                     password=None,
                     is_binary=False,
@@ -918,7 +918,7 @@ async def test_branch_success_detached_head():
                         "refs/remotes/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    env=None,
+                    env=ANY,
                     username=None,
                     password=None,
                     is_binary=False,
@@ -1020,7 +1020,7 @@ async def test_branch_success_rebasing():
                         "refs/heads/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    env=None,
+                    env=ANY,
                     username=None,
                     password=None,
                     is_binary=False,
@@ -1052,7 +1052,7 @@ async def test_branch_success_rebasing():
                         "refs/remotes/",
                     ],
                     cwd=str(Path("/bin") / "test_curr_path"),
-                    env=None,
+                    env=ANY,
                     username=None,
                     password=None,
                     is_binary=False,

@@ -879,7 +879,9 @@ class Git:
             "refs/heads/",
         ]
 
-        code, output, error = await self.__execute(cmd, cwd=path, env=os.environ.copy())
+        code, output, error = await self.__execute(
+            cmd, cwd=path, env=os.environ.copy()
+        )
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
@@ -945,7 +947,9 @@ class Git:
             "refs/remotes/",
         ]
 
-        code, output, error = await self.__execute(cmd, cwd=path, env=os.environ.copy())
+        code, output, error = await self.__execute(
+            cmd, cwd=path, env=os.environ.copy()
+        )
         if code != 0:
             return {"code": code, "command": " ".join(cmd), "message": error}
 
