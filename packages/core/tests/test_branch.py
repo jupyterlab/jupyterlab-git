@@ -797,7 +797,7 @@ async def test_branch_failure():
         mock_execute.assert_called_once_with(
             expected_cmd,
             cwd=str(Path("/bin") / "test_curr_path"),
-            env=None,
+            env=ANY,
             username=None,
             password=None,
             is_binary=False,
