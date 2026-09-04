@@ -552,8 +552,8 @@ class Git:
         are_binary = dict()
         if text_code == 0:
             for line in filter(lambda l: len(l) > 0, strip_and_split(text_output)):
-                diff, name = line.rsplit("\t", maxsplit=1)
-                are_binary[name] = diff.startswith("-\t-")
+                insertions, deletions, name = line.split("\t", maxsplit=2)
+                are_binary[name] = insertions == "-" and deletions == "-"
 
         data = {
             "code": code,

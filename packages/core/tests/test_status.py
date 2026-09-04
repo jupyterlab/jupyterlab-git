@@ -16,6 +16,7 @@ from jupyterlab_git_core.git import Git
                 "A  notebook with spaces.ipynb",
                 "M  notebook with λ.ipynb",
                 "M  binary file.gif",
+                "M  file with\ttab.py",
                 "R  renamed_to_θ.py",
                 "originally_named_π.py",
                 "?? untracked.ipynb",
@@ -23,6 +24,7 @@ from jupyterlab_git_core.git import Git
             (
                 "0\t0\tnotebook with spaces.ipynb",
                 "-\t-\tbinary file.gif",
+                "1\t0\tfile with\ttab.py",
                 "0\t0\trenamed_to_θ.py",
             ),
             {
@@ -53,6 +55,13 @@ from jupyterlab_git_core.git import Git
                         "to": "binary file.gif",
                         "from": "binary file.gif",
                         "is_binary": True,
+                    },
+                    {
+                        "x": "M",
+                        "y": " ",
+                        "to": "file with\ttab.py",
+                        "from": "file with\ttab.py",
+                        "is_binary": False,
                     },
                     {
                         "x": "R",
