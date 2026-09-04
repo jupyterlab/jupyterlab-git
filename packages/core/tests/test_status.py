@@ -351,8 +351,12 @@ async def test_status(tmp_path, output, diff_output, expected):
         repository = tmp_path / "test_curr_path"
         (repository / ".git" / "rebase-merge").mkdir(parents=True)
 
+        # Without commits there is no HEAD, so the diff falls back to the empty tree.
+        is_initial = expected["branch"] == "(initial)"
+
         mock_execute.side_effect = [
             (0, "\x00".join(output) + "\x00", ""),
+            *([(128, "", "fatal: bad revision 'HEAD'")] if is_initial else []),
             (0, "\x00".join(diff_output) + "\x00", ""),
             (0 if expected["state"] == 4 else 128, "", "cherry pick"),
             (0 if expected["state"] == 2 else 128, "", "merge"),
@@ -374,20 +378,35 @@ async def test_status(tmp_path, output, diff_output, expected):
                 is_binary=False,
             ),
             call(
-                [
-                    "git",
-                    "diff",
-                    "--numstat",
-                    "-z",
-                    "--cached",
-                    "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
-                ],
+                ["git", "diff", "--numstat", "-z", "--no-renames", "HEAD"],
                 cwd=str(repository),
                 env=None,
                 username=None,
                 password=None,
                 is_binary=False,
             ),
+        ]
+
+        if is_initial:
+            expected_calls.append(
+                call(
+                    [
+                        "git",
+                        "diff",
+                        "--numstat",
+                        "-z",
+                        "--cached",
+                        "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+                    ],
+                    cwd=str(repository),
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                )
+            )
+
+        expected_calls += [
             call(
                 ["git", "show", "--quiet", "CHERRY_PICK_HEAD"],
                 cwd=str(repository),
