@@ -5,7 +5,6 @@ import {
   caretRightIcon,
   closeIcon
 } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
 import * as React from 'react';
 import { showError } from '../notifications';
 import {
@@ -26,19 +25,14 @@ import { CommitDiff } from './CommitDiff';
  */
 export interface ICommitComparisonBoxProps {
   /**
-   * Jupyter App commands registry.
+   * The Git ref to compare against.
    */
-  commands: CommandRegistry;
+  reference: Git.IRefComparison | null;
 
   /**
-   * The commit to compare against.
+   * The Git ref to compare.
    */
-  referenceCommit: Git.ISingleCommitInfo | null;
-
-  /**
-   * The commit to compare.
-   */
-  challengerCommit: Git.ISingleCommitInfo | null;
+  challenger: Git.IRefComparison | null;
 
   /**
    * Header text.
@@ -76,7 +70,7 @@ export interface ICommitComparisonBoxProps {
 }
 
 /**
- * A component which displays a comparison between two commits.
+ * A component which displays a comparison between two Git refs.
  */
 export function CommitComparisonBox(
   props: ICommitComparisonBoxProps
@@ -84,8 +78,12 @@ export function CommitComparisonBox(
   const [collapsed, setCollapsed] = React.useState<boolean>(false);
   const [files, setFiles] = React.useState<Git.ICommitModifiedFile[]>([]);
 
-  const { referenceCommit, challengerCommit, model } = props;
-  const hasDiff = referenceCommit !== null && challengerCommit !== null;
+  const { reference, challenger, model, trans } = props;
+  const referenceRef = reference?.ref ?? null;
+  const referenceLabel = reference?.label ?? null;
+  const challengerRef = challenger?.ref ?? null;
+  const challengerLabel = challenger?.label ?? null;
+  const hasDiff = reference !== null && challenger !== null;
   const totalInsertions = files.reduce((acc, file) => {
     const insertions = Number.parseInt(file.insertion, 10);
     return acc + (Number.isNaN(insertions) ? 0 : insertions);
@@ -96,27 +94,37 @@ export function CommitComparisonBox(
   }, 0);
 
   React.useEffect(() => {
+    let cancelled = false;
+
     (async () => {
-      if (referenceCommit === null || challengerCommit === null) {
+      if (referenceRef === null || challengerRef === null) {
         setFiles([]);
         return;
       }
 
+      setFiles([]);
+
       let diffResult: Git.IDiffResult | null = null;
       try {
-        diffResult = await model.diff(
-          referenceCommit.commit,
-          challengerCommit.commit
-        );
+        diffResult = await model.diff(referenceRef, challengerRef);
         if (diffResult.code !== 0) {
           throw new Error(diffResult.message);
         }
       } catch (err: any) {
-        const msg = `Failed to get the diff for ${referenceCommit.commit} and ${challengerCommit.commit}.`;
+        if (cancelled) {
+          return;
+        }
+        const msg = `Failed to get the diff for ${referenceLabel} and ${challengerLabel}.`;
         console.error(msg, err);
-        Notification.error(msg, showError(err, props.trans));
+        setFiles([]);
+        Notification.error(msg, showError(err, trans));
         return;
       }
+
+      if (cancelled) {
+        return;
+      }
+
       if (diffResult) {
         setFiles(
           (diffResult.result ?? []).map(changedFile => {
@@ -138,7 +146,18 @@ export function CommitComparisonBox(
         setFiles([]);
       }
     })();
-  }, [referenceCommit, challengerCommit]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    referenceRef,
+    referenceLabel,
+    challengerRef,
+    challengerLabel,
+    model,
+    trans
+  ]);
 
   return (
     <div className={commitComparisonBoxStyle}>
