@@ -15,6 +15,7 @@ import {
   addIcon,
   diffIcon,
   discardIcon,
+  mergeIcon,
   openIcon,
   removeIcon,
   rewindIcon
@@ -91,7 +92,7 @@ export const CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileHistory
   ],
   unmodified: [ContextCommandIDs.gitFileHistory],
-  unmerged: [ContextCommandIDs.gitFileDiff],
+  unmerged: [ContextCommandIDs.gitFileOpen, ContextCommandIDs.gitFileDiff],
   stashed: [ContextCommandIDs.gitFileStashPop]
 };
 
@@ -122,7 +123,7 @@ const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
     ContextCommandIDs.gitFileDelete
   ],
   unmodified: [ContextCommandIDs.gitFileHistory],
-  unmerged: [ContextCommandIDs.gitFileDiff],
+  unmerged: [ContextCommandIDs.gitFileOpen, ContextCommandIDs.gitFileDiff],
   stashed: [ContextCommandIDs.gitFileStashPop]
 };
 
@@ -709,7 +710,19 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
     return (
       <FileItem
         trans={this.props.trans}
-        actions={!file.is_binary ? diffButton : null}
+        actions={
+          <React.Fragment>
+            <ActionButton
+              className={hiddenButtonStyle}
+              icon={openIcon}
+              title={this.props.trans.__('Open this file')}
+              onClick={stopPropagationWrapper(() =>
+                this.openSelectedFiles(file)
+              )}
+            />
+            {!file.is_binary ? diffButton : null}
+          </React.Fragment>
+        }
         contextMenu={this.openContextMenu}
         file={file}
         model={this.props.model}
@@ -1277,8 +1290,12 @@ export class FileList extends React.Component<IFileListProps, IFileListState> {
       (getDiffProvider(file.to) || !file.is_binary) && (
         <ActionButton
           className={hiddenButtonStyle}
-          icon={diffIcon}
-          title={this.props.trans.__('Diff this file')}
+          icon={file.status === 'unmerged' ? mergeIcon : diffIcon}
+          title={
+            file.status === 'unmerged'
+              ? this.props.trans.__('Resolve conflicts')
+              : this.props.trans.__('Diff this file')
+          }
           onClick={stopPropagationWrapper(handleClick)}
         />
       )
