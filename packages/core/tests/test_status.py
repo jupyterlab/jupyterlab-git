@@ -1,4 +1,4 @@
-from unittest.mock import call, patch
+from unittest.mock import ANY, call, patch
 
 import pytest
 
@@ -368,7 +368,7 @@ async def test_status(tmp_path, output, diff_output, expected):
             call(
                 ["git", "status", "--porcelain", "-b", "-u", "-z"],
                 cwd=str(repository),
-                env=None,
+                env=ANY,
                 username=None,
                 password=None,
                 is_binary=False,
