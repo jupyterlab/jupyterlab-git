@@ -444,7 +444,14 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
   };
 
   private _gitStashApplyLatest = async (): Promise<void> => {
-    await this.props.model.applyStash(0);
+    try {
+      await this.props.model.applyStash(0);
+    } catch (error) {
+      Notification.error(
+        this.props.trans.__('Failed to apply stash'),
+        showError(error as Error, this.props.trans)
+      );
+    }
   };
 
   /**

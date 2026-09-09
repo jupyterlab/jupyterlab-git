@@ -1740,8 +1740,10 @@ export class GitExtension implements IGitExtension {
       });
     } catch (error) {
       console.error('Failed to apply stash', error);
+      throw error;
+    } finally {
+      await this.refreshStash();
     }
-    await this.refreshStash();
   }
 
   /**

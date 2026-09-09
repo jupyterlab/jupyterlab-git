@@ -200,6 +200,50 @@ describe('IGitExtension', () => {
     });
   });
 
+  describe('#applyStash', () => {
+    beforeEach(async () => {
+      mockResponses.responses['stash'] = {
+        body: () => ({
+          code: 0,
+          stashes: [{ index: 0, branch: 'main', message: 'notebook stash' }]
+        })
+      };
+      mockResponses.responses['stash?index=0'] = {
+        body: () => ({
+          code: 0,
+          files: ['notebook.ipynb']
+        })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await (model as GitExtension).refreshStash();
+    });
+
+    it('should throw an exception if applying a stash fails', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const message = 'CONFLICT (content): Merge conflict in notebook.ipynb';
+      mockResponses.responses['stash_apply'] = {
+        body: () => ({ code: 128, message }),
+        status: 500
+      };
+
+      let error: unknown;
+      try {
+        await model.applyStash(0);
+      } catch (reason) {
+        error = reason;
+      }
+
+      expect(error).toBeInstanceOf(Git.GitResponseError);
+      expect((error as Git.GitResponseError).json).toMatchObject({
+        code: 128,
+        message
+      });
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to apply stash', error);
+    });
+  });
+
   describe('#status', () => {
     it('should be clear if not in a git repository', async () => {
       let status: Partial<Git.IStatusResult> = {
