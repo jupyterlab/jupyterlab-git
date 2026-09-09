@@ -534,21 +534,26 @@ class Git:
             }
 
         # Add attribute `is_binary`
-        command = [  # Compare stage to an empty tree see `_is_binary`
-            "git",
-            "diff",
-            "--numstat",
-            "-z",
-            "--cached",
-            "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
-        ]
+        command = ["git", "diff", "--numstat", "-z", "--no-renames", "HEAD"]
         text_code, text_output, _ = await self.__execute(command, cwd=path)
+
+        if text_code != 0:
+            # No commits yet: compare the stage to an empty tree instead
+            command = [
+                "git",
+                "diff",
+                "--numstat",
+                "-z",
+                "--cached",
+                "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+            ]
+            text_code, text_output, _ = await self.__execute(command, cwd=path)
 
         are_binary = dict()
         if text_code == 0:
             for line in filter(lambda l: len(l) > 0, strip_and_split(text_output)):
-                diff, name = line.rsplit("\t", maxsplit=1)
-                are_binary[name] = diff.startswith("-\t-")
+                insertions, deletions, name = line.split("\t", maxsplit=2)
+                are_binary[name] = insertions == "-" and deletions == "-"
 
         data = {
             "code": code,
