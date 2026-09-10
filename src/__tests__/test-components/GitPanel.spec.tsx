@@ -95,14 +95,9 @@ describe('GitPanel', () => {
       expect(panel).toBeInstanceOf(GitPanel);
     });
 
-    it('should set the default commit message summary to an empty string', () => {
+    it('should set the default commit message to an empty string', () => {
       const panel = new GitPanel(props);
-      expect(panel.state.commitSummary).toEqual('');
-    });
-
-    it('should set the default commit message description to an empty string', () => {
-      const panel = new GitPanel(props);
-      expect(panel.state.commitDescription).toEqual('');
+      expect(panel.state.commitMessage).toEqual('');
     });
   });
 
@@ -191,10 +186,9 @@ describe('GitPanel', () => {
 
       props.model.checkNotebooksForOutputs = jest.fn().mockResolvedValue([]);
 
-      await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
       await userEvent.type(
-        screen.getAllByRole('textbox')[1],
-        commitDescription
+        screen.getAllByRole('textbox')[0],
+        commitSummary + '\n' + commitDescription
       );
 
       await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
@@ -215,7 +209,30 @@ describe('GitPanel', () => {
 
       // Only erase commit message upon success
       expect(screen.getAllByRole('textbox')[0]).toHaveValue('');
-      expect(screen.getAllByRole('textbox')[1]).toHaveValue('');
+    });
+
+    it('should not add another blank line when the message already has one', async () => {
+      configSpy.mockResolvedValue({ options: commitUser });
+
+      props.model.checkNotebooksForOutputs = jest.fn().mockResolvedValue([]);
+
+      await userEvent.type(
+        screen.getAllByRole('textbox')[0],
+        commitSummary + '\n\n' + commitDescription
+      );
+
+      await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
+
+      await waitFor(() => {
+        expect(configSpy).toHaveBeenCalledTimes(1);
+      });
+
+      expect(commitSpy).toHaveBeenCalledTimes(1);
+      expect(commitSpy).toHaveBeenCalledWith(
+        commitSummary + '\n\n' + commitDescription + '\n',
+        false,
+        null
+      );
     });
 
     it('should not commit without a commit message', async () => {
@@ -332,10 +349,9 @@ describe('GitPanel', () => {
         value: null
       });
 
-      await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
       await userEvent.type(
-        screen.getAllByRole('textbox')[1],
-        commitDescription
+        screen.getAllByRole('textbox')[0],
+        commitSummary + '\n' + commitDescription
       );
       await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
 
@@ -344,8 +360,9 @@ describe('GitPanel', () => {
       expect(commitSpy).not.toHaveBeenCalled();
 
       // Should not erase commit message
-      expect(screen.getAllByRole('textbox')[0]).toHaveValue(commitSummary);
-      expect(screen.getAllByRole('textbox')[1]).toHaveValue(commitDescription);
+      expect(screen.getAllByRole('textbox')[0]).toHaveValue(
+        commitSummary + '\n' + commitDescription
+      );
     });
 
     it('should not commit if no user identity is set and the user rejects the dialog', async () => {
@@ -359,10 +376,9 @@ describe('GitPanel', () => {
         value: null
       });
 
-      await userEvent.type(screen.getAllByRole('textbox')[0], commitSummary);
       await userEvent.type(
-        screen.getAllByRole('textbox')[1],
-        commitDescription
+        screen.getAllByRole('textbox')[0],
+        commitSummary + '\n' + commitDescription
       );
       await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
 
@@ -371,8 +387,9 @@ describe('GitPanel', () => {
       expect(commitSpy).not.toHaveBeenCalled();
 
       // Should not erase commit message
-      expect(screen.getAllByRole('textbox')[0]).toHaveValue(commitSummary);
-      expect(screen.getAllByRole('textbox')[1]).toHaveValue(commitDescription);
+      expect(screen.getAllByRole('textbox')[0]).toHaveValue(
+        commitSummary + '\n' + commitDescription
+      );
     });
   });
 

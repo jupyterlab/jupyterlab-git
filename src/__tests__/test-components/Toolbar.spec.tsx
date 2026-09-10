@@ -1,14 +1,24 @@
 import { nullTranslator } from '@jupyterlab/translation';
+import { Signal } from '@lumino/signaling';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import 'jest';
 import * as React from 'react';
-import { IToolbarProps, Toolbar } from '../../components/Toolbar';
+import {
+  BranchItem,
+  IRemoteActionItemProps,
+  IToolbarItemProps,
+  PullItem,
+  PushItem,
+  RefreshItem,
+  RepositoryItem
+} from '../../components/Toolbar';
 import * as git from '../../git';
 import { GitExtension } from '../../model';
 import { badgeClass } from '../../style/Toolbar';
 import { CommandIDs, Git } from '../../tokens';
+import type { GitWidget } from '../../widgets/GitWidget';
 import {
   DEFAULT_REPOSITORY_PATH,
   defaultMockedResponses,
@@ -104,7 +114,7 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
   if (options.repository !== null) {
     model.pathRepository = options.repository ?? DEFAULT_REPOSITORY_PATH;
     await model.ready;
-    // Manually fetch branch/submodule/remote data; model.ready does not await these.
+    // `model.ready` does not await branch/submodule/remote data.
     await model.refreshBranch();
     await model.listSubmodules();
     await model.refreshRemotes();
@@ -112,11 +122,36 @@ async function createModel(options: IModelOptions = {}): Promise<GitExtension> {
   return model;
 }
 
-describe('Toolbar', () => {
+interface IPanelMock {
+  panel: GitWidget;
+  toggleSubmoduleMenu: jest.Mock;
+}
+
+function createPanelMock(): IPanelMock {
+  const toggleSubmoduleMenu = jest.fn();
+  const panel: any = {
+    submoduleMenuShown: false,
+    toggleSubmoduleMenu
+  };
+  panel.submoduleMenuShownChanged = new Signal<unknown, boolean>(panel);
+  return { panel: panel as GitWidget, toggleSubmoduleMenu };
+}
+
+describe('Toolbar items', () => {
   let model: GitExtension;
   const trans = nullTranslator.load('jupyterlab_git');
 
-  function createProps(props?: Partial<IToolbarProps>): IToolbarProps {
+  function createProps(props?: Partial<IToolbarItemProps>): IToolbarItemProps {
+    return {
+      model: model,
+      trans: trans,
+      ...props
+    };
+  }
+
+  function createActionProps(
+    props?: Partial<IRemoteActionItemProps>
+  ): IRemoteActionItemProps {
     return {
       model: model,
       commands: {
@@ -127,18 +162,28 @@ describe('Toolbar', () => {
     };
   }
 
+  // The pull and push items share the remote state; render both to assert on it.
+  function RemoteActions(): JSX.Element {
+    return (
+      <>
+        <PullItem {...createActionProps()} />
+        <PushItem {...createActionProps()} />
+      </>
+    );
+  }
+
   beforeEach(async () => {
     jest.restoreAllMocks();
     model = await createModel();
   });
 
-  describe('render', () => {
+  describe('PullItem', () => {
     it('should display a button to pull the latest changes', async () => {
-      render(<Toolbar {...createProps()} />);
+      render(<PullItem {...createActionProps()} />);
 
       await waitFor(() => {
         expect(
-          screen.getAllByRole('button', { name: 'Pull latest changes' })
+          screen.getByRole('button', { name: 'Pull latest changes' })
         ).toBeDefined();
       });
 
@@ -151,7 +196,7 @@ describe('Toolbar', () => {
 
     it('should display a badge on pull icon if behind', async () => {
       model = await createModel({ status: { behind: 1 } });
-      render(<Toolbar {...createProps()} />);
+      render(<PullItem {...createActionProps()} />);
 
       await waitFor(() => {
         expect(
@@ -162,76 +207,11 @@ describe('Toolbar', () => {
       });
     });
 
-    it('should display a button to push the latest changes', async () => {
-      render(<Toolbar {...createProps()} />);
-
-      await waitFor(() => {
-        expect(
-          screen.getAllByRole('button', { name: 'Push committed changes' })
-        ).toBeDefined();
-      });
-
-      expect(
-        screen
-          .getByRole('button', { name: 'Push committed changes' })
-          .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
-      ).toHaveClass('MuiBadge-invisible');
-    });
-
-    it('should display a badge on push icon if ahead', async () => {
-      model = await createModel({ status: { ahead: 1 } });
-      render(<Toolbar {...createProps()} />);
-
-      await waitFor(() => {
-        expect(
-          screen
-            .getByRole('button', { name: /^Push committed changes/ })
-            .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
-        ).not.toHaveClass('MuiBadge-invisible');
-      });
-    });
-
-    it('should display a button to refresh the current repository', () => {
-      render(<Toolbar {...createProps()} />);
-
-      expect(
-        screen.getAllByRole('button', {
-          name: 'Refresh the repository to detect local and remote changes'
-        })
-      ).toBeDefined();
-    });
-
-    it('should display a non-interactive repository label when there are no submodules', () => {
-      render(<Toolbar {...createProps()} />);
-
-      // DEFAULT_REPOSITORY_PATH basename is 'repo'.
-      expect(screen.getByText('repo')).toBeDefined();
-      expect(screen.queryByRole('button', { name: 'repo' })).toBeNull();
-    });
-
-    it('should display a repository menu button when submodules are present', async () => {
-      model = await createModel({
-        submodules: [{ name: 'sub' }]
-      });
-      render(<Toolbar {...createProps()} />);
-
-      expect(screen.getByRole('button', { name: 'repo' })).toBeDefined();
-    });
-
-    it('should display the current branch as a static label', () => {
-      render(<Toolbar {...createProps()} />);
-
-      expect(screen.getByText('main')).toBeDefined();
-      expect(screen.queryByRole('button', { name: /branches/i })).toBeNull();
-    });
-  });
-
-  describe('push/pull changes with remote', () => {
     it('should pull changes when the button to pull the latest changes is clicked', async () => {
       const mockedExecute = jest.fn();
       render(
-        <Toolbar
-          {...createProps({
+        <PullItem
+          {...createActionProps({
             commands: {
               execute: mockedExecute
             } as any
@@ -253,11 +233,64 @@ describe('Toolbar', () => {
       expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPull);
     });
 
+    it('should not pull changes when the pull button is clicked but there is no remote branch', async () => {
+      model = await createModel({ remotes: [] });
+      const mockedExecute = jest.fn();
+      render(
+        <PullItem
+          {...createActionProps({
+            commands: {
+              execute: mockedExecute
+            } as any
+          })}
+        />
+      );
+
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: 'No remote repository defined'
+        })
+      );
+
+      expect(mockedExecute).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('PushItem', () => {
+    it('should display a button to push the latest changes', async () => {
+      render(<PushItem {...createActionProps()} />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: 'Push committed changes' })
+        ).toBeDefined();
+      });
+
+      expect(
+        screen
+          .getByRole('button', { name: 'Push committed changes' })
+          .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
+      ).toHaveClass('MuiBadge-invisible');
+    });
+
+    it('should display a badge on push icon if ahead', async () => {
+      model = await createModel({ status: { ahead: 1 } });
+      render(<PushItem {...createActionProps()} />);
+
+      await waitFor(() => {
+        expect(
+          screen
+            .getByRole('button', { name: /^Push committed changes/ })
+            .parentElement?.querySelector(`.${badgeClass} > .MuiBadge-badge`)
+        ).not.toHaveClass('MuiBadge-invisible');
+      });
+    });
+
     it('should push changes when the button to push the latest changes is clicked', async () => {
       const mockedExecute = jest.fn();
       render(
-        <Toolbar
-          {...createProps({
+        <PushItem
+          {...createActionProps({
             commands: {
               execute: mockedExecute
             } as any
@@ -278,50 +311,26 @@ describe('Toolbar', () => {
       expect(mockedExecute).toHaveBeenCalledTimes(1);
       expect(mockedExecute).toHaveBeenCalledWith(CommandIDs.gitPush);
     });
-  });
-
-  describe('push/pull changes without remote', () => {
-    beforeEach(async () => {
-      model = await createModel({ remotes: [] });
-    });
-
-    it('should not pull changes when the pull button is clicked but there is no remote branch', async () => {
-      const mockedExecute = jest.fn();
-      render(
-        <Toolbar
-          {...createProps({
-            commands: {
-              execute: mockedExecute
-            } as any
-          })}
-        />
-      );
-
-      await userEvent.click(
-        screen.getAllByRole('button', {
-          name: 'No remote repository defined'
-        })[0]
-      );
-
-      expect(mockedExecute).toHaveBeenCalledTimes(0);
-    });
 
     it('should not push changes when the push button is clicked but there is no remote branch', async () => {
+      model = await createModel({ remotes: [] });
       const mockedExecute = jest.fn();
       render(
-        <Toolbar
-          {...createProps({
+        <PushItem
+          {...createActionProps({
             commands: {
               execute: mockedExecute
             } as any
           })}
         />
       );
+
       await userEvent.click(
-        screen.getAllByRole('button', {
+        screen.getByRole('button', {
           name: 'No remote repository defined'
-        })[1]
+        })
       );
+
       expect(mockedExecute).toHaveBeenCalledTimes(0);
     });
   });
@@ -329,9 +338,8 @@ describe('Toolbar', () => {
   describe('repository discovery', () => {
     it('should enable the pull and push buttons when the repository is discovered after mount', async () => {
       model = await createModel({ repository: null });
-      render(<Toolbar {...createProps()} />);
+      render(<RemoteActions />);
 
-      // The toolbar is empty as long as no repository is detected
       expect(screen.queryAllByRole('button')).toHaveLength(0);
 
       model.pathRepository = DEFAULT_REPOSITORY_PATH;
@@ -352,7 +360,7 @@ describe('Toolbar', () => {
     it('should enable the pull and push buttons when a remote is added', async () => {
       const remotes: Git.IGitRemote[] = [];
       model = await createModel({ remotes });
-      render(<Toolbar {...createProps()} />);
+      render(<RemoteActions />);
 
       expect(
         await screen.findAllByRole('button', {
@@ -376,7 +384,7 @@ describe('Toolbar', () => {
     it('should disable the pull and push buttons when the last remote is removed', async () => {
       const remotes: Git.IGitRemote[] = [...REMOTES];
       model = await createModel({ remotes });
-      render(<Toolbar {...createProps()} />);
+      render(<RemoteActions />);
 
       expect(
         await screen.findByRole('button', { name: 'Pull latest changes' })
@@ -395,10 +403,20 @@ describe('Toolbar', () => {
     });
   });
 
-  describe('refresh repository', () => {
+  describe('RefreshItem', () => {
+    it('should display a button to refresh the current repository', () => {
+      render(<RefreshItem {...createProps()} />);
+
+      expect(
+        screen.getByRole('button', {
+          name: 'Refresh the repository to detect local and remote changes'
+        })
+      ).toBeDefined();
+    });
+
     it('should refresh the repository when the button to refresh the repository is clicked', async () => {
       const spy = jest.spyOn(model, 'refresh');
-      render(<Toolbar {...createProps()} />);
+      render(<RefreshItem {...createProps()} />);
       await userEvent.click(
         screen.getByRole('button', {
           name: 'Refresh the repository to detect local and remote changes'
@@ -408,6 +426,48 @@ describe('Toolbar', () => {
 
       spy.mockReset();
       spy.mockRestore();
+    });
+  });
+
+  describe('RepositoryItem', () => {
+    it('should display a non-interactive repository label when there are no submodules', () => {
+      const { panel } = createPanelMock();
+      render(<RepositoryItem {...createProps()} panel={panel} />);
+
+      // DEFAULT_REPOSITORY_PATH basename is 'repo'.
+      expect(screen.getByText('repo')).toBeDefined();
+      expect(screen.queryByRole('button', { name: 'repo' })).toBeNull();
+    });
+
+    it('should display a repository menu button when submodules are present', async () => {
+      model = await createModel({
+        submodules: [{ name: 'sub' }]
+      });
+      const { panel } = createPanelMock();
+      render(<RepositoryItem {...createProps()} panel={panel} />);
+
+      expect(screen.getByRole('button', { name: 'repo' })).toBeDefined();
+    });
+
+    it('should toggle the submodule menu when the repository menu button is clicked', async () => {
+      model = await createModel({
+        submodules: [{ name: 'sub' }]
+      });
+      const { panel, toggleSubmoduleMenu } = createPanelMock();
+      render(<RepositoryItem {...createProps()} panel={panel} />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'repo' }));
+
+      expect(toggleSubmoduleMenu).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('BranchItem', () => {
+    it('should display the current branch as a static label', () => {
+      render(<BranchItem {...createProps()} />);
+
+      expect(screen.getByText('main')).toBeDefined();
+      expect(screen.queryByRole('button', { name: /branches/i })).toBeNull();
     });
   });
 });

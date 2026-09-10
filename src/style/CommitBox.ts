@@ -10,6 +10,11 @@ export const commitFormClass = style({
   alignItems: 'flex-start',
 
   backgroundColor: 'var(--jp-layout-color1)',
+  borderBottom: 'var(--jp-border-width) solid var(--jp-border-color2)'
+});
+
+export const commitFormBottomClass = style({
+  borderBottom: 'none',
   borderTop: 'var(--jp-border-width) solid var(--jp-border-color2)'
 });
 
@@ -91,10 +96,60 @@ export const commitDescriptionClass = style({
   }
 });
 
+export const commitMessageClass = style({
+  marginBottom: '8px',
+  padding: 'var(--jp-code-padding) !important',
+
+  outline: 'none',
+  overflowX: 'auto',
+  resize: 'none',
+
+  border: 'var(--jp-border-width) solid var(--jp-border-color2)',
+  borderRadius: '4px',
+
+  transition: 'border-color 120ms ease, box-shadow 120ms ease',
+
+  $nest: {
+    '&.Mui-error': {
+      border: 'calc(2 * var(--jp-border-width)) solid var(--jp-error-color1)'
+    },
+    '&>*::placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    },
+    '&>*::-webkit-input-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    },
+    '&>*::-moz-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    },
+    '&>*::-ms-input-placeholder': {
+      color: 'var(--jp-ui-font-color3)'
+    }
+  }
+});
+
+const commitDescriptionHint = {
+  width: '100%',
+  // Tuck the hint under the input's 8px bottom margin
+  margin: '-4px 0 8px',
+
+  fontSize: 'var(--jp-ui-font-size0)',
+  lineHeight: 1.35
+};
+
+export const commitDescriptionHintClass = style(commitDescriptionHint, {
+  color: 'var(--jp-ui-font-color2)'
+});
+
+export const commitHintErrorClass = style(commitDescriptionHint, {
+  color: 'var(--jp-error-color1)'
+});
+
 export const commitButtonClass = style({
+  height: '28px',
   color: 'var(--jp-ui-inverse-font-color1) !important',
   backgroundColor: 'var(--jp-brand-color1) !important',
-  textTransform: 'none' as any,
+  textTransform: 'none !important' as any,
   fontWeight: 600,
 
   $nest: {
@@ -127,7 +182,28 @@ export const commitInputWrapperClass = style({
 });
 
 export const commitPaperClass = style({
-  maxWidth: '250px'
+  maxWidth: '250px',
+  border: 'var(--jp-border-width) solid var(--jp-border-color1)',
+  boxShadow: 'var(--jp-elevation-z6) !important'
+});
+
+// The commit variant menu renders inline (disablePortal) before the file list,
+// whose virtualized rows are absolutely positioned and would paint over it.
+export const commitPopperClass = style({
+  zIndex: 1
+});
+
+// commitRoot pins the item background with !important, which also suppresses
+// the MUI hover/focus tints; restate them at higher specificity.
+export const commitVariantItemClass = style({
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2) !important'
+    },
+    '&.Mui-focusVisible': {
+      backgroundColor: 'var(--jp-layout-color2) !important'
+    }
+  }
 });
 
 export const commitVariantText = style({

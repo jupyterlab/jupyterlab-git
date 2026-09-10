@@ -1,20 +1,22 @@
-import { ReactWidget } from '@jupyterlab/apputils';
+import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
+import { ISignal, Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { PanelWithToolbar, SidePanel } from '@jupyterlab/ui-components';
 import { GitPanel } from '../components/GitPanel';
-import { Toolbar } from '../components/Toolbar';
+import { SubmoduleMenu } from '../components/SubmoduleMenu';
 import { GitExtension } from '../model';
 import {
   gitWidgetStyle,
   sectionBodyStyle,
   sectionStyle
 } from '../style/GitWidgetStyle';
+import { panelToolbarClass, toolbarMenuWrapperClass } from '../style/Toolbar';
 
 /**
  * The Git extension's main side-bar widget.
@@ -40,9 +42,10 @@ export class GitWidget extends SidePanel {
     this._model = model;
     this._settings = settings;
 
-    const topToolbar = ReactWidget.create(this._renderTopToolbar());
-    topToolbar.addClass('jp-git-TopToolbar');
-    (this.layout as PanelLayout).insertWidget(0, topToolbar);
+    this.toolbar.addClass(panelToolbarClass);
+    this.toolbar.addClass('jp-git-PanelToolbar');
+    model.repositoryChanged.connect(this._onRepositoryChanged, this);
+    this.toolbar.setHidden(model.pathRepository === null);
 
     this.addWidget(
       this._createSection('Changes', this._createChangesSection())
@@ -57,6 +60,48 @@ export class GitWidget extends SidePanel {
     // Add refresh standby condition if this widget is hidden
     model.refreshStandbyCondition = (): boolean =>
       !this._settings.composite['refreshIfHidden'] && this.isHidden;
+  }
+
+  /**
+   * Whether the submodule menu is currently shown below the toolbar.
+   */
+  get submoduleMenuShown(): boolean {
+    return this._submoduleMenu !== null;
+  }
+
+  /**
+   * A signal emitted when the submodule menu is shown or hidden.
+   */
+  get submoduleMenuShownChanged(): ISignal<GitWidget, boolean> {
+    return this._submoduleMenuShownChanged;
+  }
+
+  /**
+   * Show or hide the submodule menu below the panel toolbar.
+   */
+  toggleSubmoduleMenu(): void {
+    if (this._submoduleMenu) {
+      this._submoduleMenu.dispose();
+      this._submoduleMenu = null;
+      this._submoduleMenuShownChanged.emit(false);
+    } else {
+      const menu = ReactWidget.create(
+        <UseSignal signal={this._model.submodulesChanged}>
+          {() => (
+            <SubmoduleMenu
+              model={this._model}
+              submodules={this._model.submodules}
+              trans={this._gitTrans}
+            />
+          )}
+        </UseSignal>
+      );
+      menu.addClass(toolbarMenuWrapperClass);
+      const layout = this.layout as PanelLayout;
+      layout.insertWidget(layout.widgets.indexOf(this.content), menu);
+      this._submoduleMenu = menu;
+      this._submoduleMenuShownChanged.emit(true);
+    }
   }
 
   /**
@@ -123,14 +168,11 @@ export class GitWidget extends SidePanel {
     );
   }
 
-  private _renderTopToolbar(): React.ReactElement {
-    return (
-      <Toolbar
-        commands={this._commands}
-        model={this._model}
-        trans={this._gitTrans}
-      />
-    );
+  private _onRepositoryChanged(): void {
+    this.toolbar.setHidden(this._model.pathRepository === null);
+    if (this._submoduleMenu) {
+      this.toggleSubmoduleMenu();
+    }
   }
 
   private _gitTrans: TranslationBundle;
@@ -138,4 +180,6 @@ export class GitWidget extends SidePanel {
   private _fileBrowserModel: FileBrowserModel;
   private _model: GitExtension;
   private _settings: ISettingRegistry.ISettings;
+  private _submoduleMenu: Widget | null = null;
+  private _submoduleMenuShownChanged = new Signal<GitWidget, boolean>(this);
 }

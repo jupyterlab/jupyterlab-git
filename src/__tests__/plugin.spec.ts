@@ -13,7 +13,7 @@ import {
   IMockedResponses,
   mockedRequestAPI
 } from './utils';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 
 jest.mock('../git');
 jest.mock('@jupyterlab/application');
@@ -25,7 +25,7 @@ const plugin = plugins[0];
 describe('plugin', () => {
   const mockGit = git as jest.Mocked<typeof git>;
   let app: jest.Mocked<JupyterLab>;
-  let browserFactory: jest.Mocked<IFileBrowserFactory>;
+  let fileBrowser: jest.Mocked<IDefaultFileBrowser>;
   let mockResponses: IMockedResponses = {};
   let settingRegistry: jest.Mocked<ISettingRegistry>;
 
@@ -35,11 +35,9 @@ describe('plugin', () => {
     (app as any).serviceManager = {
       serverSettings: ServerConnection.makeSettings()
     };
-    browserFactory = {
-      defaultBrowser: {
-        model: { pathChanged: new Signal(null), restored: Promise.resolve() }
-      }
-    } as unknown as jest.Mocked<IFileBrowserFactory>;
+    fileBrowser = {
+      model: { pathChanged: new Signal(null), restored: Promise.resolve() }
+    } as unknown as jest.Mocked<IDefaultFileBrowser>;
     settingRegistry = new SettingRegistry({
       connector: null as any
     }) as any;
@@ -73,11 +71,12 @@ describe('plugin', () => {
       // When
       const extension = await plugin.activate(
         app,
-        null,
-        browserFactory,
-        { tracker: { currentWidget: null } },
-        null,
-        settingRegistry
+        null, // restorer
+        null, // editorServices
+        fileBrowser,
+        settingRegistry,
+        null, // docmanager
+        null // toolbarRegistry
       );
 
       // Then
@@ -108,11 +107,12 @@ describe('plugin', () => {
       // When
       const extension = await plugin.activate(
         app,
-        null,
-        browserFactory,
-        { tracker: { currentWidget: null } },
-        null,
-        settingRegistry
+        null, // restorer
+        null, // editorServices
+        fileBrowser,
+        settingRegistry,
+        null, // docmanager
+        null // toolbarRegistry
       );
 
       // Then
@@ -142,11 +142,12 @@ describe('plugin', () => {
       // When
       const extension = await plugin.activate(
         app,
-        null,
-        browserFactory,
-        { tracker: { currentWidget: null } },
-        null,
-        settingRegistry
+        null, // restorer
+        null, // editorServices
+        fileBrowser,
+        settingRegistry,
+        null, // docmanager
+        null // toolbarRegistry
       );
 
       // Then
@@ -173,11 +174,12 @@ describe('plugin', () => {
       // When
       const extension = await plugin.activate(
         app,
-        null,
-        browserFactory,
-        { tracker: { currentWidget: null } },
-        null,
-        settingRegistry
+        null, // restorer
+        null, // editorServices
+        fileBrowser,
+        settingRegistry,
+        null, // docmanager
+        null // toolbarRegistry
       );
 
       // Then
