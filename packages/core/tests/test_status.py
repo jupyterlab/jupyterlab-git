@@ -16,6 +16,7 @@ from jupyterlab_git_core.git import Git
                 "A  notebook with spaces.ipynb",
                 "M  notebook with λ.ipynb",
                 "M  binary file.gif",
+                "M  file with\ttab.py",
                 "R  renamed_to_θ.py",
                 "originally_named_π.py",
                 "?? untracked.ipynb",
@@ -23,6 +24,7 @@ from jupyterlab_git_core.git import Git
             (
                 "0\t0\tnotebook with spaces.ipynb",
                 "-\t-\tbinary file.gif",
+                "1\t0\tfile with\ttab.py",
                 "0\t0\trenamed_to_θ.py",
             ),
             {
@@ -53,6 +55,13 @@ from jupyterlab_git_core.git import Git
                         "to": "binary file.gif",
                         "from": "binary file.gif",
                         "is_binary": True,
+                    },
+                    {
+                        "x": "M",
+                        "y": " ",
+                        "to": "file with\ttab.py",
+                        "from": "file with\ttab.py",
+                        "is_binary": False,
                     },
                     {
                         "x": "R",
@@ -351,8 +360,12 @@ async def test_status(tmp_path, output, diff_output, expected):
         repository = tmp_path / "test_curr_path"
         (repository / ".git" / "rebase-merge").mkdir(parents=True)
 
+        # Without commits there is no HEAD, so the diff falls back to the empty tree.
+        is_initial = expected["branch"] == "(initial)"
+
         mock_execute.side_effect = [
             (0, "\x00".join(output) + "\x00", ""),
+            *([(128, "", "fatal: bad revision 'HEAD'")] if is_initial else []),
             (0, "\x00".join(diff_output) + "\x00", ""),
             (0 if expected["state"] == 4 else 128, "", "cherry pick"),
             (0 if expected["state"] == 2 else 128, "", "merge"),
@@ -374,20 +387,35 @@ async def test_status(tmp_path, output, diff_output, expected):
                 is_binary=False,
             ),
             call(
-                [
-                    "git",
-                    "diff",
-                    "--numstat",
-                    "-z",
-                    "--cached",
-                    "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
-                ],
+                ["git", "diff", "--numstat", "-z", "--no-renames", "HEAD"],
                 cwd=str(repository),
                 env=None,
                 username=None,
                 password=None,
                 is_binary=False,
             ),
+        ]
+
+        if is_initial:
+            expected_calls.append(
+                call(
+                    [
+                        "git",
+                        "diff",
+                        "--numstat",
+                        "-z",
+                        "--cached",
+                        "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+                    ],
+                    cwd=str(repository),
+                    env=None,
+                    username=None,
+                    password=None,
+                    is_binary=False,
+                )
+            )
+
+        expected_calls += [
             call(
                 ["git", "show", "--quiet", "CHERRY_PICK_HEAD"],
                 cwd=str(repository),
