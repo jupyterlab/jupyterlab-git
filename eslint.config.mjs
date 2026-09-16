@@ -28,7 +28,24 @@ export default tseslint.config(
       // schema for every command and threading a translator through every
       // component (several flagged strings are CLI snippets / product names).
       'jupyter/command-described-by': 'off',
-      'jupyter/no-untranslated-string': 'off'
+      'jupyter/no-untranslated-string': 'off',
+      'jupyter/prefer-lazy-imports': [
+        'error',
+        {
+          // Activation needs these at once: the model provides the token,
+          // the commands, menus, status bar item and the sidebar shell are
+          // registered while the application starts. The sidebar loads its
+          // content on first show.
+          ignoreImports: [
+            './commandsAndMenu',
+            './components/StatusWidget',
+            './model',
+            './server',
+            './style/icons',
+            './widgets/GitWidget'
+          ]
+        }
+      ]
     }
   },
   {

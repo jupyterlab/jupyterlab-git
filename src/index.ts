@@ -24,7 +24,6 @@ import {
   addFileBrowserContextMenu,
   createGitMenu
 } from './commandsAndMenu';
-import { createImageDiff } from './components/diff/ImageDiff';
 import { createNotebookDiff } from './components/diff/NotebookDiff';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
 import { addStatusBarWidget } from './components/StatusWidget';
@@ -93,7 +92,10 @@ const imageDiffPlugin: JupyterFrontEndPlugin<void> = {
     gitExtension.registerDiffProvider(
       'ImageDiff',
       ['.jpeg', '.jpg', '.png'],
-      createImageDiff
+      async options => {
+        const { createImageDiff } = await import('./components/diff/ImageDiff');
+        return createImageDiff(options);
+      }
     );
   }
 };
