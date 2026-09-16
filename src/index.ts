@@ -26,7 +26,6 @@ import {
 } from './commandsAndMenu';
 import { createNotebookDiff } from './components/diff/NotebookDiff';
 import { createPlainTextDiff } from './components/diff/PlainTextDiff';
-import { addStatusBarWidget } from './components/StatusWidget';
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
@@ -334,9 +333,19 @@ async function activate(
       mainMenu.addMenu(createGitMenu(app.commands, trans));
     }
 
-    // Add the status bar widget
+    // Add the status bar widget once the application is restored: it shows
+    // the branch and the running operation, which are empty until the first
+    // status round trip.
     if (statusBar) {
-      addStatusBarWidget(statusBar, gitExtension, settings, trans);
+      const pluginSettings = settings;
+      app.restored
+        .then(async () => {
+          const { addStatusBarWidget } = await import(
+            './components/StatusWidget'
+          );
+          addStatusBarWidget(statusBar, gitExtension, pluginSettings, trans);
+        })
+        .catch(console.error);
     }
 
     // Add the context menu items for the default file browser

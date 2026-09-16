@@ -1450,6 +1450,48 @@ export enum ContextCommandIDs {
 }
 
 /**
+ * The context menu commands for a file, by its status.
+ */
+export type ContextCommands = Record<
+  NonNullable<Git.Status>,
+  ContextCommandIDs[]
+>;
+
+export const CONTEXT_COMMANDS: ContextCommands = {
+  'partially-staged': [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileUnstage,
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
+  ],
+  'remote-changed': [ContextCommandIDs.gitFileOpen],
+  unstaged: [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileStage,
+    ContextCommandIDs.gitFileDiscard,
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitFileHistory
+  ],
+  untracked: [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileTrack,
+    ContextCommandIDs.gitIgnore,
+    ContextCommandIDs.gitIgnoreExtension,
+    ContextCommandIDs.gitFileDelete
+  ],
+  staged: [
+    ContextCommandIDs.gitFileOpen,
+    ContextCommandIDs.gitFileUnstage,
+    ContextCommandIDs.gitFileDiff,
+    ContextCommandIDs.gitCommitAmendStaged,
+    ContextCommandIDs.gitFileHistory
+  ],
+  unmodified: [ContextCommandIDs.gitFileHistory],
+  unmerged: [ContextCommandIDs.gitFileDiff],
+  stashed: [ContextCommandIDs.gitFileStashPop]
+};
+
+/**
  * The command IDs used by the git plugin.
  */
 export enum CommandIDs {

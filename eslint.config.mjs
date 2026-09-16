@@ -37,10 +37,8 @@ export default tseslint.config(
             // the `IGitExtension` token, so the class is needed at activation.
             './model',
             // Registered while the application starts: the commands and
-            // menus, the status bar item and the sidebar, which loads its
-            // content on first show.
+            // menus, and the sidebar, which loads its content on first show.
             './commandsAndMenu',
-            './components/StatusWidget',
             './widgets/GitWidget',
             // The server settings are fetched at activation; the icons are
             // used by the commands and the sidebar tab.
