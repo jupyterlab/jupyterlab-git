@@ -32,17 +32,20 @@ export default tseslint.config(
       'jupyter/prefer-lazy-imports': [
         'error',
         {
-          // Activation needs these at once: the model provides the token,
-          // the commands, menus, status bar item and the sidebar shell are
-          // registered while the application starts. The sidebar loads its
-          // content on first show.
           ignoreImports: [
+            // The plugin returns a `GitExtension` instance as the value of
+            // the `IGitExtension` token, so the class is needed at activation.
+            './model',
+            // Registered while the application starts: the commands and
+            // menus, the status bar item and the sidebar, which loads its
+            // content on first show.
             './commandsAndMenu',
             './components/StatusWidget',
-            './model',
+            './widgets/GitWidget',
+            // The server settings are fetched at activation; the icons are
+            // used by the commands and the sidebar tab.
             './server',
-            './style/icons',
-            './widgets/GitWidget'
+            './style/icons'
           ]
         }
       ]
