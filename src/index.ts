@@ -24,8 +24,6 @@ import {
   addFileBrowserContextMenu,
   createGitMenu
 } from './commandsAndMenu';
-import { createNotebookDiff } from './components/diff/NotebookDiff';
-import { createPlainTextDiff } from './components/diff/PlainTextDiff';
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
@@ -33,8 +31,8 @@ import { CommandIDs, Git, IGitExtension } from './tokens';
 import { GitWidget } from './widgets/GitWidget';
 
 export { DiffModel } from './components/diff/model';
-export { NotebookDiff } from './components/diff/NotebookDiff';
-export { PlainTextDiff } from './components/diff/PlainTextDiff';
+export type { NotebookDiff } from './components/diff/NotebookDiff';
+export type { PlainTextDiff } from './components/diff/PlainTextDiff';
 export { Git, IGitExtension } from './tokens';
 
 /**
@@ -70,12 +68,12 @@ const notebookDiffPlugin: JupyterFrontEndPlugin<void> = {
     gitExtension: IGitExtension,
     renderMime: IRenderMimeRegistry
   ): void => {
-    gitExtension.registerDiffProvider(
-      'Nbdime',
-      ['.ipynb'],
-      (options: Git.Diff.IFactoryOptions) =>
-        createNotebookDiff({ ...options, renderMime })
-    );
+    gitExtension.registerDiffProvider('Nbdime', ['.ipynb'], async options => {
+      const { createNotebookDiff } = await import(
+        './components/diff/NotebookDiff'
+      );
+      return createNotebookDiff({ ...options, renderMime });
+    });
   }
 };
 
@@ -116,14 +114,16 @@ const plainTextDiffPlugin: JupyterFrontEndPlugin<void> = {
     languageRegistry: IEditorLanguageRegistry
   ): void => {
     const editorFactory = editorServices.factoryService;
-    gitExtension.registerFallbackDiffProvider(
-      (options: Git.Diff.IFactoryOptions) =>
-        createPlainTextDiff({
-          ...options,
-          editorFactory: editorFactory.newInlineEditor.bind(editorFactory),
-          languageRegistry
-        })
-    );
+    gitExtension.registerFallbackDiffProvider(async options => {
+      const { createPlainTextDiff } = await import(
+        './components/diff/PlainTextDiff'
+      );
+      return createPlainTextDiff({
+        ...options,
+        editorFactory: editorFactory.newInlineEditor.bind(editorFactory),
+        languageRegistry
+      });
+    });
   }
 };
 
