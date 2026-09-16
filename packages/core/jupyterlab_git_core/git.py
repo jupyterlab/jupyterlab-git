@@ -534,7 +534,7 @@ class Git:
             }
 
         # Add attribute `is_binary`
-        command = ["git", "diff", "--numstat", "-z", "--no-renames", "HEAD"]
+        command = ["git", "diff", "--numstat", "-z", "--no-renames", "HEAD", "--"]
         text_code, text_output, _ = await self.__execute(command, cwd=path)
 
         if text_code != 0:
