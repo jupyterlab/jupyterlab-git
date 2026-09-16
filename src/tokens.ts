@@ -1232,6 +1232,24 @@ export namespace Git {
     previous_file_path?: string;
   }
 
+  /**
+   * A Git reference that can be compared with another ref.
+   */
+  export interface IRefComparison {
+    /**
+     * Git reference used by git commands.
+     */
+    ref: string;
+    /**
+     * Label used when rendering the comparison.
+     */
+    label: string;
+    /**
+     * Fallback reference to compare against when no explicit reference is set.
+     */
+    previousRef?: string;
+  }
+
   /** Interface for GitCommit request result,
    * has the info of a committed file
    */
