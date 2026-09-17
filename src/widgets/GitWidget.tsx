@@ -7,8 +7,7 @@ import { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { PanelWithToolbar, SidePanel } from '@jupyterlab/ui-components';
-import { GitPanel } from '../components/GitPanel';
-import { Toolbar } from '../components/Toolbar';
+import type { GitPanel as GitPanelComponent } from '../components/GitPanel';
 import { GitExtension } from '../model';
 import {
   gitWidgetStyle,
@@ -40,20 +39,6 @@ export class GitWidget extends SidePanel {
     this._model = model;
     this._settings = settings;
 
-    const topToolbar = ReactWidget.create(this._renderTopToolbar());
-    topToolbar.addClass('jp-git-TopToolbar');
-    (this.layout as PanelLayout).insertWidget(0, topToolbar);
-
-    this.addWidget(
-      this._createSection('Changes', this._createChangesSection())
-    );
-    this.addWidget(
-      this._createSection('History', this._createHistorySection())
-    );
-    this.addWidget(
-      this._createSection('Branches and Tags', this._createBranchesSection())
-    );
-
     // Add refresh standby condition if this widget is hidden
     model.refreshStandbyCondition = (): boolean =>
       !this._settings.composite['refreshIfHidden'] && this.isHidden;
@@ -67,7 +52,49 @@ export class GitWidget extends SidePanel {
     this._model.refresh().catch(error => {
       console.error('Fail to refresh model when displaying GitWidget.', error);
     });
+    if (!this._contentPromise) {
+      this._contentPromise = this._createContent();
+      this._contentPromise.catch(error => {
+        console.error('Fail to load the content of GitWidget.', error);
+      });
+    }
     super.onBeforeShow(msg);
+  }
+
+  /**
+   * Load the toolbar and the sections the first time the widget is shown,
+   * so that their code stays out of the application startup.
+   */
+  private async _createContent(): Promise<void> {
+    const [{ GitPanel }, { Toolbar }] = await Promise.all([
+      import('../components/GitPanel'),
+      import('../components/Toolbar')
+    ]);
+    if (this.isDisposed) {
+      return;
+    }
+    const topToolbar = ReactWidget.create(
+      <Toolbar
+        commands={this._commands}
+        model={this._model}
+        trans={this._gitTrans}
+      />
+    );
+    topToolbar.addClass('jp-git-TopToolbar');
+    (this.layout as PanelLayout).insertWidget(0, topToolbar);
+
+    this.addWidget(
+      this._createSection('Changes', this._createChangesSection(GitPanel))
+    );
+    this.addWidget(
+      this._createSection('History', this._createHistorySection(GitPanel))
+    );
+    this.addWidget(
+      this._createSection(
+        'Branches and Tags',
+        this._createBranchesSection(GitPanel)
+      )
+    );
   }
 
   private _createSection(
@@ -83,7 +110,9 @@ export class GitWidget extends SidePanel {
     return section;
   }
 
-  private _createChangesSection(): React.ReactElement {
+  private _createChangesSection(
+    GitPanel: typeof GitPanelComponent
+  ): React.ReactElement {
     return (
       <GitPanel
         commands={this._commands}
@@ -97,7 +126,9 @@ export class GitWidget extends SidePanel {
     );
   }
 
-  private _createHistorySection(): React.ReactElement {
+  private _createHistorySection(
+    GitPanel: typeof GitPanelComponent
+  ): React.ReactElement {
     return (
       <GitPanel
         commands={this._commands}
@@ -110,7 +141,9 @@ export class GitWidget extends SidePanel {
     );
   }
 
-  private _createBranchesSection(): React.ReactElement {
+  private _createBranchesSection(
+    GitPanel: typeof GitPanelComponent
+  ): React.ReactElement {
     return (
       <GitPanel
         commands={this._commands}
@@ -123,19 +156,10 @@ export class GitWidget extends SidePanel {
     );
   }
 
-  private _renderTopToolbar(): React.ReactElement {
-    return (
-      <Toolbar
-        commands={this._commands}
-        model={this._model}
-        trans={this._gitTrans}
-      />
-    );
-  }
-
   private _gitTrans: TranslationBundle;
   private _commands: CommandRegistry;
   private _fileBrowserModel: FileBrowserModel;
   private _model: GitExtension;
   private _settings: ISettingRegistry.ISettings;
+  private _contentPromise: Promise<void> | null = null;
 }
