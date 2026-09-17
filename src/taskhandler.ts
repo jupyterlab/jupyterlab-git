@@ -28,6 +28,13 @@ export class TaskHandler<T> implements IDisposable {
   }
 
   /**
+   * The task currently broadcast by `taskChanged`, or null when none is pending.
+   */
+  get currentTask(): string | null {
+    return this._taskList.length === 0 ? null : this._taskList.first.task;
+  }
+
+  /**
    * Adds a task to the list of pending model tasks.
    *
    * #Note:

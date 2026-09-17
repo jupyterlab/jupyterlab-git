@@ -126,6 +126,11 @@ export interface IGitExtension extends IDisposable {
   readonly taskChanged: ISignal<IGitExtension, string>;
 
   /**
+   * The task currently broadcast by `taskChanged`, or null when none is pending.
+   */
+  readonly currentTask: string | null;
+
+  /**
    * A signal emitted when the current file selected for history of the Git repository changes.
    */
   readonly selectedHistoryFileChanged: ISignal<

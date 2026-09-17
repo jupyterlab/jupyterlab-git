@@ -164,6 +164,10 @@ export function addStatusBarWidget(
 
   const callback = Private.createEventCallback(statusWidget, trans);
   model.taskChanged.connect(callback);
+  // A task may already be running when the widget is created.
+  if (model.currentTask !== null) {
+    callback(model, model.currentTask);
+  }
 
   statusWidget.disposed.connect(() => {
     model.taskChanged.disconnect(callback);
