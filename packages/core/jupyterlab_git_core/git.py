@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import unquote
 
+import signal
 import nbformat
 import pexpect
 from inspect import isawaitable
@@ -84,6 +85,37 @@ class GitError(Exception):
     """Custom exception for Git module errors."""
 
     pass
+
+
+def sigchld_handler(signum, frame):
+    """Handle SIGCHLD to reap zombie processes from git operations.
+
+    Git commands often spawn helper processes (git-credential-helper, git-remote-https,
+    ssh, git-upload-pack, git-receive-pack) that can become zombie processes when the
+    main git process exits before its children complete.
+
+    This is particularly problematic in cloud/container environments where:
+    - The application runs as PID 1 or under minimal init systems
+    - Standard init process zombie reaping may be unreliable or slow
+    - Resource constraints can cause zombie accumulation
+
+    This handler automatically reaps any zombie processes to prevent system resource leaks.
+    """
+    while True:
+        try:
+            # Reap child processes non-blockingly
+            pid, status = os.waitpid(-1, os.WNOHANG)
+            if pid == 0:  # No more children to reap
+                break
+            get_logger().debug(f"Reaped child process {pid} with status {status}")
+        except OSError:
+            # No child processes or other error
+            break
+
+
+# Set up SIGCHLD handler for automatic zombie reaping (Unix only)
+if hasattr(signal, "SIGCHLD"):
+    signal.signal(signal.SIGCHLD, sigchld_handler)
 
 
 class State(IntEnum):
