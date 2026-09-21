@@ -1497,6 +1497,11 @@ export const CONTEXT_COMMANDS: ContextCommands = {
 };
 
 /**
+ * Toolbar factory name of the Git panel toolbar.
+ */
+export const GIT_PANEL_TOOLBAR_FACTORY = 'Git';
+
+/**
  * The command IDs used by the git plugin.
  */
 export enum CommandIDs {

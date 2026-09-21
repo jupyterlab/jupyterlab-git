@@ -4,8 +4,10 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   Dialog,
   ICommandPalette,
+  IToolbarWidgetRegistry,
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
@@ -27,7 +29,12 @@ import {
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
-import { CommandIDs, Git, IGitExtension } from './tokens';
+import {
+  CommandIDs,
+  GIT_PANEL_TOOLBAR_FACTORY,
+  Git,
+  IGitExtension
+} from './tokens';
 import { GitWidget } from './widgets/GitWidget';
 
 export { DiffModel } from './components/diff/model';
@@ -48,7 +55,13 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     ISettingRegistry,
     IDocumentManager
   ],
-  optional: [IMainMenu, IStatusBar, ICommandPalette, ITranslator],
+  optional: [
+    IToolbarWidgetRegistry,
+    IMainMenu,
+    IStatusBar,
+    ICommandPalette,
+    ITranslator
+  ],
   provides: IGitExtension,
   activate,
   autoStart: true
@@ -153,6 +166,7 @@ async function activate(
   fileBrowser: IDefaultFileBrowser,
   settingRegistry: ISettingRegistry,
   docmanager: IDocumentManager,
+  toolbarRegistry: IToolbarWidgetRegistry | null,
   mainMenu: IMainMenu | null,
   statusBar: IStatusBar | null,
   palette: ICommandPalette | null,
@@ -162,6 +176,21 @@ async function activate(
   let gitServerSettings: Git.IServerSettings;
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab_git');
+
+  let toolbarFactory: ReturnType<typeof createToolbarFactory> | null = null;
+  if (toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      GIT_PANEL_TOOLBAR_FACTORY,
+      plugin.id,
+      translator
+    );
+  } else {
+    // The schema sets `jupyter.lab.transform`, so `settingRegistry.load` below
+    // would time out if no transform were ever registered.
+    settingRegistry.transform(plugin.id, {});
+  }
 
   // Attempt to load application settings
   try {
@@ -294,7 +323,9 @@ async function activate(
       settings,
       app.commands,
       fileBrowser.model,
-      trans
+      trans,
+      toolbarRegistry,
+      toolbarFactory
     );
     gitPlugin.id = 'jp-git-sessions';
     gitPlugin.title.icon = gitIcon;
