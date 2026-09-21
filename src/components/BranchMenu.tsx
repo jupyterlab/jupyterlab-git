@@ -445,7 +445,7 @@ export class BranchMenu extends React.Component<
         return;
       }
 
-      let message = 'Switched branch.';
+      let message = this.props.trans.__('Switched branch.');
       let type: Notification.TypeOptions = 'success';
       const opts = {
         branchname: branch
@@ -478,7 +478,7 @@ export class BranchMenu extends React.Component<
 
           if (!result.button.accept) {
             shouldCheckout = false;
-            message = 'Checkout cancelled.';
+            message = this.props.trans.__('Checkout cancelled.');
             type = 'warning';
           }
         }
@@ -492,7 +492,7 @@ export class BranchMenu extends React.Component<
 
       Notification.update({
         id,
-        message: this.props.trans.__(message),
+        message,
         type,
         autoClose: 5000
       });

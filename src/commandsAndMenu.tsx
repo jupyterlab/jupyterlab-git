@@ -33,10 +33,6 @@ import { Message } from '@lumino/messaging';
 import { ContextMenu, DockPanel, Menu, Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { CancelledError } from './cancelledError';
-import { BranchPicker } from './components/BranchPicker';
-import { CONTEXT_COMMANDS } from './components/FileList';
-import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
-import { NewTagDialogBox } from './components/NewTagDialog';
 import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
 import { DiffModel } from './components/diff/model';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
@@ -52,7 +48,13 @@ import {
   removeIcon,
   tagIcon
 } from './style/icons';
-import { CommandIDs, ContextCommandIDs, Git, IGitExtension } from './tokens';
+import {
+  CommandIDs,
+  CONTEXT_COMMANDS,
+  ContextCommandIDs,
+  Git,
+  IGitExtension
+} from './tokens';
 import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
@@ -182,7 +184,7 @@ export function addCommands(
     execute: () => {
       try {
         shell.activateById('jp-git-sessions');
-      } catch (_err) {
+      } catch {
         console.error('Fail to open Git tab.');
       }
     }
@@ -241,7 +243,8 @@ export function addCommands(
 
   /** Open URL externally */
   commands.addCommand(CommandIDs.gitOpenUrl, {
-    label: args => trans.__(args['text'] as string),
+    // `text` is already translated by the caller (see RESOURCES in createGitMenu)
+    label: args => args['text'] as string,
     execute: args => {
       const url = args['url'] as string;
       window.open(url);
@@ -262,7 +265,7 @@ export function addCommands(
     label: trans.__('Manage Remote Repositories'),
     caption: trans.__('Manage Remote Repositories'),
     isEnabled: () => gitModel.pathRepository !== null,
-    execute: () => {
+    execute: async () => {
       if (gitModel.pathRepository === null) {
         console.warn(
           trans.__('Not in a Git repository. Unable to add a remote.')
@@ -278,6 +281,9 @@ export function addCommands(
         document.body.appendChild(anchor);
       }
 
+      const { ManageRemoteDialogue } = await import(
+        './components/ManageRemoteDialogue'
+      );
       const dialog = ReactWidget.create(
         <ManageRemoteDialogue
           trans={trans}
@@ -333,7 +339,7 @@ export function addCommands(
           await gitModel.writeGitIgnore(newContent);
           preview.title.className = '';
           saved = true;
-        } catch (_error) {
+        } catch {
           console.log('Could not save .gitignore');
         }
       },
@@ -859,6 +865,7 @@ export function addCommands(
         }
 
         const waitForDialog = new PromiseDelegate<string | null>();
+        const { BranchPicker } = await import('./components/BranchPicker');
         const dialog = ReactWidget.create(
           <BranchPicker
             action="merge"
@@ -936,6 +943,7 @@ export function addCommands(
         }
 
         const waitForDialog = new PromiseDelegate<string | null>();
+        const { BranchPicker } = await import('./components/BranchPicker');
         const dialog = ReactWidget.create(
           <BranchPicker
             action="rebase"
@@ -1175,7 +1183,7 @@ export function addCommands(
           } else {
             console.log('Cannot open a folder here');
           }
-        } catch (_err) {
+        } catch {
           console.error(`Fail to open ${to}.`);
         }
       }
@@ -1381,6 +1389,9 @@ export function addCommands(
         } as any);
 
         if (widget) {
+          // The model lives as long as the widget displaying it.
+          widget.disposed.connect(() => model.dispose());
+
           // Trigger diff model update
           if (diffContext.previousRef === 'HEAD') {
             const updateHead = () => {
@@ -1426,6 +1437,9 @@ export function addCommands(
               app.serviceManager.contents.fileChanged.disconnect(updateCurrent);
             });
           }
+        } else {
+          // No diff widget was opened, so nothing else will dispose the model.
+          model.dispose();
         }
       }
     },
@@ -1723,6 +1737,7 @@ export function addCommands(
       const isSingleCommit = true;
 
       const waitForDialog = new PromiseDelegate<string | null>();
+      const { NewTagDialogBox } = await import('./components/NewTagDialog');
       const dialog = ReactWidget.create(
         <NewTagDialogBox
           pastCommits={[commit.commit]}
@@ -2024,6 +2039,10 @@ export function addFileBrowserContextMenu(
     }
 
     const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+    // Ownership is handed to the application context menu right below, which
+    // outlives this extension: `addFileBrowserContextMenu` only runs at plugin
+    // activation, so the submenu lives for the whole session.
+    // eslint-disable-next-line jupyter/require-disposable-ownership
     gitMenu = new GitMenu({ commands: contextMenu.menu.commands });
     gitMenu.title.label = trans.__('Git');
     gitMenu.title.icon = gitIcon.bindprops({ stylesheet: 'menuItem' });

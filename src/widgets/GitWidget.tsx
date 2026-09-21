@@ -1,4 +1,10 @@
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import {
+  IToolbarWidgetRegistry,
+  ReactWidget,
+  setToolbar,
+  UseSignal
+} from '@jupyterlab/apputils';
+import type { createToolbarFactory } from '@jupyterlab/apputils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TranslationBundle } from '@jupyterlab/translation';
@@ -8,8 +14,8 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { PanelWithToolbar, SidePanel } from '@jupyterlab/ui-components';
-import { GitPanel } from '../components/GitPanel';
-import { SubmoduleMenu } from '../components/SubmoduleMenu';
+import type { GitPanel as GitPanelComponent } from '../components/GitPanel';
+import type { SubmoduleMenu as SubmoduleMenuComponent } from '../components/SubmoduleMenu';
 import { GitExtension } from '../model';
 import {
   gitWidgetStyle,
@@ -28,6 +34,8 @@ export class GitWidget extends SidePanel {
     commands: CommandRegistry,
     fileBrowserModel: FileBrowserModel,
     trans: TranslationBundle,
+    toolbarRegistry: IToolbarWidgetRegistry | null,
+    toolbarFactory: ReturnType<typeof createToolbarFactory> | null,
     options?: Widget.IOptions
   ) {
     super({
@@ -41,21 +49,13 @@ export class GitWidget extends SidePanel {
     this._fileBrowserModel = fileBrowserModel;
     this._model = model;
     this._settings = settings;
+    this._toolbarRegistry = toolbarRegistry;
+    this._toolbarFactory = toolbarFactory;
 
     this.toolbar.addClass(panelToolbarClass);
     this.toolbar.addClass('jp-git-PanelToolbar');
     model.repositoryChanged.connect(this._onRepositoryChanged, this);
     this.toolbar.setHidden(model.pathRepository === null);
-
-    this.addWidget(
-      this._createSection('Changes', this._createChangesSection())
-    );
-    this.addWidget(
-      this._createSection('History', this._createHistorySection())
-    );
-    this.addWidget(
-      this._createSection('Branches and Tags', this._createBranchesSection())
-    );
 
     // Add refresh standby condition if this widget is hidden
     model.refreshStandbyCondition = (): boolean =>
@@ -84,7 +84,8 @@ export class GitWidget extends SidePanel {
       this._submoduleMenu.dispose();
       this._submoduleMenu = null;
       this._submoduleMenuShownChanged.emit(false);
-    } else {
+    } else if (this._submoduleMenuComponent) {
+      const SubmoduleMenu = this._submoduleMenuComponent;
       const menu = ReactWidget.create(
         <UseSignal signal={this._model.submodulesChanged}>
           {() => (
@@ -112,7 +113,55 @@ export class GitWidget extends SidePanel {
     this._model.refresh().catch(error => {
       console.error('Fail to refresh model when displaying GitWidget.', error);
     });
+    if (!this._contentPromise) {
+      this._contentPromise = this._createContent();
+      this._contentPromise.catch(error => {
+        console.error('Fail to load the content of GitWidget.', error);
+      });
+    }
     super.onBeforeShow(msg);
+  }
+
+  /**
+   * Load the toolbar items and the sections the first time the widget is
+   * shown, so that their code stays out of the application startup.
+   */
+  private async _createContent(): Promise<void> {
+    const [{ GitPanel }, { SubmoduleMenu }, { addToolbarItems }] =
+      await Promise.all([
+        import('../components/GitPanel'),
+        import('../components/SubmoduleMenu'),
+        import('../components/Toolbar')
+      ]);
+    if (this.isDisposed) {
+      return;
+    }
+    this._submoduleMenuComponent = SubmoduleMenu;
+
+    // The factory names must match the `jupyter.lab.toolbars` entries in the
+    // schema and user settings, and must be registered before `setToolbar` runs.
+    if (this._toolbarRegistry && this._toolbarFactory) {
+      addToolbarItems(
+        this._toolbarRegistry,
+        this._model,
+        this._commands,
+        this._gitTrans
+      );
+      setToolbar(this, this._toolbarFactory);
+    }
+
+    this.addWidget(
+      this._createSection('Changes', this._createChangesSection(GitPanel))
+    );
+    this.addWidget(
+      this._createSection('History', this._createHistorySection(GitPanel))
+    );
+    this.addWidget(
+      this._createSection(
+        'Branches and Tags',
+        this._createBranchesSection(GitPanel)
+      )
+    );
   }
 
   private _createSection(
@@ -128,7 +177,9 @@ export class GitWidget extends SidePanel {
     return section;
   }
 
-  private _createChangesSection(): React.ReactElement {
+  private _createChangesSection(
+    GitPanel: typeof GitPanelComponent
+  ): React.ReactElement {
     return (
       <GitPanel
         commands={this._commands}
@@ -142,7 +193,9 @@ export class GitWidget extends SidePanel {
     );
   }
 
-  private _createHistorySection(): React.ReactElement {
+  private _createHistorySection(
+    GitPanel: typeof GitPanelComponent
+  ): React.ReactElement {
     return (
       <GitPanel
         commands={this._commands}
@@ -155,7 +208,9 @@ export class GitWidget extends SidePanel {
     );
   }
 
-  private _createBranchesSection(): React.ReactElement {
+  private _createBranchesSection(
+    GitPanel: typeof GitPanelComponent
+  ): React.ReactElement {
     return (
       <GitPanel
         commands={this._commands}
@@ -180,6 +235,10 @@ export class GitWidget extends SidePanel {
   private _fileBrowserModel: FileBrowserModel;
   private _model: GitExtension;
   private _settings: ISettingRegistry.ISettings;
+  private _toolbarRegistry: IToolbarWidgetRegistry | null;
+  private _toolbarFactory: ReturnType<typeof createToolbarFactory> | null;
+  private _submoduleMenuComponent: typeof SubmoduleMenuComponent | null = null;
   private _submoduleMenu: Widget | null = null;
   private _submoduleMenuShownChanged = new Signal<GitWidget, boolean>(this);
+  private _contentPromise: Promise<void> | null = null;
 }

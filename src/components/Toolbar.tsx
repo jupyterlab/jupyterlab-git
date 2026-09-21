@@ -25,14 +25,14 @@ import {
   toolbarButtonClass
 } from '../style/Toolbar';
 import { branchIcon, desktopIcon, pullIcon, pushIcon } from '../style/icons';
-import { CommandIDs, Git, IGitExtension } from '../tokens';
+import {
+  CommandIDs,
+  GIT_PANEL_TOOLBAR_FACTORY,
+  Git,
+  IGitExtension
+} from '../tokens';
 import type { GitWidget } from '../widgets/GitWidget';
 import { ActionButton } from './ActionButton';
-
-/**
- * Toolbar factory name of the Git panel toolbar.
- */
-export const GIT_PANEL_TOOLBAR_FACTORY = 'Git';
 
 /**
  * Interface describing toolbar item properties.

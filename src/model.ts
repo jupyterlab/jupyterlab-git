@@ -347,6 +347,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * The task currently broadcast by `taskChanged`, or null when none is pending.
+   */
+  get currentTask(): string | null {
+    return this._taskHandler.currentTask;
+  }
+
+  /**
    * A signal emitted when the Git repository remote changes.
    */
   get remoteChanged(): ISignal<
@@ -1162,7 +1169,7 @@ export class GitExtension implements IGitExtension {
               follow_path: this.selectedHistoryFile?.to
             }
           );
-        } catch (_error) {
+        } catch {
           return { code: 1 };
         }
       }
@@ -2141,7 +2148,7 @@ export class GitExtension implements IGitExtension {
       const newSubmodules = data.submodules;
       this._submodules = newSubmodules;
       this._submodulesChanged.emit();
-    } catch (_error) {
+    } catch {
       console.error('Failed to retrieve submodules');
     }
   }

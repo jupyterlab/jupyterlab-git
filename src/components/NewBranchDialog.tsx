@@ -325,9 +325,7 @@ export class NewBranchDialog extends React.Component<
           >
             {branch.name}
           </p>
-          {desc ? (
-            <p className={listItemDescClass}>{this.props.trans.__(desc)}</p>
-          ) : null}
+          {desc ? <p className={listItemDescClass}>{desc}</p> : null}
         </div>
       </ListItem>
     );
