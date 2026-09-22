@@ -387,7 +387,7 @@ async def test_status(tmp_path, output, diff_output, expected):
                 is_binary=False,
             ),
             call(
-                ["git", "diff", "--numstat", "-z", "--no-renames", "HEAD"],
+                ["git", "diff", "--numstat", "-z", "--no-renames", "HEAD", "--"],
                 cwd=str(repository),
                 env=None,
                 username=None,
