@@ -313,6 +313,83 @@ describe('BranchMenu', () => {
     });
   });
 
+  describe('worktrees', () => {
+    const WORKTREE_BRANCH = {
+      is_current_branch: false,
+      is_remote_branch: false,
+      name: 'feature-wt',
+      upstream: '',
+      top_commit: '',
+      tag: '',
+      worktree: 'path/to/wt-feature'
+    };
+
+    it('should display a worktree marker for branches checked out in another worktree', () => {
+      render(
+        <BranchMenu
+          {...createProps({
+            currentBranch: 'current',
+            branches: [WORKTREE_BRANCH]
+          })}
+        />
+      );
+
+      expect(
+        screen.getByTitle('Checked out in worktree: path/to/wt-feature')
+      ).toBeDefined();
+    });
+
+    it('should show a dialog instead of switching to a branch checked out in another worktree', async () => {
+      const mockDialog = showDialog as jest.MockedFunction<typeof showDialog>;
+      mockDialog.mockClear();
+      mockDialog.mockResolvedValue({
+        button: { accept: false },
+        isChecked: null,
+        value: undefined
+      } as any);
+
+      // Make the model aware of the branch and its worktree
+      const mock = git as jest.Mocked<typeof git>;
+      mock.requestAPI.mockImplementation(
+        mockedRequestAPI({
+          responses: {
+            ...defaultMockedResponses,
+            branch: {
+              body: () => ({
+                code: 0,
+                branches: [WORKTREE_BRANCH],
+                current_branch: { name: 'current' }
+              })
+            }
+          }
+        }) as any
+      );
+      await model.refreshBranch();
+
+      const spy = jest.spyOn(GitExtension.prototype, 'checkout');
+
+      render(
+        <BranchMenu
+          {...createProps({
+            currentBranch: 'current',
+            branches: [WORKTREE_BRANCH],
+            branching: true
+          })}
+        />
+      );
+
+      await userEvent.click(
+        screen.getByRole('listitem', {
+          name: `Switch to branch: ${WORKTREE_BRANCH.name}`
+        })
+      );
+
+      expect(mockDialog).toHaveBeenCalledTimes(1);
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+  });
+
   describe('switch branch', () => {
     it('should not switch to a specified branch upon clicking its corresponding element when branching is disabled', async () => {
       const spy = jest.spyOn(GitExtension.prototype, 'checkout');

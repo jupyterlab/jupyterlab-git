@@ -17,7 +17,11 @@ export default tseslint.config(
       '**/__tests__',
       'ui-tests',
       'packages',
-      'testutils'
+      'testutils',
+      // Nested Git worktrees hold their own copy of the sources
+      '**/worktrees',
+      '.venv',
+      '**/.ipynb_checkpoints'
     ]
   },
   { plugins: { jupyter } },

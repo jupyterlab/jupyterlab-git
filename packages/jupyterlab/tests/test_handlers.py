@@ -1,4 +1,5 @@
 import json
+import os
 from unittest.mock import ANY, MagicMock, Mock, call, patch
 
 import pytest
@@ -282,6 +283,75 @@ async def test_branch_handler_localbranch(mock_git, jp_fetch, jp_root_dir):
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload == {"code": 0, "branches": branch["branches"]}
+
+
+@patch("jupyterlab_git.handlers.GitBranchHandler.git", spec=Git)
+async def test_branch_handler_relativize_worktree_paths(
+    mock_git, jp_fetch, jp_root_dir
+):
+    # Given
+    local_path = jp_root_dir / "test_path"
+    root_real = os.path.realpath(str(jp_root_dir))
+    branch = {
+        "code": 0,
+        "branches": [
+            {
+                "is_current_branch": True,
+                "is_remote_branch": False,
+                "name": "main",
+                "upstream": None,
+                "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
+                "tag": None,
+                "worktree": os.path.join(root_real, "test_path"),
+            },
+            {
+                "is_current_branch": False,
+                "is_remote_branch": False,
+                "name": "feature-foo",
+                "upstream": None,
+                "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
+                "tag": None,
+                "worktree": os.path.join(
+                    root_real, "test_path", ".worktrees", "feature-foo"
+                ),
+            },
+            {
+                "is_current_branch": False,
+                "is_remote_branch": False,
+                "name": "feature-bar",
+                "upstream": None,
+                "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
+                "tag": None,
+                "worktree": None,
+            },
+            {
+                "is_current_branch": False,
+                "is_remote_branch": False,
+                "name": "feature-baz",
+                "upstream": None,
+                "top_commit": "abcdefghijklmnopqrstuvwxyz01234567890123",
+                "tag": None,
+                "worktree": os.path.join(os.path.dirname(root_real), "outside-wt"),
+            },
+        ],
+    }
+
+    mock_git.branch.return_value = branch
+
+    # When
+    response = await jp_fetch(
+        NAMESPACE, local_path.name, "branch", body="{}", method="POST"
+    )
+
+    # Then
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert [entry["worktree"] for entry in payload["branches"]] == [
+        "test_path",
+        "test_path/.worktrees/feature-foo",
+        None,
+        "../outside-wt",
+    ]
 
 
 @patch("jupyterlab_git.handlers.GitLogHandler.git", spec=Git)
