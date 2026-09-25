@@ -1733,9 +1733,7 @@ class Git:
             elif reference["special"] == "INDEX":
                 is_binary = await self._is_binary(filename, "INDEX", path)
                 if is_binary:
-                    content = await self.show(
-                        path, reference["git"], filename, is_binary=True
-                    )
+                    content = await self.show(path, "", filename, is_binary=True)
                 else:
                     content = await self.show(path, "", filename)
             elif reference["special"] == "BASE":

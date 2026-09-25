@@ -2,7 +2,7 @@ import json
 import nbformat
 from pathlib import Path
 from subprocess import CalledProcessError
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pytest
 
@@ -257,6 +257,36 @@ async def test_is_binary_file(args, cli_result, cmd, expected):
             )
 
             assert actual_response == expected
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "filename, numstat, is_binary",
+    [
+        ("dummy.txt", "2\t1\tdummy.txt", False),
+        ("dummy.png", "-\t-\tdummy.png", True),
+    ],
+)
+async def test_get_content_at_reference_index(filename, numstat, is_binary):
+    with patch("jupyterlab_git_core.git.execute") as mock_execute:
+        # Given
+        mock_execute.side_effect = [(0, numstat, ""), (0, "content", "")]
+
+        # When
+        actual_response = await Git().get_content_at_reference(
+            filename, {"special": "INDEX"}, "/bin", None
+        )
+
+        # Then
+        assert mock_execute.call_args_list[-1] == call(
+            ["git", "show", f":{filename}"],
+            cwd="/bin",
+            env=None,
+            username=None,
+            password=None,
+            is_binary=is_binary,
+        )
+        assert actual_response == {"content": "content"}
 
 
 nbdime = pytest.importorskip("nbdime", reason="nbdime is not installed")
