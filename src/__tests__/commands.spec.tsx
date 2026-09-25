@@ -132,6 +132,75 @@ describe('git-commands', () => {
     });
   });
 
+  describe('git:context-diff', () => {
+    [
+      {
+        status: 'unstaged',
+        reference: { special: 'INDEX' },
+        challenger: { special: 'WORKING' }
+      },
+      {
+        status: 'partially-staged',
+        reference: { git: 'HEAD' },
+        challenger: { special: 'WORKING' }
+      },
+      {
+        status: 'staged',
+        reference: { git: 'HEAD' },
+        challenger: { special: 'INDEX' }
+      }
+    ].forEach(({ status, reference, challenger }) => {
+      it(`status:${status} - diffs ${JSON.stringify(
+        reference
+      )} with ${JSON.stringify(challenger)}`, async () => {
+        const requests: any[] = [];
+        mockGit.requestAPI.mockImplementation(
+          mockedRequestAPI({
+            responses: {
+              ...mockResponses,
+              content: {
+                body: body => {
+                  requests.push(body);
+                  return { code: 0, content: '' };
+                }
+              }
+            }
+          }) as any
+        );
+
+        let diffModel: Git.Diff.IModel | undefined;
+        const execute = commands.execute.bind(commands);
+        jest.spyOn(commands, 'execute').mockImplementation((id, args) => {
+          if (id === CommandIDs.gitShowDiff) {
+            diffModel = (args as any).model;
+            return Promise.resolve(null);
+          }
+          return execute(id, args);
+        });
+
+        model.pathRepository = DEFAULT_REPOSITORY_PATH;
+        await model.ready;
+
+        await commands.execute(ContextCommandIDs.gitFileDiff, {
+          files: [
+            {
+              filePath: 'file.txt',
+              isText: true,
+              status: status as Git.Status
+            }
+          ]
+        } as CommandArguments.IGitFileDiff as any);
+        await diffModel!.reference.content();
+        await diffModel!.challenger.content();
+
+        expect(requests).toEqual([
+          { filename: 'file.txt', reference },
+          { filename: 'file.txt', reference: challenger }
+        ]);
+      });
+    });
+  });
+
   describe('git:reset-to-remote', () => {
     [true, false].forEach(checked => {
       it(
