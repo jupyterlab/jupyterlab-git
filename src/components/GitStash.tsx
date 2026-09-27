@@ -12,7 +12,7 @@ import { hiddenButtonStyle } from '../style/ActionButtonStyle';
 import { ActionButton } from './ActionButton';
 import { addIcon, trashIcon, discardIcon } from '../style/icons';
 import { TranslationBundle } from '@jupyterlab/translation';
-import { UseSignal } from '@jupyterlab/apputils';
+import { Notification, UseSignal } from '@jupyterlab/apputils';
 import { FixedSizeList } from 'react-window';
 import {
   listStyle,
@@ -24,6 +24,7 @@ import {
 import { FilePath } from './FilePath';
 import { stopPropagation, stopPropagationWrapper } from '../utils';
 import { classes } from 'typestyle';
+import { showError } from '../notifications';
 
 const HEADER_HEIGHT = 34;
 const ITEM_HEIGHT = 25;
@@ -242,10 +243,13 @@ export const GitStash: React.FunctionComponent<IGitStashProps> = (
       try {
         await props.model.applyStash(index);
       } catch (err) {
-        console.error(err);
+        Notification.error(
+          props.trans.__('Failed to apply stash'),
+          showError(err as Error, props.trans)
+        );
       }
     },
-    [props.model]
+    [props.model, props.trans]
   );
 
   return (
