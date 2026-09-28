@@ -26,9 +26,9 @@ import { IGitExtension, IGitSidebar } from '../tokens';
 /**
  * The Git extension's main side-bar widget.
  *
- * It displays the sections registered in the Git sidebar and, on
- * JupyterLab >= 4.6, lets the move-sections plugin move them to other panels
- * and host sections moved in from other panels.
+ * It displays the sections registered in the Git sidebar, and lets the
+ * move-sections plugin move them to other panels and host sections moved in
+ * from other panels.
  */
 export class GitWidget
   extends SidePanel
