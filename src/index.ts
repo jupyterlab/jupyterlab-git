@@ -7,6 +7,7 @@ import {
   createToolbarFactory,
   Dialog,
   ICommandPalette,
+  IMovableSectionRegistry,
   IToolbarWidgetRegistry,
   showErrorMessage
 } from '@jupyterlab/apputils';
@@ -20,6 +21,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { Token } from '@lumino/coreutils';
 import { gitCloneCommandPlugin } from './cloneCommand';
 import {
   addCommands,
@@ -28,39 +30,61 @@ import {
 } from './commandsAndMenu';
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
+import {
+  gitBranchesAndTagsSectionPlugin,
+  gitChangesSectionPlugin,
+  gitHistorySectionPlugin,
+  gitSidebarPlugin
+} from './sidebarPlugins';
 import { gitIcon } from './style/icons';
 import {
   CommandIDs,
   GIT_PANEL_TOOLBAR_FACTORY,
   Git,
-  IGitExtension
+  IGitExtension,
+  IGitSidebar,
+  PLUGIN_ID
 } from './tokens';
 import { GitWidget } from './widgets/GitWidget';
 
 export { DiffModel } from './components/diff/model';
 export type { NotebookDiff } from './components/diff/NotebookDiff';
 export type { PlainTextDiff } from './components/diff/PlainTextDiff';
-export { Git, IGitExtension } from './tokens';
+export {
+  Git,
+  GitSidebarSectionIDs,
+  IGitExtension,
+  IGitSidebar
+} from './tokens';
+
+/**
+ * The movable section registry token, listed only when it exists (JupyterLab
+ * >= 4.6) so that the plugin still loads on older versions.
+ */
+const movableSectionTokens: Token<IMovableSectionRegistry>[] =
+  IMovableSectionRegistry ? [IMovableSectionRegistry] : [];
 
 /**
  * The default running sessions extension.
  */
 const plugin: JupyterFrontEndPlugin<IGitExtension> = {
-  id: '@jupyterlab/git:plugin',
+  id: PLUGIN_ID,
   description: 'A JupyterLab extension for version control using Git.',
   requires: [
     ILayoutRestorer,
     IEditorServices,
     IDefaultFileBrowser,
     ISettingRegistry,
-    IDocumentManager
+    IDocumentManager,
+    IGitSidebar
   ],
   optional: [
     IToolbarWidgetRegistry,
     IMainMenu,
     IStatusBar,
     ICommandPalette,
-    ITranslator
+    ITranslator,
+    ...movableSectionTokens
   ],
   provides: IGitExtension,
   activate,
@@ -148,7 +172,11 @@ export default [
   gitCloneCommandPlugin,
   notebookDiffPlugin,
   imageDiffPlugin,
-  plainTextDiffPlugin
+  plainTextDiffPlugin,
+  gitSidebarPlugin,
+  gitChangesSectionPlugin,
+  gitHistorySectionPlugin,
+  gitBranchesAndTagsSectionPlugin
 ];
 
 /**
@@ -166,11 +194,13 @@ async function activate(
   fileBrowser: IDefaultFileBrowser,
   settingRegistry: ISettingRegistry,
   docmanager: IDocumentManager,
+  sidebar: IGitSidebar,
   toolbarRegistry: IToolbarWidgetRegistry | null,
   mainMenu: IMainMenu | null,
   statusBar: IStatusBar | null,
   palette: ICommandPalette | null,
-  translator: ITranslator | null
+  translator: ITranslator | null,
+  movableSections?: IMovableSectionRegistry | null
 ): Promise<IGitExtension> {
   let settings: ISettingRegistry.ISettings | undefined = undefined;
   let gitServerSettings: Git.IServerSettings;
@@ -314,7 +344,8 @@ async function activate(
       editorServices.factoryService,
       fileBrowser.model,
       settings,
-      translator
+      translator,
+      sidebar
     );
 
     // Create the Git widget sidebar
@@ -322,8 +353,8 @@ async function activate(
       gitExtension,
       settings,
       app.commands,
-      fileBrowser.model,
       trans,
+      sidebar,
       toolbarRegistry,
       toolbarFactory
     );
@@ -356,6 +387,13 @@ async function activate(
     // Rank has been chosen somewhat arbitrarily to give priority to the running
     // sessions widget in the sidebar.
     app.shell.add(gitPlugin, 'left', { rank: 200 });
+
+    if (movableSections) {
+      // Let users move the Git sections to other panels, and the sections of
+      // other panels to the Git panel.
+      movableSections.registerSource(PLUGIN_ID, trans.__('Git'), gitPlugin);
+      movableSections.registerTarget(PLUGIN_ID, trans.__('Git'), gitPlugin);
+    }
 
     // Add a menu for the plugin
     if (mainMenu && app.version.split('.').slice(0, 2).join('.') < '3.1') {

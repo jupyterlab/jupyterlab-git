@@ -53,7 +53,9 @@ import {
   CONTEXT_COMMANDS,
   ContextCommandIDs,
   Git,
-  IGitExtension
+  GitSidebarSectionIDs,
+  IGitExtension,
+  IGitSidebar
 } from './tokens';
 import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
@@ -134,7 +136,8 @@ export function addCommands(
   editorFactory: IEditorFactoryService,
   fileBrowserModel: FileBrowserModel,
   settings: ISettingRegistry.ISettings,
-  translator: ITranslator
+  translator: ITranslator,
+  sidebar: IGitSidebar
 ): void {
   const { commands, shell, serviceManager } = app;
   const { serverSettings } = serviceManager;
@@ -1704,7 +1707,16 @@ export function addCommands(
         return;
       }
       gitModel.selectedHistoryFile = file;
-      shell.activateById('jp-git-sessions');
+      // The history section may have been moved to another panel.
+      const history = sidebar.sections.find(
+        section => section.id === GitSidebarSectionIDs.history
+      );
+      const panel = history
+        ? [...shell.widgets('left'), ...shell.widgets('right')].find(widget =>
+            widget.node.contains(history.widget.node)
+          )
+        : undefined;
+      shell.activateById(panel?.id ?? 'jp-git-sessions');
     },
     isEnabled: args => {
       const { files } = args as any as CommandArguments.IGitContextAction;
