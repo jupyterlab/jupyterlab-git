@@ -13,7 +13,7 @@ To see the extension in action, open the example notebook included in the Binder
 
 ## Requirements
 
-- JupyterLab >= 4.6 ([older version] available for 2.x and 3.x)
+- JupyterLab >= 4.0 ([older version] available for 2.x and 3.x)
 - Git (version `>=2.x`)
 
 For older versions of JupyterLab, go to:
@@ -66,7 +66,7 @@ The registration returns an `IDisposable` that removes the section and disposes
 its widget. Contributions can also provide an `isVisible` callback and a
 `visibilityChanged` signal for conditionally displayed sections.
 
-The Git sidebar also integrates with the
+On JupyterLab 4.6 or newer, the Git sidebar also integrates with the
 [movable accordion sections](https://jupyterlab.readthedocs.io/en/stable/extension/extension_points.html#movable-accordion-sections)
 feature: right-click a section header to move the section to another panel
 (for example the file browser), and move it back from there. The Git sidebar
