@@ -7,6 +7,7 @@ on:
 
 jobs:
   check_release:
+    if: github.repository == 'jupyterlab/jupyterlab-git'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

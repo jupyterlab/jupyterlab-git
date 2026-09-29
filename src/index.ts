@@ -4,8 +4,10 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   Dialog,
   ICommandPalette,
+  IToolbarWidgetRegistry,
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
@@ -24,19 +26,20 @@ import {
   addFileBrowserContextMenu,
   createGitMenu
 } from './commandsAndMenu';
-import { createImageDiff } from './components/diff/ImageDiff';
-import { createNotebookDiff } from './components/diff/NotebookDiff';
-import { createPlainTextDiff } from './components/diff/PlainTextDiff';
-import { addStatusBarWidget } from './components/StatusWidget';
 import { GitExtension } from './model';
 import { getServerSettings } from './server';
 import { gitIcon } from './style/icons';
-import { CommandIDs, Git, IGitExtension } from './tokens';
+import {
+  CommandIDs,
+  GIT_PANEL_TOOLBAR_FACTORY,
+  Git,
+  IGitExtension
+} from './tokens';
 import { GitWidget } from './widgets/GitWidget';
 
 export { DiffModel } from './components/diff/model';
-export { NotebookDiff } from './components/diff/NotebookDiff';
-export { PlainTextDiff } from './components/diff/PlainTextDiff';
+export type { NotebookDiff } from './components/diff/NotebookDiff';
+export type { PlainTextDiff } from './components/diff/PlainTextDiff';
 export { Git, IGitExtension } from './tokens';
 
 /**
@@ -52,7 +55,13 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     ISettingRegistry,
     IDocumentManager
   ],
-  optional: [IMainMenu, IStatusBar, ICommandPalette, ITranslator],
+  optional: [
+    IToolbarWidgetRegistry,
+    IMainMenu,
+    IStatusBar,
+    ICommandPalette,
+    ITranslator
+  ],
   provides: IGitExtension,
   activate,
   autoStart: true
@@ -72,12 +81,12 @@ const notebookDiffPlugin: JupyterFrontEndPlugin<void> = {
     gitExtension: IGitExtension,
     renderMime: IRenderMimeRegistry
   ): void => {
-    gitExtension.registerDiffProvider(
-      'Nbdime',
-      ['.ipynb'],
-      (options: Git.Diff.IFactoryOptions) =>
-        createNotebookDiff({ ...options, renderMime })
-    );
+    gitExtension.registerDiffProvider('Nbdime', ['.ipynb'], async options => {
+      const { createNotebookDiff } = await import(
+        './components/diff/NotebookDiff'
+      );
+      return createNotebookDiff({ ...options, renderMime });
+    });
   }
 };
 
@@ -93,7 +102,10 @@ const imageDiffPlugin: JupyterFrontEndPlugin<void> = {
     gitExtension.registerDiffProvider(
       'ImageDiff',
       ['.jpeg', '.jpg', '.png'],
-      createImageDiff
+      async options => {
+        const { createImageDiff } = await import('./components/diff/ImageDiff');
+        return createImageDiff(options);
+      }
     );
   }
 };
@@ -115,14 +127,16 @@ const plainTextDiffPlugin: JupyterFrontEndPlugin<void> = {
     languageRegistry: IEditorLanguageRegistry
   ): void => {
     const editorFactory = editorServices.factoryService;
-    gitExtension.registerFallbackDiffProvider(
-      (options: Git.Diff.IFactoryOptions) =>
-        createPlainTextDiff({
-          ...options,
-          editorFactory: editorFactory.newInlineEditor.bind(editorFactory),
-          languageRegistry
-        })
-    );
+    gitExtension.registerFallbackDiffProvider(async options => {
+      const { createPlainTextDiff } = await import(
+        './components/diff/PlainTextDiff'
+      );
+      return createPlainTextDiff({
+        ...options,
+        editorFactory: editorFactory.newInlineEditor.bind(editorFactory),
+        languageRegistry
+      });
+    });
   }
 };
 
@@ -152,6 +166,7 @@ async function activate(
   fileBrowser: IDefaultFileBrowser,
   settingRegistry: ISettingRegistry,
   docmanager: IDocumentManager,
+  toolbarRegistry: IToolbarWidgetRegistry | null,
   mainMenu: IMainMenu | null,
   statusBar: IStatusBar | null,
   palette: ICommandPalette | null,
@@ -161,6 +176,21 @@ async function activate(
   let gitServerSettings: Git.IServerSettings;
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab_git');
+
+  let toolbarFactory: ReturnType<typeof createToolbarFactory> | null = null;
+  if (toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      GIT_PANEL_TOOLBAR_FACTORY,
+      plugin.id,
+      translator
+    );
+  } else {
+    // The schema sets `jupyter.lab.transform`, so `settingRegistry.load` below
+    // would time out if no transform were ever registered.
+    settingRegistry.transform(plugin.id, {});
+  }
 
   // Attempt to load application settings
   try {
@@ -293,7 +323,9 @@ async function activate(
       settings,
       app.commands,
       fileBrowser.model,
-      trans
+      trans,
+      toolbarRegistry,
+      toolbarFactory
     );
     gitPlugin.id = 'jp-git-sessions';
     gitPlugin.title.icon = gitIcon;
@@ -332,9 +364,19 @@ async function activate(
       mainMenu.addMenu(createGitMenu(app.commands, trans));
     }
 
-    // Add the status bar widget
+    // Add the status bar widget once the application is restored: it shows
+    // the branch and the running operation, which are empty until the first
+    // status round trip.
     if (statusBar) {
-      addStatusBarWidget(statusBar, gitExtension, settings, trans);
+      const pluginSettings = settings;
+      app.restored
+        .then(async () => {
+          const { addStatusBarWidget } = await import(
+            './components/StatusWidget'
+          );
+          addStatusBarWidget(statusBar, gitExtension, pluginSettings, trans);
+        })
+        .catch(console.error);
     }
 
     // Add the context menu items for the default file browser

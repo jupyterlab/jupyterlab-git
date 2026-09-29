@@ -28,6 +28,7 @@ export class StatusWidget extends ReactWidget {
     super();
     this._model = model;
     this._trans = trans;
+    this._status = { isIdle: true, message: trans.__('idle') };
 
     this.addClass('jp-git-StatusWidget');
   }
@@ -123,7 +124,7 @@ export class StatusWidget extends ReactWidget {
   /**
    * Current status.
    */
-  private _status: StatusWidget.IStatus = { isIdle: false, message: '' };
+  private _status: StatusWidget.IStatus;
 
   private _model: IGitExtension;
   private _trans: TranslationBundle;
@@ -163,6 +164,10 @@ export function addStatusBarWidget(
 
   const callback = Private.createEventCallback(statusWidget, trans);
   model.taskChanged.connect(callback);
+  // A task may already be running when the widget is created.
+  if (model.currentTask !== null) {
+    callback(model, model.currentTask);
+  }
 
   statusWidget.disposed.connect(() => {
     model.taskChanged.disconnect(callback);

@@ -347,6 +347,13 @@ export class GitExtension implements IGitExtension {
   }
 
   /**
+   * The task currently broadcast by `taskChanged`, or null when none is pending.
+   */
+  get currentTask(): string | null {
+    return this._taskHandler.currentTask;
+  }
+
+  /**
    * A signal emitted when the Git repository remote changes.
    */
   get remoteChanged(): ISignal<

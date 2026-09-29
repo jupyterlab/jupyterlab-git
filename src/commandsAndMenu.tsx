@@ -33,10 +33,6 @@ import { Message } from '@lumino/messaging';
 import { ContextMenu, DockPanel, Menu, Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { CancelledError } from './cancelledError';
-import { BranchPicker } from './components/BranchPicker';
-import { CONTEXT_COMMANDS } from './components/FileList';
-import { ManageRemoteDialogue } from './components/ManageRemoteDialogue';
-import { NewTagDialogBox } from './components/NewTagDialog';
 import { PreviewMainAreaWidget } from './components/diff/PreviewMainAreaWidget';
 import { DiffModel } from './components/diff/model';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
@@ -52,7 +48,13 @@ import {
   removeIcon,
   tagIcon
 } from './style/icons';
-import { CommandIDs, ContextCommandIDs, Git, IGitExtension } from './tokens';
+import {
+  CommandIDs,
+  CONTEXT_COMMANDS,
+  ContextCommandIDs,
+  Git,
+  IGitExtension
+} from './tokens';
 import { AdvancedPushForm } from './widgets/AdvancedPushForm';
 import { GitCredentialsForm } from './widgets/CredentialsBox';
 import { CheckboxForm } from './widgets/GitResetToRemoteForm';
@@ -263,7 +265,7 @@ export function addCommands(
     label: trans.__('Manage Remote Repositories'),
     caption: trans.__('Manage Remote Repositories'),
     isEnabled: () => gitModel.pathRepository !== null,
-    execute: () => {
+    execute: async () => {
       if (gitModel.pathRepository === null) {
         console.warn(
           trans.__('Not in a Git repository. Unable to add a remote.')
@@ -279,6 +281,9 @@ export function addCommands(
         document.body.appendChild(anchor);
       }
 
+      const { ManageRemoteDialogue } = await import(
+        './components/ManageRemoteDialogue'
+      );
       const dialog = ReactWidget.create(
         <ManageRemoteDialogue
           trans={trans}
@@ -860,6 +865,7 @@ export function addCommands(
         }
 
         const waitForDialog = new PromiseDelegate<string | null>();
+        const { BranchPicker } = await import('./components/BranchPicker');
         const dialog = ReactWidget.create(
           <BranchPicker
             action="merge"
@@ -937,6 +943,7 @@ export function addCommands(
         }
 
         const waitForDialog = new PromiseDelegate<string | null>();
+        const { BranchPicker } = await import('./components/BranchPicker');
         const dialog = ReactWidget.create(
           <BranchPicker
             action="rebase"
@@ -1730,6 +1737,7 @@ export function addCommands(
       const isSingleCommit = true;
 
       const waitForDialog = new PromiseDelegate<string | null>();
+      const { NewTagDialogBox } = await import('./components/NewTagDialog');
       const dialog = ReactWidget.create(
         <NewTagDialogBox
           pastCommits={[commit.commit]}

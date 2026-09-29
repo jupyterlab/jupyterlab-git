@@ -28,7 +28,25 @@ export default tseslint.config(
       // schema for every command and threading a translator through every
       // component (several flagged strings are CLI snippets / product names).
       'jupyter/command-described-by': 'off',
-      'jupyter/no-untranslated-string': 'off'
+      'jupyter/no-untranslated-string': 'off',
+      'jupyter/prefer-lazy-imports': [
+        'error',
+        {
+          ignoreImports: [
+            // The plugin returns a `GitExtension` instance as the value of
+            // the `IGitExtension` token, so the class is needed at activation.
+            './model',
+            // Registered while the application starts: the commands and
+            // menus, and the sidebar, which loads its content on first show.
+            './commandsAndMenu',
+            './widgets/GitWidget',
+            // The server settings are fetched at activation; the icons are
+            // used by the commands and the sidebar tab.
+            './server',
+            './style/icons'
+          ]
+        }
+      ]
     }
   },
   {

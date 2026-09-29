@@ -19,7 +19,13 @@ import {
   removeIcon,
   rewindIcon
 } from '../style/icons';
-import { ContextCommandIDs, CommandIDs, Git } from '../tokens';
+import {
+  CONTEXT_COMMANDS,
+  ContextCommandIDs,
+  ContextCommands,
+  CommandIDs,
+  Git
+} from '../tokens';
 import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
 import { GitStage } from './GitStage';
@@ -56,44 +62,8 @@ export interface IFileListProps {
   trans: TranslationBundle;
 }
 
-export type ContextCommands = Record<
-  NonNullable<Git.Status>,
-  ContextCommandIDs[]
->;
-
-export const CONTEXT_COMMANDS: ContextCommands = {
-  'partially-staged': [
-    ContextCommandIDs.gitFileOpen,
-    ContextCommandIDs.gitFileUnstage,
-    ContextCommandIDs.gitFileDiff,
-    ContextCommandIDs.gitFileHistory
-  ],
-  'remote-changed': [ContextCommandIDs.gitFileOpen],
-  unstaged: [
-    ContextCommandIDs.gitFileOpen,
-    ContextCommandIDs.gitFileStage,
-    ContextCommandIDs.gitFileDiscard,
-    ContextCommandIDs.gitFileDiff,
-    ContextCommandIDs.gitFileHistory
-  ],
-  untracked: [
-    ContextCommandIDs.gitFileOpen,
-    ContextCommandIDs.gitFileTrack,
-    ContextCommandIDs.gitIgnore,
-    ContextCommandIDs.gitIgnoreExtension,
-    ContextCommandIDs.gitFileDelete
-  ],
-  staged: [
-    ContextCommandIDs.gitFileOpen,
-    ContextCommandIDs.gitFileUnstage,
-    ContextCommandIDs.gitFileDiff,
-    ContextCommandIDs.gitCommitAmendStaged,
-    ContextCommandIDs.gitFileHistory
-  ],
-  unmodified: [ContextCommandIDs.gitFileHistory],
-  unmerged: [ContextCommandIDs.gitFileDiff],
-  stashed: [ContextCommandIDs.gitFileStashPop]
-};
+export type { ContextCommands } from '../tokens';
+export { CONTEXT_COMMANDS } from '../tokens';
 
 const SIMPLE_CONTEXT_COMMANDS: ContextCommands = {
   'partially-staged': [

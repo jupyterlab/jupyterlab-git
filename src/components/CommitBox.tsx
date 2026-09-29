@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
+import Input from '@mui/material/Input';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 import Paper from '@mui/material/Paper';
@@ -13,10 +14,17 @@ import * as React from 'react';
 import { classes } from 'typestyle';
 import { listItemIconClass } from '../style/BranchMenu';
 import {
+  activeStyle,
   commitButtonClass,
+  commitDescriptionHintClass,
+  commitFormBottomClass,
   commitFormClass,
+  commitHintErrorClass,
+  commitMessageClass,
   commitPaperClass,
+  commitPopperClass,
   commitRoot,
+  commitVariantItemClass,
   commitVariantSelector,
   disabledStyle
 } from '../style/CommitBox';
@@ -27,7 +35,6 @@ import {
   listItemDescClass
 } from '../style/NewBranchDialog';
 import { CommandIDs } from '../tokens';
-import { CommitMessage } from './CommitMessage';
 
 /**
  * Commit action
@@ -68,14 +75,10 @@ export interface ICommitBoxProps {
   trans: TranslationBundle;
 
   /**
-   * Commit message summary.
+   * Commit message. The first line is used as the commit summary and the
+   * remaining lines as the commit description.
    */
-  summary: string;
-
-  /**
-   * Commit message description.
-   */
-  description: string;
+  message: string;
 
   /**
    * Whether commit is amending the previous one or not
@@ -88,18 +91,16 @@ export interface ICommitBoxProps {
   warning?: JSX.Element | null;
 
   /**
-   * Updates the commit message summary.
-   *
-   * @param summary - commit message summary
+   * Position of the box in the panel; defaults to 'top'
    */
-  setSummary: (summary: string) => void;
+  position?: 'top' | 'bottom';
 
   /**
-   * Updates the commit message description.
+   * Updates the commit message.
    *
-   * @param description - commit message description
+   * @param message - commit message
    */
-  setDescription: (description: string) => void;
+  setMessage: (message: string) => void;
 
   /**
    * Updates the amend checkbox state
@@ -176,38 +177,79 @@ export class CommitBox extends React.Component<
    * @returns React element
    */
   render(): React.ReactElement {
+    const atBottom = this.props.position === 'bottom';
     const disabled = !this._canCommit();
+    const summaryEmpty = !this._summary && this.props.message.length > 0;
     const title = !this.props.hasFiles
       ? this.props.trans.__('Disabled: No files are staged for commit')
-      : !this.props.summary && !this.props.amend
-      ? this.props.trans.__('Disabled: No commit message summary')
+      : summaryEmpty && !this.props.amend
+      ? this.props.trans.__(
+          'Disabled: The first line of the commit message is empty'
+        )
+      : !this._summary && !this.props.amend
+      ? this.props.trans.__('Disabled: No commit message')
       : this.props.label;
 
     const shortcutHint = CommandRegistry.formatKeystroke(
       this._getSubmitKeystroke()
     );
-    const summaryPlaceholder = this.props.trans.__(
-      'Summary (%1 to commit)',
+    const messagePlaceholder = this.props.trans.__(
+      'Commit message (%1 to commit)',
       shortcutHint
     );
+    const summaryHint = summaryEmpty
+      ? this.props.trans.__(
+          'The first line is used as the commit summary and cannot be empty.'
+        )
+      : this.props.trans.__(
+          'The first line is used as the commit summary; the following lines as the description.'
+        );
+    const showSummaryHint = this.props.message.includes('\n');
 
     return (
-      <div className={classes(commitFormClass, 'jp-git-CommitBox')}>
+      <div
+        className={classes(
+          commitFormClass,
+          atBottom && commitFormBottomClass,
+          'jp-git-CommitBox'
+        )}
+      >
         {this.props.warning ?? null}
         {!this.props.amend && (
-          <CommitMessage
-            error={
-              this.props.hasFiles &&
-              !this.props.amend &&
-              this.props.summary.length === 0
-            }
-            trans={this.props.trans}
-            summary={this.props.summary}
-            summaryPlaceholder={summaryPlaceholder}
-            description={this.props.description}
-            setSummary={this.props.setSummary}
-            setDescription={this.props.setDescription}
-          />
+          <React.Fragment>
+            <Input
+              classes={{
+                root: classes(commitRoot, commitMessageClass),
+                focused: activeStyle,
+                disabled: disabledStyle
+              }}
+              error={this.props.hasFiles && this._summary.length === 0}
+              multiline
+              minRows={1}
+              maxRows={10}
+              placeholder={messagePlaceholder}
+              title={summaryHint}
+              aria-describedby={
+                showSummaryHint ? 'jp-git-commit-message-hint' : undefined
+              }
+              value={this.props.message}
+              onChange={this._handleMessageChange}
+              disableUnderline={true}
+              fullWidth={true}
+            />
+            {showSummaryHint && (
+              <p
+                id="jp-git-commit-message-hint"
+                className={
+                  summaryEmpty
+                    ? commitHintErrorClass
+                    : commitDescriptionHintClass
+                }
+              >
+                {summaryHint}
+              </p>
+            )}
+          </React.Fragment>
         )}
         <ButtonGroup ref={this._anchorRef} fullWidth={true} size="small">
           <Button
@@ -238,8 +280,10 @@ export class CommitBox extends React.Component<
           </Button>
         </ButtonGroup>
         <Popper
+          className={commitPopperClass}
           open={this.state.open}
           anchorEl={this._anchorRef.current}
+          placement={atBottom ? 'top-end' : 'bottom-end'}
           role={undefined}
           transition
           disablePortal
@@ -252,7 +296,9 @@ export class CommitBox extends React.Component<
                     {this._options.map((option, index) => (
                       <MenuItem
                         key={option.title}
-                        classes={{ root: commitRoot }}
+                        classes={{
+                          root: classes(commitRoot, commitVariantItemClass)
+                        }}
                         selected={this.props.amend ? index === 1 : index === 0}
                         onClick={event =>
                           this._handleMenuItemClick(event, index)
@@ -293,8 +339,26 @@ export class CommitBox extends React.Component<
     if (this.props.amend) {
       return this.props.hasFiles;
     }
-    return !!(this.props.hasFiles && this.props.summary);
+    return !!(this.props.hasFiles && this._summary);
   }
+
+  /**
+   * Commit message summary, i.e. the first line of the commit message.
+   */
+  private get _summary(): string {
+    return this.props.message.split('\n', 1)[0];
+  }
+
+  /**
+   * Callback invoked upon updating the commit message.
+   *
+   * @param event - event object
+   */
+  private _handleMessageChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ): void => {
+    this.props.setMessage(event.target.value);
+  };
 
   /**
    * Get keystroke configured to act as a submit action.
