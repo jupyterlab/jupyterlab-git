@@ -181,58 +181,35 @@ describe('GitPanel', () => {
       renderResult = render(<GitPanel {...props} />);
     });
 
-    it('should commit when commit message is provided', async () => {
+    it.each([
+      commitSummary,
+      commitSummary + '\n' + commitDescription,
+      commitSummary + '\n\n' + commitDescription,
+      commitSummary + '\n\n\n' + commitDescription + '\n\n'
+    ])('should preserve the entered commit message: %j', async message => {
       configSpy.mockResolvedValue({ options: commitUser });
-
       props.model.checkNotebooksForOutputs = jest.fn().mockResolvedValue([]);
 
-      await userEvent.type(
-        screen.getAllByRole('textbox')[0],
-        commitSummary + '\n' + commitDescription
-      );
-
+      await userEvent.type(screen.getAllByRole('textbox')[0], message);
       await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
-      // console.log(
-      //   screen.getByRole('button', { name: 'Commit' }).parentElement!.innerHTML
-      // );
 
       await waitFor(() => {
-        expect(configSpy).toHaveBeenCalledTimes(1);
+        expect(commitSpy).toHaveBeenCalledTimes(1);
       });
-
-      expect(commitSpy).toHaveBeenCalledTimes(1);
-      expect(commitSpy).toHaveBeenCalledWith(
-        commitSummary + '\n\n' + commitDescription + '\n',
-        false,
-        null
-      );
+      expect(commitSpy).toHaveBeenCalledWith(message, false, null);
 
       // Only erase commit message upon success
       expect(screen.getAllByRole('textbox')[0]).toHaveValue('');
     });
 
-    it('should not add another blank line when the message already has one', async () => {
-      configSpy.mockResolvedValue({ options: commitUser });
+    it('should reject an empty first line when committing directly', async () => {
+      const panel = new GitPanel(props);
+      panel.state = { ...panel.state, commitMessage: '\n' + commitDescription };
 
-      props.model.checkNotebooksForOutputs = jest.fn().mockResolvedValue([]);
+      await panel.commitFiles();
 
-      await userEvent.type(
-        screen.getAllByRole('textbox')[0],
-        commitSummary + '\n\n' + commitDescription
-      );
-
-      await userEvent.click(screen.getByRole('button', { name: 'Commit' }));
-
-      await waitFor(() => {
-        expect(configSpy).toHaveBeenCalledTimes(1);
-      });
-
-      expect(commitSpy).toHaveBeenCalledTimes(1);
-      expect(commitSpy).toHaveBeenCalledWith(
-        commitSummary + '\n\n' + commitDescription + '\n',
-        false,
-        null
-      );
+      expect(configSpy).not.toHaveBeenCalled();
+      expect(commitSpy).not.toHaveBeenCalled();
     });
 
     it('should not commit without a commit message', async () => {

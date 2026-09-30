@@ -1,6 +1,7 @@
 import { nullTranslator } from '@jupyterlab/translation';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import 'jest';
 import * as React from 'react';
 import {
@@ -47,12 +48,27 @@ describe('Submodule Menu', () => {
     return {
       model: model as IGitExtension,
       trans: trans,
+      onClose: jest.fn(),
       submodules: SUBMODULES,
       ...props
     };
   }
 
   describe('render', () => {
+    it.each([{ submodules: SUBMODULES }, { submodules: [] }])(
+      'should allow closing the menu independently of the repository toolbar item (%j)',
+      async ({ submodules }) => {
+        const onClose = jest.fn();
+        render(<SubmoduleMenu {...createProps({ submodules, onClose })} />);
+
+        await userEvent.click(
+          screen.getByRole('button', { name: 'Close submodule menu' })
+        );
+
+        expect(onClose).toHaveBeenCalledTimes(1);
+      }
+    );
+
     it('should display a list of submodules', () => {
       render(<SubmoduleMenu {...createProps()} />);
 

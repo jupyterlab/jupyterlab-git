@@ -6,6 +6,10 @@ export const panelToolbarClass = style({
     // over the core `.jp-Toolbar` and `.jp-Toolbar > .jp-Toolbar-item` rules
     '&.jp-Toolbar': {
       padding: '2px 8px',
+      // Older JupyterLab versions render the toolbar as a flex container.
+      gap: '4px'
+    },
+    '&.jp-Toolbar::part(positioning-region)': {
       gap: '4px'
     },
     '&.jp-Toolbar > .jp-Toolbar-item': {

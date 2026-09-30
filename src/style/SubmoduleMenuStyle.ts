@@ -1,6 +1,9 @@
 import { style } from 'typestyle';
 
 export const submoduleHeaderStyle = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
   padding: '4px 4px 1px',
   margin: '0 6px',
   fontWeight: 600,
@@ -8,5 +11,5 @@ export const submoduleHeaderStyle = style({
   fontSize: '12px',
   overflowY: 'hidden',
   borderBottom: '3px solid var(--jp-brand-color1)',
-  height: '16px'
+  minHeight: '16px'
 });

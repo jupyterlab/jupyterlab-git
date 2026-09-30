@@ -93,6 +93,7 @@ export class GitWidget extends SidePanel {
               model={this._model}
               submodules={this._model.submodules}
               trans={this._gitTrans}
+              onClose={() => this.toggleSubmoduleMenu()}
             />
           )}
         </UseSignal>

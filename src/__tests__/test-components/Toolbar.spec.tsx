@@ -1,11 +1,19 @@
+import {
+  createToolbarFactory,
+  ToolbarWidgetRegistry
+} from '@jupyterlab/apputils';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
 import { nullTranslator } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import { Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import 'jest';
 import * as React from 'react';
 import {
+  addToolbarItems,
   BranchItem,
   IRemoteActionItemProps,
   IToolbarItemProps,
@@ -177,6 +185,59 @@ describe('Toolbar items', () => {
     model = await createModel();
   });
 
+  it.each(['FileBrowser', 'HTML Viewer'])(
+    'should preserve the %s refresh item when registering Git toolbar items',
+    async factoryName => {
+      const toolbarRegistry = new ToolbarWidgetRegistry({
+        defaultFactory: () => new Widget()
+      });
+      const refreshFactory = jest.fn(() => new Widget());
+      toolbarRegistry.addFactory(factoryName, 'refresh', refreshFactory);
+      const pluginId = 'test:toolbar';
+      const settings = new SettingRegistry({
+        connector: {
+          fetch: async () => ({
+            id: pluginId,
+            version: 'test',
+            raw: '{}',
+            data: { composite: {}, user: {} },
+            schema: {
+              type: 'object',
+              'jupyter.lab.transform': true,
+              'jupyter.lab.toolbars': {
+                [factoryName]: [{ name: 'refresh' }]
+              },
+              properties: { toolbar: { type: 'array' } }
+            }
+          }),
+          list: jest.fn(),
+          save: jest.fn(),
+          remove: jest.fn()
+        }
+      });
+      const factory = createToolbarFactory(
+        toolbarRegistry,
+        settings,
+        factoryName,
+        pluginId,
+        nullTranslator
+      );
+      await settings.load(pluginId);
+      const host = new Widget();
+      const items = factory(host);
+      await waitFor(() => expect(items.length).toBe(1));
+      const refresh = items.get(0).widget;
+
+      addToolbarItems(toolbarRegistry, model, new CommandRegistry(), trans);
+
+      expect(refreshFactory).toHaveBeenCalledTimes(1);
+      expect(items.get(0).widget).toBe(refresh);
+      host.dispose();
+      refresh.dispose();
+      items.dispose();
+    }
+  );
+
   describe('PullItem', () => {
     it('should display a button to pull the latest changes', async () => {
       render(<PullItem {...createActionProps()} />);
@@ -257,6 +318,32 @@ describe('Toolbar items', () => {
   });
 
   describe('PushItem', () => {
+    it.each([
+      ['branches have not loaded', []],
+      [
+        'HEAD is detached',
+        [{ ...DEFAULT_BRANCHES[0], is_current_branch: false }]
+      ],
+      [
+        'the current branch has no upstream',
+        [{ ...DEFAULT_BRANCHES[0], upstream: null }]
+      ]
+    ] as [string, Git.IBranch[]][])(
+      'should offer to publish and show a badge when %s',
+      async (_, branches) => {
+        model = await createModel({ branches });
+        render(<PushItem {...createActionProps()} />);
+
+        const button = screen.getByRole('button', { name: 'Publish branch' });
+        expect(button).toBeEnabled();
+        expect(
+          button.parentElement?.querySelector(
+            `.${badgeClass} > .MuiBadge-badge`
+          )
+        ).not.toHaveClass('MuiBadge-invisible');
+      }
+    );
+
     it('should display a button to push the latest changes', async () => {
       render(<PushItem {...createActionProps()} />);
 
