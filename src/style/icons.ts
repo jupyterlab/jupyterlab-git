@@ -22,6 +22,7 @@ import selectForCompareSvg from '../../style/icons/select-for-compare.svg';
 import tagSvg from '../../style/icons/tag.svg';
 import trashSvg from '../../style/icons/trash.svg';
 import verticalMoreSvg from '../../style/icons/vertical-more.svg';
+import worktreeSvg from '../../style/icons/worktree.svg';
 
 export const gitIcon = new LabIcon({ name: 'git', svgstr: gitSvg });
 export const addIcon = new LabIcon({
@@ -103,4 +104,8 @@ export const trashIcon = new LabIcon({
 export const verticalMoreIcon = new LabIcon({
   name: 'git:vertical-more',
   svgstr: verticalMoreSvg
+});
+export const worktreeIcon = new LabIcon({
+  name: 'git:worktree',
+  svgstr: worktreeSvg
 });

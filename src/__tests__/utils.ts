@@ -59,6 +59,12 @@ export const defaultMockedResponses: {
       code: 0,
       tags: []
     })
+  },
+  worktrees: {
+    body: () => ({
+      code: 0,
+      worktrees: []
+    })
   }
 };
 
