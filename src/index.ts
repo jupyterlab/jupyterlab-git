@@ -21,7 +21,6 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { Token } from '@lumino/coreutils';
 import { gitCloneCommandPlugin } from './cloneCommand';
 import {
   addCommands,
@@ -58,13 +57,6 @@ export {
 } from './tokens';
 
 /**
- * The movable section registry token, listed only when it exists (JupyterLab
- * >= 4.6) so that the plugin still loads on older versions.
- */
-const movableSectionTokens: Token<IMovableSectionRegistry>[] =
-  IMovableSectionRegistry ? [IMovableSectionRegistry] : [];
-
-/**
  * The default running sessions extension.
  */
 const plugin: JupyterFrontEndPlugin<IGitExtension> = {
@@ -84,7 +76,7 @@ const plugin: JupyterFrontEndPlugin<IGitExtension> = {
     IStatusBar,
     ICommandPalette,
     ITranslator,
-    ...movableSectionTokens
+    IMovableSectionRegistry
   ],
   provides: IGitExtension,
   activate,
