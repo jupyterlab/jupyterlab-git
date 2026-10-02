@@ -13,7 +13,7 @@ import {
   historySideBarWrapperStyle
 } from '../style/HistorySideBarStyle';
 import { ContextCommandIDs, Git } from '../tokens';
-import { openFileDiff } from '../utils';
+import { commitToDiffRef, openFileDiff } from '../utils';
 import { ActionButton } from './ActionButton';
 import { FileItem } from './FileItem';
 import { PastCommitNode } from './PastCommitNode';
@@ -213,7 +213,7 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
             // and its diff is viewable
             const onOpenDiff =
               props.model.selectedHistoryFile && !commit.is_binary
-                ? openFileDiff(props.commands)(commit)(
+                ? openFileDiff(props.commands)(commitToDiffRef(commit))(
                     commit.file_path ?? props.model.selectedHistoryFile.to,
                     !commit.is_binary,
                     commit.previous_file_path
@@ -262,7 +262,9 @@ export const HistorySideBar: React.FunctionComponent<IHistorySideBarProps> = (
                 {!props.model.selectedHistoryFile && (
                   <SinglePastCommitInfo
                     {...commonProps}
-                    onOpenDiff={openFileDiff(props.commands)(commit)}
+                    onOpenDiff={openFileDiff(props.commands)(
+                      commitToDiffRef(commit)
+                    )}
                   />
                 )}
               </PastCommitNode>

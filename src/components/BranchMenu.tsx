@@ -26,7 +26,7 @@ import {
   newBranchButtonClass,
   wrapperClass
 } from '../style/BranchMenu';
-import { branchIcon, mergeIcon, trashIcon } from '../style/icons';
+import { branchIcon, diffIcon, mergeIcon, trashIcon } from '../style/icons';
 import { CommandIDs, Git, IGitExtension } from '../tokens';
 import { ActionButton } from './ActionButton';
 import { NewBranchDialog } from './NewBranchDialog';
@@ -121,6 +121,11 @@ export interface IBranchMenuProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Callback invoked to compare a branch with the current branch.
+   */
+  onCompareWithCurrent: (branch: Git.IBranch) => void;
 }
 
 /**
@@ -283,6 +288,19 @@ export class BranchMenu extends React.Component<
       >
         <branchIcon.react className={listItemIconClass} tag="span" />
         <span className={nameClass}>{branch.name}</span>
+        {!isActive && (
+          <ActionButton
+            className={hiddenButtonStyle}
+            icon={diffIcon}
+            title={this.props.trans.__('Compare with current branch')}
+            onClick={(
+              event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+            ) => {
+              event?.stopPropagation();
+              this.props.onCompareWithCurrent(branch);
+            }}
+          />
+        )}
         {!branch.is_remote_branch && !isActive && (
           <>
             <ActionButton
