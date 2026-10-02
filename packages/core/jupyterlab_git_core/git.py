@@ -808,16 +808,18 @@ class Git:
             return {"code": code, "command": " ".join(cmd), "message": my_error}
 
         result = []
-        line_array = strip_and_split(my_output)
-        for line in line_array:
-            linesplit = line.split()
-            result.append(
-                {
-                    "insertions": linesplit[0],
-                    "deletions": linesplit[1],
-                    "filename": linesplit[2],
-                }
-            )
+        line_iterable = iter(strip_and_split(my_output))
+        for line in line_iterable:
+            if not line:
+                continue
+            insertions, deletions, filename = line.split("\t", maxsplit=2)
+            file_info = {"insertions": insertions, "deletions": deletions}
+            if filename == "":
+                # A renamed file: its previous and new paths follow as separate entries
+                file_info["previous_filename"] = next(line_iterable)
+                filename = next(line_iterable)
+            file_info["filename"] = filename
+            result.append(file_info)
         return {"code": code, "result": result}
 
     async def branch(self, path):

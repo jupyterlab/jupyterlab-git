@@ -130,6 +130,7 @@ export function CommitComparisonBox(
                 changedFile.deletions === '-' || changedFile.insertions === '-',
               modified_file_name: fileName,
               modified_file_path: filePath,
+              previous_file_path: changedFile.previous_filename,
               type: changedFile.filetype
             } as Git.ICommitModifiedFile;
           })

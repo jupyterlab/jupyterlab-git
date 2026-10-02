@@ -142,6 +142,64 @@ async def test_changed_files_git_diff_error():
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
+    "output, expected",
+    [
+        ("", []),
+        (
+            "2\t1\tdummy.txt\x00",
+            [{"insertions": "2", "deletions": "1", "filename": "dummy.txt"}],
+        ),
+        (
+            "-\t-\tdummy.png\x00",
+            [{"insertions": "-", "deletions": "-", "filename": "dummy.png"}],
+        ),
+        (
+            "1\t0\tfile with spaces.txt\x001\t0\tfile with\ttab.txt\x00",
+            [
+                {
+                    "insertions": "1",
+                    "deletions": "0",
+                    "filename": "file with spaces.txt",
+                },
+                {"insertions": "1", "deletions": "0", "filename": "file with\ttab.txt"},
+            ],
+        ),
+        (
+            "3\t1\t\x00old name.py\x00new name.py\x002\t0\tother.py\x00",
+            [
+                {
+                    "insertions": "3",
+                    "deletions": "1",
+                    "previous_filename": "old name.py",
+                    "filename": "new name.py",
+                },
+                {"insertions": "2", "deletions": "0", "filename": "other.py"},
+            ],
+        ),
+    ],
+)
+async def test_diff(output, expected):
+    with patch("jupyterlab_git_core.git.execute") as mock_execute:
+        # Given
+        mock_execute.return_value = (0, output, "")
+
+        # When
+        actual_response = await Git().diff("test-path", "previous", "current")
+
+        # Then
+        mock_execute.assert_called_once_with(
+            ["git", "diff", "--numstat", "-z", "previous", "current"],
+            cwd="test-path",
+            env=None,
+            username=None,
+            password=None,
+            is_binary=False,
+        )
+        assert {"code": 0, "result": expected} == actual_response
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
     "args, cli_result, cmd, expected",
     [
         (

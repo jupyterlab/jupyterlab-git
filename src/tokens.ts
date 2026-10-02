@@ -1079,6 +1079,8 @@ export namespace Git {
       insertions: string;
       deletions: string;
       filename: string;
+      // when file has been relocated
+      previous_filename?: string;
       filetype?: DocumentRegistry.IFileType;
     }[];
   }
