@@ -125,7 +125,7 @@
     },
     "toolbar": {
       "title": "Git panel toolbar items",
-      "description": "Note: To disable a toolbar item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable the refresh button:\n{\n  \"toolbar\": [\n    {\n      \"name\": \"refresh\",\n      \"disabled\": true\n    }\n  ]\n}\n\nToolbar description:",
+      "description": "Note: To disable a toolbar item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable the refresh button:\n{\n  \"toolbar\": [\n    {\n      \"name\": \"gitRefresh\",\n      \"disabled\": true\n    }\n  ]\n}\n\nToolbar description:",
       "items": {
         "$ref": "#/definitions/toolbarItem"
       },
@@ -302,12 +302,12 @@
   "jupyter.lab.toolbars": {
     "FileBrowser": [{ "name": "gitClone", "rank": 31 }],
     "Git": [
-      { "name": "repository", "rank": 10 },
-      { "name": "branch", "rank": 20 },
+      { "name": "gitRepository", "rank": 10 },
+      { "name": "gitBranch", "rank": 20 },
       { "name": "spacer", "type": "spacer", "rank": 50 },
-      { "name": "pull", "rank": 60 },
-      { "name": "push", "rank": 70 },
-      { "name": "refresh", "rank": 80 }
+      { "name": "gitPull", "rank": 60 },
+      { "name": "gitPush", "rank": 70 },
+      { "name": "gitRefresh", "rank": 80 }
     ]
   },
   "jupyter.lab.transform": true

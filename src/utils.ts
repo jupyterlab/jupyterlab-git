@@ -3,6 +3,11 @@ import { CommandRegistry } from '@lumino/commands';
 import { CommandArguments } from './commandsAndMenu';
 import { ContextCommandIDs, Git } from './tokens';
 
+/** Get the first line of a commit message as its summary. */
+export function getCommitSummary(message: string): string {
+  return message.split('\n', 1)[0];
+}
+
 /** Get the filename from a path */
 export function extractFilename(path: string): string {
   if (path[path.length - 1] === '/') {

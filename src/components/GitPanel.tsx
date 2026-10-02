@@ -19,7 +19,11 @@ import {
 } from '../style/GitPanel';
 import { addIcon, rewindIcon, trashIcon } from '../style/icons';
 import { CommandIDs, Git } from '../tokens';
-import { openFileDiff, stopPropagationWrapper } from '../utils';
+import {
+  getCommitSummary,
+  openFileDiff,
+  stopPropagationWrapper
+} from '../utils';
 import { GitAuthorForm } from '../widgets/AuthorBox';
 import { ActionButton } from './ActionButton';
 import { CommitBox } from './CommitBox';
@@ -387,20 +391,8 @@ export class GitPanel extends React.Component<IGitPanelProps, IGitPanelState> {
    * @returns a promise which commits changes
    */
   commitFiles = async (): Promise<void> => {
-    const [summary, ...rest] = this.state.commitMessage.split('\n');
-    // Git only treats the text up to the first blank line as the commit
-    // summary, so separate the description with a blank line if it is not
-    // already there.
-    const description = rest.join('\n').replace(/^\n+/, '');
-
-    let msg = summary;
-
-    // Only include description if not empty
-    if (description) {
-      msg = msg + '\n\n' + description + '\n';
-    }
-
-    if (!msg && !this.state.commitAmend) {
+    const msg = this.state.commitMessage;
+    if (!getCommitSummary(msg) && !this.state.commitAmend) {
       return;
     }
 

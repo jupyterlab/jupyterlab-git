@@ -35,6 +35,7 @@ import {
   listItemDescClass
 } from '../style/NewBranchDialog';
 import { CommandIDs } from '../tokens';
+import { getCommitSummary } from '../utils';
 
 /**
  * Commit action
@@ -346,7 +347,7 @@ export class CommitBox extends React.Component<
    * Commit message summary, i.e. the first line of the commit message.
    */
   private get _summary(): string {
-    return this.props.message.split('\n', 1)[0];
+    return getCommitSummary(this.props.message);
   }
 
   /**

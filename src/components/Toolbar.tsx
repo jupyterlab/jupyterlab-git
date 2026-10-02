@@ -281,7 +281,7 @@ export class PushItem extends React.Component<IRemoteActionItemProps> {
       branch => branch.is_current_branch
     );
     const hasRemote = model.remotes.length > 0;
-    const hasUpstream = activeBranch[0]?.upstream !== null;
+    const hasUpstream = (activeBranch[0]?.upstream ?? null) !== null;
     return (
       <Badge
         className={badgeClass}
@@ -415,19 +415,19 @@ export function addToolbarItems(
     );
   };
 
-  addItem('repository', 'jp-git-toolbarRepository', panel => (
+  addItem('gitRepository', 'jp-git-toolbarRepository', panel => (
     <RepositoryItem model={model} panel={panel} trans={trans} />
   ));
-  addItem('branch', 'jp-git-toolbarBranch', () => (
+  addItem('gitBranch', 'jp-git-toolbarBranch', () => (
     <BranchItem model={model} trans={trans} />
   ));
-  addItem('pull', 'jp-git-toolbarPull', () => (
+  addItem('gitPull', 'jp-git-toolbarPull', () => (
     <PullItem commands={commands} model={model} trans={trans} />
   ));
-  addItem('push', 'jp-git-toolbarPush', () => (
+  addItem('gitPush', 'jp-git-toolbarPush', () => (
     <PushItem commands={commands} model={model} trans={trans} />
   ));
-  addItem('refresh', 'jp-git-toolbarRefresh', () => (
+  addItem('gitRefresh', 'jp-git-toolbarRefresh', () => (
     <RefreshItem model={model} trans={trans} />
   ));
 }

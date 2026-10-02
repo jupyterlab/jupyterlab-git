@@ -1,4 +1,5 @@
 import { TranslationBundle } from '@jupyterlab/translation';
+import { closeIcon } from '@jupyterlab/ui-components';
 import ListItem from '@mui/material/ListItem';
 import * as React from 'react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
@@ -11,6 +12,7 @@ import {
 import { submoduleHeaderStyle } from '../style/SubmoduleMenuStyle';
 import { desktopIcon } from '../style/icons';
 import { Git, IGitExtension } from '../tokens';
+import { ActionButton } from './ActionButton';
 
 const ITEM_HEIGHT = 24.8; // HTML element height for a single item
 const MIN_HEIGHT = 150; // Minimal HTML element height for the list
@@ -34,6 +36,11 @@ export interface ISubmoduleMenuProps {
    * The application language translator.
    */
   trans: TranslationBundle;
+
+  /**
+   * Close the menu independently of the configurable repository toolbar item.
+   */
+  onClose: () => void;
 }
 
 /**
@@ -78,7 +85,14 @@ export class SubmoduleMenu extends React.Component<
 
     return (
       <>
-        <div className={submoduleHeaderStyle}>Submodules</div>
+        <div className={submoduleHeaderStyle}>
+          <span>{this.props.trans.__('Submodules')}</span>
+          <ActionButton
+            icon={closeIcon}
+            title={this.props.trans.__('Close submodule menu')}
+            onClick={this.props.onClose}
+          />
+        </div>
         <FixedSizeList
           height={Math.min(
             Math.max(MIN_HEIGHT, submodules.length * ITEM_HEIGHT),
