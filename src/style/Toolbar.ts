@@ -8,6 +8,13 @@ export const panelToolbarClass = style({
       padding: '2px 8px',
       gap: '4px'
     },
+    // The items are laid out by this region of the toolbar shadow DOM, which
+    // wraps them by default: they would overflow on the panel content below
+    '&.jp-Toolbar::part(positioning-region)': {
+      flex: '1 1 auto',
+      flexWrap: 'nowrap',
+      minWidth: 0
+    },
     '&.jp-Toolbar > .jp-Toolbar-item': {
       alignItems: 'center'
     },
