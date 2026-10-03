@@ -5,15 +5,19 @@ export const panelToolbarClass = style({
     // The `&.jp-Toolbar`-prefixed selectors need the extra specificity to win
     // over the core `.jp-Toolbar` and `.jp-Toolbar > .jp-Toolbar-item` rules
     '&.jp-Toolbar': {
-      padding: '2px 8px',
-      gap: '4px'
+      padding: '2px 8px'
     },
     // The items are laid out by this region of the toolbar shadow DOM, which
     // wraps them by default: they would overflow on the panel content below
     '&.jp-Toolbar::part(positioning-region)': {
       flex: '1 1 auto',
       flexWrap: 'nowrap',
+      gap: '4px',
       minWidth: 0
+    },
+    // Unused regions, which would add the gap at both ends of the toolbar
+    '&.jp-Toolbar::part(start), &.jp-Toolbar::part(end)': {
+      display: 'none'
     },
     '&.jp-Toolbar > .jp-Toolbar-item': {
       alignItems: 'center'
