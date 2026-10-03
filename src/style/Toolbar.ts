@@ -29,14 +29,20 @@ export const panelToolbarClass = style({
     '&.jp-Toolbar > .jp-Toolbar-item': {
       alignItems: 'center'
     },
+    // Shrink well before the branch label, as the branch name matters more,
+    // but always keep the icon
     '&.jp-Toolbar > .jp-git-toolbarRepository': {
-      flex: '0 1 auto',
-      minWidth: 0,
+      flex: '0 10000 auto',
+      minWidth: '24px',
       overflow: 'hidden'
     },
-    // Shrink well before the repository label but never collapse entirely
+    // With the caret of the submodule menu button
+    '&.jp-Toolbar > .jp-git-toolbarRepository:has(button)': {
+      minWidth: '50px'
+    },
+    // Never collapse entirely
     '&.jp-Toolbar > .jp-git-toolbarBranch': {
-      flex: '0 10000 auto',
+      flex: '0 1 auto',
       minWidth: '54px'
     }
   }
@@ -126,8 +132,8 @@ export const branchInfoClass = style({
   boxSizing: 'border-box',
   display: 'inline-flex',
   alignItems: 'center',
-  // Shrink well before the repository label but never collapse entirely
-  flex: '0 10000 auto',
+  // Never collapse entirely
+  flex: '0 1 auto',
   minWidth: '54px',
   gap: '4px',
 
