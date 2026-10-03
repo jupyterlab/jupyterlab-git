@@ -1,11 +1,18 @@
 import { style } from 'typestyle';
+import type { NestedCSSProperties } from 'typestyle/lib/types';
 
 export const panelToolbarClass = style({
   $nest: {
     // The `&.jp-Toolbar`-prefixed selectors need the extra specificity to win
     // over the core `.jp-Toolbar` and `.jp-Toolbar > .jp-Toolbar-item` rules
     '&.jp-Toolbar': {
-      padding: '2px 8px'
+      padding: '2px 8px',
+      // Adapt the items to the width of the toolbar; the typestyle types do
+      // not know these properties yet
+      ...({
+        containerName: 'jp-git-toolbar',
+        containerType: 'inline-size'
+      } as NestedCSSProperties)
     },
     // The items are laid out by this region of the toolbar shadow DOM, which
     // wraps them by default: they would overflow on the panel content below
@@ -45,7 +52,15 @@ export const repoButtonLabelClass = style({
   minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap'
+  whiteSpace: 'nowrap',
+
+  $nest: {
+    // Leave the room to the branch name in a narrow panel: only the icon of
+    // the repository remains, with its name in the tooltip
+    '@container jp-git-toolbar (max-width: 300px)': {
+      display: 'none'
+    }
+  }
 });
 
 export const repoLabelClass = style({
