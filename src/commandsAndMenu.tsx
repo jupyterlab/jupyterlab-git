@@ -1286,15 +1286,25 @@ export function addCommands(
                 : 'CHERRY_PICK_HEAD'
               : 'MERGE_HEAD';
         } else if (!diffContext.currentRef) {
-          diffContext.currentRef =
-            status === 'staged'
-              ? Git.Diff.SpecialRef.INDEX
-              : Git.Diff.SpecialRef.WORKING;
+          if (status === 'staged') {
+            diffContext.currentRef = Git.Diff.SpecialRef.INDEX;
+          } else {
+            diffContext.currentRef = Git.Diff.SpecialRef.WORKING;
+            // Like `git diff`, compare unstaged changes with the index.
+            // Simple staging commits the whole working copy, so its
+            // partially staged files keep HEAD.
+            if (status === 'unstaged' && context?.previousRef === undefined) {
+              diffContext.previousRef = Git.Diff.SpecialRef.INDEX;
+            }
+          }
         }
 
         const challengerRef = Git.Diff.SpecialRef[diffContext.currentRef as any]
           ? { special: Git.Diff.SpecialRef[diffContext.currentRef as any] }
           : { git: diffContext.currentRef };
+        const referenceRef = Git.Diff.SpecialRef[diffContext.previousRef as any]
+          ? { special: Git.Diff.SpecialRef[diffContext.previousRef as any] }
+          : { git: diffContext.previousRef };
 
         // Base props used for Diff Model
         const props: Omit<Git.Diff.IModel, 'changed' | 'hasConflict'> = {
@@ -1326,7 +1336,8 @@ export function addCommands(
                 'POST',
                 {
                   filename: previousFilePath ?? filename,
-                  reference: { git: diffContext.previousRef }
+                  // @ts-expect-error this is serializable
+                  reference: referenceRef
                 },
                 'git',
                 serverSettings
@@ -1405,6 +1416,29 @@ export function addCommands(
 
             widget.disposed.connect(() => {
               gitModel.headChanged.disconnect(updateHead);
+            });
+          } else if (diffContext.previousRef === Git.Diff.SpecialRef.INDEX) {
+            // Staging or unstaging the file changes its status codes
+            const statusCodes = (status: Git.IStatus) => {
+              const file = status.files.find(item => item.to === filename);
+              return `${file?.x}${file?.y}`;
+            };
+            let previousCodes = statusCodes(gitModel.status);
+            const updateIndex = (_: IGitExtension, status: Git.IStatus) => {
+              const currentCodes = statusCodes(status);
+              if (currentCodes !== previousCodes) {
+                previousCodes = currentCodes;
+                model.reference = {
+                  ...model.reference,
+                  updateAt: Date.now()
+                };
+              }
+            };
+
+            gitModel.statusChanged.connect(updateIndex);
+
+            widget.disposed.connect(() => {
+              gitModel.statusChanged.disconnect(updateIndex);
             });
           }
 
