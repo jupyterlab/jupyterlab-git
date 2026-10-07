@@ -40,7 +40,7 @@ NAMESPACE = "/git"
 SSH_AUTH_RESOURCE = "ssh"
 
 
-def reject_option_like(value, name):
+def reject_option_injection(value, name):
     """Reject a user-supplied Git ref that starts with a hyphen.
 
     Git reads any argument starting with "-" as an option, so a value such as
@@ -344,7 +344,7 @@ class GitBranchDeleteHandler(GitHandler):
         }
         """
         data = self.get_json_body()
-        reject_option_like(data["branch"], "Branch name")
+        reject_option_injection(data["branch"], "Branch name")
         result = await self.git.branch_delete(self.url2localpath(path), data["branch"])
 
         if result["code"] != 0:
@@ -511,7 +511,7 @@ class GitResetToCommitHandler(GitHandler):
     async def post(self, path: str = ""):
         data = self.get_json_body()
         commit_id = data["commit_id"]
-        reject_option_like(commit_id, "Commit id")
+        reject_option_injection(commit_id, "Commit id")
         body = await self.git.reset_to_commit(commit_id, self.url2localpath(path))
 
         if body["code"] != 0:
@@ -532,8 +532,8 @@ class GitCheckoutHandler(GitHandler):
         data = self.get_json_body()
         local_path = self.url2localpath(path)
         if data["checkout_branch"]:
-            reject_option_like(data["branchname"], "Branch name")
-            reject_option_like(data.get("startpoint"), "Start point")
+            reject_option_injection(data["branchname"], "Branch name")
+            reject_option_injection(data.get("startpoint"), "Start point")
             body = await self.git.checkout_branch_safe(
                 data["branchname"],
                 data.get("startpoint"),
@@ -562,7 +562,7 @@ class GitMergeHandler(GitHandler):
         """
         data = self.get_json_body()
         branch = data["branch"]
-        reject_option_like(branch, "Branch name")
+        reject_option_injection(branch, "Branch name")
         body = await self.git.merge(branch, self.url2localpath(path))
 
         if body["code"] != 0:
@@ -690,7 +690,7 @@ class GitPushHandler(GitHandler):
         local_path = self.url2localpath(path)
         data = self.get_json_body()
         known_remote = data.get("remote")
-        reject_option_like(known_remote, "Remote")
+        reject_option_injection(known_remote, "Remote")
         force = data.get("force", False)
         auth = data.get("auth")
 
@@ -931,8 +931,8 @@ class GitNewTagHandler(GitHandler):
         data = self.get_json_body()
         tag = data["tag_id"]
         commit = data["commit_id"]
-        reject_option_like(tag, "Tag name")
-        reject_option_like(commit, "Commit id")
+        reject_option_injection(tag, "Tag name")
+        reject_option_injection(commit, "Commit id")
         response = await self.git.set_tag(self.url2localpath(path), tag, commit)
         if response["code"] == 0:
             self.set_status(201)
@@ -955,7 +955,7 @@ class GitRebaseHandler(GitHandler):
         branch = data.get("branch")
         action = data.get("action", "")
         if branch is not None:
-            reject_option_like(branch, "Branch name")
+            reject_option_injection(branch, "Branch name")
             body = await self.git.rebase(branch, self.url2localpath(path))
         else:
             try:

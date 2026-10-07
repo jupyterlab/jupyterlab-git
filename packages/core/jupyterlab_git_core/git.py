@@ -72,7 +72,7 @@ class GitParameterError(Exception):
     pass
 
 
-def reject_option_like(value, name):
+def reject_option_injection(value, name):
     """Reject a Git ref that starts with a hyphen.
 
     Git reads any argument starting with "-" as an option, so a value such as
@@ -872,7 +872,7 @@ class Git:
 
     async def branch_delete(self, path, branch):
         """Execute 'git branch -D <branchname>'"""
-        reject_option_like(branch, "Branch name")
+        reject_option_injection(branch, "Branch name")
         cmd = ["git", "branch", "-D", branch]
         code, _, error = await self.__execute(cmd, cwd=path)
         if code != 0:
@@ -1139,7 +1139,7 @@ class Git:
         """
         Reset the current branch to a specific past commit.
         """
-        reject_option_like(commit_id, "Commit id")
+        reject_option_injection(commit_id, "Commit id")
         cmd = ["git", "reset", "--hard"]
         if commit_id:
             cmd.append(commit_id)
@@ -1153,8 +1153,8 @@ class Git:
         """
         Execute git checkout <make-branch> command & return the result.
         """
-        reject_option_like(branchname, "Branch name")
-        reject_option_like(startpoint, "Start point")
+        reject_option_injection(branchname, "Branch name")
+        reject_option_injection(startpoint, "Start point")
         cmd = ["git", "checkout", "-b", branchname, startpoint]
         code, my_output, my_error = await self.__execute(
             cmd,
@@ -1173,7 +1173,7 @@ class Git:
         """
         Execute git rev-parse --symbolic-full-name <branch-name> and return the result (or None).
         """
-        reject_option_like(branchname, "Branch name")
+        reject_option_injection(branchname, "Branch name")
         code, my_output, _ = await self.__execute(
             ["git", "rev-parse", "--symbolic-full-name", branchname],
             cwd=path,
@@ -1188,7 +1188,7 @@ class Git:
         Execute git checkout <branch-name> command & return the result.
         Use the --track parameter for a remote branch.
         """
-        reject_option_like(branchname, "Branch name")
+        reject_option_injection(branchname, "Branch name")
         reference_name = await self._get_branch_reference(branchname, path)
         if reference_name is None:
             is_remote_branch = False
@@ -1251,7 +1251,7 @@ class Git:
         """
         Execute git merge command & return the result.
         """
-        reject_option_like(branch, "Branch name")
+        reject_option_injection(branch, "Branch name")
         cmd = ["git", "merge", branch]
         code, output, error = await self.__execute(cmd, cwd=path)
 
@@ -1394,8 +1394,8 @@ class Git:
         """
         Execute `git push $UPSTREAM $BRANCH`. The choice of upstream and branch is up to the caller.
         """
-        reject_option_like(remote, "Remote")
-        reject_option_like(branch, "Branch name")
+        reject_option_injection(remote, "Remote")
+        reject_option_injection(branch, "Branch name")
         command = ["git", "push"]
         if tags:
             command.append("--tags")
@@ -2077,8 +2077,8 @@ class Git:
         commitId:
            Identifier of commit tag is pointing to.
         """
-        reject_option_like(tag, "Tag name")
-        reject_option_like(commitId, "Commit id")
+        reject_option_injection(tag, "Tag name")
+        reject_option_injection(commitId, "Commit id")
         command = ["git", "tag", tag, commitId]
         code, _, error = await self.__execute(command, cwd=path)
         if code == 0:
@@ -2226,7 +2226,7 @@ class Git:
             branch: Branch to rebase onto
             path: Git repository path
         """
-        reject_option_like(branch, "Branch name")
+        reject_option_injection(branch, "Branch name")
         cmd = ["git", "rebase", branch]
         code, output, error = await self.__execute(cmd, cwd=path)
 
