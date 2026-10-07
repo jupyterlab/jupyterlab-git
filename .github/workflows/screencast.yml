@@ -1,0 +1,54 @@
+name: Screencast
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screencast:
+    name: Record the README screencast
+    runs-on: ubuntu-latest
+
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install the extension
+        run: |
+          set -eux
+          python -m pip install "jupyterlab>=4.0.0,<5" jupyter-archive
+          jlpm
+          python -m pip install packages/core packages/jupyterlab
+
+      - name: Install dependencies
+        working-directory: ui-tests
+        env:
+          YARN_ENABLE_IMMUTABLE_INSTALLS: 0
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+        run: |
+          jlpm install
+          jlpm playwright install chromium
+
+      - name: Record the screencast
+        working-directory: ui-tests
+        run: jlpm screencast
+
+      - name: Upload the screencast
+        uses: actions/upload-artifact@v4
+        with:
+          name: jupyterlab-git-screencast
+          path: ui-tests/screencast-results/jupyterlab-git.mp4
+          if-no-files-found: error

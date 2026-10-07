@@ -1,4 +1,5 @@
 import { style } from 'typestyle';
+import type { NestedCSSProperties } from 'typestyle/lib/types';
 
 export const panelToolbarClass = style({
   $nest: {
@@ -6,19 +7,42 @@ export const panelToolbarClass = style({
     // over the core `.jp-Toolbar` and `.jp-Toolbar > .jp-Toolbar-item` rules
     '&.jp-Toolbar': {
       padding: '2px 8px',
-      gap: '4px'
+      // Adapt the items to the width of the toolbar; the typestyle types do
+      // not know these properties yet
+      ...({
+        containerName: 'jp-git-toolbar',
+        containerType: 'inline-size'
+      } as NestedCSSProperties)
+    },
+    // The items are laid out by this region of the toolbar shadow DOM, which
+    // wraps them by default: they would overflow on the panel content below
+    '&.jp-Toolbar::part(positioning-region)': {
+      flex: '1 1 auto',
+      flexWrap: 'nowrap',
+      gap: '4px',
+      minWidth: 0
+    },
+    // Unused regions, which would add the gap at both ends of the toolbar
+    '&.jp-Toolbar::part(start), &.jp-Toolbar::part(end)': {
+      display: 'none'
     },
     '&.jp-Toolbar > .jp-Toolbar-item': {
       alignItems: 'center'
     },
+    // Shrink well before the branch label, as the branch name matters more,
+    // but always keep the icon
     '&.jp-Toolbar > .jp-git-toolbarRepository': {
-      flex: '0 1 auto',
-      minWidth: 0,
+      flex: '0 10000 auto',
+      minWidth: '24px',
       overflow: 'hidden'
     },
-    // Shrink well before the repository label but never collapse entirely
+    // With the caret of the submodule menu button
+    '&.jp-Toolbar > .jp-git-toolbarRepository:has(button)': {
+      minWidth: '50px'
+    },
+    // Never collapse entirely
     '&.jp-Toolbar > .jp-git-toolbarBranch': {
-      flex: '0 10000 auto',
+      flex: '0 1 auto',
       minWidth: '54px'
     }
   }
@@ -34,7 +58,15 @@ export const repoButtonLabelClass = style({
   minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap'
+  whiteSpace: 'nowrap',
+
+  $nest: {
+    // Leave the room to the branch name in a narrow panel: only the icon of
+    // the repository remains, with its name in the tooltip
+    '@container jp-git-toolbar (max-width: 300px)': {
+      display: 'none'
+    }
+  }
 });
 
 export const repoLabelClass = style({
@@ -100,8 +132,8 @@ export const branchInfoClass = style({
   boxSizing: 'border-box',
   display: 'inline-flex',
   alignItems: 'center',
-  // Shrink well before the repository label but never collapse entirely
-  flex: '0 10000 auto',
+  // Never collapse entirely
+  flex: '0 1 auto',
   minWidth: '54px',
   gap: '4px',
 
