@@ -932,6 +932,13 @@ class GitRebaseHandler(GitHandler):
         branch = data.get("branch")
         action = data.get("action", "")
         if branch is not None:
+            # Reject a ref that would be parsed by git as an option (e.g.
+            # --exec=<cmd>), which is an argument-injection vector.
+            if branch.startswith("-"):
+                raise tornado.web.HTTPError(
+                    status_code=400,
+                    reason="Branch to rebase onto cannot start with a hyphen",
+                )
             body = await self.git.rebase(branch, self.url2localpath(path))
         else:
             try:

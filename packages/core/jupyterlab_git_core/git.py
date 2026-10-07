@@ -2204,7 +2204,10 @@ class Git:
             branch: Branch to rebase onto
             path: Git repository path
         """
-        cmd = ["git", "rebase", branch]
+        # Use --end-of-options so a branch value beginning with "-" cannot be
+        # parsed by git as an option (e.g. --exec=<cmd>, which would run <cmd>
+        # through the shell).
+        cmd = ["git", "rebase", "--end-of-options", branch]
         code, output, error = await self.__execute(cmd, cwd=path)
 
         if code != 0:
