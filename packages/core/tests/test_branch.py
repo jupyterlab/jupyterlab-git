@@ -1062,3 +1062,25 @@ async def test_branch_success_rebasing():
         )
 
         assert expected_response == actual_response
+
+
+@pytest.mark.parametrize(
+    "method, args",
+    [
+        ("branch_delete", ("path", "--evil")),
+        ("reset_to_commit", ("--evil", "path")),
+        ("checkout_new_branch", ("ok", "--evil", "path")),
+        ("checkout_branch", ("--evil", "path")),
+        ("merge", ("--evil", "path")),
+        ("push", ("--evil", "HEAD", "path")),
+        ("set_tag", ("path", "--evil", "HEAD")),
+        ("rebase", ("--evil", "path")),
+    ],
+)
+@patch("jupyterlab_git_core.git.execute")
+async def test_option_like_ref_is_rejected(mock_execute, method, args):
+    from jupyterlab_git_core.git import GitParameterError
+
+    with pytest.raises(GitParameterError):
+        await getattr(Git(), method)(*args)
+    mock_execute.assert_not_called()
