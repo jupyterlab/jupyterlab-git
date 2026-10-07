@@ -2227,9 +2227,7 @@ class Git:
             path: Git repository path
         """
         reject_option_like(branch, "Branch name")
-        # --end-of-options is a second line of defence: even a "-" value could
-        # not be parsed by git as an option here.
-        cmd = ["git", "rebase", "--end-of-options", branch]
+        cmd = ["git", "rebase", branch]
         code, output, error = await self.__execute(cmd, cwd=path)
 
         if code != 0:

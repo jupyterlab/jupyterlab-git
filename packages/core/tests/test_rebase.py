@@ -6,7 +6,7 @@ from jupyterlab_git_core.git import Git, GitParameterError
 
 
 @pytest.mark.asyncio
-async def test_git_rebase_uses_end_of_options():
+async def test_git_rebase():
     with patch("jupyterlab_git_core.git.execute") as mock_execute:
         # Given
         mock_execute.return_value = (0, "Successfully rebased", "")
@@ -14,10 +14,9 @@ async def test_git_rebase_uses_end_of_options():
         # When
         actual_response = await Git().rebase(branch="feature", path="test_path")
 
-        # Then: --end-of-options separates the ref from any options so a value
-        # beginning with "-" cannot be parsed by git as an option.
+        # Then
         called_cmd = mock_execute.call_args.args[0]
-        assert called_cmd == ["git", "rebase", "--end-of-options", "feature"]
+        assert called_cmd == ["git", "rebase", "feature"]
         assert {"code": 0, "message": "Successfully rebased"} == actual_response
 
 
