@@ -40,6 +40,21 @@ NAMESPACE = "/git"
 SSH_AUTH_RESOURCE = "ssh"
 
 
+def reject_option_like(value, name):
+    """Reject a user-supplied Git ref that starts with a hyphen.
+
+    Git reads any argument starting with "-" as an option, so a value such as
+    "--exec=<cmd>" is parsed as a flag instead of a ref (argument injection).
+    A real branch, tag, remote or commit never starts with "-", so rejecting
+    such a value here closes the injection without losing valid input.
+    """
+    if value is not None and value.startswith("-"):
+        raise tornado.web.HTTPError(
+            status_code=400,
+            reason=f"{name} cannot start with a hyphen",
+        )
+
+
 class SSHHandler(APIHandler):
     """
     Top-level parent class for SSH actions
@@ -329,6 +344,7 @@ class GitBranchDeleteHandler(GitHandler):
         }
         """
         data = self.get_json_body()
+        reject_option_like(data["branch"], "Branch name")
         result = await self.git.branch_delete(self.url2localpath(path), data["branch"])
 
         if result["code"] != 0:
@@ -495,6 +511,7 @@ class GitResetToCommitHandler(GitHandler):
     async def post(self, path: str = ""):
         data = self.get_json_body()
         commit_id = data["commit_id"]
+        reject_option_like(commit_id, "Commit id")
         body = await self.git.reset_to_commit(commit_id, self.url2localpath(path))
 
         if body["code"] != 0:
@@ -515,6 +532,8 @@ class GitCheckoutHandler(GitHandler):
         data = self.get_json_body()
         local_path = self.url2localpath(path)
         if data["checkout_branch"]:
+            reject_option_like(data["branchname"], "Branch name")
+            reject_option_like(data.get("startpoint"), "Start point")
             body = await self.git.checkout_branch_safe(
                 data["branchname"],
                 data.get("startpoint"),
@@ -543,6 +562,7 @@ class GitMergeHandler(GitHandler):
         """
         data = self.get_json_body()
         branch = data["branch"]
+        reject_option_like(branch, "Branch name")
         body = await self.git.merge(branch, self.url2localpath(path))
 
         if body["code"] != 0:
@@ -670,6 +690,7 @@ class GitPushHandler(GitHandler):
         local_path = self.url2localpath(path)
         data = self.get_json_body()
         known_remote = data.get("remote")
+        reject_option_like(known_remote, "Remote")
         force = data.get("force", False)
         auth = data.get("auth")
 
@@ -910,6 +931,8 @@ class GitNewTagHandler(GitHandler):
         data = self.get_json_body()
         tag = data["tag_id"]
         commit = data["commit_id"]
+        reject_option_like(tag, "Tag name")
+        reject_option_like(commit, "Commit id")
         response = await self.git.set_tag(self.url2localpath(path), tag, commit)
         if response["code"] == 0:
             self.set_status(201)
@@ -932,13 +955,7 @@ class GitRebaseHandler(GitHandler):
         branch = data.get("branch")
         action = data.get("action", "")
         if branch is not None:
-            # Reject a ref that would be parsed by git as an option (e.g.
-            # --exec=<cmd>), which is an argument-injection vector.
-            if branch.startswith("-"):
-                raise tornado.web.HTTPError(
-                    status_code=400,
-                    reason="Branch to rebase onto cannot start with a hyphen",
-                )
+            reject_option_like(branch, "Branch name")
             body = await self.git.rebase(branch, self.url2localpath(path))
         else:
             try:
