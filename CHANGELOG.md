@@ -2,6 +2,57 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.55.0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.54.1...9455424a6b7c7fbd45c6277a96dcbf9f644c492f))
+
+### Enhancements made
+
+- Update `jupyter/eslint-plugin`, improve initial load performance [#1535](https://github.com/jupyterlab/jupyterlab-git/pull/1535) ([@krassowski](https://github.com/krassowski), [@jtpio](https://github.com/jtpio))
+- Improve Git panel UX [#1517](https://github.com/jupyterlab/jupyterlab-git/pull/1517) ([@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski), [@nakul-py](https://github.com/nakul-py))
+
+### Bugs fixed
+
+- Reject branches starting with hyphens to prevent shell injections [#1548](https://github.com/jupyterlab/jupyterlab-git/pull/1548) ([@Yann-P](https://github.com/Yann-P), [@claude](https://github.com/claude), [@jtpio](https://github.com/jtpio))
+- Fix the Git panel toolbar overflowing on the Changes section [#1546](https://github.com/jupyterlab/jupyterlab-git/pull/1546) ([@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+- Fix the commit comparison for renamed files and paths with spaces [#1544](https://github.com/jupyterlab/jupyterlab-git/pull/1544) ([@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+- Show only unstaged changes when diffing a file from the Changed list [#1538](https://github.com/jupyterlab/jupyterlab-git/pull/1538) ([@jtpio](https://github.com/jtpio))
+- Fix the `INDEX` content of binary files [#1537](https://github.com/jupyterlab/jupyterlab-git/pull/1537) ([@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+- Add environment variable inheritance to git status and branch API calls [#1417](https://github.com/jupyterlab/jupyterlab-git/pull/1417) ([@nsingl00](https://github.com/nsingl00), [@HaudinFlorence](https://github.com/HaudinFlorence), [@Zsailer](https://github.com/Zsailer), [@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Record the README screencast with Playwright [#1545](https://github.com/jupyterlab/jupyterlab-git/pull/1545) ([@jtpio](https://github.com/jtpio), [@krassowski](https://github.com/krassowski))
+- Skip check release when running CI on forks [#1534](https://github.com/jupyterlab/jupyterlab-git/pull/1534) ([@telamonian](https://github.com/telamonian), [@krassowski](https://github.com/krassowski))
+- Bump `@jupyter/eslint-plugin` to `^1.1.0` [#1525](https://github.com/jupyterlab/jupyterlab-git/pull/1525) ([@Darshan808](https://github.com/Darshan808), [@jtpio](https://github.com/jtpio))
+- Fix Check Links on CI [#1516](https://github.com/jupyterlab/jupyterlab-git/pull/1516) ([@jtpio](https://github.com/jtpio))
+- Update to `jupyter-builder` for building the extension [#1515](https://github.com/jupyterlab/jupyterlab-git/pull/1515) ([@jtpio](https://github.com/jtpio))
+
+### Other merged PRs
+
+- Bump brace-expansion from 1.1.16 to 1.1.21 [#1543](https://github.com/jupyterlab/jupyterlab-git/pull/1543) ([@jtpio](https://github.com/jtpio))
+- Bump dompurify from 3.4.13 to 3.4.16 in /ui-tests [#1542](https://github.com/jupyterlab/jupyterlab-git/pull/1542) ([@jtpio](https://github.com/jtpio))
+- Bump brace-expansion from 1.1.18 to 1.1.21 in /ui-tests [#1541](https://github.com/jupyterlab/jupyterlab-git/pull/1541) ([@jtpio](https://github.com/jtpio))
+- Bump js-yaml from 3.15.1 to 3.15.2 [#1533](https://github.com/jupyterlab/jupyterlab-git/pull/1533) ([@jtpio](https://github.com/jtpio))
+- Bump browserslist from 4.28.2 to 4.28.9 [#1532](https://github.com/jupyterlab/jupyterlab-git/pull/1532) ([@jtpio](https://github.com/jtpio))
+- Bump nanoid from 3.3.17 to 3.3.18 [#1526](https://github.com/jupyterlab/jupyterlab-git/pull/1526) ([@jtpio](https://github.com/jtpio))
+- Bump postcss from 8.5.16 to 8.5.26 in /ui-tests [#1523](https://github.com/jupyterlab/jupyterlab-git/pull/1523) ([@jtpio](https://github.com/jtpio))
+- Bump js-yaml from 3.15.0 to 3.15.1 [#1522](https://github.com/jupyterlab/jupyterlab-git/pull/1522) ([@jtpio](https://github.com/jtpio))
+- Bump dompurify from 3.4.12 to 3.4.13 in /ui-tests [#1521](https://github.com/jupyterlab/jupyterlab-git/pull/1521) ([@jtpio](https://github.com/jtpio))
+- Bump mermaid from 11.16.0 to 11.16.1 in /ui-tests [#1519](https://github.com/jupyterlab/jupyterlab-git/pull/1519) ([@jtpio](https://github.com/jtpio))
+- Bump brace-expansion from 1.1.16 to 1.1.18 in /ui-tests [#1514](https://github.com/jupyterlab/jupyterlab-git/pull/1514) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2026-08-03&to=2026-10-07&type=c))
+
+@claude ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Aclaude+updated%3A2026-08-03..2026-10-07&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ADarshan808+updated%3A2026-08-03..2026-10-07&type=Issues)) | @HaudinFlorence ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AHaudinFlorence+updated%3A2026-08-03..2026-10-07&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2026-08-03..2026-10-07&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Akrassowski+updated%3A2026-08-03..2026-10-07&type=Issues)) | @nakul-py ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Anakul-py+updated%3A2026-08-03..2026-10-07&type=Issues)) | @nsingl00 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ansingl00+updated%3A2026-08-03..2026-10-07&type=Issues)) | @telamonian ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Atelamonian+updated%3A2026-08-03..2026-10-07&type=Issues)) | @Yann-P ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AYann-P+updated%3A2026-08-03..2026-10-07&type=Issues)) | @Zsailer ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3AZsailer+updated%3A2026-08-03..2026-10-07&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.54.1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab-git/compare/v0.54.0...934b086265595578382ed85c1723d2bf1d1c3bee))
@@ -44,8 +95,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab-git/graphs/contributors?from=2026-06-17&to=2026-08-03&type=c))
 
 @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3ADarshan808+updated%3A2026-06-17..2026-08-03&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab-git+involves%3Ajtpio+updated%3A2026-06-17..2026-08-03&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.54.0
 
