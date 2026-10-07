@@ -26,6 +26,16 @@ For older versions of JupyterLab, go to:
 - Open the Git extension from the _Git_ tab on the left panel
 - [Set up authentication](#authentication-to-remote-repository-hosts)
 
+### Worktrees
+
+The extension supports [Git worktrees](https://git-scm.com/docs/git-worktree), which allow checking out more than one branch of the same repository at a time — for instance to follow the work of a coding agent on a separate branch.
+
+- The _Worktrees_ section of the Git panel lists the worktrees of the current repository whenever linked worktrees exist — including worktrees created outside of JupyterLab, e.g. by coding agents. Clicking a worktree opens it in the file browser, and the whole Git panel then operates on that worktree.
+- _Git > Add Worktree…_ (also available from the command palette) creates a new worktree for an existing branch, or for a new branch. By default worktrees are created in the `worktrees` folder of the repository, which is automatically excluded from the repository status.
+- Branches checked out in another worktree are flagged with a worktree icon in the branch list; selecting such a branch offers to open its worktree instead of failing the checkout.
+
+Note: worktrees located outside of the Jupyter server root folder are listed but cannot be opened.
+
 ## Install
 
 > **Note for users upgrading from a previous version:**
