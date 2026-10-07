@@ -76,8 +76,8 @@ def reject_option_injection(value, name):
     """Reject a Git ref that starts with a hyphen.
 
     Git reads any argument starting with "-" as an option, so a value such as
-    "--exec=<cmd>" would be parsed as a flag instead of a ref. A real branch,
-    tag, remote or commit never starts with "-".
+    "--exec=<cmd>" would be parsed as a flag instead of a ref. Such a value
+    can never work here, so nothing is lost.
     """
     if value is not None and value.startswith("-"):
         raise GitParameterError(f"{name} cannot start with a hyphen")

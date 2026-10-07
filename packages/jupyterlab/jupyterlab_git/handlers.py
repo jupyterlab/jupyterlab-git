@@ -45,8 +45,8 @@ def reject_option_injection(value, name):
 
     Git reads any argument starting with "-" as an option, so a value such as
     "--exec=<cmd>" is parsed as a flag instead of a ref (argument injection).
-    A real branch, tag, remote or commit never starts with "-", so rejecting
-    such a value here closes the injection without losing valid input.
+    Such a value can never work here, so rejecting it closes the injection
+    without losing valid input.
     """
     if value is not None and value.startswith("-"):
         raise tornado.web.HTTPError(
