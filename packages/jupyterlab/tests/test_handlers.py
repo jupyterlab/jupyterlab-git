@@ -957,3 +957,49 @@ async def test_content_getcontent_deleted_file(mock_execute, jp_fetch, jp_root_d
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload["content"] == ""
+
+
+@pytest.mark.parametrize(
+    "endpoint, body",
+    [
+        ("branch/delete", {"branch": "--evil"}),
+        ("reset_to_commit", {"commit_id": "--evil"}),
+        ("merge", {"branch": "--evil"}),
+        ("push", {"remote": "--evil"}),
+        ("rebase", {"branch": "--evil"}),
+        ("tag", {"tag_id": "--evil", "commit_id": "HEAD"}),
+        ("tag", {"tag_id": "v1", "commit_id": "--evil"}),
+        (
+            "checkout",
+            {"checkout_branch": True, "branchname": "--evil", "new_check": False},
+        ),
+        (
+            "checkout",
+            {
+                "checkout_branch": True,
+                "branchname": "ok",
+                "startpoint": "--evil",
+                "new_check": True,
+            },
+        ),
+    ],
+)
+@patch("jupyterlab_git_core.git.execute")
+async def test_option_like_ref_is_rejected(
+    mock_execute, endpoint, body, jp_fetch, jp_root_dir
+):
+    # A ref starting with "-" would be parsed by git as an option, so the
+    # handler must reject it before any git command runs.
+    local_path = jp_root_dir / "test_path"
+
+    with pytest.raises(tornado.httpclient.HTTPClientError) as e:
+        await jp_fetch(
+            NAMESPACE,
+            local_path.name,
+            endpoint,
+            body=json.dumps(body),
+            method="POST",
+        )
+
+    assert_http_error(e, 400)
+    mock_execute.assert_not_called()
