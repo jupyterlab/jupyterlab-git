@@ -192,7 +192,7 @@ async function activate(
   statusBar: IStatusBar | null,
   palette: ICommandPalette | null,
   translator: ITranslator | null,
-  movableSections?: IMovableSectionRegistry | null
+  movableSections: IMovableSectionRegistry | null
 ): Promise<IGitExtension> {
   let settings: ISettingRegistry.ISettings | undefined = undefined;
   let gitServerSettings: Git.IServerSettings;
