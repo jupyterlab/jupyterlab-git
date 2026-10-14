@@ -81,21 +81,37 @@ export function sleep(ms: number): Promise<void> {
 }
 
 /**
- * A callback function to display a file diff between two commits.
+ * Convert a commit to a comparable Git ref.
+ *
+ * @param commit Commit data.
+ * @returns comparable Git ref.
+ */
+export function commitToDiffRef(
+  commit: Git.ISingleCommitInfo
+): Git.IRefComparison {
+  return {
+    ref: commit.commit,
+    label: commit.commit.substring(0, 7),
+    previousRef: commit.pre_commits[0]
+  };
+}
+
+/**
+ * A callback function to display a file diff between two Git refs.
  * @param commands the command registry.
  * @returns a callback function to display a file diff.
  */
 export const openFileDiff =
   (commands: CommandRegistry) =>
   /**
-   * A callback function to display a file diff between two commits.
+   * A callback function to display a file diff between two Git refs.
    *
-   * @param commit Commit data.
-   * @param previousCommit Previous commit data to display the diff against. If not specified, the diff will be against the preceding commit.
+   * @param current Ref data to compare.
+   * @param previous Previous ref data to display the diff against. If not specified, the diff will use the current ref fallback.
    *
    * @returns A callback function.
    */
-  (commit: Git.ISingleCommitInfo, previousCommit?: Git.ISingleCommitInfo) =>
+  (current: Git.IRefComparison, previous?: Git.IRefComparison) =>
   /**
    * Returns a callback to be invoked on click to display a file diff.
    *
@@ -125,8 +141,8 @@ export const openFileDiff =
               previousFilePath,
               isText,
               context: {
-                previousRef: previousCommit?.commit ?? commit.pre_commits[0], // not sure
-                currentRef: commit.commit
+                previousRef: previous?.ref ?? current.previousRef ?? 'HEAD',
+                currentRef: current.ref
               }
             }
           ]

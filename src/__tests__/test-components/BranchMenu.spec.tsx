@@ -101,6 +101,7 @@ describe('BranchMenu', () => {
         execute: jest.fn()
       } as any,
       trans: trans,
+      onCompareWithCurrent: jest.fn(),
       ...props
     };
   }
@@ -190,10 +191,14 @@ describe('BranchMenu', () => {
         tag: ''
       }
     ].forEach(branch => {
-      const display = !(branch.is_current_branch || branch.is_remote_branch);
+      const count = branch.is_current_branch
+        ? 0
+        : branch.is_remote_branch
+        ? 1
+        : 3;
       it(`should${
-        display ? ' ' : 'not '
-      }display delete and merge buttons for ${JSON.stringify(branch)}`, () => {
+        count ? ' ' : 'not '
+      }display branch action buttons for ${JSON.stringify(branch)}`, () => {
         render(
           <BranchMenu
             {...createProps({
@@ -205,8 +210,29 @@ describe('BranchMenu', () => {
 
         expect(
           screen.getByRole('listitem').querySelectorAll('button').length
-        ).toEqual(display ? 2 : 0);
+        ).toEqual(count);
       });
+    });
+
+    it('should compare a branch with the current branch', async () => {
+      const branch = BRANCHES[1];
+      const onCompareWithCurrent = jest.fn();
+
+      render(
+        <BranchMenu
+          {...createProps({
+            branches: [BRANCHES[0], branch],
+            onCompareWithCurrent
+          })}
+        />
+      );
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Compare with current branch' })
+      );
+
+      expect(onCompareWithCurrent).toHaveBeenCalledTimes(1);
+      expect(onCompareWithCurrent).toHaveBeenCalledWith(branch);
     });
 
     it('should call delete branch when clicked on the delete button', async () => {
