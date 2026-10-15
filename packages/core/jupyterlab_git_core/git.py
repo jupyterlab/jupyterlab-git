@@ -415,7 +415,8 @@ class Git:
                 env=env,
             )
 
-        if not versioning:
+        # A failed clone creates no directory, so there is nothing to strip.
+        if not versioning and code == 0:
             new_content = set(os.listdir(path))
             directory = (new_content - current_content).pop()
             shutil.rmtree(f"{path}/{directory}/.git")
