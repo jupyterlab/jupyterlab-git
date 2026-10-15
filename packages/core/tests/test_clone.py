@@ -69,6 +69,30 @@ async def test_git_download_success(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_git_download_failure_from_git(tmp_path):
+    with patch("os.environ", {"TEST": "test"}):
+        with patch("jupyterlab_git_core.git.execute") as mock_execute:
+            # Given
+            mock_execute.return_value = (
+                128,
+                "",
+                "fatal: could not read Username for 'https://github.com': terminal prompts disabled",
+            )
+
+            # When
+            actual_response = await Git().clone(
+                path=str(tmp_path), repo_url="ghjkhjkl", auth=None, versioning=False
+            )
+
+            # Then
+            assert {
+                "code": 128,
+                "message": "fatal: could not read Username for 'https://github.com': terminal prompts disabled",
+            } == actual_response
+            assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.asyncio
 async def test_git_submodules_success(tmp_path):
     with patch("os.environ", {"TEST": "test"}):
         with patch("jupyterlab_git_core.git.execute") as mock_execute:
