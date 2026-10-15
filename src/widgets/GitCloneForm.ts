@@ -23,9 +23,9 @@ export class GitCloneForm extends Widget {
           this.node.querySelector('#input-link') as HTMLInputElement
         ).value.trim()
       ),
-      versioning: Boolean(
-        (this.node.querySelector('#download') as HTMLInputElement).checked
-      ),
+      // "Download the repository" means cloning without keeping the Git metadata
+      versioning: !(this.node.querySelector('#download') as HTMLInputElement)
+        .checked,
       submodules: Boolean(
         (this.node.querySelector('#submodules') as HTMLInputElement).checked
       )
