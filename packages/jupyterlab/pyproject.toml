@@ -34,7 +34,7 @@ dynamic = ["version", "description", "authors", "urls", "keywords"]
 dev = [
   "black",
   "jupyter-builder>=1.2.0",
-  "jupyterlab~=4.0",
+  "jupyterlab~=4.6",
   "pre-commit"
 ]
 test = [

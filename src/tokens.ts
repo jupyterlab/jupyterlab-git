@@ -9,8 +9,90 @@ import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 export const EXTENSION_ID = 'jupyter.extensions.git_plugin';
+export const PLUGIN_ID = '@jupyterlab/git:plugin';
 
 export const IGitExtension = new Token<IGitExtension>(EXTENSION_ID);
+
+/**
+ * The registry of sections displayed in the Git sidebar.
+ */
+export const IGitSidebar = new Token<IGitSidebar>(
+  '@jupyterlab/git:IGitSidebar',
+  'A registry for sections displayed in the Git sidebar.'
+);
+
+/**
+ * Registry for sections displayed in the Git sidebar.
+ */
+export interface IGitSidebar {
+  /**
+   * The registered sections, ordered by rank and registration order.
+   */
+  readonly sections: ReadonlyArray<IGitSidebar.ISection>;
+
+  /**
+   * A signal emitted when a section is registered or removed.
+   */
+  readonly changed: ISignal<IGitSidebar, void>;
+
+  /**
+   * Register a section in the Git sidebar.
+   *
+   * @param section - section contribution
+   * @returns a disposable that removes the section
+   * @throws if another section has the same identifier
+   */
+  registerSection(section: IGitSidebar.ISection): IDisposable;
+}
+
+/**
+ * A namespace for Git sidebar statics.
+ */
+export namespace IGitSidebar {
+  /**
+   * A section contributed to the Git sidebar.
+   */
+  export interface ISection {
+    /**
+     * A globally unique identifier for the section.
+     */
+    id: string;
+
+    /**
+     * The section's position in the sidebar. Lower ranks are shown first.
+     *
+     * The built-in sections use 10, 20 and 30. Defaults to 100.
+     */
+    rank?: number;
+
+    /**
+     * The widget displayed as an accordion section.
+     *
+     * Its title is used as the accordion heading. The Git sidebar owns the
+     * widget and disposes it when the contribution is removed.
+     */
+    widget: Widget;
+
+    /**
+     * Whether the section should currently be displayed.
+     */
+    isVisible?: () => boolean;
+
+    /**
+     * A signal emitted when `isVisible` may have changed.
+     */
+    visibilityChanged?: ISignal<any, void>;
+  }
+}
+
+/**
+ * Identifiers for the built-in Git sidebar section plugins.
+ */
+export enum GitSidebarSectionIDs {
+  changes = '@jupyterlab/git:changes-section',
+  history = '@jupyterlab/git:history-section',
+  branchesAndTags = '@jupyterlab/git:branches-and-tags-section'
+}
 
 /** Interface for extension class */
 export interface IGitExtension extends IDisposable {

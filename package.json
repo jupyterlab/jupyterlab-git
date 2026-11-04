@@ -103,7 +103,7 @@
         "@eslint/js": "^9.0.0",
         "@jupyter/builder": "^1.2.0",
         "@jupyter/eslint-plugin": "^1.2.0",
-        "@jupyterlab/testutils": "^4.0.0",
+        "@jupyterlab/testutils": "^4.6.0",
         "@stylistic/eslint-plugin": "^3.0.1",
         "@testing-library/jest-dom": "^6.1.4",
         "@testing-library/react": "^14.0.0",
