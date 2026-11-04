@@ -10,7 +10,7 @@ describe('GitCloneForm.getValue', () => {
     form = new GitCloneForm(trans);
   });
 
-  it('returns false for submodules and versioning if checkboxes are unchecked', () => {
+  it('returns no submodules and versioning if checkboxes are unchecked', () => {
     (form.node.querySelector('#submodules') as HTMLInputElement).checked =
       false;
     (form.node.querySelector('#download') as HTMLInputElement).checked = false;
@@ -22,10 +22,10 @@ describe('GitCloneForm.getValue', () => {
       encodeURIComponent('https://github.com/example/repo.git')
     );
     expect(value.submodules).toBe(false);
-    expect(value.versioning).toBe(false);
+    expect(value.versioning).toBe(true);
   });
 
-  it('returns true if checkboxes are checked', () => {
+  it('returns submodules and no versioning if checkboxes are checked', () => {
     (form.node.querySelector('#submodules') as HTMLInputElement).checked = true;
     (form.node.querySelector('#download') as HTMLInputElement).checked = true;
     (form.node.querySelector('#input-link') as HTMLInputElement).value =
@@ -33,6 +33,6 @@ describe('GitCloneForm.getValue', () => {
 
     const value = form.getValue();
     expect(value.submodules).toBe(true);
-    expect(value.versioning).toBe(true);
+    expect(value.versioning).toBe(false);
   });
 });
