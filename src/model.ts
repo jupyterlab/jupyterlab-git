@@ -1228,7 +1228,7 @@ export class GitExtension implements IGitExtension {
     remote?: string
   ): Promise<Git.IResultWithMessage> {
     const path = await this._getPathRepository();
-    const data = this._taskHandler.execute<Git.IResultWithMessage>(
+    const data = await this._taskHandler.execute<Git.IResultWithMessage>(
       'git:push',
       async () => {
         return await this._requestAPI<Git.IResultWithMessage>(
@@ -1242,7 +1242,7 @@ export class GitExtension implements IGitExtension {
         );
       }
     );
-    this.refreshBranch();
+    await this.refreshBranch();
     return data;
   }
 

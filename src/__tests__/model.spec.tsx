@@ -427,6 +427,70 @@ describe('IGitExtension', () => {
       spy.mockReset();
       spy.mockRestore();
     });
+
+    it('updates the upstream after pushing a new branch', async () => {
+      let pushed = false;
+      let signalPushStarted!: () => void;
+      let completePush!: () => void;
+
+      const pushStarted = new Promise<void>(resolve => {
+        signalPushStarted = resolve;
+      });
+      const pushResponse = new Promise<Git.IResultWithMessage>(resolve => {
+        completePush = () => {
+          pushed = true;
+          resolve({ code: 0, message: 'pushed' });
+        };
+      });
+      const newBranch: Git.IBranch = {
+        is_current_branch: true,
+        is_remote_branch: false,
+        name: 'new-branch',
+        upstream: null,
+        top_commit: 'abc123',
+        tag: null
+      };
+
+      mockResponses.responses['branch'] = {
+        body: () => {
+          const branch = {
+            ...newBranch,
+            upstream: pushed ? 'origin/new-branch' : null
+          };
+          return { code: 0, branches: [branch], current_branch: branch };
+        }
+      };
+
+      mockResponses.responses['remote/show'] = {
+        body: () => ({
+          code: 0,
+          remotes: [{ name: 'origin', url: 'https://example.com/repo.git' }]
+        })
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+      await model.refreshBranch();
+      expect(model.branches[0].upstream).toBeNull();
+
+      const originalRequest = mockGit.requestAPI.getMockImplementation()!;
+      mockGit.requestAPI.mockImplementation((...args) => {
+        if (args[0]?.endsWith('/push')) {
+          signalPushStarted();
+          return pushResponse;
+        }
+        return originalRequest(...args);
+      });
+
+      const pushing = model.push();
+      await pushStarted;
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+
+      completePush();
+      await pushing;
+
+      expect(model.branches[0].upstream).toBe('origin/new-branch');
+    });
   });
 
   describe('#refreshRemotes', () => {
