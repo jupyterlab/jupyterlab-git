@@ -76,6 +76,7 @@ describe('plugin', () => {
         fileBrowser,
         settingRegistry,
         null, // docmanager
+        null, // sidebar
         null // toolbarRegistry
       );
 
@@ -112,6 +113,7 @@ describe('plugin', () => {
         fileBrowser,
         settingRegistry,
         null, // docmanager
+        null, // sidebar
         null // toolbarRegistry
       );
 
@@ -147,6 +149,7 @@ describe('plugin', () => {
         fileBrowser,
         settingRegistry,
         null, // docmanager
+        null, // sidebar
         null // toolbarRegistry
       );
 
@@ -179,6 +182,7 @@ describe('plugin', () => {
         fileBrowser,
         settingRegistry,
         null, // docmanager
+        null, // sidebar
         null // toolbarRegistry
       );
 

@@ -3,11 +3,18 @@ import { showDialog } from '@jupyterlab/apputils';
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
+import { Panel, Widget } from '@lumino/widgets';
 import 'jest';
 import { CommandArguments, addCommands } from '../commandsAndMenu';
 import * as git from '../git';
 import { GitExtension } from '../model';
-import { ContextCommandIDs, CommandIDs, Git } from '../tokens';
+import { GitSidebar } from '../sidebar';
+import {
+  ContextCommandIDs,
+  CommandIDs,
+  Git,
+  GitSidebarSectionIDs
+} from '../tokens';
 import {
   defaultMockedResponses,
   DEFAULT_REPOSITORY_PATH,
@@ -24,6 +31,8 @@ describe('git-commands', () => {
   const mockGit = git as jest.Mocked<typeof git>;
   let commands: CommandRegistry;
   let model: GitExtension;
+  let shell: { activateById: jest.Mock; widgets: jest.Mock };
+  let sidebar: GitSidebar;
   let mockResponses: {
     [endpoint: string]: IMockedResponse;
   };
@@ -48,9 +57,14 @@ describe('git-commands', () => {
     );
 
     commands = new CommandRegistry();
+    shell = {
+      activateById: jest.fn(),
+      widgets: jest.fn(() => [][Symbol.iterator]())
+    };
+    sidebar = new GitSidebar();
     const app = {
       commands,
-      shell: null as any,
+      shell,
       serviceManager: {
         serverSettings: {}
       }
@@ -58,13 +72,52 @@ describe('git-commands', () => {
 
     model = new GitExtension(app as any);
     addCommands(
-      app as JupyterFrontEnd,
+      app as unknown as JupyterFrontEnd,
       model,
       new CodeMirrorEditorFactory(),
       mockedFileBrowserModel,
       null as any,
-      nullTranslator
+      nullTranslator,
+      sidebar
     );
+  });
+
+  afterEach(() => {
+    sidebar.dispose();
+  });
+
+  describe('git:context-history', () => {
+    const file = { to: 'file.txt' } as Git.IStatusFile;
+
+    it('should show the panel displaying the history section', async () => {
+      const panel = new Panel();
+      panel.id = 'host-panel';
+      const history = new Widget();
+      panel.addWidget(history);
+      sidebar.registerSection({
+        id: GitSidebarSectionIDs.history,
+        widget: history
+      });
+      shell.widgets.mockImplementation((area: string) =>
+        (area === 'left' ? [panel] : [])[Symbol.iterator]()
+      );
+
+      await commands.execute(ContextCommandIDs.gitFileHistory, {
+        files: [file]
+      } as any);
+
+      expect(model.selectedHistoryFile).toBe(file);
+      expect(shell.activateById).toHaveBeenCalledWith('host-panel');
+      panel.dispose();
+    });
+
+    it('should show the Git panel without history section', async () => {
+      await commands.execute(ContextCommandIDs.gitFileHistory, {
+        files: [file]
+      } as any);
+
+      expect(shell.activateById).toHaveBeenCalledWith('jp-git-sessions');
+    });
   });
 
   describe('git:context-discard', () => {
