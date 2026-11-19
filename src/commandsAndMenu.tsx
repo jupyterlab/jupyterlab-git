@@ -1801,7 +1801,7 @@ export function addCommands(
           Notification.update({
             id,
             message: trans.__(
-              "Failed to create tag '%1' poining to '%2'.",
+              "Failed to create tag '%1' pointing to '%2'.",
               tagName,
               commit
             ),
