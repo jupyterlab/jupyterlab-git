@@ -2001,7 +2001,7 @@ export class GitExtension implements IGitExtension {
    *
    * @param tagName - name of new tag
    * @param commitId - identifier of commit tag is pointing to
-   * @returns promise which resolves upon succesfully creating the new tag
+   * @returns promise which resolves upon successfully creating the new tag
    *
    * @throws {Git.NotInRepository} If the current path is not a Git repository
    * @throws {Git.GitResponseError} If the server response is not ok
