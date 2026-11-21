@@ -1003,3 +1003,87 @@ async def test_option_like_ref_is_rejected(
 
     assert_http_error(e, 400)
     mock_execute.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "payload, expected_versioning, expected_submodules",
+    [
+        ({"clone_url": "https://example.com/repo.git"}, True, False),
+        (
+            {
+                "clone_url": "https://example.com/repo.git",
+                "versioning": True,
+                "submodules": True,
+            },
+            True,
+            True,
+        ),
+        (
+            {
+                "clone_url": "https://example.com/repo.git",
+                "versioning": False,
+                "submodules": False,
+            },
+            False,
+            False,
+        ),
+    ],
+)
+@patch("jupyterlab_git_core.git.Git.clone")
+async def test_git_clone_handler(
+    mock_clone,
+    payload,
+    expected_versioning,
+    expected_submodules,
+    jp_fetch,
+    jp_root_dir,
+):
+    local_path = jp_root_dir / "test_path"
+    mock_clone.return_value = {"code": 0, "message": ""}
+
+    response = await jp_fetch(
+        NAMESPACE,
+        local_path.name,
+        "clone",
+        body=json.dumps(payload),
+        method="POST",
+    )
+
+    assert response.code == 200
+    assert json.loads(response.body) == {"code": 0, "message": ""}
+    mock_clone.assert_called_once_with(
+        str(local_path),
+        payload["clone_url"],
+        None,
+        expected_versioning,
+        expected_submodules,
+    )
+
+
+@patch("jupyterlab_git_core.git.Git.clone")
+async def test_git_clone_handler_failure(mock_clone, jp_fetch, jp_root_dir):
+    local_path = jp_root_dir / "test_path"
+    mock_clone.return_value = {
+        "code": 128,
+        "message": "fatal: could not read Username",
+    }
+
+    with pytest.raises(tornado.httpclient.HTTPClientError) as e:
+        await jp_fetch(
+            NAMESPACE,
+            local_path.name,
+            "clone",
+            body=json.dumps(
+                {
+                    "clone_url": "https://example.com/private.git",
+                    "versioning": False,
+                }
+            ),
+            method="POST",
+        )
+
+    assert_http_error(e, 500)
+    assert json.loads(e.value.response.body) == {
+        "code": 128,
+        "message": "fatal: could not read Username",
+    }

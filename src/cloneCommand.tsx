@@ -61,9 +61,14 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
         });
 
         if (result.button.accept && result.value?.url) {
-          const id = Notification.emit(trans.__('Cloning…'), 'in-progress', {
-            autoClose: false
-          });
+          const isVersioning = result.value.versioning;
+          const id = Notification.emit(
+            isVersioning ? trans.__('Cloning…') : trans.__('Downloading…'),
+            'in-progress',
+            {
+              autoClose: false
+            }
+          );
           const url = decodeURIComponent(result.value.url);
           const hostnameMatch = url.match(/git@(.+):.+/);
 
@@ -104,19 +109,25 @@ export const gitCloneCommandPlugin: JupyterFrontEndPlugin<void> = {
             );
             Notification.update({
               id,
-              message: trans.__('Successfully cloned'),
+              message: isVersioning
+                ? trans.__('Successfully cloned')
+                : trans.__('Successfully downloaded'),
               type: 'success',
               ...showDetails(details, trans)
             });
             await fileBrowserModel.refresh();
           } catch (error) {
             console.error(
-              'Encountered an error when cloning the repository. Error: ',
+              isVersioning
+                ? 'Encountered an error when cloning the repository. Error: '
+                : 'Encountered an error when downloading the repository. Error: ',
               error
             );
             Notification.update({
               id,
-              message: trans.__('Failed to clone'),
+              message: isVersioning
+                ? trans.__('Failed to clone')
+                : trans.__('Failed to download'),
               type: 'error',
               ...showError(error as Error, trans)
             });
