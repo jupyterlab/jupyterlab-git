@@ -1,4 +1,5 @@
 import os
+import stat
 from pathlib import Path
 from unittest.mock import call, patch
 
@@ -339,3 +340,61 @@ async def test_git_clone_with_auth_and_cache_credentials_and_existing_credential
             ]
         )
         assert {"code": 0, "message": ""} == actual_response
+
+
+@pytest.mark.asyncio
+async def test_git_download_removes_readonly_git_files(tmp_path):
+    with patch("os.environ", {"TEST": "test"}):
+        with patch("jupyterlab_git_core.git.execute") as mock_execute:
+            output = "output"
+            repo_dir = tmp_path / "dummy-repo"
+            pack_dir = repo_dir / ".git" / "objects" / "pack"
+            pack_file = pack_dir / "pack-test.idx"
+
+            def create_fake_git_repo(*args, **kwargs):
+                pack_dir.mkdir(parents=True)
+                pack_file.write_bytes(b"pack")
+                os.chmod(pack_file, stat.S_IREAD)
+                return (0, output, "")
+
+            mock_execute.side_effect = create_fake_git_repo
+
+            actual_response = await Git().clone(
+                path=str(tmp_path), repo_url="ghjkhjkl", auth=None, versioning=False
+            )
+
+            assert {"code": 0, "message": output} == actual_response
+            assert repo_dir.exists()
+            assert not (repo_dir / ".git").exists()
+
+
+@pytest.mark.asyncio
+async def test_git_download_with_submodules_removes_submodule_git(tmp_path):
+    with patch("os.environ", {"TEST": "test"}):
+        with patch("jupyterlab_git_core.git.execute") as mock_execute:
+            repo_dir = tmp_path / "dummy-repo"
+            sub_dir = repo_dir / "submod"
+            sub_git_file = sub_dir / ".git"
+
+            def create_fake_git_repo(*args, **kwargs):
+                (repo_dir / ".git").mkdir(parents=True)
+                sub_dir.mkdir(parents=True)
+                sub_git_file.write_text("gitdir: ../.git/modules/submod\n")
+                os.chmod(sub_git_file, stat.S_IREAD)
+                return (0, "", "")
+
+            mock_execute.side_effect = create_fake_git_repo
+
+            actual_response = await Git().clone(
+                path=str(tmp_path),
+                repo_url="ghjkhjkl",
+                auth=None,
+                versioning=False,
+                submodules=True,
+            )
+
+            assert {"code": 0, "message": ""} == actual_response
+            assert repo_dir.exists()
+            assert sub_dir.exists()
+            assert not (repo_dir / ".git").exists()
+            assert not sub_git_file.exists()

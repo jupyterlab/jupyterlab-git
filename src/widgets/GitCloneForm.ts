@@ -65,9 +65,11 @@ export class GitCloneForm extends Widget {
     submodules.setAttribute('type', 'checkbox');
     submodules.setAttribute('checked', 'checked');
 
-    downloadLabel.textContent = trans.__('Download the repository');
+    downloadLabel.textContent = trans.__(
+      'Download without Git history (snapshot only)'
+    );
     downloadLabel.title = trans.__(
-      'If checked, the remote repository default branch will be downloaded instead of cloned'
+      'If checked, only a snapshot of the default branch will be downloaded without the .git directory (Git operations like Pull/Push will be unavailable)'
     );
     download.setAttribute('type', 'checkbox');
 

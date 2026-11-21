@@ -9,7 +9,9 @@ import pathlib
 import re
 import shlex
 import shutil
+import stat
 import subprocess
+import sys
 import traceback
 from enum import Enum, IntEnum
 from pathlib import Path
@@ -70,6 +72,43 @@ class GitParameterError(Exception):
     """Raised when required parameters for a Git operation are missing."""
 
     pass
+
+
+def _remove_tree(path: Path) -> None:
+    """Remove a directory tree, clearing read-only bits (e.g. Git objects on Windows)."""
+
+    def _on_error(func, p, exc_info):
+        exc = exc_info[1] if isinstance(exc_info, tuple) else exc_info
+        if isinstance(exc, PermissionError):
+            os.chmod(p, os.stat(p).st_mode | stat.S_IWUSR)
+            func(p)
+        else:
+            raise exc
+
+    if sys.version_info >= (3, 12):
+        shutil.rmtree(path, onexc=_on_error)
+    else:
+        shutil.rmtree(path, onerror=_on_error)
+
+
+def _remove_git_metadata(repo_dir: Path, submodules: bool = False) -> None:
+    """Remove `.git` metadata from a downloaded repository (and submodules)."""
+    git_dir = repo_dir / ".git"
+    if git_dir.exists():
+        _remove_tree(git_dir)
+    if submodules:
+        for sub_git in sorted(
+            repo_dir.rglob(".git"),
+            key=lambda p: len(p.parts),
+            reverse=True,
+        ):
+            if not sub_git.exists():
+                continue
+            if sub_git.is_dir():
+                _remove_tree(sub_git)
+            elif sub_git.is_file():
+                os.chmod(sub_git, os.stat(sub_git).st_mode | stat.S_IWUSR)
+                sub_git.unlink()
 
 
 def reject_option_injection(value, name):
@@ -418,7 +457,7 @@ class Git:
         if not versioning:
             new_content = set(os.listdir(path))
             directory = (new_content - current_content).pop()
-            shutil.rmtree(f"{path}/{directory}/.git")
+            _remove_git_metadata(Path(path) / directory, submodules=submodules)
 
         response = {"code": code, "message": output.strip()}
 
