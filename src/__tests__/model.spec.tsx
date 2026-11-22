@@ -1,3 +1,4 @@
+import { Notification } from '@jupyterlab/apputils';
 import { testEmission } from '@jupyterlab/testutils';
 import 'jest';
 import * as git from '../git';
@@ -141,6 +142,45 @@ describe('IGitExtension', () => {
       };
       const topLevel = await model.showPrefix(mockResponses.path);
       expect(topLevel).toBeNull();
+    });
+
+    it('should throw an exception if git reports an error', async () => {
+      mockResponses.path = 'repo/cwd';
+      mockResponses.responses['show_prefix'] = {
+        body: () => {
+          return { code: 128, command: 'git rev-parse --show-prefix' };
+        },
+        message:
+          "fatal: detected dubious ownership in repository at 'repo/cwd'",
+        status: 500
+      };
+      await expect(model.showPrefix(mockResponses.path)).rejects.toThrow(
+        'detected dubious ownership'
+      );
+    });
+
+    it('should notify the user when git reports an error', async () => {
+      const notification = jest
+        .spyOn(Notification, 'error')
+        .mockImplementation((): string => '');
+      mockResponses.responses['show_prefix'] = {
+        body: () => {
+          return { code: 128, command: 'git rev-parse --show-prefix' };
+        },
+        message:
+          "fatal: detected dubious ownership in repository at 'repo/cwd'",
+        status: 500
+      };
+
+      model.pathRepository = DEFAULT_REPOSITORY_PATH;
+      await model.ready;
+
+      expect(model.pathRepository).toBeNull();
+      expect(notification).toHaveBeenCalledWith(
+        'Failed to get the Git repository.',
+        expect.objectContaining({ autoClose: false })
+      );
+      notification.mockRestore();
     });
 
     it('should throw an exception if the server otherwise', async () => {

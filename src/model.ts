@@ -1,12 +1,19 @@
+import { Notification } from '@jupyterlab/apputils';
 import { IChangedArgs, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { JSONExt, JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import { AUTH_ERROR_MESSAGES, requestAPI } from './git';
+import { showError } from './notifications';
 import { TaskHandler } from './taskhandler';
 import { Git, IGitExtension } from './tokens';
 import { decodeStage } from './utils';
@@ -63,14 +70,17 @@ export class GitExtension implements IGitExtension {
    * @param docRegistry - document registry
    * @param settings - plugin settings
    * @param serverSettings - optional server connection settings for API requests
+   * @param translator - optional application language translator
    * @returns extension model
    */
   constructor(
     docmanager: IDocumentManager | null = null,
     docRegistry: DocumentRegistry | null = null,
     settings?: ISettingRegistry.ISettings,
-    serverSettings?: ServerConnection.ISettings
+    serverSettings?: ServerConnection.ISettings,
+    translator?: ITranslator
   ) {
+    this.trans = (translator ?? nullTranslator).load('jupyterlab_git');
     this._docmanager = docmanager;
     this._docRegistry = docRegistry;
     this._settings = settings || null;
@@ -106,6 +116,11 @@ export class GitExtension implements IGitExtension {
       this._onSettingsChange(settings);
     }
   }
+
+  /**
+   * The application language translator.
+   */
+  readonly trans: TranslationBundle;
 
   /**
    * Branch list for the current repository.
@@ -218,6 +233,12 @@ export class GitExtension implements IGitExtension {
           this._pendingReadyPromise -= 1;
           console.error(
             `Fail to find Git top level for path ${currentFolder}.\n${reason}`
+          );
+          // A folder is reported as not being a repository when git fails, so
+          // the git error itself has to be surfaced here.
+          Notification.error(
+            this.trans.__('Failed to get the Git repository.'),
+            showError(reason, this.trans)
           );
         });
     }
@@ -1675,8 +1696,13 @@ export class GitExtension implements IGitExtension {
       if (
         error instanceof Git.GitResponseError &&
         error.response.status === 500 &&
-        error.json.code === 128
+        error.json.code === 128 &&
+        !error.message
       ) {
+        // No git message means that the folder is not part of a repository.
+        // Otherwise git itself failed (e.g. "detected dubious ownership in
+        // repository") and the error must not be reported as an empty
+        // repository, so it is let through to be surfaced to the user.
         return null;
       }
       throw error;
