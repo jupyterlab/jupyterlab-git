@@ -268,7 +268,8 @@ async function activate(
     docmanager,
     app.docRegistry,
     settings,
-    serverSettings
+    serverSettings,
+    translator
   );
 
   const onPathChanged = (

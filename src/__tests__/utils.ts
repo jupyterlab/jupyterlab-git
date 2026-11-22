@@ -7,6 +7,8 @@ export interface IMockedResponse {
   body?: (body: any) => Record<string, any> | null;
   // Response status code
   status?: number;
+  // Error message reported by the server
+  message?: string;
 }
 
 export interface IMockedResponses {
@@ -89,7 +91,7 @@ export function mockedRequestAPI(
           new Response(null, {
             status: reply.status
           }),
-          '',
+          reply.message ?? '',
           '',
           reply.body ? reply.body(body) : {}
         );
